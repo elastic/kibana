@@ -10,7 +10,7 @@ import {
   ALERT_CONSUMER,
   EVENT_ACTION,
   EVENT_KIND,
-  RULE_ID,
+  ALERT_RULE_ID,
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
@@ -95,7 +95,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
     }
 
     const filter: estypes.QueryDslQueryContainer[] = [
-      { terms: { [RULE_ID]: ruleIds } },
+      { terms: { [ALERT_RULE_ID]: ruleIds } },
       { terms: { [SPACE_IDS]: [spaceId] } },
     ];
 
@@ -114,7 +114,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         aggs: {
           rules: {
             terms: {
-              field: RULE_ID,
+              field: ALERT_RULE_ID,
               size: ruleIds.length,
             },
             aggs: {
@@ -226,7 +226,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         [EVENT_ACTION]: metric,
         [EVENT_KIND]: 'metric',
         [getMetricField(metric)]: value,
-        [RULE_ID]: ruleId,
+        [ALERT_RULE_ID]: ruleId,
         [TIMESTAMP]: new Date().toISOString(),
         [ALERT_CONSUMER]: 'siem',
       },
@@ -248,7 +248,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         [EVENT_KIND]: 'event',
         [EVENT_SEQUENCE]: this.sequence++,
         [MESSAGE]: message,
-        [RULE_ID]: ruleId,
+        [ALERT_RULE_ID]: ruleId,
         [RULE_STATUS_SEVERITY]: statusSeverityDict[newStatus],
         [RULE_STATUS]: newStatus,
         [TIMESTAMP]: new Date().toISOString(),

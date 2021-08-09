@@ -1583,7 +1583,7 @@ Object {
           "path": "signal.ancestors.type",
           "type": "alias",
         },
-        "kibana.alert.consumer": Object {
+        "kibana.alert.rule.consumer": Object {
           "type": "constant_keyword",
           "value": "siem",
         },
@@ -1675,7 +1675,7 @@ Object {
           "path": "signal.original_time",
           "type": "alias",
         },
-        "kibana.alert.producer": Object {
+        "kibana.alert.rule.producer": Object {
           "type": "constant_keyword",
           "value": "siem",
         },

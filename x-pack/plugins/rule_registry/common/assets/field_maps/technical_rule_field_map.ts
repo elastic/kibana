@@ -15,7 +15,7 @@ export const technicalRuleFieldMap = {
     Fields.EVENT_KIND,
     Fields.EVENT_ACTION,
     Fields.RULE_UUID,
-    Fields.RULE_ID,
+    Fields.ALERT_RULE_TYPE_ID,
     Fields.RULE_NAME,
     Fields.RULE_CATEGORY,
     Fields.TAGS

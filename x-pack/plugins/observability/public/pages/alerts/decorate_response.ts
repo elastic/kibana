@@ -6,7 +6,7 @@
  */
 
 import {
-  RULE_ID,
+  ALERT_RULE_TYPE_ID,
   RULE_NAME,
   ALERT_STATUS,
   ALERT_START,
@@ -22,7 +22,7 @@ export function decorateResponse(
 ): TopAlert[] {
   return alerts.map((alert) => {
     const parsedFields = parseTechnicalFields(alert);
-    const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[RULE_ID]!);
+    const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[ALERT_RULE_TYPE_ID]!);
     const formatted = {
       link: undefined,
       reason: parsedFields[RULE_NAME]!,

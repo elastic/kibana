@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_CONSUMER, ALERT_STATUS, SPACE_IDS } from '@kbn/rule-data-utils';
+import { ALERT_CONSUMER, ALERT_STATUS, SPACE_IDS, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -58,7 +58,7 @@ describe('get()', () => {
                 _seq_no: 362,
                 _primary_term: 2,
                 _source: {
-                  'rule.id': 'apm.error_rate',
+                  [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
                   [ALERT_CONSUMER]: 'apm',
                   [ALERT_STATUS]: 'open',
@@ -80,7 +80,7 @@ describe('get()', () => {
           "test_default_space_id",
         ],
         "message": "hello world 1",
-        "rule.id": "apm.error_rate",
+        "${ALERT_RULE_TYPE_ID}: "apm.error_rate",
       }
     `);
     expect(esClientMock.search).toHaveBeenCalledTimes(1);
@@ -139,7 +139,7 @@ describe('get()', () => {
                 _seq_no: 362,
                 _primary_term: 2,
                 _source: {
-                  'rule.id': 'apm.error_rate',
+                  [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
                   [ALERT_CONSUMER]: 'apm',
                   [ALERT_STATUS]: 'open',
@@ -201,7 +201,7 @@ describe('get()', () => {
                   _seq_no: 362,
                   _primary_term: 2,
                   _source: {
-                    'rule.id': 'apm.error_rate',
+                    [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                     message: 'hello world 1',
                     [ALERT_CONSUMER]: 'apm',
                     [ALERT_STATUS]: 'open',
@@ -234,7 +234,7 @@ describe('get()', () => {
             "test_default_space_id",
           ],
           "message": "hello world 1",
-          "rule.id": "apm.error_rate",
+          "${ALERT_RULE_TYPE_ID}: "apm.error_rate",
         }
       `);
     });

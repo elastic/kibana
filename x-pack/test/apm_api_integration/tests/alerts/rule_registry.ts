@@ -392,7 +392,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "rule.category": Array [
               "Transaction error rate threshold",
             ],
-            "rule.id": Array [
+            "kibana.alert.rule.rule_type_id": Array [
               "apm.transaction_error_rate",
             ],
             "rule.name": Array [
@@ -468,7 +468,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "rule.category": Array [
               "Transaction error rate threshold",
             ],
-            "rule.id": Array [
+            "kibana.alert.rule.rule_type_id": Array [
               "apm.transaction_error_rate",
             ],
             "rule.name": Array [
@@ -572,7 +572,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "rule.category": Array [
               "Transaction error rate threshold",
             ],
-            "rule.id": Array [
+            "kibana.alert.rule.rule_type_id": Array [
               "apm.transaction_error_rate",
             ],
             "rule.name": Array [

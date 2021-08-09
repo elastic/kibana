@@ -32,14 +32,6 @@ const ALERT_END = `${ALERT_NAMESPACE}.end` as const;
 const ALERT_EVALUATION_THRESHOLD = `${ALERT_NAMESPACE}.evaluation.threshold` as const;
 const ALERT_EVALUATION_VALUE = `${ALERT_NAMESPACE}.evaluation.value` as const;
 const ALERT_ID = `${ALERT_NAMESPACE}.id` as const;
-// the feature instantiating a rule type.
-// Rule created in stack --> alerts
-// Rule created in siem --> siem
-const ALERT_CONSUMER = `${ALERT_NAMESPACE}.consumer` as const;
-// the plugin that registered the rule type.
-// Rule type apm.error_rate --> apm
-// Rule type siem.signals --> siem
-const ALERT_PRODUCER = `${ALERT_NAMESPACE}.producer` as const;
 const ALERT_REASON = `${ALERT_NAMESPACE}.reason` as const;
 const ALERT_RISK_SCORE = `${ALERT_NAMESPACE}.risk_score` as const;
 const ALERT_SEVERITY = `${ALERT_NAMESPACE}.severity` as const;
@@ -78,6 +70,14 @@ const ALERT_RULE_TYPE_ID = `${ALERT_RULE_NAMESPACE}.rule_type_id` as const;
 const ALERT_RULE_UPDATED_AT = `${ALERT_RULE_NAMESPACE}.updated_at` as const;
 const ALERT_RULE_UPDATED_BY = `${ALERT_RULE_NAMESPACE}.updated_by` as const;
 const ALERT_RULE_VERSION = `${ALERT_RULE_NAMESPACE}.version` as const;
+// the feature instantiating a rule type.
+// Rule created in stack --> alerts
+// Rule created in siem --> siem
+const ALERT_CONSUMER = `${ALERT_RULE_NAMESPACE}.consumer` as const;
+// the plugin that registered the rule type.
+// Rule type apm.error_rate --> apm
+// Rule type siem.signals --> siem
+const ALERT_PRODUCER = `${ALERT_RULE_NAMESPACE}.producer` as const;
 
 const namespaces = {
   KIBANA_NAMESPACE,

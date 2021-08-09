@@ -8,6 +8,7 @@
 import {
   ALERT_DURATION,
   ALERT_EVALUATION_THRESHOLD,
+  ALERT_RULE_TYPE_ID,
   ALERT_EVALUATION_VALUE,
   ALERT_ID,
   ALERT_SEVERITY_LEVEL,
@@ -120,7 +121,7 @@ Example.args = {
   alertsResponse: {
     alerts: [
       {
-        'rule.id': ['apm.transaction_duration'],
+        [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
         [ALERT_EVALUATION_VALUE]: [2001708.19],
         'service.name': ['frontend-rum'],
         'rule.name': ['Latency threshold | frontend-rum'],
@@ -128,7 +129,7 @@ Example.args = {
         [ALERT_STATUS]: ['open'],
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
-        'kibana.alert.producer': ['apm'],
+        'kibana.alert.rule.producer': ['apm'],
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478180'],
         'rule.uuid': ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
@@ -141,7 +142,7 @@ Example.args = {
         'rule.category': ['Latency threshold'],
       },
       {
-        'rule.id': ['apm.transaction_duration'],
+        [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
         [ALERT_EVALUATION_VALUE]: [2001708.19],
         'service.name': ['frontend-rum'],
         'rule.name': ['Latency threshold | frontend-rum'],
@@ -149,7 +150,7 @@ Example.args = {
         [ALERT_STATUS]: ['open'],
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
-        'kibana.alert.producer': ['apm'],
+        'kibana.alert.rule.producer': ['apm'],
         [ALERT_SEVERITY_LEVEL]: ['warning'],
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478181'],
         'rule.uuid': ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
@@ -163,7 +164,7 @@ Example.args = {
         'rule.category': ['Latency threshold'],
       },
       {
-        'rule.id': ['apm.transaction_duration'],
+        [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
         [ALERT_EVALUATION_VALUE]: [2001708.19],
         'service.name': ['frontend-rum'],
         'rule.name': ['Latency threshold | frontend-rum'],
@@ -171,7 +172,7 @@ Example.args = {
         [ALERT_STATUS]: ['open'],
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
-        'kibana.alert.producer': ['apm'],
+        'kibana.alert.rule.producer': ['apm'],
         [ALERT_SEVERITY_LEVEL]: ['critical'],
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478182'],
         'rule.uuid': ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],

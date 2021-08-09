@@ -8,6 +8,7 @@
 import {
   ALERT_DURATION,
   ALERT_EVALUATION_THRESHOLD,
+  ALERT_RULE_TYPE_ID,
   ALERT_EVALUATION_VALUE,
   ALERT_ID,
   ALERT_PRODUCER,
@@ -35,7 +36,7 @@ const theme = ({
 } as unknown) as EuiTheme;
 const alert: Alert = {
   [SPACE_IDS]: ['space-id'],
-  'rule.id': ['apm.transaction_duration'],
+  [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
   [ALERT_EVALUATION_VALUE]: [2057657.39],
   'service.name': ['frontend-rum'],
   'rule.name': ['Latency threshold | frontend-rum'],

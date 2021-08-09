@@ -14,7 +14,7 @@ import {
   EuiPopoverTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RULE_ID, RULE_NAME } from '@kbn/rule-data-utils/target/technical_field_names';
+import { ALERT_RULE_TYPE_ID, RULE_NAME } from '@kbn/rule-data-utils/target/technical_field_names';
 import React, { useState } from 'react';
 import { format, parse } from 'url';
 
@@ -29,7 +29,7 @@ export function RowCellActionsRender({ data }: ActionProps) {
   const { prepend } = core.http.basePath;
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
   const parsedFields = parseTechnicalFields(dataFieldEs);
-  const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[RULE_ID]!);
+  const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[ALERT_RULE_TYPE_ID]!);
   const formatted = {
     link: undefined,
     reason: parsedFields[RULE_NAME]!,

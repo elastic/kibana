@@ -30,7 +30,7 @@ import {
   EVENT_ACTION,
   EVENT_KIND,
   ALERT_CONSUMER,
-  RULE_ID,
+  ALERT_RULE_TYPE_ID,
   RULE_UUID,
   TIMESTAMP,
   SPACE_IDS,
@@ -155,7 +155,7 @@ export const createLifecycleExecutor = (
       currentAlerts[id] = {
         ...fields,
         [ALERT_ID]: id,
-        [RULE_ID]: rule.ruleTypeId,
+        [ALERT_RULE_TYPE_ID]: rule.ruleTypeId,
         [ALERT_CONSUMER]: rule.consumer,
       };
       return alertInstanceFactory(id);
@@ -229,7 +229,7 @@ export const createLifecycleExecutor = (
       alertsDataMap[alertId] = {
         ...fields,
         [ALERT_ID]: alertId,
-        [RULE_ID]: rule.ruleTypeId,
+        [ALERT_RULE_TYPE_ID]: rule.ruleTypeId,
         [ALERT_CONSUMER]: rule.consumer,
       };
     });

@@ -11,6 +11,7 @@ import {
   ALERT_ID,
   ALERT_SEVERITY_LEVEL,
   ALERT_SEVERITY_VALUE,
+  ALERT_RULE_TYPE_ID,
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
@@ -18,7 +19,7 @@ import {
 
 export const apmAlertResponseExample = [
   {
-    'rule.id': ['apm.error_rate'],
+    [ALERT_RULE_TYPE_ID]: ['apm.error_rate'],
     'service.name': ['opbeans-java'],
     'rule.name': ['Error count threshold | opbeans-java (smith test)'],
     [ALERT_DURATION]: [180057000],
@@ -31,14 +32,14 @@ export const apmAlertResponseExample = [
     '@timestamp': ['2021-04-12T13:53:49.550Z'],
     [ALERT_ID]: ['apm.error_rate_opbeans-java_production'],
     [ALERT_START]: ['2021-04-12T13:50:49.493Z'],
-    'kibana.producer': ['apm'],
+    'kibana.alert.rule.producer': ['apm'],
     'event.kind': ['state'],
     'rule.category': ['Error count threshold'],
     'service.environment': ['production'],
     'processor.event': ['error'],
   },
   {
-    'rule.id': ['apm.error_rate'],
+    [ALERT_RULE_TYPE_ID]: ['apm.error_rate'],
     'service.name': ['opbeans-java'],
     'rule.name': ['Error count threshold | opbeans-java (smith test)'],
     [ALERT_DURATION]: [2419005000],
@@ -51,7 +52,7 @@ export const apmAlertResponseExample = [
     '@timestamp': ['2021-04-12T13:49:49.446Z'],
     [ALERT_ID]: ['apm.error_rate_opbeans-java_production'],
     [ALERT_START]: ['2021-04-12T13:09:30.441Z'],
-    'kibana.producer': ['apm'],
+    'kibana.alert.rule.producer': ['apm'],
     'event.kind': ['state'],
     'rule.category': ['Error count threshold'],
     'service.environment': ['production'],
@@ -158,7 +159,7 @@ export const dynamicIndexPattern = {
       readFromDocValues: true,
     },
     {
-      name: 'kibana.producer',
+      name: 'kibana.alert.rule.producer',
       type: 'string',
       esTypes: ['keyword'],
       searchable: true,
@@ -182,7 +183,7 @@ export const dynamicIndexPattern = {
       readFromDocValues: true,
     },
     {
-      name: 'rule.id',
+      name: [ALERT_RULE_TYPE_ID],
       type: 'string',
       esTypes: ['keyword'],
       searchable: true,

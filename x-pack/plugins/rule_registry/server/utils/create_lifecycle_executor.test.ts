@@ -23,7 +23,7 @@ import {
   ALERT_STATUS,
   EVENT_ACTION,
   EVENT_KIND,
-  RULE_ID,
+  ALERT_RULE_TYPE_ID,
   ALERT_CONSUMER,
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
@@ -132,7 +132,7 @@ describe('createLifecycleExecutor', () => {
             fields: {
               [ALERT_ID]: 'TEST_ALERT_0',
               [ALERT_CONSUMER]: 'CONSUMER',
-              [RULE_ID]: 'RULE_TYPE_ID',
+              [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
             },
           },
@@ -140,7 +140,7 @@ describe('createLifecycleExecutor', () => {
             fields: {
               [ALERT_ID]: 'TEST_ALERT_1',
               [ALERT_CONSUMER]: 'CONSUMER',
-              [RULE_ID]: 'RULE_TYPE_ID',
+              [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
             },
           },
@@ -230,7 +230,7 @@ describe('createLifecycleExecutor', () => {
               '@timestamp': '',
               [ALERT_ID]: 'TEST_ALERT_0',
               [ALERT_CONSUMER]: 'CONSUMER',
-              [RULE_ID]: 'RULE_TYPE_ID',
+              [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
               [SPACE_IDS]: ['fake-space-id'],
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must show up in the written doc
             },
@@ -240,7 +240,7 @@ describe('createLifecycleExecutor', () => {
               '@timestamp': '',
               [ALERT_ID]: 'TEST_ALERT_1',
               [ALERT_CONSUMER]: 'CONSUMER',
-              [RULE_ID]: 'RULE_TYPE_ID',
+              [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
               [SPACE_IDS]: ['fake-space-id'],
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
             },
