@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ALERTS_CONSUMERS } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import type { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 
 import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
@@ -44,7 +44,7 @@ export interface TimelineRequestBasicOptions extends IEsSearchRequest {
   docValueFields?: DocValueFields[];
   factoryQueryType?: TimelineFactoryQueryTypes;
   entityType?: EntityType;
-  alertConsumers?: ALERTS_CONSUMERS[];
+  alertConsumers?: AlertConsumers[];
 }
 
 export interface TimelineRequestSortField<Field = string> extends SortField<Field> {

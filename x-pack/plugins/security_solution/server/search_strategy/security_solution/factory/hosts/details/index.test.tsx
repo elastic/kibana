@@ -31,9 +31,11 @@ const mockDeps = {
     config: jest.fn().mockResolvedValue({}),
     experimentalFeatures: {
       trustedAppsByPolicyEnabled: false,
+      excludePoliciesInFilterEnabled: false,
       metricsEntitiesEnabled: false,
       ruleRegistryEnabled: false,
       tGridEnabled: false,
+      uebaEnabled: false,
     },
     service: {} as EndpointAppContextService,
   } as EndpointAppContext,

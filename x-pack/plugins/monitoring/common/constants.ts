@@ -566,7 +566,7 @@ export const ALERT_ACTION_TYPE_LOG = '.server-log';
 /**
  * To enable modifing of alerts in under actions
  */
-export const ALERT_REQUIRES_APP_CONTEXT = true;
+export const ALERT_REQUIRES_APP_CONTEXT = false;
 
 export const ALERT_EMAIL_SERVICES = ['gmail', 'hotmail', 'icloud', 'outlook365', 'ses', 'yahoo'];
 

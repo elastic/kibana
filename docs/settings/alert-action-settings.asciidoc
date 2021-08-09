@@ -41,14 +41,15 @@ You can configure the following settings in the `kibana.yml` file.
 [cols="2*<"]
 |===
 | `xpack.actions.enabled`
-  | Feature toggle that enables Actions in {kib}. Default: `true`.
+  | Feature toggle that enables Actions in {kib}.
+  If `false`, all features dependent on Actions are disabled, including the *Observability* and *Security* apps.  Default: `true`.
 
 | `xpack.actions.allowedHosts` {ess-icon}
   | A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `[*]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections. +
   +
   Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `[*]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.
- 
-| `xpack.actions.customHostSettings` {ess-icon} 
+
+| `xpack.actions.customHostSettings` {ess-icon}
   | A list of custom host settings to override existing global settings.
   Default: an empty list. +
   +
@@ -69,7 +70,7 @@ You can configure the following settings in the `kibana.yml` file.
 --
 xpack.actions.customHostSettings:
   - url: smtp://mail.example.com:465
-    ssl: 
+    ssl:
       verificationMode: 'full'
       certificateAuthoritiesFiles: [ 'one.crt' ]
       certificateAuthoritiesData: |
@@ -79,7 +80,7 @@ xpack.actions.customHostSettings:
     smtp:
       requireTLS: true
   - url: https://webhook.example.com
-    ssl: 
+    ssl:
       // legacy
       rejectUnauthorized: false
       verificationMode: 'none'
@@ -117,14 +118,14 @@ xpack.actions.customHostSettings:
   The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
 
 | `xpack.actions.customHostSettings[n]`
-`.ssl.rejectUnauthorized` {ess-icon}
+`.ssl.rejectUnauthorized`
   | Deprecated. Use <<action-config-custom-host-verification-mode,`xpack.actions.customHostSettings.ssl.verificationMode`>> instead. A boolean value indicating whether to bypass server certificate validation.
   Overrides the general `xpack.actions.rejectUnauthorized` configuration
   for requests made for this hostname/port.
 
 |[[action-config-custom-host-verification-mode]] `xpack.actions.customHostSettings[n]`
-`.ssl.verificationMode`
-  | Controls the verification of the server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection to the host server. Valid values are `full`, `certificate`, and `none`. 
+`.ssl.verificationMode` {ess-icon}
+  | Controls the verification of the server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection to the host server. Valid values are `full`, `certificate`, and `none`.
  Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>. Overrides the general `xpack.actions.ssl.verificationMode` configuration
   for requests made for this hostname/port.
 
@@ -137,7 +138,7 @@ xpack.actions.customHostSettings:
 `.ssl.certificateAuthoritiesData` {ess-icon}
   | The contents of a PEM-encoded certificate file, or multiple files appended
   into a single string.  This configuration can be used for environments where
-  the files cannot be made available.  
+  the files cannot be made available.
 
 | `xpack.actions.enabledActionTypes` {ess-icon}
   | A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, and `.webhook`. An empty list `[]` will disable all action types. +
@@ -170,7 +171,7 @@ a|`xpack.actions.`
 |[[action-config-proxy-verification-mode]]
 `xpack.actions[n]`
 `.ssl.proxyVerificationMode` {ess-icon}
-| Controls the verification for the proxy server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection to the proxy server. Valid values are `full`, `certificate`, and `none`. 
+| Controls the verification for the proxy server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection to the proxy server. Valid values are `full`, `certificate`, and `none`.
 Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>.
 
 | `xpack.actions.rejectUnauthorized` {ess-icon}
@@ -182,7 +183,7 @@ Use `full` to perform hostname verification, `certificate` to skip hostname veri
 |[[action-config-verification-mode]]
 `xpack.actions[n]`
 `.ssl.verificationMode` {ess-icon}
-| Controls the verification for the server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection for actions. Valid values are `full`, `certificate`, and `none`. 
+| Controls the verification for the server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection for actions. Valid values are `full`, `certificate`, and `none`.
   Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>. +
   +
   As an alternative to setting `xpack.actions.ssl.verificationMode`, you can use the setting

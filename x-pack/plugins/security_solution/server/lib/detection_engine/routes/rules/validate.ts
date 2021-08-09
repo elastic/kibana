@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
+import { SavedObject, SavedObjectsFindResult } from 'kibana/server';
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import {
@@ -20,8 +20,8 @@ import { PartialAlert } from '../../../../../../alerting/server';
 import {
   isAlertType,
   IRuleSavedAttributesSavedObjectAttributes,
-  isRuleStatusFindType,
   IRuleStatusSOAttributes,
+  isRuleStatusSavedObjectType,
 } from '../../rules/types';
 import { createBulkErrorObject, BulkError } from '../utils';
 import { transform, transformAlertToRule } from './utils';
@@ -58,15 +58,11 @@ export const transformValidateBulkError = (
   ruleId: string,
   alert: PartialAlert<RuleParams>,
   ruleActions?: RuleActions | null,
-  ruleStatus?: SavedObjectsFindResponse<IRuleStatusSOAttributes>
+  ruleStatus?: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>
 ): RulesSchema | BulkError => {
   if (isAlertType(alert)) {
-    if (isRuleStatusFindType(ruleStatus) && ruleStatus?.saved_objects.length > 0) {
-      const transformed = transformAlertToRule(
-        alert,
-        ruleActions,
-        ruleStatus?.saved_objects[0] ?? ruleStatus
-      );
+    if (ruleStatus && ruleStatus?.length > 0 && isRuleStatusSavedObjectType(ruleStatus[0])) {
+      const transformed = transformAlertToRule(alert, ruleActions, ruleStatus[0]);
       const [validated, errors] = validateNonExact(transformed, rulesSchema);
       if (errors != null || validated == null) {
         return createBulkErrorObject({
