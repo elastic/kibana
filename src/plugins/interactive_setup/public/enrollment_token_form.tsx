@@ -25,7 +25,6 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 
 import type { EnrollmentToken } from '../common/types';
 import { decodeEnrollmentToken } from './decode_enrollment_token';
@@ -87,12 +86,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
   const enrollmentToken = decodeEnrollmentToken(form.values.token);
 
   return (
-    <EuiForm
-      component="form"
-      {...eventHandlers}
-      noValidate
-      style={{ width: euiThemeVars.euiFormMaxWidth }}
-    >
+    <EuiForm component="form" noValidate {...eventHandlers}>
       {form.submitError && (
         <>
           <EuiCallOut

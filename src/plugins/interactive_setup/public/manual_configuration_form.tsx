@@ -31,7 +31,6 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 
 import type { Certificate, PingResponse } from '../common/types';
 import type { ValidationErrors } from './use_form';
@@ -209,12 +208,7 @@ export const ManualConfigurationForm: FunctionComponent<ManualConfigurationFormP
   });
 
   return (
-    <EuiForm
-      component="form"
-      {...eventHandlers}
-      noValidate
-      style={{ width: euiThemeVars.euiFormMaxWidth }}
-    >
+    <EuiForm component="form" noValidate {...eventHandlers}>
       {state.value?.statusCode === 200 && (
         <>
           <EuiCallOut

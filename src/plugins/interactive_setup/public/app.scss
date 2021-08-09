@@ -1,0 +1,25 @@
+.interactiveSetup {
+  @include kibanaFullScreenGraphics;
+}
+
+.interactiveSetup__header {
+  position: relative;
+  padding: $euiSizeXL;
+  z-index: 10;
+}
+
+.interactiveSetup__logo {
+  @include kibanaCircleLogo;
+  @include euiBottomShadowMedium;
+
+  margin-bottom: $euiSizeXL;
+}
+
+.interactiveSetup__content {
+  position: relative;
+  margin: auto;
+  max-width: 512px;
+  padding-left: $euiSizeXL;
+  padding-right: $euiSizeXL;
+  z-index: 10;
+}
