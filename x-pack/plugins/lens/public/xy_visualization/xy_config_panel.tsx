@@ -117,6 +117,7 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   return (
     <EuiSuperSelect
       className="lnsLayerChartSwitch"
+      data-test-subj="lns_layer_settings"
       compressed
       fullWidth
       options={options}
