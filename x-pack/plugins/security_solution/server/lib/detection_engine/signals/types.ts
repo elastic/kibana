@@ -293,7 +293,10 @@ export type WrapHits = (
   buildReasonMessage: BuildReasonMessage
 ) => SimpleHit[];
 
-export type WrapSequences = (sequences: Array<EqlSequence<SignalSource>>) => SimpleHit[];
+export type WrapSequences = (
+  sequences: Array<EqlSequence<SignalSource>>,
+  buildReasonMessage: BuildReasonMessage
+) => SimpleHit[];
 
 export interface SearchAfterAndBulkCreateParams {
   tuple: {

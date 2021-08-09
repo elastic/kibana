@@ -46,12 +46,10 @@ export const buildBulkBody = (
   const filteredSource = filterSource(mergedDoc);
   const timestamp = new Date().toISOString();
   let hostName = '';
-  if (doc._source?.host != null && doc._source?.host?.name) {
-    hostName = doc._source?.host.name;
-  }
   let userName = '';
-  if (doc._source?.user != null && doc._source?.user?.name) {
-    userName = doc._source?.user.name;
+  if (mergedDoc.fields) {
+    hostName = mergedDoc.fields['host.name'] != null ? mergedDoc.fields['host.name'] : hostName;
+    userName = mergedDoc.fields['user.name'] != null ? mergedDoc.fields['user.name'] : userName;
   }
   const reason = buildReasonMessage({
     alertName: rule.name,

@@ -43,12 +43,10 @@ export const buildBulkBody = (
   const rule = buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {});
   const timestamp = new Date().toISOString();
   let hostName = '';
-  if (doc._source?.host != null && doc._source?.host?.name) {
-    hostName = doc._source?.host.name;
-  }
   let userName = '';
-  if (doc._source?.user != null && doc._source?.user?.name) {
-    userName = doc._source?.user.name;
+  if (mergedDoc.fields) {
+    hostName = mergedDoc.fields['host.name'] != null ? mergedDoc.fields['host.name'] : hostName;
+    userName = mergedDoc.fields['user.name'] != null ? mergedDoc.fields['user.name'] : userName;
   }
   const reason = buildReasonMessage({
     alertName: rule.name,
@@ -88,11 +86,12 @@ export const buildSignalGroupFromSequence = (
   sequence: EqlSequence<SignalSource>,
   ruleSO: SavedObject<AlertAttributes>,
   outputIndex: string,
-  mergeStrategy: ConfigType['alertMergeStrategy']
+  mergeStrategy: ConfigType['alertMergeStrategy'],
+  buildReasonMessage: BuildReasonMessage
 ): WrappedSignalHit[] => {
   const wrappedBuildingBlocks = wrapBuildingBlocks(
     sequence.events.map((event) => {
-      const signal = buildSignalFromEvent(event, ruleSO, false, mergeStrategy);
+      const signal = buildSignalFromEvent(event, ruleSO, false, mergeStrategy, buildReasonMessage);
       signal.signal.rule.building_block_type = 'default';
       return signal;
     }),
@@ -131,7 +130,7 @@ export const buildSignalFromSequence = (
   ruleSO: SavedObject<AlertAttributes>
 ): SignalHit => {
   const rule = buildRuleWithoutOverrides(ruleSO);
-  const signal: Signal = buildSignal(events, rule);
+  const signal: Signal = buildSignal(events, rule, null);
   const mergedEvents = objectArrayIntersection(events.map((event) => event._source));
   return {
     ...mergedEvents,
@@ -154,14 +153,31 @@ export const buildSignalFromEvent = (
   event: BaseSignalHit,
   ruleSO: SavedObject<AlertAttributes>,
   applyOverrides: boolean,
-  mergeStrategy: ConfigType['alertMergeStrategy']
+  mergeStrategy: ConfigType['alertMergeStrategy'],
+  buildReasonMessage: BuildReasonMessage
 ): SignalHit => {
   const mergedEvent = getMergeStrategy(mergeStrategy)({ doc: event });
   const rule = applyOverrides
     ? buildRuleWithOverrides(ruleSO, mergedEvent._source ?? {})
     : buildRuleWithoutOverrides(ruleSO);
+  const timestamp = new Date().toISOString();
+  let hostName = '';
+  let userName = '';
+  if (mergedEvent.fields) {
+    hostName = mergedEvent.fields['host.name'] != null ? mergedEvent.fields['host.name'] : hostName;
+    userName = mergedEvent.fields['user.name'] != null ? mergedEvent.fields['user.name'] : userName;
+  }
+  const reason = buildReasonMessage({
+    alertName: rule.name,
+    alertRiskScore: ruleSO.attributes.params.riskScore,
+    alertSeverity: ruleSO.attributes.params.severity,
+    hostName,
+    timestamp,
+    userName,
+  });
+
   const signal: Signal = {
-    ...buildSignal([mergedEvent], rule),
+    ...buildSignal([mergedEvent], rule, reason),
     ...additionalSignalFields(mergedEvent),
   };
   const eventFields = buildEventTypeSignal(mergedEvent);
@@ -172,7 +188,7 @@ export const buildSignalFromEvent = (
   // TODO: better naming for SignalHit - it's really a new signal to be inserted
   const signalHit: SignalHit = {
     ...filteredSource,
-    '@timestamp': new Date().toISOString(),
+    '@timestamp': timestamp,
     event: eventFields,
     signal,
   };

@@ -18,15 +18,16 @@ export interface BuildReasonMessageArgs {
 
 export type BuildReasonMessage = (args: BuildReasonMessageArgs) => string;
 
-export const buildReasonMessageForEqlAlert = ({
+const buildCommonReasonMessage = ({
   alertName,
   alertSeverity,
   alertRiskScore,
   hostName,
+  ruleType,
   timestamp,
   userName,
-}: BuildReasonMessageArgs) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.signals.eql.eqlAlertReasonDescription', {
+}: BuildReasonMessageArgs & { ruleType: string }) =>
+  i18n.translate(`xpack.securitySolution.detectionEngine.signals.${ruleType}.reasonDescription`, {
     defaultMessage:
       'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and risk score of {alertRiskScore} by {userName} on {hostName}',
     values: {
@@ -39,89 +40,17 @@ export const buildReasonMessageForEqlAlert = ({
     },
   });
 
-export const buildReasonMessageForMlAlert = ({
-  alertName,
-  alertSeverity,
-  alertRiskScore,
-  hostName,
-  timestamp,
-  userName,
-}: BuildReasonMessageArgs) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.signals.mlAlertReasonDescription', {
-    defaultMessage:
-      'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and risk score of {alertRiskScore} by {userName} on {hostName}',
-    values: {
-      alertName,
-      alertSeverity,
-      alertRiskScore,
-      hostName,
-      timestamp,
-      userName,
-    },
-  });
+export const buildReasonMessageForEqlAlert = (args: BuildReasonMessageArgs) =>
+  buildCommonReasonMessage({ ...args, ruleType: 'eql' });
 
-export const buildReasonMessageForQueryAlert = ({
-  alertName,
-  alertSeverity,
-  alertRiskScore,
-  hostName,
-  timestamp,
-  userName,
-}: BuildReasonMessageArgs) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.signals.queryAlertReasonDescription', {
-    defaultMessage:
-      'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and risk score of {alertRiskScore} by {userName} on {hostName}',
-    values: {
-      alertName,
-      alertSeverity,
-      alertRiskScore,
-      hostName,
-      timestamp,
-      userName,
-    },
-  });
+export const buildReasonMessageForMlAlert = (args: BuildReasonMessageArgs) =>
+  buildCommonReasonMessage({ ...args, ruleType: 'machineLearning' });
 
-export const buildReasonMessageForThreatMatchAlert = ({
-  alertName,
-  alertSeverity,
-  alertRiskScore,
-  hostName,
-  timestamp,
-  userName,
-}: BuildReasonMessageArgs) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.signals.threatMatchAlertReasonDescription',
-    {
-      defaultMessage:
-        'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and risk score of {alertRiskScore} by {userName} on {hostName}',
-      values: {
-        alertName,
-        alertSeverity,
-        alertRiskScore,
-        hostName,
-        timestamp,
-        userName,
-      },
-    }
-  );
+export const buildReasonMessageForQueryAlert = (args: BuildReasonMessageArgs) =>
+  buildCommonReasonMessage({ ...args, ruleType: 'query' });
 
-export const buildReasonMessageForThresholdAlert = ({
-  alertName,
-  alertSeverity,
-  alertRiskScore,
-  hostName,
-  timestamp,
-  userName,
-}: BuildReasonMessageArgs) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.signals.thresholdAlertReasonDescription', {
-    defaultMessage:
-      'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and risk score of {alertRiskScore} by {userName} on {hostName}',
-    values: {
-      alertName,
-      alertSeverity,
-      alertRiskScore,
-      hostName,
-      timestamp,
-      userName,
-    },
-  });
+export const buildReasonMessageForThreatMatchAlert = (args: BuildReasonMessageArgs) =>
+  buildCommonReasonMessage({ ...args, ruleType: 'threatMatch' });
+
+export const buildReasonMessageForThresholdAlert = (args: BuildReasonMessageArgs) =>
+  buildCommonReasonMessage({ ...args, ruleType: 'threshold' });
