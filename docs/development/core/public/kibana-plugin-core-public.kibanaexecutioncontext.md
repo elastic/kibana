@@ -4,6 +4,7 @@
 
 ## KibanaExecutionContext type
 
+Represents a meta-information about a Kibana entity initiating a search request.
 
 <b>Signature:</b>
 

@@ -952,7 +952,7 @@ export interface IUiSettingsClient {
     set: (key: string, value: any) => Promise<boolean>;
 }
 
-// @public (undocumented)
+// @public
 export type KibanaExecutionContext = {
     readonly type: string;
     readonly name: string;

@@ -1356,7 +1356,7 @@ export interface IUiSettingsClient {
     setMany: (changes: Record<string, any>) => Promise<void>;
 }
 
-// @public (undocumented)
+// @public
 export type KibanaExecutionContext = {
     readonly type: string;
     readonly name: string;
