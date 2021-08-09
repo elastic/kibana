@@ -30,8 +30,12 @@ import { i18n } from '@kbn/i18n';
 
 import { getDurationFormatter } from '../../../../common/utils/formatters';
 
-import { useTheme } from '../../../hooks/use_theme';
 import { HistogramItem } from '../../../../common/search_strategies/correlations/types';
+
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useTheme } from '../../../hooks/use_theme';
+
+import { ChartContainer } from '../../shared/charts/chart_container';
 
 const { euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
@@ -81,7 +85,7 @@ interface CorrelationsChartProps {
   histogram?: HistogramItem[];
   markerValue: number;
   markerPercentile: number;
-  overallHistogram: HistogramItem[];
+  overallHistogram?: HistogramItem[];
   onChartSelection?: BrushEndListener;
   selection?: [number, number];
 }
@@ -137,8 +141,6 @@ export function CorrelationsChart({
 }: CorrelationsChartProps) {
   const euiTheme = useTheme();
 
-  if (!Array.isArray(overallHistogram)) return <div />;
-
   const annotationsDataValues: LineAnnotationDatum[] = [
     {
       dataValue: markerValue,
@@ -154,7 +156,7 @@ export function CorrelationsChart({
     },
   ];
 
-  const xMax = Math.max(...overallHistogram.map((d) => d.key)) ?? 0;
+  const xMax = Math.max(...(overallHistogram ?? []).map((d) => d.key)) ?? 0;
 
   const durationFormatter = getDurationFormatter(xMax);
 
@@ -186,95 +188,101 @@ export function CorrelationsChart({
       data-test-subj="apmCorrelationsChart"
       style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
     >
-      <Chart
-        size={{
-          height: '250px',
-        }}
+      <ChartContainer
+        height={250}
+        hasData={Array.isArray(overallHistogram) && overallHistogram.length > 0}
+        status={
+          Array.isArray(overallHistogram)
+            ? FETCH_STATUS.SUCCESS
+            : FETCH_STATUS.LOADING
+        }
       >
-        <Settings
-          rotation={0}
-          theme={chartTheme}
-          showLegend
-          legendPosition={Position.Bottom}
-          onBrushEnd={onBrushEnd}
-        />
-        {selectionAnnotation !== undefined && (
-          <RectAnnotation
-            dataValues={selectionAnnotation}
-            id="rect_annotation_1"
-            style={{
-              strokeWidth: 1,
-              stroke: '#e5e5e5',
-              fill: '#e5e5e5',
-              opacity: 0.9,
-            }}
-            hideTooltips={true}
+        <Chart>
+          <Settings
+            rotation={0}
+            theme={chartTheme}
+            showLegend
+            legendPosition={Position.Bottom}
+            onBrushEnd={onBrushEnd}
           />
-        )}
-        <LineAnnotation
-          id="annotation_1"
-          domainType={AnnotationDomainType.XDomain}
-          dataValues={annotationsDataValues}
-          style={annotationsStyle}
-          marker={`${markerPercentile}p`}
-          markerPosition={'top'}
-        />
-        <Axis
-          id="x-axis"
-          title=""
-          position={Position.Bottom}
-          tickFormat={(d) => durationFormatter(d).formatted}
-        />
-        <Axis
-          id="y-axis"
-          domain={yAxisDomain}
-          title={i18n.translate(
-            'xpack.apm.correlations.latency.chart.numberOfTransactionsLabel',
-            { defaultMessage: '# transactions' }
-          )}
-          position={Position.Left}
-          tickFormat={(d) =>
-            d === 0 || Number.isInteger(Math.log10(d)) ? d : ''
-          }
-        />
-        <AreaSeries
-          id={i18n.translate(
-            'xpack.apm.correlations.latency.chart.overallLatencyDistributionLabel',
-            { defaultMessage: 'Overall latency distribution' }
-          )}
-          xScaleType={ScaleType.Log}
-          yScaleType={ScaleType.Log}
-          data={overallHistogram}
-          curve={CurveType.CURVE_STEP_AFTER}
-          xAccessor="key"
-          yAccessors={['doc_count']}
-          color={euiTheme.eui.euiColorVis1}
-          fit="lookahead"
-        />
-        {Array.isArray(histogram) &&
-          field !== undefined &&
-          value !== undefined && (
-            <AreaSeries
-              id={i18n.translate(
-                'xpack.apm.correlations.latency.chart.selectedTermLatencyDistributionLabel',
-                {
-                  defaultMessage: '{fieldName}:{fieldValue}',
-                  values: {
-                    fieldName: field,
-                    fieldValue: value,
-                  },
-                }
-              )}
-              xScaleType={ScaleType.Log}
-              yScaleType={ScaleType.Log}
-              data={histogram}
-              curve={CurveType.CURVE_STEP_AFTER}
-              xAccessor="key"
-              yAccessors={['doc_count']}
-              color={euiTheme.eui.euiColorVis2}
+          {selectionAnnotation !== undefined && (
+            <RectAnnotation
+              dataValues={selectionAnnotation}
+              id="rect_annotation_1"
+              style={{
+                strokeWidth: 1,
+                stroke: '#e5e5e5',
+                fill: '#e5e5e5',
+                opacity: 0.9,
+              }}
+              hideTooltips={true}
             />
           )}
-      </Chart>
+          <LineAnnotation
+            id="annotation_1"
+            domainType={AnnotationDomainType.XDomain}
+            dataValues={annotationsDataValues}
+            style={annotationsStyle}
+            marker={`${markerPercentile}p`}
+            markerPosition={'top'}
+          />
+          <Axis
+            id="x-axis"
+            title=""
+            position={Position.Bottom}
+            tickFormat={(d) => durationFormatter(d).formatted}
+          />
+          <Axis
+            id="y-axis"
+            domain={yAxisDomain}
+            title={i18n.translate(
+              'xpack.apm.correlations.latency.chart.numberOfTransactionsLabel',
+              { defaultMessage: '# transactions' }
+            )}
+            position={Position.Left}
+            tickFormat={(d) =>
+              d === 0 || Number.isInteger(Math.log10(d)) ? d : ''
+            }
+          />
+          <AreaSeries
+            id={i18n.translate(
+              'xpack.apm.correlations.latency.chart.overallLatencyDistributionLabel',
+              { defaultMessage: 'Overall latency distribution' }
+            )}
+            xScaleType={ScaleType.Log}
+            yScaleType={ScaleType.Log}
+            data={overallHistogram ?? []}
+            curve={CurveType.CURVE_STEP_AFTER}
+            xAccessor="key"
+            yAccessors={['doc_count']}
+            color={euiTheme.eui.euiColorVis1}
+            fit="lookahead"
+          />
+          {Array.isArray(histogram) &&
+            field !== undefined &&
+            value !== undefined && (
+              <AreaSeries
+                id={i18n.translate(
+                  'xpack.apm.correlations.latency.chart.selectedTermLatencyDistributionLabel',
+                  {
+                    defaultMessage: '{fieldName}:{fieldValue}',
+                    values: {
+                      fieldName: field,
+                      fieldValue: value,
+                    },
+                  }
+                )}
+                xScaleType={ScaleType.Log}
+                yScaleType={ScaleType.Log}
+                data={histogram}
+                curve={CurveType.CURVE_STEP_AFTER}
+                xAccessor="key"
+                yAccessors={['doc_count']}
+                color={euiTheme.eui.euiColorVis2}
+              />
+            )}
+        </Chart>
+      </ChartContainer>
     </div>
   );
 }
