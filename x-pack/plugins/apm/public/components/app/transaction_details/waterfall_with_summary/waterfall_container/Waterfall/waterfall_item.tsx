@@ -147,7 +147,15 @@ function HttpStatusCode({ item }: { item: IWaterfallSpanOrTransaction }) {
 function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
   switch (item.docType) {
     case 'span':
-      return <EuiText size="s">{item.doc.span.name}</EuiText>;
+      let name = item.doc.span.name;
+      if (item.doc.span.composite) {
+        const compositePrefix =
+          item.doc.span.composite.compression_strategy === 'exact_match'
+            ? 'x'
+            : '';
+        name = `${item.doc.span.composite.count}${compositePrefix} ${name}`;
+      }
+      return <EuiText size="s">{name}</EuiText>;
     case 'transaction':
       return (
         <EuiTitle size="xxs">
@@ -182,6 +190,9 @@ export function WaterfallItem({
     }
   );
 
+  const isCompositeSpan = item.docType === 'span' && item.doc.span.composite;
+  const itemBarStyle = getItemBarStyle(item, color, width, left);
+
   return (
     <Container
       type={item.docType}
@@ -193,8 +204,8 @@ export function WaterfallItem({
       }}
     >
       <ItemBar // using inline styles instead of props to avoid generating a css class for each item
-        style={{ left: `${left}%`, width: `${width}%` }}
-        color={color}
+        style={itemBarStyle}
+        color={isCompositeSpan ? 'transparent' : color}
         type={item.docType}
       />
       <ItemText // using inline styles instead of props to avoid generating a css class for each item
@@ -226,4 +237,33 @@ export function WaterfallItem({
       </ItemText>
     </Container>
   );
+}
+
+function getItemBarStyle(
+  item: IWaterfallSpanOrTransaction,
+  color: string,
+  width: number,
+  left: number
+): React.CSSProperties {
+  let itemBarStyle = { left: `${left}%`, width: `${width}%` };
+
+  if (item.docType === 'span' && item.doc.span.composite) {
+    const percNumItems = 100.0 / item.doc.span.composite.count;
+    const spanSumRatio =
+      item.doc.span.composite.sum.us / item.doc.span.duration.us;
+    const percDuration = percNumItems * spanSumRatio;
+
+    itemBarStyle = {
+      ...itemBarStyle,
+      ...{
+        backgroundImage:
+          `repeating-linear-gradient(90deg, ${color},` +
+          ` ${color} max(${percDuration}%,3px),` +
+          ` transparent max(${percDuration}%,3px),` +
+          ` transparent max(${percNumItems}%,max(${percDuration}%,3px) + 3px))`,
+      },
+    };
+  }
+
+  return itemBarStyle;
 }

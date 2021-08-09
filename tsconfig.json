@@ -71,6 +71,7 @@
     { "path": "./src/plugins/visualize/tsconfig.json" },
     { "path": "./src/plugins/index_pattern_management/tsconfig.json" },
     { "path": "./src/plugins/index_pattern_field_editor/tsconfig.json" },
+    { "path": "./src/plugins/index_pattern_editor/tsconfig.json" },
     { "path": "./x-pack/plugins/actions/tsconfig.json" },
     { "path": "./x-pack/plugins/alerting/tsconfig.json" },
     { "path": "./x-pack/plugins/apm/tsconfig.json" },

@@ -153,9 +153,12 @@ export default ({ getService }: FtrProviderContext) => {
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         expect(signalsOpen.hits.hits.length).equal(10);
         const fullSource = signalsOpen.hits.hits.find(
-          (signal) => signal._source.signal.parents[0].id === '7yJ-B2kBR346wHgnhlMn'
+          (signal) => signal._source?.signal.parents[0].id === '7yJ-B2kBR346wHgnhlMn'
         );
-        const fullSignal = fullSource!._source; // If this doesn't exist the test is going to fail anyway so using a bang operator here to get rid of ts error
+        const fullSignal = fullSource?._source;
+        if (!fullSignal) {
+          return expect(fullSignal).to.be.ok();
+        }
         expect(fullSignal).eql({
           '@timestamp': fullSignal['@timestamp'],
           agent: {
@@ -439,7 +442,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(signalsOpen.hits.hits.length).equal(2);
 
           const { hits } = signalsOpen.hits;
-          const threats = hits.map((hit) => hit._source.threat);
+          const threats = hits.map((hit) => hit._source?.threat);
           expect(threats).to.eql([
             {
               indicator: [
@@ -544,7 +547,9 @@ export default ({ getService }: FtrProviderContext) => {
           expect(signalsOpen.hits.hits.length).equal(1);
 
           const { hits } = signalsOpen.hits;
-          const [threat] = hits.map((hit) => hit._source.threat) as Array<{ indicator: unknown[] }>;
+          const [threat] = hits.map((hit) => hit._source?.threat) as Array<{
+            indicator: unknown[];
+          }>;
 
           assertContains(threat.indicator, [
             {
@@ -644,7 +649,9 @@ export default ({ getService }: FtrProviderContext) => {
           expect(signalsOpen.hits.hits.length).equal(1);
 
           const { hits } = signalsOpen.hits;
-          const [threat] = hits.map((hit) => hit._source.threat) as Array<{ indicator: unknown[] }>;
+          const [threat] = hits.map((hit) => hit._source?.threat) as Array<{
+            indicator: unknown[];
+          }>;
 
           assertContains(threat.indicator, [
             {
@@ -779,7 +786,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(signalsOpen.hits.hits.length).equal(2);
 
           const { hits } = signalsOpen.hits;
-          const threats = hits.map((hit) => hit._source.threat) as Array<{ indicator: unknown[] }>;
+          const threats = hits.map((hit) => hit._source?.threat) as Array<{ indicator: unknown[] }>;
 
           assertContains(threats[0].indicator, [
             {

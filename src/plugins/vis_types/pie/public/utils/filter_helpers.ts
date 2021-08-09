@@ -8,9 +8,10 @@
 
 import { LayerValue, SeriesIdentifier } from '@elastic/charts';
 import { Datatable, DatatableColumn } from '../../../../expressions/public';
-import { DataPublicPluginStart, FieldFormat } from '../../../../data/public';
+import { DataPublicPluginStart } from '../../../../data/public';
 import { ClickTriggerEvent } from '../../../../charts/public';
 import { ValueClickContext } from '../../../../embeddable/public';
+import type { FieldFormat } from '../../../../field_formats/common';
 import { BucketColumns } from '../types';
 
 export const canFilter = async (

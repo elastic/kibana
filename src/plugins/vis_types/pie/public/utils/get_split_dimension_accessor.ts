@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import { AccessorFn } from '@elastic/charts';
-import { FieldFormatsStart } from '../../../../data/public';
 import { DatatableColumn } from '../../../../expressions/public';
+import type { FieldFormatsStart } from '../../../../field_formats/public';
 import { Dimension } from '../types';
 
 export const getSplitDimensionAccessor = (

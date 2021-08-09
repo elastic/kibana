@@ -26,13 +26,14 @@ import {
   ChartsPluginSetup,
   PaletteRegistry,
 } from '../../../charts/public';
-import { DataPublicPluginStart, FieldFormat } from '../../../data/public';
+import { DataPublicPluginStart } from '../../../data/public';
 import type { PersistedState } from '../../../visualizations/public';
 import {
   Datatable,
   DatatableColumn,
   IInterpreterRenderHandlers,
 } from '../../../expressions/public';
+import type { FieldFormat } from '../../../field_formats/common';
 import { DEFAULT_PERCENT_DECIMALS } from '../common';
 import { PieVisParams, BucketColumns, ValueFormats, PieContainerDimensions } from './types';
 import {
