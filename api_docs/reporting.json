@@ -54,6 +54,40 @@
                 "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingAPIClient.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "uiSettings",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.IUiSettingsClient",
+                    "text": "IUiSettingsClient"
+                  }
+                ],
+                "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingAPIClient.Unnamed.$3",
+                "type": "string",
+                "tags": [],
+                "label": "kibanaVersion",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -311,7 +345,9 @@
             "label": "getReportingJobPath",
             "description": [],
             "signature": [
-              "(exportType: string, jobParams: JobParams) => string"
+              "(exportType: string, jobParams: ",
+              "BaseParams",
+              ") => string"
             ],
             "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
             "deprecated": false,
@@ -338,7 +374,7 @@
                 "label": "jobParams",
                 "description": [],
                 "signature": [
-                  "JobParams"
+                  "BaseParams"
                 ],
                 "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
                 "deprecated": false,
@@ -355,7 +391,9 @@
             "label": "createReportingJob",
             "description": [],
             "signature": [
-              "(exportType: string, jobParams: any) => Promise<",
+              "(exportType: string, jobParams: ",
+              "BaseParams",
+              ") => Promise<",
               "Job",
               ">"
             ],
@@ -379,12 +417,77 @@
               {
                 "parentPluginId": "reporting",
                 "id": "def-public.ReportingAPIClient.createReportingJob.$2",
-                "type": "Any",
+                "type": "Object",
                 "tags": [],
                 "label": "jobParams",
                 "description": [],
                 "signature": [
-                  "any"
+                  "BaseParams"
+                ],
+                "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-public.ReportingAPIClient.createImmediateReport",
+            "type": "Function",
+            "tags": [],
+            "label": "createImmediateReport",
+            "description": [],
+            "signature": [
+              "(baseParams: ",
+              "BaseParams",
+              ") => Promise<any>"
+            ],
+            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingAPIClient.createImmediateReport.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "baseParams",
+                "description": [],
+                "signature": [
+                  "BaseParams"
+                ],
+                "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-public.ReportingAPIClient.getDecoratedJobParams",
+            "type": "Function",
+            "tags": [],
+            "label": "getDecoratedJobParams",
+            "description": [],
+            "signature": [
+              "<T extends Pick<",
+              "BaseParams",
+              ", \"title\" | \"objectType\" | \"layout\">>(baseParams: T) => ",
+              "BaseParams"
+            ],
+            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "reporting",
+                "id": "def-public.ReportingAPIClient.getDecoratedJobParams.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "baseParams",
+                "description": [],
+                "signature": [
+                  "T"
                 ],
                 "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
                 "deprecated": false,
@@ -869,6 +972,21 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-server.ReportingCore.getKibanaVersion",
+            "type": "Function",
+            "tags": [],
+            "label": "getKibanaVersion",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/reporting/server/core.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -2138,8 +2256,8 @@
           ],
           "path": "x-pack/plugins/reporting/server/types.ts",
           "deprecated": false,
-          "returnComment": [],
-          "children": []
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> Import from the "<!-- -->@<!-- -->kbn/es-query" package directly instead.  8.0
+> Import from the "<!-- -->@<!-- -->kbn/es-query" package directly instead.  8.1
 > 
 
 <b>Signature:</b>

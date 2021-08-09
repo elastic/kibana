@@ -82,7 +82,7 @@ export async function getServiceErrorGroupMainStatistics({
     response.aggregations?.error_groups.buckets.map((bucket) => ({
       group_id: bucket.key as string,
       name: getErrorName(bucket.sample.hits.hits[0]._source),
-      last_seen: new Date(
+      lastSeen: new Date(
         bucket.sample.hits.hits[0]?._source['@timestamp']
       ).getTime(),
       occurrences: bucket.doc_count,

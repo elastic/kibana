@@ -14,8 +14,14 @@ import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_message
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 
-import { CrawlerData, CrawlerDomain } from './types';
-import { crawlerDataServerToClient } from './utils';
+import {
+  CrawlerData,
+  CrawlerDomain,
+  CrawlRequest,
+  CrawlRequestFromServer,
+  CrawlerStatus,
+} from './types';
+import { crawlerDataServerToClient, crawlRequestServerToClient } from './utils';
 
 export const DELETE_DOMAIN_MESSAGE = (domainUrl: string) =>
   i18n.translate(
@@ -28,15 +34,28 @@ export const DELETE_DOMAIN_MESSAGE = (domainUrl: string) =>
     }
   );
 
-interface CrawlerOverviewValues {
+const POLLING_DURATION = 1000;
+const POLLING_DURATION_ON_FAILURE = 5000;
+
+export interface CrawlerOverviewValues {
+  crawlRequests: CrawlRequest[];
   dataLoading: boolean;
   domains: CrawlerDomain[];
+  mostRecentCrawlRequestStatus: CrawlerStatus;
+  timeoutId: NodeJS.Timeout | null;
 }
 
 interface CrawlerOverviewActions {
+  clearTimeoutId(): void;
+  createNewTimeoutForCrawlRequests(duration: number): { duration: number };
   deleteDomain(domain: CrawlerDomain): { domain: CrawlerDomain };
   fetchCrawlerData(): void;
+  getLatestCrawlRequests(refreshData?: boolean): { refreshData?: boolean };
+  onCreateNewTimeout(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
   onReceiveCrawlerData(data: CrawlerData): { data: CrawlerData };
+  onReceiveCrawlRequests(crawlRequests: CrawlRequest[]): { crawlRequests: CrawlRequest[] };
+  startCrawl(): void;
+  stopCrawl(): void;
 }
 
 export const CrawlerOverviewLogic = kea<
@@ -44,9 +63,16 @@ export const CrawlerOverviewLogic = kea<
 >({
   path: ['enterprise_search', 'app_search', 'crawler', 'crawler_overview'],
   actions: {
+    clearTimeoutId: true,
+    createNewTimeoutForCrawlRequests: (duration) => ({ duration }),
     deleteDomain: (domain) => ({ domain }),
     fetchCrawlerData: true,
+    getLatestCrawlRequests: (refreshData) => ({ refreshData }),
+    onCreateNewTimeout: (timeoutId) => ({ timeoutId }),
     onReceiveCrawlerData: (data) => ({ data }),
+    onReceiveCrawlRequests: (crawlRequests) => ({ crawlRequests }),
+    startCrawl: () => null,
+    stopCrawl: () => null,
   },
   reducers: {
     dataLoading: [
@@ -61,15 +87,44 @@ export const CrawlerOverviewLogic = kea<
         onReceiveCrawlerData: (_, { data: { domains } }) => domains,
       },
     ],
+    crawlRequests: [
+      [],
+      {
+        onReceiveCrawlRequests: (_, { crawlRequests }) => crawlRequests,
+      },
+    ],
+    timeoutId: [
+      null,
+      {
+        clearTimeoutId: () => null,
+        onCreateNewTimeout: (_, { timeoutId }) => timeoutId,
+      },
+    ],
   },
-  listeners: ({ actions }) => ({
+  selectors: ({ selectors }) => ({
+    mostRecentCrawlRequestStatus: [
+      () => [selectors.crawlRequests],
+      (crawlRequests: CrawlerOverviewValues['crawlRequests']) => {
+        const eligibleCrawlRequests = crawlRequests.filter(
+          (req) => req.status !== CrawlerStatus.Skipped
+        );
+        if (eligibleCrawlRequests.length === 0) {
+          return CrawlerStatus.Success;
+        }
+        return eligibleCrawlRequests[0].status;
+      },
+    ],
+  }),
+  listeners: ({ actions, values }) => ({
     fetchCrawlerData: async () => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
       try {
         const response = await http.get(`/api/app_search/engines/${engineName}/crawler`);
+
         const crawlerData = crawlerDataServerToClient(response);
+
         actions.onReceiveCrawlerData(crawlerData);
       } catch (e) {
         flashAPIErrors(e);
@@ -93,6 +148,79 @@ export const CrawlerOverviewLogic = kea<
         flashSuccessToast(DELETE_DOMAIN_MESSAGE(domain.url));
       } catch (e) {
         flashAPIErrors(e);
+      }
+    },
+    startCrawl: async () => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+
+      try {
+        await http.post(`/api/app_search/engines/${engineName}/crawler/crawl_requests`);
+        actions.getLatestCrawlRequests();
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    stopCrawl: async () => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+
+      try {
+        await http.post(`/api/app_search/engines/${engineName}/crawler/crawl_requests/cancel`);
+        actions.getLatestCrawlRequests();
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    createNewTimeoutForCrawlRequests: ({ duration }) => {
+      if (values.timeoutId) {
+        clearTimeout(values.timeoutId);
+      }
+
+      const timeoutIdId = setTimeout(() => {
+        actions.getLatestCrawlRequests();
+      }, duration);
+
+      actions.onCreateNewTimeout(timeoutIdId);
+    },
+    getLatestCrawlRequests: async ({ refreshData = true }) => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+
+      try {
+        const crawlRequestsFromServer: CrawlRequestFromServer[] = await http.get(
+          `/api/app_search/engines/${engineName}/crawler/crawl_requests`
+        );
+        const crawlRequests = crawlRequestsFromServer.map(crawlRequestServerToClient);
+        actions.onReceiveCrawlRequests(crawlRequests);
+        if (
+          [
+            CrawlerStatus.Pending,
+            CrawlerStatus.Starting,
+            CrawlerStatus.Running,
+            CrawlerStatus.Canceling,
+          ].includes(crawlRequests[0]?.status)
+        ) {
+          actions.createNewTimeoutForCrawlRequests(POLLING_DURATION);
+        } else if (
+          [CrawlerStatus.Success, CrawlerStatus.Failed, CrawlerStatus.Canceled].includes(
+            crawlRequests[0]?.status
+          )
+        ) {
+          actions.clearTimeoutId();
+          if (refreshData) {
+            actions.fetchCrawlerData();
+          }
+        }
+      } catch (e) {
+        actions.createNewTimeoutForCrawlRequests(POLLING_DURATION_ON_FAILURE);
+      }
+    },
+  }),
+  events: ({ values }) => ({
+    beforeUnmount: () => {
+      if (values.timeoutId) {
+        clearTimeout(values.timeoutId);
       }
     },
   }),

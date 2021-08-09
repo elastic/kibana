@@ -10,7 +10,7 @@ import {
   getEmptyFindResult,
   getAlertMock,
   getCreateRequest,
-  getFindResultStatus,
+  getRuleExecutionStatuses,
   getFindResultWithSingleHit,
   createMlRuleRequest,
 } from '../__mocks__/request_responses';
@@ -38,7 +38,7 @@ describe('create_rules', () => {
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
     clients.rulesClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // creation succeeds
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // needed to transform
+    clients.ruleExecutionLogClient.find.mockResolvedValue(getRuleExecutionStatuses()); // needed to transform: ;
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
