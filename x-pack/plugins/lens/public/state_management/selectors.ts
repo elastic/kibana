@@ -10,6 +10,7 @@ import { SavedObjectReference } from 'kibana/server';
 import { LensState } from './types';
 import { extractFilterReferences } from '../persistence';
 import { Datasource, DatasourceMap, VisualizationMap } from '../types';
+import { createDatasourceLayers } from '../editor_frame_service/editor_frame';
 
 const selectQuery = (state: LensState) => state.lens.query;
 const selectFilters = (state: LensState) => state.lens.filters;
@@ -54,24 +55,20 @@ export const selectDocState = createSelector(
 
 const selectVisualizationMap = (
   state: LensState,
-  visualizationMap: VisualizationMap,
-  datasourceMap: DatasourceMap
+  datasourceMap: DatasourceMap,
+  visualizationMap: VisualizationMap
 ) => visualizationMap;
 
-const selectDatasourceMap = (
-  state: LensState,
-  visualizationMap: VisualizationMap,
-  datasourceMap: DatasourceMap
-) => datasourceMap;
+const selectDatasourceMap = (state: LensState, datasourceMap: DatasourceMap) => datasourceMap;
 
 export const selectSavedObjectFormat = createSelector(
   [
     selectDocState,
     (state: LensState) => state.lens.activeDatasourceId,
-    selectVisualizationMap,
     selectDatasourceMap,
+    selectVisualizationMap,
   ],
-  (docState, activeDatasourceId, visualizationMap, datasourceMap) => {
+  (docState, activeDatasourceId, datasourceMap, visualizationMap) => {
     const { datasourceStates, visualization, filters } = docState.state;
     const activeVisualization =
       visualization && docState.visualizationType && visualizationMap[docState.visualizationType];
@@ -119,29 +116,6 @@ export const selectSavedObjectFormat = createSelector(
   }
 );
 
-// export const selectCurrentForSuggestionPanel = createSelector(
-//   [
-//     (state) => state.lens.stagedPreview,
-//     (state) => state.lens.datasourceStates,
-//     (state) => state.lens.visualization,
-//   ],
-//   (stagedPreview, datasourceStates, visualization) => {
-//     const currentDatasourceStates = stagedPreview ? stagedPreview.datasourceStates : datasourceStates;
-//     const currentVisualizationState = stagedPreview
-//       ? stagedPreview.visualization.state
-//       : visualization.state;
-//     const currentVisualizationId = stagedPreview
-//       ? stagedPreview.visualization.activeId
-//       : visualization.activeId;
-//     return stagedPreview ? {
-//       datasourceStates: stagedPreview.datasourceStates : datasourceStates,
-//       visualization: {
-//         state:
-//       }
-//     }
-//   }
-// );
-
 export const selectCurrentVisualization = createSelector(
   [selectVisualization, selectStagedPreview],
   (visualization, stagedPreview) => (stagedPreview ? stagedPreview.visualization : visualization)
@@ -151,4 +125,15 @@ export const selectCurrentDatasourceStates = createSelector(
   [selectDatasourceStates, selectStagedPreview],
   (datasourceStates, stagedPreview) =>
     stagedPreview ? stagedPreview.datasourceStates : datasourceStates
+);
+
+export const selectAreDatasourcesLoaded = createSelector(
+  selectDatasourceStates,
+  (datasourceStates) =>
+    Object.values(datasourceStates).every(({ isLoading }) => isLoading === false)
+);
+
+export const selectDatasourceLayers = createSelector(
+  [(state: LensState) => state.lens.datasourceStates, selectDatasourceMap],
+  (datasourceStates, datasourceMap) => createDatasourceLayers(datasourceStates, datasourceMap)
 );

@@ -37,7 +37,7 @@ export async function initializeDatasources(
   initialContext?: VisualizeFieldContext,
   options?: InitializationOptions
 ) {
-  const states: Record<string, { isLoading: boolean; state: unknown }> = {};
+  const states: DatasourceStates = {};
   await Promise.all(
     Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
       if (datasourceStates[datasourceId]) {

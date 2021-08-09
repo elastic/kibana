@@ -87,7 +87,7 @@ export function App({
   } = useLensSelector((state) => state.lens);
 
   const currentDoc = useLensSelector((state) =>
-    selectSavedObjectFormat(state, visualizationMap, datasourceMap)
+    selectSavedObjectFormat(state, datasourceMap, visualizationMap)
   );
 
   // Used to show a popover that guides the user towards changing the date range when no data is available.

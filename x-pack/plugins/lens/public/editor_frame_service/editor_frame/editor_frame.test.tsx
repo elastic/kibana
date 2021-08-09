@@ -1100,45 +1100,5 @@ describe('editor_frame', () => {
         })
       );
     });
-
-    it('should avoid completely to compute suggestion when in fullscreen mode', async () => {
-      const props = {
-        ...getDefaultProps(),
-        initialContext: {
-          indexPatternId: '1',
-          fieldName: 'test',
-        },
-        visualizationMap: {
-          testVis: mockVisualization,
-        },
-        datasourceMap: {
-          testDatasource: mockDatasource,
-          testDatasource2: mockDatasource2,
-        },
-
-        ExpressionRenderer: expressionRendererMock,
-      };
-
-      const { instance: el, lensStore } = await mountWithProvider(<EditorFrame {...props} />, {
-        data: props.plugins.data,
-      });
-      instance = el;
-
-      expect(
-        instance.find(FrameLayout).prop('suggestionsPanel') as ReactElement
-      ).not.toBeUndefined();
-
-      lensStore.dispatch(setToggleFullscreen());
-      instance.update();
-
-      expect(instance.find(FrameLayout).prop('suggestionsPanel') as ReactElement).toBe(false);
-
-      lensStore.dispatch(setToggleFullscreen());
-      instance.update();
-
-      expect(
-        instance.find(FrameLayout).prop('suggestionsPanel') as ReactElement
-      ).not.toBeUndefined();
-    });
   });
 });

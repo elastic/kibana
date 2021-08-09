@@ -49,6 +49,7 @@ import {
   useLensSelector,
   selectCurrentVisualization,
   selectCurrentDatasourceStates,
+  DatasourceStates,
 } from '../../state_management';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
@@ -163,6 +164,11 @@ const SuggestionPreview = ({
       </div>
     </EuiToolTip>
   );
+};
+
+export const SuggestionPanelWrapper = (props: SuggestionPanelProps) => {
+  const isFullscreenDatasource = useLensSelector((state) => state.lens.isFullscreenDatasource);
+  return isFullscreenDatasource ? null : <SuggestionPanel {...props} />;
 };
 
 export function SuggestionPanel({
@@ -444,8 +450,8 @@ function getPreviewExpression(
 function preparePreviewExpression(
   visualizableState: VisualizableState,
   visualization: Visualization,
-  datasourceMap: Record<string, Datasource<unknown, unknown>>,
-  datasourceStates: Record<string, { isLoading: boolean; state: unknown }>,
+  datasourceMap: DatasourceMap,
+  datasourceStates: DatasourceStates,
   framePublicAPI: FramePublicAPI
 ) {
   const suggestionDatasourceId = visualizableState.datasourceId;

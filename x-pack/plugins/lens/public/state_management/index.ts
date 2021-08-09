@@ -44,7 +44,7 @@ export const makeConfigureStore = (
 ) => {
   const middleware = [
     ...getDefaultMiddleware({
-      // serializableCheck: false,
+      serializableCheck: false,
     }),
     initMiddleware(storeDeps),
     optimizingMiddleware(),

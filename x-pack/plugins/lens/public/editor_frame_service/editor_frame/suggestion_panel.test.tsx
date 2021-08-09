@@ -16,12 +16,12 @@ import {
 } from '../../mocks';
 import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
-import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
+import { SuggestionPanel, SuggestionPanelProps, SuggestionPanelWrapper } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { mountWithProvider } from '../../mocks';
-import { LensAppState, PreviewState, setState } from '../../state_management';
+import { LensAppState, PreviewState, setState, setToggleFullscreen } from '../../state_management';
 
 jest.mock('./suggestion_helpers');
 
@@ -91,6 +91,21 @@ describe('suggestion_panel', () => {
       ExpressionRenderer: expressionRendererMock,
       frame: createMockFramePublicAPI(),
     };
+  });
+
+  it('should avoid completely to render SuggestionPanel when in fullscreen mode', async () => {
+    const { instance, lensStore } = await mountWithProvider(
+      <SuggestionPanelWrapper {...defaultProps} />
+    );
+    expect(instance.find(SuggestionPanel).exists()).toBe(true);
+
+    lensStore.dispatch(setToggleFullscreen());
+    instance.update();
+    expect(instance.find(SuggestionPanel).exists()).toBe(false);
+
+    lensStore.dispatch(setToggleFullscreen());
+    instance.update();
+    expect(instance.find(SuggestionPanel).exists()).toBe(true);
   });
 
   it('should list passed in suggestions', async () => {

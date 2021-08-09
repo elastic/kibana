@@ -12,14 +12,19 @@ import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../types';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel';
 import { FrameLayout } from './frame_layout';
-import { SuggestionPanel } from './suggestion_panel';
+import { SuggestionPanelWrapper } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
 import { DragDropIdentifier, RootDragDropProvider } from '../../drag_drop';
 import { EditorFrameStartPlugins } from '../service';
 import { createDatasourceLayers } from './state_helpers';
 import { getTopSuggestionForField, switchToSuggestion, Suggestion } from './suggestion_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-import { useLensSelector, useLensDispatch } from '../../state_management';
+import {
+  useLensSelector,
+  useLensDispatch,
+  selectDatasourceLayers,
+  selectAreDatasourcesLoaded,
+} from '../../state_management';
 
 export interface EditorFrameProps {
   datasourceMap: DatasourceMap;
@@ -31,47 +36,31 @@ export interface EditorFrameProps {
 }
 
 export function EditorFrame(props: EditorFrameProps) {
-  const {
-    activeData,
-    activeDatasourceId,
-    datasourceStates,
-    visualization,
-    isFullscreenDatasource,
-  } = useLensSelector((state) => state.lens);
-
+  const { datasourceMap, visualizationMap } = props;
   const dispatchLens = useLensDispatch();
-
-  const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
-
-  const datasourceLayers = React.useMemo(
-    () => createDatasourceLayers(datasourceStates, props.datasourceMap),
-    [props.datasourceMap, datasourceStates]
+  const { activeData, activeDatasourceId, datasourceStates, visualization } = useLensSelector(
+    (state) => state.lens
   );
+  const allLoaded = useLensSelector(selectAreDatasourcesLoaded);
+  const datasourceLayers = useLensSelector((state) => selectDatasourceLayers(state, datasourceMap));
 
   const framePublicAPI: FramePublicAPI = useMemo(() => ({ datasourceLayers, activeData }), [
     activeData,
     datasourceLayers,
   ]);
 
-  // TODO: move to redux
   // Using a ref to prevent rerenders in the child components while keeping the latest state
   const getSuggestionForField = useRef<(field: DragDropIdentifier) => Suggestion | undefined>();
   getSuggestionForField.current = (field: DragDropIdentifier) => {
-    const activeVisualizationId = visualization.activeId;
-    const visualizationState = visualization.state;
-    const { visualizationMap, datasourceMap } = props;
-
     if (!field || !activeDatasourceId) {
       return;
     }
-
     return getTopSuggestionForField(
       datasourceLayers,
-      activeVisualizationId,
-      visualizationMap,
-      visualizationState,
-      datasourceMap[activeDatasourceId],
+      visualization,
       datasourceStates,
+      visualizationMap,
+      datasourceMap[activeDatasourceId],
       field
     );
   };
@@ -97,9 +86,9 @@ export function EditorFrame(props: EditorFrameProps) {
       <FrameLayout
         dataPanel={
           <DataPanelWrapper
-            datasourceMap={props.datasourceMap}
             core={props.core}
             plugins={props.plugins}
+            datasourceMap={datasourceMap}
             showNoDataPopover={props.showNoDataPopover}
             dropOntoWorkspace={dropOntoWorkspace}
             hasSuggestionForField={hasSuggestionForField}
@@ -108,33 +97,32 @@ export function EditorFrame(props: EditorFrameProps) {
         configPanel={
           allLoaded && (
             <ConfigPanelWrapper
-              framePublicAPI={framePublicAPI}
-              visualizationMap={props.visualizationMap}
-              datasourceMap={props.datasourceMap}
               core={props.core}
+              datasourceMap={datasourceMap}
+              visualizationMap={visualizationMap}
+              framePublicAPI={framePublicAPI}
             />
           )
         }
         workspacePanel={
           allLoaded && (
             <WorkspacePanel
-              framePublicAPI={framePublicAPI}
-              datasourceMap={props.datasourceMap}
-              visualizationMap={props.visualizationMap}
-              ExpressionRenderer={props.ExpressionRenderer}
               core={props.core}
               plugins={props.plugins}
+              ExpressionRenderer={props.ExpressionRenderer}
+              datasourceMap={datasourceMap}
+              visualizationMap={visualizationMap}
+              framePublicAPI={framePublicAPI}
               getSuggestionForField={getSuggestionForField.current}
             />
           )
         }
         suggestionsPanel={
-          allLoaded &&
-          !isFullscreenDatasource && (
-            <SuggestionPanel
-              visualizationMap={props.visualizationMap}
-              datasourceMap={props.datasourceMap}
+          allLoaded && (
+            <SuggestionPanelWrapper
               ExpressionRenderer={props.ExpressionRenderer}
+              datasourceMap={datasourceMap}
+              visualizationMap={visualizationMap}
               frame={framePublicAPI}
             />
           )

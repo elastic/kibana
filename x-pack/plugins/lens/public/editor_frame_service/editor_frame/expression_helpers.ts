@@ -12,13 +12,7 @@ import { Visualization, DatasourcePublicAPI, DatasourceMap } from '../../types';
 export function prependDatasourceExpression(
   visualizationExpression: Ast | string | null,
   datasourceMap: DatasourceMap,
-  datasourceStates: Record<
-    string,
-    {
-      isLoading: boolean;
-      state: unknown;
-    }
-  >
+  datasourceStates: DatasourceStates
 ): Ast | null {
   const datasourceExpressions: Array<[string, Ast | string]> = [];
 
