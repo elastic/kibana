@@ -8,7 +8,7 @@
 import { openSans } from '../../../common/lib/fonts';
 import { ElementFactory } from '../../../types';
 import { SetupInitializer } from '../../plugin';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { FORMATS_UI_SETTINGS } from '../../../../../../src/plugins/field_formats/common';
 
 export const metricElementInitializer: SetupInitializer<ElementFactory> = (core, setup) => {
   return () => ({
@@ -22,10 +22,10 @@ export const metricElementInitializer: SetupInitializer<ElementFactory> = (core,
     expression: `filters
   | demodata
   | math "unique(country)"
-  | metric "Countries" 
-    metricFont={font size=48 family="${openSans.value}" color="#000000" align="center" lHeight=48} 
+  | metric "Countries"
+    metricFont={font size=48 family="${openSans.value}" color="#000000" align="center" lHeight=48}
     labelFont={font size=14 family="${openSans.value}" color="#000000" align="center"}
-    metricFormat="${core.uiSettings.get(UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN)}"
+    metricFormat="${core.uiSettings.get(FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN)}"
   | render`,
   });
 };
