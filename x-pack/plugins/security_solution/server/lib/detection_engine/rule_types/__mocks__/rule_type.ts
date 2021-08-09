@@ -17,6 +17,7 @@ import { ConfigType } from '../../../../config';
 import { AlertAttributes } from '../../signals/types';
 import { createRuleMock } from './rule';
 import { listMock } from '../../../../../../lists/server/mocks';
+import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
 
 export const createRuleTypeMocks = () => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -85,6 +86,7 @@ export const createRuleTypeMocks = () => {
         })),
         isWriteEnabled: jest.fn(() => true),
       } as unknown) as RuleDataClient,
+      ruleDataService: ruleRegistryMocks.createRuleDataPluginService(),
     },
     services,
     scheduleActions,

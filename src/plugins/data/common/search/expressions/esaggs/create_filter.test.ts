@@ -7,7 +7,7 @@
  */
 
 import { isRangeFilter } from '@kbn/es-query';
-import { BytesFormat, FieldFormatsGetConfigFn } from '../../../field_formats';
+import { BytesFormat, FieldFormatsGetConfigFn } from '../../../../../field_formats/common';
 import { AggConfigs, IAggConfig } from '../../aggs';
 import { mockAggTypesRegistry } from '../../aggs/test_helpers';
 
