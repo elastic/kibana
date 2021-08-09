@@ -15,7 +15,7 @@ import JSON5 from 'json5';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/utils';
-import { getEnvOptions } from '@kbn/config/target/mocks';
+import { getEnvOptions } from '../../../config/mocks';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const logFilePath = Path.join(__dirname, '7_13_unknown_types_test.log');
