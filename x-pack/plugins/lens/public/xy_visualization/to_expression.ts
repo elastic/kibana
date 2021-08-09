@@ -155,6 +155,10 @@ export const buildExpression = (
                     floatingColumns: state.legend.floatingColumns
                       ? [Math.min(5, state.legend.floatingColumns)]
                       : [],
+                    maxLines:
+                      state.legend.maxLines !== undefined
+                        ? [Math.min(5, state.legend.maxLines)]
+                        : [],
                   },
                 },
               ],

@@ -56,6 +56,8 @@ function expressionHelper(
           legendDisplay: [layer.legendDisplay],
           legendPosition: [layer.legendPosition || 'right'],
           percentDecimals: [layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS],
+          legendMaxLines:
+            layer.legendMaxLines !== undefined ? [Math.min(5, layer.legendMaxLines)] : [],
           nestedLegend: [!!layer.nestedLegend],
           ...(state.palette
             ? {

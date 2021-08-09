@@ -142,6 +142,7 @@ Object {
                   "isVisible": Array [
                     true,
                   ],
+                  "maxLines": Array [],
                   "position": Array [
                     "bottom",
                   ],

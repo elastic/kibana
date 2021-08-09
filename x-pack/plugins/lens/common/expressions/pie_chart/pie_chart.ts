@@ -74,6 +74,10 @@ export const pie: ExpressionFunctionDefinition<
       types: ['boolean'],
       help: '',
     },
+    legendMaxLines: {
+      types: ['number'],
+      help: '',
+    },
     legendPosition: {
       types: ['string'],
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],

@@ -7,7 +7,11 @@
 
 import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test/jest';
-import { LegendSettingsPopover, LegendSettingsPopoverProps } from './legend_settings_popover';
+import {
+  LegendSettingsPopover,
+  LegendSettingsPopoverProps,
+  MaxLinesInput,
+} from './legend_settings_popover';
 
 describe('Legend Settings', () => {
   const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
@@ -48,6 +52,11 @@ describe('Legend Settings', () => {
     const component = shallow(<LegendSettingsPopover {...props} />);
     component.find('[data-test-subj="lens-legend-display-btn"]').simulate('change');
     expect(props.onDisplayChange).toHaveBeenCalled();
+  });
+
+  it('should have default the max lines input to 0 when no value is given', () => {
+    const component = shallow(<LegendSettingsPopover {...props} />);
+    expect(component.find(MaxLinesInput).prop('value')).toEqual(0);
   });
 
   it('should enable the Nested Legend Switch when renderNestedLegendSwitch prop is true', () => {

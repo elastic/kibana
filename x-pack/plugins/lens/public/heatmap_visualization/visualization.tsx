@@ -69,6 +69,7 @@ function getInitialState(): Omit<HeatmapVisualizationState, 'layerId'> {
     legend: {
       isVisible: true,
       position: Position.Right,
+      maxLines: 0,
       type: LEGEND_FUNCTION,
     },
     gridConfig: {

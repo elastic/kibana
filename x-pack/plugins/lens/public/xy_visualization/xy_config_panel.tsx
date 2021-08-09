@@ -391,6 +391,13 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                 legend: { ...state.legend, floatingColumns: val },
               });
             }}
+            maxLines={state?.legend.maxLines}
+            onMaxLinesChange={(val) => {
+              setState({
+                ...state,
+                legend: { ...state.legend, maxLines: val },
+              });
+            }}
             onPositionChange={(id) => {
               setState({
                 ...state,

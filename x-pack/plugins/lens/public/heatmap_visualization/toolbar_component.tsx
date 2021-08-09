@@ -65,6 +65,13 @@ export const HeatmapToolbar = memo(
                   legend: { ...state.legend, position: id as Position },
                 });
               }}
+              maxLines={state?.legend.maxLines}
+              onMaxLinesChange={(val) => {
+                setState({
+                  ...state,
+                  legend: { ...state.legend, maxLines: val },
+                });
+              }}
             />
           </EuiFlexGroup>
         </EuiFlexItem>

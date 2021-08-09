@@ -7,12 +7,19 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiButtonGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiButtonGroup,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiFieldNumber,
+} from '@elastic/eui';
 import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { ToolbarPopover } from '../shared_components';
 import { LegendLocationSettings } from './legend_location_settings';
 import { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
 import { TooltipWrapper } from './tooltip_wrapper';
+import { useDebouncedValue } from './debounced_value';
 
 export interface LegendSettingsPopoverProps {
   /**
@@ -64,9 +71,17 @@ export interface LegendSettingsPopoverProps {
    */
   floatingColumns?: number;
   /**
-   * Callback on horizontal alignment option change
+   * Callback on alignment option change
    */
   onFloatingColumnsChange?: (value: number) => void;
+  /**
+   * Sets the number of lines per legend item
+   */
+  maxLines?: number;
+  /**
+   * Callback on max lines option change
+   */
+  onMaxLinesChange?: (value: number) => void;
   /**
    * If true, nested legend switch is rendered
    */
@@ -97,6 +112,33 @@ export interface LegendSettingsPopoverProps {
   groupPosition?: ToolbarButtonProps['groupPosition'];
 }
 
+const DEFAULT_MAX_LINES = 0;
+
+export const MaxLinesInput = ({
+  value,
+  setValue,
+  isDisabled,
+}: {
+  value: number;
+  setValue: (value: number) => void;
+  isDisabled: boolean;
+}) => {
+  const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange: setValue });
+  return (
+    <EuiFieldNumber
+      data-test-subj="lens-legend-max-lines-input"
+      value={inputValue}
+      min={0}
+      max={5}
+      compressed
+      disabled={isDisabled}
+      onChange={(e) => {
+        handleInputChange(Number(e.target.value));
+      }}
+    />
+  );
+};
+
 export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopoverProps> = ({
   legendOptions,
   mode,
@@ -109,6 +151,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
   floatingColumns,
   onAlignmentChange = () => {},
   onFloatingColumnsChange = () => {},
+  onMaxLinesChange = () => {},
   onPositionChange,
   renderNestedLegendSwitch,
   nestedLegend,
@@ -117,6 +160,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
   onValueInLegendChange = () => {},
   renderValueInLegendSwitch,
   groupPosition = 'right',
+  maxLines,
 }) => {
   return (
     <ToolbarPopover
@@ -158,6 +202,29 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
         position={position}
         onPositionChange={onPositionChange}
       />
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.shared.maxLinesLabel', {
+          defaultMessage: 'Maximum legend lines',
+        })}
+        fullWidth
+        display="columnCompressed"
+      >
+        <TooltipWrapper
+          tooltipContent={i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
+            defaultMessage: 'Requires legend to be shown',
+          })}
+          condition={mode === 'hide'}
+          position="top"
+          delay="regular"
+          display="block"
+        >
+          <MaxLinesInput
+            value={maxLines ?? DEFAULT_MAX_LINES}
+            setValue={onMaxLinesChange}
+            isDisabled={mode === 'hide'}
+          />
+        </TooltipWrapper>
+      </EuiFormRow>
       {renderNestedLegendSwitch && (
         <EuiFormRow
           display="columnCompressedSwitch"
