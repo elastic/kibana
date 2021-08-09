@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -30,8 +32,9 @@ export function ServiceOverviewDependenciesTable() {
   } = useUrlParams();
 
   const {
+    query,
     query: { kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/overview');
+  } = useApmParams('/services/:serviceName/*');
 
   const { offset } = getTimeRangeComparison({
     start,
@@ -41,6 +44,15 @@ export function ServiceOverviewDependenciesTable() {
   });
 
   const { serviceName, transactionType } = useApmServiceContext();
+
+  const router = useApmRouter();
+
+  const dependenciesLink = router.link('/services/:serviceName/dependencies', {
+    path: {
+      serviceName,
+    },
+    query,
+  });
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -109,7 +121,7 @@ export function ServiceOverviewDependenciesTable() {
       title={i18n.translate(
         'xpack.apm.serviceOverview.dependenciesTableTitle',
         {
-          defaultMessage: 'Dependencies',
+          defaultMessage: 'Downstream services and backends',
         }
       )}
       nameColumnTitle={i18n.translate(
@@ -118,8 +130,15 @@ export function ServiceOverviewDependenciesTable() {
           defaultMessage: 'Backend',
         }
       )}
-      serviceName={serviceName}
       status={status}
+      link={
+        <EuiLink href={dependenciesLink}>
+          {i18n.translate(
+            'xpack.apm.serviceOverview.dependenciesTableTabLink',
+            { defaultMessage: 'View dependencies' }
+          )}
+        </EuiLink>
+      }
     />
   );
 }

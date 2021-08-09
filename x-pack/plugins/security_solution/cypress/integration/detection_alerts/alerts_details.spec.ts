@@ -47,13 +47,14 @@ describe('Alert details with unmapped fields', () => {
         const length = elements.length;
         cy.wrap(elements)
           .eq(length - expectedUnmappedField.line)
-          .should('have.text', expectedUnmappedField.text);
+          .invoke('text')
+          .should('include', expectedUnmappedField.text);
       });
   });
 
   it('Displays the unmapped field on the table', () => {
     const expectedUnmmappedField = {
-      row: 55,
+      row: 88,
       field: 'unmapped',
       text: 'This is the unmapped field',
     };
