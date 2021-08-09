@@ -216,8 +216,8 @@ describe('xy_visualization', () => {
   });
 
   describe('#getSupportedLayers', () => {
-    it('should return a single layer type', () => {
-      expect(xyVisualization.getSupportedLayers()).toHaveLength(1);
+    it('should return a double layer types', () => {
+      expect(xyVisualization.getSupportedLayers()).toHaveLength(2);
     });
 
     it('should return the icon for the visualization type', () => {

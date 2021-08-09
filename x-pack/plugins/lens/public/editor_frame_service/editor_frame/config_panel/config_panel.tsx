@@ -27,7 +27,7 @@ import {
   selectVisualization,
   VisualizationState,
 } from '../../../state_management';
-import { AddLayerButton } from './add_layer';
+import { AddLayerButton, getLayerType } from './add_layer';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const visualization = useLensSelector(selectVisualization);
@@ -177,6 +177,16 @@ export function LayerPanels(
                 layerIds.length
               ) === 'clear'
             }
+            onEmptyDimensionAdd={(columnId, { groupId }) => {
+              addMaybeDefaultThreshold({
+                ...props,
+                layerId,
+                layerType: getLayerType(activeVisualization, visualizationState, layerId),
+                columnId,
+                updateAll,
+                groupId,
+              });
+            }}
             onRemoveLayer={() => {
               dispatchLens(
                 updateState({
@@ -243,10 +253,65 @@ export function LayerPanels(
                 }),
             })
           );
-
+          addMaybeDefaultThreshold({ ...props, layerId: id, layerType, updateAll });
           setNextFocusedLayerId(id);
         }}
       />
     </EuiForm>
   );
+}
+
+function addMaybeDefaultThreshold({
+  activeVisualization,
+  visualizationState,
+  framePublicAPI,
+  layerType,
+  activeDatasourceId,
+  datasourceMap,
+  updateAll,
+  layerId,
+  columnId,
+  groupId,
+}: ConfigPanelWrapperProps & {
+  activeDatasourceId: string;
+  activeVisualization: Visualization;
+  layerId: string;
+  layerType: string;
+  columnId?: string;
+  groupId?: string;
+  updateAll: (
+    datasourceId: string,
+    newDatasourceState: unknown,
+    newVisualizationState: unknown
+  ) => void;
+}) {
+  const layerInfo = activeVisualization
+    .getSupportedLayers(visualizationState, framePublicAPI)
+    .find(({ type }) => type === layerType);
+  if (layerInfo?.initialDimensions && datasourceMap[activeDatasourceId]?.initializeDimension) {
+    const info = groupId
+      ? layerInfo.initialDimensions.find(({ groupId: id }) => id === groupId)
+      : // pick the first available one if not passed
+        layerInfo.initialDimensions[0];
+    if (info) {
+      updateAll(
+        activeDatasourceId,
+        (currentState: unknown) => {
+          return datasourceMap[activeDatasourceId].initializeDimension?.(currentState, layerId, {
+            ...info,
+            columnId: columnId || info.columnId,
+          });
+        },
+        (currentState: unknown) => {
+          return activeVisualization.setDimension({
+            groupId: info.groupId,
+            layerId,
+            columnId: columnId || info.columnId,
+            prevState: currentState,
+            frame: framePublicAPI,
+          });
+        }
+      );
+    }
+  }
 }

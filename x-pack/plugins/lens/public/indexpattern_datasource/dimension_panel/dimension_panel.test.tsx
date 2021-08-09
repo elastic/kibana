@@ -211,6 +211,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       dimensionGroups: [],
       groupId: 'a',
       isFullscreen: false,
+      supportStaticValue: false,
       toggleFullscreen: jest.fn(),
     };
 

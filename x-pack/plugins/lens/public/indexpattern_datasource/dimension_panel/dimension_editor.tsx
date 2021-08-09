@@ -48,6 +48,7 @@ import { defaultFilter, Filtering, setFilter } from './filtering';
 import { AdvancedOptions } from './advanced_options';
 import { setTimeShift, TimeShift } from './time_shift';
 import { useDebouncedValue } from '../../shared_components';
+import { LayerType, layerTypes } from '../../../common';
 
 const operationPanels = getOperationDisplay();
 
@@ -55,6 +56,15 @@ export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   selectedColumn?: IndexPatternColumn;
   operationSupportMatrix: OperationSupportMatrix;
   currentIndexPattern: IndexPattern;
+  layerType: LayerType;
+}
+
+const formulaOperationName = 'formula';
+const staticValueOperationName = 'static_value';
+const nonQuickFunctions = new Set([formulaOperationName, staticValueOperationName]);
+
+function isQuickFunction(operationType: string) {
+  return !nonQuickFunctions.has(operationType);
 }
 
 const LabelInput = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
@@ -96,7 +106,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
     dimensionGroups,
     toggleFullscreen,
     isFullscreen,
-    layerType,
+    supportStaticValue,
+    layerType = layerTypes.DATA,
   } = props;
   const services = {
     data: props.data,
@@ -141,9 +152,20 @@ export function DimensionEditor(props: DimensionEditorProps) {
     ...incompleteParams
   } = incompleteInfo || {};
 
-  const ParamEditor = selectedOperationDefinition?.paramEditor;
-
   const [temporaryQuickFunction, setQuickFunction] = useState(false);
+
+  const showQuickFunctions = Boolean(
+    temporaryQuickFunction ||
+      (supportStaticValue
+        ? selectedOperationDefinition && isQuickFunction(selectedOperationDefinition.type)
+        : !selectedOperationDefinition || isQuickFunction(selectedOperationDefinition?.type))
+  );
+
+  const ParamEditor =
+    selectedOperationDefinition?.paramEditor ||
+    (supportStaticValue && !showQuickFunctions
+      ? operationDefinitionMap[staticValueOperationName].paramEditor
+      : null);
 
   const possibleOperations = useMemo(() => {
     return Object.values(operationDefinitionMap)
@@ -264,7 +286,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
               visualizationGroups: dimensionGroups,
               targetGroup: props.groupId,
             });
-            if (temporaryQuickFunction && newLayer.columns[columnId].operationType !== 'formula') {
+            if (
+              temporaryQuickFunction &&
+              newLayer.columns[columnId].operationType !== formulaOperationName
+            ) {
               // Only switch the tab once the formula is fully removed
               setQuickFunction(false);
             }
@@ -297,7 +322,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
               });
               // );
             }
-            if (temporaryQuickFunction && newLayer.columns[columnId].operationType !== 'formula') {
+            if (
+              temporaryQuickFunction &&
+              newLayer.columns[columnId].operationType !== formulaOperationName
+            ) {
               // Only switch the tab once the formula is fully removed
               setQuickFunction(false);
             }
@@ -348,11 +376,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
     !currentFieldIsInvalid &&
     !incompleteInfo &&
     selectedColumn &&
-    selectedColumn.operationType !== 'formula';
+    isQuickFunction(selectedColumn.operationType);
 
   const quickFunctions = (
     <>
-      {temporaryQuickFunction && selectedColumn?.operationType === 'formula' && (
+      {temporaryQuickFunction && selectedColumn?.operationType === formulaOperationName && (
         <>
           <EuiCallOut
             className="lnsIndexPatternDimensionEditor__warning"
@@ -608,7 +636,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     </>
   );
 
-  const formulaTab = ParamEditor ? (
+  const customParamEditor = ParamEditor ? (
     <ParamEditor
       layer={state.layers[layerId]}
       layerId={layerId}
@@ -626,6 +654,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
     />
   ) : null;
 
+  const TabContent = showQuickFunctions ? quickFunctions : customParamEditor;
+
   const onFormatChange = useCallback(
     (newFormat) => {
       updateLayer(
@@ -640,15 +670,47 @@ export function DimensionEditor(props: DimensionEditorProps) {
     [columnId, layerId, state.layers, updateLayer]
   );
 
+  const hasFormula =
+    !isFullscreen && operationSupportMatrix.operationWithoutField.has(formulaOperationName);
+
+  const hasTabs = hasFormula || supportStaticValue;
+
   return (
     <div id={columnId}>
-      {!isFullscreen && operationSupportMatrix.operationWithoutField.has('formula') ? (
+      {hasTabs ? (
         <EuiTabs size="s" className="lnsIndexPatternDimensionEditor__header">
+          {supportStaticValue ? (
+            <EuiTab
+              isSelected={
+                !temporaryQuickFunction &&
+                (!selectedColumn || selectedColumn?.operationType === staticValueOperationName)
+              }
+              data-test-subj="lens-dimensionTabs-static_value"
+              onClick={() => {
+                setQuickFunction(false);
+                if (selectedColumn?.operationType !== staticValueOperationName) {
+                  const newLayer = insertOrReplaceColumn({
+                    layer: props.state.layers[props.layerId],
+                    indexPattern: currentIndexPattern,
+                    columnId,
+                    op: staticValueOperationName,
+                    visualizationGroups: dimensionGroups,
+                  });
+                  setStateWrapper(newLayer);
+                  trackUiEvent(`indexpattern_dimension_operation_static_value`);
+                }
+              }}
+            >
+              {i18n.translate('xpack.lens.indexPattern.staticValueLabel', {
+                defaultMessage: 'Static value',
+              })}
+            </EuiTab>
+          ) : null}
           <EuiTab
-            isSelected={temporaryQuickFunction || selectedColumn?.operationType !== 'formula'}
+            isSelected={showQuickFunctions}
             data-test-subj="lens-dimensionTabs-quickFunctions"
             onClick={() => {
-              if (selectedColumn?.operationType === 'formula') {
+              if (selectedColumn && !isQuickFunction(selectedColumn.operationType)) {
                 setQuickFunction(true);
               }
             }}
@@ -657,39 +719,39 @@ export function DimensionEditor(props: DimensionEditorProps) {
               defaultMessage: 'Quick functions',
             })}
           </EuiTab>
-          <EuiTab
-            isSelected={!temporaryQuickFunction && selectedColumn?.operationType === 'formula'}
-            data-test-subj="lens-dimensionTabs-formula"
-            onClick={() => {
-              if (selectedColumn?.operationType !== 'formula') {
-                setQuickFunction(false);
-                const newLayer = insertOrReplaceColumn({
-                  layer: props.state.layers[props.layerId],
-                  indexPattern: currentIndexPattern,
-                  columnId,
-                  op: 'formula',
-                  visualizationGroups: dimensionGroups,
-                });
-                setStateWrapper(newLayer);
-                trackUiEvent(`indexpattern_dimension_operation_formula`);
-                return;
-              } else {
-                setQuickFunction(false);
+          {hasFormula ? (
+            <EuiTab
+              isSelected={
+                !temporaryQuickFunction && selectedColumn?.operationType === formulaOperationName
               }
-            }}
-          >
-            {i18n.translate('xpack.lens.indexPattern.formulaLabel', {
-              defaultMessage: 'Formula',
-            })}
-          </EuiTab>
+              data-test-subj="lens-dimensionTabs-formula"
+              onClick={() => {
+                setQuickFunction(false);
+                if (selectedColumn?.operationType !== formulaOperationName) {
+                  const newLayer = insertOrReplaceColumn({
+                    layer: props.state.layers[props.layerId],
+                    indexPattern: currentIndexPattern,
+                    columnId,
+                    op: formulaOperationName,
+                    visualizationGroups: dimensionGroups,
+                  });
+                  setStateWrapper(newLayer);
+                  trackUiEvent(`indexpattern_dimension_operation_formula`);
+                  return;
+                } else {
+                  setQuickFunction(false);
+                }
+              }}
+            >
+              {i18n.translate('xpack.lens.indexPattern.formulaLabel', {
+                defaultMessage: 'Formula',
+              })}
+            </EuiTab>
+          ) : null}
         </EuiTabs>
       ) : null}
 
-      {isFullscreen
-        ? formulaTab
-        : selectedOperationDefinition?.type === 'formula' && !temporaryQuickFunction
-        ? formulaTab
-        : quickFunctions}
+      {TabContent}
 
       {!isFullscreen && !currentFieldIsInvalid && !temporaryQuickFunction && (
         <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded">

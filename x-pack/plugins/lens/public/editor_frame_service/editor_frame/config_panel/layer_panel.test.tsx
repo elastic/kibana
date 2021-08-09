@@ -83,6 +83,7 @@ describe('LayerPanel', () => {
       registerNewLayerRef: jest.fn(),
       isFullscreen: false,
       toggleFullscreen: jest.fn(),
+      onEmptyDimensionAdd: jest.fn(),
     };
   }
 

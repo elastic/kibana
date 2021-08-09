@@ -28,6 +28,9 @@ import {
   CurveType,
   LegendPositionConfig,
   LabelOverflowConstraint,
+  RectAnnotation,
+  AnnotationDomainType,
+  LineAnnotation,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import type {
@@ -35,9 +38,10 @@ import type {
   Datatable,
   DatatableRow,
 } from 'src/plugins/expressions/public';
-import { IconType } from '@elastic/eui';
+import { EuiIcon, IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RenderMode } from 'src/plugins/expressions';
+import { groupBy } from 'lodash';
 import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
 import type { LensMultiTable, FormatFactory } from '../../common';
 import { layerTypes } from '../../common';
@@ -261,6 +265,7 @@ export function XYChart({
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
     return <EmptyPlaceholder icon={icon} />;
   }
+  const thresholdLayers = layers.filter((layer) => layer.layerType === layerTypes.THRESHOLD);
 
   // use formatting hint of first x axis column to format ticks
   const xAxisColumn = data.tables[filteredLayers[0].layerId].columns.find(
@@ -841,6 +846,162 @@ export function XYChart({
           }
         })
       )}
+      {thresholdLayers.flatMap((thresholdLayer) => {
+        if (!thresholdLayer.yConfig) {
+          return [];
+        }
+        const { columnToLabel, palette, yConfig: yConfigs, layerId } = thresholdLayer;
+        const columnToLabelMap: Record<string, string> = columnToLabel
+          ? JSON.parse(columnToLabel)
+          : {};
+        const table = data.tables[layerId];
+        const colorAssignment = colorAssignments[palette.name];
+
+        const row = table.rows[0];
+
+        const yConfigByValue = yConfigs.sort(
+          ({ forAccessor: idA }, { forAccessor: idB }) => row[idA] - row[idB]
+        );
+
+        const groupedByDirection = groupBy(yConfigByValue, 'fill');
+
+        return yConfigByValue.flatMap((yConfig, i) => {
+          const formatter = formatFactory(
+            table?.columns.find((column) => column.id === yConfig.forAccessor)?.meta?.params || {
+              id: 'number',
+            }
+          );
+
+          const seriesLayers: SeriesLayer[] = [
+            {
+              name: columnToLabelMap[yConfig.forAccessor],
+              totalSeriesAtDepth: colorAssignment.totalSeriesCount,
+              rankAtDepth: colorAssignment.getRank(
+                thresholdLayer,
+                String(yConfig.forAccessor),
+                String(yConfig.forAccessor)
+              ),
+            },
+          ];
+          const defaultColor = paletteService.get(palette.name).getCategoricalColor(
+            seriesLayers,
+            {
+              maxDepth: 1,
+              behindText: false,
+              totalSeries: colorAssignment.totalSeriesCount,
+              syncColors,
+            },
+            palette.params
+          );
+
+          const props = {
+            groupId:
+              yConfig.axisMode === 'bottom'
+                ? undefined
+                : yConfig.axisMode === 'right'
+                ? 'right'
+                : 'left',
+            marker: yConfig.icon ? <EuiIcon type={yConfig.icon} /> : undefined,
+          };
+          const annotations = [];
+
+          annotations.push(
+            <LineAnnotation
+              {...props}
+              id={`${layerId}-${yConfig.forAccessor}-line`}
+              key={`${layerId}-${yConfig.forAccessor}-line`}
+              dataValues={table.rows.map(() => ({
+                dataValue: row[yConfig.forAccessor],
+                header: columnToLabelMap[yConfig.forAccessor],
+                details: formatter.convert(row[yConfig.forAccessor]),
+              }))}
+              domainType={
+                yConfig.axisMode === 'bottom'
+                  ? AnnotationDomainType.XDomain
+                  : AnnotationDomainType.YDomain
+              }
+              style={{
+                line: {
+                  strokeWidth: yConfig.lineWidth || 1,
+                  stroke: (yConfig.color || defaultColor) ?? '#f00',
+                  dash:
+                    yConfig.lineStyle === 'dashed'
+                      ? [(yConfig.lineWidth || 1) * 3, yConfig.lineWidth || 1]
+                      : yConfig.lineStyle === 'dotted'
+                      ? [yConfig.lineWidth || 1, yConfig.lineWidth || 1]
+                      : undefined,
+                  opacity: 1,
+                },
+              }}
+            />
+          );
+
+          if (yConfig.fill && yConfig.fill !== 'none') {
+            const isFillAbove = yConfig.fill === 'above';
+            const indexFromSameType = groupedByDirection[yConfig.fill].findIndex(
+              ({ forAccessor }) => forAccessor === yConfig.forAccessor
+            );
+            const shouldCheckNextThreshold =
+              indexFromSameType < groupedByDirection[yConfig.fill].length - 1;
+            annotations.push(
+              <RectAnnotation
+                {...props}
+                id={`${layerId}-${yConfig.forAccessor}-rect`}
+                key={`${layerId}-${yConfig.forAccessor}-rect`}
+                dataValues={table.rows.map(() => {
+                  if (yConfig.axisMode === 'bottom') {
+                    return {
+                      coordinates: {
+                        x0: isFillAbove ? row[yConfig.forAccessor] : undefined,
+                        y0: undefined,
+                        x1: isFillAbove
+                          ? shouldCheckNextThreshold
+                            ? row[
+                                groupedByDirection[yConfig.fill!][indexFromSameType + 1].forAccessor
+                              ]
+                            : undefined
+                          : row[yConfig.forAccessor],
+                        y1: undefined,
+                      },
+                      header: columnToLabelMap[yConfig.forAccessor],
+                      details: formatter.convert(row[yConfig.forAccessor]),
+                    };
+                  }
+                  return {
+                    coordinates: {
+                      x0: undefined,
+                      y0: isFillAbove ? row[yConfig.forAccessor] : undefined,
+                      x1: undefined,
+                      y1: isFillAbove
+                        ? shouldCheckNextThreshold
+                          ? row[
+                              groupedByDirection[yConfig.fill!][indexFromSameType + 1].forAccessor
+                            ]
+                          : undefined
+                        : row[yConfig.forAccessor],
+                    },
+                    header: columnToLabelMap[yConfig.forAccessor],
+                    details: formatter.convert(row[yConfig.forAccessor]),
+                  };
+                })}
+                style={{
+                  strokeWidth: yConfig.lineWidth || 1,
+                  stroke: (yConfig.color || defaultColor) ?? '#f00',
+                  fill: (yConfig.color || defaultColor) ?? '#f00',
+                  dash:
+                    yConfig.lineStyle === 'dashed'
+                      ? [(yConfig.lineWidth || 1) * 3, yConfig.lineWidth || 1]
+                      : yConfig.lineStyle === 'dotted'
+                      ? [yConfig.lineWidth || 1, yConfig.lineWidth || 1]
+                      : undefined,
+                  opacity: 0.3,
+                }}
+              />
+            );
+          }
+          return annotations;
+        });
+      })}
     </Chart>
   );
 }

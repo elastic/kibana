@@ -336,6 +336,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   toggleFullscreen: () => void;
   isFullscreen: boolean;
   layerType: LayerType | undefined;
+  supportStaticValue: boolean;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
