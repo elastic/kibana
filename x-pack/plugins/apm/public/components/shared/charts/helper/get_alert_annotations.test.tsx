@@ -45,6 +45,7 @@ const alert: Alert = {
   [ALERT_RULE_NAME]: ['Latency threshold | frontend-rum'],
   [ALERT_DURATION]: [62879000],
   [ALERT_STATUS]: ['open'],
+  [SPACE_IDS]: ['myfakespaceid'],
   tags: ['apm', 'service.name:frontend-rum'],
   'transaction.type': ['page-load'],
   [ALERT_RULE_PRODUCER]: ['apm'],
