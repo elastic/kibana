@@ -8,7 +8,7 @@
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { FIELD_FORMAT_IDS } from '../../../../src/plugins/data/common';
+import { FIELD_FORMAT_IDS } from '../../../../src/plugins/field_formats/common';
 import { WebElementWrapper } from '../../services/lib/web_element_wrapper';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -290,7 +290,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         { title: indexTitle },
         { override: true }
       );
-      indexPatternId = indexPatternResult.id;
+      indexPatternId = indexPatternResult.id!;
     });
 
     describe('edit formats', () => {
