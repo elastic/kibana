@@ -21,7 +21,11 @@ function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
 }
 
-export function BackendErrorRateChart({ height }: { height: number }) {
+export function BackendFailedTransactionRateChart({
+  height,
+}: {
+  height: number;
+}) {
   const { backendName } = useApmBackendContext();
 
   const theme = useTheme();

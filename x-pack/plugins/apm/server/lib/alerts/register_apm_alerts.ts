@@ -14,7 +14,7 @@ import { registerTransactionDurationAnomalyAlertType } from './register_transact
 import { registerErrorCountAlertType } from './register_error_count_alert_type';
 import { APMConfig } from '../..';
 import { MlPluginSetup } from '../../../../ml/server';
-import { registerFailedTransactionRateAlertType } from './register_transaction_error_rate_alert_type';
+import { registerTransactionErrorRateAlertType } from './register_transaction_error_rate_alert_type';
 
 export interface RegisterRuleDependencies {
   ruleDataClient: RuleDataClient;
@@ -28,5 +28,5 @@ export function registerApmAlerts(dependencies: RegisterRuleDependencies) {
   registerTransactionDurationAlertType(dependencies);
   registerTransactionDurationAnomalyAlertType(dependencies);
   registerErrorCountAlertType(dependencies);
-  registerFailedTransactionRateAlertType(dependencies);
+  registerTransactionErrorRateAlertType(dependencies);
 }
