@@ -33,7 +33,7 @@ import {
   indexFleetEndpointPolicy,
 } from './index_fleet_endpoint_policy';
 import { metadataCurrentIndexPattern } from '../constants';
-import { wrapErrorAndRejectPromise } from './utils';
+import { EndpointDataLoadingError, wrapErrorAndRejectPromise } from './utils';
 
 export interface IndexedHostsResponse
   extends IndexedFleetAgentResponse,
@@ -57,7 +57,7 @@ export interface IndexedHostsResponse
 
 /**
  * Indexes the requested number of documents for the endpoint host metadata currently being output by the generator.
- * Endpoint Host metadata documents are addeded to an index that is set as "append only", thus one Endpoint host could
+ * Endpoint Host metadata documents are added to an index that is set as "append only", thus one Endpoint host could
  * have multiple documents in that index.
  *
  *
@@ -218,9 +218,7 @@ const fetchKibanaVersion = async (kbnClient: KbnClient) => {
   })) as AxiosResponse).data.version.number;
 
   if (!version) {
-    // eslint-disable-next-line no-console
-    console.log('failed to retrieve kibana version');
-    return '8.0.0';
+    throw new EndpointDataLoadingError('failed to get kibana version via `/api/status` api');
   }
 
   return version;
