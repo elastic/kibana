@@ -24,12 +24,11 @@ describe('TelemetryManagementSectionComponent', () => {
     const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
     const telemetryService = new TelemetryService({
       config: {
+        sendUsageTo: 'staging',
         enabled: true,
-        url: '',
         banner: true,
         allowChangingOptInStatus: true,
         optIn: true,
-        optInStatusUrl: '',
         sendUsageFrom: 'browser',
       },
       isScreenshotMode: false,
@@ -60,12 +59,11 @@ describe('TelemetryManagementSectionComponent', () => {
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
-        url: '',
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
-        optInStatusUrl: '',
         sendUsageFrom: 'browser',
+        sendUsageTo: 'staging',
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,
@@ -116,11 +114,10 @@ describe('TelemetryManagementSectionComponent', () => {
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
-        url: '',
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
-        optInStatusUrl: '',
+        sendUsageTo: 'staging',
         sendUsageFrom: 'browser',
       },
       isScreenshotMode: false,
@@ -165,11 +162,10 @@ describe('TelemetryManagementSectionComponent', () => {
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
-        url: '',
         banner: true,
         allowChangingOptInStatus: false,
         optIn: true,
-        optInStatusUrl: '',
+        sendUsageTo: 'staging',
         sendUsageFrom: 'browser',
       },
       isScreenshotMode: false,
@@ -205,11 +201,10 @@ describe('TelemetryManagementSectionComponent', () => {
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
-        url: '',
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
-        optInStatusUrl: '',
+        sendUsageTo: 'staging',
         sendUsageFrom: 'browser',
       },
       isScreenshotMode: false,
@@ -246,11 +241,10 @@ describe('TelemetryManagementSectionComponent', () => {
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
-        url: '',
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
-        optInStatusUrl: '',
+        sendUsageTo: 'staging',
         sendUsageFrom: 'browser',
       },
       isScreenshotMode: false,
@@ -287,11 +281,10 @@ describe('TelemetryManagementSectionComponent', () => {
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
-        url: '',
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
-        optInStatusUrl: '',
+        sendUsageTo: 'staging',
         sendUsageFrom: 'browser',
       },
       isScreenshotMode: false,
@@ -328,11 +321,10 @@ describe('TelemetryManagementSectionComponent', () => {
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
-        url: '',
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
-        optInStatusUrl: '',
+        sendUsageTo: 'staging',
         sendUsageFrom: 'browser',
       },
       isScreenshotMode: false,
@@ -379,11 +371,10 @@ describe('TelemetryManagementSectionComponent', () => {
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
-        url: '',
         banner: true,
         allowChangingOptInStatus: false,
         optIn: false,
-        optInStatusUrl: '',
+        sendUsageTo: 'staging',
         sendUsageFrom: 'browser',
       },
       isScreenshotMode: false,
