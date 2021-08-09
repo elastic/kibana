@@ -1163,7 +1163,7 @@ export type ResolveDeprecationResponse = {
 
 // @public
 export interface ResolvedSimpleSavedObject<T = unknown> {
-    aliasTargetId?: SavedObjectsResolveResponse['aliasTargetId'];
+    alias_target_id?: SavedObjectsResolveResponse['alias_target_id'];
     outcome: SavedObjectsResolveResponse['outcome'];
     saved_object: SimpleSavedObject<T>;
 }
@@ -1520,7 +1520,7 @@ export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolat
 
 // @public (undocumented)
 export interface SavedObjectsResolveResponse<T = unknown> {
-    aliasTargetId?: string;
+    alias_target_id?: string;
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
     saved_object: SavedObject<T>;
 }

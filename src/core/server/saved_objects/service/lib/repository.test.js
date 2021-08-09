@@ -3459,7 +3459,7 @@ describe('SavedObjectsRepository', () => {
           expect(result).toEqual({
             saved_object: expect.objectContaining({ type, id: aliasTargetId }),
             outcome: 'aliasMatch',
-            aliasTargetId,
+            alias_target_id: aliasTargetId,
           });
         };
 
@@ -3501,7 +3501,7 @@ describe('SavedObjectsRepository', () => {
           expect(result).toEqual({
             saved_object: expect.objectContaining({ type, id }),
             outcome: 'conflict',
-            aliasTargetId,
+            alias_target_id: aliasTargetId,
           });
         });
       });
