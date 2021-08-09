@@ -17,12 +17,7 @@ export const FILTER_CLOSED: Status = 'closed';
 export const FILTER_IN_PROGRESS: Status = 'in-progress';
 
 const StatusFilterButton = styled(EuiFilterButton)<{ isActive: boolean }>`
-  ${(props) =>
-    props.isActive
-      ? `
-      background: ${props.theme.eui.euiColorPrimary};
-  `
-      : ''}
+  background: ${({ isActive, theme }) => (isActive ? theme.eui.euiColorPrimary : '')};
 `;
 
 const StatusFilterGroup = styled(EuiFilterGroup)`
