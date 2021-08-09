@@ -97,6 +97,7 @@ export function getServiceColumns({
       sortable: true,
       render: (_, { serviceName, agentName }) => (
         <TruncateWithTooltip
+          data-test-subj="apmServiceListAppLink"
           text={formatString(serviceName)}
           content={
             <ServiceLink
