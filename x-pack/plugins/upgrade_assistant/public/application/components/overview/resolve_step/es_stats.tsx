@@ -81,56 +81,53 @@ export const ESDeprecationStats: FunctionComponent = () => {
         </>
       }
       {...reactRouterNavigate(history, '/es_deprecations/cluster')}
-      description={
-        <>
-          <EuiSpacer />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiStat
-                data-test-subj="criticalDeprecations"
-                title={error ? '--' : criticalDeprecations.length}
-                titleElement="span"
-                description={i18nTexts.criticalDeprecationsTitle}
-                titleColor="danger"
-                isLoading={isLoading}
-              >
-                {error === null && (
-                  <EuiScreenReaderOnly>
-                    <p>
-                      {isLoading
-                        ? i18nTexts.loadingText
-                        : i18nTexts.getCriticalDeprecationsMessage(criticalDeprecations.length)}
-                    </p>
-                  </EuiScreenReaderOnly>
-                )}
-              </EuiStat>
-            </EuiFlexItem>
+    >
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiStat
+            data-test-subj="criticalDeprecations"
+            title={error ? '--' : criticalDeprecations.length}
+            titleElement="span"
+            description={i18nTexts.criticalDeprecationsTitle}
+            titleColor="danger"
+            isLoading={isLoading}
+          >
+            {error === null && (
+              <EuiScreenReaderOnly>
+                <p>
+                  {isLoading
+                    ? i18nTexts.loadingText
+                    : i18nTexts.getCriticalDeprecationsMessage(criticalDeprecations.length)}
+                </p>
+              </EuiScreenReaderOnly>
+            )}
+          </EuiStat>
+        </EuiFlexItem>
 
-            <EuiFlexItem>
-              <EuiStat
-                data-test-subj="totalDeprecations"
-                title={error ? '--' : allDeprecations.length}
-                titleElement="span"
-                description={i18nTexts.totalDeprecationsTitle}
-                isLoading={isLoading}
-              >
-                {error === null && (
-                  <EuiScreenReaderOnly>
-                    <p>
-                      {isLoading
-                        ? i18nTexts.loadingText
-                        : i18nTexts.getTotalDeprecationsMessage(
-                            esDeprecations?.cluster.length ?? 0,
-                            esDeprecations?.indices.length ?? 0
-                          )}
-                    </p>
-                  </EuiScreenReaderOnly>
-                )}
-              </EuiStat>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      }
-    />
+        <EuiFlexItem>
+          <EuiStat
+            data-test-subj="totalDeprecations"
+            title={error ? '--' : allDeprecations.length}
+            titleElement="span"
+            description={i18nTexts.totalDeprecationsTitle}
+            isLoading={isLoading}
+          >
+            {error === null && (
+              <EuiScreenReaderOnly>
+                <p>
+                  {isLoading
+                    ? i18nTexts.loadingText
+                    : i18nTexts.getTotalDeprecationsMessage(
+                        esDeprecations?.cluster.length ?? 0,
+                        esDeprecations?.indices.length ?? 0
+                      )}
+                </p>
+              </EuiScreenReaderOnly>
+            )}
+          </EuiStat>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiCard>
   );
 };

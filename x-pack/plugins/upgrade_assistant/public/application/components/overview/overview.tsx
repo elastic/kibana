@@ -24,27 +24,6 @@ import { getResolveStep } from './resolve_step';
 import { getObserveStep } from './observe_step';
 import { getUpgradeStep } from './upgrade_step';
 
-const PageDescription = ({ version, whatsNewLink }: { version: number; whatsNewLink: string }) => (
-  <>
-    <FormattedMessage
-      id="xpack.upgradeAssistant.overview.pageDescription"
-      defaultMessage="Get ready for the next version of Elastic Stack!"
-    />
-
-    <EuiSpacer size="m" />
-
-    <EuiText>
-      <EuiLink href={whatsNewLink} target="_blank">
-        <FormattedMessage
-          id="xpack.upgradeAssistant.overview.pageDescriptionLink"
-          defaultMessage="What's new in version {version}.0?"
-          values={{ version }}
-        />
-      </EuiLink>
-    </EuiText>
-  </>
-);
-
 export const DeprecationsOverview: FunctionComponent = () => {
   const {
     kibanaVersionInfo,
@@ -77,12 +56,9 @@ export const DeprecationsOverview: FunctionComponent = () => {
         pageTitle={i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
           defaultMessage: 'Upgrade Assistant',
         })}
-        description={
-          <PageDescription
-            version={currentMajor}
-            whatsNewLink={docLinks.links.elasticsearch.whatsNew}
-          />
-        }
+        description={i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
+          defaultMessage: 'Get ready for the next version of Elastic Stack!',
+        })}
         rightSideItems={[
           <EuiButtonEmpty
             href={docLinks.links.upgradeAssistant}
@@ -96,7 +72,17 @@ export const DeprecationsOverview: FunctionComponent = () => {
             />
           </EuiButtonEmpty>,
         ]}
-      />
+      >
+        <EuiText>
+          <EuiLink href={docLinks.links.elasticsearch.whatsNew} target="_blank">
+            <FormattedMessage
+              id="xpack.upgradeAssistant.overview.whatsNewLink"
+              defaultMessage="What's new in version {currentMajor}.0?"
+              values={{ currentMajor }}
+            />
+          </EuiLink>
+        </EuiText>
+      </EuiPageHeader>
 
       <EuiSpacer size="l" />
 

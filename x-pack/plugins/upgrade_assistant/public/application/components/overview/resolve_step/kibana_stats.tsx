@@ -97,80 +97,77 @@ export const KibanaDeprecationStats: FunctionComponent = () => {
       layout="horizontal"
       title={i18nTexts.statsTitle}
       {...reactRouterNavigate(history, '/kibana_deprecations')}
-      description={
-        <>
-          <EuiSpacer />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiStat
-                data-test-subj="criticalDeprecations"
-                title={
-                  kibanaDeprecations
-                    ? kibanaDeprecations.filter((deprecation) => deprecation.level === 'critical')
-                        ?.length ?? '0'
-                    : '--'
-                }
-                titleElement="span"
-                description={i18nTexts.criticalDeprecationsTitle}
-                titleColor="danger"
-                isLoading={isLoading}
-              >
-                {error === undefined && (
-                  <EuiScreenReaderOnly>
-                    <p>
-                      {isLoading
-                        ? i18nTexts.loadingText
-                        : i18nTexts.getCriticalDeprecationsMessage(
-                            kibanaDeprecations
-                              ? kibanaDeprecations.filter(
-                                  (deprecation) => deprecation.level === 'critical'
-                                )?.length ?? 0
-                              : 0
-                          )}
-                    </p>
-                  </EuiScreenReaderOnly>
-                )}
+    >
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiStat
+            data-test-subj="criticalDeprecations"
+            title={
+              kibanaDeprecations
+                ? kibanaDeprecations.filter((deprecation) => deprecation.level === 'critical')
+                    ?.length ?? '0'
+                : '--'
+            }
+            titleElement="span"
+            description={i18nTexts.criticalDeprecationsTitle}
+            titleColor="danger"
+            isLoading={isLoading}
+          >
+            {error === undefined && (
+              <EuiScreenReaderOnly>
+                <p>
+                  {isLoading
+                    ? i18nTexts.loadingText
+                    : i18nTexts.getCriticalDeprecationsMessage(
+                        kibanaDeprecations
+                          ? kibanaDeprecations.filter(
+                              (deprecation) => deprecation.level === 'critical'
+                            )?.length ?? 0
+                          : 0
+                      )}
+                </p>
+              </EuiScreenReaderOnly>
+            )}
 
-                {error && (
-                  <>
-                    <EuiSpacer size="s" />
+            {error && (
+              <>
+                <EuiSpacer size="s" />
 
-                    <EuiIconTip
-                      type="alert"
-                      color="danger"
-                      size="l"
-                      content={i18nTexts.loadingError}
-                      iconProps={{
-                        'data-test-subj': 'requestErrorIconTip',
-                      }}
-                    />
-                  </>
-                )}
-              </EuiStat>
-            </EuiFlexItem>
+                <EuiIconTip
+                  type="alert"
+                  color="danger"
+                  size="l"
+                  content={i18nTexts.loadingError}
+                  iconProps={{
+                    'data-test-subj': 'requestErrorIconTip',
+                  }}
+                />
+              </>
+            )}
+          </EuiStat>
+        </EuiFlexItem>
 
-            <EuiFlexItem>
-              <EuiStat
-                data-test-subj="totalDeprecations"
-                title={error ? '--' : kibanaDeprecations?.length ?? '0'}
-                titleElement="span"
-                description={i18nTexts.totalDeprecationsTitle}
-                isLoading={isLoading}
-              >
-                {error === undefined && (
-                  <EuiScreenReaderOnly>
-                    <p>
-                      {isLoading
-                        ? i18nTexts.loadingText
-                        : i18nTexts.getTotalDeprecationsMessage(kibanaDeprecations?.length ?? 0)}
-                    </p>
-                  </EuiScreenReaderOnly>
-                )}
-              </EuiStat>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      }
-    />
+        <EuiFlexItem>
+          <EuiStat
+            data-test-subj="totalDeprecations"
+            title={error ? '--' : kibanaDeprecations?.length ?? '0'}
+            titleElement="span"
+            description={i18nTexts.totalDeprecationsTitle}
+            isLoading={isLoading}
+          >
+            {error === undefined && (
+              <EuiScreenReaderOnly>
+                <p>
+                  {isLoading
+                    ? i18nTexts.loadingText
+                    : i18nTexts.getTotalDeprecationsMessage(kibanaDeprecations?.length ?? 0)}
+                </p>
+              </EuiScreenReaderOnly>
+            )}
+          </EuiStat>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiCard>
   );
 };
