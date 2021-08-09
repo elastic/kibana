@@ -28,6 +28,12 @@ export class ContentStream extends Duplex {
   private primaryTerm?: number;
   private seqNo?: number;
 
+  /**
+   * The number of bytes written so far.
+   * Does not include data that is still queued for writing.
+   */
+  bytesWritten = 0;
+
   constructor(
     private client: ElasticsearchClient,
     private exportTypesRegistry: ExportTypesRegistry,
@@ -138,6 +144,7 @@ export class ContentStream extends Duplex {
       });
 
       ({ _primary_term: this.primaryTerm, _seq_no: this.seqNo } = body);
+      this.bytesWritten += this.buffer.byteLength;
       this.buffer = Buffer.from('');
       callback();
     } catch (error) {

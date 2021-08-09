@@ -7,7 +7,7 @@
 
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { PDF_JOB_TYPE_V2 } from '../../../common/constants';
 import { TaskRunResult } from '../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
@@ -58,19 +58,17 @@ export const runTaskFnFactory: RunTaskFnFactory<
           logo
         );
       }),
-      map(({ buffer, warnings }) => {
+      tap(({ buffer, warnings }) => {
         apmGeneratePdf?.end();
 
         if (buffer) {
           stream.write(buffer);
         }
-
-        return {
-          content_type: 'application/pdf',
-          size: buffer?.byteLength ?? 0,
-          warnings,
-        };
       }),
+      map(({ warnings }) => ({
+        content_type: 'application/pdf',
+        warnings,
+      })),
       catchError((err) => {
         jobLogger.error(err);
         return Rx.throwError(err);

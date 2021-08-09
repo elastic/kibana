@@ -114,6 +114,15 @@ describe('ContentStream', () => {
       expect(request).toHaveProperty('body.doc.output.content', '123456');
     });
 
+    it('should update a number of written bytes', async () => {
+      stream.write('123');
+      stream.write('456');
+      stream.end();
+      await new Promise((resolve) => stream.once('finish', resolve));
+
+      expect(stream.bytesWritten).toBe(6);
+    });
+
     it('should emit an error event', async () => {
       client.update.mockRejectedValueOnce('some error');
 

@@ -52,9 +52,8 @@ export const runTaskFnFactory: RunTaskFnFactory<
         );
       }),
       tap(({ buffer }) => stream.write(buffer)),
-      map(({ buffer, warnings }) => ({
+      map(({ warnings }) => ({
         content_type: 'image/png',
-        size: buffer.byteLength,
         warnings,
       })),
       catchError((err) => {
