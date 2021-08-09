@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
 import {
   DATE_NOW,
@@ -61,7 +61,7 @@ export const getSearchEsListItemMock = (): SearchEsListItemSchema => ({
   ip: VALUE,
 });
 
-export const getSearchListItemMock = (): SearchResponse<SearchEsListItemSchema> => ({
+export const getSearchListItemMock = (): estypes.SearchResponse<SearchEsListItemSchema> => ({
   _scroll_id: '123',
   _shards: getShardMock(),
   hits: {
