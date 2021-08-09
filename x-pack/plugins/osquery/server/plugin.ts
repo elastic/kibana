@@ -39,6 +39,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
     category: DEFAULT_APP_CATEGORIES.management,
     app: [PLUGIN_ID, 'kibana'],
     catalogue: [PLUGIN_ID],
+    order: 2300,
     excludeFromBasePrivileges: true,
     privileges: {
       all: {
