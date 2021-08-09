@@ -113,9 +113,11 @@ export const cumulativeSumOperation: OperationDefinition<
     const opName = i18n.translate('xpack.lens.indexPattern.cumulativeSum', {
       defaultMessage: 'Cumulative sum',
     });
-    const dataLayerErrors = checkForDataLayerType(layerType, opName);
-    if (dataLayerErrors) {
-      return dataLayerErrors.join(', ');
+    if (layerType) {
+      const dataLayerErrors = checkForDataLayerType(layerType, opName);
+      if (dataLayerErrors) {
+        return dataLayerErrors.join(', ');
+      }
     }
     return checkForDateHistogram(layer, opName)?.join(', ');
   },

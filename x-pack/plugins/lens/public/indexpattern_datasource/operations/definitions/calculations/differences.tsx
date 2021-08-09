@@ -104,9 +104,11 @@ export const derivativeOperation: OperationDefinition<
     const opName = i18n.translate('xpack.lens.indexPattern.derivative', {
       defaultMessage: 'Differences',
     });
-    const dataLayerErrors = checkForDataLayerType(layerType, opName);
-    if (dataLayerErrors) {
-      return dataLayerErrors.join(', ');
+    if (layerType) {
+      const dataLayerErrors = checkForDataLayerType(layerType, opName);
+      if (dataLayerErrors) {
+        return dataLayerErrors.join(', ');
+      }
     }
     return checkForDateHistogram(layer, opName)?.join(', ');
   },

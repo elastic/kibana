@@ -116,10 +116,13 @@ export const counterRateOperation: OperationDefinition<
     const opName = i18n.translate('xpack.lens.indexPattern.counterRate', {
       defaultMessage: 'Counter rate',
     });
-    const dataLayerErrors = checkForDataLayerType(layerType, opName);
-    if (dataLayerErrors) {
-      return dataLayerErrors.join(', ');
+    if (layerType) {
+      const dataLayerErrors = checkForDataLayerType(layerType, opName);
+      if (dataLayerErrors) {
+        return dataLayerErrors.join(', ');
+      }
     }
+
     return checkForDateHistogram(layer, opName)?.join(', ');
   },
   timeScalingMode: 'mandatory',
