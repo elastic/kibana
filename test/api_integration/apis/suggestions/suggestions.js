@@ -186,7 +186,7 @@ export default function ({ getService }) {
             expect(body).to.have.length(5);
           }));
 
-      it('filter is applied on an index level with terms_enum', () => {
+      it('filter is applied on an index level with terms_enum - find in range', () =>
         supertest
           .post('/api/kibana/suggestions/values/logstash-*')
           .send({
@@ -208,8 +208,9 @@ export default function ({ getService }) {
           .expect(200)
           .then(({ body }) => {
             expect(body).to.have.length(2);
-          });
+          }));
 
+      it('filter is applied on an index level with terms_enum - DONT find in range', () => {
         supertest
           .post('/api/kibana/suggestions/values/logstash-*')
           .send({

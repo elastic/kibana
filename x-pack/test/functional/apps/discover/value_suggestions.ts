@@ -33,9 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/drilldowns');
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaSettings();
-      await PageObjects.settings.clearAdvancedSettings(UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE);
     });
 
     describe('useTimeRange enabled', () => {
@@ -47,32 +44,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
       });
 
-      afterEach(async () => {
-        queryBar.clearQuery();
-      });
+      describe('discover', () => {
+        afterEach(async () => {
+          await queryBar.clearQuery();
+        });
 
-      it('dont show up if outside of range', async () => {
-        await PageObjects.timePicker.setAbsoluteRange(
-          'Mar 1, 2020 @ 00:00:00.000',
-          'Nov 1, 2020 @ 00:00:00.000'
-        );
+        it('dont show up if outside of range', async () => {
+          await PageObjects.timePicker.setAbsoluteRange(
+            'Mar 1, 2020 @ 00:00:00.000',
+            'Nov 1, 2020 @ 00:00:00.000'
+          );
 
-        await queryBar.setQuery('extension.raw : ');
-        const suggestions = await queryBar.getSuggestions();
-        expect(suggestions.length).to.be(0);
-      });
+          await queryBar.setQuery('extension.raw : ');
+          const suggestions = await queryBar.getSuggestions();
+          expect(suggestions.length).to.be(0);
+        });
 
-      it('show up if in range', async () => {
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await queryBar.setQuery('extension.raw : ');
-        const suggestions = await queryBar.getSuggestions();
-        expect(suggestions.length).to.be(5);
-        expect(suggestions).to.contain('"jpg"');
+        it('show up if in range', async () => {
+          await PageObjects.timePicker.setDefaultAbsoluteRange();
+          await queryBar.setQuery('extension.raw : ');
+          const suggestions = await queryBar.getSuggestions();
+          expect(suggestions.length).to.be(5);
+          expect(suggestions).to.contain('"jpg"');
+        });
       });
 
       describe('context', () => {
         after(async () => {
-          filterBar.removeFilter('geo.dest');
+          await filterBar.removeFilter('geo.dest');
         });
 
         it('shows all autosuggest options for a filter in discover context app', async () => {
@@ -101,7 +100,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        queryBar.clearQuery();
+        await queryBar.clearQuery();
+      });
+
+      after(async () => {
+        await PageObjects.settings.navigateTo();
+        await PageObjects.settings.clickKibanaSettings();
+        await PageObjects.settings.clearAdvancedSettings(UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE);
       });
 
       it('DO show up if outside of range', async () => {

@@ -5,38 +5,34 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const filterBar = getService('filterBar');
-  const docTable = getService('docTable');
+  const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'settings', 'context']);
 
   describe('value suggestions non time based', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded(
-        'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+        'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
       );
     });
 
     after(async () => {
       await esArchiver.unload(
-        'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+        'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
       );
     });
 
     it('shows all autosuggest options for a filter in discover context app', async () => {
       await PageObjects.common.navigateToApp('discover');
 
-      // navigate to context
-      await docTable.clickRowToggle({ rowIndex: 0 });
-      const rowActions = await docTable.getRowActions({ rowIndex: 0 });
-      await rowActions[0].click();
-      await PageObjects.context.waitUntilContextLoadingHasFinished();
-
-      // Apply filter in context view
-      await filterBar.addFilter('baz.keyword', 'is', 'hello');
+      await queryBar.setQuery('type.keyword : ');
+      const suggestions = await queryBar.getSuggestions();
+      expect(suggestions.length).to.be(1);
+      expect(suggestions).to.contain('"apache"');
     });
   });
 }
