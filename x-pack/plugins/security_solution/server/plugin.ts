@@ -97,6 +97,7 @@ import { getKibanaPrivilegesFeaturePrivileges } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import { createIndicatorMatchAlertType } from './lib/detection_engine/rule_types/indicator_match/create_indicator_match_alert_type';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
+import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -234,7 +235,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               settings: {
                 number_of_shards: 1,
               },
-              mappings: mappingFromFieldMap({ ...alertsFieldMap, ...rulesFieldMap }, false),
+              mappings: mappingFromFieldMap(
+                { ...alertsFieldMap, ...rulesFieldMap, ...ctiFieldMap },
+                false
+              ),
             },
           },
         });
