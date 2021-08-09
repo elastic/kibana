@@ -9,7 +9,7 @@
 import { TableHeader } from './table_header/table_header';
 import { getServices } from '../../../../kibana_services';
 import { SORT_DEFAULT_ORDER_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
-import { UI_SETTINGS } from '../../../../../../data/public';
+import { FORMATS_UI_SETTINGS } from '../../../../../../field_formats/common';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createTableHeaderDirective(reactDirective: any) {
@@ -30,7 +30,7 @@ export function createTableHeaderDirective(reactDirective: any) {
     { restrict: 'A' },
     {
       hideTimeColumn: config.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
-      isShortDots: config.get(UI_SETTINGS.SHORT_DOTS_ENABLE),
+      isShortDots: config.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE),
       defaultSortOrder: config.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
     }
   );
