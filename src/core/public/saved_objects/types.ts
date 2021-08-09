@@ -19,7 +19,7 @@ export interface ResolvedSimpleSavedObject<T = unknown> {
   /**
    * The saved object that was found.
    */
-  savedObject: SimpleSavedObject<T>;
+  saved_object: SimpleSavedObject<T>;
   /**
    * The outcome for a successful `resolve` call is one of the following values:
    *

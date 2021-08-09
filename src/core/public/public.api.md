@@ -1165,7 +1165,7 @@ export type ResolveDeprecationResponse = {
 export interface ResolvedSimpleSavedObject<T = unknown> {
     aliasTargetId?: SavedObjectsResolveResponse['aliasTargetId'];
     outcome: SavedObjectsResolveResponse['outcome'];
-    savedObject: SimpleSavedObject<T>;
+    saved_object: SimpleSavedObject<T>;
 }
 
 // Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
