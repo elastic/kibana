@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import expect from '@kbn/expect';
 
 import {
@@ -57,6 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
   const APM_ALERT_INDEX = '.alerts-observability-apm';
   const SECURITY_SOLUTION_ALERT_ID = '020202';
   const SECURITY_SOLUTION_ALERT_INDEX = '.alerts-security.alerts';
+  // const ALERT_VERSION = Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'); // required for optimistic concurrency control
 
   const getAPMIndexName = async (user: User) => {
     const {
@@ -86,11 +86,13 @@ export default ({ getService }: FtrProviderContext) => {
     expect(securitySolution).to.eql(SECURITY_SOLUTION_ALERT_INDEX); // assert this here so we can use constants in the dynamically-defined test cases below
   };
 
-  describe('Alerts - GET - RBAC - spaces', () => {
+  describe('Alert - Bulk Update - RBAC - spaces', () => {
     before(async () => {
       await getSecuritySolutionIndexName(superUser);
       await getAPMIndexName(superUser);
+    });
 
+    before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
     });
 
@@ -98,80 +100,69 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
     });
 
-    it('superuser should be able to access an alert in a given space', async () => {
-      await supertestWithoutAuth
-        .get(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?id=space1alert&index=${APM_ALERT_INDEX}`)
-        .auth(superUser.username, superUser.password)
-        .set('kbn-xsrf', 'true')
-        .expect(200);
-    });
-
-    it('superuser should NOT be able to access an alert in a space which the alert does not exist in', async () => {
-      await supertestWithoutAuth
-        .get(`${getSpaceUrlPrefix(SPACE2)}${TEST_URL}?id=space1alert&index=${APM_ALERT_INDEX}`)
-        .auth(superUser.username, superUser.password)
-        .set('kbn-xsrf', 'true')
-        .expect(404);
-    });
-
-    it('obs only space 1 user should NOT be able to access an alert in a space which the user does not have access to', async () => {
-      await supertestWithoutAuth
-        .get(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?id=space2alert&index=${APM_ALERT_INDEX}`)
-        .auth(superUser.username, superUser.password)
-        .set('kbn-xsrf', 'true')
-        .expect(404);
-    });
-
     function addTests({ space, authorizedUsers, unauthorizedUsers, alertId, index }: TestCase) {
       authorizedUsers.forEach(({ username, password }) => {
-        it(`${username} should be able to access alert ${alertId} in ${space}/${index}`, async () => {
-          await supertestWithoutAuth
-            .get(`${getSpaceUrlPrefix(space)}${TEST_URL}?id=${alertId}&index=${index}`)
+        it(`${username} should bulk update alert with given id ${alertId} in ${space}/${index}`, async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts'); // since this is a success case, reload the test data immediately beforehand
+          const { body: updated } = await supertestWithoutAuth
+            .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/bulk_update`)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
-            .expect(200);
+            .send({
+              ids: [alertId],
+              status: 'closed',
+              index,
+            });
+          expect(updated.statusCode).to.eql(200);
+          const items = updated.body.items;
+          // @ts-expect-error
+          items.map((item) => expect(item.update.result).to.eql('updated'));
         });
 
-        it(`${username} should fail to access a non-existent alert in ${space}/${index}`, async () => {
-          const fakeAlertId = 'some-alert-id-that-doesnt-exist';
-          await supertestWithoutAuth
-            .get(`${getSpaceUrlPrefix(space)}${TEST_URL}?id=${fakeAlertId}&index=${index}`)
+        it(`${username} should bulk update alerts which match query in ${space}/${index}`, async () => {
+          const { body: updated } = await supertestWithoutAuth
+            .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/bulk_update`)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
-            .expect(404);
-        });
-
-        it(`${username} should return a 404 when trying to accesses not-existent alerts as data index`, async () => {
-          await supertestWithoutAuth
-            .get(`${getSpaceUrlPrefix(space)}${TEST_URL}?id=${APM_ALERT_ID}&index=myfakeindex`)
-            .auth(username, password)
-            .set('kbn-xsrf', 'true')
-            .expect(404);
+            .send({
+              status: 'closed',
+              query: 'kibana.alert.status: open',
+              index,
+            });
+          expect(updated.statusCode).to.eql(200);
+          expect(updated.body.updated).to.greaterThan(0);
         });
       });
 
       unauthorizedUsers.forEach(({ username, password }) => {
-        it(`${username} should NOT be able to access alert ${alertId} in ${space}/${index}`, async () => {
+        it(`${username} should NOT be able to update alert ${alertId} in ${space}/${index}`, async () => {
           const res = await supertestWithoutAuth
-            .get(`${getSpaceUrlPrefix(space)}${TEST_URL}?id=${alertId}&index=${index}`)
+            .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/bulk_update`)
             .auth(username, password)
-            .set('kbn-xsrf', 'true');
+            .set('kbn-xsrf', 'true')
+            .send({
+              ids: [alertId],
+              status: 'closed',
+              index,
+            });
           expect([403, 404]).to.contain(res.statusCode);
         });
       });
     }
 
+    // Alert - Update - RBAC - spaces Security Solution superuser should bulk update alerts which match query in space1/.alerts-security.alerts
+    // Alert - Update - RBAC - spaces superuser should bulk update alert with given id 020202 in space1/.alerts-security.alerts
     describe('Security Solution', () => {
-      const authorizedInAllSpaces = [superUser, globalRead, secOnlySpacesAll, obsSecSpacesAll];
-      const authorizedOnlyInSpace1 = [secOnly, secOnlyRead, obsSec, obsSecRead];
-      const authorizedOnlyInSpace2 = [
-        secOnlySpace2,
-        secOnlyReadSpace2,
-        obsSecAllSpace2,
-        obsSecReadSpace2,
-      ];
+      const authorizedInAllSpaces = [superUser, secOnlySpacesAll, obsSecSpacesAll];
+      const authorizedOnlyInSpace1 = [secOnly, obsSec];
+      const authorizedOnlyInSpace2 = [secOnlySpace2, obsSecAllSpace2];
       const unauthorized = [
-        // these users are not authorized to access alerts for the Security Solution in any space
+        // these users are not authorized to update alerts for the Security Solution in any space
+        globalRead,
+        secOnlyRead,
+        obsSecRead,
+        secOnlyReadSpace2,
+        obsSecReadSpace2,
         obsOnly,
         obsOnlyRead,
         obsOnlySpace2,
@@ -197,16 +188,16 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('APM', () => {
-      const authorizedInAllSpaces = [superUser, globalRead, obsOnlySpacesAll, obsSecSpacesAll];
-      const authorizedOnlyInSpace1 = [obsOnly, obsOnlyRead, obsSec, obsSecRead];
-      const authorizedOnlyInSpace2 = [
-        obsOnlySpace2,
-        obsOnlyReadSpace2,
-        obsSecAllSpace2,
-        obsSecReadSpace2,
-      ];
+      const authorizedInAllSpaces = [superUser, obsOnlySpacesAll, obsSecSpacesAll];
+      const authorizedOnlyInSpace1 = [obsOnly, obsSec];
+      const authorizedOnlyInSpace2 = [obsOnlySpace2, obsSecAllSpace2];
       const unauthorized = [
-        // these users are not authorized to access alerts for APM in any space
+        // these users are not authorized to update alerts for APM in any space
+        globalRead,
+        obsOnlyRead,
+        obsSecRead,
+        obsOnlyReadSpace2,
+        obsSecReadSpace2,
         secOnly,
         secOnlyRead,
         secOnlySpace2,
