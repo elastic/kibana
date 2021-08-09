@@ -7,3 +7,4 @@
  */
 
 export type { KibanaExecutionContext } from '../../types';
+export { ExecutionContextContainer } from './execution_context_container';
