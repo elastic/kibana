@@ -54,9 +54,9 @@ describe('Legend Settings', () => {
     expect(props.onDisplayChange).toHaveBeenCalled();
   });
 
-  it('should have default the max lines input to 0 when no value is given', () => {
+  it('should have default the max lines input to 1 when no value is given', () => {
     const component = shallow(<LegendSettingsPopover {...props} />);
-    expect(component.find(MaxLinesInput).prop('value')).toEqual(0);
+    expect(component.find(MaxLinesInput).prop('value')).toEqual(1);
   });
 
   it('should enable the Nested Legend Switch when renderNestedLegendSwitch prop is true', () => {

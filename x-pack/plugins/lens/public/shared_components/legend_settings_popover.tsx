@@ -83,6 +83,14 @@ export interface LegendSettingsPopoverProps {
    */
   onMaxLinesChange?: (value: number) => void;
   /**
+   * Defines if the legend items will be truncated or not
+   */
+  truncate?: boolean;
+  /**
+   * Callback on nested switch status change
+   */
+  onTruncateLegendChange?: (event: EuiSwitchEvent) => void;
+  /**
    * If true, nested legend switch is rendered
    */
   renderNestedLegendSwitch?: boolean;
@@ -112,7 +120,7 @@ export interface LegendSettingsPopoverProps {
   groupPosition?: ToolbarButtonProps['groupPosition'];
 }
 
-const DEFAULT_MAX_LINES = 0;
+const DEFAULT_MAX_LINES = 1;
 
 export const MaxLinesInput = ({
   value,
@@ -128,7 +136,7 @@ export const MaxLinesInput = ({
     <EuiFieldNumber
       data-test-subj="lens-legend-max-lines-input"
       value={inputValue}
-      min={0}
+      min={1}
       max={5}
       compressed
       disabled={isDisabled}
@@ -151,7 +159,6 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
   floatingColumns,
   onAlignmentChange = () => {},
   onFloatingColumnsChange = () => {},
-  onMaxLinesChange = () => {},
   onPositionChange,
   renderNestedLegendSwitch,
   nestedLegend,
@@ -161,6 +168,9 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
   renderValueInLegendSwitch,
   groupPosition = 'right',
   maxLines,
+  onMaxLinesChange = () => {},
+  truncate,
+  onTruncateLegendChange = () => {},
 }) => {
   return (
     <ToolbarPopover
@@ -203,6 +213,34 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
         onPositionChange={onPositionChange}
       />
       <EuiFormRow
+        display="columnCompressedSwitch"
+        label={i18n.translate('xpack.lens.shared.truncateLegend', {
+          defaultMessage: 'Truncate',
+        })}
+      >
+        <TooltipWrapper
+          tooltipContent={i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
+            defaultMessage: 'Requires legend to be shown',
+          })}
+          condition={mode === 'hide'}
+          position="top"
+          delay="regular"
+          display="block"
+        >
+          <EuiSwitch
+            compressed
+            label={i18n.translate('xpack.lens.shared.truncateLegend', {
+              defaultMessage: 'Truncate',
+            })}
+            data-test-subj="lens-legend-all-lines-switch"
+            showLabel={false}
+            disabled={mode === 'hide'}
+            checked={!!truncate}
+            onChange={onTruncateLegendChange}
+          />
+        </TooltipWrapper>
+      </EuiFormRow>
+      <EuiFormRow
         label={i18n.translate('xpack.lens.shared.maxLinesLabel', {
           defaultMessage: 'Maximum legend lines',
         })}
@@ -221,7 +259,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
           <MaxLinesInput
             value={maxLines ?? DEFAULT_MAX_LINES}
             setValue={onMaxLinesChange}
-            isDisabled={mode === 'hide'}
+            isDisabled={mode === 'hide' || !truncate}
           />
         </TooltipWrapper>
       </EuiFormRow>

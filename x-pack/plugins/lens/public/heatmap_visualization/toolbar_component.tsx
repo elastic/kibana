@@ -72,6 +72,13 @@ export const HeatmapToolbar = memo(
                   legend: { ...state.legend, maxLines: val },
                 });
               }}
+              truncate={state?.legend.truncate ?? true}
+              onTruncateLegendChange={() => {
+                setState({
+                  ...state,
+                  legend: { ...state.legend, truncate: !state.legend.truncate },
+                });
+              }}
             />
           </EuiFlexGroup>
         </EuiFlexItem>

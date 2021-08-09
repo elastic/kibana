@@ -398,6 +398,13 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                 legend: { ...state.legend, maxLines: val },
               });
             }}
+            truncate={state?.legend.truncate ?? true}
+            onTruncateLegendChange={() => {
+              setState({
+                ...state,
+                legend: { ...state.legend, truncate: !state.legend.truncate },
+              });
+            }}
             onPositionChange={(id) => {
               setState({
                 ...state,

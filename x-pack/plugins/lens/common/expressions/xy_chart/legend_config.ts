@@ -41,6 +41,10 @@ export interface LegendConfig {
    * Maximum number of lines per legend item
    */
   maxLines?: number;
+  /**
+   * Flag whether the legend is inside the chart
+   */
+  truncate?: boolean;
 }
 
 export type LegendConfigResult = LegendConfig & { type: 'lens_xy_legendConfig' };
@@ -108,6 +112,12 @@ export const legendConfig: ExpressionFunctionDefinition<
       types: ['number'],
       help: i18n.translate('xpack.lens.xyChart.maxLines.help', {
         defaultMessage: 'Specifies the number of lines per legend item.',
+      }),
+    },
+    truncate: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.xyChart.truncate.help', {
+        defaultMessage: 'Specifies whether the legend items will be truncated or not',
       }),
     },
   },

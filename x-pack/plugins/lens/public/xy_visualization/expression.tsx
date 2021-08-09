@@ -517,7 +517,7 @@ export function XYChart({
             color: undefined, // removes background for embeddables
           },
           legend: {
-            labelOptions: { maxLines: legend?.maxLines ?? 0 },
+            labelOptions: { maxLines: legend.truncate ? legend?.maxLines ?? 1 : 0 },
           },
         }}
         baseTheme={chartBaseTheme}

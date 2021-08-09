@@ -63,6 +63,7 @@ describe('PieVisualization component', () => {
       categoryDisplay: 'default',
       legendDisplay: 'default',
       legendMaxLines: 1,
+      truncateLegend: true,
       nestedLegend: false,
       percentDecimals: 3,
       hideLabels: false,

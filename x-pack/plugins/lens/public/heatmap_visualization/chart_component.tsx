@@ -324,7 +324,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         theme={{
           ...chartTheme,
           legend: {
-            labelOptions: { maxLines: args.legend?.maxLines ?? 0 },
+            labelOptions: { maxLines: args.legend.truncate ? args.legend?.maxLines ?? 1 : 0 },
           },
         }}
       />

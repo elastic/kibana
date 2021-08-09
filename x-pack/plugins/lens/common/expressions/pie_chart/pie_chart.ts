@@ -78,6 +78,10 @@ export const pie: ExpressionFunctionDefinition<
       types: ['number'],
       help: '',
     },
+    truncateLegend: {
+      types: ['boolean'],
+      help: '',
+    },
     legendPosition: {
       types: ['string'],
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
