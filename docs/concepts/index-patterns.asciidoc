@@ -44,14 +44,14 @@ image:management/index-patterns/images/create-index-pattern.png["Create index pa
 . Start typing in the *Index pattern* field, and {kib} looks for the names of
 {es} indices that match your input.
 +
-** To match multiple indices, use a wildcard (*). `filebeat-*` matches
+** To match multiple sources, use a wildcard (*). For example, `filebeat-*` matches
 `filebeat-apache-a`, `filebeat-apache-b`, and so on.
 +
 ** To match multiple single sources, enter their names,
 separated with a comma.  Do not include a space after the comma.
 `filebeat-a,filebeat-b` matches two indices, but not match `filebeat-c`.
 +
-** To exclude an index, use a minus sign (-), for example, `-test3`.
+** To exclude a source, use a minus sign (-), for example, `-test3`.
 
 . Click *Next step*.
 
@@ -67,7 +67,10 @@ based on different timestamps.
 
 . Click *Create index pattern*.
 +
-{kib} is now configured to use your {es} data.
+[[reload-fields]] {kib} is now configured to use your {es} data. When a new field is added to an index, 
+the index pattern field list is updated
+the next time the index pattern is loaded, for example, when you load the page or
+move between {kib} apps.
 
 . Select this index pattern when you search and visualize your data.
 
