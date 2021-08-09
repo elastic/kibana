@@ -2571,8 +2571,6 @@ export class SavedObjectsErrorHelpers {
     // (undocumented)
     static isNotFoundError(error: Error | DecoratedError): boolean;
     // (undocumented)
-    static isNotFoundEsUnavailableError(error: Error | DecoratedError): boolean;
-    // (undocumented)
     static isRequestEntityTooLargeError(error: Error | DecoratedError): boolean;
     // Warning: (ae-forgotten-export) The symbol "DecoratedError" needs to be exported by the entry point index.d.ts
     //

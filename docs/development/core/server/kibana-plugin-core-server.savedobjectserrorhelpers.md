@@ -42,7 +42,6 @@ export declare class SavedObjectsErrorHelpers
 |  [isInvalidVersionError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.isinvalidversionerror.md) | <code>static</code> |  |
 |  [isNotAuthorizedError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.isnotauthorizederror.md) | <code>static</code> |  |
 |  [isNotFoundError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.isnotfounderror.md) | <code>static</code> |  |
-|  [isNotFoundEsUnavailableError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.isnotfoundesunavailableerror.md) | <code>static</code> |  |
 |  [isRequestEntityTooLargeError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.isrequestentitytoolargeerror.md) | <code>static</code> |  |
 |  [isSavedObjectsClientError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.issavedobjectsclienterror.md) | <code>static</code> |  |
 |  [isTooManyRequestsError(error)](./kibana-plugin-core-server.savedobjectserrorhelpers.istoomanyrequestserror.md) | <code>static</code> |  |
