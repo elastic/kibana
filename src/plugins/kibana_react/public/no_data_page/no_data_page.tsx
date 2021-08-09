@@ -60,7 +60,7 @@ export type NoDataPageActionsProps = Record<string, NoDataPageActions>;
 
 export interface NoDataPageProps {
   /**
-   * Single name for the current solution
+   * Single name for the current solution, used to auto-generate the title, logo, description, and button label
    */
   solution: string;
   /**
@@ -68,17 +68,19 @@ export interface NoDataPageProps {
    */
   logo?: string;
   /**
-   * The array of card configurations
-   */
-  actions: NoDataPageActionsProps;
-  /**
-   * Link to docs for the whole solution
+   * Required to set the docs link for the whole solution
    */
   docsLink: string;
   /**
-   * Replace the auto-generated page title (h1)
+   * Optionally replace the auto-generated page title (h1)
    */
   pageTitle?: string;
+  /**
+   * An object of `NoDataPageActions` configurations with unique primary keys.
+   * Use `elasticAgent` or `beats` as the primary key for pre-configured cards of this type.
+   * Otherwise use a custom key that contains `EuiCard` props.
+   */
+  actions: NoDataPageActionsProps;
 }
 
 export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
