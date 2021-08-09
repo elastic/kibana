@@ -187,12 +187,9 @@ export const CodeEditor: React.FC<Props> = ({
   );
 
   const renderPrompt = useCallback(() => {
-    const tooltipId = htmlIdGenerator('codeEditorTooltip')();
-
     return (
       <EuiToolTip
         display="block"
-        id={tooltipId}
         content={
           <div>
             <EuiText>
@@ -218,7 +215,6 @@ export const CodeEditor: React.FC<Props> = ({
         <div
           className={promptClasses}
           id={htmlIdGenerator('codeEditor')()}
-          aria-describedby={tooltipId}
           ref={editorHint}
           tabIndex={0}
           role="button"
