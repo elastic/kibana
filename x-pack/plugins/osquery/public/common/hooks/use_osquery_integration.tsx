@@ -15,7 +15,7 @@ export const useOsqueryIntegration = () => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useQuery('integrations', () => http.get('/internal/osquery/status'), {
+  return useQuery('integration', () => http.get('/internal/osquery/status'), {
     onError: (error: Error) =>
       setErrorToast(error, {
         title: i18n.translate('xpack.osquery.osquery_integration.fetchError', {
