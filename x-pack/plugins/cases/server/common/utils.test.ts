@@ -15,11 +15,7 @@ import {
   CommentRequestUserType,
   CommentType,
 } from '../../common/api';
-import {
-  mockCaseComments,
-  mockCases,
-  mockCaseNoConnectorId,
-} from '../routes/api/__fixtures__/mock_saved_objects';
+import { mockCaseComments, mockCases } from '../routes/api/__fixtures__/mock_saved_objects';
 import {
   flattenCaseSavedObject,
   transformNewComment,
@@ -473,14 +469,13 @@ describe('common utils', () => {
       `);
     });
 
-    it('inserts missing connector', () => {
+    it('leaves the connector.id in the attributes', () => {
       const extraCaseData = {
         totalComment: 2,
       };
 
       const res = flattenCaseSavedObject({
-        // @ts-ignore this is to update old case saved objects to include connector
-        savedObject: mockCaseNoConnectorId,
+        savedObject: mockCases[0],
         ...extraCaseData,
       });
 
@@ -503,7 +498,8 @@ describe('common utils', () => {
           },
           "description": "This is a brand new case of a bad meanie defacing data",
           "external_service": null,
-          "id": "mock-no-connector_id",
+          "id": "mock-id-1",
+          "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
@@ -516,6 +512,7 @@ describe('common utils', () => {
           "title": "Super Bad Security Issue",
           "totalAlerts": 0,
           "totalComment": 2,
+          "type": "individual",
           "updated_at": "2019-11-25T21:54:48.952Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",

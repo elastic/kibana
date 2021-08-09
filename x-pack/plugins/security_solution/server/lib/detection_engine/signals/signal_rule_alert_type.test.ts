@@ -34,6 +34,7 @@ import { mlExecutor } from './executors/ml';
 import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
+import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
 
 jest.mock('./rule_status_saved_objects_client');
 jest.mock('./rule_status_service');
@@ -119,6 +120,7 @@ describe('signal_rule_alert_type', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let alertServices: AlertServicesMock;
   let ruleStatusService: Record<string, jest.Mock>;
+  let ruleDataService: ReturnType<typeof ruleRegistryMocks.createRuleDataPluginService>;
 
   beforeEach(() => {
     alertServices = alertsMock.createAlertServices();
@@ -130,6 +132,7 @@ describe('signal_rule_alert_type', () => {
       error: jest.fn(),
       partialFailure: jest.fn(),
     };
+    ruleDataService = ruleRegistryMocks.createRuleDataPluginService();
     (ruleStatusServiceFactory as jest.Mock).mockReturnValue(ruleStatusService);
     (getListsClient as jest.Mock).mockReturnValue({
       listClient: getListClientMock(),
@@ -196,6 +199,7 @@ describe('signal_rule_alert_type', () => {
       ml: mlMock,
       lists: listMock.createSetup(),
       mergeStrategy: 'missingFields',
+      ruleDataService,
     });
   });
 

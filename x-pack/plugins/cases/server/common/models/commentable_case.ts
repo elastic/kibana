@@ -26,19 +26,14 @@ import {
   CommentPatchRequest,
   CommentRequest,
   CommentType,
-  ESCaseAttributes,
   MAX_DOCS_PER_PAGE,
   SUB_CASE_SAVED_OBJECT,
   SubCaseAttributes,
   User,
   CommentRequestUserType,
+  CaseAttributes,
 } from '../../../common';
-import {
-  transformESConnectorToCaseConnector,
-  flattenCommentSavedObjects,
-  flattenSubCaseSavedObject,
-  transformNewComment,
-} from '..';
+import { flattenCommentSavedObjects, flattenSubCaseSavedObject, transformNewComment } from '..';
 import { AttachmentService, CasesService } from '../../services';
 import { createCaseError } from '../error';
 import { countAlertsForID } from '../index';
@@ -55,7 +50,7 @@ interface NewCommentResp {
 }
 
 interface CommentableCaseParams {
-  collection: SavedObject<ESCaseAttributes>;
+  collection: SavedObject<CaseAttributes>;
   subCase?: SavedObject<SubCaseAttributes>;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   caseService: CasesService;
@@ -68,7 +63,7 @@ interface CommentableCaseParams {
  * a Sub Case, Case, and Collection.
  */
 export class CommentableCase {
-  private readonly collection: SavedObject<ESCaseAttributes>;
+  private readonly collection: SavedObject<CaseAttributes>;
   private readonly subCase?: SavedObject<SubCaseAttributes>;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly caseService: CasesService;
@@ -171,6 +166,7 @@ export class CommentableCase {
       }
 
       const updatedCase = await this.caseService.patchCase({
+        originalCase: this.collection,
         unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
         caseId: this.collection.id,
         updatedAttributes: {
@@ -331,7 +327,6 @@ export class CommentableCase {
       version: this.collection.version ?? '0',
       totalComment,
       ...this.collection.attributes,
-      connector: transformESConnectorToCaseConnector(this.collection.attributes.connector),
     };
   }
 

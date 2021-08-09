@@ -26,6 +26,7 @@ import { LensDocShape714 } from '../../../lens/server';
 
 import {
   AssociationType,
+  CaseAttributes,
   CaseConnector,
   CaseResponse,
   CasesClientPostRequest,
@@ -38,11 +39,8 @@ import {
   CommentResponse,
   CommentsResponse,
   CommentType,
-  ConnectorTypeFields,
+  ConnectorTypes,
   ENABLE_CASE_CONNECTOR,
-  ESCaseAttributes,
-  ESCaseConnector,
-  ESConnectorFields,
   SubCaseAttributes,
   SubCaseResponse,
   SubCasesFindResponse,
@@ -71,13 +69,13 @@ export const transformNewCase = ({
   newCase,
   username,
 }: {
-  connector: ESCaseConnector;
+  connector: CaseConnector;
   createdDate: string;
   email?: string | null;
   full_name?: string | null;
   newCase: CasesClientPostRequest;
   username?: string | null;
-}): ESCaseAttributes => ({
+}): CaseAttributes => ({
   ...newCase,
   closed_at: null,
   closed_by: null,
@@ -151,7 +149,7 @@ export const flattenCaseSavedObject = ({
   subCases,
   subCaseIds,
 }: {
-  savedObject: SavedObject<ESCaseAttributes>;
+  savedObject: SavedObject<CaseAttributes>;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
@@ -164,7 +162,6 @@ export const flattenCaseSavedObject = ({
   totalComment,
   totalAlerts,
   ...savedObject.attributes,
-  connector: transformESConnectorToCaseConnector(savedObject.attributes.connector),
   subCases,
   subCaseIds: !isEmpty(subCaseIds) ? subCaseIds : undefined,
 });
@@ -211,47 +208,6 @@ export const flattenCommentSavedObject = (
   version: savedObject.version ?? '0',
   ...savedObject.attributes,
 });
-
-export const transformCaseConnectorToEsConnector = (connector: CaseConnector): ESCaseConnector => ({
-  id: connector?.id ?? 'none',
-  name: connector?.name ?? 'none',
-  type: connector?.type ?? '.none',
-  fields:
-    connector?.fields != null
-      ? Object.entries(connector.fields).reduce<ESConnectorFields>(
-          (acc, [key, value]) => [
-            ...acc,
-            {
-              key,
-              value,
-            },
-          ],
-          []
-        )
-      : [],
-});
-
-export const transformESConnectorToCaseConnector = (connector?: ESCaseConnector): CaseConnector => {
-  const connectorTypeField = {
-    type: connector?.type ?? '.none',
-    fields:
-      connector && connector.fields != null && connector.fields.length > 0
-        ? connector.fields.reduce(
-            (fields, { key, value }) => ({
-              ...fields,
-              [key]: value,
-            }),
-            {}
-          )
-        : null,
-  } as ConnectorTypeFields;
-
-  return {
-    id: connector?.id ?? 'none',
-    name: connector?.name ?? 'none',
-    ...connectorTypeField,
-  };
-};
 
 export const getIDsAndIndicesAsArrays = (
   comment: CommentRequestAlertType
@@ -446,6 +402,18 @@ export function checkEnabledCaseConnectorOrThrow(subCaseID: string | undefined) 
     );
   }
 }
+
+/**
+ * Returns a connector that indicates that no connector was set.
+ *
+ * @returns the 'none' connector
+ */
+ export const getNoneCaseConnector = () => ({
+  id: 'none',
+  name: 'none',
+  type: ConnectorTypes.none,
+  fields: null,
+});
 
 interface LensMarkdownNode {
   timeRange: TimeRange;
