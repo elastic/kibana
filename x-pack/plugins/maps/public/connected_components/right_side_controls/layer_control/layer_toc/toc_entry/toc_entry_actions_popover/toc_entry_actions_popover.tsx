@@ -34,9 +34,11 @@ export interface Props {
   isReadOnly: boolean;
   layer: ILayer;
   removeLayer: (layerId: string) => void;
+  showThisLayerOnly: (layerId: string) => void;
   supportsFitToBounds: boolean;
   toggleVisible: (layerId: string) => void;
   editModeActiveForLayer: boolean;
+  numLayers: number;
 }
 
 interface State {
@@ -158,6 +160,20 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         },
       },
     ];
+    if (this.props.numLayers > 2) {
+      actionItems.push({
+        name: i18n.translate('xpack.maps.layerTocActions.showThisLayerOnlyTitle', {
+          defaultMessage: 'Show this layer only',
+        }),
+        icon: <EuiIcon type="eye" size="m" />,
+        'data-test-subj': 'showThisLayerOnlyButton',
+        toolTipContent: null,
+        onClick: () => {
+          this._closePopover();
+          this.props.showThisLayerOnly(this.props.layer.getId());
+        },
+      });
+    }
     actionItems.push({
       disabled: this.props.isEditButtonDisabled,
       name: EDIT_LAYER_SETTINGS_LABEL,

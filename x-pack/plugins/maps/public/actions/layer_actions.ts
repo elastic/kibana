@@ -51,7 +51,7 @@ import {
 } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer';
-import { DRAW_MODE, LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
+import { DRAW_MODE, LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_TYPES } from '../../common/constants';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
@@ -243,6 +243,38 @@ export function toggleLayerVisible(layerId: string) {
     const makeVisible = !layer.isVisible();
 
     dispatch(setLayerVisibility(layerId, makeVisible));
+  };
+}
+
+export function showThisLayerOnly(layerId: string) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    getLayerList(getState()).forEach((layer: ILayer, index: number) => {
+      // do not hide basemap layers
+      const sourceType = layer.getSource().getType();
+      if (
+        sourceType === SOURCE_TYPES.EMS_TMS ||
+        (index === 0 &&
+          [SOURCE_TYPES.WMS, SOURCE_TYPES.EMS_XYZ].includes(sourceType as SOURCE_TYPES))
+      ) {
+        return;
+      }
+
+      // show target layer
+      if (layer.getId() === layerId) {
+        if (!layer.isVisible()) {
+          dispatch(setLayerVisibility(layerId, true));
+        }
+        return;
+      }
+
+      // hide all other layers
+      if (layer.isVisible()) {
+        dispatch(setLayerVisibility(layer.getId(), false));
+      }
+    });
   };
 }
 
