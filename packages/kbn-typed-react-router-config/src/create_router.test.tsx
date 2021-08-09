@@ -204,10 +204,6 @@ describe('createRouter', () => {
     it('applies defaults', () => {
       history.push('/services?rangeTo=now&transactionType=request');
 
-      expect(() => {
-        router.matchRoutes('/', history.location);
-      }).not.toThrow();
-
       const matches = router.matchRoutes('/', history.location);
 
       expect(matches[1]?.match.params).toEqual({
@@ -279,14 +275,14 @@ describe('createRouter', () => {
     });
 
     it('applies defaults', () => {
-      expect(() => {
-        router.link('/traces', {
-          query: {
-            rangeTo: 'now',
-            aggregationType: 'avg',
-          },
-        } as any);
-      }).not.toThrowError();
+      const href = router.link('/traces', {
+        query: {
+          rangeTo: 'now',
+          aggregationType: 'avg',
+        },
+      });
+
+      expect(href).toEqual('/traces?aggregationType=avg&rangeFrom=now-30m&rangeTo=now');
     });
   });
 });
