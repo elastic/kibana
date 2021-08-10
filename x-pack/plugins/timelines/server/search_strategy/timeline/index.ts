@@ -9,7 +9,8 @@ import { ALERT_OWNER, RULE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import { from } from 'rxjs';
 import {
-  isValidFeatureId,
+  // TODO: Undo comment in fix here https://github.com/elastic/kibana/pull/107857
+  // isValidFeatureId,
   mapConsumerToIndexName,
   AlertConsumers,
 } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
