@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { merge, cloneDeep, isPlainObject } from 'lodash';
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
