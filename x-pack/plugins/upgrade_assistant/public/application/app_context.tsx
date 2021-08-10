@@ -34,6 +34,8 @@ export interface ContextValue {
   deprecations: DeprecationsServiceStart;
   isCloudEnabled: boolean;
   cloudDeploymentUrl: string;
+  startServices: CoreStart;
+  startPluginDeps: CoreStart;
 }
 
 export const AppContext = createContext<ContextValue>({} as any);

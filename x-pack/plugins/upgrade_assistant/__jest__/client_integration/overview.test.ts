@@ -74,22 +74,6 @@ describe('Overview page', () => {
     server.restore();
   });
 
-  test('renders the overview page', () => {
-    const { exists, find } = testBed;
-
-    expect(exists('overviewPageContent')).toBe(true);
-
-    // Verify ES stats
-    expect(exists('esStatsPanel')).toBe(true);
-    expect(find('esStatsPanel.totalDeprecations').text()).toContain('2');
-    expect(find('esStatsPanel.criticalDeprecations').text()).toContain('1');
-
-    // Verify Kibana stats
-    expect(exists('kibanaStatsPanel')).toBe(true);
-    expect(find('kibanaStatsPanel.totalDeprecations').text()).toContain('1');
-    expect(find('kibanaStatsPanel.criticalDeprecations').text()).toContain('1');
-  });
-
   describe('Deprecation logging', () => {
     test('toggles deprecation logging', async () => {
       const { find, actions } = testBed;

@@ -19,7 +19,7 @@ export {
 
 export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 
-export { EuiThemeProvider } from '../../../../src/plugins/kibana_react/common';
+export { EuiThemeProvider, EuiTheme } from '../../../../src/plugins/kibana_react/common';
 export { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
 export const useKibana = () => _useKibana<AppServicesContext>();
