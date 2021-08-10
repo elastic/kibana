@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiDescribedFormGroup, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback } from 'react';
@@ -79,17 +79,14 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
         >
           <>
             {indices.map((index) => (
-              <>
-                <IndexSetupRow
-                  index={index}
-                  isDisabled={disabled}
-                  key={index.name}
-                  onChangeIsSelected={changeIsIndexSelected}
-                  onChangeDatasetFilter={changeDatasetFilter}
-                  previousQualityWarnings={previousQualityWarnings}
-                />
-                <EuiSpacer />
-              </>
+              <IndexSetupRow
+                index={index}
+                isDisabled={disabled}
+                key={index.name}
+                onChangeIsSelected={changeIsIndexSelected}
+                onChangeDatasetFilter={changeDatasetFilter}
+                previousQualityWarnings={previousQualityWarnings}
+              />
             ))}
           </>
         </EuiFormRow>

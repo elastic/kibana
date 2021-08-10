@@ -63,7 +63,7 @@ export const IndexSetupRow: React.FC<{
   const isSelected = index.validity === 'valid' && index.isSelected;
 
   return (
-    <EuiFlexGroup gutterSize="s" direction="column">
+    <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
         <EuiCheckbox
           key={index.name}
@@ -90,7 +90,7 @@ export const IndexSetupRow: React.FC<{
           disabled={isDisabled || index.validity === 'invalid'}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         {index.validity === 'invalid' ? (
           <EuiIconTip content={formatValidationError(index.errors)} type="alert" color="danger" />
         ) : index.validity === 'valid' ? (
