@@ -23,7 +23,7 @@ export const strings = {
     }),
   getHelpDescription: () =>
     i18n.translate('expressionTagcloud.renderer.tagcloud.helpDescription', {
-      defaultMessage: '', // @todo add some help description !!!!
+      defaultMessage: 'Tag Cloud visualization', // @todo add some help description !!!!
     }),
 };
 
