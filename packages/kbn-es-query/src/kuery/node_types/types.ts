@@ -10,7 +10,7 @@
  * WARNING: these typings are incomplete
  */
 
-import { JsonValue } from '@kbn/common-utils';
+import { JsonValue } from '@kbn/utility-types';
 import { KueryNode } from '..';
 import { IndexPatternBase } from '../..';
 
