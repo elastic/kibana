@@ -9,7 +9,8 @@ import { UpdateDocumentByQueryResponse } from 'elasticsearch';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { AlertStatus } from '../../../timelines/common';
 
-export const DETECTION_ENGINE_SIGNALS_STATUS_URL = '/api/detection_engine/signals/status';
+// export const DETECTION_ENGINE_SIGNALS_STATUS_URL = '/api/detection_engine/signals/status';
+export const RAC_ALERTS_BULK_UPDATE_URL = '/internal/rac/alerts/bulk_update';
 
 /**
  * Update alert status by query
@@ -22,17 +23,22 @@ export const DETECTION_ENGINE_SIGNALS_STATUS_URL = '/api/detection_engine/signal
  */
 export const useUpdateAlertsStatus = (): {
   updateAlertStatus: (params: {
-    query: object;
     status: AlertStatus;
+    index: string;
+    ids?: string[];
+    query?: object;
   }) => Promise<UpdateDocumentByQueryResponse>;
 } => {
   const { http } = useKibana().services;
-
   return {
-    updateAlertStatus: ({ query, status }) =>
-      http!.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
+    updateAlertStatus: ({ status: alertStatus, index, ids, query }) => {
+      const status: string = alertStatus === 'in-progress' ? 'acknowledged' : alertStatus;
+      console.log({ index, status, query, ids });
+
+      return http!.fetch(RAC_ALERTS_BULK_UPDATE_URL, {
         method: 'POST',
-        body: JSON.stringify({ status, query }),
-      }),
+        body: JSON.stringify({ index, status, ...(query ? { query } : { ids }) }),
+      });
+    },
   };
 };

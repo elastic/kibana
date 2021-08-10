@@ -33,7 +33,12 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { calculateTotalPages, combineQueries, resolverIsShowing } from '../helpers';
+import {
+  calculateTotalPages,
+  combineQueries,
+  getCombinedFilterQuery,
+  resolverIsShowing,
+} from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
 import { HeaderSection } from '../header_section';
@@ -263,6 +268,23 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     [headerFilterGroup, graphEventId]
   );
 
+  const filterQuery = useMemo(
+    () =>
+      getCombinedFilterQuery({
+        config: esQuery.getEsQueryConfig(uiSettings),
+        dataProviders: EMPTY_DATA_PROVIDERS,
+        indexPattern: indexPatterns,
+        browserFields,
+        filters,
+        kqlQuery: query,
+        kqlMode: 'search',
+        isEventViewer: true,
+        from: start,
+        to: end,
+      }),
+    [uiSettings, indexPatterns, browserFields, filters, query, start, end]
+  );
+
   useEffect(() => {
     setIsQueryLoading(loading);
   }, [loading]);
@@ -327,6 +349,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                   <StatefulBody
                     activePage={pageInfo.activePage}
                     browserFields={browserFields}
+                    filterQuery={filterQuery}
                     data={nonDeletedEvents}
                     defaultCellActions={defaultCellActions}
                     id={STANDALONE_ID}
@@ -346,6 +369,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                     leadingControlColumns={leadingControlColumns}
                     trailingControlColumns={trailingControlColumns}
                     refetch={refetch}
+                    indexNames={indexNames}
                   />
                   <Footer
                     activePage={pageInfo.activePage}
