@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { defaults, omit } from 'lodash';
 import React from 'react';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { asInteger } from '../../../../common/utils/formatters';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
@@ -47,6 +48,7 @@ export function ErrorCountAlertTrigger(props: Props) {
       threshold: 25,
       windowSize: 1,
       windowUnit: 'm',
+      environment: ENVIRONMENT_ALL.value,
     }
   );
 
