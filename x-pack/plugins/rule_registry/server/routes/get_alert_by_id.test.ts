@@ -15,6 +15,7 @@ import {
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
+  ALERT_RULE_ID,
   ALERT_RULE_UUID,
 } from '@kbn/rule-data-utils';
 
@@ -35,7 +36,8 @@ const getMockAlert = (): ParsedTechnicalFields => ({
   [ALERT_RULE_RISK_SCORE]: 20,
   [SPACE_IDS]: ['fake-space-id'],
   [ALERT_RULE_SEVERITY]: 'warning',
-  [ALERT_RULE_UUID]: '12345',
+  [ALERT_RULE_ID]: '12345',
+  [ALERT_RULE_UUID]: 'abcd',
 });
 
 describe('getAlertByIdRoute', () => {

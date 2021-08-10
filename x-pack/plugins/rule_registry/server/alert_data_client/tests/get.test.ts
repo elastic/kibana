@@ -105,13 +105,13 @@ describe('get()', () => {
     const result = await alertsClient.get({ id: '1', index: '.alerts-observability-apm' });
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "kibana.alert.rule.consumer": "apm",
         "kibana.alert.rule.rule_type_id": "apm.error_rate",
         "kibana.alert.status": "open",
         "kibana.space_ids": Array [
           "test_default_space_id",
         ],
         "message": "hello world 1",
-        "undefined": "apm",
       }
     `);
     expect(esClientMock.search).toHaveBeenCalledTimes(1);
@@ -240,8 +240,8 @@ describe('get()', () => {
                 _id: fakeAlertId,
                 _index: indexName,
                 _source: {
-                  [RULE_ID]: fakeRuleTypeId,
-                  [ALERT_OWNER]: 'apm',
+                  [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
+                  [ALERT_RULE_CONSUMER]: 'apm',
                   [ALERT_STATUS]: 'open',
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
@@ -335,13 +335,13 @@ describe('get()', () => {
 
       expect(result).toMatchInlineSnapshot(`
         Object {
+          "kibana.alert.rule.consumer": "apm",
           "kibana.alert.rule.rule_type_id": "apm.error_rate",
           "kibana.alert.status": "open",
           "kibana.space_ids": Array [
             "test_default_space_id",
           ],
           "message": "hello world 1",
-          "undefined": "apm",
         }
       `);
     });

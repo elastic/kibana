@@ -16,6 +16,7 @@ export const technicalRuleFieldMap = {
     Fields.EVENT_ACTION,
     Fields.TAGS
   ),
+  [Fields.ALERT_RULE_ID]: { type: 'keyword', required: true },
   [Fields.ALERT_RULE_UUID]: { type: 'keyword', required: true },
   [Fields.ALERT_RULE_TYPE_ID]: { type: 'keyword', required: true },
   [Fields.ALERT_RULE_CONSUMER]: { type: 'keyword', required: true },
@@ -86,6 +87,11 @@ export const technicalRuleFieldMap = {
     array: false,
     required: false,
   },
+  [Fields.ALERT_RULE_CATEGORY]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   [Fields.ALERT_RULE_CREATED_AT]: {
     type: 'date',
     array: false,
@@ -108,11 +114,6 @@ export const technicalRuleFieldMap = {
   },
   [Fields.ALERT_RULE_FROM]: {
     type: 'date',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_ID]: {
-    type: 'keyword',
     array: false,
     required: false,
   },
