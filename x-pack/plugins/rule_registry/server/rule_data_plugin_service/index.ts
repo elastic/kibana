@@ -44,6 +44,7 @@ export class RuleDataPluginService {
     );
   }
 
+  // TODO: https://github.com/elastic/kibana/issues/106432
   public getResourcePrefix() {
     return this.options.index;
   }

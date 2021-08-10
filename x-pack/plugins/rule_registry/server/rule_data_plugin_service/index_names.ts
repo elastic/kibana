@@ -10,6 +10,7 @@ import { Dataset } from './index_options';
 const joinWithDash = (...names: string[]): string => names.filter(Boolean).join('-');
 
 export interface IndexNamesOptions {
+  // TODO: https://github.com/elastic/kibana/issues/106432
   /** @example '.alerts' */
   indexPrefix: string;
 
