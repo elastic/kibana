@@ -36,10 +36,14 @@ async function cypressStart(
 
   // Creates APM users
   await createKibanaUserRole({
-    esUserName: config.get('servers.elasticsearch.username'),
-    esPassword: config.get('servers.elasticsearch.password'),
-    kibanaBaseUrl: kibanaUrl,
-    kibanaRoleSuffix: 'e2e_tests',
+    elasticsearch: {
+      username: config.get('servers.elasticsearch.username'),
+      password: config.get('servers.elasticsearch.password'),
+    },
+    kibana: {
+      hostname: kibanaUrl,
+      roleSuffix: 'e2e_tests',
+    },
   });
 
   try {

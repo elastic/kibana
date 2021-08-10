@@ -8,16 +8,40 @@
 /* eslint-disable no-console */
 
 import { argv } from 'yargs';
-import {
-  createKibanaUserRole,
-  isAxiosError,
-  AbortError,
-} from './create_kibana_user_role';
+import { isAxiosError } from './call_kibana';
+import { createKibanaUserRole, AbortError } from './create_kibana_user_role';
 
-const kibanaRoleSuffix = argv.roleSuffix as string | undefined;
 const esUserName = (argv.username as string) || 'elastic';
 const esPassword = argv.password as string | undefined;
 const kibanaBaseUrl = argv.kibanaUrl as string | undefined;
+const kibanaRoleSuffix = argv.roleSuffix as string | undefined;
+
+if (!esPassword) {
+  throw new Error(
+    'Please specify credentials for elasticsearch: `--username elastic --password abcd` '
+  );
+}
+
+if (!kibanaBaseUrl) {
+  throw new Error(
+    'Please specify the url for Kibana: `--kibana-url http://localhost:5601` '
+  );
+}
+
+if (
+  !kibanaBaseUrl.startsWith('https://') &&
+  !kibanaBaseUrl.startsWith('http://')
+) {
+  throw new Error(
+    'Kibana url must be prefixed with http(s):// `--kibana-url http://localhost:5601`'
+  );
+}
+
+if (!kibanaRoleSuffix) {
+  throw new Error(
+    'Please specify a unique suffix that will be added to your roles with `--role-suffix <suffix>` '
+  );
+}
 
 console.log({
   kibanaRoleSuffix,
@@ -27,10 +51,14 @@ console.log({
 });
 
 createKibanaUserRole({
-  kibanaRoleSuffix,
-  esUserName,
-  esPassword,
-  kibanaBaseUrl,
+  kibana: {
+    roleSuffix: kibanaRoleSuffix,
+    hostname: kibanaBaseUrl,
+  },
+  elasticsearch: {
+    username: esUserName,
+    password: esPassword,
+  },
 }).catch((e) => {
   if (e instanceof AbortError) {
     console.error(e.message);
