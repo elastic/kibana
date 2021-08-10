@@ -28,7 +28,6 @@ export function createRuleDataClientMock(): RuleDataClientMock {
 
   return {
     indexName: '.alerts-security.alerts',
-    createWriteTargetIfNeeded: jest.fn(({}) => Promise.resolve()),
     getReader: jest.fn((_options?: { namespace?: string }) => ({
       getDynamicIndexPattern,
       search,

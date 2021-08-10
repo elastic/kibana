@@ -18,6 +18,7 @@ export interface IndexOptions {
   componentTemplates: ComponentTemplateOptions[]; // NOTE: order matters
   indexTemplate: IndexTemplateOptions;
   ilmPolicy?: IlmPolicyOptions;
+  secondaryAlias?: string;
 }
 
 export const enum Dataset {

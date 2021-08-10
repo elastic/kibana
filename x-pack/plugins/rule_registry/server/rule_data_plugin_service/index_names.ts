@@ -6,60 +6,70 @@
  */
 
 import { Dataset } from './index_options';
+import { ResourceNames } from './resource_names';
 
-const joinWithDash = (...names: string[]): string => names.filter(Boolean).join('-');
+const joinWithDash = ResourceNames.joinWithDash;
 
-export interface IndexNamesOptions {
-  // TODO: https://github.com/elastic/kibana/issues/106432
-  /** @example '.alerts' */
-  indexPrefix: string;
+interface ConstructorOptions {
+  resourceNames: ResourceNames;
 
   /** @example 'security', 'observability', 'observability.logs' */
   registrationContext: string;
 
   /** @example 'alerts', 'events' */
   dataset: Dataset;
+
+  /** @example '.siem-signals', null */
+  secondaryAlias: string | null;
 }
 
 export class IndexNames {
-  public static joinWithDash = joinWithDash;
+  constructor(private readonly options: ConstructorOptions) {
+    const { resourceNames, registrationContext, dataset } = options;
 
-  /** @example '.alerts-security.alerts' */
-  private readonly baseName: string;
-
-  constructor(options: IndexNamesOptions) {
-    const { indexPrefix, registrationContext, dataset } = options;
-    this.baseName = joinWithDash(indexPrefix, registrationContext, dataset);
+    this.prefix = resourceNames.getFullPrefix();
+    this.baseName = resourceNames.getFullName(registrationContext, dataset);
+    this.basePattern = joinWithDash(this.baseName, '*');
   }
 
+  /** @example '.alerts' */
+  public readonly prefix: string;
+
   /** @example '.alerts-security.alerts' */
-  public get indexBaseName(): string {
-    return this.baseName;
-  }
+  public readonly baseName: string;
 
   /** @example '.alerts-security.alerts-*' */
-  public get indexBasePattern(): string {
-    return joinWithDash(this.baseName, '*');
-  }
+  public readonly basePattern: string;
 
   /** @example '.alerts-security.alerts-default' */
-  public getIndexAliasName(namespace: string): string {
+  public getPrimaryAlias(namespace: string): string {
     return joinWithDash(this.baseName, namespace);
   }
 
   /** @example '.alerts-security.alerts-default-*' */
-  public getIndexAliasPattern(namespace: string): string {
+  public getPrimaryAliasPattern(namespace: string): string {
     return joinWithDash(this.baseName, namespace, '*');
   }
 
+  /** @example '.siem-signals-default', null */
+  public getSecondaryAlias(namespace: string): string | null {
+    const { secondaryAlias } = this.options;
+    return secondaryAlias ? joinWithDash(secondaryAlias, namespace) : null;
+  }
+
   /** @example '.alerts-security.alerts-default-000001' */
-  public getIndexInitialName(namespace: string): string {
+  public getConcreteIndexInitialName(namespace: string): string {
     return joinWithDash(this.baseName, namespace, '000001');
   }
 
   /** @example '.alerts-security.alerts-policy' */
-  public get ilmPolicyName(): string {
+  public getIlmPolicyName(): string {
     return joinWithDash(this.baseName, 'policy');
+  }
+
+  /** @example '.alerts-security.alerts-mappings' */
+  public getComponentTemplateName(relativeName: string): string {
+    return joinWithDash(this.baseName, relativeName);
   }
 
   /** @example '.alerts-security.alerts-default-index-template' */

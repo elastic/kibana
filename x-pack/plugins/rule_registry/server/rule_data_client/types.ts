@@ -7,13 +7,10 @@
 
 import { ApiResponse } from '@elastic/elasticsearch';
 import { BulkRequest, BulkResponse } from '@elastic/elasticsearch/api/types';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
 
-import { ElasticsearchClient } from 'kibana/server';
 import { FieldDescriptor } from 'src/plugins/data/server';
 import { ESSearchRequest, ESSearchResponse } from 'src/core/types/elasticsearch';
 import { TechnicalRuleDataFieldName } from '../../common/technical_rule_data_field_names';
-import { IndexNames } from '../rule_data_plugin_service/index_names';
 
 export interface RuleDataReader {
   search<TSearchRequest extends ESSearchRequest>(
@@ -39,20 +36,4 @@ export interface IRuleDataClient {
   getReader(options?: { namespace?: string }): RuleDataReader;
   getWriter(options?: { namespace?: string }): RuleDataWriter;
   isWriteEnabled(): boolean;
-  createWriteTargetIfNeeded(options: { namespace?: string }): Promise<void>;
-}
-
-/**
- * The purpose of the `feature` param is to force the user to update
- * the data structure which contains the mapping of consumers to alerts
- * as data indices. The idea is it is typed such that it forces the
- * user to go to the code and modify it. At least until a better system
- * is put in place or we move the alerts as data client out of rule registry.
- */
-export interface RuleDataClientConstructorOptions {
-  feature: ValidFeatureId;
-  names: IndexNames;
-  ready: () => Promise<void>;
-  getClusterClient: () => Promise<ElasticsearchClient>;
-  isWriteEnabled: boolean;
 }

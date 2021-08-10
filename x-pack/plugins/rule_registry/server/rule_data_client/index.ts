@@ -6,21 +6,40 @@
  */
 
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { ValidFeatureId } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+
+import { ElasticsearchClient } from 'kibana/server';
 import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
+
 import { RuleDataWriteDisabledError } from '../rule_data_plugin_service/errors';
-import {
-  IRuleDataClient,
-  RuleDataClientConstructorOptions,
-  RuleDataReader,
-  RuleDataWriter,
-} from './types';
+import { IndexNames } from '../rule_data_plugin_service/index_names';
+import { IndexOptions } from '../rule_data_plugin_service/index_options';
+import { ResourceInstaller } from '../rule_data_plugin_service/resource_installer';
+import { IRuleDataClient, RuleDataReader, RuleDataWriter } from './types';
 
 function getNamespacedAlias(options: { alias: string; namespace?: string }) {
   return [options.alias, options.namespace].filter(Boolean).join('-');
 }
 
+/**
+ * The purpose of the `feature` param is to force the user to update
+ * the data structure which contains the mapping of consumers to alerts
+ * as data indices. The idea is it is typed such that it forces the
+ * user to go to the code and modify it. At least until a better system
+ * is put in place or we move the alerts as data client out of rule registry.
+ */
+interface ConstructorOptions {
+  feature: ValidFeatureId;
+  indexNames: IndexNames;
+  indexOptions: IndexOptions;
+  resourceInstaller: ResourceInstaller;
+  isWriteEnabled: boolean;
+  ready: () => Promise<void>;
+  getClusterClient: () => Promise<ElasticsearchClient>;
+}
+
 export class RuleDataClient implements IRuleDataClient {
-  constructor(private readonly options: RuleDataClientConstructorOptions) {}
+  constructor(private readonly options: ConstructorOptions) {}
 
   private async getClusterClient() {
     await this.options.ready();
@@ -28,7 +47,7 @@ export class RuleDataClient implements IRuleDataClient {
   }
 
   public get indexName(): string {
-    return this.options.names.indexBaseName;
+    return this.options.indexNames.baseName;
   }
 
   isWriteEnabled(): boolean {
@@ -79,6 +98,7 @@ export class RuleDataClient implements IRuleDataClient {
 
   getWriter(options: { namespace?: string } = {}): RuleDataWriter {
     const { namespace } = options;
+    const { indexNames, indexOptions, resourceInstaller } = this.options;
     const isWriteEnabled = this.isWriteEnabled();
     const alias = getNamespacedAlias({ alias: this.indexName, namespace });
 
@@ -107,14 +127,16 @@ export class RuleDataClient implements IRuleDataClient {
                   (item) => item.index?.error?.type === 'illegal_argument_exception'
                 ))
             ) {
-              return this.createWriteTargetIfNeeded({ namespace }).then(() => {
-                return clusterClient.bulk(requestWithDefaultParameters).then((retryResponse) => {
-                  if (retryResponse.body.errors) {
-                    throw new ResponseError(retryResponse);
-                  }
-                  return retryResponse;
+              return resourceInstaller
+                .createWriteTargetIfNeeded(indexOptions, indexNames, namespace)
+                .then(() => {
+                  return clusterClient.bulk(requestWithDefaultParameters).then((retryResponse) => {
+                    if (retryResponse.body.errors) {
+                      throw new ResponseError(retryResponse);
+                    }
+                    return retryResponse;
+                  });
                 });
-              });
             }
             const error = new ResponseError(response);
             throw error;
@@ -123,64 +145,5 @@ export class RuleDataClient implements IRuleDataClient {
         });
       },
     };
-  }
-
-  async createWriteTargetIfNeeded({ namespace }: { namespace?: string }) {
-    const alias = getNamespacedAlias({ alias: this.indexName, namespace });
-
-    const clusterClient = await this.getClusterClient();
-
-    const { body: indicesExist } = await clusterClient.indices.exists({
-      index: `${alias}-*`,
-      allow_no_indices: false,
-    });
-
-    const concreteIndexName = `${alias}-000001`;
-
-    if (!indicesExist) {
-      try {
-        await clusterClient.indices.create({
-          index: concreteIndexName,
-          body: {
-            aliases: {
-              [alias]: {
-                is_write_index: true,
-              },
-            },
-          },
-        });
-      } catch (err) {
-        // If the index already exists and it's the write index for the alias,
-        // something else created it so suppress the error. If it's not the write
-        // index, that's bad, throw an error.
-        if (err?.meta?.body?.error?.type === 'resource_already_exists_exception') {
-          const { body: existingIndices } = await clusterClient.indices.get({
-            index: concreteIndexName,
-          });
-          if (!existingIndices[concreteIndexName]?.aliases?.[alias]?.is_write_index) {
-            throw Error(
-              `Attempted to create index: ${concreteIndexName} as the write index for alias: ${alias}, but the index already exists and is not the write index for the alias`
-            );
-          }
-        } else {
-          throw err;
-        }
-      }
-    } else {
-      // If we find indices matching the pattern, then we expect one of them to be the write index for the alias.
-      // Throw an error if none of them are the write index.
-      const { body: aliasesResponse } = await clusterClient.indices.getAlias({
-        index: `${alias}-*`,
-      });
-      if (
-        !Object.entries(aliasesResponse).some(
-          ([_, aliasesObject]) => aliasesObject.aliases[alias]?.is_write_index
-        )
-      ) {
-        throw Error(
-          `Indices matching pattern ${alias}-* exist but none are set as the write index for alias ${alias}`
-        );
-      }
-    }
   }
 }
