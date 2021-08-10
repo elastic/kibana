@@ -47,5 +47,5 @@ export const config: PluginConfigDescriptor<ConfigType> = {
 
 export { ConfigType, Plugin, PluginSetup, PluginStart };
 export { AppClient };
-
 export type { AppRequestContext } from './types';
+export { EndpointError } from './endpoint/errors';

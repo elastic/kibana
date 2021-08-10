@@ -86,6 +86,10 @@ describe('policy_config and licenses', () => {
       // behavior protection
       policy.windows.behavior_protection.mode = ProtectionModes.prevent;
       policy.windows.behavior_protection.supported = true;
+      policy.mac.behavior_protection.mode = ProtectionModes.prevent;
+      policy.mac.behavior_protection.supported = true;
+      policy.linux.behavior_protection.mode = ProtectionModes.prevent;
+      policy.linux.behavior_protection.supported = true;
 
       const valid = isEndpointPolicyValidForLicense(policy, Platinum);
       expect(valid).toBeTruthy();
@@ -102,6 +106,10 @@ describe('policy_config and licenses', () => {
       // behavior protection
       policy.windows.popup.behavior_protection.enabled = true;
       policy.windows.behavior_protection.supported = true;
+      policy.mac.popup.behavior_protection.enabled = true;
+      policy.mac.behavior_protection.supported = true;
+      policy.linux.popup.behavior_protection.enabled = true;
+      policy.linux.behavior_protection.supported = true;
       const valid = isEndpointPolicyValidForLicense(policy, Platinum);
       expect(valid).toBeTruthy();
     });
@@ -187,6 +195,8 @@ describe('policy_config and licenses', () => {
       it('blocks behavior_protection to be turned on for Gold and below licenses', () => {
         const policy = policyFactoryWithoutPaidFeatures();
         policy.windows.behavior_protection.mode = ProtectionModes.prevent;
+        policy.mac.behavior_protection.mode = ProtectionModes.prevent;
+        policy.linux.behavior_protection.mode = ProtectionModes.prevent;
 
         let valid = isEndpointPolicyValidForLicense(policy, Gold);
         expect(valid).toBeFalsy();
@@ -197,6 +207,8 @@ describe('policy_config and licenses', () => {
       it('blocks behavior_protection notification to be turned on for Gold and below licenses', () => {
         const policy = policyFactoryWithoutPaidFeatures();
         policy.windows.popup.behavior_protection.enabled = true;
+        policy.mac.popup.behavior_protection.enabled = true;
+        policy.linux.popup.behavior_protection.enabled = true;
         let valid = isEndpointPolicyValidForLicense(policy, Gold);
         expect(valid).toBeFalsy();
 
@@ -207,6 +219,8 @@ describe('policy_config and licenses', () => {
       it('allows behavior_protection notification message changes with a Platinum license', () => {
         const policy = policyFactory();
         policy.windows.popup.behavior_protection.message = 'BOOM';
+        policy.mac.popup.behavior_protection.message = 'BOOM';
+        policy.linux.popup.behavior_protection.message = 'BOOM';
         const valid = isEndpointPolicyValidForLicense(policy, Platinum);
         expect(valid).toBeTruthy();
       });
@@ -214,6 +228,8 @@ describe('policy_config and licenses', () => {
       it('blocks behavior_protection notification message changes for Gold and below licenses', () => {
         const policy = policyFactory();
         policy.windows.popup.behavior_protection.message = 'BOOM';
+        policy.mac.popup.behavior_protection.message = 'BOOM';
+        policy.linux.popup.behavior_protection.message = 'BOOM';
         let valid = isEndpointPolicyValidForLicense(policy, Gold);
         expect(valid).toBeFalsy();
 
@@ -275,11 +291,23 @@ describe('policy_config and licenses', () => {
       policy.windows.behavior_protection.mode = ProtectionModes.detect;
       policy.windows.popup.behavior_protection.enabled = false;
       policy.windows.popup.behavior_protection.message = popupMessage;
+      policy.mac.behavior_protection.mode = ProtectionModes.detect;
+      policy.mac.popup.behavior_protection.enabled = false;
+      policy.mac.popup.behavior_protection.message = popupMessage;
+      policy.linux.behavior_protection.mode = ProtectionModes.detect;
+      policy.linux.popup.behavior_protection.enabled = false;
+      policy.linux.popup.behavior_protection.message = popupMessage;
 
       const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
       expect(retPolicy.windows.behavior_protection.mode).toEqual(ProtectionModes.detect);
       expect(retPolicy.windows.popup.behavior_protection.enabled).toBeFalsy();
       expect(retPolicy.windows.popup.behavior_protection.message).toEqual(popupMessage);
+      expect(retPolicy.mac.behavior_protection.mode).toEqual(ProtectionModes.detect);
+      expect(retPolicy.mac.popup.behavior_protection.enabled).toBeFalsy();
+      expect(retPolicy.mac.popup.behavior_protection.message).toEqual(popupMessage);
+      expect(retPolicy.linux.behavior_protection.mode).toEqual(ProtectionModes.detect);
+      expect(retPolicy.linux.popup.behavior_protection.enabled).toBeFalsy();
+      expect(retPolicy.linux.popup.behavior_protection.message).toEqual(popupMessage);
     });
 
     it('resets Platinum-paid fields for lower license tiers', () => {
@@ -349,6 +377,8 @@ describe('policy_config and licenses', () => {
       const policy = policyFactory(); // what we will modify, and should be reset
       const popupMessage = 'WOOP WOOP';
       policy.windows.popup.behavior_protection.message = popupMessage;
+      policy.mac.popup.behavior_protection.message = popupMessage;
+      policy.linux.popup.behavior_protection.message = popupMessage;
 
       const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Gold);
 
@@ -363,6 +393,30 @@ describe('policy_config and licenses', () => {
       // need to invert the test, since it could be either value
       expect(['', DefaultPolicyNotificationMessage]).toContain(
         retPolicy.windows.popup.behavior_protection.message
+      );
+
+      expect(retPolicy.mac.behavior_protection.mode).toEqual(defaults.mac.behavior_protection.mode);
+      expect(retPolicy.mac.popup.behavior_protection.enabled).toEqual(
+        defaults.mac.popup.behavior_protection.enabled
+      );
+      expect(retPolicy.mac.popup.behavior_protection.message).not.toEqual(popupMessage);
+
+      // need to invert the test, since it could be either value
+      expect(['', DefaultPolicyNotificationMessage]).toContain(
+        retPolicy.mac.popup.behavior_protection.message
+      );
+
+      expect(retPolicy.linux.behavior_protection.mode).toEqual(
+        defaults.linux.behavior_protection.mode
+      );
+      expect(retPolicy.linux.popup.behavior_protection.enabled).toEqual(
+        defaults.linux.popup.behavior_protection.enabled
+      );
+      expect(retPolicy.linux.popup.behavior_protection.message).not.toEqual(popupMessage);
+
+      // need to invert the test, since it could be either value
+      expect(['', DefaultPolicyNotificationMessage]).toContain(
+        retPolicy.linux.popup.behavior_protection.message
       );
     });
 
@@ -413,11 +467,19 @@ describe('policy_config and licenses', () => {
       const defaults = policyFactoryWithoutPaidFeatures(); // reference
       const policy = policyFactory(); // what we will modify, and should be reset
       policy.windows.behavior_protection.supported = true;
+      policy.mac.behavior_protection.supported = true;
+      policy.linux.behavior_protection.supported = true;
 
       const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Gold);
 
       expect(retPolicy.windows.behavior_protection.supported).toEqual(
         defaults.windows.behavior_protection.supported
+      );
+      expect(retPolicy.mac.behavior_protection.supported).toEqual(
+        defaults.mac.behavior_protection.supported
+      );
+      expect(retPolicy.linux.behavior_protection.supported).toEqual(
+        defaults.linux.behavior_protection.supported
       );
     });
 
@@ -425,11 +487,19 @@ describe('policy_config and licenses', () => {
       const defaults = policyFactoryWithSupportedFeatures(); // reference
       const policy = policyFactory(); // what we will modify, and should be reset
       policy.windows.behavior_protection.supported = false;
+      policy.mac.behavior_protection.supported = false;
+      policy.linux.behavior_protection.supported = false;
 
       const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
 
       expect(retPolicy.windows.behavior_protection.supported).toEqual(
         defaults.windows.behavior_protection.supported
+      );
+      expect(retPolicy.mac.behavior_protection.supported).toEqual(
+        defaults.mac.behavior_protection.supported
+      );
+      expect(retPolicy.linux.behavior_protection.supported).toEqual(
+        defaults.linux.behavior_protection.supported
       );
     });
   });

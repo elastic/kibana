@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Writable } from 'stream';
 import type { IRouter, KibanaRequest, RequestHandlerContext } from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DataPluginStart } from 'src/plugins/data/server/plugin';
@@ -76,7 +77,8 @@ export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload
 export type RunTaskFn<TaskPayloadType = BasePayload> = (
   jobId: string,
   payload: ReportTaskParams<TaskPayloadType>['payload'],
-  cancellationToken: CancellationToken
+  cancellationToken: CancellationToken,
+  stream: Writable
 ) => Promise<TaskRunResult>;
 
 export type CreateJobFnFactory<CreateJobFnType> = (

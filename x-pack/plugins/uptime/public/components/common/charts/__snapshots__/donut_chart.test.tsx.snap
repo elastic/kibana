@@ -198,6 +198,9 @@ exports[`DonutChart component passes correct props without errors for valid prop
           },
           "legend": Object {
             "horizontalHeight": 64,
+            "labelOptions": Object {
+              "maxLines": 1,
+            },
             "margin": 0,
             "spacingBuffer": 10,
             "verticalWidth": 200,

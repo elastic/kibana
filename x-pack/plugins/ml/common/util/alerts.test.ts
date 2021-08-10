@@ -90,6 +90,11 @@ describe('getResultJobsHealthRuleConfig', () => {
       mml: {
         enabled: true,
       },
+      delayedData: {
+        docsCount: 1,
+        enabled: true,
+        timeInterval: null,
+      },
     });
   });
   test('returns config with overridden values based on provided configuration', () => {
@@ -97,6 +102,10 @@ describe('getResultJobsHealthRuleConfig', () => {
       getResultJobsHealthRuleConfig({
         mml: { enabled: false },
         errorMessages: { enabled: true },
+        delayedData: {
+          enabled: true,
+          docsCount: 1,
+        },
       })
     ).toEqual({
       datafeed: {
@@ -104,6 +113,11 @@ describe('getResultJobsHealthRuleConfig', () => {
       },
       mml: {
         enabled: false,
+      },
+      delayedData: {
+        docsCount: 1,
+        enabled: true,
+        timeInterval: null,
       },
     });
   });
