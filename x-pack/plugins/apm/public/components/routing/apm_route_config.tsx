@@ -21,15 +21,6 @@ import { settings } from './settings';
  */
 const apmRoutes = route([
   {
-    path: '/',
-    element: (
-      <Breadcrumb title="APM" href="/">
-        <Outlet />
-      </Breadcrumb>
-    ),
-    children: [settings, serviceDetail, home],
-  },
-  {
     path: '/link-to/transaction/:transactionId',
     element: <TransactionLink />,
     params: t.intersection([
@@ -62,6 +53,15 @@ const apmRoutes = route([
         }),
       }),
     ]),
+  },
+  {
+    path: '/',
+    element: (
+      <Breadcrumb title="APM" href="/">
+        <Outlet />
+      </Breadcrumb>
+    ),
+    children: [settings, serviceDetail, home],
   },
 ] as const);
 

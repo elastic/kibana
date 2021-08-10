@@ -45,10 +45,13 @@ export interface EditorFrameProps {
   showNoDataPopover: () => void;
 }
 
+export type VisualizationMap = Record<string, Visualization>;
+export type DatasourceMap = Record<string, Datasource>;
+
 export interface EditorFrameInstance {
   EditorFrameContainer: (props: EditorFrameProps) => React.ReactElement;
-  datasourceMap: Record<string, Datasource>;
-  visualizationMap: Record<string, Visualization>;
+  datasourceMap: DatasourceMap;
+  visualizationMap: VisualizationMap;
 }
 
 export interface EditorFrameSetup {
@@ -251,6 +254,11 @@ export interface Datasource<T = unknown, P = unknown> {
    * The frame calls this function to display warnings about visualization
    */
   getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
+}
+
+export interface DatasourceFixAction<T> {
+  label: string;
+  newState: (frame: FrameDatasourceAPI) => Promise<T>;
 }
 
 /**
@@ -513,10 +521,11 @@ export interface FramePublicAPI {
    * If accessing, make sure to check whether expected columns actually exist.
    */
   activeData?: Record<string, Datatable>;
+}
+export interface FrameDatasourceAPI extends FramePublicAPI {
   dateRange: DateRange;
   query: Query;
   filters: Filter[];
-  searchSessionId: string;
 }
 
 /**
@@ -536,7 +545,7 @@ export interface VisualizationType {
    */
   label: string;
   /**
-   * Optional label used in chart type search if chart switcher is expanded and for tooltips
+   * Optional label used in visualization type search if chart switcher is expanded and for tooltips
    */
   fullLabel?: string;
   /**

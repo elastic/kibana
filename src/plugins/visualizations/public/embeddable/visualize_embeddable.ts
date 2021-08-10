@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
-  IIndexPattern,
+  IndexPattern,
   TimeRange,
   Query,
   esFilters,
@@ -47,7 +47,7 @@ const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
-  indexPatterns?: IIndexPattern[];
+  indexPatterns?: IndexPattern[];
   editPath: string;
   editUrl: string;
   capabilities: { visualizeSave: boolean; dashboardSave: boolean };
@@ -69,7 +69,7 @@ export interface VisualizeOutput extends EmbeddableOutput {
   editPath: string;
   editApp: string;
   editUrl: string;
-  indexPatterns?: IIndexPattern[];
+  indexPatterns?: IndexPattern[];
   visTypeName: string;
 }
 
@@ -384,6 +384,15 @@ export class VisualizeEmbeddable
   };
 
   private async updateHandler() {
+    const context = {
+      type: 'visualization',
+      name: this.vis.type.title,
+      id: this.vis.id ?? 'an_unsaved_vis',
+      description: this.vis.title || this.input.title || this.vis.type.name,
+      url: this.output.editUrl,
+      parent: this.parent?.getInput().executionContext,
+    };
+
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
         timeRange: this.timeRange,
@@ -394,13 +403,7 @@ export class VisualizeEmbeddable
       syncColors: this.input.syncColors,
       uiState: this.vis.uiState,
       inspectorAdapters: this.inspectorAdapters,
-      executionContext: this.deps.start().core.executionContext.create({
-        type: 'visualization',
-        name: this.vis.type.name,
-        id: this.vis.id ?? 'an_unsaved_vis',
-        description: this.vis.title ?? this.vis.type.title,
-        url: this.output.editUrl,
-      }),
+      executionContext: context,
     };
     if (this.abortController) {
       this.abortController.abort();

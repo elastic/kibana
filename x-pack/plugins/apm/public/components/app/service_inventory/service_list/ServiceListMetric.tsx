@@ -5,17 +5,42 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
+import { Coordinate } from '../../../../../typings/timeseries';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 
 export function ServiceListMetric({
   color,
   series,
   valueLabel,
+  comparisonSeries,
+  hideSeries = false,
 }: {
   color: 'euiColorVis1' | 'euiColorVis0' | 'euiColorVis7';
-  series?: Array<{ x: number; y: number | null }>;
+  series?: Coordinate[];
+  comparisonSeries?: Coordinate[];
   valueLabel: React.ReactNode;
+  hideSeries?: boolean;
 }) {
-  return <SparkPlot valueLabel={valueLabel} series={series} color={color} />;
+  if (!hideSeries) {
+    return (
+      <SparkPlot
+        valueLabel={valueLabel}
+        series={series}
+        color={color}
+        comparisonSeries={comparisonSeries}
+      />
+    );
+  }
+
+  return (
+    <EuiFlexGroup gutterSize="none" alignItems="flexEnd">
+      <EuiFlexItem>
+        <EuiText size="s" textAlign="right">
+          {valueLabel}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 }

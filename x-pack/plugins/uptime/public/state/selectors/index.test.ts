@@ -109,6 +109,11 @@ describe('state selectors', () => {
     },
     journeys: {},
     networkEvents: {},
+    synthetics: {
+      blocks: {},
+      cacheSize: 0,
+      hitCount: [],
+    },
   };
 
   it('selects base path from state', () => {

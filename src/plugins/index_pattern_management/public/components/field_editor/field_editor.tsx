@@ -33,16 +33,15 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
 import {
   getEnabledScriptingLanguages,
   getDeprecatedScriptingLanguages,
   getSupportedScriptingLanguages,
 } from '../../scripting_languages';
 import {
-  IndexPatternField,
-  FieldFormatInstanceType,
   IndexPattern,
-  IFieldType,
+  IndexPatternField,
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
   DataPublicPluginStart,
@@ -145,7 +144,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       scriptingLangs: [],
       fieldTypes: [],
       fieldTypeFormats: [],
-      existingFieldNames: indexPattern.fields.getAll().map((f: IFieldType) => f.name),
+      existingFieldNames: indexPattern.fields.getAll().map((f: IndexPatternField) => f.name),
       fieldFormatId: undefined,
       fieldFormatParams: {},
       showScriptingHelp: false,

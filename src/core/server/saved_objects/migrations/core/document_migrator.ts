@@ -65,7 +65,7 @@ import { MigrationLogger } from './migration_logger';
 import { TransformSavedObjectDocumentError } from '.';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectMigrationFn, SavedObjectMigrationMap } from '../types';
-import { DEFAULT_NAMESPACE_STRING } from '../../service/lib/utils';
+import { DEFAULT_NAMESPACE_STRING, SavedObjectsUtils } from '../../service/lib/utils';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 
 const DEFAULT_MINIMUM_CONVERT_VERSION = '8.0.0';
@@ -556,7 +556,7 @@ function convertNamespaceType(doc: SavedObjectUnsanitizedDoc) {
   }
 
   const { id: originId, type } = otherAttrs;
-  const id = deterministicallyRegenerateObjectId(namespace, type, originId!);
+  const id = SavedObjectsUtils.getConvertedObjectId(namespace, type, originId!);
   if (namespace !== undefined) {
     const legacyUrlAlias: SavedObjectUnsanitizedDoc<LegacyUrlAlias> = {
       id: `${namespace}:${type}:${originId}`,
@@ -616,7 +616,9 @@ function getReferenceTransforms(typeRegistry: ISavedObjectTypeRegistry): Transfo
             references: references.map(({ type, id, ...attrs }) => ({
               ...attrs,
               type,
-              id: types.has(type) ? deterministicallyRegenerateObjectId(namespace, type, id) : id,
+              id: types.has(type)
+                ? SavedObjectsUtils.getConvertedObjectId(namespace, type, id)
+                : id,
             })),
           },
           additionalDocs: [],

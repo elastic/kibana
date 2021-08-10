@@ -74,6 +74,7 @@ const MONITORING_DATASETS = [
   'elastic_agent.packetbeat',
   'elastic_agent.endpoint_security',
   'elastic_agent.auditbeat',
+  'elastic_agent.heartbeat',
 ];
 
 class AgentPolicyService {
@@ -333,14 +334,30 @@ class AgentPolicyService {
       withPackagePolicies = false,
     } = options;
 
-    const agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({
+    const baseFindParams = {
       type: SAVED_OBJECT_TYPE,
       sortField,
       sortOrder,
       page,
       perPage,
-      filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
-    });
+    };
+    const filter = kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined;
+    let agentPoliciesSO;
+    try {
+      agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({ ...baseFindParams, filter });
+    } catch (e) {
+      const isBadRequest = e.output?.statusCode === 400;
+      const isKQLSyntaxError = e.message?.startsWith('KQLSyntaxError');
+      if (isBadRequest && !isKQLSyntaxError) {
+        // fall back to simple search if the kuery is just a search term i.e not KQL
+        agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({
+          ...baseFindParams,
+          search: kuery,
+        });
+      } else {
+        throw e;
+      }
+    }
 
     const agentPolicies = await Promise.all(
       agentPoliciesSO.saved_objects.map(async (agentPolicySO) => {
