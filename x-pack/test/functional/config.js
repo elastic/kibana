@@ -384,6 +384,17 @@ export default async function ({ readConfigFile }) {
           },
         },
 
+        test_logs_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['logs-*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
         geoall_data_writer: {
           elasticsearch: {
             indices: [
