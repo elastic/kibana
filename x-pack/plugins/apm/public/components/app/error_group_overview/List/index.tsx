@@ -17,7 +17,7 @@ import { truncate, unit } from '../../../../utils/style';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { APMQueryParams } from '../../../shared/Links/url_helpers';
-import { ManagedTable } from '../../../shared/managed_table';
+import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 
 const GroupIdLink = euiStyled(ErrorDetailLink)`
@@ -52,8 +52,8 @@ interface Props {
 function ErrorGroupList({ items, serviceName }: Props) {
   const { urlParams } = useUrlParams();
 
-  const columns = useMemo(
-    () => [
+  const columns = useMemo(() => {
+    return [
       {
         name: (
           <>
@@ -80,7 +80,7 @@ function ErrorGroupList({ items, serviceName }: Props) {
         field: 'groupId',
         sortable: false,
         width: `${unit * 6}px`,
-        render: (groupId: string) => {
+        render: (_, { groupId }) => {
           return (
             <GroupIdLink serviceName={serviceName} errorGroupId={groupId}>
               {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
@@ -94,7 +94,7 @@ function ErrorGroupList({ items, serviceName }: Props) {
         }),
         field: 'type',
         sortable: false,
-        render: (type: string) => {
+        render: (_, { type }) => {
           return (
             <ErrorLink
               title={type}
@@ -121,18 +121,18 @@ function ErrorGroupList({ items, serviceName }: Props) {
         field: 'message',
         sortable: false,
         width: '50%',
-        render: (message: string, item: ErrorGroupItem) => {
+        render: (_, item: ErrorGroupItem) => {
           return (
             <MessageAndCulpritCell>
               <EuiToolTip
                 id="error-message-tooltip"
-                content={message || NOT_AVAILABLE_LABEL}
+                content={item.message || NOT_AVAILABLE_LABEL}
               >
                 <MessageLink
                   serviceName={serviceName}
                   errorGroupId={item.groupId}
                 >
-                  {message || NOT_AVAILABLE_LABEL}
+                  {item.message || NOT_AVAILABLE_LABEL}
                 </MessageLink>
               </EuiToolTip>
               <br />
@@ -151,8 +151,8 @@ function ErrorGroupList({ items, serviceName }: Props) {
         field: 'handled',
         sortable: false,
         align: 'right',
-        render: (isUnhandled: boolean) =>
-          isUnhandled === false && (
+        render: (_, { handled }) =>
+          handled === false && (
             <EuiBadge color="warning">
               {i18n.translate('xpack.apm.errorsTable.unhandledLabel', {
                 defaultMessage: 'Unhandled',
@@ -167,8 +167,10 @@ function ErrorGroupList({ items, serviceName }: Props) {
         field: 'occurrenceCount',
         sortable: true,
         dataType: 'number',
-        render: (value?: number) =>
-          value ? numeral(value).format('0.[0]a') : NOT_AVAILABLE_LABEL,
+        render: (_, { occurrenceCount }) =>
+          occurrenceCount
+            ? numeral(occurrenceCount).format('0.[0]a')
+            : NOT_AVAILABLE_LABEL,
       },
       {
         field: 'latestOccurrenceAt',
@@ -180,16 +182,15 @@ function ErrorGroupList({ items, serviceName }: Props) {
           }
         ),
         align: 'right',
-        render: (value?: number) =>
-          value ? (
-            <TimestampTooltip time={value} timeUnit="minutes" />
+        render: (_, { latestOccurrenceAt }) =>
+          latestOccurrenceAt ? (
+            <TimestampTooltip time={latestOccurrenceAt} timeUnit="minutes" />
           ) : (
             NOT_AVAILABLE_LABEL
           ),
       },
-    ],
-    [serviceName, urlParams]
-  );
+    ] as Array<ITableColumn<ErrorGroupItem>>;
+  }, [serviceName, urlParams]);
 
   return (
     <ManagedTable
