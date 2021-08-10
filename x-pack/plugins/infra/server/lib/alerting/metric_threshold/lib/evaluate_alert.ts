@@ -8,10 +8,7 @@
 import { mapValues, first, last, isNaN } from 'lodash';
 import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
-import {
-  isTooManyBucketsPreviewException,
-  TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
-} from '../../../../../common/alerting/metrics';
+import { isTooManyBucketsPreviewException } from '../../../../../common/alerting/metrics';
 import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
 import { roundTimestamp } from '../../../../utils/round_timestamp';
 import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
