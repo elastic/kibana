@@ -400,9 +400,10 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             }}
             truncate={state?.legend.truncate ?? true}
             onTruncateLegendChange={() => {
+              const current = state?.legend.truncate ?? true;
               setState({
                 ...state,
-                legend: { ...state.legend, truncate: !state.legend.truncate },
+                legend: { ...state.legend, truncate: !current },
               });
             }}
             onPositionChange={(id) => {

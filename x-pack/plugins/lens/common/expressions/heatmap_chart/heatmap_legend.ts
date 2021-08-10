@@ -70,6 +70,7 @@ export const heatmapLegendConfig: ExpressionFunctionDefinition<
     },
     truncate: {
       types: ['boolean'],
+      default: true,
       help: i18n.translate('xpack.lens.heatmapChart.legend.truncate.help', {
         defaultMessage: 'Specifies whether or not the legend items should be truncated.',
       }),

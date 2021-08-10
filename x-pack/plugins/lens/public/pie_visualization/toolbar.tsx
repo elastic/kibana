@@ -222,9 +222,10 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         }}
         truncate={layer.truncateLegend ?? true}
         onTruncateLegendChange={() => {
+          const current = layer.truncateLegend ?? true;
           setState({
             ...state,
-            layers: [{ ...layer, truncateLegend: !layer.truncateLegend }],
+            layers: [{ ...layer, truncateLegend: !current }],
           });
         }}
         maxLines={layer?.legendMaxLines}

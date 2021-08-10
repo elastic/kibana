@@ -215,7 +215,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
       <EuiFormRow
         display="columnCompressedSwitch"
         label={i18n.translate('xpack.lens.shared.truncateLegend', {
-          defaultMessage: 'Truncate',
+          defaultMessage: 'Truncate legend text',
         })}
       >
         <TooltipWrapper
@@ -230,12 +230,12 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
           <EuiSwitch
             compressed
             label={i18n.translate('xpack.lens.shared.truncateLegend', {
-              defaultMessage: 'Truncate',
+              defaultMessage: 'Truncate legend text',
             })}
-            data-test-subj="lens-legend-all-lines-switch"
+            data-test-subj="lens-legend-truncate-switch"
             showLabel={false}
             disabled={mode === 'hide'}
-            checked={!!truncate}
+            checked={truncate ?? true}
             onChange={onTruncateLegendChange}
           />
         </TooltipWrapper>

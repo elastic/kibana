@@ -147,6 +147,9 @@ Object {
                     "bottom",
                   ],
                   "showSingleSeries": Array [],
+                  "truncate": Array [
+                    true,
+                  ],
                   "verticalAlignment": Array [],
                 },
                 "function": "lens_xy_legendConfig",

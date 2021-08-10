@@ -116,6 +116,7 @@ export const legendConfig: ExpressionFunctionDefinition<
     },
     truncate: {
       types: ['boolean'],
+      default: true,
       help: i18n.translate('xpack.lens.xyChart.truncate.help', {
         defaultMessage: 'Specifies whether the legend items will be truncated or not',
       }),
