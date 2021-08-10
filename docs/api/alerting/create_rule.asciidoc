@@ -18,11 +18,13 @@ WARNING: This API supports <<token-api-authentication>> only.
 [[create-rule-api-path-params]]
 ==== Path parameters
 
-`<id>`::
-  (Optional, string) Specifies a UUID v1 or v4 to use instead of a randomly generated ID.
-
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+deprecated::[7.15.0,"Ability to specify `<id>` as a path parameter is deprecated in 7.15.0. As part of the {kibana-ref}/sharing-saved-objects.html[Sharing Saved Objects] effort, all rule IDs will be regenerated in 8.0.0. Because we cannot guarantee that a rule created with a specified ID will retain that ID, we are deprecating this path parameter."]
+
+`<id>`::
+  (Optional, string) Specifies a UUID v1 or v4 to use instead of a randomly generated ID.
 
 [[create-rule-api-request-body]]
 ==== Request body
