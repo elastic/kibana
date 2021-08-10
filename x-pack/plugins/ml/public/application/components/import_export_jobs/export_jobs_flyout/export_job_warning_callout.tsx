@@ -33,7 +33,7 @@ export const ExportJobDependenciesWarningCallout: FC<Props> = ({ jobs: allJobs }
       >
         <FormattedMessage
           id="xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.calendarDependencies"
-          defaultMessage="When importing jobs into a new environment, calendars and filters which are relied upon by jobs will need to be recreated."
+          defaultMessage="When you export jobs, calendars and filter lists are not included. You must create the filter lists before you import jobs; otherwise, the import fails. If you want the new jobs to continue to ignore scheduled events, you must create the calendars."
         />
         <EuiSpacer />
 
@@ -65,13 +65,13 @@ export const ExportJobDependenciesWarningCallout: FC<Props> = ({ jobs: allJobs }
             aria-label={i18n.translate(
               'xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.jobUsingFiltersAria',
               {
-                defaultMessage: 'Jobs using filters',
+                defaultMessage: 'Jobs using filter lists',
               }
             )}
             buttonContent={
               <FormattedMessage
                 id="xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.jobUsingFiltersButton"
-                defaultMessage="Jobs using filters"
+                defaultMessage="Jobs using filter lists"
               />
             }
           >
@@ -120,7 +120,7 @@ const FilterJobList: FC<{ jobs: JobDependencies }> = ({ jobs }) => (
               {filterIds.length > 0 && (
                 <FormattedMessage
                   id="xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.filterList"
-                  defaultMessage="{num, plural, one {filter} other {filters}}: {filters}"
+                  defaultMessage="Filter {num, plural, one {list} other {lists}}: {filters}"
                   values={{ num: filterIds.length, filters: filterIds.join(', ') }}
                 />
               )}
@@ -139,7 +139,7 @@ function getTitle(jobs: JobDependencies, calendarCount: number, filterCount: num
       'xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.calendarOnlyTitle',
       {
         defaultMessage:
-          '{jobCount, plural, one {# selected job has} other {# selected jobs have}} dependencies on {calendarCount, plural, one {a calendar} other {calendars}}',
+          '{jobCount, plural, one {# selected job uses} other {# selected jobs use}} {calendarCount, plural, one {a calendar} other {calendars}}',
         values: { jobCount: jobs.length, calendarCount },
       }
     );
@@ -150,7 +150,7 @@ function getTitle(jobs: JobDependencies, calendarCount: number, filterCount: num
       'xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.filterOnlyTitle',
       {
         defaultMessage:
-          '{jobCount, plural, one {# selected job has} other {# selected jobs have}} dependencies on {filterCount, plural, one {a filter} other {filters}}',
+          '{jobCount, plural, one {# selected job uses} other {# selected jobs use}} {filterCount, plural, one {a filter list} other {filter lists}}',
         values: { jobCount: jobs.length, filterCount },
       }
     );
@@ -160,7 +160,7 @@ function getTitle(jobs: JobDependencies, calendarCount: number, filterCount: num
     'xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.filterAndCalendarTitle',
     {
       defaultMessage:
-        '{jobCount, plural, one {# selected job has} other {# selected jobs have}} dependencies on filters and calendars',
+        '{jobCount, plural, one {# selected job uses} other {# selected jobs use}} filter lists and calendars',
       values: { jobCount: jobs.length },
     }
   );
