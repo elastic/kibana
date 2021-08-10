@@ -9,8 +9,7 @@ import { ALERT_OWNER, RULE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import { from } from 'rxjs';
 import {
-  // TODO: Undo comment in fix here https://github.com/elastic/kibana/pull/107857
-  // isValidFeatureId,
+  isValidFeatureId,
   mapConsumerToIndexName,
   AlertConsumers,
 } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
@@ -50,9 +49,7 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
     search: (request, options, deps) => {
       const factoryQueryType = request.factoryQueryType;
       const entityType = request.entityType;
-      let alertConsumers = request.alertConsumers;
-      // TODO: Remove in fix here https://github.com/elastic/kibana/pull/107857
-      alertConsumers = undefined;
+      const alertConsumers = request.alertConsumers;
 
       if (factoryQueryType == null) {
         throw new Error('factoryQueryType is required');
@@ -61,9 +58,7 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
       const queryFactory: TimelineFactory<T> = timelineFactory[factoryQueryType];
 
       if (alertConsumers != null && entityType != null && entityType === EntityType.ALERTS) {
-        // TODO: Thist won't be hit since alertConsumers = undefined
-        // TODO: remove in fix here https://github.com/elastic/kibana/pull/107857
-        const allFeatureIdsValid = null; // alertConsumers.every((id) => isValidFeatureId(id));
+        const allFeatureIdsValid = alertConsumers.every((id) => isValidFeatureId(id));
 
         if (!allFeatureIdsValid) {
           throw new Error('An invalid alerts consumer feature id was provided');
