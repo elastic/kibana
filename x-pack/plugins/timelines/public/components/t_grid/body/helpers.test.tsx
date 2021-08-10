@@ -14,7 +14,11 @@ import {
   mapSortDirectionToDirection,
   mapSortingColumns,
   stringifyEvent,
+  addBuildingBlockStyle,
 } from './helpers';
+
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
+import { mockDnsEvent } from '../../../mock';
 
 describe('helpers', () => {
   describe('stringifyEvent', () => {
@@ -386,6 +390,34 @@ describe('helpers', () => {
           fieldName: 'non-allowlisted',
         })
       ).toBe(false);
+    });
+  });
+
+  describe('addBuildingBlockStyle', () => {
+    const THEME = { eui: euiThemeVars, darkMode: false };
+
+    test('it calls `setCellProps` with background color when event is a building block', () => {
+      const mockedSetCellProps = jest.fn();
+      const ecs = {
+        ...mockDnsEvent,
+        ...{ signal: { rule: { building_block_type: ['default'] } } },
+      };
+
+      addBuildingBlockStyle(ecs, THEME, mockedSetCellProps);
+
+      expect(mockedSetCellProps).toBeCalledWith({
+        style: {
+          backgroundColor: euiThemeVars.euiColorHighlight,
+        },
+      });
+    });
+
+    test('it call `setCellProps` reseting the background color when event is not a building block', () => {
+      const mockedSetCellProps = jest.fn();
+
+      addBuildingBlockStyle(mockDnsEvent, THEME, mockedSetCellProps);
+
+      expect(mockedSetCellProps).toBeCalledWith({ style: { backgroundColor: 'inherit' } });
     });
   });
 });
