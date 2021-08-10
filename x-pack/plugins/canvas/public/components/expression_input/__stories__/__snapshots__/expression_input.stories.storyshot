@@ -27,6 +27,7 @@ exports[`Storyshots components/ExpressionInput default 1`] = `
             onMouseOver={[Function]}
           >
             <div
+              aria-label="Code Editor"
               className="kibanaCodeEditor__keyboardHint"
               data-test-subj="codeEditorHint"
               id="generated-id"

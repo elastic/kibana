@@ -33,6 +33,7 @@ function createEditorInstance() {
       }
     }),
     focus: jest.fn(),
+    onDidBlurEditorText: jest.fn(),
     onKeyDown: jest.fn((listener) => {
       keyDownListeners.push(listener);
     }),
