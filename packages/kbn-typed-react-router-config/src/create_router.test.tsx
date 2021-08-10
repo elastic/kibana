@@ -276,6 +276,7 @@ describe('createRouter', () => {
 
     it('applies defaults', () => {
       const href = router.link('/traces', {
+        // @ts-ignore
         query: {
           rangeTo: 'now',
           aggregationType: 'avg',
