@@ -14,61 +14,66 @@ import { LiveQueryForm } from '../../live_queries/form';
 import { queryClient } from '../../query_client';
 
 interface OsqueryActionProps {
-  hostId?: string | undefined;
+  agentId?: string | undefined;
 }
 
-const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ hostId }) => {
-  const [agentId, setAgentId] = useState<string>();
-  const { indexPatterns, search } = useKibana().services.data;
+const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ agentId }) => {
+  
+  const { http } = useKibana().services;
 
   useEffect(() => {
-    if (hostId) {
-      const findAgent = async () => {
-        const searchSource = await search.searchSource.create();
-        const indexPattern = await indexPatterns.find('.fleet-agents');
 
-        searchSource.setField('index', indexPattern[0]);
-        searchSource.setField('filter', [
-          {
-            meta: {
-              alias: null,
-              disabled: false,
-              negate: false,
-              key: 'local_metadata.host.id',
-              value: hostId,
-            },
-            query: {
-              match_phrase: {
-                'local_metadata.host.id': hostId,
-              },
-            },
-          },
-          {
-            meta: {
-              alias: null,
-              disabled: false,
-              negate: false,
-              key: 'active',
-              value: 'true',
-            },
-            query: {
-              match_phrase: {
-                active: 'true',
-              },
-            },
-          },
-        ]);
+    // if (hostId) {
+    //   const findAgent = async () => {
+    //     const searchSource = await search.searchSource.create();
+    //     const indexPattern = await indexPatterns.find('.fleet-agents');
 
-        const response = await searchSource.fetch$().toPromise();
+    //     searchSource.setField('index', indexPattern[0]);
+    //     searchSource.setField('filter', [
+    //       {
+    //         meta: {
+    //           alias: null,
+    //           disabled: false,
+    //           negate: false,
+    //           key: 'local_metadata.host.id',
+    //           value: hostId,
+    //         },
+    //         query: {
+    //           match_phrase: {
+    //             'local_metadata.host.id': hostId,
+    //           },
+    //         },
+    //       },
+    //       {
+    //         meta: {
+    //           alias: null,
+    //           disabled: false,
+    //           negate: false,
+    //           key: 'active',
+    //           value: 'true',
+    //         },
+    //         query: {
+    //           match_phrase: {
+    //             active: 'true',
+    //           },
+    //         },
+    //       },
+    //     ]);
 
-        if (response.rawResponse.hits.hits.length && response.rawResponse.hits.hits[0]._id) {
-          setAgentId(response.rawResponse.hits.hits[0]._id);
-        }
-      };
+    //     const response = await searchSource.fetch$().toPromise();
 
-      findAgent();
-    }
-  });
+    //     console.error('response', response);
+
+    //     if (response.rawResponse.hits.hits.length && response.rawResponse.hits.hits[0]._id) {
+    //       setAgentId(response.rawResponse.hits.hits[0]._id);
+    //     }
+    //   };
+
+    //   findAgent();
+    // }
+  }, []);
+
+  console.error('agentId', agentId);
 
   if (!agentId) {
     return <EuiLoadingContent lines={10} />;

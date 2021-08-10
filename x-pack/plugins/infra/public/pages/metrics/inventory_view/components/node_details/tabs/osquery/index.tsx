@@ -34,8 +34,9 @@ const TabComponent = (props: TabProps) => {
   } = useKibanaContextForPlugin();
 
   const OsqueryAction = osquery?.OsqueryAction;
+  console.error('metadata', metadata);
 
-  if (!OsqueryAction || !metadata?.info?.host?.id) {
+  if (!OsqueryAction || !metadata?.info?.agent?.id) {
     return (
       <TabContent>
         <EuiLoadingContent lines={10} />
@@ -45,7 +46,7 @@ const TabComponent = (props: TabProps) => {
 
   return (
     <TabContent>
-      <OsqueryAction hostId={metadata?.info?.host?.id} />
+      <OsqueryAction agentId={metadata?.info?.agent?.id} />
     </TabContent>
   );
 };
