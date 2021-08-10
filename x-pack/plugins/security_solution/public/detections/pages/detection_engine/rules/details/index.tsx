@@ -24,7 +24,7 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import {
   ExceptionListTypeEnum,
@@ -134,6 +134,14 @@ const StyledFullHeightContainer = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
+`;
+
+const RuleDetailsLastAlertComponent = styled.div`
+  ${({ theme }) => css`
+    color: ${theme.eui.euiTextSubduedColor};
+    font-size: ${theme.eui.euiFontSizeXS};
+    line-height: ${theme.eui.euiLineHeight};
+  `}
 `;
 
 enum RuleDetailTabs {
@@ -649,16 +657,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 }}
                 border
                 subtitle={subTitle}
-                subtitle2={[
-                  ...(lastAlerts != null
-                    ? [
-                        <>
-                          {detectionI18n.LAST_ALERT}
-                          {': '}
-                          {lastAlerts}
-                        </>,
-                      ]
-                    : []),
+                subtitle2={
                   <>
                     <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
                       <EuiFlexItem grow={false}>
@@ -667,8 +666,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       </EuiFlexItem>
                       {ruleStatusInfo}
                     </EuiFlexGroup>
-                  </>,
-                ]}
+                  </>
+                }
                 title={title}
                 badgeOptions={badgeOptions}
               >
@@ -759,8 +758,23 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
             </Display>
             {ruleDetailTab === RuleDetailTabs.alerts && (
               <>
-                <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
-                <EuiSpacer size="m" />
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                  <EuiFlexItem grow={false}>
+                    <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <RuleDetailsLastAlertComponent data-test-subj="header-page-subtitle">
+                      {lastAlerts != null && (
+                        <>
+                          {detectionI18n.LAST_ALERT}
+                          {': '}
+                          {lastAlerts}
+                        </>
+                      )}
+                    </RuleDetailsLastAlertComponent>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="l" />
                 <Display show={!globalFullScreen}>
                   <AlertsHistogramPanel
                     filters={alertMergedFilters}

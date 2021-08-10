@@ -12,7 +12,7 @@ import {
   EuiWindowEvent,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
@@ -79,6 +79,14 @@ const StyledFullHeightContainer = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
+`;
+
+const DetectionEngineLastAlertComponent = styled.div`
+  ${({ theme }) => css`
+    color: ${theme.eui.euiTextSubduedColor};
+    font-size: ${theme.eui.euiFontSizeXS};
+    line-height: ${theme.eui.euiLineHeight};
+  `}
 `;
 
 type DetectionEngineComponentProps = PropsFromRedux;
@@ -289,7 +297,22 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                 </LinkAnchor>
               </DetectionEngineHeaderPage>
               <EuiHorizontalRule margin="m" />
-              <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <DetectionEngineLastAlertComponent data-test-subj="header-page-subtitle">
+                    {lastAlerts != null && (
+                      <>
+                        {i18n.LAST_ALERT}
+                        {': '}
+                        {lastAlerts}
+                      </>
+                    )}
+                  </DetectionEngineLastAlertComponent>
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiSpacer size="m" />
               <EuiFlexGroup wrap>
                 <EuiFlexItem grow={2}>
