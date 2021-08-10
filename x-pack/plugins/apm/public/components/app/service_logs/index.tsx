@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -13,6 +14,11 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { LogStream } from '../../../../../infra/public';
+import {
+  CONTAINER_ID,
+  HOSTNAME,
+  POD_NAME,
+} from '../../../../common/elasticsearch_fieldnames';
 
 export function ServiceLogs() {
   const { serviceName } = useApmServiceContext();
@@ -41,11 +47,11 @@ export function ServiceLogs() {
   );
 
   const noInfrastructureData = useMemo(() => {
-  return (
-    isEmpty(data?.serviceInfrastructure?.containerIds) &&
-    isEmpty(data?.serviceInfrastructure?.hostNames) &&
-    isEmpty(data?.serviceInfrastructure?.podNames)
-  );
+    return (
+      isEmpty(data?.serviceInfrastructure?.containerIds) &&
+      isEmpty(data?.serviceInfrastructure?.hostNames) &&
+      isEmpty(data?.serviceInfrastructure?.podNames)
+    );
   }, [data]);
 
   if (status === FETCH_STATUS.LOADING) {
@@ -69,31 +75,31 @@ export function ServiceLogs() {
       />
     );
   }
-  
+
   return (
-      <LogStream
+    <LogStream
       columns={[{ type: 'timestamp' }, { type: 'message' }]}
       height={'60vh'}
       startTimestamp={moment(start).valueOf()}
       endTimestamp={moment(end).valueOf()}
       query={`
        ${
-         (!!data?.serviceInfrastructure?.containerIds?.length)
+         !!data?.serviceInfrastructure?.containerIds?.length
            ? data.serviceInfrastructure.containerIds
                .map((id) => `${CONTAINER_ID}: "${id}"`)
                .join(' or ')
            : ''
        } ${
-        (data?.serviceInfrastructure?.hostNames?.length ?? 0) > 0
-          ? `or host.name : ${data?.serviceInfrastructure.hostNames
-              .map((hostName) => `"${hostName}"`)
-              .join(' or host.name : ')}`
+        !!data?.serviceInfrastructure?.hostNames?.length
+          ? data.serviceInfrastructure.hostNames
+              .map((hostName) => `${HOSTNAME}: "${hostName}"`)
+              .join(' or ')
           : ''
       } ${
-        (data?.serviceInfrastructure?.podNames?.length ?? 0) > 0
-          ? `or kubernetes.pod.name : ${data?.serviceInfrastructure.podNames
-              .map((podName) => `"${podName}"`)
-              .join(' or kubernetes.pod.name : ')}`
+        !!data?.serviceInfrastructure?.podNames?.length
+          ? data.serviceInfrastructure.podNames
+              .map((podName) => `${POD_NAME}: "${podName}"`)
+              .join(' or ')
           : ''
       }
       `}
