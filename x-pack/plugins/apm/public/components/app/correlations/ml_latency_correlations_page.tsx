@@ -329,7 +329,10 @@ export function MlLatencyCorrelations({
                     )}
                   </EuiText>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem
+                  grow={false}
+                  style={{ flexDirection: 'row', alignItems: 'center' }}
+                >
                   <EuiButtonEmpty
                     onClick={onClearSelection}
                     iconType="cross"
