@@ -117,8 +117,8 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
         ),
         rightSideItems: [
           <EuiButton fill href={manageDetectionRulesHref}>
-            {i18n.translate('xpack.observability.alerts.manageDetectionRulesButtonLabel', {
-              defaultMessage: 'Manage detection rules',
+            {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
+              defaultMessage: 'Manage rules',
             })}
           </EuiButton>,
         ],
