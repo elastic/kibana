@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/elasticsearch_fieldnames';
+import {
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+} from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { ProcessorEvent } from '../../../common/processor_event';
@@ -63,7 +66,10 @@ export async function getThroughputChartsForBackend({
           }),
           aggs: {
             throughput: {
-              rate: {},
+              rate: {
+                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                unit: 'minute',
+              },
             },
           },
         },
