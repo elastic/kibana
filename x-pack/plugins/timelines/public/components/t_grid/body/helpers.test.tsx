@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { omit } from 'lodash/fp';
 
 import { ColumnHeaderOptions } from '../../../../common';
@@ -349,7 +350,7 @@ describe('helpers', () => {
       expect(
         allowSorting({
           browserField: undefined, // no BrowserField metadata for this field
-          fieldName: 'signal.rule.name', //  an allow-listed field name
+          fieldName: ALERT_RULE_NAME, //  an allow-listed field name
         })
       ).toBe(true);
     });
