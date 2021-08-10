@@ -62,6 +62,7 @@ export interface OwnProps {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
+  additionalFilters?: React.ReactNode;
 }
 
 type Props = OwnProps & PropsFromRedux;
@@ -98,6 +99,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   showCheckboxes,
   sort,
   utilityBar,
+  additionalFilters,
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId,
 }) => {
@@ -165,7 +167,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               setGlobalFullScreen,
               start,
               sort,
-              utilityBar,
+              additionalFilters,
               graphEventId,
               filterStatus: currentFilter,
               leadingControlColumns,
@@ -291,6 +293,7 @@ export const StatefulEventsViewer = connector(
       prevProps.showCheckboxes === nextProps.showCheckboxes &&
       prevProps.start === nextProps.start &&
       prevProps.utilityBar === nextProps.utilityBar &&
+      prevProps.additionalFilters === nextProps.additionalFilters &&
       prevProps.graphEventId === nextProps.graphEventId
   )
 );

@@ -2,22 +2,19 @@
 
 [Home](./index.md) &gt; [kibana-plugin-core-server](./kibana-plugin-core-server.md) &gt; [KibanaExecutionContext](./kibana-plugin-core-server.kibanaexecutioncontext.md)
 
-## KibanaExecutionContext interface
+## KibanaExecutionContext type
 
+Represents a meta-information about a Kibana entity initiating a search request.
 
 <b>Signature:</b>
 
 ```typescript
-export interface KibanaExecutionContext 
+export declare type KibanaExecutionContext = {
+    readonly type: string;
+    readonly name: string;
+    readonly id: string;
+    readonly description: string;
+    readonly url?: string;
+    parent?: KibanaExecutionContext;
+};
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [description](./kibana-plugin-core-server.kibanaexecutioncontext.description.md) | <code>string</code> | human readable description. For example, a vis title, action name |
-|  [id](./kibana-plugin-core-server.kibanaexecutioncontext.id.md) | <code>string</code> | unique value to identify the source |
-|  [name](./kibana-plugin-core-server.kibanaexecutioncontext.name.md) | <code>string</code> | public name of a user-facing feature |
-|  [type](./kibana-plugin-core-server.kibanaexecutioncontext.type.md) | <code>string</code> | Kibana application initated an operation. |
-|  [url](./kibana-plugin-core-server.kibanaexecutioncontext.url.md) | <code>string</code> | in browser - url to navigate to a current page, on server - endpoint path, for task: task SO url |
-

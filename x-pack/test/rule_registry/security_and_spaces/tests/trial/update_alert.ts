@@ -166,7 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
             index: apmIndex,
             _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
           })
-          .expect(403);
+          .expect(404);
       });
 
       it(`${obsMinAllSpacesAll.username} should NOT be able to update the APM alert in ${SPACE1}`, async () => {
@@ -181,7 +181,7 @@ export default ({ getService }: FtrProviderContext) => {
             index: apmIndex,
             _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
           })
-          .expect(403);
+          .expect(404);
       });
     });
   });
