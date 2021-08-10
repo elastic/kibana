@@ -68,8 +68,8 @@ export const createMigration = async ({
                   for (indicator in ctx._source.threat.indicator) {
                     def enrichment = [:];
                     enrichment.indicator = indicator;
-                    enrichment.matched = indicator.matched;
                     enrichment.indicator.reference = indicator.event?.reference;
+                    enrichment.matched = indicator.matched;
                     enrichment.indicator.remove("matched");
 
                     ctx._source.threat.enrichments.add(enrichment);
