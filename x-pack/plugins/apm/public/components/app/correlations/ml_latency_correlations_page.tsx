@@ -16,6 +16,7 @@ import {
   EuiIcon,
   EuiBasicTableColumn,
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
@@ -62,6 +63,7 @@ interface MlCorrelationsTerms {
 
 interface Props {
   correlationAnalysisEnabled: boolean;
+  markerCurrentTransaction?: number;
   onChartSelection?: BrushEndListener;
   onClearSelection?: () => void;
   selection?: [number, number];
@@ -69,6 +71,7 @@ interface Props {
 
 export function MlLatencyCorrelations({
   correlationAnalysisEnabled,
+  markerCurrentTransaction,
   onChartSelection,
   onClearSelection,
   selection,
@@ -325,13 +328,36 @@ export function MlLatencyCorrelations({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
             {selection && (
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={onClearSelection}>
-                  {clearSelectionButtonLabel}
-                </EuiButton>
-              </EuiFlexItem>
+              <>
+                <EuiFlexItem
+                  grow={false}
+                  style={{ flexDirection: 'row', alignItems: 'center' }}
+                >
+                  <EuiText size="xs">
+                    {i18n.translate(
+                      'xpack.apm.correlations.latencyCorrelations.chartTitle',
+                      {
+                        defaultMessage: `Selection: {selectionFrom} - {selectionTo}ms`,
+                        values: {
+                          selectionFrom: Math.round(selection[0] / 1000),
+                          selectionTo: Math.round(selection[1] / 1000),
+                        },
+                      }
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={onClearSelection}
+                    iconType="cross"
+                    size="xs"
+                  >
+                    {clearSelectionButtonLabel}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </>
             )}
             {/* {correlationAnalysisEnabled && !showCorrelations && (
                   <EuiFlexItem grow={false}>
@@ -349,6 +375,7 @@ export function MlLatencyCorrelations({
       <EuiSpacer size="s" />
 
       <CorrelationsChart
+        markerCurrentTransaction={markerCurrentTransaction}
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
         markerValue={percentileThresholdValue ?? 0}
         {...selectedHistogram}

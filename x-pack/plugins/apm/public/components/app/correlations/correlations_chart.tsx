@@ -26,6 +26,8 @@ import {
 
 import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 
+import { euiPaletteColorBlind } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { getDurationFormatter } from '../../../../common/utils/formatters';
@@ -74,15 +76,11 @@ const chartTheme: PartialTheme = {
   },
 };
 
-// Log based axis cannot start a 0. Use a small positive number instead.
-const yAxisDomain = {
-  min: 0.9,
-};
-
 interface CorrelationsChartProps {
   field?: string;
   value?: string;
   histogram?: HistogramItem[];
+  markerCurrentTransaction?: number;
   markerValue: number;
   markerPercentile: number;
   overallHistogram?: HistogramItem[];
@@ -90,20 +88,20 @@ interface CorrelationsChartProps {
   selection?: [number, number];
 }
 
-const annotationsStyle = {
+const getAnnotationsStyle = (color = 'gray') => ({
   line: {
     strokeWidth: 1,
-    stroke: 'gray',
+    stroke: color,
     opacity: 0.8,
   },
   details: {
     fontSize: 8,
     fontFamily: 'Arial',
     fontStyle: 'normal',
-    fill: 'gray',
+    fill: color,
     padding: 0,
   },
-};
+});
 
 const CHART_PLACEHOLDER_VALUE = 0.0001;
 
@@ -133,6 +131,7 @@ export function CorrelationsChart({
   field,
   value,
   histogram: originalHistogram,
+  markerCurrentTransaction,
   markerValue,
   markerPercentile,
   overallHistogram,
@@ -157,6 +156,27 @@ export function CorrelationsChart({
   ];
 
   const xMax = Math.max(...(overallHistogram ?? []).map((d) => d.key)) ?? 0;
+
+  // We want y axis ticks for 1, 10, 100, 1000 ...
+  // First get the actual max of y values
+  const yMax =
+    Math.max(...(overallHistogram ?? []).map((d) => d.doc_count)) ?? 0;
+  // The axis treats the ticks number as a best effort/recommendation.
+  // By counting the digits of yMax we make sure it's one less than what we want.
+  // The axis will then round up the ticks and we won't overshoot with many tick values.
+  const yTicks = ('' + Math.round(yMax)).length;
+  // Up the maximum y domain value to the next nice log label,
+  // e.g. if the actual max is 234, we'll up it to 1000.
+  const yDomainMax = parseInt(
+    `1${new Array(('' + Math.round(yMax)).length).fill(0).join('')}`,
+    10
+  );
+
+  // Log based axis cannot start a 0. Use a small positive number instead.
+  const yAxisDomain = {
+    min: 0.9,
+    max: yDomainMax,
+  };
 
   const durationFormatter = getDurationFormatter(xMax);
 
@@ -218,11 +238,36 @@ export function CorrelationsChart({
               hideTooltips={true}
             />
           )}
+          {typeof markerCurrentTransaction === 'number' && (
+            <LineAnnotation
+              id="annotation_current_transaction"
+              domainType={AnnotationDomainType.XDomain}
+              dataValues={[
+                {
+                  dataValue: markerCurrentTransaction,
+                  details: i18n.translate(
+                    'xpack.apm.correlations.latency.chart.currentTransactionMarkerLabel',
+                    {
+                      defaultMessage: 'Current sample',
+                    }
+                  ),
+                },
+              ]}
+              style={getAnnotationsStyle(euiPaletteColorBlind()[0])}
+              marker={i18n.translate(
+                'xpack.apm.correlations.latency.chart.currentTransactionMarkerLabel',
+                {
+                  defaultMessage: 'Current sample',
+                }
+              )}
+              markerPosition={'top'}
+            />
+          )}
           <LineAnnotation
             id="annotation_1"
             domainType={AnnotationDomainType.XDomain}
             dataValues={annotationsDataValues}
-            style={annotationsStyle}
+            style={getAnnotationsStyle()}
             marker={`${markerPercentile}p`}
             markerPosition={'top'}
           />
@@ -240,9 +285,7 @@ export function CorrelationsChart({
               { defaultMessage: '# transactions' }
             )}
             position={Position.Left}
-            tickFormat={(d) =>
-              d === 0 || Number.isInteger(Math.log10(d)) ? d : ''
-            }
+            ticks={yTicks}
           />
           <AreaSeries
             id={i18n.translate(

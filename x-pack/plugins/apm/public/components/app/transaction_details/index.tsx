@@ -64,17 +64,19 @@ function TraceSamplesTab({
             ? [sampleRangeFrom, sampleRangeTo]
             : undefined
         }
+        markerCurrentTransaction={
+          waterfall.entryWaterfallTransaction?.doc.transaction.duration.us
+        }
       />
       <EuiSpacer size="s" />
-      <HeightRetainer>
-        <WaterfallWithSummary
-          urlParams={urlParams}
-          waterfall={waterfall}
-          isLoading={waterfallStatus === FETCH_STATUS.LOADING}
-          exceedsMax={exceedsMax}
-          traceSamples={traceSamples}
-        />
-      </HeightRetainer>
+
+      <WaterfallWithSummary
+        urlParams={urlParams}
+        waterfall={waterfall}
+        isLoading={waterfallStatus === FETCH_STATUS.LOADING}
+        exceedsMax={exceedsMax}
+        traceSamples={traceSamples}
+      />
     </>
   );
 }
@@ -209,17 +211,19 @@ export function TransactionDetails() {
         ))}
       </EuiTabs>
 
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
 
-      <TabContent
-        {...{
-          selectSampleFromChartSelection,
-          clearChartSelection,
-          sampleRangeFrom,
-          sampleRangeTo,
-          traceSamples,
-        }}
-      />
+      <HeightRetainer>
+        <TabContent
+          {...{
+            selectSampleFromChartSelection,
+            clearChartSelection,
+            sampleRangeFrom,
+            sampleRangeTo,
+            traceSamples,
+          }}
+        />
+      </HeightRetainer>
     </>
   );
 }
