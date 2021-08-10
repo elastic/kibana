@@ -23,7 +23,7 @@ export const selectDatasourceStates = (state: LensState) => state.lens.datasourc
 export const selectActiveDatasourceId = (state: LensState) => state.lens.activeDatasourceId;
 export const selectActiveData = (state: LensState) => state.lens.activeData;
 export const selectIsFullscreenDatasource = (state: LensState) =>
-  !!state.lens.isFullscreenDatasource;
+  Boolean(state.lens.isFullscreenDatasource);
 
 export const selectExecutionContext = createSelector(
   [selectQuery, selectFilters, selectResolvedDateRange],

@@ -186,7 +186,7 @@ export function SuggestionPanel({
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const activeData = useLensSelector(selectActiveData);
   const datasourceStates = useLensSelector(selectDatasourceStates);
-  const existsStagedPreview = useLensSelector((state) => !!state.lens.stagedPreview);
+  const existsStagedPreview = useLensSelector((state) => Boolean(state.lens.stagedPreview));
   const currentVisualization = useLensSelector(selectCurrentVisualization);
   const currentDatasourceStates = useLensSelector(selectCurrentDatasourceStates);
 
