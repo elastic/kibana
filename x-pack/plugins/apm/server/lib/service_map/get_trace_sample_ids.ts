@@ -39,9 +39,13 @@ export async function getTraceSampleIds({
     },
   };
 
+  let events: ProcessorEvent[];
+
   if (serviceName) {
     query.bool.filter.push({ term: { [SERVICE_NAME]: serviceName } });
+    events = [ProcessorEvent.span, ProcessorEvent.transaction];
   } else {
+    events = [ProcessorEvent.span];
     query.bool.filter.push({
       exists: {
         field: SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -63,7 +67,7 @@ export async function getTraceSampleIds({
 
   const params = {
     apm: {
-      events: [ProcessorEvent.span],
+      events,
     },
     body: {
       size: 0,
