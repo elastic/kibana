@@ -133,7 +133,7 @@ export class RuleDataClient implements IRuleDataClient {
       // It's critical that we specify *both* the index pattern and alias in this request. The alias prevents the
       // request from finding other namespaces that could match the -* part of the index pattern
       // (see https://github.com/elastic/kibana/issues/107704). The index pattern prevents the request from
-      // finding legacy .siem-signals that we add the alias to for backwards compatibility reasons. Together,
+      // finding legacy .siem-signals indices that we add the alias to for backwards compatibility reasons. Together,
       // the index pattern and alias should ensure that we retrieve only the "new" backing indices for this
       // particular alias.
       const { body: aliases } = await clusterClient.indices.getAlias({
