@@ -213,6 +213,14 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
     );
   }
 
+  // { [x: string]: string | string[] | ExecutionMetricValue<T>;
+  //   [x: number]: string;
+  //   "kibana.space_ids": string[];
+  //   "event.action": T;
+  //   "event.kind": string;
+  //   "rule.id": string;
+  //   "@timestamp": string; }
+
   public async logExecutionMetric<T extends ExecutionMetric>({
     ruleId,
     namespace,
