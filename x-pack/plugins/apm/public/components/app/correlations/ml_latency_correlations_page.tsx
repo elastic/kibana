@@ -94,25 +94,6 @@ export function MlLatencyCorrelations({
     }
   );
 
-  // const showCorrelationsButtonLabel = i18n.translate(
-  //   'xpack.apm.transactionDetails.showCorrelationsButtonLabel',
-  //   {
-  //     defaultMessage: 'Analyze correlations',
-  //   }
-  // );
-
-  // const hideCorrelationsButtonLabel = i18n.translate(
-  //   'xpack.apm.transactionDetails.hideCorrelationsButtonLabel',
-  //   {
-  //     defaultMessage: 'Hide correlations',
-  //   }
-  // );
-
-  // const [showCorrelations, setShowCorrelations] = useState(
-  //   correlationAnalysisEnabled
-  // );
-  // const toggleShowCorrelations = () => setShowCorrelations(!showCorrelations);
-
   const {
     ccsWarning,
     log,
@@ -154,7 +135,7 @@ export function MlLatencyCorrelations({
       cancelFetch();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [correlationAnalysisEnabled]);
+  }, []);
 
   useEffect(() => {
     if (isErrorMessage(error)) {
@@ -359,15 +340,6 @@ export function MlLatencyCorrelations({
                 </EuiFlexItem>
               </>
             )}
-            {/* {correlationAnalysisEnabled && !showCorrelations && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButton fill onClick={toggleShowCorrelations}>
-                      {showCorrelations
-                        ? hideCorrelationsButtonLabel
-                        : showCorrelationsButtonLabel}
-                    </EuiButton>
-                  </EuiFlexItem>
-                )} */}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
