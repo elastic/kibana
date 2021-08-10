@@ -48,22 +48,30 @@ export function ServiceLogs() {
   );
   }, [data]);
 
-  return status === FETCH_STATUS.LOADING ? (
-    <div style={{ textAlign: 'center' }}>
-      <EuiLoadingSpinner size="m" />
-    </div>
-  ) : status === FETCH_STATUS.SUCCESS && noInfrastructureData ? (
-    <EuiEmptyPrompt
-      title={
-        <h2>
-          {i18n.translate('xpack.apm.serviceLogs.noInfrastructureMessage', {
-            defaultMessage: 'There are no log messages to display.',
-          })}
-        </h2>
-      }
-    />
-  ) : (
-    <LogStream
+  if (status === FETCH_STATUS.LOADING) {
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <EuiLoadingSpinner size="m" />
+      </div>
+    );
+  }
+
+  if (status === FETCH_STATUS.SUCCESS && noInfrastructureData) {
+    return (
+      <EuiEmptyPrompt
+        title={
+          <h2>
+            {i18n.translate('xpack.apm.serviceLogs.noInfrastructureMessage', {
+              defaultMessage: 'There are no log messages to display.',
+            })}
+          </h2>
+        }
+      />
+    );
+  }
+  
+  return (
+      <LogStream
       columns={[{ type: 'timestamp' }, { type: 'message' }]}
       height={'60vh'}
       startTimestamp={moment(start).valueOf()}
