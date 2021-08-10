@@ -14,6 +14,8 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { LogStream } from '../../../../../infra/public';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
+
 import {
   CONTAINER_ID,
   HOSTNAME,
@@ -87,32 +89,16 @@ export function ServiceLogs() {
   );
 }
 
-const getInfrastructureKQLFilter = (data?: {
-  serviceInfrastructure: Record<string, Array<string | number>>;
-}) => {
-  if (!data) return '';
+const getInfrastructureKQLFilter = (
+  data?: APIReturnType<'GET /api/apm/services/{serviceName}/infrastructure'>
+) => {
+  const containerIds = data?.serviceInfrastructure?.containerIds ?? [];
+  const hostNames = data?.serviceInfrastructure?.hostNames ?? [];
+  const podNames = data?.serviceInfrastructure?.podNames ?? [];
 
-  const infraTypeToField: Record<string, string> = {
-    containerIds: CONTAINER_ID,
-    hostNames: HOSTNAME,
-    podNames: POD_NAME,
-  };
-
-  const clauses = Object.entries(data.serviceInfrastructure).reduce<string[]>(
-    (acc, infrastructureType) => {
-      const [key, value] = infrastructureType;
-      if (value.length === 0) return acc;
-      return [
-        ...acc,
-        value
-          .map((infraValue) => {
-            return `${infraTypeToField[key]}: "${infraValue}"`;
-          })
-          .join(' or '),
-      ];
-    },
-    []
-  );
-
-  return clauses.join(' or ');
+  return [
+    ...containerIds.map((id) => `${CONTAINER_ID}: "${id}"`),
+    ...hostNames.map((id) => `${HOSTNAME}: "${id}"`),
+    ...podNames.map((id) => `${POD_NAME}: "${id}"`),
+  ].join(' or ');
 };
