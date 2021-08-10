@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { assertUnreachable } from '../../../../plugins/security_solution/common/utility_types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { assertUnreachable } from '../../../../plugins/security_solution/common';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   t1AnalystUser,
   t2AnalystUser,
@@ -28,6 +28,13 @@ import {
 
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 
+export { ROLES };
+
+/**
+ * creates a security solution centric role and a user (both having the same name)
+ * @param getService
+ * @param role
+ */
 export const createUserAndRole = async (
   getService: FtrProviderContext['getService'],
   role: ROLES
