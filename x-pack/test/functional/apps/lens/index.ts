@@ -13,7 +13,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-
   describe('lens app', () => {
     before(async () => {
       log.debug('Starting lens before method');
