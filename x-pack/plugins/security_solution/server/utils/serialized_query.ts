@@ -7,7 +7,7 @@
 
 import { isEmpty, isPlainObject, isString } from 'lodash/fp';
 
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
 
 export const parseFilterQuery = (filterQuery: string): JsonObject => {
   try {
