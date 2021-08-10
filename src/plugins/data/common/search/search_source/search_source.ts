@@ -100,7 +100,7 @@ import {
   isPartialResponse,
   IKibanaSearchResponse,
 } from '../../../common';
-import { getHighlightRequest } from '../../../common/field_formats';
+import { getHighlightRequest } from '../../../../field_formats/common';
 import { extractReferences } from './extract_references';
 
 /** @internal */
