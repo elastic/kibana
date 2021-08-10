@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
-import { AlertingPlugin } from '../../../../alerting/server';
+import type { Logger } from 'kibana/server';
+import type { AlertingPlugin } from '../../../../alerting/server';
 import { registerAnomalyDetectionAlertType } from './register_anomaly_detection_alert_type';
-import { SharedServices } from '../../shared_services';
+import type { SharedServices } from '../../shared_services';
 import { registerJobsMonitoringRuleType } from './register_jobs_monitoring_rule_type';
-import { MlServicesProviders } from '../../shared_services/shared_services';
+import type { MlServicesProviders } from '../../shared_services/shared_services';
+import type { IRuleDataClient } from '../../../../rule_registry/server';
 
 export interface RegisterAlertParams {
   alerting: AlertingPlugin['setup'];
   logger: Logger;
   mlSharedServices: SharedServices;
   mlServicesProviders: MlServicesProviders;
+  ruleDataClient: IRuleDataClient | null;
 }
 
 export function registerMlAlerts(params: RegisterAlertParams) {

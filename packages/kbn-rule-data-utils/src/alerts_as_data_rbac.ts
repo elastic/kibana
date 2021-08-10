@@ -22,6 +22,7 @@ export const AlertConsumers = {
   OBSERVABILITY: 'observability',
   SIEM: 'siem',
   SYNTHETICS: 'synthetics',
+  ML: 'ml',
 } as const;
 export type AlertConsumers = typeof AlertConsumers[keyof typeof AlertConsumers];
 
@@ -32,6 +33,7 @@ export const mapConsumerToIndexName: Record<AlertConsumers, string | string[]> =
   observability: '.alerts-observability',
   siem: ['.alerts-security.alerts', '.siem-signals'],
   synthetics: '.alerts-observability-synthetics',
+  ml: '.alerts-ml',
 };
 export type ValidFeatureId = keyof typeof mapConsumerToIndexName;
 

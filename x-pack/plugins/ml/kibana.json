@@ -27,7 +27,8 @@
     "management",
     "licenseManagement",
     "maps",
-    "usageCollection"
+    "usageCollection",
+    "ruleRegistry"
   ],
   "server": true,
   "ui": true,

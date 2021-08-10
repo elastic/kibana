@@ -60,6 +60,8 @@ import { registerMlAlerts } from './lib/alerts/register_ml_alerts';
 import { ML_ALERT_TYPES } from '../common/constants/alerts';
 import { alertingRoutes } from './routes/alerting';
 import { registerCollector } from './usage';
+import { getRuleDataClient } from './lib/alerts/get_rule_data_client';
+import { IRuleDataClient } from '../../rule_registry/server';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -207,12 +209,18 @@ export class MlServerPlugin
       () => this.isMlReady
     );
 
+    let ruleDataClient: IRuleDataClient | null = null;
+    if (plugins.ruleRegistry) {
+      ruleDataClient = getRuleDataClient(plugins.ruleRegistry, this.log);
+    }
+
     if (plugins.alerting) {
       registerMlAlerts({
         alerting: plugins.alerting,
         logger: this.log,
         mlSharedServices: sharedServicesProviders,
         mlServicesProviders: internalServicesProviders,
+        ruleDataClient,
       });
     }
 

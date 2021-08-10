@@ -23,6 +23,10 @@ import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '../../../../src/plugins/data/server';
+import {
+  RuleRegistryPluginSetupContract,
+  RuleRegistryPluginStartContract,
+} from '../../rule_registry/server';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;
@@ -55,11 +59,13 @@ export interface PluginsSetup {
   alerting?: AlertingPlugin['setup'];
   actions?: ActionsPlugin['setup'];
   usageCollection?: UsageCollectionSetup;
+  ruleRegistry?: RuleRegistryPluginSetupContract;
 }
 
 export interface PluginsStart {
   data: DataPluginStart;
   spaces?: SpacesPluginStart;
+  ruleRegistry?: RuleRegistryPluginStartContract;
 }
 
 export interface RouteInitialization {
