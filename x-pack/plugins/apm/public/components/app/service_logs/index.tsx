@@ -82,27 +82,37 @@ export function ServiceLogs() {
       height={'60vh'}
       startTimestamp={moment(start).valueOf()}
       endTimestamp={moment(end).valueOf()}
-      query={`
-       ${
-         !!data?.serviceInfrastructure?.containerIds?.length
-           ? data.serviceInfrastructure.containerIds
-               .map((id) => `${CONTAINER_ID}: "${id}"`)
-               .join(' or ')
-           : ''
-       } ${
-        !!data?.serviceInfrastructure?.hostNames?.length
-          ? data.serviceInfrastructure.hostNames
-              .map((hostName) => `${HOSTNAME}: "${hostName}"`)
-              .join(' or ')
-          : ''
-      } ${
-        !!data?.serviceInfrastructure?.podNames?.length
-          ? data.serviceInfrastructure.podNames
-              .map((podName) => `${POD_NAME}: "${podName}"`)
-              .join(' or ')
-          : ''
-      }
-      `}
+      query={getInfrastructureKQLFilter(data)}
     />
   );
 }
+
+const getInfrastructureKQLFilter = (data?: {
+  serviceInfrastructure: Record<string, Array<string | number>>;
+}) => {
+  if (!data) return '';
+
+  const infraTypeToField: Record<string, string> = {
+    containerIds: CONTAINER_ID,
+    hostNames: HOSTNAME,
+    podNames: POD_NAME,
+  };
+
+  const clauses = Object.entries(data.serviceInfrastructure).reduce<string[]>(
+    (acc, infrastructureType) => {
+      const [key, value] = infrastructureType;
+      if (value.length === 0) return acc;
+      return [
+        ...acc,
+        value
+          .map((infraValue) => {
+            return `${infraTypeToField[key]}: "${infraValue}"`;
+          })
+          .join(' or '),
+      ];
+    },
+    []
+  );
+
+  return clauses.join(' or ');
+};
