@@ -85,9 +85,9 @@ export function resolveTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
       if (!testCase.failure) {
         expect(response.body.outcome).to.eql(expectedOutcome);
         if (expectedOutcome === 'conflict' || expectedOutcome === 'aliasMatch') {
-          expect(response.body.aliasTargetId).to.eql(expectedAliasTargetId);
+          expect(response.body.alias_target_id).to.eql(expectedAliasTargetId);
         } else {
-          expect(response.body.aliasTargetId).to.eql(undefined);
+          expect(response.body.alias_target_id).to.eql(undefined);
         }
       }
     }
