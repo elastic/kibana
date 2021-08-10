@@ -69,7 +69,7 @@ index, you'll need:
 
 You can manage your roles, privileges, and spaces in **{stack-manage-app}** in
 {kib}. For more information, refer to
-<<xpack-kibana-role-management,{kib} role management>>.
+<<kibana-role-management,{kib} role management>>.
 
 [discrete]
 === Additional options for loading your data
