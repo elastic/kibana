@@ -6,15 +6,6 @@
  */
 
 import React, { memo, useMemo, useCallback } from 'react';
-import {
-  EuiPopover,
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiText,
-  EuiContextMenuItem,
-  EuiToolTip,
-  EuiPortal,
-} from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { CaseStatuses, StatusAll } from '../../../../../../cases/common';
 import { Ecs } from '../../../../../common/ecs';
@@ -52,20 +43,12 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const dispatch = useDispatch();
   const { cases } = useKibana<TimelinesStartServices>().services;
   const {
-    addNewCaseClick,
-    addExistingCaseClick,
     onCaseClicked,
     goToCreateCase,
     onCaseSuccess,
     attachAlertToCase,
     createCaseUrl,
     isAllCaseModalOpen,
-    isDisabled,
-    userCanCrud,
-    isEventSupported,
-    openPopover,
-    closePopover,
-    isPopoverOpen,
     isCreateCaseFlyoutOpen,
   } = useAddToCase({ ecsRowData, useInsertTimeline, casePermissions, appId, closeCallbacks });
 
@@ -115,21 +98,18 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
         useInsertTimeline={useInsertTimeline}
         casePermissions={casePermissions}
         appId={appId}
+        closeCallbacks={closeCallbacks}
       />
       {isCreateCaseFlyoutOpen && (
-        <EuiPortal>
-          <CreateCaseFlyout
-            afterCaseCreated={attachAlertToCase}
-            onCloseFlyout={closeCaseFlyoutOpen}
-            onSuccess={onCaseSuccess}
-            useInsertTimeline={useInsertTimeline}
-            appId={appId}
-          />
-        </EuiPortal>
+        <CreateCaseFlyout
+          afterCaseCreated={attachAlertToCase}
+          onCloseFlyout={closeCaseFlyoutOpen}
+          onSuccess={onCaseSuccess}
+          useInsertTimeline={useInsertTimeline}
+          appId={appId}
+        />
       )}
-      {isAllCaseModalOpen && (
-        <EuiPortal>{cases.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}</EuiPortal>
-      )}
+      {isAllCaseModalOpen && cases.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}
     </>
   );
 };

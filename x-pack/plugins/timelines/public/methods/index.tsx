@@ -77,7 +77,7 @@ export const getAddToCaseLazy = (props: AddToCaseActionProps) => {
 const AddToExistingButton = lazy(
   () => import('../components/actions/timeline/cases/add_to_existing_case_button')
 );
-export const getAddToExistingCaseButtonLazy = (props, store) => {
+export const getAddToExistingCaseButtonLazy = (props: AddToCaseActionProps, store: Store) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <Provider store={store}>
@@ -92,7 +92,7 @@ export const getAddToExistingCaseButtonLazy = (props, store) => {
 const AddToNewCaseButton = lazy(
   () => import('../components/actions/timeline/cases/add_to_new_case_button')
 );
-export const getAddToNewCaseButtonLazy = (props, store) => {
+export const getAddToNewCaseButtonLazy = (props: AddToCaseActionProps, store: Store) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <Provider store={store}>

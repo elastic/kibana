@@ -14,8 +14,7 @@ import {
   EuiContextMenuItem,
   EuiToolTip,
 } from '@elastic/eui';
-
-import { Ecs } from '../../../../../common/ecs';
+import { AddToCaseActionProps } from './add_to_case_action';
 import { useAddToCase } from '../../../../hooks/use_add_to_case';
 import { ActionIconItem } from '../../action_icon_item';
 import * as i18n from './translations';
@@ -26,6 +25,7 @@ const AddToCaseActionButtonComponent: React.FC<AddToCaseActionProps> = ({
   useInsertTimeline,
   casePermissions,
   appId,
+  closeCallbacks = [],
 }) => {
   const {
     addNewCaseClick,
@@ -44,7 +44,7 @@ const AddToCaseActionButtonComponent: React.FC<AddToCaseActionProps> = ({
     isPopoverOpen,
     // isCreateCaseFlyoutOpen,
     // closeCaseFlyoutOpen,
-  } = useAddToCase({ ecsRowData, useInsertTimeline, casePermissions, appId });
+  } = useAddToCase({ ecsRowData, useInsertTimeline, casePermissions, appId, closeCallbacks });
   const tooltipContext = userCanCrud
     ? isEventSupported
       ? i18n.ACTION_ADD_TO_CASE_TOOLTIP

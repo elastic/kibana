@@ -37,8 +37,6 @@ export interface TGridEpicDependencies<State> {
 /** The state of all timelines is stored here */
 export interface TimelineState {
   timelineById: TimelineById;
-  isAddToExistingCaseOpen: boolean;
-  isCreateNewCaseOpen: boolean;
 }
 
 export enum TimelineId {

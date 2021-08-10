@@ -5,21 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import {
-  EuiPopover,
-  EuiButtonEmpty,
-  EuiContextMenuPanel,
-  EuiText,
-  EuiContextMenuItem,
-  EuiToolTip,
-} from '@elastic/eui';
+import React, { memo } from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
 
-import { CaseStatuses, StatusAll } from '../../../../../../cases/common';
-import { Ecs } from '../../../../../common/ecs';
 import { useAddToCase } from '../../../../hooks/use_add_to_case';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { TimelinesStartServices } from '../../../../types';
 import { AddToCaseActionProps } from './add_to_case_action';
 import * as i18n from './translations';
 
@@ -31,28 +20,13 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   appId,
   closeCallbacks,
 }) => {
-  const eventId = ecsRowData._id;
-  const eventIndex = ecsRowData._index;
-  const rule = ecsRowData.signal?.rule;
-  const { cases } = useKibana<TimelinesStartServices>().services;
-  const {
-    addNewCaseClick,
-    addExistingCaseClick,
-    onCaseClicked,
-    goToCreateCase,
-    onCaseSuccess,
-    attachAlertToCase,
-    createCaseUrl,
-    isAllCaseModalOpen,
-    isDisabled,
-    userCanCrud,
-    isEventSupported,
-    openPopover,
-    closePopover,
-    isPopoverOpen,
-    isCreateCaseFlyoutOpen,
-    closeCaseFlyoutOpen,
-  } = useAddToCase({ ecsRowData, useInsertTimeline, casePermissions, appId, closeCallbacks });
+  const { addNewCaseClick, isDisabled, userCanCrud } = useAddToCase({
+    ecsRowData,
+    useInsertTimeline,
+    casePermissions,
+    appId,
+    closeCallbacks,
+  });
 
   return (
     <>

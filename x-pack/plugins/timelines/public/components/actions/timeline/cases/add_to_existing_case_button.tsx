@@ -9,8 +9,6 @@ import React, { memo } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 
 import { useAddToCase } from '../../../../hooks/use_add_to_case';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { TimelinesStartServices } from '../../../../types';
 import { AddToCaseActionProps } from './add_to_case_action';
 import * as i18n from './translations';
 
@@ -22,24 +20,13 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   appId,
   closeCallbacks,
 }) => {
-  const {
-    addNewCaseClick,
-    addExistingCaseClick,
-    onCaseClicked,
-    goToCreateCase,
-    onCaseSuccess,
-    attachAlertToCase,
-    createCaseUrl,
-    isAllCaseModalOpen,
-    isDisabled,
-    userCanCrud,
-    isEventSupported,
-    openPopover,
-    closePopover,
-    isPopoverOpen,
-    isCreateCaseFlyoutOpen,
-    closeCaseFlyoutOpen,
-  } = useAddToCase({ ecsRowData, useInsertTimeline, casePermissions, appId, closeCallbacks });
+  const { addExistingCaseClick, isDisabled, userCanCrud } = useAddToCase({
+    ecsRowData,
+    useInsertTimeline,
+    casePermissions,
+    appId,
+    closeCallbacks,
+  });
   return (
     <>
       {userCanCrud && (

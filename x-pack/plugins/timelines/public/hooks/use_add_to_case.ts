@@ -19,15 +19,23 @@ import { AddToCaseActionProps } from '../components/actions/timeline/cases/add_t
 interface UseAddToCase {
   addNewCaseClick: () => void;
   addExistingCaseClick: () => void;
-  onCaseClicked: (arg0: Case) => void;
+  onCaseClicked: (theCase: Case) => void;
   goToCreateCase: (ev: SyntheticEvent) => Promise<void>;
-  onCaseSuccess: () => void;
-  attachAlertToCase: () => void;
-  createCaseUrl: () => void;
+  onCaseSuccess: (theCase: Case) => Promise<void>;
+  attachAlertToCase: (
+    theCase: Case,
+    postComment?: ((arg: PostCommentArg) => Promise<void>) | undefined,
+    updateCase?: ((newCase: Case) => void) | undefined
+  ) => Promise<void>;
+  createCaseUrl: string;
   isAllCaseModalOpen: boolean;
   isDisabled: boolean;
   userCanCrud: boolean;
   isEventSupported: boolean;
+  openPopover: (event: SyntheticEvent<HTMLButtonElement, MouseEvent>) => void;
+  closePopover: () => void;
+  isPopoverOpen: boolean;
+  isCreateCaseFlyoutOpen: boolean;
 }
 
 const appendSearch = (search?: string) =>
@@ -75,23 +83,29 @@ export const useAddToCase = ({
   const eventIndex = ecsRowData._index;
   const rule = ecsRowData.signal?.rule;
   const dispatch = useDispatch();
-  const timelineById = useDeepEqualSelector((state) => state.timeline.timelineById[eventId]);
+  // TODO: use correct value in standalone or integrated.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const timelineById = useDeepEqualSelector((state: any) => {
+    if (state.timeline) {
+      return state.timeline.timelineById[eventId];
+    } else {
+      return state.timelineById[eventId];
+    }
+  });
   const isAllCaseModalOpen = useMemo(() => {
     if (timelineById) {
-      console.log('all case', eventId, timelineById.isAddToExistingCaseOpen);
       return timelineById.isAddToExistingCaseOpen;
     } else {
       return false;
     }
-  }, [timelineById, eventId]);
+  }, [timelineById]);
   const isCreateCaseFlyoutOpen = useMemo(() => {
     if (timelineById) {
-      console.log('create case', eventId, timelineById.isCreateNewCaseOpen);
       return timelineById.isCreateNewCaseOpen;
     } else {
       return false;
     }
-  }, [timelineById, eventId]);
+  }, [timelineById]);
   const {
     application: { navigateToApp, getUrlForApp },
     notifications: { toasts },
@@ -148,7 +162,7 @@ export const useAddToCase = ({
   );
   const onCaseSuccess = useCallback(
     async (theCase: Case) => {
-      dispatch(tGridActions.setOpenAddToNewCase({ id: eventId, isOpen: false }));
+      dispatch(tGridActions.setOpenAddToExistingCase({ id: eventId, isOpen: false }));
       createUpdateSuccessToaster(toasts, theCase, onViewCaseClick);
     },
     [onViewCaseClick, toasts, dispatch, eventId]
@@ -175,7 +189,7 @@ export const useAddToCase = ({
       if (theCase == null) {
         dispatch(tGridActions.setOpenAddToNewCase({ id: eventId, isOpen: true }));
       }
-      dispatch(tGridActions.setOpenAddToExistingCase({ id: eventId, isOpen: true }));
+      dispatch(tGridActions.setOpenAddToExistingCase({ id: eventId, isOpen: false }));
     },
     [dispatch, eventId]
   );
