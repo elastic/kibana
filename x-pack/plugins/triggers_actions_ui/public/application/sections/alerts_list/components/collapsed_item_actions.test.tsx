@@ -4,116 +4,342 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import * as React from 'react';
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
-import {
-  CollapsedItemActionsWithApi as CollapsedItemActions,
-  ComponentOpts,
-} from './collapsed_item_actions';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { CollapsedItemActions } from './collapsed_item_actions';
+import { act } from 'react-dom/test-utils';
+import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
+import { AlertTableItem, AlertTypeModel } from '../../../../types';
+import { useKibana } from '../../../../common/lib/kibana';
+jest.mock('../../../../common/lib/kibana');
+
+const onAlertChanged = jest.fn();
+const onEditAlert = jest.fn();
+const setAlertsToDelete = jest.fn();
+const disableAlert = jest.fn();
+const enableAlert = jest.fn();
+const unmuteAlert = jest.fn();
+const muteAlert = jest.fn();
+
+export const tick = (ms = 0) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 
 describe('CollapsedItemActions', () => {
-  const props: ComponentOpts = {
-    deleteAlert: jest.fn(),
-    item: {
+  async function setup(editable: boolean = true) {
+    const ruleTypeRegistry = ruleTypeRegistryMock.create();
+    ruleTypeRegistry.has.mockReturnValue(true);
+    const alertTypeR: AlertTypeModel = {
+      id: 'my-alert-type',
+      iconClass: 'test',
+      description: 'Alert when testing',
+      documentationUrl: 'https://localhost.local/docs',
+      validate: () => {
+        return { errors: {} };
+      },
+      alertParamsExpression: jest.fn(),
+      requiresAppContext: !editable,
+    };
+    ruleTypeRegistry.get.mockReturnValue(alertTypeR);
+    const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
+  }
+
+  const getPropsWithRule = (overrides = {}, editable = false) => {
+    const rule: AlertTableItem = {
       id: '1',
-      name: 'test alert',
-      tags: ['tag1'],
       enabled: true,
-      alertTypeId: 'test_alert_type',
+      name: 'test rule',
+      tags: ['tag1'],
+      alertTypeId: 'test_rule_type',
+      consumer: 'alerts',
       schedule: { interval: '5d' },
-      actions: [],
-      params: { name: 'test alert type name' },
+      actions: [
+        { id: 'test', actionTypeId: 'the_connector', group: 'rule', params: { message: 'test' } },
+      ],
+      params: { name: 'test rule type name' },
       createdBy: null,
       updatedBy: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
       apiKeyOwner: null,
       throttle: '1m',
+      notifyWhen: 'onActiveAlert',
       muteAll: false,
       mutedInstanceIds: [],
       executionStatus: {
         status: 'active',
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
       },
-      consumer: 'test',
-      actionsCount: 0,
-      alertType: 'test_alert_type',
-      createdAt: new Date('2020-08-20T19:23:38Z'),
-      enabledInLicense: true,
+      actionsCount: 1,
+      tagsText: 'tag1',
+      alertType: 'Test Alert Type',
       isEditable: true,
-      notifyWhen: null,
-      tagsText: 'test',
-      updatedAt: new Date('2020-08-20T19:23:38Z'),
-    },
-    enableAlert: jest.fn(),
-    onAlertChanged: jest.fn(),
-    muteAlert: jest.fn(),
-    deleteAlerts: jest.fn(),
-    disableAlert: jest.fn(),
-    disableAlerts: jest.fn(),
-    enableAlerts: jest.fn(),
-    getHealth: jest.fn(),
-    loadAlert: jest.fn(),
-    loadAlertInstanceSummary: jest.fn(),
-    loadAlertState: jest.fn(),
-    loadAlertTypes: jest.fn(),
-    muteAlertInstance: jest.fn(),
-    muteAlerts: jest.fn(),
-    onEditAlert: jest.fn(),
-    setAlertsToDelete: jest.fn(),
-    unmuteAlert: jest.fn(),
-    unmuteAlertInstance: jest.fn(),
-    unmuteAlerts: jest.fn(),
+      enabledInLicense: true,
+      ...overrides,
+    };
+
+    return {
+      item: rule,
+      onAlertChanged,
+      onEditAlert,
+      setAlertsToDelete,
+      disableAlert,
+      enableAlert,
+      unmuteAlert,
+      muteAlert,
+    };
   };
 
-  beforeEach(() => jest.resetAllMocks());
-
-  test('renders panel items as disabled', () => {
+  test('renders panel items as disabled', async () => {
+    await setup();
     const wrapper = mountWithIntl(
-      <CollapsedItemActions
-        {...{
-          ...props,
-          item: {
-            id: '1',
-            name: 'test alert',
-            tags: ['tag1'],
-            enabled: true,
-            alertTypeId: 'test_alert_type',
-            schedule: { interval: '5d' },
-            actions: [],
-            params: { name: 'test alert type name' },
-            createdBy: null,
-            updatedBy: null,
-            apiKeyOwner: null,
-            throttle: '1m',
-            muteAll: false,
-            mutedInstanceIds: [],
-            executionStatus: {
-              status: 'active',
-              lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-            },
-            consumer: 'test',
-            actionsCount: 0,
-            alertType: 'test_alert_type',
-            createdAt: new Date('2020-08-20T19:23:38Z'),
-            enabledInLicense: true,
-            isEditable: false,
-            notifyWhen: null,
-            tagsText: 'test',
-            updatedAt: new Date('2020-08-20T19:23:38Z'),
-          },
-        }}
-      />
+      <CollapsedItemActions {...getPropsWithRule({ isEditable: false })} />
     );
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
     expect(
-      wrapper.find('[data-test-subj="collapsedActionsButton"]').first().props().disabled
+      wrapper.find('[data-test-subj="selectActionButton"]').first().props().disabled
     ).toBeTruthy();
   });
 
-  test('renders panel items', () => {
-    const wrapper = mountWithIntl(<CollapsedItemActions {...props} />);
+  test('renders closed popover initially and opens on click with all actions enabled', async () => {
+    await setup();
+    const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
+
+    expect(wrapper.find('[data-test-subj="selectActionButton"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="collapsedActionPanel"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="muteButton"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="disableButton"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="editAlert"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="deleteAlert"]').exists()).toBeFalsy();
+
+    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="collapsedActionPanel"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="muteButton"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="disableButton"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="editAlert"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="deleteAlert"]').exists()).toBeTruthy();
 
     expect(
-      wrapper.find('[data-test-subj="collapsedActionsButton"]').first().props().disabled
+      wrapper.find('[data-test-subj="selectActionButton"]').first().props().disabled
     ).toBeFalsy();
+
+    expect(wrapper.find(`[data-test-subj="muteButton"] button`).prop('disabled')).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="muteButton"] button`).text()).toEqual('Mute');
+    expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
+    expect(wrapper.find(`[data-test-subj="editAlert"] button`).prop('disabled')).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="editAlert"] button`).text()).toEqual('Edit rule');
+    expect(wrapper.find(`[data-test-subj="deleteAlert"] button`).prop('disabled')).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="deleteAlert"] button`).text()).toEqual('Delete rule');
+  });
+
+  test('handles case when rule is unmuted and enabled and mute is clicked', async () => {
+    await setup();
+    const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
+    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    wrapper.find('button[data-test-subj="muteButton"]').simulate('click');
+    await act(async () => {
+      await tick(10);
+      wrapper.update();
+    });
+    expect(muteAlert).toHaveBeenCalled();
+  });
+
+  test('handles case when rule is unmuted and enabled and disable is clicked', async () => {
+    await setup();
+    const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
+    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    wrapper.find('button[data-test-subj="disableButton"]').simulate('click');
+    await act(async () => {
+      await tick(10);
+      wrapper.update();
+    });
+    expect(disableAlert).toHaveBeenCalled();
+  });
+
+  test('handles case when rule is muted and enabled and unmute is clicked', async () => {
+    await setup();
+    const wrapper = mountWithIntl(
+      <CollapsedItemActions {...getPropsWithRule({ muteAll: true })} />
+    );
+    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    wrapper.find('button[data-test-subj="muteButton"]').simulate('click');
+    await act(async () => {
+      await tick(10);
+      wrapper.update();
+    });
+    expect(unmuteAlert).toHaveBeenCalled();
+  });
+
+  test('handles case when rule is unmuted and disabled and enable is clicked', async () => {
+    await setup();
+    const wrapper = mountWithIntl(
+      <CollapsedItemActions {...getPropsWithRule({ enabled: false })} />
+    );
+    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    wrapper.find('button[data-test-subj="disableButton"]').simulate('click');
+    await act(async () => {
+      await tick(10);
+      wrapper.update();
+    });
+    expect(enableAlert).toHaveBeenCalled();
+  });
+
+  test('handles case when edit rule is clicked', async () => {
+    await setup();
+    const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
+    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    wrapper.find('button[data-test-subj="editAlert"]').simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    expect(onEditAlert).toHaveBeenCalled();
+  });
+
+  test('handles case when delete rule is clicked', async () => {
+    await setup();
+    const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
+    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    wrapper.find('button[data-test-subj="deleteAlert"]').simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    expect(setAlertsToDelete).toHaveBeenCalled();
+  });
+
+  test('renders actions correctly when rule is disabled', async () => {
+    await setup();
+    const wrapper = mountWithIntl(
+      <CollapsedItemActions {...getPropsWithRule({ enabled: false })} />
+    );
+    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find(`[data-test-subj="muteButton"] button`).prop('disabled')).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="muteButton"] button`).text()).toEqual('Mute');
+    expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Enable');
+    expect(wrapper.find(`[data-test-subj="editAlert"] button`).prop('disabled')).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="editAlert"] button`).text()).toEqual('Edit rule');
+    expect(wrapper.find(`[data-test-subj="deleteAlert"] button`).prop('disabled')).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="deleteAlert"] button`).text()).toEqual('Delete rule');
+  });
+
+  test('renders actions correctly when rule is not editable', async () => {
+    await setup();
+    const wrapper = mountWithIntl(
+      <CollapsedItemActions {...getPropsWithRule({ isEditable: false })} />
+    );
+    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(
+      wrapper.find(`[data-test-subj="selectActionButton"] button`).prop('disabled')
+    ).toBeTruthy();
+  });
+
+  test('renders actions correctly when rule is not enabled due to license', async () => {
+    await setup();
+    const wrapper = mountWithIntl(
+      <CollapsedItemActions {...getPropsWithRule({ enabledInLicense: false })} />
+    );
+    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find(`[data-test-subj="muteButton"] button`).prop('disabled')).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="muteButton"] button`).text()).toEqual('Mute');
+    expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
+    expect(wrapper.find(`[data-test-subj="editAlert"] button`).prop('disabled')).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="editAlert"] button`).text()).toEqual('Edit rule');
+    expect(wrapper.find(`[data-test-subj="deleteAlert"] button`).prop('disabled')).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="deleteAlert"] button`).text()).toEqual('Delete rule');
+  });
+
+  test('renders actions correctly when rule is muted', async () => {
+    await setup();
+    const wrapper = mountWithIntl(
+      <CollapsedItemActions {...getPropsWithRule({ muteAll: true })} />
+    );
+    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find(`[data-test-subj="muteButton"] button`).prop('disabled')).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="muteButton"] button`).text()).toEqual('Unmute');
+    expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
+    expect(wrapper.find(`[data-test-subj="editAlert"] button`).prop('disabled')).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="editAlert"] button`).text()).toEqual('Edit rule');
+    expect(wrapper.find(`[data-test-subj="deleteAlert"] button`).prop('disabled')).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="deleteAlert"] button`).text()).toEqual('Delete rule');
+  });
+
+  test('renders actions correctly when rule type is not editable in this context', async () => {
+    await setup(false);
+    const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
+    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find(`[data-test-subj="muteButton"] button`).prop('disabled')).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="muteButton"] button`).text()).toEqual('Mute');
+    expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
+    expect(wrapper.find(`[data-test-subj="editAlert"] button`).prop('disabled')).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="editAlert"] button`).text()).toEqual('Edit rule');
+    expect(wrapper.find(`[data-test-subj="deleteAlert"] button`).prop('disabled')).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="deleteAlert"] button`).text()).toEqual('Delete rule');
   });
 });

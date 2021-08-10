@@ -96,6 +96,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
               return (
                 <EuiFieldText
                   value={value}
+                  data-test-subj={`colorEditorKeyPattern ${item.index}`}
                   onChange={(e) => {
                     this.onColorChange(
                       {
@@ -120,6 +121,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
               return (
                 <EuiFieldText
                   value={value}
+                  data-test-subj={`colorEditorKeyRange ${item.index}`}
                   onChange={(e) => {
                     this.onColorChange(
                       {
@@ -144,6 +146,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
           return (
             <EuiColorPicker
               color={color}
+              data-test-subj={`colorEditorColorPicker ${item.index}`}
               onChange={(newColor) => {
                 this.onColorChange(
                   {
@@ -168,6 +171,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
           return (
             <EuiColorPicker
               color={color}
+              data-test-subj={`colorEditorBackgroundPicker ${item.index}`}
               onChange={(newColor) => {
                 this.onColorChange(
                   {
@@ -220,6 +224,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
             icon: 'trash',
             color: 'danger',
             available: () => items.length > 1,
+            'data-test-subj': 'colorEditorRemoveColor',
           },
         ],
       },
@@ -229,7 +234,12 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
       <Fragment>
         <EuiBasicTable items={items} columns={columns} />
         <EuiSpacer size="m" />
-        <EuiButton iconType="plusInCircle" size="s" onClick={this.addColor}>
+        <EuiButton
+          iconType="plusInCircle"
+          size="s"
+          onClick={this.addColor}
+          data-test-subj={'colorEditorAddColor'}
+        >
           <FormattedMessage
             id="indexPatternFieldEditor.color.addColorButton"
             defaultMessage="Add color"
