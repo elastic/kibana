@@ -8,14 +8,14 @@
 import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { useFetcher } from './use_fetcher';
 
-export function useSearchAggregatedTransactionsFetcher() {
+export function useFallbackToTransactionsFetcher() {
   const {
     urlParams: { kuery },
   } = useUrlParams();
-  const { data = { searchAggregatedTransactions: true } } = useFetcher(
+  const { data = { fallbackToTransactions: false } } = useFetcher(
     (callApmApi) => {
       return callApmApi({
-        endpoint: 'GET /api/apm/search_aggregated_transactions',
+        endpoint: 'GET /api/apm/fallback_to_transactions',
         params: {
           query: { kuery },
         },
@@ -24,5 +24,7 @@ export function useSearchAggregatedTransactionsFetcher() {
     [kuery]
   );
 
-  return data;
+  // return data;
+  // TODO restore this bit
+  return { fallbackToTransactions: true };
 }

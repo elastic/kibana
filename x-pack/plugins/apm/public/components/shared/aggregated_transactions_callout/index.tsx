@@ -12,18 +12,15 @@ import { i18n } from '@kbn/i18n';
 export function AggregatedTransactionsCallout() {
   return (
     <EuiCallOut
-      title={i18n.translate(
-        'xpack.apm.useAggregatedTransactions.callout.title',
-        {
-          defaultMessage:
-            'No metrics events were found in the current time range so transaction events are used to display data instead',
-        }
-      )}
+      size="s"
+      title={i18n.translate('xpack.apm.aggregatedTransactions.callout.title', {
+        defaultMessage: 'No metrics events found',
+      })}
       iconType="iInCircle"
     >
       <p>
-        {i18n.translate('xpack.apm.useAggregatedTransactions.callout.content', {
-          defaultMessage: `This page is using data only from raw transaction events instead of aggregated transaction metrics.`,
+        {i18n.translate('xpack.apm.aggregatedTransactions.callout.content', {
+          defaultMessage: `This page is using transaction event data as no metrics events were found in the current time range.`,
         })}
       </p>
     </EuiCallOut>

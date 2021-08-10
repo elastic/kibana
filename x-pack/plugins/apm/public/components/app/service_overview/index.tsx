@@ -20,7 +20,7 @@ import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
 import { ServiceOverviewInstancesChartAndTable } from './service_overview_instances_chart_and_table';
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
 import { TransactionsTable } from '../../shared/transactions_table';
-import { useSearchAggregatedTransactionsFetcher } from '../../../hooks/use_search_aggregated_transactions_fetcher';
+import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
 import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
 
 /**
@@ -30,9 +30,7 @@ import { AggregatedTransactionsCallout } from '../../shared/aggregated_transacti
 export const chartHeight = 288;
 
 export function ServiceOverview() {
-  const {
-    searchAggregatedTransactions,
-  } = useSearchAggregatedTransactionsFetcher();
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher();
   const { agentName, serviceName } = useApmServiceContext();
 
   // The default EuiFlexGroup breaks at 768, but we want to break at 992, so we
@@ -46,7 +44,7 @@ export function ServiceOverview() {
     <AnnotationsContextProvider>
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
-          {!searchAggregatedTransactions && (
+          {fallbackToTransactions && (
             <EuiFlexItem>
               <AggregatedTransactionsCallout />
             </EuiFlexItem>

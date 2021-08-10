@@ -15,7 +15,7 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useSearchAggregatedTransactionsFetcher } from '../../../hooks/use_search_aggregated_transactions_fetcher';
+import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
 import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
 import { useUpgradeAssistantHref } from '../../shared/Links/kibana';
 import { SearchBar } from '../../shared/search_bar';
@@ -157,9 +157,7 @@ function useServicesFetcher() {
 
 export function ServiceInventory() {
   const { core } = useApmPluginContext();
-  const {
-    searchAggregatedTransactions,
-  } = useSearchAggregatedTransactionsFetcher();
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher();
   const {
     servicesData,
     servicesStatus,
@@ -194,7 +192,7 @@ export function ServiceInventory() {
             <MLCallout onDismiss={() => setUserHasDismissedCallout(true)} />
           </EuiFlexItem>
         )}
-        {!searchAggregatedTransactions && (
+        {fallbackToTransactions && (
           <EuiFlexItem>
             <AggregatedTransactionsCallout />
           </EuiFlexItem>

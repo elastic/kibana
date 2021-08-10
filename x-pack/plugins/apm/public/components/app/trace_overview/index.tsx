@@ -12,7 +12,7 @@ import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { SearchBar } from '../../shared/search_bar';
 import { TraceList } from './trace_list';
-import { useSearchAggregatedTransactionsFetcher } from '../../../hooks/use_search_aggregated_transactions_fetcher';
+import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
 import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
 
 type TracesAPIResponse = APIReturnType<'GET /api/apm/traces'>;
@@ -21,9 +21,7 @@ const DEFAULT_RESPONSE: TracesAPIResponse = {
 };
 
 export function TraceOverview() {
-  const {
-    searchAggregatedTransactions,
-  } = useSearchAggregatedTransactionsFetcher();
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher();
   const {
     urlParams: { environment, kuery, start, end },
   } = useUrlParams();
@@ -50,7 +48,7 @@ export function TraceOverview() {
     <>
       <SearchBar />
 
-      {!searchAggregatedTransactions && (
+      {fallbackToTransactions && (
         <EuiFlexGroup>
           <EuiFlexItem>
             <AggregatedTransactionsCallout />

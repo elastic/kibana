@@ -12,7 +12,7 @@ import { useLocation } from 'react-router-dom';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { IUrlParams } from '../../../context/url_params_context/types';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useSearchAggregatedTransactionsFetcher } from '../../../hooks/use_search_aggregated_transactions_fetcher';
+import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
 import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
@@ -42,9 +42,7 @@ function getRedirectLocation({
 }
 
 export function TransactionOverview() {
-  const {
-    searchAggregatedTransactions,
-  } = useSearchAggregatedTransactionsFetcher();
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher();
   const location = useLocation();
   const { urlParams } = useUrlParams();
   const { transactionType, serviceName } = useApmServiceContext();
@@ -60,7 +58,7 @@ export function TransactionOverview() {
 
   return (
     <>
-      {!searchAggregatedTransactions && (
+      {fallbackToTransactions && (
         <>
           <EuiFlexGroup>
             <EuiFlexItem>

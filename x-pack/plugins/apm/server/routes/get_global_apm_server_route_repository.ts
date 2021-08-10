@@ -21,7 +21,7 @@ import { indexPatternRouteRepository } from './index_pattern';
 import { metricsRouteRepository } from './metrics';
 import { observabilityOverviewRouteRepository } from './observability_overview';
 import { rumRouteRepository } from './rum_client';
-import { searchAggregatedTransactionsRouteRepository } from './search_aggregated_transactions';
+import { fallbackToTransactionsRouteRepository } from './fallback_to_transactions';
 import { serviceRouteRepository } from './services';
 import { serviceMapRouteRepository } from './service_map';
 import { serviceNodeRouteRepository } from './service_nodes';
@@ -56,7 +56,7 @@ const getTypedGlobalApmServerRouteRepository = () => {
     .merge(sourceMapsRouteRepository)
     .merge(apmFleetRouteRepository)
     .merge(backendsRouteRepository)
-    .merge(searchAggregatedTransactionsRouteRepository);
+    .merge(fallbackToTransactionsRouteRepository);
 
   return repository;
 };
