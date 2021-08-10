@@ -44,6 +44,11 @@ describe('ServiceList', () => {
   });
 
   describe('responsive columns', () => {
+    const query = {
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+    };
+
     const service: any = {
       serviceName: 'opbeans-python',
       agentName: 'python',
@@ -65,7 +70,7 @@ describe('ServiceList', () => {
     describe('when small', () => {
       it('shows environment, transaction type and sparklines', () => {
         const renderedColumns = getServiceColumns({
-          query: {},
+          query,
           showTransactionTypeColumn: true,
           breakPoints: {
             isSmall: true,
@@ -99,7 +104,7 @@ describe('ServiceList', () => {
     describe('when Large', () => {
       it('hides environment, transaction type and sparklines', () => {
         const renderedColumns = getServiceColumns({
-          query: {},
+          query,
           showTransactionTypeColumn: true,
           breakPoints: {
             isSmall: false,
@@ -122,7 +127,7 @@ describe('ServiceList', () => {
       describe('when XL', () => {
         it('hides transaction type', () => {
           const renderedColumns = getServiceColumns({
-            query: {},
+            query,
             showTransactionTypeColumn: true,
             breakPoints: {
               isSmall: false,
@@ -155,7 +160,7 @@ describe('ServiceList', () => {
       describe('when XXL', () => {
         it('hides transaction type', () => {
           const renderedColumns = getServiceColumns({
-            query: {},
+            query,
             showTransactionTypeColumn: true,
             breakPoints: {
               isSmall: false,
