@@ -14,7 +14,7 @@ Object {
     "mappings": Object {
       "_meta": Object {
         "aliases_version": 1,
-        "version": 55,
+        "version": 56,
       },
       "dynamic": false,
       "properties": Object {
@@ -5670,6 +5670,6 @@ Object {
       },
     },
   },
-  "version": 55,
+  "version": 56,
 }
 `;
