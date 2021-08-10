@@ -60,7 +60,7 @@ export const createMigration = async ({
                 }
                 ctx._source.signal._meta.version = params.version;
 
-                // migrate enrichments before 7.15 to ECS 1.10
+                // migrate enrichments before 7.15 to ECS 1.11
                 if (ctx._source.signal?.rule?.type == "threat_match" &&
                 ctx._source.threat?.indicator instanceof List &&
                 ctx._source.threat?.enrichments == null) {
