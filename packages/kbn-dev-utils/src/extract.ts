@@ -12,11 +12,15 @@ import Path from 'path';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
-import { lastValueFrom } from '@kbn/std';
 import Tar from 'tar';
 import Yauzl, { ZipFile, Entry } from 'yauzl';
 import * as Rx from 'rxjs';
 import { map, mergeMap, takeUntil } from 'rxjs/operators';
+
+const strComplete = (obs: Rx.Observable<unknown>) =>
+  new Promise<void>((resolve, reject) => {
+    obs.subscribe({ complete: resolve, error: reject });
+  });
 
 const asyncPipeline = promisify(pipeline);
 
@@ -134,5 +138,5 @@ export async function extract({
   // trigger the initial 'entry' event, happens async so the event will be delivered after the observable is subscribed
   zipFile.readEntry();
 
-  await lastValueFrom(Rx.merge(entry$, error$));
+  await strComplete(Rx.merge(entry$, error$));
 }

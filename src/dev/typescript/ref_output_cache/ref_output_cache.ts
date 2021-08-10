@@ -17,8 +17,7 @@ import { Archives } from './archives';
 import { zip } from './zip';
 import { concurrentMap } from '../concurrent_map';
 import { RepoInfo } from './repo_info';
-import { getFilesChangedSinceSha } from './files_changed_since_sha';
-import { PROJECTS } from '../projects';
+import { ProjectSet } from '../project_set';
 
 export const OUTDIR_MERGE_BASE_FILENAME = '.ts-ref-cache-merge-base';
 
@@ -51,7 +50,7 @@ export class RefOutputCache {
   static async create(options: {
     log: ToolingLog;
     workingDir: string;
-    outDirs: string[];
+    projects: ProjectSet;
     repoRoot: string;
     upstreamUrl: string;
   }) {
@@ -61,14 +60,14 @@ export class RefOutputCache {
     const upstreamBranch: string = kibanaPackageJson.branch;
     const mergeBase = await repoInfo.getMergeBase('HEAD', upstreamBranch);
 
-    return new RefOutputCache(options.log, repoInfo, archives, options.outDirs, mergeBase);
+    return new RefOutputCache(options.log, repoInfo, archives, options.projects, mergeBase);
   }
 
   constructor(
     private readonly log: ToolingLog,
     private readonly repo: RepoInfo,
     public readonly archives: Archives,
-    private readonly outDirs: string[],
+    private readonly projects: ProjectSet,
     private readonly mergeBase: string
   ) {}
 
@@ -79,7 +78,7 @@ export class RefOutputCache {
    */
   async initCaches() {
     const outdatedOutDirs = (
-      await concurrentMap(100, this.outDirs, async (outDir) => ({
+      await concurrentMap(100, this.projects.outDirs, async (outDir) => ({
         path: outDir,
         outdated: !(await matchMergeBase(outDir, this.mergeBase)),
       }))
@@ -103,12 +102,8 @@ export class RefOutputCache {
       return;
     }
 
-    const changedFiles = await getFilesChangedSinceSha(this.log, archive.sha);
-    const outDirsForcingExtraCacheCheck = PROJECTS.filter((p) =>
-      changedFiles.some((f) => p.isAbsolutePathSelected(f) || p.getConfigPaths().includes(f))
-    )
-      .map((p) => p.getOutDir())
-      .filter((p): p is string => typeof p === 'string');
+    const changedFiles = await this.repo.getFilesChangesSinceSha(archive.sha);
+    const outDirsForcingExtraCacheCheck = this.projects.filterByPaths(changedFiles).outDirs;
 
     const tmpDir = tempy.directory();
     this.log.debug(
@@ -180,7 +175,7 @@ export class RefOutputCache {
     const subZips: Array<[string, string]> = [];
 
     await Promise.all(
-      this.outDirs.map(async (absolute) => {
+      this.projects.outDirs.map(async (absolute) => {
         const relative = this.repo.getRelative(absolute);
         const subZipName = `${relative.split(Path.sep).join('__')}.zip`;
         const subZipPath = Path.resolve(tmpDir, subZipName);

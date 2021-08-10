@@ -42,15 +42,15 @@ export async function runBuildRefsCli() {
       // a reference to every composite project in the repo
       await updateRootRefsConfig(log);
 
-      // find the outDirs of the root refs config file deeply, so we know all
-      // the outDirs we are going to be cleaning or populating with caches
-      const outDirs = Project.load(
+      // load all the projects referenced from the root refs config deeply, so we know all
+      // the ts projects we are going to be cleaning or populating with caches
+      const projects = Project.load(
         ROOT_REFS_CONFIG_PATH,
         {},
         {
           skipConfigValidation: true,
         }
-      ).getOutDirsDeep(PROJECT_CACHE);
+      ).getProjectsDeep(PROJECT_CACHE);
 
       const cacheEnabled = process.env.BUILD_TS_REFS_CACHE_ENABLE !== 'false' && !!flags.cache;
       const doCapture = process.env.BUILD_TS_REFS_CACHE_CAPTURE === 'true';
@@ -58,15 +58,15 @@ export async function runBuildRefsCli() {
       const doInitCache = cacheEnabled && !doCapture;
 
       if (doClean) {
-        log.info('deleting', outDirs.length, 'ts output directories');
-        await concurrentMap(100, outDirs, (outDir) => del(outDir));
+        log.info('deleting', projects.outDirs.length, 'ts output directories');
+        await concurrentMap(100, projects.outDirs, (outDir) => del(outDir));
       }
 
       let outputCache;
       if (cacheEnabled) {
         outputCache = await RefOutputCache.create({
           log,
-          outDirs,
+          projects,
           repoRoot: REPO_ROOT,
           workingDir: CACHE_WORKING_DIR,
           upstreamUrl: 'https://github.com/elastic/kibana.git',

@@ -12,6 +12,7 @@ import { IMinimatch, Minimatch } from 'minimatch';
 import { REPO_ROOT } from '@kbn/utils';
 
 import { parseTsConfig } from './ts_configfile';
+import { ProjectSet } from './project_set';
 
 function makeMatchers(directory: string, patterns: string[]) {
   return patterns.map(
@@ -40,7 +41,7 @@ interface LoadOptions {
 export class Project {
   static load(
     tsConfigPath: string,
-    projectOptions: ProjectOptions,
+    projectOptions?: ProjectOptions,
     loadOptions: LoadOptions = {}
   ): Project {
     const cache = loadOptions.cache ?? new Map<string, Project>();
@@ -153,22 +154,19 @@ export class Project {
     return this.baseProject ? this.baseProject.getRefdPaths() : [];
   }
 
-  public getOutDirsDeep(cache?: Map<string, Project>): string[] {
-    const outDirs = new Set<string>();
+  public getProjectsDeep(cache?: Map<string, Project>) {
+    const projects = new Set<Project>();
     const queue = new Set<string>([this.tsConfigPath]);
 
     for (const path of queue) {
       const project = Project.load(path, {}, { skipConfigValidation: true, cache });
-      const outDir = project.getOutDir();
-      if (outDir) {
-        outDirs.add(outDir);
-      }
+      projects.add(project);
       for (const refPath of project.getRefdPaths()) {
         queue.add(refPath);
       }
     }
 
-    return [...outDirs];
+    return new ProjectSet(projects);
   }
 
   public getConfigPaths(): string[] {
