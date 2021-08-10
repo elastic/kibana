@@ -3029,7 +3029,7 @@ export interface SavedObjectsResolveImportErrorsOptions {
 
 // @public (undocumented)
 export interface SavedObjectsResolveResponse<T = unknown> {
-    aliasTargetId?: string;
+    alias_target_id?: string;
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
     saved_object: SavedObject<T>;
 }
