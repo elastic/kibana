@@ -50,6 +50,7 @@ function formatString(value?: string | null) {
 }
 
 const ToolTipWrapper = euiStyled.span`
+  line-height: 0px;
   width: 100%;
   .apmServiceList__serviceNameTooltip {
     width: 100%;
