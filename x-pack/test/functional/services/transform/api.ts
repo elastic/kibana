@@ -12,6 +12,9 @@ import { TransformState, TRANSFORM_STATE } from '../../../../plugins/transform/c
 import type { TransformStats } from '../../../../plugins/transform/common/types/transform_stats';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { GetTransformsResponseSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
+import { PostTransformsUpdateRequestSchema } from '../../../../plugins/transform/common/api_schemas/update_transforms';
+import { TransformPivotConfig } from '../../../../plugins/transform/common/types/transform';
 
 export async function asyncForEach(array: any[], callback: Function) {
   for (let index = 0; index < array.length; index++) {
@@ -174,8 +177,26 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
+    async getTransformList(size: number = 10): Promise<GetTransformsResponseSchema> {
+      return (await esSupertest
+        .get(`/_transform`)
+        .expect(200)
+        .then((response) => response.body)) as GetTransformsResponseSchema;
+    },
+
     async getTransform(transformId: string, expectedCode = 200) {
       return await esSupertest.get(`/_transform/${transformId}`).expect(expectedCode);
+    },
+
+    async updateTransform(
+      transformId: string,
+      updates: Partial<PostTransformsUpdateRequestSchema>
+    ): Promise<TransformPivotConfig> {
+      return await esSupertest
+        .post(`/_transform/${transformId}/_update`)
+        .send(updates)
+        .expect(200)
+        .then((response: { body: TransformPivotConfig }) => response.body);
     },
 
     async createTransform(transformId: string, transformConfig: PutTransformsRequestSchema) {

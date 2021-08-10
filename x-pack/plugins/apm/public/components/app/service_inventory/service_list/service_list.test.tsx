@@ -61,7 +61,10 @@ describe('ServiceList', () => {
       environments: ['test'],
     };
     const renderedColumns = getServiceColumns({
-      query: {},
+      query: {
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+      },
       showTransactionTypeColumn: false,
     }).map((c) => c.render!(service[c.field!], service));
 
