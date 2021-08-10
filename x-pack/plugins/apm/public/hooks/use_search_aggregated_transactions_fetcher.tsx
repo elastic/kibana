@@ -17,7 +17,7 @@ export function useSearchAggregatedTransactionsFetcher() {
       return callApmApi({
         endpoint: 'GET /api/apm/search_aggregated_transactions',
         params: {
-          query: { kuery: kuery || undefined },
+          query: { kuery },
         },
       });
     },

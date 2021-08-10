@@ -16,7 +16,7 @@ export function AggregatedTransactionsCallout() {
         'xpack.apm.useAggregatedTransactions.callout.title',
         {
           defaultMessage:
-            'Transactions events are used to display data in this page',
+            'No metrics events were found in the current time range so transaction events are used to display data instead',
         }
       )}
       iconType="iInCircle"
