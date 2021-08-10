@@ -57,14 +57,20 @@ const DatacolumnArgInput = ({
       // if setting size, auto-select the first column if no column is already set
       if (fn === 'size') {
         const col = column || (columns[0] && columns[0].name) || '';
-        if (col) return onValueChange(`${fn}(${maybeQuoteValue(col)})`);
+        if (col) {
+          return onValueChange(`${fn}(${maybeQuoteValue(col)})`);
+        }
       }
 
       // if there is no column value, do nothing
-      if (valueNotSet(column)) return setMathValue({ ...mathValue, fn });
+      if (valueNotSet(column)) {
+        return setMathValue({ ...mathValue, fn });
+      }
 
       // if fn is not set, just use the value input
-      if (valueNotSet(fn)) return onValueChange(column);
+      if (valueNotSet(fn)) {
+        return onValueChange(column);
+      }
 
       // fn has a value, so use it as a math.js expression
       onValueChange(`${fn}(${maybeQuoteValue(column)})`);
