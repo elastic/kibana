@@ -10,13 +10,13 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TableHeader } from './components/table_header/table_header';
+import { FORMATS_UI_SETTINGS } from '../../../../../../../field_formats/common';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SAMPLE_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../../../common';
 import { getServices, IndexPattern } from '../../../../../kibana_services';
-import { UI_SETTINGS } from '../../../../../../../data/public';
 import { SortOrder } from './components/table_header/helpers';
 import { DocTableRow, TableRow } from './components/table_row';
 import { DocViewFilterFn } from '../../../../doc_views/doc_views_types';
@@ -126,7 +126,7 @@ export const DocTableWrapper = ({
     return [
       services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
       services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
-      services.uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE),
+      services.uiSettings.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE),
       services.uiSettings.get(SAMPLE_SIZE_SETTING, 500),
       services.filterManager,
       services.addBasePath,

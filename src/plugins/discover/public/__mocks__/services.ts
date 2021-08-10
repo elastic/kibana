@@ -19,6 +19,7 @@ import {
 import { savedSearchMock } from './saved_search';
 import { UI_SETTINGS } from '../../../data/common';
 import { TopNavMenu } from '../../../navigation/public';
+import { FORMATS_UI_SETTINGS } from 'src/plugins/field_formats/common';
 const dataPlugin = dataPluginMock.createStartContract();
 
 export const discoverServiceMock = ({
@@ -57,7 +58,7 @@ export const discoverServiceMock = ({
         return 5;
       } else if (key === SORT_DEFAULT_ORDER_SETTING) {
         return 'desc';
-      } else if (key === UI_SETTINGS.SHORT_DOTS_ENABLE) {
+      } else if (key === FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE) {
         return false;
       } else if (key === SAMPLE_SIZE_SETTING) {
         return 250;
