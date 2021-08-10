@@ -72,11 +72,6 @@ const chartTheme: PartialTheme = {
   },
 };
 
-// Log based axis cannot start a 0. Use a small positive number instead.
-const yAxisDomain = {
-  min: 0.9,
-};
-
 interface CorrelationsChartProps {
   field?: string;
   value?: string;
@@ -152,6 +147,27 @@ export function CorrelationsChart({
 
   const xMax = Math.max(...(overallHistogram ?? []).map((d) => d.key)) ?? 0;
 
+  // We want y axis ticks for 1, 10, 100, 1000 ...
+  // First get the actual max of y values
+  const yMax =
+    Math.max(...(overallHistogram ?? []).map((d) => d.doc_count)) ?? 0;
+  // The axis treats the ticks number as a best effort/recommendation.
+  // By counting the digits of yMax we make sure it's one less than what we want.
+  // The axis will then round up the ticks and we won't overshoot with many tick values.
+  const yTicks = ('' + Math.round(yMax)).length;
+  // Up the maximum y domain value to the next nice log label,
+  // e.g. if the actual max is 234, we'll up it to 1000.
+  const yDomainMax = parseInt(
+    `1${new Array(('' + Math.round(yMax)).length).fill(0).join('')}`,
+    10
+  );
+
+  // Log based axis cannot start a 0. Use a small positive number instead.
+  const yAxisDomain = {
+    min: 0.9,
+    max: yDomainMax,
+  };
+
   const durationFormatter = getDurationFormatter(xMax);
 
   const histogram = replaceHistogramDotsWithBars(originalHistogram);
@@ -199,9 +215,7 @@ export function CorrelationsChart({
               { defaultMessage: '# transactions' }
             )}
             position={Position.Left}
-            tickFormat={(d) =>
-              d === 0 || Number.isInteger(Math.log10(d)) ? d : ''
-            }
+            ticks={yTicks}
           />
           <AreaSeries
             id={i18n.translate(
