@@ -138,6 +138,8 @@ export const CodeEditor: React.FC<Props> = ({
     return isMockedComponent ? (ReactMonacoEditor as any)() : ReactMonacoEditor;
   }, []);
 
+  const isReadOnly = options?.readOnly ?? false;
+
   const _editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const isSuggestionMenuOpen = useRef(false);
   const editorHint = useRef<HTMLDivElement>(null);
@@ -202,19 +204,33 @@ export const CodeEditor: React.FC<Props> = ({
           <div>
             <EuiText>
               <p>
-                <FormattedMessage
-                  id="kibana-react.kibanaCodeEditor.startEditing"
-                  defaultMessage="Press Enter to start editing."
-                />
+                {isReadOnly ? (
+                  <FormattedMessage
+                    id="kibana-react.kibanaCodeEditor.startEditingReadOnly"
+                    defaultMessage="Press Enter to start interacting with the code."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="kibana-react.kibanaCodeEditor.startEditing"
+                    defaultMessage="Press Enter to start editing."
+                  />
+                )}
               </p>
             </EuiText>
 
             <EuiText>
               <p>
-                <FormattedMessage
-                  id="kibana-react.kibanaCodeEditor.stopEditing"
-                  defaultMessage="Press Escape to stop editing."
-                />
+                {isReadOnly ? (
+                  <FormattedMessage
+                    id="kibana-react.kibanaCodeEditor.stopEditingReadOnly"
+                    defaultMessage="Press Escape to stop interacting with the code."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="kibana-react.kibanaCodeEditor.stopEditing"
+                    defaultMessage="Press Escape to stop editing."
+                  />
+                )}
               </p>
             </EuiText>
           </div>
