@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-export function setCollectionInterval(req) {
+import { LegacyRequest } from '../../../types';
+
+export function setCollectionEnabled(req: LegacyRequest) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
   const params = {
     body: {
-      transient: { 'xpack.monitoring.collection.interval': null }, // clears the disabling method used in testing environment
-      persistent: { 'xpack.monitoring.collection.interval': '10s' },
+      transient: { 'xpack.monitoring.collection.enabled': null }, // clears the disabling method used in testing environment
+      persistent: { 'xpack.monitoring.collection.enabled': true },
     },
   };
 

@@ -6,23 +6,30 @@
  */
 
 import { get } from 'lodash';
+import { ClusterGetSettingsResponse } from '@elastic/elasticsearch/api/types';
 import { findReason } from './find_reason';
+import { ClusterSettingsReasonResponse, LegacyRequest } from '../../types';
 
-export function handleResponse(response, isCloudEnabled) {
-  const sources = ['persistent', 'transient', 'defaults'];
-  for (const source of sources) {
-    const monitoringSettings = get(response[source], 'xpack.monitoring');
-    if (monitoringSettings !== undefined) {
-      const check = findReason(
-        monitoringSettings,
-        {
-          context: `cluster ${source}`,
-        },
-        isCloudEnabled
-      );
+export function handleResponse(
+  response: ClusterGetSettingsResponse,
+  isCloudEnabled: boolean
+): ClusterSettingsReasonResponse {
+  let source: keyof ClusterGetSettingsResponse;
+  for (source in response) {
+    if (Object.prototype.hasOwnProperty.call(response, source)) {
+      const monitoringSettings = get(response[source], 'xpack.monitoring');
+      if (monitoringSettings !== undefined) {
+        const check = findReason(
+          monitoringSettings,
+          {
+            context: `cluster ${source}`,
+          },
+          isCloudEnabled
+        );
 
-      if (check.found) {
-        return check;
+        if (check.found) {
+          return check;
+        }
       }
     }
   }

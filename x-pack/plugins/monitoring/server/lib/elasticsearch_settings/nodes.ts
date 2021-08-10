@@ -6,9 +6,10 @@
  */
 
 import { get } from 'lodash';
+import { LegacyRequest } from '../../types';
 import { findReason } from './find_reason';
 
-export function handleResponse({ nodes = {} } = {}, isCloudEnabled) {
+export function handleResponse({ nodes = {} } = {}, isCloudEnabled: boolean) {
   const nodeIds = Object.keys(nodes);
   for (const nodeId of nodeIds) {
     const nodeSettings = get(nodes, [nodeId, 'settings']);
@@ -31,7 +32,7 @@ export function handleResponse({ nodes = {} } = {}, isCloudEnabled) {
   return { found: false };
 }
 
-export async function checkNodesSettings(req) {
+export async function checkNodesSettings(req: LegacyRequest) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
   const { cloud } = req.server.newPlatform.setup.plugins;
   const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);

@@ -172,3 +172,10 @@ export interface Bucket {
 export interface Aggregation {
   buckets: Bucket[];
 }
+export interface ClusterSettingsReasonResponse {
+  found: boolean;
+  reason?: {
+    property?: string;
+    data?: string;
+  };
+}
