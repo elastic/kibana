@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter, Logger } from 'kibana/server';
 import { ILicenseState } from '../lib';
 import { defineLegacyRoutes } from './legacy';
 import { AlertingRequestHandlerContext } from '../types';
@@ -31,10 +31,11 @@ import { updateRuleApiKeyRoute } from './update_rule_api_key';
 export function defineRoutes(
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState,
+  logger: Logger,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
-  defineLegacyRoutes(router, licenseState, encryptedSavedObjects);
-  createRuleRoute(router, licenseState);
+  defineLegacyRoutes(router, licenseState, logger, encryptedSavedObjects);
+  createRuleRoute(router, licenseState, logger);
   getRuleRoute(router, licenseState);
   updateRuleRoute(router, licenseState);
   deleteRuleRoute(router, licenseState);

@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { Logger } from 'kibana/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
@@ -43,7 +44,11 @@ export const bodySchema = schema.object({
   notifyWhen: schema.nullable(schema.string({ validate: validateNotifyWhenType })),
 });
 
-export const createAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
+export const createAlertRoute = (
+  router: AlertingRouter,
+  licenseState: ILicenseState,
+  logger: Logger
+) => {
   router.post(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id?}`,
@@ -68,6 +73,11 @@ export const createAlertRoute = (router: AlertingRouter, licenseState: ILicenseS
         const params = req.params;
         const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as AlertNotifyWhenType) : null;
         try {
+          if (params?.id) {
+            logger.warn(
+              `POST ${LEGACY_BASE_ALERT_API_PATH}/alert/${params?.id}: Usage of "id" has been deprecated and will be removed in 8.0.0`
+            );
+          }
           const alertRes: SanitizedAlert<AlertTypeParams> = await rulesClient.create<AlertTypeParams>(
             {
               data: { ...alert, notifyWhen },

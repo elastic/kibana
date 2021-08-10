@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter, Logger } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { validateDurationSchema, ILicenseState, AlertTypeDisabledError } from '../lib';
 import { CreateOptions } from '../rules_client';
@@ -95,7 +95,8 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
 
 export const createRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  logger: Logger
 ) => {
   router.post(
     {
@@ -116,6 +117,11 @@ export const createRuleRoute = (
           const rule = req.body;
           const params = req.params;
           try {
+            if (params?.id) {
+              logger.warn(
+                `POST ${BASE_ALERTING_API_PATH}/rule/${params?.id}: Usage of "id" has been deprecated and will be removed in 8.0.0`
+              );
+            }
             const createdRule: SanitizedAlert<AlertTypeParams> = await rulesClient.create<AlertTypeParams>(
               {
                 data: rewriteBodyReq({
