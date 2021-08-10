@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BaseAlert } from './base_alert';
+import { BaseRule } from './base_rule';
 
 jest.mock('../static_globals', () => ({
   Globals: {
@@ -15,10 +15,10 @@ jest.mock('../static_globals', () => ({
   },
 }));
 
-describe('BaseAlert', () => {
+describe('BaseRule', () => {
   describe('create', () => {
-    it('should create an alert if it does not exist', async () => {
-      const alert = new BaseAlert();
+    it('should create a rule if it does not exist', async () => {
+      const rule = new BaseRule();
       const rulesClient = {
         create: jest.fn(),
         find: jest.fn().mockImplementation(() => {
@@ -41,7 +41,7 @@ describe('BaseAlert', () => {
         },
       ];
 
-      await alert.createIfDoesNotExist(rulesClient as any, actionsClient as any, actions);
+      await rule.createIfDoesNotExist(rulesClient as any, actionsClient as any, actions);
       expect(rulesClient.create).toHaveBeenCalledWith({
         data: {
           actions: [
@@ -71,8 +71,8 @@ describe('BaseAlert', () => {
       });
     });
 
-    it('should not create an alert if it exists', async () => {
-      const alert = new BaseAlert();
+    it('should not create a rule if it exists', async () => {
+      const rule = new BaseRule();
       const rulesClient = {
         create: jest.fn(),
         find: jest.fn().mockImplementation(() => {
@@ -96,7 +96,7 @@ describe('BaseAlert', () => {
         },
       ];
 
-      await alert.createIfDoesNotExist(rulesClient as any, actionsClient as any, actions);
+      await rule.createIfDoesNotExist(rulesClient as any, actionsClient as any, actions);
       expect(rulesClient.create).not.toHaveBeenCalled();
     });
   });
@@ -116,8 +116,8 @@ describe('BaseAlert', () => {
       };
       const id = '456def';
       const filters: any[] = [];
-      const alert = new BaseAlert();
-      const states = await alert.getStates(rulesClient as any, id, filters);
+      const rule = new BaseRule();
+      const states = await rule.getStates(rulesClient as any, id, filters);
       expect(states).toStrictEqual({
         abc123: {
           id: 'foobar',
@@ -133,8 +133,8 @@ describe('BaseAlert', () => {
       };
       const id = '456def';
       const filters: any[] = [];
-      const alert = new BaseAlert();
-      const states = await alert.getStates(rulesClient as any, id, filters);
+      const rule = new BaseRule();
+      const states = await rule.getStates(rulesClient as any, id, filters);
       expect(states).toStrictEqual({});
     });
   });

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from 'kibana/server';
-import { BaseAlert } from './base_alert';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -20,8 +20,8 @@ import {
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerting/server';
 import {
-  ALERT_CLUSTER_HEALTH,
-  LEGACY_ALERT_DETAILS,
+  RULE_CLUSTER_HEALTH,
+  LEGACY_RULE_DETAILS,
   INDEX_PATTERN_ELASTICSEARCH,
 } from '../../common/constants';
 import { AlertMessageTokenType, AlertClusterHealthType, AlertSeverity } from '../../common/enums';
@@ -43,11 +43,11 @@ const YELLOW_STATUS_MESSAGE = i18n.translate(
   }
 );
 
-export class ClusterHealthAlert extends BaseAlert {
-  constructor(public rawAlert?: SanitizedAlert) {
-    super(rawAlert, {
-      id: ALERT_CLUSTER_HEALTH,
-      name: LEGACY_ALERT_DETAILS[ALERT_CLUSTER_HEALTH].label,
+export class ClusterHealthRule extends BaseRule {
+  constructor(public sanitizedRule?: SanitizedAlert) {
+    super(sanitizedRule, {
+      id: RULE_CLUSTER_HEALTH,
+      name: LEGACY_RULE_DETAILS[RULE_CLUSTER_HEALTH].label,
       actionVariables: [
         {
           name: 'clusterHealth',

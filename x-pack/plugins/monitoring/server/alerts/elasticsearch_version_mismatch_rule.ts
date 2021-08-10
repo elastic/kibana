@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from 'kibana/server';
-import { BaseAlert } from './base_alert';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -19,9 +19,9 @@ import {
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerting/server';
 import {
-  ALERT_LOGSTASH_VERSION_MISMATCH,
-  LEGACY_ALERT_DETAILS,
-  INDEX_PATTERN_LOGSTASH,
+  RULE_ELASTICSEARCH_VERSION_MISMATCH,
+  LEGACY_RULE_DETAILS,
+  INDEX_PATTERN_ELASTICSEARCH,
 } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
@@ -29,21 +29,21 @@ import { SanitizedAlert } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
-import { fetchLogstashVersions } from '../lib/alerts/fetch_logstash_versions';
+import { fetchElasticsearchVersions } from '../lib/alerts/fetch_elasticsearch_versions';
 
-export class LogstashVersionMismatchAlert extends BaseAlert {
-  constructor(public rawAlert?: SanitizedAlert) {
-    super(rawAlert, {
-      id: ALERT_LOGSTASH_VERSION_MISMATCH,
-      name: LEGACY_ALERT_DETAILS[ALERT_LOGSTASH_VERSION_MISMATCH].label,
+export class ElasticsearchVersionMismatchRule extends BaseRule {
+  constructor(public sanitizedRule?: SanitizedAlert) {
+    super(sanitizedRule, {
+      id: RULE_ELASTICSEARCH_VERSION_MISMATCH,
+      name: LEGACY_RULE_DETAILS[RULE_ELASTICSEARCH_VERSION_MISMATCH].label,
       interval: '1d',
       actionVariables: [
         {
           name: 'versionList',
           description: i18n.translate(
-            'xpack.monitoring.alerts.logstashVersionMismatch.actionVariables.clusterHealth',
+            'xpack.monitoring.alerts.elasticsearchVersionMismatch.actionVariables.clusterHealth',
             {
-              defaultMessage: 'The versions of Logstash running in this cluster.',
+              defaultMessage: 'The versions of Elasticsearch running in this cluster.',
             }
           ),
         },
@@ -58,24 +58,24 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
-    let logstashIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_LOGSTASH);
+    let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
     if (availableCcs) {
-      logstashIndexPattern = getCcsIndexPattern(logstashIndexPattern, availableCcs);
+      esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
-    const logstashVersions = await fetchLogstashVersions(
+    const elasticsearchVersions = await fetchElasticsearchVersions(
       esClient,
       clusters,
-      logstashIndexPattern,
+      esIndexPattern,
       Globals.app.config.ui.max_bucket_size
     );
 
-    return logstashVersions.map((logstashVersion) => {
+    return elasticsearchVersions.map((elasticsearchVersion) => {
       return {
-        shouldFire: logstashVersion.versions.length > 1,
+        shouldFire: elasticsearchVersion.versions.length > 1,
         severity: AlertSeverity.Warning,
-        meta: logstashVersion,
-        clusterUuid: logstashVersion.clusterUuid,
-        ccs: logstashVersion.ccs,
+        meta: elasticsearchVersion,
+        clusterUuid: elasticsearchVersion.clusterUuid,
+        ccs: elasticsearchVersion.ccs,
       };
     });
   }
@@ -83,9 +83,9 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
     const { versions } = item.meta as AlertVersions;
     const text = i18n.translate(
-      'xpack.monitoring.alerts.logstashVersionMismatch.ui.firingMessage',
+      'xpack.monitoring.alerts.elasticsearchVersionMismatch.ui.firingMessage',
       {
-        defaultMessage: `Multiple versions of Logstash ({versions}) running in this cluster.`,
+        defaultMessage: `Multiple versions of Elasticsearch ({versions}) running in this cluster.`,
         values: {
           versions: versions.join(', '),
         },
@@ -112,28 +112,28 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
     const state = alertStates[0];
     const { versions } = state.meta as AlertVersions;
     const shortActionText = i18n.translate(
-      'xpack.monitoring.alerts.logstashVersionMismatch.shortAction',
+      'xpack.monitoring.alerts.elasticsearchVersionMismatch.shortAction',
       {
         defaultMessage: 'Verify you have the same version across all nodes.',
       }
     );
     const fullActionText = i18n.translate(
-      'xpack.monitoring.alerts.logstashVersionMismatch.fullAction',
+      'xpack.monitoring.alerts.elasticsearchVersionMismatch.fullAction',
       {
         defaultMessage: 'View nodes',
       }
     );
     const globalStateLink = this.createGlobalStateLink(
-      'logstash/nodes',
+      'elasticsearch/nodes',
       cluster.clusterUuid,
       state.ccs
     );
     const action = `[${fullActionText}](${globalStateLink})`;
     instance.scheduleActions('default', {
       internalShortMessage: i18n.translate(
-        'xpack.monitoring.alerts.logstashVersionMismatch.firing.internalShortMessage',
+        'xpack.monitoring.alerts.elasticsearchVersionMismatch.firing.internalShortMessage',
         {
-          defaultMessage: `Logstash version mismatch alert is firing for {clusterName}. {shortActionText}`,
+          defaultMessage: `Elasticsearch version mismatch alert is firing for {clusterName}. {shortActionText}`,
           values: {
             clusterName: cluster.clusterName,
             shortActionText,
@@ -141,9 +141,9 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
         }
       ),
       internalFullMessage: i18n.translate(
-        'xpack.monitoring.alerts.logstashVersionMismatch.firing.internalFullMessage',
+        'xpack.monitoring.alerts.elasticsearchVersionMismatch.firing.internalFullMessage',
         {
-          defaultMessage: `Logstash version mismatch alert is firing for {clusterName}. Logstash is running {versions}. {action}`,
+          defaultMessage: `Elasticsearch version mismatch alert is firing for {clusterName}. Elasticsearch is running {versions}. {action}`,
           values: {
             clusterName: cluster.clusterName,
             versions: versions.join(', '),
