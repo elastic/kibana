@@ -8,7 +8,7 @@
 import { buildEsQuery, Query, Filter } from '@kbn/es-query';
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { noop } from 'lodash';
-import { JsonValue } from '@kbn/common-utils';
+import { JsonValue } from '@kbn/utility-types';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { LogEntryCursor } from '../../../common/log_entry';

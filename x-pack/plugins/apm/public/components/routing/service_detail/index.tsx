@@ -67,19 +67,29 @@ export const serviceDetail = {
         serviceName: t.string,
       }),
     }),
-    t.partial({
-      query: t.partial({
-        environment: t.string,
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        comparisonEnabled: t.string,
-        comparisonType: t.string,
-        latencyAggregationType: t.string,
-        transactionType: t.string,
-        kuery: t.string,
-      }),
+    t.type({
+      query: t.intersection([
+        t.type({
+          rangeFrom: t.string,
+          rangeTo: t.string,
+        }),
+        t.partial({
+          environment: t.string,
+          comparisonEnabled: t.string,
+          comparisonType: t.string,
+          latencyAggregationType: t.string,
+          transactionType: t.string,
+          kuery: t.string,
+        }),
+      ]),
     }),
   ]),
+  defaults: {
+    query: {
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+    },
+  },
   children: [
     page({
       path: '/overview',

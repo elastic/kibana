@@ -433,8 +433,6 @@ export interface CoreStart {
     // (undocumented)
     docLinks: DocLinksStart;
     // (undocumented)
-    executionContext: ExecutionContextServiceStart;
-    // (undocumented)
     fatalErrors: FatalErrorsStart;
     // (undocumented)
     http: HttpStart;
@@ -717,11 +715,6 @@ export interface ErrorToastOptions extends ToastOptions {
     toastMessage?: string;
 }
 
-// @public (undocumented)
-export interface ExecutionContextServiceStart {
-    create: (context: KibanaExecutionContext) => IExecutionContextContainer;
-}
-
 // @public
 export interface FatalErrorInfo {
     // (undocumented)
@@ -761,7 +754,7 @@ export interface HttpFetchOptions extends HttpRequestInit {
     asResponse?: boolean;
     asSystemRequest?: boolean;
     // (undocumented)
-    context?: IExecutionContextContainer;
+    context?: KibanaExecutionContext;
     headers?: HttpHeadersInit;
     prependBasePath?: boolean;
     query?: HttpFetchQuery;
@@ -897,14 +890,6 @@ export interface IBasePath {
     readonly serverBasePath: string;
 }
 
-// @public (undocumented)
-export interface IExecutionContextContainer {
-    // (undocumented)
-    toHeader: () => Record<string, string>;
-    // (undocumented)
-    toJSON: () => Readonly<KibanaExecutionContext>;
-}
-
 // @public
 export interface IExternalUrl {
     validateUrl(relativeOrAbsoluteUrl: string): URL | null;
@@ -967,14 +952,15 @@ export interface IUiSettingsClient {
     set: (key: string, value: any) => Promise<boolean>;
 }
 
-// @public (undocumented)
-export interface KibanaExecutionContext {
-    readonly description: string;
-    readonly id: string;
-    readonly name: string;
+// @public
+export type KibanaExecutionContext = {
     readonly type: string;
+    readonly name: string;
+    readonly id: string;
+    readonly description: string;
     readonly url?: string;
-}
+    parent?: KibanaExecutionContext;
+};
 
 // @public
 export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
@@ -1692,6 +1678,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:172:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:168:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { map, mapValues, fromPairs, has } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
 import { RuleTypeRegistry } from '../types';
 import { SecurityPluginSetup } from '../../../security/server';
 import { RegistryRuleType } from '../rule_type_registry';
@@ -282,10 +282,22 @@ export class AlertingAuthorization {
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
     logSuccessfulAuthorization: () => void;
   }> {
+    return this.getAuthorizationFilter(authorizationEntity, filterOpts, ReadOperations.Find);
+  }
+
+  public async getAuthorizationFilter(
+    authorizationEntity: AlertingAuthorizationEntity,
+    filterOpts: AlertingAuthorizationFilterOpts,
+    operation: WriteOperations | ReadOperations
+  ): Promise<{
+    filter?: KueryNode | JsonObject;
+    ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
+    logSuccessfulAuthorization: () => void;
+  }> {
     if (this.authorization && this.shouldCheckAuthorization()) {
       const { username, authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
         this.ruleTypeRegistry.list(),
-        [ReadOperations.Find],
+        [operation],
         authorizationEntity
       );
 
