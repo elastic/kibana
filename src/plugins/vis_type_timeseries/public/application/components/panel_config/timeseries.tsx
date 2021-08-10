@@ -23,6 +23,7 @@ import {
   EuiFieldText,
   EuiTitle,
   EuiHorizontalRule,
+  EuiFieldNumber,
 } from '@elastic/eui';
 
 // @ts-expect-error not typed yet
@@ -352,47 +353,15 @@ export class TimeseriesPanelConfig extends Component<
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormRow
-                  label={i18n.translate('visTypeTimeseries.timeseries.optionsTab.showLegendLabel', {
-                    defaultMessage: 'Show legend?',
-                  })}
-                >
-                  <YesNo
-                    value={model.show_legend}
-                    name="show_legend"
-                    onChange={this.props.onChange}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFormLabel htmlFor={htmlId('legendPos')}>
+                <EuiFormLabel>
                   <FormattedMessage
-                    id="visTypeTimeseries.timeseries.optionsTab.legendPositionLabel"
-                    defaultMessage="Legend position"
+                    id="visTypeTimeseries.timeseries.optionsTab.displayGridLabel"
+                    defaultMessage="Display grid"
                   />
                 </EuiFormLabel>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiComboBox
-                  isClearable={false}
-                  id={htmlId('legendPos')}
-                  options={legendPositionOptions}
-                  selectedOptions={selectedLegendPosOption ? [selectedLegendPosOption] : []}
-                  onChange={handleSelectChange('legend_position')}
-                  singleSelection={{ asPlainText: true }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'visTypeTimeseries.timeseries.optionsTab.displayGridLabel',
-                    {
-                      defaultMessage: 'Display grid',
-                    }
-                  )}
-                >
-                  <YesNo value={model.show_grid} name="show_grid" onChange={this.props.onChange} />
-                </EuiFormRow>
+                <YesNo value={model.show_grid} name="show_grid" onChange={this.props.onChange} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormLabel>
@@ -409,6 +378,76 @@ export class TimeseriesPanelConfig extends Component<
                   options={tooltipModeOptions}
                   selectedOptions={selectedTooltipMode ? [selectedTooltipMode] : []}
                   onChange={handleSelectChange('tooltip_mode')}
+                  singleSelection={{ asPlainText: true }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFlexGroup responsive={false} wrap={true} alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel>
+                  <FormattedMessage
+                    id="visTypeTimeseries.timeseries.optionsTab.showLegendLabel"
+                    defaultMessage="Show legend?"
+                  />
+                </EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <YesNo
+                  value={model.show_legend}
+                  name="show_legend"
+                  onChange={this.props.onChange}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel>
+                  <FormattedMessage
+                    id="visTypeTimeseries.timeseries.optionsTab.truncateLegendLabel"
+                    defaultMessage="Truncate legend?"
+                  />
+                </EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <YesNo
+                  value={model.truncate_legend}
+                  name="truncate_legend"
+                  onChange={this.props.onChange}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel>
+                  <FormattedMessage
+                    id="visTypeTimeseries.timeseries.optionsTab.maxLinesLabel"
+                    defaultMessage="Maximum legend lines"
+                  />
+                </EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFieldNumber
+                  value={model.max_lines_legend}
+                  min={1}
+                  max={5}
+                  compressed
+                  disabled={!Boolean(model.truncate_legend)}
+                  onChange={(e) => {
+                    this.props.onChange({ max_lines_legend: Number(e.target.value) });
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel htmlFor={htmlId('legendPos')}>
+                  <FormattedMessage
+                    id="visTypeTimeseries.timeseries.optionsTab.legendPositionLabel"
+                    defaultMessage="Legend position"
+                  />
+                </EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiComboBox
+                  isClearable={false}
+                  id={htmlId('legendPos')}
+                  options={legendPositionOptions}
+                  selectedOptions={selectedLegendPosOption ? [selectedLegendPosOption] : []}
+                  onChange={handleSelectChange('legend_position')}
                   singleSelection={{ asPlainText: true }}
                 />
               </EuiFlexItem>
