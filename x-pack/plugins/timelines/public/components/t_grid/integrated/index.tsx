@@ -34,7 +34,6 @@ import {
   DataPublicPluginStart,
 } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import { Refetch } from '../../../store/t_grid/inputs';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { calculateTotalPages, combineQueries, resolverIsShowing } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
@@ -42,7 +41,6 @@ import { useTimelineEvents } from '../../../container';
 import { HeaderSection } from '../header_section';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
-import { LastUpdatedAt } from '../..';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem } from '../styles';
 import * as i18n from '../translations';
 import { ExitFullScreen } from '../../exit_full_screen';
@@ -132,7 +130,7 @@ export interface TGridIntegratedProps {
   setGlobalFullScreen: (fullscreen: boolean) => void;
   start: string;
   sort: Sort[];
-  utilityBar?: (refetch: Refetch, totalCount: number) => React.ReactNode;
+  additionalFilters: React.ReactNode;
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId: string | undefined;
   leadingControlColumns?: ControlColumnProps[];
@@ -167,7 +165,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   setGlobalFullScreen,
   start,
   sort,
-  utilityBar,
+  additionalFilters,
   graphEventId,
   leadingControlColumns,
   trailingControlColumns,
@@ -239,7 +237,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const [
     loading,
-    { events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
+    { events, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
     alertConsumers: SECURITY_ALERTS_CONSUMERS,
     docValueFields,
@@ -294,19 +292,17 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               height={
                 headerFilterGroup == null ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT
               }
-              subtitle={utilityBar}
               title={globalFullScreen ? titleWithExitFullScreen : justTitle}
             >
               {HeaderSectionContent}
             </HeaderSection>
-
             <EventsContainerLoading
               data-timeline-id={id}
               data-test-subj={`events-container-loading-${loading}`}
             >
               <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
                 <UpdatedFlexItem grow={false} show={!loading}>
-                  <LastUpdatedAt updatedAt={updatedAt} />
+                  {!resolverIsShowing(graphEventId) && additionalFilters}
                 </UpdatedFlexItem>
               </EuiFlexGroup>
 
