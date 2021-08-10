@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, memo, useContext, useEffect, useState } from 'react';
+import React, { useMemo, useCallback, memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import {
   EuiHorizontalRule,
