@@ -138,8 +138,6 @@ export const buildSignalFromSequence = (
     alertRiskScore: ruleSO.attributes.params.riskScore,
     alertSeverity: ruleSO.attributes.params.severity,
     timestamp,
-    userName: null,
-    hostName: null,
   });
   const signal: Signal = buildSignal(events, rule, reason);
   const mergedEvents = objectArrayIntersection(events.map((event) => event._source));
