@@ -6,6 +6,9 @@ To import geospatical data into the Elastic Stack, the data must be indexed as {
 Geospatial data comes in many formats.
 Choose an import tool based on the format of your geospatial data.
 
+TIP: When you upload GeoJSON or delimited files in {kib}, there is a file size
+limit, which is configurable in <<fileupload-maxfilesize,Advanced Settings>>.
+
 [discrete]
 [[import-geospatial-privileges]]
 === Security privileges
@@ -43,8 +46,6 @@ On the {kib} home page, you can upload a file and import it into an {es} index w
 . If a combined `geo_point` field is not created automatically, click *Add combined field*, then click *Add geo point field*.
 . Fill out the form and click *Add*.
 . Click *Import*.
-
-By default, you can upload a file up to 100 MB. This value is configurable in <<fileupload-maxfilesize,Advanced Settings>>.
 
 [discrete]
 === Upload a GeoJSON file
