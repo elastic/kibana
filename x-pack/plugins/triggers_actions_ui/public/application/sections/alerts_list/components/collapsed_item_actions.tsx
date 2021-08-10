@@ -45,6 +45,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   const button = (
     <EuiButtonIcon
       disabled={!item.isEditable}
+      data-test-subj="collapsedActionsButton"
       iconType="boxesHorizontal"
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       aria-label={i18n.translate(

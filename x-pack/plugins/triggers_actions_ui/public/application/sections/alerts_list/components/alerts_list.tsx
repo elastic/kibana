@@ -464,42 +464,46 @@ export const AlertsList: React.FunctionComponent = () => {
       render(item: AlertTableItem) {
         return (
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
-            <EuiFlexItem grow={false} className="alertSidebarItem">
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    color={'primary'}
-                    title={i18n.translate(
-                      'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editButtonTooltip',
-                      { defaultMessage: 'Edit' }
-                    )}
-                    className="alertSidebarItem__action"
-                    onClick={() => onRuleEdit(item)}
-                    iconType={'pencil'}
-                    aria-label={i18n.translate(
-                      'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editAriaLabel',
-                      { defaultMessage: 'Edit' }
-                    )}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    color={'danger'}
-                    title={i18n.translate(
-                      'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteButtonTooltip',
-                      { defaultMessage: 'Delete' }
-                    )}
-                    className="alertSidebarItem__action"
-                    onClick={() => setAlertsToDelete([item.id])}
-                    iconType={'trash'}
-                    aria-label={i18n.translate(
-                      'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteAriaLabel',
-                      { defaultMessage: 'Delete' }
-                    )}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+            {item.isEditable ? (
+              <EuiFlexItem grow={false} className="alertSidebarItem">
+                <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      color={'primary'}
+                      title={i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editButtonTooltip',
+                        { defaultMessage: 'Edit' }
+                      )}
+                      className="alertSidebarItem__action"
+                      data-test-subj="editActionHoverButton"
+                      onClick={() => onRuleEdit(item)}
+                      iconType={'pencil'}
+                      aria-label={i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editAriaLabel',
+                        { defaultMessage: 'Edit' }
+                      )}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      color={'danger'}
+                      title={i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteButtonTooltip',
+                        { defaultMessage: 'Delete' }
+                      )}
+                      className="alertSidebarItem__action"
+                      data-test-subj="deleteActionHoverButton"
+                      onClick={() => setAlertsToDelete([item.id])}
+                      iconType={'trash'}
+                      aria-label={i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteAriaLabel',
+                        { defaultMessage: 'Delete' }
+                      )}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            ) : null}
             <EuiFlexItem grow={false}>
               <CollapsedItemActions
                 key={item.id}

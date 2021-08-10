@@ -536,11 +536,18 @@ describe('alerts_list with show only capability', () => {
     });
   }
 
+  it('renders table of alerts with edit button disabled', async () => {
+    await setup();
+    expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
+    expect(wrapper.find('EuiTableRow')).toHaveLength(2);
+    expect(wrapper.find('[data-test-subj="editActionHoverButton"]')).toHaveLength(0);
+  });
+
   it('renders table of alerts with delete button disabled', async () => {
     await setup();
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
-    // TODO: check delete button
+    expect(wrapper.find('[data-test-subj="deleteActionHoverButton"]')).toHaveLength(0);
   });
 });
 
