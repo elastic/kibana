@@ -108,6 +108,55 @@ describe('switch', () => {
           expectObservable(fn(context, args)).toBe('(0|)', [result])
         );
       });
+
+      it('should support partial results', () => {
+        testScheduler.run(({ cold, expectObservable }) => {
+          const context = 'foo';
+          const case1 = cold('--ab-c-', {
+            a: {
+              type: 'case',
+              matches: false,
+              result: 1,
+            },
+            b: {
+              type: 'case',
+              matches: true,
+              result: 2,
+            },
+            c: {
+              type: 'case',
+              matches: false,
+              result: 3,
+            },
+          });
+          const case2 = cold('-a--bc-', {
+            a: {
+              type: 'case',
+              matches: true,
+              result: 4,
+            },
+            b: {
+              type: 'case',
+              matches: true,
+              result: 5,
+            },
+            c: {
+              type: 'case',
+              matches: true,
+              result: 6,
+            },
+          });
+          const expected = ' --abc(de)-';
+          const args = { case: [() => case1, () => case2] };
+          expectObservable(fn(context, args)).toBe(expected, {
+            a: 4,
+            b: 2,
+            c: 2,
+            d: 5,
+            e: 6,
+          });
+        });
+      });
     });
   });
 });
