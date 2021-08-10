@@ -12,7 +12,7 @@ import React, { Component } from 'react';
 import { injectI18n, FormattedMessage, InjectedIntlProps } from '@kbn/i18n/react';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { IndexPattern, IFieldType } from '../../../../data/public';
+import { IndexPattern, IndexPatternField } from '../../../../data/public';
 
 interface FieldSelectUiState {
   isLoading: boolean;
@@ -25,7 +25,7 @@ export type FieldSelectUiProps = InjectedIntlProps & {
   indexPatternId: string;
   onChange: (value: any) => void;
   fieldName?: string;
-  filterField?: (field: IFieldType) => boolean;
+  filterField?: (field: IndexPatternField) => boolean;
   controlIndex: number;
 };
 
@@ -96,7 +96,7 @@ class FieldSelectUi extends Component<FieldSelectUiProps, FieldSelectUiState> {
     const fields: Array<EuiComboBoxOptionOption<string>> = [];
     indexPattern.fields
       .filter(this.props.filterField ?? (() => true))
-      .forEach((field: IFieldType) => {
+      .forEach((field: IndexPatternField) => {
         const fieldsList = fieldsByTypeMap.get(field.type) ?? [];
         fieldsList.push(field.name);
         fieldsByTypeMap.set(field.type, fieldsList);

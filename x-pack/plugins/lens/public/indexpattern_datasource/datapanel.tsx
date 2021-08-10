@@ -353,23 +353,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       supportedFieldTypes.has(field.type)
     );
     const sorted = allSupportedTypesFields.sort(sortFields);
-    let groupedFields;
-    // optimization before existingFields are synced
-    if (!hasSyncedExistingFields) {
-      groupedFields = {
-        ...defaultFieldGroups,
-        ...groupBy(sorted, (field) => {
-          if (field.type === 'document') {
-            return 'specialFields';
-          } else if (field.meta) {
-            return 'metaFields';
-          } else {
-            return 'emptyFields';
-          }
-        }),
-      };
-    }
-    groupedFields = {
+    const groupedFields = {
       ...defaultFieldGroups,
       ...groupBy(sorted, (field) => {
         if (field.type === 'document') {
@@ -461,7 +445,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     return fieldGroupDefinitions;
   }, [
     allFields,
-    hasSyncedExistingFields,
     fieldInfoUnavailable,
     filters.length,
     existenceFetchTimeout,
