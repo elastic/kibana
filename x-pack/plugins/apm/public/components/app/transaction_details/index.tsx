@@ -64,6 +64,9 @@ function TraceSamplesTab({
             ? [sampleRangeFrom, sampleRangeTo]
             : undefined
         }
+        markerCurrentTransaction={
+          waterfall.entryWaterfallTransaction?.doc.transaction.duration.us
+        }
       />
       <EuiSpacer size="s" />
 

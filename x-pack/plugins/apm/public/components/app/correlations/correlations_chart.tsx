@@ -26,6 +26,8 @@ import {
 
 import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 
+import { euiPaletteColorBlind } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { getDurationFormatter } from '../../../../common/utils/formatters';
@@ -83,6 +85,7 @@ interface CorrelationsChartProps {
   field?: string;
   value?: string;
   histogram?: HistogramItem[];
+  markerCurrentTransaction?: number;
   markerValue: number;
   markerPercentile: number;
   overallHistogram?: HistogramItem[];
@@ -90,20 +93,20 @@ interface CorrelationsChartProps {
   selection?: [number, number];
 }
 
-const annotationsStyle = {
+const getAnnotationsStyle = (color = 'gray') => ({
   line: {
     strokeWidth: 1,
-    stroke: 'gray',
+    stroke: color,
     opacity: 0.8,
   },
   details: {
     fontSize: 8,
     fontFamily: 'Arial',
     fontStyle: 'normal',
-    fill: 'gray',
+    fill: color,
     padding: 0,
   },
-};
+});
 
 const CHART_PLACEHOLDER_VALUE = 0.0001;
 
@@ -133,6 +136,7 @@ export function CorrelationsChart({
   field,
   value,
   histogram: originalHistogram,
+  markerCurrentTransaction,
   markerValue,
   markerPercentile,
   overallHistogram,
@@ -218,11 +222,36 @@ export function CorrelationsChart({
               hideTooltips={true}
             />
           )}
+          {typeof markerCurrentTransaction === 'number' && (
+            <LineAnnotation
+              id="annotation_current_transaction"
+              domainType={AnnotationDomainType.XDomain}
+              dataValues={[
+                {
+                  dataValue: markerCurrentTransaction,
+                  details: i18n.translate(
+                    'xpack.apm.correlations.latency.chart.currentTransactionMarkerLabel',
+                    {
+                      defaultMessage: 'Current sample',
+                    }
+                  ),
+                },
+              ]}
+              style={getAnnotationsStyle(euiPaletteColorBlind()[0])}
+              marker={i18n.translate(
+                'xpack.apm.correlations.latency.chart.currentTransactionMarkerLabel',
+                {
+                  defaultMessage: 'Current sample',
+                }
+              )}
+              markerPosition={'top'}
+            />
+          )}
           <LineAnnotation
             id="annotation_1"
             domainType={AnnotationDomainType.XDomain}
             dataValues={annotationsDataValues}
-            style={annotationsStyle}
+            style={getAnnotationsStyle()}
             marker={`${markerPercentile}p`}
             markerPosition={'top'}
           />

@@ -63,6 +63,7 @@ interface MlCorrelationsTerms {
 
 interface Props {
   correlationAnalysisEnabled: boolean;
+  markerCurrentTransaction?: number;
   onChartSelection?: BrushEndListener;
   onClearSelection?: () => void;
   selection?: [number, number];
@@ -70,6 +71,7 @@ interface Props {
 
 export function MlLatencyCorrelations({
   correlationAnalysisEnabled,
+  markerCurrentTransaction,
   onChartSelection,
   onClearSelection,
   selection,
@@ -373,6 +375,7 @@ export function MlLatencyCorrelations({
       <EuiSpacer size="s" />
 
       <CorrelationsChart
+        markerCurrentTransaction={markerCurrentTransaction}
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
         markerValue={percentileThresholdValue ?? 0}
         {...selectedHistogram}
