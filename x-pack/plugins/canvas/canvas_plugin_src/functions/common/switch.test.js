@@ -56,25 +56,6 @@ describe('switch', () => {
   });
 
   describe('function', () => {
-    describe('with no cases', () => {
-      it('should return the context if no default is provided', () => {
-        const context = 'foo';
-
-        testScheduler.run(({ expectObservable }) =>
-          expectObservable(fn(context, {})).toBe('(0|)', [context])
-        );
-      });
-
-      it('should return the default if provided', () => {
-        const context = 'foo';
-        const args = { default: () => of('bar') };
-
-        testScheduler.run(({ expectObservable }) =>
-          expectObservable(fn(context, args)).toBe('(0|)', ['bar'])
-        );
-      });
-    });
-
     describe('with no matching cases', () => {
       it('should return the context if no default is provided', () => {
         const context = 'foo';

@@ -12,7 +12,7 @@ import { Case } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
-  case?: Array<() => Observable<Case>>;
+  case: Array<() => Observable<Case>>;
   default?(): Observable<any>;
 }
 
@@ -43,10 +43,7 @@ export function switchFn(): ExpressionFunctionDefinition<
       },
     },
     fn(input, args) {
-      const cases = args.case?.map((item) => defer(() => item())) ?? [];
-      const cases$ = cases.length ? combineLatest(cases) : of([]);
-
-      return cases$.pipe(
+      return combineLatest(args.case.map((item) => defer(() => item()))).pipe(
         concatMap((items) => {
           const item = items.find(({ matches }) => matches);
           const item$ = item && of(item.result);
