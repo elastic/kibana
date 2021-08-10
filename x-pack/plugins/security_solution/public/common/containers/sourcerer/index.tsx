@@ -32,9 +32,7 @@ export const useInitSourcerer = (
     []
   );
   const defaultIndexPattern = useDeepEqualSelector(getDefaultIndexPatternSelector);
-  // const kibanaIndexPatterns = useDeepEqualSelector(
-  //   sourcererSelectors.sourcererKibanaIndexPatternsSelector()
-  // );
+
   const { addError } = useAppToasts();
 
   useEffect(() => {
@@ -67,7 +65,7 @@ export const useInitSourcerer = (
   );
 
   useIndexFields(scopeId);
-  useIndexFields(SourcererScopeName.timeline);
+  // useIndexFields(SourcererScopeName.timeline);
 
   useEffect(() => {
     if (!loadingSignalIndex && signalIndexName != null && signalIndexNameSelector == null) {

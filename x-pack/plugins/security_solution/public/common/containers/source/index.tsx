@@ -27,6 +27,7 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { DocValueFields } from '../../../../common/search_strategy/common';
 import { useAppToasts } from '../../hooks/use_app_toasts';
+import { SelectedKip } from '../../store/sourcerer/selectors';
 
 export { BrowserField, BrowserFields, DocValueFields };
 
@@ -161,7 +162,7 @@ export const useFetchIndex = (
 
                 previousIndexesName.current = response.indicesExist;
                 setLoading(false);
-
+                // TODO: Steph/sourcerer IMO all the below formatting should be happening serverside. follow up with X
                 setState({
                   browserFields: getBrowserFields(stringifyIndices, response.indexFields),
                   docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
@@ -211,11 +212,10 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const dispatch = useDispatch();
-  const indexNamesSelectedSelector = useMemo(() => sourcererSelectors.getSelectedKipSelector(), []);
-  const { kipId, indexNames } = useDeepEqualSelector<{
-    kipId: string;
-    indexNames: string[];
-  }>((state) => indexNamesSelectedSelector(state, sourcererScopeName));
+  const getSelectedKip = useMemo(() => sourcererSelectors.getSelectedKipSelector(), []);
+  const { kipId, patternList, selectedPatterns } = useDeepEqualSelector<SelectedKip>((state) =>
+    getSelectedKip(state, sourcererScopeName)
+  );
   const { addError, addWarning } = useAppToasts();
 
   const setLoading = useCallback(
@@ -226,13 +226,13 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   );
 
   const indexFieldsSearch = useCallback(
-    (selectedKipId: string, selectedPatterns: string[]) => {
+    (selectedKipId: string) => {
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
         searchSubscription$.current = data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-            { kipId: selectedKipId, indices: selectedPatterns, onlyCheckIfIndicesExist: false },
+            { kipId: selectedKipId, indices: patternList, onlyCheckIfIndicesExist: false },
             {
               abortSignal: abortCtrl.current.signal,
               strategy: 'indexFields',
@@ -241,19 +241,26 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                const stringifyIndices = response.indicesExist.sort().join();
+                const selectablePatterns = response.indicesExist;
+                // ensures all selected patterns are selectable
+                const newSelectedPatterns = selectedPatterns.filter((pattern) =>
+                  selectablePatterns.includes(pattern)
+                );
+                const patternString = newSelectedPatterns.sort().join();
                 dispatch(
                   sourcererActions.setSource({
                     id: sourcererScopeName,
                     payload: {
-                      browserFields: getBrowserFields(stringifyIndices, response.indexFields),
-                      docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
+                      // TODO: Steph/sourcerer IMO all the below formatting should be happening serverside. follow up with X
+                      browserFields: getBrowserFields(patternString, response.indexFields),
+                      docValueFields: getDocValueFields(patternString, response.indexFields),
                       errorMessage: null,
                       id: sourcererScopeName,
-                      indexPattern: getIndexFields(stringifyIndices, response.indexFields),
-                      indicesExist: response.indicesExist.length > 0,
+                      indexPattern: getIndexFields(patternString, response.indexFields),
+                      indicesExist: selectablePatterns.length > 0,
                       loading: false,
-                      selectedPatterns,
+                      selectedPatterns: newSelectedPatterns,
+                      selectablePatterns,
                       selectedKipId,
                     },
                   })
@@ -278,16 +285,26 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
       abortCtrl.current.abort();
       asyncSearch();
     },
-    [data.search, dispatch, addError, addWarning, setLoading, sourcererScopeName]
+    [
+      setLoading,
+      data.search,
+      patternList,
+      dispatch,
+      sourcererScopeName,
+      selectedPatterns,
+      addWarning,
+      addError,
+    ]
   );
-
+  const refKipId = useRef('');
   useEffect(() => {
-    if (kipId != null) {
-      indexFieldsSearch(kipId, indexNames);
+    if (kipId != null && kipId !== refKipId.current) {
+      indexFieldsSearch(kipId);
     }
+    refKipId.current = kipId;
     return () => {
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
-  }, [kipId, indexNames, indexFieldsSearch]);
+  }, [kipId]);
 };

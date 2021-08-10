@@ -15,7 +15,7 @@ import {
   SourcererScopeById,
   SourcererScopeName,
 } from './model';
-import { getPatternList } from './helpers';
+import { getPatternList, getScopePatternListSelection } from './helpers';
 
 export const sourcererKibanaIndexPatternsSelector = ({ sourcerer }: State): KibanaIndexPatterns =>
   sourcerer.kibanaIndexPatterns;
@@ -50,7 +50,6 @@ export const defaultIndexPatternSelector = () =>
 export const getIndexNamesSelectedSelector = () => {
   const getScopeSelector = scopeIdSelector();
   const getDefaultIndexPatternSelector = defaultIndexPatternSelector();
-
   return (
     state: State,
     scopeId: SourcererScopeName
@@ -66,23 +65,33 @@ export const getIndexNamesSelectedSelector = () => {
     };
   };
 };
-interface SelectedKip {
+export interface SelectedKip {
   kipId: string;
-  indexNames: string[];
+  patternList: string[];
+  selectedPatterns: string[];
 }
 export const getSelectedKipSelector = () => {
   const getScopeSelector = scopeIdSelector();
   const getDefaultIndexPatternSelector = defaultIndexPatternSelector();
+  const getKibanaIndexPatternsSelector = kibanaIndexPatternsSelector();
 
   return (state: State, scopeId: SourcererScopeName): SelectedKip => {
     const scope = getScopeSelector(state, scopeId);
     const defaultIndexPattern = getDefaultIndexPatternSelector(state);
+    const kibanaIndexPatterns = getKibanaIndexPatternsSelector(state);
+    const kipId = scope.selectedKipId === null ? defaultIndexPattern.id : scope.selectedKipId;
+    const patternList =
+      scope.selectedPatterns.length === 0
+        ? getPatternList(defaultIndexPattern)
+        : scope.selectedPatterns;
+    const selectedPatterns =
+      scope.selectedPatterns.length === 0
+        ? getScopePatternListSelection(kibanaIndexPatterns, kipId, scopeId)
+        : scope.selectedPatterns;
     return {
-      kipId: scope.selectedKipId === null ? defaultIndexPattern.id : scope.selectedKipId,
-      indexNames:
-        scope.selectedPatterns.length === 0
-          ? getPatternList(defaultIndexPattern)
-          : scope.selectedPatterns,
+      kipId,
+      patternList,
+      selectedPatterns,
     };
   };
 };

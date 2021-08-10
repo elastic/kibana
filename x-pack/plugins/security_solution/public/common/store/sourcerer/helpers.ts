@@ -17,7 +17,7 @@ export interface Args {
   state: SourcererModel;
 }
 
-export const getPatternList = (kip: KibanaIndexPattern): string[] => [kip.title]; // kip.title.split(','); // TODO: Steph/sourcerer implement splitting KIPs
+export const getPatternList = (kip: KibanaIndexPattern): string[] => kip.title.split(',');
 
 export const getScopePatternListSelection = (
   kibanaIndexPatterns: KibanaIndexPattern[],

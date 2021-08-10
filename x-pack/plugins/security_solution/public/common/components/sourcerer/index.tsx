@@ -50,22 +50,23 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     State,
     SourcererScopeSelector
   >((state) => sourcererScopeSelector(state, scopeId), deepEqual);
-  const { selectedKipId, selectedPatterns, loading } = sourcererScope;
+  const { selectedKipId, selectablePatterns, selectedPatterns, loading } = sourcererScope;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
   const [selectedOption, setSelectedOption] = useState<string>(selectedKipId ?? '');
-  const selectablePatternList = useMemo(() => {
+  const patternList = useMemo(() => {
     const theKip = kibanaIndexPatterns.find((kip) => kip.id === selectedOption);
     return theKip != null ? theKip.title.split(',') : [];
   }, [kibanaIndexPatterns, selectedOption]);
 
   const selectableOptions = useMemo(
     () =>
-      selectablePatternList.map((indexName) => ({
+      patternList.map((indexName) => ({
         label: indexName,
         value: indexName,
+        disabled: !selectablePatterns.includes(indexName),
       })),
-    [selectablePatternList]
+    [selectablePatterns, patternList]
   );
 
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(

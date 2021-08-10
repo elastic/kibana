@@ -40,19 +40,15 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       },
     },
   }))
-  .case(setSelectedKip, (state, { id, selectedKipId, selectedPatterns, eventType }) => {
-    const sPatterns =
-      selectedPatterns != null
-        ? selectedPatterns
-        : getScopePatternListSelection(state.kibanaIndexPatterns, selectedKipId, id);
+  .case(setSelectedKip, (state, payload) => {
+    const { id, eventType, ...rest } = payload;
     return {
       ...state,
       sourcererScopes: {
         ...state.sourcererScopes,
         [id]: {
           ...state.sourcererScopes[id],
-          selectedKipId,
-          selectedPatterns: sPatterns, // TODO: Steph/sourcerer createDefaultIndexPatterns({ eventType, id, selectedPatterns, state }),
+          ...rest, // TODO: Steph/sourcerer createDefaultIndexPatterns({ eventType, id, selectedPatterns, state }),
         },
       },
     };
