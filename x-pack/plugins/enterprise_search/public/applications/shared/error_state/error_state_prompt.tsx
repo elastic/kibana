@@ -13,7 +13,6 @@ import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { KibanaLogic } from '../kibana';
-import { BetaNotification } from '../layout/beta';
 import { EuiButtonTo } from '../react_router_helpers';
 
 import './error_state_prompt.scss';
@@ -100,7 +99,6 @@ export const ErrorStatePrompt: React.FC = () => {
             defaultMessage="Review setup guide"
           />
         </EuiButtonTo>,
-        <BetaNotification buttonProps={{ size: 'm', flush: undefined }} />,
       ]}
     />
   );
