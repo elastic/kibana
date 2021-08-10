@@ -15,5 +15,4 @@ export * from './capabilities';
 export * from './app_category';
 export * from './ui_settings';
 export * from './saved_objects';
-export * from './serializable';
 export type { KibanaExecutionContext } from './execution_context';
