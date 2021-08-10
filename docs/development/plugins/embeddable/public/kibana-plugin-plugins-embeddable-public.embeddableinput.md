@@ -13,10 +13,11 @@ export declare type EmbeddableInput = {
     id: string;
     lastReloadRequestTime?: number;
     hidePanelTitles?: boolean;
-    enhancements?: SerializableState;
+    enhancements?: SerializableRecord;
     disabledActions?: string[];
     disableTriggers?: boolean;
     searchSessionId?: string;
     syncColors?: boolean;
+    executionContext?: KibanaExecutionContext;
 };
 ```

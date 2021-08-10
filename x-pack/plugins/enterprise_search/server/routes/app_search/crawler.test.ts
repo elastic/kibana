@@ -318,4 +318,51 @@ describe('crawler routes', () => {
       mockRouter.shouldThrow(request);
     });
   });
+
+  describe('POST /api/app_search/engines/{name}/crawler/process_crawls', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/app_search/engines/{name}/crawler/process_crawls',
+      });
+
+      registerCrawlerRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v0/engines/:name/crawler/process_crawls',
+      });
+    });
+
+    it('validates correctly', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        body: { domains: ['https://elastic.co', 'https://swiftype.com'] },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validates correctly without body', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        body: {},
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without a name param', () => {
+      const request = {
+        params: {},
+        body: { domains: ['https://elastic.co', 'https://swiftype.com'] },
+      };
+      mockRouter.shouldThrow(request);
+    });
+  });
 });
