@@ -100,6 +100,7 @@ const createExecutionHandlerParams: jest.Mocked<
   },
   supportsEphemeralTasks: false,
   maxEphemeralActionsPerAlert: Promise.resolve(10),
+  alertConsumer: 'my-consumer',
 };
 
 beforeEach(() => {
@@ -176,6 +177,7 @@ test('enqueues execution per selected action', async () => {
             "alerting": Object {
               "action_group_id": "default",
               "action_subgroup": undefined,
+              "consumer": "my-consumer",
               "instance_id": "2",
             },
             "saved_objects": Array [
@@ -192,6 +194,9 @@ test('enqueues execution per selected action', async () => {
                 "type": "action",
                 "type_id": "test",
               },
+            ],
+            "space_ids": Array [
+              "test1",
             ],
           },
           "message": "alert: test:1: 'name-of-alert' instanceId: '2' scheduled actionGroup: 'default' action: test:1",

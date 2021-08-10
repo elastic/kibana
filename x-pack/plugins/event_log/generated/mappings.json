@@ -237,6 +237,13 @@
                     "type": "keyword",
                     "ignore_above": 1024
                 },
+                "space_ids": {
+                    "type": "keyword",
+                    "ignore_above": 1024,
+                    "meta": {
+                        "isArray": "true"
+                    }
+                },
                 "task": {
                     "properties": {
                         "scheduled": {
@@ -262,6 +269,10 @@
                             "ignore_above": 1024
                         },
                         "status": {
+                            "type": "keyword",
+                            "ignore_above": 1024
+                        },
+                        "consumer": {
                             "type": "keyword",
                             "ignore_above": 1024
                         }

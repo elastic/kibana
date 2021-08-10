@@ -170,7 +170,8 @@ export class TaskRunner<
     apiKey: RawAlert['apiKey'],
     kibanaBaseUrl: string | undefined,
     actions: Alert<Params>['actions'],
-    alertParams: Params
+    alertParams: Params,
+    alertConsumer: string
   ) {
     return createExecutionHandler<
       Params,
@@ -196,6 +197,7 @@ export class TaskRunner<
       alertParams,
       supportsEphemeralTasks: this.context.supportsEphemeralTasks,
       maxEphemeralActionsPerAlert: this.context.maxEphemeralActionsPerAlert,
+      alertConsumer,
     });
   }
 
@@ -361,6 +363,7 @@ export class TaskRunner<
       alertId,
       alertLabel,
       namespace,
+      spaceIds: [spaceId],
       ruleType: alertType,
       rule: alert,
     });
@@ -451,7 +454,8 @@ export class TaskRunner<
       apiKey,
       this.context.kibanaBaseUrl,
       alert.actions,
-      alert.params
+      alert.params,
+      alert.consumer
     );
     return this.executeAlertInstances(
       services,
@@ -503,7 +507,7 @@ export class TaskRunner<
 
   async run(): Promise<AlertTaskRunResult> {
     const {
-      params: { alertId, spaceId },
+      params: { alertId, spaceId, alertConsumer },
       startedAt,
       state: originalState,
       schedule: taskSchedule,
@@ -526,6 +530,10 @@ export class TaskRunner<
         category: [this.alertType.producer],
       },
       kibana: {
+        space_ids: [spaceId],
+        alerting: {
+          consumer: alertConsumer,
+        },
         saved_objects: [
           {
             rel: SAVED_OBJECT_REL_PRIMARY,
@@ -717,6 +725,7 @@ interface GenerateNewAndRecoveredInstanceEventsParams<
   alertId: string;
   alertLabel: string;
   namespace: string | undefined;
+  spaceIds: string[];
   ruleType: NormalizedAlertType<
     AlertTypeParams,
     AlertTypeParams,
@@ -741,6 +750,7 @@ function generateNewAndRecoveredInstanceEvents<
     eventLogger,
     alertId,
     namespace,
+    spaceIds,
     currentAlertInstances,
     originalAlertInstances,
     recoveredAlertInstances,
@@ -762,6 +772,7 @@ function generateNewAndRecoveredInstanceEvents<
       EVENT_LOG_ACTIONS.recoveredInstance,
       message,
       state,
+      rule.consumer,
       actionGroup,
       actionSubgroup
     );
@@ -777,6 +788,7 @@ function generateNewAndRecoveredInstanceEvents<
       EVENT_LOG_ACTIONS.newInstance,
       message,
       state,
+      rule.consumer,
       actionGroup,
       actionSubgroup
     );
@@ -796,6 +808,7 @@ function generateNewAndRecoveredInstanceEvents<
       EVENT_LOG_ACTIONS.activeInstance,
       message,
       state,
+      rule.consumer,
       actionGroup,
       actionSubgroup
     );
@@ -806,6 +819,7 @@ function generateNewAndRecoveredInstanceEvents<
     action: string,
     message: string,
     state: InstanceState,
+    consumer: string,
     group?: string,
     subgroup?: string
   ) {
@@ -819,7 +833,9 @@ function generateNewAndRecoveredInstanceEvents<
         ...(state?.duration !== undefined ? { duration: state.duration as number } : {}),
       },
       kibana: {
+        space_ids: spaceIds,
         alerting: {
+          consumer,
           instance_id: instanceId,
           ...(group ? { action_group_id: group } : {}),
           ...(subgroup ? { action_subgroup: subgroup } : {}),

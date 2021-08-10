@@ -74,6 +74,8 @@ describe('Task Runner', () => {
       taskType: 'alerting:test',
       params: {
         alertId: '1',
+        alertConsumer: 'bar',
+        spaceId: 'default',
       },
       ownerId: null,
     };
@@ -306,6 +308,9 @@ describe('Task Runner', () => {
           "kind": "alert",
         },
         "kibana": Object {
+          "alerting": Object {
+            "consumer": "bar",
+          },
           "saved_objects": Array [
             Object {
               "id": "1",
@@ -314,6 +319,9 @@ describe('Task Runner', () => {
               "type": "alert",
               "type_id": "test",
             },
+          ],
+          "space_ids": Array [
+            "default",
           ],
           "task": Object {
             "schedule_delay": 0,
@@ -424,7 +432,7 @@ describe('Task Runner', () => {
             },
             "type": "SAVED_OBJECT",
           },
-          "spaceId": undefined,
+          "spaceId": "default",
         },
       ]
     `);
@@ -456,6 +464,10 @@ describe('Task Runner', () => {
             schedule_delay: 0,
             scheduled: '1970-01-01T00:00:00.000Z',
           },
+          space_ids: ['default'],
+          alerting: {
+            consumer: 'bar',
+          },
           saved_objects: [
             {
               id: '1',
@@ -483,10 +495,12 @@ describe('Task Runner', () => {
           start: '1970-01-01T00:00:00.000Z',
         },
         kibana: {
+          space_ids: ['default'],
           alerting: {
             action_group_id: 'default',
             action_subgroup: 'subDefault',
             instance_id: '1',
+            consumer: 'bar',
           },
           saved_objects: [
             {
@@ -504,7 +518,6 @@ describe('Task Runner', () => {
           id: '1',
           license: 'basic',
           name: 'alert-name',
-          namespace: undefined,
           ruleset: 'alerts',
         },
       });
@@ -517,7 +530,13 @@ describe('Task Runner', () => {
           start: '1970-01-01T00:00:00.000Z',
         },
         kibana: {
-          alerting: { action_group_id: 'default', action_subgroup: 'subDefault', instance_id: '1' },
+          alerting: {
+            action_group_id: 'default',
+            action_subgroup: 'subDefault',
+            instance_id: '1',
+            consumer: 'bar',
+          },
+          space_ids: ['default'],
           saved_objects: [
             { id: '1', namespace: undefined, rel: 'primary', type: 'alert', type_id: 'test' },
           ],
@@ -529,7 +548,6 @@ describe('Task Runner', () => {
           id: '1',
           license: 'basic',
           name: 'alert-name',
-          namespace: undefined,
           ruleset: 'alerts',
         },
       });
@@ -544,18 +562,18 @@ describe('Task Runner', () => {
             instance_id: '1',
             action_group_id: 'default',
             action_subgroup: 'subDefault',
+            consumer: 'bar',
           },
+          space_ids: ['default'],
           saved_objects: [
             {
               id: '1',
-              namespace: undefined,
               rel: 'primary',
               type: 'alert',
               type_id: 'test',
             },
             {
               id: '1',
-              namespace: undefined,
               type: 'action',
               type_id: 'action',
             },
@@ -568,7 +586,6 @@ describe('Task Runner', () => {
           id: '1',
           license: 'basic',
           name: 'alert-name',
-          namespace: undefined,
           ruleset: 'alerts',
         },
       });
@@ -577,12 +594,14 @@ describe('Task Runner', () => {
         event: { action: 'execute', category: ['alerts'], kind: 'alert', outcome: 'success' },
         kibana: {
           alerting: {
+            consumer: 'bar',
             status: 'active',
           },
           task: {
             schedule_delay: 0,
             scheduled: '1970-01-01T00:00:00.000Z',
           },
+          space_ids: ['default'],
           saved_objects: [
             {
               id: '1',
@@ -672,6 +691,10 @@ describe('Task Runner', () => {
           schedule_delay: 0,
           scheduled: '1970-01-01T00:00:00.000Z',
         },
+        space_ids: ['default'],
+        alerting: {
+          consumer: 'bar',
+        },
         saved_objects: [
           {
             id: '1',
@@ -699,8 +722,10 @@ describe('Task Runner', () => {
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        space_ids: ['default'],
         alerting: {
           action_group_id: 'default',
+          consumer: 'bar',
           instance_id: '1',
         },
         saved_objects: [
@@ -719,7 +744,6 @@ describe('Task Runner', () => {
         id: '1',
         license: 'basic',
         name: 'alert-name',
-        namespace: undefined,
         ruleset: 'alerts',
       },
     });
@@ -732,9 +756,11 @@ describe('Task Runner', () => {
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        space_ids: ['default'],
         alerting: {
           instance_id: '1',
           action_group_id: 'default',
+          consumer: 'bar',
         },
         saved_objects: [
           {
@@ -752,7 +778,6 @@ describe('Task Runner', () => {
         id: '1',
         license: 'basic',
         name: 'alert-name',
-        namespace: undefined,
         ruleset: 'alerts',
       },
     });
@@ -765,8 +790,10 @@ describe('Task Runner', () => {
         outcome: 'success',
       },
       kibana: {
+        space_ids: ['default'],
         alerting: {
           status: 'active',
+          consumer: 'bar',
         },
         task: {
           schedule_delay: 0,
@@ -927,6 +954,9 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alerting": Object {
+                "consumer": "bar",
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -935,6 +965,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -964,6 +997,7 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
+                "consumer": "bar",
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -974,6 +1008,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
@@ -999,6 +1036,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "consumer": "bar",
                 "status": "active",
               },
               "saved_objects": Array [
@@ -1009,6 +1047,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -1241,7 +1282,7 @@ describe('Task Runner', () => {
             },
             "type": "SAVED_OBJECT",
           },
-          "spaceId": undefined,
+          "spaceId": "default",
         },
       ]
     `);
@@ -1262,6 +1303,9 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alerting": Object {
+                "consumer": "bar",
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -1270,6 +1314,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -1299,6 +1346,7 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
+                "consumer": "bar",
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -1309,6 +1357,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "test:1: 'alert-name' created new instance: '1'",
@@ -1335,6 +1386,7 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
+                "consumer": "bar",
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -1345,6 +1397,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
@@ -1370,22 +1425,24 @@ describe('Task Runner', () => {
               "alerting": Object {
                 "action_group_id": "default",
                 "action_subgroup": undefined,
+                "consumer": "bar",
                 "instance_id": "1",
               },
               "saved_objects": Array [
                 Object {
                   "id": "1",
-                  "namespace": undefined,
                   "rel": "primary",
                   "type": "alert",
                   "type_id": "test",
                 },
                 Object {
                   "id": "1",
-                  "namespace": undefined,
                   "type": "action",
                   "type_id": "action",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: action:1",
@@ -1411,6 +1468,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "consumer": "bar",
                 "status": "active",
               },
               "saved_objects": Array [
@@ -1421,6 +1479,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -1558,6 +1619,9 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alerting": Object {
+                "consumer": "bar",
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -1566,6 +1630,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -1595,6 +1662,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "consumer": "bar",
                 "instance_id": "2",
               },
               "saved_objects": Array [
@@ -1605,6 +1673,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "test:1: 'alert-name' instance '2' has recovered",
@@ -1631,6 +1702,7 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
+                "consumer": "bar",
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -1641,6 +1713,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
@@ -1666,22 +1741,24 @@ describe('Task Runner', () => {
               "alerting": Object {
                 "action_group_id": "recovered",
                 "action_subgroup": undefined,
+                "consumer": "bar",
                 "instance_id": "2",
               },
               "saved_objects": Array [
                 Object {
                   "id": "1",
-                  "namespace": undefined,
                   "rel": "primary",
                   "type": "alert",
                   "type_id": "test",
                 },
                 Object {
                   "id": "2",
-                  "namespace": undefined,
                   "type": "action",
                   "type_id": "action",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "alert: test:1: 'alert-name' instanceId: '2' scheduled actionGroup: 'recovered' action: action:2",
@@ -1707,22 +1784,24 @@ describe('Task Runner', () => {
               "alerting": Object {
                 "action_group_id": "default",
                 "action_subgroup": undefined,
+                "consumer": "bar",
                 "instance_id": "1",
               },
               "saved_objects": Array [
                 Object {
                   "id": "1",
-                  "namespace": undefined,
                   "rel": "primary",
                   "type": "alert",
                   "type_id": "test",
                 },
                 Object {
                   "id": "1",
-                  "namespace": undefined,
                   "type": "action",
                   "type_id": "action",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: action:1",
@@ -1748,6 +1827,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "consumer": "bar",
                 "status": "active",
               },
               "saved_objects": Array [
@@ -1758,6 +1838,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -1801,7 +1884,7 @@ describe('Task Runner', () => {
             },
             "type": "SAVED_OBJECT",
           },
-          "spaceId": undefined,
+          "spaceId": "default",
         },
       ]
     `);
@@ -1852,6 +1935,8 @@ describe('Task Runner', () => {
           },
           params: {
             alertId,
+            alertConsumer: 'my-consumer',
+            spaceId: 'default',
           },
         },
         customTaskRunnerFactoryInitializerParams
@@ -2030,7 +2115,7 @@ describe('Task Runner', () => {
             },
             "type": "SAVED_OBJECT",
           },
-          "spaceId": undefined,
+          "spaceId": "default",
         },
       ]
     `);
@@ -2125,6 +2210,9 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alerting": Object {
+                "consumer": "bar",
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2133,6 +2221,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -2163,6 +2254,7 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
+                "consumer": "bar",
                 "instance_id": "2",
               },
               "saved_objects": Array [
@@ -2173,6 +2265,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "test:1: 'alert-name' instance '2' has recovered",
@@ -2199,6 +2294,7 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
+                "consumer": "bar",
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -2209,6 +2305,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
@@ -2234,6 +2333,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "consumer": "bar",
                 "status": "active",
               },
               "saved_objects": Array [
@@ -2244,6 +2344,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -2461,6 +2564,9 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alerting": Object {
+                "consumer": "bar",
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2469,6 +2575,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -2501,6 +2610,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "consumer": "bar",
                 "status": "error",
               },
               "saved_objects": Array [
@@ -2511,6 +2621,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -2570,6 +2683,9 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alerting": Object {
+                "consumer": "bar",
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2578,6 +2694,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -2610,6 +2729,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "consumer": "bar",
                 "status": "error",
               },
               "saved_objects": Array [
@@ -2620,6 +2740,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -2687,6 +2810,9 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alerting": Object {
+                "consumer": "bar",
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2695,6 +2821,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -2727,6 +2856,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "consumer": "bar",
                 "status": "error",
               },
               "saved_objects": Array [
@@ -2737,6 +2867,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -2804,6 +2937,9 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alerting": Object {
+                "consumer": "bar",
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2812,6 +2948,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -2844,6 +2983,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "consumer": "bar",
                 "status": "error",
               },
               "saved_objects": Array [
@@ -2854,6 +2994,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -2920,6 +3063,9 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alerting": Object {
+                "consumer": "bar",
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2928,6 +3074,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -2960,6 +3109,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "consumer": "bar",
                 "status": "error",
               },
               "saved_objects": Array [
@@ -2970,6 +3120,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -3210,6 +3363,9 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alerting": Object {
+                "consumer": "bar",
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -3218,6 +3374,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -3247,6 +3406,7 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
+                "consumer": "bar",
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -3257,6 +3417,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "test:1: 'alert-name' created new instance: '1'",
@@ -3283,6 +3446,7 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
+                "consumer": "bar",
                 "instance_id": "2",
               },
               "saved_objects": Array [
@@ -3293,6 +3457,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "test:1: 'alert-name' created new instance: '2'",
@@ -3319,6 +3486,7 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
+                "consumer": "bar",
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -3329,6 +3497,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
@@ -3355,6 +3526,7 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
+                "consumer": "bar",
                 "instance_id": "2",
               },
               "saved_objects": Array [
@@ -3365,6 +3537,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "test:1: 'alert-name' active instance: '2' in actionGroup: 'default'",
@@ -3390,6 +3565,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "consumer": "bar",
                 "status": "active",
               },
               "saved_objects": Array [
@@ -3400,6 +3576,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -3496,6 +3675,9 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alerting": Object {
+                "consumer": "bar",
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -3504,6 +3686,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -3533,6 +3718,7 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
+                "consumer": "bar",
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -3543,6 +3729,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
@@ -3569,6 +3758,7 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
+                "consumer": "bar",
                 "instance_id": "2",
               },
               "saved_objects": Array [
@@ -3579,6 +3769,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "test:1: 'alert-name' active instance: '2' in actionGroup: 'default'",
@@ -3604,6 +3797,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "consumer": "bar",
                 "status": "active",
               },
               "saved_objects": Array [
@@ -3614,6 +3808,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -3702,6 +3899,9 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alerting": Object {
+                "consumer": "bar",
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -3710,6 +3910,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -3737,6 +3940,7 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
+                "consumer": "bar",
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -3747,6 +3951,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
@@ -3771,6 +3978,7 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
+                "consumer": "bar",
                 "instance_id": "2",
               },
               "saved_objects": Array [
@@ -3781,6 +3989,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "test:1: 'alert-name' active instance: '2' in actionGroup: 'default'",
@@ -3806,6 +4017,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "consumer": "bar",
                 "status": "active",
               },
               "saved_objects": Array [
@@ -3816,6 +4028,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -3899,6 +4114,9 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alerting": Object {
+                "consumer": "bar",
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -3907,6 +4125,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -3936,6 +4157,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "consumer": "bar",
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -3946,6 +4168,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "test:1: 'alert-name' instance '1' has recovered",
@@ -3972,6 +4197,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "consumer": "bar",
                 "instance_id": "2",
               },
               "saved_objects": Array [
@@ -3982,6 +4208,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "test:1: 'alert-name' instance '2' has recovered",
@@ -4007,6 +4236,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "consumer": "bar",
                 "status": "ok",
               },
               "saved_objects": Array [
@@ -4017,6 +4247,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -4102,6 +4335,9 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alerting": Object {
+                "consumer": "bar",
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -4110,6 +4346,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -4136,6 +4375,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "consumer": "bar",
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -4146,6 +4386,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "test:1: 'alert-name' instance '1' has recovered",
@@ -4169,6 +4412,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "consumer": "bar",
                 "instance_id": "2",
               },
               "saved_objects": Array [
@@ -4179,6 +4423,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
             },
             "message": "test:1: 'alert-name' instance '2' has recovered",
@@ -4204,6 +4451,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "consumer": "bar",
                 "status": "ok",
               },
               "saved_objects": Array [
@@ -4214,6 +4462,9 @@ describe('Task Runner', () => {
                   "type": "alert",
                   "type_id": "test",
                 },
+              ],
+              "space_ids": Array [
+                "default",
               ],
               "task": Object {
                 "schedule_delay": 0,
@@ -4350,6 +4601,9 @@ describe('Task Runner', () => {
           "kind": "alert",
         },
         "kibana": Object {
+          "alerting": Object {
+            "consumer": "bar",
+          },
           "saved_objects": Array [
             Object {
               "id": "1",
@@ -4358,6 +4612,9 @@ describe('Task Runner', () => {
               "type": "alert",
               "type_id": "test",
             },
+          ],
+          "space_ids": Array [
+            "default",
           ],
           "task": Object {
             "schedule_delay": 0,

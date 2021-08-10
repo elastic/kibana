@@ -56,6 +56,7 @@ export interface CreateExecutionHandlerOptions<
   alertParams: AlertTypeParams;
   supportsEphemeralTasks: boolean;
   maxEphemeralActionsPerAlert: Promise<number>;
+  alertConsumer: string;
 }
 
 interface ExecutionHandlerOptions<ActionGroupIds extends string> {
@@ -94,6 +95,7 @@ export function createExecutionHandler<
   alertParams,
   supportsEphemeralTasks,
   maxEphemeralActionsPerAlert,
+  alertConsumer,
 }: CreateExecutionHandlerOptions<
   Params,
   ExtractedParams,
@@ -208,10 +210,12 @@ export function createExecutionHandler<
           category: [alertType.producer],
         },
         kibana: {
+          space_ids: [spaceId],
           alerting: {
             instance_id: alertInstanceId,
             action_group_id: actionGroup,
             action_subgroup: actionSubgroup,
+            consumer: alertConsumer,
           },
           saved_objects: [
             {

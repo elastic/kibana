@@ -18,6 +18,7 @@ const createClusterClientMock = () => {
     doesAliasExist: jest.fn(),
     createIndex: jest.fn(),
     queryEventsBySavedObjects: jest.fn(),
+    queryEvents: jest.fn(),
     shutdown: jest.fn(),
   };
   return mock;

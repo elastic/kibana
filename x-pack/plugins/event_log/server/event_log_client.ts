@@ -103,4 +103,17 @@ export class EventLogClient implements IEventLogClient {
       legacyIds,
     });
   }
+
+  async findEvents(options?: Partial<FindOptionsType>): Promise<QueryEventsBySavedObjectResult> {
+    const findOptions = findOptionsSchema.validate(options ?? {});
+
+    // Use 'default' if spaces plugin is not enabled
+    const spaceId = this.spacesService ? this.spacesService.getSpaceId(this.request) : 'default';
+
+    return await this.esContext.esAdapter.queryEvents(
+      this.esContext.esNames.indexPattern,
+      spaceId,
+      findOptions
+    );
+  }
 }

@@ -421,6 +421,83 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     }
   }
 
+  public async queryEvents(
+    index: string,
+    spaceId: string,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    { page, per_page: perPage, start, end, sort_field, sort_order, filter }: FindOptionsType
+  ): Promise<QueryEventsBySavedObjectResult> {
+    const esClient = await this.elasticsearchClientPromise;
+    let dslFilterQuery;
+    try {
+      dslFilterQuery = filter ? toElasticsearchQuery(fromKueryExpression(filter)) : [];
+    } catch (err) {
+      this.debug(`Invalid kuery syntax for the filter (${filter}) error:`, {
+        message: err.message,
+        statusCode: err.statusCode,
+      });
+      throw err;
+    }
+
+    const namespaceQuery = {
+      terms: {
+        'kibana.space_ids': [spaceId],
+      },
+    };
+
+    const musts: estypes.QueryDslQueryContainer[] = [namespaceQuery];
+
+    if (start) {
+      musts.push({
+        range: {
+          '@timestamp': {
+            gte: start,
+          },
+        },
+      });
+    }
+    if (end) {
+      musts.push({
+        range: {
+          '@timestamp': {
+            lte: end,
+          },
+        },
+      });
+    }
+
+    const body: estypes.SearchRequest['body'] = {
+      size: perPage,
+      from: (page - 1) * perPage,
+      sort: [{ [sort_field]: { order: sort_order } }],
+      query: {
+        bool: {
+          filter: dslFilterQuery,
+          must: reject(musts, isUndefined),
+        },
+      },
+    };
+
+    try {
+      const {
+        body: {
+          hits: { hits, total },
+        },
+      } = await esClient.search<IValidatedEvent>({
+        index,
+        track_total_hits: true,
+        body,
+      });
+      return {
+        page,
+        per_page: perPage,
+        total: isNumber(total) ? total : total.value,
+        data: hits.map((hit) => hit._source),
+      };
+    } catch (err) {
+      throw new Error(`querying for Event Log failed with: ${err.message}`);
+    }
+  }
   private debug(message: string, object?: unknown) {
     const objectString = object == null ? '' : JSON.stringify(object);
     this.logger.debug(`esContext: ${message} ${objectString}`);

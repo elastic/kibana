@@ -102,6 +102,7 @@ export const EventSchema = schema.maybe(
     kibana: schema.maybe(
       schema.object({
         server_uuid: ecsString(),
+        space_ids: ecsStringMulti(),
         task: schema.maybe(
           schema.object({
             scheduled: ecsDate(),
@@ -114,6 +115,7 @@ export const EventSchema = schema.maybe(
             action_group_id: ecsString(),
             action_subgroup: ecsString(),
             status: ecsString(),
+            consumer: ecsString(),
           })
         ),
         saved_objects: schema.maybe(

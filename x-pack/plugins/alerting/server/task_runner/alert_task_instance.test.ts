@@ -71,6 +71,8 @@ describe('Alert Task Instance', () => {
       taskType: 'alerting:test',
       params: {
         alertId: '1',
+        alertConsumer: 'my-consumer',
+        spaceId: 'my-space',
       },
       ownerId: null,
     };
@@ -121,6 +123,8 @@ describe('Alert Task Instance', () => {
       taskType: 'alerting:test',
       params: {
         alertId: '1',
+        alertConsumer: 'my-consumer',
+        spaceId: 'my-space',
       },
       ownerId: null,
     };
@@ -152,6 +156,8 @@ describe('Alert Task Instance', () => {
       taskType: 'alerting:test',
       params: {
         alertId: '1',
+        alertConsumer: 'my-consumer',
+        spaceId: 'my-space',
       },
       ownerId: null,
     };
@@ -177,6 +183,8 @@ describe('Alert Task Instance', () => {
       taskType: 'alerting:test',
       params: {
         alertId: '1',
+        alertConsumer: 'my-consumer',
+        spaceId: 'my-space',
       },
       ownerId: null,
     };
@@ -200,6 +208,8 @@ describe('Alert Task Instance', () => {
       taskType: 'alerting:test',
       params: {
         alertId: '1',
+        alertConsumer: 'my-consumer',
+        spaceId: 'my-space',
       },
       ownerId: null,
     };
@@ -231,7 +241,7 @@ describe('Alert Task Instance', () => {
     expect(() =>
       taskInstanceToAlertTaskInstance(taskInstance, alert)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Task \\"215ee69b-1df9-428e-ab1a-ccf274f8fa5b\\" (underlying Alert \\"alert-123\\") has an invalid param at .0.alertId"`
+      `"Task \\"215ee69b-1df9-428e-ab1a-ccf274f8fa5b\\" (underlying Alert \\"alert-123\\") has an invalid param at .alertId,.spaceId,.alertConsumer"`
     );
   });
 });

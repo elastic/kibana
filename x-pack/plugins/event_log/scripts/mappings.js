@@ -17,6 +17,10 @@ exports.EcsCustomPropertyMappings = {
         type: 'keyword',
         ignore_above: 1024,
       },
+      space_ids: {
+        type: 'keyword',
+        ignore_above: 1024,
+      },
       // task specific fields
       task: {
         properties: {
@@ -44,6 +48,10 @@ exports.EcsCustomPropertyMappings = {
             ignore_above: 1024,
           },
           status: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          consumer: {
             type: 'keyword',
             ignore_above: 1024,
           },
@@ -105,4 +113,10 @@ exports.EcsPropertiesToGenerate = [
 /**
  * These properties can have multiple values (are arrays in the generated event schema).
  */
-exports.EcsEventLogMultiValuedProperties = ['tags', 'event.category', 'event.type', 'rule.author'];
+exports.EcsEventLogMultiValuedProperties = [
+  'tags',
+  'event.category',
+  'event.type',
+  'rule.author',
+  'kibana.space_ids',
+];

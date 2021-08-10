@@ -151,6 +151,8 @@ describe('getAlertState()', () => {
       state: {},
       params: {
         alertId: '1',
+        alertConsumer: 'my-consumer',
+        spaceId: 'my-space',
       },
       ownerId: null,
     });
