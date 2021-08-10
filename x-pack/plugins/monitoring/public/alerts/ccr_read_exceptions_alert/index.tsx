@@ -10,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { Expression, Props } from '../components/param_details_form/expression';
 import { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
 import {
-  ALERT_CCR_READ_EXCEPTIONS,
-  ALERT_DETAILS,
-  ALERT_REQUIRES_APP_CONTEXT,
+  RULE_CCR_READ_EXCEPTIONS,
+  RULE_DETAILS,
+  RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
 import { AlertTypeParams } from '../../../../alerting/common';
 
@@ -38,17 +38,17 @@ const validate = (inputValues: ValidateOptions): ValidationResult => {
 
 export function createCCRReadExceptionsAlertType(): AlertTypeModel<ValidateOptions> {
   return {
-    id: ALERT_CCR_READ_EXCEPTIONS,
-    description: ALERT_DETAILS[ALERT_CCR_READ_EXCEPTIONS].description,
+    id: RULE_CCR_READ_EXCEPTIONS,
+    description: RULE_DETAILS[RULE_CCR_READ_EXCEPTIONS].description,
     iconClass: 'bell',
     documentationUrl(docLinks) {
       return `${docLinks.links.monitoring.alertsKibanaCCRReadExceptions}`;
     },
     alertParamsExpression: (props: Props) => (
-      <Expression {...props} paramDetails={ALERT_DETAILS[ALERT_CCR_READ_EXCEPTIONS].paramDetails} />
+      <Expression {...props} paramDetails={RULE_DETAILS[RULE_CCR_READ_EXCEPTIONS].paramDetails} />
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
-    requiresAppContext: ALERT_REQUIRES_APP_CONTEXT,
+    requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
   };
 }

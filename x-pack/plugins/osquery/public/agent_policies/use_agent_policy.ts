@@ -9,7 +9,6 @@ import { useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../common/lib/kibana';
-import { agentPolicyRouteService } from '../../../fleet/common';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
 interface UseAgentPolicy {
@@ -23,7 +22,7 @@ export const useAgentPolicy = ({ policyId, skip }: UseAgentPolicy) => {
 
   return useQuery(
     ['agentPolicy', { policyId }],
-    () => http.get(agentPolicyRouteService.getInfoPath(policyId)),
+    () => http.get(`/internal/osquery/fleet_wrapper/agent_policies/${policyId}`),
     {
       enabled: !skip,
       keepPreviousData: true,
