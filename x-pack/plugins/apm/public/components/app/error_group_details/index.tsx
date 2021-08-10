@@ -101,6 +101,7 @@ export function ErrorGroupDetails() {
 
   const {
     path: { groupId },
+    query: { rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName/errors/:groupId');
 
   useBreadcrumb({
@@ -109,6 +110,10 @@ export function ErrorGroupDetails() {
       path: {
         serviceName,
         groupId,
+      },
+      query: {
+        rangeFrom,
+        rangeTo,
       },
     }),
   });
