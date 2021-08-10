@@ -9,14 +9,20 @@
 
 set -e
 
-USER=${1:-'observer'}
-ID=${2:-'Do4JnHoBqkRSppNZ6vre'}
+QUERY=${1:-"signal.status: open"}
+STATUS=${2}
+
+echo $IDS
+echo "'"$STATUS"'"
 
 cd ./hunter && sh ./post_detections_role.sh && sh ./post_detections_user.sh
 cd ../observer && sh ./post_detections_role.sh && sh ./post_detections_user.sh
 cd ..
 
-# Example: ./get_observability_alert.sh hunter
-curl -v -k \
- -u $USER:changeme \
- -X GET "${KIBANA_URL}${SPACE_URL}/internal/rac/alerts?id=$ID&index=.alerts-observability-apm" | jq .
+# Example: ./update_observability_alert.sh "kibana.rac.alert.stats: open" <closed | open>
+curl -s -k \
+ -H 'Content-Type: application/json' \
+ -H 'kbn-xsrf: 123' \
+ -u hunter:changeme \
+ -X POST ${KIBANA_URL}${SPACE_URL}/internal/rac/alerts/bulk_update \
+-d "{\"query\": \"$QUERY\", \"status\":\"$STATUS\", \"index\":\".siem-signals*\"}" | jq .
