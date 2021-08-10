@@ -14,7 +14,7 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
 export const allowedExperimentalValues = Object.freeze({
   metricsEntitiesEnabled: false,
   ruleRegistryEnabled: false,
-  tGridEnabled: true,
+  tGridEnabled: false,
   trustedAppsByPolicyEnabled: false,
   excludePoliciesInFilterEnabled: false,
   uebaEnabled: false,

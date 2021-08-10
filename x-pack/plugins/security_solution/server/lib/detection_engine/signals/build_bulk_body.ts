@@ -110,7 +110,7 @@ export const buildSignalGroupFromSequence = (
   // we can build the signal that links the building blocks together
   // and also insert the group id (which is also the "shell" signal _id) in each building block
   const sequenceSignal = wrapSignal(
-    buildSignalFromSequence(wrappedBuildingBlocks, ruleSO),
+    buildSignalFromSequence(wrappedBuildingBlocks, ruleSO, buildReasonMessage),
     outputIndex
   );
   wrappedBuildingBlocks.forEach((block, idx) => {
@@ -127,14 +127,25 @@ export const buildSignalGroupFromSequence = (
 
 export const buildSignalFromSequence = (
   events: WrappedSignalHit[],
-  ruleSO: SavedObject<AlertAttributes>
+  ruleSO: SavedObject<AlertAttributes>,
+  buildReasonMessage: BuildReasonMessage
 ): SignalHit => {
   const rule = buildRuleWithoutOverrides(ruleSO);
-  const signal: Signal = buildSignal(events, rule, null);
+  const timestamp = new Date().toISOString();
+
+  const reason = buildReasonMessage({
+    alertName: rule.name,
+    alertRiskScore: ruleSO.attributes.params.riskScore,
+    alertSeverity: ruleSO.attributes.params.severity,
+    timestamp,
+    userName: null,
+    hostName: null,
+  });
+  const signal: Signal = buildSignal(events, rule, reason);
   const mergedEvents = objectArrayIntersection(events.map((event) => event._source));
   return {
     ...mergedEvents,
-    '@timestamp': new Date().toISOString(),
+    '@timestamp': timestamp,
     event: {
       kind: 'signal',
     },

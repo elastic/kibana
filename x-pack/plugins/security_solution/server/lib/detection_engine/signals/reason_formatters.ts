@@ -11,9 +11,9 @@ export interface BuildReasonMessageArgs {
   alertName: string;
   alertSeverity: string;
   alertRiskScore: number;
-  userName: string;
+  userName?: string;
   timestamp: string;
-  hostName: string;
+  hostName?: string;
 }
 
 export type BuildReasonMessage = (args: BuildReasonMessageArgs) => string;
@@ -25,19 +25,23 @@ const buildCommonReasonMessage = ({
   hostName,
   timestamp,
   userName,
-}: BuildReasonMessageArgs) =>
-  i18n.translate(`xpack.securitySolution.detectionEngine.signals.alertReasonDescription`, {
+}: BuildReasonMessageArgs) => {
+  const isFieldEmpty = (field: string | string[] | undefined | null) =>
+    !field || !field.length || (field.length === 1 && field[0] === '-');
+
+  return i18n.translate(`xpack.securitySolution.detectionEngine.signals.alertReasonDescription`, {
     defaultMessage:
       'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and risk score of {alertRiskScore} {userName, select, null {} other {by {userName} } } {hostName, select, null {} other {on {hostName} } }',
     values: {
       alertName,
       alertSeverity,
       alertRiskScore,
-      hostName: hostName ?? 'null',
+      hostName: isFieldEmpty(hostName) ? 'null' : hostName,
       timestamp,
-      userName: userName ?? 'null',
+      userName: isFieldEmpty(userName) ? 'null' : userName,
     },
   });
+};
 
 export const buildReasonMessageForEqlAlert = (args: BuildReasonMessageArgs) =>
   buildCommonReasonMessage({ ...args });
