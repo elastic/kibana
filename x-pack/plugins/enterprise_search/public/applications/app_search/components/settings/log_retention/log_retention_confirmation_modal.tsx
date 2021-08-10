@@ -20,7 +20,7 @@ export const LogRetentionConfirmationModal: React.FC = () => {
   const CANNOT_BE_RECOVERED_TEXT = i18n.translate(
     'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.recovery',
     {
-      defaultMessage: 'You can not recover deleted data.',
+      defaultMessage: 'You cannot recover deleted data.',
     }
   );
 
