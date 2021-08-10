@@ -10,6 +10,7 @@
 import { EuiButton, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import type { ContentsProps } from '.';
 import { NodeStats } from '../../../../../common/service_map';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -17,13 +18,28 @@ import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { AnomalyDetection } from './anomaly_detection';
 import { StatsList } from './stats_list';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 
 export function ServiceContents({ onFocusClick, nodeData }: ContentsProps) {
   const apmRouter = useApmRouter();
 
   const {
-    urlParams: { environment, start, end },
+    urlParams: { environment },
   } = useUrlParams();
+
+  const { query } = useApmParams('/*');
+
+  if (
+    !('rangeFrom' in query && 'rangeTo' in query) ||
+    !query.rangeFrom ||
+    !query.rangeTo
+  ) {
+    throw new Error('Expected rangeFrom and rangeTo to be set');
+  }
+
+  const { rangeFrom, rangeTo } = query;
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const serviceName = nodeData.id!;
 
@@ -49,10 +65,12 @@ export function ServiceContents({ onFocusClick, nodeData }: ContentsProps) {
 
   const detailsUrl = apmRouter.link('/services/:serviceName', {
     path: { serviceName },
+    query: { rangeFrom, rangeTo },
   });
 
   const focusUrl = apmRouter.link('/services/:serviceName/service-map', {
     path: { serviceName },
+    query: { rangeFrom, rangeTo },
   });
 
   const { serviceAnomalyStats } = nodeData;

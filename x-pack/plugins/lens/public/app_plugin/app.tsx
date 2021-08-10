@@ -29,13 +29,13 @@ import {
   useLensDispatch,
   LensAppState,
   DispatchSetState,
+  selectSavedObjectFormat,
 } from '../state_management';
 import {
   SaveModalContainer,
   getLastKnownDocWithoutPinnedFilters,
   runSaveLensVisualization,
 } from './save_modal_container';
-import { getSavedObjectFormat } from '../utils';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -79,11 +79,6 @@ export function App({
   );
 
   const {
-    datasourceStates,
-    visualization,
-    filters,
-    query,
-    activeDatasourceId,
     persistedDoc,
     isLinkedToOriginatingApp,
     searchSessionId,
@@ -91,52 +86,20 @@ export function App({
     isSaveable,
   } = useLensSelector((state) => state.lens);
 
+  const currentDoc = useLensSelector((state) =>
+    selectSavedObjectFormat(state, datasourceMap, visualizationMap)
+  );
+
   // Used to show a popover that guides the user towards changing the date range when no data is available.
   const [indicateNoData, setIndicateNoData] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(undefined);
 
   useEffect(() => {
-    const activeVisualization = visualization.activeId && visualizationMap[visualization.activeId];
-    const activeDatasource =
-      activeDatasourceId && !datasourceStates[activeDatasourceId].isLoading
-        ? datasourceMap[activeDatasourceId]
-        : undefined;
-
-    if (!activeDatasource || !activeVisualization || !visualization.state) {
-      return;
+    if (currentDoc) {
+      setLastKnownDoc(currentDoc);
     }
-    setLastKnownDoc(
-      // todo: that should be redux store selector
-      getSavedObjectFormat({
-        activeDatasources: Object.keys(datasourceStates).reduce(
-          (acc, datasourceId) => ({
-            ...acc,
-            [datasourceId]: datasourceMap[datasourceId],
-          }),
-          {}
-        ),
-        datasourceStates,
-        visualization,
-        filters,
-        query,
-        title: persistedDoc?.title || '',
-        description: persistedDoc?.description,
-        persistedId: persistedDoc?.savedObjectId,
-      })
-    );
-  }, [
-    persistedDoc?.title,
-    persistedDoc?.description,
-    persistedDoc?.savedObjectId,
-    datasourceStates,
-    visualization,
-    filters,
-    query,
-    activeDatasourceId,
-    datasourceMap,
-    visualizationMap,
-  ]);
+  }, [currentDoc]);
 
   const showNoDataPopover = useCallback(() => {
     setIndicateNoData(true);
