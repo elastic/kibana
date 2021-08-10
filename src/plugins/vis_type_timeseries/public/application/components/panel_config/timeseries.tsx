@@ -411,6 +411,7 @@ export class TimeseriesPanelConfig extends Component<
                   value={model.truncate_legend}
                   name="truncate_legend"
                   onChange={this.props.onChange}
+                  data-test-subj="timeSeriesEditorDataTruncateLegendSwitch"
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -423,6 +424,7 @@ export class TimeseriesPanelConfig extends Component<
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFieldNumber
+                  data-test-subj="timeSeriesEditorDataMaxLegendLines"
                   value={model.max_lines_legend}
                   min={1}
                   max={5}

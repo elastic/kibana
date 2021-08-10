@@ -65,12 +65,12 @@ export class SeriesEditor extends Component {
 
   render() {
     const { limit, model, name, fields, colorPicker } = this.props;
-    const list = model[name].filter((val, index) => index < (limit || Infinity));
+    const list = model[name]?.filter((val, index) => index < (limit || Infinity));
 
     return (
       <EuiDragDropContext onDragEnd={this.sortHandler}>
         <EuiDroppable droppableId={DROPPABLE_ID} spacing="l" type="MACRO">
-          {list.map((row, idx) => (
+          {list?.map((row, idx) => (
             <EuiDraggable
               spacing="m"
               key={row.id}
