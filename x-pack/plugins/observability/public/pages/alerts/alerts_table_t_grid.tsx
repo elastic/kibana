@@ -15,8 +15,8 @@ import {
   ALERT_DURATION,
   ALERT_SEVERITY_LEVEL,
   ALERT_STATUS,
-  ALERT_START,
   RULE_NAME,
+  TIMESTAMP,
 } from '@kbn/rule-data-utils/target/technical_field_names';
 
 import type { TimelinesUIStart } from '../../../../timelines/public';
@@ -80,10 +80,10 @@ export const columns: Array<
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.observability.alertsTGrid.triggeredColumnDescription', {
-      defaultMessage: 'Triggered',
+    displayAsText: i18n.translate('xpack.observability.alertsTGrid.lastUpdatedColumnDescription', {
+      defaultMessage: 'Last updated',
     }),
-    id: ALERT_START,
+    id: TIMESTAMP,
     initialWidth: 176,
   },
   {

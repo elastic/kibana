@@ -11,8 +11,8 @@ import {
   ALERT_DURATION,
   ALERT_SEVERITY_LEVEL,
   ALERT_STATUS,
-  ALERT_START,
   RULE_NAME,
+  TIMESTAMP,
 } from '@kbn/rule-data-utils/target/technical_field_names';
 
 import type { CellValueElementProps, TimelineNonEcsData } from '../../../../timelines/common';
@@ -87,7 +87,7 @@ export const getRenderCellValue = ({
             type="check"
           />
         );
-      case ALERT_START:
+      case TIMESTAMP:
         return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
       case ALERT_DURATION:
         return asDuration(Number(value));
