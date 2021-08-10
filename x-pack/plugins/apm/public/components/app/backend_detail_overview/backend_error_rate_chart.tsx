@@ -76,7 +76,7 @@ export function BackendFailedTransactionRateChart({
         type: 'linemark',
         color: theme.eui.euiColorVis7,
         title: i18n.translate('xpack.apm.backendErrorRateChart.chartTitle', {
-          defaultMessage: 'Failed transaction %',
+          defaultMessage: 'Failed transaction rate',
         }),
       });
     }
