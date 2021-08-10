@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiContextMenuItem } from '@elastic/eui';
 
 import { useAddToCase } from '../../../../hooks/use_add_to_case';
 import { AddToCaseActionProps } from './add_to_case_action';
@@ -31,15 +31,15 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   return (
     <>
       {userCanCrud && (
-        <EuiButtonEmpty
+        <EuiContextMenuItem
           aria-label={ariaLabel}
           data-test-subj="attach-alert-to-case-button"
           size="s"
           onClick={addNewCaseClick}
-          isDisabled={isDisabled}
+          disabled={isDisabled}
         >
           {i18n.ACTION_ADD_NEW_CASE}
-        </EuiButtonEmpty>
+        </EuiContextMenuItem>
       )}
     </>
   );
