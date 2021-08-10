@@ -185,6 +185,7 @@ export interface FieldSpecExportFmt {
 }
 
 /**
+ * @public
  * Serialized version of IndexPatternField
  */
 export interface FieldSpec extends IndexPatternFieldBase {

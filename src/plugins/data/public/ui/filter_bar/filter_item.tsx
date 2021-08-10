@@ -36,6 +36,7 @@ export interface FilterItemProps {
   intl: InjectedIntl;
   uiSettings: IUiSettingsClient;
   hiddenPanelOptions?: PanelOptions[];
+  timeRangeForSuggestionsOverride?: boolean;
 }
 
 interface LabelOptions {
@@ -253,6 +254,7 @@ export function FilterItem(props: FilterItemProps) {
               onCancel={() => {
                 setIsPopoverOpen(false);
               }}
+              timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
             />
           </div>
         ),
