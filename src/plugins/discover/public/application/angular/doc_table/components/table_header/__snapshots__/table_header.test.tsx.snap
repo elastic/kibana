@@ -15,7 +15,6 @@ exports[`TableHeader with time column renders correctly 1`] = `
       class="kbnDocTableHeader__actions"
       data-test-subj="docTableHeader-time"
     >
-       
       Time
       <span
         class="euiToolTipAnchor"
@@ -44,7 +43,6 @@ exports[`TableHeader with time column renders correctly 1`] = `
       class="kbnDocTableHeader__actions"
       data-test-subj="docTableHeader-first"
     >
-       
       first
       <span
         class="euiToolTipAnchor"
@@ -91,7 +89,6 @@ exports[`TableHeader with time column renders correctly 1`] = `
       class="kbnDocTableHeader__actions"
       data-test-subj="docTableHeader-middle"
     >
-       
       middle
       <span
         class="euiToolTipAnchor"
@@ -156,7 +153,6 @@ exports[`TableHeader with time column renders correctly 1`] = `
       class="kbnDocTableHeader__actions"
       data-test-subj="docTableHeader-last"
     >
-       
       last
       <span
         class="euiToolTipAnchor"
@@ -214,7 +210,6 @@ exports[`TableHeader without time column renders correctly 1`] = `
       class="kbnDocTableHeader__actions"
       data-test-subj="docTableHeader-first"
     >
-       
       first
       <span
         class="euiToolTipAnchor"
@@ -261,7 +256,6 @@ exports[`TableHeader without time column renders correctly 1`] = `
       class="kbnDocTableHeader__actions"
       data-test-subj="docTableHeader-middle"
     >
-       
       middle
       <span
         class="euiToolTipAnchor"
@@ -326,7 +320,6 @@ exports[`TableHeader without time column renders correctly 1`] = `
       class="kbnDocTableHeader__actions"
       data-test-subj="docTableHeader-last"
     >
-       
       last
       <span
         class="euiToolTipAnchor"
