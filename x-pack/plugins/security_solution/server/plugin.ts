@@ -244,6 +244,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         indexTemplate: {
           version: 0,
         },
+        secondaryAlias: config.signalsIndex,
       });
 
       // Register rule types via rule-registry
