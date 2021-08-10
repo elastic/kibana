@@ -92,6 +92,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
       windowSize: 5,
       windowUnit: 'm',
       environment: ENVIRONMENT_ALL.value,
+      transactionType: transactionTypes[0],
     }
   );
 
