@@ -7,6 +7,7 @@
 
 jest.mock('../lib/generate_pdf', () => ({ generatePdfObservableFactory: jest.fn() }));
 
+import { Writable } from 'stream';
 import * as Rx from 'rxjs';
 import { ReportingCore } from '../../../';
 import { CancellationToken } from '../../../../common';
@@ -16,7 +17,9 @@ import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import { TaskPayloadPDF } from '../types';
 import { runTaskFnFactory } from './';
 
+let content: string;
 let mockReporting: ReportingCore;
+let stream: jest.Mocked<Writable>;
 
 const cancellationToken = ({
   on: jest.fn(),
@@ -40,6 +43,9 @@ const encryptHeaders = async (headers: Record<string, string>) => {
 const getBasePayload = (baseObj: any) => baseObj as TaskPayloadPDF;
 
 beforeEach(async () => {
+  content = '';
+  stream = ({ write: jest.fn((chunk) => (content += chunk)) } as unknown) as typeof stream;
+
   const reportingConfig = {
     'server.basePath': '/sbp',
     index: '.reports-test',
@@ -71,7 +77,8 @@ test(`passes browserTimezone to generatePdf`, async () => {
       browserTimezone,
       headers: encryptedHeaders,
     }),
-    cancellationToken
+    cancellationToken,
+    stream
   );
 
   const tzParam = generatePdfObservable.mock.calls[0][3];
@@ -89,7 +96,8 @@ test(`returns content_type of application/pdf`, async () => {
   const { content_type: contentType } = await runTask(
     'pdfJobId',
     getBasePayload({ relativeUrls: [], headers: encryptedHeaders }),
-    cancellationToken
+    cancellationToken,
+    stream
   );
   expect(contentType).toBe('application/pdf');
 });
@@ -101,10 +109,11 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
 
   const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
-  const { content } = await runTask(
+  await runTask(
     'pdfJobId',
     getBasePayload({ relativeUrls: [], headers: encryptedHeaders }),
-    cancellationToken
+    cancellationToken,
+    stream
   );
 
   expect(content).toEqual(Buffer.from(testContent).toString('base64'));
