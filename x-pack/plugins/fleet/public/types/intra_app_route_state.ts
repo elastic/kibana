@@ -47,13 +47,6 @@ export interface IntegrationsAppBrowseRouteState {
 }
 
 /**
- * Supported routing state for the edit package policy page
- */
-export interface EditPackagePolicyRouteState {
-  from: EditPackagePolicyFrom;
-}
-
-/**
  * All possible Route states.
  */
 export type AnyIntraAppRouteState =

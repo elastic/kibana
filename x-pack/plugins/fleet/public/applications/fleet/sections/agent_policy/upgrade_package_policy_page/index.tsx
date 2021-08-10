@@ -23,6 +23,7 @@ export const UpgradePackagePolicyPage = memo(() => {
 
   let from: EditPackagePolicyFrom | undefined;
 
+  // Shorten query strings to make them more presentable in the URL
   if (fromQs && fromQs === 'fleet-policy-list') {
     from = 'upgrade-from-fleet-policy-list';
   } else if (fromQs && fromQs === 'integrations-policy-list') {

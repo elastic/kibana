@@ -15,7 +15,6 @@ export {
   NewAgentPolicy,
   SimplifiedAgentStatus,
   EnrollmentAPIKey,
-  InMemoryPackagePolicy,
   PackagePolicy,
   NewPackagePolicy,
   UpdatePackagePolicy,
@@ -132,5 +131,5 @@ export {
 } from '../../common';
 
 export * from './intra_app_route_state';
-
 export * from './ui_extensions';
+export * from './in_memory_package_policy';

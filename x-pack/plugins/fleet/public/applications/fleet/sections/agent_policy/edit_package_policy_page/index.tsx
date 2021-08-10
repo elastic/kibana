@@ -27,13 +27,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 
-import type {
-  AgentPolicy,
-  PackageInfo,
-  UpdatePackagePolicy,
-  PackagePolicy,
-  EditPackagePolicyRouteState,
-} from '../../../types';
+import type { AgentPolicy, PackageInfo, UpdatePackagePolicy, PackagePolicy } from '../../../types';
 import {
   useLink,
   useBreadcrumbs,
@@ -47,7 +41,6 @@ import {
   sendGetPackageInfoByKey,
   sendUpgradePackagePolicy,
   sendUpgradePackagePolicyDryRun,
-  useIntraAppState,
 } from '../../../hooks';
 import { useBreadcrumbs as useIntegrationsBreadcrumbs } from '../../../../integrations/hooks';
 import { Loading, Error, ExtensionWrapper } from '../../../components';
@@ -105,12 +98,7 @@ export const EditPackagePolicyForm = memo<{
     GetOnePackagePolicyResponse['item']
   >();
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
-  const routeState = useIntraAppState<EditPackagePolicyRouteState>();
 
-  // Allow overriding the `from` prop via intra-app state
-  if (routeState && routeState.from) {
-    from = routeState.from;
-  }
   const isUpgrade =
     from === 'upgrade-from-fleet-policy-list' || from === 'upgrade-from-integrations-policy-list';
 
@@ -304,7 +292,7 @@ export const EditPackagePolicyForm = memo<{
 
   // Cancel url + Success redirect Path:
   //  if `from === 'edit'` then it links back to Policy Details
-  //  if `from === 'package-edit'` then it links back to the Integration Policy List
+  //  if `from === 'package-edit'`, or `upgrade-from-integrations-policy-list` then it links back to the Integration Policy List
   const cancelUrl = useMemo((): string => {
     if (packageInfo && policyId) {
       return from === 'package-edit'
