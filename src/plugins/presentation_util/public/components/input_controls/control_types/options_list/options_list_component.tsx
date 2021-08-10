@@ -103,8 +103,11 @@ export const OptionsListInner = ({ input, fetchData }: OptionsListProps) => {
       const newAvailableOptions = toggleAvailableOptions([index], availableOptions, !toggleOff);
       setAvailableOptions(newAvailableOptions);
 
-      if (toggleOff) selectedOptions.current.delete(item.label);
-      else selectedOptions.current.add(item.label);
+      if (toggleOff) {
+        selectedOptions.current.delete(item.label);
+      } else {
+        selectedOptions.current.add(item.label);
+      }
     },
     [availableOptions]
   );
@@ -140,7 +143,6 @@ export const OptionsListInner = ({ input, fetchData }: OptionsListProps) => {
       })}
     >
       <EuiPopover
-        id="popoverExampleMultiSelect"
         button={button}
         isOpen={isPopoverOpen}
         className="optionsList--popoverOverride"
