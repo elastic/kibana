@@ -309,13 +309,13 @@ export function MlLatencyCorrelations({
   }, [histograms]);
 
   return (
-    <EuiPanel hasBorder={true}>
+    <>
       <EuiFlexGroup>
         <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
           <EuiTitle size="xs">
             <h5 data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">
               {i18n.translate(
-                'xpack.apm.correlations.latencyCorrelations.chartTitle',
+                'xpack.apm.correlations.latencyCorrelations.panelTitle',
                 {
                   defaultMessage:
                     'Latency distribution for {name} (Log-Log Plot)',
@@ -337,7 +337,7 @@ export function MlLatencyCorrelations({
                 >
                   <EuiText size="xs">
                     {i18n.translate(
-                      'xpack.apm.correlations.latencyCorrelations.chartTitle',
+                      'xpack.apm.correlations.latencyCorrelations.selectionText',
                       {
                         defaultMessage: `Selection: {selectionFrom} - {selectionTo}ms`,
                         values: {
@@ -526,6 +526,6 @@ export function MlLatencyCorrelations({
           )}
         </>
       )}
-    </EuiPanel>
+    </>
   );
 }
