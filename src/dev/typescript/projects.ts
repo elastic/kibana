@@ -44,10 +44,10 @@ export const PROJECTS = [
     .sync('src/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
     .map((path) => new Project(resolve(REPO_ROOT, path))),
   ...glob
-    .sync('x-pack/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
+    .sync('src/plugins/*/*/tsconfig.json', { cwd: REPO_ROOT })
     .map((path) => new Project(resolve(REPO_ROOT, path))),
   ...glob
-    .sync('x-pack/plugins/chart_expressions/*/tsconfig.json', { cwd: REPO_ROOT })
+    .sync('x-pack/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
     .map((path) => new Project(resolve(REPO_ROOT, path))),
   ...glob
     .sync('examples/*/tsconfig.json', { cwd: REPO_ROOT })

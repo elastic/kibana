@@ -8,6 +8,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/expression_reveal_image'],
+  rootDir: '../../../../',
+  roots: ['<rootDir>/src/plugins/chart_expressions/expression_tagcloud'],
 };
