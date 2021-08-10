@@ -87,7 +87,7 @@ export function BackendDetailOverview() {
                   <h2>
                     {i18n.translate(
                       'xpack.apm.backendDetailFailedTransactionRateChartTitle',
-                      { defaultMessage: 'Failed transactions (%)' }
+                      { defaultMessage: 'Failed transaction rate' }
                     )}
                   </h2>
                 </EuiTitle>
