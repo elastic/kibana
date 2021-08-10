@@ -23,14 +23,20 @@ type SavedObjectType = SavedObject<{ title?: string }>;
 type CheckOriginConflictsParams = Parameters<typeof checkOriginConflicts>[0];
 
 /**
- * Function to create a realistic-looking import object given a type, ID, and optional originId
+ * Function to create a realistic-looking import object given a type, ID, optional originId, and optional updated_at
  */
-const createObject = (type: string, id: string, originId?: string): SavedObjectType => ({
+const createObject = (
+  type: string,
+  id: string,
+  originId?: string,
+  updatedAt?: string
+): SavedObjectType => ({
   type,
   id,
   attributes: { title: `Title for ${type}:${id}` },
   references: (Symbol() as unknown) as SavedObjectReference[],
   ...(originId && { originId }),
+  ...(updatedAt && { updated_at: updatedAt }),
 });
 
 const MULTI_NS_TYPE = 'multi';
@@ -389,21 +395,21 @@ describe('#checkOriginConflicts', () => {
         // try to import obj1 and obj2
         const obj1 = createObject(MULTI_NS_TYPE, 'id-1');
         const obj2 = createObject(MULTI_NS_TYPE, 'id-2', 'originId-foo');
-        const objA = createObject(MULTI_NS_TYPE, 'id-A', obj1.id);
-        const objB = createObject(MULTI_NS_TYPE, 'id-B', obj1.id);
+        const objA = createObject(MULTI_NS_TYPE, 'id-A', obj1.id, '2017-09-21T18:59:16.270Z');
+        const objB = createObject(MULTI_NS_TYPE, 'id-B', obj1.id, '2021-08-10T13:21:44.135Z');
         const objC = createObject(MULTI_NS_TYPE, 'id-C', obj2.originId);
         const objD = createObject(MULTI_NS_TYPE, 'id-D', obj2.originId);
         const objects = [obj1, obj2];
         const params = setupParams({ objects });
         mockFindResult(objA, objB); // find for obj1: the result is an inexact match with two destinations
-        mockFindResult(objC, objD); // find for obj2: the result is an inexact match with two destinations
+        mockFindResult(objD, objC); // find for obj2: the result is an inexact match with two destinations
 
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
           importIdMap: new Map(),
           errors: [
-            createAmbiguousConflictError(obj1, [objA, objB]),
-            createAmbiguousConflictError(obj2, [objC, objD]),
+            createAmbiguousConflictError(obj1, [objB, objA]), // Assert that these have been sorted by updatedAt in descending order
+            createAmbiguousConflictError(obj2, [objC, objD]), // Assert that these have been sorted by ID in ascending order (since their updatedAt values are the same)
           ],
           pendingOverwrites: new Set(),
         };
