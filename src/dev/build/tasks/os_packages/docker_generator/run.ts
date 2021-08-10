@@ -116,11 +116,6 @@ export async function runDockerGenerator(
         );
       }
     }
-  }
-
-  // Create the kibana linux target inside the
-  // Kibana docker build
-  for (const dep of dependencies) {
     await linkAsync(resolve(artifactsDir, dep), resolve(dockerBuildDir, dep));
   }
 
