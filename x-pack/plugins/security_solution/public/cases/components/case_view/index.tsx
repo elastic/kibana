@@ -7,7 +7,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { ALERTS_CONSUMERS } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 
 import {
   getCaseDetailsUrl,
@@ -54,9 +54,9 @@ export interface CaseProps extends Props {
   updateCase: (newCase: Case) => void;
 }
 
-const ALERT_CONSUMER: ALERTS_CONSUMERS[] = [ALERTS_CONSUMERS.SIEM];
+const ALERT_CONSUMER: AlertConsumers[] = [AlertConsumers.SIEM];
 
-const TimelineDetailsPanel = ({ alertConsumers }: { alertConsumers?: ALERTS_CONSUMERS[] }) => {
+const TimelineDetailsPanel = ({ alertConsumers }: { alertConsumers?: AlertConsumers[] }) => {
   const { browserFields, docValueFields } = useSourcererScope(SourcererScopeName.detections);
 
   return (

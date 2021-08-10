@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiFlyout, EuiFlyoutProps } from '@elastic/eui';
-import { ALERTS_CONSUMERS } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
@@ -20,7 +20,7 @@ import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';
 
 interface DetailsPanelProps {
-  alertConsumers?: ALERTS_CONSUMERS[];
+  alertConsumers?: AlertConsumers[];
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
   handleOnPanelClosed?: () => void;

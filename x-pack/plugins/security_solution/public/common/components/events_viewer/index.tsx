@@ -11,7 +11,7 @@ import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
 
 import { isEmpty } from 'lodash/fp';
-import { ALERTS_CONSUMERS } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
@@ -65,7 +65,7 @@ export interface OwnProps {
 
 type Props = OwnProps & PropsFromRedux;
 
-const alertsConsumers: ALERTS_CONSUMERS[] = [ALERTS_CONSUMERS.SIEM];
+const alertsConsumers: AlertConsumers[] = [AlertConsumers.SIEM];
 
 /**
  * The stateful events viewer component is the highest level component that is utilized across the security_solution pages layer where

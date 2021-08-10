@@ -9,7 +9,7 @@ import { isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
-import { ALERTS_CONSUMERS } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 
 import { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
@@ -33,14 +33,14 @@ export interface EventsArgs {
 }
 
 export interface UseTimelineEventsDetailsProps {
-  alertConsumers?: ALERTS_CONSUMERS[];
+  alertConsumers?: AlertConsumers[];
   docValueFields: DocValueFields[];
   indexName: string;
   eventId: string;
   skip: boolean;
 }
 
-const EMPTY_ARRAY: ALERTS_CONSUMERS[] = [];
+const EMPTY_ARRAY: AlertConsumers[] = [];
 
 export const useTimelineEventsDetails = ({
   alertConsumers = EMPTY_ARRAY,

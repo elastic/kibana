@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiMarkdownEditorUiPlugin, EuiMarkdownAstNodePosition } from '@elastic/eui';
-import type { ALERTS_CONSUMERS } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import type { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 import { Plugin } from 'unified';
 /**
  * @description - manage the plugins, hooks, and ui components needed to enable timeline functionality within the cases plugin
@@ -29,7 +29,7 @@ interface TimelineProcessingPluginRendererProps {
 }
 
 export interface CasesTimelineIntegration {
-  alertConsumers?: ALERTS_CONSUMERS[];
+  alertConsumers?: AlertConsumers[];
   editor_plugins: {
     parsingPlugin: Plugin;
     processingPluginRenderer: React.FC<
@@ -48,7 +48,7 @@ export interface CasesTimelineIntegration {
     renderTimelineDetailsPanel?: ({
       alertConsumers,
     }: {
-      alertConsumers?: ALERTS_CONSUMERS[];
+      alertConsumers?: AlertConsumers[];
     }) => JSX.Element;
   };
 }
