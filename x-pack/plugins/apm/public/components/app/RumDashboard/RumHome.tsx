@@ -18,7 +18,7 @@ import { UserPercentile } from './UserPercentile';
 import { useBreakPoints } from '../../../hooks/use_break_points';
 
 export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
-  defaultMessage: 'User Experience',
+  defaultMessage: 'Dashboard',
 });
 
 export function RumHome() {
@@ -36,7 +36,7 @@ export function RumHome() {
           isXXL
             ? {
                 pageTitle: i18n.translate('xpack.apm.ux.overview', {
-                  defaultMessage: 'Overview',
+                  defaultMessage: 'Dashboard',
                 }),
                 rightSideItems: [
                   <DatePicker />,
