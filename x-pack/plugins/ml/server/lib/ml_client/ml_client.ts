@@ -103,7 +103,7 @@ export function getMlClient(
     const ids = getADJobIdsFromRequest(p);
     if (ids.length) {
       const { body } = await mlClient.getJobs(...p);
-      await groupIdsCheck(p, body.jobs, filteredJobIds);
+      await groupIdsCheck(p, body.jobs as Job[], filteredJobIds);
     }
   }
 
@@ -343,12 +343,12 @@ export function getMlClient(
         const { body } = await mlClient.getJobs<{ jobs: Job[] }>(...p);
         const jobs = await jobSavedObjectService.filterJobsForSpace<Job>(
           'anomaly-detector',
-          body.jobs,
+          body.jobs as Job[],
           'job_id'
         );
         await groupIdsCheck(
           p,
-          body.jobs,
+          body.jobs as Job[],
           jobs.map((j) => j.job_id)
         );
         return { body: { ...body, count: jobs.length, jobs } };
@@ -473,6 +473,10 @@ export function getMlClient(
     async updateJob(...p: Parameters<MlClient['updateJob']>) {
       await jobIdsCheck('anomaly-detector', p);
       return mlClient.updateJob(...p);
+    },
+    async resetJob(...p: Parameters<MlClient['updateJob']>) {
+      await jobIdsCheck('anomaly-detector', p);
+      return mlClient.resetJob(...p);
     },
     async updateModelSnapshot(...p: Parameters<MlClient['updateModelSnapshot']>) {
       await jobIdsCheck('anomaly-detector', p);

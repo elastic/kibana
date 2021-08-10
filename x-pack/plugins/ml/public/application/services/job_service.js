@@ -386,6 +386,10 @@ class JobService {
     return ml.jobs.closeJobs(jIds);
   }
 
+  resetJobs(jIds) {
+    return ml.jobs.resetJobs(jIds);
+  }
+
   validateDetector(detector) {
     return new Promise((resolve, reject) => {
       if (detector) {

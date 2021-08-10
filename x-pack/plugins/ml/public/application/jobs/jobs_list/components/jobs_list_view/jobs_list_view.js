@@ -27,6 +27,7 @@ import { JobDetails } from '../job_details';
 import { JobFilterBar } from '../job_filter_bar';
 import { EditJobFlyout } from '../edit_job_flyout';
 import { DeleteJobModal } from '../delete_job_modal';
+import { ResetJobModal } from '../reset_job_modal';
 import { StartDatafeedModal } from '../start_datafeed_modal';
 import { MultiJobActions } from '../multi_job_actions';
 import { NewJobButton } from '../new_job_button';
@@ -70,6 +71,7 @@ export class JobsListView extends Component {
 
     this.showEditJobFlyout = () => {};
     this.showDeleteJobModal = () => {};
+    this.showResetJobModal = () => {};
     this.showStartDatafeedModal = () => {};
     this.showCreateAlertFlyout = () => {};
     // work around to keep track of whether the component is mounted
@@ -207,6 +209,13 @@ export class JobsListView extends Component {
   };
   unsetShowDeleteJobModalFunction = () => {
     this.showDeleteJobModal = () => {};
+  };
+
+  setShowResetJobModalFunction = (func) => {
+    this.showResetJobModal = func;
+  };
+  unsetShowResetJobModalFunction = () => {
+    this.showResetJobModal = () => {};
   };
 
   setShowStartDatafeedModalFunction = (func) => {
@@ -515,6 +524,7 @@ export class JobsListView extends Component {
                   allJobIds={jobIds}
                   showStartDatafeedModal={this.showStartDatafeedModal}
                   showDeleteJobModal={this.showDeleteJobModal}
+                  showResetJobModal={this.showResetJobModal}
                   showCreateAlertFlyout={this.showCreateAlertFlyout}
                   refreshJobs={() => this.refreshJobSummaryList(true)}
                 />
@@ -531,6 +541,7 @@ export class JobsListView extends Component {
                 selectJobChange={this.selectJobChange}
                 showEditJobFlyout={this.showEditJobFlyout}
                 showDeleteJobModal={this.showDeleteJobModal}
+                showResetJobModal={this.showResetJobModal}
                 showStartDatafeedModal={this.showStartDatafeedModal}
                 refreshJobs={() => this.refreshJobSummaryList(true)}
                 jobsViewState={this.props.jobsViewState}
@@ -548,6 +559,11 @@ export class JobsListView extends Component {
               <DeleteJobModal
                 setShowFunction={this.setShowDeleteJobModalFunction}
                 unsetShowFunction={this.unsetShowDeleteJobModalFunction}
+                refreshJobs={() => this.refreshJobSummaryList(true)}
+              />
+              <ResetJobModal
+                setShowFunction={this.setShowResetJobModalFunction}
+                unsetShowFunction={this.unsetShowResetJobModalFunction}
                 refreshJobs={() => this.refreshJobSummaryList(true)}
               />
               <StartDatafeedModal

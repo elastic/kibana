@@ -173,6 +173,13 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
+    resetJob({ jobId }: { jobId: string }) {
+      return httpService.http<any>({
+        path: `${basePath()}/anomaly_detectors/${jobId}/_reset`,
+        method: 'POST',
+      });
+    },
+
     estimateBucketSpan(obj: BucketSpanEstimatorData) {
       const body = JSON.stringify(obj);
       return httpService.http<BucketSpanEstimatorResponse>({

@@ -12,7 +12,14 @@ import React, { Component } from 'react';
 
 import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 
-import { closeJobs, stopDatafeeds, isStartable, isStoppable, isClosable } from '../utils';
+import {
+  closeJobs,
+  stopDatafeeds,
+  isStartable,
+  isStoppable,
+  isClosable,
+  isResetable,
+} from '../utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -27,6 +34,7 @@ class MultiJobActionsMenuUI extends Component {
     this.canDeleteJob = checkPermission('canDeleteJob');
     this.canStartStopDatafeed = checkPermission('canStartStopDatafeed') && mlNodesAvailable();
     this.canCloseJob = checkPermission('canCloseJob') && mlNodesAvailable();
+    this.canResetJob = checkPermission('canResetJob') && mlNodesAvailable();
     this.canCreateMlAlerts = checkPermission('canCreateMlAlerts');
   }
 
@@ -97,6 +105,27 @@ class MultiJobActionsMenuUI extends Component {
           <FormattedMessage
             id="xpack.ml.jobsList.multiJobsActions.closeJobsLabel"
             defaultMessage="Close {jobsCount, plural, one {job} other {jobs}}"
+            values={{ jobsCount: this.props.jobs.length }}
+          />
+        </EuiContextMenuItem>
+      );
+    }
+
+    if (isResetable(this.props.jobs)) {
+      items.push(
+        <EuiContextMenuItem
+          key="reset job"
+          icon="refresh"
+          disabled={this.canCloseJob === false}
+          onClick={() => {
+            this.props.showResetJobModal(this.props.jobs);
+            this.closePopover();
+          }}
+          data-test-subj="mlADJobListMultiSelectResetJobActionButton"
+        >
+          <FormattedMessage
+            id="xpack.ml.jobsList.multiJobsActions.resetJobsLabel"
+            defaultMessage="Reset {jobsCount, plural, one {job} other {jobs}}"
             values={{ jobsCount: this.props.jobs.length }}
           />
         </EuiContextMenuItem>

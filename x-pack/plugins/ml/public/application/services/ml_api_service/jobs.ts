@@ -127,6 +127,15 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
+  resetJobs(jobIds: string[]) {
+    const body = JSON.stringify({ jobIds });
+    return httpService.http<any>({
+      path: `${ML_BASE_PATH}/jobs/reset_jobs`,
+      method: 'POST',
+      body,
+    });
+  },
+
   forceStopAndCloseJob(jobId: string) {
     const body = JSON.stringify({ jobId });
     return httpService.http<{ success: boolean }>({

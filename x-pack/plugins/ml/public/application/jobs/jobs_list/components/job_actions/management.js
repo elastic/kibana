@@ -9,13 +9,22 @@ import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 import { getIndexPatternNames } from '../../../../util/index_utils';
 
-import { stopDatafeeds, cloneJob, closeJobs, isStartable, isStoppable, isClosable } from '../utils';
+import {
+  stopDatafeeds,
+  cloneJob,
+  closeJobs,
+  isStartable,
+  isStoppable,
+  isClosable,
+  isResetable,
+} from '../utils';
 import { getToastNotifications } from '../../../../util/dependency_cache';
 import { i18n } from '@kbn/i18n';
 
 export function actionsMenuContent(
   showEditJobFlyout,
   showDeleteJobModal,
+  showResetJobModal,
   showStartDatafeedModal,
   refreshJobs,
   showCreateAlertFlyout
@@ -26,6 +35,7 @@ export function actionsMenuContent(
   const canUpdateDatafeed = checkPermission('canUpdateDatafeed');
   const canStartStopDatafeed = checkPermission('canStartStopDatafeed') && mlNodesAvailable();
   const canCloseJob = checkPermission('canCloseJob') && mlNodesAvailable();
+  const canResetJob = checkPermission('canResetJob') && mlNodesAvailable();
   const canCreateMlAlerts = checkPermission('canCreateMlAlerts');
 
   return [
@@ -37,7 +47,7 @@ export function actionsMenuContent(
         defaultMessage: 'Start datafeed',
       }),
       icon: 'play',
-      enabled: (item) => item.deleting !== true && canStartStopDatafeed,
+      enabled: (item) => jobBlocked(item) === false && canStartStopDatafeed,
       available: (item) => isStartable([item]),
       onClick: (item) => {
         showStartDatafeedModal([item]);
@@ -53,7 +63,7 @@ export function actionsMenuContent(
         defaultMessage: 'Stop datafeed',
       }),
       icon: 'stop',
-      enabled: (item) => item.deleting !== true && canStartStopDatafeed,
+      enabled: (item) => jobBlocked(item) === false && canStartStopDatafeed,
       available: (item) => isStoppable([item]),
       onClick: (item) => {
         stopDatafeeds([item], refreshJobs);
@@ -69,7 +79,7 @@ export function actionsMenuContent(
         defaultMessage: 'Create alert rule',
       }),
       icon: 'bell',
-      enabled: (item) => item.deleting !== true,
+      enabled: (item) => jobBlocked(item) === false,
       available: () => canCreateMlAlerts,
       onClick: (item) => {
         showCreateAlertFlyout([item.id]);
@@ -85,13 +95,29 @@ export function actionsMenuContent(
         defaultMessage: 'Close job',
       }),
       icon: 'cross',
-      enabled: (item) => item.deleting !== true && canCloseJob,
+      enabled: (item) => jobBlocked(item) === false && canCloseJob,
       available: (item) => isClosable([item]),
       onClick: (item) => {
         closeJobs([item], refreshJobs);
         closeMenu(true);
       },
       'data-test-subj': 'mlActionButtonCloseJob',
+    },
+    {
+      name: i18n.translate('xpack.ml.jobsList.managementActions.resetJobLabel', {
+        defaultMessage: 'Reset job',
+      }),
+      description: i18n.translate('xpack.ml.jobsList.managementActions.resetJobDescription', {
+        defaultMessage: 'Reset job',
+      }),
+      icon: 'refresh',
+      enabled: (item) => jobBlocked(item) === false && canResetJob,
+      available: (item) => isResetable([item]),
+      onClick: (item) => {
+        showResetJobModal([item]);
+        closeMenu(true);
+      },
+      'data-test-subj': 'mlActionButtonResetJob',
     },
     {
       name: i18n.translate('xpack.ml.jobsList.managementActions.cloneJobLabel', {
@@ -106,7 +132,7 @@ export function actionsMenuContent(
         // the indexPattern the job was created for. An indexPattern could either have been deleted
         // since the the job was created or the current user doesn't have the required permissions to
         // access the indexPattern.
-        return item.deleting !== true && canCreateJob;
+        return jobBlocked(item) === false && canCreateJob;
       },
       onClick: (item) => {
         const indexPatternNames = getIndexPatternNames();
@@ -136,7 +162,7 @@ export function actionsMenuContent(
         defaultMessage: 'Edit job',
       }),
       icon: 'pencil',
-      enabled: (item) => item.deleting !== true && canUpdateJob && canUpdateDatafeed,
+      enabled: (item) => jobBlocked(item) === false && canUpdateJob && canUpdateDatafeed,
       onClick: (item) => {
         showEditJobFlyout(item);
         closeMenu();
@@ -160,6 +186,10 @@ export function actionsMenuContent(
       'data-test-subj': 'mlActionButtonDeleteJob',
     },
   ];
+}
+
+function jobBlocked(item) {
+  return item.deleting === true || item.blocked !== undefined;
 }
 
 function closeMenu(now = false) {

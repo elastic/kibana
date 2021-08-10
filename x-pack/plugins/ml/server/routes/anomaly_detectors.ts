@@ -304,6 +304,45 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
+   * @api {post} /api/ml/anomaly_detectors/:jobId/_reset Close specified job
+   * @apiName CloseAnomalyDetectorsJob
+   * @apiDescription Closes an anomaly detection job.
+   *
+   * @apiSchema (params) jobIdSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/anomaly_detectors/{jobId}/_reset',
+      validate: {
+        params: jobIdSchema,
+        query: schema.object({ wait_for_completion: schema.maybe(schema.boolean()) }),
+      },
+      options: {
+        tags: ['access:ml:canCloseJob'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const options: { job_id: string; waitForCompletion?: boolean } = {
+          job_id: request.params.jobId,
+        };
+        const waitForCompletion = request.query.wait_for_completion;
+        if (waitForCompletion !== undefined) {
+          options.waitForCompletion = waitForCompletion;
+        }
+        const { body } = await mlClient.resetJob(options);
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup AnomalyDetectors
+   *
    * @api {delete} /api/ml/anomaly_detectors/:jobId Delete specified job
    * @apiName DeleteAnomalyDetectorsJob
    * @apiDescription Deletes specified anomaly detection job.

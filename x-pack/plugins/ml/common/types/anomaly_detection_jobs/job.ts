@@ -10,7 +10,12 @@ import { estypes } from '@elastic/elasticsearch';
 export type JobId = string;
 export type BucketSpan = string;
 
-export type Job = estypes.MlJob;
+export type Job = estypes.MlJob & {
+  blocked: {
+    reason: 'delete' | 'revert' | 'reset';
+    task_id?: string;
+  };
+};
 
 export type AnalysisConfig = estypes.MlAnalysisConfig;
 

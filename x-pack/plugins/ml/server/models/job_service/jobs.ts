@@ -145,6 +145,23 @@ export function jobsProvider(
     return results;
   }
 
+  async function resetJobs(jobIds: string[]) {
+    const results: Results = {};
+    for (const jobId of jobIds) {
+      try {
+        await mlClient.resetJob({ job_id: jobId }); // CHANGE - add wait_for_completion
+        results[jobId] = { reset: true };
+      } catch (error) {
+        if (isRequestTimeout(error)) {
+          return fillResultsWithTimeouts(results, jobId, jobIds, 'reset'); // CHANGE - make constant for 'delete', 'revert', 'reset'
+        } else {
+          results[jobId] = { reset: false, error: error.body };
+        }
+      }
+    }
+    return results;
+  }
+
   async function forceStopAndCloseJob(jobId: string) {
     const datafeedIds = await getDatafeedIdsByJobId();
     const datafeedId = datafeedIds[jobId];
@@ -290,7 +307,7 @@ export function jobsProvider(
     if (jobResults && jobResults.jobs) {
       const job = jobResults.jobs.find((j) => j.job_id === jobId);
       if (job) {
-        result.job = job;
+        result.job = job as Job;
       }
     }
     return result;
@@ -613,6 +630,7 @@ export function jobsProvider(
     forceDeleteJob,
     deleteJobs,
     closeJobs,
+    resetJobs,
     forceStopAndCloseJob,
     jobsSummary,
     jobsWithTimerange,

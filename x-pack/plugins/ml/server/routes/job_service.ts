@@ -177,6 +177,40 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JobService
    *
+   * @api {post} /api/ml/jobs/reset_jobs Close jobs
+   * @apiName CloseJobs
+   * @apiDescription Closes one or more anomaly detection jobs
+   *
+   * @apiSchema (body) jobIdsSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/jobs/reset_jobs',
+      validate: {
+        body: jobIdsSchema,
+      },
+      options: {
+        tags: ['access:ml:canResetJob'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      try {
+        const { resetJobs } = jobServiceProvider(client, mlClient);
+        const { jobIds } = request.body;
+        const resp = await resetJobs(jobIds);
+
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobService
+   *
    * @api {post} /api/ml/jobs/force_stop_and_close_job Force stop and close job
    * @apiName ForceStopAndCloseJob
    * @apiDescription Force stops the datafeed and then force closes the anomaly detection job specified by job ID

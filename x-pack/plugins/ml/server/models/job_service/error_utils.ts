@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 
 const REQUEST_TIMEOUT_NAME = 'RequestTimeout';
-type ACTION_STATE = DATAFEED_STATE | JOB_STATE;
+type ACTION_STATE = DATAFEED_STATE | JOB_STATE | 'delete' | 'revert' | 'reset';
 
 export function isRequestTimeout(error: { name: string }) {
   return error.name === REQUEST_TIMEOUT_NAME;
