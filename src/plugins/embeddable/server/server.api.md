@@ -6,6 +6,7 @@
 
 import { CoreSetup } from 'kibana/server';
 import { CoreStart } from 'kibana/server';
+import { KibanaExecutionContext } from 'src/core/public';
 import { Plugin } from 'kibana/server';
 
 // Warning: (ae-forgotten-export) The symbol "EmbeddableStateWithType" needs to be exported by the entry point index.d.ts
