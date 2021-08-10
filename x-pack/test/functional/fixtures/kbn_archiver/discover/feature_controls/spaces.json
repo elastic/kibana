@@ -4,22 +4,6 @@
     "defaultIndex": "logstash-*"
   },
   "coreMigrationVersion": "7.15.0",
-  "id": "6.0.0",
-  "migrationVersion": {
-    "config": "7.13.0"
-  },
-  "references": [],
-  "type": "config",
-  "updated_at": "2019-01-22T19:32:02.235Z",
-  "version": "WzUsMl0="
-}
-
-{
-  "attributes": {
-    "buildNum": 9007199254740991,
-    "defaultIndex": "logstash-*"
-  },
-  "coreMigrationVersion": "7.15.0",
   "id": "7.15.0",
   "migrationVersion": {
     "config": "7.13.0"
