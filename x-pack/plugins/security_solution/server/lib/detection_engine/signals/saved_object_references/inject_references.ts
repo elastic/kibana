@@ -25,6 +25,7 @@ import { injectExceptionsReferences } from './inject_exceptions_list';
  * };
  * @param logger Kibana injected logger
  * @param params The params of the base rule(s).
+ * @param savedObjectReferences The saved object references to merge with the rule params
  * @returns The rule parameters with the saved object references.
  */
 export const injectReferences = ({
