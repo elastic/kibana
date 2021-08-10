@@ -121,5 +121,10 @@ export const CreateDockerContexts: Task = {
       context: true,
       image: false,
     });
+    await runDockerGenerator(config, log, build, {
+      cloud: true,
+      context: true,
+      image: false,
+    });
   },
 };
