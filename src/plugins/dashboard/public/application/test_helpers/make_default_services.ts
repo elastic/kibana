@@ -62,7 +62,7 @@ export function makeDefaultServices(): DashboardAppServices {
     createNew: true,
     saveQuery: true,
     createShortUrl: true,
-    hideWriteControls: false,
+    showWriteControls: true,
     storeSearchSession: true,
     mapsCapabilities: { save: true },
     visualizeCapabilities: { save: true },

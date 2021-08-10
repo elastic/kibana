@@ -18,11 +18,6 @@ export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
 
 export interface PluginDeps {
   discover: Pick<DiscoverStart, 'locator'>;
-  kibanaLegacy?: {
-    dashboardConfig: {
-      getHideWriteControls: KibanaLegacyStart['dashboardConfig']['getHideWriteControls'];
-    };
-  };
 }
 
 export interface CoreDeps {
@@ -53,11 +48,6 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
 
     if (capabilities.discover && !capabilities.discover.show) return false;
     if (!plugins.discover.locator) return false;
-    const isDashboardOnlyMode = !!this.params
-      .start()
-      .plugins.kibanaLegacy?.dashboardConfig.getHideWriteControls();
-    if (isDashboardOnlyMode) return false;
-
     if (!shared.hasExactlyOneIndexPattern(embeddable)) return false;
     if (embeddable.getInput().viewMode !== ViewMode.VIEW) return false;
 

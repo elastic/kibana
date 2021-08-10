@@ -259,7 +259,7 @@ export const useDashboardAppState = ({
       const updateLastSavedState = () => {
         setLastSavedState(
           savedObjectToDashboardState({
-            hideWriteControls: dashboardBuildContext.dashboardCapabilities.hideWriteControls,
+            showWriteControls: dashboardBuildContext.dashboardCapabilities.showWriteControls,
             version: dashboardBuildContext.kibanaVersion,
             savedObjectsTagging,
             usageCollection,

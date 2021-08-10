@@ -65,11 +65,6 @@ const setup = (
     discover: {
       locator,
     },
-    kibanaLegacy: {
-      dashboardConfig: {
-        getHideWriteControls: () => dashboardOnlyMode,
-      },
-    },
   };
 
   const params: Params = {
