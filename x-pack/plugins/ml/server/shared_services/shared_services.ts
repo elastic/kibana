@@ -34,6 +34,7 @@ import {
   getJobsHealthServiceProvider,
   JobsHealthServiceProvider,
 } from '../lib/alerts/jobs_health_service';
+import type { IRuleDataClient } from '../../../rule_registry/server';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
@@ -64,6 +65,7 @@ interface OkParams {
   scopedClient: IScopedClusterClient;
   mlClient: MlClient;
   jobSavedObjectService: JobSavedObjectService;
+  ruleDataClient: IRuleDataClient | null;
 }
 
 type OkCallback = (okParams: OkParams) => any;
@@ -76,7 +78,8 @@ export function createSharedServices(
   resolveMlCapabilities: ResolveMlCapabilities,
   getClusterClient: () => IClusterClient | null,
   getInternalSavedObjectsClient: () => SavedObjectsClientContract | null,
-  isMlReady: () => Promise<void>
+  isMlReady: () => Promise<void>,
+  ruleDataClient: IRuleDataClient | null
 ): {
   sharedServicesProviders: SharedServices;
   internalServicesProviders: MlServicesProviders;
@@ -120,7 +123,7 @@ export function createSharedServices(
       },
       async ok(callback: OkCallback) {
         await Promise.all(asyncGuards);
-        return callback({ scopedClient, mlClient, jobSavedObjectService });
+        return callback({ scopedClient, mlClient, jobSavedObjectService, ruleDataClient });
       },
     };
     return guards;

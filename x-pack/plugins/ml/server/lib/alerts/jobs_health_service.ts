@@ -33,6 +33,7 @@ import { AnnotationService } from '../../models/annotation_service/annotation';
 import { annotationServiceProvider } from '../../models/annotation_service';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { isDefined } from '../../../common/types/guards';
+import { IRuleDataClient } from '../../../../rule_registry/server';
 
 interface TestResult {
   name: string;
@@ -45,7 +46,8 @@ export function jobsHealthServiceProvider(
   mlClient: MlClient,
   datafeedsService: DatafeedsService,
   annotationService: AnnotationService,
-  logger: Logger
+  logger: Logger,
+  ruleDataClient: IRuleDataClient | null
 ) {
   /**
    * Extracts result list of jobs based on included and excluded selection of jobs and groups.
@@ -355,12 +357,13 @@ export function getJobsHealthServiceProvider(getGuards: GetGuards) {
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
-            .ok(({ mlClient, scopedClient }) =>
+            .ok(({ mlClient, scopedClient, ruleDataClient }) =>
               jobsHealthServiceProvider(
                 mlClient,
                 datafeedsProvider(scopedClient, mlClient),
                 annotationServiceProvider(scopedClient),
-                logger
+                logger,
+                ruleDataClient
               ).getTestsResults(...args)
             );
         },

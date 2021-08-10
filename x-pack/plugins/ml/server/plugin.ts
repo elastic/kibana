@@ -198,6 +198,11 @@ export class MlServerPlugin
 
     initMlServerLog({ log: this.log });
 
+    let ruleDataClient: IRuleDataClient | null = null;
+    if (plugins.ruleRegistry) {
+      ruleDataClient = getRuleDataClient(plugins.ruleRegistry, this.log);
+    }
+
     const { internalServicesProviders, sharedServicesProviders } = createSharedServices(
       this.mlLicense,
       getSpaces,
@@ -206,13 +211,9 @@ export class MlServerPlugin
       resolveMlCapabilities,
       () => this.clusterClient,
       () => getInternalSavedObjectsClient(),
-      () => this.isMlReady
+      () => this.isMlReady,
+      ruleDataClient
     );
-
-    let ruleDataClient: IRuleDataClient | null = null;
-    if (plugins.ruleRegistry) {
-      ruleDataClient = getRuleDataClient(plugins.ruleRegistry, this.log);
-    }
 
     if (plugins.alerting) {
       registerMlAlerts({
