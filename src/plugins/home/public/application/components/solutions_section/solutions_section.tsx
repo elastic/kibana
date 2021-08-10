@@ -8,7 +8,7 @@
 
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiFlexGroup, EuiHorizontalRule, EuiScreenReaderOnly } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SolutionPanel } from './solution_panel';
 import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../';
@@ -34,36 +34,6 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions, directorie
 
   return (
     <>
-      {/* <section aria-labelledby="homSolutions__title" className="homSolutions">
-        <EuiScreenReaderOnly>
-          <h2 id="homSolutions__title">
-            <FormattedMessage
-              id="home.solutionsSection.sectionTitle"
-              defaultMessage="Pick your solution"
-            />
-          </h2>
-        </EuiScreenReaderOnly>
-
-        <EuiFlexGroup className="homSolutions__content" justifyContent="spaceAround">
-          {solutions.length ? (
-            <EuiFlexItem grow={1} className="homSolutions__group homSolutions__group--multiple">
-              <EuiFlexGroup direction="column">
-                {solutions.map((solution) => (
-                  <SolutionPanel key={solution.id} solution={solution} addBasePath={addBasePath} />
-                ))}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          ) : null}
-          {kibana ? (
-            <SolutionPanel
-              solution={kibana}
-              addBasePath={addBasePath}
-              apps={kibanaApps.length ? kibanaApps : undefined}
-            />
-          ) : null}
-        </EuiFlexGroup>
-      </section> */}
-
       <section aria-labelledby="homSolutions__title" className="homSolutions">
         <EuiScreenReaderOnly>
           <h2 id="homSolutions__title">
