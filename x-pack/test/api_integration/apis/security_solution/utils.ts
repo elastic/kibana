@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { JsonObject, JsonArray } from '@kbn/common-utils';
+import { JsonObject, JsonArray } from '@kbn/utility-types';
 
 export const getFilterValue = (hostName: string, from: string, to: string): JsonObject => ({
   bool: {
