@@ -52,8 +52,8 @@ export function registerOrgSettingsUploadImagesRoute({
       path: '/api/workplace_search/org/settings/upload_images',
       validate: {
         body: schema.object({
-          logo: schema.nullable(schema.string()),
-          icon: schema.nullable(schema.string()),
+          logo: schema.maybe(schema.nullable(schema.string())),
+          icon: schema.maybe(schema.nullable(schema.string())),
         }),
       },
     },
