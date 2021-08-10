@@ -113,6 +113,13 @@ export function getConnectionStats({
             y: point.count > 0 ? point.latency_sum / point.count : null,
           })),
         },
+        totalTime: {
+          value: mergedStats.value.latency_sum,
+          timeseries: mergedStats.timeseries.map((point) => ({
+            x: point.x,
+            y: point.latency_sum,
+          })),
+        },
         throughput: {
           value:
             mergedStats.value.count > 0
