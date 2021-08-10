@@ -86,6 +86,13 @@ const trainingDatasetHelpText = i18n.translate(
   }
 );
 
+const evaluationQualityMetricsHelpText = i18n.translate(
+  'xpack.ml.dataframe.analytics.classificationExploration.evaluationQualityMetricsHelpText',
+  {
+    defaultMessage: 'Evaluation quality metrics',
+  }
+);
+
 function getHelpText(dataSubsetTitle: string): string {
   let helpText = entireDatasetHelpText;
   if (dataSubsetTitle === SUBSET_TITLE.TESTING) {
@@ -367,6 +374,10 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
             ) : null}
             {/* Accuracy and Recall */}
             <EuiSpacer size="xl" />
+            <EuiTitle size="xxs">
+              <span>{evaluationQualityMetricsHelpText}</span>
+            </EuiTitle>
+            <EuiSpacer size="s" />
             <EuiFlexGroup
               direction="column"
               justifyContent="center"

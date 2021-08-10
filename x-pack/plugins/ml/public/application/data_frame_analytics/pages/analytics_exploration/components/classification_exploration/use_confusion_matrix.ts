@@ -65,7 +65,9 @@ export const useConfusionMatrix = (
   const [confusionMatrixData, setConfusionMatrixData] = useState<ConfusionMatrix[]>([]);
   const [overallAccuracy, setOverallAccuracy] = useState<null | number>(null);
   const [avgRecall, setAvgRecall] = useState<null | number>(null);
-  const [evaluationMetricsItems, setEvalutaionMetricsItems] = useState<any>([]);
+  const [evaluationMetricsItems, setEvaluationMetricsItems] = useState<ClassificationMetricItem[]>(
+    []
+  );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [docsCount, setDocsCount] = useState<null | number>(null);
   const [error, setError] = useState<null | string>(null);
@@ -115,7 +117,7 @@ export const useConfusionMatrix = (
         setConfusionMatrixData(confusionMatrix || []);
         setAvgRecall(evalData.eval?.classification?.recall?.avg_recall || null);
         setOverallAccuracy(evalData.eval?.classification?.accuracy?.overall_accuracy || null);
-        setEvalutaionMetricsItems(getEvalutionMetricsItems(evalData.eval?.classification));
+        setEvaluationMetricsItems(getEvalutionMetricsItems(evalData.eval?.classification));
         setIsLoading(false);
       } else {
         setIsLoading(false);

@@ -63,8 +63,8 @@ export const EvaluationQualityMetricsTable: FC<{
         <EuiInMemoryTable<ClassificationMetricItem>
           items={evaluationMetricsItems}
           columns={columns}
-          pagination={true}
-          sorting={true}
+          pagination
+          sorting
         />
       </EuiPanel>
     </EuiAccordion>
