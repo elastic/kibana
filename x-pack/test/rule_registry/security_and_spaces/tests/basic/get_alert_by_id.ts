@@ -152,11 +152,11 @@ export default ({ getService }: FtrProviderContext) => {
 
       unauthorizedUsers.forEach(({ username, password }) => {
         it(`${username} should NOT be able to access alert ${alertId} in ${space}/${index}`, async () => {
-          await supertestWithoutAuth
+          const res = await supertestWithoutAuth
             .get(`${getSpaceUrlPrefix(space)}${TEST_URL}?id=${alertId}&index=${index}`)
             .auth(username, password)
-            .set('kbn-xsrf', 'true')
-            .expect(403);
+            .set('kbn-xsrf', 'true');
+          expect([403, 404]).to.contain(res.statusCode);
         });
       });
     }

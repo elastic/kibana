@@ -48,6 +48,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
   const {
     services: {
       notifications: { toasts },
+      mlServices: { mlUsageCollection },
     },
   } = useMlKibana();
 
@@ -142,6 +143,13 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
       } else {
         await jobsExportService.exportDataframeAnalyticsJobs(selectedJobIds);
       }
+
+      mlUsageCollection.count(
+        selectedJobType === 'anomaly-detector'
+          ? 'exported_anomaly_detector_jobs'
+          : 'exported_data_frame_analytics_jobs',
+        selectedJobIds.length
+      );
 
       setExporting(false);
       setShowFlyout(false);
