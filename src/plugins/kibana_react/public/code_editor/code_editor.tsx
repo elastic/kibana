@@ -11,6 +11,7 @@ import ReactResizeDetector from 'react-resize-detector';
 import ReactMonacoEditor from 'react-monaco-editor';
 import { htmlIdGenerator, EuiText, EuiToolTip } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import classNames from 'classnames';
 
@@ -107,6 +108,10 @@ export interface Props {
    * Should the editor be rendered using the fullWidth EUI attribute
    */
   fullWidth?: boolean;
+  /**
+   * Accessible name for the editor. (Defaults to "Code editor")
+   */
+  'aria-label'?: string;
 }
 
 export const CodeEditor: React.FC<Props> = ({
@@ -125,6 +130,9 @@ export const CodeEditor: React.FC<Props> = ({
   signatureProvider,
   hoverProvider,
   languageConfiguration,
+  'aria-label': ariaLabel = i18n.translate('kibana-react.kibanaCodeEditor.ariaLabel', {
+    defaultMessage: 'Code Editor',
+  }),
 }) => {
   // We need to be able to mock the MonacoEditor in our test in order to not test implementation
   // detail and not have to call methods on the <CodeEditor /> component instance.
@@ -186,6 +194,10 @@ export const CodeEditor: React.FC<Props> = ({
     [stopEditing]
   );
 
+  const onBlurMonaco = useCallback(() => {
+    stopEditing();
+  }, [stopEditing]);
+
   const renderPrompt = useCallback(() => {
     return (
       <EuiToolTip
@@ -220,6 +232,7 @@ export const CodeEditor: React.FC<Props> = ({
           role="button"
           onClick={startEditing}
           onKeyDown={onKeyDownHint}
+          aria-label={ariaLabel}
           data-test-subj="codeEditorHint"
         />
       </EuiToolTip>
@@ -300,6 +313,7 @@ export const CodeEditor: React.FC<Props> = ({
       }
 
       editor.onKeyDown(onKeydownMonaco);
+      editor.onDidBlurEditorText(onBlurMonaco);
 
       // "widget" is not part of the TS interface but does exist
       // @ts-expect-errors
