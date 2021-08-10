@@ -204,7 +204,7 @@ export const TagCloudChart = ({
                 color="warning"
                 content={
                   <FormattedMessage
-                    id="visTypeTagCloud.feedbackMessage.tooSmallContainerDescription"
+                    id="expressionTagcloud.feedbackMessage.tooSmallContainerDescription"
                     defaultMessage="The container is too small to display the entire cloud. Tags might be cropped or omitted."
                   />
                 }
@@ -218,7 +218,7 @@ export const TagCloudChart = ({
                 color="warning"
                 content={
                   <FormattedMessage
-                    id="visTypeTagCloud.feedbackMessage.truncatedTagsDescription"
+                    id="expressionTagcloud.feedbackMessage.truncatedTagsDescription"
                     defaultMessage="The number of tags has been truncated to avoid long draw times."
                   />
                 }

@@ -4,7 +4,7 @@
   "ui": true,
   "server": true,
   "requiredPlugins": ["data", "expressions", "visualizations", "charts"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor"],
+  "requiredBundles": ["kibanaReact", "visDefaultEditor"],
   "owner": {
     "name": "Kibana App",
     "githubTeam": "kibana-app"

@@ -20,5 +20,6 @@
     { "path": "../../visualizations/tsconfig.json" },
     { "path": "../../charts/tsconfig.json" },
     { "path": "../../field_formats/tsconfig.json" },
+    { "path": "../../kibana_utils/tsconfig.json" },
   ]
 }

@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { prepareLogTable, Dimension } from '../../../../visualizations/public';
+import { prepareLogTable, Dimension } from '../../../../visualizations/common';
 import { TagCloudVisParams } from '../types';
 import { ExpressionTagcloudFunction } from '../types';
 import { EXPRESSION_NAME } from '../constants';
@@ -24,13 +24,13 @@ const strings = {
       defaultMessage: 'Orientation of words inside tagcloud',
     }),
     minFontSize: i18n.translate('expressionTagcloud.functions.tagcloud.args.minFontSizeHelpText', {
-      defaultMessage: '',
+      defaultMessage: 'Min font size',
     }),
     maxFontSize: i18n.translate('expressionTagcloud.functions.tagcloud.args.maxFontSizeHelpText', {
-      defaultMessage: '',
+      defaultMessage: 'Max font size',
     }),
     showLabel: i18n.translate('expressionTagcloud.functions.tagcloud.args.showLabelHelpText', {
-      defaultMessage: '',
+      defaultMessage: 'Show chart label',
     }),
     palette: i18n.translate('expressionTagcloud.functions.tagcloud.args.paletteHelpText', {
       defaultMessage: 'Defines the chart palette name',

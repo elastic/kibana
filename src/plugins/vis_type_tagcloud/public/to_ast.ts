@@ -12,7 +12,6 @@ import {
 } from '../../data/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../visualizations/public';
-import { TagcloudExpressionFunctionDefinition } from './tag_cloud_fn';
 import { TagCloudVisParams } from './types';
 
 const prepareDimension = (params: SchemaConfig) => {
@@ -41,7 +40,7 @@ export const toExpressionAst: VisToExpressionAst<TagCloudVisParams> = (vis, para
   const schemas = getVisSchemas(vis, params);
   const { scale, orientation, minFontSize, maxFontSize, showLabel, palette } = vis.params;
 
-  const tagcloud = buildExpressionFunction<TagcloudExpressionFunctionDefinition>('tagcloud', {
+  const tagcloud = buildExpressionFunction('tagcloud', {
     scale,
     orientation,
     minFontSize,
