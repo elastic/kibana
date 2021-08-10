@@ -6,18 +6,16 @@
  */
 
 import { getSearchAggregatedTransactions } from '.';
-import { APMConfig } from '../../..';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
-import { APMEventClient } from '../create_es_client/create_apm_event_client';
+import { Setup, SetupTimeRange } from '../setup_request';
 
-export async function getFallbackToTransactions(options: {
-  config: APMConfig;
-  start?: number;
-  end?: number;
-  apmEventClient: APMEventClient;
+export async function getFallbackToTransactions({
+  setup: { config, start, end, apmEventClient },
+  kuery,
+}: {
+  setup: Setup & Partial<SetupTimeRange>;
   kuery?: string;
 }): Promise<boolean> {
-  const { config } = options;
   const searchAggregatedTransactions =
     config['xpack.apm.searchAggregatedTransactions'];
   const forceSearchRawTransactions =
@@ -27,8 +25,12 @@ export async function getFallbackToTransactions(options: {
     return false;
   }
 
-  const searchesAggregatedTransactions = await getSearchAggregatedTransactions(
-    options
-  );
+  const searchesAggregatedTransactions = await getSearchAggregatedTransactions({
+    config,
+    start,
+    end,
+    apmEventClient,
+    kuery,
+  });
   return !searchesAggregatedTransactions;
 }

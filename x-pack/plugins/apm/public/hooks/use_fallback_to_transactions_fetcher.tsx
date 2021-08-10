@@ -10,21 +10,19 @@ import { useFetcher } from './use_fetcher';
 
 export function useFallbackToTransactionsFetcher() {
   const {
-    urlParams: { kuery },
+    urlParams: { kuery, start, end },
   } = useUrlParams();
   const { data = { fallbackToTransactions: false } } = useFetcher(
     (callApmApi) => {
       return callApmApi({
         endpoint: 'GET /api/apm/fallback_to_transactions',
         params: {
-          query: { kuery },
+          query: { kuery, start, end },
         },
       });
     },
     [kuery]
   );
 
-  // return data;
-  // TODO restore this bit
-  return { fallbackToTransactions: true };
+  return data;
 }

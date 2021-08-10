@@ -10,11 +10,11 @@ import { getFallbackToTransactions } from '../lib/helpers/aggregated_transaction
 import { setupRequest } from '../lib/helpers/setup_request';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
-import { kueryRt } from './default_api_types';
+import { kueryRt, rangeRt } from './default_api_types';
 
 const fallbackToTransactionsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/fallback_to_transactions',
-  params: t.partial({ query: kueryRt }),
+  params: t.partial({ query: t.intersection([kueryRt, t.partial(rangeRt.props)]) }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
@@ -24,10 +24,7 @@ const fallbackToTransactionsRoute = createApmServerRoute({
       },
     } = resources;
     return {
-      fallbackToTransactions: await getFallbackToTransactions({
-        ...setup,
-        kuery,
-      }),
+      fallbackToTransactions: await getFallbackToTransactions({ setup, kuery }),
     };
   },
 });
