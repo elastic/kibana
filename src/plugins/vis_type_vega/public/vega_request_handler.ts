@@ -47,10 +47,13 @@ export function createVegaRequestHandler(
     executionContext,
   }: VegaRequestHandlerParams) {
     if (!searchAPI) {
+      const { search, indexPatterns } = getData();
+
       searchAPI = new SearchAPI(
         {
           uiSettings,
-          search: getData().search,
+          search,
+          indexPatterns,
           injectedMetadata: getInjectedMetadata(),
         },
         context.abortSignal,

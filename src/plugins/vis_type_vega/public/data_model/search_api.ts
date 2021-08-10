@@ -9,7 +9,6 @@
 import { combineLatest, from } from 'rxjs';
 import { map, tap, switchMap } from 'rxjs/operators';
 import type { CoreStart, IUiSettingsClient, KibanaExecutionContext } from 'kibana/public';
-import { getData } from '../services';
 import {
   getSearchParamsFromRequest,
   SearchRequest,
@@ -17,22 +16,28 @@ import {
   IEsSearchResponse,
 } from '../../../data/public';
 import { search as dataPluginSearch } from '../../../data/public';
-import { VegaInspectorAdapters } from '../vega_inspector';
-import { RequestResponder } from '../../../inspector/public';
+import type { VegaInspectorAdapters } from '../vega_inspector';
+import type { RequestResponder } from '../../../inspector/public';
 
-const extendSearchParamsWithRuntimeFields = async (
+/** @internal **/
+export const extendSearchParamsWithRuntimeFields = async (
+  indexPatterns: SearchAPIDependencies['indexPatterns'],
   requestParams: ReturnType<typeof getSearchParamsFromRequest>,
   indexPatternString?: string
 ) => {
   if (indexPatternString) {
-    const indexPattern = (await getData().indexPatterns.find(indexPatternString)).find(
-      (index) => index.title === indexPatternString
-    );
-    const runtimeFields = indexPattern?.getComputedFields().runtimeFields;
+    let runtimeMappings = requestParams.body?.runtime_mappings;
+
+    if (!runtimeMappings) {
+      const indexPattern = (await indexPatterns.find(indexPatternString)).find(
+        (index) => index.title === indexPatternString
+      );
+      runtimeMappings = indexPattern?.getComputedFields().runtimeFields;
+    }
 
     return {
       ...requestParams,
-      body: { ...requestParams.body, runtime_mappings: runtimeFields },
+      body: { ...requestParams.body, runtime_mappings: runtimeMappings },
     };
   }
 
@@ -43,6 +48,7 @@ export interface SearchAPIDependencies {
   uiSettings: IUiSettingsClient;
   injectedMetadata: CoreStart['injectedMetadata'];
   search: DataPublicPluginStart['search'];
+  indexPatterns: DataPublicPluginStart['indexPatterns'];
 }
 
 export class SearchAPI {
@@ -55,7 +61,7 @@ export class SearchAPI {
   ) {}
 
   search(searchRequests: SearchRequest[]) {
-    const { search } = this.dependencies;
+    const { search, indexPatterns } = this.dependencies;
     const requestResponders: any = {};
 
     return combineLatest(
@@ -65,15 +71,19 @@ export class SearchAPI {
           getConfig: this.dependencies.uiSettings.get.bind(this.dependencies.uiSettings),
         });
 
-        if (this.inspectorAdapters) {
-          requestResponders[requestId] = this.inspectorAdapters.requests.start(requestId, {
-            ...request,
-            searchSessionId: this.searchSessionId,
-          });
-          requestResponders[requestId].json(requestParams.body);
-        }
-
-        return from(extendSearchParamsWithRuntimeFields(requestParams, request.index)).pipe(
+        return from(
+          extendSearchParamsWithRuntimeFields(indexPatterns, requestParams, request.index)
+        ).pipe(
+          tap((params) => {
+            /** inspect request data **/
+            if (this.inspectorAdapters) {
+              requestResponders[requestId] = this.inspectorAdapters.requests.start(requestId, {
+                ...request,
+                searchSessionId: this.searchSessionId,
+              });
+              requestResponders[requestId].json(params.body);
+            }
+          }),
           switchMap((params) =>
             search
               .search(
