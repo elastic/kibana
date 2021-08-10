@@ -394,7 +394,7 @@ The rendering of the column headers and the cell contents can also be customized
   </Story>
 </Canvas>
 
-### Render props for overwritting states
+### Render props for overwriting loading and empty states
 
 By default the `<LogStream />` component will provide default empty and loading states. But if you were to need your own you can use the following props in order to overwrite it:
 
@@ -403,8 +403,8 @@ By default the `<LogStream />` component will provide default empty and loading 
   sourceId="my_source"
   startTimestamp={...}
   endTimestamp={...}
-  loadingState={<p>Loading...</p>}
-  emptyState={({ handleReload }) => (
+  renderLoadingState={<p>Loading...</p>}
+  renderEmptyState={({ handleReload }) => (
     <div>
       <p>No entries.</p>
       <button>Click here to reload</button>
@@ -413,18 +413,43 @@ By default the `<LogStream />` component will provide default empty and loading 
 />
 ```
 
+<Canvas>
+  <Story
+    name="Overwritting states"
+    args={{
+      startTimestamp,
+      endTimestamp,
+      renderLoadingState: (<p>Loading</p>),
+      renderEmptyState: ({ handleReload }) => (
+        <div>
+          <p>No entries.</p>
+          <button onClick={handleReload}>Click here to reload</button>
+        </div>
+      )
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
 ### Hidding column headers
 
-By default the `<LogStream />` component will always show the column headers. We can control that by using the `hasColumnHeaders` prop:
+By default the `<LogStream />` component will always show the column headers. We can control that by using the `showColumnHeaders` prop:
 
 ```tsx
 <LogStream
   sourceId="my_source"
   startTimestamp={...}
   endTimestamp={...}
-  hasColumnHeaders={false}
+  showColumnHeaders={false}
 />
 ```
+
+<Canvas>
+  <Story name="Hide column headers" args={{ startTimestamp, endTimestamp, showColumnHeaders: false }}>
+    {Template.bind({})}
+  </Story>
+</Canvas>
 
 ### With a source configuration
 

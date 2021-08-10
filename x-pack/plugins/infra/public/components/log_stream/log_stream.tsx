@@ -71,9 +71,9 @@ interface LogStreamContentProps {
   center?: LogEntryCursor;
   highlight?: string;
   columns?: LogColumnDefinition[];
-  hasColumnHeaders?: boolean;
-  loadingState?: React.ReactNode;
-  emptyState?: (options: { handleReload: () => void }) => React.ReactNode;
+  showColumnHeaders?: boolean;
+  renderLoadingState?: React.ReactNode;
+  renderEmptyState?: (options: { handleReload: () => void }) => React.ReactNode;
 }
 
 export const LogStream: React.FC<LogStreamProps> = ({ height = 400, ...contentProps }) => {
@@ -95,9 +95,9 @@ export const LogStreamContent: React.FC<LogStreamContentProps> = ({
   center,
   highlight,
   columns,
-  hasColumnHeaders,
-  emptyState,
-  loadingState,
+  showColumnHeaders,
+  renderEmptyState,
+  renderLoadingState,
 }) => {
   const customColumns = useMemo(
     () => (columns ? convertLogColumnDefinitionToLogSourceColumnDefinition(columns) : undefined),
@@ -219,9 +219,9 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
       updateDateRange={noop}
       startLiveStreaming={noop}
       hideScrollbar={false}
-      hasColumnHeaders={hasColumnHeaders}
-      emptyState={emptyState}
-      loadingState={loadingState}
+      showColumnHeaders={showColumnHeaders}
+      renderEmptyState={renderEmptyState}
+      renderLoadingState={renderLoadingState}
     />
   );
 };

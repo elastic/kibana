@@ -60,9 +60,9 @@ interface ScrollableLogTextStreamViewProps {
   updateDateRange: (range: { startDateExpression?: string; endDateExpression?: string }) => void;
   startLiveStreaming: () => void;
   hideScrollbar?: boolean;
-  hasColumnHeaders?: boolean;
-  loadingState?: React.ReactNode;
-  emptyState?: (options: { handleReload: () => void }) => React.ReactNode;
+  showColumnHeaders?: boolean;
+  renderLoadingState?: React.ReactNode;
+  renderEmptyState?: (options: { handleReload: () => void }) => React.ReactNode;
 }
 
 interface ScrollableLogTextStreamViewState {
@@ -77,7 +77,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
   ScrollableLogTextStreamViewState
 > {
   static defaultProps = {
-    hasColumnHeaders: true,
+    showColumnHeaders: true,
   };
 
   public static getDerivedStateFromProps(
@@ -151,9 +151,9 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       startLiveStreaming,
       onOpenLogEntryFlyout,
       setContextEntry,
-      hasColumnHeaders,
-      emptyState,
-      loadingState,
+      showColumnHeaders,
+      renderEmptyState,
+      renderLoadingState,
     } = this.props;
     const hideScrollbar = this.props.hideScrollbar ?? true;
 
@@ -166,7 +166,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       <ScrollableLogTextStreamViewWrapper>
         {isReloading && (!isStreaming || !hasItems) ? (
           <>
-            {loadingState ?? (
+            {renderLoadingState ?? (
               <InfraLoadingPanel
                 width="100%"
                 height="100%"
@@ -181,8 +181,8 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
           </>
         ) : !hasItems ? (
           <>
-            {emptyState ? (
-              emptyState({ handleReload: this.handleReload })
+            {renderEmptyState ? (
+              renderEmptyState({ handleReload: this.handleReload })
             ) : (
               <NoData
                 titleText={i18n.translate('xpack.infra.logs.emptyView.noLogMessageTitle', {
@@ -207,7 +207,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
             {({ columnWidths, CharacterDimensionsProbe }) => (
               <>
                 <CharacterDimensionsProbe />
-                {hasColumnHeaders && (
+                {showColumnHeaders && (
                   <LogColumnHeaders
                     columnConfigurations={columnConfigurations}
                     columnWidths={columnWidths}
