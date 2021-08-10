@@ -129,6 +129,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     publicAPIMock,
     getErrorMessages: jest.fn((_state) => undefined),
     checkIntegrity: jest.fn((_state) => []),
+    isTimeBased: jest.fn(),
   };
 }
 
@@ -286,7 +287,7 @@ export function mockDataPlugin(sessionIdSubject = new Subject<string>()) {
     },
     indexPatterns: {
       get: jest.fn((id) => {
-        return new Promise((resolve) => resolve({ id }));
+        return new Promise((resolve) => resolve({ id, isTimeBased: () => true }));
       }),
     },
     search: createMockSearchService(),
