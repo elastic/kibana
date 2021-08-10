@@ -4,8 +4,9 @@
     "composite": false,
     "outDir": "./target/types",
     "stripInternal": false,
+    "declaration": true,
     "emitDeclarationOnly": true,
-    "declarationMap": true
+    "declarationMap": true,
   },
   "include": [
     "src/core/server/index.ts",
