@@ -21,6 +21,7 @@ import { ServiceNodeMetrics } from '../../app/service_node_metrics';
 import { ServiceMap } from '../../app/service_map';
 import { TransactionDetails } from '../../app/transaction_details';
 import { ServiceProfiling } from '../../app/service_profiling';
+import { ServiceDependencies } from '../../app/service_dependencies';
 
 function page<TPath extends string>({
   path,
@@ -65,19 +66,29 @@ export const serviceDetail = {
         serviceName: t.string,
       }),
     }),
-    t.partial({
-      query: t.partial({
-        environment: t.string,
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        comparisonEnabled: t.string,
-        comparisonType: t.string,
-        latencyAggregationType: t.string,
-        transactionType: t.string,
-        kuery: t.string,
-      }),
+    t.type({
+      query: t.intersection([
+        t.type({
+          rangeFrom: t.string,
+          rangeTo: t.string,
+        }),
+        t.partial({
+          environment: t.string,
+          comparisonEnabled: t.string,
+          comparisonType: t.string,
+          latencyAggregationType: t.string,
+          transactionType: t.string,
+          kuery: t.string,
+        }),
+      ]),
     }),
   ]),
+  defaults: {
+    query: {
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+    },
+  },
   children: [
     page({
       path: '/overview',
@@ -101,6 +112,7 @@ export const serviceDetail = {
         element: <Outlet />,
         searchBarOptions: {
           showTransactionTypeSelector: true,
+          showTimeComparison: true,
         },
       }),
       children: [
@@ -125,6 +137,17 @@ export const serviceDetail = {
         },
       ],
     },
+    page({
+      path: '/dependencies',
+      element: <ServiceDependencies />,
+      tab: 'dependencies',
+      title: i18n.translate('xpack.apm.views.dependencies.title', {
+        defaultMessage: 'Dependencies',
+      }),
+      searchBarOptions: {
+        showTimeComparison: true,
+      },
+    }),
     {
       ...page({
         path: '/errors',

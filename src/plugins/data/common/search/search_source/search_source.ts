@@ -99,7 +99,7 @@ import {
   isPartialResponse,
   IKibanaSearchResponse,
 } from '../../../common';
-import { getHighlightRequest } from '../../../common/field_formats';
+import { getHighlightRequest } from '../../../../field_formats/common';
 import { extractReferences } from './extract_references';
 
 /** @internal */
@@ -314,7 +314,8 @@ export class SearchSource {
 
   /**
    * Fetch this source and reject the returned Promise on error
-   * @deprecated Use fetch$ instead
+   * @deprecated Use the `fetch$` method instead
+   * @removeBy 8.1
    */
   fetch(options: ISearchOptions = {}) {
     return this.fetch$(options)

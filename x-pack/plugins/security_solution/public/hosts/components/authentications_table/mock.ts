@@ -5,12 +5,24 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { HostAuthenticationsStrategyResponse } from '../../../../common/search_strategy/security_solution/hosts/authentications';
 
 export const mockData: { Authentications: HostAuthenticationsStrategyResponse } = {
   Authentications: {
     rawResponse: {
+      took: 880,
+      timed_out: false,
+      _shards: {
+        total: 26,
+        successful: 26,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: 2,
+        hits: [],
+      },
       aggregations: {
         group_by_users: {
           buckets: [
@@ -32,7 +44,7 @@ export const mockData: { Authentications: HostAuthenticationsStrategyResponse } 
           sum_other_doc_count: 566,
         },
       },
-    } as SearchResponse<unknown>,
+    } as estypes.SearchResponse<unknown>,
     totalCount: 54,
     edges: [
       {

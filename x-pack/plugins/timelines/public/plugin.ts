@@ -14,7 +14,7 @@ import type {
   PluginInitializerContext,
   CoreStart,
 } from '../../../../src/core/public';
-import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserWrappedProps } from './components';
+import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from './components';
 import {
   getLastUpdatedLazy,
   getLoadingPanelLazy,
@@ -27,6 +27,7 @@ import { tGridReducer } from './store/t_grid/reducer';
 import { useDraggableKeyboardWrapper } from './components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
 import { getHoverActions } from './components/hover_actions';
+
 export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
   private _store: Store | undefined;
@@ -60,7 +61,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       getLastUpdated: (props: LastUpdatedAtProps) => {
         return getLastUpdatedLazy(props);
       },
-      getFieldBrowser: (props: FieldBrowserWrappedProps) => {
+      getFieldBrowser: (props: FieldBrowserProps) => {
         return getFieldsBrowserLazy(props, {
           store: this._store!,
         });
