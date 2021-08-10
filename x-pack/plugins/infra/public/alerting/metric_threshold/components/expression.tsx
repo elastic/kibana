@@ -17,6 +17,8 @@ import {
   EuiToolTip,
   EuiIcon,
   EuiFieldSearch,
+  EuiAccordion,
+  EuiPanel,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -259,6 +261,11 @@ export const Expressions: React.FC<Props> = (props) => {
     return alertParams.groupBy;
   }, [alertParams.groupBy]);
 
+  const areAllAggsRate = useMemo(
+    () => alertParams.criteria?.every((c) => c.aggType === Aggregators.RATE),
+    [alertParams.criteria]
+  );
+
   return (
     <>
       <EuiSpacer size={'m'} />
@@ -323,27 +330,60 @@ export const Expressions: React.FC<Props> = (props) => {
       </div>
 
       <EuiSpacer size={'m'} />
-      <EuiCheckbox
-        id="metrics-alert-no-data-toggle"
-        label={
-          <>
-            {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnNoData', {
-              defaultMessage: "Alert me if there's no data",
-            })}{' '}
-            <EuiToolTip
-              content={i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
-                defaultMessage:
-                  'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
-              })}
-            >
-              <EuiIcon type="questionInCircle" color="subdued" />
-            </EuiToolTip>
-          </>
-        }
-        checked={alertParams.alertOnNoData}
-        onChange={(e) => setAlertParams('alertOnNoData', e.target.checked)}
-      />
-
+      <EuiAccordion
+        id="advanced-options-accordion"
+        buttonContent={i18n.translate('xpack.infra.metrics.alertFlyout.advancedOptions', {
+          defaultMessage: 'Advanced options',
+        })}
+      >
+        <EuiPanel color="subdued">
+          <EuiCheckbox
+            id="metrics-alert-no-data-toggle"
+            label={
+              <>
+                {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnNoData', {
+                  defaultMessage: "Alert me if there's no data",
+                })}{' '}
+                <EuiToolTip
+                  content={i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
+                    defaultMessage:
+                      'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
+                  })}
+                >
+                  <EuiIcon type="questionInCircle" color="subdued" />
+                </EuiToolTip>
+              </>
+            }
+            checked={alertParams.alertOnNoData}
+            onChange={(e) => setAlertParams('alertOnNoData', e.target.checked)}
+          />
+          <EuiCheckbox
+            id="metrics-alert-partial-buckets-toggle"
+            label={
+              <>
+                {i18n.translate('xpack.infra.metrics.alertFlyout.shouldDropPartialBuckets', {
+                  defaultMessage: 'Drop partial buckets when evaluating data',
+                })}{' '}
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.infra.metrics.alertFlyout.dropPartialBucketsHelpText',
+                    {
+                      defaultMessage:
+                        "Enable this to drop the most recent bucket of evaluation data if it's less than {timeSize}{timeUnit}.",
+                      values: { timeSize, timeUnit },
+                    }
+                  )}
+                >
+                  <EuiIcon type="questionInCircle" color="subdued" />
+                </EuiToolTip>
+              </>
+            }
+            checked={areAllAggsRate || alertParams.shouldDropPartialBuckets}
+            disabled={areAllAggsRate}
+            onChange={(e) => setAlertParams('shouldDropPartialBuckets', e.target.checked)}
+          />
+        </EuiPanel>
+      </EuiAccordion>
       <EuiSpacer size={'m'} />
 
       <EuiFormRow
@@ -400,7 +440,14 @@ export const Expressions: React.FC<Props> = (props) => {
         alertThrottle={alertThrottle}
         alertNotifyWhen={alertNotifyWhen}
         alertType={METRIC_THRESHOLD_ALERT_TYPE_ID}
-        alertParams={pick(alertParams, 'criteria', 'groupBy', 'filterQuery', 'sourceId')}
+        alertParams={pick(
+          alertParams,
+          'criteria',
+          'groupBy',
+          'filterQuery',
+          'sourceId',
+          'shouldDropPartialBuckets'
+        )}
         showNoDataResults={alertParams.alertOnNoData}
         validate={validateMetricThreshold}
         groupByDisplayName={groupByPreviewDisplayName}

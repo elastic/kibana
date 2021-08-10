@@ -6,7 +6,7 @@
  */
 
 import { isString } from 'lodash';
-import { JsonValue } from '@kbn/common-utils';
+import { JsonValue } from '@kbn/utility-types';
 import { HealthStatus, RawMonitoringStats } from '../monitoring';
 import { TaskManagerConfig } from '../config';
 

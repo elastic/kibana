@@ -7,11 +7,11 @@
 
 import { KbnClient } from '@kbn/test';
 import type { ApiResponse } from '@elastic/elasticsearch';
+import { Context } from '@elastic/elasticsearch/lib/Transport';
+import type { estypes } from '@elastic/elasticsearch';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
-import { Context } from '@elastic/elasticsearch/lib/Transport';
-import { SearchResponse } from 'elasticsearch';
 import type {
   ListArray,
   NonEmptyEntriesArray,
@@ -1079,12 +1079,14 @@ export const getSignalsByRuleIds = async (
   supertest: SuperTest<supertestAsPromised.Test>,
   ruleIds: string[]
 ): Promise<
-  SearchResponse<{
+  estypes.SearchResponse<{
     signal: Signal;
     [x: string]: unknown;
   }>
 > => {
-  const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+  const {
+    body: signalsOpen,
+  }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
     .send(getQuerySignalsRuleId(ruleIds))
@@ -1103,12 +1105,14 @@ export const getSignalsByIds = async (
   ids: string[],
   size?: number
 ): Promise<
-  SearchResponse<{
+  estypes.SearchResponse<{
     signal: Signal;
     [x: string]: unknown;
   }>
 > => {
-  const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+  const {
+    body: signalsOpen,
+  }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
     .send(getQuerySignalsId(ids, size))
@@ -1125,12 +1129,14 @@ export const getSignalsById = async (
   supertest: SuperTest<supertestAsPromised.Test>,
   id: string
 ): Promise<
-  SearchResponse<{
+  estypes.SearchResponse<{
     signal: Signal;
     [x: string]: unknown;
   }>
 > => {
-  const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+  const {
+    body: signalsOpen,
+  }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
     .send(getQuerySignalsId([id]))

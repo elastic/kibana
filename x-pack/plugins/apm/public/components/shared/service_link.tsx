@@ -19,7 +19,7 @@ const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
 interface ServiceLinkProps {
   agentName?: AgentName;
-  query?: TypeOf<ApmRoutes, '/services/:serviceName/overview'>['query'];
+  query: TypeOf<ApmRoutes, '/services/:serviceName/overview'>['query'];
   serviceName: string;
 }
 
