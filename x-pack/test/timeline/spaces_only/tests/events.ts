@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
 import { ALERT_ID, ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
 

@@ -23,7 +23,6 @@ export const AlertsDropdown: React.FC<{}> = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const closePopover = () => {
-    alertsEnableModalProvider.enableAlerts();
     setIsPopoverOpen(false);
   };
 
@@ -32,6 +31,7 @@ export const AlertsDropdown: React.FC<{}> = () => {
   };
 
   const createDefaultRules = () => {
+    alertsEnableModalProvider.enableAlerts();
     closePopover();
   };
 

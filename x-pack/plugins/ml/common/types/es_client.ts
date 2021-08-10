@@ -7,7 +7,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
 import { buildEsQuery, DslQuery } from '@kbn/es-query';
 
 import { isPopulatedObject } from '../util/object_utils';
