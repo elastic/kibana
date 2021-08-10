@@ -41,13 +41,11 @@ export function ServiceLogs() {
   );
 
   const noInfrastructureData = useMemo(() => {
-    const containerIdsLength =
-      data?.serviceInfrastructure?.containerIds?.length ?? 0;
-    const hostNamesLength = data?.serviceInfrastructure?.hostNames?.length ?? 0;
-    const podNamesLength = data?.serviceInfrastructure?.podNames?.length ?? 0;
-    return (
-      containerIdsLength === 0 && hostNamesLength === 0 && podNamesLength === 0
-    );
+  return (
+    isEmpty(data?.serviceInfrastructure?.containerIds) &&
+    isEmpty(data?.serviceInfrastructure?.hostNames) &&
+    isEmpty(data?.serviceInfrastructure?.podNames)
+  );
   }, [data]);
 
   return status === FETCH_STATUS.LOADING ? (
