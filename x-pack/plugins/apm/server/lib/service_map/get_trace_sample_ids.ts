@@ -8,7 +8,6 @@
 import Boom from '@hapi/boom';
 import { sortBy, take, uniq } from 'lodash';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -36,19 +35,18 @@ export async function getTraceSampleIds({
 
   const query = {
     bool: {
-      filter: [
-        {
-          exists: {
-            field: SPAN_DESTINATION_SERVICE_RESOURCE,
-          },
-        },
-        ...rangeQuery(start, end),
-      ] as ESFilter[],
+      filter: [...rangeQuery(start, end)],
     },
-  } as { bool: { filter: ESFilter[]; must_not?: ESFilter[] | ESFilter } };
+  };
 
   if (serviceName) {
     query.bool.filter.push({ term: { [SERVICE_NAME]: serviceName } });
+  } else {
+    query.bool.filter.push({
+      exists: {
+        field: SPAN_DESTINATION_SERVICE_RESOURCE,
+      },
+    });
   }
 
   query.bool.filter.push(...environmentQuery(environment));
@@ -78,6 +76,7 @@ export async function getTraceSampleIds({
                 [SPAN_DESTINATION_SERVICE_RESOURCE]: {
                   terms: {
                     field: SPAN_DESTINATION_SERVICE_RESOURCE,
+                    missing_bucket: true,
                   },
                 },
               },
