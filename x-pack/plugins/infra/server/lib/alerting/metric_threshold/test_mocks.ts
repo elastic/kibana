@@ -104,61 +104,6 @@ const bucketsC = (from: number) => [
   },
 ];
 
-const previewBucketsA = (from: number) =>
-  range(from, from + 3600000, 60000).map((timestamp, i) => {
-    return {
-      doc_count: i % 2 ? 3 : 2,
-      aggregatedValue: { value: i % 2 ? 16 : 0.5 },
-      from_as_string: new Date(timestamp).toISOString(),
-    };
-  });
-
-const previewBucketsB = (from: number) =>
-  range(from, from + 3600000, 60000).map((timestamp, i) => {
-    const value = i % 2 ? 3.5 : 2.5;
-    return {
-      doc_count: i % 2 ? 3 : 2,
-      aggregatedValue: { value, values: [{ key: 99.0, value }] },
-      from_as_string: new Date(timestamp).toISOString(),
-    };
-  });
-
-const previewBucketsWithNulls = (from: number) => [
-  // 25 Fired
-  ...range(from, from + 1500000, 60000).map((timestamp) => {
-    return {
-      doc_count: 2,
-      aggregatedValue: { value: 1, values: [{ key: 95.0, value: 1 }] },
-      from_as_string: new Date(timestamp).toISOString(),
-    };
-  }),
-  // 25 OK
-  ...range(from + 2100000, from + 2940000, 60000).map((timestamp) => {
-    return {
-      doc_count: 2,
-      aggregatedValue: { value: 0.5, values: [{ key: 95.0, value: 0.5 }] },
-      from_as_string: new Date(timestamp).toISOString(),
-    };
-  }),
-  // 10 No Data
-  ...range(from + 3000000, from + 3600000, 60000).map((timestamp) => {
-    return {
-      doc_count: 0,
-      aggregatedValue: { value: null, values: [{ key: 95.0, value: null }] },
-      from_as_string: new Date(timestamp).toISOString(),
-    };
-  }),
-];
-
-const previewBucketsRepeat = (from: number) =>
-  range(from, from + 3600000, 60000).map((timestamp, i) => {
-    return {
-      doc_count: i % 3 ? 3 : 2,
-      aggregatedValue: { value: i % 3 ? 0.5 : 16 },
-      from_as_string: new Date(timestamp).toISOString(),
-    };
-  });
-
 export const basicMetricResponse = (from: number) => ({
   aggregations: {
     aggregatedIntervals: {
