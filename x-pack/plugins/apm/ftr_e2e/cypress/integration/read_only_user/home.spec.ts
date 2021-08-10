@@ -16,12 +16,23 @@ const serviceInventoryHref = url.format({
   query: { rangeFrom: start, rangeTo: end },
 });
 
+const apisToIntercept = [
+  {
+    endpoint: '/api/apm/service',
+    name: 'servicesMainStatistics',
+  },
+  {
+    endpoint: '/api/apm/services/detailed_statistics',
+    name: 'servicesDetailedStatistics',
+  },
+];
+
 describe('Home page', () => {
   before(() => {
-    esArchiverLoad('apm_8.0.0');
+    // esArchiverLoad('apm_8.0.0');
   });
   after(() => {
-    esArchiverUnload('apm_8.0.0');
+    // esArchiverUnload('apm_8.0.0');
   });
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
@@ -46,7 +57,17 @@ describe('Home page', () => {
 
   describe('navigations', () => {
     it('navigates to service overview page with transaction type', () => {
+      apisToIntercept.map(({ endpoint, name }) => {
+        cy.intercept('GET', endpoint).as(name);
+      });
+
       cy.visit(serviceInventoryHref);
+
+      cy.contains('Services');
+
+      cy.wait('@servicesMainStatistics', { responseTimeout: 10000 });
+      cy.wait('@servicesDetailedStatistics', { responseTimeout: 10000 });
+
       cy.get('[data-test-subj="serviceLink_rum-js"]').then((element) => {
         element[0].click();
       });
