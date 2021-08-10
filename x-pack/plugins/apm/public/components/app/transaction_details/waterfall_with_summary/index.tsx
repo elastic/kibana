@@ -10,7 +10,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPagination,
-  EuiPanel,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -83,13 +82,13 @@ export function WaterfallWithSummary({
       />
     );
 
-    return <EuiPanel hasBorder={true}>{content}</EuiPanel>;
+    return content;
   }
 
   const entryTransaction = entryWaterfallTransaction.doc;
 
   return (
-    <EuiPanel hasBorder={true}>
+    <>
       <EuiFlexGroup>
         <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
           <EuiTitle size="xs">
@@ -136,6 +135,6 @@ export function WaterfallWithSummary({
         waterfall={waterfall}
         exceedsMax={exceedsMax}
       />
-    </EuiPanel>
+    </>
   );
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiTabs, EuiTab, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTabs, EuiTab, EuiTitle } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { XYBrushArea } from '@elastic/charts';
@@ -68,6 +68,7 @@ function TraceSamplesTab({
           waterfall.entryWaterfallTransaction?.doc.transaction.duration.us
         }
       />
+
       <EuiSpacer size="s" />
 
       <WaterfallWithSummary
@@ -214,15 +215,17 @@ export function TransactionDetails() {
       <EuiSpacer size="m" />
 
       <HeightRetainer>
-        <TabContent
-          {...{
-            selectSampleFromChartSelection,
-            clearChartSelection,
-            sampleRangeFrom,
-            sampleRangeTo,
-            traceSamples,
-          }}
-        />
+        <EuiPanel hasBorder={true}>
+          <TabContent
+            {...{
+              selectSampleFromChartSelection,
+              clearChartSelection,
+              sampleRangeFrom,
+              sampleRangeTo,
+              traceSamples,
+            }}
+          />
+        </EuiPanel>
       </HeightRetainer>
     </>
   );
