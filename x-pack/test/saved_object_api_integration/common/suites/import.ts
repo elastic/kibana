@@ -163,16 +163,11 @@ export function importTestSuiteFactory(
             type: 'conflict',
             ...(expectedNewId && { destinationId: expectedNewId }),
           };
-          if (fail409Param === 'ambiguous_conflict_1a1b') {
-            // "ambiguous source" conflict
-            error = {
-              type: 'ambiguous_conflict',
-              destinations: [getConflictDest(`${CID}1`)],
-            };
-          } else if (fail409Param === 'ambiguous_conflict_2c') {
+          if (fail409Param === 'ambiguous_conflict_2c') {
             // "ambiguous destination" conflict
             error = {
               type: 'ambiguous_conflict',
+              // response destinations should be sorted by updatedAt in descending order, then ID in ascending order
               destinations: [getConflictDest(`${CID}2a`), getConflictDest(`${CID}2b`)],
             };
           }
