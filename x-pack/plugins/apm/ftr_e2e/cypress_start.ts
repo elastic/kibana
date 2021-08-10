@@ -12,7 +12,16 @@ import archives_metadata from './cypress/fixtures/es_archiver/archives_metadata'
 import { createKibanaUserRole } from '../scripts/kibana-security/create_kibana_user_role';
 
 export async function cypressRunTests({ getService }: FtrProviderContext) {
-  await cypressStart(getService, cypress.run);
+  try {
+    const result = await cypressStart(getService, cypress.run);
+
+    if (result && (result.status === 'failed' || result.totalFailed > 0)) {
+      process.exit(1);
+    }
+  } catch (error) {
+    console.error('errors: ', error);
+    process.exit(1);
+  }
 }
 
 export async function cypressOpenTests({ getService }: FtrProviderContext) {
@@ -46,21 +55,12 @@ async function cypressStart(
     },
   });
 
-  try {
-    const result = await cypressExecution({
-      config: { baseUrl: kibanaUrl },
-      env: {
-        START_DATE: start,
-        END_DATE: end,
-        KIBANA_URL: kibanaUrl,
-      },
-    });
-
-    if (result && (result.status === 'failed' || result.totalFailed > 0)) {
-      process.exit(1);
-    }
-  } catch (error) {
-    console.error('errors: ', error);
-    process.exit(1);
-  }
+  return cypressExecution({
+    config: { baseUrl: kibanaUrl },
+    env: {
+      START_DATE: start,
+      END_DATE: end,
+      KIBANA_URL: kibanaUrl,
+    },
+  });
 }

@@ -21,18 +21,18 @@ export async function createAPMUsers({
   kibana: Kibana;
   elasticsearch: Elasticsearch;
 }) {
-  const OBSERVABILITY_READ_ROLE = `observability_read_${roleSuffix}`;
-  const OBSERVABILITY_POWER_ROLE = `observability_power_${roleSuffix}`;
+  const KIBANA_READ_ROLE = `kibana_read_${roleSuffix}`;
+  const KIBANA_POWER_ROLE = `kibana_power_${roleSuffix}`;
   const APM_USER_ROLE = 'apm_user';
 
   // roles definition
   const roles = [
     {
-      roleName: OBSERVABILITY_READ_ROLE,
+      roleName: KIBANA_READ_ROLE,
       role: readOnlyUserRole,
     },
     {
-      roleName: OBSERVABILITY_POWER_ROLE,
+      roleName: KIBANA_POWER_ROLE,
       role: powerUserRole,
     },
   ];
@@ -48,11 +48,11 @@ export async function createAPMUsers({
   const users = [
     {
       username: 'apm_read_user',
-      roles: [APM_USER_ROLE, OBSERVABILITY_READ_ROLE],
+      roles: [APM_USER_ROLE, KIBANA_READ_ROLE],
     },
     {
       username: 'apm_power_user',
-      roles: [APM_USER_ROLE, OBSERVABILITY_READ_ROLE],
+      roles: [APM_USER_ROLE, KIBANA_READ_ROLE],
     },
   ];
 
