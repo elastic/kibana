@@ -128,7 +128,8 @@ export class Home extends Component {
       <KibanaPageTemplate
         data-test-subj="homeApp"
         pageHeader={{
-          pageTitle: <FormattedMessage id="home.header.title" defaultMessage="Home" />,
+          bottomBorder: false,
+          pageTitle: <FormattedMessage id="home.header.title" defaultMessage="Welcome home" />,
           rightSideItems: overviewPageActions({
             addBasePath,
             application,

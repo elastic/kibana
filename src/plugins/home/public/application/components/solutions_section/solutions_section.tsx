@@ -34,7 +34,7 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions, directorie
 
   return (
     <>
-      <section aria-labelledby="homSolutions__title" className="homSolutions">
+      {/* <section aria-labelledby="homSolutions__title" className="homSolutions">
         <EuiScreenReaderOnly>
           <h2 id="homSolutions__title">
             <FormattedMessage
@@ -62,9 +62,36 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions, directorie
             />
           ) : null}
         </EuiFlexGroup>
+      </section> */}
+
+      <section aria-labelledby="homSolutions__title" className="homSolutions">
+        <EuiScreenReaderOnly>
+          <h2 id="homSolutions__title">
+            <FormattedMessage
+              id="home.solutionsSection.sectionTitle"
+              defaultMessage="Pick your solution"
+            />
+          </h2>
+        </EuiScreenReaderOnly>
+
+        <EuiFlexGroup className="homSolutions__content">
+          {kibana ? (
+            <SolutionPanel
+              addBasePath={addBasePath}
+              apps={kibanaApps.length ? kibanaApps : undefined}
+              solution={kibana}
+            />
+          ) : null}
+
+          {solutions.length
+            ? solutions.map((solution) => (
+                <SolutionPanel addBasePath={addBasePath} key={solution.id} solution={solution} />
+              ))
+            : null}
+        </EuiFlexGroup>
       </section>
 
-      <EuiHorizontalRule margin="xl" aria-hidden="true" />
+      <EuiHorizontalRule margin="xxl" />
     </>
   );
 };
