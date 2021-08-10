@@ -78,10 +78,10 @@ export function ServiceLogs() {
       endTimestamp={moment(end).valueOf()}
       query={`
        ${
-         (data?.serviceInfrastructure?.containerIds?.length ?? 0) > 0
-           ? `container.id : ${data?.serviceInfrastructure.containerIds
-               .map((id) => `"${id}"`)
-               .join(' or container.id : ')}`
+         (!!data?.serviceInfrastructure?.containerIds?.length)
+           ? data.serviceInfrastructure.containerIds
+               .map((id) => `${CONTAINER_ID}: "${id}"`)
+               .join(' or ')
            : ''
        } ${
         (data?.serviceInfrastructure?.hostNames?.length ?? 0) > 0
