@@ -7,9 +7,10 @@
  */
 
 import { Observable } from 'rxjs';
+import type { SerializableRecord } from '@kbn/utility-types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from 'src/core/server';
-import type { IExecutionContextContainer } from 'src/core/public';
+import type { KibanaExecutionContext } from 'src/core/public';
 
 import { Executor } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
@@ -18,11 +19,7 @@ import { ExecutionContract, ExecutionResult } from '../execution';
 import { AnyExpressionTypeDefinition, ExpressionValueError } from '../expression_types';
 import { AnyExpressionFunctionDefinition } from '../expression_functions';
 import { SavedObjectReference } from '../../../../core/types';
-import {
-  PersistableStateService,
-  SerializableState,
-  VersionedState,
-} from '../../../kibana_utils/common';
+import { PersistableStateService, VersionedState } from '../../../kibana_utils/common';
 import { Adapters } from '../../../inspector/common/adapters';
 import {
   clog,
@@ -60,7 +57,7 @@ export type ExpressionsServiceSetup = Pick<
 >;
 
 export interface ExpressionExecutionParams {
-  searchContext?: SerializableState;
+  searchContext?: SerializableRecord;
 
   variables?: Record<string, any>;
 
@@ -84,7 +81,7 @@ export interface ExpressionExecutionParams {
 
   inspectorAdapters?: Adapters;
 
-  executionContext?: IExecutionContextContainer;
+  executionContext?: KibanaExecutionContext;
 }
 
 /**

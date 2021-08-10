@@ -11,10 +11,18 @@ import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { useUserData } from '../../user_info';
 import { ACTION_ADD_ENDPOINT_EXCEPTION, ACTION_ADD_EXCEPTION } from '../translations';
 
-interface UseExceptionActions {
+interface ExceptionActions {
   name: string;
   onClick: () => void;
   disabled: boolean;
+}
+
+interface UseExceptionActions {
+  disabledAddEndpointException: boolean;
+  disabledAddException: boolean;
+  exceptionActions: ExceptionActions[];
+  handleEndpointExceptionModal: () => void;
+  handleDetectionExceptionModal: () => void;
 }
 
 interface UseExceptionActionProps {
@@ -25,7 +33,7 @@ interface UseExceptionActionProps {
 export const useExceptionActions = ({
   isEndpointAlert,
   onAddExceptionTypeClick,
-}: UseExceptionActionProps): UseExceptionActions[] => {
+}: UseExceptionActionProps): UseExceptionActions => {
   const [{ canUserCRUD, hasIndexWrite }] = useUserData();
 
   const handleDetectionExceptionModal = useCallback(() => {
@@ -62,5 +70,11 @@ export const useExceptionActions = ({
     ]
   );
 
-  return exceptionActions;
+  return {
+    disabledAddEndpointException,
+    disabledAddException,
+    exceptionActions,
+    handleEndpointExceptionModal,
+    handleDetectionExceptionModal,
+  };
 };
