@@ -6,19 +6,22 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
-
+import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-export const findScheduledQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
+export const findScheduledQueryGroupRoute = (
+  router: IRouter,
+  osqueryContext: OsqueryAppContext
+) => {
   router.get(
     {
-      path: '/internal/osquery/scheduled_query',
+      path: '/internal/osquery/scheduled_query_group',
       validate: {
         query: schema.object({}, { unknowns: 'allow' }),
       },
+      options: { tags: [`access:${PLUGIN_ID}-readPacks`] },
     },
     async (context, request, response) => {
       const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name: ${OSQUERY_INTEGRATION_NAME}`;
