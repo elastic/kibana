@@ -23,18 +23,26 @@ import {
   updateDatasourceState,
   updateVisualizationState,
   setToggleFullscreen,
+  useLensSelector,
+  selectVisualization,
+  VisualizationState,
 } from '../../../state_management';
 import { AddLayerButton } from './add_layer';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
-  return props.activeVisualization && props.visualizationState ? (
-    <LayerPanels {...props} activeVisualization={props.activeVisualization} />
+  const visualization = useLensSelector(selectVisualization);
+  const activeVisualization = visualization.activeId
+    ? props.visualizationMap[visualization.activeId]
+    : null;
+
+  return activeVisualization && visualization.state ? (
+    <LayerPanels {...props} activeVisualization={activeVisualization} />
   ) : null;
 });
 
 function getRemoveOperation(
   activeVisualization: Visualization,
-  visualizationState: ConfigPanelWrapperProps['visualizationState'],
+  visualizationState: VisualizationState['state'],
   layerId: string,
   layerCount: number
 ) {
@@ -46,14 +54,15 @@ function getRemoveOperation(
 }
 export function LayerPanels(
   props: ConfigPanelWrapperProps & {
-    activeDatasourceId: string;
     activeVisualization: Visualization;
   }
 ) {
-  const { activeVisualization, visualizationState, activeDatasourceId, datasourceMap } = props;
+  const { activeVisualization, datasourceMap } = props;
+  const { activeDatasourceId, visualization } = useLensSelector((state) => state.lens);
+
   const dispatchLens = useLensDispatch();
 
-  const layerIds = activeVisualization.getLayerIds(visualizationState);
+  const layerIds = activeVisualization.getLayerIds(visualization.state);
   const {
     setNextFocusedId: setNextFocusedLayerId,
     removeRef: removeLayerRef,
@@ -155,7 +164,7 @@ export function LayerPanels(
             key={layerId}
             layerId={layerId}
             layerIndex={layerIndex}
-            visualizationState={visualizationState}
+            visualizationState={visualization.state}
             updateVisualization={setVisualizationState}
             updateDatasource={updateDatasource}
             updateDatasourceAsync={updateDatasourceAsync}
@@ -163,7 +172,7 @@ export function LayerPanels(
             isOnlyLayer={
               getRemoveOperation(
                 activeVisualization,
-                visualizationState,
+                visualization.state,
                 layerId,
                 layerIds.length
               ) === 'clear'
@@ -216,7 +225,7 @@ export function LayerPanels(
       )}
       <AddLayerButton
         visualization={activeVisualization}
-        visualizationState={visualizationState}
+        visualizationState={visualization.state}
         layersMeta={props.framePublicAPI}
         onAddLayerClick={(layerType) => {
           const id = generateId();
@@ -228,7 +237,7 @@ export function LayerPanels(
                   activeVisualization,
                   generateId: () => id,
                   trackUiEvent,
-                  activeDatasource: datasourceMap[activeDatasourceId],
+                  activeDatasource: datasourceMap[activeDatasourceId!],
                   state,
                   layerType,
                 }),

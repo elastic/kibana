@@ -23,12 +23,6 @@ function mockFrame(): FramePublicAPI {
   return {
     ...createMockFramePublicAPI(),
     datasourceLayers: {},
-    query: { query: '', language: 'lucene' },
-    dateRange: {
-      fromDate: 'now-7d',
-      toDate: 'now',
-    },
-    filters: [],
   };
 }
 

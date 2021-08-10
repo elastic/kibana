@@ -569,7 +569,7 @@ describe('renderApp', () => {
 });
 ```
 
-### SavedObjects
+### SavedObjectsClient
 
 #### Unit Tests
 
@@ -793,6 +793,192 @@ Kibana and esArchiver to load fixture data into Elasticsearch.
 3. Load the fixtures in your test using esArchiver `esArchiver.load('path from root of repo')`;
 
 _todo: fully worked out example_
+
+### Saved Objects migrations
+
+_Also see <DocLink id="kibDevTutorialSavedObject" section="migrations" text="How to write a migration"/>._
+
+It is critical that you have extensive tests to ensure that migrations behave as expected with all possible input
+documents. Given how simple it is to test all the branch conditions in a migration function and the high impact of a
+bug in this code, there’s really no reason not to aim for 100% test code coverage.
+
+It's recommend that you primarily leverage unit testing with Jest for testing your migration function. Unit tests will
+be a much more effective approach to testing all the different shapes of input data and edge cases that your migration
+may need to handle. With more complex migrations that interact with several components or may behave different depending
+on registry contents (such as Embeddable migrations), we recommend that you use the Jest Integration suite which allows
+you to create a full instance Kibana and all plugins in memory and leverage the import API to test migrating documents.
+
+#### Throwing exceptions
+Keep in mind that any exception thrown by your migration function will cause Kibana to fail to upgrade. This should almost
+never happen for our end users and we should be exhaustive in our testing to be sure to catch as many edge cases that we
+could possibly handle. This entails ensuring that the migration is written defensively; we should try to avoid every bug
+possible in our implementation.
+
+In general, exceptions should only be thrown when the input data is corrupted and doesn't match the expected schema. In
+such cases, it's important that an informative error message is included in the exception and we do not rely on implicit
+runtime exceptions such as "null pointer exceptions" like `TypeError: Cannot read property 'foo' of undefined`.
+
+#### Unit testing
+
+Unit testing migration functions is typically pretty straight forward and comparable to other types of Jest testing. In
+general, you should focus this tier of testing on validating output and testing input edge cases. One focus of this tier
+should be trying to find edge cases that throw exceptions the migration shouldn't. As you can see in this simple
+example, the coverage here is very exhaustive and verbose, which is intentional.
+
+```ts
+import { migrateCaseFromV7_9_0ToV7_10_0 } from './case_migrations';
+
+const validInput_7_9_0 = {
+  id: '1',
+  type: 'case',
+  attributes: {
+    connector_id: '1234';
+  }
+}
+
+describe('Case migrations v7.7.0 -> v7.8.0', () => {
+  it('transforms the connector field', () => {
+    expect(migrateCaseFromV7_9_0ToV7_10_0(validInput_7_9_0)).toEqual({
+      id: '1',
+      type: 'case',
+      attributes: {
+        connector: {
+          id: '1234',   // verify id was moved into subobject
+          name: 'none', // verify new default field was added
+        }
+      }
+    });
+  });
+
+  it('handles empty string', () => {
+    expect(migrateCaseFromV7_9_0ToV7_10_0({
+      id: '1',
+      type: 'case',
+      attributes: {
+        connector_id: ''
+      }
+    })).toEqual({
+      id: '1',
+      type: 'case',
+      attributes: {
+        connector: {
+          id: 'none',
+          name: 'none',
+        }
+      }
+    });
+  });
+
+  it('handles null', () => {
+    expect(migrateCaseFromV7_9_0ToV7_10_0({
+      id: '1',
+      type: 'case',
+      attributes: {
+        connector_id: null
+      }
+    })).toEqual({
+      id: '1',
+      type: 'case',
+      attributes: {
+        connector: {
+          id: 'none',
+          name: 'none',
+        }
+      }
+    });
+  });
+
+  it('handles undefined', () => {
+    expect(migrateCaseFromV7_9_0ToV7_10_0({
+      id: '1',
+      type: 'case',
+      attributes: {
+        // Even though undefined isn't a valid JSON or Elasticsearch value, we should test it anyways since there
+        // could be some JavaScript layer that casts the field to `undefined` for some reason.
+        connector_id: undefined 
+      }
+    })).toEqual({
+      id: '1',
+      type: 'case',
+      attributes: {
+        connector: {
+          id: 'none',
+          name: 'none',
+        }
+      }
+    });
+
+    expect(migrateCaseFromV7_9_0ToV7_10_0({
+      id: '1',
+      type: 'case',
+      attributes: {
+        // also test without the field present at all
+      }
+    })).toEqual({
+      id: '1',
+      type: 'case',
+      attributes: {
+        connector: {
+          id: 'none',
+          name: 'none',
+        }
+      }
+    });
+  });
+});
+```
+
+#### Integration testing
+With more complicated migrations, the behavior of the migration may be dependent on values from other plugins which may
+be difficult or even impossible to test with unit tests. You need to actually bootstrap Kibana, load the plugins, and
+then test the full end-to-end migration. This type of set up will also test ingesting your documents into Elasticsearch
+against the mappings defined by your Saved Object type.
+
+This can be achieved using the `jest_integration` suite and the `kbnTestServer` utility for starting an in-memory
+instance of Kibana. You can then leverage the import API to test migrations. This API applies the same migrations to
+imported documents as are applied at Kibana startup and is much easier to work with for testing.
+
+```ts
+// You may need to adjust these paths depending on where your test file is located.
+// The absolute path is src/core/test_helpers/so_migrations
+import { createTestHarness, SavedObjectTestHarness } from '../../../../src/core/test_helpers/so_migrations';
+
+describe('my plugin migrations', () => {
+  let testHarness: SavedObjectTestHarness;
+
+  beforeAll(async () => {
+    testHarness = createTestHarness();
+    await testHarness.start();
+  });
+
+  afterAll(async () => {
+    await testHarness.stop();
+  });
+
+  it('successfully migrates valid case documents', async () => {
+    expect(
+      await testHarness.migrate([
+        { type: 'case', id: '1', attributes: { connector_id: '1234' }, references: [] },
+        { type: 'case', id: '2', attributes: { connector_id: '' }, references: [] },
+        { type: 'case', id: '3', attributes: { connector_id: null }, references: [] },
+      ])
+    ).toEqual([
+      expect.objectContaining(
+        { type: 'case', id: '1', attributes: { connector: { id: '1234', name: 'none' } } }),
+      expect.objectContaining(
+        { type: 'case', id: '2', attributes: { connector: { id: 'none', name: 'none' } } }),
+      expect.objectContaining(
+        { type: 'case', id: '3', attributes: { connector: { id: 'none', name: 'none' } } }),
+    ])
+  })
+})
+```
+
+There are some caveats about using the import/export API for testing migrations:
+- You cannot test the startup behavior of Kibana this way. This should not have any effect on type migrations but does
+  mean that this method cannot be used for testing the migration algorithm itself.
+- While not yet supported, if support is added for migrations that affect multiple types, it's possible that the
+  behavior during import may vary slightly from the upgrade behavior.
 
 ### Elasticsearch
 
