@@ -73,6 +73,9 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
             <FormattedMessage
               id="xpack.fleet.editPackagePolicy.editPageTitleWithPackageName"
               defaultMessage="Edit {packageName} integration"
+              values={{
+                packageName: packageInfo.title,
+              }}
             />
           );
         } else if (isUpgrade) {
