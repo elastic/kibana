@@ -76,7 +76,7 @@ export const useTimelineEventsDetails = ({
 
         searchSubscription$.current = data.search
           .search<TimelineEventsDetailsRequestOptions, TimelineEventsDetailsStrategyResponse>(
-            { ...request, entityType: EntityType.EVENTS },
+            { ...request, entityType: EntityType.ALERTS },
             {
               strategy: 'timelineSearchStrategy',
               abortSignal: abortCtrl.current.signal,
