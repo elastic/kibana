@@ -24,7 +24,7 @@ export const useOsqueryIntegrationStatus = ({ agentId, skip }: Props) => {
     'integration',
     () => http.get('/internal/osquery/status', agentId ? { query: { agentId } } : undefined),
     {
-      skip,
+      enabled: !skip,
       onError: (error: Error) =>
         setErrorToast(error, {
           title: i18n.translate('xpack.osquery.osquery_integration.fetchError', {
