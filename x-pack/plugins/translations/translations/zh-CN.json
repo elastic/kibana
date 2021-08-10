@@ -6145,7 +6145,6 @@
     "xpack.apm.transactionDurationLabel": "持续时间",
     "xpack.apm.transactionErrorRateAlert.name": "事务错误率阈值",
     "xpack.apm.transactionErrorRateAlertTrigger.isAbove": "高于",
-    "xpack.apm.transactionRateLabel": "{value} tpm",
     "xpack.apm.transactions.latency.chart.95thPercentileLabel": "第 95 个百分位",
     "xpack.apm.transactions.latency.chart.99thPercentileLabel": "第 99 个百分位",
     "xpack.apm.transactions.latency.chart.averageLabel": "平均值",

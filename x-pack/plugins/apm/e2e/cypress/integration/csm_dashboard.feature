@@ -25,11 +25,6 @@ Feature: CSM Dashboard
     Then should display percentile for page load chart
       And should display tooltip on hover
 
-  Scenario: Breakdown filter
-    Given a user clicks the page load breakdown filter
-    When the user selected the breakdown
-    Then breakdown series should appear in chart
-
   Scenario: Search by url filter focus
     When a user clicks inside url search field
     Then it displays top pages in the suggestion popover
