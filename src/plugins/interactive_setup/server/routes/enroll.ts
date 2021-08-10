@@ -9,7 +9,6 @@
 import { constants } from 'fs';
 import fs from 'fs/promises';
 import yaml from 'js-yaml';
-import forge from 'node-forge';
 import path from 'path';
 
 import { schema } from '@kbn/config-schema';
