@@ -10,20 +10,20 @@ import { useHistory } from 'react-router-dom';
 import { useFetcher } from './use_fetcher';
 import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
 import { maybe } from '../../common/utils/maybe';
-import { APIReturnType } from '../services/rest/createCallApmApi';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 
-type APIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/distribution'>;
+export interface TraceSample {
+  traceId: string;
+  transactionId: string;
+}
 
 const INITIAL_DATA = {
-  buckets: [] as APIResponse['buckets'],
   noHits: true,
-  bucketSize: 0,
-  hits: [] as APIResponse['hits'],
+  traceSamples: [] as TraceSample[],
 };
 
-export function useTransactionDistributionFetcher({
+export function useTransactionTraceSamplesFetcher({
   transactionName,
 }: {
   transactionName: string;
@@ -49,7 +49,7 @@ export function useTransactionDistributionFetcher({
       if (serviceName && start && end && transactionType && transactionName) {
         const response = await callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/transactions/charts/distribution',
+            'GET /api/apm/services/{serviceName}/transactions/traces/samples',
           params: {
             path: {
               serviceName,
@@ -69,14 +69,18 @@ export function useTransactionDistributionFetcher({
           },
         });
 
-        const buckets = response.hits.map((hit) => ({
+        if (response.noHits) {
+          return { noHits: true, traceSamples: [] };
+        }
+
+        const traceSamples: TraceSample[] = response.hits.map((hit) => ({
           transactionId: hit._source.transaction.id,
           traceId: hit._source.trace.id,
         }));
 
         const selectedSample =
           transactionId && traceId
-            ? buckets.find(
+            ? traceSamples.find(
                 (sample) =>
                   sample.transactionId === transactionId &&
                   sample.traceId === traceId
@@ -85,7 +89,7 @@ export function useTransactionDistributionFetcher({
 
         if (!selectedSample) {
           // selected sample was not found. select a new one:
-          const preferredSample = maybe(buckets[0]);
+          const preferredSample = maybe(traceSamples[0]);
 
           history.replace({
             ...history.location,
@@ -99,10 +103,13 @@ export function useTransactionDistributionFetcher({
           });
         }
 
-        return response;
+        return {
+          noHits: false,
+          traceSamples,
+        };
       }
     },
-    // the histogram should not be refetched if the transactionId or traceId changes
+    // the samples should not be refetched if the transactionId or traceId changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       environment,
@@ -118,8 +125,8 @@ export function useTransactionDistributionFetcher({
   );
 
   return {
-    distributionData: data,
-    distributionStatus: status,
-    distributionError: error,
+    traceSamplesData: data,
+    traceSamplesStatus: status,
+    traceSamplesError: error,
   };
 }
