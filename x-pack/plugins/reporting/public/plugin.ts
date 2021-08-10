@@ -168,10 +168,15 @@ export class ReportingPublicPlugin
       title: this.title,
       order: 1,
       mount: async (params) => {
+        // The redirect app will be mounted if reporting is opened on a specific path. The redirect app expects a
+        // specific environment to be present so that it can navigate to a specific application. This is used by
+        // report generation to navigate to the correct place with full app state.
         if (isRedirectAppPath(params.history.location.pathname)) {
           const { mountRedirectApp } = await import('./redirect');
           return mountRedirectApp({ ...params, share, apiClient });
         }
+
+        // Otherwise load the reporting management UI.
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
         const [[start], { mountManagementSection }] = await Promise.all([
           getStartServices(),

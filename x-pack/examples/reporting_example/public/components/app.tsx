@@ -54,8 +54,6 @@ export const ReportingExampleApp = ({
   screenshotMode,
   forwardedParams,
 }: ReportingExampleAppProps) => {
-  const { getDefaultLayoutSelectors } = reporting;
-
   useEffect(() => {
     // eslint-disable-next-line no-console
     console.log('forwardedParams', forwardedParams);
@@ -86,7 +84,6 @@ export const ReportingExampleApp = ({
     return {
       layout: {
         id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
-        selectors: getDefaultLayoutSelectors(),
       },
       relativeUrls: ['/app/reportingExample#/intended-visualization'],
       objectType: 'develeloperExample',
@@ -99,7 +96,6 @@ export const ReportingExampleApp = ({
       version: '8.0.0',
       layout: {
         id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
-        selectors: getDefaultLayoutSelectors(),
       },
       locatorParams: [
         { id: REPORTING_EXAMPLE_LOCATOR_ID, version: '0.5.0', params: { myTestState: {} } },
@@ -115,7 +111,6 @@ export const ReportingExampleApp = ({
       version: '8.0.0',
       layout: {
         id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
-        selectors: getDefaultLayoutSelectors(),
       },
       locatorParams: {
         id: REPORTING_EXAMPLE_LOCATOR_ID,
@@ -141,8 +136,8 @@ export const ReportingExampleApp = ({
       initialFocusedItemIndex: 1,
       title: 'PDF Reports',
       items: [
-        { name: 'No Layout Option', icon: 'document', panel: 2 },
-        { name: 'V2 No Layout Option', icon: 'document', panel: 4 },
+        { name: 'Default layout', icon: 'document', panel: 2 },
+        { name: 'Default layout V2', icon: 'document', panel: 4 },
         { name: 'Canvas Layout Option', icon: 'canvasApp', panel: 3 },
       ],
     },
@@ -150,11 +145,11 @@ export const ReportingExampleApp = ({
       id: 7,
       initialFocusedItemIndex: 0,
       title: 'PNG Reports',
-      items: [{ name: 'V2 No Layout Option', icon: 'document', panel: 5 }],
+      items: [{ name: 'Default layout V2', icon: 'document', panel: 5 }],
     },
     {
       id: 2,
-      title: 'No Layout Option',
+      title: 'Default layout',
       content: (
         <reporting.components.ReportingPanelPDF
           getJobParams={getPDFJobParamsDefault}
@@ -175,7 +170,7 @@ export const ReportingExampleApp = ({
     },
     {
       id: 4,
-      title: 'V2 No Layout Option',
+      title: 'Default layout V2',
       content: (
         <reporting.components.ReportingPanelPDFV2
           getJobParams={getPDFJobParamsDefaultV2}
@@ -185,7 +180,7 @@ export const ReportingExampleApp = ({
     },
     {
       id: 5,
-      title: 'V2 No Layout Option',
+      title: 'Default layout V2',
       content: (
         <reporting.components.ReportingPanelPNGV2
           getJobParams={getPNGJobParamsDefaultV2}
