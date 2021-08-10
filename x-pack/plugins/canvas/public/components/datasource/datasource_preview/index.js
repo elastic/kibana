@@ -18,7 +18,9 @@ export const DatasourcePreview = (props) => {
     interpretAst({ type: 'expression', chain: [props.function] }, {}).then(setDatatable);
   }, [props.function, setDatatable]);
 
-  if (!datatable) return <Loading {...props} />;
+  if (!datatable) {
+    return <Loading {...props} />;
+  }
 
   return <Component {...props} datatable={datatable} setDatatable={setDatatable} />;
 };
