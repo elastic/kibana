@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { FunctionComponent } from 'react';
 
 import {
   EuiText,
@@ -29,19 +29,10 @@ import { DEPRECATION_LOGS_SOURCE_ID } from '../../../../../common/constants';
 
 const DeprecationLogsPreview: FunctionComponent = () => {
   const state = useDeprecationLogging();
-  const [isExpanded, setExpanded] = useState(false);
 
   const endTimestamp = Date.now();
   const startTimestamp = endTimestamp - 1000 * 60 * 60 * 24 * 7; // 7 days
   const showFooter = state.isEnabled && (!state.fetchError || !state.isLoading);
-
-  // If we switch toggle off we have to make sure to collapse the drawer to
-  // avoid container to become smaller.
-  useEffect(() => {
-    if (!state.isEnabled) {
-      setExpanded(false);
-    }
-  }, [state.isEnabled]);
 
   return (
     <>
@@ -49,12 +40,7 @@ const DeprecationLogsPreview: FunctionComponent = () => {
 
       <EuiSpacer size="l" />
 
-      <Collapsible
-        showFooter={showFooter}
-        isExpanded={isExpanded}
-        setExpanded={setExpanded}
-        renderFooter={<ExternalLinks />}
-      >
+      <Collapsible showFooter={showFooter} renderFooter={<ExternalLinks />}>
         {(() => {
           if (state.isLoading) {
             return (

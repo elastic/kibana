@@ -1,9 +1,12 @@
+// The LogStream component is being set to 200px height, so we wanna
+// keep the height of the drawer when collapsed to half of that.
 $collapsibleHeight: 100px;
 
 .upgCollapsible {
   position: relative;
 
   .upgCollapsibleContent {
+    height: $collapsibleHeight * 2;
     margin-bottom: $euiSizeL;
 
     // HACK: to hide empty top row above table
