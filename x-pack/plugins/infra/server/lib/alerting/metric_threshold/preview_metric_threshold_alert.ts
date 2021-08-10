@@ -26,6 +26,7 @@ interface PreviewMetricThresholdAlertParams {
     criteria: MetricExpressionParams[];
     groupBy: string | undefined | string[];
     filterQuery: string | undefined;
+    shouldDropPartialBuckets?: boolean;
   };
   config: InfraSource['configuration'];
   lookback: Unit;

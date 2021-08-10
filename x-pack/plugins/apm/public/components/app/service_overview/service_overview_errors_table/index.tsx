@@ -32,7 +32,7 @@ type ErrorGroupMainStatistics = APIReturnType<'GET /api/apm/services/{serviceNam
 type ErrorGroupDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 type SortDirection = 'asc' | 'desc';
-type SortField = 'name' | 'last_seen' | 'occurrences';
+type SortField = 'name' | 'lastSeen' | 'occurrences';
 
 const PAGE_SIZE = 5;
 const DEFAULT_SORT = {

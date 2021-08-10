@@ -14,6 +14,8 @@ import type { AgentPolicy, NewPackagePolicy, Output } from '../types';
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
+import * as agentPolicy from './agent_policy';
+
 import {
   ensurePreconfiguredPackagesAndPolicies,
   comparePreconfiguredPolicyToCurrent,
@@ -128,6 +130,7 @@ jest.mock('./epm/packages/get', () => ({
 jest.mock('./package_policy', () => ({
   ...jest.requireActual('./package_policy'),
   packagePolicyService: {
+    getByIDs: jest.fn().mockReturnValue([]),
     create(soClient: any, esClient: any, newPackagePolicy: NewPackagePolicy) {
       return {
         id: 'mocked',
@@ -152,10 +155,13 @@ jest.mock('./app_context', () => ({
   },
 }));
 
+const spyAgentPolicyServiceUpdate = jest.spyOn(agentPolicy.agentPolicyService, 'update');
+
 describe('policy preconfiguration', () => {
   beforeEach(() => {
     mockInstalledPackages.clear();
     mockConfiguredPolicies.clear();
+    spyAgentPolicyServiceUpdate.mockClear();
   });
 
   it('should perform a no-op when passed no policies or packages', async () => {
@@ -329,6 +335,84 @@ describe('policy preconfiguration', () => {
     expect(policiesB.length).toEqual(1);
     expect(policiesB[0].id).toBe('mocked-test-id');
     expect(policiesB[0].updated_at).toEqual(policiesA[0].updated_at);
+    expect(nonFatalErrorsB.length).toBe(0);
+  });
+
+  it('should update a managed policy if top level fields are changed', async () => {
+    const soClient = getPutPreconfiguredPackagesMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    mockConfiguredPolicies.set('test-id', {
+      name: 'Test policy',
+      description: 'Test policy description',
+      unenroll_timeout: 120,
+      namespace: 'default',
+      id: 'test-id',
+      package_policies: [],
+      is_managed: true,
+    } as PreconfiguredAgentPolicy);
+
+    const {
+      policies,
+      nonFatalErrors: nonFatalErrorsB,
+    } = await ensurePreconfiguredPackagesAndPolicies(
+      soClient,
+      esClient,
+      [
+        {
+          name: 'Renamed Test policy',
+          description: 'Renamed Test policy description',
+          unenroll_timeout: 999,
+          namespace: 'default',
+          id: 'test-id',
+          is_managed: true,
+          package_policies: [],
+        },
+      ] as PreconfiguredAgentPolicy[],
+      [],
+      mockDefaultOutput
+    );
+    expect(spyAgentPolicyServiceUpdate).toBeCalled();
+    expect(spyAgentPolicyServiceUpdate).toBeCalledWith(
+      expect.anything(), // soClient
+      expect.anything(), // esClient
+      'test-id',
+      expect.objectContaining({
+        name: 'Renamed Test policy',
+        description: 'Renamed Test policy description',
+        unenroll_timeout: 999,
+      })
+    );
+    expect(policies.length).toEqual(1);
+    expect(policies[0].id).toBe('test-id');
+    expect(nonFatalErrorsB.length).toBe(0);
+  });
+
+  it('should not update a managed policy if a top level field has not changed', async () => {
+    const soClient = getPutPreconfiguredPackagesMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const policy: PreconfiguredAgentPolicy = {
+      name: 'Test policy',
+      namespace: 'default',
+      id: 'test-id',
+      package_policies: [],
+      is_managed: true,
+    };
+    mockConfiguredPolicies.set('test-id', policy);
+
+    const {
+      policies,
+      nonFatalErrors: nonFatalErrorsB,
+    } = await ensurePreconfiguredPackagesAndPolicies(
+      soClient,
+      esClient,
+      [policy],
+      [],
+      mockDefaultOutput
+    );
+    expect(spyAgentPolicyServiceUpdate).not.toBeCalled();
+    expect(policies.length).toEqual(1);
+    expect(policies[0].id).toBe('test-id');
     expect(nonFatalErrorsB.length).toBe(0);
   });
 });
