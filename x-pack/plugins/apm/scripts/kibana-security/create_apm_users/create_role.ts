@@ -36,7 +36,7 @@ export async function createRole({
   });
   if (roleFound) {
     console.log(`Skipping: Role "${roleName}" already exists`);
-    return;
+    return Promise.resolve();
   }
 
   await callKibana({

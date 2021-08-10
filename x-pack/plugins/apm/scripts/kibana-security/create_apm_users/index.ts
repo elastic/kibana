@@ -52,7 +52,7 @@ export async function createAPMUsers({
     },
     {
       username: 'apm_power_user',
-      roles: [APM_USER_ROLE, KIBANA_READ_ROLE],
+      roles: [APM_USER_ROLE, KIBANA_POWER_ROLE],
     },
   ];
 
