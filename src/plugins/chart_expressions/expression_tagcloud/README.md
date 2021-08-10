@@ -1,6 +1,6 @@
 # expressionTagcloud
 
-A Kibana plugin
+Expression Tagcloud plugin adds a `tagcloud` renderer and function to the expression plugin. The renderer will display the `Wordcloud` chart.
 
 ---
 
