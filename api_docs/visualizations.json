@@ -1256,7 +1256,7 @@
             "text": "SerializedFieldFormat"
           },
           "<Record<string, any>> | undefined; source?: string | undefined; sourceParams?: ",
-          "SerializableState",
+          "Serializable",
           " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; rows: Record<string, any>[]; }"
         ],
         "path": "src/plugins/visualizations/common/prepare_log_table.ts",
@@ -1651,7 +1651,7 @@
             "description": [],
             "signature": [
               "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
               {
                 "pluginId": "data",
@@ -2075,7 +2075,7 @@
             "description": [],
             "signature": [
               "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
               {
                 "pluginId": "data",
@@ -4881,7 +4881,7 @@
             "text": "SerializedFieldFormat"
           },
           "<Record<string, any>> | undefined; source?: string | undefined; sourceParams?: ",
-          "SerializableState",
+          "Serializable",
           " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; rows: Record<string, any>[]; }"
         ],
         "path": "src/plugins/visualizations/common/prepare_log_table.ts",
@@ -4981,7 +4981,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/visualizations/common/expression_functions/range.ts",
@@ -5047,7 +5047,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
@@ -5120,7 +5120,7 @@
             "description": [],
             "signature": [
               "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
               {
                 "pluginId": "data",
