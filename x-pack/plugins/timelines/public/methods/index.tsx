@@ -7,7 +7,9 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n/react';
 import type { Store } from 'redux';
+import { Provider } from 'react-redux';
 import type { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import type { TGridProps } from '../types';
@@ -68,6 +70,36 @@ export const getAddToCaseLazy = (props: AddToCaseActionProps) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <AddToCaseLazy {...props} />
+    </Suspense>
+  );
+};
+
+const AddToExistingButton = lazy(
+  () => import('../components/actions/timeline/cases/add_to_existing_case_button')
+);
+export const getAddToExistingCaseButtonLazy = (props, store) => {
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <Provider store={store}>
+        <I18nProvider>
+          <AddToExistingButton {...props} />
+        </I18nProvider>
+      </Provider>
+    </Suspense>
+  );
+};
+
+const AddToNewCaseButton = lazy(
+  () => import('../components/actions/timeline/cases/add_to_new_case_button')
+);
+export const getAddToNewCaseButtonLazy = (props, store) => {
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <Provider store={store}>
+        <I18nProvider>
+          <AddToNewCaseButton {...props} />
+        </I18nProvider>
+      </Provider>
     </Suspense>
   );
 };
