@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useCallback, memo, useContext, useEffect, useState } from 'react';
+import styled from 'styled-components';
 import {
   EuiHorizontalRule,
   EuiBasicTable,
@@ -63,6 +64,15 @@ import { metadataTransformPrefix } from '../../../../../common/endpoint/constant
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
 
+const StyledDatePicker = styled.div`
+  .euiFormControlLayout--group {
+    background-color: rgba(0, 119, 204, 0.2);
+  }
+
+  .euiDatePickerRange--readOnly {
+    background-color: ${(props) => props.theme.eui.euiFormBackgroundColor};
+  }
+`;
 const EndpointListNavLink = memo<{
   name: string;
   href: string;
@@ -659,15 +669,18 @@ export const EndpointList = () => {
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false} style={refreshStyle}>
-            <EuiSuperDatePicker
-              onTimeChange={NOOP}
-              isDisabled={hasSelectedEndpoint}
-              onRefresh={onRefresh}
-              isPaused={refreshIsPaused}
-              refreshInterval={refreshInterval}
-              onRefreshChange={onRefreshChange}
-              isAutoRefreshOnly={true}
-            />
+            <StyledDatePicker>
+              <EuiSuperDatePicker
+                className="endpointListDatePicker"
+                onTimeChange={NOOP}
+                isDisabled={hasSelectedEndpoint}
+                onRefresh={onRefresh}
+                isPaused={refreshIsPaused}
+                refreshInterval={refreshInterval}
+                onRefreshChange={onRefreshChange}
+                isAutoRefreshOnly={true}
+              />
+            </StyledDatePicker>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
