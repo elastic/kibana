@@ -44,7 +44,6 @@ export default ({ getService }: FtrProviderContext) => {
           'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
         );
         await createSignalsIndex(supertest);
-        // wait for indexes to be loaded
       });
 
       afterEach(async () => {
