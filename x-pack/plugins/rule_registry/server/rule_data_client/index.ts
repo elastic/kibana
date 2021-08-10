@@ -27,12 +27,16 @@ export class RuleDataClient implements IRuleDataClient {
     return await this.options.getClusterClient();
   }
 
+  public get indexName(): string {
+    return this.options.names.indexBaseName;
+  }
+
   isWriteEnabled(): boolean {
     return this.options.isWriteEnabled;
   }
 
   getReader(options: { namespace?: string } = {}): RuleDataReader {
-    const index = `${[this.options.alias, options.namespace].filter(Boolean).join('-')}*`;
+    const index = `${[this.indexName, options.namespace].filter(Boolean).join('-')}*`;
 
     return {
       search: async (request) => {
@@ -76,7 +80,7 @@ export class RuleDataClient implements IRuleDataClient {
   getWriter(options: { namespace?: string } = {}): RuleDataWriter {
     const { namespace } = options;
     const isWriteEnabled = this.isWriteEnabled();
-    const alias = getNamespacedAlias({ alias: this.options.alias, namespace });
+    const alias = getNamespacedAlias({ alias: this.indexName, namespace });
 
     return {
       bulk: async (request) => {
@@ -122,7 +126,7 @@ export class RuleDataClient implements IRuleDataClient {
   }
 
   async createWriteTargetIfNeeded({ namespace }: { namespace?: string }) {
-    const alias = getNamespacedAlias({ alias: this.options.alias, namespace });
+    const alias = getNamespacedAlias({ alias: this.indexName, namespace });
 
     const clusterClient = await this.getClusterClient();
 

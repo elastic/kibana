@@ -6,7 +6,6 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import { get, isEmpty, once } from 'lodash';
@@ -20,8 +19,8 @@ import { ecsComponentTemplate } from '../../common/assets/component_templates/ec
 import { defaultLifecyclePolicy } from '../../common/assets/lifecycle_policies/default_lifecycle_policy';
 import { RuleDataClient } from '../rule_data_client';
 import { incrementIndexName } from './utils';
-import { IndexOptions } from './index_options';
 import { IndexNames } from './index_names';
+import { IndexOptions } from './index_options';
 
 const COMMON_RESOURCES = 'common resources shared between all indices';
 const INDEX_RESOURCES = 'index resources shared between namespaces';
@@ -35,37 +34,26 @@ export interface RuleDataPluginServiceConstructorOptions {
 }
 
 export class RuleDataPluginService {
-  private bootstrapResourcesSharedBetweenAllIndices: () => Promise<void>;
+  private readonly getClusterClient: () => Promise<ElasticsearchClient>;
+  private readonly bootstrapResourcesSharedBetweenAllIndices: () => Promise<void>;
 
   constructor(private readonly options: RuleDataPluginServiceConstructorOptions) {
+    this.getClusterClient = options.getClusterClient;
     this.bootstrapResourcesSharedBetweenAllIndices = this.createBootstrapper(COMMON_RESOURCES, () =>
       this.installResourcesSharedBetweenAllIndices()
     );
   }
 
-  /** @deprecated */
+  public getResourcePrefix() {
+    return this.options.index;
+  }
+
+  public getResourceName(...relativeNameSegments: string[]) {
+    return IndexNames.joinWithDash(this.options.index, ...relativeNameSegments);
+  }
+
   public isWriteEnabled(): boolean {
     return this.options.isWriteEnabled;
-  }
-
-  /** @deprecated */
-  public getFullAssetName(assetName: string = '') {
-    return IndexNames.joinWithDash(this.options.index, assetName);
-  }
-
-  /** @deprecated */
-  public getRuleDataClient(
-    feature: ValidFeatureId,
-    alias: string,
-    initialize: () => Promise<void>
-  ) {
-    return new RuleDataClient({
-      alias,
-      feature,
-      getClusterClient: () => this.getClusterClient(),
-      isWriteEnabled: this.isWriteEnabled(),
-      ready: initialize,
-    });
   }
 
   public initializeService(): void {
@@ -91,7 +79,13 @@ export class RuleDataPluginService {
     // Start bootstrapping eagerly
     const bootstrapPromise = bootstrapResources();
 
-    return this.getRuleDataClient(feature, indexNames.indexBaseName, () => bootstrapPromise);
+    return new RuleDataClient({
+      feature,
+      names: indexNames,
+      ready: () => bootstrapPromise,
+      getClusterClient: () => this.getClusterClient(),
+      isWriteEnabled: this.isWriteEnabled(),
+    });
   }
 
   private createBootstrapper<T>(
@@ -129,17 +123,17 @@ export class RuleDataPluginService {
     logger.info(`Installing ${COMMON_RESOURCES}`);
 
     await this.createOrUpdateLifecyclePolicy({
-      policy: this.getFullAssetName(DEFAULT_ILM_POLICY_ID),
+      policy: this.getResourceName(DEFAULT_ILM_POLICY_ID),
       body: defaultLifecyclePolicy,
     });
 
     await this.createOrUpdateComponentTemplate({
-      name: this.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
+      name: this.getResourceName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
       body: technicalComponentTemplate,
     });
 
     await this.createOrUpdateComponentTemplate({
-      name: this.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
+      name: this.getResourceName(ECS_COMPONENT_TEMPLATE_NAME),
       body: ecsComponentTemplate,
     });
 
@@ -189,15 +183,15 @@ export class RuleDataPluginService {
       })
     );
 
+    const referencedComponents = componentTemplateRefs;
     const ownComponents = componentTemplates.map((ct) => ct.name);
-    const externalComponents = componentTemplateRefs;
-    const technicalComponents = [indexNames.getPrefixedName(TECHNICAL_COMPONENT_TEMPLATE_NAME)];
+    const technicalComponents = [this.getResourceName(TECHNICAL_COMPONENT_TEMPLATE_NAME)];
 
     await this.createOrUpdateIndexTemplate({
       name: indexNames.getIndexTemplateName(''), // TODO: should be namespaced,
       body: {
         index_patterns: [indexNames.indexBasePattern], // TODO: should be namespaced
-        composed_of: [...externalComponents, ...ownComponents, ...technicalComponents], // order matters
+        composed_of: [...referencedComponents, ...ownComponents, ...technicalComponents], // order matters
         version: indexTemplate.version,
         _meta: indexTemplate._meta,
       },
@@ -208,7 +202,6 @@ export class RuleDataPluginService {
     logger.info(`Installed ${INDEX_RESOURCES}`);
   }
 
-  /** @deprecated */
   private async createOrUpdateLifecyclePolicy(policy: estypes.IlmPutLifecycleRequest) {
     this.options.logger.debug(`Installing lifecycle policy ${policy.policy}`);
 
@@ -216,7 +209,6 @@ export class RuleDataPluginService {
     return clusterClient.ilm.putLifecycle(policy);
   }
 
-  /** @deprecated */
   private async createOrUpdateComponentTemplate(
     template: estypes.ClusterPutComponentTemplateRequest
   ) {
@@ -226,7 +218,6 @@ export class RuleDataPluginService {
     return clusterClient.cluster.putComponentTemplate(template);
   }
 
-  /** @deprecated */
   private async createOrUpdateIndexTemplate(template: estypes.IndicesPutIndexTemplateRequest) {
     this.options.logger.debug(`Installing index template ${template.name}`);
 
@@ -244,7 +235,6 @@ export class RuleDataPluginService {
     return clusterClient.indices.putIndexTemplate(template);
   }
 
-  /** @deprecated */
   private async updateIndexMappingsMatchingPattern(pattern: string) {
     const clusterClient = await this.getClusterClient();
     const { body: aliasesResponse } = await clusterClient.indices.getAlias({ index: pattern });
@@ -265,7 +255,6 @@ export class RuleDataPluginService {
     );
   }
 
-  /** @deprecated */
   private async updateAliasWriteIndexMapping({ index, alias }: { index: string; alias: string }) {
     const clusterClient = await this.getClusterClient();
 
@@ -310,10 +299,5 @@ export class RuleDataPluginService {
         }
       }
     }
-  }
-
-  /** @deprecated */
-  private async getClusterClient() {
-    return await this.options.getClusterClient();
   }
 }

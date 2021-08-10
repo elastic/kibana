@@ -13,6 +13,7 @@ import { ElasticsearchClient } from 'kibana/server';
 import { FieldDescriptor } from 'src/plugins/data/server';
 import { ESSearchRequest, ESSearchResponse } from 'src/core/types/elasticsearch';
 import { TechnicalRuleDataFieldName } from '../../common/technical_rule_data_field_names';
+import { IndexNames } from '../rule_data_plugin_service/index_names';
 
 export interface RuleDataReader {
   search<TSearchRequest extends ESSearchRequest>(
@@ -34,6 +35,7 @@ export interface RuleDataWriter {
 }
 
 export interface IRuleDataClient {
+  indexName: string;
   getReader(options?: { namespace?: string }): RuleDataReader;
   getWriter(options?: { namespace?: string }): RuleDataWriter;
   isWriteEnabled(): boolean;
@@ -48,9 +50,9 @@ export interface IRuleDataClient {
  * is put in place or we move the alerts as data client out of rule registry.
  */
 export interface RuleDataClientConstructorOptions {
+  feature: ValidFeatureId;
+  names: IndexNames;
+  ready: () => Promise<void>;
   getClusterClient: () => Promise<ElasticsearchClient>;
   isWriteEnabled: boolean;
-  ready: () => Promise<void>;
-  alias: string;
-  feature: ValidFeatureId;
 }

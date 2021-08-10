@@ -93,7 +93,6 @@ type SecurityAlertTypeWithExecutor<
 };
 
 export type CreateSecurityRuleTypeFactory = (options: {
-  indexAlias: string;
   lists: SetupPlugins['lists'];
   logger: Logger;
   mergeStrategy: ConfigType['alertMergeStrategy'];
@@ -122,7 +121,6 @@ export type WrappedRACAlert = BaseHit<RACAlert>;
 
 export interface CreateRuleOptions {
   experimentalFeatures: ExperimentalFeatures;
-  indexAlias: string;
   lists: SetupPlugins['lists'];
   logger: Logger;
   mergeStrategy: ConfigType['alertMergeStrategy'];

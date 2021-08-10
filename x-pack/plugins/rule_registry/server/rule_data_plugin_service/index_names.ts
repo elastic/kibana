@@ -23,24 +23,15 @@ export interface IndexNamesOptions {
 export class IndexNames {
   public static joinWithDash = joinWithDash;
 
-  /** @example '.alerts-security-alerts' */
+  /** @example '.alerts-security.alerts' */
   private readonly baseName: string;
 
-  constructor(private readonly options: IndexNamesOptions) {
+  constructor(options: IndexNamesOptions) {
     const { indexPrefix, registrationContext, dataset } = options;
     this.baseName = joinWithDash(indexPrefix, registrationContext, dataset);
   }
 
-  public getPrefixedName(...relativeNames: string[]): string {
-    const { indexPrefix } = this.options;
-    return joinWithDash(indexPrefix, ...relativeNames);
-  }
-
-  public getFullAssetName(...relativeNames: string[]): string {
-    return joinWithDash(this.baseName, ...relativeNames);
-  }
-
-  /** @example '.alerts-security-alerts' */
+  /** @example '.alerts-security.alerts' */
   public get indexBaseName(): string {
     return this.baseName;
   }
