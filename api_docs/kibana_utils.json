@@ -9150,8 +9150,8 @@
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           },
           ">) => S"
         ],
@@ -9198,8 +9198,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               ">"
             ],
@@ -10007,8 +10007,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               ">) => P) | undefined"
             ],
@@ -10037,8 +10037,8 @@
                     "pluginId": "kibanaUtils",
                     "scope": "common",
                     "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.SerializableState",
-                    "text": "SerializableState"
+                    "section": "def-common.Serializable",
+                    "text": "Serializable"
                   },
                   ">"
                 ],
@@ -10964,16 +10964,16 @@
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           },
           ", version: string) => ",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           }
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
@@ -11216,16 +11216,16 @@
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           },
           " | ",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableValue",
-            "text": "SerializableValue"
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
           },
           "[] | null | undefined"
         ],
@@ -11235,10 +11235,10 @@
       },
       {
         "parentPluginId": "kibanaUtils",
-        "id": "def-common.SerializableState",
+        "id": "def-common.Serializable",
         "type": "Type",
         "tags": [],
-        "label": "SerializableState",
+        "label": "Serializable",
         "description": [
           "\nSerializable state is something is a POJO JavaScript object that can be\nserialized to a JSON string."
         ],
@@ -11259,10 +11259,10 @@
       },
       {
         "parentPluginId": "kibanaUtils",
-        "id": "def-common.SerializableValue",
+        "id": "def-common.SerializableRecord",
         "type": "Type",
         "tags": [],
-        "label": "SerializableValue",
+        "label": "SerializableRecord",
         "description": [],
         "signature": [
           "string | number | boolean | ",
@@ -11270,8 +11270,8 @@
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           },
           " | null | undefined"
         ],

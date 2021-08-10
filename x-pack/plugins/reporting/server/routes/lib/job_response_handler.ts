@@ -22,8 +22,7 @@ interface JobResponseHandlerOpts {
 
 export function downloadJobResponseHandlerFactory(reporting: ReportingCore) {
   const jobsQuery = jobsQueryFactory(reporting);
-  const exportTypesRegistry = reporting.getExportTypesRegistry();
-  const getDocumentPayload = getDocumentPayloadFactory(exportTypesRegistry);
+  const getDocumentPayload = getDocumentPayloadFactory(reporting);
 
   return async function jobResponseHandler(
     res: typeof kibanaResponseFactory,
@@ -35,7 +34,7 @@ export function downloadJobResponseHandlerFactory(reporting: ReportingCore) {
     try {
       const { docId } = params;
 
-      const doc = await jobsQuery.getContent(user, docId);
+      const doc = await jobsQuery.get(user, docId);
       if (!doc) {
         return res.notFound();
       }
@@ -46,7 +45,7 @@ export function downloadJobResponseHandlerFactory(reporting: ReportingCore) {
         });
       }
 
-      const payload = getDocumentPayload(doc);
+      const payload = await getDocumentPayload(doc);
 
       if (!payload.contentType || !ALLOWED_JOB_CONTENT_TYPES.includes(payload.contentType)) {
         return res.badRequest({

@@ -25,7 +25,7 @@ export class XyVisualization {
 
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
-    { expressions, formatFactory, editorFrame, charts }: XyVisualizationPluginSetupPlugins
+    { expressions, formatFactory, editorFrame }: XyVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
       const {
@@ -41,7 +41,7 @@ export class XyVisualization {
         getXyChartRenderer,
         getXyVisualization,
       } = await import('../async_services');
-      const [, { data }] = await core.getStartServices();
+      const [, { data, charts }] = await core.getStartServices();
       const palettes = await charts.palettes.getPalettes();
       expressions.registerFunction(() => legendConfig);
       expressions.registerFunction(() => yAxisConfig);
@@ -57,6 +57,7 @@ export class XyVisualization {
         getXyChartRenderer({
           formatFactory,
           chartsThemeService: charts.theme,
+          chartsActiveCursorService: charts.activeCursor,
           paletteService: palettes,
           timeZone: getTimeZone(core.uiSettings),
         })

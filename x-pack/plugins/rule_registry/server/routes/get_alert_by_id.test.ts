@@ -13,6 +13,7 @@ import {
   CONSUMERS,
   ECS_VERSION,
   RULE_ID,
+  SPACE_IDS,
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
@@ -33,6 +34,7 @@ const getMockAlert = (): ParsedTechnicalFields => ({
   [ALERT_OWNER]: 'apm',
   [ALERT_STATUS]: 'open',
   [ALERT_RULE_RISK_SCORE]: 20,
+  [SPACE_IDS]: ['fake-space-id'],
   [ALERT_RULE_SEVERITY]: 'warning',
 });
 
