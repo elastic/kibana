@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MockedLogger, loggerMock } from '@kbn/logging/target/mocks';
 import { createAlertRoute } from './create';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
@@ -15,6 +16,7 @@ import { Alert } from '../../../common/alert';
 import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
 
 const rulesClient = rulesClientMock.create();
+let logger: MockedLogger;
 
 jest.mock('../../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -22,6 +24,7 @@ jest.mock('../../lib/license_api_access.ts', () => ({
 
 beforeEach(() => {
   jest.resetAllMocks();
+  logger = loggerMock.create();
 });
 
 describe('createAlertRoute', () => {
@@ -79,7 +82,7 @@ describe('createAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createAlertRoute(router, licenseState);
+    createAlertRoute(router, licenseState, logger);
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -97,6 +100,7 @@ describe('createAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({ body: createResult });
 
+    expect(logger.warn).not.toHaveBeenCalled();
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
     expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -146,7 +150,7 @@ describe('createAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createAlertRoute(router, licenseState);
+    createAlertRoute(router, licenseState, logger);
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -165,6 +169,9 @@ describe('createAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({ body: expectedResult });
 
+    expect(logger.warn).toHaveBeenCalledWith(
+      `POST /api/alerts/alert/custom-id: Usage of "id" has been deprecated and will be removed in 8.0.0`
+    );
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
     expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -210,7 +217,7 @@ describe('createAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createAlertRoute(router, licenseState);
+    createAlertRoute(router, licenseState, logger);
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -231,7 +238,7 @@ describe('createAlertRoute', () => {
       throw new Error('OMG');
     });
 
-    createAlertRoute(router, licenseState);
+    createAlertRoute(router, licenseState, logger);
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -248,7 +255,7 @@ describe('createAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createAlertRoute(router, licenseState);
+    createAlertRoute(router, licenseState, logger);
 
     const [, handler] = router.post.mock.calls[0];
 

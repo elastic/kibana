@@ -6,6 +6,7 @@
  */
 
 import { pick } from 'lodash';
+import { MockedLogger, loggerMock } from '@kbn/logging/target/mocks';
 import { createRuleRoute } from './create_rule';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
@@ -18,6 +19,7 @@ import { AsApiContract } from './lib';
 import { SanitizedAlert } from '../types';
 
 const rulesClient = rulesClientMock.create();
+let logger: MockedLogger;
 
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -25,6 +27,7 @@ jest.mock('../lib/license_api_access.ts', () => ({
 
 beforeEach(() => {
   jest.resetAllMocks();
+  logger = loggerMock.create();
 });
 
 describe('createRuleRoute', () => {
@@ -106,7 +109,7 @@ describe('createRuleRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createRuleRoute(router, licenseState);
+    createRuleRoute(router, licenseState, logger);
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -124,6 +127,7 @@ describe('createRuleRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({ body: createResult });
 
+    expect(logger.warn).not.toHaveBeenCalled();
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
     expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -166,7 +170,7 @@ describe('createRuleRoute', () => {
     });
   });
 
-  it('allows providing a custom id', async () => {
+  it('allows providing a custom id but logs deprecation warning', async () => {
     const expectedResult = {
       ...createResult,
       id: 'custom-id',
@@ -174,7 +178,7 @@ describe('createRuleRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createRuleRoute(router, licenseState);
+    createRuleRoute(router, licenseState, logger);
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -196,6 +200,9 @@ describe('createRuleRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({ body: expectedResult });
 
+    expect(logger.warn).toHaveBeenCalledWith(
+      `POST /api/alerting/rule/custom-id: Usage of "id" has been deprecated and will be removed in 8.0.0`
+    );
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
     expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -242,7 +249,7 @@ describe('createRuleRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createRuleRoute(router, licenseState);
+    createRuleRoute(router, licenseState, logger);
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -263,7 +270,7 @@ describe('createRuleRoute', () => {
       throw new Error('OMG');
     });
 
-    createRuleRoute(router, licenseState);
+    createRuleRoute(router, licenseState, logger);
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -280,7 +287,7 @@ describe('createRuleRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createRuleRoute(router, licenseState);
+    createRuleRoute(router, licenseState, logger);
 
     const [, handler] = router.post.mock.calls[0];
 
