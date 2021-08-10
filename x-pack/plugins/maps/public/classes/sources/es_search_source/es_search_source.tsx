@@ -312,12 +312,18 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         },
       },
     });
-    const entityIsNotEmptyFilter = esFilters.buildPhraseFilter(topHitsSplitField, '', indexPattern);
-    entityIsNotEmptyFilter.meta.negate = true;
-    searchSource.setField('filter', [
-      ...(searchSource.getField('filter') as Filter[]),
-      entityIsNotEmptyFilter,
-    ]);
+    if (topHitsSplitField.type === 'string') {
+      const entityIsNotEmptyFilter = esFilters.buildPhraseFilter(
+        topHitsSplitField,
+        '',
+        indexPattern
+      );
+      entityIsNotEmptyFilter.meta.negate = true;
+      searchSource.setField('filter', [
+        ...(searchSource.getField('filter') as Filter[]),
+        entityIsNotEmptyFilter,
+      ]);
+    }
 
     const resp = await this._runEsQuery({
       requestId: this.getId(),
