@@ -112,7 +112,7 @@ export function MlErrorCorrelations({ onClose }: Props) {
         name: (
           <>
             {i18n.translate(
-              'xpack.apm.correlations.errorCorrelations.correlationsTable.scoreLabel',
+              'xpack.apm.correlations.failingTransactions.correlationsTable.scoreLabel',
               {
                 defaultMessage: 'Score',
               }
@@ -129,7 +129,7 @@ export function MlErrorCorrelations({ onClose }: Props) {
         name: (
           <>
             {i18n.translate(
-              'xpack.apm.correlations.errorCorrelations.correlationsTable.pValueLabel',
+              'xpack.apm.correlations.failingTransactions.correlationsTable.pValueLabel',
               {
                 defaultMessage: 'P value',
               }
@@ -146,14 +146,14 @@ export function MlErrorCorrelations({ onClose }: Props) {
       {
         field: 'fieldName',
         name: i18n.translate(
-          'xpack.apm.correlations.errorCorrelations.correlationsTable.fieldNameLabel',
+          'xpack.apm.correlations.failingTransactions.correlationsTable.fieldNameLabel',
           { defaultMessage: 'Field name' }
         ),
       },
       {
         field: 'key',
         name: i18n.translate(
-          'xpack.apm.correlations.errorCorrelations.correlationsTable.fieldValueLabel',
+          'xpack.apm.correlations.failingTransactions.correlationsTable.fieldValueLabel',
           { defaultMessage: 'Field value' }
         ),
         render: (fieldValue: string) => String(fieldValue).slice(0, 50),
@@ -166,7 +166,7 @@ export function MlErrorCorrelations({ onClose }: Props) {
     if (isErrorMessage(error)) {
       notifications.toasts.addDanger({
         title: i18n.translate(
-          'xpack.apm.correlations.errorCorrelations.errorTitle',
+          'xpack.apm.correlations.failingTransactions.errorTitle',
           {
             defaultMessage: 'An error occurred fetching correlations',
           }
@@ -182,7 +182,7 @@ export function MlErrorCorrelations({ onClose }: Props) {
           {!isRunning && (
             <EuiButton size="s" onClick={startFetch}>
               <FormattedMessage
-                id="xpack.apm.correlations.errorCorrelations.refreshButtonTitle"
+                id="xpack.apm.correlations.failingTransactions.refreshButtonTitle"
                 defaultMessage="Refresh"
               />
             </EuiButton>
@@ -190,7 +190,7 @@ export function MlErrorCorrelations({ onClose }: Props) {
           {isRunning && (
             <EuiButton size="s" onClick={cancelFetch}>
               <FormattedMessage
-                id="xpack.apm.correlations.errorCorrelations.cancelButtonTitle"
+                id="xpack.apm.correlations.failingTransactions.cancelButtonTitle"
                 defaultMessage="Cancel"
               />
             </EuiButton>
@@ -198,11 +198,11 @@ export function MlErrorCorrelations({ onClose }: Props) {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem data-test-subj="apmCorrelationsLatencyCorrelationsProgressTitle">
+            <EuiFlexItem data-test-subj="apmCorrelationsFailingTransactionsCorrelationsProgressTitle">
               <EuiText size="xs" color="subdued">
                 <FormattedMessage
-                  data-test-subj="apmCorrelationsLatencyCorrelationsProgressTitle"
-                  id="xpack.apm.correlations.errorCorrelations.progressTitle"
+                  data-test-subj="apmCorrelationsFailingTransactionsCorrelationsProgressTitle"
+                  id="xpack.apm.correlations.failingTransactions.progressTitle"
                   defaultMessage="Progress: {progress}%"
                   values={{ progress: Math.round(progress * 100) }}
                 />
@@ -211,7 +211,7 @@ export function MlErrorCorrelations({ onClose }: Props) {
             <EuiFlexItem>
               <EuiProgress
                 aria-label={i18n.translate(
-                  'xpack.apm.correlations.errorCorrelations.progressAriaLabel',
+                  'xpack.apm.correlations.failingTransactions.progressAriaLabel',
                   { defaultMessage: 'Progress' }
                 )}
                 value={Math.round(progress * 100)}
@@ -240,7 +240,7 @@ export function MlErrorCorrelations({ onClose }: Props) {
           <EuiSpacer size="m" />
           <EuiCallOut
             title={i18n.translate(
-              'xpack.apm.correlations.errorCorrelations.ccsWarningCalloutTitle',
+              'xpack.apm.correlations.failingTransactions.ccsWarningCalloutTitle',
               {
                 defaultMessage: 'Cross-cluster search compatibility',
               }
@@ -249,7 +249,7 @@ export function MlErrorCorrelations({ onClose }: Props) {
           >
             <p>
               {i18n.translate(
-                'xpack.apm.correlations.errorCorrelations.ccsWarningCalloutBody',
+                'xpack.apm.correlations.failingTransactions.ccsWarningCalloutBody',
                 {
                   defaultMessage:
                     'Data for the correlation analysis could not be fully retrieved. This feature is supported only for 7.14 and later versions.',
@@ -265,7 +265,7 @@ export function MlErrorCorrelations({ onClose }: Props) {
         <EuiAccordion
           id="accordion1"
           buttonContent={i18n.translate(
-            'xpack.apm.correlations.errorCorrelations.logButtonContent',
+            'xpack.apm.correlations.failingTransactions.logButtonContent',
             {
               defaultMessage: 'Log',
             }

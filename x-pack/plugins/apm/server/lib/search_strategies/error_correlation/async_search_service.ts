@@ -6,13 +6,14 @@
  */
 
 import type { ElasticsearchClient } from 'src/core/server';
+import { chunk } from 'lodash';
 import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { asyncSearchServiceLogProvider } from '../correlations/async_search_service_log';
 import { asyncErrorCorrelationsSearchServiceStateProvider } from './async_search_service_state';
 import { fetchTransactionDurationFieldCandidates } from '../correlations/queries';
-import { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
-import { fetchErrorCorrelationPValues } from './queries/query_error_correlation';
+import type { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
+import { fetchFailedTransactionsCorrelationPValues } from './queries/query_error_correlation';
 import { ERROR_CORRELATION_THRESHOLD } from './constants';
 
 export const asyncErrorCorrelationSearchServiceProvider = (
@@ -43,33 +44,63 @@ export const asyncErrorCorrelationSearchServiceProvider = (
 
       addLogMessage(`Identified ${fieldCandidates.length} fieldCandidates.`);
 
-      state.setProgress({ loadedFieldCanditates: 1 });
+      state.setProgress({ loadedFieldCandidates: 1 });
 
-      for (let i = 0; i < fieldCandidates.length; i++) {
-        try {
-          const results = await fetchErrorCorrelationPValues(
-            esClient,
-            params,
-            fieldCandidates[i]
-          );
-
-          state.addValues(
-            results.filter(
-              (r) =>
-                r &&
-                typeof r.p_value === 'number' &&
-                r.p_value < ERROR_CORRELATION_THRESHOLD
-            )
-          );
-        } catch (e) {
-          state.setError(e);
+      let fieldCandidatesFetchedCount = 0;
+      if (params && fieldCandidates.length > 0) {
+        const batches = chunk(fieldCandidates, 10);
+        for (let i = 0; i < batches.length; i++) {
+          try {
+            const results = await Promise.allSettled(
+              batches[i].map((fieldName) =>
+                fetchFailedTransactionsCorrelationPValues(
+                  esClient,
+                  params!,
+                  fieldName
+                )
+              )
+            );
+            results.forEach((result, idx) => {
+              if (result.status === 'fulfilled') {
+                state.addValues(
+                  result.value.filter(
+                    (record) =>
+                      record &&
+                      typeof record.p_value === 'number' &&
+                      record.p_value < ERROR_CORRELATION_THRESHOLD
+                  )
+                );
+              } else {
+                // If one of the fields in the batch had an error
+                addLogMessage(
+                  `Error getting error correlation for field ${batches[i][idx]}: ${result.reason}.`
+                );
+              }
+            });
+          } catch (e) {
+            state.setError(e);
+          } finally {
+            fieldCandidatesFetchedCount += batches[i].length;
+            state.setProgress({
+              loadedErrorCorrelations:
+                fieldCandidatesFetchedCount / fieldCandidates.length,
+            });
+          }
         }
+
+        addLogMessage(
+          `Identified correlations for ${fieldCandidatesFetchedCount} fields out of ${fieldCandidates.length} candidates.`
+        );
       }
     } catch (e) {
       state.setError(e);
     }
 
-    state.setProgress({ loadedErrorCorrelations: 1 });
+    addLogMessage(
+      `Identified ${
+        state.getState().values.length
+      } significant correlations relating to failed transactions.`
+    );
 
     if (state.getState().error !== undefined && params?.index.includes(':')) {
       state.setCcsWarning(true);
