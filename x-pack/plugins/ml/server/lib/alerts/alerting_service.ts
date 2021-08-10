@@ -405,8 +405,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
           .filter((v) => v.doc_count > 0 && v[resultsLabel.aggGroupLabel].doc_count > 0)
           // Map response
           .map(formatter)
-      : // @ts-expect-error
-        [formatter(result as AggResultsResponse)]
+      : [formatter(result as AggResultsResponse)]
     ).filter(isDefined);
   };
 
@@ -448,8 +447,10 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
     }
 
     const lookBackTimeInterval: string =
+      // @ts-expect-error @elastic-elasticsearch missing blocked property in job
       params.lookbackInterval ?? resolveLookbackInterval(jobsResponse, datafeeds ?? []);
 
+    // @ts-expect-error @elastic-elasticsearch missing blocked property in job
     const topNBuckets: number = params.topNBuckets ?? getTopNBuckets(jobsResponse[0]);
 
     const requestBody = {
