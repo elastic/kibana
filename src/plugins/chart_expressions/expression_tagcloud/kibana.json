@@ -4,6 +4,6 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["expressions", "visualizations", "charts", "presentationUtil"],
+  "requiredPlugins": ["expressions", "visualizations", "charts", "presentationUtil", "fieldFormats"],
   "optionalPlugins": []
 }

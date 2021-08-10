@@ -6,153 +6,230 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { useResizeObserver } from '@elastic/eui';
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { css, CSSObject } from '@emotion/react';
-import { NodeDimensions, TagcloudRendererConfig, OriginString } from '../../common/types';
-import { isValidUrl } from '../../../presentation_util/public';
+import React, { useCallback, useState, useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { throttle } from 'lodash';
+import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
+import { Chart, Settings, Wordcloud, RenderChangeListener } from '@elastic/charts';
+import type { PaletteRegistry } from '../../../../charts/public';
+import type { IInterpreterRenderHandlers } from '../../../../expressions/public';
+import { getFormatService } from '../services';
+import { TagcloudRendererConfig } from '../../common/types';
 
-const tagcloudParentStyle = css`
-  height: 100%;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-`;
+import './tag_cloud.scss';
 
-const tagcloudAlignerStyle: CSSObject = {
-  backgroundSize: 'contain',
-  backgroundRepeat: 'no-repeat',
+const MAX_TAG_COUNT = 200;
+
+export type TagCloudChartProps = TagcloudRendererConfig & {
+  fireEvent: IInterpreterRenderHandlers['event'];
+  renderComplete: IInterpreterRenderHandlers['done'];
+  palettesRegistry: PaletteRegistry;
 };
 
-const tagcloudStyle: CSSObject = {
-  userSelect: 'none',
+const calculateWeight = (value: number, x1: number, y1: number, x2: number, y2: number) =>
+  ((value - x1) * (y2 - x2)) / (y1 - x1) + x2;
+
+const getColor = (
+  palettes: PaletteRegistry,
+  activePalette: string,
+  text: string,
+  values: string[],
+  syncColors: boolean
+) => {
+  return palettes?.get(activePalette).getCategoricalColor(
+    [
+      {
+        name: text,
+        rankAtDepth: values.length ? values.findIndex((name) => name === text) : 0,
+        totalSeriesAtDepth: values.length || 1,
+      },
+    ],
+    {
+      maxDepth: 1,
+      totalSeries: values.length || 1,
+      behindText: false,
+      syncColors,
+    }
+  );
 };
 
-interface TagcloudComponentProps extends TagcloudRendererConfig {
-  onLoaded: IInterpreterRenderHandlers['done'];
-  parentNode: HTMLElement;
-}
+const ORIENTATIONS = {
+  single: {
+    endAngle: 0,
+    angleCount: 360,
+  },
+  'right angled': {
+    endAngle: 90,
+    angleCount: 2,
+  },
+  multiple: {
+    endAngle: -90,
+    angleCount: 12,
+  },
+};
 
-interface ImageStyles {
-  width?: number | string;
-  height?: number | string;
-  clipPath?: string;
-}
+export const TagCloudChart = ({
+  visData,
+  visParams,
+  palettesRegistry,
+  fireEvent,
+  renderComplete,
+  syncColors,
+}: TagCloudChartProps) => {
+  const [warning, setWarning] = useState(false);
+  const { bucket, metric, scale, palette, showLabel, orientation } = visParams;
+  const bucketFormatter = bucket ? getFormatService().deserialize(bucket.format) : null;
 
-interface AlignerStyles {
-  backgroundImage?: string;
-}
+  const tagCloudData = useMemo(() => {
+    const tagColumn = bucket ? visData.columns[bucket.accessor].id : -1;
+    const metricColumn = visData.columns[metric.accessor]?.id;
 
-function TagcloudComponent({
-  onLoaded,
-  parentNode,
-  percent,
-  origin,
-  image,
-  emptyImage,
-}: TagcloudComponentProps) {
-  const [loaded, setLoaded] = useState(false);
-  const [dimensions, setDimensions] = useState<NodeDimensions>({
-    width: 1,
-    height: 1,
-  });
+    const metrics = visData.rows.map((row) => row[metricColumn]);
+    const values = bucket ? visData.rows.map((row) => row[tagColumn]) : [];
+    const maxValue = Math.max(...metrics);
+    const minValue = Math.min(...metrics);
 
-  const imgRef = useRef<HTMLImageElement>(null);
+    return visData.rows.map((row) => {
+      const tag = row[tagColumn] === undefined ? 'all' : row[tagColumn];
+      return {
+        text: (bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag) as string,
+        weight:
+          tag === 'all' || visData.rows.length <= 1
+            ? 1
+            : calculateWeight(row[metricColumn], minValue, maxValue, 0, 1) || 0,
+        color: getColor(palettesRegistry, palette.name, tag, values, syncColors) || 'rgba(0,0,0,0)',
+      };
+    });
+  }, [
+    bucket,
+    bucketFormatter,
+    metric.accessor,
+    palette.name,
+    palettesRegistry,
+    syncColors,
+    visData.columns,
+    visData.rows,
+  ]);
 
-  const parentNodeDimensions = useResizeObserver(parentNode);
+  const label = bucket
+    ? `${visData.columns[bucket.accessor].name} - ${visData.columns[metric.accessor].name}`
+    : '';
 
-  // modify the top-level container class
-  parentNode.className = 'tagcloud';
-  parentNode.setAttribute('style', tagcloudParentStyle.styles);
+  const onRenderChange = useCallback<RenderChangeListener>(
+    (isRendered) => {
+      if (isRendered) {
+        renderComplete();
+      }
+    },
+    [renderComplete]
+  );
 
-  // set up the overlay image
-  const updateImageView = useCallback(() => {
-    if (imgRef.current) {
-      setDimensions({
-        height: imgRef.current.naturalHeight,
-        width: imgRef.current.naturalWidth,
+  const updateChart = useMemo(
+    () =>
+      throttle(() => {
+        setWarning(false);
+      }, 300),
+    []
+  );
+
+  const handleWordClick = useCallback(
+    (d) => {
+      if (!bucket) {
+        return;
+      }
+      const termsBucket = visData.columns[bucket.accessor];
+      const clickedValue = d[0][0].text;
+
+      const rowIndex = visData.rows.findIndex((row) => {
+        const formattedValue = bucketFormatter
+          ? bucketFormatter.convert(row[termsBucket.id], 'text')
+          : row[termsBucket.id];
+        return formattedValue === clickedValue;
       });
 
-      setLoaded(true);
-      onLoaded();
-    }
-  }, [imgRef, onLoaded]);
+      if (rowIndex < 0) {
+        return;
+      }
 
-  useEffect(() => {
-    updateImageView();
-  }, [parentNodeDimensions, updateImageView]);
-
-  function getClipPath(percentParam: number, originParam: OriginString = 'bottom') {
-    const directions: Record<OriginString, number> = { bottom: 0, left: 1, top: 2, right: 3 };
-    const values: Array<number | string> = [0, 0, 0, 0];
-    values[directions[originParam]] = `${100 - percentParam * 100}%`;
-    return `inset(${values.join(' ')})`;
-  }
-
-  function getImageSizeStyle() {
-    const imgStyles: ImageStyles = {};
-
-    const imgDimensions = {
-      height: dimensions.height,
-      width: dimensions.width,
-      ratio: dimensions.height / dimensions.width,
-    };
-
-    const domNodeDimensions = {
-      width: parentNode.clientWidth,
-      height: parentNode.clientHeight,
-      ratio: parentNode.clientHeight / parentNode.clientWidth,
-    };
-
-    if (imgDimensions.ratio > domNodeDimensions.ratio) {
-      imgStyles.height = domNodeDimensions.height;
-      imgStyles.width = 'initial';
-    } else {
-      imgStyles.width = domNodeDimensions.width;
-      imgStyles.height = 'initial';
-    }
-
-    return imgStyles;
-  }
-
-  const additionaAlignerStyles: AlignerStyles = {};
-
-  if (isValidUrl(emptyImage ?? '')) {
-    // only use empty image if one is provided
-    additionaAlignerStyles.backgroundImage = `url(${emptyImage})`;
-  }
-
-  let additionalImgStyles: ImageStyles = {};
-  if (imgRef.current && loaded) additionalImgStyles = getImageSizeStyle();
-
-  additionalImgStyles.clipPath = getClipPath(percent, origin);
-  if (imgRef.current && loaded) {
-    imgRef.current.style.setProperty('-webkit-clip-path', getClipPath(percent, origin));
-  }
+      fireEvent({
+        name: 'filterBucket',
+        data: {
+          data: [
+            {
+              table: visData,
+              column: bucket.accessor,
+              row: rowIndex,
+            },
+          ],
+        },
+      });
+    },
+    [bucket, bucketFormatter, fireEvent, visData]
+  );
 
   return (
-    <div
-      className="tagcloudAligner"
-      css={css({
-        ...tagcloudAlignerStyle,
-        ...additionaAlignerStyles,
-      })}
-    >
-      <img
-        ref={imgRef}
-        onLoad={updateImageView}
-        css={css({ ...tagcloudStyle, ...additionalImgStyles })}
-        src={image}
-        alt=""
-        role="presentation"
-      />
-    </div>
+    <EuiResizeObserver onResize={updateChart}>
+      {(resizeRef) => (
+        <div className="tgcChart__wrapper" ref={resizeRef} data-test-subj="tagCloudVisualization">
+          <Chart size="100%">
+            <Settings onElementClick={handleWordClick} onRenderChange={onRenderChange} />
+            <Wordcloud
+              id="tagCloud"
+              startAngle={0}
+              endAngle={ORIENTATIONS[orientation].endAngle}
+              angleCount={ORIENTATIONS[orientation].angleCount}
+              padding={5}
+              fontWeight={400}
+              fontFamily="Inter UI, sans-serif"
+              fontStyle="normal"
+              minFontSize={visParams.minFontSize}
+              maxFontSize={visParams.maxFontSize}
+              spiral="archimedean"
+              data={tagCloudData}
+              weightFn={scale === 'square root' ? 'squareRoot' : scale}
+              outOfRoomCallback={() => {
+                setWarning(true);
+              }}
+            />
+          </Chart>
+          {label && showLabel && (
+            <div className="tgcChart__label" data-test-subj="tagCloudLabel">
+              {label}
+            </div>
+          )}
+          {warning && (
+            <div className="tgcChart__warning">
+              <EuiIconTip
+                type="alert"
+                color="warning"
+                content={
+                  <FormattedMessage
+                    id="visTypeTagCloud.feedbackMessage.tooSmallContainerDescription"
+                    defaultMessage="The container is too small to display the entire cloud. Tags might be cropped or omitted."
+                  />
+                }
+              />
+            </div>
+          )}
+          {tagCloudData.length > MAX_TAG_COUNT && (
+            <div className="tgcChart__warning">
+              <EuiIconTip
+                type="alert"
+                color="warning"
+                content={
+                  <FormattedMessage
+                    id="visTypeTagCloud.feedbackMessage.truncatedTagsDescription"
+                    defaultMessage="The number of tags has been truncated to avoid long draw times."
+                  />
+                }
+              />
+            </div>
+          )}
+        </div>
+      )}
+    </EuiResizeObserver>
   );
-}
+};
 
-// default export required for React.Lazy
 // eslint-disable-next-line import/no-default-export
-export { TagcloudComponent as default };
+export { TagCloudChart as default };

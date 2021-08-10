@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { tagcloudRenderer } from './tagcloud_renderer';
-
-export const renderers = [tagcloudRenderer];
-
-export { tagcloudRenderer };
+export { tagcloudRenderer } from './tagcloud_renderer';

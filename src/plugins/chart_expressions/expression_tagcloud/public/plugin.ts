@@ -8,15 +8,25 @@
 
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { ExpressionsStart, ExpressionsSetup } from '../../../expressions/public';
+import { ChartsPluginSetup } from '../../../charts/public';
 import { tagcloudRenderer } from './expression_renderers';
 import { tagcloudFunction } from '../common/expression_functions';
+import { FieldFormatsStart } from '../../../field_formats/public';
+import { setFormatService } from './services';
 
 interface SetupDeps {
   expressions: ExpressionsSetup;
+  charts: ChartsPluginSetup;
+}
+
+/** @internal  */
+export interface ExpressioTagcloudRendererDependencies {
+  palettes: ChartsPluginSetup['palettes'];
 }
 
 interface StartDeps {
   expression: ExpressionsStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 export type ExpressionTagcloudPluginSetup = void;
@@ -25,12 +35,17 @@ export type ExpressionTagcloudPluginStart = void;
 export class ExpressionTagcloudPlugin
   implements
     Plugin<ExpressionTagcloudPluginSetup, ExpressionTagcloudPluginStart, SetupDeps, StartDeps> {
-  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionTagcloudPluginSetup {
+  public setup(core: CoreSetup, { expressions, charts }: SetupDeps): ExpressionTagcloudPluginSetup {
+    const rendererDependencies: ExpressioTagcloudRendererDependencies = {
+      palettes: charts.palettes,
+    };
     expressions.registerFunction(tagcloudFunction);
-    expressions.registerRenderer(tagcloudRenderer);
+    expressions.registerRenderer(tagcloudRenderer(rendererDependencies));
   }
 
-  public start(core: CoreStart): ExpressionTagcloudPluginStart {}
+  public start(core: CoreStart, { fieldFormats }: StartDeps): ExpressionTagcloudPluginStart {
+    setFormatService(fieldFormats);
+  }
 
   public stop() {}
 }

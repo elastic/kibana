@@ -42,7 +42,7 @@ export interface TagCloudVisParams extends TagCloudCommonParams {
   bucket?: Dimension;
 }
 
-export interface TagCloudVisRenderValue {
+export interface TagcloudRendererConfig {
   visType: typeof EXPRESSION_NAME;
   visData: Datatable;
   visParams: TagCloudVisParams;
@@ -57,5 +57,5 @@ export type ExpressionTagcloudFunction = () => ExpressionFunctionDefinition<
   'tagcloud',
   Datatable,
   Arguments,
-  ExpressionValueRender<TagCloudVisRenderValue>
+  ExpressionValueRender<TagcloudRendererConfig>
 >;
