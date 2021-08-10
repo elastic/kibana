@@ -63,6 +63,11 @@ export async function runDockerGenerator(
   const dockerTargetFilename = config.resolveFromTarget(
     `kibana${imageFlavor}-${version}-docker-image${imageArchitecture}.tar.gz`
   );
+  const dependencies = [
+    artifactTarball,
+    ...(flags.cloud ? [metricbeatTarball, filebeatTarball] : []),
+  ];
+
   const scope: TemplateContext = {
     artifactPrefix,
     artifactTarball,
@@ -95,29 +100,8 @@ export async function runDockerGenerator(
     return;
   }
 
-  // Verify if we have the needed kibana target in order
-  // to build the kibana docker image.
-  // Also create the docker build target folder
-  // and  delete the current linked target into the
-  // kibana docker build folder if we have one.
+  // Create the docker build target folder
   await mkdirp(dockerBuildDir);
-  const dependencies = [
-    artifactTarball,
-    ...(flags.cloud ? [metricbeatTarball, filebeatTarball] : []),
-  ];
-  for (const dep of dependencies) {
-    try {
-      await accessAsync(resolve(artifactsDir, dep));
-      await unlinkAsync(resolve(dockerBuildDir, dep));
-    } catch (e) {
-      if (e && e.code === 'ENOENT' && e.syscall === 'access') {
-        throw new Error(
-          `${resolve(artifactsDir, dep)} is needed in order to build the docker image.`
-        );
-      }
-    }
-    await linkAsync(resolve(artifactsDir, dep), resolve(dockerBuildDir, dep));
-  }
 
   // Write all the needed docker config files
   // into kibana-docker folder
@@ -148,6 +132,21 @@ export async function runDockerGenerator(
 
   // Only build images on native targets
   if (flags.image) {
+    // Link dependencies
+    for (const dep of dependencies) {
+      try {
+        await accessAsync(resolve(artifactsDir, dep));
+        await unlinkAsync(resolve(dockerBuildDir, dep));
+      } catch (e) {
+        if (e && e.code === 'ENOENT' && e.syscall === 'access') {
+          throw new Error(
+            `${resolve(artifactsDir, dep)} is needed in order to build the docker image.`
+          );
+        }
+      }
+      await linkAsync(resolve(artifactsDir, dep), resolve(dockerBuildDir, dep));
+    }
+
     await exec(log, `./build_docker.sh`, [], {
       cwd: dockerBuildDir,
       level: 'info',
