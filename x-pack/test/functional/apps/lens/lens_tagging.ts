@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const find = getService('find');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects([
     'common',
@@ -31,10 +32,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens tagging', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
     });
 
     it('adds a new tag to a Lens visualization', async () => {
