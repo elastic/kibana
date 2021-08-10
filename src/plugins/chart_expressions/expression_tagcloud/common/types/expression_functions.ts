@@ -5,38 +5,57 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ExpressionFunctionDefinition, ExpressionValueRender } from 'src/plugins/expressions';
+import { PaletteOutput } from '../../../../charts/common';
+import {
+  Datatable,
+  ExpressionFunctionDefinition,
+  ExpressionValueRender,
+  SerializedFieldFormat,
+} from '../../../../expressions';
+import { ExpressionValueVisDimension } from '../../../../visualizations/common';
+import { EXPRESSION_NAME } from '../constants';
 
-export enum Origin {
-  TOP = 'top',
-  LEFT = 'left',
-  BOTTOM = 'bottom',
-  RIGHT = 'right',
+interface Dimension {
+  accessor: number;
+  format: {
+    id?: string;
+    params?: SerializedFieldFormat<object>;
+  };
 }
 
-interface Arguments {
-  image: string | null;
-  emptyImage: string | null;
-  origin: Origin;
+interface TagCloudCommonParams {
+  scale: 'linear' | 'log' | 'square root';
+  orientation: 'single' | 'right angled' | 'multiple';
+  minFontSize: number;
+  maxFontSize: number;
+  showLabel: boolean;
 }
 
-export interface Output {
-  image: string;
-  emptyImage: string;
-  origin: Origin;
-  percent: number;
+export interface TagCloudVisConfig extends TagCloudCommonParams {
+  metric: ExpressionValueVisDimension;
+  bucket?: ExpressionValueVisDimension;
+}
+
+export interface TagCloudVisParams extends TagCloudCommonParams {
+  palette: PaletteOutput;
+  metric: Dimension;
+  bucket?: Dimension;
+}
+
+export interface TagCloudVisRenderValue {
+  visType: typeof EXPRESSION_NAME;
+  visData: Datatable;
+  visParams: TagCloudVisParams;
+  syncColors: boolean;
+}
+
+interface Arguments extends TagCloudVisConfig {
+  palette: string;
 }
 
 export type ExpressionTagcloudFunction = () => ExpressionFunctionDefinition<
   'tagcloud',
-  number,
+  Datatable,
   Arguments,
-  Promise<ExpressionValueRender<Output>>
+  ExpressionValueRender<TagCloudVisRenderValue>
 >;
-
-export enum Position {
-  TOP = 'top',
-  BOTTOM = 'bottom',
-  LEFT = 'left',
-  RIGHT = 'right',
-}

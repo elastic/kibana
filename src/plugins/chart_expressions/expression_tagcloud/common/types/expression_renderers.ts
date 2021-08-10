@@ -6,16 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type OriginString = 'bottom' | 'left' | 'top' | 'right';
+import { ChartsPluginSetup } from '../../../../charts/public';
 
-export interface TagcloudRendererConfig {
-  percent: number;
-  origin?: OriginString;
-  image: string;
-  emptyImage?: string;
-}
-
-export interface NodeDimensions {
-  width: number;
-  height: number;
+export interface TagCloudTypeProps {
+  palettes: ChartsPluginSetup['palettes'];
 }

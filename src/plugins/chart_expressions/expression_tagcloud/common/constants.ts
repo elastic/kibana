@@ -8,3 +8,5 @@
 
 export const PLUGIN_ID = 'expressionTagcloud';
 export const PLUGIN_NAME = 'expressionTagcloud';
+
+export const EXPRESSION_NAME = 'tagcloud';
