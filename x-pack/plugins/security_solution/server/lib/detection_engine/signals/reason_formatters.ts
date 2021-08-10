@@ -29,7 +29,7 @@ const buildCommonReasonMessage = ({
   const isFieldEmpty = (field: string | string[] | undefined | null) =>
     !field || !field.length || (field.length === 1 && field[0] === '-');
 
-  return i18n.translate(`xpack.securitySolution.detectionEngine.signals.alertReasonDescription`, {
+  return i18n.translate('xpack.securitySolution.detectionEngine.signals.alertReasonDescription', {
     defaultMessage:
       'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and risk score of {alertRiskScore} {userName, select, null {} other {by {userName} } } {hostName, select, null {} other {on {hostName} } }',
     values: {
