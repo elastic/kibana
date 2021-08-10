@@ -29,14 +29,11 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
 
       if (request.query?.agentId) {
         const agentService = osqueryContext.service.getAgentService();
+        const agentPolicyService = osqueryContext.service.getAgentPolicyService();
         const agent = await agentService?.getAgent(esClient, request.query.agentId);
-        // const agentPolicyService = osqueryContext.service.getAgentPolicyService();
-        // const agentPolicy = await agentPolicyService?.getFullAgentPolicy(
-        //   soClient,
-        //   request.query?.agentPolicyId
-        // );
+        const agentPolicy = await agentPolicyService?.getFullAgentPolicy(soClient, agent.policy_id);
 
-        return response.ok({ body: agent });
+        return response.ok({ body: { agent, agentPolicy } });
       }
 
       return response.ok({ body: packageInfo });

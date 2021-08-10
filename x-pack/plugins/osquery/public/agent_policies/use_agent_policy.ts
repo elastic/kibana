@@ -24,7 +24,7 @@ export const useAgentPolicy = ({ policyId, skip }: UseAgentPolicy) => {
     ['agentPolicy', { policyId }],
     () => http.get(`/internal/osquery/fleet_wrapper/agent_policies/${policyId}`),
     {
-      enabled: !skip,
+      enabled: !!(policyId && !skip),
       keepPreviousData: true,
       select: (response) => response.item,
       onSuccess: () => setErrorToast(),

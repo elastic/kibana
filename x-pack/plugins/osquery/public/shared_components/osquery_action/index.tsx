@@ -5,83 +5,94 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary, EuiLoadingContent } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import { find } from 'lodash';
+import { EuiErrorBoundary, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
+import React, { useMemo, useEffect, useState } from 'react';
 import { QueryClientProvider } from 'react-query';
+import { useAgentDetails } from '../../agents/use_agent_details';
+import { useAgentPolicy } from '../../agent_policies';
+import { useOsqueryIntegrationStatus } from '../../common/hooks';
 import { KibanaContextProvider, useKibana } from '../../common/lib/kibana';
 
 import { LiveQueryForm } from '../../live_queries/form';
 import { queryClient } from '../../query_client';
 
 interface OsqueryActionProps {
-  agentId?: string | undefined;
+  metadata?: Record<string, any> | undefined;
 }
 
-const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ agentId }) => {
-  
-  const { http } = useKibana().services;
+const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
+  const permissions = useKibana().services.application.capabilities.osquery;
 
-  useEffect(() => {
+  const agentId = metadata?.info?.agent?.id ?? null;
+  const { data: agentData, isFetched: agentFetched } = useAgentDetails({ agentId });
+  const { data: agentPolicyData, isFetched: policyFetched } = useAgentPolicy({
+    policyId: agentData?.item?.policy_id,
+    skip: !agentData,
+  });
+  console.error('agentId', agentId, agentData, agentPolicyData);
 
-    // if (hostId) {
-    //   const findAgent = async () => {
-    //     const searchSource = await search.searchSource.create();
-    //     const indexPattern = await indexPatterns.find('.fleet-agents');
+  const osqueryAvailable = useMemo(() => {
+    const osqueryPackageInstalled = find(agentPolicyData?.package_policies, [
+      'package.name',
+      'osquery_manager',
+    ]);
+    return osqueryPackageInstalled?.enabled;
+  }, [agentPolicyData?.package_policies]);
 
-    //     searchSource.setField('index', indexPattern[0]);
-    //     searchSource.setField('filter', [
-    //       {
-    //         meta: {
-    //           alias: null,
-    //           disabled: false,
-    //           negate: false,
-    //           key: 'local_metadata.host.id',
-    //           value: hostId,
-    //         },
-    //         query: {
-    //           match_phrase: {
-    //             'local_metadata.host.id': hostId,
-    //           },
-    //         },
-    //       },
-    //       {
-    //         meta: {
-    //           alias: null,
-    //           disabled: false,
-    //           negate: false,
-    //           key: 'active',
-    //           value: 'true',
-    //         },
-    //         query: {
-    //           match_phrase: {
-    //             active: 'true',
-    //           },
-    //         },
-    //       },
-    //     ]);
-
-    //     const response = await searchSource.fetch$().toPromise();
-
-    //     console.error('response', response);
-
-    //     if (response.rawResponse.hits.hits.length && response.rawResponse.hits.hits[0]._id) {
-    //       setAgentId(response.rawResponse.hits.hits[0]._id);
-    //     }
-    //   };
-
-    //   findAgent();
-    // }
-  }, []);
-
-  console.error('agentId', agentId);
-
-  if (!agentId) {
+  if (!agentFetched || !policyFetched) {
     return <EuiLoadingContent lines={10} />;
   }
 
+  if (!osqueryAvailable) {
+    return (
+      <EuiEmptyPrompt
+        iconType="alert"
+        iconColor="danger"
+        title={<h2>Error Osquery not installed</h2>}
+        body={
+          <p>Osquery is not installed on this agent. Please contact your Kibana administrator.</p>
+        }
+      />
+    );
+  }
+
+  if (agentData?.item?.status !== 'online') {
+    console.error('active,', agentData?.item?.status);
+    return (
+      <EuiEmptyPrompt
+        iconType="alert"
+        iconColor="danger"
+        title={<h2>Error agent is inactive</h2>}
+        body={
+          <p>
+            Agent has be `active` for running Osquery queries. Please contact your Kibana
+            administrator.
+          </p>
+        }
+      />
+    );
+  }
+
+  if (osqueryAvailable && (permissions.runSavedQueries || !permissions.writeLiveQueries)) {
+    return (
+      // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+      <LiveQueryForm defaultValue={{ agentSelection: { agents: [agentId] } }} agentId={agentId} />
+    );
+  }
+
   return (
-    // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-    <LiveQueryForm defaultValue={{ agentSelection: { agents: [agentId] } }} agentId={agentId} />
+    <EuiEmptyPrompt
+      iconType="alert"
+      iconColor="danger"
+      title={<h2>Error missing permissions</h2>}
+      body={
+        <p>
+          You are missing a Kibana privilege to run osquery queries. Please contact your Kibana
+          administrator.
+        </p>
+      }
+    />
   );
 };
 

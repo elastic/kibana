@@ -13,9 +13,10 @@ import { useErrorToast } from './use_error_toast';
 
 interface Props {
   agentId?: string;
+  skip?: boolean;
 }
 
-export const useOsqueryIntegrationStatus = ({ agentId }: Props) => {
+export const useOsqueryIntegrationStatus = ({ agentId, skip }: Props) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
@@ -23,6 +24,7 @@ export const useOsqueryIntegrationStatus = ({ agentId }: Props) => {
     'integration',
     () => http.get('/internal/osquery/status', agentId ? { query: { agentId } } : undefined),
     {
+      skip,
       onError: (error: Error) =>
         setErrorToast(error, {
           title: i18n.translate('xpack.osquery.osquery_integration.fetchError', {

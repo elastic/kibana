@@ -22,7 +22,7 @@ const TabComponent = (props: TabProps) => {
   const inventoryModel = findInventoryModel(nodeType);
   const { sourceId } = useContext(Source.Context);
   const { currentTimeRange } = useWaffleTimeContext();
-  const { metadata } = useMetadata(
+  const { loading, metadata } = useMetadata(
     nodeId,
     nodeType,
     inventoryModel.requiredMetrics,
@@ -32,21 +32,16 @@ const TabComponent = (props: TabProps) => {
   const {
     services: { osquery },
   } = useKibanaContextForPlugin();
-
   const OsqueryAction = osquery?.OsqueryAction;
   console.error('metadata', metadata);
 
-  if (!OsqueryAction || !metadata?.info?.agent?.id) {
-    return (
-      <TabContent>
-        <EuiLoadingContent lines={10} />
-      </TabContent>
-    );
-  }
-
   return (
     <TabContent>
-      <OsqueryAction agentId={metadata?.info?.agent?.id} />
+      {!OsqueryAction || loading ? (
+        <EuiLoadingContent lines={10} />
+      ) : (
+        <OsqueryAction metadata={metadata} />
+      )}
     </TabContent>
   );
 };
