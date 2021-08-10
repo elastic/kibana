@@ -38,7 +38,6 @@ const theme = ({
   eui: { euiColorDanger, euiColorWarning },
 } as unknown) as EuiTheme;
 const alert: Alert = {
-  [SPACE_IDS]: ['space-id'],
   [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
   [ALERT_EVALUATION_VALUE]: [2057657.39],
   'service.name': ['frontend-rum'],
@@ -139,7 +138,7 @@ describe('getAlertAnnotations', () => {
             setSelectedAlertId,
             theme,
           })![0].props.dataValues[0].details
-        ).toEqual(alert['rule.name']![0]);
+        ).toEqual(alert[ALERT_RULE_NAME]![0]);
       });
     });
 
