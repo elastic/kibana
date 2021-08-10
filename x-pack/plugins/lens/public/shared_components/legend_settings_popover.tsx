@@ -248,10 +248,16 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
         display="columnCompressed"
       >
         <TooltipWrapper
-          tooltipContent={i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
-            defaultMessage: 'Requires legend to be shown',
-          })}
-          condition={mode === 'hide'}
+          tooltipContent={
+            mode === 'hide'
+              ? i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
+                  defaultMessage: 'Requires legend to be shown',
+                })
+              : i18n.translate('xpack.lens.shared.legendIsTruncated', {
+                  defaultMessage: 'Requires legend to be truncated',
+                })
+          }
+          condition={mode === 'hide' || !truncate}
           position="top"
           delay="regular"
           display="block"
