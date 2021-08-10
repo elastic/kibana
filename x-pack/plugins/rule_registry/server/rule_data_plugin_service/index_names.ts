@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Dataset } from './options';
+import { Dataset } from './index_options';
 
 const joinWithDash = (...names: string[]): string => names.filter(Boolean).join('-');
 

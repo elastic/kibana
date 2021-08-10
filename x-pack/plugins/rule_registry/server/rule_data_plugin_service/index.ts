@@ -19,11 +19,12 @@ import {
 import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
 import { defaultLifecyclePolicy } from '../../common/assets/lifecycle_policies/default_lifecycle_policy';
 import { RuleDataClient } from '../rule_data_client';
-import { RuleDataWriteDisabledError } from './errors';
 import { incrementIndexName } from './utils';
-import { IndexOptions } from './new/options';
-import { IndexNames } from './new/index_names';
+import { IndexOptions } from './index_options';
+import { IndexNames } from './index_names';
 
+const COMMON_RESOURCES = 'common resources shared between all indices';
+const INDEX_RESOURCES = 'index resources shared between namespaces';
 const BOOTSTRAP_TIMEOUT = 60000;
 
 export interface RuleDataPluginServiceConstructorOptions {
@@ -33,94 +34,205 @@ export interface RuleDataPluginServiceConstructorOptions {
   index: string;
 }
 
-function createSignal() {
-  let resolver: () => void;
-
-  let ready: boolean = false;
-
-  const promise = new Promise<void>((resolve) => {
-    resolver = resolve;
-  });
-
-  function wait(): Promise<void> {
-    return promise.then(() => {
-      ready = true;
-    });
-  }
-
-  function complete() {
-    resolver();
-  }
-
-  return { wait, complete, isReady: () => ready };
-}
-
 export class RuleDataPluginService {
-  private signal = createSignal();
   private bootstrapResourcesSharedBetweenAllIndices: () => Promise<void>;
 
   constructor(private readonly options: RuleDataPluginServiceConstructorOptions) {
-    this.bootstrapResourcesSharedBetweenAllIndices = this.createBootstrapper(
-      'common resources shared between all indices',
-      () => this.installResourcesSharedBetweenAllIndices()
+    this.bootstrapResourcesSharedBetweenAllIndices = this.createBootstrapper(COMMON_RESOURCES, () =>
+      this.installResourcesSharedBetweenAllIndices()
     );
   }
 
-  private assertWriteEnabled() {
-    if (!this.isWriteEnabled()) {
-      throw new RuleDataWriteDisabledError();
-    }
+  /** @deprecated */
+  public isWriteEnabled(): boolean {
+    return this.options.isWriteEnabled;
   }
 
-  private async getClusterClient() {
-    return await this.options.getClusterClient();
+  /** @deprecated */
+  public getFullAssetName(assetName: string = '') {
+    return IndexNames.joinWithDash(this.options.index, assetName);
   }
 
-  private async init() {
+  /** @deprecated */
+  public getRuleDataClient(
+    feature: ValidFeatureId,
+    alias: string,
+    initialize: () => Promise<void>
+  ) {
+    return new RuleDataClient({
+      alias,
+      feature,
+      getClusterClient: () => this.getClusterClient(),
+      isWriteEnabled: this.isWriteEnabled(),
+      ready: initialize,
+    });
+  }
+
+  public initializeService(): void {
+    this.bootstrapResourcesSharedBetweenAllIndices().catch((e) => {
+      this.options.logger.error(e);
+    });
+  }
+
+  public initializeIndex(indexOptions: IndexOptions): RuleDataClient {
+    const { feature, registrationContext, dataset } = indexOptions;
+
+    const indexNames = new IndexNames({
+      indexPrefix: this.options.index,
+      registrationContext,
+      dataset,
+    });
+
+    const bootstrapResources = this.createBootstrapper(INDEX_RESOURCES, async () => {
+      await this.bootstrapResourcesSharedBetweenAllIndices();
+      return await this.installResourcesSharedBetweenIndexNamespaces(indexOptions, indexNames);
+    });
+
+    // Start bootstrapping eagerly
+    const bootstrapPromise = bootstrapResources();
+
+    return this.getRuleDataClient(feature, indexNames.indexBaseName, () => bootstrapPromise);
+  }
+
+  private createBootstrapper<T>(
+    resources: string,
+    installResources: () => Promise<T>
+  ): () => Promise<T> {
+    return once(async () => {
+      try {
+        return await Promise.race([
+          installResources(),
+          new Promise<T>((resolve, reject) => {
+            setTimeout(() => {
+              const msg = `Timeout: it took more than ${BOOTSTRAP_TIMEOUT}ms`;
+              reject(new Error(msg));
+            }, BOOTSTRAP_TIMEOUT);
+          }),
+        ]);
+      } catch (e) {
+        this.options.logger.error(e);
+
+        const reason = e?.message || 'Unknown reason';
+        throw new Error(`Failure installing ${resources}. ${reason}`);
+      }
+    });
+  }
+
+  private async installResourcesSharedBetweenAllIndices(): Promise<void> {
+    const { logger } = this.options;
+
     if (!this.isWriteEnabled()) {
-      this.options.logger.info('Write is disabled, not installing assets');
-      this.signal.complete();
+      logger.info(`Write is disabled; not installing ${COMMON_RESOURCES}`);
       return;
     }
 
-    this.options.logger.info(`Installing assets in namespace ${this.getFullAssetName()}`);
+    logger.info(`Installing ${COMMON_RESOURCES}`);
 
-    await this._createOrUpdateLifecyclePolicy({
+    await this.createOrUpdateLifecyclePolicy({
       policy: this.getFullAssetName(DEFAULT_ILM_POLICY_ID),
       body: defaultLifecyclePolicy,
     });
 
-    await this._createOrUpdateComponentTemplate({
+    await this.createOrUpdateComponentTemplate({
       name: this.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
       body: technicalComponentTemplate,
     });
 
-    await this._createOrUpdateComponentTemplate({
+    await this.createOrUpdateComponentTemplate({
       name: this.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
       body: ecsComponentTemplate,
     });
 
-    this.options.logger.info(`Installed all assets`);
-
-    this.signal.complete();
+    logger.info(`Installed ${COMMON_RESOURCES}`);
   }
 
-  private async _createOrUpdateComponentTemplate(
-    template: estypes.ClusterPutComponentTemplateRequest
-  ) {
-    this.assertWriteEnabled();
+  private async installResourcesSharedBetweenIndexNamespaces(
+    indexOptions: IndexOptions,
+    indexNames: IndexNames
+  ): Promise<void> {
+    const { logger } = this.options;
+    const { componentTemplateRefs, componentTemplates, indexTemplate, ilmPolicy } = indexOptions;
+
+    if (!this.isWriteEnabled()) {
+      logger.info(`Write is disabled; not installing ${INDEX_RESOURCES}`);
+      return;
+    }
+
+    logger.info(`Installing ${INDEX_RESOURCES}`);
+
+    if (ilmPolicy != null) {
+      await this.createOrUpdateLifecyclePolicy({
+        policy: indexNames.ilmPolicyName,
+        body: { policy: ilmPolicy },
+      });
+    }
+
+    await Promise.all(
+      componentTemplates.map(async (ct) => {
+        await this.createOrUpdateComponentTemplate({
+          name: ct.name,
+          body: {
+            // TODO: difference?
+            // template: {
+            //   settings: ct.settings,
+            //   mappings: ct.mappings,
+            //   version: ct.version,
+            //   _meta: ct._meta,
+            // },
+            template: { settings: {} },
+            settings: ct.settings,
+            mappings: ct.mappings,
+            version: ct.version,
+            _meta: ct._meta,
+          },
+        });
+      })
+    );
+
+    const ownComponents = componentTemplates.map((ct) => ct.name);
+    const externalComponents = componentTemplateRefs;
+    const technicalComponents = [indexNames.getPrefixedName(TECHNICAL_COMPONENT_TEMPLATE_NAME)];
+
+    await this.createOrUpdateIndexTemplate({
+      name: indexNames.getIndexTemplateName(''), // TODO: should be namespaced,
+      body: {
+        index_patterns: [indexNames.indexBasePattern], // TODO: should be namespaced
+        composed_of: [...externalComponents, ...ownComponents, ...technicalComponents], // order matters
+        version: indexTemplate.version,
+        _meta: indexTemplate._meta,
+      },
+    });
+
+    await this.updateIndexMappingsMatchingPattern(indexNames.indexBasePattern);
+
+    logger.info(`Installed ${INDEX_RESOURCES}`);
+  }
+
+  /** @deprecated */
+  private async createOrUpdateLifecyclePolicy(policy: estypes.IlmPutLifecycleRequest) {
+    this.options.logger.debug(`Installing lifecycle policy ${policy.policy}`);
 
     const clusterClient = await this.getClusterClient();
+    return clusterClient.ilm.putLifecycle(policy);
+  }
+
+  /** @deprecated */
+  private async createOrUpdateComponentTemplate(
+    template: estypes.ClusterPutComponentTemplateRequest
+  ) {
     this.options.logger.debug(`Installing component template ${template.name}`);
+
+    const clusterClient = await this.getClusterClient();
     return clusterClient.cluster.putComponentTemplate(template);
   }
 
-  private async _createOrUpdateIndexTemplate(template: estypes.IndicesPutIndexTemplateRequest) {
-    this.assertWriteEnabled();
+  /** @deprecated */
+  private async createOrUpdateIndexTemplate(template: estypes.IndicesPutIndexTemplateRequest) {
+    this.options.logger.debug(`Installing index template ${template.name}`);
 
     const clusterClient = await this.getClusterClient();
-    this.options.logger.debug(`Installing index template ${template.name}`);
     const { body: simulateResponse } = await clusterClient.indices.simulateTemplate(template);
+
     const mappings: estypes.MappingTypeMapping = simulateResponse.template.mappings;
 
     if (isEmpty(mappings)) {
@@ -128,17 +240,32 @@ export class RuleDataPluginService {
         'No mappings would be generated for this index, possibly due to failed/misconfigured bootstrapping'
       );
     }
+
     return clusterClient.indices.putIndexTemplate(template);
   }
 
-  private async _createOrUpdateLifecyclePolicy(policy: estypes.IlmPutLifecycleRequest) {
-    this.assertWriteEnabled();
+  /** @deprecated */
+  private async updateIndexMappingsMatchingPattern(pattern: string) {
     const clusterClient = await this.getClusterClient();
+    const { body: aliasesResponse } = await clusterClient.indices.getAlias({ index: pattern });
 
-    this.options.logger.debug(`Installing lifecycle policy ${policy.policy}`);
-    return clusterClient.ilm.putLifecycle(policy);
+    const writeIndicesAndAliases: Array<{ index: string; alias: string }> = [];
+    Object.entries(aliasesResponse).forEach(([index, aliases]) => {
+      Object.entries(aliases.aliases).forEach(([aliasName, aliasProperties]) => {
+        if (aliasProperties.is_write_index) {
+          writeIndicesAndAliases.push({ index, alias: aliasName });
+        }
+      });
+    });
+
+    await Promise.all(
+      writeIndicesAndAliases.map((indexAndAlias) =>
+        this.updateAliasWriteIndexMapping(indexAndAlias)
+      )
+    );
   }
 
+  /** @deprecated */
   private async updateAliasWriteIndexMapping({ index, alias }: { index: string; alias: string }) {
     const clusterClient = await this.getClusterClient();
 
@@ -185,179 +312,8 @@ export class RuleDataPluginService {
     }
   }
 
-  async createOrUpdateComponentTemplate(template: estypes.ClusterPutComponentTemplateRequest) {
-    await this.wait();
-    return this._createOrUpdateComponentTemplate(template);
-  }
-
-  async createOrUpdateIndexTemplate(template: estypes.IndicesPutIndexTemplateRequest) {
-    await this.wait();
-    return this._createOrUpdateIndexTemplate(template);
-  }
-
-  async createOrUpdateLifecyclePolicy(policy: estypes.IlmPutLifecycleRequest) {
-    await this.wait();
-    return this._createOrUpdateLifecyclePolicy(policy);
-  }
-
-  async updateIndexMappingsMatchingPattern(pattern: string) {
-    await this.wait();
-    const clusterClient = await this.getClusterClient();
-    const { body: aliasesResponse } = await clusterClient.indices.getAlias({ index: pattern });
-    const writeIndicesAndAliases: Array<{ index: string; alias: string }> = [];
-    Object.entries(aliasesResponse).forEach(([index, aliases]) => {
-      Object.entries(aliases.aliases).forEach(([aliasName, aliasProperties]) => {
-        if (aliasProperties.is_write_index) {
-          writeIndicesAndAliases.push({ index, alias: aliasName });
-        }
-      });
-    });
-    await Promise.all(
-      writeIndicesAndAliases.map((indexAndAlias) =>
-        this.updateAliasWriteIndexMapping(indexAndAlias)
-      )
-    );
-  }
-
-  isReady() {
-    return this.signal.isReady();
-  }
-
-  wait() {
-    return Promise.race([
-      this.signal.wait(),
-      new Promise((resolve, reject) => {
-        setTimeout(reject, BOOTSTRAP_TIMEOUT);
-      }),
-    ]);
-  }
-
-  isWriteEnabled(): boolean {
-    return this.options.isWriteEnabled;
-  }
-
-  getFullAssetName(assetName: string = '') {
-    return IndexNames.joinWithDash(this.options.index, assetName);
-  }
-
-  getRuleDataClient(feature: ValidFeatureId, alias: string, initialize: () => Promise<void>) {
-    return new RuleDataClient({
-      alias,
-      feature,
-      getClusterClient: () => this.getClusterClient(),
-      isWriteEnabled: this.isWriteEnabled(),
-      ready: initialize,
-    });
-  }
-
-  public initializeService(): void {
-    this.bootstrapResourcesSharedBetweenAllIndices().catch((e) => {
-      this.options.logger.error(e);
-    });
-  }
-
-  public initializeIndex(indexOptions: IndexOptions): RuleDataClient {
-    const { feature, registrationContext, dataset } = indexOptions;
-
-    const indexNames = new IndexNames({
-      indexPrefix: this.options.index,
-      registrationContext,
-      dataset,
-    });
-
-    const bootstrapResources = this.createBootstrapper(
-      'index resources shared between namespaces',
-      async () => {
-        await this.bootstrapResourcesSharedBetweenAllIndices();
-        return await this.installResourcesSharedBetweenIndexNamespaces(indexOptions, indexNames);
-      }
-    );
-
-    // Start bootstrapping eagerly
-    const bootstrapPromise = bootstrapResources();
-
-    return this.getRuleDataClient(feature, indexNames.indexBaseName, () => bootstrapPromise);
-  }
-
-  private createBootstrapper<T>(resources: string, fn: () => Promise<T>): () => Promise<T> {
-    return once(async () => {
-      try {
-        return await Promise.race([
-          fn(),
-          new Promise<T>((resolve, reject) => {
-            setTimeout(() => {
-              const msg = `Timeout: it took more than ${BOOTSTRAP_TIMEOUT}ms`;
-              reject(new Error(msg));
-            }, BOOTSTRAP_TIMEOUT);
-          }),
-        ]);
-      } catch (e) {
-        this.options.logger.error(e);
-
-        const reason = e?.message || 'unknown reason';
-        throw new Error(`Failure installing ${resources}. ${reason}`);
-      }
-    });
-  }
-
-  private async installResourcesSharedBetweenAllIndices(): Promise<void> {
-    // TODO: inline
-    await this.init();
-  }
-
-  private async installResourcesSharedBetweenIndexNamespaces(
-    indexOptions: IndexOptions,
-    indexNames: IndexNames
-  ): Promise<void> {
-    const { componentTemplateRefs, componentTemplates, indexTemplate, ilmPolicy } = indexOptions;
-
-    if (!this.isWriteEnabled()) {
-      return;
-    }
-
-    if (ilmPolicy != null) {
-      await this.createOrUpdateLifecyclePolicy({
-        policy: indexNames.ilmPolicyName,
-        body: { policy: ilmPolicy },
-      });
-    }
-
-    await Promise.all(
-      componentTemplates.map(async (ct) => {
-        await this.createOrUpdateComponentTemplate({
-          name: ct.name,
-          body: {
-            // TODO: difference?
-            // template: {
-            //   settings: ct.settings,
-            //   mappings: ct.mappings,
-            //   version: ct.version,
-            //   _meta: ct._meta,
-            // },
-            template: { settings: {} },
-            settings: ct.settings,
-            mappings: ct.mappings,
-            version: ct.version,
-            _meta: ct._meta,
-          },
-        });
-      })
-    );
-
-    const ownComponents = componentTemplates.map((ct) => ct.name);
-    const externalComponents = componentTemplateRefs;
-    const technicalComponents = [indexNames.getPrefixedName(TECHNICAL_COMPONENT_TEMPLATE_NAME)];
-
-    await this.createOrUpdateIndexTemplate({
-      name: indexNames.getIndexTemplateName(''), // TODO: should be namespaced,
-      body: {
-        index_patterns: [indexNames.indexBasePattern], // TODO: should be namespaced
-        composed_of: [...externalComponents, ...ownComponents, ...technicalComponents], // order matters
-        version: indexTemplate.version,
-        _meta: indexTemplate._meta,
-      },
-    });
-
-    await this.updateIndexMappingsMatchingPattern(indexNames.indexBasePattern);
+  /** @deprecated */
+  private async getClusterClient() {
+    return await this.options.getClusterClient();
   }
 }
