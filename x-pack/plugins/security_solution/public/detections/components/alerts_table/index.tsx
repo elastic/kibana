@@ -31,7 +31,8 @@ import {
   alertsDefaultModelRuleRegistry,
   buildAlertStatusFilterRuleRegistry,
 } from './default_config';
-import { AlertsUtilityBar } from './alerts_utility_bar';
+import { FILTER_OPEN, AlertsTableFilterGroup } from './alerts_filter_group';
+import { AditionalFiltersAction, AlertsUtilityBar } from './alerts_utility_bar';
 import * as i18nCommon from '../../../common/translations';
 import * as i18n from './translations';
 import {
@@ -313,6 +314,16 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     ]
   );
 
+  const additionalFiltersComponent = (
+    <AditionalFiltersAction
+      areEventsLoading={loadingEventIds.length > 0}
+      onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
+      showBuildingBlockAlerts={showBuildingBlockAlerts}
+      onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsChanged}
+      showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+    />
+  );
+
   const defaultFiltersMemo = useMemo(() => {
     // TODO: Once we are past experimental phase this code should be removed
     const alertStatusFilter = ruleRegistryEnabled
@@ -382,6 +393,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       scopeId={SourcererScopeName.detections}
       start={from}
       utilityBar={utilityBarCallback}
+      additionalFilters={additionalFiltersComponent}
     />
   );
 };

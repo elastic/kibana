@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { Lifecycle } from '@hapi/hapi';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { JsonArray, JsonValue } from '@kbn/common-utils';
+import { JsonArray, JsonValue } from '@kbn/utility-types';
 import { RouteConfig, RouteMethod } from '../../../../../../../src/core/server';
 import {
   PluginSetup as DataPluginSetup,
