@@ -345,7 +345,7 @@ export class TimeseriesPanelConfig extends Component<
                   />
                 </EuiFormLabel>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <ColorPicker
                   onChange={this.props.onChange}
                   name="background_color"
@@ -360,7 +360,7 @@ export class TimeseriesPanelConfig extends Component<
                   />
                 </EuiFormLabel>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <YesNo value={model.show_grid} name="show_grid" onChange={this.props.onChange} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -371,7 +371,7 @@ export class TimeseriesPanelConfig extends Component<
                   />
                 </EuiFormLabel>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiComboBox
                   isClearable={false}
                   id={htmlId('tooltipMode')}
@@ -391,7 +391,7 @@ export class TimeseriesPanelConfig extends Component<
                   />
                 </EuiFormLabel>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <YesNo
                   value={model.show_legend}
                   name="show_legend"
@@ -406,7 +406,7 @@ export class TimeseriesPanelConfig extends Component<
                   />
                 </EuiFormLabel>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <YesNo
                   value={model.truncate_legend}
                   name="truncate_legend"
@@ -422,7 +422,7 @@ export class TimeseriesPanelConfig extends Component<
                   />
                 </EuiFormLabel>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiFieldNumber
                   data-test-subj="timeSeriesEditorDataMaxLegendLines"
                   value={model.max_lines_legend}
@@ -443,7 +443,7 @@ export class TimeseriesPanelConfig extends Component<
                   />
                 </EuiFormLabel>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiComboBox
                   isClearable={false}
                   id={htmlId('legendPos')}
