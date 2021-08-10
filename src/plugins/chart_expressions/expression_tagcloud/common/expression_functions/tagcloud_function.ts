@@ -151,7 +151,7 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
       }
       return {
         type: 'render',
-        as: 'tagloud_vis',
+        as: EXPRESSION_NAME,
         value: {
           visData: input,
           visType: EXPRESSION_NAME,
