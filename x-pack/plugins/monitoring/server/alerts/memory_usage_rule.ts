@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { ElasticsearchClient } from 'kibana/server';
-import { BaseAlert } from './base_alert';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -25,8 +25,8 @@ import {
 import { AlertInstance } from '../../../alerting/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
-  ALERT_MEMORY_USAGE,
-  ALERT_DETAILS,
+  RULE_MEMORY_USAGE,
+  RULE_DETAILS,
 } from '../../common/constants';
 // @ts-ignore
 import { ROUNDED_FLOAT } from '../../common/formatting';
@@ -39,11 +39,11 @@ import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { parseDuration } from '../../../alerting/common/parse_duration';
 import { Globals } from '../static_globals';
 
-export class MemoryUsageAlert extends BaseAlert {
-  constructor(public rawAlert?: SanitizedAlert) {
-    super(rawAlert, {
-      id: ALERT_MEMORY_USAGE,
-      name: ALERT_DETAILS[ALERT_MEMORY_USAGE].label,
+export class MemoryUsageRule extends BaseRule {
+  constructor(public sanitizedRule?: SanitizedAlert) {
+    super(sanitizedRule, {
+      id: RULE_MEMORY_USAGE,
+      name: RULE_DETAILS[RULE_MEMORY_USAGE].label,
       accessorKey: 'memoryUsage',
       defaultParams: {
         threshold: 85,

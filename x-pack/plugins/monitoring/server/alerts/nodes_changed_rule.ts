@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from 'kibana/server';
-import { BaseAlert } from './base_alert';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -21,8 +21,8 @@ import {
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerting/server';
 import {
-  ALERT_NODES_CHANGED,
-  LEGACY_ALERT_DETAILS,
+  RULE_NODES_CHANGED,
+  LEGACY_RULE_DETAILS,
   INDEX_PATTERN_ELASTICSEARCH,
 } from '../../common/constants';
 import { AlertingDefaults } from './alert_helpers';
@@ -63,11 +63,11 @@ function getNodeStates(nodes: AlertClusterStatsNodes): AlertNodesChangedStates {
   };
 }
 
-export class NodesChangedAlert extends BaseAlert {
-  constructor(public rawAlert?: SanitizedAlert) {
-    super(rawAlert, {
-      id: ALERT_NODES_CHANGED,
-      name: LEGACY_ALERT_DETAILS[ALERT_NODES_CHANGED].label,
+export class NodesChangedRule extends BaseRule {
+  constructor(public sanitizedRule?: SanitizedAlert) {
+    super(sanitizedRule, {
+      id: RULE_NODES_CHANGED,
+      name: LEGACY_RULE_DETAILS[RULE_NODES_CHANGED].label,
       actionVariables: [
         {
           name: 'added',

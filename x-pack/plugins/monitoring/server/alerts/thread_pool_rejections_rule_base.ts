@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from 'kibana/server';
-import { BaseAlert } from './base_alert';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -32,7 +32,7 @@ import { Globals } from '../static_globals';
 
 type ActionVariables = Array<{ name: string; description: string }>;
 
-export class ThreadPoolRejectionsAlertBase extends BaseAlert {
+export class ThreadPoolRejectionsRuleBase extends BaseRule {
   protected static createActionVariables(type: string) {
     return [
       {
@@ -50,13 +50,13 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
   }
 
   constructor(
-    rawAlert: Alert | undefined = undefined,
+    sanitizedRule: Alert | undefined = undefined,
     public readonly id: string,
     public readonly threadPoolType: string,
     public readonly name: string,
     public readonly actionVariables: ActionVariables
   ) {
-    super(rawAlert, {
+    super(sanitizedRule, {
       id,
       name,
       defaultParams: {

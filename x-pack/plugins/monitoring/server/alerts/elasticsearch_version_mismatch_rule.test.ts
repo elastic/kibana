@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchVersionMismatchAlert } from './elasticsearch_version_mismatch_alert';
-import { ALERT_ELASTICSEARCH_VERSION_MISMATCH } from '../../common/constants';
+import { ElasticsearchVersionMismatchRule } from './elasticsearch_version_mismatch_rule';
+import { RULE_ELASTICSEARCH_VERSION_MISMATCH } from '../../common/constants';
 import { fetchElasticsearchVersions } from '../lib/alerts/fetch_elasticsearch_versions';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
@@ -38,11 +38,11 @@ jest.mock('../static_globals', () => ({
 
 describe('ElasticsearchVersionMismatchAlert', () => {
   it('should have defaults', () => {
-    const alert = new ElasticsearchVersionMismatchAlert();
-    expect(alert.alertOptions.id).toBe(ALERT_ELASTICSEARCH_VERSION_MISMATCH);
-    expect(alert.alertOptions.name).toBe('Elasticsearch version mismatch');
-    expect(alert.alertOptions.throttle).toBe('1d');
-    expect(alert.alertOptions.actionVariables).toStrictEqual([
+    const rule = new ElasticsearchVersionMismatchRule();
+    expect(rule.ruleOptions.id).toBe(RULE_ELASTICSEARCH_VERSION_MISMATCH);
+    expect(rule.ruleOptions.name).toBe('Elasticsearch version mismatch');
+    expect(rule.ruleOptions.throttle).toBe('1d');
+    expect(rule.ruleOptions.actionVariables).toStrictEqual([
       {
         name: 'versionList',
         description: 'The versions of Elasticsearch running in this cluster.',
@@ -116,12 +116,12 @@ describe('ElasticsearchVersionMismatchAlert', () => {
     });
 
     it('should fire actions', async () => {
-      const alert = new ElasticsearchVersionMismatchAlert();
-      const type = alert.getAlertType();
+      const rule = new ElasticsearchVersionMismatchRule();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -170,12 +170,12 @@ describe('ElasticsearchVersionMismatchAlert', () => {
           },
         ];
       });
-      const alert = new ElasticsearchVersionMismatchAlert();
-      const type = alert.getAlertType();
+      const rule = new ElasticsearchVersionMismatchRule();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();

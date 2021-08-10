@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { ElasticsearchClient } from 'kibana/server';
-import { BaseAlert } from './base_alert';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -23,11 +23,7 @@ import {
   CommonAlertFilter,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerting/server';
-import {
-  INDEX_PATTERN_ELASTICSEARCH,
-  ALERT_DISK_USAGE,
-  ALERT_DETAILS,
-} from '../../common/constants';
+import { INDEX_PATTERN_ELASTICSEARCH, RULE_DISK_USAGE, RULE_DETAILS } from '../../common/constants';
 // @ts-ignore
 import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchDiskUsageNodeStats } from '../lib/alerts/fetch_disk_usage_node_stats';
@@ -38,11 +34,11 @@ import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
 
-export class DiskUsageAlert extends BaseAlert {
-  constructor(public rawAlert?: SanitizedAlert) {
-    super(rawAlert, {
-      id: ALERT_DISK_USAGE,
-      name: ALERT_DETAILS[ALERT_DISK_USAGE].label,
+export class DiskUsageRule extends BaseRule {
+  constructor(public sanitizedRule?: SanitizedAlert) {
+    super(sanitizedRule, {
+      id: RULE_DISK_USAGE,
+      name: RULE_DETAILS[RULE_DISK_USAGE].label,
       accessorKey: 'diskUsage',
       defaultParams: {
         threshold: 80,

@@ -44,7 +44,7 @@ type ExecutedState =
     }
   | Record<string, any>;
 
-interface AlertOptions {
+interface RuleOptions {
   id: string;
   name: string;
   throttle?: string | null;
@@ -55,7 +55,7 @@ interface AlertOptions {
   accessorKey?: string;
 }
 
-const defaultAlertOptions = (): AlertOptions => {
+const defaultRuleOptions = (): RuleOptions => {
   return {
     id: '',
     name: '',
@@ -65,24 +65,24 @@ const defaultAlertOptions = (): AlertOptions => {
     actionVariables: [],
   };
 };
-export class BaseAlert {
+export class BaseRule {
   protected scopedLogger: Logger;
 
   constructor(
-    public rawAlert?: SanitizedAlert,
-    public alertOptions: AlertOptions = defaultAlertOptions()
+    public sanitizedRule?: SanitizedAlert,
+    public ruleOptions: RuleOptions = defaultRuleOptions()
   ) {
-    const defaultOptions = defaultAlertOptions();
+    const defaultOptions = defaultRuleOptions();
     defaultOptions.defaultParams = {
       ...defaultOptions.defaultParams,
-      ...this.alertOptions.defaultParams,
+      ...this.ruleOptions.defaultParams,
     };
-    this.alertOptions = { ...defaultOptions, ...this.alertOptions };
-    this.scopedLogger = Globals.app.getLogger(alertOptions.id);
+    this.ruleOptions = { ...defaultOptions, ...this.ruleOptions };
+    this.scopedLogger = Globals.app.getLogger(ruleOptions.id);
   }
 
-  public getAlertType(): AlertType<never, never, never, never, never, 'default'> {
-    const { id, name, actionVariables } = this.alertOptions;
+  public getRuleType(): AlertType<never, never, never, never, never, 'default'> {
+    const { id, name, actionVariables } = this.ruleOptions;
     return {
       id,
       name,
@@ -110,7 +110,7 @@ export class BaseAlert {
   }
 
   public getId() {
-    return this.rawAlert?.id;
+    return this.sanitizedRule?.id;
   }
 
   public async createIfDoesNotExist(
@@ -118,24 +118,24 @@ export class BaseAlert {
     actionsClient: ActionsClient,
     actions: AlertEnableAction[]
   ): Promise<SanitizedAlert<AlertTypeParams>> {
-    const existingAlertData = await rulesClient.find({
+    const existingRuleData = await rulesClient.find({
       options: {
-        search: this.alertOptions.id,
+        search: this.ruleOptions.id,
       },
     });
 
-    if (existingAlertData.total > 0) {
-      const existingAlert = existingAlertData.data[0] as Alert;
-      return existingAlert;
+    if (existingRuleData.total > 0) {
+      const existingRule = existingRuleData.data[0] as Alert;
+      return existingRule;
     }
 
-    const alertActions = [];
+    const ruleActions = [];
     for (const actionData of actions) {
       const action = await actionsClient.get({ id: actionData.id });
       if (!action) {
         continue;
       }
-      alertActions.push({
+      ruleActions.push({
         group: 'default',
         id: actionData.id,
         params: {
@@ -151,7 +151,7 @@ export class BaseAlert {
       id: alertTypeId,
       throttle = '1d',
       interval = '1m',
-    } = this.alertOptions;
+    } = this.ruleOptions;
     return await rulesClient.create<AlertTypeParams>({
       data: {
         enabled: true,
@@ -163,7 +163,7 @@ export class BaseAlert {
         throttle,
         notifyWhen: null,
         schedule: { interval },
-        actions: alertActions,
+        actions: ruleActions,
       },
     });
   }
@@ -247,11 +247,11 @@ export class BaseAlert {
       return await fetchClusters(esClient, esIndexPattern);
     }
     const limit = parseDuration(params.limit);
-    const rangeFilter = this.alertOptions.fetchClustersRange
+    const rangeFilter = this.ruleOptions.fetchClustersRange
       ? {
           timestamp: {
             format: 'epoch_millis',
-            gte: +new Date() - limit - this.alertOptions.fetchClustersRange,
+            gte: +new Date() - limit - this.ruleOptions.fetchClustersRange,
           },
         }
       : undefined;
@@ -281,7 +281,7 @@ export class BaseAlert {
         continue;
       }
 
-      const key = this.alertOptions.accessorKey;
+      const key = this.ruleOptions.accessorKey;
 
       // for each node, update the alert's state with node state
       for (const node of nodes) {
