@@ -21618,8 +21618,6 @@
     "xpack.securitySolution.endpoint.hostIsolation.unIsolateThisHost": "現在{hostName}は{isolated}です。このホストを{unisolate}しますか？",
     "xpack.securitySolution.endpoint.hostIsolationStatus.isolated": "分離済み",
     "xpack.securitySolution.endpoint.ingestManager.createPackagePolicy.endpointConfiguration": "推奨のデフォルト値で統合が保存されます。後からこれを変更するには、エージェントポリシー内で Endpoint Security 統合を編集します。",
-    "xpack.securitySolution.endpoint.ingestToastMessage": "Fleetが設定中に失敗しました。",
-    "xpack.securitySolution.endpoint.ingestToastTitle": "アプリを初期化できませんでした",
     "xpack.securitySolution.endpoint.list.actionmenu": "開く",
     "xpack.securitySolution.endpoint.list.actions": "アクション",
     "xpack.securitySolution.endpoint.list.endpointsEnrolling": "エンドポイントを登録しています。進行状況を追跡するには、{agentsLink}してください。",
