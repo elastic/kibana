@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import {
   clearFlashMessages,
   setQueuedSuccessMessage,
-  setSuccessMessage,
+  flashSuccessToast,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
@@ -150,7 +150,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       try {
         const response = await http.put(route, { body });
         actions.setUpdatedName(response);
-        setSuccessMessage(ORG_UPDATED_MESSAGE);
+        flashSuccessToast(ORG_UPDATED_MESSAGE);
         AppLogic.actions.setOrgName(name);
       } catch (e) {
         flashAPIErrors(e);
@@ -170,7 +170,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       try {
         const response = await http.put(route, { body });
         actions.setUpdatedOauthApplication(response);
-        setSuccessMessage(OAUTH_APP_UPDATED_MESSAGE);
+        flashSuccessToast(OAUTH_APP_UPDATED_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }

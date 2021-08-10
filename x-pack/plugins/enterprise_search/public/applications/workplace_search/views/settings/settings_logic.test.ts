@@ -25,7 +25,7 @@ describe('SettingsLogic', () => {
   const {
     clearFlashMessages,
     flashAPIErrors,
-    setSuccessMessage,
+    flashSuccessToast,
     setQueuedSuccessMessage,
   } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(SettingsLogic);
@@ -143,7 +143,7 @@ describe('SettingsLogic', () => {
           body: JSON.stringify({ name: NAME }),
         });
         await nextTick();
-        expect(setSuccessMessage).toHaveBeenCalledWith(ORG_UPDATED_MESSAGE);
+        expect(flashSuccessToast).toHaveBeenCalledWith(ORG_UPDATED_MESSAGE);
         expect(setUpdatedNameSpy).toHaveBeenCalledWith({ organizationName: NAME });
       });
 
@@ -179,7 +179,7 @@ describe('SettingsLogic', () => {
         );
         await nextTick();
         expect(setUpdatedOauthApplicationSpy).toHaveBeenCalledWith({ oauthApplication });
-        expect(setSuccessMessage).toHaveBeenCalledWith(OAUTH_APP_UPDATED_MESSAGE);
+        expect(flashSuccessToast).toHaveBeenCalledWith(OAUTH_APP_UPDATED_MESSAGE);
       });
 
       it('handles error', async () => {
