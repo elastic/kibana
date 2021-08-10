@@ -6,11 +6,11 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { RuleDataPluginService, RuleDataPluginServiceConstructorOptions } from './';
+import { RuleDataPluginService } from './';
 
 type Schema = PublicMethodsOf<RuleDataPluginService>;
 
-const createRuleDataPluginServiceMock = (_: RuleDataPluginServiceConstructorOptions) => {
+const createRuleDataPluginService = () => {
   const mocked: jest.Mocked<Schema> = {
     init: jest.fn(),
     isReady: jest.fn(),
@@ -27,9 +27,7 @@ const createRuleDataPluginServiceMock = (_: RuleDataPluginServiceConstructorOpti
 };
 
 export const ruleDataPluginServiceMock: {
-  create: (
-    _: RuleDataPluginServiceConstructorOptions
-  ) => jest.Mocked<PublicMethodsOf<RuleDataPluginService>>;
+  create: () => jest.Mocked<PublicMethodsOf<RuleDataPluginService>>;
 } = {
-  create: createRuleDataPluginServiceMock,
+  create: createRuleDataPluginService,
 };
