@@ -79,13 +79,6 @@ discover-app {
 
 .dscHistogram {
   display: flex;
-  height: $euiSize * 12.5;
-  padding: $euiSizeS;
-}
-
-// new slimmer layout for data grid
-.dscHistogramGrid {
-  display: flex;
   height: $euiSize * 8;
   padding: $euiSizeS $euiSizeS 0 $euiSizeS;
 }
