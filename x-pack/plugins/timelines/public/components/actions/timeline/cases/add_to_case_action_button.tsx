@@ -30,20 +30,12 @@ const AddToCaseActionButtonComponent: React.FC<AddToCaseActionProps> = ({
   const {
     addNewCaseClick,
     addExistingCaseClick,
-    // onCaseClicked,
-    // goToCreateCase,
-    // onCaseSuccess,
-    // attachAlertToCase,
-    // createCaseUrl,
-    // isAllCaseModalOpen,
     isDisabled,
     userCanCrud,
     isEventSupported,
     openPopover,
     closePopover,
     isPopoverOpen,
-    // isCreateCaseFlyoutOpen,
-    // closeCaseFlyoutOpen,
   } = useAddToCase({ ecsRowData, useInsertTimeline, casePermissions, appId, closeCallbacks });
   const tooltipContext = userCanCrud
     ? isEventSupported

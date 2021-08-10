@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
+import { EuiContextMenuItem } from '@elastic/eui';
 
 import { useAddToCase } from '../../../../hooks/use_add_to_case';
 import { AddToCaseActionProps } from './add_to_case_action';
