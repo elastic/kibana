@@ -100,32 +100,28 @@ export async function runDockerGenerator(
   // Also create the docker build target folder
   // and  delete the current linked target into the
   // kibana docker build folder if we have one.
-  try {
-    await accessAsync(resolve(artifactsDir, artifactTarball));
-    await mkdirp(dockerBuildDir);
-    await unlinkAsync(resolve(dockerBuildDir, artifactTarball));
-    await unlinkAsync(resolve(dockerBuildDir, metricbeatTarball));
-    await unlinkAsync(resolve(dockerBuildDir, filebeatTarball));
-  } catch (e) {
-    if (e && e.code === 'ENOENT' && e.syscall === 'access') {
-      throw new Error(
-        `Kibana linux target (${artifactTarball}) is needed in order to build ${''}the docker image. None was found at ${artifactsDir}`
-      );
+  await mkdirp(dockerBuildDir);
+  const dependencies = [
+    artifactTarball,
+    ...(flags.cloud ? [metricbeatTarball, filebeatTarball] : []),
+  ];
+  for (const dep of dependencies) {
+    try {
+      await accessAsync(resolve(artifactsDir, dep));
+      await unlinkAsync(resolve(dockerBuildDir, dep));
+    } catch (e) {
+      if (e && e.code === 'ENOENT' && e.syscall === 'access') {
+        throw new Error(
+          `${resolve(artifactsDir, dep)} is needed in order to build the docker image.`
+        );
+      }
     }
   }
 
   // Create the kibana linux target inside the
   // Kibana docker build
-  await linkAsync(resolve(artifactsDir, artifactTarball), resolve(dockerBuildDir, artifactTarball));
-  if (flags.cloud) {
-    await linkAsync(
-      resolve(artifactsDir, metricbeatTarball),
-      resolve(dockerBuildDir, metricbeatTarball)
-    );
-    await linkAsync(
-      resolve(artifactsDir, filebeatTarball),
-      resolve(dockerBuildDir, filebeatTarball)
-    );
+  for (const dep of dependencies) {
+    await linkAsync(resolve(artifactsDir, dep), resolve(dockerBuildDir, dep));
   }
 
   // Write all the needed docker config files
