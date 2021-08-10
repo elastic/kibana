@@ -11,8 +11,10 @@ It also exposes a rule data client that will create or update the index stream t
 By default, these indices will be prefixed with `.alerts`. To change this, for instance to support legacy multitenancy, set the following configuration option:
 
 ```yaml
-xpack.ruleRegistry.index: '.kibana-alerts'
+xpack.ruleRegistry.index: 'myAlerts'
 ```
+
+The above produces an alerts index prefixed `.alerts-myAlerts`.
 
 To disable writing entirely:
 

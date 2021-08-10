@@ -114,7 +114,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         aggs: {
           rules: {
             terms: {
-              field: 'rule.id',
+              field: ALERT_RULE_ID,
               size: ruleIds.length,
             },
             aggs: {

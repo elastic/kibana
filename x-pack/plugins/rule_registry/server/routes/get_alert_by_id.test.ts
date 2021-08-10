@@ -8,15 +8,12 @@
 import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_RISK_SCORE,
-  ALERT_RULE_SEVERITY,
   ALERT_STATUS,
   ECS_VERSION,
   ALERT_RULE_TYPE_ID,
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
-  ALERT_RULE_ID,
-  ALERT_RULE_UUID,
 } from '@kbn/rule-data-utils';
 
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
@@ -35,9 +32,6 @@ const getMockAlert = (): ParsedTechnicalFields => ({
   [ALERT_STATUS]: 'open',
   [ALERT_RULE_RISK_SCORE]: 20,
   [SPACE_IDS]: ['fake-space-id'],
-  [ALERT_RULE_SEVERITY]: 'warning',
-  [ALERT_RULE_ID]: '12345',
-  [ALERT_RULE_UUID]: 'abcd',
 });
 
 describe('getAlertByIdRoute', () => {
