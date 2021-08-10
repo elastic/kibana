@@ -31,7 +31,6 @@ import {
   alertsDefaultModelRuleRegistry,
   buildAlertStatusFilterRuleRegistry,
 } from './default_config';
-import { FILTER_OPEN, AlertsTableFilterGroup } from './alerts_filter_group';
 import { AditionalFiltersAction, AlertsUtilityBar } from './alerts_utility_bar';
 import * as i18nCommon from '../../../common/translations';
 import * as i18n from './translations';
