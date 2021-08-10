@@ -154,7 +154,7 @@ export function registerApmAlerts(
       reason: i18n.translate(
         'xpack.apm.alertTypes.transactionErrorRate.reason',
         {
-          defaultMessage: `Rate of failed transactions is greater than {threshold} (current value is {measured}) for {serviceName}`,
+          defaultMessage: `Failed transactions rate is greater than {threshold} (current value is {measured}) for {serviceName}`,
           values: {
             threshold: asPercent(fields[ALERT_EVALUATION_THRESHOLD], 100),
             measured: asPercent(fields[ALERT_EVALUATION_VALUE], 100),
