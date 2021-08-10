@@ -18,7 +18,7 @@ const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
 interface BackendLinkProps {
   backendName: string;
-  query?: TypeOf<ApmRoutes, '/backends/:backendName/overview'>['query'];
+  query: TypeOf<ApmRoutes, '/backends/:backendName/overview'>['query'];
   subtype?: string;
   type?: string;
 }
