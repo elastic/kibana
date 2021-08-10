@@ -56,7 +56,7 @@ export const FieldPreview = () => {
     const [field] = fields;
 
     return (
-      <ul tabIndex={0}>
+      <ul>
         <li data-test-subj="fieldPreviewItem">
           <PreviewListItem field={field} highlighted />
         </li>
@@ -73,10 +73,8 @@ export const FieldPreview = () => {
   return (
     <div
       className="indexPatternFieldEditor__previewPannel"
+      // This tabIndex is for the scrollable area of the flyout panel.
       tabIndex={0}
-      aria-label={i18n.translate('indexPatternFieldEditor.fieldPreview.panelLabel', {
-        defaultMessage: 'Field preview',
-      })}
     >
       {isEmptyPromptVisible ? (
         <FieldPreviewEmptyPrompt />

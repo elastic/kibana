@@ -132,9 +132,16 @@ export const getFieldEditorOpener = ({
         size: 'l',
         ownFocus: true,
         hideCloseButton: true,
-        'aria-label': i18n.translate('indexPatternFieldEditor.flyoutAriaLabel', {
-          defaultMessage: 'Create or edit field',
-        }),
+        'aria-label': isNewRuntimeField
+          ? i18n.translate('indexPatternFieldEditor.createField.flyoutAriaLabel', {
+              defaultMessage: 'Create field',
+            })
+          : i18n.translate('indexPatternFieldEditor.editField.flyoutAriaLabel', {
+              defaultMessage: 'Edit {fieldName} field',
+              values: {
+                fieldName,
+              },
+            }),
         onClose: (flyout) => {
           const canClose = canCloseValidator.current();
           if (canClose) {
