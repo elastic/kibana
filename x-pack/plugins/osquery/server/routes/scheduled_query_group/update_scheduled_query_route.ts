@@ -6,28 +6,39 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
+import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { savedQuerySavedObjectType } from '../../../common/types';
 
-export const readScheduledQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
-  router.get(
+export const updateSavedQueryRoute = (router: IRouter) => {
+  router.put(
     {
-      path: '/internal/osquery/scheduled_query/{id}',
+      path: '/internal/osquery/saved_query/{id}',
       validate: {
         params: schema.object({}, { unknowns: 'allow' }),
+        body: schema.object({}, { unknowns: 'allow' }),
       },
+      options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
     },
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
-      const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
       // @ts-expect-error update types
-      const scheduledQuery = await packagePolicyService?.get(savedObjectsClient, request.params.id);
+      const { name, description, query } = request.body;
+
+      const savedQuerySO = await savedObjectsClient.update(
+        savedQuerySavedObjectType,
+        // @ts-expect-error update types
+        request.params.id,
+        {
+          name,
+          description,
+          query,
+        }
+      );
 
       return response.ok({
-        // @ts-expect-error update types
-        body: scheduledQuery,
+        body: savedQuerySO,
       });
     }
   );
