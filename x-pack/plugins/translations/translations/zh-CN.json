@@ -5595,7 +5595,6 @@
     "xpack.apm.correlations.latencyCorrelations.refreshButtonTitle": "刷新",
     "xpack.apm.correlations.licenseCheckText": "要使用相关性，必须订阅 Elastic 白金级许可证。使用相关性，将能够发现哪些字段与性能差相关。",
     "xpack.apm.correlations.serviceLabel": "服务",
-    "xpack.apm.correlations.tabs.errorRateLabel": "错误率",
     "xpack.apm.correlations.tabs.latencyLabel": "延迟",
     "xpack.apm.correlations.title": "相关性",
     "xpack.apm.correlations.transactionLabel": "事务",

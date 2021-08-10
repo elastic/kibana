@@ -5570,7 +5570,6 @@
     "xpack.apm.correlations.latencyCorrelations.refreshButtonTitle": "更新",
     "xpack.apm.correlations.licenseCheckText": "相関関係を使用するには、Elastic Platinumライセンスのサブスクリプションが必要です。使用すると、パフォーマンスの低下に関連しているフィールドを検出できます。",
     "xpack.apm.correlations.serviceLabel": "サービス",
-    "xpack.apm.correlations.tabs.errorRateLabel": "エラー率",
     "xpack.apm.correlations.tabs.latencyLabel": "レイテンシ",
     "xpack.apm.correlations.title": "相関関係",
     "xpack.apm.correlations.transactionLabel": "トランザクション",
