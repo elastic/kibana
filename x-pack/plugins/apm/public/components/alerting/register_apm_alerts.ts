@@ -71,7 +71,7 @@ export function registerApmAlerts(
     validate: () => ({
       errors: [],
     }),
-    requiresAppContext: true,
+    requiresAppContext: false,
     defaultActionMessage: i18n.translate(
       'xpack.apm.alertTypes.errorCount.defaultActionMessage',
       {
@@ -126,7 +126,7 @@ export function registerApmAlerts(
     validate: () => ({
       errors: [],
     }),
-    requiresAppContext: true,
+    requiresAppContext: false,
     defaultActionMessage: i18n.translate(
       'xpack.apm.alertTypes.transactionDuration.defaultActionMessage',
       {
@@ -182,7 +182,7 @@ export function registerApmAlerts(
     validate: () => ({
       errors: [],
     }),
-    requiresAppContext: true,
+    requiresAppContext: false,
     defaultActionMessage: i18n.translate(
       'xpack.apm.alertTypes.transactionErrorRate.defaultActionMessage',
       {
@@ -237,7 +237,7 @@ export function registerApmAlerts(
     validate: () => ({
       errors: [],
     }),
-    requiresAppContext: true,
+    requiresAppContext: false,
     defaultActionMessage: i18n.translate(
       'xpack.apm.alertTypes.transactionDurationAnomaly.defaultActionMessage',
       {

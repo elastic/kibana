@@ -5,113 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponse } from 'kibana/server';
-import {
-  CaseConnector,
-  CaseType,
-  ConnectorTypes,
-  ESCaseConnector,
-  ESCasesConfigureAttributes,
-} from '../../common/api';
-import { mockCaseConfigure } from '../routes/api/__fixtures__';
+import { CaseConnector, CaseType, ConnectorTypes } from '../../common/api';
 import { newCase } from '../routes/api/__mocks__/request_responses';
-import {
-  transformCaseConnectorToEsConnector,
-  transformESConnectorToCaseConnector,
-  transformNewCase,
-} from '../common';
-import { getConnectorFromConfiguration, sortToSnake } from './utils';
+import { transformNewCase } from '../common';
+import { sortToSnake } from './utils';
 
 describe('utils', () => {
-  const caseConnector: CaseConnector = {
-    id: '123',
-    name: 'Jira',
-    type: ConnectorTypes.jira,
-    fields: { issueType: 'Task', priority: 'High', parent: null },
-  };
-
-  const esCaseConnector: ESCaseConnector = {
-    id: '123',
-    name: 'Jira',
-    type: ConnectorTypes.jira,
-    fields: [
-      { key: 'issueType', value: 'Task' },
-      { key: 'priority', value: 'High' },
-      { key: 'parent', value: null },
-    ],
-  };
-
-  const caseConfigure: SavedObjectsFindResponse<ESCasesConfigureAttributes> = {
-    saved_objects: [{ ...mockCaseConfigure[0], score: 0 }],
-    total: 1,
-    per_page: 20,
-    page: 1,
-  };
-
-  describe('transformCaseConnectorToEsConnector', () => {
-    it('transform correctly', () => {
-      expect(transformCaseConnectorToEsConnector(caseConnector)).toEqual(esCaseConnector);
-    });
-
-    it('transform correctly with null attributes', () => {
-      // @ts-ignore this is case the connector does not exist for old cases object or configurations
-      expect(transformCaseConnectorToEsConnector(null)).toEqual({
-        id: 'none',
-        name: 'none',
-        type: ConnectorTypes.none,
-        fields: [],
-      });
-    });
-  });
-
-  describe('transformESConnectorToCaseConnector', () => {
-    it('transform correctly', () => {
-      expect(transformESConnectorToCaseConnector(esCaseConnector)).toEqual(caseConnector);
-    });
-
-    it('transform correctly with null attributes', () => {
-      // @ts-ignore this is case the connector does not exist for old cases object or configurations
-      expect(transformESConnectorToCaseConnector(null)).toEqual({
-        id: 'none',
-        name: 'none',
-        type: ConnectorTypes.none,
-        fields: null,
-      });
-    });
-  });
-
-  describe('getConnectorFromConfiguration', () => {
-    it('transform correctly', () => {
-      expect(getConnectorFromConfiguration(caseConfigure)).toEqual({
-        id: '789',
-        name: 'My connector 3',
-        type: ConnectorTypes.jira,
-        fields: null,
-      });
-    });
-
-    it('transform correctly with no connector', () => {
-      const caseConfigureNoConnector: SavedObjectsFindResponse<ESCasesConfigureAttributes> = {
-        ...caseConfigure,
-        saved_objects: [
-          {
-            ...mockCaseConfigure[0],
-            // @ts-ignore this is case the connector does not exist for old cases object or configurations
-            attributes: { ...mockCaseConfigure[0].attributes, connector: null },
-            score: 0,
-          },
-        ],
-      };
-
-      expect(getConnectorFromConfiguration(caseConfigureNoConnector)).toEqual({
-        id: 'none',
-        name: 'none',
-        type: ConnectorTypes.none,
-        fields: null,
-      });
-    });
-  });
-
   describe('sortToSnake', () => {
     it('it transforms status correctly', () => {
       expect(sortToSnake('status')).toBe('status');
@@ -139,15 +38,11 @@ describe('utils', () => {
   });
 
   describe('transformNewCase', () => {
-    const connector: ESCaseConnector = {
+    const connector: CaseConnector = {
       id: '123',
       name: 'My connector',
       type: ConnectorTypes.jira,
-      fields: [
-        { key: 'issueType', value: 'Task' },
-        { key: 'priority', value: 'High' },
-        { key: 'parent', value: null },
-      ],
+      fields: { issueType: 'Task', priority: 'High', parent: null },
     };
     it('transform correctly', () => {
       const myCase = {
@@ -166,20 +61,11 @@ describe('utils', () => {
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
-            "fields": Array [
-              Object {
-                "key": "issueType",
-                "value": "Task",
-              },
-              Object {
-                "key": "priority",
-                "value": "High",
-              },
-              Object {
-                "key": "parent",
-                "value": null,
-              },
-            ],
+            "fields": Object {
+              "issueType": "Task",
+              "parent": null,
+              "priority": "High",
+            },
             "id": "123",
             "name": "My connector",
             "type": ".jira",
@@ -223,20 +109,11 @@ describe('utils', () => {
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
-            "fields": Array [
-              Object {
-                "key": "issueType",
-                "value": "Task",
-              },
-              Object {
-                "key": "priority",
-                "value": "High",
-              },
-              Object {
-                "key": "parent",
-                "value": null,
-              },
-            ],
+            "fields": Object {
+              "issueType": "Task",
+              "parent": null,
+              "priority": "High",
+            },
             "id": "123",
             "name": "My connector",
             "type": ".jira",
@@ -283,20 +160,11 @@ describe('utils', () => {
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
-            "fields": Array [
-              Object {
-                "key": "issueType",
-                "value": "Task",
-              },
-              Object {
-                "key": "priority",
-                "value": "High",
-              },
-              Object {
-                "key": "parent",
-                "value": null,
-              },
-            ],
+            "fields": Object {
+              "issueType": "Task",
+              "parent": null,
+              "priority": "High",
+            },
             "id": "123",
             "name": "My connector",
             "type": ".jira",

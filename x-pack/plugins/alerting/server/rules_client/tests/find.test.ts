@@ -8,7 +8,7 @@
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
-import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { nodeTypes } from '@kbn/es-query';
 import { esKuery } from '../../../../../../src/plugins/data/server';
@@ -20,10 +20,10 @@ import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { auditServiceMock } from '../../../../security/server/audit/index.mock';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
-import { RegistryAlertType } from '../../alert_type_registry';
+import { RegistryRuleType } from '../../rule_type_registry';
 
 const taskManager = taskManagerMock.createStart();
-const alertTypeRegistry = alertTypeRegistryMock.create();
+const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
@@ -33,7 +33,7 @@ const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKiba
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
-  alertTypeRegistry,
+  ruleTypeRegistry,
   unsecuredSavedObjectsClient,
   authorization: (authorization as unknown) as AlertingAuthorization,
   actionsAuthorization: (actionsAuthorization as unknown) as ActionsAuthorization,
@@ -49,7 +49,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 beforeEach(() => {
-  getBeforeSetup(rulesClientParams, taskManager, alertTypeRegistry);
+  getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
 });
 
@@ -60,7 +60,7 @@ jest.mock('../lib/map_sort_field', () => ({
 }));
 
 describe('find()', () => {
-  const listedTypes = new Set<RegistryAlertType>([
+  const listedTypes = new Set<RegistryRuleType>([
     {
       actionGroups: [],
       recoveryActionGroup: RecoveredActionGroup,
@@ -117,7 +117,7 @@ describe('find()', () => {
         },
       ],
     });
-    alertTypeRegistry.list.mockReturnValue(listedTypes);
+    ruleTypeRegistry.list.mockReturnValue(listedTypes);
     authorization.filterByRuleTypeAuthorization.mockResolvedValue(
       new Set([
         {
@@ -201,7 +201,7 @@ describe('find()', () => {
       bar: true,
       parameterThatIsSavedObjectId: '9',
     });
-    alertTypeRegistry.list.mockReturnValue(
+    ruleTypeRegistry.list.mockReturnValue(
       new Set([
         ...listedTypes,
         {
@@ -218,7 +218,7 @@ describe('find()', () => {
         },
       ])
     );
-    alertTypeRegistry.get.mockImplementationOnce(() => ({
+    ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: 'myType',
       name: 'myType',
       actionGroups: [{ id: 'default', name: 'Default' }],
@@ -229,7 +229,7 @@ describe('find()', () => {
       async executor() {},
       producer: 'myApp',
     }));
-    alertTypeRegistry.get.mockImplementationOnce(() => ({
+    ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: '123',
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],
@@ -396,7 +396,7 @@ describe('find()', () => {
     const injectReferencesFn = jest.fn().mockImplementation(() => {
       throw new Error('something went wrong!');
     });
-    alertTypeRegistry.list.mockReturnValue(
+    ruleTypeRegistry.list.mockReturnValue(
       new Set([
         ...listedTypes,
         {
@@ -413,7 +413,7 @@ describe('find()', () => {
         },
       ])
     );
-    alertTypeRegistry.get.mockImplementationOnce(() => ({
+    ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: 'myType',
       name: 'myType',
       actionGroups: [{ id: 'default', name: 'Default' }],
@@ -424,7 +424,7 @@ describe('find()', () => {
       async executor() {},
       producer: 'myApp',
     }));
-    alertTypeRegistry.get.mockImplementationOnce(() => ({
+    ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: '123',
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],

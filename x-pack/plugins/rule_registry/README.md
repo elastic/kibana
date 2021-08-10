@@ -58,7 +58,7 @@ await plugins.ruleRegistry.createOrUpdateComponentTemplate({
         [PROCESSOR_EVENT]: {
           type: 'keyword',
         },
-      }),
+      }, 'strict'),
     },
   },
 });
@@ -124,21 +124,20 @@ The following fields are defined in the technical field component template and s
 - `rule.uuid`: the saved objects id of the rule.
 - `rule.name`: the name of the rule (as specified by the user).
 - `rule.category`: the name of the rule type (as defined by the rule type producer)
-- `kibana.rac.alert.producer`: the producer of the rule type. Usually a Kibana plugin. e.g., `APM`.
-- `kibana.rac.alert.owner`: the feature which produced the alert. Usually a Kibana feature id like `apm`, `siem`...
-- `kibana.rac.alert.id`: the id of the alert, that is unique within the context of the rule execution it was created in. E.g., for a rule that monitors latency for all services in all environments, this might be `opbeans-java:production`.
-- `kibana.rac.alert.uuid`: the unique identifier for the alert during its lifespan. If an alert recovers (or closes), this identifier is re-generated when it is opened again.
-- `kibana.rac.alert.status`: the status of the alert. Can be `open` or `closed`.
-- `kibana.rac.alert.start`: the ISO timestamp of the time at which the alert started.
-- `kibana.rac.alert.end`: the ISO timestamp of the time at which the alert recovered.
-- `kibana.rac.alert.duration.us`: the duration of the alert, in microseconds. This is always the difference between either the current time, or the time when the alert recovered.
-- `kibana.rac.alert.severity.level`: the severity of the alert, as a keyword (e.g. critical).
-- `kibana.rac.alert.severity.value`: the severity of the alert, as a numerical value, which allows sorting.
-- `kibana.rac.alert.evaluation.value`: The measured (numerical value).
-- `kibana.rac.alert.threshold.value`: The threshold that was defined (or, in case of multiple thresholds, the one that was exceeded).
-- `kibana.rac.alert.ancestors`: the array of ancestors (if any) for the alert.
-- `kibana.rac.alert.depth`: the depth of the alert in the ancestral tree (default 0).
-- `kibana.rac.alert.building_block_type`: the building block type of the alert (default undefined).
+- `kibana.alert.owner`: the feature which produced the alert. Usually a Kibana feature id like `apm`, `siem`...
+- `kibana.alert.id`: the id of the alert, that is unique within the context of the rule execution it was created in. E.g., for a rule that monitors latency for all services in all environments, this might be `opbeans-java:production`.
+- `kibana.alert.uuid`: the unique identifier for the alert during its lifespan. If an alert recovers (or closes), this identifier is re-generated when it is opened again.
+- `kibana.alert.status`: the status of the alert. Can be `open` or `closed`.
+- `kibana.alert.start`: the ISO timestamp of the time at which the alert started.
+- `kibana.alert.end`: the ISO timestamp of the time at which the alert recovered.
+- `kibana.alert.duration.us`: the duration of the alert, in microseconds. This is always the difference between either the current time, or the time when the alert recovered.
+- `kibana.alert.severity.level`: the severity of the alert, as a keyword (e.g. critical).
+- `kibana.alert.severity.value`: the severity of the alert, as a numerical value, which allows sorting.
+- `kibana.alert.evaluation.value`: The measured (numerical value).
+- `kibana.alert.threshold.value`: The threshold that was defined (or, in case of multiple thresholds, the one that was exceeded).
+- `kibana.alert.ancestors`: the array of ancestors (if any) for the alert.
+- `kibana.alert.depth`: the depth of the alert in the ancestral tree (default 0).
+- `kibana.alert.building_block_type`: the building block type of the alert (default undefined).
 
 # Alerts as data
 

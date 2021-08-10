@@ -151,7 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should put secondary axis on the right', async function () {
-        const length = await PageObjects.visChart.getRightValueAxesCount();
+        const length = await PageObjects.visChart.getAxesCountByPosition('right');
         expect(length).to.be(1);
       });
     });

@@ -33,7 +33,7 @@ import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
 
 const AlertAdd = ({
   consumer,
-  alertTypeRegistry,
+  ruleTypeRegistry,
   actionTypeRegistry,
   onClose,
   canChangeTrigger,
@@ -137,7 +137,7 @@ const AlertAdd = ({
     }
   };
 
-  const alertType = alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null;
+  const alertType = alert.alertTypeId ? ruleTypeRegistry.get(alert.alertTypeId) : null;
   const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
     alert as Alert,
     alertType
@@ -202,7 +202,7 @@ const AlertAdd = ({
                   }
                 )}
                 actionTypeRegistry={actionTypeRegistry}
-                alertTypeRegistry={alertTypeRegistry}
+                ruleTypeRegistry={ruleTypeRegistry}
                 metadata={metadata}
               />
             </EuiFlyoutBody>

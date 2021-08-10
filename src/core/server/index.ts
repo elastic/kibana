@@ -84,11 +84,7 @@ export type {
 
 import type { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
 
-export type {
-  IExecutionContextContainer,
-  KibanaServerExecutionContext,
-  KibanaExecutionContext,
-} from './execution_context';
+export type { IExecutionContextContainer, KibanaExecutionContext } from './execution_context';
 
 export { bootstrap } from './bootstrap';
 export type {
@@ -312,6 +308,7 @@ export type {
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsCreateOptions,
+  SavedObjectTypeExcludeFromUpgradeFilterHook,
   SavedObjectsExportResultDetails,
   SavedObjectsExportExcludedObject,
   SavedObjectsFindResult,

@@ -179,6 +179,9 @@ export interface DeprecationInfo {
   message: string;
   url: string;
   details?: string;
+  _meta?: {
+    [key: string]: string;
+  };
 }
 
 export interface IndexSettingsDeprecationInfo {

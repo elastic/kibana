@@ -221,7 +221,10 @@ const getCombinedIndexInfos = async (
   return indices as EnrichedDeprecationInfo[];
 };
 
-const getCorrectiveAction = (message: string): EnrichedDeprecationInfo['correctiveAction'] => {
+const getCorrectiveAction = (
+  message: string,
+  metadata?: { [key: string]: string }
+): EnrichedDeprecationInfo['correctiveAction'] => {
   const indexSettingDeprecation = Object.values(indexSettingDeprecations).find(
     ({ deprecationMessage }) => deprecationMessage === message
   );
@@ -243,19 +246,12 @@ const getCorrectiveAction = (message: string): EnrichedDeprecationInfo['correcti
   }
 
   if (requiresMlAction) {
-    // This logic is brittle, as we are expecting the message to be in a particular format to extract the snapshot ID and job ID
-    // Implementing https://github.com/elastic/elasticsearch/issues/73089 in ES should address this concern
-    const regex = /(?<=\[).*?(?=\])/g;
-    const matches = message.match(regex);
+    const { snapshot_id: snapshotId, job_id: jobId } = metadata!;
 
-    if (matches?.length === 2) {
-      return {
-        type: 'mlSnapshot',
-        snapshotId: matches[0],
-        jobId: matches[1],
-      };
-    }
+    return {
+      type: 'mlSnapshot',
+      snapshotId,
+      jobId,
+    };
   }
-
-  return undefined;
 };

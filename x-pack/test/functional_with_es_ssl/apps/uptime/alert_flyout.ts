@@ -11,8 +11,7 @@ import { delay } from 'bluebird';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  // FLAKY: https://github.com/elastic/kibana/issues/101984
-  describe.skip('uptime alerts', () => {
+  describe('uptime alerts', () => {
     const pageObjects = getPageObjects(['common', 'uptime']);
     const supertest = getService('supertest');
     const retry = getService('retry');
