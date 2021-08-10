@@ -22,8 +22,10 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 SRC_DEPS = [
+  "//packages/kbn-es-query",
   "@npm//tslib",
   "@npm//utility-types",
+  "@npm//@elastic/elasticsearch",
 ]
 
 TYPES_DEPS = [
