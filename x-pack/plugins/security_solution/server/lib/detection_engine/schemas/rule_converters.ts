@@ -13,7 +13,6 @@ import {
 import {
   InternalRuleCreate,
   TypeSpecificRuleParams,
-  BaseRuleParams,
   InternalRuleCreateBase,
   InternalRACRuleCreate,
   BaseRACRuleParams,
@@ -32,7 +31,7 @@ import { AppClient } from '../../../types';
 import { addTags } from '../rules/add_tags';
 import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { SanitizedAlert } from '../../../../../alerting/common';
+import { AlertTypeParams, SanitizedAlert } from '../../../../../alerting/common';
 import { IRuleStatusSOAttributes } from '../rules/types';
 import { transformTags } from '../routes/rules/utils';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -260,7 +259,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
 
 // TODO: separate out security solution defined common params from Alerting framework common params
 // so we can explicitly specify the return type of this function
-export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
+export const commonParamsCamelToSnake = (params: AlertTypeParams) => {
   return {
     description: params.description,
     risk_score: params.riskScore,
@@ -290,7 +289,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
   };
 };
 
-export const internalRuleToAPIResponse = <TRuleParams extends BaseRuleParams>(
+export const internalRuleToAPIResponse = <TRuleParams extends AlertTypeParams>(
   rule: SanitizedAlert<TRuleParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: IRuleStatusSOAttributes,
@@ -335,7 +334,7 @@ export const internalRuleToAPIResponse = <TRuleParams extends BaseRuleParams>(
 };
 
 export const mergeAlertWithSidecarStatus = (
-  alert: SanitizedAlert<BaseRuleParams>,
+  alert: SanitizedAlert<AlertTypeParams>,
   status: IRuleStatusSOAttributes
 ): IRuleStatusSOAttributes => {
   if (

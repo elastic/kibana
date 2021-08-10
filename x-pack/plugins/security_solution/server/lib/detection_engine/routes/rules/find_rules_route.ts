@@ -22,6 +22,9 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import { transformFindAlerts } from './utils';
 import { getBulkRuleActionsSavedObject } from '../../rule_actions/get_bulk_rule_actions_saved_object';
 import { RACRuleParams, RuleParams } from '../../schemas/rule_schemas';
+import { AlertTypeParams, RulesClient } from '../../../../../../alerting/server';
+import { RuleExecutionLogClient } from '../../rule_execution_log/rule_execution_log_client';
+import { SavedObjectsClientContract } from '../../../../../../../../src/core/server';
 
 export const findRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -47,17 +50,14 @@ export const findRulesRoute = (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
 
-      try {
-        const { query } = request;
-        const rulesClient = context.alerting?.getRulesClient();
-        const savedObjectsClient = context.core.savedObjects.client;
-
-        if (!rulesClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
-
-        const execLogClient = context.securitySolution.getExecutionLogClient();
-        const rules = await findRules({
+      const findAndTransform = async <TRuleParams extends AlertTypeParams>(opts: {
+        execLogClient: RuleExecutionLogClient;
+        query: FindRulesSchemaDecoded;
+        rulesClient: RulesClient;
+        savedObjectsClient: SavedObjectsClientContract;
+      }) => {
+        const { execLogClient, query, rulesClient, savedObjectsClient } = opts;
+        const rules = await findRules<TRuleParams>({
           isRuleRegistryEnabled,
           rulesClient,
           perPage: query.per_page,
@@ -67,6 +67,7 @@ export const findRulesRoute = (
           filter: query.filter,
           fields: query.fields,
         });
+
         const alertIds = rules.data.map((rule) => rule.id);
 
         const [ruleStatuses, ruleActions] = await Promise.all([
@@ -77,16 +78,46 @@ export const findRulesRoute = (
           }),
           getBulkRuleActionsSavedObject({ alertIds, savedObjectsClient }),
         ]);
-        let transformed = null;
-        if (isRuleRegistryEnabled) {
-          transformed = transformFindAlerts<RACRuleParams>(rules, ruleActions, ruleStatuses);
-        } else {
-          transformed = transformFindAlerts<RuleParams>(rules, ruleActions, ruleStatuses);
-        }
+
+        const transformed = transformFindAlerts<TRuleParams>(
+          rules,
+          ruleActions,
+          ruleStatuses,
+          isRuleRegistryEnabled
+        );
+
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
         } else {
           return response.ok({ body: transformed ?? {} });
+        }
+      };
+
+      try {
+        const { query } = request;
+        const rulesClient = context.alerting?.getRulesClient();
+        const savedObjectsClient = context.core.savedObjects.client;
+
+        if (!rulesClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+
+        const execLogClient = context.securitySolution.getExecutionLogClient();
+
+        if (isRuleRegistryEnabled) {
+          return await findAndTransform<RACRuleParams>({
+            execLogClient,
+            query,
+            rulesClient,
+            savedObjectsClient,
+          });
+        } else {
+          return await findAndTransform<RuleParams>({
+            execLogClient,
+            query,
+            rulesClient,
+            savedObjectsClient,
+          });
         }
       } catch (err) {
         const error = transformError(err);

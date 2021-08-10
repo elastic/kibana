@@ -32,8 +32,8 @@ import {
 } from '../utils';
 import { RuleActions } from '../../rule_actions/types';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
-import { BaseRuleParams, RuleParams } from '../../schemas/rule_schemas';
-import { SanitizedAlert } from '../../../../../../alerting/common';
+import { RuleParams } from '../../schemas/rule_schemas';
+import { AlertTypeParams, SanitizedAlert } from '../../../../../../alerting/common';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -114,10 +114,11 @@ export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<R
   return alerts.map((alert) => transformAlertToRule(alert));
 };
 
-export const transformFindAlerts = <TRuleParams extends BaseRuleParams>(
+export const transformFindAlerts = <TRuleParams extends AlertTypeParams>(
   findResults: FindResult<TRuleParams>,
   ruleActions: { [key: string]: RuleActions | undefined },
-  ruleStatuses: { [key: string]: IRuleStatusSOAttributes[] | undefined }
+  ruleStatuses: { [key: string]: IRuleStatusSOAttributes[] | undefined },
+  isRuleRegistryEnabled: boolean
 ): {
   page: number;
   perPage: number;
@@ -131,7 +132,12 @@ export const transformFindAlerts = <TRuleParams extends BaseRuleParams>(
     data: findResults.data.map((alert) => {
       const statuses = ruleStatuses[alert.id];
       const status = statuses ? statuses[0] : undefined;
-      return internalRuleToAPIResponse<TRuleParams>(alert, ruleActions[alert.id], status);
+      return internalRuleToAPIResponse<TRuleParams>(
+        alert,
+        ruleActions[alert.id],
+        status,
+        isRuleRegistryEnabled
+      );
     }),
   };
 };
