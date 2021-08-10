@@ -32,38 +32,42 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions, directorie
     .sort(sortByOrder);
   solutions = solutions.sort(sortByOrder).filter(({ id }) => id !== 'kibana');
 
-  return (
-    <>
-      <section aria-labelledby="homSolutions__title" className="homSolutions">
-        <EuiScreenReaderOnly>
-          <h2 id="homSolutions__title">
-            <FormattedMessage
-              id="home.solutionsSection.sectionTitle"
-              defaultMessage="Pick your solution"
-            />
-          </h2>
-        </EuiScreenReaderOnly>
+  if (solutions.length) {
+    return (
+      <>
+        <section aria-labelledby="homSolutions__title" className="homSolutions">
+          <EuiScreenReaderOnly>
+            <h2 id="homSolutions__title">
+              <FormattedMessage
+                id="home.solutionsSection.sectionTitle"
+                defaultMessage="Pick your solution"
+              />
+            </h2>
+          </EuiScreenReaderOnly>
 
-        <EuiFlexGroup className="homSolutions__content">
-          {kibana ? (
-            <SolutionPanel
-              addBasePath={addBasePath}
-              apps={kibanaApps.length ? kibanaApps : undefined}
-              solution={kibana}
-            />
-          ) : null}
+          <EuiFlexGroup className="homSolutions__content">
+            {kibana ? (
+              <SolutionPanel
+                addBasePath={addBasePath}
+                apps={kibanaApps.length ? kibanaApps : undefined}
+                solution={kibana}
+              />
+            ) : null}
 
-          {solutions.length
-            ? solutions.map((solution) => (
-                <SolutionPanel addBasePath={addBasePath} key={solution.id} solution={solution} />
-              ))
-            : null}
-        </EuiFlexGroup>
-      </section>
+            {solutions.length
+              ? solutions.map((solution) => (
+                  <SolutionPanel addBasePath={addBasePath} key={solution.id} solution={solution} />
+                ))
+              : null}
+          </EuiFlexGroup>
+        </section>
 
-      <EuiHorizontalRule margin="xxl" />
-    </>
-  );
+        <EuiHorizontalRule margin="xxl" />
+      </>
+    );
+  } else {
+    return null;
+  }
 };
 
 SolutionsSection.propTypes = {

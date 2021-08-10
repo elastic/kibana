@@ -9,14 +9,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import {
   KibanaPageTemplate,
   overviewPageActions,
   OverviewPageFooter,
-} from '../../../../../../src/plugins/kibana_react/public';
+} from '../../../../kibana_react/public';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import { FeatureCatalogueCategory } from '../../services';
 import { getServices } from '../kibana_services';
@@ -139,31 +138,22 @@ export class Home extends Component {
         }}
         template="empty"
       >
-        {solutions.length ? (
-          <SolutionsSection
-            addBasePath={addBasePath}
-            solutions={solutions}
-            directories={directories}
-          />
+        <SolutionsSection
+          addBasePath={addBasePath}
+          solutions={solutions}
+          directories={directories}
+        />
+
+        {/* TODO: HIDE IF NO ACCESS TO INTEGRATIONS AND BEATS */}
+        {addDataFeatures.length ? (
+          <AddData addBasePath={addBasePath} features={addDataFeatures} />
         ) : null}
 
-        <EuiFlexGroup
-          className={`homData ${
-            addDataFeatures.length === 1 && manageDataFeatures.length === 1
-              ? 'homData--compressed'
-              : 'homData--expanded'
-          }`}
-        >
-          <EuiFlexItem>
-            <AddData addBasePath={addBasePath} features={addDataFeatures} />
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <ManageData addBasePath={addBasePath} features={manageDataFeatures} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiHorizontalRule margin="xl" aria-hidden="true" />
+        <ManageData
+          addBasePath={addBasePath}
+          application={application}
+          features={manageDataFeatures}
+        />
 
         <OverviewPageFooter
           addBasePath={addBasePath}
@@ -184,6 +174,7 @@ export class Home extends Component {
   renderLoading() {
     return '';
   }
+
   renderWelcome() {
     return (
       <Welcome
