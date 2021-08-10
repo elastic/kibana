@@ -12,6 +12,7 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
   ALERT_SEVERITY_LEVEL,
   ALERT_SEVERITY_VALUE,
 } from '@kbn/rule-data-utils/target/technical_field_names';
@@ -30,6 +31,7 @@ import {
   AlertType,
   ALERT_TYPES_CONFIG,
   ANOMALY_ALERT_SEVERITY_TYPES,
+  formatTransactionDurationAnomalyReason,
 } from '../../../common/alert_types';
 import { getMLJobs } from '../service_map/get_service_anomalies';
 import { apmActionVariables } from './action_variables';
@@ -246,6 +248,11 @@ export function registerTransactionDurationAnomalyAlertType({
                 [ALERT_SEVERITY_VALUE]: score,
                 [ALERT_EVALUATION_VALUE]: score,
                 [ALERT_EVALUATION_THRESHOLD]: threshold,
+                [ALERT_REASON]: formatTransactionDurationAnomalyReason({
+                  measured: score,
+                  serviceName,
+                  severityLevel,
+                }),
               },
             })
             .scheduleActions(alertTypeConfig.defaultActionGroupId, {

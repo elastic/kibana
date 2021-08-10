@@ -10,6 +10,7 @@ import { take } from 'rxjs/operators';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
 } from '@kbn/rule-data-utils/target/technical_field_names';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
@@ -21,6 +22,7 @@ import {
   AlertType,
   APM_SERVER_FEATURE_ID,
   ALERT_TYPES_CONFIG,
+  formatErrorCountReason,
 } from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
@@ -150,6 +152,11 @@ export function registerErrorCountAlertType({
                   [PROCESSOR_EVENT]: ProcessorEvent.error,
                   [ALERT_EVALUATION_VALUE]: errorCount,
                   [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold,
+                  [ALERT_REASON]: formatErrorCountReason({
+                    serviceName,
+                    threshold: alertParams.threshold,
+                    measured: errorCount,
+                  }),
                 },
               })
               .scheduleActions(alertTypeConfig.defaultActionGroupId, {

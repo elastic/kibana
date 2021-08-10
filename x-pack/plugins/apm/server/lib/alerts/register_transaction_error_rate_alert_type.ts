@@ -10,6 +10,7 @@ import { take } from 'rxjs/operators';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
 } from '@kbn/rule-data-utils/target/technical_field_names';
 import {
   ENVIRONMENT_NOT_DEFINED,
@@ -21,6 +22,7 @@ import {
   AlertType,
   ALERT_TYPES_CONFIG,
   APM_SERVER_FEATURE_ID,
+  formatTransactionErrorRateReason,
 } from '../../../common/alert_types';
 import {
   EVENT_OUTCOME,
@@ -37,6 +39,7 @@ import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
+import { asPercent } from '../../../../observability/common/utils/formatters';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -209,6 +212,12 @@ export function registerTransactionErrorRateAlertType({
                 [PROCESSOR_EVENT]: ProcessorEvent.transaction,
                 [ALERT_EVALUATION_VALUE]: errorRate,
                 [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold,
+                [ALERT_REASON]: formatTransactionErrorRateReason({
+                  threshold: alertParams.threshold,
+                  measured: errorRate,
+                  asPercent,
+                  serviceName,
+                }),
               },
             })
             .scheduleActions(alertTypeConfig.defaultActionGroupId, {

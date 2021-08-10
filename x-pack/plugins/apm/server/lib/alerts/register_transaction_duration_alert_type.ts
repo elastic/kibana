@@ -11,7 +11,9 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
 } from '@kbn/rule-data-utils/target/technical_field_names';
+import { asDuration } from '../../../../observability/common/utils/formatters';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
   getEnvironmentLabel,
@@ -21,6 +23,7 @@ import {
   AlertType,
   APM_SERVER_FEATURE_ID,
   ALERT_TYPES_CONFIG,
+  formatTransactionDurationReason,
 } from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
@@ -169,6 +172,12 @@ export function registerTransactionDurationAlertType({
               [PROCESSOR_EVENT]: ProcessorEvent.transaction,
               [ALERT_EVALUATION_VALUE]: transactionDuration,
               [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold * 1000,
+              [ALERT_REASON]: formatTransactionDurationReason({
+                measured: transactionDuration,
+                serviceName: alertParams.serviceName,
+                threshold: alertParams.threshold,
+                asDuration,
+              }),
             },
           })
           .scheduleActions(alertTypeConfig.defaultActionGroupId, {
