@@ -7,30 +7,64 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiPopover,
   EuiPopoverTitle,
   EuiExpression,
   EuiFormRow,
   EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFormHelpText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { IFieldType } from 'src/plugins/data/public';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { DEFAULT_MAX_BUCKETS_LIMIT } from '../../../../../common/constants';
 import { SingleFieldSelect } from '../../../../components/single_field_select';
 import { ValidatedNumberInput } from '../../../../components/validated_number_input';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { getTermsFields } from '../../../../index_pattern_util';
 import {
   getIndexPatternService,
   getIndexPatternSelectComponent,
 } from '../../../../kibana_services';
+import type { JoinField } from '../join_editor';
 
-export class JoinExpression extends Component {
-  state = {
+interface Props {
+  // Left source props (static - can not change)
+  leftSourceName?: string;
+
+  // Left field props
+  leftValue?: string;
+  leftFields: JoinField[];
+  onLeftFieldChange: (leftField: string) => void;
+
+  // Right source props
+  rightSourceIndexPatternId: string;
+  rightSourceName: string;
+  onRightSourceChange: ({
+    indexPatternId,
+    indexPatternTitle,
+  }: {
+    indexPatternId: string;
+    indexPatternTitle: string;
+  }) => void;
+
+  // Right field props
+  rightValue: string;
+  rightSize?: number;
+  rightFields: IFieldType[];
+  onRightFieldChange: (term?: string) => void;
+  onRightSizeChange: (size: number) => void;
+}
+
+interface State {
+  isPopoverOpen: boolean;
+}
+
+export class JoinExpression extends Component<Props, State> {
+  state: State = {
     isPopoverOpen: false,
   };
 
@@ -46,7 +80,11 @@ export class JoinExpression extends Component {
     });
   };
 
-  _onRightSourceChange = async (indexPatternId) => {
+  _onRightSourceChange = async (indexPatternId?: string) => {
+    if (!indexPatternId || indexPatternId.length === 0) {
+      return;
+    }
+
     try {
       const indexPattern = await getIndexPatternService().get(indexPatternId);
       this.props.onRightSourceChange({
@@ -58,7 +96,7 @@ export class JoinExpression extends Component {
     }
   };
 
-  _onLeftFieldChange = (selectedFields) => {
+  _onLeftFieldChange = (selectedFields: Array<EuiComboBoxOptionOption<JoinField>>) => {
     this.props.onLeftFieldChange(_.get(selectedFields, '[0].value.name', null));
   };
 
@@ -246,7 +284,9 @@ export class JoinExpression extends Component {
             })}
           >
             <EuiComboBox
-              selectedOptions={[{ value: leftSourceName, label: leftSourceName }]}
+              selectedOptions={
+                leftSourceName ? [{ value: leftSourceName, label: leftSourceName }] : []
+              }
               isDisabled
             />
           </EuiFormRow>
@@ -262,33 +302,6 @@ export class JoinExpression extends Component {
     );
   }
 }
-
-JoinExpression.propTypes = {
-  // Left source props (static - can not change)
-  leftSourceName: PropTypes.string,
-
-  // Left field props
-  leftValue: PropTypes.string,
-  leftFields: PropTypes.arrayOf(
-    PropTypes.shape({
-      label: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-    })
-  ),
-  onLeftFieldChange: PropTypes.func.isRequired,
-
-  // Right source props
-  rightSourceIndexPatternId: PropTypes.string,
-  rightSourceName: PropTypes.string,
-  onRightSourceChange: PropTypes.func.isRequired,
-
-  // Right field props
-  rightValue: PropTypes.string,
-  rightSize: PropTypes.number,
-  rightFields: PropTypes.array,
-  onRightFieldChange: PropTypes.func.isRequired,
-  onRightSizeChange: PropTypes.func.isRequired,
-};
 
 function getSelectFieldPlaceholder() {
   return i18n.translate('xpack.maps.layerPanel.joinExpression.selectFieldPlaceholder', {
