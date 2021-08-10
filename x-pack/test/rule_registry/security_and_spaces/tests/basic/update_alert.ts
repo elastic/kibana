@@ -145,25 +145,11 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(404);
         });
-
-        it(`${username} should return a 404 when superuser accesses not-existent alerts as data index`, async () => {
-          await supertestWithoutAuth
-            .get(`${getSpaceUrlPrefix(space)}${TEST_URL}?id=${APM_ALERT_ID}&index=myfakeindex`)
-            .auth(username, password)
-            .set('kbn-xsrf', 'true')
-            .send({
-              ids: [APM_ALERT_ID],
-              status: 'closed',
-              index: 'this index does not exist',
-              _version: ALERT_VERSION,
-            })
-            .expect(404);
-        });
       });
 
       unauthorizedUsers.forEach(({ username, password }) => {
         it(`${username} should NOT be able to update alert ${alertId} in ${space}/${index}`, async () => {
-          await supertestWithoutAuth
+          const res = await supertestWithoutAuth
             .post(`${getSpaceUrlPrefix(space)}${TEST_URL}`)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
@@ -172,8 +158,8 @@ export default ({ getService }: FtrProviderContext) => {
               status: 'closed',
               index,
               _version: ALERT_VERSION,
-            })
-            .expect(403);
+            });
+          expect([403, 404]).to.contain(res.statusCode);
         });
       });
     }
