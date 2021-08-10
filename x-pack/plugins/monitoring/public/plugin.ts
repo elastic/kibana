@@ -97,6 +97,7 @@ export class MonitoringPlugin
           pluginsStart.kibanaLegacy.loadAngularBootstrap(),
           import('./angular'),
         ]);
+        const externalConfig = this.getExternalConfig();
         const deps: MonitoringStartPluginDependencies = {
           navigation: pluginsStart.navigation,
           kibanaLegacy: pluginsStart.kibanaLegacy,
@@ -105,27 +106,33 @@ export class MonitoringPlugin
           data: pluginsStart.data,
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           pluginInitializerContext: this.initializerContext,
-          externalConfig: this.getExternalConfig(),
+          externalConfig,
           triggersActionsUi: pluginsStart.triggersActionsUi,
           usageCollection: plugins.usageCollection,
           appMountParameters: params,
         };
 
-        const monitoringApp = new AngularApp(deps);
-        const removeHistoryListener = params.history.listen((location) => {
-          if (location.pathname === '' && location.hash === '') {
-            monitoringApp.applyScope();
-          }
-        });
+        //  TODO: this shouldn't be hardcoded
+        if (externalConfig[4][1]) {
+          const { renderApp } = await import('./application.tsx');
+          return renderApp(coreStart, pluginsStart, params);
+        } else {
+          const monitoringApp = new AngularApp(deps);
+          const removeHistoryListener = params.history.listen((location) => {
+            if (location.pathname === '' && location.hash === '') {
+              monitoringApp.applyScope();
+            }
+          });
 
-        const removeHashChange = this.setInitialTimefilter(deps);
-        return () => {
-          if (removeHashChange) {
-            removeHashChange();
-          }
-          removeHistoryListener();
-          monitoringApp.destroy();
-        };
+          const removeHashChange = this.setInitialTimefilter(deps);
+          return () => {
+            if (removeHashChange) {
+              removeHashChange();
+            }
+            removeHistoryListener();
+            monitoringApp.destroy();
+          };
+        }
       },
     };
 
@@ -166,6 +173,7 @@ export class MonitoringPlugin
       ['showLicenseExpiration', monitoring.ui.show_license_expiration],
       ['showCgroupMetricsElasticsearch', monitoring.ui.container.elasticsearch.enabled],
       ['showCgroupMetricsLogstash', monitoring.ui.container.logstash.enabled],
+      ['renderReactApp', monitoring.ui.render_react_app],
     ];
   }
 

@@ -6,12 +6,13 @@
  */
 
 import React, { Fragment } from 'react';
+// import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ElasticsearchPanel } from './elasticsearch_panel';
-import { KibanaPanel } from './kibana_panel';
-import { LogstashPanel } from './logstash_panel';
-import { BeatsPanel } from './beats_panel';
+// import { KibanaPanel } from './kibana_panel';
+// import { LogstashPanel } from './logstash_panel';
+// import { BeatsPanel } from './beats_panel';
 import { EuiPage, EuiPageBody, EuiScreenReaderOnly } from '@elastic/eui';
-import { ApmPanel } from './apm_panel';
+// import { ApmPanel } from './apm_panel';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 
@@ -40,15 +41,15 @@ export function Overview(props) {
               showLicenseExpiration={props.showLicenseExpiration}
               alerts={props.alerts}
             />
-            <KibanaPanel
+            {/* <KibanaPanel
               {...props.cluster.kibana}
               setupMode={props.setupMode}
               alerts={props.alerts}
-            />
+            /> */}
           </Fragment>
         ) : null}
 
-        <LogstashPanel
+        {/* <LogstashPanel
           {...props.cluster.logstash}
           setupMode={props.setupMode}
           alerts={props.alerts}
@@ -56,7 +57,7 @@ export function Overview(props) {
 
         <BeatsPanel {...props.cluster.beats} setupMode={props.setupMode} alerts={props.alerts} />
 
-        <ApmPanel {...props.cluster.apm} setupMode={props.setupMode} alerts={props.alerts} />
+        <ApmPanel {...props.cluster.apm} setupMode={props.setupMode} alerts={props.alerts} /> */}
       </EuiPageBody>
     </EuiPage>
   );

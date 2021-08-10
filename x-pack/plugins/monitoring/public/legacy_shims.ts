@@ -142,9 +142,9 @@ export class Legacy {
   }
 
   public static get shims(): Readonly<IShims> {
-    if (!Legacy._shims) {
-      throw new Error('Legacy needs to be initiated with Legacy.init(...) before use');
-    }
+    // if (!Legacy._shims) {
+    //   console.log('Legacy needs to be initiated with Legacy.init(...) before use');
+    // }
     return Legacy._shims;
   }
 }

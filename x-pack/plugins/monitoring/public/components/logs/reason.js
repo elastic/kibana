@@ -9,13 +9,12 @@ import React from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Legacy } from '../../legacy_shims';
 import { Monospace } from '../metricbeat_migration/instruction_steps/components/monospace/monospace';
 
 export const Reason = ({ reason }) => {
-  const filebeatUrl = Legacy.shims.docLinks.links.filebeat.installation;
-  const elasticsearchUrl = Legacy.shims.docLinks.links.filebeat.elasticsearchModule;
-  const troubleshootUrl = Legacy.shims.docLinks.links.monitoring.troubleshootKibana;
+  const filebeatUrl = 'http://aUrl.com';
+  const elasticsearchUrl = 'http://aUrl.com';
+  const troubleshootUrl = 'http://aUrl.com';
   let title = i18n.translate('xpack.monitoring.logs.reason.defaultTitle', {
     defaultMessage: 'No log data found',
   });

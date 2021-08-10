@@ -18,7 +18,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React from 'react';
-import { Legacy } from '../../../legacy_shims';
 import { formatBytesUsage, formatNumber, formatPercentageUsage } from '../../../lib/format_number';
 
 export function HealthLabel(props) {
@@ -50,7 +49,7 @@ export function HealthLabel(props) {
         {i18n.translate('xpack.monitoring.cluster.health.pluginIssues', {
           defaultMessage: 'Some plugins may be experiencing issues. Please check ',
         })}
-        <EuiLink href={`${Legacy.shims.getBasePath()}/status`}>the Kibana status page</EuiLink>.
+        <EuiLink href="/status">the Kibana status page</EuiLink>.
       </EuiText>
     );
   }
