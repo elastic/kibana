@@ -6,7 +6,7 @@
  */
 import './_index.scss';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -35,6 +35,7 @@ import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_typ
 import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
+import { ChartAnnotationLineService } from '../../components/chart_annotation_line/chart_annotation_line_service';
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
   defaultMessage:
     'This selection contains too many buckets to be displayed. You should shorten the time range of the view or narrow the selection in the timeline.',
@@ -74,6 +75,7 @@ function ExplorerChartContainer({
   showSelectedInterval,
 }) {
   const [explorerSeriesLink, setExplorerSeriesLink] = useState('');
+  const chartAnnotationLineService = useMemo(() => new ChartAnnotationLineService(), []);
 
   useEffect(() => {
     let isCancelled = false;

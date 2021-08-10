@@ -74,7 +74,7 @@ export class ExplorerChartDistribution extends React.Component {
     }
 
     const fieldFormat = mlFieldFormatService.getFieldFormat(config.jobId, config.detectorIndex);
-
+    let svg = undefined;
     let vizWidth = 0;
     const chartHeight = 170;
     const LINE_CHART_ANOMALY_RADIUS = 7;
@@ -99,7 +99,7 @@ export class ExplorerChartDistribution extends React.Component {
     highlight = highlight && highlight.entity;
 
     const filteredChartData = init(config);
-    drawRareChart(filteredChartData);
+    drawRareChart(filteredChartData, margin);
 
     function init({ chartData, functionDescription }) {
       const $el = $('.ml-explorer-chart');
@@ -112,7 +112,7 @@ export class ExplorerChartDistribution extends React.Component {
       const svgWidth = $el.width();
       const svgHeight = chartHeight + margin.top + margin.bottom;
 
-      const svg = chartElement
+      svg = chartElement
         .append('svg')
         .classed('ml-explorer-chart-svg', true)
         .attr('width', svgWidth)
@@ -242,7 +242,7 @@ export class ExplorerChartDistribution extends React.Component {
       return chartData;
     }
 
-    function drawRareChart(data) {
+    function drawRareChart(data, margin) {
       // Add border round plot area.
       lineChartGroup
         .append('rect')
@@ -258,6 +258,7 @@ export class ExplorerChartDistribution extends React.Component {
       drawRareChartHighlightedSpan();
       drawRareChartDots(data, lineChartGroup, lineChartValuesLine);
       drawRareChartMarkers(data);
+      drawRareChartAnnotationLine(lineChartGroup, vizWidth, chartHeight, margin);
     }
 
     function drawRareChartAxes() {
@@ -270,6 +271,12 @@ export class ExplorerChartDistribution extends React.Component {
       const tickValuesStart = Math.max(config.selectedEarliest, config.plotEarliest);
       // +1 ms to account for the ms that was subtracted for query aggregations.
       const interval = config.selectedLatest - config.selectedEarliest + 1;
+      const tickValues = getTickValues(
+        tickValuesStart,
+        interval,
+        config.plotEarliest,
+        config.plotLatest
+      );
 
       const xAxis = d3.svg
         .axis()
@@ -280,18 +287,10 @@ export class ExplorerChartDistribution extends React.Component {
         .tickPadding(10)
         .tickFormat((d) => moment(d).format(xAxisTickFormat));
 
-      // With tooManyBuckets, or when the chart is used as an embeddable,
-      // the chart would end up with no x-axis labels because the ticks are based on the span of the
-      // emphasis section, and the selected area spans the whole chart.
-      const useAutoTicks =
-        tooManyBuckets === true || interval >= config.plotLatest - config.plotEarliest;
-      if (useAutoTicks === false) {
-        const tickValues = getTickValues(
-          tickValuesStart,
-          interval,
-          config.plotEarliest,
-          config.plotLatest
-        );
+      // With tooManyBuckets the chart would end up with no x-axis labels
+      // because the ticks are based on the span of the emphasis section,
+      // and the highlighted area spans the whole chart.
+      if (tooManyBuckets === false) {
         xAxis.tickValues(tickValues);
       } else {
         xAxis.ticks(numTicksForDateFormat(vizWidth, xAxisTickFormat));
@@ -329,7 +328,7 @@ export class ExplorerChartDistribution extends React.Component {
           });
       }
 
-      if (useAutoTicks === false) {
+      if (tooManyBuckets === false) {
         removeLabelOverlap(gAxis, tickValuesStart, interval, vizWidth);
       }
     }
@@ -439,6 +438,43 @@ export class ExplorerChartDistribution extends React.Component {
           'y',
           (d) => lineChartYScale(d[CHART_Y_ATTRIBUTE]) - SCHEDULED_EVENT_MARKER_HEIGHT / 2
         );
+    }
+
+    function drawRareChartAnnotationLine(anchor, svgWidth, svgHeight, margin) {
+      const mouseG = svg
+        .append('g')
+        .attr('class', 'mouse-over-effects')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+      mouseG
+        .append('path') // this is the black vertical line to follow mouse
+        .attr('class', 'mouse-line')
+        .style('stroke', 'black')
+        .style('stroke-width', '1px');
+
+      mouseG
+        .append('svg:rect') // append a rect to catch mouse movements on canvas
+        .attr('width', svgWidth) // can't catch mouse events on a g element
+        .attr('height', svgHeight)
+        .attr('fill', 'none')
+        .attr('opacity', 0)
+        .attr('pointer-events', 'all')
+        .on('mouseout', function () {
+          // on mouse out hide line, circles and text
+          d3.selectAll('.mouse-line').style('opacity', '0');
+        })
+        .on('mouseover', function () {
+          // on mouse in show line, circles and text
+          d3.selectAll('.mouse-line').style('opacity', '1');
+        })
+        .on('mousemove', function () {
+          // mouse moving over canvas
+          const mouse = d3.mouse(this);
+          d3.selectAll('.mouse-line').attr('d', function () {
+            let d = 'M' + mouse[0] + ',' + svgHeight;
+            d += ' ' + mouse[0] + ',' + 0;
+            return d;
+          });
+        });
     }
 
     function showLineChartTooltip(marker, circle) {

@@ -73,7 +73,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     }
 
     const fieldFormat = mlFieldFormatService.getFieldFormat(config.jobId, config.detectorIndex);
-
+    let svg = undefined;
     let vizWidth = 0;
     const chartHeight = 170;
 
@@ -99,7 +99,7 @@ export class ExplorerChartSingleMetric extends React.Component {
       const svgWidth = $el.width();
       const svgHeight = chartHeight + margin.top + margin.bottom;
 
-      const svg = chartElement
+      svg = chartElement
         .append('svg')
         .classed('ml-explorer-chart-svg', true)
         .attr('width', svgWidth)
@@ -180,10 +180,48 @@ export class ExplorerChartSingleMetric extends React.Component {
         .style('stroke-width', 1);
 
       drawLineChartAxes();
-      drawLineChartHighlightedSpan();
+      drawLineChartHighlightedSpan(vizWidth, chartHeight);
       drawLineChartPaths(data);
+      drawChartAnnotationLine(lineChartGroup, vizWidth, chartHeight, margin);
       drawLineChartDots(data, lineChartGroup, lineChartValuesLine);
       drawLineChartMarkers(data);
+    }
+
+    function drawChartAnnotationLine(anchor, svgWidth, svgHeight, margin) {
+      const mouseG = svg
+        .append('g')
+        .attr('class', 'mouse-over-effects')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+      mouseG
+        .append('path') // this is the black vertical line to follow mouse
+        .attr('class', 'mouse-line')
+        .style('stroke', 'black')
+        .style('stroke-width', '1px');
+
+      mouseG
+        .append('svg:rect') // append a rect to catch mouse movements on canvas
+        .attr('width', svgWidth) // can't catch mouse events on a g element
+        .attr('height', svgHeight)
+        .attr('fill', 'none')
+        .attr('opacity', 0)
+        .attr('pointer-events', 'all')
+        .on('mouseout', function () {
+          // on mouse out hide line, circles and text
+          d3.selectAll('.mouse-line').style('opacity', '0');
+        })
+        .on('mouseover', function () {
+          // on mouse in show line, circles and text
+          d3.selectAll('.mouse-line').style('opacity', '1');
+        })
+        .on('mousemove', function () {
+          // mouse moving over canvas
+          const mouse = d3.mouse(this);
+          d3.selectAll('.mouse-line').attr('d', function () {
+            let d = 'M' + mouse[0] + ',' + svgHeight;
+            d += ' ' + mouse[0] + ',' + 0;
+            return d;
+          });
+        });
     }
 
     function drawLineChartAxes() {
