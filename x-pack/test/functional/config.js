@@ -388,7 +388,7 @@ export default async function ({ readConfigFile }) {
           elasticsearch: {
             indices: [
               {
-                names: ['logs-*'],
+                names: ['logs-*', 'test_data_stream'],
                 privileges: ['read', 'view_index_metadata'],
               },
             ],

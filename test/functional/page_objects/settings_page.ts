@@ -177,6 +177,10 @@ export class SettingsPageObject extends FtrService {
     await this.testSubjects.click('deleteIndexPatternButton');
   }
 
+  async clickCloseFlyOutButton() {
+    await this.testSubjects.click('closeFlyoutButton');
+  }
+
   async getIndexPageHeading() {
     return await this.testSubjects.getVisibleText('indexPatternTitle');
   }
@@ -357,7 +361,12 @@ export class SettingsPageObject extends FtrService {
       }
 
       await this.header.waitUntilLoadingHasFinished();
-      await this.clickAddNewIndexPatternButton();
+      const flyOut = await this.testSubjects.exists('createAnyway');
+      if (flyOut) {
+        await this.testSubjects.click('createAnyway');
+      } else {
+        await this.clickAddNewIndexPatternButton();
+      }
       await this.header.waitUntilLoadingHasFinished();
       if (!isStandardIndexPattern) {
         await this.selectRollupIndexPatternType();
@@ -740,6 +749,12 @@ export class SettingsPageObject extends FtrService {
   async closeScriptedFieldHelp() {
     await this.flyout.ensureClosed('scriptedFieldsHelpFlyout');
   }
+
+  async closeIndexPatternFlyOut() {
+    await this.testSubjects.click('createAnyway');
+  }
+
+  // createAnyway
 
   async executeScriptedField(script: string, additionalField: string) {
     this.log.debug('execute Scripted Fields help');
