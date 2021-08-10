@@ -6,6 +6,7 @@
 
 import { CoreSetup } from 'kibana/server';
 import { CoreStart } from 'kibana/server';
+import { KibanaExecutionContext } from 'src/core/public';
 import { Plugin } from 'kibana/server';
 import { SerializableRecord } from '@kbn/utility-types';
 

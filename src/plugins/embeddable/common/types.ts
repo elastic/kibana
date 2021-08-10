@@ -7,6 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { KibanaExecutionContext } from 'src/core/public';
 import { PersistableStateService } from '../../kibana_utils/common';
 
 export enum ViewMode {
@@ -50,6 +51,8 @@ export type EmbeddableInput = {
    * Flag whether colors should be synced with other panels
    */
   syncColors?: boolean;
+
+  executionContext?: KibanaExecutionContext;
 };
 
 export interface PanelState<E extends EmbeddableInput & { id: string } = { id: string }> {

@@ -282,10 +282,22 @@ export class AlertingAuthorization {
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
     logSuccessfulAuthorization: () => void;
   }> {
+    return this.getAuthorizationFilter(authorizationEntity, filterOpts, ReadOperations.Find);
+  }
+
+  public async getAuthorizationFilter(
+    authorizationEntity: AlertingAuthorizationEntity,
+    filterOpts: AlertingAuthorizationFilterOpts,
+    operation: WriteOperations | ReadOperations
+  ): Promise<{
+    filter?: KueryNode | JsonObject;
+    ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
+    logSuccessfulAuthorization: () => void;
+  }> {
     if (this.authorization && this.shouldCheckAuthorization()) {
       const { username, authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
         this.ruleTypeRegistry.list(),
-        [ReadOperations.Find],
+        [operation],
         authorizationEntity
       );
 

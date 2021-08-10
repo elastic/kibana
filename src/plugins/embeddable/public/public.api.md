@@ -28,6 +28,7 @@ import { I18nStart as I18nStart_2 } from 'src/core/public';
 import { IconType } from '@elastic/eui';
 import { IncomingHttpHeaders } from 'http';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import { KibanaExecutionContext as KibanaExecutionContext_2 } from 'src/core/public';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
@@ -422,6 +423,7 @@ export type EmbeddableInput = {
     disableTriggers?: boolean;
     searchSessionId?: string;
     syncColors?: boolean;
+    executionContext?: KibanaExecutionContext_2;
 };
 
 // Warning: (ae-missing-release-tag) "EmbeddableInstanceConfiguration" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

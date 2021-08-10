@@ -8,7 +8,7 @@ import { CoreSetup } from 'src/core/server';
 import { CoreStart } from 'src/core/server';
 import { Ensure } from '@kbn/utility-types';
 import { EventEmitter } from 'events';
-import { IExecutionContextContainer } from 'src/core/public';
+import { KibanaExecutionContext } from 'src/core/public';
 import { KibanaRequest } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { ObservableLike } from '@kbn/utility-types';
@@ -137,7 +137,7 @@ export type ExecutionContainer<Output = ExpressionValue> = StateContainer<Execut
 // @public
 export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters, ExecutionContextSearch extends SerializableRecord = SerializableRecord> {
     abortSignal: AbortSignal;
-    getExecutionContext: () => IExecutionContextContainer | undefined;
+    getExecutionContext: () => KibanaExecutionContext | undefined;
     getKibanaRequest?: () => KibanaRequest;
     getSearchContext: () => ExecutionContextSearch;
     getSearchSessionId: () => string | undefined;

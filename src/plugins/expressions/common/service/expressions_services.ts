@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 import type { SerializableRecord } from '@kbn/utility-types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from 'src/core/server';
-import type { IExecutionContextContainer } from 'src/core/public';
+import type { KibanaExecutionContext } from 'src/core/public';
 
 import { Executor } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
@@ -81,7 +81,7 @@ export interface ExpressionExecutionParams {
 
   inspectorAdapters?: Adapters;
 
-  executionContext?: IExecutionContextContainer;
+  executionContext?: KibanaExecutionContext;
 }
 
 /**
