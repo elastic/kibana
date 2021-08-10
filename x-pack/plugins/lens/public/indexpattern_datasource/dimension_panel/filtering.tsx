@@ -93,7 +93,12 @@ export function Filtering({
   );
 
   return (
-    <EuiFormRow display="columnCompressed" label={filterByLabel} fullWidth>
+    <EuiFormRow
+      display="columnCompressed"
+      label={filterByLabel}
+      fullWidth
+      isInvalid={!isInputFilterValid}
+    >
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem>
           <EuiPopover
