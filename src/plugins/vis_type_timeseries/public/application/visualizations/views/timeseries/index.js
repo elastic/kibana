@@ -323,6 +323,7 @@ TimeSeries.propTypes = {
   legend: PropTypes.bool,
   legendPosition: PropTypes.string,
   truncateLegend: PropTypes.bool,
+  maxLegendLines: PropTypes.number,
   series: PropTypes.array,
   yAxis: PropTypes.array,
   onBrush: PropTypes.func,
