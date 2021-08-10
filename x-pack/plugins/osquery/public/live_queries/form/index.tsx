@@ -47,6 +47,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   defaultValue,
   onSuccess,
 }) => {
+  const permissions = useKibana().services.application.capabilities.osquery;
   const { http } = useKibana().services;
   const [showSavedQueryFlyout, setShowSavedQueryFlyout] = useState(false);
   const setErrorToast = useErrorToast();
@@ -175,7 +176,12 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           {!agentId && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                disabled={!agentSelected || !queryValueProvided || resultsStatus === 'disabled'}
+                disabled={
+                  !permissions.writeSavedQueries ||
+                  !agentSelected ||
+                  !queryValueProvided ||
+                  resultsStatus === 'disabled'
+                }
                 onClick={handleShowSaveQueryFlout}
               >
                 <FormattedMessage
@@ -199,6 +205,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [
       agentId,
       agentSelected,
+      permissions.writeSavedQueries,
       handleShowSaveQueryFlout,
       queryComponentProps,
       queryValueProvided,

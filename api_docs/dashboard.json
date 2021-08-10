@@ -1137,8 +1137,8 @@
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           }
         ],
         "path": "src/plugins/dashboard/public/locator.ts",
@@ -1204,8 +1204,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               ") | undefined"
             ],
@@ -1334,8 +1334,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               ") | undefined"
             ],
