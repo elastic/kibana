@@ -7,6 +7,7 @@
  */
 
 import _ from 'lodash';
+import type { KibanaExecutionContext } from 'src/core/public';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../embeddable';
 import {
@@ -34,6 +35,7 @@ type BuildDashboardContainerProps = DashboardBuildContext & {
   savedDashboard: DashboardSavedObject;
   initialDashboardState: DashboardState;
   incomingEmbeddable?: EmbeddablePackageState;
+  executionContext?: KibanaExecutionContext;
 };
 
 /**
@@ -50,6 +52,7 @@ export const buildDashboardContainer = async ({
   embeddable,
   history,
   data,
+  executionContext,
 }: BuildDashboardContainerProps) => {
   const {
     search: { session },
@@ -102,6 +105,7 @@ export const buildDashboardContainer = async ({
     query: data.query,
     searchSessionId,
     savedDashboard,
+    executionContext,
   });
 
   /**

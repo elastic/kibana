@@ -30,4 +30,5 @@ export interface VisSeries {
   color?: string;
   data: Array<Array<number | null>>;
   stack: boolean;
+  _hide?: boolean;
 }
