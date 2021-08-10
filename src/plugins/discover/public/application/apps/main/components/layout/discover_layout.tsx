@@ -31,7 +31,7 @@ import {
 } from '../../../../../../../data/public';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
-import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../../../../common';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../../common';
 import { popularizeField } from '../../../../helpers/popularize_field';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { DocViewFilterFn, ElasticSearchHit } from '../../../../doc_views/doc_views_types';
@@ -88,7 +88,6 @@ export function DiscoverLayout({
   }, [indexPattern]);
 
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
-  const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const resultState = useMemo(
@@ -251,7 +250,6 @@ export function DiscoverLayout({
                   >
                     <EuiFlexItem grow={false}>
                       <DiscoverChartMemoized
-                        isLegacy={isLegacy}
                         state={state}
                         resetQuery={resetQuery}
                         savedSearch={savedSearch}
