@@ -6,6 +6,7 @@
  */
 
 import { EventEcs } from '../event';
+import { UrlEcs } from '../url';
 
 interface ThreatMatchEcs {
   atomic?: string[];
@@ -24,6 +25,7 @@ export interface LegacyThreatIndicatorEcs {
 }
 
 export interface ThreatIndicatorEcs {
+  url?: UrlEcs;
   provider?: string[];
   reference?: string[];
   type?: string[];

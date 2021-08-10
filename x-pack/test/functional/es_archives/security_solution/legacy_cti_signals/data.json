@@ -32,31 +32,8 @@
         "architecture": "x86_64",
         "hostname": "elastic.local",
         "id": "1633D595-A115-5BF5-870B-A471B49446C3",
-        "ip": [
-          "fe80::aede:48ff:fe00:1122",
-          "fe80::18ea:23b6:13de:e2f1",
-          "192.168.1.43",
-          "fe80::2490:bbff:fe0d:8b01",
-          "fe80::2490:bbff:fe0d:8b01",
-          "fe80::8d15:212c:404b:b3f6",
-          "fe80::f293:e535:f068:f60b",
-          "fe80::50a2:b70c:c965:7c1b",
-          "fe80::707e:2e1d:74f4:4ae5",
-          "fe80::2524:f453:bfa9:6263",
-          "fe80::1688:134:373d:6bfb"
-        ],
-        "mac": [
-          "ac:de:48:00:11:22",
-          "aa:66:5a:44:45:93",
-          "88:66:5a:44:45:93",
-          "26:90:bb:0d:8b:01",
-          "26:90:bb:0d:8b:01",
-          "82:7e:2a:21:48:05",
-          "82:7e:2a:21:48:04",
-          "82:7e:2a:21:48:01",
-          "82:7e:2a:21:48:00",
-          "82:7e:2a:21:48:01"
-        ],
+        "ip": [ "192.168.1.1" ],
+        "mac": [ "aa:bb:cc:dd:ee:ff" ],
         "name": "elastic.local",
         "os": {
           "build": "20G80",
@@ -68,7 +45,7 @@
           "version": "10.16"
         }
       },
-      "message": "Process mdworker_shared (PID: 32162) by user ryland STOPPED",
+      "message": "Process mdworker_shared (PID: 32162) by user elastic STOPPED",
       "process": {
         "args": [
           "/System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared",
@@ -217,7 +194,7 @@
               "ingested": "2021-08-04T03:53:37.514040Z",
               "kind": "enrichment",
               "module": "threatintel",
-              "reference": "https://urlhaus.abuse.ch/url/1503372/",
+              "reference": "https://urlhaus.abuse.ch/url/12345/",
               "type": "indicator"
             },
             "first_seen": "2021-08-03T20:35:17.000Z",
@@ -228,14 +205,14 @@
               "index": "filebeat-7.14.0-2021.08.04-000001",
               "type": "indicator_match_rule"
             },
-            "provider": "Cryptolaemus1",
+            "provider": "provider1",
             "type": "url",
             "url": {
-              "domain": "feedproxy.google.com",
+              "domain": "elastic.local",
               "extension": "php",
-              "full": "http://feedproxy.google.com/~r/tyydrixr/~3/-Qu77JMCUiI/convent.php",
-              "original": "http://feedproxy.google.com/~r/tyydrixr/~3/-Qu77JMCUiI/convent.php",
-              "path": "/~r/tyydrixr/~3/-Qu77JMCUiI/convent.php",
+              "full": "http://elastic.local/thing",
+              "original": "http://elastic.local/thing",
+              "path": "/thing",
               "scheme": "http"
             }
           }
@@ -253,7 +230,7 @@
           "name": "staff"
         },
         "id": "501",
-        "name": "ryland",
+        "name": "elastic",
         "saved": {
           "group": {
             "id": "20"
@@ -299,31 +276,8 @@
         "architecture": "x86_64",
         "hostname": "elastic.local",
         "id": "1633D595-A115-5BF5-870B-A471B49446C3",
-        "ip": [
-          "fe80::aede:48ff:fe00:1122",
-          "fe80::18ea:23b6:13de:e2f1",
-          "192.168.1.43",
-          "fe80::2490:bbff:fe0d:8b01",
-          "fe80::2490:bbff:fe0d:8b01",
-          "fe80::8d15:212c:404b:b3f6",
-          "fe80::f293:e535:f068:f60b",
-          "fe80::50a2:b70c:c965:7c1b",
-          "fe80::707e:2e1d:74f4:4ae5",
-          "fe80::2524:f453:bfa9:6263",
-          "fe80::1688:134:373d:6bfb"
-        ],
-        "mac": [
-          "ac:de:48:00:11:22",
-          "aa:66:5a:44:45:93",
-          "88:66:5a:44:45:93",
-          "26:90:bb:0d:8b:01",
-          "26:90:bb:0d:8b:01",
-          "82:7e:2a:21:48:05",
-          "82:7e:2a:21:48:04",
-          "82:7e:2a:21:48:01",
-          "82:7e:2a:21:48:00",
-          "82:7e:2a:21:48:01"
-        ],
+        "ip": [ "192.168.1.1" ],
+        "mac": [ "aa:bb:cc:dd:ee:ff" ],
         "name": "elastic.local",
         "os": {
           "build": "20G80",
@@ -335,7 +289,7 @@
           "version": "10.16"
         }
       },
-      "message": "Process mdworker_shared (PID: 32306) by user ryland STARTED",
+      "message": "Process mdworker_shared (PID: 32306) by user elastic STARTED",
       "process": {
         "args": [
           "/System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared",
@@ -484,7 +438,7 @@
               "ingested": "2021-08-04T03:53:37.514040Z",
               "kind": "enrichment",
               "module": "threatintel",
-              "reference": "https://urlhaus.abuse.ch/url/1503372/",
+              "reference": "https://urlhaus.abuse.ch/url/12345/",
               "type": "indicator"
             },
             "first_seen": "2021-08-03T20:35:17.000Z",
@@ -495,14 +449,14 @@
               "index": "filebeat-7.14.0-2021.08.04-000001",
               "type": "indicator_match_rule"
             },
-            "provider": "Cryptolaemus1",
+            "provider": "provider1",
             "type": "url",
             "url": {
-              "domain": "feedproxy.google.com",
+              "domain": "elastic.local",
               "extension": "php",
-              "full": "http://feedproxy.google.com/~r/tyydrixr/~3/-Qu77JMCUiI/convent.php",
-              "original": "http://feedproxy.google.com/~r/tyydrixr/~3/-Qu77JMCUiI/convent.php",
-              "path": "/~r/tyydrixr/~3/-Qu77JMCUiI/convent.php",
+              "full": "http://elastic.local/thing",
+              "original": "http://elastic.local/thing",
+              "path": "/thing",
               "scheme": "http"
             }
           }
@@ -520,7 +474,7 @@
           "name": "staff"
         },
         "id": "501",
-        "name": "ryland",
+        "name": "elastic",
         "saved": {
           "group": {
             "id": "20"

@@ -30,6 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('Alerts Compatibility', function () {
     describe('CTI', () => {
       const expectedDomain = 'elastic.local';
+      const expectedProvider = 'provider1';
       const expectedEnrichmentMatch = {
         atomic: expectedDomain,
         field: 'host.name',
@@ -83,9 +84,11 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hits.length).to.eql(2);
         const indicators = hits.flatMap((hit) => hit._source?.threat.indicator);
         const indicatorMatches = indicators.map((indicator) => indicator?.matched);
-        const indicatorDomains = indicators.map((indicator) => indicator?.domain);
         expect(indicatorMatches).to.eql([expectedEnrichmentMatch, expectedEnrichmentMatch]);
+        const indicatorDomains = indicators.map((indicator) => indicator?.domain);
         expect(indicatorDomains).to.eql([expectedDomain, expectedDomain]);
+        const indicatorProviders = indicators.map((indicator) => indicator?.provider);
+        expect(indicatorProviders).to.eql([expectedProvider, expectedProvider]);
       });
 
       it('migrates legacy enriched signals to be queried by threat.enrichments', async () => {
@@ -141,7 +144,14 @@ export default ({ getService }: FtrProviderContext) => {
         const enrichments = hits.flatMap((hit) => hit._source?.threat.enrichments);
         const enrichmentMatches = enrichments.map((enrichment) => enrichment?.matched);
         expect(enrichmentMatches).to.eql([expectedEnrichmentMatch, expectedEnrichmentMatch]);
-        // TODO check more field migrations, here
+        const enrichmentDomains = enrichments.map(
+          (enrichment) => enrichment?.indicator?.url?.domain
+        );
+        expect(enrichmentDomains).to.eql([expectedDomain, expectedDomain]);
+        const enrichmentProviders = enrichments.map(
+          (enrichment) => enrichment?.indicator?.provider
+        );
+        expect(enrichmentProviders).to.eql([expectedProvider, expectedProvider]);
       });
     });
   });
