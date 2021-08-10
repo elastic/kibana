@@ -126,6 +126,12 @@ export function ServiceOverviewThroughputChart({
                 'xpack.apm.serviceOverview.throughtputChartTitle',
                 { defaultMessage: 'Throughput' }
               )}
+              {data.throughputUnit === 'second'
+                ? i18n.translate(
+                    'xpack.apm.serviceOverview.throughtputPerSecondChartTitle',
+                    { defaultMessage: '(per second)' }
+                  )
+                : ''}
             </h2>
           </EuiTitle>
         </EuiFlexItem>
