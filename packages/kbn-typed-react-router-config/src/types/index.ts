@@ -56,6 +56,7 @@ interface PlainRoute {
   element: ReactElement;
   children?: PlainRoute[];
   params?: t.Type<any>;
+  defaults?: Record<string, Record<string, string>>;
 }
 
 interface ReadonlyPlainRoute {
@@ -63,6 +64,7 @@ interface ReadonlyPlainRoute {
   readonly element: ReactElement;
   readonly children?: readonly ReadonlyPlainRoute[];
   readonly params?: t.Type<any>;
+  readonly defaults?: Record<string, Record<string, string>>;
 }
 
 export type Route = PlainRoute | ReadonlyPlainRoute;

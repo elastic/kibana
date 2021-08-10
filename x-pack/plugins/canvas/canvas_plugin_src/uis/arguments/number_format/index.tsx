@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { compose, withProps } from 'recompose';
-import { NumberFormatArgInput as Component, Props as ComponentProps } from './number_format';
+import React from 'react';
+import { Assign } from '@kbn/utility-types';
+import { NumberFormatArgInput, Props as ComponentProps } from './number_format';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentFactory } from '../../../../types/arguments';
 import { ArgumentStrings } from '../../../../i18n';
@@ -14,6 +15,10 @@ import { SetupInitializer } from '../../../plugin';
 import { FORMATS_UI_SETTINGS } from '../../../../../../../src/plugins/field_formats/common';
 
 const { NumberFormat: strings } = ArgumentStrings;
+
+const getNumberFormatArgInput = (defaultNumberFormats: ComponentProps['numberFormats']) => (
+  props: Assign<ComponentProps, { numberFormats?: ComponentProps['numberFormats'] }>
+) => <NumberFormatArgInput numberFormats={defaultNumberFormats} {...props} />;
 
 export const numberFormatInitializer: SetupInitializer<ArgumentFactory<ComponentProps>> = (
   core,
@@ -35,14 +40,10 @@ export const numberFormatInitializer: SetupInitializer<ArgumentFactory<Component
     { value: formatMap.BYTES, text: strings.getFormatBytes() },
   ];
 
-  const NumberFormatArgInput = compose<ComponentProps, null>(withProps({ numberFormats }))(
-    Component
-  );
-
   return () => ({
     name: 'numberFormat',
     displayName: strings.getDisplayName(),
     help: strings.getHelp(),
-    simpleTemplate: templateFromReactComponent(NumberFormatArgInput),
+    simpleTemplate: templateFromReactComponent(getNumberFormatArgInput(numberFormats)),
   });
 };
