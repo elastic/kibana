@@ -68,7 +68,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
   const history = useHistory();
 
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
 
   const { pagination, pageOfItems } = useMemo(() => {
     const pageStart = pageIndex * pageSize;
