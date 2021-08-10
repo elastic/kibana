@@ -49,7 +49,10 @@ export function deleteTestSuiteFactory(
         size: 0,
         query: {
           terms: {
-            type: ['visualization', 'dashboard', 'space', 'config', 'index-pattern'],
+            type: ['visualization', 'dashboard', 'space', 'index-pattern'],
+            // TODO: add assertions for config objects -- these assertions were removed because of flaky behavior in #92358, but we should
+            // consider adding them again at some point, especially if we convert config objects to `namespaceType: 'multiple-isolated'` in
+            // the future.
           },
         },
         aggs: {
@@ -80,7 +83,7 @@ export function deleteTestSuiteFactory(
     const expectedBuckets = [
       {
         key: 'default',
-        doc_count: 9,
+        doc_count: 8,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
@@ -98,10 +101,6 @@ export function deleteTestSuiteFactory(
               doc_count: 2,
             },
             {
-              key: 'config',
-              doc_count: 1,
-            },
-            {
               key: 'index-pattern',
               doc_count: 1,
             },
@@ -109,7 +108,7 @@ export function deleteTestSuiteFactory(
         },
       },
       {
-        doc_count: 7,
+        doc_count: 6,
         key: 'space_1',
         countByType: {
           doc_count_error_upper_bound: 0,
@@ -122,10 +121,6 @@ export function deleteTestSuiteFactory(
             {
               key: 'dashboard',
               doc_count: 2,
-            },
-            {
-              key: 'config',
-              doc_count: 1,
             },
             {
               key: 'index-pattern',
@@ -190,16 +185,6 @@ export function deleteTestSuiteFactory(
         await esArchiver.load(
           'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
         );
-
-        // since we want to verify that we only delete the right things
-        // and can't include a config document with the correct id in the
-        // archive we read the settings to trigger an automatic upgrade
-        // in each space
-        await supertest.get('/api/kibana/settings').auth(user.username, user.password).expect(200);
-        await supertest
-          .get('/s/space_1/api/kibana/settings')
-          .auth(user.username, user.password)
-          .expect(200);
       });
       afterEach(() =>
         esArchiver.unload(
