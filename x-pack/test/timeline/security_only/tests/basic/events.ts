@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
 import { ALERT_ID, ALERT_OWNER } from '@kbn/rule-data-utils';
 
 import { getSpaceUrlPrefix } from '../../../../rule_registry/common/lib/authentication/spaces';
