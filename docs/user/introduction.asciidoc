@@ -108,7 +108,7 @@ You can limit your results to the most recent documents added to {es}.
 
 | *3*
 | *Visualize.* {kib} provides many options to create visualizations of your data, from
-aggregation-based data to time series data.
+aggregation-based data to time series data to geo data.
 <<dashboard, *Dashboard*>> is your starting point to create visualizations,
 and then pulling them together to show your data from multiple perspectives.
 
@@ -130,16 +130,6 @@ choice when you’re looking for a spatial pattern, performing ad-hoc location-d
 or analyzing metrics with a geographic perspective. With *Maps*, you can build
 world country maps, administrative region maps, and point-to-point origin-destination maps.
 You can also visualize and track movement over space and through time.
-
-[float]
-==== Model data behavior
-
-To model the behavior of your data, you'll use
-<<xpack-ml, *{ml-cap}*>>.
-This app can help you extract insights from your data that you might otherwise miss.
-You can forecast unusual behavior in your time series data.
-You can also perform outlier detection, regression, and classification analysis
-on your data and generate annotated results.
 
 [float]
 ==== Graph relationships
@@ -211,20 +201,6 @@ image::images/select-your-space.png[Space selector view]
 
 Most of {kib}’s entities are space-aware, including dashboards, visualizations, index patterns,
 *Canvas* workpads, graphs, tags, and machine learning jobs.
-
-In addition:
-
-* **Elastic Security** is space-aware, so the timelines and investigations
-you open in one space will not be available to other spaces.
-
-* **Observability** is currently partially space-aware, but will be enhanced to become fully space-aware.
-
-* Most of the **Stack Management** features are not space aware because they
-are primarily used to manage features of {es}, which serves as a shared data store for all spaces.
-
-* Alerts are space-aware and work nicely with the {kib} role-based access control
-model to allow you secure access to them, depending on the alert type and your user roles.
-For example, roles with no access to an app will not have access to its alerts.
 
 [float]
 ==== Control feature visibility
