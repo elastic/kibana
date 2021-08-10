@@ -9,7 +9,7 @@
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import ReactResizeDetector from 'react-resize-detector';
 import ReactMonacoEditor from 'react-monaco-editor';
-import { htmlIdGenerator, EuiText, EuiToolTip } from '@elastic/eui';
+import { htmlIdGenerator, EuiText, EuiToolTip, keys } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -23,10 +23,6 @@ import {
 } from './editor_theme';
 
 import './editor.scss';
-
-export enum keyCodes {
-  ENTER = 13,
-}
 
 export interface Props {
   /** Width of editor. Defaults to 100%. */
@@ -169,8 +165,8 @@ export const CodeEditor: React.FC<Props> = ({
   }, []);
 
   const onKeyDownHint = useCallback(
-    (ev) => {
-      if (ev.keyCode === keyCodes.ENTER) {
+    (ev: React.KeyboardEvent) => {
+      if (ev.key === keys.ENTER) {
         ev.preventDefault();
         startEditing();
       }

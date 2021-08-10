@@ -11,10 +11,12 @@ import { ReactWrapper } from 'enzyme';
 import { mountWithIntl, findTestSubject } from '@kbn/test/jest';
 import { monaco } from '@kbn/monaco';
 
+import { keys } from '@elastic/eui';
+
 // This import needs to come before './code_editor' below as it sets the jest.mocks
 import { mockedEditorInstance } from './code_editor.test.helpers';
 
-import { CodeEditor, keyCodes } from './code_editor';
+import { CodeEditor } from './code_editor';
 
 // disabled because this is a test, but also it seems we shouldn't need this?
 /* eslint-disable-next-line @kbn/eslint/module_migration */
@@ -123,13 +125,13 @@ describe('<CodeEditor />', () => {
       // Initially it is visible and active
       expect((getHint().props() as any).className).not.toContain('isInactive');
 
-      getHint().simulate('keydown', { keyCode: keyCodes.ENTER });
+      getHint().simulate('keydown', { key: keys.ENTER });
 
       expect((getHint().props() as any).className).toContain('isInactive');
     });
 
     test('should be enabled when hitting the ESC key', () => {
-      getHint().simulate('keydown', { keyCode: keyCodes.ENTER });
+      getHint().simulate('keydown', { key: keys.ENTER });
 
       expect((getHint().props() as any).className).toContain('isInactive');
 
@@ -141,7 +143,7 @@ describe('<CodeEditor />', () => {
     });
 
     test('should detect that the suggestion menu is open and not show the hint on ESC', async () => {
-      getHint().simulate('keydown', { keyCode: keyCodes.ENTER });
+      getHint().simulate('keydown', { key: keys.ENTER });
 
       expect((getHint().props() as any).className).toContain('isInactive');
       expect(mockedEditorInstance?.__helpers__.areSuggestionsVisible()).toBe(false);
