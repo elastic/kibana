@@ -72,14 +72,8 @@ export const getServiceInfrastructure = async ({
   });
 
   return {
-    containerIds: response.aggregations?.containerIds
-      ? response.aggregations?.containerIds?.buckets.map((bucket) => bucket.key)
-      : [],
-    hostNames: response.aggregations?.hostNames
-      ? response.aggregations?.hostNames?.buckets.map((bucket) => bucket.key)
-      : [],
-    podNames: response.aggregations?.podNames
-      ? response.aggregations?.podNames?.buckets.map((bucket) => bucket.key)
-      : [],
+    containerIds: response.aggregations?.containerIds?.buckets.map((bucket) => bucket.key) ?? []
+    hostNames: response.aggregations?.hostNames?.buckets.map((bucket) => bucket.key) ?? []
+    podNames: response.aggregations?.podNames?.buckets.map((bucket) => bucket.key) ?? []
   };
 };
