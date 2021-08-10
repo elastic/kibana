@@ -63,9 +63,7 @@ export const renderApp = ({ element }: AppMountParameters) => {
           />
           <Route path="/view/:id" children={<DiscoverMainRoute opts={opts} />} />
           <Route path="/" exact children={<DiscoverMainRoute opts={opts} />} />
-          <Route path="/*">
-            <NotFoundRoute services={services} />
-          </Route>
+          <NotFoundRoute services={services} />
         </Switch>
       </KibanaContextProvider>
     </Router>

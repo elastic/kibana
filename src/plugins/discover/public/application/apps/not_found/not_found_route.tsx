@@ -11,6 +11,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toMountPoint } from '../../../../../kibana_react/public';
 import { DiscoverServices } from '../../../build_services';
+import { getUrlTracker } from '../../../kibana_services';
 
 export interface NotFoundRouteProps {
   /**
@@ -22,14 +23,14 @@ let bannerId: string | undefined;
 
 export function NotFoundRoute(props: NotFoundRouteProps) {
   const { services } = props;
-  const { urlForwarding, restorePreviousUrl } = services;
+  const { urlForwarding } = services;
 
   useEffect(() => {
     const path = window.location.hash.substr(1);
-    restorePreviousUrl();
+    getUrlTracker().restorePreviousUrl();
     const { navigated } = urlForwarding.navigateToLegacyKibanaUrl(path);
-    if (navigated) {
-      return;
+    if (!navigated) {
+      urlForwarding.navigateToDefaultApp();
     }
 
     const bannerMessage = i18n.translate('discover.noMatchRoute.bannerTitleText', {
@@ -56,9 +57,7 @@ export function NotFoundRoute(props: NotFoundRouteProps) {
         services.core.overlays.banners.remove(bannerId);
       }
     }, 15000);
-
-    urlForwarding.navigateToDefaultApp();
-  }, [restorePreviousUrl, services.core.overlays.banners, urlForwarding]);
+  }, [services.core.overlays.banners, services.history, urlForwarding]);
 
   return null;
 }
