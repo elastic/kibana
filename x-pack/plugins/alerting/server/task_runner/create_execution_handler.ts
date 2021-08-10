@@ -7,7 +7,6 @@
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
 import {
-  asSavedObjectExecutionSource,
   PluginStartContract as ActionsPluginStartContract,
 } from '../../../actions/server';
 import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
@@ -174,10 +173,6 @@ export function createExecutionHandler<
         params: action.params,
         spaceId,
         apiKey: apiKey ?? null,
-        source: asSavedObjectExecutionSource({
-          id: alertId,
-          type: 'alert',
-        }),
         references: [
           {
             id: alertId,

@@ -43,7 +43,7 @@ export function createExecutionEnqueuerFunction({
 }: CreateExecuteFunctionOptions): ExecutionEnqueuer<void> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
-    { id, params, spaceId, source, apiKey, references }: ExecuteOptions
+    { id, params, spaceId, apiKey, references }: ExecuteOptions
   ) {
     if (!isESOCanEncrypt) {
       throw new Error(
@@ -59,14 +59,20 @@ export function createExecutionEnqueuerFunction({
       actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
     }
 
+    const actionTaskParamsReferences = references ?? [];
+    actionTaskParamsReferences.push({
+      type: 'action',
+      name: 'action',
+      id,
+    });
+
     const actionTaskParamsRecord = await unsecuredSavedObjectsClient.create(
       ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
       {
-        actionId: id,
         params,
         apiKey,
       },
-      references ? { references } : {}
+      { references: actionTaskParamsReferences }
     );
 
     await taskManager.schedule({

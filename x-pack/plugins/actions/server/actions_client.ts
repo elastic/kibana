@@ -474,18 +474,19 @@ export class ActionsClient {
     actionId,
     params,
     source,
-  }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult<unknown>> {
+  }: Omit<ExecuteOptions, 'request'> & { actionId: string }): Promise<ActionTypeExecutorResult<unknown>> {
     if (
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
       await this.authorization.ensureAuthorized('execute');
     }
+    const references = [{ type: 'action', name: 'action', id: actionId }]
     return this.actionExecutor.execute({
-      actionId,
       params,
       source,
       request: this.request,
+      references,
     });
   }
 

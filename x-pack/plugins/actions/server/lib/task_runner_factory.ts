@@ -84,7 +84,7 @@ export class TaskRunnerFactory {
         const { spaceId } = actionTaskExecutorParams;
 
         const {
-          attributes: { actionId, params, apiKey },
+          attributes: { params, apiKey },
           references,
         } = await getActionTaskParams(
           actionTaskExecutorParams,
@@ -121,11 +121,11 @@ export class TaskRunnerFactory {
         try {
           executorResult = await actionExecutor.execute({
             params,
-            actionId: actionId as string,
             isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
             request: fakeRequest,
             ...getSourceFromReferences(references),
             taskInfo,
+            references,
           });
         } catch (e) {
           if (e instanceof ActionTypeDisabledError) {

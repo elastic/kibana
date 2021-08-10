@@ -46,13 +46,12 @@ export interface TaskInfo {
 }
 
 export interface ExecuteOptions<Source = unknown> {
-  actionId: string;
   isEphemeral?: boolean;
   request: KibanaRequest;
-  params: Record<string, unknown>;
   source?: ActionExecutionSource<Source>;
+  params: Record<string, unknown>;
   taskInfo?: TaskInfo;
-  references?: SavedObjectReference[];
+  references: SavedObjectReference[];
 }
 
 export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
@@ -75,7 +74,6 @@ export class ActionExecutor {
   }
 
   public async execute({
-    actionId,
     params,
     request,
     source,
@@ -93,12 +91,19 @@ export class ActionExecutor {
       );
     }
 
+    const action = references?.find(reference => reference.type === 'action');
+    if (!action) {
+      throw new Error(
+        `Unable to execute action because the no action provided in references`
+      );
+    }
+
     return withSpan(
       {
         name: `execute_action`,
         type: 'actions',
         labels: {
-          actionId,
+          actionId: action.id,
         },
       },
       async (span) => {
@@ -121,7 +126,7 @@ export class ActionExecutor {
           await getActionsClientWithRequest(request, source),
           encryptedSavedObjectsClient,
           preconfiguredActions,
-          actionId,
+          action.id,
           namespace.namespace
         );
 
@@ -132,7 +137,7 @@ export class ActionExecutor {
           });
         }
 
-        if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId, { notifyUsage: true })) {
+        if (!actionTypeRegistry.isActionExecutable(action.id, actionTypeId, { notifyUsage: true })) {
           actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
         }
         const actionType = actionTypeRegistry.get(actionTypeId);
@@ -147,10 +152,10 @@ export class ActionExecutor {
           validatedSecrets = validateSecrets(actionType, secrets);
         } catch (err) {
           span?.setOutcome('failure');
-          return { status: 'error', actionId, message: err.message, retry: false };
+          return { status: 'error', actionId: action.id, message: err.message, retry: false };
         }
 
-        const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
+        const actionLabel = `${actionTypeId}:${action.id}: ${name}`;
         logger.debug(`executing action ${actionLabel}`);
 
         const task = taskInfo
@@ -170,7 +175,7 @@ export class ActionExecutor {
               {
                 rel: SAVED_OBJECT_REL_PRIMARY,
                 type: 'action',
-                id: actionId,
+                id: action.id,
                 type_id: actionTypeId,
                 ...namespace,
               },
@@ -202,7 +207,7 @@ export class ActionExecutor {
         let rawResult: ActionTypeExecutorResult<unknown>;
         try {
           rawResult = await actionType.executor({
-            actionId,
+            actionId: action.id,
             services,
             params: validatedParams,
             config: validatedConfig,
@@ -211,7 +216,7 @@ export class ActionExecutor {
           });
         } catch (err) {
           rawResult = {
-            actionId,
+            actionId: action.id,
             status: 'error',
             message: 'an error occurred while running the action executor',
             serviceMessage: err.message,
@@ -222,7 +227,7 @@ export class ActionExecutor {
 
         // allow null-ish return to indicate success
         const result = rawResult || {
-          actionId,
+          actionId: action.id,
           status: 'ok',
         };
 

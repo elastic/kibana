@@ -11,7 +11,6 @@ import {
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationFn,
   SavedObjectMigrationContext,
-  SavedObjectsUtils,
 } from '../../../../../src/core/server';
 import { ActionTaskParams, RawAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
@@ -41,32 +40,18 @@ function createEsoMigration<T = RawAction>(
 export function getActionTaskParamsMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
-  const migrationResolveSavedObjectsIdsInActionTaskParams = createEsoMigration<ActionTaskParams>(
+  const migrationActionsMoveActionIdAndRelatedSavedObjectsToReferences = createEsoMigration(
     encryptedSavedObjects,
     (
       doc: SavedObjectUnsanitizedDoc<ActionTaskParams>
     ): doc is SavedObjectUnsanitizedDoc<ActionTaskParams> => {
       return doc.type === 'action_task_params';
     },
-    pipeMigrations(resolveSavedObjectIdsInActionTaskParams)
-  );
-
-  const migrationActionsMoveRelatedSavedObjects = createEsoMigration(
-    encryptedSavedObjects,
-    (
-      doc: SavedObjectUnsanitizedDoc<ActionTaskParams>
-    ): doc is SavedObjectUnsanitizedDoc<ActionTaskParams> => {
-      return doc.type === 'action_task_params';
-    },
-    pipeMigrations(moveRelatedSavedObjects)
+    pipeMigrations(moveActionIdAndRelatedSavedObjectsToReferences)
   );
 
   return {
-    // '7.15.0': executeMigrationWithErrorHandling(migrationActionsMoveRelatedSavedObjects, '7.15.0'),
-    '8.0.0': executeMigrationWithErrorHandling(
-      migrationResolveSavedObjectsIdsInActionTaskParams,
-      '8.0.0'
-    ),
+    '7.15.0': executeMigrationWithErrorHandling(migrationActionsMoveActionIdAndRelatedSavedObjectsToReferences, '7.15.0'),
   };
 }
 
@@ -96,21 +81,10 @@ export function getMigrations(
     pipeMigrations(addisMissingSecretsField)
   );
 
-  // This empty migration is necessary to ensure that the saved object is decrypted with its old descriptor/ and re-encrypted with its new
-  // descriptor, if necessary. This is included because the saved object is being converted to `namespaceType: 'multiple-isolated'` in 8.0
-  // (see the `convertToMultiNamespaceTypeVersion` field in the saved object type registration process).
-  const migrationActions800 = createEsoMigration(
-    encryptedSavedObjects,
-    (doc: SavedObjectUnsanitizedDoc<RawAction>): doc is SavedObjectUnsanitizedDoc<RawAction> =>
-      true,
-    (doc) => doc // no-op
-  );
-
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationActionsTen, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationActionsEleven, '7.11.0'),
     '7.14.0': executeMigrationWithErrorHandling(migrationActionsFourteen, '7.14.0'),
-    '8.0.0': executeMigrationWithErrorHandling(migrationActions800, '8.0.0'),
   };
 }
 
@@ -206,44 +180,52 @@ const addisMissingSecretsField = (
   };
 };
 
-const moveRelatedSavedObjects = (
+const moveActionIdAndRelatedSavedObjectsToReferences = (
   doc: SavedObjectUnsanitizedDoc<ActionTaskParams>
 ): SavedObjectUnsanitizedDoc<ActionTaskParams> => {
-  const relatedSavedObjects = (doc.attributes
+  let references = doc.references;
+  let attributes = doc.attributes;
+
+  const relatedSavedObjects = (attributes
     .relatedSavedObjects as unknown) as RelatedSavedObjects[];
   if (relatedSavedObjects) {
-    const references = doc.references ?? [];
-    references.push(
-      ...relatedSavedObjects.map((relatedSavedObject) => ({
-        name: relatedSavedObject.typeId ?? 'unknown',
-        type: relatedSavedObject.type,
-        id: relatedSavedObject.id,
-      }))
-    );
-    return {
-      ...doc,
-      references,
-      attributes: omit(doc.attributes, ['relatedSavedObjects']),
-    };
+    references = references ?? [];
+    let referenceExists = false;
+    for (const reference of references) {
+      for (const relatedSavedObject of relatedSavedObjects) {
+        if (relatedSavedObject.id === reference.id && relatedSavedObject.type === reference.type) {
+          referenceExists = true;
+          break;
+        }
+      }
+    }
+    if (!referenceExists) {
+      references.push(
+        ...relatedSavedObjects.map((relatedSavedObject) => ({
+          name: relatedSavedObject.typeId ?? 'unknown',
+          type: relatedSavedObject.type,
+          id: relatedSavedObject.id,
+        }))
+      );
+    }
+    attributes = omit(attributes, ['relatedSavedObjects']);
   }
-  return doc;
-};
 
-const resolveSavedObjectIdsInActionTaskParams = (
-  doc: SavedObjectUnsanitizedDoc<ActionTaskParams>
-): SavedObjectUnsanitizedDoc<ActionTaskParams> => {
-  const namespace = doc.namespaces && doc.namespaces.length ? doc.namespaces[0] : undefined;
-  const newId =
-    namespace && namespace !== 'default'
-      ? SavedObjectsUtils.getConvertedObjectId(namespace, 'action', doc.attributes.actionId)
-      : doc.attributes.actionId;
+  if (attributes && attributes.actionId) {
+    references = references ?? [];
+    references.push({
+      name: 'action',
+      type: 'action',
+      id: attributes.actionId
+    });
+    attributes = omit(attributes, ['actionId']);
+  }
+
   return {
     ...doc,
-    attributes: {
-      ...doc.attributes,
-      actionId: newId,
-    },
-  };
+    attributes,
+    references,
+  }
 };
 
 function pipeMigrations<T = RawAction>(

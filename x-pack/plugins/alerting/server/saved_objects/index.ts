@@ -53,8 +53,7 @@ export function setupSavedObjects(
   savedObjects.registerType({
     name: 'alert',
     hidden: true,
-    namespaceType: 'multiple-isolated',
-    convertToMultiNamespaceTypeVersion: '8.0.0',
+    namespaceType: 'single',
     migrations: getMigrations(encryptedSavedObjects),
     mappings: mappings.alert as SavedObjectsTypeMappingDefinition,
     management: {

@@ -33,8 +33,7 @@ export function setupSavedObjects(
   savedObjects.registerType({
     name: ACTION_SAVED_OBJECT_TYPE,
     hidden: true,
-    namespaceType: 'multiple-isolated',
-    convertToMultiNamespaceTypeVersion: '8.0.0',
+    namespaceType: 'single',
     mappings: mappings.action as SavedObjectsTypeMappingDefinition,
     migrations: getMigrations(encryptedSavedObjects),
     management: {
@@ -70,8 +69,7 @@ export function setupSavedObjects(
   savedObjects.registerType({
     name: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     hidden: true,
-    namespaceType: 'multiple-isolated',
-    convertToMultiNamespaceTypeVersion: '8.0.0',
+    namespaceType: 'single',
     migrations: getActionTaskParamsMigrations(encryptedSavedObjects),
     mappings: mappings.action_task_params as SavedObjectsTypeMappingDefinition,
     excludeOnUpgrade: async ({ readonlyEsClient }) => {
