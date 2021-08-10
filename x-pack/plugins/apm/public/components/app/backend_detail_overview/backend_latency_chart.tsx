@@ -19,13 +19,18 @@ import {
   getMaxY,
   getResponseTimeTickFormatter,
 } from '../../shared/charts/transaction_charts/helper';
+import { useApmParams } from '../../../hooks/use_apm_params';
 
 export function BackendLatencyChart({ height }: { height: number }) {
   const { backendName } = useApmBackendContext();
 
   const theme = useTheme();
 
-  const { start, end } = useTimeRange();
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/backends/:backendName/overview');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const {
     urlParams: { kuery, environment },
