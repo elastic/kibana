@@ -6,7 +6,7 @@
  */
 
 import { PaletteOutput } from 'src/plugins/charts/public';
-import { ExistsFilter, PhraseFilter } from '@kbn/es-query';
+import { ExistsFilter } from '@kbn/es-query';
 import {
   LastValueIndexPatternColumn,
   DateHistogramIndexPatternColumn,
@@ -42,7 +42,7 @@ export interface MetricOption {
   field?: string;
   label: string;
   description?: string;
-  columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN' | 'unique_count';
+  columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN';
   columnFilters?: ColumnFilter[];
   timeScale?: string;
 }
@@ -55,7 +55,7 @@ export interface SeriesConfig {
   defaultSeriesType: SeriesType;
   filterFields: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
-  baseFilters?: Array<PersistableFilter | ExistsFilter | PhraseFilter>;
+  baseFilters?: PersistableFilter[] | ExistsFilter[];
   definitionFields: string[];
   metricOptions?: MetricOption[];
   labels: Record<string, string>;
@@ -69,7 +69,6 @@ export interface SeriesConfig {
 export type URLReportDefinition = Record<string, string[]>;
 
 export interface SeriesUrl {
-  name: string;
   time: {
     to: string;
     from: string;
@@ -77,12 +76,12 @@ export interface SeriesUrl {
   breakdown?: string;
   filters?: UrlFilter[];
   seriesType?: SeriesType;
+  reportType: ReportViewType;
   operationType?: OperationType;
   dataType: AppDataType;
   reportDefinitions?: URLReportDefinition;
   selectedMetricField?: string;
-  hidden?: boolean;
-  color?: string;
+  isNew?: boolean;
 }
 
 export interface UrlFilter {
