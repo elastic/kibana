@@ -6,7 +6,7 @@
  */
 
 import { EuiPanel, EuiSpacer, EuiTabs, EuiTab, EuiTitle } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { XYBrushArea } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +16,10 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useTransactionDistributionFetcher } from '../../../hooks/use_transaction_distribution_fetcher';
+import {
+  useTransactionTraceSamplesFetcher,
+  TraceSample,
+} from '../../../hooks/use_transaction_trace_samples_fetcher';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { HeightRetainer } from '../../shared/HeightRetainer';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
@@ -25,17 +28,12 @@ import { MlLatencyCorrelations } from '../correlations/ml_latency_correlations_p
 import { useWaterfallFetcher } from './use_waterfall_fetcher';
 import { WaterfallWithSummary } from './waterfall_with_summary';
 
-interface Sample {
-  traceId: string;
-  transactionId: string;
-}
-
 interface TabContentProps {
   selectSampleFromChartSelection: (selection: XYBrushArea) => void;
   clearChartSelection: () => void;
   sampleRangeFrom?: number;
   sampleRangeTo?: number;
-  traceSamples: Sample[];
+  traceSamples: TraceSample[];
 }
 
 function TraceSamplesTab({
@@ -82,12 +80,7 @@ function TraceSamplesTab({
   );
 }
 
-function LatencyCorrelationsTab({
-  selectSampleFromChartSelection,
-  clearChartSelection,
-  sampleRangeFrom,
-  sampleRangeTo,
-}: TabContentProps) {
+function LatencyCorrelationsTab({}: TabContentProps) {
   return <MlLatencyCorrelations correlationAnalysisEnabled={true} />;
 }
 
@@ -126,7 +119,7 @@ export function TransactionDetails() {
 
   const { transactionName } = query;
 
-  const { distributionData } = useTransactionDistributionFetcher({
+  const { traceSamplesData } = useTransactionTraceSamplesFetcher({
     transactionName,
   });
 
@@ -139,13 +132,7 @@ export function TransactionDetails() {
   });
 
   const { sampleRangeFrom, sampleRangeTo } = urlParams;
-
-  const traceSamples: Sample[] = useMemo(() => {
-    return distributionData.hits.map((hit) => ({
-      transactionId: hit._source.transaction.id,
-      traceId: hit._source.trace.id,
-    }));
-  }, [distributionData.hits]);
+  const { traceSamples } = traceSamplesData;
 
   const selectSampleFromChartSelection = (selection: XYBrushArea) => {
     if (selection !== undefined) {
@@ -168,7 +155,7 @@ export function TransactionDetails() {
     delete currentQuery.sampleRangeFrom;
     delete currentQuery.sampleRangeTo;
 
-    const firstSample = distributionData.buckets[0].samples[0];
+    const firstSample = traceSamples[0];
     currentQuery.transactionId = firstSample?.transactionId;
     currentQuery.traceId = firstSample?.traceId;
 

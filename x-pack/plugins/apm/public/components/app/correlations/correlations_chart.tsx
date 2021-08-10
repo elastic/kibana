@@ -171,22 +171,17 @@ export function CorrelationsChart({
     `1${new Array(('' + Math.round(yMax)).length).fill(0).join('')}`,
     10
   );
-
   // Log based axis cannot start a 0. Use a small positive number instead.
+  const yDomainMin = 0.9;
+
   const yAxisDomain = {
-    min: 0.9,
+    min: yDomainMin,
     max: yDomainMax,
   };
 
   const durationFormatter = getDurationFormatter(xMax);
 
   const histogram = replaceHistogramDotsWithBars(originalHistogram);
-
-  const onBrushEnd: BrushEndListener = (d) => {
-    if (onChartSelection !== undefined) {
-      onChartSelection(d);
-    }
-  };
 
   const selectionAnnotation =
     selection !== undefined
@@ -195,8 +190,8 @@ export function CorrelationsChart({
             coordinates: {
               x0: selection[0],
               x1: selection[1],
-              y0: 0,
-              y1: 100000,
+              y0: yDomainMin,
+              y1: yDomainMax,
             },
             details: 'selection',
           },
@@ -223,7 +218,7 @@ export function CorrelationsChart({
             theme={chartTheme}
             showLegend
             legendPosition={Position.Bottom}
-            onBrushEnd={onBrushEnd}
+            onBrushEnd={onChartSelection}
           />
           {selectionAnnotation !== undefined && (
             <RectAnnotation
