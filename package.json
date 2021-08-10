@@ -124,7 +124,6 @@
     "@kbn/analytics": "link:bazel-bin/packages/kbn-analytics",
     "@kbn/apm-config-loader": "link:bazel-bin/packages/kbn-apm-config-loader",
     "@kbn/apm-utils": "link:bazel-bin/packages/kbn-apm-utils",
-    "@kbn/common-utils": "link:bazel-bin/packages/kbn-common-utils",
     "@kbn/config": "link:bazel-bin/packages/kbn-config",
     "@kbn/config-schema": "link:bazel-bin/packages/kbn-config-schema",
     "@kbn/crypto": "link:bazel-bin/packages/kbn-crypto",
