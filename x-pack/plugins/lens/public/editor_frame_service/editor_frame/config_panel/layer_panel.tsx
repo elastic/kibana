@@ -29,6 +29,12 @@ import { EmptyDimensionButton } from './buttons/empty_dimension_button';
 import { DimensionButton } from './buttons/dimension_button';
 import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
 import { useFocusUpdate } from './use_focus_update';
+import {
+  useLensSelector,
+  selectIsFullscreenDatasource,
+  selectResolvedDateRange,
+  selectDatasourceStates,
+} from '../../../state_management';
 
 const initialActiveDimensionState = {
   isNew: false,
@@ -51,7 +57,6 @@ export function LayerPanel(
     onRemoveLayer: () => void;
     registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
     toggleFullscreen: () => void;
-    isFullscreen: boolean;
   }
 ) {
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
@@ -69,12 +74,14 @@ export function LayerPanel(
     updateVisualization,
     updateDatasource,
     toggleFullscreen,
-    isFullscreen,
     updateAll,
     updateDatasourceAsync,
     visualizationState,
   } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
+  const dateRange = useLensSelector(selectResolvedDateRange);
+  const datasourceStates = useLensSelector(selectDatasourceStates);
+  const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
 
   useEffect(() => {
     setActiveDimension(initialActiveDimensionState);
@@ -90,12 +97,12 @@ export function LayerPanel(
     layerId,
     state: props.visualizationState,
     frame: props.framePublicAPI,
-    dateRange: props.framePublicAPI.dateRange,
+    dateRange,
     activeData: props.framePublicAPI.activeData,
   };
 
   const datasourceId = datasourcePublicAPI.datasourceId;
-  const layerDatasourceState = props.datasourceStates[datasourceId].state;
+  const layerDatasourceState = datasourceStates[datasourceId].state;
 
   const layerDatasourceDropProps = useMemo(
     () => ({
@@ -113,8 +120,8 @@ export function LayerPanel(
   const layerDatasourceConfigProps = {
     ...layerDatasourceDropProps,
     frame: props.framePublicAPI,
-    dateRange: props.framePublicAPI.dateRange,
     activeData: props.framePublicAPI.activeData,
+    dateRange,
   };
 
   const { groups } = useMemo(
