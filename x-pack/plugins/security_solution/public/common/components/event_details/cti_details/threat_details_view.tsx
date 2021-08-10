@@ -191,7 +191,6 @@ const ThreatDetailsViewComponent: React.FC<{
               <h5>{i18n.INVESTIGATION_TOOLTIP_TITLE}</h5>
             </EuiTitle>
             <EuiSpacer size="xs" />
-            {/* TODO: Date form */}
             <EuiText size="xs">
               <FormattedMessage
                 id="xpack.securitySolution.alertDetails.threatDetails.investigationSubtitle"

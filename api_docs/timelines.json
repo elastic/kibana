@@ -10918,7 +10918,7 @@
             "label": "alertConsumers",
             "description": [],
             "signature": [
-              "ALERTS_CONSUMERS",
+              "AlertConsumers",
               "[] | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",

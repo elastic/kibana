@@ -47,7 +47,7 @@ export async function getServiceErrorGroups({
   pageIndex: number;
   numBuckets: number;
   sortDirection: 'asc' | 'desc';
-  sortField: 'name' | 'last_seen' | 'occurrences';
+  sortField: 'name' | 'lastSeen' | 'occurrences';
   transactionType: string;
 }) {
   return withApmSpan('get_service_error_groups', async () => {
@@ -108,7 +108,7 @@ export async function getServiceErrorGroups({
       response.aggregations?.error_groups.buckets.map((bucket) => ({
         group_id: bucket.key as string,
         name: getErrorName(bucket.sample.hits.hits[0]._source),
-        last_seen: new Date(
+        lastSeen: new Date(
           bucket.sample.hits.hits[0]?._source['@timestamp']
         ).getTime(),
         occurrences: {

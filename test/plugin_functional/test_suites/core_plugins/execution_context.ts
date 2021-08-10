@@ -25,13 +25,13 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           await browser.execute(async () => {
             const coreStart = window._coreProvider.start.core;
 
-            const context = coreStart.executionContext.create({
+            const context = {
               type: 'visualization',
               name: 'execution_context_app',
               // add a non-ASCII symbols to make sure it doesn't break the context propagation mechanism
               id: 'Visualization☺漢字',
               description: 'какое-то странное описание',
-            });
+            };
 
             const result = await coreStart.http.get('/execution_context/pass', {
               context,
