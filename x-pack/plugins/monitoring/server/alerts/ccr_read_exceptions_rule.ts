@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from 'kibana/server';
-import { BaseAlert } from './base_alert';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -24,8 +24,8 @@ import {
 import { AlertInstance } from '../../../alerting/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
-  ALERT_CCR_READ_EXCEPTIONS,
-  ALERT_DETAILS,
+  RULE_CCR_READ_EXCEPTIONS,
+  RULE_DETAILS,
 } from '../../common/constants';
 import { fetchCCRReadExceptions } from '../lib/alerts/fetch_ccr_read_exceptions';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
@@ -36,11 +36,11 @@ import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
 
-export class CCRReadExceptionsAlert extends BaseAlert {
-  constructor(public rawAlert?: SanitizedAlert) {
-    super(rawAlert, {
-      id: ALERT_CCR_READ_EXCEPTIONS,
-      name: ALERT_DETAILS[ALERT_CCR_READ_EXCEPTIONS].label,
+export class CCRReadExceptionsRule extends BaseRule {
+  constructor(public sanitizedRule?: SanitizedAlert) {
+    super(sanitizedRule, {
+      id: RULE_CCR_READ_EXCEPTIONS,
+      name: RULE_DETAILS[RULE_CCR_READ_EXCEPTIONS].label,
       throttle: '6h',
       defaultParams: {
         duration: '1h',

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { NodesChangedAlert } from './nodes_changed_alert';
-import { ALERT_NODES_CHANGED } from '../../common/constants';
+import { NodesChangedRule } from './nodes_changed_rule';
+import { RULE_NODES_CHANGED } from '../../common/constants';
 import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
@@ -44,11 +44,11 @@ jest.mock('../static_globals', () => ({
 
 describe('NodesChangedAlert', () => {
   it('should have defaults', () => {
-    const alert = new NodesChangedAlert();
-    expect(alert.alertOptions.id).toBe(ALERT_NODES_CHANGED);
-    expect(alert.alertOptions.name).toBe('Nodes changed');
-    expect(alert.alertOptions.throttle).toBe('1d');
-    expect(alert.alertOptions.actionVariables).toStrictEqual([
+    const rule = new NodesChangedRule();
+    expect(rule.ruleOptions.id).toBe(RULE_NODES_CHANGED);
+    expect(rule.ruleOptions.name).toBe('Nodes changed');
+    expect(rule.ruleOptions.throttle).toBe('1d');
+    expect(rule.ruleOptions.actionVariables).toStrictEqual([
       { name: 'added', description: 'The list of nodes added to the cluster.' },
       { name: 'removed', description: 'The list of nodes removed from the cluster.' },
       { name: 'restarted', description: 'The list of nodes restarted in the cluster.' },
@@ -168,12 +168,12 @@ describe('NodesChangedAlert', () => {
       (fetchNodesFromClusterStats as jest.Mock).mockImplementation(() => {
         return nodesChanged;
       });
-      const alert = new NodesChangedAlert();
-      const type = alert.getAlertType();
+      const rule = new NodesChangedRule();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -231,12 +231,12 @@ describe('NodesChangedAlert', () => {
       (fetchNodesFromClusterStats as jest.Mock).mockImplementation(() => {
         return nodesAddedChangedRemoved;
       });
-      const alert = new NodesChangedAlert();
-      const type = alert.getAlertType();
+      const rule = new NodesChangedRule();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -325,12 +325,12 @@ describe('NodesChangedAlert', () => {
           },
         ];
       });
-      const alert = new NodesChangedAlert();
-      const type = alert.getAlertType();
+      const rule = new NodesChangedRule();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();

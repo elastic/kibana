@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { LicenseExpirationAlert } from './license_expiration_alert';
-import { ALERT_LICENSE_EXPIRATION } from '../../common/constants';
+import { LicenseExpirationRule } from './license_expiration_rule';
+import { RULE_LICENSE_EXPIRATION } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
@@ -42,13 +42,13 @@ jest.mock('../static_globals', () => ({
   },
 }));
 
-describe('LicenseExpirationAlert', () => {
+describe('LicenseExpirationRule', () => {
   it('should have defaults', () => {
-    const alert = new LicenseExpirationAlert();
-    expect(alert.alertOptions.id).toBe(ALERT_LICENSE_EXPIRATION);
-    expect(alert.alertOptions.name).toBe('License expiration');
-    expect(alert.alertOptions.throttle).toBe('1d');
-    expect(alert.alertOptions.actionVariables).toStrictEqual([
+    const rule = new LicenseExpirationRule();
+    expect(rule.ruleOptions.id).toBe(RULE_LICENSE_EXPIRATION);
+    expect(rule.ruleOptions.name).toBe('License expiration');
+    expect(rule.ruleOptions.throttle).toBe('1d');
+    expect(rule.ruleOptions.actionVariables).toStrictEqual([
       { name: 'expiredDate', description: 'The date when the license expires.' },
       { name: 'clusterName', description: 'The cluster to which the license belong.' },
       {
@@ -117,11 +117,11 @@ describe('LicenseExpirationAlert', () => {
     });
 
     it('should fire actions', async () => {
-      const alert = new LicenseExpirationAlert();
-      const type = alert.getAlertType();
+      const alert = new LicenseExpirationRule();
+      const type = alert.getRuleType();
       await type.executor({
         ...executorOptions,
-        params: alert.alertOptions.defaultParams,
+        params: alert.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -196,12 +196,12 @@ describe('LicenseExpirationAlert', () => {
           },
         ];
       });
-      const alert = new LicenseExpirationAlert();
-      const type = alert.getAlertType();
+      const rule = new LicenseExpirationRule();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();
@@ -218,12 +218,12 @@ describe('LicenseExpirationAlert', () => {
           },
         ];
       });
-      const alert = new LicenseExpirationAlert();
-      const type = alert.getAlertType();
+      const rule = new LicenseExpirationRule();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState.mock.calls[0][0].alertStates[0].ui.severity).toBe(AlertSeverity.Danger);
     });
@@ -239,12 +239,12 @@ describe('LicenseExpirationAlert', () => {
           },
         ];
       });
-      const alert = new LicenseExpirationAlert();
-      const type = alert.getAlertType();
+      const rule = new LicenseExpirationRule();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState.mock.calls[0][0].alertStates[0].ui.severity).toBe(AlertSeverity.Warning);
     });

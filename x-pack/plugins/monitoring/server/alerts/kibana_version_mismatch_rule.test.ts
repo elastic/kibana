@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaVersionMismatchAlert } from './kibana_version_mismatch_alert';
-import { ALERT_KIBANA_VERSION_MISMATCH } from '../../common/constants';
+import { KibanaVersionMismatchRule } from './kibana_version_mismatch_rule';
+import { RULE_KIBANA_VERSION_MISMATCH } from '../../common/constants';
 import { fetchKibanaVersions } from '../lib/alerts/fetch_kibana_versions';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
@@ -36,13 +36,13 @@ jest.mock('../static_globals', () => ({
   },
 }));
 
-describe('KibanaVersionMismatchAlert', () => {
+describe('KibanaVersionMismatchRule', () => {
   it('should have defaults', () => {
-    const alert = new KibanaVersionMismatchAlert();
-    expect(alert.alertOptions.id).toBe(ALERT_KIBANA_VERSION_MISMATCH);
-    expect(alert.alertOptions.name).toBe('Kibana version mismatch');
-    expect(alert.alertOptions.throttle).toBe('1d');
-    expect(alert.alertOptions.actionVariables).toStrictEqual([
+    const rule = new KibanaVersionMismatchRule();
+    expect(rule.ruleOptions.id).toBe(RULE_KIBANA_VERSION_MISMATCH);
+    expect(rule.ruleOptions.name).toBe('Kibana version mismatch');
+    expect(rule.ruleOptions.throttle).toBe('1d');
+    expect(rule.ruleOptions.actionVariables).toStrictEqual([
       {
         name: 'versionList',
         description: 'The versions of Kibana running in this cluster.',
@@ -119,11 +119,11 @@ describe('KibanaVersionMismatchAlert', () => {
     });
 
     it('should fire actions', async () => {
-      const alert = new KibanaVersionMismatchAlert();
-      const type = alert.getAlertType();
+      const rule = new KibanaVersionMismatchRule();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        params: alert.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -172,11 +172,11 @@ describe('KibanaVersionMismatchAlert', () => {
           },
         ];
       });
-      const alert = new KibanaVersionMismatchAlert();
-      const type = alert.getAlertType();
+      const rule = new KibanaVersionMismatchRule();
+      const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        params: alert.alertOptions.defaultParams,
+        params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();

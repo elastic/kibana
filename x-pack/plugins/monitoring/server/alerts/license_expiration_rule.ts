@@ -7,7 +7,7 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from 'kibana/server';
-import { BaseAlert } from './base_alert';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -22,8 +22,8 @@ import {
 } from '../../common/types/alerts';
 import { AlertExecutorOptions, AlertInstance } from '../../../alerting/server';
 import {
-  ALERT_LICENSE_EXPIRATION,
-  LEGACY_ALERT_DETAILS,
+  RULE_LICENSE_EXPIRATION,
+  LEGACY_RULE_DETAILS,
   INDEX_PATTERN_ELASTICSEARCH,
 } from '../../common/constants';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
@@ -36,11 +36,11 @@ import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 
 const EXPIRES_DAYS = [60, 30, 14, 7];
 
-export class LicenseExpirationAlert extends BaseAlert {
-  constructor(public rawAlert?: SanitizedAlert) {
-    super(rawAlert, {
-      id: ALERT_LICENSE_EXPIRATION,
-      name: LEGACY_ALERT_DETAILS[ALERT_LICENSE_EXPIRATION].label,
+export class LicenseExpirationRule extends BaseRule {
+  constructor(public sanitizedRule?: SanitizedAlert) {
+    super(sanitizedRule, {
+      id: RULE_LICENSE_EXPIRATION,
+      name: LEGACY_RULE_DETAILS[RULE_LICENSE_EXPIRATION].label,
       interval: '1d',
       actionVariables: [
         {
