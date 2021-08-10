@@ -515,7 +515,13 @@ class PackagePolicyService {
           updatePackagePolicy.inputs as PackagePolicyInput[]
         );
 
-        await this.update(soClient, esClient, id, updatePackagePolicy, options);
+        await this.update(
+          soClient,
+          esClient,
+          id,
+          omit(updatePackagePolicy, 'missingVars'),
+          options
+        );
         result.push({
           id,
           name: packagePolicy.name,

@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 import {
   UpgradePackagePolicyDryRunResponse,
@@ -27,6 +28,8 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
+
+    setupFleetAndAgents(providerContext);
 
     describe('when package is installed', function () {
       before(async function () {
@@ -236,7 +239,7 @@ export default function (providerContext: FtrProviderContext) {
           expect(body.length).to.be(1);
           expect(body[0].diff?.length).to.be(2);
           expect(body[0].hasErrors).to.be(false);
-          expect(body[0].diff?.[1].missingVars).to.be(['test_var']);
+          expect(body[0].diff?.[1].missingVars).to.contain('test_var');
         });
       });
 
