@@ -6107,7 +6107,6 @@
     "xpack.apm.transactionDurationLabel": "期間",
     "xpack.apm.transactionErrorRateAlert.name": "トランザクションエラー率しきい値",
     "xpack.apm.transactionErrorRateAlertTrigger.isAbove": "より大きい",
-    "xpack.apm.transactionRateLabel": "{value} tpm",
     "xpack.apm.transactions.latency.chart.95thPercentileLabel": "95 パーセンタイル",
     "xpack.apm.transactions.latency.chart.99thPercentileLabel": "99 パーセンタイル",
     "xpack.apm.transactions.latency.chart.averageLabel": "平均",
