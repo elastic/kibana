@@ -175,3 +175,17 @@ export const readableCrawlerStatuses: { [key in CrawlerStatus]: string } = {
     { defaultMessage: 'Skipped' }
   ),
 };
+
+export interface CrawlSchedule {
+  frequency: number;
+  unit: CrawlUnits;
+}
+
+// The BE uses a singular form of each unit
+// See shared_togo/app/models/shared_togo/crawler/crawl_schedule.rb
+export enum CrawlUnits {
+  hours = 'hour',
+  days = 'day',
+  weeks = 'week',
+  months = 'month',
+}

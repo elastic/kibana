@@ -33,23 +33,24 @@ export function registerBsearchRoute(
       onBatchItem: async ({ request: requestData, options }) => {
         const search = getScoped(request);
         const { executionContext, ...restOptions } = options || {};
-        if (executionContext) executionContextService.set(executionContext);
 
-        return search
-          .search(requestData, restOptions)
-          .pipe(
-            first(),
-            catchError((err) => {
-              // Re-throw as object, to get attributes passed to the client
-              // eslint-disable-next-line no-throw-literal
-              throw {
-                message: err.message,
-                statusCode: err.statusCode,
-                attributes: err.errBody?.error,
-              };
-            })
-          )
-          .toPromise();
+        return executionContextService.withContext(executionContext, () =>
+          search
+            .search(requestData, restOptions)
+            .pipe(
+              first(),
+              catchError((err) => {
+                // Re-throw as object, to get attributes passed to the client
+                // eslint-disable-next-line no-throw-literal
+                throw {
+                  message: err.message,
+                  statusCode: err.statusCode,
+                  attributes: err.errBody?.error,
+                };
+              })
+            )
+            .toPromise()
+        );
       },
     };
   });
