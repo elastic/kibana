@@ -72,6 +72,7 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
     // We should check if we can connect to Elasticsearch with default configuration to know if we
     // need to activate interactive setup. This check can take some time, so we should register our
     // routes to let interactive setup UI to handle user requests until the check is complete.
+    // TODO: Use `core.http.getServerInfo()` once exposed by preboot core
     const setupInstructions = `
 
 ${chalk.bold(chalk.whiteBright(`${chalk.cyanBright('i')} Kibana has not been configured.`))}

@@ -26,8 +26,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { EnrollmentToken } from '../common/types';
-import { decodeEnrollmentToken } from './decode_enrollment_token';
+import type { EnrollmentToken } from '../common';
 import type { ValidationErrors } from './use_form';
 import { useForm } from './use_form';
 import { useHttp } from './use_http';
@@ -53,7 +52,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
   const [form, eventHandlers] = useForm({
     defaultValues,
     validate: (values) => {
-      const errors: ValidationErrors<typeof values> = {};
+      const errors: ValidationErrors<EnrollmentTokenFormValues> = {};
 
       if (!values.token) {
         errors.token = i18n.translate('interactiveSetup.enrollmentTokenForm.tokenRequiredError', {
@@ -162,7 +161,7 @@ const EnrollmentTokenDetails: FunctionComponent<EnrollmentTokenDetailsProps> = (
     <EuiFlexItem grow={false}>
       <EuiText size="xs">
         <FormattedMessage
-          id="interactiveSetup.enrollmentTokenDetails.infoPart"
+          id="interactiveSetup.enrollmentTokenDetails.connectTo"
           defaultMessage="Connect to"
         />
       </EuiText>
@@ -179,7 +178,7 @@ const EnrollmentTokenDetails: FunctionComponent<EnrollmentTokenDetailsProps> = (
     <EuiFlexItem grow={false}>
       <EuiText size="xs">
         <FormattedMessage
-          id="interactiveSetup.enrollmentTokenDetails.versionPart"
+          id="interactiveSetup.enrollmentTokenDetails.elasticsearchVersion"
           defaultMessage="Elasticsearch (v{version})"
           values={{ version: token.ver }}
         />
@@ -187,3 +186,10 @@ const EnrollmentTokenDetails: FunctionComponent<EnrollmentTokenDetailsProps> = (
     </EuiFlexItem>
   </EuiFlexGroup>
 );
+
+export function decodeEnrollmentToken(enrollmentToken: string) {
+  try {
+    // TODO: validate token schema manually
+    return JSON.parse(atob(enrollmentToken)) as EnrollmentToken;
+  } catch (error) {} // eslint-disable-line no-empty
+}

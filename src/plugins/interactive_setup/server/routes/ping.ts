@@ -54,10 +54,8 @@ export function definePingRoute({ router, core, logger }: RouteDefinitionParams)
         statusCode = error.statusCode || 400;
       }
 
-      return response.custom<PingResponse>({
-        statusCode,
-        body: { statusCode, certificateChain },
-        bypassErrorFormat: true,
+      return response.ok({
+        body: { statusCode, certificateChain } as PingResponse,
       });
     }
   );

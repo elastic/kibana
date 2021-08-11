@@ -14,12 +14,17 @@ import React, { useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { ClusterAddressForm } from './cluster_address_form';
+import type { ClusterConfigurationFormProps } from './cluster_configuration_form';
+import { ClusterConfigurationForm } from './cluster_configuration_form';
 import { EnrollmentTokenForm } from './enrollment_token_form';
-import { ManualConfigurationForm } from './manual_configuration_form';
 import { ProgressIndicator } from './progress_indicator';
 
 export const App: FunctionComponent = () => {
   const [page, setPage] = useState<'token' | 'manual' | 'success'>('token');
+  const [cluster, setCluster] = useState<
+    Omit<ClusterConfigurationFormProps, 'onCancel' | 'onSuccess'>
+  >();
 
   return (
     <div className="interactiveSetup login-form">
@@ -49,10 +54,24 @@ export const App: FunctionComponent = () => {
             />
           </div>
           <div hidden={page !== 'manual'}>
-            <ManualConfigurationForm
-              onCancel={() => setPage('token')}
-              onSuccess={() => setPage('success')}
-            />
+            {cluster ? (
+              <ClusterConfigurationForm
+                onCancel={() => setCluster(undefined)}
+                onSuccess={() => setPage('success')}
+                {...cluster}
+              />
+            ) : (
+              <ClusterAddressForm
+                onCancel={() => setPage('token')}
+                onSuccess={(values, result) =>
+                  setCluster({
+                    host: values.host,
+                    authRequired: result.statusCode === 401,
+                    certificateChain: result.certificateChain,
+                  })
+                }
+              />
+            )}
           </div>
           {page === 'success' && (
             <ProgressIndicator onSuccess={() => window.location.replace('/')} />
