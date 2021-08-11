@@ -11,7 +11,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { produce } from 'immer';
 
-import { i18n } from '@kbn/i18n';
 import {
   agentRouteService,
   agentPolicyRouteService,
@@ -29,6 +28,7 @@ import {
 import { ScheduledQueryGroupQueriesTable } from '../scheduled_query_groups/scheduled_query_group_queries_table';
 import { useKibana } from '../common/lib/kibana';
 import { NavigationButtons } from './navigation_buttons';
+import { DisabledCallout } from './disabled_callout';
 import { OsqueryManagerPackagePolicy } from '../../common/types';
 
 /**
@@ -163,22 +163,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
 
   return (
     <>
-      {!editMode ? (
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiCallOut
-                title={i18n.translate(
-                  'xpack.osquery.fleetIntegration.saveIntegrationCalloutTitle',
-                  { defaultMessage: 'Save the integration to access the options below' }
-                )}
-                iconType="save"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer />
-        </>
-      ) : null}
+      {!editMode ? <DisabledCallout /> : null}
       {policyAgentsCount === 0 ? (
         <>
           <EuiFlexGroup>
