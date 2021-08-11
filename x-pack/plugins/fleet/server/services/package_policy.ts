@@ -424,6 +424,11 @@ class PackagePolicyService {
           id,
           name: packagePolicy.name,
           success: true,
+          package: {
+            name: packagePolicy.name,
+            title: '',
+            version: packagePolicy.version || '',
+          },
         });
       } catch (error) {
         result.push({
@@ -625,29 +630,47 @@ class PackagePolicyService {
     return Promise.all(inputsPromises);
   }
 
-  public async runExternalCallbacks(
-    externalCallbackType: ExternalCallback[0],
-    newPackagePolicy: NewPackagePolicy,
+  public async runExternalCallbacks<A extends ExternalCallback[0]>(
+    externalCallbackType: A,
+    packagePolicy: NewPackagePolicy | DeletePackagePoliciesResponse,
     context: RequestHandlerContext,
     request: KibanaRequest
-  ): Promise<NewPackagePolicy> {
-    let newData = newPackagePolicy;
-
-    const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
-    if (externalCallbacks && externalCallbacks.size > 0) {
-      let updatedNewData: NewPackagePolicy = newData;
-      for (const callback of externalCallbacks) {
-        const result = await callback(updatedNewData, context, request);
-        if (externalCallbackType === 'packagePolicyCreate') {
-          updatedNewData = NewPackagePolicySchema.validate(result);
-        } else if (externalCallbackType === 'packagePolicyUpdate') {
-          updatedNewData = UpdatePackagePolicySchema.validate(result);
+  ): Promise<A extends 'postPackagePolicyDelete' ? void : NewPackagePolicy>;
+  public async runExternalCallbacks(
+    externalCallbackType: ExternalCallback[0],
+    packagePolicy: NewPackagePolicy | DeletePackagePoliciesResponse,
+    context: RequestHandlerContext,
+    request: KibanaRequest
+  ): Promise<NewPackagePolicy | void> {
+    if (externalCallbackType === 'postPackagePolicyDelete') {
+      const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
+      if (externalCallbacks && externalCallbacks.size > 0) {
+        for (const callback of externalCallbacks) {
+          if (Array.isArray(packagePolicy)) {
+            await callback(packagePolicy, context, request);
+          }
         }
       }
+    } else {
+      if (!Array.isArray(packagePolicy)) {
+        let newData = packagePolicy;
+        const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
+        if (externalCallbacks && externalCallbacks.size > 0) {
+          let updatedNewData = newData;
+          for (const callback of externalCallbacks) {
+            const result = await callback(updatedNewData, context, request);
+            if (externalCallbackType === 'packagePolicyCreate') {
+              updatedNewData = NewPackagePolicySchema.validate(result);
+            } else if (externalCallbackType === 'packagePolicyUpdate') {
+              updatedNewData = UpdatePackagePolicySchema.validate(result);
+            }
+          }
 
-      newData = updatedNewData;
+          newData = updatedNewData;
+        }
+        return newData;
+      }
     }
-    return newData;
   }
 }
 
