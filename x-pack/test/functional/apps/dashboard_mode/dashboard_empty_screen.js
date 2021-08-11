@@ -12,12 +12,15 @@ export default function ({ getPageObjects, getService }) {
   const esArchiver = getService('esArchiver');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['common', 'dashboard', 'visualize', 'lens']);
+  const kibanaServer = getService('kibanaServer');
 
   // FLAKY: https://github.com/elastic/kibana/issues/102366
   describe.skip('empty dashboard', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
@@ -25,6 +28,10 @@ export default function ({ getPageObjects, getService }) {
 
     after(async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
     });
 
     it('adds Lens visualization to empty dashboard', async () => {
