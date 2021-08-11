@@ -116,7 +116,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
       } else if (actionsKeys[i] === 'beats') {
         return (
           <EuiFlexItem key={`empty-page-beats-action`}>
-            <ElasticBeatsCard {...action} />
+            <ElasticBeatsCard solution={solution} {...action} />
           </EuiFlexItem>
         );
       } else {

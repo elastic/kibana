@@ -79,13 +79,8 @@ export function OverviewPage({ routeParams }: Props) {
     : {
         solution: 'Observability',
         actions: {
-          elasticAgent: {
-            href: 'app/integrations/browse',
-            recommended: false,
-          },
           beats: {
             href: `app/home#/tutorial_directory/logging`,
-            recommended: true,
           },
         },
         docsLink: '#',

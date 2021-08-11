@@ -9,7 +9,10 @@ import React from 'react';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import type { LazyObservabilityPageTemplateProps } from '../../../../observability/public';
 import { useLogSourceContext } from '../../containers/logs/log_source';
-import { KibanaPageTemplateProps } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaPageTemplateProps,
+  useKibana,
+} from '../../../../../../src/plugins/kibana_react/public';
 
 export const LogsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = (
   pageTemplateProps
@@ -22,6 +25,9 @@ export const LogsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = (
     },
   } = useKibanaContextForPlugin();
 
+  const { http } = useKibana().services;
+  const basePath = http!.basePath.get();
+
   const { sourceStatus } = useLogSourceContext();
   const noDataConfig: KibanaPageTemplateProps['noDataConfig'] =
     sourceStatus?.logIndexStatus !== 'missing'
@@ -29,13 +35,8 @@ export const LogsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = (
       : {
           solution: 'Observability',
           actions: {
-            elasticAgent: {
-              href: 'app/integrations/browse',
-              recommended: false,
-            },
             beats: {
-              href: `app/home#/tutorial_directory/logging`,
-              recommended: true,
+              href: basePath + `/app/home#/tutorial_directory/logging`,
             },
           },
           docsLink: '#',

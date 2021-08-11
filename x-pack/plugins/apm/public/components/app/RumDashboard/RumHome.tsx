@@ -23,7 +23,7 @@ export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
 });
 
 export function RumHome() {
-  const { observability } = useApmPluginContext();
+  const { core, observability } = useApmPluginContext();
   const PageTemplateComponent = observability.navigation.PageTemplate;
 
   const { isSmall, isXXL } = useBreakPoints();
@@ -38,13 +38,8 @@ export function RumHome() {
     solution: 'Observability',
     pageTitle: 'Set up User Experience Tracking for Observability!',
     actions: {
-      elasticAgent: {
-        href: 'integrations/detail/apm-0.3.0/overview',
-        recommended: false,
-      },
       beats: {
-        href: `home#/tutorial/apm`,
-        recommended: true,
+        href: core.http.basePath.prepend(`/app/home#/tutorial/apm`),
       },
     },
     docsLink: '#',

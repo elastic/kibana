@@ -33,6 +33,8 @@ export function ApmMainTemplate({
   pageHeader?: EuiPageHeaderProps;
   children: React.ReactNode;
 } & KibanaPageTemplateProps) {
+  const { http } = useKibana().services;
+  const basePath = http!.basePath.get();
   const { services } = useKibana<ApmPluginStartDeps>();
 
   const ObservabilityPageTemplate =
@@ -44,13 +46,8 @@ export function ApmMainTemplate({
     solution: 'Observability',
     pageTitle: 'Set up APM for Observability!',
     actions: {
-      elasticAgent: {
-        href: '/integrations/detail/apm-0.3.0/overview',
-        recommended: false,
-      },
       beats: {
-        href: `/app/home#/tutorial/apm`,
-        recommended: true,
+        href: basePath + `/app/home#/tutorial/apm`,
       },
     },
     docsLink: '#',

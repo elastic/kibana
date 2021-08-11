@@ -1,0 +1,9 @@
+.kbnNoDataPage__card {
+  min-width: 400px;
+}
+
+@include euiBreakpoint('xs', 's') {
+  .kbnNoDataPage__card {
+    min-width: auto;
+  }
+}

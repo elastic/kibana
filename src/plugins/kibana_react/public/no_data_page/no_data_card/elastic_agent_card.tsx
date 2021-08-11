@@ -14,6 +14,7 @@ import { CoreStart } from 'kibana/public';
 import { EuiButton, EuiCard } from '@elastic/eui';
 import { useKibana } from '../../context';
 import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
+import './index.scss';
 
 export type ElasticAgentCardProps = NoDataPageActions & {
   solution: string;
@@ -39,15 +40,10 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     typeof button !== 'string' && typeof button !== 'undefined' ? (
       button
     ) : (
-      <EuiButton
-        href={href}
-        onClick={cardRest?.onClick}
-        target={cardRest?.target}
-        fill={recommended}
-      >
+      <EuiButton href={href} onClick={cardRest?.onClick} target={cardRest?.target} fill>
         {button ||
           i18n.translate('kibana-react.noDataPage.elasticAgentCard.buttonLabel', {
-            defaultMessage: 'Find an integration for {solution}',
+            defaultMessage: 'Find a {solution} integration',
             values: { solution },
           })}
       </EuiButton>
@@ -56,14 +52,15 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
   return (
     <EuiCard
       paddingSize="l"
+      className="kbnNoDataPage__card"
       href={href}
       title={i18n.translate('kibana-react.noDataPage.elasticAgentCard.title', {
-        defaultMessage: 'Add integrations with Elastic Agent',
+        defaultMessage: 'Add a {solution} integration',
+        values: { solution },
       })}
       description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
         defaultMessage: `The Elastic Agent provides a simple, unified way to
-        collect logs, metrics, and other types of
-        data from your hosts.`,
+        collect data from your machines.`,
       })}
       image={addBasePath(`${basePathUrl}elastic_agent_card.svg`)}
       betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}

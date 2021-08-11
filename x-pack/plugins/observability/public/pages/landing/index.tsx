@@ -46,13 +46,8 @@ export function LandingPage() {
   const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
     solution: 'Observability',
     actions: {
-      elasticAgent: {
-        href: 'app/integrations/browse',
-        recommended: false,
-      },
       beats: {
-        href: `app/home#/tutorial_directory/logging`,
-        recommended: true,
+        href: core.http.basePath.prepend(`/app/home#/tutorial_directory/logging`),
       },
     },
     docsLink: '#',

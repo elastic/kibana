@@ -20,13 +20,8 @@ export const LogsPageNoIndicesContent = () => {
       noDataConfig={{
         solution: 'Observability',
         actions: {
-          elasticAgent: {
-            href: 'app/integrations/browse',
-            recommended: false,
-          },
           beats: {
             ...tutorialLinkProps,
-            recommended: true,
           },
         },
         docsLink: '#',

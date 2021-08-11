@@ -153,6 +153,8 @@ export const PageRouter: FC = () => {
       flex-wrap: wrap;
     }
   `;
+  const { http } = useKibana().services;
+  const basePath = http!.basePath.get();
 
   const { data } = useSelector(indexStatusSelector);
   const noDataInfo = !data || data?.docCount === 0 || data?.indexExists === false;
@@ -160,13 +162,8 @@ export const PageRouter: FC = () => {
     solution: 'Observability',
     pageTitle: 'Set up Uptime for Observability!',
     actions: {
-      elasticAgent: {
-        href: 'integrations/detail/synthetics-0.2.1/overview',
-        recommended: false,
-      },
       beats: {
-        href: `home#/tutorial/uptimeMonitors`,
-        recommended: true,
+        href: basePath + `/app/home#/tutorial/uptimeMonitors`,
       },
     },
     docsLink: '#',

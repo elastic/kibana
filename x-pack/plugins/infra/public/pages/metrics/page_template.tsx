@@ -28,10 +28,6 @@ export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> =
     hash: '/tutorial_directory/metrics',
   });
 
-  const integrationLinkProps = useLinkProps({
-    app: 'integrations/browse',
-  });
-
   const { metricIndicesExist } = useContext(Source.Context);
   const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = metricIndicesExist
     ? undefined
@@ -39,13 +35,8 @@ export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> =
         solution: 'Observability',
         pageTitle: 'Set up Metrics for Observability!',
         actions: {
-          elasticAgent: {
-            ...integrationLinkProps,
-            recommended: false,
-          },
           beats: {
             ...tutorialLinkProps,
-            recommended: true,
           },
         },
         docsLink: '#',

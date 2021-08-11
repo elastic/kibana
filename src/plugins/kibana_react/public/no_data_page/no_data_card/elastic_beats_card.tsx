@@ -14,11 +14,17 @@ import { CoreStart } from 'kibana/public';
 import { EuiButton, EuiCard } from '@elastic/eui';
 import { useKibana } from '../../context';
 import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
+import './index.scss';
 
-export const ElasticBeatsCard: FunctionComponent<NoDataPageActions> = ({
+export type ElasticBeatsCardProps = NoDataPageActions & {
+  solution: string;
+};
+
+export const ElasticBeatsCard: FunctionComponent<ElasticBeatsCardProps> = ({
   recommended,
   href = 'app/home#/tutorial',
   button,
+  solution,
   ...cardRest
 }) => {
   const {
@@ -32,15 +38,11 @@ export const ElasticBeatsCard: FunctionComponent<NoDataPageActions> = ({
     typeof button !== 'string' && typeof button !== 'undefined' ? (
       button
     ) : (
-      <EuiButton
-        href={href}
-        onClick={cardRest?.onClick}
-        target={cardRest?.target}
-        fill={recommended}
-      >
+      <EuiButton href={href} onClick={cardRest?.onClick} target={cardRest?.target} fill>
         {button ||
           i18n.translate('kibana-react.noDataPage.elasticBeatsCard.buttonLabel', {
-            defaultMessage: 'Setup Beats',
+            defaultMessage: 'Install Beats for {solution}',
+            values: { solution },
           })}
       </EuiButton>
     );
@@ -48,14 +50,14 @@ export const ElasticBeatsCard: FunctionComponent<NoDataPageActions> = ({
   return (
     <EuiCard
       paddingSize="l"
+      className="kbnNoDataPage__card"
       href={href}
       title={i18n.translate('kibana-react.noDataPage.elasticBeatsCard.title', {
         defaultMessage: 'Add data with Beats',
       })}
       description={i18n.translate('kibana-react.noDataPage.elasticBeatsCard.description', {
-        defaultMessage: `While Agent is the best we have to offer, we are still
-        adding features. If Elastic Agent is missing a feature
-        you need, use Beats instead.`,
+        defaultMessage: `
+            Beats send data from hundreds or thousands of machines and systems to Logstash or Elasticsearch.`,
       })}
       image={addBasePath(
         `${basePathUrl}elastic_beats_card_${IS_DARK_THEME ? 'dark' : 'light'}.svg`
