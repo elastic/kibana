@@ -746,12 +746,6 @@ export class SettingsPageObject extends FtrService {
     await this.flyout.ensureClosed('scriptedFieldsHelpFlyout');
   }
 
-  async closeIndexPatternFlyOut() {
-    await this.testSubjects.click('createAnyway');
-  }
-
-  // createAnyway
-
   async executeScriptedField(script: string, additionalField: string) {
     this.log.debug('execute Scripted Fields help');
     await this.closeScriptedFieldHelp(); // ensure script help is closed so script input is not blocked
