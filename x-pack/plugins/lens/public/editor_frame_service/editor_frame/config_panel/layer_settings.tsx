@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
 import { NativeRenderer } from '../../../native_renderer';
 import { Visualization, VisualizationLayerWidgetProps } from '../../../types';
 
@@ -26,14 +26,23 @@ export function LayerSettings({
       return null;
     }
     return (
-      <>
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        responsive={false}
+        className={'lnsLayerPanel__settingsStaticHeader'}
+      >
         {description.icon && (
-          <EuiIcon type={description.icon} className="lnsLayerPanel__settingsStaticHeaderIcon" />
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={description.icon} />{' '}
+          </EuiFlexItem>
         )}
-        <EuiTitle size="xxs" className="lnsLayerPanel__settingsStaticHeader">
-          <h5>{description.label}</h5>
-        </EuiTitle>
-      </>
+        <EuiFlexItem grow>
+          <EuiTitle size="xxs">
+            <h5>{description.label}</h5>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 

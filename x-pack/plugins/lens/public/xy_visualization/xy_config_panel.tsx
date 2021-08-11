@@ -101,6 +101,7 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   if (!layer) {
     return null;
   }
+
   const currentVisType = visualizationTypes.find(({ id }) => id === layer.seriesType)!;
 
   const createTrigger = function () {
