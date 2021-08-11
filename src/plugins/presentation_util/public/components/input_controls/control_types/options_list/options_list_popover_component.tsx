@@ -23,9 +23,9 @@ import { OptionsListStrings } from './options_list_strings';
 interface OptionsListPopoverProps {
   loading: boolean;
   typeaheadSubject: Subject<string>;
-  searchString: string;
+  searchString?: string;
   updateItem: (index: number) => void;
-  availableOptions: EuiSelectableOption[];
+  availableOptions?: EuiSelectableOption[];
 }
 
 export const OptionsListPopover = ({
