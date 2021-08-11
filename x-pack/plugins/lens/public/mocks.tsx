@@ -24,7 +24,7 @@ import { LensAppServices } from './app_plugin/types';
 import { DOC_TYPE, layerTypes } from '../common';
 import { DataPublicPluginStart, esFilters, UI_SETTINGS } from '../../../../src/plugins/data/public';
 import { dashboardPluginMock } from '../../../../src/plugins/dashboard/public/mocks';
-import {
+import type {
   LensByValueInput,
   LensSavedObjectAttributes,
   LensByReferenceInput,
@@ -33,8 +33,9 @@ import {
   mockAttributeService,
   createEmbeddableStateTransferMock,
 } from '../../../../src/plugins/embeddable/public/mocks';
-import { LensAttributeService } from './lens_attribute_service';
-import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
+import { fieldFormatsServiceMock } from '../../../../src/plugins/field_formats/public/mocks';
+import type { LensAttributeService } from './lens_attribute_service';
+import type { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
 
 import { makeConfigureStore, LensAppState, LensState } from './state_management/index';
 import { getResolvedDateRange } from './utils';
@@ -393,6 +394,7 @@ export function makeDefaultServices(
       getUrlForApp: jest.fn((appId: string) => `/testbasepath/app/${appId}#/`),
     },
     data: mockDataPlugin(sessionIdSubject),
+    fieldFormats: fieldFormatsServiceMock.createStartContract(),
     storage: {
       get: jest.fn(),
       set: jest.fn(),
