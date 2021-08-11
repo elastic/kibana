@@ -76,10 +76,12 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
       const route = routesByReactRouterConfig.get(matchedRoute.route);
 
       if (route?.params) {
-        const decoded = deepExactRt(route.params).decode({
-          path: matchedRoute.match.params,
-          query: qs.parse(location.search),
-        });
+        const decoded = deepExactRt(route.params).decode(
+          merge({}, route.defaults ?? {}, {
+            path: matchedRoute.match.params,
+            query: qs.parse(location.search),
+          })
+        );
 
         if (isLeft(decoded)) {
           throw new Error(PathReporter.report(decoded).join('\n'));
@@ -110,12 +112,12 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
   const link = (path: string, ...args: any[]) => {
     const params: { path?: Record<string, any>; query?: Record<string, any> } | undefined = args[0];
 
-    const paramsWithDefaults = merge({ path: {}, query: {} }, params);
+    const paramsWithBuiltInDefaults = merge({ path: {}, query: {} }, params);
 
     path = path
       .split('/')
       .map((part) => {
-        return part.startsWith(':') ? paramsWithDefaults.path[part.split(':')[1]] : part;
+        return part.startsWith(':') ? paramsWithBuiltInDefaults.path[part.split(':')[1]] : part;
       })
       .join('/');
 
@@ -125,15 +127,25 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
       throw new Error(`No matching route found for ${path}`);
     }
 
+    const matchedRoutes = matches.map((match) => {
+      return routesByReactRouterConfig.get(match.route)!;
+    });
+
     const validationType = mergeRt(
       ...(compact(
-        matches.map((match) => {
-          return routesByReactRouterConfig.get(match.route)?.params;
+        matchedRoutes.map((match) => {
+          return match.params;
         })
       ) as [any, any])
     );
 
-    const validation = validationType.decode(paramsWithDefaults);
+    const paramsWithRouteDefaults = merge(
+      {},
+      ...matchedRoutes.map((route) => route.defaults ?? {}),
+      paramsWithBuiltInDefaults
+    );
+
+    const validation = validationType.decode(paramsWithRouteDefaults);
 
     if (isLeft(validation)) {
       throw new Error(PathReporter.report(validation).join('\n'));
@@ -141,7 +153,7 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
 
     return qs.stringifyUrl({
       url: path,
-      query: paramsWithDefaults.query,
+      query: paramsWithRouteDefaults.query,
     });
   };
 
@@ -152,7 +164,10 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
     getParams: (...args: any[]) => {
       const matches = matchRoutes(...args);
       return matches.length
-        ? merge({ path: {}, query: {} }, ...matches.map((match) => match.match.params))
+        ? merge(
+            { path: {}, query: {} },
+            ...matches.map((match) => merge({}, match.route?.defaults ?? {}, match.match.params))
+          )
         : undefined;
     },
     matchRoutes: (...args: any[]) => {
