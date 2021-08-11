@@ -25,6 +25,12 @@ import { ProtectionSwitch } from '../components/protection_switch';
 export const MemoryProtection = React.memo(() => {
   const OSes: Immutable<MemoryProtectionOSes[]> = [OS.windows];
   const protection = 'memory_protection';
+  const protectionLabel = i18n.translate(
+    'xpack.securitySolution.endpoint.policy.protections.memory',
+    {
+      defaultMessage: 'Memory protections',
+    }
+  );
   return (
     <ConfigForm
       type={i18n.translate('xpack.securitySolution.endpoint.policy.details.memory_protection', {
@@ -32,7 +38,9 @@ export const MemoryProtection = React.memo(() => {
       })}
       supportedOss={[OperatingSystem.WINDOWS]}
       dataTestSubj="memoryProtectionsForm"
-      rightCorner={<ProtectionSwitch protection={protection} osList={OSes} />}
+      rightCorner={
+        <ProtectionSwitch protection={protection} protectionLabel={protectionLabel} osList={OSes} />
+      }
     >
       <RadioButtons protection={protection} osList={OSes} />
       <UserNotification protection={protection} osList={OSes} />

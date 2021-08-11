@@ -11,7 +11,7 @@ import { ReportingCore } from '../../';
 import { ReportingInternalSetup } from '../../core';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../types';
-import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
+import { authorizedUserPreRouting } from './authorized_user_pre_routing';
 
 let mockCore: ReportingCore;
 const mockReportingConfig = createMockConfigSchema({ roles: { enabled: false } });
@@ -46,11 +46,10 @@ describe('authorized_user_pre_routing', function () {
         ...mockCore.pluginSetupDeps,
         security: undefined, // disable security
       } as unknown) as ReportingInternalSetup);
-    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockCore);
     const mockResponseFactory = httpServerMock.createResponseFactory() as KibanaResponseFactory;
 
     let handlerCalled = false;
-    authorizedUserPreRouting((user: unknown) => {
+    authorizedUserPreRouting(mockCore, (user: unknown) => {
       expect(user).toBe(false); // verify the user is a false value
       handlerCalled = true;
       return Promise.resolve({ status: 200, options: {} });
@@ -70,11 +69,10 @@ describe('authorized_user_pre_routing', function () {
           },
         }, // disable security
       } as unknown) as ReportingInternalSetup);
-    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockCore);
     const mockResponseFactory = httpServerMock.createResponseFactory() as KibanaResponseFactory;
 
     let handlerCalled = false;
-    authorizedUserPreRouting((user: unknown) => {
+    authorizedUserPreRouting(mockCore, (user: unknown) => {
       expect(user).toBe(false); // verify the user is a false value
       handlerCalled = true;
       return Promise.resolve({ status: 200, options: {} });
@@ -93,11 +91,10 @@ describe('authorized_user_pre_routing', function () {
           authc: { getCurrentUser: () => null },
         },
       } as unknown) as ReportingInternalSetup);
-    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockCore);
     const mockHandler = () => {
       throw new Error('Handler callback should not be called');
     };
-    const requestHandler = authorizedUserPreRouting(mockHandler);
+    const requestHandler = authorizedUserPreRouting(mockCore, mockHandler);
     const mockResponseFactory = getMockResponseFactory();
 
     expect(requestHandler(getMockContext(), getMockRequest(), mockResponseFactory)).toMatchObject({
@@ -126,14 +123,13 @@ describe('authorized_user_pre_routing', function () {
             authc: { getCurrentUser: () => ({ username: 'friendlyuser', roles: ['cowboy'] }) },
           },
         } as unknown) as ReportingInternalSetup);
-      const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockCore);
       const mockResponseFactory = getMockResponseFactory();
 
       const mockHandler = () => {
         throw new Error('Handler callback should not be called');
       };
       expect(
-        authorizedUserPreRouting(mockHandler)(
+        authorizedUserPreRouting(mockCore, mockHandler)(
           getMockContext(),
           getMockRequest(),
           mockResponseFactory
@@ -153,10 +149,9 @@ describe('authorized_user_pre_routing', function () {
             },
           },
         } as unknown) as ReportingInternalSetup);
-      const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockCore);
       const mockResponseFactory = getMockResponseFactory();
 
-      authorizedUserPreRouting((user) => {
+      authorizedUserPreRouting(mockCore, (user) => {
         expect(user).toMatchObject({ roles: ['reporting_user'], username: 'friendlyuser' });
         done();
         return Promise.resolve({ status: 200, options: {} });

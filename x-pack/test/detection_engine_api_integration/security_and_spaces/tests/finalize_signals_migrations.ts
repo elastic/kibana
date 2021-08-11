@@ -21,7 +21,7 @@ import {
   getIndexNameFromLoad,
   waitFor,
 } from '../../utils';
-import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 interface StatusResponse {
   index: string;

@@ -100,6 +100,12 @@ export async function runTests(options) {
         await runFtr({ configPath, options: opts });
       } finally {
         try {
+          const delay = config.get('kbnTestServer.delayShutdown');
+          if (typeof delay === 'number') {
+            log.info('Delaying shutdown of Kibana for', delay, 'ms');
+            await new Promise((r) => setTimeout(r, delay));
+          }
+
           await procs.stop('kibana');
         } finally {
           if (es) {
