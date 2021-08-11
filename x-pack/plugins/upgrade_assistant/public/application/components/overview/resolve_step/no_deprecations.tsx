@@ -11,19 +11,22 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const i18nTexts = {
-  noWarningsText: i18n.translate('xpack.upgradeAssistant.esDeprecationStats.noWarningsText', {
-    defaultMessage: 'No warnings. Good to go!',
-  }),
+  noDeprecationsText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecationStats.noDeprecationsText',
+    {
+      defaultMessage: 'No warnings. Good to go!',
+    }
+  ),
 };
 
-export const NoWarnings: FunctionComponent = () => {
+export const NoDeprecations: FunctionComponent = () => {
   return (
     <EuiText color="success">
       <EuiFlexGroup gutterSize="s" alignItems="center" className="upgRenderSuccessMessage">
         <EuiFlexItem grow={false}>
           <EuiIcon type="check" />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{i18nTexts.noWarningsText}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{i18nTexts.noDeprecationsText}</EuiFlexItem>
       </EuiFlexGroup>
     </EuiText>
   );

@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useAppContext } from '../../../app_context';
 import { EsStatsErrors } from './es_stats_error';
-import { NoWarnings } from './no_warnings';
+import { NoDeprecations } from './no_deprecations';
 
 const i18nTexts = {
   statsTitle: i18n.translate('xpack.upgradeAssistant.esDeprecationStats.statsTitle', {
@@ -73,7 +73,7 @@ export const ESDeprecationStats: FunctionComponent = () => {
 
   const hasWarnings = allDeprecations.length > 0;
   const hasCritical = criticalDeprecations.length > 0;
-  const shouldRenderNothing = !isLoading && !error && !hasWarnings && !hasCritical;
+  const hasNoDeprecations = !isLoading && !error && !hasWarnings && !hasCritical;
   const shouldRenderStat = (forSection: boolean) => error || isLoading || forSection;
 
   return (
@@ -86,13 +86,13 @@ export const ESDeprecationStats: FunctionComponent = () => {
           {error && <EsStatsErrors error={error} />}
         </>
       }
-      {...(!shouldRenderNothing && reactRouterNavigate(history, '/es_deprecations/cluster'))}
+      {...(!hasNoDeprecations && reactRouterNavigate(history, '/es_deprecations/cluster'))}
     >
       <EuiSpacer />
       <EuiFlexGroup>
-        {shouldRenderNothing && (
+        {hasNoDeprecations && (
           <EuiFlexItem>
-            <NoWarnings />
+            <NoDeprecations />
           </EuiFlexItem>
         )}
 
