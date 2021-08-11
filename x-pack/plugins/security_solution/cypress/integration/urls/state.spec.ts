@@ -42,11 +42,11 @@ import { TIMELINE } from '../../screens/create_new_case';
 import { cleanKibana } from '../../tasks/common';
 
 const ABSOLUTE_DATE = {
-  endTime: '2019-08-01T20:33:29.186Z',
+  endTime: 'Aug 1, 2019 @ 20:33:29.186',
   endTimeTimeline: '2019-08-02T21:03:29.186Z',
   newEndTimeTyped: 'Aug 01, 2019 @ 15:03:29.186',
   newStartTimeTyped: 'Aug 01, 2019 @ 14:33:29.186',
-  startTime: '2019-08-01T20:03:29.186Z',
+  startTime: 'Aug 1, 2019 @ 20:03:29.186',
   startTimeTimeline: '2019-08-02T20:03:29.186Z',
   firefoxEndTimeTyped: '2019-08-01T15:03:29',
   firefoxStartTimeTyped: '2019-08-01T14:33:29',
