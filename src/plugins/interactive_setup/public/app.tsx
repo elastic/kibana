@@ -27,14 +27,14 @@ export const App: FunctionComponent = () => {
   >();
 
   return (
-    <div className="interactiveSetup login-form">
+    <div className="interactiveSetup">
       <header className="interactiveSetup__header">
         <div className="interactiveSetup__content eui-textCenter">
           <EuiSpacer size="xxl" />
           <span className="interactiveSetup__logo">
             <EuiIcon type="logoElastic" size="xxl" />
           </span>
-          <EuiTitle size="m" className="interactiveSetup__title">
+          <EuiTitle size="m">
             <h1>
               <FormattedMessage
                 id="interactiveSetup.app.pageTitle"
@@ -45,7 +45,7 @@ export const App: FunctionComponent = () => {
           <EuiSpacer size="xl" />
         </div>
       </header>
-      <div className="interactiveSetup__content interactiveSetup-body">
+      <div className="interactiveSetup__content">
         <EuiPanel paddingSize="l">
           <div hidden={page !== 'token'}>
             <EnrollmentTokenForm

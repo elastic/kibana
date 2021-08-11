@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { errors as elasticsearchErrors } from '@elastic/elasticsearch';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -25,6 +24,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { IHttpFetchError } from 'kibana/public';
 
 import type { EnrollmentToken } from '../common';
 import type { ValidationErrors } from './use_form';
@@ -94,7 +94,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
               defaultMessage: "Couldn't connect to cluster",
             })}
           >
-            {(form.submitError as elasticsearchErrors.ResponseError).body?.message}
+            {(form.submitError as IHttpFetchError).body?.message}
           </EuiCallOut>
           <EuiSpacer />
         </>
