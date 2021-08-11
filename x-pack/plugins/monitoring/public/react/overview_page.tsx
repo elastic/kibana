@@ -22,7 +22,10 @@ export const OverviewPage = () => {
   useEffect(() => {
     // from services/clusters.js
     const fetchClusters = async () => {
-      const url = '/api/monitoring/v1/clusters/dltQ_pDUTOW04Do08ltpdA';
+      // hardcoding the cluster uuid. For some reason /clusters and /clusters/:cluster_uuid
+      // returns different data for a cluster, so the overview component crashes because
+      // it's missing some expected data
+      const url = '/api/monitoring/v1/clusters/rZvPbJdeQfyVdw2FWUKO-w';
       const max = moment();
       const min = moment().subtract(15, 'm');
 
@@ -40,19 +43,30 @@ export const OverviewPage = () => {
         });
 
         setData(response[0]);
+
+        // Just testing toast notifications
+        kibana.notifications.toasts.warning({
+          toastLifeTimeMs: 3000,
+          title: 'Data has been loaded successfully',
+          body: (
+            <div>
+              <h5>This is the toast content</h5>
+            </div>
+          ),
+        });
       } catch (err) {
         // TODO: handle error
       }
     };
 
     fetchClusters();
-  }, [kibana.services.http]);
+  }, [kibana.services.http, kibana.notifications.toasts]);
 
   return (
     <EuiErrorBoundary>
-      {data && (
+      {data ? (
         <Overview cluster={data} alerts={{}} setupMode={false} showLicenseExpiration={false} />
-      )}
+      ) : null}
     </EuiErrorBoundary>
   );
 };
