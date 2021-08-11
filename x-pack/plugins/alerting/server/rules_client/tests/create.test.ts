@@ -116,6 +116,19 @@ describe('create()', () => {
         isPreconfigured: false,
       },
     ]);
+    taskManager.schedule.mockResolvedValue({
+      id: 'task-123',
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
     rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
   });
 
@@ -153,19 +166,6 @@ describe('create()', () => {
             id: '1',
           },
         ],
-      });
-      taskManager.schedule.mockResolvedValueOnce({
-        id: 'task-123',
-        taskType: 'alerting:123',
-        scheduledAt: new Date(),
-        attempts: 1,
-        status: TaskStatus.Idle,
-        runAt: new Date(),
-        startedAt: null,
-        retryAt: null,
-        state: {},
-        params: {},
-        ownerId: null,
       });
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: '1',
@@ -318,19 +318,6 @@ describe('create()', () => {
           id: '1',
         },
       ],
-    });
-    taskManager.schedule.mockResolvedValueOnce({
-      id: 'task-123',
-      taskType: 'alerting:123',
-      scheduledAt: new Date(),
-      attempts: 1,
-      status: TaskStatus.Idle,
-      runAt: new Date(),
-      startedAt: null,
-      retryAt: null,
-      state: {},
-      params: {},
-      ownerId: null,
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -525,19 +512,6 @@ describe('create()', () => {
         },
       ],
     });
-    taskManager.schedule.mockResolvedValueOnce({
-      id: 'task-123',
-      taskType: 'alerting:123',
-      scheduledAt: new Date(),
-      attempts: 1,
-      status: TaskStatus.Idle,
-      runAt: new Date(),
-      startedAt: null,
-      retryAt: null,
-      state: {},
-      params: {},
-      ownerId: null,
-    });
     const result = await rulesClient.create({ data, options: { id: '123' } });
     expect(result.id).toEqual('123');
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
@@ -596,19 +570,6 @@ describe('create()', () => {
           id: '1',
         },
       ],
-    });
-    taskManager.schedule.mockResolvedValueOnce({
-      id: 'task-123',
-      taskType: 'alerting:123',
-      scheduledAt: new Date(),
-      attempts: 1,
-      status: TaskStatus.Idle,
-      runAt: new Date(),
-      startedAt: null,
-      retryAt: null,
-      state: {},
-      params: {},
-      ownerId: null,
     });
     const result = await customrulesClient.create({ data, options: { id: '123' } });
     expect(result.id).toEqual('123');
@@ -775,19 +736,6 @@ describe('create()', () => {
           id: '2',
         },
       ],
-    });
-    taskManager.schedule.mockResolvedValueOnce({
-      id: 'task-123',
-      taskType: 'alerting:123',
-      scheduledAt: new Date(),
-      attempts: 1,
-      status: TaskStatus.Idle,
-      runAt: new Date(),
-      startedAt: null,
-      retryAt: null,
-      state: {},
-      params: {},
-      ownerId: null,
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -985,19 +933,6 @@ describe('create()', () => {
         },
       ],
     });
-    taskManager.schedule.mockResolvedValueOnce({
-      id: 'task-123',
-      taskType: 'alerting:123',
-      scheduledAt: new Date(),
-      attempts: 1,
-      status: TaskStatus.Idle,
-      runAt: new Date(),
-      startedAt: null,
-      retryAt: null,
-      state: {},
-      params: {},
-      ownerId: null,
-    });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -1163,19 +1098,6 @@ describe('create()', () => {
         },
       ],
     });
-    taskManager.schedule.mockResolvedValueOnce({
-      id: 'task-123',
-      taskType: 'alerting:123',
-      scheduledAt: new Date(),
-      attempts: 1,
-      status: TaskStatus.Idle,
-      runAt: new Date(),
-      startedAt: null,
-      retryAt: null,
-      state: {},
-      params: {},
-      ownerId: null,
-    });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -1298,19 +1220,6 @@ describe('create()', () => {
         },
       ],
     });
-    taskManager.schedule.mockResolvedValueOnce({
-      id: 'task-123',
-      taskType: 'alerting:123',
-      scheduledAt: new Date(),
-      attempts: 1,
-      status: TaskStatus.Idle,
-      runAt: new Date(),
-      startedAt: null,
-      retryAt: null,
-      state: {},
-      params: {},
-      ownerId: null,
-    });
 
     await rulesClient.create({ data });
     expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: 123/my alert name');
@@ -1354,19 +1263,6 @@ describe('create()', () => {
           id: '1',
         },
       ],
-    });
-    taskManager.schedule.mockResolvedValueOnce({
-      id: 'task-123',
-      taskType: 'alerting:123',
-      scheduledAt: new Date(),
-      attempts: 1,
-      status: TaskStatus.Idle,
-      runAt: new Date(),
-      startedAt: null,
-      retryAt: null,
-      state: {},
-      params: {},
-      ownerId: null,
     });
     const result = await rulesClient.create({ data });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
@@ -1496,19 +1392,6 @@ describe('create()', () => {
         },
       ],
     });
-    taskManager.schedule.mockResolvedValueOnce({
-      id: 'task-123',
-      taskType: 'alerting:123',
-      scheduledAt: new Date(),
-      attempts: 1,
-      status: TaskStatus.Idle,
-      runAt: new Date(),
-      startedAt: null,
-      retryAt: null,
-      state: {},
-      params: {},
-      ownerId: null,
-    });
     const result = await rulesClient.create({ data });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
@@ -1636,19 +1519,6 @@ describe('create()', () => {
           id: '1',
         },
       ],
-    });
-    taskManager.schedule.mockResolvedValueOnce({
-      id: 'task-123',
-      taskType: 'alerting:123',
-      scheduledAt: new Date(),
-      attempts: 1,
-      status: TaskStatus.Idle,
-      runAt: new Date(),
-      startedAt: null,
-      retryAt: null,
-      state: {},
-      params: {},
-      ownerId: null,
     });
     const result = await rulesClient.create({ data });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
@@ -1938,19 +1808,6 @@ describe('create()', () => {
         },
       ],
     });
-    taskManager.schedule.mockResolvedValueOnce({
-      id: 'task-123',
-      taskType: 'alerting:123',
-      scheduledAt: new Date(),
-      attempts: 1,
-      status: TaskStatus.Idle,
-      runAt: new Date(),
-      startedAt: null,
-      retryAt: null,
-      state: {},
-      params: {},
-      ownerId: null,
-    });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -2049,19 +1906,6 @@ describe('create()', () => {
           id: '1',
         },
       ],
-    });
-    taskManager.schedule.mockResolvedValueOnce({
-      id: 'task-123',
-      taskType: 'alerting:123',
-      scheduledAt: new Date(),
-      attempts: 1,
-      status: TaskStatus.Idle,
-      runAt: new Date(),
-      startedAt: null,
-      retryAt: null,
-      state: {},
-      params: {},
-      ownerId: null,
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
