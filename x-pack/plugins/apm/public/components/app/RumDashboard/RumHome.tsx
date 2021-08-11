@@ -34,21 +34,23 @@ export function RumHome() {
   const {
     sharedData: { totalPageViews },
   } = useContext(CsmSharedContext);
-  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
-    solution: 'Observability',
-    pageTitle: 'Set up User Experience Tracking for Observability!',
-    actions: {
-      beats: {
-        href: core.http.basePath.prepend(`/app/home#/tutorial/apm`),
-      },
-    },
-    docsLink: '#',
-  };
+  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = totalPageViews
+    ? {
+        solution: 'Observability',
+        pageTitle: 'Set up User Experience Tracking for Observability!',
+        actions: {
+          beats: {
+            href: core.http.basePath.prepend(`/app/home#/tutorial/apm`),
+          },
+        },
+        docsLink: '#',
+      }
+    : undefined;
 
   return (
     <CsmSharedContextProvider>
       <PageTemplateComponent
-        noDataConfig={totalPageViews > 0 ? undefined : noDataConfig}
+        noDataConfig={noDataConfig}
         pageHeader={
           isXXL
             ? {

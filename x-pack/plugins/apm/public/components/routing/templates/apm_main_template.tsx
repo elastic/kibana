@@ -41,22 +41,24 @@ export function ApmMainTemplate({
     services.observability.navigation.PageTemplate;
 
   // TODO: NEEDS A DATA CHECK
-  const hasData = false;
-  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
-    solution: 'Observability',
-    pageTitle: 'Set up APM for Observability!',
-    actions: {
-      beats: {
-        href: basePath + `/app/home#/tutorial/apm`,
-      },
-    },
-    docsLink: '#',
-  };
+  const hasData = true;
+  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = !hasData
+    ? {
+        solution: 'Observability',
+        pageTitle: 'Set up APM for Observability!',
+        actions: {
+          beats: {
+            href: basePath + `/app/home#/tutorial/apm`,
+          },
+        },
+        docsLink: '#',
+      }
+    : undefined;
 
   // TODO: GET A CHECK
   return (
     <ObservabilityPageTemplate
-      noDataConfig={hasData ? undefined : noDataConfig}
+      noDataConfig={noDataConfig}
       pageHeader={{
         pageTitle,
         rightSideItems: [<EnvironmentFilter />],
