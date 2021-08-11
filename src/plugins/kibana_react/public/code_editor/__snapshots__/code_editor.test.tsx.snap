@@ -178,6 +178,9 @@ exports[`<CodeEditor /> is rendered 1`] = `
       onChange={[Function]}
       options={
         Object {
+          "fontFamily": "Roboto Mono",
+          "fontSize": 12,
+          "lineHeight": 21,
           "matchBrackets": "never",
           "minimap": Object {
             "enabled": false,

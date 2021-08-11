@@ -9,6 +9,7 @@ import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { defaults, map, omit } from 'lodash';
 import React from 'react';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
@@ -90,6 +91,8 @@ export function TransactionDurationAlertTrigger(props: Props) {
       threshold: 1500,
       windowSize: 5,
       windowUnit: 'm',
+      environment: ENVIRONMENT_ALL.value,
+      transactionType: transactionTypes[0],
     }
   );
 
