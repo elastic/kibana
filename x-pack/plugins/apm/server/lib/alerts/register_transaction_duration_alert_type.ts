@@ -12,6 +12,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
 } from '@kbn/rule-data-utils/target/technical_field_names';
+import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
   getEnvironmentLabel,
@@ -35,6 +36,7 @@ import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
+import { getDocumentTypeFilterForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
 const paramsSchema = schema.object({
   serviceName: schema.string(),
@@ -92,8 +94,16 @@ export function registerTransactionDurationAlertType({
         savedObjectsClient: services.savedObjectsClient,
       });
 
+      const searchAggregatedTransactions =
+        config['xpack.apm.searchAggregatedTransactions'] !==
+        SearchAggregatedTransactionSetting.never;
+
+      const index = searchAggregatedTransactions
+        ? indices['apm_oss.metricsIndices']
+        : indices['apm_oss.transactionIndices'];
+
       const searchParams = {
-        index: indices['apm_oss.transactionIndices'],
+        index,
         body: {
           size: 0,
           query: {
@@ -106,9 +116,9 @@ export function registerTransactionDurationAlertType({
                     },
                   },
                 },
-                {
-                  term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction },
-                },
+                ...getDocumentTypeFilterForAggregatedTransactions(
+                  searchAggregatedTransactions
+                ),
                 { term: { [SERVICE_NAME]: alertParams.serviceName } },
                 {
                   term: {

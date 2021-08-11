@@ -37,6 +37,8 @@ import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
+import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
+import { getDocumentTypeFilterForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -89,9 +91,17 @@ export function registerTransactionErrorRateAlertType({
           savedObjectsClient: services.savedObjectsClient,
         });
 
+        const searchAggregatedTransactions =
+          config['xpack.apm.searchAggregatedTransactions'] !==
+          SearchAggregatedTransactionSetting.never;
+
+        const index = searchAggregatedTransactions
+          ? indices['apm_oss.metricsIndices']
+          : indices['apm_oss.transactionIndices'];
+
         const searchParams = {
-          index: indices['apm_oss.transactionIndices'],
-          size: 1,
+          index,
+          size: 0,
           body: {
             query: {
               bool: {
@@ -103,7 +113,9 @@ export function registerTransactionErrorRateAlertType({
                       },
                     },
                   },
-                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+                  ...getDocumentTypeFilterForAggregatedTransactions(
+                    searchAggregatedTransactions
+                  ),
                   {
                     terms: {
                       [EVENT_OUTCOME]: [
