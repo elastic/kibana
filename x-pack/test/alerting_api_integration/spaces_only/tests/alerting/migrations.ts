@@ -175,5 +175,14 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         },
       ]);
     });
+
+    it('7.16.0 migrates existing alerts to contain legacyId field', async () => {
+      const response = await supertest.get(
+        `${getUrlPrefix(``)}/api/alerting/rule/74f3e6d7-b7bb-477d-ac28-92ee22728e6e`
+      );
+
+      expect(response.status).to.eql(200);
+      expect(response.body.legacyId).to.equal('74f3e6d7-b7bb-477d-ac28-92ee22728e6e');
+    });
   });
 }

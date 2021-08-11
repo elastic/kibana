@@ -91,12 +91,19 @@ export function getMigrations(
     pipeMigrations(removeNullAuthorFromSecurityRules)
   );
 
+  const migrateLegacyIds716 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
+    pipeMigrations(setLegacyId)
+  );
+
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
     '7.11.2': executeMigrationWithErrorHandling(migrationActions7112, '7.11.2'),
     '7.13.0': executeMigrationWithErrorHandling(migrationSecurityRules713, '7.13.0'),
     '7.14.1': executeMigrationWithErrorHandling(migrationSecurityRules714, '7.14.1'),
+    '7.16.0': executeMigrationWithErrorHandling(migrateLegacyIds716, '7.16.0'),
   };
 }
 
@@ -463,6 +470,19 @@ function removeNullAuthorFromSecurityRules(
         ...params,
         author: params.author != null ? params.author : [],
       },
+    },
+  };
+}
+
+function setLegacyId(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const { id } = doc;
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      legacyId: id,
     },
   };
 }

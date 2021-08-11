@@ -1012,6 +1012,20 @@ describe('successful migrations', () => {
       });
     });
   });
+
+  describe('7.16.0', () => {
+    test('add legacyId field to alert - set to SavedObject id attribute', () => {
+      const migration716 = getMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const alert = getMockData({}, true);
+      expect(migration716(alert, migrationContext)).toEqual({
+        ...alert,
+        attributes: {
+          ...alert.attributes,
+          legacyId: alert.id,
+        },
+      });
+    });
+  });
 });
 
 describe('handles errors during migrations', () => {
