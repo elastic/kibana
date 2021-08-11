@@ -297,7 +297,7 @@ export class RulesClient {
     );
 
     const createTime = Date.now();
-    const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : undefined;
+    const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
     const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
 
     const rawAlert: RawAlert = {

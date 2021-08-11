@@ -418,7 +418,7 @@ describe('create()', () => {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
           "status": "pending",
         },
-        "legacyId": undefined,
+        "legacyId": null,
         "meta": Object {
           "versionApiKeyLastmodified": "v8.0.0",
         },
