@@ -24,7 +24,7 @@ import { IndexNames } from './index_names';
 import { IndexOptions } from './index_options';
 import { incrementIndexName } from './utils';
 
-export const enum Resources {
+export enum Resources {
   common = 'common resources shared between all indices',
   forIndex = 'resources for a particular index',
   forNamespace = 'resources for a particular namespace',

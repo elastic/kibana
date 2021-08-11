@@ -21,7 +21,7 @@ export interface IndexOptions {
   secondaryAlias?: string;
 }
 
-export const enum Dataset {
+export enum Dataset {
   alerts = 'alerts',
   events = 'events',
 }
