@@ -71,10 +71,13 @@ export class RuleDataPluginService {
       Resources.forIndex,
       async () => {
         await this.installCommonResources();
-        return this.resourceInstaller.installResourcesSharedBetweenIndexNamespaces(
+        await this.resourceInstaller.installResourcesSharedBetweenIndexNamespaces(
           indexOptions,
           indexNames
         );
+
+        const clusterClient = await this.options.getClusterClient();
+        return { clusterClient };
       }
     );
 
@@ -87,8 +90,7 @@ export class RuleDataPluginService {
       indexOptions,
       resourceInstaller: this.resourceInstaller,
       isWriteEnabled: this.isWriteEnabled(),
-      ready: () => installPromise,
-      getClusterClient: () => this.options.getClusterClient(),
+      waitUntilIndexIsReady: () => installPromise,
     });
   }
 }

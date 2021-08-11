@@ -8,16 +8,24 @@
 import { ApiResponse } from '@elastic/elasticsearch';
 import { BulkRequest, BulkResponse } from '@elastic/elasticsearch/api/types';
 
-import { FieldDescriptor } from 'src/plugins/data/server';
 import { ESSearchRequest, ESSearchResponse } from 'src/core/types/elasticsearch';
+import { FieldDescriptor } from 'src/plugins/data/server';
 import { TechnicalRuleDataFieldName } from '../../common/technical_rule_data_field_names';
 
-export interface RuleDataReader {
+export interface IRuleDataClient {
+  indexName: string;
+  isWriteEnabled(): boolean;
+  getReader(options?: { namespace?: string }): IRuleDataReader;
+  getWriter(options?: { namespace?: string }): IRuleDataWriter;
+}
+
+export interface IRuleDataReader {
   search<TSearchRequest extends ESSearchRequest>(
     request: TSearchRequest
   ): Promise<
     ESSearchResponse<Partial<Record<TechnicalRuleDataFieldName, unknown[]>>, TSearchRequest>
   >;
+
   getDynamicIndexPattern(
     target?: string
   ): Promise<{
@@ -27,13 +35,6 @@ export interface RuleDataReader {
   }>;
 }
 
-export interface RuleDataWriter {
+export interface IRuleDataWriter {
   bulk(request: BulkRequest): Promise<ApiResponse<BulkResponse>>;
-}
-
-export interface IRuleDataClient {
-  indexName: string;
-  getReader(options?: { namespace?: string }): RuleDataReader;
-  getWriter(options?: { namespace?: string }): RuleDataWriter;
-  isWriteEnabled(): boolean;
 }

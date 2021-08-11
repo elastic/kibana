@@ -225,7 +225,7 @@ export class ResourceInstaller {
   public async createWriteTargetIfNeeded(
     indexOptions: IndexOptions,
     indexNames: IndexNames,
-    namespace: string = 'default'
+    namespace: string
   ) {
     const { logger, getClusterClient } = this.options;
     const clusterClient = await getClusterClient();
