@@ -408,6 +408,10 @@ export class AlertsClient {
         const result = await this.singleSearchAfterAndAudit({
           id: null,
           query,
+          aggs: undefined,
+          track_total_hits: undefined,
+          _source: undefined,
+          size: undefined,
           index,
           operation,
           lastSortIds,
@@ -445,7 +449,11 @@ export class AlertsClient {
       // first search for the alert by id, then use the alert info to check if user has access to it
       const alert = await this.singleSearchAfterAndAudit({
         id,
-        query: null,
+        query: undefined,
+        aggs: undefined,
+        track_total_hits: undefined,
+        _source: undefined,
+        size: undefined,
         index,
         operation: ReadOperations.Get,
         lastSortIds: undefined,
@@ -474,7 +482,11 @@ export class AlertsClient {
     try {
       const alert = await this.singleSearchAfterAndAudit({
         id,
-        query: null,
+        query: undefined,
+        aggs: undefined,
+        track_total_hits: undefined,
+        _source: undefined,
+        size: undefined,
         index,
         operation: WriteOperations.Update,
         lastSortIds: undefined,
