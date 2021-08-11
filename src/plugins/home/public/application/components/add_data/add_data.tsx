@@ -7,90 +7,129 @@
  */
 
 import React, { FC, MouseEvent } from 'react';
-import PropTypes from 'prop-types';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import type { FeatureCatalogueEntry } from '../../../services';
+import { ApplicationStart, DocLinksStart } from 'kibana/public';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 // @ts-expect-error untyped component
 import { Synopsis } from '../synopsis';
 import { getServices } from '../../kibana_services';
+import { RedirectAppLinks } from '../../../../../kibana_react/public';
 
 interface Props {
   addBasePath: (path: string) => string;
-  features: FeatureCatalogueEntry[];
+  application: ApplicationStart;
+  docLinks: DocLinksStart;
 }
 
-export const AddData: FC<Props> = ({ addBasePath, features }) => {
+export const AddData: FC<Props> = ({ addBasePath, application, docLinks }) => {
   const { trackUiMetric } = getServices();
 
+  const { integrations: isIntegrationsEnabled } = application.capabilities.navLinks;
+
   return (
-    <section className="homDataAdd" aria-labelledby="homDataAdd__title">
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={1}>
-          <EuiTitle size="s">
-            <h2 id="homDataAdd__title">
-              <FormattedMessage id="home.addData.sectionTitle" defaultMessage="Ingest your data" />
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
+    <>
+      <section className="homDataAdd" aria-labelledby="homDataAdd__title">
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h2 id="homDataAdd__title">
+                <FormattedMessage
+                  id="home.addData.sectionTitle"
+                  defaultMessage="Get started by adding your data"
+                />
+              </h2>
+            </EuiTitle>
 
-        <EuiFlexItem className="homDataAdd__actions" grow={false}>
-          <div>
-            <EuiButtonEmpty
-              data-test-subj="addSampleData"
-              className="homDataAdd__actionButton"
-              flush="left"
-              href="#/tutorial_directory/sampleData"
-              iconType="visTable"
-              size="xs"
-            >
-              <FormattedMessage
-                id="home.addData.sampleDataButtonLabel"
-                defaultMessage="Try our sample data"
-              />
-            </EuiButtonEmpty>
-          </div>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            <EuiSpacer />
 
-      <EuiSpacer size="m" />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="home.addData.text"
+                  defaultMessage="To begin your Kibana journey, we recommend adding your data via the Elastic Agent’s suite of data integrations. If the integration or features your looking for aren’t available, give our legacy Beats a try instead."
+                />
+              </p>
+            </EuiText>
 
-      <EuiFlexGroup className="homDataAdd__content">
-        {features.map((feature) => (
-          <EuiFlexItem key={feature.id}>
-            <Synopsis
-              id={feature.id}
-              onClick={(event: MouseEvent) => {
-                trackUiMetric(METRIC_TYPE.CLICK, `ingest_data_card_${feature.id}`);
-                createAppNavigationHandler(feature.path)(event);
-              }}
-              description={feature.description}
-              iconType={feature.icon}
-              title={feature.title}
-              url={addBasePath(feature.path)}
-              wrapInPanel
-            />
+            <EuiSpacer />
+
+            <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+              {isIntegrationsEnabled ? (
+                <EuiFlexItem grow={false}>
+                  <RedirectAppLinks application={application}>
+                    {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                    <EuiButton
+                      fill
+                      href={addBasePath('/app/integrations')}
+                      onClick={(event: MouseEvent) => {
+                        trackUiMetric(METRIC_TYPE.CLICK, 'ingest_data_card_fleet');
+                        createAppNavigationHandler('/app/integrations')(event);
+                      }}
+                    >
+                      Find a data integration
+                    </EuiButton>
+                  </RedirectAppLinks>
+                </EuiFlexItem>
+              ) : null}
+
+              <EuiFlexItem grow={false}>
+                <RedirectAppLinks application={application}>
+                  {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                  <EuiButton
+                    href={addBasePath('/app/home#/tutorial_directory')}
+                    onClick={(event: MouseEvent) => {
+                      trackUiMetric(METRIC_TYPE.CLICK, 'home_tutorial_directory');
+                      createAppNavigationHandler('/app/home#/tutorial_directory')(event);
+                    }}
+                  >
+                    Setup Beats
+                  </EuiButton>
+                </RedirectAppLinks>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            {isIntegrationsEnabled ? (
+              <>
+                <EuiSpacer />
+
+                <EuiText color="subdued" size="xs">
+                  <p>
+                    <FormattedMessage
+                      id="home.addData.docs"
+                      defaultMessage="Confused on which to use? {docsLink}"
+                      values={{
+                        docsLink: (
+                          <EuiLink href={docLinks.links.addData} target="_blank">
+                            <FormattedMessage
+                              id="home.addData.docsLink"
+                              defaultMessage="Check our docs for more information"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </p>
+                </EuiText>
+              </>
+            ) : null}
           </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    </section>
-  );
-};
 
-AddData.propTypes = {
-  addBasePath: PropTypes.func.isRequired,
-  features: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-      description: PropTypes.string.isRequired,
-      icon: PropTypes.string.isRequired,
-      path: PropTypes.string.isRequired,
-      showOnHomePage: PropTypes.bool.isRequired,
-      category: PropTypes.string.isRequired,
-      order: PropTypes.number,
-    })
-  ),
+          <EuiFlexItem>Image goes here...</EuiFlexItem>
+        </EuiFlexGroup>
+      </section>
+
+      <EuiHorizontalRule margin="xxl" />
+    </>
+  );
 };

@@ -7,7 +7,6 @@
  */
 
 import React, { FC, MouseEvent } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -59,7 +58,7 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
 
             {isDevToolsEnabled || isManagementEnabled ? (
               <EuiFlexItem className="homDataManage__actions" grow={false}>
-                <EuiFlexGroup alignItems="center" responsive={false}>
+                <EuiFlexGroup alignItems="center" responsive={false} wrap>
                   {isDevToolsEnabled ? (
                     <EuiFlexItem grow={false}>
                       <RedirectAppLinks application={application}>
@@ -129,20 +128,4 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
   } else {
     return null;
   }
-};
-
-ManageData.propTypes = {
-  addBasePath: PropTypes.func.isRequired,
-  features: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-      description: PropTypes.string.isRequired,
-      icon: PropTypes.string.isRequired,
-      path: PropTypes.string.isRequired,
-      showOnHomePage: PropTypes.bool.isRequired,
-      category: PropTypes.string.isRequired,
-      order: PropTypes.number,
-    })
-  ),
 };

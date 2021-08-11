@@ -8,6 +8,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -109,7 +110,7 @@ export class Home extends Component {
 
   renderNormal() {
     const { addBasePath, solutions, directories } = this.props;
-    const { application, trackUiMetric } = getServices();
+    const { application, docLinks, trackUiMetric } = getServices();
     const devTools = this.findDirectoryById('console');
     const addDataFeatures = this.getFeaturesByCategory(FeatureCatalogueCategory.DATA);
     const manageDataFeatures = this.getFeaturesByCategory(FeatureCatalogueCategory.ADMIN);
@@ -118,6 +119,10 @@ export class Home extends Component {
     if (manageDataFeatures.length < 1 && devTools) {
       manageDataFeatures.push(devTools);
     }
+
+    console.log(application.capabilities.navLinks);
+    console.log(addDataFeatures);
+    console.log(docLinks.links);
 
     return (
       <KibanaPageTemplate
@@ -128,16 +133,15 @@ export class Home extends Component {
         }}
         template="empty"
       >
+        <EuiSpacer size="m" />
+
         <SolutionsSection
           addBasePath={addBasePath}
           solutions={solutions}
           directories={directories}
         />
 
-        {/* TODO: HIDE IF NO ACCESS TO INTEGRATIONS AND BEATS */}
-        {addDataFeatures.length ? (
-          <AddData addBasePath={addBasePath} features={addDataFeatures} />
-        ) : null}
+        <AddData addBasePath={addBasePath} application={application} docLinks={docLinks} />
 
         <ManageData
           addBasePath={addBasePath}
