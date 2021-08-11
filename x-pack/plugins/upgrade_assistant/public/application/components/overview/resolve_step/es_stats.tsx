@@ -13,7 +13,9 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
   EuiCard,
+  EuiIcon,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -40,6 +42,9 @@ const i18nTexts = {
   ),
   loadingText: i18n.translate('xpack.upgradeAssistant.esDeprecationStats.loadingText', {
     defaultMessage: 'Loading Elasticsearch deprecation stats…',
+  }),
+  noWarningsText: i18n.translate('xpack.upgradeAssistant.esDeprecationStats.noWarningsText', {
+    defaultMessage: 'No warnings. Good to go!',
   }),
   getCriticalDeprecationsMessage: (criticalDeprecations: number) =>
     i18n.translate('xpack.upgradeAssistant.esDeprecationStats.criticalDeprecationsLabel', {
@@ -70,6 +75,11 @@ export const ESDeprecationStats: FunctionComponent = () => {
     (deprecation) => deprecation.level === 'critical'
   );
 
+  const hasWarnings = allDeprecations.length > 0;
+  const hasCritical = criticalDeprecations.length > 0;
+  const shouldRenderNothing = !isLoading && !error && !hasWarnings && !hasCritical;
+  const shouldRenderStat = (forSection: boolean) => error || isLoading || forSection;
+
   return (
     <EuiCard
       data-test-subj="esStatsPanel"
@@ -80,53 +90,70 @@ export const ESDeprecationStats: FunctionComponent = () => {
           {error && <EsStatsErrors error={error} />}
         </>
       }
-      {...reactRouterNavigate(history, '/es_deprecations/cluster')}
+      {...(!shouldRenderNothing && reactRouterNavigate(history, '/es_deprecations/cluster'))}
     >
       <EuiSpacer />
       <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiStat
-            data-test-subj="criticalDeprecations"
-            title={error ? '--' : criticalDeprecations.length}
-            titleElement="span"
-            description={i18nTexts.criticalDeprecationsTitle}
-            titleColor="danger"
-            isLoading={isLoading}
-          >
-            {error === null && (
-              <EuiScreenReaderOnly>
-                <p>
-                  {isLoading
-                    ? i18nTexts.loadingText
-                    : i18nTexts.getCriticalDeprecationsMessage(criticalDeprecations.length)}
-                </p>
-              </EuiScreenReaderOnly>
-            )}
-          </EuiStat>
-        </EuiFlexItem>
+        {shouldRenderNothing && (
+          <EuiFlexItem>
+            <EuiText color="success">
+              <EuiFlexGroup gutterSize="s" alignItems="center" className="upgRenderSuccessMessage">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="check" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{i18nTexts.noWarningsText}</EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiText>
+          </EuiFlexItem>
+        )}
 
-        <EuiFlexItem>
-          <EuiStat
-            data-test-subj="totalDeprecations"
-            title={error ? '--' : allDeprecations.length}
-            titleElement="span"
-            description={i18nTexts.totalDeprecationsTitle}
-            isLoading={isLoading}
-          >
-            {error === null && (
-              <EuiScreenReaderOnly>
-                <p>
-                  {isLoading
-                    ? i18nTexts.loadingText
-                    : i18nTexts.getTotalDeprecationsMessage(
-                        esDeprecations?.cluster.length ?? 0,
-                        esDeprecations?.indices.length ?? 0
-                      )}
-                </p>
-              </EuiScreenReaderOnly>
-            )}
-          </EuiStat>
-        </EuiFlexItem>
+        {shouldRenderStat(hasCritical) && (
+          <EuiFlexItem>
+            <EuiStat
+              data-test-subj="criticalDeprecations"
+              title={error ? '--' : criticalDeprecations.length}
+              titleElement="span"
+              description={i18nTexts.criticalDeprecationsTitle}
+              titleColor="danger"
+              isLoading={isLoading}
+            >
+              {error === null && (
+                <EuiScreenReaderOnly>
+                  <p>
+                    {isLoading
+                      ? i18nTexts.loadingText
+                      : i18nTexts.getCriticalDeprecationsMessage(criticalDeprecations.length)}
+                  </p>
+                </EuiScreenReaderOnly>
+              )}
+            </EuiStat>
+          </EuiFlexItem>
+        )}
+
+        {shouldRenderStat(hasWarnings) && (
+          <EuiFlexItem>
+            <EuiStat
+              data-test-subj="totalDeprecations"
+              title={error ? '--' : allDeprecations.length}
+              titleElement="span"
+              description={i18nTexts.totalDeprecationsTitle}
+              isLoading={isLoading}
+            >
+              {error === null && (
+                <EuiScreenReaderOnly>
+                  <p>
+                    {isLoading
+                      ? i18nTexts.loadingText
+                      : i18nTexts.getTotalDeprecationsMessage(
+                          esDeprecations?.cluster.length ?? 0,
+                          esDeprecations?.indices.length ?? 0
+                        )}
+                  </p>
+                </EuiScreenReaderOnly>
+              )}
+            </EuiStat>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiCard>
   );

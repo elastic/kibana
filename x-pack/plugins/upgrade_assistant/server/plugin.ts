@@ -32,10 +32,7 @@ import {
   reindexOperationSavedObjectType,
   mlSavedObjectType,
 } from './saved_object_types';
-import {
-  DEPRECATION_LOGS_SOURCE_ID,
-  DEPRECATION_LOGS_INDEX_PATTERN,
-} from '../common/constants';
+import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX_PATTERN } from '../common/constants';
 
 import { RouteDependencies } from './types';
 

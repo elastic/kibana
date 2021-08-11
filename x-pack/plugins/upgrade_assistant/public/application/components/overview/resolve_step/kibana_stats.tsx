@@ -12,6 +12,8 @@ import {
   EuiCard,
   EuiStat,
   EuiSpacer,
+  EuiText,
+  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -39,6 +41,9 @@ const i18nTexts = {
       defaultMessage: 'Critical',
     }
   ),
+  noWarningsText: i18n.translate('xpack.upgradeAssistant.esDeprecationStats.noWarningsText', {
+    defaultMessage: 'No warnings. Good to go!',
+  }),
   loadingError: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecationStats.loadingErrorMessage',
     {
@@ -91,82 +96,102 @@ export const KibanaDeprecationStats: FunctionComponent = () => {
     getAllDeprecations();
   }, [deprecations]);
 
+  const warningDeprecationsCount = kibanaDeprecations?.length ?? 0;
+  const criticalDeprecationsCount =
+    kibanaDeprecations?.filter((deprecation) => deprecation.level === 'critical')?.length ?? 0;
+
+  const hasWarnings = criticalDeprecationsCount > 0;
+  const hasCritical = warningDeprecationsCount > 0;
+  const shouldRenderNothing = !isLoading && !error && !hasWarnings && !hasCritical;
+  const shouldRenderStat = (forSection: boolean) => error || isLoading || forSection;
+
   return (
     <EuiCard
       data-test-subj="kibanaStatsPanel"
       layout="horizontal"
-      title={i18nTexts.statsTitle}
-      {...reactRouterNavigate(history, '/kibana_deprecations')}
+      title={
+        <>
+          {i18nTexts.statsTitle}
+          {error && (
+            <EuiIconTip
+              type="alert"
+              color="danger"
+              size="l"
+              content={i18nTexts.loadingError}
+              iconProps={{
+                'data-test-subj': 'requestErrorIconTip',
+              }}
+            />
+          )}
+        </>
+      }
+      {...(!shouldRenderNothing && reactRouterNavigate(history, '/kibana_deprecations'))}
     >
       <EuiSpacer />
       <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiStat
-            data-test-subj="criticalDeprecations"
-            title={
-              kibanaDeprecations
-                ? kibanaDeprecations.filter((deprecation) => deprecation.level === 'critical')
-                    ?.length ?? '0'
-                : '--'
-            }
-            titleElement="span"
-            description={i18nTexts.criticalDeprecationsTitle}
-            titleColor="danger"
-            isLoading={isLoading}
-          >
-            {error === undefined && (
-              <EuiScreenReaderOnly>
-                <p>
-                  {isLoading
-                    ? i18nTexts.loadingText
-                    : i18nTexts.getCriticalDeprecationsMessage(
-                        kibanaDeprecations
-                          ? kibanaDeprecations.filter(
-                              (deprecation) => deprecation.level === 'critical'
-                            )?.length ?? 0
-                          : 0
-                      )}
-                </p>
-              </EuiScreenReaderOnly>
-            )}
+        {shouldRenderNothing && (
+          <EuiFlexItem>
+            <EuiText color="success">
+              <EuiFlexGroup gutterSize="s" alignItems="center" className="upgRenderSuccessMessage">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="check" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{i18nTexts.noWarningsText}</EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiText>
+          </EuiFlexItem>
+        )}
 
-            {error && (
-              <>
-                <EuiSpacer size="s" />
+        {shouldRenderStat(hasCritical) && (
+          <EuiFlexItem>
+            <EuiStat
+              data-test-subj="criticalDeprecations"
+              title={kibanaDeprecations ? criticalDeprecationsCount : '--'}
+              titleElement="span"
+              description={i18nTexts.criticalDeprecationsTitle}
+              titleColor="danger"
+              isLoading={isLoading}
+            >
+              {error === undefined && (
+                <EuiScreenReaderOnly>
+                  <p>
+                    {isLoading
+                      ? i18nTexts.loadingText
+                      : i18nTexts.getCriticalDeprecationsMessage(
+                          kibanaDeprecations
+                            ? kibanaDeprecations.filter(
+                                (deprecation) => deprecation.level === 'critical'
+                              )?.length ?? 0
+                            : 0
+                        )}
+                  </p>
+                </EuiScreenReaderOnly>
+              )}
+            </EuiStat>
+          </EuiFlexItem>
+        )}
 
-                <EuiIconTip
-                  type="alert"
-                  color="danger"
-                  size="l"
-                  content={i18nTexts.loadingError}
-                  iconProps={{
-                    'data-test-subj': 'requestErrorIconTip',
-                  }}
-                />
-              </>
-            )}
-          </EuiStat>
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiStat
-            data-test-subj="totalDeprecations"
-            title={error ? '--' : kibanaDeprecations?.length ?? '0'}
-            titleElement="span"
-            description={i18nTexts.totalDeprecationsTitle}
-            isLoading={isLoading}
-          >
-            {error === undefined && (
-              <EuiScreenReaderOnly>
-                <p>
-                  {isLoading
-                    ? i18nTexts.loadingText
-                    : i18nTexts.getTotalDeprecationsMessage(kibanaDeprecations?.length ?? 0)}
-                </p>
-              </EuiScreenReaderOnly>
-            )}
-          </EuiStat>
-        </EuiFlexItem>
+        {shouldRenderStat(hasWarnings) && (
+          <EuiFlexItem>
+            <EuiStat
+              data-test-subj="totalDeprecations"
+              title={error ? '--' : warningDeprecationsCount}
+              titleElement="span"
+              description={i18nTexts.totalDeprecationsTitle}
+              isLoading={isLoading}
+            >
+              {error === undefined && (
+                <EuiScreenReaderOnly>
+                  <p>
+                    {isLoading
+                      ? i18nTexts.loadingText
+                      : i18nTexts.getTotalDeprecationsMessage(kibanaDeprecations?.length ?? 0)}
+                  </p>
+                </EuiScreenReaderOnly>
+              )}
+            </EuiStat>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiCard>
   );
