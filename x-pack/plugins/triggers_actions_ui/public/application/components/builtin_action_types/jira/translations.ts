@@ -67,28 +67,28 @@ export const JIRA_REENTER_VALUES_LABEL = i18n.translate(
 export const JIRA_EMAIL_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.emailTextFieldLabel',
   {
-    defaultMessage: 'Username or email address',
+    defaultMessage: 'Email address',
   }
 );
 
 export const JIRA_EMAIL_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredEmailTextField',
   {
-    defaultMessage: 'Username or email address is required',
+    defaultMessage: 'Email address is required',
   }
 );
 
 export const JIRA_API_TOKEN_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.apiTokenTextFieldLabel',
   {
-    defaultMessage: 'API token or password',
+    defaultMessage: 'API token',
   }
 );
 
 export const JIRA_API_TOKEN_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredApiTokenTextField',
   {
-    defaultMessage: 'API token or password is required',
+    defaultMessage: 'API token is required',
   }
 );
 
