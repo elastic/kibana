@@ -36,8 +36,8 @@ export class Plugin implements PluginType {
     const { ruleDataService } = plugins.ruleRegistry;
 
     const ready = once(async () => {
-      const componentTemplateName = ruleDataService.getFullAssetName('synthetics-mappings');
-      const alertsIndexPattern = ruleDataService.getFullAssetName('observability.synthetics*');
+      const componentTemplateName = ruleDataService.getFullAssetName('uptime-mappings');
+      const alertsIndexPattern = ruleDataService.getFullAssetName('observability.uptime*');
 
       if (!ruleDataService.isWriteEnabled()) {
         return;
@@ -56,7 +56,7 @@ export class Plugin implements PluginType {
       });
 
       await ruleDataService.createOrUpdateIndexTemplate({
-        name: ruleDataService.getFullAssetName('synthetics-index-template'),
+        name: ruleDataService.getFullAssetName('uptime-index-template'),
         body: {
           index_patterns: [alertsIndexPattern],
           composed_of: [
@@ -75,8 +75,8 @@ export class Plugin implements PluginType {
     });
 
     const ruleDataClient = ruleDataService.getRuleDataClient(
-      'synthetics',
-      ruleDataService.getFullAssetName('observability.synthetics'),
+      'uptime',
+      ruleDataService.getFullAssetName('observability.uptime'),
       () => initializeRuleDataTemplatesPromise
     );
 
