@@ -6,5 +6,11 @@
   "ui": true,
   "requiredPlugins": ["expressions", "visualizations", "charts", "presentationUtil", "fieldFormats"],
   "requiredBundles": ["kibanaUtils"],
-  "optionalPlugins": []
+  "optionalPlugins": [],
+  "owner": {
+    "name": "Kibana App",
+    "githubTeam": "kibana-app"
+  },
+  "description": "Expression Tagcloud plugin adds a `tagcloud` renderer and function to the expression plugin. The renderer will display the `Wordcloud` chart."
 }
+  
