@@ -111,7 +111,7 @@ export const SourceSettings: React.FC = () => {
     updateContentSource(id, { name: inputValue });
   };
 
-  const handleSynchronizeChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleSynchronizeChange = (e: EuiSwitchEvent) => {
     setSynchronize(e.target.checked);
     updateContentSource(id, { indexing: { enabled: e.target.checked } }); // why can't I use `synchronizeChecked` here instead of `e.target.checked`?
   }
