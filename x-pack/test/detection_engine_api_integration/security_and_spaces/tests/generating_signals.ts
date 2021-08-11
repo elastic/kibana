@@ -232,7 +232,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const signalNoRule = omit(signal, 'rule');
+        const signalNoRule = omit(signal, ['rule', 'reason']);
         expect(signalNoRule).eql({
           parents: [
             {
@@ -1244,7 +1244,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const signalNoRule = omit(signal, 'rule');
+        const signalNoRule = omit(signal, ['rule', 'reason']);
 
         expect(signalNoRule).eql({
           parents: [
@@ -1405,7 +1405,7 @@ export default ({ getService }: FtrProviderContext) => {
         const signalsOpen = await getSignalsByRuleIds(supertest, ['signal-on-signal']);
         const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const signalNoRule = omit(signal, 'rule');
+        const signalNoRule = omit(signal, ['rule', 'reason']);
 
         expect(signalNoRule).eql({
           parents: [
