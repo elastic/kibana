@@ -103,7 +103,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.crawler.automaticCrawlSchedule.crawlAutomaticallySwitchLabel',
                 {
-                  defaultMessage: 'Crawl Automatically',
+                  defaultMessage: 'Crawl automatically',
                 }
               )}
             </EuiText>

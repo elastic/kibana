@@ -61,7 +61,7 @@ export const ManageCrawlsPopoverLogic = kea<
           i18n.translate(
             'xpack.enterpriseSearch.appSearch.crawler.manageCrawlsPopover.reApplyCrawlRules.successMessage',
             {
-              defaultMessage: 'Crawl Rules are being re-applied in the background',
+              defaultMessage: 'Crawl rules are being re-applied in the background',
             }
           )
         );
