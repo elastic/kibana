@@ -22,5 +22,5 @@ export interface RowRenderer {
     data: Ecs;
     isDraggable: boolean;
     timelineId: string;
-  }) => React.ReactNode;
+  }) => JSX.Element;
 }
