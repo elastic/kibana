@@ -8,7 +8,9 @@
 
 import { IRouter } from 'src/core/server';
 import { registerHitsStatusRoute } from './fetch_es_hits_status';
+import { registerNewInstanceStatusRoute } from './fetch_new_instance_status';
 
 export const registerRoutes = (router: IRouter) => {
   registerHitsStatusRoute(router);
+  registerNewInstanceStatusRoute(router);
 };
