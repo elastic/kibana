@@ -13,7 +13,7 @@ import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 
 interface UseAgentDetails {
-  agentId: string;
+  agentId?: string;
   silent?: boolean;
   skip?: boolean;
 }

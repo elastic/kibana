@@ -18,15 +18,18 @@ import { queryClient } from '../../query_client';
 import { OsqueryIcon } from '../../components/osquery_icon';
 
 interface OsqueryActionProps {
-  metadata?: Record<string, any> | undefined;
+  metadata?: {
+    info: {
+      agent: { id: string };
+    };
+  };
 }
 
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
   const { fleet } = useKibana().services;
   const permissions = useKibana().services.application.capabilities.osquery;
-  const [fleetAvailable, setFleetAvailable] = useState<boolean | null>(null);
-
-  const agentId = metadata?.info?.agent?.id ?? null;
+  const [fleetAvailable, setFleetAvailable] = useState<boolean | undefined>(undefined);
+  const agentId = metadata?.info?.agent?.id ?? undefined;
   const { data: agentData, isFetched: agentFetched } = useAgentDetails({
     agentId,
     silent: true,
