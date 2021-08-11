@@ -158,16 +158,20 @@ export const PageRouter: FC = () => {
 
   const { data } = useSelector(indexStatusSelector);
   const noDataInfo = !data || data?.docCount === 0 || data?.indexExists === false;
-  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
-    solution: 'Observability',
-    pageTitle: 'Set up Uptime for Observability!',
-    actions: {
-      beats: {
-        href: basePath + `/app/home#/tutorial/uptimeMonitors`,
-      },
-    },
-    docsLink: '#',
-  };
+  const noDataPage = (
+    <StyledPageTemplateComponent
+      noDataConfig={{
+        solution: 'Observability',
+        pageTitle: 'Set up Uptime for Observability!',
+        actions: {
+          beats: {
+            href: basePath + `/app/home#/tutorial/uptimeMonitors`,
+          },
+        },
+        docsLink: '#',
+      }}
+    />
+  );
 
   return (
     <Switch>
@@ -177,12 +181,19 @@ export const PageRouter: FC = () => {
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <SyntheticsCallout />
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
-              <StyledPageTemplateComponent
-                noDataConfig={noDataInfo ? noDataConfig : undefined}
-                pageHeader={pageHeader}
-              >
-                <RouteComponent />
-              </StyledPageTemplateComponent>
+
+              {/* Render the No Data config if there is no data */}
+              {noDataInfo && noDataPage}
+
+              {/* Apply the template component, only if `pageHeader` is defined in the route */}
+              {!noDataInfo && pageHeader && (
+                <StyledPageTemplateComponent pageHeader={pageHeader}>
+                  <RouteComponent />
+                </StyledPageTemplateComponent>
+              )}
+
+              {/* Otherwise the template should be in the route page itself  */}
+              {!noDataInfo && !pageHeader && <RouteComponent />}
             </div>
           </Route>
         )

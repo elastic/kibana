@@ -32,12 +32,18 @@ export const SyntheticsCheckSteps: React.FC = () => {
 
   return (
     <PageTemplateComponent
-      pageHeader={{
-        pageTitle: details?.journey?.monitor.name || details?.journey?.monitor.id,
-        rightSideItems: [
-          details ? <ChecksNavigation timestamp={details.timestamp} details={details} /> : null,
-        ],
-      }}
+      pageHeader={
+        details?.journey?.monitor
+          ? {
+              pageTitle: details?.journey?.monitor.name || details?.journey?.monitor.id,
+              rightSideItems: [
+                details ? (
+                  <ChecksNavigation timestamp={details.timestamp} details={details} />
+                ) : null,
+              ],
+            }
+          : undefined
+      }
     >
       <StepsList data={steps} loading={loading} error={error} />
       {(!steps || steps.length === 0) && !loading && <EmptyJourney checkGroup={checkGroup} />}
