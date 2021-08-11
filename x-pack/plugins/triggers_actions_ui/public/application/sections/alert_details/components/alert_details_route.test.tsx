@@ -10,7 +10,7 @@ import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { createMemoryHistory, createLocation } from 'history';
 import { ToastsApi } from 'kibana/public';
-import { AlertDetailsRoute, getAlertData } from './alert_details_route';
+import { AlertDetailsRoute, getRuleData } from './alert_details_route';
 import { Alert } from '../../../../types';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 jest.mock('../../../../common/lib/kibana');
@@ -34,7 +34,7 @@ describe('getAlertData useEffect handler', () => {
 
   it('fetches alert', async () => {
     const alert = mockAlert();
-    const { loadAlert, loadAlertTypes, loadActionTypes } = mockApis();
+    const { loadAlert, loadAlertTypes, loadActionTypes, resolveRule } = mockApis();
     const { setAlert, setAlertType, setActionTypes } = mockStateSetter();
 
     loadAlert.mockImplementationOnce(async () => alert);
@@ -43,10 +43,11 @@ describe('getAlertData useEffect handler', () => {
       addDanger: jest.fn(),
     } as unknown) as ToastsApi;
 
-    await getAlertData(
+    await getRuleData(
       alert.id,
       loadAlert,
       loadAlertTypes,
+      resolveRule,
       loadActionTypes,
       setAlert,
       setAlertType,
@@ -78,7 +79,7 @@ describe('getAlertData useEffect handler', () => {
       id: alert.alertTypeId,
       name: 'type name',
     };
-    const { loadAlert, loadAlertTypes, loadActionTypes } = mockApis();
+    const { loadAlert, loadAlertTypes, loadActionTypes, resolveRule } = mockApis();
     const { setAlert, setAlertType, setActionTypes } = mockStateSetter();
 
     loadAlert.mockImplementation(async () => alert);
@@ -89,10 +90,11 @@ describe('getAlertData useEffect handler', () => {
       addDanger: jest.fn(),
     } as unknown) as ToastsApi;
 
-    await getAlertData(
+    await getRuleData(
       alert.id,
       loadAlert,
       loadAlertTypes,
+      resolveRule,
       loadActionTypes,
       setAlert,
       setAlertType,
@@ -124,7 +126,7 @@ describe('getAlertData useEffect handler', () => {
       ],
     });
 
-    const { loadAlert, loadAlertTypes, loadActionTypes } = mockApis();
+    const { loadAlert, loadAlertTypes, loadActionTypes, resolveRule } = mockApis();
     const { setAlert, setAlertType, setActionTypes } = mockStateSetter();
 
     loadAlert.mockImplementation(async () => {
@@ -134,10 +136,11 @@ describe('getAlertData useEffect handler', () => {
     const toastNotifications = ({
       addDanger: jest.fn(),
     } as unknown) as ToastsApi;
-    await getAlertData(
+    await getRuleData(
       alert.id,
       loadAlert,
       loadAlertTypes,
+      resolveRule,
       loadActionTypes,
       setAlert,
       setAlertType,
@@ -167,7 +170,7 @@ describe('getAlertData useEffect handler', () => {
       ],
     });
 
-    const { loadAlert, loadAlertTypes, loadActionTypes } = mockApis();
+    const { loadAlert, loadAlertTypes, loadActionTypes, resolveRule } = mockApis();
     const { setAlert, setAlertType, setActionTypes } = mockStateSetter();
 
     loadAlert.mockImplementation(async () => alert);
@@ -180,10 +183,11 @@ describe('getAlertData useEffect handler', () => {
     const toastNotifications = ({
       addDanger: jest.fn(),
     } as unknown) as ToastsApi;
-    await getAlertData(
+    await getRuleData(
       alert.id,
       loadAlert,
       loadAlertTypes,
+      resolveRule,
       loadActionTypes,
       setAlert,
       setAlertType,
@@ -217,7 +221,7 @@ describe('getAlertData useEffect handler', () => {
       name: 'type name',
     };
 
-    const { loadAlert, loadAlertTypes, loadActionTypes } = mockApis();
+    const { loadAlert, loadAlertTypes, loadActionTypes, resolveRule } = mockApis();
     const { setAlert, setAlertType, setActionTypes } = mockStateSetter();
 
     loadAlert.mockImplementation(async () => alert);
@@ -230,10 +234,11 @@ describe('getAlertData useEffect handler', () => {
     const toastNotifications = ({
       addDanger: jest.fn(),
     } as unknown) as ToastsApi;
-    await getAlertData(
+    await getRuleData(
       alert.id,
       loadAlert,
       loadAlertTypes,
+      resolveRule,
       loadActionTypes,
       setAlert,
       setAlertType,
@@ -268,7 +273,7 @@ describe('getAlertData useEffect handler', () => {
       name: 'type name',
     };
 
-    const { loadAlert, loadAlertTypes, loadActionTypes } = mockApis();
+    const { loadAlert, loadAlertTypes, loadActionTypes, resolveRule } = mockApis();
     const { setAlert, setAlertType, setActionTypes } = mockStateSetter();
 
     loadAlert.mockImplementation(async () => alert);
@@ -278,10 +283,11 @@ describe('getAlertData useEffect handler', () => {
     const toastNotifications = ({
       addDanger: jest.fn(),
     } as unknown) as ToastsApi;
-    await getAlertData(
+    await getRuleData(
       alert.id,
       loadAlert,
       loadAlertTypes,
+      resolveRule,
       loadActionTypes,
       setAlert,
       setAlertType,
@@ -327,7 +333,7 @@ describe('getAlertData useEffect handler', () => {
       name: 'type name',
     };
 
-    const { loadAlert, loadAlertTypes, loadActionTypes } = mockApis();
+    const { loadAlert, loadAlertTypes, loadActionTypes, resolveRule } = mockApis();
     const { setAlert, setAlertType, setActionTypes } = mockStateSetter();
 
     loadAlert.mockImplementation(async () => alert);
@@ -337,10 +343,11 @@ describe('getAlertData useEffect handler', () => {
     const toastNotifications = ({
       addDanger: jest.fn(),
     } as unknown) as ToastsApi;
-    await getAlertData(
+    await getRuleData(
       alert.id,
       loadAlert,
       loadAlertTypes,
+      resolveRule,
       loadActionTypes,
       setAlert,
       setAlertType,
@@ -359,6 +366,7 @@ function mockApis() {
     loadAlert: jest.fn(),
     loadAlertTypes: jest.fn(),
     loadActionTypes: jest.fn(),
+    resolveRule: jest.fn(),
   };
 }
 

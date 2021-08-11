@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { ToastsApi } from 'kibana/public';
-import { Alert, AlertType, ActionType } from '../../../../types';
+import { Alert, AlertType, ActionType, ResolvedRule } from '../../../../types';
 import { AlertDetailsWithApi as AlertDetails } from './alert_details';
 import { throwIfAbsent, throwIfIsntContained } from '../../../lib/value_validators';
 import {
@@ -27,7 +27,7 @@ type AlertDetailsRouteProps = RouteComponentProps<{
   ruleId: string;
 }> &
   Pick<ActionApis, 'loadActionTypes'> &
-  Pick<AlertApis, 'loadAlert' | 'loadAlertTypes'>;
+  Pick<AlertApis, 'loadAlert' | 'loadAlertTypes' | 'resolveRule'>;
 
 export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> = ({
   match: {
@@ -36,6 +36,7 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
   loadAlert,
   loadAlertTypes,
   loadActionTypes,
+  resolveRule,
 }) => {
   const {
     http,
@@ -47,17 +48,18 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
   const [actionTypes, setActionTypes] = useState<ActionType[] | null>(null);
   const [refreshToken, requestRefresh] = React.useState<number>();
   useEffect(() => {
-    getAlertData(
+    getRuleData(
       ruleId,
       loadAlert,
       loadAlertTypes,
+      resolveRule,
       loadActionTypes,
       setAlert,
       setAlertType,
       setActionTypes,
       toasts
     );
-  }, [ruleId, http, loadActionTypes, loadAlert, loadAlertTypes, toasts, refreshToken]);
+  }, [ruleId, http, loadActionTypes, loadAlert, loadAlertTypes, resolveRule, toasts, refreshToken]);
 
   return alert && alertType && actionTypes ? (
     <AlertDetails
@@ -71,10 +73,11 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
   );
 };
 
-export async function getAlertData(
-  alertId: string,
+export async function getRuleData(
+  ruleId: string,
   loadAlert: AlertApis['loadAlert'],
   loadAlertTypes: AlertApis['loadAlertTypes'],
+  resolveRule: AlertApis['resolveRule'],
   loadActionTypes: ActionApis['loadActionTypes'],
   setAlert: React.Dispatch<React.SetStateAction<Alert | null>>,
   setAlertType: React.Dispatch<React.SetStateAction<AlertType | null>>,
@@ -82,16 +85,25 @@ export async function getAlertData(
   toasts: Pick<ToastsApi, 'addDanger'>
 ) {
   try {
-    const loadedAlert = await loadAlert(alertId);
-    setAlert(loadedAlert);
+    let loadedRule: Alert | ResolvedRule;
+    try {
+      loadedRule = await loadAlert(ruleId);
+    } catch (err) {
+      if (err) {
+        throw err;
+      }
+      loadedRule = await resolveRule(ruleId);
+    }
+    // const loadedAlert = await loadAlert(ruleId);
+    setAlert(loadedRule);
 
     const [loadedAlertType, loadedActionTypes] = await Promise.all<AlertType, ActionType[]>([
       loadAlertTypes()
-        .then((types) => types.find((type) => type.id === loadedAlert.alertTypeId))
-        .then(throwIfAbsent(`Invalid Alert Type: ${loadedAlert.alertTypeId}`)),
+        .then((types) => types.find((type) => type.id === loadedRule.alertTypeId))
+        .then(throwIfAbsent(`Invalid Alert Type: ${loadedRule.alertTypeId}`)),
       loadActionTypes().then(
         throwIfIsntContained(
-          new Set(loadedAlert.actions.map((action) => action.actionTypeId)),
+          new Set(loadedRule.actions.map((action) => action.actionTypeId)),
           (requiredActionType: string) => `Invalid Action Type: ${requiredActionType}`,
           (action: ActionType) => action.id
         )
