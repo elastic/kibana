@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { computeExpectationsAndRanges } from './compute_expectations_and_ranges';
-export { currentTimeAsString } from './current_time_as_string';
-export { hasPrefixToInclude } from './has_prefix_to_include';
+import { FIELD_PREFIX_TO_ADD_AS_CANDIDATE } from '../constants';
+
+export const hasPrefixToInclude = (fieldName: string) => {
+  return FIELD_PREFIX_TO_ADD_AS_CANDIDATE.some((prefix) =>
+    fieldName.startsWith(prefix)
+  );
+};
