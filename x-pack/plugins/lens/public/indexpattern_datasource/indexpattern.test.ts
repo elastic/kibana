@@ -20,6 +20,8 @@ import { operationDefinitionMap, getErrorMessages } from './operations';
 import { createMockedFullReference } from './operations/mocks';
 import { indexPatternFieldEditorPluginMock } from 'src/plugins/index_pattern_field_editor/public/mocks';
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+
 jest.mock('./loader');
 jest.mock('../id_generator');
 jest.mock('./operations');
@@ -172,6 +174,7 @@ describe('IndexPattern Data Source', () => {
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       data: dataPluginMock.createStartContract(),
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
       charts: chartPluginMock.createSetupContract(),
       indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),

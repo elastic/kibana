@@ -9,7 +9,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters, ExecutionContextSearch extends SerializableState = SerializableState> 
+export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters, ExecutionContextSearch extends SerializableRecord = SerializableRecord> 
 ```
 
 ## Properties
@@ -17,7 +17,7 @@ export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters,
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [abortSignal](./kibana-plugin-plugins-expressions-public.executioncontext.abortsignal.md) | <code>AbortSignal</code> | Adds ability to abort current execution. |
-|  [getExecutionContext](./kibana-plugin-plugins-expressions-public.executioncontext.getexecutioncontext.md) | <code>() =&gt; IExecutionContextContainer &#124; undefined</code> | Contains the meta-data about the source of the expression. |
+|  [getExecutionContext](./kibana-plugin-plugins-expressions-public.executioncontext.getexecutioncontext.md) | <code>() =&gt; KibanaExecutionContext &#124; undefined</code> | Contains the meta-data about the source of the expression. |
 |  [getKibanaRequest](./kibana-plugin-plugins-expressions-public.executioncontext.getkibanarequest.md) | <code>() =&gt; KibanaRequest</code> | Getter to retrieve the <code>KibanaRequest</code> object inside an expression function. Useful for functions which are running on the server and need to perform operations that are scoped to a specific user. |
 |  [getSearchContext](./kibana-plugin-plugins-expressions-public.executioncontext.getsearchcontext.md) | <code>() =&gt; ExecutionContextSearch</code> | Get search context of the expression. |
 |  [getSearchSessionId](./kibana-plugin-plugins-expressions-public.executioncontext.getsearchsessionid.md) | <code>() =&gt; string &#124; undefined</code> | Search context in which expression should operate. |

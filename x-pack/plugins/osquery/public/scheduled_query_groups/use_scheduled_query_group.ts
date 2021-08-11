@@ -8,7 +8,7 @@
 import { useQuery } from 'react-query';
 
 import { useKibana } from '../common/lib/kibana';
-import { GetOnePackagePolicyResponse, packagePolicyRouteService } from '../../../fleet/common';
+import { GetOnePackagePolicyResponse } from '../../../fleet/common';
 import { OsqueryManagerPackagePolicy } from '../../common/types';
 
 interface UseScheduledQueryGroup {
@@ -28,7 +28,7 @@ export const useScheduledQueryGroup = ({
     OsqueryManagerPackagePolicy
   >(
     ['scheduledQueryGroup', { scheduledQueryGroupId }],
-    () => http.get(packagePolicyRouteService.getInfoPath(scheduledQueryGroupId)),
+    () => http.get(`/internal/osquery/scheduled_query_group/${scheduledQueryGroupId}`),
     {
       keepPreviousData: true,
       enabled: !skip || !scheduledQueryGroupId,
