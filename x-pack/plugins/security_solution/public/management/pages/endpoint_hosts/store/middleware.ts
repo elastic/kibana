@@ -115,6 +115,10 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       endpointDetailsMiddleware({ store, coreStart });
     }
 
+    if (action.type === 'endpointDetailsLoad') {
+      loadEndpointDetails({ store, coreStart, selectedEndpoint: action.payload.endpointId });
+    }
+
     if (
       action.type === 'userChangedUrl' &&
       hasSelectedEndpoint(getState()) === true &&
