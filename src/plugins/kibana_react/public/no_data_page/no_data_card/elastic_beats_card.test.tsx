@@ -10,6 +10,16 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { ElasticBeatsCard } from './elastic_beats_card';
 
+jest.mock('../../context', () => ({
+  ...jest.requireActual('../../context'),
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      http: { basePath: { prepend: jest.fn((path: string) => (path ? path : 'path')) } },
+      uiSettings: { get: jest.fn() },
+    },
+  }),
+}));
+
 describe('ElasticBeatsCard', () => {
   test('renders', () => {
     const component = shallow(<ElasticBeatsCard solution="Solution" />);

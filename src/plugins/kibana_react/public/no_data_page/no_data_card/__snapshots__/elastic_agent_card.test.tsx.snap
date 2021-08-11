@@ -1,29 +1,81 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ElasticAgentCard props button 1`] = `
-<ElasticAgentCard
-  button="Button"
-  solution="Solution"
+<EuiCard
+  betaBadgeLabel="Recommended"
+  description="The Elastic Agent provides a simple, unified way to
+        collect data from your machines."
+  footer={
+    <EuiButton
+      fill={true}
+      href="app/integrations/browse"
+    >
+      Button
+    </EuiButton>
+  }
+  href="app/integrations/browse"
+  image="httpPrepend"
+  paddingSize="l"
+  title="Add a Solution integration"
 />
 `;
 
 exports[`ElasticAgentCard props href 1`] = `
-<ElasticAgentCard
-  button="Button"
+<EuiCard
+  betaBadgeLabel="Recommended"
+  description="The Elastic Agent provides a simple, unified way to
+        collect data from your machines."
+  footer={
+    <EuiButton
+      fill={true}
+      href="#"
+    >
+      Button
+    </EuiButton>
+  }
   href="#"
-  solution="Solution"
+  image="httpPrepend"
+  paddingSize="l"
+  title="Add a Solution integration"
 />
 `;
 
 exports[`ElasticAgentCard props recommended 1`] = `
-<ElasticAgentCard
-  recommended={true}
-  solution="Solution"
+<EuiCard
+  betaBadgeLabel="Recommended"
+  description="The Elastic Agent provides a simple, unified way to
+        collect data from your machines."
+  footer={
+    <EuiButton
+      fill={true}
+      href="app/integrations/browse"
+    >
+      Find a Solution integration
+    </EuiButton>
+  }
+  href="app/integrations/browse"
+  image="httpPrepend"
+  paddingSize="l"
+  title="Add a Solution integration"
 />
 `;
 
 exports[`ElasticAgentCard renders 1`] = `
-<ElasticAgentCard
-  solution="Solution"
+<EuiCard
+  betaBadgeLabel="Recommended"
+  description="The Elastic Agent provides a simple, unified way to
+        collect data from your machines."
+  footer={
+    <EuiButton
+      fill={true}
+      href="app/integrations/browse"
+    >
+      Find a Solution integration
+    </EuiButton>
+  }
+  href="app/integrations/browse"
+  image="httpPrepend"
+  paddingSize="l"
+  title="Add a Solution integration"
 />
 `;

@@ -10,18 +10,15 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { ElasticAgentCard } from './elastic_agent_card';
 
-// jest.mock('../../context', () => ({
-//   useKibana: jest.fn().mockReturnValue({
-//     services: {
-//       application: { capabilities: { advancedSettings: { show: true, save: true } } },
-//       notifications: { toast: { addSuccess: jest.fn() } },
-//     },
-//   }),
-// }));
-
-// jest.mock('../../ui_settings', () => ({
-//   useUiSetting$: jest.fn().mockReturnValue(['path-to-default-route', jest.fn()]),
-// }));
+jest.mock('../../context', () => ({
+  ...jest.requireActual('../../context'),
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      http: { basePath: { prepend: jest.fn((path: string) => (path ? path : 'path')) } },
+      uiSettings: { get: jest.fn() },
+    },
+  }),
+}));
 
 describe('ElasticAgentCard', () => {
   test('renders', () => {
