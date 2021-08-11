@@ -10,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { Expression, Props } from '../components/param_details_form/expression';
 import { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
 import {
-  ALERT_LARGE_SHARD_SIZE,
-  ALERT_DETAILS,
-  ALERT_REQUIRES_APP_CONTEXT,
+  RULE_LARGE_SHARD_SIZE,
+  RULE_DETAILS,
+  RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
 import { AlertTypeParams } from '../../../../alerting/common';
 
@@ -38,17 +38,17 @@ const validate = (inputValues: ValidateOptions): ValidationResult => {
 
 export function createLargeShardSizeAlertType(): AlertTypeModel<ValidateOptions> {
   return {
-    id: ALERT_LARGE_SHARD_SIZE,
-    description: ALERT_DETAILS[ALERT_LARGE_SHARD_SIZE].description,
+    id: RULE_LARGE_SHARD_SIZE,
+    description: RULE_DETAILS[RULE_LARGE_SHARD_SIZE].description,
     iconClass: 'bell',
     documentationUrl(docLinks) {
       return `${docLinks.links.monitoring.alertsKibanaLargeShardSize}`;
     },
     alertParamsExpression: (props: Props) => (
-      <Expression {...props} paramDetails={ALERT_DETAILS[ALERT_LARGE_SHARD_SIZE].paramDetails} />
+      <Expression {...props} paramDetails={RULE_DETAILS[RULE_LARGE_SHARD_SIZE].paramDetails} />
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
-    requiresAppContext: ALERT_REQUIRES_APP_CONTEXT,
+    requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
   };
 }

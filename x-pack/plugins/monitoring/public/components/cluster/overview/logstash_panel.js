@@ -15,7 +15,7 @@ import {
 import {
   LOGSTASH,
   LOGSTASH_SYSTEM_ID,
-  ALERT_LOGSTASH_VERSION_MISMATCH,
+  RULE_LOGSTASH_VERSION_MISMATCH,
 } from '../../../../common/constants';
 
 import {
@@ -42,7 +42,7 @@ import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
 import { SetupModeContext } from '../../setup_mode/setup_mode_context';
 
-const NODES_PANEL_ALERTS = [ALERT_LOGSTASH_VERSION_MISMATCH];
+const NODES_PANEL_RULES = [RULE_LOGSTASH_VERSION_MISMATCH];
 
 export function LogstashPanel(props) {
   const { setupMode } = props;
@@ -72,8 +72,8 @@ export function LogstashPanel(props) {
   ) : null;
 
   let nodesAlertStatus = null;
-  if (shouldShowAlertBadge(alerts, NODES_PANEL_ALERTS, setupModeContext)) {
-    const alertsList = NODES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
+  if (shouldShowAlertBadge(alerts, NODES_PANEL_RULES, setupModeContext)) {
+    const alertsList = NODES_PANEL_RULES.map((alertType) => alerts[alertType]);
     nodesAlertStatus = (
       <EuiFlexItem grow={false}>
         <AlertsBadge alerts={alertsList} />

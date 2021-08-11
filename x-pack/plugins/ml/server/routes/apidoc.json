@@ -22,8 +22,6 @@
     "ValidateDataFrameAnalytics",
 
     "DataVisualizer",
-    "GetOverallStats",
-    "GetStatsForFields",
     "GetHistogramsForFields",
 
     "AnomalyDetectors",

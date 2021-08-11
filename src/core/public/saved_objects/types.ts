@@ -19,7 +19,7 @@ export interface ResolvedSimpleSavedObject<T = unknown> {
   /**
    * The saved object that was found.
    */
-  savedObject: SimpleSavedObject<T>;
+  saved_object: SimpleSavedObject<T>;
   /**
    * The outcome for a successful `resolve` call is one of the following values:
    *
@@ -33,5 +33,5 @@ export interface ResolvedSimpleSavedObject<T = unknown> {
   /**
    * The ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`.
    */
-  aliasTargetId?: SavedObjectsResolveResponse['aliasTargetId'];
+  alias_target_id?: SavedObjectsResolveResponse['alias_target_id'];
 }
