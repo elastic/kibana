@@ -1,61 +1,46 @@
 [[install]]
 == Install {kib}
 
-[float]
-=== Hosted {kib}
+Want it hosted? Deploy on Elastic Cloud.
 
-If you are running our hosted Elasticsearch Service on Elastic Cloud, you access Kibana with a single click. (You can {ess-trial}[sign up for a free trial] and start exploring data in minutes.)
+To install and manage {kib} yourself, use our package repositories.
+Kibana supports only 64-bit operating systems.
 
-[float]
-=== Install {kib} yourself
+***Packages of {kib} are provided for and tested against Linux, Darwin, and Windows.
+Because {kib} runs on Node.js, we include the necessary Node.js binaries for these platforms.
+Running {kib} against a separately maintained version of Node.js is not supported.
 
-NOTE: Starting with version 6.0.0, Kibana only supports 64 bit operating systems.
+[cols="50, 50"]
+|===
 
-Kibana is provided in the following package formats:
-
-[horizontal]
-`tar.gz`/`zip`::
-
-The `tar.gz` packages are provided for installation on Linux and Darwin and are
-the easiest choice for getting started with Kibana.
-+
+|`tar.gz`/`zip`
+|The `tar.gz` packages are for installation on Linux and Darwin.
 The `zip` package is the only supported package for Windows.
-+
-<<targz>> or <<windows>>
+|
+<<targz>>
+<<windows>>
 
-`deb`::
+|`deb`
+|The `deb` package is suitable for Debian, Ubuntu, and other Debian-based
+systems.
 
-The `deb` package is suitable for Debian, Ubuntu, and other Debian-based
-systems.  Debian packages may be downloaded from the Elastic website or from
-our Debian repository.
-+
 <<deb>>
 
-`rpm`::
-
-The `rpm` package is suitable for installation on Red Hat, Centos, SLES,
-OpenSuSE and other RPM-based systems.  RPMs may be downloaded from the
-Elastic website or from our RPM repository.
+|`rpm`
+|The `rpm` package is suitable for installation on Red Hat, Centos, SLES,
+OpenSuSE and other RPM-based systems.
 +
 <<rpm>>
 
-`docker`::
+|`docker`
+|Images are available for running {kib} as a Docker container.
 
-Images are available for running Kibana as a Docker container. They may be
-downloaded from the Elastic Docker Registry.
-+
-<<docker,Running Kibana on Docker>>
+<<docker>>
 
-`brew`::
-
-Formulae are available from the Elastic Homebrew tap for installing {kib} on macOS with the Homebrew package manager.
-+
+|`brew`
+|Formulae are available from the Elastic Homebrew tap for installing {kib} on macOS with the Homebrew package manager.
 <<brew>>
-
-IMPORTANT: If your Elasticsearch installation is protected by
-{ref}/elasticsearch-security.html[{stack-security-features}] see
-{kibana-ref}/using-kibana-with-security.html[Configuring security in {kib}] for
-additional setup instructions.
+|===
 
 include::install/targz.asciidoc[]
 
