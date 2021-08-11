@@ -177,10 +177,6 @@ export class SettingsPageObject extends FtrService {
     await this.testSubjects.click('deleteIndexPatternButton');
   }
 
-  async clickCloseFlyOutButton() {
-    await this.testSubjects.click('closeFlyoutButton');
-  }
-
   async getIndexPageHeading() {
     return await this.testSubjects.getVisibleText('indexPatternTitle');
   }
