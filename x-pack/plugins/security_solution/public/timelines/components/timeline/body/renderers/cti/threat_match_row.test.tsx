@@ -8,11 +8,27 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import { Fields } from '../../../../../../../common/search_strategy';
 import { TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
-import { ThreatMatchRowProps, ThreatMatchRowView } from './threat_match_row';
+import { ThreatMatchRow, ThreatMatchRowProps, ThreatMatchRowView } from './threat_match_row';
 
 jest.mock('../../../../../../common/lib/kibana');
+
+describe('ThreatMatchRow', () => {
+  const mount = useMountAppended();
+
+  it('correctly renders partial indicator objects', () => {
+    const partialData = { 'matched.atomic': ['atomic'], 'matched.field': ['field'] } as Fields;
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatMatchRow contextId="test" eventId="test" isDraggable={false} data={partialData} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="threat-match-row"]').exists()).toEqual(true);
+  });
+});
 
 describe('ThreatMatchRowView', () => {
   const mount = useMountAppended();

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import React from 'react';
+import { getOr } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { Fields } from '../../../../../../../common/search_strategy';
@@ -45,12 +45,12 @@ export const ThreatMatchRow = ({
   const props = {
     contextId,
     eventId,
-    indicatorReference: get(data, REFERENCE)[0] as string | undefined,
-    indicatorProvider: get(data, PROVIDER)[0] as string | undefined,
-    indicatorType: get(data, MATCHED_TYPE)[0] as string | undefined,
+    indicatorReference: getOr([], REFERENCE, data)[0] as string | undefined,
+    indicatorProvider: getOr([], PROVIDER, data)[0] as string | undefined,
+    indicatorType: getOr([], MATCHED_TYPE, data)[0] as string | undefined,
     isDraggable,
-    sourceField: get(data, MATCHED_FIELD)[0] as string,
-    sourceValue: get(data, MATCHED_ATOMIC)[0] as string,
+    sourceField: getOr([], MATCHED_FIELD, data)[0] as string,
+    sourceValue: getOr([], MATCHED_ATOMIC, data)[0] as string,
   };
 
   return <ThreatMatchRowView {...props} />;
