@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ElasticAgentCard props button 1`] = `
+<ElasticAgentCard
+  button="Button"
+  solution="Solution"
+/>
+`;
+
+exports[`ElasticAgentCard props href 1`] = `
+<ElasticAgentCard
+  button="Button"
+  href="#"
+  solution="Solution"
+/>
+`;
+
+exports[`ElasticAgentCard props recommended 1`] = `
+<ElasticAgentCard
+  recommended={true}
+  solution="Solution"
+/>
+`;
+
+exports[`ElasticAgentCard renders 1`] = `
+<ElasticAgentCard
+  solution="Solution"
+/>
+`;

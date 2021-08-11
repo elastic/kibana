@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ElasticBeatsCard props button 1`] = `
+<ElasticBeatsCard
+  button="Button"
+  solution="Solution"
+/>
+`;
+
+exports[`ElasticBeatsCard props href 1`] = `
+<ElasticBeatsCard
+  button="Button"
+  href="#"
+  solution="Solution"
+/>
+`;
+
+exports[`ElasticBeatsCard props recommended 1`] = `
+<ElasticBeatsCard
+  recommended={true}
+  solution="Solution"
+/>
+`;
+
+exports[`ElasticBeatsCard renders 1`] = `
+<ElasticBeatsCard
+  solution="Solution"
+/>
+`;

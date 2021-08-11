@@ -6,28 +6,36 @@
  * Side Public License, v 1.
  */
 
+import { render } from 'enzyme';
 import React from 'react';
-import { shallow } from 'enzyme';
 import { NoDataCard } from './no_data_card';
 
-jest.mock('../../context', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      application: { capabilities: { advancedSettings: { show: true, save: true } } },
-      notifications: { toast: { addSuccess: jest.fn() } },
-    },
-  }),
-}));
-
-jest.mock('../../ui_settings', () => ({
-  useUiSetting$: jest.fn().mockReturnValue(['path-to-default-route', jest.fn()]),
-}));
-
-afterEach(() => jest.clearAllMocks());
-
-describe('ElasticAgentCard', () => {
+describe('NoDataCard', () => {
   test('renders', () => {
-    const component = shallow(<NoDataCard />);
+    const component = render(<NoDataCard title="Card title" description="Description" />);
     expect(component).toMatchSnapshot();
+  });
+
+  describe('props', () => {
+    test('recommended', () => {
+      const component = render(
+        <NoDataCard recommended title="Card title" description="Description" />
+      );
+      expect(component).toMatchSnapshot();
+    });
+
+    test('button', () => {
+      const component = render(
+        <NoDataCard button="Button" title="Card title" description="Description" />
+      );
+      expect(component).toMatchSnapshot();
+    });
+
+    test('href', () => {
+      const component = render(
+        <NoDataCard href="#" button="Button" title="Card title" description="Description" />
+      );
+      expect(component).toMatchSnapshot();
+    });
   });
 });

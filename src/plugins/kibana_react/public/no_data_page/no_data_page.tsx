@@ -89,7 +89,6 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
   actions,
   docsLink,
   pageTitle,
-  ...rest
 }) => {
   // Convert obj data into an iterable array
   const entries = Object.entries(actions);

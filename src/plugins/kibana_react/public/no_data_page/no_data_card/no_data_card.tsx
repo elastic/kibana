@@ -9,8 +9,11 @@
 /* eslint-disable @elastic/eui/href-or-on-click */
 
 import React, { FunctionComponent } from 'react';
-import { EuiButton, EuiCard } from '@elastic/eui';
+import { EuiButton, EuiCard, EuiCardProps } from '@elastic/eui';
 import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
+
+// Custom cards require all the props the EuiCard does
+type NoDataCard = EuiCardProps & NoDataPageActions;
 
 export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
   recommended,
@@ -21,12 +24,7 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
     typeof button !== 'string' ? (
       button
     ) : (
-      <EuiButton
-        href={cardRest?.href}
-        onClick={cardRest?.onClick}
-        target={cardRest?.target}
-        fill={recommended}
-      >
+      <EuiButton href={cardRest?.href} onClick={cardRest?.onClick} target={cardRest?.target} fill>
         {button}
       </EuiButton>
     );

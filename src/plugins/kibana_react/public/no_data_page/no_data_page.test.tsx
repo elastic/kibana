@@ -10,27 +10,6 @@ import React from 'react';
 import { NoDataPage } from './no_data_page';
 import { shallowWithIntl } from '@kbn/test/jest';
 
-// jest.mock('../../app_links', () => ({
-//   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
-// }));
-
-// jest.mock('../../context', () => ({
-//   useKibana: jest.fn().mockReturnValue({
-//     services: {
-//       application: { capabilities: { advancedSettings: { show: true, save: true } } },
-//       notifications: { toast: { addSuccess: jest.fn() } },
-//     },
-//   }),
-// }));
-
-// jest.mock('../../ui_settings', () => ({
-//   useUiSetting$: jest.fn().mockReturnValue(['path-to-default-route', jest.fn()]),
-// }));
-
-// afterEach(() => jest.clearAllMocks());
-
-// const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
-
 describe('NoDataPage', () => {
   test('render', () => {
     const component = shallowWithIntl(

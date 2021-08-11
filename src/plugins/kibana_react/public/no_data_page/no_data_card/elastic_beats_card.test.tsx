@@ -6,28 +6,30 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 import { ElasticBeatsCard } from './elastic_beats_card';
-
-jest.mock('../../context', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      application: { capabilities: { advancedSettings: { show: true, save: true } } },
-      notifications: { toast: { addSuccess: jest.fn() } },
-    },
-  }),
-}));
-
-jest.mock('../../ui_settings', () => ({
-  useUiSetting$: jest.fn().mockReturnValue(['path-to-default-route', jest.fn()]),
-}));
-
-afterEach(() => jest.clearAllMocks());
 
 describe('ElasticBeatsCard', () => {
   test('renders', () => {
-    const component = shallow(<ElasticBeatsCard />);
+    const component = shallow(<ElasticBeatsCard solution="Solution" />);
     expect(component).toMatchSnapshot();
+  });
+
+  describe('props', () => {
+    test('recommended', () => {
+      const component = shallow(<ElasticBeatsCard recommended solution="Solution" />);
+      expect(component).toMatchSnapshot();
+    });
+
+    test('button', () => {
+      const component = shallow(<ElasticBeatsCard button="Button" solution="Solution" />);
+      expect(component).toMatchSnapshot();
+    });
+
+    test('href', () => {
+      const component = shallow(<ElasticBeatsCard href="#" button="Button" solution="Solution" />);
+      expect(component).toMatchSnapshot();
+    });
   });
 });
