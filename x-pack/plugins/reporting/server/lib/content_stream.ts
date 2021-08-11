@@ -6,10 +6,20 @@
  */
 
 import { Duplex } from 'stream';
+import { defaults, get } from 'lodash';
+import Puid from 'puid';
+import { ByteSizeValue } from '@kbn/config-schema';
 import type { ElasticsearchClient } from 'src/core/server';
 import { ReportingCore } from '..';
 import { ReportDocument, ReportSource } from '../../common/types';
 import { ExportTypesRegistry } from './export_types_registry';
+
+/**
+ * @note The Elasticsearch `http.max_content_length` is including the whole POST body.
+ * But the update/index request also contains JSON-serialized query parameters.
+ * 1Kb span should be enough for that.
+ */
+const REQUEST_SPAN_SIZE_IN_BYTES = 1024;
 
 type Callback = (error?: Error) => void;
 type SearchRequest = Required<Parameters<ElasticsearchClient['search']>>[0];
@@ -21,10 +31,38 @@ interface ContentStreamDocument {
   if_seq_no?: number;
 }
 
+interface ChunkOutput {
+  chunk: number;
+  content: string;
+}
+
+interface ChunkSource {
+  parent_id: string;
+  output: ChunkOutput;
+}
+
 export class ContentStream extends Duplex {
+  /**
+   * @see https://en.wikipedia.org/wiki/Base64#Output_padding
+   */
+  private static getMaxBase64EncodedSize(max: number) {
+    return Math.floor(max / 4) * 3;
+  }
+
+  /**
+   * @note Raw data might be escaped during JSON serialization.
+   * In the worst-case, every character is escaped, so the max raw data length is twice less.
+   */
+  private static getMaxJsonEscapedSize(max: number) {
+    return Math.floor(max / 2);
+  }
+
   private buffer = Buffer.from('');
+  private chunksWritten = 0;
   private jobContentEncoding?: string;
   private jobType?: string;
+  private maxChunkSize?: number;
+  private puid = new Puid();
   private primaryTerm?: number;
   private seqNo?: number;
 
@@ -91,6 +129,29 @@ export class ContentStream extends Duplex {
     return buffer.toString(contentEncoding === 'base64' ? 'base64' : undefined);
   }
 
+  private async getMaxContentSize() {
+    const { body } = await this.client.cluster.getSettings({ include_defaults: true });
+    const { persistent, transient, defaults: defaultSettings } = body;
+    const settings = defaults({}, persistent, transient, defaultSettings);
+    const maxContentSize = get(settings, 'http.max_content_length', '100mb');
+
+    return ByteSizeValue.parse(maxContentSize).getValueInBytes();
+  }
+
+  private async getMaxChunkSize() {
+    if (!this.maxChunkSize) {
+      const maxContentSize = (await this.getMaxContentSize()) - REQUEST_SPAN_SIZE_IN_BYTES;
+      const jobContentEncoding = await this.getJobContentEncoding();
+
+      this.maxChunkSize =
+        jobContentEncoding === 'base64'
+          ? ContentStream.getMaxBase64EncodedSize(maxContentSize)
+          : ContentStream.getMaxJsonEscapedSize(maxContentSize);
+    }
+
+    return this.maxChunkSize;
+  }
+
   async _read() {
     const { id, index } = this.document;
     const body: SearchRequest['body'] = {
@@ -123,29 +184,91 @@ export class ContentStream extends Duplex {
     }
   }
 
-  _write(chunk: Buffer | string, encoding: BufferEncoding, callback: Callback) {
+  private async removeChunks() {
+    const { id, index } = this.document;
+
+    await this.client.deleteByQuery({
+      index,
+      body: {
+        query: {
+          match: { parent_id: id },
+        },
+      },
+    });
+  }
+
+  private async writeHead(content: string) {
+    const { body } = await this.client.update<ReportSource>({
+      ...this.document,
+      body: {
+        doc: {
+          output: { content },
+        },
+      },
+    });
+
+    ({ _primary_term: this.primaryTerm, _seq_no: this.seqNo } = body);
+  }
+
+  private async writeChunk(content: string) {
+    const { id: parentId, index } = this.document;
+    const id = this.puid.generate();
+
+    await this.client.index<ChunkSource>({
+      id,
+      index,
+      body: {
+        parent_id: parentId,
+        output: {
+          content,
+          chunk: this.chunksWritten,
+        },
+      },
+    });
+  }
+
+  private async flush(size = this.buffer.byteLength) {
+    const chunk = this.buffer.slice(0, size);
+    if (!chunk.byteLength) {
+      return;
+    }
+
+    const content = await this.encode(chunk);
+
+    if (!this.chunksWritten) {
+      await this.removeChunks();
+      await this.writeHead(content);
+    } else {
+      await this.writeChunk(content);
+    }
+
+    this.chunksWritten++;
+    this.bytesWritten += chunk.byteLength;
+    this.buffer = this.buffer.slice(size);
+  }
+
+  async _write(chunk: Buffer | string, encoding: BufferEncoding, callback: Callback) {
     this.buffer = Buffer.concat([
       this.buffer,
       Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding),
     ]);
-    callback();
+
+    try {
+      const maxChunkSize = await this.getMaxChunkSize();
+
+      while (this.buffer.byteLength >= maxChunkSize) {
+        await this.flush(maxChunkSize);
+      }
+
+      callback();
+    } catch (error) {
+      callback(error);
+    }
   }
 
   async _final(callback: Callback) {
     try {
-      const content = await this.encode(this.buffer);
-      const { body } = await this.client.update<ReportDocument>({
-        ...this.document,
-        body: {
-          doc: {
-            output: { content },
-          },
-        },
-      });
-
-      ({ _primary_term: this.primaryTerm, _seq_no: this.seqNo } = body);
-      this.bytesWritten += this.buffer.byteLength;
-      this.buffer = Buffer.from('');
+      await this.flush();
       callback();
     } catch (error) {
       callback(error);

@@ -6,13 +6,12 @@
  */
 
 import { set } from 'lodash';
-import { ElasticsearchClient } from 'src/core/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { ContentStream } from './content_stream';
 import { ExportTypesRegistry } from './export_types_registry';
 
 describe('ContentStream', () => {
-  let client: jest.Mocked<ElasticsearchClient>;
+  let client: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
   let exportTypesRegistry: jest.Mocked<ExportTypesRegistry>;
   let stream: ContentStream;
 
@@ -162,6 +161,107 @@ describe('ContentStream', () => {
       expect(request).toHaveProperty(
         'body.doc.output.content',
         Buffer.from('12345').toString('base64')
+      );
+    });
+
+    it('should remove all previous chunks before writing', async () => {
+      stream.end('12345');
+      await new Promise((resolve) => stream.once('finish', resolve));
+
+      expect(client.deleteByQuery).toHaveBeenCalledTimes(1);
+
+      const [[request]] = client.deleteByQuery.mock.calls;
+
+      expect(request).toHaveProperty('index', 'somewhere');
+      expect(request).toHaveProperty('body.query.match.parent_id', 'something');
+    });
+
+    it('should split raw data into chunks', async () => {
+      client.cluster.getSettings.mockResolvedValueOnce(
+        set<any>({}, 'body.defaults.http.max_content_length', 1028)
+      );
+      stream.end('123456');
+      await new Promise((resolve) => stream.once('finish', resolve));
+
+      expect(client.update).toHaveBeenCalledTimes(1);
+      expect(client.update).toHaveBeenCalledWith(
+        expect.objectContaining(set({}, 'body.doc.output.content', '12'))
+      );
+      expect(client.index).toHaveBeenCalledTimes(2);
+      expect(client.index).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          id: expect.any(String),
+          index: 'somewhere',
+          body: {
+            parent_id: 'something',
+            output: {
+              content: '34',
+              chunk: 1,
+            },
+          },
+        })
+      );
+      expect(client.index).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          id: expect.any(String),
+          index: 'somewhere',
+          body: {
+            parent_id: 'something',
+            output: {
+              content: '56',
+              chunk: 2,
+            },
+          },
+        })
+      );
+    });
+
+    it('should encode every chunk separately', async () => {
+      exportTypesRegistry.get.mockReturnValueOnce({ jobContentEncoding: 'base64' } as ReturnType<
+        typeof exportTypesRegistry.get
+      >);
+      client.cluster.getSettings.mockResolvedValueOnce(
+        set<any>({}, 'body.defaults.http.max_content_length', 1028)
+      );
+      stream.end('12345678');
+      await new Promise((resolve) => stream.once('finish', resolve));
+
+      expect(client.update).toHaveBeenCalledTimes(1);
+      expect(client.update).toHaveBeenCalledWith(
+        expect.objectContaining(
+          set({}, 'body.doc.output.content', Buffer.from('123').toString('base64'))
+        )
+      );
+      expect(client.index).toHaveBeenCalledTimes(2);
+      expect(client.index).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          id: expect.any(String),
+          index: 'somewhere',
+          body: {
+            parent_id: 'something',
+            output: {
+              content: Buffer.from('456').toString('base64'),
+              chunk: 1,
+            },
+          },
+        })
+      );
+      expect(client.index).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          id: expect.any(String),
+          index: 'somewhere',
+          body: {
+            parent_id: 'something',
+            output: {
+              content: Buffer.from('78').toString('base64'),
+              chunk: 2,
+            },
+          },
+        })
       );
     });
   });
