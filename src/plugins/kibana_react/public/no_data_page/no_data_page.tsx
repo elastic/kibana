@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import classNames from 'classnames';
 import { KibanaPageTemplateProps, KibanaPageTemplateSolutionNavAvatar } from '../page_template';
 
 import { ElasticAgentCard, ElasticBeatsCard, NoDataCard } from './no_data_card';
