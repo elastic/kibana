@@ -20,7 +20,7 @@ import type { HeatmapExpressionProps } from './types';
 export { heatmapGridConfig, heatmapLegendConfig, heatmap } from '../../common/expressions';
 
 export const getHeatmapRenderer = (dependencies: {
-  formatFactory: Promise<FormatFactory>;
+  formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginSetup['theme'];
   paletteService: PaletteRegistry;
   timeZone: string;
@@ -37,7 +37,6 @@ export const getHeatmapRenderer = (dependencies: {
     config: HeatmapExpressionProps,
     handlers: IInterpreterRenderHandlers
   ) => {
-    const formatFactory = await dependencies.formatFactory;
     const onClickValue = (data: LensFilterEvent['data']) => {
       handlers.event({ name: 'filter', data });
     };
@@ -53,7 +52,7 @@ export const getHeatmapRenderer = (dependencies: {
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
             timeZone={dependencies.timeZone}
-            formatFactory={formatFactory}
+            formatFactory={dependencies.formatFactory}
             chartsThemeService={dependencies.chartsThemeService}
             paletteService={dependencies.paletteService}
           />

@@ -104,7 +104,7 @@ export function StatsList({ data, isLoading }: StatsListProps) {
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.errorRatePopoverStat', {
-        defaultMessage: 'Trans. error rate (avg.)',
+        defaultMessage: 'Failed transaction rate (avg.)',
       }),
       description: asPercent(avgErrorRate, 1, ''),
     },
