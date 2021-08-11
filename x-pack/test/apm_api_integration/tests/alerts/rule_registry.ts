@@ -362,25 +362,28 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "event.kind": Array [
               "signal",
             ],
-            "${ALERT_DURATION}": Array [
+            "kibana.alert.duration.us": Array [
               0,
             ],
-            "${ALERT_EVALUATION_THRESHOLD}": Array [
+            "kibana.alert.evaluation.threshold": Array [
               30,
             ],
-            "${ALERT_EVALUATION_VALUE}": Array [
+            "kibana.alert.evaluation.value": Array [
               50,
             ],
-            "${ALERT_ID}": Array [
+            "kibana.alert.id": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
-            "${ALERT_OWNER}": Array [
+            "kibana.alert.owner": Array [
               "apm",
             ],
-            "${ALERT_PRODUCER}": Array [
+            "kibana.alert.producer": Array [
               "apm",
             ],
-            "${ALERT_STATUS}": Array [
+            "kibana.alert.reason": Array [
+              "Transaction error rate is greater than 30% (current value is 50%) for opbeans-go",
+            ],
+            "kibana.alert.status": Array [
               "open",
             ],
             "kibana.space_ids": Array [
@@ -438,25 +441,28 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "event.kind": Array [
               "signal",
             ],
-            "${ALERT_DURATION}": Array [
+            "kibana.alert.duration.us": Array [
               0,
             ],
-            "${ALERT_EVALUATION_THRESHOLD}": Array [
+            "kibana.alert.evaluation.threshold": Array [
               30,
             ],
-            "${ALERT_EVALUATION_VALUE}": Array [
+            "kibana.alert.evaluation.value": Array [
               50,
             ],
-            "${ALERT_ID}": Array [
+            "kibana.alert.id": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
-            "${ALERT_OWNER}": Array [
+            "kibana.alert.owner": Array [
               "apm",
             ],
-            "${ALERT_PRODUCER}": Array [
+            "kibana.alert.producer": Array [
               "apm",
             ],
-            "${ALERT_STATUS}": Array [
+            "kibana.alert.reason": Array [
+              "Transaction error rate is greater than 30% (current value is 50%) for opbeans-go",
+            ],
+            "kibana.alert.status": Array [
               "open",
             ],
             "kibana.space_ids": Array [
@@ -545,22 +551,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "event.kind": Array [
               "signal",
             ],
-            "${ALERT_EVALUATION_THRESHOLD}": Array [
+            "kibana.alert.evaluation.threshold": Array [
               30,
             ],
-            "${ALERT_EVALUATION_VALUE}": Array [
+            "kibana.alert.evaluation.value": Array [
               50,
             ],
-            "${ALERT_ID}": Array [
+            "kibana.alert.id": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
-            "${ALERT_OWNER}": Array [
+            "kibana.alert.owner": Array [
               "apm",
             ],
-            "${ALERT_PRODUCER}": Array [
+            "kibana.alert.producer": Array [
               "apm",
             ],
-            "${ALERT_STATUS}": Array [
+            "kibana.alert.reason": Array [
+              "Transaction error rate is greater than 30% (current value is 50%) for opbeans-go",
+            ],
+            "kibana.alert.status": Array [
               "closed",
             ],
             "kibana.space_ids": Array [
