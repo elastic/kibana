@@ -50,7 +50,7 @@ import {
   FormulaIndexPatternColumn,
 } from './formula';
 import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
-import { FramePublicAPI, OperationMetadata } from '../../../types';
+import { FrameDatasourceAPI, OperationMetadata } from '../../../types';
 import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
 import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
 import { DateRange } from '../../../../common';
@@ -280,7 +280,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
               label: string;
               newState: (
                 core: CoreStart,
-                frame: FramePublicAPI,
+                frame: FrameDatasourceAPI,
                 layerId: string
               ) => Promise<IndexPatternLayer>;
             };
@@ -437,7 +437,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
               label: string;
               newState: (
                 core: CoreStart,
-                frame: FramePublicAPI,
+                frame: FrameDatasourceAPI,
                 layerId: string
               ) => Promise<IndexPatternLayer>;
             };

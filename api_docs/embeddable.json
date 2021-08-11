@@ -8095,8 +8095,8 @@
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           },
           " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; }"
         ],
@@ -8511,8 +8511,8 @@
               "pluginId": "kibanaUtils",
               "scope": "common",
               "docId": "kibKibanaUtilsPluginApi",
-              "section": "def-common.SerializableState",
-              "text": "SerializableState"
+              "section": "def-common.Serializable",
+              "text": "Serializable"
             },
             ">) => void"
           ],
@@ -8539,8 +8539,8 @@
                   "pluginId": "kibanaUtils",
                   "scope": "common",
                   "docId": "kibKibanaUtilsPluginApi",
-                  "section": "def-common.SerializableState",
-                  "text": "SerializableState"
+                  "section": "def-common.Serializable",
+                  "text": "Serializable"
                 },
                 ">"
               ],
@@ -9194,8 +9194,8 @@
               "pluginId": "kibanaUtils",
               "scope": "common",
               "docId": "kibKibanaUtilsPluginApi",
-              "section": "def-common.SerializableState",
-              "text": "SerializableState"
+              "section": "def-common.Serializable",
+              "text": "Serializable"
             },
             ">) => void"
           ],
@@ -9222,8 +9222,8 @@
                   "pluginId": "kibanaUtils",
                   "scope": "common",
                   "docId": "kibKibanaUtilsPluginApi",
-                  "section": "def-common.SerializableState",
-                  "text": "SerializableState"
+                  "section": "def-common.Serializable",
+                  "text": "Serializable"
                 },
                 ">"
               ],
@@ -9965,8 +9965,8 @@
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           },
           " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; }"
         ],
@@ -10037,16 +10037,16 @@
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           },
           ", version: string) => ",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           }
         ],
         "path": "src/plugins/embeddable/common/lib/migrate.ts",
