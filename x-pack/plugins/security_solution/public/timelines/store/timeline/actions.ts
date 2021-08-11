@@ -67,6 +67,10 @@ export const createTimeline = actionCreator<TimelinePersistInput>('CREATE_TIMELI
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');
 
+export const setTimelineUpdatedAt = actionCreator<{ id: string; updated: number }>(
+  'SET_TIMELINE_UPDATED_AT'
+);
+
 export const removeProvider = actionCreator<{
   id: string;
   providerId: string;

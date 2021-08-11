@@ -24,7 +24,7 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import {
   ExceptionListTypeEnum,
@@ -32,7 +32,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { Dispatch } from 'redux';
-import { isTab } from '../../../../../../../timelines/public';
+import { isTab, LastUpdatedAt } from '../../../../../../../timelines/public';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
@@ -59,7 +59,6 @@ import { AlertsHistogramPanel } from '../../../../components/alerts_kpis/alerts_
 import { AlertsTable } from '../../../../components/alerts_table';
 import { useUserData } from '../../../../components/user_info';
 import { OverviewEmpty } from '../../../../../overview/components/overview_empty';
-import { useAlertInfo } from '../../../../components/alerts_info';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
 import {
@@ -136,14 +135,6 @@ const StyledFullHeightContainer = styled.div`
   flex: 1 1 auto;
 `;
 
-const RuleDetailsLastAlertComponent = styled.div`
-  ${({ theme }) => css`
-    color: ${theme.eui.euiTextSubduedColor};
-    font-size: ${theme.eui.euiFontSizeXS};
-    line-height: ${theme.eui.euiLineHeight};
-  `}
-`;
-
 enum RuleDetailTabs {
   alerts = 'alerts',
   failures = 'failures',
@@ -185,6 +176,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const graphEventId = useShallowEqualSelector(
     (state) =>
       (getTimeline(state, TimelineId.detectionsRulesDetailsPage) ?? timelineDefaults).graphEventId
+  );
+  const updatedAt = useShallowEqualSelector(
+    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).updated
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -242,7 +236,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           defineRuleData: null,
           scheduleRuleData: null,
         };
-  const [lastAlerts] = useAlertInfo({ ruleId });
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const mlCapabilities = useMlCapabilities();
@@ -763,15 +756,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <RuleDetailsLastAlertComponent data-test-subj="header-page-subtitle">
-                      {lastAlerts != null && (
-                        <>
-                          {detectionI18n.LAST_ALERT}
-                          {': '}
-                          {lastAlerts}
-                        </>
-                      )}
-                    </RuleDetailsLastAlertComponent>
+                    <LastUpdatedAt updatedAt={updatedAt || 0} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="l" />

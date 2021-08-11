@@ -46,6 +46,7 @@ import {
   updateTitleAndDescription,
   toggleModalSaveTimeline,
   updateEqlOptions,
+  setTimelineUpdatedAt,
 } from './actions';
 import {
   addNewTimeline,
@@ -371,5 +372,15 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(showTimeline, (state, { id, show }) => ({
     ...state,
     timelineById: updateTimelineShowTimeline({ id, show, timelineById: state.timelineById }),
+  }))
+  .case(setTimelineUpdatedAt, (state, { id, updated }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        updated,
+      },
+    },
   }))
   .build();

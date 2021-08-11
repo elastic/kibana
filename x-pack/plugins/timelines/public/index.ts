@@ -21,6 +21,7 @@ export type {
 } from '../common/search_strategy/common';
 export { Direction } from '../common/search_strategy/common';
 export { tGridReducer } from './store/t_grid/reducer';
+export { LastUpdatedAt } from './components';
 export type { TGridModelForTimeline, TimelineState, TimelinesUIStart } from './types';
 export {
   ARIA_COLINDEX_ATTRIBUTE,

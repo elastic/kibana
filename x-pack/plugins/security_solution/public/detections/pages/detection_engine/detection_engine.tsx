@@ -12,14 +12,14 @@ import {
   EuiWindowEvent,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { isTab } from '../../../../../timelines/public';
+import { isTab, LastUpdatedAt } from '../../../../../timelines/public';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SecurityPageName } from '../../../app/types';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -81,14 +81,6 @@ const StyledFullHeightContainer = styled.div`
   flex: 1 1 auto;
 `;
 
-const DetectionEngineLastAlertComponent = styled.div`
-  ${({ theme }) => css`
-    color: ${theme.eui.euiTextSubduedColor};
-    font-size: ${theme.eui.euiFontSizeXS};
-    line-height: ${theme.eui.euiLineHeight};
-  `}
-`;
-
 type DetectionEngineComponentProps = PropsFromRedux;
 
 const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
@@ -101,6 +93,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).graphEventId
+  );
+  const updatedAt = useShallowEqualSelector(
+    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).updated
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -302,15 +297,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                   <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <DetectionEngineLastAlertComponent data-test-subj="header-page-subtitle">
-                    {lastAlerts != null && (
-                      <>
-                        {i18n.LAST_ALERT}
-                        {': '}
-                        {lastAlerts}
-                      </>
-                    )}
-                  </DetectionEngineLastAlertComponent>
+                  <LastUpdatedAt updatedAt={updatedAt || 0} />
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="m" />
