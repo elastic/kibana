@@ -23,14 +23,6 @@ const noop = () => {};
 
 export type SetDate = (date: moment.Moment) => void;
 
-export interface RangePickerProps {
-  setStartDate: SetDate;
-  setEndDate: SetDate;
-  startDate: moment.Moment;
-  endDate: moment.Moment;
-  loading: boolean;
-}
-
 export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
   const { addError } = useAppToasts();
   const kibana = useKibana();
@@ -84,12 +76,10 @@ export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
 
   return {
     result,
-    rangePickerProps: {
-      setStartDate,
-      setEndDate,
-      startDate,
-      endDate,
-      loading,
-    },
+    setStartDate,
+    setEndDate,
+    startDate,
+    endDate,
+    loading,
   };
 };

@@ -39,8 +39,6 @@ export const CTI_ROW_RENDERER_FIELDS = [
   INDICATOR_PROVIDER,
 ];
 
-export type EnrichmentType = 'investigation_time' | 'indicator_match_rule';
-
 export enum ENRICHMENT_TYPES {
   InvestigationTime = 'investigation_time',
   IndicatorMatchRule = 'indicator_match_rule',

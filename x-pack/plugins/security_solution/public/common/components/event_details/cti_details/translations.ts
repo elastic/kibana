@@ -98,7 +98,7 @@ export const IF_CTI_NOT_ENABLED = i18n.translate(
 );
 
 export const CHECK_DOCS = i18n.translate('xpack.securitySolution.alertDetails.checkDocs', {
-  defaultMessage: 'please check out our documentation.',
+  defaultMessage: 'please check out our documentation',
 });
 
 export const INVESTIGATION_QUERY_TITLE = i18n.translate(

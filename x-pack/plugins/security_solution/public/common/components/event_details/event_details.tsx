@@ -34,6 +34,7 @@ import {
   parseExistingEnrichments,
   timelineDataToEnrichment,
 } from './cti_details/helpers';
+import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -111,16 +112,17 @@ const EventDetailsComponent: React.FC<Props> = ({
         : [],
     [data, isAlert]
   );
-  const { result: enrichmentsResponse, rangePickerProps } = useInvestigationTimeEnrichment(
+  const { result: enrichmentsResponse, ...rangePickerProps } = useInvestigationTimeEnrichment(
     eventFields
   );
+  const { loading: isEnrichmentsLoading } = rangePickerProps;
 
   const allEnrichments = useMemo(() => {
-    if (rangePickerProps.loading || !enrichmentsResponse?.enrichments) {
+    if (isEnrichmentsLoading || !enrichmentsResponse?.enrichments) {
       return existingEnrichments;
     }
     return filterDuplicateEnrichments([...existingEnrichments, ...enrichmentsResponse.enrichments]);
-  }, [rangePickerProps.loading, enrichmentsResponse, existingEnrichments]);
+  }, [isEnrichmentsLoading, enrichmentsResponse, existingEnrichments]);
 
   const enrichmentCount = allEnrichments.length;
 
@@ -150,7 +152,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                     enrichments={allEnrichments}
                   />
                 )}
-                {rangePickerProps.loading && (
+                {isEnrichmentsLoading && (
                   <>
                     <EuiLoadingContent lines={2} />
                   </>
@@ -165,7 +167,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       id,
       browserFields,
       timelineId,
-      rangePickerProps.loading,
+      isEnrichmentsLoading,
       enrichmentCount,
       allEnrichments,
     ]
@@ -188,7 +190,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                   <span>{i18n.THREAT_INTEL}</span>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  {rangePickerProps.loading ? (
+                  {isEnrichmentsLoading ? (
                     <EuiLoadingSpinner />
                   ) : (
                     <EuiNotificationBadge data-test-subj="enrichment-count-notification">
@@ -199,11 +201,20 @@ const EventDetailsComponent: React.FC<Props> = ({
               </EuiFlexGroup>
             ),
             content: (
-              <ThreatDetailsView enrichments={allEnrichments} rangePickerProps={rangePickerProps} />
+              <ThreatDetailsView
+                loading={rangePickerProps.loading}
+                enrichments={allEnrichments}
+                showInvestigationTimeEnrichments={Boolean(Object.keys(eventFields).length)}
+              >
+                <>
+                  <EnrichmentRangePicker {...rangePickerProps} />
+                  <EuiSpacer size="m" />
+                </>
+              </ThreatDetailsView>
             ),
           }
         : undefined,
-    [allEnrichments, rangePickerProps, enrichmentCount, isAlert]
+    [allEnrichments, rangePickerProps, enrichmentCount, isAlert, eventFields, isEnrichmentsLoading]
   );
 
   const tableTab = useMemo(

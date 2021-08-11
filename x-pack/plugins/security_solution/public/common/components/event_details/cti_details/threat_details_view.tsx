@@ -4,230 +4,67 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import styled from 'styled-components';
 import {
-  EuiAccordion,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiLink,
   EuiLoadingContent,
   EuiSpacer,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
 import { groupBy } from 'lodash';
 
-import { StyledEuiInMemoryTable } from '../summary_view';
-import { getSummaryColumns, SummaryRow, ThreatDetailsRow } from '../helpers';
-import {
-  EnrichmentType,
-  ENRICHMENT_TYPES,
-  EVENT_REFERENCE,
-  EVENT_URL,
-  FIRSTSEEN,
-} from '../../../../../common/cti/constants';
-import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
-import { getFirstElement } from '../../../../../common/utils/data_retrieval';
+import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
-import {
-  getEnrichmentIdentifiers,
-  getShimmedIndicatorValue,
-  isInvestigationTimeEnrichment,
-} from './helpers';
 import * as i18n from './translations';
-import {
-  QUERY_ID,
-  RangePickerProps,
-} from '../../../containers/cti/event_enrichment/use_investigation_enrichment';
-import { InspectButton } from '../../inspect';
-import { EnrichmentButtonContent } from './enrichment_button_content';
 import { EnrichmentIcon } from './enrichment_icon';
-import { useKibana } from '../../../lib/kibana';
-import { EnrichmentRangePicker } from './enrichment_range_picker';
+import { EnrichmentAccordionGroup } from './enrichment_accordion_group';
+import { EnrichmentNoData } from './enrichment_no_data';
 
-const getFirstSeen = (enrichment: CtiEnrichment): number => {
-  const firstSeenValue = getShimmedIndicatorValue(enrichment, FIRSTSEEN);
-  const firstSeenDate = Date.parse(firstSeenValue ?? 'no date');
-  return Number.isInteger(firstSeenDate) ? firstSeenDate : new Date(-1).valueOf();
-};
-
-const StyledEuiAccordion = styled(EuiAccordion)`
-  .euiAccordion__triggerWrapper {
-    background: ${({ theme }) => theme.eui.euiColorLightestShade};
-    border-radius: ${({ theme }) => theme.eui.paddingSizes.xs};
-    height: ${({ theme }) => theme.eui.paddingSizes.xl};
-    margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
-    padding-left: ${({ theme }) => theme.eui.paddingSizes.s};
-  }
-`;
-
-const InlineBlock = styled.div`
-  display: inline-block;
-  line-height: 1.7em;
-`;
-
-const NoIntelligenceCTA: React.FC<{}> = () => {
-  const threatIntelDocsUrl = `${
-    useKibana().services.docLinks.links.filebeat.base
-  }/filebeat-module-threatintel.html`;
-  return (
+const EnrichmentSectionHeader: React.FC<{ type?: ENRICHMENT_TYPES }> = ({ type }) => {
+  return type ? (
     <>
-      <span>{i18n.INDICATOR_TOOLTIP_CONTENT}</span>
-      <span>{i18n.IF_CTI_NOT_ENABLED}</span>
-      <span>
-        <EuiLink href={threatIntelDocsUrl} target="_blank">
-          {i18n.CHECK_DOCS}
-        </EuiLink>
-      </span>
+      <EuiFlexGroup direction="row" gutterSize="xs" alignItems="baseline">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xxxs">
+            <h5>
+              {type === ENRICHMENT_TYPES.IndicatorMatchRule
+                ? i18n.INDICATOR_TOOLTIP_TITLE
+                : i18n.INVESTIGATION_TOOLTIP_TITLE}
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EnrichmentIcon type={type} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
     </>
-  );
-};
-
-const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
-  fieldName,
-  value,
-}) => {
-  const tooltipChild = [EVENT_URL, EVENT_REFERENCE].includes(fieldName) ? (
-    <EuiLink href={value} target="_blank">
-      {value}
-    </EuiLink>
-  ) : (
-    <span>{value}</span>
-  );
-  return (
-    <EuiToolTip
-      data-test-subj="message-tool-tip"
-      content={
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <span>{fieldName}</span>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-    >
-      {tooltipChild}
-    </EuiToolTip>
-  );
-};
-
-const columns: Array<EuiBasicTableColumn<SummaryRow>> = getSummaryColumns(ThreatDetailsDescription);
-
-const buildThreatDetailsItems = (enrichment: CtiEnrichment) =>
-  Object.keys(enrichment)
-    .sort()
-    .map((field) => ({
-      title: field.startsWith(DEFAULT_INDICATOR_SOURCE_PATH)
-        ? field.replace(`${DEFAULT_INDICATOR_SOURCE_PATH}.`, '')
-        : field,
-      description: {
-        fieldName: field,
-        value: getFirstElement(enrichment[field]),
-      },
-    }));
-
-const EnrichmentAccordion: React.FC<{
-  enrichment: CtiEnrichment;
-  index: number;
-  enrichmentsLength: number;
-}> = ({ enrichment, index, enrichmentsLength }) => {
-  const { id = `threat-details-item`, field, provider, type, value } = getEnrichmentIdentifiers(
-    enrichment
-  );
-  const accordionId = `${id}${field}`;
-  return (
-    <StyledEuiAccordion
-      id={accordionId}
-      key={accordionId}
-      initialIsOpen={true}
-      arrowDisplay={'right'}
-      buttonContent={<EnrichmentButtonContent field={field} provider={provider} value={value} />}
-      extraAction={
-        isInvestigationTimeEnrichment(type) && (
-          <EuiFlexItem grow={false}>
-            <InspectButton queryId={QUERY_ID} title={i18n.INVESTIGATION_QUERY_TITLE} />
-          </EuiFlexItem>
-        )
-      }
-    >
-      <StyledEuiInMemoryTable
-        columns={columns}
-        compressed
-        data-test-subj={`threat-details-view-${index}`}
-        items={buildThreatDetailsItems(enrichment)}
-      />
-      {index < enrichmentsLength - 1 && <EuiSpacer size="m" />}
-    </StyledEuiAccordion>
-  );
-};
-
-const getMessagesFromType = (type?: EnrichmentType) => {
-  let title;
-  let dataTestSubj;
-  let noData;
-  if (type === ENRICHMENT_TYPES.IndicatorMatchRule) {
-    dataTestSubj = 'threat-match-detected';
-    title = i18n.INDICATOR_TOOLTIP_TITLE;
-    noData = <NoIntelligenceCTA />;
-  } else if (type === ENRICHMENT_TYPES.InvestigationTime) {
-    dataTestSubj = 'enriched-with-threat-intel';
-    title = i18n.INVESTIGATION_TOOLTIP_TITLE;
-    noData = i18n.NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION;
-  } else {
-    dataTestSubj = 'matches-with-no-type';
-  }
-  return { dataTestSubj, title, noData };
+  ) : null;
 };
 
 const EnrichmentSection: React.FC<{
   enrichments: CtiEnrichment[];
-  type?: EnrichmentType;
-  rangePickerProps?: RangePickerProps;
-}> = ({ enrichments, type, rangePickerProps }) => {
-  const { dataTestSubj, title, noData } = getMessagesFromType(type);
+  type?: ENRICHMENT_TYPES;
+  loading?: boolean;
+  dataTestSubj: string;
+  children?: React.ReactNode;
+}> = ({ enrichments, type, loading, dataTestSubj, children }) => {
   return (
     <div data-test-subj={dataTestSubj}>
-      {type && (
-        <>
-          <EuiFlexGroup direction={'row'} gutterSize={'xs'} alignItems={'baseline'}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xxxs">
-                <h5>{title}</h5>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EnrichmentIcon type={type} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-        </>
-      )}
-      {rangePickerProps && (
-        <>
-          <EnrichmentRangePicker {...rangePickerProps} />
-          <EuiSpacer size="m" />
-        </>
-      )}
+      <EnrichmentSectionHeader type={type} />
+      {children}
       {Array.isArray(enrichments) ? (
-        <>
-          {enrichments
-            .sort((a, b) => getFirstSeen(b) - getFirstSeen(a))
-            .map((enrichment, index) => (
-              <EnrichmentAccordion
-                key={`${enrichment.id}`}
-                enrichment={enrichment}
-                index={index}
-                enrichmentsLength={enrichments.length}
-              />
-            ))}
-        </>
+        <EnrichmentAccordionGroup enrichments={enrichments} />
       ) : (
         <>
-          {noData && <InlineBlock data-test-subj={'no-enrichments-found'}>{noData}</InlineBlock>}
-          {rangePickerProps?.loading && (
-            <EuiLoadingContent data-test-subj={'loading-enrichments'} lines={4} />
+          <EnrichmentNoData type={type} />
+          {loading && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiLoadingContent data-test-subj="loading-enrichments" lines={4} />
+            </>
           )}
         </>
       )}
@@ -237,8 +74,10 @@ const EnrichmentSection: React.FC<{
 
 const ThreatDetailsViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
-  rangePickerProps: RangePickerProps;
-}> = ({ enrichments, rangePickerProps }) => {
+  showInvestigationTimeEnrichments: boolean;
+  loading: boolean;
+  children?: React.ReactNode;
+}> = ({ enrichments, showInvestigationTimeEnrichments, loading, children }) => {
   const {
     [ENRICHMENT_TYPES.IndicatorMatchRule]: indicatorMatches,
     [ENRICHMENT_TYPES.InvestigationTime]: threatIntelEnrichments,
@@ -249,23 +88,28 @@ const ThreatDetailsViewComponent: React.FC<{
     <>
       <EuiSpacer size="m" />
       <EnrichmentSection
+        dataTestSubj="threat-match-detected"
         enrichments={indicatorMatches}
         type={ENRICHMENT_TYPES.IndicatorMatchRule}
       />
-      <EuiHorizontalRule />
-      <EnrichmentSection
-        rangePickerProps={rangePickerProps}
-        enrichments={threatIntelEnrichments}
-        type={ENRICHMENT_TYPES.InvestigationTime}
-      />
-
+      {showInvestigationTimeEnrichments && (
+        <>
+          <EuiHorizontalRule />
+          <EnrichmentSection
+            dataTestSubj="enriched-with-threat-intel"
+            enrichments={threatIntelEnrichments}
+            type={ENRICHMENT_TYPES.InvestigationTime}
+            loading={loading}
+          >
+            {children}
+          </EnrichmentSection>
+        </>
+      )}
       {matchesWithNoType && (
         <>
           <EuiHorizontalRule />
-          <div data-test-subj={'matches-with-no-type'}>
-            {indicatorMatches && <EuiSpacer size="l" />}
-            <EnrichmentSection enrichments={matchesWithNoType} />
-          </div>
+          {indicatorMatches && <EuiSpacer size="l" />}
+          <EnrichmentSection enrichments={matchesWithNoType} dataTestSubj="matches-with-no-type" />
         </>
       )}
     </>

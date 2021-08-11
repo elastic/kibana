@@ -12,6 +12,7 @@ import {
 } from '../../../../../common/constants';
 import {
   ENRICHMENT_TYPES,
+  FIRSTSEEN,
   MATCHED_ATOMIC,
   MATCHED_FIELD,
   MATCHED_ID,
@@ -121,3 +122,9 @@ export const getEnrichmentFields = (items: TimelineEventsDetailsItem[]): EventFi
     }
     return fields;
   }, {});
+
+export const getFirstSeen = (enrichment: CtiEnrichment): number => {
+  const firstSeenValue = getShimmedIndicatorValue(enrichment, FIRSTSEEN);
+  const firstSeenDate = Date.parse(firstSeenValue ?? 'no date');
+  return Number.isInteger(firstSeenDate) ? firstSeenDate : new Date(-1).valueOf();
+};

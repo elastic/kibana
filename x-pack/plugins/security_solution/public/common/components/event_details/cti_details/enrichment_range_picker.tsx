@@ -16,7 +16,15 @@ import {
 } from '@elastic/eui';
 
 import * as i18n from './translations';
-import { RangePickerProps } from '../../../containers/cti/event_enrichment';
+import { SetDate } from '../../../containers/cti/event_enrichment';
+
+export interface RangePickerProps {
+  setStartDate: SetDate;
+  setEndDate: SetDate;
+  startDate: moment.Moment;
+  endDate: moment.Moment;
+  loading: boolean;
+}
 
 export const EnrichmentRangePicker: React.FC<RangePickerProps> = ({
   setStartDate,

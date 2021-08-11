@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import moment from 'moment';
 import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../mock';
@@ -15,14 +14,6 @@ import { FIRSTSEEN } from '../../../../../common/cti/constants';
 import { ThreatDetailsView } from './threat_details_view';
 
 describe('ThreatDetailsView', () => {
-  const rangePickerProps = {
-    startDate: moment().subtract(30, 'd'),
-    endDate: moment(),
-    loading: false,
-    setStartDate: jest.fn(),
-    setEndDate: jest.fn(),
-  };
-
   it('renders a detail view for each enrichment', () => {
     const enrichments = [
       buildEventEnrichmentMock(),
@@ -31,7 +22,11 @@ describe('ThreatDetailsView', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <ThreatDetailsView enrichments={enrichments} rangePickerProps={rangePickerProps} />
+        <ThreatDetailsView
+          enrichments={enrichments}
+          showInvestigationTimeEnrichments
+          loading={false}
+        />
       </TestProviders>
     );
 
@@ -50,7 +45,11 @@ describe('ThreatDetailsView', () => {
     ];
     const wrapper = mount(
       <TestProviders>
-        <ThreatDetailsView enrichments={enrichments} rangePickerProps={rangePickerProps} />
+        <ThreatDetailsView
+          enrichments={enrichments}
+          showInvestigationTimeEnrichments
+          loading={false}
+        />
       </TestProviders>
     );
     expect(wrapper.find('a').length).toEqual(2);
@@ -73,7 +72,11 @@ describe('ThreatDetailsView', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <ThreatDetailsView enrichments={enrichments} rangePickerProps={rangePickerProps} />
+        <ThreatDetailsView
+          enrichments={enrichments}
+          showInvestigationTimeEnrichments
+          loading={false}
+        />
       </TestProviders>
     );
 
@@ -98,7 +101,11 @@ describe('ThreatDetailsView', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <ThreatDetailsView enrichments={enrichments} rangePickerProps={rangePickerProps} />
+        <ThreatDetailsView
+          enrichments={enrichments}
+          showInvestigationTimeEnrichments
+          loading={false}
+        />
       </TestProviders>
     );
 
@@ -109,7 +116,7 @@ describe('ThreatDetailsView', () => {
   it('renders no data views', () => {
     const wrapper = mount(
       <TestProviders>
-        <ThreatDetailsView enrichments={[]} rangePickerProps={rangePickerProps} />
+        <ThreatDetailsView enrichments={[]} showInvestigationTimeEnrichments loading={false} />
       </TestProviders>
     );
 
@@ -128,7 +135,7 @@ describe('ThreatDetailsView', () => {
   it('renders range picker', () => {
     const wrapper = mount(
       <TestProviders>
-        <ThreatDetailsView enrichments={[]} rangePickerProps={rangePickerProps} />
+        <ThreatDetailsView enrichments={[]} showInvestigationTimeEnrichments loading={false} />
       </TestProviders>
     );
 
@@ -138,13 +145,44 @@ describe('ThreatDetailsView', () => {
   it('renders loading state picker', () => {
     const wrapper = mount(
       <TestProviders>
-        <ThreatDetailsView
-          enrichments={[]}
-          rangePickerProps={{ ...rangePickerProps, loading: true }}
-        />
+        <ThreatDetailsView enrichments={[]} showInvestigationTimeEnrichments loading />
       </TestProviders>
     );
 
     expect(wrapper.exists('[data-test-subj="loading-enrichments"]')).toEqual(true);
+  });
+
+  it('can hide investigation time enrichments', () => {
+    const investigationEnrichment = buildEventEnrichmentMock({
+      'matched.type': ['investigation_time'],
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatDetailsView
+          enrichments={[investigationEnrichment]}
+          showInvestigationTimeEnrichments={false}
+          loading={false}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.exists('[data-test-subj="enriched-with-threat-intel"]')).toEqual(false);
+  });
+
+  it('renders children', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatDetailsView
+          enrichments={[]}
+          showInvestigationTimeEnrichments={false}
+          loading={false}
+        >
+          <div className={'test-div'} />
+        </ThreatDetailsView>
+      </TestProviders>
+    );
+
+    expect(wrapper.exists('.test-div')).toEqual(false);
   });
 });

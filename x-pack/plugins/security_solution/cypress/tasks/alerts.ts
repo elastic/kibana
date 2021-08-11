@@ -64,7 +64,7 @@ export const closeAlerts = () => {
 };
 
 export const expandFirstAlert = () => {
-  cy.get(EXPAND_ALERT_BTN).first().click({ force: true });
+  cy.get(EXPAND_ALERT_BTN).should('exist').first().click({ force: true });
 };
 
 export const viewThreatIntelTab = () => cy.get(THREAT_INTEL_TAB).click();
