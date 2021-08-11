@@ -21,6 +21,7 @@ import {
 
 import { resetJobs } from '../utils';
 import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
+import { RESETTING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import { OpenJobsWarningCallout } from './open_jobs_warning_callout';
 
 type ShowFunc = (jobs: MlSummaryJob[]) => void;
@@ -63,7 +64,9 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
     setResetting(true);
     await resetJobs(jobIds);
     closeModal();
-    refreshJobs();
+    setTimeout(() => {
+      refreshJobs();
+    }, RESETTING_JOBS_REFRESH_INTERVAL_MS);
   }, [jobIds, refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {
