@@ -28,7 +28,7 @@ import { Logger, ElasticsearchClient, EcsEventOutcome } from '../../../../../src
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import { AuditLogger } from '../../../security/server';
 import {
-  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
   ALERT_OWNER,
   RULE_ID,
   SPACE_IDS,
@@ -296,7 +296,11 @@ export class AlertsClient {
           },
         },
         {
-          doc: { [ALERT_STATUS]: status },
+          doc: {
+            [item?._source?.[ALERT_WORKFLOW_STATUS] == null
+              ? 'signal.status'
+              : ALERT_WORKFLOW_STATUS]: status,
+          },
         },
       ]);
 
@@ -464,7 +468,7 @@ export class AlertsClient {
         index,
         body: {
           doc: {
-            [ALERT_STATUS]: status,
+            [ALERT_WORKFLOW_STATUS]: status,
           },
         },
         refresh: 'wait_for',
@@ -516,8 +520,8 @@ export class AlertsClient {
           refresh: true,
           body: {
             script: {
-              source: `if (ctx._source['${ALERT_STATUS}'] != null) {
-                ctx._source['${ALERT_STATUS}'] = '${status}'
+              source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
+                ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}'
               }
               if (ctx._source['signal.status'] != null) {
                 ctx._source['signal.status'] = '${status}'

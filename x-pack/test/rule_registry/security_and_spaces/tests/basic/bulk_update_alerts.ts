@@ -6,6 +6,7 @@
  */
 import expect from '@kbn/expect';
 
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import {
   superUser,
   globalRead,
@@ -26,6 +27,7 @@ import {
   secOnlySpacesAll,
   noKibanaPrivileges,
 } from '../../../common/lib/authentication/users';
+
 import type { User } from '../../../common/lib/authentication/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
@@ -126,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .send({
               status: 'closed',
-              query: 'kibana.alert.status: open',
+              query: `${ALERT_WORKFLOW_STATUS}: open`,
               index,
             });
           expect(updated.statusCode).to.eql(200);

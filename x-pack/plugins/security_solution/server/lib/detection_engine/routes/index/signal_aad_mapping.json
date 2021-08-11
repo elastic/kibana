@@ -83,7 +83,7 @@
   "signal.rule.updated_at": "kibana.alert.rule.updated_at",
   "signal.rule.updated_by": "kibana.alert.rule.updated_by",
   "signal.rule.version": "kibana.alert.rule.version",
-  "signal.status": "kibana.alert.status",
+  "signal.status": "kibana.alert.workflow_status",
   "signal.threshold_result.from": "kibana.alert.threshold_result.from",
   "signal.threshold_result.terms.field": "kibana.alert.threshold_result.terms.field",
   "signal.threshold_result.terms.value": "kibana.alert.threshold_result.terms.value",
