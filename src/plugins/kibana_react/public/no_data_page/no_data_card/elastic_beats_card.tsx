@@ -14,7 +14,6 @@ import { CoreStart } from 'kibana/public';
 import { EuiButton, EuiCard } from '@elastic/eui';
 import { useKibana } from '../../context';
 import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
-import './index.scss';
 
 export type ElasticBeatsCardProps = NoDataPageActions & {
   solution: string;
@@ -50,7 +49,6 @@ export const ElasticBeatsCard: FunctionComponent<ElasticBeatsCardProps> = ({
   return (
     <EuiCard
       paddingSize="l"
-      className="kbnNoDataPage__card"
       href={href}
       title={i18n.translate('kibana-react.noDataPage.elasticBeatsCard.title', {
         defaultMessage: 'Add data with Beats',

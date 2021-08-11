@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import classNames from 'classnames';
 import { KibanaPageTemplateProps, KibanaPageTemplateSolutionNavAvatar } from '../page_template';
 
 import { ElasticAgentCard, ElasticBeatsCard, NoDataCard } from './no_data_card';
@@ -109,19 +110,22 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
     return Object.values(sortedData).map((action, i) => {
       if (actionsKeys[i] === 'elasticAgent') {
         return (
-          <EuiFlexItem key={`empty-page-agent-action`}>
+          <EuiFlexItem key={`empty-page-agent-action`} className="kbnNoDataPageContents__item">
             <ElasticAgentCard solution={solution} {...action} />
           </EuiFlexItem>
         );
       } else if (actionsKeys[i] === 'beats') {
         return (
-          <EuiFlexItem key={`empty-page-beats-action`}>
+          <EuiFlexItem key={`empty-page-beats-action`} className="kbnNoDataPageContents__item">
             <ElasticBeatsCard solution={solution} {...action} />
           </EuiFlexItem>
         );
       } else {
         return (
-          <EuiFlexItem key={`empty-page-${actionsKeys[i]}-action`}>
+          <EuiFlexItem
+            key={`empty-page-${actionsKeys[i]}-action`}
+            className="kbnNoDataPageContents__item"
+          >
             <NoDataCard {...action} />
           </EuiFlexItem>
         );
