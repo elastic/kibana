@@ -103,7 +103,7 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
             }
           )}
           <EuiListGroupItem
-            label={<AlertConfiguration alert={status.alert.rawAlert} key={index} compressed />}
+            label={<AlertConfiguration alert={status.alert.sanitizedRule} key={index} compressed />}
           />
         </EuiListGroup>
       </EuiAccordion>

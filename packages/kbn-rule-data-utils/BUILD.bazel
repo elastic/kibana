@@ -22,8 +22,10 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 SRC_DEPS = [
+  "//packages/kbn-es-query",
   "@npm//tslib",
   "@npm//utility-types",
+  "@npm//@elastic/elasticsearch",
 ]
 
 TYPES_DEPS = [
@@ -38,6 +40,7 @@ ts_config(
   src = "tsconfig.json",
   deps = [
     "//:tsconfig.base.json",
+    "//:tsconfig.bazel.json",
   ],
 )
 
@@ -48,7 +51,6 @@ ts_project(
   deps = DEPS,
   declaration = True,
   declaration_map = True,
-  incremental = True,
   out_dir = "target",
   source_map = True,
   root_dir = "src",

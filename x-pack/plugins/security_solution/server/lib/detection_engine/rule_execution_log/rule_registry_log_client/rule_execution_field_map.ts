@@ -18,6 +18,9 @@ import {
  * @deprecated ruleExecutionFieldMap is kept here only as a reference. It will be superseded with EventLog implementation
  */
 export const ruleExecutionFieldMap = {
+  // [ALERT_OWNER]: { type: 'keyword', required: true },
+  // [SPACE_IDS]: { type: 'keyword', array: true, required: true },
+  // [RULE_ID]: { type: 'keyword', required: true },
   [MESSAGE]: { type: 'keyword' },
   [EVENT_SEQUENCE]: { type: 'long' },
   [EVENT_END]: { type: 'date' },
