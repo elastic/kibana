@@ -17,8 +17,8 @@ import {
   ALERT_SEVERITY_LEVEL,
   ALERT_START,
   ALERT_UUID,
-  RULE_ID,
-  RULE_NAME,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_NAME,
 } from '@kbn/rule-data-utils/target/technical_field_names';
 import React, { Dispatch, SetStateAction } from 'react';
 import { EuiTheme } from 'src/plugins/kibana_react/common';
@@ -106,10 +106,10 @@ export function getAlertAnnotations({
     const severityLevel = parsed[ALERT_SEVERITY_LEVEL];
     const color = getAlertColor({ severityLevel, theme });
     const header = getAlertHeader({ severityLevel });
-    const formatter = getFormatter(parsed[RULE_ID]!);
+    const formatter = getFormatter(parsed[ALERT_RULE_TYPE_ID]!);
     const formatted = {
       link: undefined,
-      reason: parsed[RULE_NAME],
+      reason: parsed[ALERT_RULE_NAME],
       ...(formatter?.({
         fields: parsed,
         formatters: { asDuration, asPercent },
