@@ -34,6 +34,7 @@ import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import * as timelineMarkdownPlugin from '../../../common/components/markdown_editor/plugins/timeline';
 import { CaseDetailsRefreshContext } from '../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { getEndpointDetailsPath } from '../../../management/common/routing';
+import { EntityType } from '../../../timelines/containers/details';
 
 interface Props {
   caseId: string;
@@ -64,6 +65,7 @@ const TimelineDetailsPanel = ({ alertConsumers }: { alertConsumers?: AlertConsum
       alertConsumers={alertConsumers}
       browserFields={browserFields}
       docValueFields={docValueFields}
+      entityType={EntityType.ALERTS}
       isFlyoutView
       timelineId={TimelineId.casePage}
     />

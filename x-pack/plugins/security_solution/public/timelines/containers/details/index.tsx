@@ -24,7 +24,7 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/pl
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
 
-enum EntityType {
+export enum EntityType {
   ALERTS = 'alerts',
   EVENTS = 'events',
 }
@@ -34,6 +34,7 @@ export interface EventsArgs {
 
 export interface UseTimelineEventsDetailsProps {
   alertConsumers?: AlertConsumers[];
+  entityType?: EntityType;
   docValueFields: DocValueFields[];
   indexName: string;
   eventId: string;
@@ -44,6 +45,7 @@ const EMPTY_ARRAY: AlertConsumers[] = [];
 
 export const useTimelineEventsDetails = ({
   alertConsumers = EMPTY_ARRAY,
+  entityType = EntityType.EVENTS,
   docValueFields,
   indexName,
   eventId,
@@ -76,7 +78,7 @@ export const useTimelineEventsDetails = ({
 
         searchSubscription$.current = data.search
           .search<TimelineEventsDetailsRequestOptions, TimelineEventsDetailsStrategyResponse>(
-            { ...request, entityType: EntityType.ALERTS },
+            request,
             {
               strategy: 'timelineSearchStrategy',
               abortSignal: abortCtrl.current.signal,
@@ -115,6 +117,7 @@ export const useTimelineEventsDetails = ({
         ...(prevRequest ?? {}),
         alertConsumers,
         docValueFields,
+        entityType,
         indexName,
         eventId,
         factoryQueryType: TimelineEventsQueries.details,
@@ -124,7 +127,7 @@ export const useTimelineEventsDetails = ({
       }
       return prevRequest;
     });
-  }, [alertConsumers, docValueFields, eventId, indexName]);
+  }, [alertConsumers, docValueFields, entityType, eventId, indexName]);
 
   useEffect(() => {
     timelineDetailsSearch(timelineDetailsRequest);

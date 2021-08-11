@@ -18,11 +18,13 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { EventDetailsPanel } from './event_details';
 import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';
+import { EntityType } from '../../containers/details';
 
 interface DetailsPanelProps {
   alertConsumers?: AlertConsumers[];
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
+  entityType?: EntityType;
   handleOnPanelClosed?: () => void;
   isFlyoutView?: boolean;
   tabType?: TimelineTabs;
@@ -39,6 +41,7 @@ export const DetailsPanel = React.memo(
     alertConsumers,
     browserFields,
     docValueFields,
+    entityType,
     handleOnPanelClosed,
     isFlyoutView,
     tabType,
@@ -77,6 +80,7 @@ export const DetailsPanel = React.memo(
           alertConsumers={alertConsumers}
           browserFields={browserFields}
           docValueFields={docValueFields}
+          entityType={entityType}
           expandedEvent={currentTabDetail?.params}
           handleOnEventClosed={closePanel}
           isFlyoutView={isFlyoutView}

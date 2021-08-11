@@ -20,7 +20,7 @@ import deepEqual from 'fast-deep-equal';
 import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
-import { useTimelineEventsDetails } from '../../../containers/details';
+import { EntityType, useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
@@ -53,6 +53,7 @@ interface EventDetailsPanelProps {
   alertConsumers?: AlertConsumers[];
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
+  entityType?: EntityType;
   expandedEvent: {
     eventId: string;
     indexName: string;
@@ -70,6 +71,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   alertConsumers,
   browserFields,
   docValueFields,
+  entityType,
   expandedEvent,
   handleOnEventClosed,
   isFlyoutView,
@@ -79,6 +81,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   const [loading, detailsData] = useTimelineEventsDetails({
     alertConsumers,
     docValueFields,
+    entityType,
     indexName: expandedEvent.indexName ?? '',
     eventId: expandedEvent.eventId ?? '',
     skip: !expandedEvent.eventId,

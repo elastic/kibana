@@ -31,6 +31,7 @@ import { useKibana } from '../../lib/kibana';
 import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { EventsViewer } from './events_viewer';
 import * as i18n from './translations';
+import { EntityType } from '../../../timelines/containers/details';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 const leadingControlColumns: ControlColumnProps[] = [
@@ -68,7 +69,7 @@ export interface OwnProps {
 
 type Props = OwnProps & PropsFromRedux;
 
-const alertsConsumers: AlertConsumers[] = [AlertConsumers.SIEM];
+const alertConsumers: AlertConsumers[] = [AlertConsumers.SIEM];
 
 /**
  * The stateful events viewer component is the highest level component that is utilized across the security_solution pages layer where
@@ -208,8 +209,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         </InspectButtonContainer>
       </FullScreenContainer>
       <DetailsPanel
-        alertConsumers={alertsConsumers}
+        alertConsumers={alertConsumers}
         browserFields={browserFields}
+        entityType={EntityType.ALERTS}
         docValueFields={docValueFields}
         isFlyoutView
         timelineId={id}
