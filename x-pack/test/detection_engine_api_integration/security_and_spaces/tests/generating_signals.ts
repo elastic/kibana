@@ -112,7 +112,8 @@ export default ({ getService }: FtrProviderContext) => {
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const signalNoRule = omit(signal, 'rule');
+        // remove reason to avoid failures due to @timestamp mismatches in the reason string
+        const signalNoRule = omit(signal, ['rule', 'reason']);
 
         expect(signalNoRule).eql({
           parents: [
@@ -131,8 +132,6 @@ export default ({ getService }: FtrProviderContext) => {
               depth: 0,
             },
           ],
-          reason:
-            'Alert Signal Testing Query created at 2019-02-19T17:40:03.790Z with a high severity and risk score of 1 by root on suricata-zeek-sensor-toronto.',
           status: 'open',
           depth: 1,
           parent: {
@@ -167,7 +166,8 @@ export default ({ getService }: FtrProviderContext) => {
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const signalNoRule = omit(signal, 'rule');
+        // remove reason to avoid failures due to @timestamp mismatches in the reason string
+        const signalNoRule = omit(signal, ['rule', 'reason']);
         expect(signalNoRule).eql({
           parents: [
             {
@@ -185,8 +185,6 @@ export default ({ getService }: FtrProviderContext) => {
               depth: 0,
             },
           ],
-          reason:
-            'Alert Signal Testing Query created at 2019-02-19T17:40:03.790Z with a high severity and risk score of 1 by root on suricata-zeek-sensor-toronto.',
           status: 'open',
           depth: 1,
           parent: {
@@ -364,8 +362,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             signal: {
-              reason:
-                'Alert Signal Testing Query created at 2019-02-19T17:33:04.622Z with a high severity and risk score of 1 on suricata-zeek-sensor-toronto.',
+              reason: `Alert Signal Testing Query created at ${fullSignal['@timestamp']} with a high severity and risk score of 1 on suricata-zeek-sensor-toronto.`,
               rule: fullSignal.signal.rule,
               original_time: fullSignal.signal.original_time,
               status: 'open',
@@ -500,8 +497,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             signal: {
-              reason:
-                'Alert Signal Testing Query created at 2019-02-19T17:33:04.622Z with a high severity and risk score of 1 on suricata-zeek-sensor-toronto.',
+              reason: `Alert Signal Testing Query created at ${fullSignal['@timestamp']} with a high severity and risk score of 1 on suricata-zeek-sensor-toronto.`,
               rule: fullSignal.signal.rule,
               original_time: fullSignal.signal.original_time,
               status: 'open',
@@ -666,8 +662,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             signal: {
-              reason:
-                'Alert Signal Testing Query created at 2019-02-19T17:29:28.254Z with a high severity and risk score of 1 by root on zeek-sensor-amsterdam.',
+              reason: `Alert Signal Testing Query created at ${fullSignal['@timestamp']} with a high severity and risk score of 1 by root on zeek-sensor-amsterdam.`,
               rule: fullSignal.signal.rule,
               group: fullSignal.signal.group,
               original_time: fullSignal.signal.original_time,
@@ -1185,7 +1180,8 @@ export default ({ getService }: FtrProviderContext) => {
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const signalNoRule = omit(signal, 'rule');
+        // remove reason to avoid failures due to @timestamp mismatches in the reason string
+        const signalNoRule = omit(signal, ['rule', 'reason']);
         expect(signalNoRule).eql({
           parents: [
             {
@@ -1211,8 +1207,6 @@ export default ({ getService }: FtrProviderContext) => {
             index: 'signal_name_clash',
             depth: 0,
           },
-          reason:
-            'Alert Signal Testing Query created at 2020-10-28T05:08:53.000Z with a high severity and risk score of 1.',
           original_time: '2020-10-28T05:08:53.000Z',
           original_signal: 1,
           _meta: {
@@ -1341,7 +1335,8 @@ export default ({ getService }: FtrProviderContext) => {
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const signalNoRule = omit(signal, 'rule');
+        // remove reason to avoid failures due to @timestamp mismatches in the reason string
+        const signalNoRule = omit(signal, ['rule', 'reason']);
         expect(signalNoRule).eql({
           parents: [
             {
@@ -1359,8 +1354,6 @@ export default ({ getService }: FtrProviderContext) => {
               depth: 0,
             },
           ],
-          reason:
-            'Alert Signal Testing Query created at 2020-10-28T05:08:53.000Z with a high severity and risk score of 1.',
           status: 'open',
           depth: 1,
           parent: {
@@ -1693,8 +1686,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
             status: 'open',
-            reason:
-              'Alert boot created at 2019-02-19T06:18:50.109Z with a high severity and risk score of 1 on zeek-sensor-amsterdam.',
+            reason: `Alert boot created at ${fullSignal['@timestamp']} with a high severity and risk score of 1 on zeek-sensor-amsterdam.`,
             rule: {
               ...fullSignal.signal.rule,
               name: 'boot',

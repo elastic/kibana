@@ -34,17 +34,9 @@ export const buildCommonReasonMessage = ({
   }
   let hostName;
   let userName;
-  let timestampForReason = timestamp;
   if (mergedDoc?.fields) {
     hostName = mergedDoc.fields['host.name'] != null ? mergedDoc.fields['host.name'] : hostName;
     userName = mergedDoc.fields['user.name'] != null ? mergedDoc.fields['user.name'] : userName;
-    if (mergedDoc.fields['@timestamp'] != null) {
-      // If available use the @timestamp provided in the underlying doc
-      timestampForReason = mergedDoc.fields['@timestamp'];
-    } else if (mergedDoc._source && mergedDoc._source['@timestamp'] != null) {
-      // The fields api should be available, but just in case finally get it from _source
-      timestampForReason = mergedDoc._source['@timestamp'];
-    }
   }
 
   const isFieldEmpty = (field: string | string[] | undefined | null) =>
@@ -58,7 +50,7 @@ export const buildCommonReasonMessage = ({
       alertSeverity: rule.severity,
       alertRiskScore: rule.risk_score,
       hostName: isFieldEmpty(hostName) ? 'null' : hostName,
-      timestamp: timestampForReason,
+      timestamp,
       userName: isFieldEmpty(userName) ? 'null' : userName,
       whitespace: ' ', // there isn't support for the unicode /u0020 for whitespace, and leading spaces are deleted, so to prevent double-whitespace explicitly passing the space in.
     },

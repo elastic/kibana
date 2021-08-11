@@ -35,7 +35,7 @@ describe('reason_formatter', () => {
     describe('when rule, mergedDoc, and timestamp are provided', () => {
       it('should return the full reason message', () => {
         expect(buildCommonReasonMessage({ rule, mergedDoc, timestamp })).toEqual(
-          'Alert What is in a name created at 2021-08-11T02:28:59.101Z with a medium severity and risk score of 9000 by ferris bueller on party host.'
+          'Alert What is in a name created at 2021-08-11T02:28:59.401Z with a medium severity and risk score of 9000 by ferris bueller on party host.'
         );
       });
     });
@@ -49,7 +49,7 @@ describe('reason_formatter', () => {
           },
         };
         expect(buildCommonReasonMessage({ rule, mergedDoc: updatedMergedDoc, timestamp })).toEqual(
-          'Alert What is in a name created at 2021-08-11T02:28:59.101Z with a medium severity and risk score of 9000 by ferris bueller.'
+          'Alert What is in a name created at 2021-08-11T02:28:59.401Z with a medium severity and risk score of 9000 by ferris bueller.'
         );
       });
     });
@@ -63,7 +63,7 @@ describe('reason_formatter', () => {
           },
         };
         expect(buildCommonReasonMessage({ rule, mergedDoc: updatedMergedDoc, timestamp })).toEqual(
-          'Alert What is in a name created at 2021-08-11T02:28:59.101Z with a medium severity and risk score of 9000 on party host.'
+          'Alert What is in a name created at 2021-08-11T02:28:59.401Z with a medium severity and risk score of 9000 on party host.'
         );
       });
     });
