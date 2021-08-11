@@ -22,6 +22,7 @@ import { ServiceMap } from '../../app/service_map';
 import { TransactionDetails } from '../../app/transaction_details';
 import { ServiceProfiling } from '../../app/service_profiling';
 import { ServiceDependencies } from '../../app/service_dependencies';
+import { ServiceLogs } from '../../app/service_logs';
 
 function page<TPath extends string>({
   path,
@@ -66,19 +67,29 @@ export const serviceDetail = {
         serviceName: t.string,
       }),
     }),
-    t.partial({
-      query: t.partial({
-        environment: t.string,
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        comparisonEnabled: t.string,
-        comparisonType: t.string,
-        latencyAggregationType: t.string,
-        transactionType: t.string,
-        kuery: t.string,
-      }),
+    t.type({
+      query: t.intersection([
+        t.type({
+          rangeFrom: t.string,
+          rangeTo: t.string,
+        }),
+        t.partial({
+          environment: t.string,
+          comparisonEnabled: t.string,
+          comparisonType: t.string,
+          latencyAggregationType: t.string,
+          transactionType: t.string,
+          kuery: t.string,
+        }),
+      ]),
     }),
   ]),
+  defaults: {
+    query: {
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+    },
+  },
   children: [
     page({
       path: '/overview',
@@ -222,6 +233,14 @@ export const serviceDetail = {
       searchBarOptions: {
         hidden: true,
       },
+    }),
+    page({
+      path: '/logs',
+      tab: 'logs',
+      title: i18n.translate('xpack.apm.views.logs.title', {
+        defaultMessage: 'Logs',
+      }),
+      element: <ServiceLogs />,
     }),
     page({
       path: '/profiling',
