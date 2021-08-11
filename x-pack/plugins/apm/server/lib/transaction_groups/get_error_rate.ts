@@ -183,16 +183,14 @@ export async function getErrorRatePeriods({
     previousPeriodPromise,
   ]);
 
-  const firtCurrentPeriod = currentPeriod.transactionErrorRate.length
-    ? currentPeriod.transactionErrorRate
-    : undefined;
+  const firstCurrentPeriod = currentPeriod.transactionErrorRate;
 
   return {
     currentPeriod,
     previousPeriod: {
       ...previousPeriod,
       transactionErrorRate: offsetPreviousPeriodCoordinates({
-        currentPeriodTimeseries: firtCurrentPeriod,
+        currentPeriodTimeseries: firstCurrentPeriod,
         previousPeriodTimeseries: previousPeriod.transactionErrorRate,
       }),
     },
