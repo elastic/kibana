@@ -22,33 +22,21 @@ import { getUrlTracker } from '../../../kibana_services';
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
 export interface DiscoverMainProps {
-  opts: {
-    /**
-     * Use angular router for navigation
-     */
-    navigateTo: (path: string) => void;
-    /**
-     * Instance of browser history
-     */
-    history: History;
-    /**
-     * List of available index patterns
-     */
-    indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
-    /**
-     * Kibana core services used by discover
-     */
-    services: DiscoverServices;
-  };
+  /**
+   * Instance of browser history
+   */
+  history: History;
+  /**
+   * Kibana core services used by discover
+   */
+  services: DiscoverServices;
 }
 
 interface DiscoverLandingParams {
   id: string;
 }
 
-export function DiscoverMainRoute(props: DiscoverMainProps) {
-  const { opts } = props;
-  const { services, history } = opts;
+export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
   const {
     core,
     chrome,
@@ -62,7 +50,7 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
   const indexPattern = savedSearch?.searchSource?.getField('index');
   const [indexPatternList, setIndexPatternList] = useState<
     Array<SavedObject<IndexPatternAttributes>>
-  >(opts.indexPatternList);
+  >([]);
 
   const { id } = useParams<DiscoverLandingParams>();
 
@@ -86,6 +74,8 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
 
     async function loadSavedSearch() {
       try {
+        // force a refresh if a given saved search without id was saved
+        setSavedSearch(undefined);
         const loadedSavedSearch = await services.getSavedSearchById(savedSearchId);
         const loadedIndexPattern = await loadDefaultOrCurrentIndexPattern(loadedSavedSearch);
         if (loadedSavedSearch && !loadedSavedSearch?.searchSource.getField('index')) {
@@ -145,7 +135,10 @@ export function DiscoverMainRoute(props: DiscoverMainProps) {
   return (
     <DiscoverMainAppMemoized
       indexPattern={indexPattern}
-      opts={{ ...props.opts, savedSearch, indexPatternList }}
+      history={history}
+      indexPatternList={indexPatternList}
+      savedSearch={savedSearch}
+      services={services}
     />
   );
 }

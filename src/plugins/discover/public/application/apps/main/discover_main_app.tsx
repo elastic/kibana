@@ -23,36 +23,34 @@ export interface DiscoverMainProps {
    * Current IndexPattern
    */
   indexPattern: IndexPattern;
-
-  opts: {
-    /**
-     * Use angular router for navigation
-     */
-    navigateTo: (path: string) => void;
-    /**
-     * Instance of browser history
-     */
-    history: History;
-    /**
-     * List of available index patterns
-     */
-    indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
-    /**
-     * Kibana core services used by discover
-     */
-    services: DiscoverServices;
-    /**
-     * Current instance of SavedSearch
-     */
-    savedSearch: SavedSearch;
-  };
+  /**
+   * Instance of browser history
+   */
+  history: History;
+  /**
+   * List of available index patterns
+   */
+  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  /**
+   * Kibana core services used by discover
+   */
+  services: DiscoverServices;
+  /**
+   * Current instance of SavedSearch
+   */
+  savedSearch: SavedSearch;
 }
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
-  const { services, history, navigateTo, indexPatternList } = props.opts;
+  const { services, history, indexPatternList } = props;
   const { chrome, docLinks, uiSettings: config, data } = services;
-
-  const initialSavedSearch = props.opts.savedSearch;
+  const navigateTo = useCallback(
+    (path: string) => {
+      history.push(path);
+    },
+    [history]
+  );
+  const initialSavedSearch = props.savedSearch;
   const initialIndexPattern = props.indexPattern;
 
   /**

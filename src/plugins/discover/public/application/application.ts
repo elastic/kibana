@@ -13,7 +13,6 @@ import { renderApp as renderReactApp } from './index';
  * Here's where Discover's inner angular is mounted and rendered
  */
 export async function renderApp(moduleName: string, element: HTMLElement) {
-  await import('./angular');
   const app = mountDiscoverApp(moduleName, element);
   return () => {
     app();

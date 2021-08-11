@@ -46,7 +46,7 @@ export function useDiscoverState({
   const searchSource = useMemo(() => {
     savedSearch.searchSource.setField('index', indexPattern);
     return savedSearch.searchSource.createChild();
-  }, [savedSearch.searchSource, indexPattern]);
+  }, [savedSearch, indexPattern]);
 
   const stateContainer = useMemo(
     () =>
@@ -125,12 +125,6 @@ export function useDiscoverState({
         savedSearch.searchSource.setField('index', nextIndexPattern.loaded);
 
         reset();
-        /**
-         const nextIndexPattern = await loadIndexPattern(nextState.index, indexPatterns, config);
-
-         if (nextIndexPattern) {
-          setIndexPattern(nextIndexPattern.loaded);
-        } **/
       }
 
       if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {

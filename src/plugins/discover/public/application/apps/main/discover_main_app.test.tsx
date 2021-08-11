@@ -26,18 +26,16 @@ describe('DiscoverMainApp', () => {
       return { ...ip, ...{ attributes: { title: ip.title } } };
     }) as unknown) as Array<SavedObject<IndexPatternAttributes>>;
 
-    const component = mountWithIntl(
-      <DiscoverMainApp
-        indexPattern={indexPatternMock}
-        opts={{
-          indexPatternList,
-          services: discoverServiceMock,
-          savedSearch: savedSearchMock,
-          navigateTo: jest.fn(),
-          history,
-        }}
-      />
-    );
+    const props = {
+      indexPattern: indexPatternMock,
+      indexPatternList,
+      services: discoverServiceMock,
+      savedSearch: savedSearchMock,
+      navigateTo: jest.fn(),
+      history,
+    };
+
+    const component = mountWithIntl(<DiscoverMainApp {...props} />);
 
     expect(findTestSubject(component, 'indexPattern-switch-link').text()).toBe(
       indexPatternMock.title
