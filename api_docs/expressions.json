@@ -76,8 +76,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }>>>, ",
               {
@@ -116,8 +116,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }>>>, {}>"
             ],
@@ -157,7 +157,7 @@
                 "text": "ExecutionContext"
               },
               "<InspectorAdapters, ",
-              "SerializableState",
+              "Serializable",
               ">"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -203,8 +203,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }>>>"
             ],
@@ -350,8 +350,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }>>>"
             ],
@@ -840,8 +840,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }> | Output>>"
             ],
@@ -1469,8 +1469,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }> | Output>>"
             ],
@@ -1851,8 +1851,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               ">) => ",
               {
@@ -1886,8 +1886,8 @@
                     "pluginId": "kibanaUtils",
                     "scope": "common",
                     "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.SerializableState",
-                    "text": "SerializableState"
+                    "section": "def-common.Serializable",
+                    "text": "Serializable"
                   },
                   ">"
                 ],
@@ -2301,16 +2301,16 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               ") => ",
               {
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               "; }"
             ],
@@ -4000,8 +4000,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }> | Output>>"
             ],
@@ -4616,8 +4616,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               ">) => ",
               {
@@ -4651,8 +4651,8 @@
                     "pluginId": "kibanaUtils",
                     "scope": "common",
                     "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.SerializableState",
-                    "text": "SerializableState"
+                    "section": "def-common.Serializable",
+                    "text": "Serializable"
                   },
                   ">"
                 ],
@@ -7709,7 +7709,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -7755,7 +7755,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -7793,7 +7793,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -7831,7 +7831,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -7869,7 +7869,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -7931,7 +7931,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -7993,7 +7993,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -8055,7 +8055,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -8117,7 +8117,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -8614,8 +8614,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }> | Output>>"
             ],
@@ -9105,7 +9105,7 @@
             "label": "searchContext",
             "description": [],
             "signature": [
-              "SerializableState",
+              "Serializable",
               " | undefined"
             ],
             "path": "src/plugins/expressions/public/types/index.ts",
@@ -10235,7 +10235,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -10638,8 +10638,8 @@
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           },
           " | undefined; }"
         ],
@@ -10786,8 +10786,8 @@
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           },
           " | undefined; }"
         ],
@@ -11195,8 +11195,8 @@
           "pluginId": "kibanaUtils",
           "scope": "common",
           "docId": "kibKibanaUtilsPluginApi",
-          "section": "def-common.SerializableState",
-          "text": "SerializableState"
+          "section": "def-common.Serializable",
+          "text": "Serializable"
         },
         " | undefined; }> | Output>>; readonly fork: () => ",
         {
@@ -11550,8 +11550,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }>>>, ",
               {
@@ -11590,8 +11590,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }>>>, {}>"
             ],
@@ -11631,7 +11631,7 @@
                 "text": "ExecutionContext"
               },
               "<InspectorAdapters, ",
-              "SerializableState",
+              "Serializable",
               ">"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -11677,8 +11677,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }>>>"
             ],
@@ -11824,8 +11824,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }>>>"
             ],
@@ -12745,8 +12745,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }> | Output>>"
             ],
@@ -13127,8 +13127,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               ">) => ",
               {
@@ -13162,8 +13162,8 @@
                     "pluginId": "kibanaUtils",
                     "scope": "common",
                     "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.SerializableState",
-                    "text": "SerializableState"
+                    "section": "def-common.Serializable",
+                    "text": "Serializable"
                   },
                   ">"
                 ],
@@ -13577,16 +13577,16 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               ") => ",
               {
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               "; }"
             ],
@@ -17443,7 +17443,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17489,7 +17489,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17527,7 +17527,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17565,7 +17565,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17603,7 +17603,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17665,7 +17665,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17727,7 +17727,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17789,7 +17789,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17851,7 +17851,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -18962,7 +18962,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -19314,8 +19314,8 @@
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           },
           " | undefined; }"
         ],
@@ -19462,8 +19462,8 @@
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           },
           " | undefined; }"
         ],
@@ -19839,8 +19839,8 @@
           "pluginId": "kibanaUtils",
           "scope": "common",
           "docId": "kibKibanaUtilsPluginApi",
-          "section": "def-common.SerializableState",
-          "text": "SerializableState"
+          "section": "def-common.Serializable",
+          "text": "Serializable"
         },
         " | undefined; }> | Output>>; readonly fork: () => ",
         {
@@ -19955,8 +19955,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }>>>, ",
               {
@@ -19995,8 +19995,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }>>>, {}>"
             ],
@@ -20036,7 +20036,7 @@
                 "text": "ExecutionContext"
               },
               "<InspectorAdapters, ",
-              "SerializableState",
+              "Serializable",
               ">"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -20082,8 +20082,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }>>>"
             ],
@@ -20229,8 +20229,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }>>>"
             ],
@@ -20719,8 +20719,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }> | Output>>"
             ],
@@ -21348,8 +21348,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }> | Output>>"
             ],
@@ -21730,8 +21730,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               ">) => ",
               {
@@ -21765,8 +21765,8 @@
                     "pluginId": "kibanaUtils",
                     "scope": "common",
                     "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.SerializableState",
-                    "text": "SerializableState"
+                    "section": "def-common.Serializable",
+                    "text": "Serializable"
                   },
                   ">"
                 ],
@@ -22180,16 +22180,16 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               ") => ",
               {
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               "; }"
             ],
@@ -23248,8 +23248,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }> | Output>>"
             ],
@@ -23864,8 +23864,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               ">) => ",
               {
@@ -23899,8 +23899,8 @@
                     "pluginId": "kibanaUtils",
                     "scope": "common",
                     "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.SerializableState",
-                    "text": "SerializableState"
+                    "section": "def-common.Serializable",
+                    "text": "Serializable"
                   },
                   ">"
                 ],
@@ -25367,8 +25367,8 @@
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           },
           " | undefined; }>"
         ],
@@ -25533,7 +25533,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">"
         ],
         "path": "src/plugins/expressions/common/util/test_utils.ts",
@@ -25923,8 +25923,8 @@
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           },
           " | undefined; }>"
         ],
@@ -26796,7 +26796,7 @@
               "\nany extra parameters for the source that produced this column"
             ],
             "signature": [
-              "SerializableState",
+              "Serializable",
               " | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
@@ -28555,8 +28555,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined"
             ],
@@ -29009,7 +29009,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29055,7 +29055,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29093,7 +29093,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29131,7 +29131,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29169,7 +29169,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29231,7 +29231,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29293,7 +29293,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29355,7 +29355,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29417,7 +29417,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29882,8 +29882,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }> | Output>>"
             ],
@@ -31260,7 +31260,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -31570,8 +31570,8 @@
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           },
           " | undefined; }> | undefined; rawError?: any; duration: number | undefined; }"
         ],
@@ -31640,7 +31640,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/clog.ts",
@@ -31703,7 +31703,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/cumulative_sum.ts",
@@ -31766,7 +31766,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/derivative.ts",
@@ -31813,7 +31813,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
@@ -31876,7 +31876,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/moving_average.ts",
@@ -31939,7 +31939,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
@@ -31978,7 +31978,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/theme.ts",
@@ -32033,7 +32033,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/ui_setting.ts",
@@ -32072,7 +32072,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/var.ts",
@@ -32111,7 +32111,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
@@ -32271,8 +32271,8 @@
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           },
           " | undefined; }> | Output>>; readonly fork: () => ",
           {
@@ -32380,8 +32380,8 @@
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           },
           " | undefined; }"
         ],
@@ -32550,8 +32550,8 @@
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           },
           " | undefined; }"
         ],
@@ -34894,8 +34894,8 @@
                     "pluginId": "kibanaUtils",
                     "scope": "common",
                     "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.SerializableState",
-                    "text": "SerializableState"
+                    "section": "def-common.Serializable",
+                    "text": "Serializable"
                   },
                   " | undefined; }>) => ",
                   {
@@ -34926,8 +34926,8 @@
                     "pluginId": "kibanaUtils",
                     "scope": "common",
                     "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.SerializableState",
-                    "text": "SerializableState"
+                    "section": "def-common.Serializable",
+                    "text": "Serializable"
                   },
                   " | undefined; }>, \"error\" | \"info\">; }>"
                 ],
@@ -34962,8 +34962,8 @@
                         "pluginId": "kibanaUtils",
                         "scope": "common",
                         "docId": "kibKibanaUtilsPluginApi",
-                        "section": "def-common.SerializableState",
-                        "text": "SerializableState"
+                        "section": "def-common.Serializable",
+                        "text": "Serializable"
                       },
                       " | undefined; }>"
                     ],
@@ -36961,7 +36961,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">) => ",
               {
                 "pluginId": "expressions",
@@ -37038,7 +37038,7 @@
                     "text": "Adapters"
                   },
                   ", ",
-                  "SerializableState",
+                  "Serializable",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
@@ -39686,7 +39686,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">) => any"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/theme.ts",
@@ -39744,7 +39744,7 @@
                     "text": "Adapters"
                   },
                   ", ",
-                  "SerializableState",
+                  "Serializable",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/expression_functions/specs/theme.ts",
@@ -40166,7 +40166,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">) => any"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/var.ts",
@@ -40224,7 +40224,7 @@
                     "text": "Adapters"
                   },
                   ", ",
-                  "SerializableState",
+                  "Serializable",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/expression_functions/specs/var.ts",
@@ -40429,7 +40429,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">) => unknown"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
@@ -40487,7 +40487,7 @@
                     "text": "Adapters"
                   },
                   ", ",
-                  "SerializableState",
+                  "Serializable",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",

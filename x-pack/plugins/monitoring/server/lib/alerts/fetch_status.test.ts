@@ -9,10 +9,10 @@ import { fetchStatus } from './fetch_status';
 import { AlertUiState, AlertState } from '../../../common/types/alerts';
 import { AlertSeverity } from '../../../common/enums';
 import {
-  ALERT_CPU_USAGE,
-  ALERT_CLUSTER_HEALTH,
-  ALERT_DISK_USAGE,
-  ALERT_MISSING_MONITORING_DATA,
+  RULE_CPU_USAGE,
+  RULE_CLUSTER_HEALTH,
+  RULE_DISK_USAGE,
+  RULE_MISSING_MONITORING_DATA,
 } from '../../../common/constants';
 
 jest.mock('../../static_globals', () => ({
@@ -31,7 +31,7 @@ jest.mock('../../static_globals', () => ({
 }));
 
 describe('fetchStatus', () => {
-  const alertType = ALERT_CPU_USAGE;
+  const alertType = RULE_CPU_USAGE;
   const alertTypes = [alertType];
   const defaultClusterState = {
     clusterUuid: 'abc',
@@ -81,11 +81,11 @@ describe('fetchStatus', () => {
     expect(status).toEqual({
       monitoring_alert_cpu_usage: [
         {
-          rawAlert: { id: 1 },
+          sanitizedRule: { id: 1 },
           states: [],
         },
         {
-          rawAlert: { id: 2 },
+          sanitizedRule: { id: 2 },
           states: [],
         },
       ],
@@ -149,11 +149,7 @@ describe('fetchStatus', () => {
         isEnabled: true,
       })),
     };
-    await fetchStatus(
-      rulesClient as any,
-      [ALERT_CLUSTER_HEALTH],
-      [defaultClusterState.clusterUuid]
-    );
+    await fetchStatus(rulesClient as any, [RULE_CLUSTER_HEALTH], [defaultClusterState.clusterUuid]);
     expect(customLicenseService.getWatcherFeature).toHaveBeenCalled();
   });
 
@@ -187,13 +183,13 @@ describe('fetchStatus', () => {
     };
     const status = await fetchStatus(
       customRulesClient as any,
-      [ALERT_CPU_USAGE, ALERT_DISK_USAGE, ALERT_MISSING_MONITORING_DATA],
+      [RULE_CPU_USAGE, RULE_DISK_USAGE, RULE_MISSING_MONITORING_DATA],
       [defaultClusterState.clusterUuid]
     );
     expect(Object.keys(status)).toEqual([
-      ALERT_CPU_USAGE,
-      ALERT_DISK_USAGE,
-      ALERT_MISSING_MONITORING_DATA,
+      RULE_CPU_USAGE,
+      RULE_DISK_USAGE,
+      RULE_MISSING_MONITORING_DATA,
     ]);
   });
 });
