@@ -7,5 +7,7 @@
     "declarationMap": true,
     "isolatedModules": true
   },
-  "references": [{ "path": "./*/tsconfig.json" }]
+  "references": [
+    { "path": "./expression_tagcloud/tsconfig.json" }
+  ]
 }
