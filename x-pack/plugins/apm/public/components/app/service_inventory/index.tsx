@@ -80,7 +80,7 @@ function useServicesFetcher() {
 
   const { mainStatisticsData, requestId } = data;
 
-  const { data: comparisonData, status: comparisonStatus } = useFetcher(
+  const { data: comparisonData } = useFetcher(
     (callApmApi) => {
       if (start && end && mainStatisticsData.items.length) {
         return callApmApi({
@@ -147,9 +147,7 @@ function useServicesFetcher() {
     servicesData: mainStatisticsData,
     servicesStatus: mainStatisticsStatus,
     comparisonData,
-    isLoading:
-      mainStatisticsStatus === FETCH_STATUS.LOADING ||
-      comparisonStatus === FETCH_STATUS.LOADING,
+    isLoading: mainStatisticsStatus === FETCH_STATUS.LOADING,
   };
 }
 
