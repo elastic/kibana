@@ -15,10 +15,14 @@ export { SavedObjectInfoService } from './saved_object_info';
 
 export const runSavedObjInfoSvc = () =>
   run(
-    async ({ flags, log }) =>
-      areValid(flags)
-        ? await pipe(await types(flags.esUrl as string)(), format, logTypes(log))
-        : noop(),
+    async ({ flags, log }) => {
+      const getTypesF = types(flags.esUrl as string);
+      const getTypesNoFilter = getTypesF();
+      const getTypesFiltered = getTypesF(flags.type);
+      const exec = flags.type ? getTypesFiltered() : getTypesNoFilter();
+
+      return areValid(flags) ? await pipe(await exec, format, logTypes(log)) : noop();
+    },
     {
       description: `
 

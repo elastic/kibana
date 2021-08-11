@@ -27,11 +27,12 @@ export const areValid = (flags: any) => {
 export const logTypes = (log: ToolingLog) => (x: any) => log.info(`${x}\n`);
 
 export const expectedFlags = () => ({
-  string: ['esUrl'],
+  string: ['esUrl', 'type'],
   boolean: ['soTypes', 'detectionRules'],
   help: `
 --esUrl             Required, tells the app which url to point to
---soTypes           Not Required, tells the svc to show the types within the .kibana index
+--soTypes           Not required, tells the svc to show the types within the .kibana index
 --detectionRules    Not required, tells the svc to show the detection rules.
+--type              Not required, tells the svc to only show specific types of types, specified via a comma-separated list.
         `,
 });

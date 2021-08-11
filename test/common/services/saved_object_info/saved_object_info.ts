@@ -19,6 +19,52 @@ import { format } from './utils';
 const pluck = (key: string) => (obj: any): Either<Error, string> =>
   fromNullable(new Error(`Missing ${key}`))(obj[key]);
 
+/*
+In Dev Tools (not filtered):
+GET _search
+{
+  "size": 0,
+  "aggs": {
+    "savedobjs": {
+      "terms": {
+        "field": "type"
+      }
+    }
+  }
+}
+ */
+
+/*
+In Dev Tools (filtered):
+GET _search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match_phrase": {
+            "type": "config"
+          }
+        },
+        {
+          "match_phrase": {
+            "type": "space"
+          }
+        }
+      ],
+      "minimum_should_match": 1
+    }
+  },
+  "size": 0,
+  "aggs": {
+    "savedobjs": {
+      "terms": {
+        "field": "type"
+      }
+    }
+  }
+}
+ */
 const query = {
   aggs: {
     savedobjs: {
@@ -29,7 +75,9 @@ const query = {
   },
 };
 
-export const types = (node: string) => async (index: string = '.kibana') =>
+export const types = (node: string) => (typeList: any = null) => async (
+  index: string = '.kibana'
+) =>
   await pipe(
     TE.tryCatch(
       async () => {
