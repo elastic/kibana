@@ -103,12 +103,18 @@ export const getColumns = (
             />
           </>
         );
+
+        // show version warning only if:
+        // 1. the session was created in a different version of Kibana
+        // AND
+        // 2. if still can restore this session: it has IN_PROGRESS or COMPLETE status.
         const versionIncompatibleWarning =
-          isRestorable && version === kibanaVersion ? null : (
+          isRestorable && version !== kibanaVersion ? (
             <>
               {' '}
               <EuiIconTip
                 type="alert"
+                iconProps={{ 'data-test-subj': 'versionIncompatibleWarningTestSubj' }}
                 content={
                   <FormattedMessage
                     id="xpack.data.mgmt.searchSessions.table.versionIncompatibleWarning"
@@ -117,7 +123,8 @@ export const getColumns = (
                 }
               />
             </>
-          );
+          ) : null;
+
         return (
           <RedirectAppLinks application={core.application}>
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}

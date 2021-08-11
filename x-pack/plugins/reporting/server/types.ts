@@ -118,10 +118,3 @@ export interface ReportingRequestHandlerContext {
  * @internal
  */
 export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;
-
-type Url = string;
-type UrlLocatorTuple = [url: Url, locatorParams: LocatorParams];
-/**
- * @internal
- */
-export type UrlOrUrlLocatorTuple = Url | UrlLocatorTuple;

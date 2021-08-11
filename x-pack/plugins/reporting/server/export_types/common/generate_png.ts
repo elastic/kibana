@@ -8,12 +8,12 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
-import { ReportingCore } from '../..';
+import { ReportingCore } from '../../';
+import { UrlOrUrlLocatorTuple } from '../../../common/types';
 import { LevelLogger } from '../../lib';
 import { LayoutParams, PreserveLayout } from '../../lib/layouts';
-import { ScreenshotResults } from '../../lib/screenshots';
-import { UrlOrUrlLocatorTuple } from '../../types';
-import { ConditionalHeaders } from './';
+import { getScreenshots$, ScreenshotResults } from '../../lib/screenshots';
+import { ConditionalHeaders } from '../common';
 
 function getBase64DecodedSize(value: string) {
   // @see https://en.wikipedia.org/wiki/Base64#Output_padding
@@ -25,7 +25,9 @@ function getBase64DecodedSize(value: string) {
 }
 
 export async function generatePngObservableFactory(reporting: ReportingCore) {
-  const getScreenshots = await reporting.getScreenshotsObservable();
+  const config = reporting.getConfig();
+  const captureConfig = config.get('capture');
+  const { browserDriverFactory } = await reporting.getPluginStartDeps();
 
   return function generatePngObservable(
     logger: LevelLogger,
@@ -44,7 +46,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
 
     const apmScreenshots = apmTrans?.startSpan('screenshots_pipeline', 'setup');
     let apmBuffer: typeof apm.currentSpan;
-    const screenshots$ = getScreenshots({
+    const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, {
       logger,
       urlsOrUrlLocatorTuples: [urlOrUrlLocatorTuple],
       conditionalHeaders,

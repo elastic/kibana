@@ -19,8 +19,8 @@ export const openUrl = async (
   url: string,
   pageLoadSelector: string,
   conditionalHeaders: ConditionalHeaders,
-  logger: LevelLogger,
-  locator?: LocatorParams
+  locator: LocatorParams | undefined,
+  logger: LevelLogger
 ): Promise<void> => {
   const endTrace = startTrace('open_url', 'wait');
   try {

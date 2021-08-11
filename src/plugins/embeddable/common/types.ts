@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { PersistableStateService, SerializableState } from '../../kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { KibanaExecutionContext } from 'src/core/public';
+import { PersistableStateService } from '../../kibana_utils/common';
 
 export enum ViewMode {
   EDIT = 'edit',
@@ -28,7 +30,7 @@ export type EmbeddableInput = {
   /**
    * Reserved key for enhancements added by other plugins.
    */
-  enhancements?: SerializableState;
+  enhancements?: SerializableRecord;
 
   /**
    * List of action IDs that this embeddable should not render.
@@ -49,6 +51,8 @@ export type EmbeddableInput = {
    * Flag whether colors should be synced with other panels
    */
   syncColors?: boolean;
+
+  executionContext?: KibanaExecutionContext;
 };
 
 export interface PanelState<E extends EmbeddableInput & { id: string } = { id: string }> {

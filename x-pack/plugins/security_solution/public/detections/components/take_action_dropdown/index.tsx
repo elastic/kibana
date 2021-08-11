@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { EuiContextMenu, EuiButton, EuiPopover } from '@elastic/eui';
+import { EuiContextMenu, EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
@@ -135,7 +135,7 @@ export const TakeActionDropdown = React.memo(
       [onAddExceptionTypeClick]
     );
 
-    const exceptionActions = useExceptionActions({
+    const { exceptionActions } = useExceptionActions({
       isEndpointAlert,
       onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
     });
@@ -149,7 +149,7 @@ export const TakeActionDropdown = React.memo(
       onAddEventFilterClick: handleOnAddEventFilterClick,
     });
 
-    const { statusActions } = useAlertsActions({
+    const { actionItems } = useAlertsActions({
       alertStatus: actionsData.alertStatus,
       eventId: actionsData.eventId,
       timelineId,
@@ -191,7 +191,7 @@ export const TakeActionDropdown = React.memo(
         {
           id: 1,
           title: CHANGE_ALERT_STATUS,
-          items: statusActions,
+          content: <EuiContextMenuPanel size="s" items={actionItems} />,
         },
         /* Todo: Uncomment case action after getAddToCaseAction is split into action and modal
         {
@@ -210,7 +210,7 @@ export const TakeActionDropdown = React.memo(
           ),
         },*/
       ],
-      [alertsActionItems, hostIsolationAction, investigateInTimelineAction, statusActions]
+      [actionItems, alertsActionItems, hostIsolationAction, investigateInTimelineAction]
     );
 
     const takeActionButton = useMemo(() => {

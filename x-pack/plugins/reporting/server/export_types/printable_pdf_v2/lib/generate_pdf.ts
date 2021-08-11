@@ -8,13 +8,12 @@
 import { groupBy, zip } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { LocatorParams } from '../../../../common/types';
-import { getRedirectAppPathHome } from '../../../../common/constants';
 import { ReportingCore } from '../../../';
-import { UrlOrUrlLocatorTuple } from '../../../types';
+import { getRedirectAppPathHome } from '../../../../common/constants';
+import { LocatorParams, UrlOrUrlLocatorTuple } from '../../../../common/types';
+import { getScreenshots$, ScreenshotResults } from '../../../lib/screenshots';
 import { LevelLogger } from '../../../lib';
 import { createLayout, LayoutParams } from '../../../lib/layouts';
-import { ScreenshotResults } from '../../../lib/screenshots';
 import { ConditionalHeaders } from '../../common';
 import { getFullUrls } from '../../common/v2/get_full_urls';
 import { PdfMaker } from './pdf';
@@ -33,7 +32,7 @@ const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
 export async function generatePdfObservableFactory(reporting: ReportingCore) {
   const config = reporting.getConfig();
   const captureConfig = config.get('capture');
-  const getScreenshots = await reporting.getScreenshotsObservable();
+  const { browserDriverFactory } = await reporting.getPluginStartDeps();
 
   return function generatePdfObservable(
     logger: LevelLogger,
@@ -60,7 +59,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     const relativeUrls = locatorParams.map(() => getRedirectAppPathHome());
     const urls = getFullUrls(reporting.getConfig(), relativeUrls);
 
-    const screenshots$ = getScreenshots({
+    const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, {
       logger,
       urlsOrUrlLocatorTuples: zip(urls, locatorParams) as UrlOrUrlLocatorTuple[],
       conditionalHeaders,

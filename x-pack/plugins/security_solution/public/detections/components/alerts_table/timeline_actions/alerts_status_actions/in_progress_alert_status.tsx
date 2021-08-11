@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenuItem, EuiText } from '@elastic/eui';
+import { EuiContextMenuItem } from '@elastic/eui';
 import React from 'react';
 import { FILTER_IN_PROGRESS } from '../../alerts_filter_group';
 import * as i18n from '../../translations';
@@ -28,7 +28,7 @@ const InProgressAlertStatusComponent: React.FC<InProgressAlertStatusProps> = ({
       onClick={onClick}
       disabled={disabled}
     >
-      <EuiText size="m">{i18n.ACTION_IN_PROGRESS_ALERT}</EuiText>
+      {i18n.ACTION_IN_PROGRESS_ALERT}
     </EuiContextMenuItem>
   );
 };

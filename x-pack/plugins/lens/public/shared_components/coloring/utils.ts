@@ -294,7 +294,12 @@ export function getColorStops(
 export function getContrastColor(color: string, isDarkTheme: boolean) {
   const darkColor = isDarkTheme ? euiDarkVars.euiColorInk : euiLightVars.euiColorInk;
   const lightColor = isDarkTheme ? euiDarkVars.euiColorGhost : euiLightVars.euiColorGhost;
-  return isColorDark(...chroma(color).rgb()) ? lightColor : darkColor;
+  const backgroundColor = isDarkTheme
+    ? euiDarkVars.euiPageBackgroundColor
+    : euiLightVars.euiPageBackgroundColor;
+  const finalColor =
+    chroma(color).alpha() < 1 ? chroma.blend(backgroundColor, color, 'overlay') : chroma(color);
+  return isColorDark(...finalColor.rgb()) ? lightColor : darkColor;
 }
 
 /**
