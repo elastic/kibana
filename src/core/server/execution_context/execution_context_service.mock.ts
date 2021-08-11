@@ -15,9 +15,11 @@ import type {
 const createExecutionContextMock = () => {
   const mock: jest.Mocked<IExecutionContext> = {
     set: jest.fn(),
-    reset: jest.fn(),
+    setRequestId: jest.fn(),
+    withContext: jest.fn(),
     get: jest.fn(),
     getParentContextFrom: jest.fn(),
+    getAsHeader: jest.fn(),
   };
   return mock;
 };
@@ -28,8 +30,7 @@ const createInternalSetupContractMock = () => {
 
 const createSetupContractMock = () => {
   const mock: jest.Mocked<ExecutionContextSetup> = {
-    set: jest.fn(),
-    get: jest.fn(),
+    withContext: jest.fn(),
   };
   return mock;
 };

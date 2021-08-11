@@ -239,7 +239,7 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
     previousPeriodPromise,
   ]);
 
-  const firtCurrentPeriod = currentPeriod.length ? currentPeriod[0] : undefined;
+  const firstCurrentPeriod = currentPeriod?.[0];
 
   return {
     currentPeriod: keyBy(currentPeriod, 'transactionName'),
@@ -248,15 +248,15 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
         return {
           ...data,
           errorRate: offsetPreviousPeriodCoordinates({
-            currentPeriodTimeseries: firtCurrentPeriod?.errorRate,
+            currentPeriodTimeseries: firstCurrentPeriod?.errorRate,
             previousPeriodTimeseries: data.errorRate,
           }),
           throughput: offsetPreviousPeriodCoordinates({
-            currentPeriodTimeseries: firtCurrentPeriod?.throughput,
+            currentPeriodTimeseries: firstCurrentPeriod?.throughput,
             previousPeriodTimeseries: data.throughput,
           }),
           latency: offsetPreviousPeriodCoordinates({
-            currentPeriodTimeseries: firtCurrentPeriod?.latency,
+            currentPeriodTimeseries: firstCurrentPeriod?.latency,
             previousPeriodTimeseries: data.latency,
           }),
         };
