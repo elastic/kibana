@@ -1026,25 +1026,17 @@ describe('7.13.0', () => {
         },
       },
     });
-
-    expect(migration713(alert, migrationContext)).toEqual({
-      ...alert,
-      attributes: {
-        ...alert.attributes,
-        params: {
-          anomalyThreshold: 20,
-          machineLearningJobId: ['my_job_id', 'my_other_job_id'],
-          exceptionsList: [],
-          riskScoreMapping: [],
-          severityMapping: [],
-          threat: [],
-        },
-      },
-    });
   });
 });
 
 describe('7.14.1', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    encryptedSavedObjectsSetup.createMigration.mockImplementation(
+      (shouldMigrateWhenPredicate, migration) => migration
+    );
+  });
+
   test('security solution author field is migrated to array if it is undefined', () => {
     const migration7141 = getMigrations(encryptedSavedObjectsSetup)['7.14.1'];
     const alert = getMockData({
@@ -1082,114 +1074,6 @@ describe('7.14.1', () => {
           author: ['author 1'],
         },
       },
-    });
-  });
-});
-
-describe('handles errors during migrations', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    encryptedSavedObjectsSetup.createMigration.mockImplementation(() => () => {
-      throw new Error(`Can't migrate!`);
-    });
-  });
-  describe('7.10.0 throws if migration fails', () => {
-    test('should show the proper exception', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
-      const alert = getMockData({
-        consumer: 'alerting',
-      });
-      expect(() => {
-        migration710(alert, migrationContext);
-      }).toThrowError(`Can't migrate!`);
-      expect(migrationContext.log.error).toHaveBeenCalledWith(
-        `encryptedSavedObject 7.10.0 migration failed for alert ${alert.id} with error: Can't migrate!`,
-        {
-          migrations: {
-            alertDocument: {
-              ...alert,
-              attributes: {
-                ...alert.attributes,
-              },
-            },
-          },
-        }
-      );
-    });
-  });
-
-  describe('7.11.0 throws if migration fails', () => {
-    test('should show the proper exception', () => {
-      const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
-      const alert = getMockData({
-        consumer: 'alerting',
-      });
-      expect(() => {
-        migration711(alert, migrationContext);
-      }).toThrowError(`Can't migrate!`);
-      expect(migrationContext.log.error).toHaveBeenCalledWith(
-        `encryptedSavedObject 7.11.0 migration failed for alert ${alert.id} with error: Can't migrate!`,
-        {
-          migrations: {
-            alertDocument: {
-              ...alert,
-              attributes: {
-                ...alert.attributes,
-              },
-            },
-          },
-        }
-      );
-    });
-  });
-
-  describe('7.11.2 throws if migration fails', () => {
-    test('should show the proper exception', () => {
-      const migration7112 = getMigrations(encryptedSavedObjectsSetup)['7.11.2'];
-      const alert = getMockData({
-        consumer: 'alerting',
-      });
-      expect(() => {
-        migration7112(alert, migrationContext);
-      }).toThrowError(`Can't migrate!`);
-      expect(migrationContext.log.error).toHaveBeenCalledWith(
-        `encryptedSavedObject 7.11.2 migration failed for alert ${alert.id} with error: Can't migrate!`,
-        {
-          migrations: {
-            alertDocument: {
-              ...alert,
-              attributes: {
-                ...alert.attributes,
-              },
-            },
-          },
-        }
-      );
-    });
-  });
-
-  describe('7.13.0 throws if migration fails', () => {
-    test('should show the proper exception', () => {
-      const migration7130 = getMigrations(encryptedSavedObjectsSetup)['7.13.0'];
-      const alert = getMockData({
-        consumer: 'alerting',
-      });
-      expect(() => {
-        migration7130(alert, migrationContext);
-      }).toThrowError(`Can't migrate!`);
-      expect(migrationContext.log.error).toHaveBeenCalledWith(
-        `encryptedSavedObject 7.13.0 migration failed for alert ${alert.id} with error: Can't migrate!`,
-        {
-          migrations: {
-            alertDocument: {
-              ...alert,
-              attributes: {
-                ...alert.attributes,
-              },
-            },
-          },
-        }
-      );
     });
   });
 });
