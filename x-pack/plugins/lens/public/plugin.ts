@@ -7,6 +7,7 @@
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import type { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { UsageCollectionSetup, UsageCollectionStart } from 'src/plugins/usage_collection/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
@@ -57,7 +58,7 @@ import {
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
-import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
+import { APP_ID, FormatFactory, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
 import type { EditorFrameStart, VisualizationType } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
@@ -77,6 +78,7 @@ export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
   expressions: ExpressionsSetup;
   data: DataPublicPluginSetup;
+  fieldFormats: FieldFormatsSetup;
   embeddable?: EmbeddableSetup;
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
@@ -86,6 +88,7 @@ export interface LensPluginSetupDependencies {
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
@@ -158,6 +161,7 @@ export class LensPlugin {
       urlForwarding,
       expressions,
       data,
+      fieldFormats,
       embeddable,
       visualizations,
       charts,
@@ -170,9 +174,21 @@ export class LensPlugin {
       const [coreStart, startDependencies] = await core.getStartServices();
       return getLensAttributeService(coreStart, startDependencies);
     };
+
     const getStartServices = async (): Promise<LensEmbeddableStartServices> => {
       const [coreStart, deps] = await core.getStartServices();
-      this.initParts(core, data, embeddable, charts, expressions, usageCollection);
+
+      this.initParts(
+        core,
+        data,
+        embeddable,
+        charts,
+        expressions,
+        usageCollection,
+        fieldFormats,
+        deps.fieldFormats.deserialize
+      );
+
       return {
         attributeService: await this.attributeService!(),
         capabilities: coreStart.application.capabilities,
@@ -210,7 +226,19 @@ export class LensPlugin {
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
-        await this.initParts(core, data, embeddable, charts, expressions, usageCollection);
+        const [, deps] = await core.getStartServices();
+
+        await this.initParts(
+          core,
+          data,
+          embeddable,
+          charts,
+          expressions,
+          usageCollection,
+          fieldFormats,
+          deps.fieldFormats.deserialize
+        );
+
         const { mountApp, stopReportManager } = await import('./async_services');
         this.stopReportManager = stopReportManager;
         await ensureDefaultIndexPattern();
@@ -245,7 +273,9 @@ export class LensPlugin {
     embeddable: EmbeddableSetup | undefined,
     charts: ChartsPluginSetup,
     expressions: ExpressionsServiceSetup,
-    usageCollection: UsageCollectionSetup | undefined
+    usageCollection: UsageCollectionSetup | undefined,
+    fieldFormats: FieldFormatsSetup,
+    formatFactory: FormatFactory
   ) {
     const {
       DatatableVisualization,
@@ -277,11 +307,10 @@ export class LensPlugin {
       PieVisualizationPluginSetupPlugins = {
       expressions,
       data,
+      fieldFormats,
       charts,
       editorFrame: editorFrameSetupInterface,
-      formatFactory: core
-        .getStartServices()
-        .then(([_, { data: dataStart }]) => dataStart.fieldFormats.deserialize),
+      formatFactory,
     };
     this.indexpatternDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);

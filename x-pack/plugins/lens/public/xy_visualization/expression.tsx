@@ -124,7 +124,7 @@ export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
 }
 
 export const getXyChartRenderer = (dependencies: {
-  formatFactory: Promise<FormatFactory>;
+  formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginStart['theme'];
   chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
@@ -149,12 +149,12 @@ export const getXyChartRenderer = (dependencies: {
     const onSelectRange = (data: LensBrushEvent['data']) => {
       handlers.event({ name: 'brush', data });
     };
-    const formatFactory = await dependencies.formatFactory;
+
     ReactDOM.render(
       <I18nProvider>
         <XYChartReportable
           {...config}
-          formatFactory={formatFactory}
+          formatFactory={dependencies.formatFactory}
           chartsActiveCursorService={dependencies.chartsActiveCursorService}
           chartsThemeService={dependencies.chartsThemeService}
           paletteService={dependencies.paletteService}

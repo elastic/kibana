@@ -19,7 +19,7 @@ import {
 import { EuiTitle } from '@elastic/eui';
 import d3 from 'd3';
 import React, { Suspense, useState } from 'react';
-import { RULE_ID } from '@kbn/rule-data-utils/target/technical_field_names';
+import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils/target/technical_field_names';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { asRelativeDateTimeRange } from '../../../../../common/utils/formatters';
@@ -124,7 +124,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
           />
           {getAlertAnnotations({
             alerts: alerts?.filter(
-              (alert) => alert[RULE_ID]?.[0] === AlertType.ErrorCount
+              (alert) => alert[ALERT_RULE_TYPE_ID]?.[0] === AlertType.ErrorCount
             ),
             chartStartTime: buckets[0]?.x0,
             getFormatter,
