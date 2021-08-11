@@ -26,22 +26,18 @@ import {
 } from './errors';
 import { getESQueryHostMetadataByID } from '../../routes/metadata/query_builders';
 import { queryResponseToHostResult } from '../../routes/metadata/support/query_strategies';
-import { DEFAULT_ENDPOINT_HOST_STATUS, fleetAgentStatusToEndpointHostStatus } from '../../utils';
+import {
+  catchAndWrapError,
+  DEFAULT_ENDPOINT_HOST_STATUS,
+  fleetAgentStatusToEndpointHostStatus,
+  wrapErrorIfNeeded,
+} from '../../utils';
 import { EndpointError } from '../../errors';
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];
 };
-
-// Will wrap the given Error with `EndpointError`, which will
-// help getting a good picture of where in our code the error originated from.
-const wrapErrorIfNeeded = (error: Error): EndpointError =>
-  error instanceof EndpointError ? error : new EndpointError(error.message, error);
-
-// used as the callback to `Promise#catch()` to ensure errors
-// (especially those from kibana/elasticsearch clients) are wrapped
-const catchAndWrapError = <E extends Error>(error: E) => Promise.reject(wrapErrorIfNeeded(error));
 
 export class EndpointMetadataService {
   /**

@@ -22,6 +22,7 @@ import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptController } from './http_intercept_controller';
 import { interceptRequest, interceptResponse } from './intercept';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
+import { ExecutionContextContainer } from '../execution_context';
 
 interface Params {
   basePath: IBasePath;
@@ -124,7 +125,7 @@ export class Fetch {
         'Content-Type': 'application/json',
         ...options.headers,
         'kbn-version': this.params.kibanaVersion,
-        ...options.context?.toHeader(),
+        ...(options.context ? new ExecutionContextContainer(options.context).toHeader() : {}),
       }),
     };
 
