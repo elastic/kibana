@@ -64,14 +64,6 @@
   }
 }
 
-.kbnOverviewSolution__icon {
-  background-color: $euiColorEmptyShade !important;
-  box-shadow: none !important;
-  height: $euiSizeL * 2;
-  padding: $euiSizeM;
-  width: $euiSizeL * 2;
-}
-
 .kbnOverviewSupplements--noNews .kbnOverviewMore {
   h2 {
     @include euiBreakpoint('m', 'l', 'xl') {
