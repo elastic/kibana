@@ -19,7 +19,7 @@ const ManageIntegrationLinkComponent = () => {
   const {
     application: { getUrlForApp, navigateToApp },
   } = useKibana().services;
-  const { data: osqueryIntegration } = useOsqueryIntegrationStatus({});
+  const { data: osqueryIntegration } = useOsqueryIntegrationStatus();
 
   const integrationHref = useMemo(() => {
     if (osqueryIntegration) {

@@ -25,7 +25,7 @@ export const useAgentDetails = ({ agentId, silent, skip }: UseAgentDetails) => {
     ['agentDetails', agentId],
     () => http.get(`/internal/osquery/fleet_wrapper/agents/${agentId}`),
     {
-      enabled: !skip && agentId.length > 0,
+      enabled: !skip,
       onSuccess: () => setErrorToast(),
       onError: (error) =>
         !silent &&

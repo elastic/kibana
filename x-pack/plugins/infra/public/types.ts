@@ -23,7 +23,7 @@ import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '../../observability/public';
-import type { OsqueryPluginStart } from '../../osquery/public';
+// import type { OsqueryPluginStart } from '../../osquery/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 import { MlPluginStart, MlPluginSetup } from '../../ml/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
@@ -51,7 +51,7 @@ export interface InfraClientStartDeps {
   usageCollection: UsageCollectionStart;
   ml: MlPluginStart;
   embeddable?: EmbeddableStart;
-  osquery?: OsqueryPluginStart;
+  osquery?: unknown; // OsqueryPluginStart;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;

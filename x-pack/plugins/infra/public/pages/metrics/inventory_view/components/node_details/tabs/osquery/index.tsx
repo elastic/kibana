@@ -32,6 +32,7 @@ const TabComponent = (props: TabProps) => {
   const {
     services: { osquery },
   } = useKibanaContextForPlugin();
+  // @ts-expect-error
   const OsqueryAction = osquery?.OsqueryAction;
 
   // TODO: Add info when Osquery plugin in not available
@@ -58,6 +59,7 @@ const OsqueryTabName = React.memo(() => {
   const {
     services: { osquery },
   } = useKibanaContextForPlugin();
+  // @ts-expect-error
   const OsqueryIcon = osquery?.OsqueryIcon;
 
   if (OsqueryIcon) {

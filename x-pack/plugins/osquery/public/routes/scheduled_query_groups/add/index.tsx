@@ -19,7 +19,7 @@ import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 const AddScheduledQueryGroupPageComponent = () => {
   useBreadcrumbs('scheduled_query_group_add');
   const scheduledQueryListProps = useRouterNavigate('scheduled_query_groups');
-  const { data: osqueryIntegration } = useOsqueryIntegrationStatus({});
+  const { data: osqueryIntegration } = useOsqueryIntegrationStatus();
 
   const packageInfo = useMemo(() => {
     if (!osqueryIntegration) return;
