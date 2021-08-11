@@ -443,6 +443,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 canvas workpad
                               </span>
@@ -548,6 +549,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             2020-04-14 @ 05:01 PM
                           </span>
                         </FormattedMessage>
+                         
                         <EuiText
                           size="s"
                         >
@@ -559,8 +561,9 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
-                                Waiting for job to be processed.
+                                Waiting for job to process.
                               </span>
                             </EuiTextColor>
                           </div>
@@ -1291,7 +1294,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   }
                                 >
                                   <EuiToolTip
-                                    content="See report info"
+                                    content="See report info."
                                     delay="regular"
                                     position="top"
                                   >
@@ -1454,6 +1457,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 canvas workpad
                               </span>
@@ -1559,6 +1563,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             2020-04-14 @ 05:01 PM
                           </span>
                         </FormattedMessage>
+                         
                         <EuiText
                           size="s"
                         >
@@ -1570,6 +1575,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 Attempt 1 of 1.
                               </span>
@@ -2302,7 +2308,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   }
                                 >
                                   <EuiToolTip
-                                    content="See report info"
+                                    content="See report info."
                                     delay="regular"
                                     position="top"
                                   >
@@ -2465,6 +2471,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 canvas workpad
                               </span>
@@ -2570,6 +2577,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             2020-04-14 @ 04:19 PM
                           </span>
                         </FormattedMessage>
+                         
                       </div>
                     </div>
                   </td>
@@ -3343,7 +3351,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   }
                                 >
                                   <EuiToolTip
-                                    content="See report info"
+                                    content="See report info."
                                     delay="regular"
                                     position="top"
                                   >
@@ -3506,6 +3514,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 canvas workpad
                               </span>
@@ -3611,6 +3620,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             2020-04-14 @ 01:21 PM
                           </span>
                         </FormattedMessage>
+                         
                         <EuiText
                           size="s"
                         >
@@ -3622,6 +3632,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 See report info for warnings.
                               </span>
@@ -4411,7 +4422,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   }
                                 >
                                   <EuiToolTip
-                                    content="See report info and warnings"
+                                    content="See report info and warnings."
                                     delay="regular"
                                     position="top"
                                   >
@@ -4574,6 +4585,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 canvas workpad
                               </span>
@@ -4679,6 +4691,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             2020-04-14 @ 01:19 PM
                           </span>
                         </FormattedMessage>
+                         
                       </div>
                     </div>
                   </td>
@@ -5452,7 +5465,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   }
                                 >
                                   <EuiToolTip
-                                    content="See report info"
+                                    content="See report info."
                                     delay="regular"
                                     position="top"
                                   >
@@ -5615,6 +5628,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 canvas workpad
                               </span>
@@ -5720,6 +5734,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             2020-04-14 @ 01:19 PM
                           </span>
                         </FormattedMessage>
+                         
                       </div>
                     </div>
                   </td>
@@ -6493,7 +6508,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   }
                                 >
                                   <EuiToolTip
-                                    content="See report info"
+                                    content="See report info."
                                     delay="regular"
                                     position="top"
                                   >
@@ -6656,6 +6671,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 canvas workpad
                               </span>
@@ -6761,6 +6777,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             2020-04-14 @ 01:18 PM
                           </span>
                         </FormattedMessage>
+                         
                       </div>
                     </div>
                   </td>
@@ -7534,7 +7551,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   }
                                 >
                                   <EuiToolTip
-                                    content="See report info"
+                                    content="See report info."
                                     delay="regular"
                                     position="top"
                                   >
@@ -7697,6 +7714,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 canvas workpad
                               </span>
@@ -7802,6 +7820,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             2020-04-14 @ 01:13 PM
                           </span>
                         </FormattedMessage>
+                         
                       </div>
                     </div>
                   </td>
@@ -8575,7 +8594,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   }
                                 >
                                   <EuiToolTip
-                                    content="See report info"
+                                    content="See report info."
                                     delay="regular"
                                     position="top"
                                   >
@@ -8738,6 +8757,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             >
                               <span
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 visualization
                               </span>
@@ -8843,6 +8863,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             2020-04-09 @ 03:10 PM
                           </span>
                         </FormattedMessage>
+                         
                       </div>
                     </div>
                   </td>
@@ -9616,7 +9637,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   }
                                 >
                                   <EuiToolTip
-                                    content="See report info"
+                                    content="See report info."
                                     delay="regular"
                                     position="top"
                                   >

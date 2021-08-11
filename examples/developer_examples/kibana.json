@@ -1,9 +1,6 @@
 {
   "id": "developerExamples",
-  "version": "0.0.1",
   "kibanaVersion": "kibana",
-  "server": false,
-  "ui": true,
-  "requiredPlugins": [],
-  "optionalPlugins": []
+  "version": "0.0.1",
+  "ui": true
 }
