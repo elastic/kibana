@@ -28,6 +28,7 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
             Object {
               "available": [Function],
               "color": "danger",
+              "data-test-subj": "staticLookupEditorRemoveEntry",
               "description": "Delete entry",
               "icon": "trash",
               "name": "Delete",
@@ -67,6 +68,7 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
     size="m"
   />
   <EuiButton
+    data-test-subj="staticLookupEditorAddEntry"
     iconType="plusInCircle"
     onClick={[Function]}
     size="s"
@@ -96,6 +98,7 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
     labelType="label"
   >
     <EuiFieldText
+      data-test-subj="staticLookupEditorUnknownValue"
       onChange={[Function]}
       placeholder="Leave blank to keep value as-is"
       value="test value"
@@ -135,6 +138,7 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
             Object {
               "available": [Function],
               "color": "danger",
+              "data-test-subj": "staticLookupEditorRemoveEntry",
               "description": "Delete entry",
               "icon": "trash",
               "name": "Delete",
@@ -168,6 +172,7 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
     size="m"
   />
   <EuiButton
+    data-test-subj="staticLookupEditorAddEntry"
     iconType="plusInCircle"
     onClick={[Function]}
     size="s"
@@ -197,6 +202,7 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
     labelType="label"
   >
     <EuiFieldText
+      data-test-subj="staticLookupEditorUnknownValue"
       onChange={[Function]}
       placeholder="Leave blank to keep value as-is"
       value=""
