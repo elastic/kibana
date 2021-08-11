@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { ToastsApi } from 'kibana/public';
+import { EuiSpacer } from '@elastic/eui';
 import { Alert, AlertType, ActionType, ResolvedRule } from '../../../../types';
 import { AlertDetailsWithApi as AlertDetails } from './alert_details';
 import { throwIfAbsent, throwIfIsntContained } from '../../../lib/value_validators';
@@ -41,9 +42,12 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
   const {
     http,
     notifications: { toasts },
+    spacesOss,
   } = useKibana().services;
 
-  const [alert, setAlert] = useState<Alert | null>(null);
+  const { basePath } = http;
+
+  const [alert, setAlert] = useState<Alert | ResolvedRule | null>(null);
   const [alertType, setAlertType] = useState<AlertType | null>(null);
   const [actionTypes, setActionTypes] = useState<ActionType[] | null>(null);
   const [refreshToken, requestRefresh] = React.useState<number>();
@@ -61,13 +65,62 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
     );
   }, [ruleId, http, loadActionTypes, loadAlert, loadAlertTypes, resolveRule, toasts, refreshToken]);
 
+  useEffect(() => {
+    if (alert) {
+      const outcome = (alert as ResolvedRule).outcome;
+      if (outcome === 'aliasMatch' && spacesOss.isSpacesAvailable) {
+        // This rule has been resolved from a legacy URL - redirect the user to the new URL and display a toast.
+        const path = basePath.prepend(`insightsAndAlerting/triggersActions/rule/${alert.id}`);
+        spacesOss.ui.redirectLegacyUrl(
+          path,
+          i18n.translate('xpack.triggersActionsUI.sections.alertDetails.redirectObjectNoun', {
+            defaultMessage: 'rule',
+          })
+        );
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alert]);
+
+  const getLegacyUrlConflictCallout = () => {
+    const outcome = (alert as ResolvedRule).outcome;
+    const aliasTargetId = (alert as ResolvedRule).alias_target_id;
+    if (outcome === 'conflict' && aliasTargetId && spacesOss.isSpacesAvailable) {
+      // We have resolved to one rule, but there is another one with a legacy URL associated with this page. Display a
+      // callout with a warning for the user, and provide a way for them to navigate to the other rule.
+      const otherRulePath = basePath.prepend(
+        `insightsAndAlerting/triggersActions/rule/${aliasTargetId}`
+      );
+      return (
+        <>
+          <EuiSpacer />
+          {spacesOss.ui.components.getLegacyUrlConflict({
+            objectNoun: i18n.translate(
+              'xpack.triggersActionsUI.sections.alertDetails.redirectObjectNoun',
+              {
+                defaultMessage: 'rule',
+              }
+            ),
+            currentObjectId: alert?.id!,
+            otherObjectId: aliasTargetId,
+            otherObjectPath: otherRulePath,
+          })}
+        </>
+      );
+    }
+    return null;
+  };
+
   return alert && alertType && actionTypes ? (
-    <AlertDetails
-      alert={alert}
-      alertType={alertType}
-      actionTypes={actionTypes}
-      requestRefresh={async () => requestRefresh(Date.now())}
-    />
+    <>
+      {getLegacyUrlConflictCallout()}
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={actionTypes}
+        requestRefresh={async () => requestRefresh(Date.now())}
+      />
+    </>
   ) : (
     <CenterJustifiedSpinner />
   );
@@ -79,7 +132,7 @@ export async function getRuleData(
   loadAlertTypes: AlertApis['loadAlertTypes'],
   resolveRule: AlertApis['resolveRule'],
   loadActionTypes: ActionApis['loadActionTypes'],
-  setAlert: React.Dispatch<React.SetStateAction<Alert | null>>,
+  setAlert: React.Dispatch<React.SetStateAction<Alert | ResolvedRule | null>>,
   setAlertType: React.Dispatch<React.SetStateAction<AlertType | null>>,
   setActionTypes: React.Dispatch<React.SetStateAction<ActionType[] | null>>,
   toasts: Pick<ToastsApi, 'addDanger'>
@@ -95,7 +148,6 @@ export async function getRuleData(
       }
       loadedRule = await resolveRule(ruleId);
     }
-    // const loadedAlert = await loadAlert(ruleId);
     setAlert(loadedRule);
 
     const [loadedAlertType, loadedActionTypes] = await Promise.all<AlertType, ActionType[]>([
