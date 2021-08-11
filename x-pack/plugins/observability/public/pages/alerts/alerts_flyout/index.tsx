@@ -38,9 +38,11 @@ import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observ
 import { parseAlert } from '../parse_alert';
 import { SeverityBadge } from '../severity_badge';
 
+type AlertFields = Record<string, unknown>;
+
 type AlertsFlyoutProps = {
   alert?: TopAlert;
-  alerts?: Array<Record<string, unknown>>;
+  alerts?: AlertFields[];
   isInApp?: boolean;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   selectedAlertId?: string;
