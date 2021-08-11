@@ -608,6 +608,8 @@ export class AlertsClient {
         lastSortIds: undefined,
       });
 
+      this.logger.info(`Found: ${JSON.stringify(alertsSearchResponse, null, 2)}`);
+
       if (alertsSearchResponse == null || alertsSearchResponse.hits.hits.length === 0) {
         const errorMessage = `Unable to retrieve alert details for alert with query and operation ${ReadOperations.Find}`;
         this.logger.error(errorMessage);

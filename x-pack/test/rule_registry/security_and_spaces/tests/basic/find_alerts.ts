@@ -87,7 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
     expect(securitySolution).to.eql(SECURITY_SOLUTION_ALERT_INDEX); // assert this here so we can use constants in the dynamically-defined test cases below
   };
 
-  describe('Alert - Bulk Update - RBAC - spaces', () => {
+  describe('Alert - Find - RBAC - spaces', () => {
     before(async () => {
       await getSecuritySolutionIndexName(superUser);
       await getAPMIndexName(superUser);
@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     function addTests({ space, authorizedUsers, unauthorizedUsers, alertId, index }: TestCase) {
       authorizedUsers.forEach(({ username, password }) => {
-        it(`${username} should bulk update alerts which match query in ${space}/${index}`, async () => {
+        it(`${username} should finds alerts which match query in ${space}/${index}`, async () => {
           const found = await supertestWithoutAuth
             .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/find`)
             .auth(username, password)
@@ -118,13 +118,13 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       unauthorizedUsers.forEach(({ username, password }) => {
-        it(`${username} should NOT be able to update alert ${alertId} in ${space}/${index}`, async () => {
+        it(`${username} should NOT be able to find alert ${alertId} in ${space}/${index}`, async () => {
           const res = await supertestWithoutAuth
             .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/find`)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .send({
-              query: { match: { [ALERT_STATUS]: 'open' } },
+              query: { term: { _id: alertId } },
               index,
             });
           expect([403, 404]).to.contain(res.statusCode);
@@ -135,16 +135,16 @@ export default ({ getService }: FtrProviderContext) => {
     // Alert - Update - RBAC - spaces Security Solution superuser should bulk update alerts which match query in space1/.alerts-security.alerts
     // Alert - Update - RBAC - spaces superuser should bulk update alert with given id 020202 in space1/.alerts-security.alerts
     describe('Security Solution', () => {
-      const authorizedInAllSpaces = [superUser, secOnlySpacesAll, obsSecSpacesAll];
-      const authorizedOnlyInSpace1 = [secOnly, obsSec];
-      const authorizedOnlyInSpace2 = [secOnlySpace2, obsSecAllSpace2];
-      const unauthorized = [
-        // these users are not authorized to update alerts for the Security Solution in any space
-        globalRead,
-        secOnlyRead,
-        obsSecRead,
+      const authorizedInAllSpaces = [superUser, globalRead, secOnlySpacesAll, obsSecSpacesAll];
+      const authorizedOnlyInSpace1 = [secOnly, secOnlyRead, obsSecRead, obsSec];
+      const authorizedOnlyInSpace2 = [
         secOnlyReadSpace2,
         obsSecReadSpace2,
+        secOnlySpace2,
+        obsSecAllSpace2,
+      ];
+      const unauthorized = [
+        // these users are not authorized to get alerts for the Security Solution in any space
         obsOnly,
         obsOnlyRead,
         obsOnlySpace2,
@@ -170,16 +170,16 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('APM', () => {
-      const authorizedInAllSpaces = [superUser, obsOnlySpacesAll, obsSecSpacesAll];
-      const authorizedOnlyInSpace1 = [obsOnly, obsSec];
-      const authorizedOnlyInSpace2 = [obsOnlySpace2, obsSecAllSpace2];
+      const authorizedInAllSpaces = [superUser, globalRead, obsOnlySpacesAll, obsSecSpacesAll];
+      const authorizedOnlyInSpace1 = [obsOnly, obsSec, obsOnlyRead, obsSecRead];
+      const authorizedOnlyInSpace2 = [
+        obsOnlySpace2,
+        obsSecReadSpace2,
+        obsOnlyReadSpace2,
+        obsSecAllSpace2,
+      ];
       const unauthorized = [
         // these users are not authorized to update alerts for APM in any space
-        globalRead,
-        obsOnlyRead,
-        obsSecRead,
-        obsOnlyReadSpace2,
-        obsSecReadSpace2,
         secOnly,
         secOnlyRead,
         secOnlySpace2,
