@@ -7,9 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { deepFreeze } from '@kbn/std';
 import type { UnwrapPromise } from '@kbn/utility-types';
-import type { ServerStatus, StatusResponse, ServerStatusLevel } from '../../../../types/status';
+import type { StatusResponse, ServiceStatus, ServiceStatusLevel } from '../../../../types/status';
 import type { HttpSetup } from '../../../http';
 import type { NotificationsSetup } from '../../../notifications';
 import type { DataType } from '../lib';
@@ -23,7 +22,7 @@ export interface Metric {
 export interface FormattedStatus {
   id: string;
   state: {
-    id: ServerStatusLevel;
+    id: ServiceStatusLevel;
     title: string;
     message: string;
     uiColor: string;
@@ -92,7 +91,7 @@ function formatMetrics({ metrics }: StatusResponse): Metric[] {
 /**
  * Reformat the backend data to make the frontend views simpler.
  */
-function formatStatus(id: string, status: ServerStatus): FormattedStatus {
+function formatStatus(id: string, status: ServiceStatus): FormattedStatus {
   const { title, uiColor } = STATUS_LEVEL_UI_ATTRS[status.level];
 
   return {
@@ -106,7 +105,7 @@ function formatStatus(id: string, status: ServerStatus): FormattedStatus {
   };
 }
 
-const STATUS_LEVEL_UI_ATTRS = deepFreeze<Record<string, StatusUIAttributes>>({
+const STATUS_LEVEL_UI_ATTRS: Record<ServiceStatusLevel, StatusUIAttributes> = {
   critical: {
     title: i18n.translate('core.status.redTitle', {
       defaultMessage: 'Red',
@@ -131,7 +130,7 @@ const STATUS_LEVEL_UI_ATTRS = deepFreeze<Record<string, StatusUIAttributes>>({
     }),
     uiColor: 'secondary',
   },
-});
+};
 
 /**
  * Get the status from the server API and format it for display.
@@ -181,10 +180,10 @@ export async function loadStatus({
     version: response.version,
     statuses: [
       ...Object.entries(response.status.core).map(([serviceName, status]) =>
-        formatStatus(`core:${serviceName}@${response.version.number}`, status)
+        formatStatus(`core:${serviceName}`, status)
       ),
-      ...Object.entries(response.status.plugins).map(
-        ([pluginName, status]) => formatStatus(`plugin:${pluginName}`, status) // Do we want to report the version even when it may not be accurate for 3rd-party plugins?
+      ...Object.entries(response.status.plugins).map(([pluginName, status]) =>
+        formatStatus(`plugin:${pluginName}`, status)
       ),
     ],
     serverState: formatStatus('overall', response.status.overall).state,
