@@ -357,7 +357,9 @@ export class DiscoverPageObject extends FtrService {
     const isLegacyDefault = await this.useLegacyTable();
     if (isLegacyDefault) {
       await this.retry.waitFor(`field ${field} to be added to classic table`, async () => {
-        return await this.testSubjects.exists(`docTableRemoveHeader-${field}`);
+        return await this.testSubjects.exists(`docTableRemoveHeader-${field}`, {
+          allowHidden: true,
+        });
       });
     } else {
       await this.retry.waitFor(`field ${field} to be added to new table`, async () => {
