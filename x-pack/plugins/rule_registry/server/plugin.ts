@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   PluginInitializerContext,
   Plugin,
@@ -13,29 +14,27 @@ import {
   CoreStart,
   IContextProvider,
 } from 'src/core/server';
-import { SecurityPluginSetup } from '../../security/server';
-import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
+
 import { PluginStartContract as AlertingStart } from '../../alerting/server';
-import { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
-import { defineRoutes } from './routes';
-import { SpacesPluginStart } from '../../spaces/server';
+import { SecurityPluginSetup } from '../../security/server';
+
 import { RuleRegistryPluginConfig } from './config';
 import { RuleDataPluginService } from './rule_data_plugin_service';
-import { EventLogService, IEventLogService } from './event_log';
+import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
 import { AlertsClient } from './alert_data_client/alerts_client';
+import { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
+import { defineRoutes } from './routes';
 
 export interface RuleRegistryPluginSetupDependencies {
   security?: SecurityPluginSetup;
 }
 
 export interface RuleRegistryPluginStartDependencies {
-  spaces: SpacesPluginStart;
   alerting: AlertingStart;
 }
 
 export interface RuleRegistryPluginSetupContract {
   ruleDataService: RuleDataPluginService;
-  eventLogService: IEventLogService;
 }
 
 export interface RuleRegistryPluginStartContract {
@@ -53,7 +52,6 @@ export class RuleRegistryPlugin
     > {
   private readonly config: RuleRegistryPluginConfig;
   private readonly logger: Logger;
-  private eventLogService: EventLogService | null;
   private readonly alertsClientFactory: AlertsClientFactory;
   private ruleDataService: RuleDataPluginService | null;
   private security: SecurityPluginSetup | undefined;
@@ -61,7 +59,6 @@ export class RuleRegistryPlugin
   constructor(initContext: PluginInitializerContext) {
     this.config = initContext.config.get<RuleRegistryPluginConfig>();
     this.logger = initContext.logger.get();
-    this.eventLogService = null;
     this.ruleDataService = null;
     this.alertsClientFactory = new AlertsClientFactory();
   }
@@ -70,7 +67,7 @@ export class RuleRegistryPlugin
     core: CoreSetup<RuleRegistryPluginStartDependencies, RuleRegistryPluginStartContract>,
     plugins: RuleRegistryPluginSetupDependencies
   ): RuleRegistryPluginSetupContract {
-    const { logger } = this;
+    const { config, logger } = this;
 
     const startDependencies = core.getStartServices().then(([coreStart, pluginStart]) => {
       return {
@@ -81,19 +78,17 @@ export class RuleRegistryPlugin
 
     this.security = plugins.security;
 
-    const service = new RuleDataPluginService({
-      logger: this.logger,
-      isWriteEnabled: this.config.write.enabled,
-      index: this.config.index,
+    this.ruleDataService = new RuleDataPluginService({
+      logger,
+      isWriteEnabled: config.write.enabled,
+      index: config.index,
       getClusterClient: async () => {
         const deps = await startDependencies;
         return deps.core.elasticsearch.client.asInternalUser;
       },
     });
 
-    service.initializeService();
-
-    this.ruleDataService = service;
+    this.ruleDataService.initializeService();
 
     // ALERTS ROUTES
     const router = core.http.createRouter<RacRequestHandlerContext>();
@@ -104,21 +99,7 @@ export class RuleRegistryPlugin
 
     defineRoutes(router);
 
-    const eventLogService = new EventLogService({
-      config: {
-        indexPrefix: this.config.index,
-        isWriteEnabled: this.config.write.enabled,
-      },
-      dependencies: {
-        clusterClient: startDependencies.then((deps) => deps.core.elasticsearch.client),
-        spacesService: startDependencies.then((deps) => deps.spaces.spacesService),
-        logger: logger.get('eventLog'),
-      },
-    });
-
-    this.eventLogService = eventLogService;
-
-    return { ruleDataService: this.ruleDataService, eventLogService };
+    return { ruleDataService: this.ruleDataService };
   }
 
   public start(
@@ -126,12 +107,6 @@ export class RuleRegistryPlugin
     plugins: RuleRegistryPluginStartDependencies
   ): RuleRegistryPluginStartContract {
     const { logger, alertsClientFactory, security } = this;
-
-    // TODO: delete me
-    const { eventLogService } = this;
-    if (eventLogService) {
-      eventLogService.start();
-    }
 
     alertsClientFactory.initialize({
       logger,
@@ -165,13 +140,5 @@ export class RuleRegistryPlugin
     };
   };
 
-  public stop() {
-    const { eventLogService, logger } = this;
-
-    if (eventLogService) {
-      eventLogService.stop().catch((e) => {
-        logger.error(e);
-      });
-    }
-  }
+  public stop() {}
 }
