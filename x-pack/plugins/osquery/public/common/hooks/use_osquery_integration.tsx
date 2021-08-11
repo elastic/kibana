@@ -11,26 +11,16 @@ import { useQuery } from 'react-query';
 import { useKibana } from '../lib/kibana';
 import { useErrorToast } from './use_error_toast';
 
-interface Props {
-  agentId?: string;
-  skip?: boolean;
-}
-
-export const useOsqueryIntegrationStatus = ({ agentId, skip }: Props) => {
+export const useOsqueryIntegrationStatus = () => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useQuery(
-    'integration',
-    () => http.get('/internal/osquery/status', agentId ? { query: { agentId } } : undefined),
-    {
-      enabled: !skip,
-      onError: (error: Error) =>
-        setErrorToast(error, {
-          title: i18n.translate('xpack.osquery.osquery_integration.fetchError', {
-            defaultMessage: 'Error while fetching osquery integration',
-          }),
+  return useQuery('integration', () => http.get('/internal/osquery/status'), {
+    onError: (error: Error) =>
+      setErrorToast(error, {
+        title: i18n.translate('xpack.osquery.osquery_integration.fetchError', {
+          defaultMessage: 'Error while fetching osquery integration',
         }),
-    }
-  );
+      }),
+  });
 };
