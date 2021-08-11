@@ -163,7 +163,7 @@ export function extractConnectorIdFromJson({
   return defResult;
 }
 
-function isCreateCaseConnector(
+export function isCreateCaseConnector(
   action: string,
   actionFields: string[],
   decodedJson: unknown
@@ -181,7 +181,7 @@ function isCreateCaseConnector(
   }
 }
 
-function transformCreateConnector(
+export function transformCreateConnector(
   connector: CaseConnector,
   fieldType: UserActionFieldType
 ): ExtractedConnector {
@@ -196,7 +196,7 @@ function transformCreateConnector(
   };
 }
 
-function isUpdateCaseConnector(
+export function isUpdateCaseConnector(
   action: string,
   actionFields: string[],
   decodedJson: unknown
@@ -208,7 +208,7 @@ function isUpdateCaseConnector(
   }
 }
 
-function transformUpdateConnector(
+export function transformUpdateConnector(
   connector: CaseConnector,
   fieldType: UserActionFieldType
 ): ExtractedConnector {
@@ -225,7 +225,7 @@ function transformUpdateConnector(
 
 type CaseExternalService = rt.TypeOf<typeof CaseExternalServiceBasicRt>;
 
-function isPushConnector(
+export function isPushConnector(
   action: string,
   actionFields: string[],
   decodedJson: unknown
@@ -237,7 +237,7 @@ function isPushConnector(
   }
 }
 
-function transformPushConnector(
+export function transformPushConnector(
   externalService: CaseExternalService,
   fieldType: UserActionFieldType
 ): ExtractedConnector {

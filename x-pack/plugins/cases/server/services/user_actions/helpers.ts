@@ -23,6 +23,11 @@ import {
 } from '../../../common';
 import { isTwoArraysDifference } from '../../client/utils';
 import { UserActionItem } from '.';
+import {
+  extractConnectorIdFromObject,
+  isCreateCaseConnector,
+  UserActionFieldType,
+} from './transform';
 
 export const transformNewUserAction = ({
   actionField,
@@ -61,9 +66,9 @@ interface BuildCaseUserAction {
   actionBy: User;
   caseId: string;
   owner: string;
-  fields: UserActionField | unknown[];
-  newValue?: string | unknown;
-  oldValue?: string | unknown;
+  fields: UserActionField;
+  newValue?: unknown;
+  oldValue?: unknown;
   subCaseId?: string;
 }
 
@@ -115,6 +120,44 @@ export const buildCommentUserActionItem = ({
   ],
 });
 
+// export const buildCaseUserActionItem = ({
+//   action,
+//   actionAt,
+//   actionBy,
+//   caseId,
+//   fields,
+//   newValue,
+//   oldValue,
+//   subCaseId,
+//   owner,
+// }: BuildCaseUserAction): UserActionItem => ({
+//   attributes: transformNewUserAction({
+//     actionField: fields as UserActionField,
+//     action,
+//     actionAt,
+//     owner,
+//     ...actionBy,
+//     newValue: newValue as string,
+//     oldValue: oldValue as string,
+//   }),
+//   references: [
+//     {
+//       type: CASE_SAVED_OBJECT,
+//       name: `associated-${CASE_SAVED_OBJECT}`,
+//       id: caseId,
+//     },
+//     ...(subCaseId
+//       ? [
+//           {
+//             type: SUB_CASE_SAVED_OBJECT,
+//             name: `associated-${SUB_CASE_SAVED_OBJECT}`,
+//             id: subCaseId,
+//           },
+//         ]
+//       : []),
+//   ],
+// });
+
 export const buildCaseUserActionItem = ({
   action,
   actionAt,
@@ -125,33 +168,57 @@ export const buildCaseUserActionItem = ({
   oldValue,
   subCaseId,
   owner,
-}: BuildCaseUserAction): UserActionItem => ({
-  attributes: transformNewUserAction({
-    actionField: fields as UserActionField,
+}: BuildCaseUserAction): UserActionItem => {
+  const {
+    transformedJson: transformedNewValue,
+    references: newValueReferences,
+  } = extractConnectorIdFromObject({
     action,
-    actionAt,
-    owner,
-    ...actionBy,
-    newValue: newValue as string,
-    oldValue: oldValue as string,
-  }),
-  references: [
-    {
-      type: CASE_SAVED_OBJECT,
-      name: `associated-${CASE_SAVED_OBJECT}`,
-      id: caseId,
-    },
-    ...(subCaseId
-      ? [
-          {
-            type: SUB_CASE_SAVED_OBJECT,
-            name: `associated-${SUB_CASE_SAVED_OBJECT}`,
-            id: subCaseId,
-          },
-        ]
-      : []),
-  ],
-});
+    actionFields: fields,
+    actionDetails: newValue,
+    fieldType: UserActionFieldType.New,
+  });
+
+  const {
+    transformedJson: transformedOldValue,
+    references: oldValueReferences,
+  } = extractConnectorIdFromObject({
+    action,
+    actionFields: fields,
+    actionDetails: oldValue,
+    fieldType: UserActionFieldType.Old,
+  });
+
+  return {
+    attributes: transformNewUserAction({
+      actionField: fields as UserActionField,
+      action,
+      actionAt,
+      owner,
+      ...actionBy,
+      newValue: transformedNewValue,
+      oldValue: transformedOldValue,
+    }),
+    references: [
+      {
+        type: CASE_SAVED_OBJECT,
+        name: `associated-${CASE_SAVED_OBJECT}`,
+        id: caseId,
+      },
+      ...(subCaseId
+        ? [
+            {
+              type: SUB_CASE_SAVED_OBJECT,
+              name: `associated-${SUB_CASE_SAVED_OBJECT}`,
+              id: subCaseId,
+            },
+          ]
+        : []),
+      ...newValueReferences,
+      ...oldValueReferences,
+    ],
+  };
+};
 
 const userActionFieldsAllowed: UserActionField = [
   'comment',

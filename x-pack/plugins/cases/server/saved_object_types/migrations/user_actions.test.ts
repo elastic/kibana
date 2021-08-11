@@ -13,6 +13,7 @@ import {
   CaseUserActionAttributes,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '../../../common';
+import { getNoneCaseConnector } from '../../common';
 import { createExternalService, createJiraConnector } from '../../services/test_utils';
 import {
   extractConnectorIdFromJson,
@@ -411,6 +412,43 @@ describe('user action migrations', () => {
           `);
         });
 
+        it('removes the connector.id when the connector is none', () => {
+          const connector = { connector: getNoneCaseConnector() };
+
+          const { transformedJson } = extractConnectorIdFromJson({
+            action: 'create',
+            actionFields: ['connector'],
+            stringifiedJson: JSON.stringify(connector),
+            fieldType: UserActionFieldType.New,
+          })!;
+
+          const parsedJson = JSON.parse(transformedJson!);
+
+          expect(parsedJson.connector).not.toHaveProperty('id');
+          expect(parsedJson).toMatchInlineSnapshot(`
+            Object {
+              "connector": Object {
+                "fields": null,
+                "name": "none",
+                "type": ".none",
+              },
+            }
+          `);
+        });
+
+        it('does not return a reference when the connector is none', () => {
+          const connector = { connector: getNoneCaseConnector() };
+
+          const { references } = extractConnectorIdFromJson({
+            action: 'create',
+            actionFields: ['connector'],
+            stringifiedJson: JSON.stringify(connector),
+            fieldType: UserActionFieldType.New,
+          })!;
+
+          expect(references).toEqual([]);
+        });
+
         it('returns a reference to the connector.id', () => {
           const jiraConnector = createConnectorObject();
 
@@ -512,6 +550,27 @@ describe('user action migrations', () => {
           `);
         });
 
+        it('returns the stringified json without the id when the connector is none', () => {
+          const connector = getNoneCaseConnector();
+
+          const { transformedJson } = extractConnectorIdFromJson({
+            action: 'update',
+            actionFields: ['connector'],
+            stringifiedJson: JSON.stringify(connector),
+            fieldType: UserActionFieldType.New,
+          });
+
+          const transformedConnetor = JSON.parse(transformedJson!);
+          expect(transformedConnetor).not.toHaveProperty('id');
+          expect(transformedConnetor).toMatchInlineSnapshot(`
+            Object {
+              "fields": null,
+              "name": "none",
+              "type": ".none",
+            }
+          `);
+        });
+
         it('returns a reference to the connector.id', () => {
           const jiraConnector = createJiraConnector();
 
@@ -531,6 +590,19 @@ describe('user action migrations', () => {
               },
             ]
           `);
+        });
+
+        it('does not return a reference when the connector is none', () => {
+          const connector = getNoneCaseConnector();
+
+          const { references } = extractConnectorIdFromJson({
+            action: 'update',
+            actionFields: ['connector'],
+            stringifiedJson: JSON.stringify(connector),
+            fieldType: UserActionFieldType.New,
+          })!;
+
+          expect(references).toEqual([]);
         });
 
         it('returns an old reference name to the connector.id', () => {
