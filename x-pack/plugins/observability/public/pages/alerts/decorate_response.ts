@@ -6,8 +6,8 @@
  */
 
 import {
-  RULE_ID,
-  RULE_NAME,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_NAME,
   ALERT_STATUS,
   ALERT_START,
 } from '@kbn/rule-data-utils/target/technical_field_names';
@@ -22,10 +22,10 @@ export function decorateResponse(
 ): TopAlert[] {
   return alerts.map((alert) => {
     const parsedFields = parseTechnicalFields(alert);
-    const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[RULE_ID]!);
+    const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[ALERT_RULE_TYPE_ID]!);
     const formatted = {
       link: undefined,
-      reason: parsedFields[RULE_NAME]!,
+      reason: parsedFields[ALERT_RULE_NAME]!,
       ...(formatter?.({ fields: parsedFields, formatters: { asDuration, asPercent } }) ?? {}),
     };
 
