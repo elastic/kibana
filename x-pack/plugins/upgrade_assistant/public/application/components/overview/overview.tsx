@@ -93,7 +93,7 @@ export const DeprecationsOverview: FunctionComponent = () => {
           <EuiSteps
             steps={[
               getResolveStep({ currentMajor }),
-              getObserveStep({ docLinks, currentMajor }),
+              getObserveStep(),
               getUpgradeStep({ docLinks, isCloudEnabled, cloudDeploymentUrl, currentMajor }),
             ]}
           />

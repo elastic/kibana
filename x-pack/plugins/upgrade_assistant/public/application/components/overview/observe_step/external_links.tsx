@@ -7,8 +7,9 @@
 
 import React, { FunctionComponent, useState, useEffect } from 'react';
 
-import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
+
 import { useKibana, DataPublicPluginStart } from '../../../../shared_imports';
 import {
   DEPRECATION_LOGS_INDEX_PATTERN,
@@ -62,13 +63,12 @@ const DiscoverAppLink: FunctionComponent = () => {
   }, [dataService, discoverService, application]);
 
   return (
-    <EuiButtonEmpty size="xs" href={discoveryUrl} target="_blank">
+    <EuiLink href={discoveryUrl} target="_blank">
       <FormattedMessage
         id="xpack.upgradeAssistant.overview.viewDiscoverResultsAction"
         defaultMessage="Analyse logs in Discover "
       />
-      <EuiIcon type="popout" size="s" style={{ marginLeft: 4 }} />
-    </EuiButtonEmpty>
+    </EuiLink>
   );
 };
 
@@ -79,21 +79,46 @@ const ObserveAppLink: FunctionComponent = () => {
   );
 
   return (
-    <EuiButtonEmpty size="xs" href={logStreamUrl} target="_blank">
+    <EuiLink href={logStreamUrl} target="_blank">
       <FormattedMessage
         id="xpack.upgradeAssistant.overview.viewObserveResultsAction"
         defaultMessage="View deprecation logs in Observability"
       />
-      <EuiIcon type="popout" size="s" style={{ marginLeft: 4 }} />
-    </EuiButtonEmpty>
+    </EuiLink>
   );
 };
 
 export const ExternalLinks: FunctionComponent = () => {
   return (
-    <div>
-      <ObserveAppLink />
-      <DiscoverAppLink />
-    </div>
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiPanel>
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.upgradeAssistant.overview.observe.observabilityDescription"
+                defaultMessage="Get insight into which deprecated APIs are being used and what applications you need to update."
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <ObserveAppLink />
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiPanel>
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.upgradeAssistant.overview.observe.discoveryDescription"
+                defaultMessage="Search and filter the deprecation logs to understand the types of changes you need to make."
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <DiscoverAppLink />
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

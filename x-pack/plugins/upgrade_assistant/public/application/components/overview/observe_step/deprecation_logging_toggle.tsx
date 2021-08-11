@@ -14,8 +14,6 @@ import {
   EuiText,
   EuiPopover,
   EuiLink,
-  EuiSpacer,
-  EuiCallOut,
   EuiTextColor,
   EuiButtonEmpty,
   EuiLoadingSpinner,
@@ -51,19 +49,6 @@ const i18nTexts = {
   buttonLabel: i18n.translate('xpack.upgradeAssistant.overview.deprecationLogs.buttonLabel', {
     defaultMessage: 'Enable deprecation logging and indexing',
   }),
-  deprecationWarningTitle: i18n.translate(
-    'xpack.upgradeAssistant.overview.deprecationLogs.deprecationWarningTitle',
-    {
-      defaultMessage: 'Your logs are being written to the logs directory',
-    }
-  ),
-  deprecationWarningBody: i18n.translate(
-    'xpack.upgradeAssistant.overview.deprecationLogs.deprecationWarningBody',
-    {
-      defaultMessage:
-        'Go to your logs directory to view the deprecation logs or enable log collecting to see them in the UI.',
-    }
-  ),
 };
 
 const ErrorDetailsLink = ({ error }: { error: ResponseError }) => {
@@ -139,46 +124,35 @@ export const DeprecationLoggingToggle: FunctionComponent<DeprecationLoggingPrevi
   }
 
   return (
-    <>
-      <EuiFlexGroup gutterSize="xs" alignItems="center">
+    <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiSwitch
+          data-test-subj="upgradeAssistantDeprecationToggle"
+          label={i18nTexts.buttonLabel}
+          checked={!!isEnabled}
+          onChange={toggleLogging}
+          disabled={Boolean(fetchError) || isUpdating}
+        />
+      </EuiFlexItem>
+
+      {updateError && (
         <EuiFlexItem grow={false}>
-          <EuiSwitch
-            data-test-subj="upgradeAssistantDeprecationToggle"
-            label={i18nTexts.buttonLabel}
-            checked={!!isEnabled}
-            onChange={toggleLogging}
-            disabled={Boolean(fetchError) || isUpdating}
-          />
+          <EuiFlexGroup gutterSize="xs" alignItems="flexEnd" data-test-subj="updateLoggingError">
+            <EuiFlexItem grow={false}>
+              <EuiTextColor color="danger">{i18nTexts.updateErrorMessage}</EuiTextColor>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ErrorDetailsLink error={updateError} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-
-        {updateError && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" alignItems="flexEnd" data-test-subj="updateLoggingError">
-              <EuiFlexItem grow={false}>
-                <EuiTextColor color="danger">{i18nTexts.updateErrorMessage}</EuiTextColor>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ErrorDetailsLink error={updateError} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
-
-        {isUpdating && (
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-
-      {hasLoggerDeprecationWarning && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiCallOut title={i18nTexts.deprecationWarningTitle} color="warning" iconType="help">
-            <p>{i18nTexts.deprecationWarningBody}</p>
-          </EuiCallOut>
-        </>
       )}
-    </>
+
+      {isUpdating && (
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };
