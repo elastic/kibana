@@ -35,6 +35,7 @@ const TemplateComponent = ({ defPairs }: Props) => {
   );
 };
 
+/** @public */
 export class SourceFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS._SOURCE;
   static title = '_source';
