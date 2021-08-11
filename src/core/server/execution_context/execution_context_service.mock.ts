@@ -31,6 +31,7 @@ const createInternalSetupContractMock = () => {
 const createSetupContractMock = () => {
   const mock: jest.Mocked<ExecutionContextSetup> = {
     withContext: jest.fn(),
+    setRequestId: jest.fn(),
   };
   return mock;
 };
