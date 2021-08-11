@@ -5,6 +5,10 @@
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
 
+# Tech leads
+/dev_docs @elastic/kibana-tech-leads
+/packages/kbn-docs-utils/ @elastic/kibana-tech-leads @elastic/kibana-operations
+
 # App
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-app
 /x-pack/plugins/lens/ @elastic/kibana-app
@@ -154,6 +158,7 @@
 
 # Maps
 #CC# /x-pack/plugins/maps/ @elastic/kibana-gis
+/x-pack/plugins/maps/ @elastic/kibana-gis
 /x-pack/test/api_integration/apis/maps/ @elastic/kibana-gis
 /x-pack/test/functional/apps/maps/ @elastic/kibana-gis
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
@@ -161,7 +166,9 @@
 /x-pack/plugins/stack_alerts/server/alert_types/geo_containment @elastic/kibana-gis
 /x-pack/plugins/stack_alerts/public/alert_types/geo_containment @elastic/kibana-gis
 #CC# /src/plugins/maps_legacy/ @elastic/kibana-gis
+/src/plugins/maps_legacy/ @elastic/kibana-gis
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
+/x-pack/plugins/file_upload @elastic/kibana-gis
 /src/plugins/tile_map/ @elastic/kibana-gis
 /src/plugins/region_map/ @elastic/kibana-gis
 /packages/kbn-mapbox-gl @elastic/kibana-gis
@@ -201,6 +208,7 @@
 /test/functional/services/remote @elastic/kibana-qa
 
 # Core
+/examples/hello_world/ @elastic/kibana-core
 /src/core/  @elastic/kibana-core
 /src/plugins/saved_objects_tagging_oss  @elastic/kibana-core
 /config/kibana.yml @elastic/kibana-core

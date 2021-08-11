@@ -141,4 +141,21 @@ export function registerCrawlerRoutes({
       path: '/api/as/v0/crawler/validate_url',
     })
   );
+
+  router.post(
+    {
+      path: '/api/app_search/engines/{name}/crawler/process_crawls',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+        body: schema.object({
+          domains: schema.maybe(schema.arrayOf(schema.string())),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/process_crawls',
+    })
+  );
 }

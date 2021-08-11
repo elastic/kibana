@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { UsageCollectionStart } from 'src/plugins/usage_collection/public';
 import type { ConfigSchema } from '.';
 import {
   AppMountParameters,
@@ -32,9 +33,10 @@ import type { FeaturesPluginSetup } from '../../features/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
 import type { MapsStartApi } from '../../maps/public';
 import type { MlPluginSetup, MlPluginStart } from '../../ml/public';
-import type {
+import {
   FetchDataParams,
   HasDataParams,
+  METRIC_TYPE,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '../../observability/public';
@@ -112,7 +114,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     // register observability nav if user has access to plugin
     plugins.observability.navigation.registerSections(
       from(core.getStartServices()).pipe(
-        map(([coreStart]) => {
+        map(([coreStart, pluginsStart]) => {
           if (coreStart.application.capabilities.apm.show) {
             return [
               // APM navigation
@@ -123,7 +125,24 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                   { label: servicesTitle, app: 'apm', path: '/services' },
                   { label: tracesTitle, app: 'apm', path: '/traces' },
                   { label: serviceMapTitle, app: 'apm', path: '/service-map' },
-                  { label: backendsTitle, app: 'apm', path: '/backends' },
+                  {
+                    label: backendsTitle,
+                    app: 'apm',
+                    path: '/backends',
+                    onClick: () => {
+                      const { usageCollection } = pluginsStart as {
+                        usageCollection?: UsageCollectionStart;
+                      };
+
+                      if (usageCollection) {
+                        usageCollection.reportUiCounter(
+                          'apm',
+                          METRIC_TYPE.CLICK,
+                          'side_nav_backend'
+                        );
+                      }
+                    },
+                  },
                 ],
               },
 

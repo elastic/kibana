@@ -71,8 +71,16 @@ export const policyFactory = (): PolicyConfig => {
       malware: {
         mode: ProtectionModes.prevent,
       },
+      behavior_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
       popup: {
         malware: {
+          message: '',
+          enabled: true,
+        },
+        behavior_protection: {
           message: '',
           enabled: true,
         },
@@ -90,8 +98,16 @@ export const policyFactory = (): PolicyConfig => {
       malware: {
         mode: ProtectionModes.prevent,
       },
+      behavior_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
       popup: {
         malware: {
+          message: '',
+          enabled: true,
+        },
+        behavior_protection: {
           message: '',
           enabled: true,
         },
@@ -147,21 +163,37 @@ export const policyFactoryWithoutPaidFeatures = (
     },
     mac: {
       ...policy.mac,
+      behavior_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
       popup: {
         ...policy.mac.popup,
         malware: {
           message: '',
           enabled: true,
         },
+        behavior_protection: {
+          message: '',
+          enabled: false,
+        },
       },
     },
     linux: {
       ...policy.linux,
+      behavior_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
       popup: {
         ...policy.linux.popup,
         malware: {
           message: '',
           enabled: true,
+        },
+        behavior_protection: {
+          message: '',
+          enabled: false,
         },
       },
     },
@@ -186,6 +218,20 @@ export const policyFactoryWithSupportedFeatures = (
         ...policy.windows.memory_protection,
         supported: true,
       },
+      behavior_protection: {
+        ...policy.windows.behavior_protection,
+        supported: true,
+      },
+    },
+    mac: {
+      ...policy.mac,
+      behavior_protection: {
+        ...policy.windows.behavior_protection,
+        supported: true,
+      },
+    },
+    linux: {
+      ...policy.linux,
       behavior_protection: {
         ...policy.windows.behavior_protection,
         supported: true,
