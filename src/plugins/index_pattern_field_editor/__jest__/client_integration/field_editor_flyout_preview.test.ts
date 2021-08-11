@@ -530,7 +530,6 @@ describe('Field editor Preview panel', () => {
       expect(exists('fieldPreviewItem')).toBe(false);
       expect(exists('indexPatternFieldList')).toBe(false);
       expect(exists('previewError')).toBe(true);
-      expect(find('previewError.title').text()).toBe('Error compiling the painless script');
       expect(find('previewError.reason').text()).toBe(error.caused_by.reason);
 
       httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });

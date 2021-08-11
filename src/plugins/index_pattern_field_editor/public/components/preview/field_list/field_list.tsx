@@ -53,10 +53,10 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
   const { indexPattern } = useFieldEditorContext();
   const {
     currentDocument: { value: currentDocument },
+    pinnedFields: { value: pinnedFields, set: setPinnedFields },
   } = useFieldPreviewContext();
 
   const [showAllFields, setShowAllFields] = useState(false);
-  const [pinnedFields, setPinnedFields] = useState<{ [key: string]: boolean }>({});
 
   const {
     fields: { getAll: getAllFields },
@@ -134,15 +134,18 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
     setShowAllFields((prev) => !prev);
   }, []);
 
-  const toggleIsPinnedField = useCallback((name) => {
-    setPinnedFields((prev) => {
-      const isPinned = !prev[name];
-      return {
-        ...prev,
-        [name]: isPinned,
-      };
-    });
-  }, []);
+  const toggleIsPinnedField = useCallback(
+    (name) => {
+      setPinnedFields((prev) => {
+        const isPinned = !prev[name];
+        return {
+          ...prev,
+          [name]: isPinned,
+        };
+      });
+    },
+    [setPinnedFields]
+  );
 
   const renderEmptyResult = () => {
     return (

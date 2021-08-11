@@ -70,6 +70,9 @@ export const FieldPreview = () => {
     return reset;
   }, [reset]);
 
+  const doShowFieldList =
+    error === null || (error.code !== 'DOC_NOT_FOUND' && error.code !== 'ERR_FETCHING_DOC');
+
   return (
     <div
       className="indexPatternFieldEditor__previewPannel"
@@ -100,7 +103,10 @@ export const FieldPreview = () => {
           />
           <EuiSpacer size="s" />
 
-          {error === null ? (
+          <FieldPreviewError />
+          <EuiSpacer size="s" />
+
+          {doShowFieldList && (
             <>
               {/* The current field(s) the user is creating */}
               {renderFieldsToPreview()}
@@ -120,8 +126,6 @@ export const FieldPreview = () => {
                 )}
               </EuiResizeObserver>
             </>
-          ) : (
-            <FieldPreviewError />
           )}
         </>
       )}

@@ -35,7 +35,8 @@ export const DocumentsNavPreview = () => {
           }
         )
       : null;
-  const isInvalid = error !== null;
+
+  const isInvalid = error !== null && error.code === 'DOC_NOT_FOUND';
 
   // We don't display the nav button when the user has entered a custom
   // document ID as at that point there is no more reference to what's "next"

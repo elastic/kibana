@@ -28,9 +28,10 @@ export const FieldPreviewError = () => {
       role="alert"
       data-test-subj="previewError"
     >
-      <p data-test-subj="title">{error.error.message}</p>
-      {error.code === 'PAINLESS_SCRIPT_ERROR' && (
+      {error.code === 'PAINLESS_SCRIPT_ERROR' ? (
         <p data-test-subj="reason">{error.error.reason}</p>
+      ) : (
+        <p data-test-subj="title">{error.error.message}</p>
       )}
     </EuiCallOut>
   );

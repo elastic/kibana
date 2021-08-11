@@ -90,6 +90,10 @@ interface Context {
     prev: () => void;
   };
   reset: () => void;
+  pinnedFields: {
+    value: { [key: string]: boolean };
+    set: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>;
+  };
 }
 
 const fieldPreviewContext = createContext<Context | undefined>(undefined);
@@ -151,6 +155,8 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const [customDocIdToLoad, setCustomDocIdToLoad] = useState<string | null>(null);
   /** Define if we provide the document to preview from the cluster or from a custom JSON */
   const [from, setFrom] = useState<From>('cluster');
+  /** Map of fields pinned to the top of the list */
+  const [pinnedFields, setPinnedFields] = useState<{ [key: string]: boolean }>({});
 
   const { documents, currentIdx } = clusterData;
   const currentDocument: EsDocument | undefined = useMemo(() => documents[currentIdx], [
@@ -312,15 +318,15 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   );
 
   const updatePreview = useCallback(async () => {
-    if (!needToUpdatePreview) {
-      return;
-    }
-
     setLastExecutePainlessReqParams({
       type: params.type,
       script: params.script?.source,
       documentId: currentDocId,
     });
+
+    if (!needToUpdatePreview) {
+      return;
+    }
 
     const currentApiCall = ++previewCount.current;
 
@@ -453,6 +459,10 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         set: setFrom,
       },
       reset,
+      pinnedFields: {
+        value: pinnedFields,
+        set: setPinnedFields,
+      },
     }),
     [
       previewResponse,
@@ -471,6 +481,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       isPanelVisible,
       from,
       reset,
+      pinnedFields,
     ]
   );
 
