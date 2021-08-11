@@ -239,6 +239,7 @@ export function jobsProvider(
         isNotSingleMetricViewerJobMessage: errorMessage,
         nodeName: job.node ? job.node.name : undefined,
         deleting: job.deleting || undefined,
+        blocked: job.blocked ?? undefined,
         awaitingNodeAssignment: isJobAwaitingNodeAssignment(job),
         alertingRules: job.alerting_rules,
         jobTags: job.custom_settings?.job_tags ?? {},

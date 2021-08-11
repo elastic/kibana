@@ -77,7 +77,7 @@ export function isClosable(jobs) {
   );
 }
 
-export function isResetable(jobs) {
+export function isResettable(jobs) {
   return jobs.some((j) => j.jobState === JOB_STATE.CLOSED);
 }
 

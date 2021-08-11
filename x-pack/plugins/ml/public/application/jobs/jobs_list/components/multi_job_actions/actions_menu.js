@@ -18,7 +18,7 @@ import {
   isStartable,
   isStoppable,
   isClosable,
-  isResetable,
+  isResettable,
 } from '../utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -111,7 +111,7 @@ class MultiJobActionsMenuUI extends Component {
       );
     }
 
-    if (isResetable(this.props.jobs)) {
+    if (isResettable(this.props.jobs)) {
       items.push(
         <EuiContextMenuItem
           key="reset job"

@@ -12,11 +12,13 @@ export type BucketSpan = string;
 
 // temporary Job override, waiting for es client to have correct types
 export type Job = estypes.MlJob & {
-  blocked: {
-    reason: 'delete' | 'revert' | 'reset';
-    task_id?: string;
-  };
+  blocked: MlJobBlocked;
 };
+
+export interface MlJobBlocked {
+  reason: 'delete' | 'revert' | 'reset';
+  task_id?: string;
+}
 
 export type AnalysisConfig = estypes.MlAnalysisConfig;
 

@@ -16,7 +16,7 @@ import {
   isStartable,
   isStoppable,
   isClosable,
-  isResetable,
+  isResettable,
 } from '../utils';
 import { getToastNotifications } from '../../../../util/dependency_cache';
 import { i18n } from '@kbn/i18n';
@@ -112,7 +112,7 @@ export function actionsMenuContent(
       }),
       icon: 'refresh',
       enabled: (item) => isJobBlocked(item) === false && canResetJob,
-      available: (item) => isResetable([item]),
+      available: (item) => isResettable([item]),
       onClick: (item) => {
         showResetJobModal([item]);
         closeMenu(true);
