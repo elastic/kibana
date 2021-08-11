@@ -17,7 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiForm,
+  EuiHorizontalRule,
   EuiPanel,
   EuiSwitch,
   EuiSwitchEvent,
@@ -52,6 +52,8 @@ import {
   SYNC_MANAGEMENT_TITLE,
   SYNC_MANAGEMENT_DESCRIPTION,
   SYNC_MANAGEMENT_SYNCHRONIZE_LABEL,
+  SYNC_MANAGEMENT_THUMBNAILS_LABEL,
+  SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL,
   SOURCE_REMOVE_TITLE,
   SOURCE_REMOVE_DESCRIPTION,
   SYNC_DIAGNOSTICS_TITLE,
@@ -70,7 +72,7 @@ export const SourceSettings: React.FC = () => {
   const { getSourceConfigData } = useActions(AddSourceLogic);
 
   const {
-    contentSource: { name, id, serviceType, indexing: {enabled} },
+    contentSource: { name, id, serviceType, indexing: {enabled, features: {contentExtraction: {enabled: contentExtractionEnabled}, thumbnails: {enabled: thumbnailsEnabled}}} },
     buttonLoading,
   } = useValues(SourceLogic);
 
@@ -97,6 +99,8 @@ export const SourceSettings: React.FC = () => {
   const showConfig = isOrganization && !isEmpty(configuredFields);
 
   const [synchronizeChecked, setSynchronize] = useState(enabled);
+  const [thumbnailsChecked, setThumbnails] = useState(thumbnailsEnabled);
+  const [contentExtractionChecked, setContentExtraction] = useState(contentExtractionEnabled);
 
   const { clientId, clientSecret, publicKey, consumerKey, baseUrl } = configuredFields || {};
 
@@ -113,7 +117,17 @@ export const SourceSettings: React.FC = () => {
 
   const handleSynchronizeChange = (e: EuiSwitchEvent) => {
     setSynchronize(e.target.checked);
-    updateContentSource(id, { indexing: { enabled: e.target.checked } }); // why can't I use `synchronizeChecked` here instead of `e.target.checked`?
+    updateContentSource(id, { indexing: { enabled: e.target.checked } });
+  }
+
+  const handleThumbnailsChange = (e: EuiSwitchEvent) => {
+    setThumbnails(e.target.checked);
+    updateContentSource(id, { indexing: { features: {thumbnails: { enabled: e.target.checked } } } });
+  }
+
+  const handleContentExtractionChange = (e: EuiSwitchEvent) => {
+    setContentExtraction(e.target.checked);
+    updateContentSource(id, { indexing: { features: {content_extraction: { enabled: e.target.checked } } } });
   }
 
   const handleSourceRemoval = () => {
@@ -195,7 +209,10 @@ export const SourceSettings: React.FC = () => {
         </ContentSection>
       )}
       <ContentSection title={SYNC_MANAGEMENT_TITLE} description={SYNC_MANAGEMENT_DESCRIPTION}>
-        <EuiPanel>
+        <EuiPanel
+          hasShadow={false}
+          hasBorder={true}
+        >
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiSwitch
@@ -203,6 +220,27 @@ export const SourceSettings: React.FC = () => {
                 onChange={handleSynchronizeChange}
                 label={SYNC_MANAGEMENT_SYNCHRONIZE_LABEL}
                 data-test-subj="SynchronizeToggle"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiHorizontalRule/>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                checked={thumbnailsChecked}
+                onChange={handleThumbnailsChange}
+                label={SYNC_MANAGEMENT_THUMBNAILS_LABEL}
+                data-test-subj="ThumbnailsToggle"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                checked={contentExtractionChecked}
+                onChange={handleContentExtractionChange}
+                label={SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL}
+                data-test-subj="ContentExtractionToggle"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

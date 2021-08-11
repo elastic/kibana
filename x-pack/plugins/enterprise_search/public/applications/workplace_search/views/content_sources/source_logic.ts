@@ -34,8 +34,8 @@ export interface SourceActions {
   searchContentSourceDocuments(sourceId: string): { sourceId: string };
   updateContentSource(
     sourceId: string,
-    source: { name?: string, indexing?: { enabled?: boolean } }
-  ): { sourceId: string; source: { name: string, indexing: { enabled: boolean } } };
+    source: { name?: string, indexing?: { enabled?: boolean, features?: { thumbnails?: { enabled: boolean }, content_extraction?: { enabled: boolean } } } }
+  ): { sourceId: string; source: { name: string, indexing: { enabled: boolean, features: { thumbnails: { enabled: boolean }, content_extraction: { enabled: boolean } } } } };
   resetSourceState(): void;
   removeContentSource(sourceId: string): { sourceId: string };
   initializeSource(sourceId: string): { sourceId: string };
@@ -69,7 +69,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     initializeSource: (sourceId: string) => ({ sourceId }),
     initializeFederatedSummary: (sourceId: string) => ({ sourceId }),
     searchContentSourceDocuments: (sourceId: string) => ({ sourceId }),
-    updateContentSource: (sourceId: string, source: { name?: string, indexing?: { enabled?: boolean } }) => ({ sourceId, source }),
+    updateContentSource: (sourceId: string, source: { name?: string, indexing?: { enabled?: boolean, features?: { thumbnails?: { enabled: boolean }, content_extraction?: { enabled: boolean } } } }) => ({ sourceId, source }),
     removeContentSource: (sourceId: string) => ({
       sourceId,
     }),

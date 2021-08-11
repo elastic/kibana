@@ -131,6 +131,14 @@ interface SourceActivity {
 
 interface IndexingConfig {
   enabled: boolean;
+  features: {
+    contentExtraction: {
+      enabled: boolean
+    },
+    thumbnails: {
+      enabled: boolean
+    }
+  }
 }
 
 export interface ContentSourceFullData extends ContentSourceDetails {

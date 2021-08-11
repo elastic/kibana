@@ -221,7 +221,15 @@ export function registerAccountSourceSettingsRoute({
           content_source: schema.object({
             name: schema.maybe(schema.string()),
             indexing: schema.maybe(schema.object({
-              enabled: schema.maybe(schema.boolean())
+              enabled: schema.maybe(schema.boolean()),
+              features: schema.maybe(schema.object({
+                thumbnails: schema.maybe(schema.object({
+                  enabled: schema.boolean()
+                })),
+                content_extraction: schema.maybe(schema.object({
+                  enabled: schema.boolean()
+                }))
+              }))
             }))
           }),
         }),
@@ -572,7 +580,15 @@ export function registerOrgSourceSettingsRoute({
           content_source: schema.object({
             name: schema.maybe(schema.string()),
             indexing: schema.maybe(schema.object({
-              enabled: schema.maybe(schema.boolean())
+              enabled: schema.maybe(schema.boolean()),
+              features: schema.maybe(schema.object({
+                thumbnails: schema.maybe(schema.object({
+                  enabled: schema.boolean()
+                })),
+                content_extraction: schema.maybe(schema.object({
+                  enabled: schema.boolean()
+                }))
+              }))
             }))
           }),
         }),

@@ -313,6 +313,20 @@ export const SYNC_MANAGEMENT_SYNCHRONIZE_LABEL = i18n.translate(
   }
 );
 
+export const SYNC_MANAGEMENT_THUMBNAILS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sync.management.thumbnails.label',
+  {
+    defaultMessage: 'Sync thumbnails',
+  }
+);
+
+export const SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sync.management.content_extraction.label',
+  {
+    defaultMessage: 'Sync all text and content',
+  }
+);
+
 export const SOURCE_CONFIG_LINK = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.config.link',
   {
