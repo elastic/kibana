@@ -1,9 +1,7 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
-    "incremental": true,
-    "outDir": "./target",
-    "target": "ES2019",
+    "outDir": "./target/types",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,

@@ -6,7 +6,7 @@
  */
 
 import { DslQuery, Filter } from '@kbn/es-query';
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
 
 export type ESQuery =
   | ESRangeQuery

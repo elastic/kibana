@@ -4,6 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { AlertConsumers as AlertConsumersTyped } from '@kbn/rule-data-utils';
+// @ts-expect-error
+import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -15,7 +19,7 @@ import { Direction } from '../../../../common/search_strategy';
 import type { DocValueFields } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import { TGridCellAction, TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -32,7 +36,6 @@ import {
   DataPublicPluginStart,
 } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import { Refetch } from '../../../store/t_grid/inputs';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { calculateTotalPages, combineQueries, resolverIsShowing } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
@@ -40,12 +43,13 @@ import { useTimelineEvents } from '../../../container';
 import { HeaderSection } from '../header_section';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
-import { LastUpdatedAt } from '../..';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem } from '../styles';
 import * as i18n from '../translations';
 import { ExitFullScreen } from '../../exit_full_screen';
 import { Sort } from '../body/sort';
 import { InspectButtonContainer } from '../../inspect';
+
+const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const COMPACT_HEADER_HEIGHT = 36; // px
@@ -100,10 +104,13 @@ const HeaderFilterGroupWrapper = styled.header<{ show: boolean }>`
   ${({ show }) => (show ? '' : 'visibility: hidden;')}
 `;
 
+const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
+
 export interface TGridIntegratedProps {
   browserFields: BrowserFields;
   columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
+  defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
   docValueFields: DocValueFields[];
   end: string;
@@ -127,7 +134,7 @@ export interface TGridIntegratedProps {
   setGlobalFullScreen: (fullscreen: boolean) => void;
   start: string;
   sort: Sort[];
-  utilityBar?: (refetch: Refetch, totalCount: number) => React.ReactNode;
+  additionalFilters: React.ReactNode;
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId: string | undefined;
   leadingControlColumns?: ControlColumnProps[];
@@ -138,6 +145,7 @@ export interface TGridIntegratedProps {
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   browserFields,
   columns,
+  defaultCellActions,
   dataProviders,
   deletedEventIds,
   docValueFields,
@@ -161,7 +169,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   setGlobalFullScreen,
   start,
   sort,
-  utilityBar,
+  additionalFilters,
   graphEventId,
   leadingControlColumns,
   trailingControlColumns,
@@ -233,8 +241,9 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const [
     loading,
-    { events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
+    { events, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
+    alertConsumers: SECURITY_ALERTS_CONSUMERS,
     docValueFields,
     fields,
     filterQuery: combinedQueries!.filterQuery,
@@ -287,19 +296,17 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               height={
                 headerFilterGroup == null ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT
               }
-              subtitle={utilityBar}
               title={globalFullScreen ? titleWithExitFullScreen : justTitle}
             >
               {HeaderSectionContent}
             </HeaderSection>
-
             <EventsContainerLoading
               data-timeline-id={id}
               data-test-subj={`events-container-loading-${loading}`}
             >
               <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
                 <UpdatedFlexItem grow={false} show={!loading}>
-                  <LastUpdatedAt updatedAt={updatedAt} />
+                  {!resolverIsShowing(graphEventId) && additionalFilters}
                 </UpdatedFlexItem>
               </EuiFlexGroup>
 
@@ -309,6 +316,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                     activePage={pageInfo.activePage}
                     browserFields={browserFields}
                     data={nonDeletedEvents}
+                    defaultCellActions={defaultCellActions}
                     id={id}
                     isEventViewer={true}
                     loadPage={loadPage}

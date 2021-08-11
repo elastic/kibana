@@ -34,6 +34,9 @@ export interface FindBulkResponse {
   [key: string]: IRuleStatusSOAttributes[] | undefined;
 }
 
+/**
+ * @pdeprecated Use RuleExecutionLogClient instead
+ */
 export const ruleStatusSavedObjectsClientFactory = (
   savedObjectsClient: SavedObjectsClientContract
 ): RuleStatusSavedObjectsClient => ({
