@@ -132,17 +132,7 @@ describe('ThreatDetailsView', () => {
     ).toEqual(true);
   });
 
-  it('renders range picker', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <ThreatDetailsView enrichments={[]} showInvestigationTimeEnrichments loading={false} />
-      </TestProviders>
-    );
-
-    expect(wrapper.exists('[data-test-subj="enrichment-query-range-picker"]')).toEqual(true);
-  });
-
-  it('renders loading state picker', () => {
+  it('renders loading state', () => {
     const wrapper = mount(
       <TestProviders>
         <ThreatDetailsView enrichments={[]} showInvestigationTimeEnrichments loading />
@@ -170,7 +160,19 @@ describe('ThreatDetailsView', () => {
     expect(wrapper.exists('[data-test-subj="enriched-with-threat-intel"]')).toEqual(false);
   });
 
-  it('renders children', () => {
+  it('renders children as a part of investigation time enrichment section', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatDetailsView enrichments={[]} showInvestigationTimeEnrichments loading={false}>
+          <div className={'test-div'} />
+        </ThreatDetailsView>
+      </TestProviders>
+    );
+
+    expect(wrapper.exists('.test-div')).toEqual(true);
+  });
+
+  it('does not render children id investigation time enrichment section is not showing', () => {
     const wrapper = mount(
       <TestProviders>
         <ThreatDetailsView
@@ -183,6 +185,6 @@ describe('ThreatDetailsView', () => {
       </TestProviders>
     );
 
-    expect(wrapper.exists('.test-div')).toEqual(true);
+    expect(wrapper.exists('.test-div')).toEqual(false);
   });
 });
