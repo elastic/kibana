@@ -12,6 +12,7 @@ import { uniq } from 'lodash';
 import { latencyAggregationTypeRt } from '../../common/latency_aggregation_types';
 import { ProfilingValueType } from '../../common/profiling';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { getThroughputUnit } from '../lib/helpers/calculate_throughput';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
@@ -43,6 +44,7 @@ import {
 import { offsetPreviousPeriodCoordinates } from '../../common/utils/offset_previous_period_coordinate';
 import { getServicesDetailedStatistics } from '../lib/services/get_services_detailed_statistics';
 import { getServiceDependenciesBreakdown } from '../lib/services/get_service_dependencies_breakdown';
+import { getBucketSizeForAggregatedTransactions } from '../lib/helpers/get_bucket_size_for_aggregated_transactions';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services',
@@ -451,6 +453,16 @@ const serviceThroughputRoute = createApmServerRoute({
     });
 
     const { start, end } = setup;
+    const {
+      bucketSize,
+      intervalString,
+    } = getBucketSizeForAggregatedTransactions({
+      start,
+      end,
+      searchAggregatedTransactions,
+    });
+
+    const throughputUnit = getThroughputUnit(bucketSize);
 
     const commonProps = {
       environment,
@@ -459,6 +471,8 @@ const serviceThroughputRoute = createApmServerRoute({
       serviceName,
       setup,
       transactionType,
+      throughputUnit,
+      intervalString,
     };
 
     const [currentPeriod, previousPeriod] = await Promise.all([
@@ -482,6 +496,7 @@ const serviceThroughputRoute = createApmServerRoute({
         currentPeriodTimeseries: currentPeriod,
         previousPeriodTimeseries: previousPeriod,
       }),
+      throughputUnit,
     };
   },
 });
