@@ -89,7 +89,8 @@ export async function getRuleData(
     try {
       loadedRule = await loadAlert(ruleId);
     } catch (err) {
-      if (err) {
+      // Try resolving this rule id if the error is a 404, otherwise re-throw
+      if (err?.body?.statusCode !== 404) {
         throw err;
       }
       loadedRule = await resolveRule(ruleId);
@@ -100,11 +101,11 @@ export async function getRuleData(
     const [loadedAlertType, loadedActionTypes] = await Promise.all<AlertType, ActionType[]>([
       loadAlertTypes()
         .then((types) => types.find((type) => type.id === loadedRule.alertTypeId))
-        .then(throwIfAbsent(`Invalid Alert Type: ${loadedRule.alertTypeId}`)),
+        .then(throwIfAbsent(`Invalid Rule Type: ${loadedRule.alertTypeId}`)),
       loadActionTypes().then(
         throwIfIsntContained(
           new Set(loadedRule.actions.map((action) => action.actionTypeId)),
-          (requiredActionType: string) => `Invalid Action Type: ${requiredActionType}`,
+          (requiredActionType: string) => `Invalid Connector Type: ${requiredActionType}`,
           (action: ActionType) => action.id
         )
       ),
