@@ -587,12 +587,12 @@ export class AlertsClient {
     size,
     index,
   }: {
-    query: object | undefined;
-    aggs: object | undefined;
+    query?: object | undefined;
+    aggs?: object | undefined;
     index: string | undefined;
-    track_total_hits: boolean | undefined;
-    _source: string[] | undefined;
-    size: number | undefined;
+    track_total_hits?: boolean | undefined;
+    _source?: string[] | undefined;
+    size?: number | undefined;
   }) {
     try {
       // first search for the alert by id, then use the alert info to check if user has access to it
