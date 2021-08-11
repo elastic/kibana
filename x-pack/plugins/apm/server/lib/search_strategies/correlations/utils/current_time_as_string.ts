@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { computeExpectationsAndRanges } from './compute_expectations_and_ranges';
-export { currentTimeAsString } from './current_time_as_string';
-export { hasPrefixToInclude } from './has_prefix_to_include';
+export const currentTimeAsString = () => new Date().toISOString();

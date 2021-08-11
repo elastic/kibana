@@ -32,6 +32,7 @@ export interface SearchServiceParams {
 
 export interface SearchServiceFetchParams extends SearchServiceParams {
   index: string;
+  includeFrozen?: boolean;
 }
 
 export interface SearchServiceValue {
@@ -50,5 +51,4 @@ export interface AsyncSearchProviderProgress {
   loadedFieldCanditates: number;
   loadedFieldValuePairs: number;
   loadedHistograms: number;
-  getOverallProgress: () => number;
 }

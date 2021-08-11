@@ -9,36 +9,33 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
+import { TRANSACTION_DURATION } from '../../../../../common/elasticsearch_fieldnames';
 import type {
   HistogramItem,
   ResponseHit,
   SearchServiceFetchParams,
-} from '../../../../common/search_strategies/correlations/types';
+} from '../../../../../common/search_strategies/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
+import { getRequestBase } from './get_request_base';
 
 export const getTransactionDurationHistogramRequest = (
   params: SearchServiceFetchParams,
   interval: number,
   fieldName?: string,
   fieldValue?: string
-): estypes.SearchRequest => {
-  const query = getQueryWithParams({ params, fieldName, fieldValue });
-
-  return {
-    index: params.index,
-    body: {
-      query,
-      size: 0,
-      aggs: {
-        transaction_duration_histogram: {
-          histogram: { field: TRANSACTION_DURATION, interval },
-        },
+): estypes.SearchRequest => ({
+  ...getRequestBase(params),
+  body: {
+    query: getQueryWithParams({ params, fieldName, fieldValue }),
+    size: 0,
+    aggs: {
+      transaction_duration_histogram: {
+        histogram: { field: TRANSACTION_DURATION, interval },
       },
     },
-  };
-};
+  },
+});
 
 export const fetchTransactionDurationHistogram = async (
   esClient: ElasticsearchClient,

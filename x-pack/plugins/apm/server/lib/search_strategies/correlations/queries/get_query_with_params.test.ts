@@ -11,7 +11,12 @@ describe('correlations', () => {
   describe('getQueryWithParams', () => {
     it('returns the most basic query filtering on processor.event=transaction', () => {
       const query = getQueryWithParams({
-        params: { index: 'apm-*', start: '2020', end: '2021' },
+        params: {
+          index: 'apm-*',
+          start: '2020',
+          end: '2021',
+          includeFrozen: false,
+        },
       });
       expect(query).toEqual({
         bool: {
@@ -40,6 +45,7 @@ describe('correlations', () => {
           start: '2020',
           end: '2021',
           environment: 'dev',
+          includeFrozen: false,
         },
       });
       expect(query).toEqual({
@@ -81,7 +87,12 @@ describe('correlations', () => {
 
     it('returns a query considering a custom field/value pair', () => {
       const query = getQueryWithParams({
-        params: { index: 'apm-*', start: '2020', end: '2021' },
+        params: {
+          index: 'apm-*',
+          start: '2020',
+          end: '2021',
+          includeFrozen: false,
+        },
         fieldName: 'actualFieldName',
         fieldValue: 'actualFieldValue',
       });
