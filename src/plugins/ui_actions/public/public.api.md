@@ -13,6 +13,7 @@ import { Plugin } from 'src/core/public';
 import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core/public';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import React from 'react';
+import { SerializableRecord } from '@kbn/utility-types';
 import { UiComponent } from 'src/plugins/kibana_utils/public';
 
 // Warning: (ae-missing-release-tag) "Action" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

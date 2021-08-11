@@ -11,32 +11,9 @@ search: {
     aggs: {
         CidrMask: typeof CidrMask;
         dateHistogramInterval: typeof dateHistogramInterval;
-        intervalOptions: ({
-            display: string;
-            val: string;
-            enabled(agg: import("../common").IBucketAggConfig): boolean;
-        } | {
-            display: string;
-            val: string;
-        })[];
-        InvalidEsCalendarIntervalError: typeof InvalidEsCalendarIntervalError;
-        InvalidEsIntervalFormatError: typeof InvalidEsIntervalFormatError;
         IpAddress: typeof IpAddress;
-        isNumberType: (agg: import("../common").AggConfig) => boolean;
-        isStringType: (agg: import("../common").AggConfig) => boolean;
-        isType: (...types: string[]) => (agg: import("../common").AggConfig) => boolean;
-        isValidEsInterval: typeof isValidEsInterval;
-        isValidInterval: typeof isValidInterval;
-        parentPipelineType: string;
-        parseEsInterval: typeof parseEsInterval;
         parseInterval: typeof parseInterval;
-        propFilter: typeof propFilter;
-        siblingPipelineType: string;
-        termsAggFilter: string[];
-        toAbsoluteDates: typeof toAbsoluteDates;
         calcAutoIntervalLessThan: typeof calcAutoIntervalLessThan;
     };
-    tabifyAggResponse: typeof tabifyAggResponse;
-    tabifyGetColumns: typeof tabifyGetColumns;
 }
 ```

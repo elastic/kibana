@@ -11,6 +11,7 @@ import { NumeralFormat } from './numeral';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 
+/** @public */
 export class PercentFormat extends NumeralFormat {
   static id = FIELD_FORMAT_IDS.PERCENT;
   static title = i18n.translate('fieldFormats.percent.title', {

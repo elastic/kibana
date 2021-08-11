@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenuItem, EuiText } from '@elastic/eui';
+import { EuiContextMenuItem } from '@elastic/eui';
 import React from 'react';
 import { FILTER_CLOSED } from '../../alerts_filter_group';
 import * as i18n from '../../translations';
@@ -25,7 +25,7 @@ const CloseAlertActionComponent: React.FC<CloseAlertActionProps> = ({ onClick, d
       onClick={onClick}
       disabled={disabled}
     >
-      <EuiText size="m">{i18n.ACTION_CLOSE_ALERT}</EuiText>
+      {i18n.ACTION_CLOSE_ALERT}
     </EuiContextMenuItem>
   );
 };
