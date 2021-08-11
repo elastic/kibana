@@ -29,7 +29,6 @@ import { ReportingConfig, ReportingSetup } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
-import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/screenshots';
 import { ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
 import { ReportingPluginRouter } from './types';
@@ -235,12 +234,6 @@ export class ReportingCore {
         first()
       )
       .toPromise();
-  }
-
-  public async getScreenshotsObservable(): Promise<ScreenshotsObservableFn> {
-    const config = this.getConfig();
-    const { browserDriverFactory } = await this.getPluginStartDeps();
-    return screenshotsObservableFactory(config.get('capture'), browserDriverFactory);
   }
 
   public getEnableScreenshotMode() {

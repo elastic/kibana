@@ -12,7 +12,7 @@ import { AggTypesDependencies } from '../agg_types';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketHistogramAggConfig, getHistogramBucketAgg, AutoBounds } from './histogram';
 import { BucketAggType } from './bucket_agg_type';
-import { SerializableState } from 'src/plugins/expressions/common';
+import { SerializableRecord } from '@kbn/utility-types';
 
 describe('Histogram Agg', () => {
   let aggTypesDependencies: AggTypesDependencies;
@@ -256,7 +256,7 @@ describe('Histogram Agg', () => {
         });
         (aggConfigs.aggs[0] as IBucketHistogramAggConfig).setAutoBounds({ min: 0, max: 1000 });
         const serializedAgg = aggConfigs.aggs[0].serialize();
-        const serializedIntervalParam = (serializedAgg.params as SerializableState).used_interval;
+        const serializedIntervalParam = (serializedAgg.params as SerializableRecord).used_interval;
         expect(serializedIntervalParam).toBe(500);
         const freshHistogramAggConfig = getAggConfigs({
           interval: 100,
