@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiImage,
   EuiLink,
   EuiSpacer,
   EuiText,
@@ -30,9 +31,10 @@ interface Props {
   addBasePath: (path: string) => string;
   application: ApplicationStart;
   docLinks: DocLinksStart;
+  isDarkMode: boolean;
 }
 
-export const AddData: FC<Props> = ({ addBasePath, application, docLinks }) => {
+export const AddData: FC<Props> = ({ addBasePath, application, docLinks, isDarkMode }) => {
   const { trackUiMetric } = getServices();
 
   const { integrations: isIntegrationsEnabled } = application.capabilities.navLinks;
@@ -125,7 +127,17 @@ export const AddData: FC<Props> = ({ addBasePath, application, docLinks }) => {
             ) : null}
           </EuiFlexItem>
 
-          <EuiFlexItem>Image goes here...</EuiFlexItem>
+          <EuiFlexItem>
+            <EuiImage
+              alt="Illustration of Elastic data integrations"
+              src={
+                addBasePath('/plugins/apm/assets/') +
+                (isDarkMode
+                  ? 'illustration_integrations_darkmode.svg'
+                  : 'illustration_integrations_lightmode.svg')
+              }
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </section>
 
