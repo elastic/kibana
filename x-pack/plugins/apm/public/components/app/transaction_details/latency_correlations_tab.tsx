@@ -9,6 +9,11 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import {
+  METRIC_TYPE,
+  useTrackMetric,
+} from '../../../../../observability/public';
+
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 
 import { useLicenseContext } from '../../../context/license/use_license_context';
@@ -22,7 +27,19 @@ import type { TabContentProps } from './types';
 function LatencyCorrelationsTab({}: TabContentProps) {
   const license = useLicenseContext();
 
-  return isActivePlatinumLicense(license) ? (
+  const hasActivePlatinumLicense = isActivePlatinumLicense(license);
+
+  const metric = {
+    app: 'apm' as const,
+    metric: hasActivePlatinumLicense
+      ? 'correlations_tab_view'
+      : 'correlations_license_prompt',
+    metricType: METRIC_TYPE.COUNT as METRIC_TYPE.COUNT,
+  };
+  useTrackMetric(metric);
+  useTrackMetric({ ...metric, delay: 15000 });
+
+  return hasActivePlatinumLicense ? (
     <MlLatencyCorrelations correlationAnalysisEnabled={true} />
   ) : (
     <LicensePrompt
