@@ -82,6 +82,10 @@ export function ObservabilityPageTemplate({
             href,
             isSelected,
             onClick: (event) => {
+              if (entry.onClick) {
+                entry.onClick(event);
+              }
+
               if (
                 event.button !== 0 ||
                 event.defaultPrevented ||

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { AlertConsumers } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -97,6 +98,7 @@ const HeaderFilterGroupWrapper = styled.header<{ show: boolean }>`
 `;
 
 export interface TGridStandaloneProps {
+  alertConsumers: AlertConsumers[];
   columns: ColumnHeaderOptions[];
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
@@ -127,6 +129,7 @@ export interface TGridStandaloneProps {
 const basicUnit = (n: number) => i18n.UNIT(n);
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
+  alertConsumers,
   columns,
   defaultCellActions,
   deletedEventIds,
@@ -221,6 +224,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     loading,
     { events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
+    alertConsumers,
     docValueFields: [],
     excludeEcsData: true,
     fields,

@@ -47,6 +47,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
   const {
     jobs: { bulkCreateJobs },
     dataFrameAnalytics: { createDataFrameAnalytics },
+    filters: { filters: getFilters },
   } = useMlApiContext();
   const {
     services: {
@@ -54,6 +55,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
         indexPatterns: { getTitles: getIndexPatternTitles },
       },
       notifications: { toasts },
+      mlServices: { mlUsageCollection },
     },
   } = useMlKibana();
 
@@ -129,7 +131,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       const validatedJobs = await jobImportService.validateJobs(
         loadedFile.jobs,
         loadedFile.jobType,
-        getIndexPatternTitles
+        getIndexPatternTitles,
+        getFilters
       );
 
       if (loadedFile.jobType === 'anomaly-detector') {
@@ -175,6 +178,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       const renamedJobs = jobImportService.renameAdJobs(jobIdObjects, adJobs);
       try {
         await bulkCreateADJobs(renamedJobs);
+        mlUsageCollection.count('imported_anomaly_detector_jobs', renamedJobs.length);
       } catch (error) {
         // display unexpected error
         displayErrorToast(error);
@@ -182,6 +186,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
     } else if (jobType === 'data-frame-analytics') {
       const renamedJobs = jobImportService.renameDfaJobs(jobIdObjects, dfaJobs);
       await bulkCreateDfaJobs(renamedJobs);
+      mlUsageCollection.count('imported_data_frame_analytics_jobs', renamedJobs.length);
     }
 
     setImporting(false);

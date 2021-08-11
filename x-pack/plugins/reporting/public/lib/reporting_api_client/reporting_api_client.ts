@@ -123,7 +123,7 @@ export class ReportingAPIClient implements IReportingAPI {
     }
 
     return i18n.translate('xpack.reporting.apiClient.unknownError', {
-      defaultMessage: `Report job {job} failed: Unknown error.`,
+      defaultMessage: `Report job {job} failed. Error unknown.`,
       values: { job: jobId },
     });
   }

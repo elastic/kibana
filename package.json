@@ -95,7 +95,7 @@
   "dependencies": {
     "@elastic/apm-rum": "^5.8.0",
     "@elastic/apm-rum-react": "^1.2.11",
-    "@elastic/charts": "33.1.0",
+    "@elastic/charts": "33.2.2",
     "@elastic/datemath": "link:bazel-bin/packages/elastic-datemath",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary.14",
     "@elastic/ems-client": "7.14.0",
@@ -124,7 +124,6 @@
     "@kbn/analytics": "link:bazel-bin/packages/kbn-analytics",
     "@kbn/apm-config-loader": "link:bazel-bin/packages/kbn-apm-config-loader",
     "@kbn/apm-utils": "link:bazel-bin/packages/kbn-apm-utils",
-    "@kbn/common-utils": "link:bazel-bin/packages/kbn-common-utils",
     "@kbn/config": "link:bazel-bin/packages/kbn-config",
     "@kbn/config-schema": "link:bazel-bin/packages/kbn-config-schema",
     "@kbn/crypto": "link:bazel-bin/packages/kbn-crypto",

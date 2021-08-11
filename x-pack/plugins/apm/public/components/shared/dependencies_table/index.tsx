@@ -113,7 +113,7 @@ export function DependenciesTable(props: Props) {
     {
       field: 'errorRateValue',
       name: i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
-        defaultMessage: 'Error rate',
+        defaultMessage: 'Failed transaction rate',
       }),
       width: `${unit * 10}px`,
       render: (_, { currentStats, previousStats }) => {
