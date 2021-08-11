@@ -14,7 +14,7 @@ import * as TE from 'fp-ts/lib/TaskEither';
 import * as T from 'fp-ts/lib/Task';
 import { ToolingLog } from '@kbn/dev-utils';
 import { FtrService } from '../../ftr_provider_context';
-import { format } from './utils';
+import { print } from './utils';
 
 const pluck = (key: string) => (obj: any): Either<Error, string> =>
   fromNullable(new Error(`Missing ${key}`))(obj[key]);
@@ -105,9 +105,6 @@ export class SavedObjectInfoService extends FtrService {
   private readonly config = this.ctx.getService('config');
 
   public async logSoTypes(log: ToolingLog, msg: string | null = null) {
-    const print = (xs: any) =>
-      log.info(`\n### Saved Object Types ${msg || 'Count: ' + xs.length}\n${format(xs)}`);
-
-    pipe(await types(url.format(this.config.get('servers.elasticsearch'))), print);
+    pipe(await types(url.format(this.config.get('servers.elasticsearch'))), print(log)(msg));
   }
 }

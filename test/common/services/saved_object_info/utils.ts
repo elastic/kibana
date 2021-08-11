@@ -24,7 +24,8 @@ export const areValid = (flags: any) => {
   return true;
 };
 
-export const logTypes = (log: ToolingLog) => (x: any) => log.info(`${x}\n`);
+export const print = (log: ToolingLog) => (msg: string | null = null) => (xs: any) =>
+  log.success(`\n### Saved Object Types ${msg || 'Count: ' + xs.length}\n${xs}`);
 
 export const expectedFlags = () => ({
   string: ['esUrl', 'type'],

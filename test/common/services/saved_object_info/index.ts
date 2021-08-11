@@ -8,7 +8,7 @@
 
 import { run } from '@kbn/dev-utils';
 import { pipe } from 'fp-ts/function';
-import { format, noop, areValid, logTypes, expectedFlags } from './utils';
+import { format, noop, areValid, print, expectedFlags } from './utils';
 import { types } from './saved_object_info';
 
 export { SavedObjectInfoService } from './saved_object_info';
@@ -21,7 +21,7 @@ export const runSavedObjInfoSvc = () =>
       const getTypesFiltered = getTypesF(flags.type);
       const exec = flags.type ? getTypesFiltered() : getTypesNoFilter();
 
-      return areValid(flags) ? await pipe(await exec, format, logTypes(log)) : noop();
+      return areValid(flags) ? await pipe(await exec, format, print(log)()) : noop();
     },
     {
       description: `
