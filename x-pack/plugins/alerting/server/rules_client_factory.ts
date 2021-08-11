@@ -19,7 +19,6 @@ import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/serve
 import { TaskManagerStartContract } from '../../task_manager/server';
 import { IEventLogClientService } from '../../../plugins/event_log/server';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
-import { ALERTS_FEATURE_ID } from '../common';
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -87,7 +86,7 @@ export class RulesClientFactory {
         excludedWrappers: ['security'],
         includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
       }),
-      authorization: this.authorization.create(request, [ALERTS_FEATURE_ID]),
+      authorization: this.authorization.create(request),
       actionsAuthorization: actions.getActionsAuthorizationWithRequest(request),
       namespace: this.spaceIdToNamespace(spaceId),
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
