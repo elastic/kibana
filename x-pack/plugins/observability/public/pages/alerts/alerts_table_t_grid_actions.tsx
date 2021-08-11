@@ -14,10 +14,15 @@ import {
   EuiPopoverTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type {
+  ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
+} from '@kbn/rule-data-utils';
 import {
-  ALERT_RULE_TYPE_ID,
-  ALERT_RULE_NAME,
-} from '@kbn/rule-data-utils/target/technical_field_names';
+  ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_NON_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
+  // @ts-expect-error
+} from '@kbn/rule-data-utils/target_node/technical_field_names';
 import React, { useState } from 'react';
 import { format, parse } from 'url';
 
@@ -25,6 +30,9 @@ import { parseTechnicalFields } from '../../../../rule_registry/common/parse_tec
 import type { ActionProps } from '../../../../timelines/common';
 import { asDuration, asPercent } from '../../../common/utils/formatters';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+
+const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED = ALERT_RULE_TYPE_ID_NON_TYPED;
+const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
 
 export function RowCellActionsRender({ data }: ActionProps) {
   const { core, observabilityRuleTypeRegistry } = usePluginContext();
