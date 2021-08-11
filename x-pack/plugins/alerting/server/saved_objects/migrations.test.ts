@@ -1029,6 +1029,55 @@ describe('7.13.0', () => {
   });
 });
 
+describe('7.14.1', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    encryptedSavedObjectsSetup.createMigration.mockImplementation(
+      (shouldMigrateWhenPredicate, migration) => migration
+    );
+  });
+
+  test('security solution author field is migrated to array if it is undefined', () => {
+    const migration7141 = getMigrations(encryptedSavedObjectsSetup)['7.14.1'];
+    const alert = getMockData({
+      alertTypeId: 'siem.signals',
+      params: {},
+    });
+
+    expect(migration7141(alert, migrationContext)).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        params: {
+          author: [],
+        },
+      },
+    });
+  });
+
+  test('security solution author field does not override existing values if they exist', () => {
+    const migration7141 = getMigrations(encryptedSavedObjectsSetup)['7.14.1'];
+    const alert = getMockData({
+      alertTypeId: 'siem.signals',
+      params: {
+        note: 'some note',
+        author: ['author 1'],
+      },
+    });
+
+    expect(migration7141(alert, migrationContext)).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        params: {
+          note: 'some note',
+          author: ['author 1'],
+        },
+      },
+    });
+  });
+});
+
 function getUpdatedAt(): string {
   const updatedAt = new Date();
   updatedAt.setHours(updatedAt.getHours() + 2);
