@@ -9,12 +9,7 @@ import { produce } from 'immer';
 import { useQuery } from 'react-query';
 
 import { useKibana } from '../common/lib/kibana';
-import {
-  ListResult,
-  PackagePolicy,
-  packagePolicyRouteService,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../fleet/common';
+import { ListResult, PackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
 export const useScheduledQueryGroups = () => {
@@ -23,7 +18,7 @@ export const useScheduledQueryGroups = () => {
   return useQuery<ListResult<PackagePolicy>>(
     ['scheduledQueries'],
     () =>
-      http.get(packagePolicyRouteService.getListPath(), {
+      http.get('/internal/osquery/scheduled_query_group', {
         query: {
           page: 1,
           perPage: 10000,
