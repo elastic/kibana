@@ -6,23 +6,21 @@
  */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export function AggregatedTransactionsCallout() {
   return (
     <EuiCallOut
       size="s"
-      title={i18n.translate('xpack.apm.aggregatedTransactions.callout.title', {
-        defaultMessage: 'No metrics events found',
-      })}
+      title={
+        <EuiText size="xs">
+          {i18n.translate('xpack.apm.aggregatedTransactions.callout.title', {
+            defaultMessage: `This page is using transaction event data as no metrics events were found in the current time range.`,
+          })}
+        </EuiText>
+      }
       iconType="iInCircle"
-    >
-      <p>
-        {i18n.translate('xpack.apm.aggregatedTransactions.callout.content', {
-          defaultMessage: `This page is using transaction event data as no metrics events were found in the current time range.`,
-        })}
-      </p>
-    </EuiCallOut>
+    />
   );
 }

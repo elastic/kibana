@@ -18,10 +18,10 @@ export async function getFallbackToTransactions({
 }): Promise<boolean> {
   const searchAggregatedTransactions =
     config['xpack.apm.searchAggregatedTransactions'];
-  const forceSearchRawTransactions =
+  const neverSearchAggregatedTransactions =
     searchAggregatedTransactions === SearchAggregatedTransactionSetting.never;
 
-  if (forceSearchRawTransactions) {
+  if (neverSearchAggregatedTransactions) {
     return false;
   }
 
