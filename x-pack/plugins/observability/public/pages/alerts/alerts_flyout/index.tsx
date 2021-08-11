@@ -20,15 +20,25 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type {
+  ALERT_DURATION as ALERT_DURATION_TYPED,
+  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
+  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
+  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
+  ALERT_UUID as ALERT_UUID_TYPED,
+  ALERT_RULE_CATEGORY as ALERT_RULE_CATEGORY_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
+} from '@kbn/rule-data-utils';
 import {
-  ALERT_DURATION,
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUE,
-  ALERT_SEVERITY_LEVEL,
-  ALERT_UUID,
-  RULE_CATEGORY,
-  RULE_NAME,
-} from '@kbn/rule-data-utils/target/technical_field_names';
+  ALERT_DURATION as ALERT_DURATION_NON_TYPED,
+  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_NON_TYPED,
+  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
+  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
+  ALERT_UUID as ALERT_UUID_NON_TYPED,
+  ALERT_RULE_CATEGORY as ALERT_RULE_CATEGORY_NON_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
+  // @ts-expect-error
+} from '@kbn/rule-data-utils/target_node/technical_field_names';
 import moment from 'moment-timezone';
 import React, { useMemo } from 'react';
 import type { TopAlert, TopAlertResponse } from '../';
@@ -45,6 +55,14 @@ type AlertsFlyoutProps = {
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   selectedAlertId?: string;
 } & EuiFlyoutProps;
+
+const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
+const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED = ALERT_EVALUATION_THRESHOLD_NON_TYPED;
+const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED = ALERT_EVALUATION_VALUE_NON_TYPED;
+const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
+const ALERT_UUID: typeof ALERT_UUID_TYPED = ALERT_UUID_NON_TYPED;
+const ALERT_RULE_CATEGORY: typeof ALERT_RULE_CATEGORY_TYPED = ALERT_RULE_CATEGORY_NON_TYPED;
+const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
 
 export function AlertsFlyout({
   alert,
@@ -113,7 +131,7 @@ export function AlertsFlyout({
       title: i18n.translate('xpack.observability.alertsFlyout.ruleTypeLabel', {
         defaultMessage: 'Rule type',
       }),
-      description: alertData.fields[RULE_CATEGORY] ?? '-',
+      description: alertData.fields[ALERT_RULE_CATEGORY] ?? '-',
     },
   ];
 
@@ -121,7 +139,7 @@ export function AlertsFlyout({
     <EuiFlyout onClose={onClose} size="s">
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2>{alertData.fields[RULE_NAME]}</h2>
+          <h2>{alertData.fields[ALERT_RULE_NAME]}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s">{alertData.reason}</EuiText>
