@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { Observable } from 'rxjs';
 import { HttpStart } from 'kibana/public';
 import { HttpService } from '../http_service';
@@ -151,14 +152,14 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     deleteJob({ jobId }: { jobId: string }) {
-      return httpService.http<any>({
+      return httpService.http<estypes.MlDeleteJobResponse>({
         path: `${basePath()}/anomaly_detectors/${jobId}`,
         method: 'DELETE',
       });
     },
 
     forceDeleteJob({ jobId }: { jobId: string }) {
-      return httpService.http<any>({
+      return httpService.http<estypes.MlDeleteJobResponse>({
         path: `${basePath()}/anomaly_detectors/${jobId}?force=true`,
         method: 'DELETE',
       });
@@ -174,7 +175,8 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     resetJob({ jobId }: { jobId: string }) {
-      return httpService.http<any>({
+      return httpService.http<estypes.AcknowledgedResponseBase>({
+        // CHANGE - use correct response type
         path: `${basePath()}/anomaly_detectors/${jobId}/_reset`,
         method: 'POST',
       });

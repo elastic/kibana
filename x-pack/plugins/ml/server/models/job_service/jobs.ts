@@ -27,8 +27,10 @@ import {
   MlJobsStatsResponse,
   JobsExistResponse,
   BulkCreateResults,
+  ResetJobsResponse,
 } from '../../../common/types/job_service';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
+import { JOB_ACTION } from '../../../common/constants/job_actions';
 import { datafeedsProvider, MlDatafeedsResponse, MlDatafeedsStatsResponse } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { resultsServiceProvider } from '../results_service';
@@ -146,14 +148,14 @@ export function jobsProvider(
   }
 
   async function resetJobs(jobIds: string[]) {
-    const results: Results = {};
+    const results: ResetJobsResponse = {};
     for (const jobId of jobIds) {
       try {
         await mlClient.resetJob({ job_id: jobId }); // CHANGE - add wait_for_completion
         results[jobId] = { reset: true };
       } catch (error) {
         if (isRequestTimeout(error)) {
-          return fillResultsWithTimeouts(results, jobId, jobIds, 'reset'); // CHANGE - make constant for 'delete', 'revert', 'reset'
+          return fillResultsWithTimeouts(results, jobId, jobIds, JOB_ACTION.RESET); // CHANGE - make constant for 'delete', 'revert', 'reset'
         } else {
           results[jobId] = { reset: false, error: error.body };
         }

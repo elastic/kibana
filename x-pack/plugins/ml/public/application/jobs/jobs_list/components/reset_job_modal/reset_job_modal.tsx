@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiSpacer,
@@ -47,17 +47,17 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
     };
   }, []);
 
-  function showModal(jobs: any[]) {
+  const showModal = useCallback((jobs: Array<{ id: string }>) => {
     setJobIds(jobs.map(({ id }) => id));
     setModalVisible(true);
     setResetting(false);
-  }
+  }, []);
 
-  function closeModal() {
+  const closeModal = useCallback(() => {
     setModalVisible(false);
-  }
+  }, []);
 
-  function resetJob() {
+  const resetJob = useCallback(() => {
     setResetting(true);
     resetJobs(jobIds);
 
@@ -65,7 +65,7 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
       closeModal();
       refreshJobs();
     }, RESETTING_JOBS_REFRESH_INTERVAL_MS);
-  }
+  }, [refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {
     return null;

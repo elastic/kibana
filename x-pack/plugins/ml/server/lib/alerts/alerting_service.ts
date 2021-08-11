@@ -405,7 +405,8 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
           .filter((v) => v.doc_count > 0 && v[resultsLabel.aggGroupLabel].doc_count > 0)
           // Map response
           .map(formatter)
-      : [formatter(result as AggResultsResponse)]
+      : // @ts-expect-error
+        [formatter(result as AggResultsResponse)]
     ).filter(isDefined);
   };
 

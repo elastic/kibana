@@ -27,7 +27,11 @@ import type {
 } from '../../../../common/types/categories';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../common/constants/categorization_job';
 import type { Category } from '../../../../common/types/categories';
-import type { JobsExistResponse, BulkCreateResults } from '../../../../common/types/job_service';
+import type {
+  JobsExistResponse,
+  BulkCreateResults,
+  ResetJobsResponse,
+} from '../../../../common/types/job_service';
 import { ML_BASE_PATH } from '../../../../common/constants/app';
 
 export const jobsApiProvider = (httpService: HttpService) => ({
@@ -129,7 +133,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
 
   resetJobs(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
-    return httpService.http<any>({
+    return httpService.http<ResetJobsResponse>({
       path: `${ML_BASE_PATH}/jobs/reset_jobs`,
       method: 'POST',
       body,

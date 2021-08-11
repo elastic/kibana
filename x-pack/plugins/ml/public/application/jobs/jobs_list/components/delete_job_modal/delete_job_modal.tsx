@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiSpacer,
@@ -49,18 +49,18 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
     };
   }, []);
 
-  function showModal(jobs: any[]) {
+  const showModal = useCallback((jobs: Array<{ id: string }>) => {
     setJobIds(jobs.map(({ id }) => id));
     setModalVisible(true);
     setDeleting(false);
-  }
+  }, []);
 
-  function closeModal() {
+  const closeModal = useCallback(() => {
     setModalVisible(false);
     setCanDelete(false);
-  }
+  }, []);
 
-  function deleteJob() {
+  const deleteJob = useCallback(() => {
     setDeleting(true);
     deleteJobs(jobIds.map((id) => ({ id })));
 
@@ -68,7 +68,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
       closeModal();
       refreshJobs();
     }, DELETING_JOBS_REFRESH_INTERVAL_MS);
-  }
+  }, [refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {
     return null;

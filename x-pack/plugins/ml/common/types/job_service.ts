@@ -48,3 +48,10 @@ export interface BulkCreateResults {
     datafeed: { success: boolean; error?: ErrorType };
   };
 }
+
+export interface ResetJobsResponse {
+  [jobId: string]: {
+    reset: boolean;
+    error?: ErrorType;
+  };
+}
