@@ -36,7 +36,6 @@ function getProps(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {
   return {
     expandedDoc: undefined,
     indexPattern: indexPatternMock,
-    isMobile: jest.fn(() => false),
     onAddFilter: jest.fn(),
     savedSearch: savedSearchMock,
     documents$,
