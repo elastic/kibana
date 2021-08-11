@@ -18,6 +18,7 @@ export const emptyMlCapabilities: MlCapabilitiesResponse = {
     canDeleteJob: false,
     canOpenJob: false,
     canCloseJob: false,
+    canResetJob: false,
     canForecastJob: false,
     canGetDatafeeds: false,
     canStartStopDatafeed: false,
