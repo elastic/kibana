@@ -24,22 +24,17 @@ export { metricChart } from '../../common/expressions';
 export type { MetricState, MetricConfig } from '../../common/expressions';
 
 export const getMetricChartRenderer = (
-  formatFactory: Promise<FormatFactory>
+  formatFactory: FormatFactory
 ): ExpressionRenderDefinition<MetricChartProps> => ({
   name: 'lens_metric_chart_renderer',
   displayName: 'Metric chart',
   help: 'Metric chart renderer',
   validate: () => undefined,
   reuseDomNode: true,
-  render: async (
-    domNode: Element,
-    config: MetricChartProps,
-    handlers: IInterpreterRenderHandlers
-  ) => {
-    const resolvedFormatFactory = await formatFactory;
+  render: (domNode: Element, config: MetricChartProps, handlers: IInterpreterRenderHandlers) => {
     ReactDOM.render(
       <I18nProvider>
-        <MetricChart {...config} formatFactory={resolvedFormatFactory} />
+        <MetricChart {...config} formatFactory={formatFactory} />
       </I18nProvider>,
       domNode,
       () => {

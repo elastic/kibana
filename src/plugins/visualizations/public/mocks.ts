@@ -64,7 +64,6 @@ const createInstance = async () => {
       getAttributeService: jest.fn(),
       savedObjectsClient: coreMock.createStart().savedObjects.client,
       savedObjects: savedObjectsPluginMock.createStartContract(),
-      executionContext: coreMock.createStart().executionContext,
     });
 
   return {

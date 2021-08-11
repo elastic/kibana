@@ -40,6 +40,7 @@ import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage
 import { MlLocatorDefinition } from '../../../../../ml/public';
 import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { MockUrlService } from 'src/plugins/share/common/mocks';
+import { fleetMock } from '../../../../../fleet/public/mocks';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -96,6 +97,7 @@ export const createStartServicesMock = (): StartServices => {
   const security = securityMock.createSetup();
   const urlService = new MockUrlService();
   const locator = urlService.locators.create(new MlLocatorDefinition());
+  const fleet = fleetMock.createStartMock();
 
   return ({
     ...core,
@@ -141,6 +143,7 @@ export const createStartServicesMock = (): StartServices => {
     },
     security,
     storage,
+    fleet,
     ml: {
       locator,
     },
