@@ -37,7 +37,7 @@ export function handleResponse(
   return { found: false };
 }
 
-export async function checkClusterSettings(req) {
+export async function checkClusterSettings(req: LegacyRequest) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
   const { cloud } = req.server.newPlatform.setup.plugins;
   const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
