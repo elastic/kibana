@@ -15,23 +15,14 @@ export const createJobFnFactory: CreateJobFnFactory<
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
-  return async function createJob(
-    { title, locatorParams, browserTimezone, layout, objectType, ...jobParams },
-    context,
-    req
-  ) {
+  return async function createJob(jobParams, context, req) {
     const serializedEncryptedHeaders = await crypto.encrypt(req.headers);
 
     return {
       ...jobParams,
       headers: serializedEncryptedHeaders,
       spaceId: reporting.getSpaceId(req, logger),
-      browserTimezone,
       forceNow: new Date().toISOString(),
-      layout,
-      locatorParams,
-      title,
-      objectType,
     };
   };
 };

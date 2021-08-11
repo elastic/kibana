@@ -60,15 +60,6 @@ export function getScreenshots$(
         concatMap((urlOrUrlLocatorTuple, index) => {
           const setup$: Rx.Observable<ScreenSetupData> = Rx.of(1).pipe(
             mergeMap(() => {
-              let url: string;
-              let locator: undefined | LocatorParams;
-
-              if (typeof urlOrUrlLocatorTuple === 'string') {
-                url = urlOrUrlLocatorTuple;
-              } else {
-                [url, locator] = urlOrUrlLocatorTuple;
-              }
-
               // If we're moving to another page in the app, we'll want to wait for the app to tell us
               // it's loaded the next page.
               const page = index + 1;
@@ -78,10 +69,9 @@ export function getScreenshots$(
               return openUrl(
                 captureConfig,
                 driver,
-                url,
+                urlOrUrlLocatorTuple,
                 pageLoadSelector,
                 conditionalHeaders,
-                locator,
                 logger
               );
             }),
