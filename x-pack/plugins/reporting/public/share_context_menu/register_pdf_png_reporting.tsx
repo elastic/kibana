@@ -150,11 +150,7 @@ export const reportingScreenshotShareProvider = ({
             reportType={pngReportType}
             objectId={objectId}
             requiresSavedState={true}
-            getJobParams={getJobParams(
-              apiClient,
-              { shareableUrl, objectType, sharingData },
-              pngReportType
-            )}
+            getJobParams={getJobParams(apiClient, jobProviderOptions, pngReportType)}
             isDirty={isDirty}
             onClose={onClose}
           />
@@ -189,11 +185,7 @@ export const reportingScreenshotShareProvider = ({
             objectId={objectId}
             requiresSavedState={true}
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
-            getJobParams={getJobParams(
-              apiClient,
-              { shareableUrl, objectType, sharingData },
-              pdfReportType
-            )}
+            getJobParams={getJobParams(apiClient, jobProviderOptions, pdfReportType)}
             isDirty={isDirty}
             onClose={onClose}
           />

@@ -8,7 +8,6 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
-import { LocatorParams } from '../../../common/types';
 import { HeadlessChromiumDriverFactory } from '../../browsers';
 import { CaptureConfig } from '../../types';
 import { ElementsPositionAndAttribute, ScreenshotObservableOpts, ScreenshotResults } from './';
