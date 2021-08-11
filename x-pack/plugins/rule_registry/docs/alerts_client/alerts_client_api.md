@@ -10,5 +10,6 @@ Alerts as data client API Interface
 
 ### Interfaces
 
+- [BulkUpdateOptions](interfaces/bulkupdateoptions.md)
 - [ConstructorOptions](interfaces/constructoroptions.md)
 - [UpdateOptions](interfaces/updateoptions.md)

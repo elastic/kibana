@@ -96,10 +96,20 @@ export class RuleDataClient implements IRuleDataClient {
           if (response.body.errors) {
             if (
               response.body.items.length > 0 &&
-              response.body.items?.[0]?.index?.error?.type === 'index_not_found_exception'
+              (response.body.items.every(
+                (item) => item.index?.error?.type === 'index_not_found_exception'
+              ) ||
+                response.body.items.every(
+                  (item) => item.index?.error?.type === 'illegal_argument_exception'
+                ))
             ) {
               return this.createWriteTargetIfNeeded({ namespace }).then(() => {
-                return clusterClient.bulk(requestWithDefaultParameters);
+                return clusterClient.bulk(requestWithDefaultParameters).then((retryResponse) => {
+                  if (retryResponse.body.errors) {
+                    throw new ResponseError(retryResponse);
+                  }
+                  return retryResponse;
+                });
               });
             }
             const error = new ResponseError(response);
@@ -116,13 +126,14 @@ export class RuleDataClient implements IRuleDataClient {
 
     const clusterClient = await this.getClusterClient();
 
-    const { body: aliasExists } = await clusterClient.indices.existsAlias({
-      name: alias,
+    const { body: indicesExist } = await clusterClient.indices.exists({
+      index: `${alias}-*`,
+      allow_no_indices: false,
     });
 
     const concreteIndexName = `${alias}-000001`;
 
-    if (!aliasExists) {
+    if (!indicesExist) {
       try {
         await clusterClient.indices.create({
           index: concreteIndexName,
@@ -135,10 +146,36 @@ export class RuleDataClient implements IRuleDataClient {
           },
         });
       } catch (err) {
-        // something might have created the index already, that sounds OK
-        if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
+        // If the index already exists and it's the write index for the alias,
+        // something else created it so suppress the error. If it's not the write
+        // index, that's bad, throw an error.
+        if (err?.meta?.body?.error?.type === 'resource_already_exists_exception') {
+          const { body: existingIndices } = await clusterClient.indices.get({
+            index: concreteIndexName,
+          });
+          if (!existingIndices[concreteIndexName]?.aliases?.[alias]?.is_write_index) {
+            throw Error(
+              `Attempted to create index: ${concreteIndexName} as the write index for alias: ${alias}, but the index already exists and is not the write index for the alias`
+            );
+          }
+        } else {
           throw err;
         }
+      }
+    } else {
+      // If we find indices matching the pattern, then we expect one of them to be the write index for the alias.
+      // Throw an error if none of them are the write index.
+      const { body: aliasesResponse } = await clusterClient.indices.getAlias({
+        index: `${alias}-*`,
+      });
+      if (
+        !Object.entries(aliasesResponse).some(
+          ([_, aliasesObject]) => aliasesObject.aliases[alias]?.is_write_index
+        )
+      ) {
+        throw Error(
+          `Indices matching pattern ${alias}-* exist but none are set as the write index for alias ${alias}`
+        );
       }
     }
   }

@@ -46,6 +46,7 @@ Array [
           >
             <div
               className="euiTextColor euiTextColor--subdued"
+              style={Object {}}
             >
               Deleting this variable may adversely affect the workpad. Are you sure you wish to continue?
             </div>

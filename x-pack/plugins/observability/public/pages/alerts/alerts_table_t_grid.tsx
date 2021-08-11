@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 import { EuiButtonIcon, EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -15,7 +16,7 @@ import {
   ALERT_SEVERITY_LEVEL,
   ALERT_STATUS,
   ALERT_START,
-  RULE_NAME,
+  ALERT_RULE_NAME,
 } from '@kbn/rule-data-utils/target/technical_field_names';
 
 import type { TimelinesUIStart } from '../../../../timelines/public';
@@ -31,6 +32,7 @@ import type {
 import { getRenderCellValue } from './render_cell_value';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { decorateResponse } from './decorate_response';
+import { getDefaultCellActions } from './default_cell_actions';
 import { LazyAlertsFlyout } from '../..';
 
 interface AlertsTableTGridProps {
@@ -106,13 +108,20 @@ export const columns: Array<
       defaultMessage: 'Reason',
     }),
     linkField: '*',
-    id: RULE_NAME,
+    id: ALERT_RULE_NAME,
   },
 ];
 
 const NO_ROW_RENDER: RowRenderer[] = [];
 
 const trailingControlColumns: never[] = [];
+
+const OBSERVABILITY_ALERT_CONSUMERS = [
+  AlertConsumers.APM,
+  AlertConsumers.LOGS,
+  AlertConsumers.INFRASTRUCTURE,
+  AlertConsumers.SYNTHETICS,
+];
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const { core, observabilityRuleTypeRegistry } = usePluginContext();
@@ -189,9 +198,11 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         </Suspense>
       )}
       {timelines.getTGrid<'standalone'>({
+        alertConsumers: OBSERVABILITY_ALERT_CONSUMERS,
         type: 'standalone',
         columns,
         deletedEventIds: [],
+        defaultCellActions: getDefaultCellActions({ enableFilterActions: false }),
         end: rangeTo,
         filters: [],
         indexNames: [indexName],
