@@ -32,23 +32,21 @@ export const CrawlerSingleDomain: React.FC = () => {
 
   const { fetchDomainData } = useActions(CrawlerSingleDomainLogic);
 
-  const displayDomainUrl = domain
-    ? domain.url
-    : i18n.translate('xpack.enterpriseSearch.appSearch.crawler.singleDomain.loadingTitle', {
-        defaultMessage: 'Loading...',
-      });
-
   useEffect(() => {
     fetchDomainData(domainId);
   }, []);
 
   return (
     <AppSearchPageTemplate
-      pageChrome={getEngineBreadcrumbs([CRAWLER_TITLE, displayDomainUrl])}
-      pageHeader={{
-        pageTitle: displayDomainUrl,
-        rightSideItems: [<ManageCrawlsPopover />, <CrawlerStatusIndicator />],
-      }}
+      pageChrome={getEngineBreadcrumbs([CRAWLER_TITLE, domain?.url || '...'])}
+      pageHeader={
+        dataLoading
+          ? undefined
+          : {
+              pageTitle: domain!.url,
+              rightSideItems: [<ManageCrawlsPopover />, <CrawlerStatusIndicator />],
+            }
+      }
       isLoading={dataLoading}
     >
       <CrawlerStatusBanner />
