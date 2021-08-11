@@ -5,14 +5,50 @@
  * 2.0.
  */
 
-import { FtrService } from '../ftr_provider_context';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export class GrokDebuggerPageObject extends FtrService {
-  private readonly common = this.ctx.getPageObject('common');
-  private readonly grokDebugger = this.ctx.getService('grokDebugger');
+export function GrokDebuggerPageProvider({ getPageObjects, getService }: FtrProviderContext) {
+  const PageObjects = getPageObjects(['common']);
+  const testSubjects = getService('testSubjects');
+  const aceEditor = getService('aceEditor');
+  const retry = getService('retry');
+  const log = getService('log');
+  return {
+    async simulateButton() {
+      return await testSubjects.find('btnSimulate');
+    },
 
-  async gotoGrokDebugger() {
-    await this.common.navigateToApp('grokDebugger');
-    await this.grokDebugger.assertExists();
-  }
+    async getEventOutput() {
+      return await aceEditor.getValue(
+        'grokDebuggerContainer > aceEventOutput > codeEditorContainer'
+      );
+    },
+
+    async setEventInput(value) {
+      await aceEditor.setValue(
+        'grokDebuggerContainer > aceEventInput > codeEditorContainer',
+        value
+      );
+    },
+
+    async setPatternInput(value) {
+      await aceEditor.setValue(
+        'grokDebuggerContainer > acePatternInput > codeEditorContainer',
+        value
+      );
+    },
+
+    async executeGrokSimulation(input, pattern) {
+      await this.setEventInput(input);
+      await this.setPatternInput(pattern);
+      await (await this.simulateButton()).click();
+      await retry.waitFor('Output to not be empty', async () => {
+        const value = JSON.parse(await this.getEventOutput());
+        log.debug(value);
+        return value !== '{}';
+      });
+      log.debug(await this.getEventOutput());
+      return await this.getEventOutput();
+    },
+  };
 }
