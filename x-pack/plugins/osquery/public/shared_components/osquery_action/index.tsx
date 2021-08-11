@@ -13,7 +13,7 @@ import { useAgentDetails } from '../../agents/use_agent_details';
 import { useAgentPolicy } from '../../agent_policies';
 import { KibanaContextProvider, useKibana } from '../../common/lib/kibana';
 
-import { LiveQueryForm } from '../../live_queries/form';
+import { LiveQuery } from '../../live_queries';
 import { queryClient } from '../../query_client';
 import { OsqueryIcon } from '../../components/osquery_icon';
 
@@ -73,7 +73,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
     );
   }
 
-  if (fleetAvailable === null) {
+  if (fleetAvailable === undefined) {
     return <EuiLoadingContent lines={10} />;
   }
 
@@ -144,10 +144,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
     );
   }
 
-  return (
-    // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-    <LiveQueryForm defaultValue={{ agentSelection: { agents: [agentId] } }} agentId={agentId} />
-  );
+  return <LiveQuery agentId={agentId} />;
 };
 
 export const OsqueryAction = React.memo(OsqueryActionComponent);
