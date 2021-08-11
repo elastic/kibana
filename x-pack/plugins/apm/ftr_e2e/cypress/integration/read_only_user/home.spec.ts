@@ -7,23 +7,26 @@
 
 import url from 'url';
 import archives_metadata from '../../fixtures/es_archiver/archives_metadata';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 const { start, end } = archives_metadata['apm_8.0.0'];
 
-const servicesPath = '/app/apm/services';
-const baseUrl = url.format({
-  pathname: servicesPath,
+const serviceInventoryHref = url.format({
+  pathname: '/app/apm/services',
   query: { rangeFrom: start, rangeTo: end },
 });
 
+const apisToIntercept = [
+  {
+    endpoint: '/api/apm/service',
+    name: 'servicesMainStatistics',
+  },
+  {
+    endpoint: '/api/apm/services/detailed_statistics',
+    name: 'servicesDetailedStatistics',
+  },
+];
+
 describe('Home page', () => {
-  before(() => {
-    esArchiverLoad('apm_8.0.0');
-  });
-  after(() => {
-    esArchiverUnload('apm_8.0.0');
-  });
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
@@ -34,12 +37,12 @@ describe('Home page', () => {
       'include',
       'app/apm/services?rangeFrom=now-15m&rangeTo=now'
     );
-    cy.get('.euiTabs .euiTab-isSelected').contains('Services');
   });
 
-  it('includes services with only metric documents', () => {
+  // Flaky
+  it.skip('includes services with only metric documents', () => {
     cy.visit(
-      `${baseUrl}&kuery=not%2520(processor.event%2520%253A%2522transaction%2522%2520)`
+      `${serviceInventoryHref}&kuery=not%2520(processor.event%2520%253A%2522transaction%2522%2520)`
     );
     cy.contains('opbeans-python');
     cy.contains('opbeans-java');
@@ -47,16 +50,28 @@ describe('Home page', () => {
   });
 
   describe('navigations', () => {
-    it('navigates to service overview page with transaction type', () => {
-      const kuery = encodeURIComponent(
-        'transaction.name : "taskManager markAvailableTasksAsClaimed"'
-      );
-      cy.visit(`${baseUrl}&kuery=${kuery}`);
-      cy.contains('taskManager');
-      cy.contains('kibana').click();
+    /*
+     This test is flaky, there's a problem with EuiBasicTable, that it blocks any action while loading is enabled.
+     So it might fail to click on the service link.
+    */
+    it.skip('navigates to service overview page with transaction type', () => {
+      apisToIntercept.map(({ endpoint, name }) => {
+        cy.intercept('GET', endpoint).as(name);
+      });
+
+      cy.visit(serviceInventoryHref);
+
+      cy.contains('Services');
+
+      cy.wait('@servicesMainStatistics', { responseTimeout: 10000 });
+      cy.wait('@servicesDetailedStatistics', { responseTimeout: 10000 });
+
+      cy.get('[data-test-subj="serviceLink_rum-js"]').then((element) => {
+        element[0].click();
+      });
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
-        'taskManager'
+        'page-load'
       );
     });
   });
