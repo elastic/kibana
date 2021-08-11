@@ -1,5 +1,5 @@
 [[tutorial-secure-access-to-kibana]]
-== Securing access to {kib}
+=== Securing access to {kib}
 
 
 {kib} is home to an ever-growing suite of powerful features, which help you get the most out of your data. Your data is important, and should be protected. {kib} allows you to secure access to your data and control how users are able to interact with your data.
@@ -9,7 +9,7 @@ For example, some users might only need to view your stunning dashboards, while 
 This guide introduces you to three of {kib}'s security features: spaces, roles, and users. By the end of this tutorial, you will learn how to manage these entities, and how you can leverage them to secure access to both {kib} and your data.
 
 [float]
-=== Spaces
+==== Spaces
 
 Do you have multiple teams or tenants using {kib}? Do you want a “playground” to experiment with new visualizations or alerts? If so, then <<xpack-spaces,{kib} Spaces>> can help.
 
@@ -20,7 +20,7 @@ The assets you create in one space are isolated from other spaces, so when you e
 Refer to the <<xpack-spaces, Spaces documentation>> for more information.
 
 [float]
-=== Roles
+==== Roles
 
 Once your spaces are setup, the next step to securing access is to provision your roles. Roles are a collection of privileges that allow you to perform actions in {kib} and Elasticsearch. Roles are assigned to users, and to {ref}/built-in-users.html[system accounts] that power the Elastic Stack.
 
@@ -34,7 +34,7 @@ As an administrator, you have the ability to create your own roles to describe e
 
 
 [float]
-=== Users
+==== Users
 
 Once your roles are setup, the next step to securing access is to create your users, and assign them one or more roles. {kib}'s user management allows you to provision accounts for each of your users.
 
@@ -43,12 +43,12 @@ TIP: Want Single Sign-on? {kib} supports a wide range of SSO implementations, in
 
 [float]
 [[tutorial-secure-kibana-dashboards-only]]
-=== Example: Create a user with access only to dashboards
+==== Example: Create a user with access only to dashboards
 
 Let’s work through an example together. Consider a marketing analyst who wants to monitor the effectiveness of their campaigns. They should be able to see their team’s dashboards, but not be allowed to view or manage anything else in {kib}. All of the team’s dashboards are located in the Marketing space.
 
 [float]
-==== Create a space
+===== Create a space
 
 Create a Marketing space for your marketing analysts to use.
 
@@ -65,7 +65,7 @@ image::security/images/tutorial-secure-access-example-1-space.png[Create space U
 
 
 [float]
-==== Create a role
+===== Create a role
 
 To effectively use dashboards, create a role that describes the privileges you want to grant.
 In this example, a marketing analyst will need:
@@ -97,7 +97,7 @@ image::security/images/tutorial-secure-access-example-1-role.png[Create role UI]
 
 
 [float]
-==== Create a user
+===== Create a user
 
 Now that you created a role, create a user account.
 
@@ -111,7 +111,7 @@ Now that you created a role, create a user account.
 image::security/images/tutorial-secure-access-example-1-user.png[Create user UI]
 
 [float]
-==== Verify
+===== Verify
 
 Verify that the user and role are working correctly.
 
@@ -125,7 +125,7 @@ image::security/images/tutorial-secure-access-example-1-test.png[Verifying acces
 
 
 [float]
-=== What's next?
+==== What's next?
 
 This guide is an introduction to {kib}'s security features. Check out these additional resources to learn more about authenticating and authorizing your users.
 

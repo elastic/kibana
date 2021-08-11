@@ -1,5 +1,5 @@
 [[index-patterns]]
-=== Create an index pattern
+=== Working with index patterns
 
 {kib} requires an index pattern to access the {es} data that you want to explore.
 An index pattern selects the data to use and allows you to define properties of the fields.

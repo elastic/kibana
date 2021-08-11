@@ -10,6 +10,8 @@ varies. The following upgrades are supported:
 * From {prev-major-version} to {version}
 ifeval::[ "{version}" != "{minor-version}.0" ]
 * From any version since {minor-version}.0 to {version}
+
+When you upgrade the Elastic Stack, you can use a minor {es} version that is higher than the {kib} version when you upgrade {es} first. For example, Kibana 5.0 and Elasticsearch 5.1. The Kibana server startup logs a temporary warning until you upgrade to the same {es} version.
 endif::[]
 
 The following table shows the recommended upgrade paths to {version}.

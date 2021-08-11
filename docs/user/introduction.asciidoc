@@ -119,7 +119,18 @@ the “wow” factor needed to impress your CEO and captivate coworkers with a b
 
 | *5*
 | *Share.* Ready to <<reporting-getting-started, share>> your findings with a larger audience? {kib} offers many options&mdash;embed
-a dashboard, share a link, export to PDF, and more.
+a dashboard, share a link, export to PDF, and more. {kib} lets you save objects for your own future use or for sharing with others.
+Each <<managing-saved-objects,saved object>> type has different abilities. For example, you can save
+your search queries made with *Discover*, which lets you:
+
+* Share a link to your search
+* Download the full search results in CSV form
+* Start an aggregated visualization using the same search query
+* Embed the *Discover* search results into a dashboard
+* Embed the *Discover* search results into a Canvas workpad
+
+For organization, every saved object can have a name, <<kibana-navigation-search,tags>>, and type.
+Use the global search to quickly open a saved object.
 |===
 
 [float]

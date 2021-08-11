@@ -1,11 +1,11 @@
 ==== Run {kib} from the command line
 
-Kibana can be started from the command line as follows:
+Start {kib} from the command line:
 
 [source,sh]
 --------------------------------------------
 ./bin/kibana
 --------------------------------------------
 
-By default, Kibana runs in the foreground, prints its logs to the
-standard output (`stdout`), and can be stopped by pressing *Ctrl-C*.
+{kib} runs in the foreground, prints the logs to the
+standard (`stdout`) output, and can be stopped by pressing *Ctrl-C*.
