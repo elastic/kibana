@@ -6,19 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { SerializableRecord } from '@kbn/utility-types';
 import { has } from 'lodash';
-import type { FieldFilter, Filter, FilterMeta, LatLon } from './types';
+import type { FieldFilter, Filter, LatLon } from './types';
 
-export type GeoBoundingBoxFilterMeta = FilterMeta & {
-  params: {
-    bottom_right: LatLon;
-    top_left: LatLon;
-  };
-};
+export interface GeoBoundingBoxFilterParams extends SerializableRecord {
+  bottom_right: LatLon;
+  top_left: LatLon;
+}
 
-export type GeoBoundingBoxFilter = Filter & {
-  meta: GeoBoundingBoxFilterMeta;
-  geo_bounding_box: any;
+export type GeoBoundingBoxFilter = Filter<GeoBoundingBoxFilterParams> & {
+  geo_bounding_box: SerializableRecord;
 };
 
 /**

@@ -41,7 +41,6 @@ import {
   isFilters,
   KueryNode,
   RangeFilter,
-  RangeFilterMeta,
   RangeFilterParams,
   ExistsFilter,
   PhrasesFilter,
@@ -142,7 +141,6 @@ export const esFilters = {
 export {
   KueryNode,
   RangeFilter,
-  RangeFilterMeta,
   RangeFilterParams,
   ExistsFilter,
   PhrasesFilter,

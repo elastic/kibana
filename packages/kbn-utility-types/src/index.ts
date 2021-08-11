@@ -14,6 +14,7 @@ export type {
   JsonValue,
   JsonObject,
   SerializableRecord,
+  SerializableArray,
   Serializable,
 } from './serializable';
 

@@ -7,7 +7,8 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 import { map, reduce, mapValues, has, get, keys, pickBy } from 'lodash';
-import type { FieldFilter, Filter, FilterMeta } from './types';
+import { SerializableRecord } from '@kbn/utility-types';
+import type { FieldFilter, Filter } from './types';
 import type { IndexPatternBase, IndexPatternFieldBase } from '../../es_query';
 
 const OPERANDS_IN_RANGE = 2;
@@ -36,7 +37,7 @@ const dateComparators = {
  * An interface for all possible range filter params
  * @public
  */
-export interface RangeFilterParams {
+export interface RangeFilterParams extends SerializableRecord {
   from?: number | string;
   to?: number | string;
   gt?: number | string;
@@ -44,6 +45,7 @@ export interface RangeFilterParams {
   gte?: number | string;
   lte?: number | string;
   format?: string;
+  value?: string;
 }
 
 const hasRangeKeys = (params: RangeFilterParams) =>
@@ -51,31 +53,20 @@ const hasRangeKeys = (params: RangeFilterParams) =>
     keys(params).find((key: string) => ['gte', 'gt', 'lte', 'lt', 'from', 'to'].includes(key))
   );
 
-export type RangeFilterMeta = FilterMeta & {
-  params: RangeFilterParams;
-  field?: string;
-  formattedValue?: string;
-};
-
-export interface EsRangeFilter {
-  range: { [key: string]: RangeFilterParams };
-}
-
 /**
  * @public
  */
-export type RangeFilter = Filter &
-  EsRangeFilter & {
-    meta: RangeFilterMeta;
-    script?: {
-      script: {
-        params: any;
-        lang: estypes.ScriptLanguage;
-        source: string;
-      };
+export type RangeFilter = Filter<RangeFilterParams> & {
+  range: { [key: string]: RangeFilterParams };
+  script?: {
+    script: {
+      params: RangeFilterParams;
+      lang: estypes.ScriptLanguage;
+      source: string;
     };
-    match_all?: any;
   };
+  match_all?: SerializableRecord;
+};
 
 /**
  * @param filter
@@ -93,9 +84,8 @@ export const isRangeFilter = (filter?: FieldFilter): filter is RangeFilter => ha
  * @public
  */
 export const isScriptedRangeFilter = (filter: FieldFilter): filter is RangeFilter => {
-  const params: RangeFilterParams = get(filter, 'script.script.params', {});
-
-  return hasRangeKeys(params);
+  const params = get(filter, 'script.script.params', {});
+  return hasRangeKeys(params as RangeFilterParams);
 };
 
 /**
@@ -126,7 +116,7 @@ export const buildRangeFilter = (
   indexPattern: IndexPatternBase,
   formattedValue?: string
 ): RangeFilter => {
-  const filter: any = { meta: { index: indexPattern.id, params: {} } };
+  const filter: RangeFilter = { meta: { index: indexPattern.id, params: {} }, range: {} };
 
   if (formattedValue) {
     filter.meta.formattedValue = formattedValue;
@@ -139,7 +129,7 @@ export const buildRangeFilter = (
 
   const totalInfinite = ['gt', 'lt'].reduce((acc: number, op: any) => {
     const key = op in params ? op : `${op}e`;
-    const isInfinite = Math.abs(get(params, key)) === Infinity;
+    const isInfinite = Math.abs(get(params, key) as number) === Infinity;
 
     if (isInfinite) {
       acc++;
@@ -155,8 +145,10 @@ export const buildRangeFilter = (
     filter.match_all = {};
     filter.meta.field = field.name;
   } else if (field.scripted) {
-    filter.script = getRangeScript(field, params);
-    filter.script.script.params.value = formatValue(filter.script.script.params);
+    const scr = getRangeScript(field, params);
+    scr.script.params.value = formatValue(scr.script.params as any);
+
+    filter.script = scr;
 
     filter.meta.field = field.name;
   } else {
@@ -201,7 +193,7 @@ export const getRangeScript = (field: IndexPatternFieldBase, params: RangeFilter
     script: {
       source: script,
       params: knownParams,
-      lang: field.lang,
+      lang: field.lang!,
     },
   };
 };

@@ -6,17 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { Serializable } from '@kbn/utility-types';
 import { has } from 'lodash';
-import type { FieldFilter, Filter, FilterMeta } from './types';
-
-export interface MatchAllFilterMeta extends FilterMeta {
-  field: string;
-  formattedValue: string;
-}
+import type { FieldFilter, Filter } from './types';
 
 export type MatchAllFilter = Filter & {
-  meta: MatchAllFilterMeta;
-  match_all: any;
+  match_all: Serializable;
 };
 
 /**

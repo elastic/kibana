@@ -6,17 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { FieldFilter, Filter, FilterMeta, FILTERS } from './types';
+import { SerializableRecord } from '@kbn/utility-types';
+import { FieldFilter, Filter, FILTERS } from './types';
 import { getPhraseScript } from './phrase_filter';
 import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
 
-export type PhrasesFilterMeta = FilterMeta & {
-  params: string[]; // The unformatted values
-  field?: string;
-};
+export type PhrasesFilterParams = string[];
 
-export type PhrasesFilter = Filter & {
-  meta: PhrasesFilterMeta;
+export type PhrasesFilter = Filter<PhrasesFilterParams> & {
+  query: {
+    bool: {
+      should: SerializableRecord[];
+      minimum_should_match?: number;
+    };
+  };
 };
 
 /**
@@ -47,7 +50,7 @@ export const getPhrasesFilterField = (filter: PhrasesFilter) => {
  */
 export const buildPhrasesFilter = (
   field: IndexPatternFieldBase,
-  params: string[],
+  params: PhrasesFilterParams,
   indexPattern: IndexPatternBase
 ) => {
   const index = indexPattern.id;

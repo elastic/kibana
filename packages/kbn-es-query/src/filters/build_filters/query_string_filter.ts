@@ -7,17 +7,11 @@
  */
 
 import { has } from 'lodash';
-import type { FieldFilter, Filter, FilterMeta } from './types';
-
-export type QueryStringFilterMeta = FilterMeta;
+import { SerializableRecord } from '@kbn/utility-types';
+import type { FieldFilter, Filter } from './types';
 
 export type QueryStringFilter = Filter & {
-  meta: QueryStringFilterMeta;
-  query?: {
-    query_string: {
-      query: string;
-    };
-  };
+  query: SerializableRecord;
 };
 
 /**

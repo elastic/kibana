@@ -66,7 +66,6 @@ export {
   RangeFilter,
   PhraseFilter,
   PhrasesFilter,
-  RangeFilterMeta,
   GeoPolygonFilter,
   MatchAllFilter,
   CustomFilter,

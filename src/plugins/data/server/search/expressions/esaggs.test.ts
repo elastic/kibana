@@ -26,6 +26,7 @@ jest.mock('../../../common/search/expressions', () => ({
 }));
 
 import { getEsaggsMeta, handleEsaggsRequest } from '../../../common/search/expressions';
+import { FilterStateStore } from 'src/plugins/data/common';
 
 describe('esaggs expression function - server', () => {
   let getStartDependencies: () => Promise<MockedKeys<EsaggsStartDependencies>>;
@@ -129,7 +130,7 @@ describe('esaggs expression function - server', () => {
   test('passes input to handleEsaggsRequest if it is available', async () => {
     const input = {
       type: 'kibana_context' as 'kibana_context',
-      filters: [{ $state: {}, meta: {}, query: {} }],
+      filters: [{ $state: { store: FilterStateStore.APP_STATE }, meta: {}, query: {} }],
       query: {
         query: 'hiya',
         language: 'painless',

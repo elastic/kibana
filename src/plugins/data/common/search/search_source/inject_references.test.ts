@@ -75,7 +75,6 @@ describe('injectSearchSourceReferences', () => {
 
   test('handles filters', () => {
     searchSourceJSON.filter = [
-      // @ts-expect-error
       { meta: { indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index' } },
     ];
     const actual = injectReferences(searchSourceJSON, references);
@@ -100,7 +99,6 @@ describe('injectSearchSourceReferences', () => {
   });
 
   test('throws an error if there is a broken filter reference', () => {
-    // @ts-expect-error
     searchSourceJSON.filter = [{ meta: { indexRefName: 'oops' } }];
     expect(() => injectReferences(searchSourceJSON, references)).toThrowErrorMatchingInlineSnapshot(
       `"Could not find reference for oops"`

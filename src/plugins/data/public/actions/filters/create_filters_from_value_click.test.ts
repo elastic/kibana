@@ -14,6 +14,7 @@ import {
   ValueClickDataContext,
 } from './create_filters_from_value_click';
 import { FieldFormatsGetConfigFn, BytesFormat } from '../../../../field_formats/common';
+import { PhraseFilter } from '@kbn/es-query';
 
 const mockField = {
   name: 'bytes',
@@ -85,7 +86,7 @@ describe('createFiltersFromValueClick', () => {
     const filters = await createFiltersFromValueClickAction({ data: dataPoints });
 
     expect(filters.length).toEqual(1);
-    expect(filters[0].query.match_phrase.bytes).toEqual('2048');
+    expect((filters[0] as PhraseFilter).query!.match_phrase!.bytes).toEqual('2048');
   });
 
   test('handles an event when aggregations type is not terms', async () => {

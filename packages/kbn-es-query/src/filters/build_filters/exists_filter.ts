@@ -8,11 +8,10 @@
 
 import { has } from 'lodash';
 import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
-import type { FieldFilter, Filter, FilterMeta } from './types';
+import type { FieldFilter, Filter } from './types';
 
 /** @public */
 export type ExistsFilter = Filter & {
-  meta: FilterMeta;
   exists?: {
     field: string;
   };

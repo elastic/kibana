@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Serializable, SerializableRecord } from '@kbn/utility-types';
 import { ExistsFilter } from './exists_filter';
 import { GeoBoundingBoxFilter } from './geo_bounding_box_filter';
 import { GeoPolygonFilter } from './geo_polygon_filter';
@@ -28,12 +29,6 @@ export type FieldFilter =
   | RangeFilter
   | MatchAllFilter
   | MissingFilter;
-
-/**
- * A common type for filters supported by this package
- * @public
- **/
-export type FilterParams = any;
 
 /**
  * An enum of all types of filters supported by this package
@@ -63,11 +58,10 @@ export enum FilterStateStore {
   GLOBAL_STATE = 'globalState',
 }
 
-// eslint-disable-next-line
-export type FilterMeta = {
-  alias: string | null;
-  disabled: boolean;
-  negate: boolean;
+export interface FilterMeta<P extends Serializable = Serializable> extends SerializableRecord {
+  alias?: string | null;
+  disabled?: boolean;
+  negate?: boolean;
   // controlledBy is there to identify who owns the filter
   controlledBy?: string;
   // index and type are optional only because when you create a new filter, there are no defaults
@@ -75,30 +69,32 @@ export type FilterMeta = {
   isMultiIndex?: boolean;
   type?: string;
   key?: string;
-  params?: any;
   value?: string;
-};
+  field?: string;
+  formattedValue?: string;
+  params?: P;
+}
 
-// eslint-disable-next-line
-export type Filter = {
+export interface Filter<P extends Serializable = Serializable> extends SerializableRecord {
   $state?: {
     store: FilterStateStore;
   };
-  meta: FilterMeta;
-  query?: any; // TODO: can we use the Query type her?
-};
+  meta: FilterMeta<P>;
+}
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Query = {
   query: string | { [key: string]: any };
   language: string;
 };
 
 /**
- * An interface for a latitude-longitude pair
+ * An type for a latitude-longitude pair
  * @public
  */
-export interface LatLon {
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type LatLon = {
   lat: number;
   lon: number;
-}
+};

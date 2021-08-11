@@ -7,13 +7,14 @@
  */
 
 import { FILTERS, Filter, isQueryStringFilter } from '@kbn/es-query';
+import { SerializableRecord } from '@kbn/utility-types';
 
 export const mapQueryString = (filter: Filter) => {
-  if (isQueryStringFilter(filter)) {
+  if (filter && isQueryStringFilter(filter)) {
     return {
       type: FILTERS.QUERY_STRING,
       key: 'query',
-      value: filter.query.query_string.query,
+      value: (filter.query.query_string as SerializableRecord).query,
     };
   }
 

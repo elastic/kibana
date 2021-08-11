@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { omit, get } from 'lodash';
+import { omit } from 'lodash';
 import { Filter, FilterStateStore } from '../build_filters';
 
 /**
@@ -26,7 +26,9 @@ export const isFilterPinned = (filter: Filter) => {
  *
  * @public
  */
-export const isFilterDisabled = (filter: Filter): boolean => get(filter, 'meta.disabled', false);
+export const isFilterDisabled = (filter: Filter): boolean => {
+  return filter.meta.disabled || false;
+};
 
 /**
  *

@@ -7,6 +7,7 @@
  */
 
 import { Filter, FILTERS } from '@kbn/es-query';
+import { has } from 'lodash';
 
 // Use mapSpatialFilter mapper to avoid bloated meta with value and params for spatial filters.
 export const mapSpatialFilter = (filter: Filter) => {
@@ -27,7 +28,7 @@ export const mapSpatialFilter = (filter: Filter) => {
     filter.meta &&
     filter.meta.type === FILTERS.SPATIAL_FILTER &&
     filter.meta.isMultiIndex &&
-    filter.query?.bool?.should
+    has(filter, 'query.bool.should')
   ) {
     return {
       key: 'query',

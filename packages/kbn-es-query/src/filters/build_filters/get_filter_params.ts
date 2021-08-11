@@ -8,7 +8,7 @@
 
 import type { PhrasesFilter } from './phrases_filter';
 import type { PhraseFilter } from './phrase_filter';
-import type { RangeFilter } from './range_filter';
+import type { RangeFilter, RangeFilterParams } from './range_filter';
 import { Filter, FILTERS } from './types';
 
 /**
@@ -17,14 +17,14 @@ import { Filter, FILTERS } from './types';
 export function getFilterParams(filter: Filter) {
   switch (filter.meta.type) {
     case FILTERS.PHRASE:
-      return (filter as PhraseFilter).meta.params.query;
+      return (filter as PhraseFilter).meta.params!.query;
     case FILTERS.PHRASES:
-      return (filter as PhrasesFilter).meta.params;
+      return (filter as PhrasesFilter).meta.params!;
     case FILTERS.RANGE:
-      const { gte, gt, lte, lt } = (filter as RangeFilter).meta.params;
+      const { gte, gt, lte, lt } = (filter as RangeFilter).meta.params!;
       return {
         from: gte ?? gt,
         to: lt ?? lte,
-      };
+      } as RangeFilterParams;
   }
 }

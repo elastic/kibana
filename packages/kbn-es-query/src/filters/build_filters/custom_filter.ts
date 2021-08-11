@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Filter, FilterMeta, FILTERS, FilterStateStore } from './types';
+import { SerializableRecord } from '@kbn/utility-types';
+import { Filter, FILTERS, FilterStateStore } from './types';
 
 /** @public */
 export type CustomFilter = Filter & {
-  query: any;
+  [key: string]: SerializableRecord;
 };
 
 /**
@@ -27,20 +28,22 @@ export type CustomFilter = Filter & {
  */
 export function buildCustomFilter(
   indexPatternString: string,
-  queryDsl: any,
-  disabled: boolean,
-  negate: boolean,
-  alias: string | null,
-  store: FilterStateStore
+  queryDsl: SerializableRecord,
+  disabled?: boolean,
+  negate?: boolean,
+  alias?: string | null,
+  store?: FilterStateStore
 ): Filter {
-  const meta: FilterMeta = {
-    index: indexPatternString,
-    type: FILTERS.CUSTOM,
-    disabled,
-    negate,
-    alias,
+  const filter: CustomFilter = {
+    ...queryDsl,
+    meta: {
+      index: indexPatternString,
+      type: FILTERS.CUSTOM,
+      disabled,
+      negate,
+      alias,
+    },
   };
-  const filter: Filter = { ...queryDsl, meta };
-  filter.$state = { store };
+  filter.$state = { store: store ?? FilterStateStore.APP_STATE };
   return filter;
 }

@@ -7,12 +7,9 @@
  */
 
 import { has } from 'lodash';
-import type { FieldFilter, Filter, FilterMeta } from './types';
-
-export type MissingFilterMeta = FilterMeta;
+import type { FieldFilter, Filter } from './types';
 
 export type MissingFilter = Filter & {
-  meta: MissingFilterMeta;
   missing: {
     field: string;
   };

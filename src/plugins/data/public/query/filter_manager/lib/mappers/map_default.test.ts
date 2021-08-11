@@ -7,7 +7,7 @@
  */
 
 import { mapDefault } from './map_default';
-import { buildQueryFilter, buildEmptyFilter } from '../../../../../common';
+import { buildQueryFilter, buildEmptyFilter } from '@kbn/es-query';
 
 describe('filter manager utilities', () => {
   describe('mapDefault()', () => {

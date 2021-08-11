@@ -23,6 +23,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { Filter } from '@kbn/es-query';
 
+import { SerializableArray } from '@kbn/utility-types';
 import { hasLargeValueList } from '../has_large_value_list';
 
 type NonListEntry = EntryMatch | EntryMatchAny | EntryNested | EntryExists;
@@ -55,6 +56,14 @@ export interface NestedFilter {
     score_mode: string;
   };
 }
+
+type ExceptionFilter = Filter & {
+  query: {
+    bool: {
+      should?: SerializableArray;
+    };
+  };
+};
 
 export const chunkExceptions = (
   exceptions: ExceptionItemSansLargeValueLists[],
@@ -161,10 +170,8 @@ export const buildExceptionFilter = ({
     (item): item is ExceptionItemSansLargeValueLists => !hasLargeValueList(item.entries)
   );
 
-  const exceptionFilter: Filter = {
+  const exceptionFilter: ExceptionFilter = {
     meta: {
-      alias: null,
-      disabled: false,
       negate: excludeExceptions,
     },
     query: {
@@ -178,7 +185,7 @@ export const buildExceptionFilter = ({
     return undefined;
   } else if (exceptionsWithoutLargeValueLists.length <= chunkSize) {
     const clause = createOrClauses(exceptionsWithoutLargeValueLists);
-    exceptionFilter.query.bool.should = clause;
+    exceptionFilter.query.bool.should = (clause as unknown) as SerializableArray;
     return exceptionFilter;
   } else {
     const chunks = chunkExceptions(exceptionsWithoutLargeValueLists, chunkSize);
@@ -187,11 +194,6 @@ export const buildExceptionFilter = ({
       const orClauses = createOrClauses(exceptionsChunk);
 
       return {
-        meta: {
-          alias: null,
-          disabled: false,
-          negate: false,
-        },
         query: {
           bool: {
             should: orClauses,
@@ -204,13 +206,11 @@ export const buildExceptionFilter = ({
 
     return {
       meta: {
-        alias: null,
-        disabled: false,
         negate: excludeExceptions,
       },
       query: {
         bool: {
-          should: clauses,
+          should: (clauses as unknown) as SerializableArray,
         },
       },
     };

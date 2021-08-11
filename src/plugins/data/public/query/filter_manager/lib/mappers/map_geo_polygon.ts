@@ -7,6 +7,7 @@
  */
 
 import { GeoPolygonFilter, FILTERS, Filter, isGeoPolygonFilter } from '@kbn/es-query';
+import { SerializableRecord } from '@kbn/utility-types';
 
 import { FilterValueFormatter } from '../../../../../common';
 
@@ -22,13 +23,13 @@ const getFormattedValueFn = (points: string[]) => {
 
 function getParams(filter: GeoPolygonFilter) {
   const key = Object.keys(filter.geo_polygon).filter((k) => k !== 'ignore_unmapped')[0];
-  const params = filter.geo_polygon[key];
+  const params = filter.geo_polygon[key] as SerializableRecord;
 
   return {
     key,
     params,
     type: FILTERS.GEO_POLYGON,
-    value: getFormattedValueFn(params.points || []),
+    value: getFormattedValueFn((params.points as string[]) || []),
   };
 }
 

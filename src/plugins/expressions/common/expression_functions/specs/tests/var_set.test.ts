@@ -11,11 +11,12 @@ import { variableSet } from '../var_set';
 import { ExecutionContext } from '../../../execution/types';
 import { createUnitTestExecutor } from '../../../test_helpers';
 import { first } from 'rxjs/operators';
+import { SerializableRecord } from '@kbn/utility-types';
 
 describe('expression_functions', () => {
   describe('var_set', () => {
     const fn = functionWrapper(variableSet);
-    let input: Partial<ReturnType<ExecutionContext['getSearchContext']>>;
+    let input: SerializableRecord;
     let context: ExecutionContext;
     let variables: Record<string, any>;
 

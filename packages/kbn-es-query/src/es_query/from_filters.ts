@@ -68,8 +68,8 @@ export const buildQueryFromFilters = (
         return migrateFilter(filter, indexPattern);
       })
       .map((filter) => handleNestedFilter(filter, indexPattern))
-      .map(translateToQuery)
-      .map(cleanFilter);
+      .map(translateToQuery) // TODO: Why is this needed?
+      .map((value) => cleanFilter(value as Filter));
   };
 
   return {

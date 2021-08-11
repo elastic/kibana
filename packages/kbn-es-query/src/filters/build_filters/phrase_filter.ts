@@ -7,22 +7,22 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 import { has, isPlainObject } from 'lodash';
-import type { FieldFilter, Filter, FilterMeta } from './types';
+import { SerializableRecord } from '@kbn/utility-types';
+import type { FieldFilter, Filter } from './types';
 import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
 import { getConvertedValueForField } from './get_converted_value_for_field';
 
-type PhraseFilterValue = string | number | boolean;
+export type PhraseFilterValue = string | number | boolean;
 
-export type PhraseFilterMeta = FilterMeta & {
-  params?: {
-    query: PhraseFilterValue; // The unformatted value
+export interface PhraseFilterParams extends SerializableRecord {
+  query: PhraseFilterValue; // The unformatted value
+}
+
+export type PhraseFilter = Filter<PhraseFilterParams> & {
+  query?: {
+    match_phrase?: SerializableRecord;
+    match?: SerializableRecord;
   };
-  field?: string;
-  index?: string;
-};
-
-export type PhraseFilter = Filter & {
-  meta: PhraseFilterMeta;
   script?: {
     script: {
       source?: string;
@@ -39,13 +39,13 @@ export type PhraseFilter = Filter & {
  * @public
  */
 export const isPhraseFilter = (filter: FieldFilter): filter is PhraseFilter => {
-  const isMatchPhraseQuery = filter && filter.query && filter.query.match_phrase;
+  const isMatchPhraseQuery = has(filter, 'query.match_phrase');
 
   const isDeprecatedMatchPhraseQuery =
-    filter &&
-    filter.query &&
-    filter.query.match &&
-    Object.values(filter.query.match).find((params: any) => params.type === 'phrase');
+    has(filter, 'query.match') &&
+    Object.values((filter as PhraseFilter).query!.match as object).find(
+      (params) => params.type === 'phrase'
+    );
 
   return Boolean(isMatchPhraseQuery || isDeprecatedMatchPhraseQuery);
 };
@@ -61,16 +61,16 @@ export const isScriptedPhraseFilter = (filter: FieldFilter): filter is PhraseFil
 
 /** @internal */
 export const getPhraseFilterField = (filter: PhraseFilter) => {
-  const queryConfig = filter.query.match_phrase || filter.query.match;
-  return Object.keys(queryConfig)[0];
+  const queryConfig = filter.query!.match_phrase || filter.query!.match;
+  return Object.keys(queryConfig as object)[0];
 };
 
 /**
  * @internal
  */
 export const getPhraseFilterValue = (filter: PhraseFilter): PhraseFilterValue => {
-  const queryConfig = filter.query.match_phrase || filter.query.match;
-  const queryValue = Object.values(queryConfig)[0] as any;
+  const queryConfig = filter.query!.match_phrase || filter.query!.match;
+  const queryValue: any = Object.values(queryConfig as object)[0];
   return isPlainObject(queryValue) ? queryValue.query : queryValue;
 };
 
@@ -92,7 +92,7 @@ export const buildPhraseFilter = (
 
   if (field.scripted) {
     return {
-      meta: { index: indexPattern.id, field: field.name } as PhraseFilterMeta,
+      meta: { index: indexPattern.id, field: field.name },
       script: getPhraseScript(field, value),
     };
   } else {

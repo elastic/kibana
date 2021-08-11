@@ -22,4 +22,9 @@ export const phrasesFilter: PhrasesFilter = {
   $state: {
     store: FilterStateStore.APP_STATE,
   },
+  query: {
+    bool: {
+      should: [],
+    },
+  },
 };

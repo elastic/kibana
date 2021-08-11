@@ -77,7 +77,7 @@ class FilterEditorUI extends Component<Props, State> {
       selectedOperator: this.getSelectedOperator(),
       params: getFilterParams(props.filter),
       useCustomLabel: props.filter.meta.alias !== null,
-      customLabel: props.filter.meta.alias,
+      customLabel: props.filter.meta.alias || null,
       queryDsl: JSON.stringify(cleanFilter(props.filter), null, 2),
       isCustomEditorOpen: this.isUnknownFilterType(),
     };
@@ -500,7 +500,7 @@ class FilterEditorUI extends Component<Props, State> {
         field,
         operator.type,
         operator.negate,
-        this.props.filter.meta.disabled,
+        this.props.filter.meta.disabled ?? false,
         params ?? '',
         alias,
         $state.store

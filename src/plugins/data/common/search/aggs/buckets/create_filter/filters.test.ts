@@ -49,7 +49,7 @@ describe('AggConfig Filters', () => {
 
     test('should return a filters filter', () => {
       const aggConfigs = getAggConfigs();
-      const filter = createFilterFilters(aggConfigs.aggs[0] as IBucketAggConfig, 'type:nginx');
+      const filter = createFilterFilters(aggConfigs.aggs[0] as IBucketAggConfig, 'type:nginx')!;
 
       expect(filter).toMatchInlineSnapshot(`
         Object {
@@ -75,9 +75,9 @@ describe('AggConfig Filters', () => {
         }
       `);
 
-      expect(filter!.query.bool.must[0].query_string.query).toBe('type:nginx');
-      expect(filter!.meta).toHaveProperty('index', '1234');
-      expect(filter!.meta).toHaveProperty('alias', 'type:nginx');
+      expect((filter.query.bool as any).must[0].query_string.query).toBe('type:nginx');
+      expect(filter.meta).toHaveProperty('index', '1234');
+      expect(filter.meta).toHaveProperty('alias', 'type:nginx');
     });
   });
 });

@@ -46,7 +46,6 @@ import {
   buildExistsFilter as oldBuildExistsFilter,
   toggleFilterNegated as oldtoggleFilterNegated,
   Filter as oldFilter,
-  RangeFilterMeta as oldRangeFilterMeta,
   RangeFilterParams as oldRangeFilterParams,
   ExistsFilter as oldExistsFilter,
   GeoPolygonFilter as oldGeoPolygonFilter,
@@ -324,12 +323,6 @@ type Filter = oldFilter;
  * @deprecated Import from the "@kbn/es-query" package directly instead.
  * @removeBy 8.1
  */
-type RangeFilterMeta = oldRangeFilterMeta;
-
-/**
- * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.1
- */
 type RangeFilterParams = oldRangeFilterParams;
 
 /**
@@ -460,7 +453,6 @@ export {
   uniqFilters,
   FilterStateStore,
   Filter,
-  RangeFilterMeta,
   RangeFilterParams,
   ExistsFilter,
   GeoPolygonFilter,

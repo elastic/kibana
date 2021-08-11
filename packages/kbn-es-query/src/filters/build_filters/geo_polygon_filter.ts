@@ -6,18 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { SerializableRecord } from '@kbn/utility-types';
 import { has } from 'lodash';
-import type { FieldFilter, Filter, FilterMeta, LatLon } from './types';
+import type { FieldFilter, Filter, LatLon } from './types';
 
-export type GeoPolygonFilterMeta = FilterMeta & {
-  params: {
-    points: LatLon[];
-  };
-};
+export interface GeoPolygonFilterParams extends SerializableRecord {
+  points: LatLon[];
+}
 
-export type GeoPolygonFilter = Filter & {
-  meta: GeoPolygonFilterMeta;
-  geo_polygon: any;
+export type GeoPolygonFilter = Filter<GeoPolygonFilterParams> & {
+  geo_polygon: SerializableRecord;
 };
 
 /**
