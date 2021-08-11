@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import { EuiButton, EuiCheckbox, EuiConfirmModal, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { PackageInfo } from '../../../../../types';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
+import type { GetAgentPoliciesResponse, PackageInfo } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
   useCapabilities,
   useUninstallPackage,
   useGetPackageInstallStatus,
   useInstallPackage,
+  sendGetAgentPolicies,
 } from '../../../../../hooks';
 
 import { ConfirmPackageUninstall } from './confirm_package_uninstall';
@@ -25,9 +28,21 @@ type InstallationButtonProps = Pick<PackageInfo, 'assets' | 'name' | 'title' | '
   disabled?: boolean;
   isUpdate?: boolean;
   latestVersion?: string;
+  packagePolicyCount?: number;
+  agentPolicyIds?: string[];
 };
 export function InstallationButton(props: InstallationButtonProps) {
-  const { assets, name, title, version, disabled = true, isUpdate = false, latestVersion } = props;
+  const {
+    assets,
+    name,
+    title,
+    version,
+    disabled = true,
+    isUpdate = false,
+    latestVersion,
+    packagePolicyCount = 0,
+    agentPolicyIds = [],
+  } = props;
   const hasWriteCapabilites = useCapabilities().write;
   const installPackage = useInstallPackage();
   const uninstallPackage = useUninstallPackage();
@@ -38,24 +53,53 @@ export function InstallationButton(props: InstallationButtonProps) {
   const isRemoving = installationStatus === InstallStatus.uninstalling;
   const isInstalled = installationStatus === InstallStatus.installed;
   const showUninstallButton = isInstalled || isRemoving;
-  const [isModalVisible, setModalVisible] = useState<boolean>(false);
-  const toggleModal = useCallback(() => {
-    setModalVisible(!isModalVisible);
-  }, [isModalVisible]);
+  const [isInstallModalVisible, setIsInstallModalVisible] = useState<boolean>(false);
+  const [isUpdateModalVisible, setIsUpdateModalVisible] = useState<boolean>(false);
+  const [upgradePackagePolicies, setUpgradePackagePolicies] = useState<boolean>(false);
+  const [agentPolicyData, setAgentPolicyData] = useState<GetAgentPoliciesResponse | null>();
+
+  useEffect(() => {
+    const fetchAgentPolicyData = async () => {
+      if (agentPolicyIds && agentPolicyIds.length) {
+        const { data } = await sendGetAgentPolicies({
+          perPage: 1000,
+          page: 1,
+          kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.id:${agentPolicyIds.join(' or ')}`,
+        });
+
+        setAgentPolicyData(data);
+      }
+    };
+
+    fetchAgentPolicyData();
+  }, [agentPolicyIds]);
+
+  const toggleInstallModal = useCallback(() => {
+    setIsInstallModalVisible(!isInstallModalVisible);
+  }, [isInstallModalVisible]);
+
+  const toggleUpdateModal = useCallback(() => {
+    setIsUpdateModalVisible(!isUpdateModalVisible);
+  }, [isUpdateModalVisible]);
 
   const handleClickInstall = useCallback(() => {
     installPackage({ name, version, title });
-    toggleModal();
-  }, [installPackage, name, title, toggleModal, version]);
+    toggleInstallModal();
+  }, [installPackage, name, title, toggleInstallModal, version]);
 
   const handleClickUpdate = useCallback(() => {
     installPackage({ name, version, title, fromUpdate: true });
+    setIsUpdateModalVisible(false);
   }, [installPackage, name, title, version]);
 
   const handleClickUninstall = useCallback(() => {
     uninstallPackage({ name, version, title, redirectToVersion: latestVersion ?? version });
-    toggleModal();
-  }, [uninstallPackage, name, title, toggleModal, version, latestVersion]);
+    toggleInstallModal();
+  }, [uninstallPackage, name, title, toggleInstallModal, version, latestVersion]);
+
+  const handleUpgradePackagePoliciesChange = useCallback(() => {
+    setUpgradePackagePolicies((prev) => !prev);
+  }, []);
 
   // counts the number of assets in the package
   const numOfAssets = useMemo(
@@ -73,7 +117,7 @@ export function InstallationButton(props: InstallationButtonProps) {
   );
 
   const installButton = (
-    <EuiButton iconType={'importAction'} isLoading={isInstalling} onClick={toggleModal}>
+    <EuiButton iconType={'importAction'} isLoading={isInstalling} onClick={toggleInstallModal}>
       {isInstalling ? (
         <FormattedMessage
           id="xpack.fleet.integrations.installPackage.installingPackageButtonLabel"
@@ -95,19 +139,48 @@ export function InstallationButton(props: InstallationButtonProps) {
   );
 
   const updateButton = (
-    <EuiButton iconType={'refresh'} isLoading={isInstalling} onClick={handleClickUpdate}>
-      <FormattedMessage
-        id="xpack.fleet.integrations.updatePackage.updatePackageButtonLabel"
-        defaultMessage="Update to latest version"
-      />
-    </EuiButton>
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          iconType={'refresh'}
+          isLoading={isInstalling}
+          onClick={upgradePackagePolicies ? toggleUpdateModal : handleClickUpdate}
+        >
+          <FormattedMessage
+            id="xpack.fleet.integrations.updatePackage.updatePackageButtonLabel"
+            defaultMessage="Update to latest version"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      {packagePolicyCount > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiCheckbox
+            compressed
+            labelProps={{
+              style: {
+                display: 'flex',
+              },
+            }}
+            id="upgradePoliciesCheckbox"
+            checked={upgradePackagePolicies}
+            onChange={handleUpgradePackagePoliciesChange}
+            label={i18n.translate(
+              'xpack.fleet.integrations.updatePackage.upgradePoliciesCheckboxLabel',
+              {
+                defaultMessage: 'Upgrade integration policies',
+              }
+            )}
+          />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 
   const uninstallButton = (
     <EuiButton
       iconType={'trash'}
       isLoading={isRemoving}
-      onClick={toggleModal}
+      onClick={toggleInstallModal}
       color="danger"
       disabled={disabled || isRemoving ? true : false}
     >
@@ -138,7 +211,7 @@ export function InstallationButton(props: InstallationButtonProps) {
       // not sure how to do this at the moment so using same value
       numOfAssets={numOfAssets}
       packageName={title}
-      onCancel={toggleModal}
+      onCancel={toggleInstallModal}
       onConfirm={handleClickUninstall}
     />
   );
@@ -147,15 +220,46 @@ export function InstallationButton(props: InstallationButtonProps) {
     <ConfirmPackageInstall
       numOfAssets={numOfAssets}
       packageName={title}
-      onCancel={toggleModal}
+      onCancel={toggleInstallModal}
       onConfirm={handleClickInstall}
     />
+  );
+
+  const updateModal = (
+    <EuiConfirmModal
+      onCancel={toggleUpdateModal}
+      cancelButtonText={i18n.translate(
+        'xpack.fleet.integrations.settings.confirmUpdateModal.cancel',
+        { defaultMessage: 'Cancel' }
+      )}
+      onConfirm={handleClickUpdate}
+      confirmButtonText={i18n.translate(
+        'xpack.fleet.integrations.settings.confirmUpdateModal.confirm',
+        { defaultMessage: 'Upgrade {packageName} and policies', values: { packageName: title } }
+      )}
+      title={i18n.translate('xpack.fleet.integrations.settings.confirmUpdateModal.updateTitle', {
+        defaultMessage: 'Upgrade {packageName} and policies',
+        values: { packageName: title },
+      })}
+    >
+      <FormattedMessage
+        id="xpack.fleet.integrations.settings.confirmUpdateModal.body"
+        defaultMessage="This action will deploy updates to all agents which use these policies.
+        Fleet has detected that {policyCount, plural, one {# integration policy is} other {# integration policies are}} ready to be upgraded
+        and {policyCount, plural, one { is} other { are}} already in use by {agentCount, plural, one {# agent} other {# agents}}"
+        values={{
+          policyCount: packagePolicyCount,
+          agentCount: agentPolicyData?.total,
+        }}
+      />
+    </EuiConfirmModal>
   );
 
   return hasWriteCapabilites ? (
     <Fragment>
       {isUpdate ? updateButton : showUninstallButton ? uninstallButton : installButton}
-      {isModalVisible && (isInstalled ? uninstallModal : installModal)}
+      {isInstallModalVisible && (isInstalled ? uninstallModal : installModal)}
+      {isUpdateModalVisible && updateModal}
     </Fragment>
   ) : null;
 }

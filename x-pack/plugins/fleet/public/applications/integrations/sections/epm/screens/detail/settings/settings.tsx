@@ -10,23 +10,28 @@ import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import semverLt from 'semver/functions/lt';
 
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiSpacer,
+  EuiLink,
+} from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 
 import type { PackageInfo } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import { useGetPackagePolicies, useGetPackageInstallStatus, useLink } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
-import { UpdateIcon } from '../components';
 
 import { InstallationButton } from './installation_button';
 
 const SettingsTitleCell = styled.td`
   padding-right: ${(props) => props.theme.eui.spacerSizes.xl};
   padding-bottom: ${(props) => props.theme.eui.spacerSizes.m};
-`;
-
-const UpdatesAvailableMsgContainer = styled.span`
-  padding-left: ${(props) => props.theme.eui.spacerSizes.s};
 `;
 
 const NoteLabel = () => (
@@ -37,14 +42,20 @@ const NoteLabel = () => (
     />
   </strong>
 );
-const UpdatesAvailableMsg = () => (
-  <UpdatesAvailableMsgContainer>
-    <UpdateIcon size="l" />
+const UpdatesAvailableMsg = ({ latestVersion }: { latestVersion: string }) => (
+  <EuiCallOut
+    color="warning"
+    iconType="alert"
+    title={i18n.translate('xpack.fleet.integrations.settings.versionInfo.updatesAvailable', {
+      defaultMessage: 'New version available',
+    })}
+  >
     <FormattedMessage
-      id="xpack.fleet.integrations.settings.versionInfo.updatesAvailable"
-      defaultMessage="Updates are available"
+      id="xpack.fleet.integration.settings.versionInfo.updatesAvailableBody"
+      defaultMessage="Upgrade to version {latestVersion} to get the latest features"
+      values={{ latestVersion }}
     />
-  </UpdatesAvailableMsgContainer>
+  </EuiCallOut>
 );
 
 const LatestVersionLink = ({ name, version }: { name: string; version: string }) => {
@@ -70,12 +81,18 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
   const { name, title, removable, latestVersion, version } = packageInfo;
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { data: packagePoliciesData } = useGetPackagePolicies({
-    perPage: 0,
+    perPage: 1000,
     page: 1,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${name}`,
   });
   const { status: installationStatus, version: installedVersion } = getPackageInstallStatus(name);
   const packageHasUsages = !!packagePoliciesData?.total;
+
+  const agentPolicyIds = Array.from(
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    new Set(packagePoliciesData?.items.map(({ policy_id }) => policy_id))
+  );
+
   const updateAvailable =
     installedVersion && semverLt(installedVersion, latestVersion) ? true : false;
 
@@ -129,7 +146,6 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                       <EuiTitle size="xs">
                         <span>{installedVersion}</span>
                       </EuiTitle>
-                      {updateAvailable && <UpdatesAvailableMsg />}
                     </td>
                   </tr>
                   <tr>
@@ -148,14 +164,20 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                 </tbody>
               </table>
               {updateAvailable && (
-                <p>
-                  <InstallationButton
-                    {...packageInfo}
-                    version={latestVersion}
-                    disabled={false}
-                    isUpdate={true}
-                  />
-                </p>
+                <>
+                  <UpdatesAvailableMsg latestVersion={latestVersion} />
+                  <EuiSpacer size="l" />
+                  <p>
+                    <InstallationButton
+                      {...packageInfo}
+                      version={latestVersion}
+                      disabled={false}
+                      isUpdate={true}
+                      packagePolicyCount={packagePoliciesData?.total}
+                      agentPolicyIds={agentPolicyIds}
+                    />
+                  </p>
+                </>
               )}
             </div>
           )}
