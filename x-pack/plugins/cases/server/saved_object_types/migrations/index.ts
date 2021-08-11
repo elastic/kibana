@@ -13,6 +13,7 @@ import { CommentType, AssociationType, SECURITY_SOLUTION_OWNER } from '../../../
 
 export { caseMigrations } from './cases';
 export { configureMigrations } from './configuration';
+export { userActionsMigrations } from './user_actions';
 
 export interface SanitizedCaseOwner {
   owner: string;

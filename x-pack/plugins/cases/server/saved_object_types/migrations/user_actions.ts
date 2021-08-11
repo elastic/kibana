@@ -22,7 +22,33 @@ import {
   CaseExternalServiceBasicRt,
   ConnectorTypes,
 } from '../../../common';
-import { transformConnectorIdToReference, transformPushConnectorIdToReference } from './utils';
+import {
+  CONNECTOR_ID_REFERENCE_NAME,
+  PUSH_CONNECTOR_ID_REFERENCE_NAME,
+  USER_ACTION_OLD_ID_REF_NAME,
+  USER_ACTION_OLD_PUSH_ID_REF_NAME,
+} from '../../common';
+import {
+  ConnectorIdReferenceName as ConnectorIdRefNameType,
+  PushConnectorIdReferenceName as PushConnectorIdRefNameType,
+  transformConnectorIdToReference,
+  transformPushConnectorIdToReference,
+} from './utils';
+
+export enum UserActionFieldType {
+  New = 'New',
+  Old = 'Old',
+}
+
+const ConnectorIdReferenceName: Record<UserActionFieldType, ConnectorIdRefNameType> = {
+  [UserActionFieldType.New]: CONNECTOR_ID_REFERENCE_NAME,
+  [UserActionFieldType.Old]: USER_ACTION_OLD_ID_REF_NAME,
+};
+
+const PushConnectorIdReferenceName: Record<UserActionFieldType, PushConnectorIdRefNameType> = {
+  [UserActionFieldType.New]: PUSH_CONNECTOR_ID_REFERENCE_NAME,
+  [UserActionFieldType.Old]: USER_ACTION_OLD_PUSH_ID_REF_NAME,
+};
 
 interface UserActions {
   action_field: string[];
@@ -52,7 +78,8 @@ export function userActionsConnectorIdMigration(
     action,
     actionFields: action_field,
     stringifiedJson: new_value,
-  }) ?? { transformedJson: new_value, references: [] };
+    fieldType: UserActionFieldType.New,
+  });
 
   const {
     transformedJson: transformedOldValue,
@@ -61,7 +88,8 @@ export function userActionsConnectorIdMigration(
     action,
     actionFields: action_field,
     stringifiedJson: old_value,
-  }) ?? { transformedJson: old_value, references: [] };
+    fieldType: UserActionFieldType.Old,
+  });
 
   return {
     ...doc,
@@ -97,7 +125,7 @@ function isPush(action?: string, actionFields?: string[]): boolean {
 }
 
 interface ExtractedConnector {
-  transformedJson: string;
+  transformedJson?: string | null;
   references: SavedObjectReference[];
 }
 
@@ -105,28 +133,34 @@ export function extractConnectorIdFromJson({
   action,
   actionFields,
   stringifiedJson,
+  fieldType,
 }: {
   action?: string;
   actionFields?: string[];
   stringifiedJson?: string | null;
-} = {}): ExtractedConnector | undefined {
+  fieldType: UserActionFieldType;
+}): ExtractedConnector {
+  const defResult = { transformedJson: stringifiedJson, references: [] };
+
   if (!action || !actionFields || !stringifiedJson) {
-    return;
+    return defResult;
   }
 
   try {
     const decodedJson = JSON.parse(stringifiedJson);
 
     if (isCreateCaseConnector(action, actionFields, decodedJson)) {
-      return transformCreateConnector(decodedJson.connector);
+      return transformCreateConnector(decodedJson.connector, fieldType);
     } else if (isUpdateCaseConnector(action, actionFields, decodedJson)) {
-      return transformUpdateConnector(decodedJson);
+      return transformUpdateConnector(decodedJson, fieldType);
     } else if (isPushConnector(action, actionFields, decodedJson)) {
-      return transformPushConnector(decodedJson);
+      return transformPushConnector(decodedJson, fieldType);
     }
   } catch (error) {
     // ignore any throws from parsing or transforming the connectors and just return undefined
   }
+
+  return defResult;
 }
 
 function isCreateCaseConnector(
@@ -147,8 +181,14 @@ function isCreateCaseConnector(
   }
 }
 
-function transformCreateConnector(connector: CaseConnector): ExtractedConnector {
-  const { transformedConnector, references } = transformConnectorIdToReference(connector);
+function transformCreateConnector(
+  connector: CaseConnector,
+  fieldType: UserActionFieldType
+): ExtractedConnector {
+  const { transformedConnector, references } = transformConnectorIdToReference(
+    ConnectorIdReferenceName[fieldType],
+    connector
+  );
 
   return {
     transformedJson: JSON.stringify(transformedConnector),
@@ -168,8 +208,14 @@ function isUpdateCaseConnector(
   }
 }
 
-function transformUpdateConnector(connector: CaseConnector): ExtractedConnector {
-  const { transformedConnector, references } = transformConnectorIdToReference(connector);
+function transformUpdateConnector(
+  connector: CaseConnector,
+  fieldType: UserActionFieldType
+): ExtractedConnector {
+  const { transformedConnector, references } = transformConnectorIdToReference(
+    ConnectorIdReferenceName[fieldType],
+    connector
+  );
 
   return {
     transformedJson: JSON.stringify(transformedConnector.connector),
@@ -191,13 +237,17 @@ function isPushConnector(
   }
 }
 
-function transformPushConnector(externalService: CaseExternalService): ExtractedConnector {
+function transformPushConnector(
+  externalService: CaseExternalService,
+  fieldType: UserActionFieldType
+): ExtractedConnector {
   const { transformedPushConnector, references } = transformPushConnectorIdToReference(
+    PushConnectorIdReferenceName[fieldType],
     externalService
   );
 
   return {
-    transformedJson: JSON.stringify(transformedPushConnector),
+    transformedJson: JSON.stringify(transformedPushConnector.external_service),
     references,
   };
 }

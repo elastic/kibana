@@ -14,6 +14,7 @@ import {
 import { ConnectorTypes } from '../../../common';
 import { addOwnerToSO, SanitizedCaseOwner } from '.';
 import { transformConnectorIdToReference } from './utils';
+import { CONNECTOR_ID_REFERENCE_NAME } from '../../common';
 
 interface UnsanitizedConfigureConnector {
   connector_id: string;
@@ -35,6 +36,7 @@ export const configureConnectorIdMigration = (
   // removing the id field since it will be stored in the references instead
   const { connector, ...restAttributes } = doc.attributes;
   const { transformedConnector, references: connectorReferences } = transformConnectorIdToReference(
+    CONNECTOR_ID_REFERENCE_NAME,
     connector
   );
   const { references = [] } = doc;

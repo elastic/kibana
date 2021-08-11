@@ -6,13 +6,20 @@
  */
 
 import { noneConnectorId } from '../../../common';
+import {
+  CONNECTOR_ID_REFERENCE_NAME,
+  PUSH_CONNECTOR_ID_REFERENCE_NAME,
+  USER_ACTION_OLD_ID_REF_NAME,
+  USER_ACTION_OLD_PUSH_ID_REF_NAME,
+} from '../../common';
 import { createExternalService, createJiraConnector } from '../../services/test_utils';
 import { transformConnectorIdToReference, transformPushConnectorIdToReference } from './utils';
 
 describe('migration utils', () => {
   describe('transformConnectorIdToReference', () => {
     it('returns the default none connector when the connector is undefined', () => {
-      expect(transformConnectorIdToReference().transformedConnector).toMatchInlineSnapshot(`
+      expect(transformConnectorIdToReference(CONNECTOR_ID_REFERENCE_NAME).transformedConnector)
+        .toMatchInlineSnapshot(`
         Object {
           "connector": Object {
             "fields": null,
@@ -24,34 +31,8 @@ describe('migration utils', () => {
     });
 
     it('returns the default none connector when the id is undefined', () => {
-      expect(transformConnectorIdToReference({ id: undefined }).transformedConnector)
-        .toMatchInlineSnapshot(`
-        Object {
-          "connector": Object {
-            "fields": null,
-            "name": "none",
-            "type": ".none",
-          },
-        }
-      `);
-    });
-
-    it('returns the default none connector when the id is none', () => {
-      expect(transformConnectorIdToReference({ id: noneConnectorId }).transformedConnector)
-        .toMatchInlineSnapshot(`
-        Object {
-          "connector": Object {
-            "fields": null,
-            "name": "none",
-            "type": ".none",
-          },
-        }
-      `);
-    });
-
-    it('returns the default none connector when the id is none and other fields are defined', () => {
       expect(
-        transformConnectorIdToReference({ ...createJiraConnector(), id: noneConnectorId })
+        transformConnectorIdToReference(CONNECTOR_ID_REFERENCE_NAME, { id: undefined })
           .transformedConnector
       ).toMatchInlineSnapshot(`
         Object {
@@ -64,27 +45,72 @@ describe('migration utils', () => {
       `);
     });
 
+    it('returns the default none connector when the id is none', () => {
+      expect(
+        transformConnectorIdToReference(CONNECTOR_ID_REFERENCE_NAME, { id: noneConnectorId })
+          .transformedConnector
+      ).toMatchInlineSnapshot(`
+        Object {
+          "connector": Object {
+            "fields": null,
+            "name": "none",
+            "type": ".none",
+          },
+        }
+      `);
+    });
+
+    it('returns the default none connector when the id is none and other fields are defined', () => {
+      expect(
+        transformConnectorIdToReference(CONNECTOR_ID_REFERENCE_NAME, {
+          ...createJiraConnector(),
+          id: noneConnectorId,
+        }).transformedConnector
+      ).toMatchInlineSnapshot(`
+        Object {
+          "connector": Object {
+            "fields": null,
+            "name": "none",
+            "type": ".none",
+          },
+        }
+      `);
+    });
+
     it('returns an empty array of references when the connector is undefined', () => {
-      expect(transformConnectorIdToReference().references.length).toBe(0);
+      expect(transformConnectorIdToReference(CONNECTOR_ID_REFERENCE_NAME).references.length).toBe(
+        0
+      );
     });
 
     it('returns an empty array of references when the id is undefined', () => {
-      expect(transformConnectorIdToReference({ id: undefined }).references.length).toBe(0);
+      expect(
+        transformConnectorIdToReference(CONNECTOR_ID_REFERENCE_NAME, { id: undefined }).references
+          .length
+      ).toBe(0);
     });
 
     it('returns an empty array of references when the id is the none connector', () => {
-      expect(transformConnectorIdToReference({ id: noneConnectorId }).references.length).toBe(0);
-    });
-
-    it('returns an empty array of references when the id is the none connector and other fields are defined', () => {
       expect(
-        transformConnectorIdToReference({ ...createJiraConnector(), id: noneConnectorId })
+        transformConnectorIdToReference(CONNECTOR_ID_REFERENCE_NAME, { id: noneConnectorId })
           .references.length
       ).toBe(0);
     });
 
+    it('returns an empty array of references when the id is the none connector and other fields are defined', () => {
+      expect(
+        transformConnectorIdToReference(CONNECTOR_ID_REFERENCE_NAME, {
+          ...createJiraConnector(),
+          id: noneConnectorId,
+        }).references.length
+      ).toBe(0);
+    });
+
     it('returns a jira connector', () => {
-      const transformedFields = transformConnectorIdToReference(createJiraConnector());
+      const transformedFields = transformConnectorIdToReference(
+        CONNECTOR_ID_REFERENCE_NAME,
+        createJiraConnector()
+      );
       expect(transformedFields.transformedConnector).toMatchInlineSnapshot(`
         Object {
           "connector": Object {
@@ -108,11 +134,43 @@ describe('migration utils', () => {
         ]
       `);
     });
+
+    it('returns a jira connector with the user action reference name', () => {
+      const transformedFields = transformConnectorIdToReference(
+        USER_ACTION_OLD_ID_REF_NAME,
+        createJiraConnector()
+      );
+      expect(transformedFields.transformedConnector).toMatchInlineSnapshot(`
+        Object {
+          "connector": Object {
+            "fields": Object {
+              "issueType": "bug",
+              "parent": "2",
+              "priority": "high",
+            },
+            "name": ".jira",
+            "type": ".jira",
+          },
+        }
+      `);
+      expect(transformedFields.references).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "1",
+            "name": "oldConnectorId",
+            "type": "action",
+          },
+        ]
+      `);
+    });
   });
 
   describe('transformPushConnectorIdToReference', () => {
     it('sets external_service to null when it is undefined', () => {
-      expect(transformPushConnectorIdToReference().transformedPushConnector).toMatchInlineSnapshot(`
+      expect(
+        transformPushConnectorIdToReference(PUSH_CONNECTOR_ID_REFERENCE_NAME)
+          .transformedPushConnector
+      ).toMatchInlineSnapshot(`
         Object {
           "external_service": null,
         }
@@ -120,8 +178,10 @@ describe('migration utils', () => {
     });
 
     it('sets external_service to null when it is null', () => {
-      expect(transformPushConnectorIdToReference(null).transformedPushConnector)
-        .toMatchInlineSnapshot(`
+      expect(
+        transformPushConnectorIdToReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, null)
+          .transformedPushConnector
+      ).toMatchInlineSnapshot(`
         Object {
           "external_service": null,
         }
@@ -130,7 +190,9 @@ describe('migration utils', () => {
 
     it('returns an object when external_service is defined but connector_id is undefined', () => {
       expect(
-        transformPushConnectorIdToReference({ connector_id: undefined }).transformedPushConnector
+        transformPushConnectorIdToReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, {
+          connector_id: undefined,
+        }).transformedPushConnector
       ).toMatchInlineSnapshot(`
         Object {
           "external_service": Object {},
@@ -139,8 +201,11 @@ describe('migration utils', () => {
     });
 
     it('returns an object when external_service is defined but connector_id is null', () => {
-      expect(transformPushConnectorIdToReference({ connector_id: null }).transformedPushConnector)
-        .toMatchInlineSnapshot(`
+      expect(
+        transformPushConnectorIdToReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, {
+          connector_id: null,
+        }).transformedPushConnector
+      ).toMatchInlineSnapshot(`
         Object {
           "external_service": Object {},
         }
@@ -151,8 +216,10 @@ describe('migration utils', () => {
       const otherFields = { otherField: 'hi' };
 
       expect(
-        transformPushConnectorIdToReference({ ...otherFields, connector_id: noneConnectorId })
-          .transformedPushConnector
+        transformPushConnectorIdToReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, {
+          ...otherFields,
+          connector_id: noneConnectorId,
+        }).transformedPushConnector
       ).toMatchInlineSnapshot(`
         Object {
           "external_service": Object {
@@ -163,34 +230,45 @@ describe('migration utils', () => {
     });
 
     it('returns an empty array of references when the external_service is undefined', () => {
-      expect(transformPushConnectorIdToReference().references.length).toBe(0);
+      expect(
+        transformPushConnectorIdToReference(PUSH_CONNECTOR_ID_REFERENCE_NAME).references.length
+      ).toBe(0);
     });
 
     it('returns an empty array of references when the external_service is null', () => {
-      expect(transformPushConnectorIdToReference(null).references.length).toBe(0);
+      expect(
+        transformPushConnectorIdToReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, null).references
+          .length
+      ).toBe(0);
     });
 
     it('returns an empty array of references when the connector_id is undefined', () => {
       expect(
-        transformPushConnectorIdToReference({ connector_id: undefined }).references.length
+        transformPushConnectorIdToReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, {
+          connector_id: undefined,
+        }).references.length
       ).toBe(0);
     });
 
     it('returns an empty array of references when the connector_id is null', () => {
       expect(
-        transformPushConnectorIdToReference({ connector_id: undefined }).references.length
+        transformPushConnectorIdToReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, {
+          connector_id: undefined,
+        }).references.length
       ).toBe(0);
     });
 
     it('returns an empty array of references when the connector_id is the none connector', () => {
       expect(
-        transformPushConnectorIdToReference({ connector_id: noneConnectorId }).references.length
+        transformPushConnectorIdToReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, {
+          connector_id: noneConnectorId,
+        }).references.length
       ).toBe(0);
     });
 
     it('returns an empty array of references when the connector_id is the none connector and other fields are defined', () => {
       expect(
-        transformPushConnectorIdToReference({
+        transformPushConnectorIdToReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, {
           ...createExternalService(),
           connector_id: noneConnectorId,
         }).references.length
@@ -198,7 +276,10 @@ describe('migration utils', () => {
     });
 
     it('returns the external_service connector', () => {
-      const transformedFields = transformPushConnectorIdToReference(createExternalService());
+      const transformedFields = transformPushConnectorIdToReference(
+        PUSH_CONNECTOR_ID_REFERENCE_NAME,
+        createExternalService()
+      );
       expect(transformedFields.transformedPushConnector).toMatchInlineSnapshot(`
         Object {
           "external_service": Object {
@@ -220,6 +301,23 @@ describe('migration utils', () => {
           Object {
             "id": "100",
             "name": "pushConnectorId",
+            "type": "action",
+          },
+        ]
+      `);
+    });
+
+    it('returns the external_service connector with a user actions reference name', () => {
+      const transformedFields = transformPushConnectorIdToReference(
+        USER_ACTION_OLD_PUSH_ID_REF_NAME,
+        createExternalService()
+      );
+
+      expect(transformedFields.references).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "100",
+            "name": "oldPushConnectorId",
             "type": "action",
           },
         ]

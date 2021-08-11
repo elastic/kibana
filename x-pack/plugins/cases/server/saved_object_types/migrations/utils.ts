@@ -14,21 +14,26 @@ import {
   getNoneCaseConnector,
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
+  USER_ACTION_OLD_ID_REF_NAME,
+  USER_ACTION_OLD_PUSH_ID_REF_NAME,
 } from '../../common';
 
-export const transformConnectorIdToReference = (connector?: {
-  id?: string;
-}): {
+export type ConnectorIdReferenceName =
+  | typeof CONNECTOR_ID_REFERENCE_NAME
+  | typeof USER_ACTION_OLD_ID_REF_NAME;
+
+export const transformConnectorIdToReference = (
+  referenceName: ConnectorIdReferenceName,
+  connector?: {
+    id?: string;
+  }
+): {
   transformedConnector: { connector: unknown };
   references: SavedObjectReference[];
 } => {
   const { id: connectorId, ...restConnector } = connector ?? {};
 
-  const references = createConnectorReference(
-    connectorId,
-    ACTION_SAVED_OBJECT_TYPE,
-    CONNECTOR_ID_REFERENCE_NAME
-  );
+  const references = createConnectorReference(connectorId, ACTION_SAVED_OBJECT_TYPE, referenceName);
 
   const { id: ignoreNoneId, ...restNoneConnector } = getNoneCaseConnector();
   const connectorFieldsToReturn =
@@ -58,15 +63,24 @@ const createConnectorReference = (
     : [];
 };
 
+interface ExternalService {
+  external_service: {} | null;
+}
+
+export type PushConnectorIdReferenceName =
+  | typeof PUSH_CONNECTOR_ID_REFERENCE_NAME
+  | typeof USER_ACTION_OLD_PUSH_ID_REF_NAME;
+
 export const transformPushConnectorIdToReference = (
+  referenceName: PushConnectorIdReferenceName,
   external_service?: { connector_id?: string | null } | null
-): { transformedPushConnector: Record<string, unknown>; references: SavedObjectReference[] } => {
+): { transformedPushConnector: ExternalService; references: SavedObjectReference[] } => {
   const { connector_id: pushConnectorId, ...restExternalService } = external_service ?? {};
 
   const references = createConnectorReference(
     pushConnectorId,
     ACTION_SAVED_OBJECT_TYPE,
-    PUSH_CONNECTOR_ID_REFERENCE_NAME
+    referenceName
   );
 
   return {
