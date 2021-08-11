@@ -404,14 +404,14 @@ export const registerCollector: RegisterCollector = ({
                 docs_lost: {
                   type: 'long',
                   _meta: {
-                    description: '',
+                    description: 'HTTP response code from cloud submission',
                   },
                 },
               },
               count: {
                 type: 'long',
                 _meta: {
-                  description: '',
+                  description: 'Number of responses with the associated response code',
                 },
               },
             },
@@ -419,13 +419,13 @@ export const registerCollector: RegisterCollector = ({
           docs_lost: {
             type: 'long',
             _meta: {
-              description: '',
+              description: 'Number of documents lost due to transmission errors',
             },
           },
           docs_transmitted: {
             type: 'long',
             _meta: {
-              description: '',
+              description: 'Number of documents transmitted successfully',
             },
           },
         },
@@ -433,13 +433,13 @@ export const registerCollector: RegisterCollector = ({
           num_capacity_exceeded: {
             type: 'long',
             _meta: {
-              description: '',
+              description: 'Number of times the telemetry queue length was exceeded',
             },
           },
           docs_lost: {
             type: 'long',
             _meta: {
-              description: '',
+              description: 'Number of documents lost as the result of exceeding queue length',
             },
           },
         },
@@ -450,25 +450,31 @@ export const registerCollector: RegisterCollector = ({
               type: {
                 type: 'string',
                 _meta: {
-                  description: '',
+                  description: 'Type of telemetry payload',
                 },
               },
               num_events: {
                 type: 'long',
                 _meta: {
-                  description: '',
+                  description: 'Number of telemetry events sent of payload type',
                 },
               },
               min_size: {
                 type: 'long',
                 _meta: {
-                  description: '',
+                  description: 'Smallest telemetry event of given type',
                 },
               },
               max_size: {
                 type: 'long',
                 _meta: {
-                  description: '',
+                  description: 'Largest telemetry event of a given type',
+                },
+              },
+              mean_size: {
+                type: 'long',
+                _meta: {
+                  description: 'Mean telemetry event size of a given type',
                 },
               },
               response_codes: {
@@ -478,14 +484,14 @@ export const registerCollector: RegisterCollector = ({
                     docs_lost: {
                       type: 'long',
                       _meta: {
-                        description: '',
+                        description: 'HTTP response code from cloud submission',
                       },
                     },
                   },
                   count: {
                     type: 'long',
                     _meta: {
-                      description: '',
+                      description: 'Number of responses with the associated response code',
                     },
                   },
                 },

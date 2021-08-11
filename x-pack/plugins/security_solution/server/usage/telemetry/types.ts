@@ -35,6 +35,7 @@ export interface TelemetryPayload {
 	type: string;
 	num_events: number;
 	min_size: number;
+	mean_size: number;
 	max_size: number;
 	response_codes: ResponseCounts[];
 }
