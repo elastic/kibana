@@ -56,7 +56,7 @@ export async function runTypeCheckCli() {
           );
         } else {
           log.success(
-            `All projects are composite so their types are validate by scripts/build_ts_refs`
+            `All projects are composite so their types are validated by scripts/build_ts_refs`
           );
         }
 
