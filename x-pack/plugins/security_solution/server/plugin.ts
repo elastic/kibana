@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { once } from 'lodash';
 import { Observable } from 'rxjs';
 import LRU from 'lru-cache';
 import { estypes } from '@elastic/elasticsearch';
@@ -30,10 +29,7 @@ import {
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 
 import { PluginStartContract as CasesPluginStartContract } from '../../cases/server';
-import {
-  ECS_COMPONENT_TEMPLATE_NAME,
-  TECHNICAL_COMPONENT_TEMPLATE_NAME,
-} from '../../rule_registry/common/assets';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
 import { SecurityPluginSetup as SecuritySetup, SecurityPluginStart } from '../../security/server';
 import {
   RuleDataClient,
