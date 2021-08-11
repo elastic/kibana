@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { createEsDebugErrorMessage } from './client';
+
 export { ElasticsearchService } from './elasticsearch_service';
 export { config, configSchema } from './elasticsearch_config';
 export { ElasticsearchConfig } from './elasticsearch_config';
@@ -37,3 +39,4 @@ export type {
   GetResponse,
   DeleteDocumentResponse,
 } from './client';
+export { getRequestDebugMeta, getErrorMessage } from './client';
