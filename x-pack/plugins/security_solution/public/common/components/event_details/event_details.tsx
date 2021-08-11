@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { isEmpty } from 'lodash';
 
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
@@ -205,7 +206,7 @@ const EventDetailsComponent: React.FC<Props> = ({
               <ThreatDetailsView
                 loading={isEnrichmentsLoading}
                 enrichments={allEnrichments}
-                showInvestigationTimeEnrichments={Boolean(Object.keys(eventFields).length)}
+                showInvestigationTimeEnrichments={!isEmpty(eventFields)}
               >
                 <>
                   <EnrichmentRangePicker setRange={setRange} loading={isEnrichmentsLoading} />

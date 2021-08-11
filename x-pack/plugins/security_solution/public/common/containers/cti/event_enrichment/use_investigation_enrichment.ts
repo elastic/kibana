@@ -7,7 +7,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { isEmpty } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
+import usePrevious from 'react-use/lib/usePrevious';
 
 import { EventFields } from '../../../../../common/search_strategy/security_solution/cti';
 import {
@@ -23,6 +24,7 @@ import { useEventEnrichmentComplete } from '.';
 
 export const QUERY_ID = 'investigation_time_enrichment';
 const noop = () => {};
+const noEnrichments = { enrichments: [] };
 
 export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
   const { addError } = useAppToasts();
@@ -65,8 +67,10 @@ export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
     }
   }, [addError, error]);
 
+  const prevEventFields = usePrevious(eventFields);
+
   useEffect(() => {
-    if (!isEmpty(eventFields)) {
+    if (!isEmpty(eventFields) && !isEqual(eventFields, prevEventFields)) {
       start({
         data: kibana.services.data,
         timerange: { to: range.to, from: range.from, interval: '' },
@@ -75,10 +79,10 @@ export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
         filterQuery: '',
       });
     }
-  }, [start, kibana.services.data, range.to, range.from, eventFields]);
+  }, [start, kibana.services.data, range.to, range.from, eventFields, prevEventFields]);
 
   return {
-    result,
+    result: isEmpty(eventFields) ? noEnrichments : result,
     setRange,
     loading,
   };
