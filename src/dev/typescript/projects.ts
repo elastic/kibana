@@ -54,6 +54,7 @@ export const PROJECTS = [
 
   ...findProjects('packages/*/tsconfig.json'),
   ...findProjects('src/plugins/*/tsconfig.json'),
+  ...findProjects('src/plugins/chart_expressions/*/tsconfig.json'),
   ...findProjects('x-pack/plugins/*/tsconfig.json'),
   ...findProjects('examples/*/tsconfig.json'),
   ...findProjects('x-pack/examples/*/tsconfig.json'),
