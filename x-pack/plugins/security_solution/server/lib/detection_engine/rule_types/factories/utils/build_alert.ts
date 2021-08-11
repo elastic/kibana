@@ -6,8 +6,8 @@
  */
 
 import {
-  ALERT_OWNER,
   ALERT_REASON,
+  ALERT_RULE_CONSUMER,
   ALERT_RULE_NAMESPACE,
   ALERT_STATUS,
   ALERT_WORKFLOW_STATUS,
@@ -106,7 +106,7 @@ export const buildAlert = (
 
   return ({
     '@timestamp': new Date().toISOString(),
-    [ALERT_OWNER]: SERVER_APP_ID,
+    [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
     [SPACE_IDS]: spaceId != null ? [spaceId] : [],
     [ALERT_ANCESTORS]: ancestors,
     [ALERT_STATUS]: 'open',
