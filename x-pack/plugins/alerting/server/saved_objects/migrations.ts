@@ -513,7 +513,7 @@ function addExceptionListsToReferences(
         } else {
           return [
             {
-              name: `exceptionsList_${index}`,
+              name: `param:exceptionsList_${index}`,
               id: String(exceptionItem.id),
               type: 'exception-list',
             },

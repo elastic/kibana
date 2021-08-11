@@ -1035,7 +1035,7 @@ describe('successful migrations', () => {
         ...alert,
         references: [
           {
-            name: 'exceptionsList_0',
+            name: 'param:exceptionsList_0',
             id: '123',
             type: 'exception-list',
           },
@@ -1070,12 +1070,12 @@ describe('successful migrations', () => {
         ...alert,
         references: [
           {
-            name: 'exceptionsList_0',
+            name: 'param:exceptionsList_0',
             id: '123',
             type: 'exception-list',
           },
           {
-            name: 'exceptionsList_1',
+            name: 'param:exceptionsList_1',
             id: '789',
             type: 'exception-list',
           },
@@ -1116,17 +1116,17 @@ describe('successful migrations', () => {
         ...alert,
         references: [
           {
-            name: 'exceptionsList_0',
+            name: 'param:exceptionsList_0',
             id: '123',
             type: 'exception-list',
           },
           {
-            name: 'exceptionsList_1',
+            name: 'param:exceptionsList_1',
             id: '789',
             type: 'exception-list',
           },
           {
-            name: 'exceptionsList_2',
+            name: 'param:exceptionsList_2',
             id: '101112',
             type: 'exception-list',
           },
@@ -1146,7 +1146,7 @@ describe('successful migrations', () => {
       expect(migration7150(alert, migrationContext)).toEqual(alert);
     });
 
-    test('security solution will not remove existing references if we do not have an exceptionsList but we do already have references', () => {
+    test('security solution will keep existing references if we do not have an exceptionsList but we do already have references', () => {
       const migration7150 = getMigrations(encryptedSavedObjectsSetup)['7.15.0'];
       const alert = {
         ...getMockData({
@@ -1157,7 +1157,7 @@ describe('successful migrations', () => {
         }),
         references: [
           {
-            name: 'exceptionsList_0',
+            name: 'param:exceptionsList_0',
             id: '123',
             type: 'exception-list',
           },
@@ -1168,7 +1168,7 @@ describe('successful migrations', () => {
         ...alert,
         references: [
           {
-            name: 'exceptionsList_0',
+            name: 'param:exceptionsList_0',
             id: '123',
             type: 'exception-list',
           },
@@ -1176,7 +1176,7 @@ describe('successful migrations', () => {
       });
     });
 
-    test('security solution will not remove any foreign references if they exist but still migrate other references', () => {
+    test('security solution keep any foreign references if they exist but still migrate other references', () => {
       const migration7150 = getMigrations(encryptedSavedObjectsSetup)['7.15.0'];
       const alert = {
         ...getMockData({
@@ -1223,17 +1223,17 @@ describe('successful migrations', () => {
             type: 'foreign-name',
           },
           {
-            name: 'exceptionsList_0',
+            name: 'param:exceptionsList_0',
             id: '123',
             type: 'exception-list',
           },
           {
-            name: 'exceptionsList_1',
+            name: 'param:exceptionsList_1',
             id: '789',
             type: 'exception-list',
           },
           {
-            name: 'exceptionsList_2',
+            name: 'param:exceptionsList_2',
             id: '101112',
             type: 'exception-list',
           },
@@ -1241,7 +1241,7 @@ describe('successful migrations', () => {
       });
     });
 
-    test('security solution is idempotent and if re-run on the same migrated data will not add or remove any additional items', () => {
+    test('security solution is idempotent and if re-run on the same migrated data will keep the same items', () => {
       const migration7150 = getMigrations(encryptedSavedObjectsSetup)['7.15.0'];
       const alert = {
         ...getMockData({
@@ -1266,12 +1266,12 @@ describe('successful migrations', () => {
         }),
         references: [
           {
-            name: 'exceptionsList_0',
+            name: 'param:exceptionsList_0',
             id: '123',
             type: 'exception-list',
           },
           {
-            name: 'exceptionsList_1',
+            name: 'param:exceptionsList_1',
             id: '789',
             type: 'exception-list',
           },
@@ -1282,12 +1282,12 @@ describe('successful migrations', () => {
         ...alert,
         references: [
           {
-            name: 'exceptionsList_0',
+            name: 'param:exceptionsList_0',
             id: '123',
             type: 'exception-list',
           },
           {
-            name: 'exceptionsList_1',
+            name: 'param:exceptionsList_1',
             id: '789',
             type: 'exception-list',
           },
@@ -1320,7 +1320,7 @@ describe('successful migrations', () => {
         }),
         references: [
           {
-            name: 'exceptionsList_0',
+            name: 'param:exceptionsList_0',
             id: '123',
             type: 'exception-list',
           },
@@ -1331,12 +1331,12 @@ describe('successful migrations', () => {
         ...alert,
         references: [
           {
-            name: 'exceptionsList_0',
+            name: 'param:exceptionsList_0',
             id: '123',
             type: 'exception-list',
           },
           {
-            name: 'exceptionsList_1',
+            name: 'param:exceptionsList_1',
             id: '789',
             type: 'exception-list',
           },
@@ -1387,12 +1387,12 @@ describe('successful migrations', () => {
         ...alert,
         references: [
           {
-            name: 'exceptionsList_0',
+            name: 'param:exceptionsList_0',
             id: '123',
             type: 'exception-list',
           },
           {
-            name: 'exceptionsList_1',
+            name: 'param:exceptionsList_1',
             id: '456',
             type: 'exception-list',
           },
@@ -1412,7 +1412,7 @@ describe('successful migrations', () => {
         }),
         references: [
           {
-            name: 'exceptionsList_0',
+            name: 'param:exceptionsList_0',
             id: '123',
             type: 'exception-list',
           },
@@ -1422,7 +1422,7 @@ describe('successful migrations', () => {
         ...alert,
         references: [
           {
-            name: 'exceptionsList_0',
+            name: 'param:exceptionsList_0',
             id: '123',
             type: 'exception-list',
           },
