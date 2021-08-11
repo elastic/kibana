@@ -47,7 +47,7 @@ export function actionsMenuContent(
         defaultMessage: 'Start datafeed',
       }),
       icon: 'play',
-      enabled: (item) => jobBlocked(item) === false && canStartStopDatafeed,
+      enabled: (item) => isJobBlocked(item) === false && canStartStopDatafeed,
       available: (item) => isStartable([item]),
       onClick: (item) => {
         showStartDatafeedModal([item]);
@@ -63,7 +63,7 @@ export function actionsMenuContent(
         defaultMessage: 'Stop datafeed',
       }),
       icon: 'stop',
-      enabled: (item) => jobBlocked(item) === false && canStartStopDatafeed,
+      enabled: (item) => isJobBlocked(item) === false && canStartStopDatafeed,
       available: (item) => isStoppable([item]),
       onClick: (item) => {
         stopDatafeeds([item], refreshJobs);
@@ -79,7 +79,7 @@ export function actionsMenuContent(
         defaultMessage: 'Create alert rule',
       }),
       icon: 'bell',
-      enabled: (item) => jobBlocked(item) === false,
+      enabled: (item) => isJobBlocked(item) === false,
       available: () => canCreateMlAlerts,
       onClick: (item) => {
         showCreateAlertFlyout([item.id]);
@@ -95,7 +95,7 @@ export function actionsMenuContent(
         defaultMessage: 'Close job',
       }),
       icon: 'cross',
-      enabled: (item) => jobBlocked(item) === false && canCloseJob,
+      enabled: (item) => isJobBlocked(item) === false && canCloseJob,
       available: (item) => isClosable([item]),
       onClick: (item) => {
         closeJobs([item], refreshJobs);
@@ -111,7 +111,7 @@ export function actionsMenuContent(
         defaultMessage: 'Reset job',
       }),
       icon: 'refresh',
-      enabled: (item) => jobBlocked(item) === false && canResetJob,
+      enabled: (item) => isJobBlocked(item) === false && canResetJob,
       available: (item) => isResetable([item]),
       onClick: (item) => {
         showResetJobModal([item]);
@@ -132,7 +132,7 @@ export function actionsMenuContent(
         // the indexPattern the job was created for. An indexPattern could either have been deleted
         // since the the job was created or the current user doesn't have the required permissions to
         // access the indexPattern.
-        return jobBlocked(item) === false && canCreateJob;
+        return isJobBlocked(item) === false && canCreateJob;
       },
       onClick: (item) => {
         const indexPatternNames = getIndexPatternNames();
@@ -162,7 +162,7 @@ export function actionsMenuContent(
         defaultMessage: 'Edit job',
       }),
       icon: 'pencil',
-      enabled: (item) => jobBlocked(item) === false && canUpdateJob && canUpdateDatafeed,
+      enabled: (item) => isJobBlocked(item) === false && canUpdateJob && canUpdateDatafeed,
       onClick: (item) => {
         showEditJobFlyout(item);
         closeMenu();
@@ -188,7 +188,7 @@ export function actionsMenuContent(
   ];
 }
 
-function jobBlocked(item) {
+function isJobBlocked(item) {
   return item.deleting === true || item.blocked !== undefined;
 }
 

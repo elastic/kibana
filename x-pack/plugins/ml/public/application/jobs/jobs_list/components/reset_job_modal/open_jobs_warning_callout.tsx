@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
@@ -17,12 +17,9 @@ interface Props {
 }
 
 export const OpenJobsWarningCallout: FC<Props> = ({ jobs }) => {
-  const [openJobsCount, setOpenJobsCount] = useState(0);
-
-  useEffect(() => {
-    const openJobs = jobs.filter((j) => j.jobState !== JOB_STATE.CLOSED);
-    setOpenJobsCount(openJobs.length);
-  }, []);
+  const openJobsCount = useMemo(() => jobs.filter((j) => j.jobState !== JOB_STATE.CLOSED).length, [
+    jobs,
+  ]);
 
   if (openJobsCount === 0) {
     return null;

@@ -16,12 +16,10 @@ import {
   EuiModalFooter,
   EuiButtonEmpty,
   EuiButton,
-  EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
 
 import { resetJobs } from '../utils';
-import { RESETTING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { OpenJobsWarningCallout } from './open_jobs_warning_callout';
 
@@ -65,10 +63,7 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
     setResetting(true);
     await resetJobs(jobIds);
     closeModal();
-
-    setTimeout(() => {
-      refreshJobs();
-    }, RESETTING_JOBS_REFRESH_INTERVAL_MS);
+    refreshJobs();
   }, [jobIds, refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {
@@ -92,34 +87,17 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
       <EuiModalBody>
         <>
           <OpenJobsWarningCallout jobs={jobs} />
-          {resetting === true ? (
-            <div>
-              <FormattedMessage
-                id="xpack.ml.jobsList.resetJobModal.resettingJobsStatusLabel"
-                defaultMessage="Resetting {jobsCount, plural, one {{jobId}} other {# jobs}}"
-                values={{
-                  jobsCount: jobIds.length,
-                  jobId: jobIds[0],
-                }}
-              />
-              <EuiSpacer />
-              <div style={{ textAlign: 'center' }}>
-                <EuiLoadingSpinner size="l" />
-              </div>
-            </div>
-          ) : (
-            <EuiText>
-              <FormattedMessage
-                id="xpack.ml.jobsList.resetJobModal.resetMultipleJobsDescription"
-                defaultMessage="Resetting {jobsCount, plural, one {a job} other {multiple jobs}} can be time consuming.
+          <EuiText>
+            <FormattedMessage
+              id="xpack.ml.jobsList.resetJobModal.resetMultipleJobsDescription"
+              defaultMessage="Resetting {jobsCount, plural, one {a job} other {multiple jobs}} can be time consuming.
                 {jobsCount, plural, one {It} other {They}} will be reset in the background
                 and may not be updated in the jobs list instantly."
-                values={{
-                  jobsCount: jobIds.length,
-                }}
-              />
-            </EuiText>
-          )}
+              values={{
+                jobsCount: jobIds.length,
+              }}
+            />
+          </EuiText>
         </>
       </EuiModalBody>
       <>

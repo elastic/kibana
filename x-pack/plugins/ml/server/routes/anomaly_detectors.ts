@@ -22,6 +22,8 @@ import {
   getModelSnapshotsSchema,
   updateModelSnapshotsSchema,
   updateModelSnapshotBodySchema,
+  forceQuerySchema,
+  jobResetQuerySchema,
 } from './schemas/anomaly_detectors_schema';
 
 /**
@@ -276,7 +278,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       path: '/api/ml/anomaly_detectors/{jobId}/_close',
       validate: {
         params: jobIdSchema,
-        query: schema.object({ force: schema.maybe(schema.boolean()) }),
+        query: forceQuerySchema,
       },
       options: {
         tags: ['access:ml:canCloseJob'],
@@ -315,7 +317,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       path: '/api/ml/anomaly_detectors/{jobId}/_reset',
       validate: {
         params: jobIdSchema,
-        query: schema.object({ wait_for_completion: schema.maybe(schema.boolean()) }),
+        query: jobResetQuerySchema,
       },
       options: {
         tags: ['access:ml:canCloseJob'],
@@ -354,7 +356,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       path: '/api/ml/anomaly_detectors/{jobId}',
       validate: {
         params: jobIdSchema,
-        query: schema.object({ force: schema.maybe(schema.boolean()) }),
+        query: forceQuerySchema,
       },
       options: {
         tags: ['access:ml:canDeleteJob'],
