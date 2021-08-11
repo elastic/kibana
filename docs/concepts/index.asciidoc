@@ -7,6 +7,7 @@
 
 {kib} provides you several ways to build search queries,
 which will reduce the number of document matches that you get from {es}.
+
 Each app in {kib} provides a time filter, and most apps also include semi-structured search and extra filters.
 
 [role="screenshot"]

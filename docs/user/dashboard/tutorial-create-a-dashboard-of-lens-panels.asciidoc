@@ -4,7 +4,6 @@
 Learn the most common ways to build a dashboard from your own data.
 The tutorial will use sample data from the perspective of an analyst looking
 at website logs, but this type of dashboard works on any type of data.
-Before using this tutorial, you should be familiar with the <<kibana-concepts-analysts>>.
 
 [role="screenshot"]
 image::images/lens_end_to_end_dashboard.png[Final dashboard vis]

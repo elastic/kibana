@@ -2,7 +2,6 @@
 == Analyze time series data
 
 In this tutorial, you'll use the ecommerce sample data to analyze sales trends, but you can use any type of data to complete the tutorial.
-Before using this tutorial, review the <<kibana-concepts-analysts>>.
 
 [role="screenshot"]
 image::images/final_time_series_analysis_dashboard.png[Final dashboard with ecommerce sample data, width=50%]

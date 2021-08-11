@@ -1,18 +1,15 @@
 [[index-patterns]]
-=== Working with index patterns
+== Working with index patterns
 
-{kib} requires an index pattern to access the {es} data that you want to explore.
-An index pattern selects the data to use and allows you to define properties of the fields.
+{kib} requires an index pattern to tell it which {es} data you want to access,
+and whether the data is time-based. An index pattern can point to one or more {es}
+{ref}/data-streams.html[data streams], indices, or {ref}/indices-aliases.html[index aliases].
+For example, `logs-elasticsearch-prod-*` is an index pattern,
+and it is time-based with a time field of `@timestamp`. The time field is not editable.
 
-An index pattern can point to a specific index, for example, your log data from yesterday,
-or all indices that contain your data.  It can also point to a
-{ref}/data-streams.html[data stream] or {ref}/indices-aliases.html[index alias].
-
-You’ll learn how to:
-
-* Create index patterns
-* Set the default index pattern
-* Delete index patterns
+Index patterns are typically created by an administrator when sending data to {es}.
+You can <<index-patterns,create or update index patterns>> in *Stack Management*, or by using a script
+that accesses the {kib} API.
 
 [float]
 [[index-patterns-read-only-access]]
@@ -150,5 +147,10 @@ WARNING: Deleting an index pattern breaks all visualizations, saved searches, an
 [float]
 [[reload-fields]]
 === What’s next
+
+You can customize the display name and format for each field.
+For example, you can tell {kib} to display `event.duration` in seconds.
+{kib} has <<managing-fields,field formatters>> for strings,
+dates, geopoints, and numbers.
 
 Learn how to <<managing-index-patterns,manage the data fields>> in your index patterns.

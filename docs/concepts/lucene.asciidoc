@@ -1,5 +1,5 @@
 [[lucene-query]]
-=== Lucene query syntax
+== Lucene query syntax
 Lucene query syntax is available to {kib} users who opt out of the <<kuery-query>>.
 Full documentation for this syntax is available as part of {es}
 {ref}/query-dsl-query-string-query.html#query-string-syntax[query string syntax].

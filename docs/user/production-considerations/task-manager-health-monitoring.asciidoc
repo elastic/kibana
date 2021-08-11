@@ -1,6 +1,6 @@
 [role="xpack"]
 [[task-manager-health-monitoring]]
-=== Task Manager health monitoring
+==== Task Manager health monitoring
 
 ++++
 <titleabbrev>Health monitoring</titleabbrev>
@@ -25,7 +25,7 @@ Monitoring the `_health` endpoint of each {kib} instance in the cluster is the r
 
 [float]
 [[task-manager-configuring-health-monitoring]]
-==== Configuring the monitored health statistics
+===== Configuring the monitored health statistics
 
 The health monitoring API monitors the performance of Task Manager out of the box.  However, certain performance considerations are deployment specific and you can configure them.
 
@@ -53,7 +53,7 @@ xpack.task_manager.monitored_task_execution_thresholds:
 
 [float]
 [[task-manager-consuming-health-stats]]
-==== Consuming health stats
+===== Consuming health stats
 
 The health API is best consumed by via the `/api/task_manager/_health` endpoint.
 
@@ -92,7 +92,7 @@ If this message appears, set <<task-manager-settings,`xpack.task_manager.monitor
 
 [float]
 [[making-sense-of-task-manager-health-stats]]
-==== Making sense of Task Manager health stats
+===== Making sense of Task Manager health stats
 
 The health monitoring API exposes three sections: `configuration`, `workload` and `runtime`:
 

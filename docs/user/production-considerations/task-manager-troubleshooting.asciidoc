@@ -1,6 +1,6 @@
 [role="xpack"]
 [[task-manager-troubleshooting]]
-=== Task Manager troubleshooting
+==== Task Manager troubleshooting
 
 ++++
 <titleabbrev>Troubleshooting</titleabbrev>
@@ -18,7 +18,7 @@ Have a question? Contact us in the https://discuss.elastic.co/[discuss forum].
 
 [float]
 [[task-manager-health-scheduled-tasks-small-schedule-interval-run-late]]
-==== Tasks with small schedule intervals run late
+===== Tasks with small schedule intervals run late
 
 *Problem*:
 
@@ -32,7 +32,7 @@ You can adjust the <<task-manager-settings,`xpack.task_manager.poll_interval`>> 
 
 [float]
 [[task-manager-health-tasks-run-late]]
-==== Tasks run late
+===== Tasks run late
 
 *Problem*:
 
@@ -58,7 +58,7 @@ _Drift_ is often addressed by adjusting the scaling the deployment to better sui
 For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
 
 [[task-manager-diagnosing-root-cause]]
-==== Diagnose a root cause for drift
+===== Diagnose a root cause for drift
 
 experimental[]
 
@@ -284,7 +284,7 @@ The API returns the following:
 
 
 [[task-manager-health-evaluate-the-configuration]]
-===== Evaluate the Configuration
+====== Evaluate the Configuration
 
 [[task-manager-theory-reduced-polling-rate]]
 *Theory*:
@@ -360,7 +360,7 @@ Max workers configuration is temporarily reduced after Elasticsearch returned 25
 Deeper investigation into the high error rate experienced by the {es} cluster is required.
 
 [[task-manager-health-evaluate-the-runtime]]
-===== Evaluate the Runtime
+====== Evaluate the Runtime
 
 [[task-manager-theory-actual-polling-frequently]]
 *Theory*:
@@ -686,7 +686,7 @@ Given the high rate of non-recurring and ephemeral tasks, it would be reasonable
 Keep in mind that these stats give you a glimpse at a moment in time, and even though there has been insufficient capacity in recent minutes, this might not be true in other times where fewer non-recurring or ephemeral tasks are used. We recommend tracking these stats over time and identifying the source of these tasks before making sweeping changes to your infrastructure.
 
 [[task-manager-health-evaluate-the-workload]]
-===== Evaluate the Workload
+====== Evaluate the Workload
 
 Predicting the required throughput a deplyment might need to support Task Manager is difficult, as features can schedule an unpredictable number of tasks at a variety of scheduled cadences.
 
@@ -848,7 +848,7 @@ For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
 
 
 [[task-manager-health-evaluate-the-capacity-estimation]]
-===== Evaluate the Capacity Estimation
+====== Evaluate the Capacity Estimation
 
 Task Manager is constantly evaluating its runtime operations and workload. This enables Task Manager to make rough estimates about the sufficiency of its capacity.
 
@@ -940,7 +940,7 @@ For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
 
 [float]
 [[task-manager-cannot-operate-when-inline-scripts-are-disabled]]
-==== Inline scripts are disabled in {es}
+===== Inline scripts are disabled in {es}
 
 *Problem*:
 
@@ -958,7 +958,7 @@ To enable inline scripting, see the Elasticsearch documentation for {ref}/module
 
 [float]
 [[task-runat-is-in-the-past]]
-==== What do I do if the Task’s `runAt` is in the past?
+===== What do I do if the Task’s `runAt` is in the past?
 
 *Problem*:
 
@@ -980,7 +980,7 @@ It’s worth looking at the status field, as it might have failed, which would e
 
 [float]
 [[task-marked-failed]]
-==== What do I do if the Task is marked as failed?
+===== What do I do if the Task is marked as failed?
 
 *Problem*:
 
@@ -993,7 +993,7 @@ Ideally you should try and find any log lines that relate to this rule and its t
 
 [float]
 [[task-manager-kibana-log]]
-==== Task Manager Kibana Log
+===== Task Manager Kibana Log
 Task manager will write log lines to the Kibana Log on certain occasions. Below are some common log lines and what they mean.
 
 Task Manager has run out of Available Workers:

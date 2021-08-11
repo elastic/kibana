@@ -1,6 +1,6 @@
 [role="xpack"]
 [[Security-production-considerations]]
-== Security production considerations
+=== Security production considerations
 
 ++++
 <titleabbrev>Security</titleabbrev>
@@ -14,14 +14,14 @@ For more information on {kib}'s security controls, see <<using-kibana-with-secur
 
 [float]
 [[enabling-ssl]]
-=== Enable SSL/TLS
+==== Enable SSL/TLS
 
 You should use SSL/TLS encryption to ensure that traffic between browsers and the {kib} server cannot be viewed or tampered with by third
 parties. See <<configuring-tls>>.
 
 [float]
 [[configuring-kibana-shield]]
-=== Use {stack} {security-features}
+==== Use {stack} {security-features}
 
 You can use {stack} {security-features} to control what {es} data users can
 access through {kib}.
@@ -38,7 +38,7 @@ For more information on granting access to {kib}, see <<xpack-security-authoriza
 
 [float]
 [[configuring-security-headers]]
-=== Use secure HTTP headers
+==== Use secure HTTP headers
 
 The {kib} server can instruct browsers to enable additional security controls using HTTP headers.
 
@@ -70,7 +70,7 @@ server.securityResponseHeaders.disableEmbedding: true
 
 [float]
 [[csp-strict-mode]]
-=== Require a Content Security Policy
+==== Require a Content Security Policy
 
 {kib} uses a Content Security Policy (CSP) to prevent the browser from allowing
 unsafe scripting, but older browsers will silently ignore this policy. If your

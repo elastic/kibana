@@ -1,5 +1,5 @@
 [[save-load-delete-query]]
-=== Save a query
+== Save a query
 
 Have you ever built a query that you wanted to reuse?
 With saved queries, you can save your query text, filters, and time range for
@@ -20,13 +20,15 @@ which include the *Discover* configuration&mdash;selected columns in the documen
 index pattern&mdash;in addition to the query.
 Saved searches are primarily used for adding search results to a dashboard.
 
+[float]
 [role="xpack"]
-==== Read-only access
+=== Read-only access
 If you have insufficient privileges to save queries,
 the *Save* button isn't visible in the saved query management popover.
 For more information, see <<xpack-security-authorization, Granting access to Kibana>>
 
-==== Save a query
+[float]
+=== Save a query
 
 . Once you’ve built a query worth saving, click the save query icon image:concepts/images/save-icon.png["save query icon"].
 . In the popover, click *Save current query*.

@@ -1,8 +1,9 @@
-[[something-good]]
-= 
+[[setup]]
+= Set up
 
 [partintro]
 --
+
 The easiest way to "get started" with {kib} is to use our {es} Service. The Elasticsearch Service is available on AWS, GCP, and Azure, and automatically configures {kib} to work with {es}.
 
 [float]
@@ -27,19 +28,17 @@ Using different patch versions of Kibana and Elasticsearch is generally supporte
 
 //[insert image]
 
-. <<install,Download, install, and run {kib}>>. 
+. <<install,Install {kib}>>. 
 
-. <<settings,Configure the {kib} settings>>.
+. <<settings,Configure {kib}>>.
+////Production considerations -- where does this go? Do we need to split it up? Need to talk to Raya.
+. <<access,Access {kib}>>.
 
-//*** Production considerations -- where does this go? Do we need to split it up? Need to talk to Raya.
+. <<using-kibana-with-security,Configure security>>.
 
-. <<access,Open {kib} and log in to your account>>.
+. <<secure-reporting,Configure reporting>>.
 
-. <<using-kibana-with-security,Configure the {kib} security features>>.
-
-. <<secure-reporting,Enable users to generate reports>>.
-
-. <<configuring-monitoring,Enable users to monitor the Elastic Stack>>.
+. <<configuring-monitoring,Configure monitoring>>.
 
 --
 
@@ -57,3 +56,5 @@ include::monitoring/configuring-monitoring.asciidoc[leveloffset=+1]
 include::monitoring/monitoring-metricbeat.asciidoc[leveloffset=+2]
 include::monitoring/viewing-metrics.asciidoc[leveloffset=+2]
 include::monitoring/monitoring-kibana.asciidoc[leveloffset=+2]
+
+include::production-considerations/index.asciidoc[]

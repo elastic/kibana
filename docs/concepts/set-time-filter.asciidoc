@@ -1,10 +1,9 @@
 [[set-time-filter]]
-=== Set the time range
-Display data within a
-specified time range when your index contains time-based events, and a time-field is configured for the
-selected <<index-patterns, index pattern>>.
-The default time range is 15 minutes, but you can customize
-it in <<advanced-options,Advanced Settings>>.
+== Set the time range
+
+The <<set-time-filter, global time filter>> limits the time range of data displayed.
+In most cases, the time filter applies to the time field in the index pattern,
+but some apps allow you to use a different time field.
 
 . Click image:concepts/images/time-filter-icon.png[clock icon].
 
@@ -22,6 +21,13 @@ it in <<advanced-options,Advanced Settings>>.
 +
 [role="screenshot"]
 image::concepts/images/time-filter.png["Time filter menu", width=75%]
++
+Using the time filter, you can configure a refresh rate to periodically
+resubmit your searches. You can also click *Refresh* to resubmit the search.
+This might be useful if you use {kib} to monitor the underlying data.
++
+[role="screenshot"]
+image:concepts/images/refresh-every.png["section of time filter where you can configure a refresh rate", width=75%]
 
 . To set start and end times, click the bar next to the time filter.
 In the popup, select *Absolute*, *Relative* or *Now*, then specify the required
@@ -29,3 +35,12 @@ options.
 +
 [role="screenshot"]
 image::concepts/images/time-relative.png["Time filter showing relative time", width=75%]
+
+The default time range is 15 minutes, but you can customize
+it in <<advanced-options,Advanced Settings>>.
+
+
+
+
+
+

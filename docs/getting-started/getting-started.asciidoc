@@ -1,14 +1,91 @@
-[[get-started]]
-== Getting started with Analytics
-///
+[[words]]
+== 
+
 **_Learn the shared concepts for analyzing and visualizing your data_**
 
-As an analyst, you will use a combination of {kib} apps to analyze and
-visualize your data. {kib} contains both general-purpose apps and apps for the
-https://www.elastic.co/guide/en/enterprise-search/current/index.html[*Enterprise Search*],
-{observability-guide}/observability-introduction.html[*Elastic Observability*],
-and {security-guide}/es-overview.html[*Elastic Security*] solutions.
-These apps share a common set of concepts.
+Data analysis is a core functionality of {kib}. These are the 
+You can quickly search through large amounts of data, explore fields and values,
+and then use {kib}’s drag-and-drop interface to rapidly build charts, tables, metrics, and more.
+
+=== Add data
+
+{kib} supports several methods to add your data. The best way to add {es} data to {kib} is to use one of our guided processes,
+available from the <<kibana-home-page,home page>>.
+
+=== Work with index patterns
+
+{kib} requires an index pattern to tell it which {es} data you want to access,
+and whether the data is time-based. An index pattern can point to one or more {es}
+data streams, indices, or index aliases by name.
+For example, `logs-elasticsearch-prod-*` is an index pattern,
+and it is time-based with a time field of `@timestamp`. The time field is not editable.
+
+Index patterns are typically created by an administrator when sending data to {es}.
+You can <<index-patterns,create or update index patterns>> in *Stack Management*, or by using a script
+that accesses the {kib} API.
+
+For this getting started experience, the sample ecommerce data comes with an index pattern for you to visualize. To see what the index pattern contains, open it in Discover!
+
+{kib} uses the index pattern to show you a list of fields in the Analytics apps, where you can explore and visualize the data.
+
+You can customize the display name and format for each field.
+For example, you can tell {kib} to display `event.duration` in seconds.
+{kib} has <<managing-fields,field formatters>> for strings,
+dates, geopoints, and numbers.
+
+=== Semistructured search
+
+This is where we talk about query bar, including KQL, Lucene, and how to save these queries.
+
+=== Filter the data
+
+This is where we talk about filter pills and time filter.
+
+--
+
+include::{kib-repo-dir}/concepts/quick-start-guide.asciidoc[Quick start] 
+
+include::{kib-repo-dir}/setup/connect-to-elasticsearch.asciidoc[Add data] 
+
+include::{kib-repo-dir}/concepts/index-patterns.asciidoc[Working with index patterns] 
+
+include::{kib-repo-dir}/concepts/kuery.asciidoc[KQL] 
+
+include::{kib-repo-dir}/concepts/lucene.asciidoc[Lucene]] 
+
+include::{kib-repo-dir}/concepts/save-query.asciidoc[Save queries]
+
+include::{kib-repo-dir}/concepts/set-time-filter.asciidoc[Time filter]
+
+
+
+
+
+
+
+
+
+
+
+
+| *Share.*
+| Ready to <<reporting-getting-started, share>> your findings with a larger audience? {kib} lets you save objects for your own future use or for sharing with others.
+Each <<managing-saved-objects,saved object>> type has different abilities. For example, you can save
+your search queries made with *Discover*, which lets you:
+
+* Share a link to your search
+* Download the full search results in CSV form
+* Start an aggregated visualization using the same search query
+* Embed the *Discover* search results into a dashboard
+* Embed the *Discover* search results into a Canvas workpad
+
+For organization, every saved object can have a name, <<kibana-navigation-search,tags>>, and type.
+Use the global search to quickly open a saved object.
+|===
+
+
+
+
 
 [float]
 === Three things to know about {es}
@@ -25,141 +102,3 @@ For example, you can filter for data "within the last 7 days" or data that "cont
 * **_Aggregatable_ means that you can extract summaries from matching documents.**
 The simplest aggregation is *count*, and it is frequently used in combination
 with the *date histogram*, to see count over time. The *terms* aggregation shows the most frequent values.
-///
-
-///
-- Introduction
-- Add data - We're not touching this content, but need to move. 
-- Access data with index patterns - Done, but need to move. 
-- Explore the data with Discover - Need to rework. Needs to be placeholder.
-- View and analyze the data with Dashboard - Need to rework. Needs to be placeholder.
-- Search (with queries) and filter (including time filter) the data - Reformatting. KQL and Lucene as subpages.
-
-include::{kib-repo-dir}/setup/connect-to-elasticsearch.asciidoc[] -- someone will rewrite this for us, will also include Fleet.
-
-[float]
-=== Accessing data with index patterns
-
-{kib} requires an index pattern to tell it which {es} data you want to access,
-and whether the data is time-based. An index pattern can point to one or more {es}
-data streams, indices, or index aliases by name.
-For example, `logs-elasticsearch-prod-*` is an index pattern,
-and it is time-based with a time field of `@timestamp`. The time field is not editable.
-
-Index patterns are typically created by an administrator when sending data to {es}.
-You can <<index-patterns,create or update index patterns>> in *Stack Management*, or by using a script
-that accesses the {kib} API.
-
-{kib} uses the index pattern to show you a list of fields, such as
-`event.duration`. You can customize the display name and format for each field.
-For example, you can tell {kib} to display `event.duration` in seconds.
-{kib} has <<managing-fields,field formatters>> for strings,
-dates, geopoints, and numbers.
-
-[float]
-[[explore-the-data]]
-== Explore the data with Discover
-
-*Discover* displays the data in an interactive histogram that shows the distribution of data, or documents, over time, and a table that lists the fields for each document that matches the index pattern. To view a subset of the documents, you can apply filters to the data, and customize the table to display only the fields you want to explore.
-
-. Open the main menu, then click *Discover*.
-
-. Change the <<set-time-filter, time filter>> to *Last 7 days*.
-+
-[role="screenshot"]
-image::images/tutorial-discover-2.png[Time filter menu with Last 7 days filter configured]
-
-. To view the sales orders for women's clothing that are $60 or more, use the <<kuery-query,*KQL*>> search field:
-+
-[source,text]
-products.taxless_price >= 60 and category : Women's Clothing
-+
-[role="screenshot"]
-image::images/tutorial-discover-4.png[Discover tables that displays only the orders for women's clothing that are $60 or more]
-
-. To view only the product categories that contain sales orders, hover over the *category* field, then click *+*.
-+
-[role="screenshot"]
-image::images/tutorial-discover-3.png[Discover table that displays only the product categories that contain orders]
-
-[float]
-[[view-and-analyze-the-data]]
-== View and analyze the data on a dashboard 
-
-A dashboard is a collection of panels that you can use to view and analyze the data. Panels contain visualizations, interactive controls, text, and more.
-
-. Open the main menu, then click *Dashboard*. 
-
-. Click *[eCommerce] Revenue Dashboard*.
-+
-[role="screenshot"]
-image::getting-started/images/tutorial-sample-dashboard.png[The [eCommerce] Revenue Dashboard that comes with the Sample eCommerce order data set]
-
-[float]
-[[create-a-visualization]]
-=== Create a visualization panel
-
-Create a treemap panel that shows the top sales regions and manufacturers, then add the panel to the dashboard.
-
-. From the toolbar, click *Edit*, then click *Create visualzation*.
-
-. Open the *Chart type* menu, then select *Treemap*.
-+
-[role="screenshot"]
-image::getting-started/images/tutorial-visualization-dropdown.png[Chart type menu with Treemap selected]
-
-. From the *Available fields* list, drag and drop the following fields onto the workspace:
-
-* *geoip.city_name*
-
-* *manufacturer.keyword*
-+
-[role="screenshot"]
-image::getting-started/images/tutorial-visualization-treemap.png[Treemap that displays Top values of geoip.city_name and Top values or manufacturer.keyword fields]
-
-. Click *Save and return*.
-+
-The treemap appears as the last visualization panel on the dashboard.
-+
-[role="screenshot"]
-image::getting-started/images/tutorial-final-dashboard.gif[Final dashboard with new treemap visualization]
-
-[float]
-[[interact-with-the-data]]
-=== Interact with the data
-
-You can interact with the dashboard data using controls that allow you to apply dashboard-level filters. Interact with the *[eCommerce] Controls* panel to view the women's clothing data from the Gnomehouse manufacturer. 
-
-. From the *Manufacturer* dropdown, select *Gnomehouse*.
-
-. From the *Category* dropdown, select *Women's Clothing*.
-
-. Click *Apply changes*.
-+
-[role="screenshot"]
-image::getting-started/images/tutorial-sample-filter.png[The [eCommerce] Revenue Dashboard that shows only the women's clothing data from the Gnomehouse manufacturer]
-
-[float]
-[[filter-and-query-the-data]]
-=== Filter the data
-
-To view a subset of the data, you can apply filters to the dashboard panels. Apply a filter to view the women's clothing data generated on Wednesday from the Gnomehouse manufacturer.
-
-. Click *Add filter*.
-
-. From the *Field* dropdown, select *day_of_week*.
-
-. From the *Operator* dropdown, select *is*.
-
-. From the *Value* dropdown, select *Wednesday*.
-
-. Click *Save*.
-+
-[role="screenshot"]
-image::getting-started/images/tutorial-sample-filter2.png[The [eCommerce] Revenue Dashboard that shows only the women's clothing data generated on Wednesday from the Gnomehouse manufacturer]
-
-
-
-Concepts
-
-Quick start.

@@ -49,9 +49,8 @@ data in *Discover*.
 
 - If you don’t already have {kib}, set it up with https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 - You must have data in {es}.  This tutorial uses the
-<<gs-get-data-into-kibana,ecommerce sample data set>>, but you can use your own data.
-- You should have an understanding of {ref}/documents-indices.html[{es} documents and indices]
-and <<kibana-concepts-analysts, {kib} concepts>>.
+<<get-started,ecommerce sample data set>>, but you can use your own data.
+- You should have an understanding of {ref}/documents-indices.html[{es} documents and indices].
 
 
 [float]

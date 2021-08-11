@@ -194,7 +194,7 @@ If you want to use the panel later, make sure that you save the panel to the *Vi
 {kib} supports several ways to search your data and apply {es} filters. You can combine the filters with any panel
 filter to display the data want to you see.
 
-For more information about {kib} and {es} filters, refer to <<kibana-concepts-analysts,{kib} concepts>>.
+For more information about {kib} and {es} filters, refer to <<filter-the-data, Filter the data>>.
 
 To apply a panel-level time filter:
 

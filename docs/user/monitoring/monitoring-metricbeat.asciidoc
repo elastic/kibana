@@ -34,7 +34,7 @@ For more information, see
 <<monitoring-settings-kb,Monitoring settings in {kib}>>.
 --
 
-. <<start-stop,Start {kib}>>.
+. <<install,Start {kib} using the method for your installation>>.
 
 . Set the `xpack.monitoring.collection.enabled` setting to `true` on
 each node in the production cluster. By default, it is disabled (`false`).

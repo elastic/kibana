@@ -1,7 +1,10 @@
 [[get-started]]
-== Quick start
+= Get started with Analytics
 
-To quickly get up and running with {kib}, set up on Cloud, then add a sample data set that you can explore and analyze.
+[partintro]
+--
+
+Add a sample data set that you can explore and analyze, then get your first insight into your data.
 
 When you've finished, you'll know how to:
 
@@ -14,17 +17,7 @@ When you've finished, you'll know how to:
 When security is enabled, you must have `read`, `write`, and `manage` privileges on the `kibana_sample_data_*` indices. 
 Learn how to <<tutorial-secure-access-to-kibana, secure access to {kib}>>, or refer to {ref}/security-privileges.html[Security privileges] for more information.
 
-[float]
-[[set-up-on-cloud]]
-== Set up on cloud
-
-include::{docs-root}/shared/cloud/ess-getting-started.asciidoc[]
-
-[float]
-[[gs-get-data-into-kibana]]
-== Add the sample data
-
-Sample data sets come with sample visualizations, dashboards, and more to help you explore {kib} before you ingest or add your own data.
+Sample data sets come with sample visualizations, dashboards, and more to help you explore {kib} before you ingest or add your own data. Add this sample data:
 
 . On the home page, click *Try our sample data*.
 
@@ -102,21 +95,6 @@ The treemap appears as the last visualization panel on the dashboard.
 image::getting-started/images/tutorial-final-dashboard.gif[Final dashboard with new treemap visualization]
 
 [float]
-[[interact-with-the-data]]
-=== Interact with the data
-
-You can interact with the dashboard data using controls that allow you to apply dashboard-level filters. Interact with the *[eCommerce] Controls* panel to view the women's clothing data from the Gnomehouse manufacturer. 
-
-. From the *Manufacturer* dropdown, select *Gnomehouse*.
-
-. From the *Category* dropdown, select *Women's Clothing*.
-
-. Click *Apply changes*.
-+
-[role="screenshot"]
-image::getting-started/images/tutorial-sample-filter.png[The [eCommerce] Revenue Dashboard that shows only the women's clothing data from the Gnomehouse manufacturer]
-
-[float]
 [[filter-and-query-the-data]]
 === Filter the data
 
@@ -139,10 +117,28 @@ image::getting-started/images/tutorial-sample-filter2.png[The [eCommerce] Revenu
 [[quick-start-whats-next]]
 == What's next?
 
-*Add your own data.* Ready to add your own data? Go to {fleet-guide}/fleet-quick-start.html[Quick start: Get logs and metrics into the Elastic Stack] to learn how to ingest your data, or go to <<connect-to-elasticsearch,Add data to {kib}>> and learn about all the other ways you can add data.
+* Ready to add your own data? Learn the different ways on how you can <<connect-to-elasticsearch,add your own data>>. 
 
-*Explore your own data in Discover.* Ready to learn more about exploring your data in *Discover*? Go to <<discover, Discover>>.
+* To access the data, learn how to work with <<index-patterns,index patterns>>.
 
-*Create a dashboard with your own data.* Ready to learn more about analyzing your data in *Dashboard*? Go to <<dashboard, Dashboard>>.
+* <<whats-the-right-app,Choose the right app>> for your data.
 
-*Try out the {ml-features}.* Ready to analyze the sample data sets and generate models for its patterns of behavior? Go to {ml-docs}/ml-getting-started.html[Getting started with {ml}].
+* Learn how to search your data with <<kuery-query,KQL>>.
+
+--
+
+include::{kib-repo-dir}/setup/connect-to-elasticsearch.asciidoc[Add data] 
+
+include::{kib-repo-dir}/concepts/index-patterns.asciidoc[Working with index patterns] 
+
+include::{kib-repo-dir}/getting-started/whats-the-right-app-for-you.asciidoc[Table of apps] 
+
+include::{kib-repo-dir}/concepts/kuery.asciidoc[KQL] 
+
+include::{kib-repo-dir}/concepts/lucene.asciidoc[Lucene]] 
+
+include::{kib-repo-dir}/concepts/set-time-filter.asciidoc[Time filter]
+
+include::{kib-repo-dir}/getting-started/filters.asciidoc[Filter the data]
+
+include::{kib-repo-dir}/concepts/save-query.asciidoc[Save queries]

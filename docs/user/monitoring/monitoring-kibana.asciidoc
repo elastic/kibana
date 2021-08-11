@@ -107,6 +107,6 @@ used when {kib} sends monitoring data to the production cluster.
 
 .. <<configuring-tls-kib-es,Configure encryption for traffic between {kib} and {es}>>.
 
-. <<start-stop,Start {kib}>>.
+. <<install,Start {kib} using the method for your installation>>.
 
 . <<monitoring-data,View the monitoring data in {kib}>>.

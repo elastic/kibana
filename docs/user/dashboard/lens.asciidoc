@@ -183,7 +183,7 @@ To add data labels to pie charts, donut charts, or treemaps, use the *Labels* me
 image::images/lens_value_labels_partition_toggle.png[Lens Pie chart value labels menu]
 
 [float]
-[[filter-the-data]]
+[[filter-the-data-in-lens]]
 ==== Filter the data
 
 Apply filters to visualizations directly from the values in the legend. Only *Bar*, *Line and area*, and *Proportion* visualizations support legend filters.
@@ -207,7 +207,7 @@ For answers to common *Lens* questions, review the following.
 .*When should I use KQL filters, the Filters function, or the Filter by option?*
 [%collapsible]
 ====
-Use the <<semi-structured-search, KQL *Search*>> field to focus on a known set of data for the entire visualization. You can combine KQL filters with other filters using AND logic.
+Use the <<kuery-query, query bar>> to focus on a known set of data for the entire visualization. You can combine KQL filters with other filters using AND logic.
 
 Use the *Filters* function to apply:
 

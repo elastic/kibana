@@ -1,0 +1,11 @@
+[[filter-the-data]]
+== Filter the data
+
+To view a subset of the documents, create filters. {kib} combines the results from the filters you apply to the queries. Each filter can be disabled, inverted, or pinned across apps.  
+
+Filters are the only way to use the {es} Query DSL in JSON form, or to target a specific index pattern for filtering. 
+
+[role="screenshot"]
+image:concepts/images/add-filter-popup.png["Add filter popup"]
+
+We need help from Devon.
