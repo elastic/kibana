@@ -64,7 +64,7 @@ export interface BulkUpdateOptions<Params extends AlertTypeParams> {
   ids: string[] | undefined | null;
   status: STATUS_VALUES;
   index: string;
-  query: string | undefined | null;
+  query: object | string | undefined | null;
 }
 
 interface GetAlertParams {
@@ -74,7 +74,7 @@ interface GetAlertParams {
 
 interface SingleSearchAfterAndAudit {
   id: string | null | undefined;
-  query: string | null | undefined;
+  query: object | string | null | undefined;
   index?: string;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
   lastSortIds: Array<string | number> | undefined;
@@ -315,7 +315,7 @@ export class AlertsClient {
   }
 
   private async buildEsQueryWithAuthz(
-    query: string | null | undefined,
+    query: object | string | null | undefined,
     id: string | null | undefined,
     alertSpaceId: string,
     operation: WriteOperations.Update | ReadOperations.Get | ReadOperations.Find,
@@ -330,15 +330,28 @@ export class AlertsClient {
         },
         operation
       );
-      return buildEsQuery(
+      let esQuery;
+      if (id != null) {
+        esQuery = { query: `_id:${id}`, language: 'kuery' };
+      } else if (typeof query === 'string') {
+        esQuery = { query, language: 'kuery' };
+      } else if (query != null && typeof query === 'object') {
+        esQuery = [];
+      }
+      const builtQuery = buildEsQuery(
         undefined,
-        { query: query == null ? `_id:${id}` : query, language: 'kuery' },
+        esQuery == null ? { query: ``, language: 'kuery' } : esQuery,
         [
           (authzFilter as unknown) as Filter,
           ({ term: { [SPACE_IDS]: alertSpaceId } } as unknown) as Filter,
         ],
         config
       );
+      if (query != null && typeof query === 'object') {
+        // @ts-expect-error
+        builtQuery.bool.must.push(query);
+      }
+      return builtQuery;
     } catch (exc) {
       this.logger.error(exc);
       throw Boom.expectationFailed(
@@ -358,7 +371,7 @@ export class AlertsClient {
     operation,
   }: {
     index: string;
-    query: string;
+    query: object | string;
     operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
   }) {
     let lastSortIds;
@@ -421,7 +434,7 @@ export class AlertsClient {
       // first search for the alert by id, then use the alert info to check if user has access to it
       const alert = await this.singleSearchAfterAndAudit({
         id,
-        query: null,
+        query: undefined,
         index,
         operation: ReadOperations.Get,
         lastSortIds: undefined,
@@ -468,7 +481,9 @@ export class AlertsClient {
         index,
         body: {
           doc: {
-            [ALERT_WORKFLOW_STATUS]: status,
+            [alert?.hits.hits[0]._source?.[ALERT_WORKFLOW_STATUS] == null
+              ? 'signal.status'
+              : ALERT_WORKFLOW_STATUS]: status,
           },
         },
         refresh: 'wait_for',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_OWNER, ALERT_STATUS, SPACE_IDS, RULE_ID } from '@kbn/rule-data-utils';
+import { ALERT_OWNER, ALERT_WORKFLOW_STATUS, SPACE_IDS, RULE_ID } from '@kbn/rule-data-utils';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -85,7 +85,7 @@ describe('update()', () => {
                   [RULE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
                   [ALERT_OWNER]: 'apm',
-                  [ALERT_STATUS]: 'open',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
@@ -171,7 +171,7 @@ describe('update()', () => {
                   'rule.id': 'apm.error_rate',
                   message: 'hello world 1',
                   [ALERT_OWNER]: 'apm',
-                  [ALERT_STATUS]: 'open',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
@@ -244,7 +244,7 @@ describe('update()', () => {
                 _source: {
                   [RULE_ID]: fakeRuleTypeId,
                   [ALERT_OWNER]: 'apm',
-                  [ALERT_STATUS]: 'open',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
@@ -326,7 +326,7 @@ describe('update()', () => {
                   'rule.id': 'apm.error_rate',
                   message: 'hello world 1',
                   [ALERT_OWNER]: 'apm',
-                  [ALERT_STATUS]: 'open',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
@@ -386,7 +386,7 @@ describe('update()', () => {
                     'rule.id': 'apm.error_rate',
                     message: 'hello world 1',
                     [ALERT_OWNER]: 'apm',
-                    [ALERT_STATUS]: 'open',
+                    [ALERT_WORKFLOW_STATUS]: 'open',
                     [SPACE_IDS]: [DEFAULT_SPACE],
                   },
                 },
