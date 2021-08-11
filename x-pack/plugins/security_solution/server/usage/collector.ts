@@ -13,6 +13,7 @@ import { fetchDetectionsMetrics } from './detections';
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 export interface UsageData {
   detectionMetrics: {};
+  telemetryUsageTelemetry: {};
 }
 
 export async function getInternalSavedObjectsClient(core: CoreSetup) {
@@ -394,6 +395,105 @@ export const registerCollector: RegisterCollector = ({
           },
         },
       },
+      telemetryUsageTelemetry: {
+        cloud_transmission: {
+          response_codes: {
+            type: 'array',
+            items: {
+              response_code: {
+                docs_lost: {
+                  type: 'long',
+                  _meta: {
+                    description: '',
+                  },
+                },
+              },
+              count: {
+                type: 'long',
+                _meta: {
+                  description: '',
+                },
+              },
+            },
+          },
+          docs_lost: {
+            type: 'long',
+            _meta: {
+              description: '',
+            },
+          },
+          docs_transmitted: {
+            type: 'long',
+            _meta: {
+              description: '',
+            },
+          },
+        },
+        queue_stats: {
+          num_capacity_exceeded: {
+            type: 'long',
+            _meta: {
+              description: '',
+            },
+          },
+          docs_lost: {
+            type: 'long',
+            _meta: {
+              description: '',
+            },
+          },
+        },
+        payload_stats: {
+          payloads: {
+            type: 'array',
+            items: {
+              type: {
+                type: 'string',
+                _meta: {
+                  description: '',
+                },
+              },
+              num_events: {
+                type: 'long',
+                _meta: {
+                  description: '',
+                },
+              },
+              min_size: {
+                type: 'long',
+                _meta: {
+                  description: '',
+                },
+              },
+              max_size: {
+                type: 'long',
+                _meta: {
+                  description: '',
+                },
+              },
+              response_codes: {
+                type: 'array',
+                items: {
+                  response_code: {
+                    docs_lost: {
+                      type: 'long',
+                      _meta: {
+                        description: '',
+                      },
+                    },
+                  },
+                  count: {
+                    type: 'long',
+                    _meta: {
+                      description: '',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }
+      },
     },
     isReady: () => true,
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
@@ -403,6 +503,7 @@ export const registerCollector: RegisterCollector = ({
       return {
         detectionMetrics:
           (await fetchDetectionsMetrics(kibanaIndex, signalsIndex, esClient, soClient, ml)) || {},
+        telemetryUsageTelemetry: {},
       };
     },
   });

@@ -9,8 +9,13 @@
 /* 
 * Info about Telemetry Trasmission to cloud 
 */
+export interface ResponseCounts {
+	response_code: number,
+	count: number
+}
+
 export interface TelemetryTransmissionMetrics {
-	response_codes: { [key: number]: number };
+	response_codes: ResponseCounts[]
 	docs_lost: number;
 	docs_transmitted: number;
 }
@@ -27,14 +32,15 @@ export interface TelemetryQueueStats {
 * Info about telemetry payloads themelves
 */
 export interface TelemetryPayload {
+	type: string;
 	num_events: number;
 	min_size: number;
 	max_size: number;
-	mean_size: number;
+	response_codes: ResponseCounts[];
 }
 
 export interface TelemetryPayloadStats {
-	types: { [key: string]: TelemetryPayload };
+	payloads: TelemetryPayload[]
 }
 
 export interface TelemetryUsageTelemetry {
