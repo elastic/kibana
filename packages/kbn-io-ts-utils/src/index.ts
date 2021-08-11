@@ -7,6 +7,7 @@
  */
 
 export { decodeOrThrow } from './decode_or_throw';
+export { deepExactRt } from './deep_exact_rt';
 export { jsonRt } from './json_rt';
 export { mergeRt } from './merge_rt';
 export { strictKeysRt } from './strict_keys_rt';
