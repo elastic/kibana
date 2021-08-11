@@ -10,15 +10,20 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 
 import {
-  fetchTransactionDurationHistogramInterval,
+  fetchTransactionDurationHistogramRangeSteps,
   getHistogramIntervalRequest,
-} from './query_histogram_interval';
+} from './query_histogram_range_steps';
 
-const params = { index: 'apm-*', start: '2020', end: '2021' };
+const params = {
+  index: 'apm-*',
+  start: '2020',
+  end: '2021',
+  includeFrozen: false,
+};
 
-describe('query_histogram_interval', () => {
+describe('query_histogram_range_steps', () => {
   describe('getHistogramIntervalRequest', () => {
-    it('returns the request body for the transaction duration ranges aggregation', () => {
+    it('returns the request body for the histogram interval request', () => {
       const req = getHistogramIntervalRequest(params);
 
       expect(req).toEqual({
@@ -58,17 +63,20 @@ describe('query_histogram_interval', () => {
           size: 0,
         },
         index: params.index,
+        ignore_throttled: !params.includeFrozen,
+        ignore_unavailable: true,
       });
     });
   });
 
-  describe('fetchTransactionDurationHistogramInterval', () => {
-    it('fetches the interval duration for histograms', async () => {
+  describe('fetchTransactionDurationHistogramRangeSteps', () => {
+    it('fetches the range steps for the log histogram', async () => {
       const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
         body: estypes.SearchResponse;
       } => {
         return {
           body: ({
+            hits: { total: { value: 10 } },
             aggregations: {
               transaction_duration_max: {
                 value: 10000,
@@ -85,12 +93,14 @@ describe('query_histogram_interval', () => {
         search: esClientSearchMock,
       } as unknown) as ElasticsearchClient;
 
-      const resp = await fetchTransactionDurationHistogramInterval(
+      const resp = await fetchTransactionDurationHistogramRangeSteps(
         esClientMock,
         params
       );
 
-      expect(resp).toEqual(10);
+      expect(resp.length).toEqual(100);
+      expect(resp[0]).toEqual(9.260965422132594);
+      expect(resp[99]).toEqual(18521.930844265193);
       expect(esClientSearchMock).toHaveBeenCalledTimes(1);
     });
   });

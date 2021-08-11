@@ -9,17 +9,19 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import type { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
+import type { SearchServiceFetchParams } from '../../../../../common/search_strategies/correlations/types';
 
-import { getQueryWithParams } from './get_query_with_params';
-import { Field } from './query_field_value_pairs';
 import {
-  FIELD_PREFIX_TO_ADD_AS_CANDIDATE,
   FIELD_PREFIX_TO_EXCLUDE_AS_CANDIDATE,
   FIELDS_TO_ADD_AS_CANDIDATE,
   FIELDS_TO_EXCLUDE_AS_CANDIDATE,
   POPULATED_DOC_COUNT_SAMPLE_SIZE,
-} from './constants';
+} from '../constants';
+import { hasPrefixToInclude } from '../utils';
+
+import { getQueryWithParams } from './get_query_with_params';
+import { getRequestBase } from './get_request_base';
+import type { FieldName } from './query_field_value_pairs';
 
 export const shouldBeExcluded = (fieldName: string) => {
   return (
@@ -30,16 +32,10 @@ export const shouldBeExcluded = (fieldName: string) => {
   );
 };
 
-export const hasPrefixToInclude = (fieldName: string) => {
-  return FIELD_PREFIX_TO_ADD_AS_CANDIDATE.some((prefix) =>
-    fieldName.startsWith(prefix)
-  );
-};
-
 export const getRandomDocsRequest = (
   params: SearchServiceFetchParams
 ): estypes.SearchRequest => ({
-  index: params.index,
+  ...getRequestBase(params),
   body: {
     fields: ['*'],
     _source: false,
@@ -57,7 +53,7 @@ export const getRandomDocsRequest = (
 export const fetchTransactionDurationFieldCandidates = async (
   esClient: ElasticsearchClient,
   params: SearchServiceFetchParams
-): Promise<{ fieldCandidates: Field[] }> => {
+): Promise<{ fieldCandidates: FieldName[] }> => {
   const { index } = params;
   // Get all fields with keyword mapping
   const respMapping = await esClient.fieldCaps({
