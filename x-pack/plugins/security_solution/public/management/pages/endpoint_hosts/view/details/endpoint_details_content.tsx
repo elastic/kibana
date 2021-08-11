@@ -39,7 +39,7 @@ const HostIds = styled(EuiListGroupItem)`
   }
 `;
 
-export const EndpointDetails = memo(
+export const EndpointDetailsContent = memo(
   ({
     details,
     policyInfo,
@@ -207,4 +207,4 @@ export const EndpointDetails = memo(
   }
 );
 
-EndpointDetails.displayName = 'EndpointDetails';
+EndpointDetailsContent.displayName = 'EndpointDetailsContent';

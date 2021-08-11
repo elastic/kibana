@@ -47,7 +47,7 @@ import { EndpointIsolationFlyoutPanel } from './components/endpoint_isolate_flyo
 import { FlyoutBodyNoTopPadding } from './components/flyout_body_no_top_padding';
 import { EndpointDetailsFlyoutHeader } from './components/flyout_header';
 import { EndpointActivityLog } from './endpoint_activity_log';
-import { EndpointDetails } from './endpoint_details';
+import { EndpointDetailsContent } from './endpoint_details_content';
 import { PolicyResponse } from './policy_response';
 
 export const EndpointDetailsView = memo(() => {
@@ -87,7 +87,7 @@ export const EndpointDetailsView = memo(() => {
           hostDetails === undefined ? (
             ContentLoadingMarkup
           ) : (
-            <EndpointDetails
+            <EndpointDetailsContent
               details={hostDetails}
               policyInfo={policyInfo}
               hostStatus={hostStatus}
