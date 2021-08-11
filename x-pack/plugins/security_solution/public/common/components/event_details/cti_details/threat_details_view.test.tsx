@@ -183,6 +183,6 @@ describe('ThreatDetailsView', () => {
       </TestProviders>
     );
 
-    expect(wrapper.exists('.test-div')).toEqual(false);
+    expect(wrapper.exists('.test-div')).toEqual(true);
   });
 });
