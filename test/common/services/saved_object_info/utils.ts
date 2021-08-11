@@ -7,6 +7,7 @@
  */
 
 import { inspect } from 'util';
+import { createFlagError, ToolingLog } from '@kbn/dev-utils';
 
 export const format = (obj: unknown) =>
   inspect(obj, {
@@ -17,3 +18,20 @@ export const format = (obj: unknown) =>
   });
 
 export const noop = () => {};
+
+export const areValid = (flags: any) => {
+  if (flags.esUrl === '') throw createFlagError('please provide a single --esUrl flag');
+  return true;
+};
+
+export const logTypes = (log: ToolingLog) => (x: any) => log.info(`${x}\n`);
+
+export const expectedFlags = () => ({
+  string: ['esUrl'],
+  boolean: ['soTypes', 'detectionRules'],
+  help: `
+--esUrl             Required, tells the app which url to point to
+--soTypes           Not Required, tells the svc to show the types within the .kibana index
+--detectionRules    Not required, tells the svc to show the detection rules.
+        `,
+});

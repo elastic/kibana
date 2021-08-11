@@ -6,33 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { run, createFlagError, ToolingLog } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-utils';
 import { pipe } from 'fp-ts/function';
-import { format, noop } from './utils';
+import { format, noop, areValid, logTypes, expectedFlags } from './utils';
 import { types } from './saved_object_info';
 
 export { SavedObjectInfoService } from './saved_object_info';
 
-const expectedFlags = {
-  string: ['esUrl'],
-  boolean: ['soTypes', 'detectionRules'],
-  help: `
---esUrl             Required, tells the app which url to point to
---soTypes           Not Required, tells the svc to show the types within the .kibana index
---detectionRules    Not required, tells the svc to show the detection rules.
-        `,
-};
-
-const valid = (flags: any) => {
-  if (flags.esUrl === '') throw createFlagError('please provide a single --esUrl flag');
-  return true;
-};
-
-const logTypes = (log: ToolingLog) => (x: any) => log.info(`\n### types: \n\n${x}\n`);
 export const runSavedObjInfoSvc = () =>
   run(
     async ({ flags, log }) =>
-      valid(flags)
+      areValid(flags)
         ? await pipe(await types(flags.esUrl as string)(), format, logTypes(log))
         : noop(),
     {
@@ -45,6 +29,6 @@ Examples:
 See 'saved_objects_info_svc.md'
 
       `,
-      flags: expectedFlags,
+      flags: expectedFlags(),
     }
   );
