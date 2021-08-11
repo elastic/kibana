@@ -8,11 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
 import { stringify } from 'querystring';
+import type {
+  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
+  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
+  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
+} from '@kbn/rule-data-utils';
 import {
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUE,
-  ALERT_SEVERITY_LEVEL,
-} from '@kbn/rule-data-utils/target/technical_field_names';
+  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_NON_TYPED,
+  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
+  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
+  // @ts-expect-error
+} from '@kbn/rule-data-utils/target_node/technical_field_names';
 import type { ObservabilityRuleTypeRegistry } from '../../../../observability/public';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { AlertType } from '../../../common/alert_types';
@@ -21,6 +27,10 @@ import { AlertType } from '../../../common/alert_types';
 const SERVICE_ENVIRONMENT = 'service.environment';
 const SERVICE_NAME = 'service.name';
 const TRANSACTION_TYPE = 'transaction.type';
+
+const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED = ALERT_EVALUATION_THRESHOLD_NON_TYPED;
+const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED = ALERT_EVALUATION_VALUE_NON_TYPED;
+const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
 
 const format = ({
   pathname,
@@ -154,7 +164,7 @@ export function registerApmAlerts(
       reason: i18n.translate(
         'xpack.apm.alertTypes.transactionErrorRate.reason',
         {
-          defaultMessage: `Transaction error rate is greater than {threshold} (current value is {measured}) for {serviceName}`,
+          defaultMessage: `Failed transactions rate is greater than {threshold} (current value is {measured}) for {serviceName}`,
           values: {
             threshold: asPercent(fields[ALERT_EVALUATION_THRESHOLD], 100),
             measured: asPercent(fields[ALERT_EVALUATION_VALUE], 100),

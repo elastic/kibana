@@ -29,6 +29,7 @@ export type DynamicPage =
   | 'add_integration_from_policy'
   | 'add_integration_to_policy'
   | 'edit_integration'
+  | 'upgrade_package_policy'
   | 'agent_list'
   | 'agent_details'
   | 'agent_details_logs';
@@ -54,6 +55,7 @@ export const FLEET_ROUTING_PATHS = {
   policy_details: '/policies/:policyId/:tabId?',
   policy_details_settings: '/policies/:policyId/settings',
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
+  upgrade_package_policy: '/policies/:policyId/upgrade-package-policy/:packagePolicyId',
   // TODO: Review uses and remove if it is no longer used or linked to in any UX flows
   add_integration_from_policy: '/policies/:policyId/add-integration',
   enrollment_tokens: '/enrollment-tokens',
@@ -130,6 +132,10 @@ export const pagePathGetters: {
   edit_integration: ({ policyId, packagePolicyId }) => [
     FLEET_BASE_PATH,
     `/policies/${policyId}/edit-integration/${packagePolicyId}`,
+  ],
+  upgrade_package_policy: ({ policyId, packagePolicyId }) => [
+    FLEET_BASE_PATH,
+    `/policies/${policyId}/upgrade-package-policy/${packagePolicyId}`,
   ],
   agent_list: ({ kuery }) => [FLEET_BASE_PATH, `/agents${kuery ? `?kuery=${kuery}` : ''}`],
   agent_details: ({ agentId, tabId, logQuery }) => [

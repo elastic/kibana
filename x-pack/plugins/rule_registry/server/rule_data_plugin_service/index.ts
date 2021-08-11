@@ -6,7 +6,7 @@
  */
 import { ClusterPutComponentTemplate } from '@elastic/elasticsearch/api/requestParams';
 import { estypes } from '@elastic/elasticsearch';
-import { ValidFeatureId } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import { ValidFeatureId } from '@kbn/rule-data-utils';
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import { get, isEmpty } from 'lodash';
