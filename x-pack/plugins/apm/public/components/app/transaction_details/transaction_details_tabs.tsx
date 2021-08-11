@@ -19,11 +19,15 @@ import { useTransactionTraceSamplesFetcher } from '../../../hooks/use_transactio
 import { HeightRetainer } from '../../shared/HeightRetainer';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 
-import { failedTransactionsTab } from './failed_transactions_tab';
+import { failedTransactionsRateTab } from './failed_transactions_rate_tab';
 import { latencyCorrelationsTab } from './latency_correlations_tab';
 import { traceSamplesTab } from './trace_samples_tab';
 
-const tabs = [traceSamplesTab, latencyCorrelationsTab, failedTransactionsTab];
+const tabs = [
+  traceSamplesTab,
+  latencyCorrelationsTab,
+  failedTransactionsRateTab,
+];
 
 export function TransactionDetailsTabs() {
   const { query } = useApmParams('/services/:serviceName/transactions/view');

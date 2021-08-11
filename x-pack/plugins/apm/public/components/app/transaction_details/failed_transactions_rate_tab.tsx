@@ -24,7 +24,7 @@ import { ErrorCorrelations } from '../correlations/error_correlations';
 
 import type { TabContentProps } from './types';
 
-function FailedTransactionsTab({}: TabContentProps) {
+function FailedTransactionsRateTab({}: TabContentProps) {
   const license = useLicenseContext();
 
   const hasActivePlatinumLicense = isActivePlatinumLicense(license);
@@ -43,20 +43,23 @@ function FailedTransactionsTab({}: TabContentProps) {
     <ErrorCorrelations />
   ) : (
     <LicensePrompt
-      text={i18n.translate('xpack.apm.failedTransactions.licenseCheckText', {
-        defaultMessage: `To use failedTransactions, you must be subscribed to an Elastic Platinum license.`,
-      })}
+      text={i18n.translate(
+        'xpack.apm.failedTransactionsRate.licenseCheckText',
+        {
+          defaultMessage: `To use the failed transactions rate feature, you must be subscribed to an Elastic Platinum license.`,
+        }
+      )}
     />
   );
 }
 
-export const failedTransactionsTab = {
-  key: 'failedTransactions',
+export const failedTransactionsRateTab = {
+  key: 'failedTransactionsRate',
   label: i18n.translate(
-    'xpack.apm.transactionDetails.tabs.failedTransactionsLabel',
+    'xpack.apm.transactionDetails.tabs.failedTransactionsRateLabel',
     {
-      defaultMessage: 'Failing transactions',
+      defaultMessage: 'Failed transaction rate',
     }
   ),
-  component: FailedTransactionsTab,
+  component: FailedTransactionsRateTab,
 };

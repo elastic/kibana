@@ -1013,14 +1013,14 @@ describe('AlertingAuthorization', () => {
           await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
             type: AlertingAuthorizationFilterType.KQL,
             fieldNames: {
-              ruleTypeId: 'path.to.rule.id',
+              ruleTypeId: 'path.to.rule_type_id',
               consumer: 'consumer-field',
             },
           })
         ).filter
       ).toEqual(
         esKuery.fromKueryExpression(
-          `((path.to.rule.id:myAppAlertType and consumer-field:(myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule.id:myOtherAppAlertType and consumer-field:(myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule.id:mySecondAppAlertType and consumer-field:(myApp or myOtherApp or myAppWithSubFeature)))`
+          `((path.to.rule_type_id:myAppAlertType and consumer-field:(myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:mySecondAppAlertType and consumer-field:(myApp or myOtherApp or myAppWithSubFeature)))`
         )
       );
       expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
