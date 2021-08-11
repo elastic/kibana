@@ -272,6 +272,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    * @apiDescription Closes an anomaly detection job.
    *
    * @apiSchema (params) jobIdSchema
+   * @apiSchema (query) forceQuerySchema
    */
   router.post(
     {
@@ -311,6 +312,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    * @apiDescription Resets an anomaly detection job.
    *
    * @apiSchema (params) jobIdSchema
+   * @apiSchema (query) jobResetQuerySchema
    */
   router.post(
     {
@@ -350,6 +352,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    * @apiDescription Deletes specified anomaly detection job.
    *
    * @apiSchema (params) jobIdSchema
+   * @apiSchema (query) forceQuerySchema
    */
   router.delete(
     {
