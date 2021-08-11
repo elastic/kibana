@@ -66,10 +66,8 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
       }
     },
     (settings, fromPath, addDeprecation) => {
-      if (
-        settings?.xpack?.task_manager?.enabled === false ||
-        settings?.xpack?.task_manager?.enabled === true
-      ) {
+      const taskManager = get(settings, fromPath);
+      if (taskManager?.enabled === false || taskManager?.enabled === true) {
         addDeprecation({
           message: `"xpack.task_manager.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
           correctiveActions: {
