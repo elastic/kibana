@@ -159,26 +159,25 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             onQueryChange={onQueryChange}
           />
         </EuiFlexItem>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <StatusFilter status={status} onChange={setStatusFilter} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <AlertsTableTGrid
-              indexName={dynamicIndexPattern.length > 0 ? dynamicIndexPattern[0].title : ''}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              kuery={kuery}
-              status={status}
-              setRefetch={setRefetch}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <StatusFilter status={status} onChange={setStatusFilter} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <AlertsTableTGrid
+            indexName={dynamicIndexPattern.length > 0 ? dynamicIndexPattern[0].title : ''}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            kuery={kuery}
+            status={status}
+            setRefetch={setRefetch}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>
   );
