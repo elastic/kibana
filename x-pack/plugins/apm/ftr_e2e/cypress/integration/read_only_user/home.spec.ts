@@ -7,7 +7,6 @@
 
 import url from 'url';
 import archives_metadata from '../../fixtures/es_archiver/archives_metadata';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 const { start, end } = archives_metadata['apm_8.0.0'];
 
@@ -28,12 +27,6 @@ const apisToIntercept = [
 ];
 
 describe('Home page', () => {
-  before(() => {
-    // esArchiverLoad('apm_8.0.0');
-  });
-  after(() => {
-    // esArchiverUnload('apm_8.0.0');
-  });
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
