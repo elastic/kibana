@@ -46,7 +46,8 @@ describe('Home page', () => {
     );
   });
 
-  it('includes services with only metric documents', () => {
+  // Flaky
+  it.skip('includes services with only metric documents', () => {
     cy.visit(
       `${serviceInventoryHref}&kuery=not%2520(processor.event%2520%253A%2522transaction%2522%2520)`
     );
@@ -58,7 +59,7 @@ describe('Home page', () => {
   describe('navigations', () => {
     /*
      This test is flaky, there's a problem with EuiBasicTable, that it blocks any action while loading is enabled.
-     So it might fail to click on the service link. 
+     So it might fail to click on the service link.
     */
     it.skip('navigates to service overview page with transaction type', () => {
       apisToIntercept.map(({ endpoint, name }) => {
