@@ -7,12 +7,21 @@
 
 import Url from 'url';
 import cypress from 'cypress';
-import childProcess from 'child_process';
 import { FtrProviderContext } from './ftr_provider_context';
 import archives_metadata from './cypress/fixtures/es_archiver/archives_metadata';
+import { createKibanaUserRole } from '../scripts/kibana-security/create_kibana_user_role';
 
 export async function cypressRunTests({ getService }: FtrProviderContext) {
-  await cypressStart(getService, cypress.run);
+  try {
+    const result = await cypressStart(getService, cypress.run);
+
+    if (result && (result.status === 'failed' || result.totalFailed > 0)) {
+      process.exit(1);
+    }
+  } catch (error) {
+    console.error('errors: ', error);
+    process.exit(1);
+  }
 }
 
 export async function cypressOpenTests({ getService }: FtrProviderContext) {
@@ -35,20 +44,22 @@ async function cypressStart(
   });
 
   // Creates APM users
-  childProcess.execSync(
-    `node ../scripts/setup-kibana-security.js --role-suffix e2e_tests --username ${config.get(
-      'servers.elasticsearch.username'
-    )} --password ${config.get(
-      'servers.elasticsearch.password'
-    )} --kibana-url ${kibanaUrl}`
-  );
+  await createKibanaUserRole({
+    elasticsearch: {
+      username: config.get('servers.elasticsearch.username'),
+      password: config.get('servers.elasticsearch.password'),
+    },
+    kibana: {
+      hostname: kibanaUrl,
+      roleSuffix: 'e2e_tests',
+    },
+  });
 
-  await cypressExecution({
+  return cypressExecution({
     config: { baseUrl: kibanaUrl },
     env: {
       START_DATE: start,
       END_DATE: end,
-      ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
       KIBANA_URL: kibanaUrl,
     },
   });
