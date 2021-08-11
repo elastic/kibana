@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { omit, isEqual, map, uniq, pick, truncate, trim } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -296,11 +297,13 @@ export class RulesClient {
     );
 
     const createTime = Date.now();
+    const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : undefined;
     const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
 
     const rawAlert: RawAlert = {
       ...data,
       ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
+      legacyId,
       actions,
       createdBy: username,
       updatedBy: username,

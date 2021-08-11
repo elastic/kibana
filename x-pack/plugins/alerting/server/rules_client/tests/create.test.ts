@@ -35,7 +35,7 @@ const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
-const kibanaVersion = 'v7.10.0';
+const kibanaVersion = 'v8.0.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
@@ -418,8 +418,9 @@ describe('create()', () => {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
           "status": "pending",
         },
+        "legacyId": undefined,
         "meta": Object {
-          "versionApiKeyLastmodified": "v7.10.0",
+          "versionApiKeyLastmodified": "v8.0.0",
         },
         "muteAll": false,
         "mutedInstanceIds": Array [],
@@ -549,6 +550,112 @@ describe('create()', () => {
             "type": "action",
           },
         ],
+      }
+    `);
+  });
+
+  test('sets legacyId when kibanaVersion is < 8.0.0', async () => {
+    const customrulesClient = new RulesClient({
+      ...rulesClientParams,
+      kibanaVersion: 'v7.10.0',
+    });
+    const data = getMockData();
+    const createdAttributes = {
+      ...data,
+      legacyId: '123',
+      alertTypeId: '123',
+      schedule: { interval: '10s' },
+      params: {
+        bar: true,
+      },
+      createdAt: '2019-02-12T21:01:22.479Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      updatedAt: '2019-02-12T21:01:22.479Z',
+      muteAll: false,
+      mutedInstanceIds: [],
+      actions: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    };
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '123',
+      type: 'alert',
+      attributes: createdAttributes,
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    taskManager.schedule.mockResolvedValueOnce({
+      id: 'task-123',
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
+    const result = await customrulesClient.create({ data, options: { id: '123' } });
+    expect(result.id).toEqual('123');
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionRef": "action_0",
+            "actionTypeId": "test",
+            "group": "default",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "apiKey": null,
+        "apiKeyOwner": null,
+        "consumer": "bar",
+        "createdAt": "2019-02-12T21:01:22.479Z",
+        "createdBy": "elastic",
+        "enabled": true,
+        "executionStatus": Object {
+          "error": null,
+          "lastExecutionDate": "2019-02-12T21:01:22.479Z",
+          "status": "pending",
+        },
+        "legacyId": "123",
+        "meta": Object {
+          "versionApiKeyLastmodified": "v7.10.0",
+        },
+        "muteAll": false,
+        "mutedInstanceIds": Array [],
+        "name": "abc",
+        "notifyWhen": "onActiveAlert",
+        "params": Object {
+          "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "tags": Array [
+          "foo",
+        ],
+        "throttle": null,
+        "updatedAt": "2019-02-12T21:01:22.479Z",
+        "updatedBy": "elastic",
       }
     `);
   });
@@ -921,7 +1028,7 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
-        meta: { versionApiKeyLastmodified: 'v7.10.0' },
+        meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
         mutedInstanceIds: [],
         name: 'abc',
@@ -1098,7 +1205,7 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
-        meta: { versionApiKeyLastmodified: 'v7.10.0' },
+        meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
         mutedInstanceIds: [],
         name: 'abc',
@@ -1283,7 +1390,7 @@ describe('create()', () => {
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
-          versionApiKeyLastmodified: 'v7.10.0',
+          versionApiKeyLastmodified: kibanaVersion,
         },
         schedule: { interval: '10s' },
         throttle: '10m',
@@ -1423,7 +1530,7 @@ describe('create()', () => {
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
-          versionApiKeyLastmodified: 'v7.10.0',
+          versionApiKeyLastmodified: kibanaVersion,
         },
         schedule: { interval: '10s' },
         throttle: '10m',
@@ -1563,7 +1670,7 @@ describe('create()', () => {
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
-          versionApiKeyLastmodified: 'v7.10.0',
+          versionApiKeyLastmodified: kibanaVersion,
         },
         schedule: { interval: '10s' },
         throttle: null,
@@ -1880,7 +1987,7 @@ describe('create()', () => {
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
-          versionApiKeyLastmodified: 'v7.10.0',
+          versionApiKeyLastmodified: kibanaVersion,
         },
         schedule: { interval: '10s' },
         throttle: null,
@@ -1991,7 +2098,7 @@ describe('create()', () => {
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: false,
         meta: {
-          versionApiKeyLastmodified: 'v7.10.0',
+          versionApiKeyLastmodified: kibanaVersion,
         },
         schedule: { interval: '10s' },
         throttle: null,
