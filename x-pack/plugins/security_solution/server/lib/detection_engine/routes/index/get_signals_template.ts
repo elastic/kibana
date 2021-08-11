@@ -7,8 +7,8 @@
 
 import {
   SPACE_IDS,
-  ALERT_CONSUMERS,
-  ALERT_PRODUCER,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_PRODUCER,
   ALERT_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import signalsMapping from './signals_mapping.json';
@@ -116,11 +116,11 @@ export const getRbacRequiredFields = (spaceId: string) => {
       type: 'constant_keyword',
       value: spaceId,
     },
-    [ALERT_CONSUMERS]: {
+    [ALERT_RULE_CONSUMER]: {
       type: 'constant_keyword',
       value: 'siem',
     },
-    [ALERT_PRODUCER]: {
+    [ALERT_RULE_PRODUCER]: {
       type: 'constant_keyword',
       value: 'siem',
     },

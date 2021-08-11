@@ -14,7 +14,7 @@ import {
   ReactExpressionRendererType,
   ReactExpressionRendererProps,
 } from 'src/plugins/expressions/public';
-import type { IExecutionContextContainer } from 'src/core/public';
+import type { KibanaExecutionContext } from 'src/core/public';
 import { ExecutionContextSearch } from 'src/plugins/data/public';
 import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
 import classNames from 'classnames';
@@ -40,7 +40,7 @@ export interface ExpressionWrapperProps {
   className?: string;
   canEdit: boolean;
   onRuntimeError: () => void;
-  executionContext?: IExecutionContextContainer;
+  executionContext?: KibanaExecutionContext;
 }
 
 interface VisualizationErrorProps {

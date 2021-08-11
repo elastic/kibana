@@ -9,6 +9,7 @@ import {
   LogicMounter,
   mockHttpValues,
   mockFlashMessageHelpers,
+  mockKibanaValues,
 } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
@@ -25,7 +26,7 @@ const DEFAULT_VALUES: CrawlerSingleDomainValues = {
 describe('CrawlerSingleDomainLogic', () => {
   const { mount } = new LogicMounter(CrawlerSingleDomainLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors } = mockFlashMessageHelpers;
+  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -53,6 +54,33 @@ describe('CrawlerSingleDomainLogic', () => {
   });
 
   describe('listeners', () => {
+    describe('deleteDomain', () => {
+      it('flashes a success toast and redirects the user to the crawler overview on success', async () => {
+        const { navigateToUrl } = mockKibanaValues;
+
+        http.delete.mockReturnValue(Promise.resolve());
+
+        CrawlerSingleDomainLogic.actions.deleteDomain({ id: '1234' } as CrawlerDomain);
+        await nextTick();
+
+        expect(http.delete).toHaveBeenCalledWith(
+          '/api/app_search/engines/some-engine/crawler/domains/1234'
+        );
+
+        expect(flashSuccessToast).toHaveBeenCalled();
+        expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/crawler');
+      });
+
+      it('calls flashApiErrors when there is an error', async () => {
+        http.delete.mockReturnValue(Promise.reject('error'));
+
+        CrawlerSingleDomainLogic.actions.deleteDomain({ id: '1234' } as CrawlerDomain);
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+    });
+
     describe('fetchDomainData', () => {
       it('updates logic with data that has been converted from server to client', async () => {
         jest.spyOn(CrawlerSingleDomainLogic.actions, 'onReceiveDomainData');
