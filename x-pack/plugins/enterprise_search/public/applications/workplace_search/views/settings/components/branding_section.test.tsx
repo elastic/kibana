@@ -62,7 +62,7 @@ describe('BrandingSection', () => {
       wrapper.find(EuiConfirmModal).prop('onConfirm')!({} as any);
 
       expect(wrapper.find(EuiConfirmModal)).toHaveLength(0);
-      expect(resetImage).toHaveBeenCalledWith();
+      expect(resetImage).toHaveBeenCalled();
     });
   });
 

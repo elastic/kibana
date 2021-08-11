@@ -192,7 +192,6 @@ describe('SettingsLogic', () => {
       it('calls API and sets values', async () => {
         const ICON = 'icon';
         SettingsLogic.actions.setStagedIcon(ICON);
-        SettingsLogic.actions.onOrgNameInputChange(ICON);
         const setIconSpy = jest.spyOn(SettingsLogic.actions, 'setIcon');
         http.put.mockReturnValue(Promise.resolve({ icon: ICON }));
 
@@ -219,7 +218,6 @@ describe('SettingsLogic', () => {
       it('calls API and sets values', async () => {
         const LOGO = 'logo';
         SettingsLogic.actions.setStagedLogo(LOGO);
-        SettingsLogic.actions.onOrgNameInputChange(LOGO);
         const setLogoSpy = jest.spyOn(SettingsLogic.actions, 'setLogo');
         http.put.mockReturnValue(Promise.resolve({ logo: LOGO }));
 
