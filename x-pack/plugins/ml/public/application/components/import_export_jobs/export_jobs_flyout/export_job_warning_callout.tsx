@@ -139,7 +139,7 @@ function getTitle(jobs: JobDependencies, calendarCount: number, filterCount: num
       'xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.calendarOnlyTitle',
       {
         defaultMessage:
-          '{jobCount, plural, one {# selected job uses} other {# selected jobs use}} {calendarCount, plural, one {a calendar} other {calendars}}',
+          '{jobCount, plural, one {# job uses} other {# jobs use}} {calendarCount, plural, one {a calendar} other {calendars}}',
         values: { jobCount: jobs.length, calendarCount },
       }
     );
@@ -150,7 +150,7 @@ function getTitle(jobs: JobDependencies, calendarCount: number, filterCount: num
       'xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.filterOnlyTitle',
       {
         defaultMessage:
-          '{jobCount, plural, one {# selected job uses} other {# selected jobs use}} {filterCount, plural, one {a filter list} other {filter lists}}',
+          '{jobCount, plural, one {# job uses} other {# jobs use}} {filterCount, plural, one {a filter list} other {filter lists}}',
         values: { jobCount: jobs.length, filterCount },
       }
     );
@@ -160,7 +160,7 @@ function getTitle(jobs: JobDependencies, calendarCount: number, filterCount: num
     'xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.filterAndCalendarTitle',
     {
       defaultMessage:
-        '{jobCount, plural, one {# selected job uses} other {# selected jobs use}} filter lists and calendars',
+        '{jobCount, plural, one {# job uses} other {# jobs use}} filter lists and calendars',
       values: { jobCount: jobs.length },
     }
   );
