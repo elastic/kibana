@@ -18762,7 +18762,6 @@
     "xpack.monitoring.updateLicenseButtonLabel": "更新许可证",
     "xpack.monitoring.updateLicenseTitle": "更新您的许可证",
     "xpack.monitoring.useAvailableLicenseDescription": "如果您已经持有新的许可证，请立即上传。",
-    "xpack.observability.alerts.manageDetectionRulesButtonLabel": "管理检测规则",
     "xpack.observability.alerts.searchBarPlaceholder": "\"domain\": \"ecommerce\" AND (\"service.name\":\"ProductCatalogService\" …)",
     "xpack.observability.alerts.statusFilter.allButtonLabel": "全部",
     "xpack.observability.alerts.statusFilter.closedButtonLabel": "已关闭",
