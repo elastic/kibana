@@ -174,8 +174,6 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should collect telemetry on saved visualization types with a painless script', async () => {
-      const esArchiver = getService('esArchiver');
-
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
