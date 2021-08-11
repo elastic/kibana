@@ -7,17 +7,15 @@
 
 import { forbidden } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
+import { getStatusCode } from './handle_error';
+import { ErrorTypes } from '../../types';
 
-const getStatusCode = (err) => {
-  return err.isBoom ? err.output.statusCode : err.statusCode;
-};
-
-export function isAuthError(err) {
+export function isAuthError(err: ErrorTypes) {
   const statusCode = getStatusCode(err);
   return statusCode === 401 || statusCode === 403;
 }
 
-export function handleAuthError(err) {
+export function handleAuthError(err: ErrorTypes) {
   const statusCode = getStatusCode(err);
 
   let message;
