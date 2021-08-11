@@ -6,22 +6,17 @@
  */
 
 import React from 'react';
-import moment from 'moment';
 import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../mock';
 import { EnrichmentRangePicker } from './enrichment_range_picker';
 
 describe('EnrichmentRangePicker', () => {
-  const setStartDateSpy = jest.fn();
-  const setEndDateSpy = jest.fn();
+  const setRangeSpy = jest.fn();
 
   const rangePickerProps = {
-    startDate: moment().subtract(30, 'd'),
-    endDate: moment(),
     loading: false,
-    setStartDate: setStartDateSpy,
-    setEndDate: setEndDateSpy,
+    setRange: setRangeSpy,
   };
 
   it('renders a date picker and a button', () => {
@@ -35,7 +30,7 @@ describe('EnrichmentRangePicker', () => {
     expect(wrapper.exists('[data-test-subj="enrichment-button"]')).toEqual(true);
   });
 
-  it('invokes setStartDate', () => {
+  it('invokes setRange', () => {
     const wrapper = mount(
       <TestProviders>
         <EnrichmentRangePicker {...rangePickerProps} />
@@ -47,24 +42,6 @@ describe('EnrichmentRangePicker', () => {
       .simulate('change', { target: { value: '08/10/2019 06:29 PM' } });
     wrapper.find('[data-test-subj="enrichment-button"]').hostNodes().simulate('click');
 
-    expect(setStartDateSpy).toHaveBeenCalled();
-  });
-
-  it('invokes setEndDate', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <EnrichmentRangePicker {...rangePickerProps} />
-      </TestProviders>
-    );
-
-    wrapper
-      .find('input.start-picker')
-      .simulate('change', { target: { value: '08/10/2019 06:29 PM' } });
-    wrapper
-      .find('input.end-picker')
-      .simulate('change', { target: { value: '08/11/2019 06:29 PM' } });
-    wrapper.find('[data-test-subj="enrichment-button"]').hostNodes().simulate('click');
-
-    expect(setEndDateSpy).toHaveBeenCalled();
+    expect(setRangeSpy).toHaveBeenCalled();
   });
 });

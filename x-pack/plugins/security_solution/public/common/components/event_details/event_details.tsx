@@ -112,10 +112,11 @@ const EventDetailsComponent: React.FC<Props> = ({
         : [],
     [data, isAlert]
   );
-  const { result: enrichmentsResponse, ...rangePickerProps } = useInvestigationTimeEnrichment(
-    eventFields
-  );
-  const { loading: isEnrichmentsLoading } = rangePickerProps;
+  const {
+    result: enrichmentsResponse,
+    loading: isEnrichmentsLoading,
+    setRange,
+  } = useInvestigationTimeEnrichment(eventFields);
 
   const allEnrichments = useMemo(() => {
     if (isEnrichmentsLoading || !enrichmentsResponse?.enrichments) {
@@ -202,19 +203,19 @@ const EventDetailsComponent: React.FC<Props> = ({
             ),
             content: (
               <ThreatDetailsView
-                loading={rangePickerProps.loading}
+                loading={isEnrichmentsLoading}
                 enrichments={allEnrichments}
                 showInvestigationTimeEnrichments={Boolean(Object.keys(eventFields).length)}
               >
                 <>
-                  <EnrichmentRangePicker {...rangePickerProps} />
+                  <EnrichmentRangePicker setRange={setRange} loading={isEnrichmentsLoading} />
                   <EuiSpacer size="m" />
                 </>
               </ThreatDetailsView>
             ),
           }
         : undefined,
-    [allEnrichments, rangePickerProps, enrichmentCount, isAlert, eventFields, isEnrichmentsLoading]
+    [allEnrichments, setRange, enrichmentCount, isAlert, eventFields, isEnrichmentsLoading]
   );
 
   const tableTab = useMemo(

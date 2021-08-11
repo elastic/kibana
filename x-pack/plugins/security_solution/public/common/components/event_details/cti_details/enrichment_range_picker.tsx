@@ -16,39 +16,26 @@ import {
 } from '@elastic/eui';
 
 import * as i18n from './translations';
-import { SetDate } from '../../../containers/cti/event_enrichment';
 
 export interface RangePickerProps {
-  setStartDate: SetDate;
-  setEndDate: SetDate;
-  startDate: moment.Moment;
-  endDate: moment.Moment;
+  setRange: ({ to, from }: { to: string; from: string }) => void;
   loading: boolean;
 }
 
-export const EnrichmentRangePicker: React.FC<RangePickerProps> = ({
-  setStartDate,
-  setEndDate,
-  startDate,
-  endDate,
-  loading,
-}) => {
-  const [localStartDate, setLocalStartDate] = useState<moment.Moment | null>(startDate);
-  const [localEndDate, setLocalEndDate] = useState<moment.Moment | null>(endDate);
+export const EnrichmentRangePicker: React.FC<RangePickerProps> = ({ setRange, loading }) => {
+  const [startDate, setStartDate] = useState<moment.Moment | null>(moment().subtract(30, 'd'));
+  const [endDate, setEndDate] = useState<moment.Moment | null>(moment());
 
   const onButtonClick = useCallback(() => {
-    if (localStartDate && startDate !== localStartDate) {
-      setStartDate(localStartDate);
+    if (startDate && endDate) {
+      setRange({
+        from: startDate.toISOString(),
+        to: endDate.toISOString(),
+      });
     }
-    if (localEndDate && endDate !== localEndDate) {
-      setEndDate(localEndDate);
-    }
-  }, [endDate, setStartDate, localStartDate, localEndDate, setEndDate, startDate]);
+  }, [endDate, setRange, startDate]);
 
-  const isValid = useMemo(() => localStartDate?.isBefore(localEndDate), [
-    localStartDate,
-    localEndDate,
-  ]);
+  const isValid = useMemo(() => startDate?.isBefore(endDate), [startDate, endDate]);
 
   return (
     <EuiFlexGroup>
@@ -59,10 +46,10 @@ export const EnrichmentRangePicker: React.FC<RangePickerProps> = ({
           startDateControl={
             <EuiDatePicker
               className="start-picker"
-              selected={localStartDate}
-              onChange={setLocalStartDate}
-              startDate={localStartDate}
-              endDate={localEndDate}
+              selected={startDate}
+              onChange={setStartDate}
+              startDate={startDate}
+              endDate={endDate}
               isInvalid={!isValid}
               aria-label={i18n.ENRICHMENT_LOOKBACK_START_DATE}
               showTimeSelect
@@ -71,10 +58,10 @@ export const EnrichmentRangePicker: React.FC<RangePickerProps> = ({
           endDateControl={
             <EuiDatePicker
               className="end-picker"
-              selected={localEndDate}
-              onChange={setLocalEndDate}
-              startDate={localStartDate}
-              endDate={localEndDate}
+              selected={endDate}
+              onChange={setEndDate}
+              startDate={startDate}
+              endDate={endDate}
               isInvalid={!isValid}
               aria-label={i18n.ENRICHMENT_LOOKBACK_END_DATE}
               showTimeSelect
