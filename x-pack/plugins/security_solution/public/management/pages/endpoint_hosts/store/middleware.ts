@@ -613,6 +613,76 @@ async function endpointDetailsActivityLogPagingMiddleware({
   }
 }
 
+async function loadEndpointDetails({
+  selectedEndpoint,
+  store,
+  coreStart,
+}: {
+  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
+  coreStart: CoreStart;
+  selectedEndpoint: string;
+}) {
+  const { getState, dispatch } = store;
+  // call the endpoint details api
+  try {
+    const response = await coreStart.http.get<HostInfo>(
+      resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: selectedEndpoint as string })
+    );
+    dispatch({
+      type: 'serverReturnedEndpointDetails',
+      payload: response,
+    });
+
+    try {
+      const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
+        coreStart.http,
+        [response],
+        nonExistingPolicies(getState())
+      );
+      if (ingestPolicies !== undefined) {
+        dispatch({
+          type: 'serverReturnedEndpointNonExistingPolicies',
+          payload: ingestPolicies.packagePolicy,
+        });
+      }
+      if (ingestPolicies?.agentPolicy !== undefined) {
+        dispatch({
+          type: 'serverReturnedEndpointAgentPolicies',
+          payload: ingestPolicies.agentPolicy,
+        });
+      }
+    } catch (error) {
+      // TODO should handle the error instead of logging it to the browser
+      // Also this is an anti-pattern we shouldn't use
+      // Ignore Errors, since this should not hinder the user's ability to use the UI
+      logError(error);
+    }
+  } catch (error) {
+    dispatch({
+      type: 'serverFailedToReturnEndpointDetails',
+      payload: error,
+    });
+  }
+
+  loadEndpointsPendingActions(store);
+
+  // call the policy response api
+  try {
+    const policyResponse = await coreStart.http.get(BASE_POLICY_RESPONSE_ROUTE, {
+      query: { agentId: selectedEndpoint },
+    });
+    dispatch({
+      type: 'serverReturnedEndpointPolicyResponse',
+      payload: policyResponse,
+    });
+  } catch (error) {
+    dispatch({
+      type: 'serverFailedToReturnEndpointPolicyResponse',
+      payload: error,
+    });
+  }
+}
+
 async function endpointDetailsMiddleware({
   store,
   coreStart,
@@ -675,65 +745,9 @@ async function endpointDetailsMiddleware({
       type: 'serverCancelledEndpointListLoading',
     });
   }
-
-  // call the endpoint details api
   const { selected_endpoint: selectedEndpoint } = uiQueryParams(getState());
-  try {
-    const response = await coreStart.http.get<HostInfo>(
-      resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: selectedEndpoint as string })
-    );
-    dispatch({
-      type: 'serverReturnedEndpointDetails',
-      payload: response,
-    });
-
-    try {
-      const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
-        coreStart.http,
-        [response],
-        nonExistingPolicies(getState())
-      );
-      if (ingestPolicies !== undefined) {
-        dispatch({
-          type: 'serverReturnedEndpointNonExistingPolicies',
-          payload: ingestPolicies.packagePolicy,
-        });
-      }
-      if (ingestPolicies?.agentPolicy !== undefined) {
-        dispatch({
-          type: 'serverReturnedEndpointAgentPolicies',
-          payload: ingestPolicies.agentPolicy,
-        });
-      }
-    } catch (error) {
-      // TODO should handle the error instead of logging it to the browser
-      // Also this is an anti-pattern we shouldn't use
-      // Ignore Errors, since this should not hinder the user's ability to use the UI
-      logError(error);
-    }
-  } catch (error) {
-    dispatch({
-      type: 'serverFailedToReturnEndpointDetails',
-      payload: error,
-    });
-  }
-
-  loadEndpointsPendingActions(store);
-
-  // call the policy response api
-  try {
-    const policyResponse = await coreStart.http.get(BASE_POLICY_RESPONSE_ROUTE, {
-      query: { agentId: selectedEndpoint },
-    });
-    dispatch({
-      type: 'serverReturnedEndpointPolicyResponse',
-      payload: policyResponse,
-    });
-  } catch (error) {
-    dispatch({
-      type: 'serverFailedToReturnEndpointPolicyResponse',
-      payload: error,
-    });
+  if (selectedEndpoint !== undefined) {
+    loadEndpointDetails({ store, coreStart, selectedEndpoint });
   }
 }
 async function endpointDetailsActivityLogChangedMiddleware({
