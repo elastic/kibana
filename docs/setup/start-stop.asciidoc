@@ -1,14 +1,13 @@
 [[start-stop]]
 == Start {kib}
 
-The method for starting {kib} varies depending on your installation.
+To start {kib} use the method for your installation.
 
 [float]
 [[start-start-targz]]
 === Archive packages (`.tar.gz`)
 
-If you installed {kib} on Linux or Darwin with a `.tar.gz` package, you can
-start and stop {kib} from the command line.
+If you installed {kib} on Linux or Darwin with a `.tar.gz` package, start {kib} from the command line.
 
 [float]
 include::install/targz-running.asciidoc[]

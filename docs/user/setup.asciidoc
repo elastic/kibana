@@ -27,29 +27,25 @@ Using different patch versions of Kibana and Elasticsearch is generally supporte
 
 //[insert image]
 
-. <<install,Download and unzip {kib}>>. Gail to rewrite.
+. <<install,Download, install, and run {kib}>>. 
 
-. Open an editor, then configure the <<settings,config/kibana.yml settings>>. Kaarina to move to new location.
+. <<settings,Configure the {kib} settings>>.
 
 //*** Production considerations -- where does this go? Do we need to split it up? Need to talk to Raya.
 
-. Start {kib}. 
+. <<access,Open {kib} and log in to your account>>.
 
-. Access {kib}. Kaarina to rewrite.
+. <<using-kibana-with-security,Configure the {kib} security features>>.
 
-. Configure security. Need to talk to Larry.
+. <<secure-reporting,Enable users to generate reports>>.
 
-. To enable users to generate reports, install the reporting packages.
-
-. To enable users to monitor the Elastic Stack, configure monitoring.
+. <<configuring-monitoring,Enable users to monitor the Elastic Stack>>.
 
 --
 
 include::{kib-repo-dir}/setup/install.asciidoc[]
 
 include::{kib-repo-dir}/setup/settings.asciidoc[]
-
-include::{kib-repo-dir}/setup/start-stop.asciidoc[]
 
 include::{kib-repo-dir}/setup/access.asciidoc[]
 
