@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 export interface PageSizeParams {
   pageMarginTop: number;
@@ -175,7 +175,7 @@ type ManagementLink = string;
 export type ManagementLinkFn = () => ManagementLink;
 
 export interface LocatorParams<
-  P extends SerializableState = SerializableState & { forceNow?: string }
+  P extends SerializableRecord = SerializableRecord & { forceNow?: string }
 > {
   id: string;
   version: string;

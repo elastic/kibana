@@ -45,8 +45,8 @@ export function getSharedComponents(core: CoreSetup, apiClient: ReportingAPIClie
           requiresSavedState={false}
           reportType={PDF_REPORT_TYPE_V2}
           apiClient={apiClient}
-          uiSettings={core.uiSettings}
           toasts={core.notifications.toasts}
+          uiSettings={core.uiSettings}
           {...props}
         />
       );
@@ -58,8 +58,8 @@ export function getSharedComponents(core: CoreSetup, apiClient: ReportingAPIClie
           requiresSavedState={false}
           reportType={PNG_REPORT_TYPE_V2}
           apiClient={apiClient}
-          uiSettings={core.uiSettings}
           toasts={core.notifications.toasts}
+          uiSettings={core.uiSettings}
           {...props}
         />
       );

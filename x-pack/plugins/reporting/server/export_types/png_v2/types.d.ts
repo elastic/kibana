@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { SerializableState } from 'src/plugins/kibana_utils/common';
-import { LocatorParams } from '../../../common/types';
-import { LayoutParams } from '../../lib/layouts';
-import { BaseParams, BasePayload } from '../../types';
+import type { LocatorParams } from '../../../common/types';
+import type { LayoutParams } from '../../lib/layouts';
+import type { BaseParams, BasePayload } from '../../types';
 
 // Job params: structure of incoming user request data
 export interface JobParamsPNGV2 extends BaseParams {

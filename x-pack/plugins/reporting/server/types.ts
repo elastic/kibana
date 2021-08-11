@@ -22,7 +22,6 @@ import { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
 import { LevelLogger } from './lib';
 import { ReportTaskParams } from './lib/tasks';
-import { LocatorParams } from '../common/types';
 
 /*
  * Plugin Contract
