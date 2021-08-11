@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
@@ -76,6 +76,11 @@ export const TimeSeries = ({
     isDateHistogram: true,
   });
 
+  const hasVisibleAnnotations = useMemo(
+    () => (annotations ?? []).some((annotation) => Boolean(annotation.data?.length)),
+    [annotations]
+  );
+
   let tooltipFormatter = decorateFormatter(xAxisFormatter);
   if (!isLastBucketDropped) {
     const domainBounds = calculateDomainForSeries(series);
@@ -124,7 +129,6 @@ export const TimeSeries = ({
     },
     [palettesService, series, syncColors]
   );
-
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
       <Settings
@@ -137,7 +141,18 @@ export const TimeSeries = ({
         animateData={false}
         onPointerUpdate={handleCursorUpdate}
         theme={[
-          chartTheme,
+          {
+            crosshair: {
+              ...chartTheme.crosshair,
+            },
+            axes: {
+              tickLabel: {
+                padding: {
+                  inner: hasVisibleAnnotations ? 19 : chartTheme.axes.tickLabel.padding.inner,
+                },
+              },
+            },
+          },
           hasBarChart
             ? {}
             : {
@@ -152,6 +167,7 @@ export const TimeSeries = ({
               color: backgroundColor,
             },
           },
+          chartTheme,
         ]}
         baseTheme={baseTheme}
         tooltip={{
