@@ -258,7 +258,6 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       <EuiSpacer />
       {field.value && field.value[0].streams?.length ? (
         <ScheduledQueryGroupQueriesTable
-          editMode={true}
           data={tableData}
           onEditClick={handleEditClick}
           onDeleteClick={handleDeleteClick}

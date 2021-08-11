@@ -34,7 +34,7 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   <EuiCodeEditor
     value={defaultValue}
     mode="osquery"
-    isReadOnly={disabled}
+    // isReadOnly={!!disabled}
     theme="tomorrow"
     onChange={onChange}
     name="osquery_editor"

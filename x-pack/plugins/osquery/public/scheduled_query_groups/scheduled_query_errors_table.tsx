@@ -36,6 +36,8 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
 }) => {
   const data = useKibana().services.data;
 
+  console.error('actionId', actionId);
+
   const { data: lastErrosData, isFetched } = useQuery(
     ['scheduledQueryErrors', { actionId, interval }],
     async () => {
@@ -43,38 +45,36 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
       const searchSource = await data.search.searchSource.create({
         index: indexPattern[0],
         fields: ['*'],
+        aggs: {
+          unique_agents: { cardinality: { field: 'agent.id' } },
+        },
         query: {
           bool: {
-            must: [],
             filter: [
               {
-                bool: {
-                  should: [
-                    {
-                      match_phrase: {
-                        message: actionId,
-                      },
-                    },
-                    {
-                      match_phrase: {
-                        message: 'Error',
-                      },
-                    },
-                  ],
-                  minimum_should_match: 2,
+                term: {
+                  'log.logger': 'osquerybeat',
+                },
+              },
+              {
+                term: {
+                  'log.level': 'error',
+                },
+              },
+              {
+                match_phrase: {
+                  message: actionId,
                 },
               },
               {
                 range: {
                   '@timestamp': {
-                    gte: `now-${(interval ?? 60) * 20000}s`,
+                    gte: `now-${(interval ?? 60) * 2}s`,
                     lte: 'now',
                   },
                 },
               },
             ],
-            should: [],
-            must_not: [],
           },
         },
         size: 100,
@@ -151,6 +151,8 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
     }),
     []
   );
+
+  console.error('lastErrosData', lastErrosData);
 
   return lastErrosData?.hits.length ? (
     <EuiInMemoryTable items={lastErrosData.hits} columns={columns} pagination={pagination} />
