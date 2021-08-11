@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import querystring from 'querystring';
-import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
+import { authorizedUserPreRouting } from './lib/authorized_user_pre_routing';
 import { API_BASE_URL } from '../../common/constants';
 import { HandlerErrorFunction, HandlerFunction } from './types';
 import { ReportingCore } from '../core';
@@ -22,7 +22,6 @@ export function registerLegacy(
   logger: LevelLogger
 ) {
   const { router } = reporting.getPluginSetupDeps();
-  const userHandler = authorizedUserPreRoutingFactory(reporting);
 
   function createLegacyPdfRoute({ path, objectType }: { path: string; objectType: string }) {
     const exportTypeId = 'printablePdf';
@@ -38,7 +37,7 @@ export function registerLegacy(
         },
       },
 
-      userHandler(async (user, context, req, res) => {
+      authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         const message = `The following URL is deprecated and will stop working in the next major version: ${req.url.pathname}${req.url.search}`;
         logger.warn(message, ['deprecation']);
 
