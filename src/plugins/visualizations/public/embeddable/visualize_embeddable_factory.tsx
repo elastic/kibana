@@ -59,10 +59,7 @@ interface VisualizationAttributes extends SavedObjectAttributes {
 
 export interface VisualizeEmbeddableFactoryDeps {
   start: StartServicesGetter<
-    Pick<
-      VisualizationsStartDeps,
-      'inspector' | 'embeddable' | 'savedObjectsClient' | 'executionContext'
-    >
+    Pick<VisualizationsStartDeps, 'inspector' | 'embeddable' | 'savedObjectsClient'>
   >;
 }
 

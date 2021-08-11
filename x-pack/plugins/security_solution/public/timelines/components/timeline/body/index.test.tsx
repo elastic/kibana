@@ -51,6 +51,7 @@ jest.mock('../../../../common/lib/kibana', () => {
           getAddToCasePopover: jest
             .fn()
             .mockReturnValue(<div data-test-subj="add-to-case-action">{'Add to case'}</div>),
+          getAddToCaseAction: jest.fn(),
         },
       },
     }),

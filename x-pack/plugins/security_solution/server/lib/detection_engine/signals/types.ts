@@ -33,6 +33,8 @@ import { BuildRuleMessage } from './rule_messages';
 import { TelemetryEventsSender } from '../../telemetry/sender';
 import { RuleParams } from '../schemas/rule_schemas';
 import { GenericBulkCreateResponse } from './bulk_create_factory';
+import { EcsFieldMap } from '../../../../../rule_registry/common/assets/field_maps/ecs_field_map';
+import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -119,6 +121,7 @@ export interface SignalSource {
     original_time?: string;
     threshold_result?: ThresholdResult;
   };
+  kibana?: SearchTypes;
 }
 
 export interface BulkItem {
@@ -166,6 +169,12 @@ export interface GetResponse {
   _source: SearchTypes;
 }
 
+export type EventHit = Exclude<TypeOfFieldMap<EcsFieldMap>, '@timestamp'> & {
+  '@timestamp': string;
+  [key: string]: SearchTypes;
+};
+export type WrappedEventHit = BaseHit<EventHit>;
+
 export type SignalSearchResponse = estypes.SearchResponse<SignalSource>;
 export type SignalSourceHit = estypes.SearchHit<SignalSource>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
@@ -186,7 +195,7 @@ export const isAlertExecutor = (
   obj: SignalRuleAlertTypeDefinition
 ): obj is AlertType<
   RuleParams,
-  never, // Only use if defining useSavedObjectReferences hook
+  RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
@@ -197,7 +206,7 @@ export const isAlertExecutor = (
 
 export type SignalRuleAlertTypeDefinition = AlertType<
   RuleParams,
-  never, // Only use if defining useSavedObjectReferences hook
+  RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
