@@ -10,44 +10,30 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 
 import {
-  fetchTransactionDurationRanges,
-  getTransactionDurationRangesRequest,
-} from './query_ranges';
+  fetchTransactionDurationHistogram,
+  getTransactionDurationHistogramRequest,
+} from './query_histogram';
 
-const params = { index: 'apm-*', start: '2020', end: '2021' };
-const rangeSteps = [1, 3, 5];
+const params = {
+  index: 'apm-*',
+  start: '2020',
+  end: '2021',
+  includeFrozen: false,
+};
+const interval = 100;
 
-describe('query_ranges', () => {
-  describe('getTransactionDurationRangesRequest', () => {
-    it('returns the request body for the duration percentiles request', () => {
-      const req = getTransactionDurationRangesRequest(params, rangeSteps);
+describe('query_histogram', () => {
+  describe('getTransactionDurationHistogramRequest', () => {
+    it('returns the request body for the histogram request', () => {
+      const req = getTransactionDurationHistogramRequest(params, interval);
 
       expect(req).toEqual({
         body: {
           aggs: {
-            logspace_ranges: {
-              range: {
+            transaction_duration_histogram: {
+              histogram: {
                 field: 'transaction.duration.us',
-                ranges: [
-                  {
-                    to: 0,
-                  },
-                  {
-                    from: 0,
-                    to: 1,
-                  },
-                  {
-                    from: 1,
-                    to: 3,
-                  },
-                  {
-                    from: 3,
-                    to: 5,
-                  },
-                  {
-                    from: 5,
-                  },
-                ],
+                interval,
               },
             },
           },
@@ -74,28 +60,18 @@ describe('query_ranges', () => {
           size: 0,
         },
         index: params.index,
+        ignore_throttled: !params.includeFrozen,
+        ignore_unavailable: true,
       });
     });
   });
 
-  describe('fetchTransactionDurationRanges', () => {
-    it('fetches the percentiles', async () => {
-      const logspaceRangesBuckets = [
+  describe('fetchTransactionDurationHistogram', () => {
+    it('returns the buckets from the histogram aggregation', async () => {
+      const histogramBucket = [
         {
-          key: '*-100.0',
-          to: 100.0,
-          doc_count: 2,
-        },
-        {
-          key: '100.0-200.0',
-          from: 100.0,
-          to: 200.0,
-          doc_count: 2,
-        },
-        {
-          key: '200.0-*',
-          from: 200.0,
-          doc_count: 3,
+          key: 0.0,
+          doc_count: 1,
         },
       ];
 
@@ -105,8 +81,8 @@ describe('query_ranges', () => {
         return {
           body: ({
             aggregations: {
-              logspace_ranges: {
-                buckets: logspaceRangesBuckets,
+              transaction_duration_histogram: {
+                buckets: histogramBucket,
               },
             },
           } as unknown) as estypes.SearchResponse,
@@ -117,16 +93,13 @@ describe('query_ranges', () => {
         search: esClientSearchMock,
       } as unknown) as ElasticsearchClient;
 
-      const resp = await fetchTransactionDurationRanges(
+      const resp = await fetchTransactionDurationHistogram(
         esClientMock,
         params,
-        rangeSteps
+        interval
       );
 
-      expect(resp).toEqual([
-        { doc_count: 2, key: 100 },
-        { doc_count: 3, key: 200 },
-      ]);
+      expect(resp).toEqual(histogramBucket);
       expect(esClientSearchMock).toHaveBeenCalledTimes(1);
     });
   });

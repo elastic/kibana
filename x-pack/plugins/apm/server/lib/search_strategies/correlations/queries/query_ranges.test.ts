@@ -10,26 +10,49 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 
 import {
-  fetchTransactionDurationPercentiles,
-  getTransactionDurationPercentilesRequest,
-} from './query_percentiles';
+  fetchTransactionDurationRanges,
+  getTransactionDurationRangesRequest,
+} from './query_ranges';
 
-const params = { index: 'apm-*', start: '2020', end: '2021' };
+const params = {
+  index: 'apm-*',
+  start: '2020',
+  end: '2021',
+  includeFrozen: false,
+};
+const rangeSteps = [1, 3, 5];
 
-describe('query_percentiles', () => {
-  describe('getTransactionDurationPercentilesRequest', () => {
+describe('query_ranges', () => {
+  describe('getTransactionDurationRangesRequest', () => {
     it('returns the request body for the duration percentiles request', () => {
-      const req = getTransactionDurationPercentilesRequest(params);
+      const req = getTransactionDurationRangesRequest(params, rangeSteps);
 
       expect(req).toEqual({
         body: {
           aggs: {
-            transaction_duration_percentiles: {
-              percentiles: {
+            logspace_ranges: {
+              range: {
                 field: 'transaction.duration.us',
-                hdr: {
-                  number_of_significant_value_digits: 3,
-                },
+                ranges: [
+                  {
+                    to: 0,
+                  },
+                  {
+                    from: 0,
+                    to: 1,
+                  },
+                  {
+                    from: 1,
+                    to: 3,
+                  },
+                  {
+                    from: 3,
+                    to: 5,
+                  },
+                  {
+                    from: 5,
+                  },
+                ],
               },
             },
           },
@@ -54,35 +77,43 @@ describe('query_percentiles', () => {
             },
           },
           size: 0,
-          track_total_hits: true,
         },
         index: params.index,
+        ignore_throttled: !params.includeFrozen,
+        ignore_unavailable: true,
       });
     });
   });
 
-  describe('fetchTransactionDurationPercentiles', () => {
+  describe('fetchTransactionDurationRanges', () => {
     it('fetches the percentiles', async () => {
-      const totalDocs = 10;
-      const percentilesValues = {
-        '1.0': 5.0,
-        '5.0': 25.0,
-        '25.0': 165.0,
-        '50.0': 445.0,
-        '75.0': 725.0,
-        '95.0': 945.0,
-        '99.0': 985.0,
-      };
+      const logspaceRangesBuckets = [
+        {
+          key: '*-100.0',
+          to: 100.0,
+          doc_count: 2,
+        },
+        {
+          key: '100.0-200.0',
+          from: 100.0,
+          to: 200.0,
+          doc_count: 2,
+        },
+        {
+          key: '200.0-*',
+          from: 200.0,
+          doc_count: 3,
+        },
+      ];
 
       const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
         body: estypes.SearchResponse;
       } => {
         return {
           body: ({
-            hits: { total: { value: totalDocs } },
             aggregations: {
-              transaction_duration_percentiles: {
-                values: percentilesValues,
+              logspace_ranges: {
+                buckets: logspaceRangesBuckets,
               },
             },
           } as unknown) as estypes.SearchResponse,
@@ -93,12 +124,16 @@ describe('query_percentiles', () => {
         search: esClientSearchMock,
       } as unknown) as ElasticsearchClient;
 
-      const resp = await fetchTransactionDurationPercentiles(
+      const resp = await fetchTransactionDurationRanges(
         esClientMock,
-        params
+        params,
+        rangeSteps
       );
 
-      expect(resp).toEqual({ percentiles: percentilesValues, totalDocs });
+      expect(resp).toEqual([
+        { doc_count: 2, key: 100 },
+        { doc_count: 3, key: 200 },
+      ]);
       expect(esClientSearchMock).toHaveBeenCalledTimes(1);
     });
   });

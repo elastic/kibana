@@ -10,25 +10,33 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 
 import {
-  fetchTransactionDurationHistogram,
-  getTransactionDurationHistogramRequest,
-} from './query_histogram';
+  fetchTransactionDurationHistogramInterval,
+  getHistogramIntervalRequest,
+} from './query_histogram_interval';
 
-const params = { index: 'apm-*', start: '2020', end: '2021' };
-const interval = 100;
+const params = {
+  index: 'apm-*',
+  start: '2020',
+  end: '2021',
+  includeFrozen: false,
+};
 
-describe('query_histogram', () => {
-  describe('getTransactionDurationHistogramRequest', () => {
-    it('returns the request body for the histogram request', () => {
-      const req = getTransactionDurationHistogramRequest(params, interval);
+describe('query_histogram_interval', () => {
+  describe('getHistogramIntervalRequest', () => {
+    it('returns the request body for the transaction duration ranges aggregation', () => {
+      const req = getHistogramIntervalRequest(params);
 
       expect(req).toEqual({
         body: {
           aggs: {
-            transaction_duration_histogram: {
-              histogram: {
+            transaction_duration_max: {
+              max: {
                 field: 'transaction.duration.us',
-                interval,
+              },
+            },
+            transaction_duration_min: {
+              min: {
+                field: 'transaction.duration.us',
               },
             },
           },
@@ -54,28 +62,26 @@ describe('query_histogram', () => {
           },
           size: 0,
         },
-        index: 'apm-*',
+        index: params.index,
+        ignore_throttled: !params.includeFrozen,
+        ignore_unavailable: true,
       });
     });
   });
 
-  describe('fetchTransactionDurationHistogram', () => {
-    it('returns the buckets from the histogram aggregation', async () => {
-      const histogramBucket = [
-        {
-          key: 0.0,
-          doc_count: 1,
-        },
-      ];
-
+  describe('fetchTransactionDurationHistogramInterval', () => {
+    it('fetches the interval duration for histograms', async () => {
       const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
         body: estypes.SearchResponse;
       } => {
         return {
           body: ({
             aggregations: {
-              transaction_duration_histogram: {
-                buckets: histogramBucket,
+              transaction_duration_max: {
+                value: 10000,
+              },
+              transaction_duration_min: {
+                value: 10,
               },
             },
           } as unknown) as estypes.SearchResponse,
@@ -86,13 +92,12 @@ describe('query_histogram', () => {
         search: esClientSearchMock,
       } as unknown) as ElasticsearchClient;
 
-      const resp = await fetchTransactionDurationHistogram(
+      const resp = await fetchTransactionDurationHistogramInterval(
         esClientMock,
-        params,
-        interval
+        params
       );
 
-      expect(resp).toEqual(histogramBucket);
+      expect(resp).toEqual(10);
       expect(esClientSearchMock).toHaveBeenCalledTimes(1);
     });
   });
