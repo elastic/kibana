@@ -9,7 +9,7 @@ import { useState, useCallback, useMemo, SyntheticEvent } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { Case } from '../../../cases/common';
+import { Case, SubCase } from '../../../cases/common';
 import { TimelinesStartServices } from '../types';
 import { tGridActions } from '../store/t_grid';
 import { useDeepEqualSelector } from './use_selector';
@@ -19,8 +19,10 @@ import { AddToCaseActionProps } from '../components/actions/timeline/cases/add_t
 interface UseAddToCase {
   addNewCaseClick: () => void;
   addExistingCaseClick: () => void;
-  onCaseClicked: (theCase: Case) => void;
-  goToCreateCase: (ev: SyntheticEvent) => Promise<void>;
+  onCaseClicked: (theCase?: Case | SubCase) => void;
+  goToCreateCase: (
+    arg: MouseEvent | React.MouseEvent<Element, MouseEvent> | null
+  ) => void | Promise<void>;
   onCaseSuccess: (theCase: Case) => Promise<void>;
   attachAlertToCase: (
     theCase: Case,
@@ -180,7 +182,7 @@ export const useAddToCase = ({
   );
 
   const onCaseClicked = useCallback(
-    (theCase: Case) => {
+    (theCase?: Case | SubCase) => {
       /**
        * No cases listed on the table.
        * The user pressed the add new case table's button.
@@ -197,10 +199,7 @@ export const useAddToCase = ({
     closePopover();
     dispatch(tGridActions.setOpenAddToNewCase({ id: eventId, isOpen: true }));
     if (closeCallbacks.length > 0) {
-      closeCallbacks.map((callback: Function) => {
-        callback();
-        return null;
-      });
+      closeCallbacks.map((callback: Function) => callback());
     }
   }, [closePopover, closeCallbacks, dispatch, eventId]);
 
@@ -208,10 +207,7 @@ export const useAddToCase = ({
     closePopover();
     dispatch(tGridActions.setOpenAddToExistingCase({ id: eventId, isOpen: true }));
     if (closeCallbacks.length > 0) {
-      closeCallbacks.map((callback: Function) => {
-        callback();
-        return null;
-      });
+      closeCallbacks.map((callback: Function) => callback());
     }
   }, [closePopover, closeCallbacks, dispatch, eventId]);
   return {

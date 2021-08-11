@@ -13,7 +13,6 @@ import { useAddToCase } from '../../../../hooks/use_add_to_case';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimelinesStartServices } from '../../../../types';
 import { CreateCaseFlyout } from './create/flyout';
-import { AddToCaseActionButton } from './add_to_case_action_button';
 import { tGridActions } from '../../../../';
 import * as i18n from './translations';
 
@@ -26,7 +25,7 @@ export interface AddToCaseActionProps {
     read: boolean;
   } | null;
   appId: string;
-  closeCallbacks: Function[];
+  closeCallbacks?: Function[];
 }
 
 const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
@@ -72,6 +71,8 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
       updateCase: onCaseSuccess,
       userCanCrud: casePermissions?.crud ?? false,
       owner: [appId],
+      onClose: () =>
+        dispatch(tGridActions.setOpenAddToExistingCase({ id: eventId, isOpen: false })),
     };
   }, [
     casePermissions?.crud,
@@ -84,6 +85,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     rule?.id,
     rule?.name,
     appId,
+    dispatch,
   ]);
 
   const closeCaseFlyoutOpen = useCallback(() => {
@@ -92,14 +94,6 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
 
   return (
     <>
-      <AddToCaseActionButton
-        ariaLabel={ariaLabel}
-        ecsRowData={ecsRowData}
-        useInsertTimeline={useInsertTimeline}
-        casePermissions={casePermissions}
-        appId={appId}
-        closeCallbacks={closeCallbacks}
-      />
       {isCreateCaseFlyoutOpen && (
         <CreateCaseFlyout
           afterCaseCreated={attachAlertToCase}

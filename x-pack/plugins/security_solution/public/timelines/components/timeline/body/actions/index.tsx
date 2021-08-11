@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
@@ -185,7 +185,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           TimelineId.detectionsRulesDetailsPage,
           TimelineId.active,
         ].includes(timelineId as TimelineId) &&
-          timelinesUi.getAddToCaseAction(addToCaseActionProps)}
+          timelinesUi.getAddToCasePopover(addToCaseActionProps)}
         <AlertContextMenu
           ariaLabel={i18n.MORE_ACTIONS_FOR_ROW({ ariaRowindex, columnValues })}
           key="alert-context-menu"
@@ -196,6 +196,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           onRuleChange={onRuleChange}
         />
       </>
+      {timelinesUi.getAddToCaseAction(addToCaseActionProps)}
     </ActionsContainer>
   );
 };

@@ -44,7 +44,7 @@ jest.mock(
   '../../../../../../../timelines/public/components/actions/timeline/cases/add_to_case_action',
   () => {
     return {
-      AddToCaseAction: () => {
+      AddToCasePopover: () => {
         return <div data-test-subj="add-to-case-action">{'Add to case'}</div>;
       },
     };

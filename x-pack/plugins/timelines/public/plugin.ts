@@ -23,6 +23,7 @@ import {
   getAddToCaseLazy,
   getAddToExistingCaseButtonLazy,
   getAddToNewCaseButtonLazy,
+  getAddToCasePopoverLazy,
 } from './methods';
 import type { TimelinesUIStart, TGridProps, TimelinesStartPlugins } from './types';
 import { tGridReducer } from './store/t_grid/reducer';
@@ -82,17 +83,8 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       getAddToCaseAction: (props) => {
         return getAddToCaseLazy(props);
       },
-      getAddToCaseHook: () => {
-        return async function () {
-          /**
-           * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-           * See https://webpack.js.org/api/module-methods/#magic-comments
-           */
-          const addToCase = await import(
-            /* webpackChunkName: "timelinesExports" */ './hooks/use_add_to_case'
-          );
-          return addToCase;
-        };
+      getAddToCasePopover: (props) => {
+        return getAddToCasePopoverLazy(props, this._store!);
       },
       getAddToExistingCaseButton: (props) => {
         return getAddToExistingCaseButtonLazy(props, this._store!);
