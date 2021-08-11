@@ -8,10 +8,10 @@
 import { readUploadedFileAsBase64 } from './';
 
 describe('readUploadedFileAsBase64', () => {
-  it('reads a file as data URL', async () => {
+  it('reads a file and returns base64 string', async () => {
     const file = new File(['a mock file'], 'mockFile.png', { type: 'img/png' });
     const text = await readUploadedFileAsBase64(file);
-    expect(text).toEqual('data:image/png;base64,YSBtb2NrIGZpbGU=');
+    expect(text).toEqual('YSBtb2NrIGZpbGU=');
   });
 
   it('throws an error if the file cannot be read', async () => {
