@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.browser.json",
+  "compilerOptions": {
+    "incremental": false,
+    "composite": false
+  }
+}
