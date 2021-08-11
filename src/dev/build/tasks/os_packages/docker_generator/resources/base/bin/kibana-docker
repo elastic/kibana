@@ -191,6 +191,7 @@ kibana_vars=(
     telemetry.enabled
     telemetry.optIn
     telemetry.optInStatusUrl
+    telemetry.sendUsageTo
     telemetry.sendUsageFrom
     tilemap.options.attribution
     tilemap.options.maxZoom
@@ -394,7 +395,6 @@ kibana_vars=(
     xpack.spaces.enabled
     xpack.spaces.maxSpaces
     xpack.task_manager.enabled
-    xpack.task_manager.index
     xpack.task_manager.max_attempts
     xpack.task_manager.max_poll_inactivity_cycles
     xpack.task_manager.max_workers

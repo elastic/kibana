@@ -34,7 +34,7 @@ export interface Props {
   value: string;
 
   /** Function invoked when text in editor is changed */
-  onChange: (value: string, event: monaco.editor.IModelContentChangedEvent) => void;
+  onChange?: (value: string, event: monaco.editor.IModelContentChangedEvent) => void;
 
   /**
    * Options for the Monaco Code Editor
@@ -193,6 +193,9 @@ export class CodeEditor extends React.Component<Props, {}> {
             wordWrap: 'on',
             wrappingIndent: 'indent',
             matchBrackets: 'never',
+            fontFamily: 'Roboto Mono',
+            fontSize: 12,
+            lineHeight: 21,
             ...options,
           }}
         />

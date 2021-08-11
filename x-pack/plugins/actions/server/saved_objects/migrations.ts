@@ -14,6 +14,7 @@ import {
 } from '../../../../../src/core/server';
 import { RawAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
 
 interface ActionsLogMeta extends LogMeta {
   migrations: { actionDocument: SavedObjectUnsanitizedDoc<RawAction> };
@@ -23,17 +24,31 @@ type ActionMigration = (
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ) => SavedObjectUnsanitizedDoc<RawAction>;
 
+function createEsoMigration(
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  isMigrationNeededPredicate: IsMigrationNeededPredicate<RawAction, RawAction>,
+  migrationFunc: ActionMigration
+) {
+  return encryptedSavedObjects.createMigration<RawAction, RawAction>({
+    isMigrationNeededPredicate,
+    migration: migrationFunc,
+    shouldMigrateIfDecryptionFails: true, // shouldMigrateIfDecryptionFails flag that applies the migration to undecrypted document if decryption fails
+  });
+}
+
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
-  const migrationActionsTen = encryptedSavedObjects.createMigration<RawAction, RawAction>(
+  const migrationActionsTen = createEsoMigration(
+    encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
       doc.attributes.config?.hasOwnProperty('casesConfiguration') ||
       doc.attributes.actionTypeId === '.email',
     pipeMigrations(renameCasesConfigurationObject, addHasAuthConfigurationObject)
   );
 
-  const migrationActionsEleven = encryptedSavedObjects.createMigration<RawAction, RawAction>(
+  const migrationActionsEleven = createEsoMigration(
+    encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
       doc.attributes.config?.hasOwnProperty('isCaseOwned') ||
       doc.attributes.config?.hasOwnProperty('incidentConfiguration') ||
@@ -41,7 +56,8 @@ export function getMigrations(
     pipeMigrations(removeCasesFieldMappings, addHasAuthConfigurationObject)
   );
 
-  const migrationActionsFourteen = encryptedSavedObjects.createMigration<RawAction, RawAction>(
+  const migrationActionsFourteen = createEsoMigration(
+    encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => true,
     pipeMigrations(addisMissingSecretsField)
   );
@@ -69,8 +85,8 @@ function executeMigrationWithErrorHandling(
           },
         }
       );
+      throw ex;
     }
-    return doc;
   };
 }
 
@@ -120,7 +136,7 @@ const addHasAuthConfigurationObject = (
   if (doc.attributes.actionTypeId !== '.email' && doc.attributes.actionTypeId !== '.webhook') {
     return doc;
   }
-  const hasAuth = !!doc.attributes.secrets.user || !!doc.attributes.secrets.password;
+  const hasAuth = !!doc.attributes.secrets?.user || !!doc.attributes.secrets?.password;
   return {
     ...doc,
     attributes: {

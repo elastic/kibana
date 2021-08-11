@@ -1,8 +1,22 @@
 [[add-aggregation-based-visualization-panels]]
 === Aggregation-based
 
-Aggregation-based visualizations are the core {kib} panels, and are not optimized
-for a specific use case.
+Aggregation-based visualizations are the core {kib} panels, and are not optimized for a specific use case.
+
+With aggregation-based visualizations, you can:
+
+* Split charts up to three aggregation levels, which is more than *Lens* and *TSVB*
+* Create visualization with non-time series data
+* Use a <<save-open-search,saved search>> as an input
+* Sort data tables and use the summary row and percentage column features
+* Assign colors to data series
+* Extend features with plugins
+
+Aggregation-based visualizations include the following limitations:
+
+* Limited styling options
+* Math is unsupported
+* Multiple indices is unsupported
 
 [float]
 [[types-of-visualizations]]
@@ -135,7 +149,7 @@ Add the sample web logs data that you'll use to create the bar chart, then creat
 [float]
 ===== Open and set up the aggregation-based bar chart
 
-Open the bar chart visualization builder and change the time range. 
+Open the *Aggregation based* editor and change the time range. 
 
 . On the dashboard, click *All types > Aggregation based*, select *Vertical bar*, then select *kibana_sample_data_logs*.
 

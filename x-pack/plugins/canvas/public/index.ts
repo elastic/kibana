@@ -18,4 +18,5 @@ export interface WithKibanaProps {
   };
 }
 
-export const plugin = (_initializerContext: PluginInitializerContext) => new CanvasPlugin();
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new CanvasPlugin(initializerContext);

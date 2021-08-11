@@ -59,6 +59,42 @@
         ]
       }
     },
+    "/settings": {
+      "get": {
+        "summary": "Settings",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/fleet_settings_response"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-settings"
+      },
+      "post": {
+        "summary": "Settings - Update",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/fleet_settings_response"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "update-settings"
+      }
+    },
     "/epm/categories": {
       "get": {
         "summary": "Package categories",
@@ -1643,6 +1679,173 @@
           }
         ]
       }
+    },
+    "/outputs": {
+      "get": {
+        "summary": "Outputs",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/output"
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-outputs"
+      }
+    },
+    "/outputs/{outputId}": {
+      "get": {
+        "summary": "Output - Info",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/output"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-output"
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "outputId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "put": {
+        "summary": "Output - Update",
+        "operationId": "update-output",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "hosts": {
+                    "type": "string"
+                  },
+                  "ca_sha256": {
+                    "type": "string"
+                  },
+                  "config": {
+                    "type": "object"
+                  },
+                  "config_yaml": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/output"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
+    },
+    "/epm/packages/{pkgName}/stats": {
+      "get": {
+        "summary": "Get stats for a package",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "$ref": "#/components/schemas/package_usage_stats"
+                    }
+                  },
+                  "required": [
+                    "response"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-package-stats",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "pkgName",
+          "in": "path",
+          "required": true
+        }
+      ]
     }
   },
   "components": {
@@ -1731,6 +1934,43 @@
         "required": [
           "isInitialized",
           "nonFatalErrors"
+        ]
+      },
+      "settings": {
+        "title": "Settings",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "has_seen_add_data_notice": {
+            "type": "boolean"
+          },
+          "has_seen_fleet_migration_notice": {
+            "type": "boolean"
+          },
+          "fleet_server_hosts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "fleet_server_hosts",
+          "id"
+        ]
+      },
+      "fleet_settings_response": {
+        "title": "Fleet settings response",
+        "type": "object",
+        "properties": {
+          "item": {
+            "$ref": "#/components/schemas/settings"
+          }
+        },
+        "required": [
+          "item"
         ]
       },
       "search_result": {
@@ -2388,6 +2628,63 @@
           {
             "$ref": "#/components/schemas/new_package_policy"
           }
+        ]
+      },
+      "output": {
+        "title": "Output",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "elasticsearch"
+            ]
+          },
+          "hosts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ca_sha256": {
+            "type": "string"
+          },
+          "api_key": {
+            "type": "string"
+          },
+          "config": {
+            "type": "object"
+          },
+          "config_yaml": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "is_default",
+          "name",
+          "type"
+        ]
+      },
+      "package_usage_stats": {
+        "title": "Package usage stats",
+        "type": "object",
+        "properties": {
+          "agent_policy_count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "agent_policy_count"
         ]
       }
     }

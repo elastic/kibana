@@ -6,19 +6,19 @@
  */
 
 import { getSuggestions } from './xy_suggestions';
-import { TableSuggestionColumn, VisualizationSuggestion, TableSuggestion } from '../types';
+import type { TableSuggestionColumn, VisualizationSuggestion, TableSuggestion } from '../types';
 import { State, XYState, visualizationTypes } from './types';
 import { generateId } from '../id_generator';
 import { getXyVisualization } from './xy_visualization';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
-import { PaletteOutput } from 'src/plugins/charts/public';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+import type { PaletteOutput } from 'src/plugins/charts/public';
 
 jest.mock('../id_generator');
 
 const xyVisualization = getXyVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
-  data: dataPluginMock.createStartContract(),
+  fieldFormats: fieldFormatsServiceMock.createStartContract(),
 });
 
 describe('xy_suggestions', () => {
@@ -633,6 +633,7 @@ describe('xy_suggestions', () => {
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },
+      labelsOrientation: { x: 0, yLeft: -45, yRight: -45 },
       preferredSeriesType: 'bar',
       layers: [
         {
@@ -675,6 +676,7 @@ describe('xy_suggestions', () => {
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },
+      labelsOrientation: { x: 0, yLeft: -45, yRight: -45 },
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -790,6 +792,7 @@ describe('xy_suggestions', () => {
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },
+      labelsOrientation: { x: 0, yLeft: -45, yRight: -45 },
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -833,6 +836,7 @@ describe('xy_suggestions', () => {
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },
+      labelsOrientation: { x: 0, yLeft: -45, yRight: -45 },
       layers: [
         {
           accessors: ['price'],
@@ -877,6 +881,7 @@ describe('xy_suggestions', () => {
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: false },
+      labelsOrientation: { x: 0, yLeft: -45, yRight: -45 },
       layers: [
         {
           accessors: ['price', 'quantity'],

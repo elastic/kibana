@@ -24,27 +24,32 @@ import {
   updateDatasourceState,
   updateVisualizationState,
   setToggleFullscreen,
+  useLensSelector,
+  selectVisualization,
 } from '../../../state_management';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
-  const activeVisualization = props.visualizationMap[props.activeVisualizationId || ''];
-  const { visualizationState } = props;
+  const visualization = useLensSelector(selectVisualization);
+  const activeVisualization = visualization.activeId
+    ? props.visualizationMap[visualization.activeId]
+    : null;
 
-  return activeVisualization && visualizationState ? (
+  return activeVisualization && visualization.state ? (
     <LayerPanels {...props} activeVisualization={activeVisualization} />
   ) : null;
 });
 
 export function LayerPanels(
   props: ConfigPanelWrapperProps & {
-    activeDatasourceId: string;
     activeVisualization: Visualization;
   }
 ) {
-  const { activeVisualization, visualizationState, activeDatasourceId, datasourceMap } = props;
+  const { activeVisualization, datasourceMap } = props;
+  const { activeDatasourceId, visualization } = useLensSelector((state) => state.lens);
+
   const dispatchLens = useLensDispatch();
 
-  const layerIds = activeVisualization.getLayerIds(visualizationState);
+  const layerIds = activeVisualization.getLayerIds(visualization.state);
   const {
     setNextFocusedId: setNextFocusedLayerId,
     removeRef: removeLayerRef,
@@ -142,7 +147,7 @@ export function LayerPanels(
             key={layerId}
             layerId={layerId}
             layerIndex={layerIndex}
-            visualizationState={visualizationState}
+            visualizationState={visualization.state}
             updateVisualization={setVisualizationState}
             updateDatasource={updateDatasource}
             updateDatasourceAsync={updateDatasourceAsync}
@@ -190,7 +195,7 @@ export function LayerPanels(
           />
         ) : null
       )}
-      {activeVisualization.appendLayer && visualizationState && (
+      {activeVisualization.appendLayer && visualization.state && (
         <EuiFlexItem grow={true} className="lnsConfigPanel__addLayerBtnWrapper">
           <EuiToolTip
             className="eui-fullWidth"
@@ -199,7 +204,7 @@ export function LayerPanels(
             })}
             content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
               defaultMessage:
-                'Use multiple layers to combine chart types or visualize different index patterns.',
+                'Use multiple layers to combine visualization types or visualize different index patterns.',
             })}
             position="bottom"
           >
@@ -223,7 +228,7 @@ export function LayerPanels(
                         activeVisualization,
                         generateId: () => id,
                         trackUiEvent,
-                        activeDatasource: datasourceMap[activeDatasourceId],
+                        activeDatasource: datasourceMap[activeDatasourceId!],
                         state,
                       }),
                   })

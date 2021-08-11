@@ -15,8 +15,6 @@ import type {
   PluginInitializerContext,
   SavedObjectsServiceStart,
   HttpServiceSetup,
-  RequestHandlerContext,
-  KibanaRequest,
 } from 'kibana/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
@@ -29,7 +27,7 @@ import type {
 } from '../../encrypted_saved_objects/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import type { FleetConfigType, NewPackagePolicy, UpdatePackagePolicy } from '../common';
+import type { FleetConfigType } from '../common';
 import { INTEGRATIONS_PLUGIN_ID } from '../common';
 import type { CloudSetup } from '../../cloud/server';
 
@@ -57,6 +55,8 @@ import {
   registerAppRoutes,
   registerPreconfigurationRoutes,
 } from './routes';
+
+import type { ExternalCallback } from './types';
 import type {
   ESIndexPatternService,
   AgentService,
@@ -72,6 +72,7 @@ import {
 } from './services';
 import {
   getAgentStatusById,
+  getAgentStatusForAgentPolicy,
   authenticateAgentWithAccessToken,
   getAgentsByKuery,
   getAgentById,
@@ -125,29 +126,6 @@ const allSavedObjectTypes = [
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 ];
-
-/**
- * Callbacks supported by the Fleet plugin
- */
-export type ExternalCallback =
-  | [
-      'packagePolicyCreate',
-      (
-        newPackagePolicy: NewPackagePolicy,
-        context: RequestHandlerContext,
-        request: KibanaRequest
-      ) => Promise<NewPackagePolicy>
-    ]
-  | [
-      'packagePolicyUpdate',
-      (
-        newPackagePolicy: UpdatePackagePolicy,
-        context: RequestHandlerContext,
-        request: KibanaRequest
-      ) => Promise<UpdatePackagePolicy>
-    ];
-
-export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
 
 /**
  * Describes public Fleet plugin contract returned at the `startup` stage.
@@ -309,6 +287,7 @@ export class FleetPlugin
         getAgent: getAgentById,
         listAgents: getAgentsByKuery,
         getAgentStatusById,
+        getAgentStatusForAgentPolicy,
         authenticateAgentWithAccessToken,
       },
       agentPolicyService: {

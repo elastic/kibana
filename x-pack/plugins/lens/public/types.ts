@@ -16,11 +16,10 @@ import {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   Datatable,
-  SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import { DateRange } from '../common';
-import { Query, Filter, IFieldFormat } from '../../../../src/plugins/data/public';
+import { Query, Filter } from '../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
 import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/embeddable/public';
 import {
@@ -37,8 +36,6 @@ import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
-export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
-
 export interface PublicAPIProps<T> {
   state: T;
   layerId: string;
@@ -48,10 +45,13 @@ export interface EditorFrameProps {
   showNoDataPopover: () => void;
 }
 
+export type VisualizationMap = Record<string, Visualization>;
+export type DatasourceMap = Record<string, Datasource>;
+
 export interface EditorFrameInstance {
   EditorFrameContainer: (props: EditorFrameProps) => React.ReactElement;
-  datasourceMap: Record<string, Datasource>;
-  visualizationMap: Record<string, Visualization>;
+  datasourceMap: DatasourceMap;
+  visualizationMap: VisualizationMap;
 }
 
 export interface EditorFrameSetup {
@@ -256,6 +256,11 @@ export interface Datasource<T = unknown, P = unknown> {
   getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
 }
 
+export interface DatasourceFixAction<T> {
+  label: string;
+  newState: (frame: FrameDatasourceAPI) => Promise<T>;
+}
+
 /**
  * This is an API provided to visualizations by the frame, which calls the publicAPI on the datasource
  */
@@ -387,15 +392,6 @@ export interface OperationMetadata {
   // introduce a raw document datasource, this should be considered here.
 }
 
-export interface LensMultiTable {
-  type: 'lens_multitable';
-  tables: Record<string, Datatable>;
-  dateRange?: {
-    fromDate: Date;
-    toDate: Date;
-  };
-}
-
 export interface VisualizationConfigProps<T = unknown> {
   layerId: string;
   frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
@@ -525,10 +521,11 @@ export interface FramePublicAPI {
    * If accessing, make sure to check whether expected columns actually exist.
    */
   activeData?: Record<string, Datatable>;
+}
+export interface FrameDatasourceAPI extends FramePublicAPI {
   dateRange: DateRange;
   query: Query;
   filters: Filter[];
-  searchSessionId: string;
 }
 
 /**
@@ -548,7 +545,7 @@ export interface VisualizationType {
    */
   label: string;
   /**
-   * Optional label used in chart type search if chart switcher is expanded and for tooltips
+   * Optional label used in visualization type search if chart switcher is expanded and for tooltips
    */
   fullLabel?: string;
   /**

@@ -18,7 +18,7 @@ interface Props {
 
 export const ShapePicker: FC<Props> = ({ shapes, onChange = () => {} }) => (
   <EuiFlexGrid gutterSize="s" columns={4} className="canvasShapePicker">
-    {shapes.sort().map((shapeKey) => (
+    {shapes.sort().map((shapeKey: string) => (
       <EuiFlexItem key={shapeKey}>
         <EuiLink onClick={() => onChange(shapeKey)}>
           <ShapePreview shape={shapeKey} />

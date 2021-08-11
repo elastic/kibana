@@ -12,17 +12,18 @@ import { Position } from '@elastic/charts';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from 'src/plugins/charts/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
-import {
+import type {
   Visualization,
   OperationMetadata,
   VisualizationType,
   AccessorConfig,
   DatasourcePublicAPI,
 } from '../types';
-import { State, SeriesType, visualizationTypes, XYLayerConfig, XYState } from './types';
+import { State, visualizationTypes, XYState } from './types';
+import type { SeriesType, XYLayerConfig } from '../../common/expressions';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
@@ -86,10 +87,10 @@ function getDescription(state?: State) {
 
 export const getXyVisualization = ({
   paletteService,
-  data,
+  fieldFormats,
 }: {
   paletteService: PaletteRegistry;
-  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
 }): Visualization<State> => ({
   id: 'lnsXY',
 
@@ -189,7 +190,7 @@ export const getXyVisualization = ({
       const colorAssignments = getColorAssignments(
         state.layers,
         { tables: frame.activeData },
-        data.fieldFormats.deserialize
+        fieldFormats.deserialize
       );
       mappedAccessors = getAccessorColorConfig(
         colorAssignments,
@@ -335,7 +336,7 @@ export const getXyVisualization = ({
       <I18nProvider>
         <DimensionEditor
           {...props}
-          formatFactory={data.fieldFormats.deserialize}
+          formatFactory={fieldFormats.deserialize}
           paletteService={paletteService}
         />
       </I18nProvider>,

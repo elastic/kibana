@@ -8,11 +8,12 @@
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
 import { Operation } from '../types';
-import { State, SeriesType, XYLayerConfig } from './types';
+import type { State } from './types';
+import type { SeriesType, XYLayerConfig } from '../../common/expressions';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 
 function exampleState(): State {
   return {
@@ -31,11 +32,11 @@ function exampleState(): State {
   };
 }
 const paletteServiceMock = chartPluginMock.createPaletteRegistry();
-const dataMock = dataPluginMock.createStartContract();
+const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 
 const xyVisualization = getXyVisualization({
   paletteService: paletteServiceMock,
-  data: dataMock,
+  fieldFormats: fieldFormatsMock,
 });
 
 describe('xy_visualization', () => {

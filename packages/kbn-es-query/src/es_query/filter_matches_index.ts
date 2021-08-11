@@ -7,12 +7,14 @@
  */
 
 import { Filter } from '../filters';
-import { IndexPatternBase } from './types';
+import { IndexPatternBase } from '..';
 
 /*
  * TODO: We should base this on something better than `filter.meta.key`. We should probably modify
  * this to check if `filter.meta.index` matches `indexPattern.id` instead, but that's a breaking
  * change.
+ *
+ * @internal
  */
 export function filterMatchesIndex(filter: Filter, indexPattern?: IndexPatternBase | null) {
   if (!filter.meta?.key || !indexPattern) {

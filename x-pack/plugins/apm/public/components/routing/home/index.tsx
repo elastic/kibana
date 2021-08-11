@@ -53,14 +53,24 @@ export const BackendInventoryTitle = i18n.translate(
 export const home = {
   path: '/',
   element: <Outlet />,
-  params: t.partial({
-    query: t.partial({
-      rangeFrom: t.string,
-      rangeTo: t.string,
-      environment: t.string,
-      kuery: t.string,
-    }),
+  params: t.type({
+    query: t.intersection([
+      t.partial({
+        environment: t.string,
+        kuery: t.string,
+      }),
+      t.type({
+        rangeFrom: t.string,
+        rangeTo: t.string,
+      }),
+    ]),
   }),
+  defaults: {
+    query: {
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+    },
+  },
   children: [
     page({
       path: '/services',
@@ -84,6 +94,12 @@ export const home = {
     {
       path: '/backends',
       element: <Outlet />,
+      params: t.partial({
+        query: t.partial({
+          comparisonEnabled: t.string,
+          comparisonType: t.string,
+        }),
+      }),
       children: [
         {
           path: '/:backendName/overview',
