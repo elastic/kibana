@@ -26,8 +26,8 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_SEVERITY_LEVEL,
   ALERT_UUID,
-  RULE_CATEGORY,
-  RULE_NAME,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_NAME,
 } from '@kbn/rule-data-utils/target/technical_field_names';
 import moment from 'moment-timezone';
 import React, { useMemo } from 'react';
@@ -113,7 +113,7 @@ export function AlertsFlyout({
       title: i18n.translate('xpack.observability.alertsFlyout.ruleTypeLabel', {
         defaultMessage: 'Rule type',
       }),
-      description: alertData.fields[RULE_CATEGORY] ?? '-',
+      description: alertData.fields[ALERT_RULE_CATEGORY] ?? '-',
     },
   ];
 
@@ -121,7 +121,7 @@ export function AlertsFlyout({
     <EuiFlyout onClose={onClose} size="s">
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2>{alertData.fields[RULE_NAME]}</h2>
+          <h2>{alertData.fields[ALERT_RULE_NAME]}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s">{alertData.reason}</EuiText>
