@@ -21,15 +21,14 @@ import { KibanaContextProvider } from '../../../kibana_react/public';
 
 export const renderApp = ({ element }: AppMountParameters) => {
   const services = getServices();
-  const { history, capabilities, chrome, data } = services;
-  const opts = {
+  const { history: getHistory, capabilities, chrome, data } = services;
+
+  const history = getHistory();
+  const mainRouteProps = {
     services,
-    history: history(),
-    navigateTo: (path: string) => {
-      history().push(path);
-    },
-    indexPatternList: [],
+    history,
   };
+
   if (!capabilities.discover.save) {
     chrome.setBadge({
       text: i18n.translate('discover.badge.readOnly.text', {
@@ -42,7 +41,7 @@ export const renderApp = ({ element }: AppMountParameters) => {
     });
   }
   const app = (
-    <Router history={history()}>
+    <Router history={history}>
       <KibanaContextProvider services={services}>
         <Switch>
           <Route
@@ -61,8 +60,8 @@ export const renderApp = ({ element }: AppMountParameters) => {
             path="/doc/:indexPatternId/:index"
             children={<SingleDocRoute services={services} />}
           />
-          <Route path="/view/:id" children={<DiscoverMainRoute opts={opts} />} />
-          <Route path="/" exact children={<DiscoverMainRoute opts={opts} />} />
+          <Route path="/view/:id" children={<DiscoverMainRoute {...mainRouteProps} />} />
+          <Route path="/" exact children={<DiscoverMainRoute {...mainRouteProps} />} />
           <NotFoundRoute services={services} />
         </Switch>
       </KibanaContextProvider>

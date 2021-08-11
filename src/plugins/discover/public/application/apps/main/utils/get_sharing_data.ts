@@ -47,7 +47,6 @@ export async function getSharingData(
       columns = [timeFieldName, ...columns];
     }
   }
-
   return {
     searchSource: searchSource.getSerializedFields(true),
     columns,
