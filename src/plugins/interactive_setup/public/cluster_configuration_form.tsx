@@ -299,7 +299,7 @@ export const CertificatePanel: FunctionComponent<CertificatePanelProps> = ({ cer
               id="interactiveSetup.certificatePanel.issuer"
               defaultMessage="Issued by: {issuer}"
               values={{
-                issuer: <EuiLink>{certificate.issuer.O || certificate.issuer.CN}</EuiLink>,
+                issuer: certificate.issuer.O || certificate.issuer.CN,
               }}
             />
           </EuiText>
