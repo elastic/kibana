@@ -50,7 +50,7 @@ import { EndpointActivityLog } from './endpoint_activity_log';
 import { EndpointDetailsContent } from './endpoint_details_content';
 import { PolicyResponse } from './policy_response';
 
-export const EndpointDetailsView = memo(() => {
+export const EndpointDetails = memo(() => {
   const toasts = useToasts();
   const queryParams = useEndpointSelector(uiQueryParams);
 
@@ -159,7 +159,7 @@ export const EndpointDetailsView = memo(() => {
   );
 });
 
-EndpointDetailsView.displayName = 'EndpointDetailsView';
+EndpointDetails.displayName = 'EndpointDetails';
 
 const PolicyResponseFlyoutPanel = memo<{
   hostMeta: HostMetadata;

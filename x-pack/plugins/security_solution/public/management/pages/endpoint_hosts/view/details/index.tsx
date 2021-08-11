@@ -12,7 +12,7 @@ import { useEndpointSelector } from '../hooks';
 import { uiQueryParams } from '../../store/selectors';
 
 import { getEndpointListPath } from '../../../../common/routing';
-import { EndpointDetailsView } from './endpoint_details_view';
+import { EndpointDetails } from './endpoint_details';
 
 export const EndpointDetailsFlyout = memo(() => {
   const history = useHistory();
@@ -41,7 +41,7 @@ export const EndpointDetailsFlyout = memo(() => {
       paddingSize="l"
       ownFocus={false}
     >
-      <EndpointDetailsView />
+      <EndpointDetails />
     </EuiFlyout>
   );
 });
