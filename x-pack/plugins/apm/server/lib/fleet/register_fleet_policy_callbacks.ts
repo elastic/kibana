@@ -6,7 +6,15 @@
  */
 
 import { APMPlugin, APMRouteHandlerResources } from '../..';
-import { ExternalCallback } from '../../../../fleet/server';
+import {
+  ExternalCallback,
+  PostPackagePolicyDeleteCallback,
+  PutPackagePolicyUpdateCallback,
+} from '../../../../fleet/server';
+import {
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+} from '../../../../fleet/common';
 import { AgentConfiguration } from '../../../common/agent_configuration/configuration_types';
 import { AGENT_NAME } from '../../../common/elasticsearch_fieldnames';
 import { APMPluginStartDependencies } from '../../types';
@@ -53,7 +61,7 @@ export async function registerFleetPolicyCallbacks({
 }
 
 type ExternalCallbackParams = Parameters<ExternalCallback[1]>;
-export type PackagePolicy = ExternalCallbackParams[0];
+export type PackagePolicy = NewPackagePolicy | UpdatePackagePolicy;
 type Context = ExternalCallbackParams[1];
 type Request = ExternalCallbackParams[2];
 
@@ -66,13 +74,15 @@ function registerPackagePolicyExternalCallback({
   logger,
 }: {
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
-  callbackName: ExternalCallback[0];
+  callbackName: 'packagePolicyCreate' | 'packagePolicyUpdate';
   plugins: APMRouteHandlerResources['plugins'];
   ruleDataClient: APMRouteHandlerResources['ruleDataClient'];
   config: NonNullable<APMPlugin['currentConfig']>;
   logger: NonNullable<APMPlugin['logger']>;
 }) {
-  const callbackFn: ExternalCallback[1] = async (
+  const callbackFn:
+    | PostPackagePolicyDeleteCallback
+    | PutPackagePolicyUpdateCallback = async (
     packagePolicy: PackagePolicy,
     context: Context,
     request: Request
