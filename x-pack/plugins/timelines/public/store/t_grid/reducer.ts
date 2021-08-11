@@ -217,30 +217,24 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
     ...state,
     timelineById: addProviderToTimelineHelper(id, dataProvider, state.timelineById),
   }))
-  .case(setOpenAddToExistingCase, (state, { id, isOpen }) => {
-    console.log('setOpenAddToExistingCase', id, isOpen);
-    return {
-      ...state,
-      timelineById: {
-        ...state.timelineById,
-        [id]: {
-          ...state.timelineById[id],
-          isAddToExistingCaseOpen: isOpen,
-        },
+  .case(setOpenAddToExistingCase, (state, { id, isOpen }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        isAddToExistingCaseOpen: isOpen,
       },
-    };
-  })
-  .case(setOpenAddToNewCase, (state, { id, isOpen }) => {
-    console.log('setOpenAddToNewCase', id, isOpen);
-    return {
-      ...state,
-      timelineById: {
-        ...state.timelineById,
-        [id]: {
-          ...state.timelineById[id],
-          isCreateNewCaseOpen: isOpen,
-        },
+    },
+  }))
+  .case(setOpenAddToNewCase, (state, { id, isOpen }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        isCreateNewCaseOpen: isOpen,
       },
-    };
-  })
+    },
+  }))
   .build();
