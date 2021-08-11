@@ -112,7 +112,11 @@ export function getSuggestions({
         visualizeTriggerFieldContext.fieldName
       );
     } else if (field) {
-      dataSourceSuggestions = datasource.getDatasourceSuggestionsForField(datasourceState, field);
+      dataSourceSuggestions = datasource.getDatasourceSuggestionsForField(
+        datasourceState,
+        field,
+        (layerId) => isLayerSupportedByVisualization(layerId, [layerTypes.DATA]) // a field dragged to workspace should added to data layer
+      );
     } else {
       dataSourceSuggestions = datasource.getDatasourceSuggestionsFromCurrentState(
         datasourceState,

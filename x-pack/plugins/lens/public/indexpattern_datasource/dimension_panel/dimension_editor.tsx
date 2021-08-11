@@ -48,15 +48,15 @@ import { defaultFilter, Filtering, setFilter } from './filtering';
 import { AdvancedOptions } from './advanced_options';
 import { setTimeShift, TimeShift } from './time_shift';
 import { useDebouncedValue } from '../../shared_components';
-import { LayerType, layerTypes } from '../../../common';
+import { LayerType } from '../../../common';
 
 const operationPanels = getOperationDisplay();
 
 export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   selectedColumn?: IndexPatternColumn;
+  layerType: LayerType;
   operationSupportMatrix: OperationSupportMatrix;
   currentIndexPattern: IndexPattern;
-  layerType: LayerType;
 }
 
 const formulaOperationName = 'formula';
@@ -107,7 +107,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     toggleFullscreen,
     isFullscreen,
     supportStaticValue,
-    layerType = layerTypes.DATA,
+    layerType,
   } = props;
   const services = {
     data: props.data,

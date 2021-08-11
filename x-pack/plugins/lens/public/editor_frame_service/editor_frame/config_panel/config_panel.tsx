@@ -180,8 +180,10 @@ export function LayerPanels(
             onEmptyDimensionAdd={(columnId, { groupId }) => {
               addMaybeDefaultThreshold({
                 ...props,
+                visualization,
+                activeDatasourceId: activeDatasourceId!,
                 layerId,
-                layerType: getLayerType(activeVisualization, visualizationState, layerId),
+                layerType: getLayerType(activeVisualization, visualization.state, layerId),
                 columnId,
                 updateAll,
                 groupId,
@@ -253,7 +255,14 @@ export function LayerPanels(
                 }),
             })
           );
-          addMaybeDefaultThreshold({ ...props, layerId: id, layerType, updateAll });
+          addMaybeDefaultThreshold({
+            ...props,
+            activeDatasourceId: activeDatasourceId!,
+            visualization,
+            layerId: id,
+            layerType,
+            updateAll,
+          });
           setNextFocusedLayerId(id);
         }}
       />
@@ -263,7 +272,7 @@ export function LayerPanels(
 
 function addMaybeDefaultThreshold({
   activeVisualization,
-  visualizationState,
+  visualization,
   framePublicAPI,
   layerType,
   activeDatasourceId,
@@ -273,6 +282,7 @@ function addMaybeDefaultThreshold({
   columnId,
   groupId,
 }: ConfigPanelWrapperProps & {
+  visualization: VisualizationState;
   activeDatasourceId: string;
   activeVisualization: Visualization;
   layerId: string;
@@ -286,7 +296,7 @@ function addMaybeDefaultThreshold({
   ) => void;
 }) {
   const layerInfo = activeVisualization
-    .getSupportedLayers(visualizationState, framePublicAPI)
+    .getSupportedLayers(visualization.state, framePublicAPI)
     .find(({ type }) => type === layerType);
   if (layerInfo?.initialDimensions && datasourceMap[activeDatasourceId]?.initializeDimension) {
     const info = groupId

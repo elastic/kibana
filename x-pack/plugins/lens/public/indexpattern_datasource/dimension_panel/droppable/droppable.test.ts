@@ -264,7 +264,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
       dateRange: { fromDate: 'now-1d', toDate: 'now' },
       columnId: 'col1',
       layerId: 'first',
-      layerType: 'data',
       uniqueLabel: 'stuff',
       groupId: 'group1',
       filterOperations: () => true,

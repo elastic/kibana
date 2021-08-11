@@ -128,7 +128,8 @@ describe('suggestion helpers', () => {
     });
     expect(datasourceMap.mock.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
       datasourceStates.mock.state,
-      droppedField
+      droppedField,
+      expect.any(Function)
     );
   });
 
@@ -161,11 +162,13 @@ describe('suggestion helpers', () => {
     });
     expect(multiDatasourceMap.mock.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
       multiDatasourceStates.mock.state,
-      droppedField
+      droppedField,
+      expect.any(Function)
     );
     expect(multiDatasourceMap.mock2.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
       multiDatasourceStates.mock2.state,
-      droppedField
+      droppedField,
+      expect.any(Function)
     );
     expect(multiDatasourceMap.mock3.getDatasourceSuggestionsForField).not.toHaveBeenCalled();
   });
@@ -538,7 +541,8 @@ describe('suggestion helpers', () => {
           humanData: {
             label: 'myfieldLabel',
           },
-        }
+        },
+        expect.any(Function)
       );
     });
 

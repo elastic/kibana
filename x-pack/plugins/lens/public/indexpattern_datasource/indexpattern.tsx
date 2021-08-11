@@ -424,9 +424,14 @@ export function getIndexPatternDatasource({
         },
       };
     },
-    getDatasourceSuggestionsForField(state, draggedField) {
+    getDatasourceSuggestionsForField(state, draggedField, filterLayers) {
       return isDraggedField(draggedField)
-        ? getDatasourceSuggestionsForField(state, draggedField.indexPatternId, draggedField.field)
+        ? getDatasourceSuggestionsForField(
+            state,
+            draggedField.indexPatternId,
+            draggedField.field,
+            filterLayers
+          )
         : [];
     },
     getDatasourceSuggestionsFromCurrentState,

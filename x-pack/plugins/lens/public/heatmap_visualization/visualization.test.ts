@@ -273,7 +273,7 @@ describe('heatmap', () => {
       const instance = getHeatmapVisualization({
         paletteService,
       });
-      expect(instance.getLayerType('first', state)).toEqual(layerTypes.DATA);
+      expect(instance.getLayerType('test-layer', state)).toEqual(layerTypes.DATA);
       expect(instance.getLayerType('foo', state)).toBeUndefined();
     });
   });

@@ -16,7 +16,7 @@ import { IndexPatternColumn } from '../indexpattern';
 import { isColumnInvalid } from '../utils';
 import { IndexPatternPrivateState } from '../types';
 import { DimensionEditor } from './dimension_editor';
-import type { DateRange } from '../../../common';
+import { DateRange, layerTypes } from '../../../common';
 import { getOperationSupportMatrix } from './operation_support';
 
 export type IndexPatternDimensionTriggerProps = DatasourceDimensionTriggerProps<IndexPatternPrivateState> & {
@@ -125,6 +125,7 @@ export const IndexPatternDimensionEditorComponent = function IndexPatternDimensi
   return (
     <DimensionEditor
       {...props}
+      layerType={props.layerType || layerTypes.DATA}
       currentIndexPattern={currentIndexPattern}
       selectedColumn={selectedColumn}
       operationSupportMatrix={operationSupportMatrix}
