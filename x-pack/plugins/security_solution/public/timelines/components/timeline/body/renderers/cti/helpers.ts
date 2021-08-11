@@ -13,7 +13,7 @@ import { INDICATOR_MATCH_SUBFIELDS } from '../../../../../../../common/cti/const
 import { Ecs } from '../../../../../../../common/ecs';
 import { ThreatIndicatorEcs } from '../../../../../../../common/ecs/threat';
 
-const getIndicatorEcs = (data: Ecs): ThreatIndicatorEcs[] => {
+export const getIndicatorEcs = (data: Ecs): ThreatIndicatorEcs[] => {
   const threatData = get(data, ENRICHMENT_DESTINATION_PATH);
   if (threatData == null) {
     return [];

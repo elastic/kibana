@@ -10,11 +10,11 @@ import { get } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 
-import { ENRICHMENT_DESTINATION_PATH } from '../../../../../../../common/constants';
 import { RowRenderer } from '../../../../../../../common';
 import { Fields } from '../../../../../../../common/search_strategy';
 import { ID_FIELD_NAME } from '../../../../../../common/components/event_details/event_id';
 import { RowRendererContainer } from '../row_renderer';
+import { getIndicatorEcs } from './helpers';
 import { ThreatMatchRow } from './threat_match_row';
 
 const SpacedContainer = styled.div`
@@ -22,7 +22,7 @@ const SpacedContainer = styled.div`
 `;
 
 export const ThreatMatchRows: RowRenderer['renderRow'] = ({ data, isDraggable, timelineId }) => {
-  const indicators = get(data, ENRICHMENT_DESTINATION_PATH) as Fields[];
+  const indicators = getIndicatorEcs(data) as Fields[];
   const eventId = get(data, ID_FIELD_NAME);
 
   return (
