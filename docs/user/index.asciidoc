@@ -6,6 +6,8 @@ include::{kib-repo-dir}/concepts/index.asciidoc[]
 
 include::{kib-repo-dir}/getting-started/quick-start-guide.asciidoc[]
 
+include::{kib-repo-dir}/access-kibana.asciidoc[]
+
 include::setup.asciidoc[]
 
 include::production-considerations/index.asciidoc[]

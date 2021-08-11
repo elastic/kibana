@@ -1,8 +1,7 @@
 [[start-stop]]
-== Start and stop {kib}
+== Start {kib}
 
-The method for starting and stopping {kib} varies depending on how you installed
-it.
+The method for starting {kib} varies depending on your installation.
 
 [float]
 [[start-start-targz]]

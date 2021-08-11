@@ -1,16 +1,49 @@
-[[setup]]
-= Set up
+[[something-good]]
+= 
 
 [partintro]
 --
-This section includes information on how to setup Kibana and get it running,
-including:
+The easiest way to "get started" with {kib} is to use our {es} Service. The Elasticsearch Service is available on AWS, GCP, and Azure, and automatically configures {kib} to work with {es}.
 
-* Downloading
-* Installing
-* Starting
-* Configuring
-* Upgrading
+[float]
+[[hosted-elasticsearch-service]]
+== Hosted {es} Service
+
+Skip managing your own Kibana installation by using our hosted Elasticsearch Service on Elastic Cloud.
+
+//[insert image]
+
+Try out the Elasticsearch Service for free, and then begin configuring your own user settings right in the Elasticsearch Service Console. Any changes are automatically changed in the kibana.yml configuration file. For detailed information about the kibana.yml settings, refer to <<settings, Configure {kib}>>.
+
+[float]
+[[install-and-manage-the-stack-yourself]]
+== Install and manage the Elastic Stack yourself
+
+If you’d rather install the Elastic Stack yourself, review the Elastic Support Matrix for information about supported operating systems and product compatibility.
+
+We recommend you use the same version of Elasticsearch and Kibana.
+
+//[insert image]
+
+. To install the Elastic Stack, go to Getting started with the Elastic Stack.
+
+. Download and install Kibana.
+
+1. 
+Install on-prem
+** Install {kib}
+** Start {kib}
+
+Install with Cloud
+* Set up on Cloud
+
+2. 
+* Configure the kibana.yml settings (optional for Cloud deployments)
+* Securing access to Kibana
+* Configure security
+
+* Configure reporting (Only necessary if you want to share your findings)
+* Configure monitoring (Only necessary if you want to look at stats for the Stack)
 
 [[supported-platforms]]
 [float]
@@ -56,8 +89,6 @@ include::{kib-repo-dir}/setup/access.asciidoc[]
 
 include::security/tutorials/how-to-secure-access-to-kibana.asciidoc[]
 
-include::{kib-repo-dir}/setup/connect-to-elasticsearch.asciidoc[]
-
 include::{kib-repo-dir}/setup/upgrade.asciidoc[]
 
 include::security/securing-kibana.asciidoc[]
@@ -68,3 +99,21 @@ include::monitoring/configuring-monitoring.asciidoc[leveloffset=+1]
 include::monitoring/monitoring-metricbeat.asciidoc[leveloffset=+2]
 include::monitoring/viewing-metrics.asciidoc[leveloffset=+2]
 include::monitoring/monitoring-kibana.asciidoc[leveloffset=+2]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+include::{kib-repo-dir}/setup/connect-to-elasticsearch.asciidoc[]
