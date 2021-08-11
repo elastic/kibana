@@ -1,0 +1,39 @@
+{
+  "attributes": {
+    "accessibility:disableAnimations": true,
+    "buildNum": 9007199254740991,
+    "dateFormat:tz": "UTC",
+    "defaultIndex": "rollup",
+    "visualization:visualize:legacyChartsLibrary": true,
+    "visualization:visualize:legacyPieChartsLibrary": true
+  },
+  "coreMigrationVersion": "7.15.0",
+  "id": "7.15.0",
+  "migrationVersion": {
+    "config": "7.13.0"
+  },
+  "references": [],
+  "type": "config",
+  "updated_at": "2021-08-04T23:35:47.992Z",
+  "version": "WzQwLDFd"
+}
+
+{
+  "attributes": {
+    "fieldAttrs": "{}",
+    "fields": "[]",
+    "runtimeFieldMap": "{}",
+    "timeFieldName": "@timestamp.date_histogram.timestamp",
+    "title": "rollup*",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "7.15.0",
+  "id": "rollup",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2021-08-04T23:22:14.902Z",
+  "version": "WzIyLDFd"
+}
