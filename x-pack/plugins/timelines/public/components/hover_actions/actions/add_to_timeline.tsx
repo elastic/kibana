@@ -106,6 +106,7 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
             aria-label={i18n.ADD_TO_TIMELINE}
             buttonRef={defaultFocusedButtonRef}
             data-test-subj="add-to-timeline"
+            icon="timeline"
             iconType="timeline"
             onClick={handleStartDragToTimeline}
             title={i18n.ADD_TO_TIMELINE}

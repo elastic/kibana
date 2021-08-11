@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { stopPropagationAndPreventDefault } from '../../../../common';
@@ -33,6 +33,7 @@ export const NESTED_COLUMN = (field: string) =>
 export const COLUMN_TOGGLE_KEYBOARD_SHORTCUT = 'i';
 
 export interface ColumnToggleProps extends HoverActionComponentProps {
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   isDisabled: boolean;
   isObjectArray: boolean;
   toggleColumn: (column: ColumnHeaderOptions) => void;
@@ -41,6 +42,7 @@ export interface ColumnToggleProps extends HoverActionComponentProps {
 const ColumnToggleButton: React.FC<ColumnToggleProps> = React.memo(
   ({
     closePopOver,
+    Component,
     defaultFocusedButtonRef,
     field,
     isDisabled,
@@ -74,6 +76,36 @@ const ColumnToggleButton: React.FC<ColumnToggleProps> = React.memo(
       }
     }, [handleToggleColumn, keyboardEvent, ownFocus]);
 
+    const button = useMemo(
+      () =>
+        Component ? (
+          <Component
+            aria-label={label}
+            data-test-subj={`toggle-field-${field}`}
+            icon="listAdd"
+            iconType="listAdd"
+            onClick={handleToggleColumn}
+            title={label}
+          >
+            {label}
+          </Component>
+        ) : (
+          <EuiButtonIcon
+            aria-label={label}
+            buttonRef={defaultFocusedButtonRef}
+            className="timelines__hoverActionButton"
+            data-test-subj={`toggle-field-${field}`}
+            data-colindex={1}
+            disabled={isDisabled}
+            id={field}
+            iconSize="s"
+            iconType="listAdd"
+            onClick={handleToggleColumn}
+          />
+        ),
+      [Component, defaultFocusedButtonRef, field, handleToggleColumn, isDisabled, label]
+    );
+
     return showTooltip ? (
       <EuiToolTip
         content={
@@ -88,32 +120,10 @@ const ColumnToggleButton: React.FC<ColumnToggleProps> = React.memo(
           />
         }
       >
-        <EuiButtonIcon
-          aria-label={label}
-          buttonRef={defaultFocusedButtonRef}
-          className="timelines__hoverActionButton"
-          data-test-subj={`toggle-field-${field}`}
-          data-colindex={1}
-          disabled={isDisabled}
-          id={field}
-          iconSize="s"
-          iconType="listAdd"
-          onClick={handleToggleColumn}
-        />
+        {button}
       </EuiToolTip>
     ) : (
-      <EuiButtonIcon
-        aria-label={label}
-        buttonRef={defaultFocusedButtonRef}
-        className="timelines__hoverActionButton"
-        data-test-subj={`toggle-field-${field}`}
-        data-colindex={1}
-        disabled={isDisabled}
-        id={field}
-        iconSize="s"
-        iconType="listAdd"
-        onClick={handleToggleColumn}
-      />
+      button
     );
   }
 );

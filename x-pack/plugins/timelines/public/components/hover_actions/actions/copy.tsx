@@ -66,6 +66,7 @@ const CopyButton: React.FC<CopyProps> = React.memo(
       <Component
         aria-label={COPY_TO_CLIPBOARD}
         data-test-subj="copy-to-clipboard"
+        icon="copyClipboard"
         iconType="copyClipboard"
         onClick={onClick}
         title={COPY_TO_CLIPBOARD}

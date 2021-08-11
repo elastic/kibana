@@ -69,6 +69,7 @@ export const ActionCell: React.FC<Props> = React.memo(
       <HoverActions
         dataType={data.type}
         dataProvider={actionCellConfig?.dataProvider}
+        enableOverflowButton={true}
         field={data.field}
         goGetTimelineId={setGoGetTimelineId}
         isObjectArray={data.isObjectArray}

@@ -64,6 +64,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
           <Component
             aria-label={SHOW_TOP(field)}
             data-test-subj="show-top-field"
+            icon="visBarVertical"
             iconType="visBarVertical"
             onClick={onClick}
             title={SHOW_TOP(field)}

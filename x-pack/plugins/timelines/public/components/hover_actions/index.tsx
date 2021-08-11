@@ -26,6 +26,7 @@ export interface HoverActionsConfig {
   getFilterOutValueButton: (
     props: HoverActionComponentProps & FilterValueFnArgs
   ) => ReactElement<HoverActionComponentProps & FilterValueFnArgs>;
+  getOverflowButton: (props: HoverActionComponentProps) => ReactElement<HoverActionComponentProps>;
 }
 
 const AddToTimelineButtonLazy = React.lazy(() => import('./actions/add_to_timeline'));
@@ -77,10 +78,20 @@ const getFilterOutValueButtonLazy = (props: HoverActionComponentProps & FilterVa
   );
 };
 
+const OverflowButtonLazy = React.lazy(() => import('./actions/overflow'));
+const getOverflowButtonLazy = (props: HoverActionComponentProps) => {
+  return (
+    <React.Suspense fallback={<EuiLoadingSpinner />}>
+      <OverflowButtonLazy {...props} />
+    </React.Suspense>
+  );
+};
+
 export const getHoverActions = (store?: Store): HoverActionsConfig => ({
   getAddToTimelineButton: getAddToTimelineButtonLazy.bind(null, store!),
   getColumnToggleButton: getColumnToggleButtonLazy,
   getCopyButton: getCopyButtonLazy,
   getFilterForValueButton: getFilterForValueButtonLazy,
   getFilterOutValueButton: getFilterOutValueButtonLazy,
+  getOverflowButton: getOverflowButtonLazy,
 });
