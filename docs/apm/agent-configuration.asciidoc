@@ -31,6 +31,9 @@ This feature requires {apm-server-ref}/setup-kibana-endpoint.html[Kibana endpoin
 APM Server acts as a proxy between the agents and Kibana.
 Kibana communicates any changed settings to APM Server so that your agents only need to poll APM Server to determine which settings have changed.
 
+In addition, if an APM agent is using {apm-server-ref}/configuration-anonymous.html[anonymous authentication] to communicate with the APM Server,
+the agent's service name must be included in the `apm-server.auth.anonymous.allow_service` list.
+
 [float]
 ==== Supported configurations
 
