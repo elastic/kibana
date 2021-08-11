@@ -93,4 +93,36 @@ describe('Actions', () => {
 
     expect(wrapper.find('[data-test-subj="select-event"]').exists()).toBe(false);
   });
+
+  test('it does NOT render a checkbox for selecting the event when `tGridEnabled` is `true`', () => {
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+
+    const wrapper = mount(
+      <TestProviders>
+        <Actions
+          ariaRowindex={2}
+          checked={false}
+          columnValues={'abc def'}
+          data={mockTimelineData[0].data}
+          ecsData={mockTimelineData[0].ecs}
+          eventIdToNoteIds={{}}
+          showNotes={false}
+          isEventPinned={false}
+          rowIndex={10}
+          toggleShowNotes={jest.fn()}
+          timelineId={'test'}
+          refetch={jest.fn()}
+          columnId={''}
+          index={2}
+          eventId="abc"
+          loadingEventIds={[]}
+          onEventDetailsPanelOpened={jest.fn()}
+          onRowSelected={jest.fn()}
+          showCheckboxes={true}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="select-event"]').exists()).toBe(false);
+  });
 });

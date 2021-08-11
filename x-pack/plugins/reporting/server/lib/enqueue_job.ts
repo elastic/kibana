@@ -7,10 +7,10 @@
 
 import { KibanaRequest } from 'src/core/server';
 import { ReportingCore } from '../';
-import { BaseParams, ReportingUser } from '../types';
-import { LevelLogger } from './';
-import { Report } from './store';
 import type { ReportingRequestHandlerContext } from '../types';
+import { BaseParams, ReportingUser } from '../types';
+import { checkParamsVersion, LevelLogger } from './';
+import { Report } from './store';
 
 export async function enqueueJob(
   reporting: ReportingCore,
@@ -37,6 +37,7 @@ export async function enqueueJob(
     reporting.getStore(),
   ]);
 
+  jobParams.version = checkParamsVersion(jobParams, logger);
   const job = await createJob!(jobParams, context, request);
 
   // 1. Add the report to ReportingStore to show as pending

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
@@ -23,6 +23,7 @@ export type FilterForValueProps = HoverActionComponentProps & FilterValueFnArgs;
 
 const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
   ({
+    Component,
     closePopOver,
     defaultFocusedButtonRef,
     field,
@@ -63,6 +64,33 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
       }
     }, [filterForValueFn, keyboardEvent, ownFocus]);
 
+    const button = useMemo(
+      () =>
+        Component ? (
+          <Component
+            aria-label={FILTER_FOR_VALUE}
+            buttonRef={defaultFocusedButtonRef}
+            data-test-subj="filter-for-value"
+            iconType="plusInCircle"
+            onClick={filterForValueFn}
+            title={FILTER_FOR_VALUE}
+          >
+            {FILTER_FOR_VALUE}
+          </Component>
+        ) : (
+          <EuiButtonIcon
+            aria-label={FILTER_FOR_VALUE}
+            buttonRef={defaultFocusedButtonRef}
+            className="timelines__hoverActionButton"
+            data-test-subj="filter-for-value"
+            iconSize="s"
+            iconType="plusInCircle"
+            onClick={filterForValueFn}
+          />
+        ),
+      [Component, defaultFocusedButtonRef, filterForValueFn]
+    );
+
     return showTooltip ? (
       <EuiToolTip
         content={
@@ -77,26 +105,10 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
           />
         }
       >
-        <EuiButtonIcon
-          aria-label={FILTER_FOR_VALUE}
-          buttonRef={defaultFocusedButtonRef}
-          className="timelines__hoverActionButton"
-          data-test-subj="filter-for-value"
-          iconSize="s"
-          iconType="plusInCircle"
-          onClick={filterForValueFn}
-        />
+        {button}
       </EuiToolTip>
     ) : (
-      <EuiButtonIcon
-        aria-label={FILTER_FOR_VALUE}
-        buttonRef={defaultFocusedButtonRef}
-        className="timelines__hoverActionButton"
-        data-test-subj="filter-for-value"
-        iconSize="s"
-        iconType="plusInCircle"
-        onClick={filterForValueFn}
-      />
+      button
     );
   }
 );

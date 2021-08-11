@@ -20,7 +20,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Visualization, FramePublicAPI, Datasource, VisualizationType } from '../../../types';
+import {
+  Visualization,
+  FramePublicAPI,
+  VisualizationType,
+  VisualizationMap,
+  DatasourceMap,
+} from '../../../types';
 import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
@@ -29,6 +35,11 @@ import {
   updateVisualizationState,
   useLensDispatch,
   useLensSelector,
+  VisualizationState,
+  DatasourceStates,
+  selectActiveDatasourceId,
+  selectVisualization,
+  selectDatasourceStates,
 } from '../../../state_management';
 import { generateId } from '../../../id_generator/id_generator';
 
@@ -44,9 +55,9 @@ interface VisualizationSelection {
 }
 
 interface Props {
-  visualizationMap: Record<string, Visualization>;
   framePublicAPI: FramePublicAPI;
-  datasourceMap: Record<string, Datasource>;
+  visualizationMap: VisualizationMap;
+  datasourceMap: DatasourceMap;
 }
 
 type SelectableEntry = EuiSelectableOption<{ value: string }>;
@@ -55,7 +66,7 @@ function VisualizationSummary({
   visualizationMap,
   visualization,
 }: {
-  visualizationMap: Record<string, Visualization>;
+  visualizationMap: VisualizationMap;
   visualization: {
     activeId: string | null;
     state: unknown;
@@ -105,9 +116,9 @@ function getCurrentVisualizationId(
 export const ChartSwitch = memo(function ChartSwitch(props: Props) {
   const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
   const dispatchLens = useLensDispatch();
-  const activeDatasourceId = useLensSelector((state) => state.lens.activeDatasourceId);
-  const visualization = useLensSelector((state) => state.lens.visualization);
-  const datasourceStates = useLensSelector((state) => state.lens.datasourceStates);
+  const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
+  const visualization = useLensSelector(selectVisualization);
+  const datasourceStates = useLensSelector(selectDatasourceStates);
 
   function removeLayers(layerIds: string[]) {
     const activeVisualization =
@@ -492,11 +503,8 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
 function getTopSuggestion(
   props: Props,
   visualizationId: string,
-  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
-  visualization: {
-    activeId: string | null;
-    state: unknown;
-  },
+  datasourceStates: DatasourceStates,
+  visualization: VisualizationState,
   newVisualization: Visualization<unknown>,
   subVisualizationId?: string
 ): Suggestion | undefined {

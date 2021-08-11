@@ -57,6 +57,7 @@ export interface ReportingInternalStart {
 }
 
 export class ReportingCore {
+  private kibanaVersion: string;
   private pluginSetupDeps?: ReportingInternalSetup;
   private pluginStartDeps?: ReportingInternalStart;
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps and config each are done
@@ -71,6 +72,7 @@ export class ReportingCore {
   public getContract: () => ReportingSetup;
 
   constructor(private logger: LevelLogger, context: PluginInitializerContext<ReportingConfigType>) {
+    this.kibanaVersion = context.env.packageInfo.version;
     const syncConfig = context.config.get<ReportingConfigType>();
     this.deprecatedAllowedRoles = syncConfig.roles.enabled ? syncConfig.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, syncConfig, this.logger);
@@ -81,6 +83,10 @@ export class ReportingCore {
     });
 
     this.executing = new Set();
+  }
+
+  public getKibanaVersion() {
+    return this.kibanaVersion;
   }
 
   /*

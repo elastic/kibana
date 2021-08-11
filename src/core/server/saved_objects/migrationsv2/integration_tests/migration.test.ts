@@ -12,7 +12,7 @@ import Util from 'util';
 import Semver from 'semver';
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { Env } from '@kbn/config';
-import { getEnvOptions } from '@kbn/config/target/mocks';
+import { getEnvOptions } from '../../../config/mocks';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { SavedObjectsRawDoc } from '../../serialization';
@@ -94,12 +94,6 @@ describe('migration v2', () => {
               appenders: ['file'],
             },
           ],
-        },
-        // reporting loads headless browser, that prevents nodejs process from exiting.
-        xpack: {
-          reporting: {
-            enabled: false,
-          },
         },
       },
       {

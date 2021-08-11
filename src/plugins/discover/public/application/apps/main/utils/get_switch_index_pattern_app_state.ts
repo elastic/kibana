@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getSortArray } from '../../../angular/doc_table';
-import { SortPairArr } from '../../../angular/doc_table/lib/get_sort';
 import { IndexPattern } from '../../../../kibana_services';
+import { getSortArray, SortPairArr } from '../components/doc_table/lib/get_sort';
 
 /**
  * Helper function to remove or adapt the currently selected columns/sort to be valid with the next

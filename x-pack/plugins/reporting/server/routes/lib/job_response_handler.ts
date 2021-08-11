@@ -24,13 +24,11 @@ export async function downloadJobResponseHandler(
   params: JobResponseHandlerParams
 ) {
   const jobsQuery = jobsQueryFactory(reporting);
-  const exportTypesRegistry = reporting.getExportTypesRegistry();
-  const getDocumentPayload = getDocumentPayloadFactory(exportTypesRegistry);
-
+  const getDocumentPayload = getDocumentPayloadFactory(reporting);
   try {
     const { docId } = params;
 
-    const doc = await jobsQuery.getContent(user, docId);
+    const doc = await jobsQuery.get(user, docId);
     if (!doc) {
       return res.notFound();
     }
@@ -41,7 +39,7 @@ export async function downloadJobResponseHandler(
       });
     }
 
-    const payload = getDocumentPayload(doc);
+    const payload = await getDocumentPayload(doc);
 
     if (!payload.contentType || !ALLOWED_JOB_CONTENT_TYPES.includes(payload.contentType)) {
       return res.badRequest({
