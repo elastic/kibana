@@ -17,11 +17,7 @@ import {
   initTimelineIndexPatterns,
 } from './actions';
 import { initialSourcererState, SourcererModel } from './model';
-import {
-  createDefaultIndexPatterns,
-  defaultIndexPatternByEventType,
-  getScopePatternListSelection,
-} from './helpers';
+import { createDefaultIndexPatterns, defaultIndexPatternByEventType } from './helpers';
 
 export type SourcererState = SourcererModel;
 

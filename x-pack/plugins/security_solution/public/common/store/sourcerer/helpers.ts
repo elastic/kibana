@@ -25,9 +25,10 @@ export const getScopePatternListSelection = (
   sourcererScope: SourcererScopeName
 ): string[] => {
   const theKip = kibanaIndexPatterns.find((kip) => kip.id === kipId);
-  let patternList: string[] = theKip != null ? theKip.title.split(',') : [];
+  let patternList: string[] = theKip != null ? theKip.patternList : [];
   if (kipId === DEFAULT_INDEX_PATTERN_ID) {
     // last index in DEFAULT_INDEX_PATTERN_ID is always signals index
+    // TODO: Steph.sourcerer is that true tho? ^^
     if (sourcererScope === SourcererScopeName.default) {
       patternList.pop();
     } else if (sourcererScope === SourcererScopeName.detections) {

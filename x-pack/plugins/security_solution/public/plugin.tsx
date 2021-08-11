@@ -358,24 +358,52 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       } catch {
         signal = { name: null };
       }
-      const patternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
+      const configPatternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
       let defaultIndexPattern;
       try {
         // check for/generate default Security Solution Kibana index pattern
         defaultIndexPattern = await coreStart.http.fetch(SOURCERER_API_URL, {
           method: 'POST',
-          body: JSON.stringify({ patternList: [...patternList, signal.name] }),
+          body: JSON.stringify({ patternList: [...configPatternList, signal.name] }),
         });
       } catch (error) {
         defaultIndexPattern = { id: null, ...error };
       }
-      console.log('PLUGIN.tsx:', defaultIndexPattern);
       const [{ createStore, createInitialState }, kibanaIndexPatterns] = await Promise.all([
         this.lazyApplicationDependencies(),
         // Note: this needs to be after defaultIndexPattern is defined in case the KIP is updated
         startPlugins.data.indexPatterns.getIdsWithTitle(),
       ]);
 
+      // check for/generate default Security Solution Kibana index pattern
+      const kibanaIndexPatternLists: string[][] = await coreStart.http.fetch(SOURCERER_API_URL, {
+        method: 'GET',
+        query: { titles: kibanaIndexPatterns.map(({ title }) => title) },
+      });
+      console.log('PLUGIN.tsx: kibanaIndexPatternLists', kibanaIndexPatternLists);
+      const kips = kibanaIndexPatterns.map((kip, i) => {
+        const patternList = kibanaIndexPatternLists[i];
+        const stringifyIt = JSON.stringify(patternList);
+        if (kip.id === 'security-solution') {
+          console.log(`kip patternList ${kip.id}:`, patternList);
+          console.log(`kip obj ${kip.id}:`, {
+            patternList,
+            stringifyIt,
+            parseIt: JSON.parse(stringifyIt),
+          });
+          console.log(`kip spread ${kip.id}:`, {
+            ...kip,
+            patternList,
+            stringifyIt,
+            parseIt: JSON.parse(stringifyIt),
+          });
+        }
+        return {
+          ...kip,
+          patternList,
+        };
+      });
+      console.log('PLUGIN.tsx: kips', kips);
       const appLibs: AppObservableLibs = { kibana: coreStart };
       const libs$ = new BehaviorSubject(appLibs);
 
@@ -416,7 +444,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           },
           {
             defaultIndexPattern,
-            kibanaIndexPatterns,
+            kibanaIndexPatterns: kips,
             signalIndexName: signal.name,
             enableExperimental: this.experimentalFeatures,
           }

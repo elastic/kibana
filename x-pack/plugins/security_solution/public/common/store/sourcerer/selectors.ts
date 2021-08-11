@@ -80,14 +80,13 @@ export const getSelectedKipSelector = () => {
     const defaultIndexPattern = getDefaultIndexPatternSelector(state);
     const kibanaIndexPatterns = getKibanaIndexPatternsSelector(state);
     const kipId = scope.selectedKipId === null ? defaultIndexPattern.id : scope.selectedKipId;
-    const patternList =
-      scope.selectedPatterns.length === 0
-        ? getPatternList(defaultIndexPattern)
-        : scope.selectedPatterns;
+    const theKip = kibanaIndexPatterns.find((kip) => kip.id === kipId);
+    const patternList = theKip != null ? theKip.patternList : [];
     const selectedPatterns =
-      scope.selectedPatterns.length === 0
+      scope.selectedPatterns.length === 0 && theKip != null
         ? getScopePatternListSelection(kibanaIndexPatterns, kipId, scopeId)
         : scope.selectedPatterns;
+
     return {
       kipId,
       patternList,
@@ -113,9 +112,8 @@ const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
 
 export const getSourcererScopeSelector = () => {
   const getScopeIdSelector = scopeIdSelector();
-  const getSelectedPatterns = memoizeOne((selectedPatternsStr: string): string[] => {
-    const selectedPatterns =
-      selectedPatternsStr.length > 0 ? selectedPatternsStr.split(',').sort() : [];
+  const getSelectedPatterns = memoizeOne((selectedPatternsStr: string[]): string[] => {
+    const selectedPatterns = selectedPatternsStr.length > 0 ? selectedPatternsStr.sort() : [];
     return selectedPatterns.some((index) => index === 'logs-*')
       ? [...selectedPatterns, EXCLUDE_ELASTIC_CLOUD_INDEX]
       : selectedPatterns;
@@ -131,7 +129,7 @@ export const getSourcererScopeSelector = () => {
 
   return (state: State, scopeId: SourcererScopeName): ManageScope => {
     const scope = getScopeIdSelector(state, scopeId);
-    const selectedPatterns = getSelectedPatterns(scope.selectedPatterns.sort().join());
+    const selectedPatterns = getSelectedPatterns(scope.selectedPatterns);
     const indexPattern = getIndexPattern(scope.indexPattern, selectedPatterns.join());
 
     return {

@@ -46,6 +46,7 @@ export type SourcererScopeById = {
 
 export interface KibanaIndexPattern {
   id: string;
+  patternList: string[];
   title: string;
 }
 

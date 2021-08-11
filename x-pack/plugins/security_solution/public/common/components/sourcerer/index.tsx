@@ -50,24 +50,26 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     State,
     SourcererScopeSelector
   >((state) => sourcererScopeSelector(state, scopeId), deepEqual);
-  const { selectedKipId, selectablePatterns, selectedPatterns, loading } = sourcererScope;
+  const { selectedKipId, selectedPatterns, loading } = sourcererScope;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
-  const [selectedOption, setSelectedOption] = useState<string>(selectedKipId ?? '');
-  const patternList = useMemo(() => {
-    const theKip = kibanaIndexPatterns.find((kip) => kip.id === selectedOption);
-    return theKip != null ? theKip.title.split(',') : [];
-  }, [kibanaIndexPatterns, selectedOption]);
+  const [kipId, setKipId] = useState<string>(selectedKipId ?? '');
 
-  const selectableOptions = useMemo(
-    () =>
-      patternList.map((indexName) => ({
-        label: indexName,
-        value: indexName,
-        disabled: !selectablePatterns.includes(indexName),
-      })),
-    [selectablePatterns, patternList]
-  );
+  const { patternList, selectablePatterns } = useMemo(() => {
+    const theKip = kibanaIndexPatterns.find((kip) => kip.id === kipId);
+    console.log('theLKip', { kibanaIndexPatterns, theKip });
+    return theKip != null
+      ? { patternList: theKip.title.split(','), selectablePatterns: theKip.patternList }
+      : { patternList: [], selectablePatterns: [] };
+  }, [kibanaIndexPatterns, kipId]);
+  const selectableOptions = useMemo(() => {
+    console.log('useMemo selectableOptions:', { patternList, selectablePatterns });
+    return patternList.map((indexName) => ({
+      label: indexName,
+      value: indexName,
+      disabled: !selectablePatterns.includes(indexName),
+    }));
+  }, [selectablePatterns, patternList]);
 
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     selectedPatterns.map((indexName) => ({
@@ -102,7 +104,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const onChangeSuper = useCallback(
     (newSelectedOption) => {
-      setSelectedOption(newSelectedOption);
+      setKipId(newSelectedOption);
       setSelectedOptions(
         getScopePatternListSelection(kibanaIndexPatterns, newSelectedOption, scopeId).map(
           (indexSelected: string) => ({
@@ -116,7 +118,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   );
 
   const resetDataSources = useCallback(() => {
-    setSelectedOption(defaultIndexPattern.id);
+    setKipId(defaultIndexPattern.id);
     setSelectedOptions(
       getScopePatternListSelection(kibanaIndexPatterns, defaultIndexPattern.id, scopeId).map(
         (indexSelected: string) => ({
@@ -129,11 +131,11 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const handleSaveIndices = useCallback(() => {
     onChangeKip(
-      selectedOption,
+      kipId,
       selectedOptions.map((so) => so.label)
     );
     setPopoverIsOpen(false);
-  }, [onChangeKip, selectedOption, selectedOptions]);
+  }, [onChangeKip, kipId, selectedOptions]);
 
   const handleClosePopOver = useCallback(() => {
     setPopoverIsOpen(false);
@@ -156,7 +158,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     [setPopoverIsOpenCb, loading]
   );
 
-  const indexesPatternSelectOptions = useMemo(
+  const kipSelectOptions = useMemo(
     () =>
       kibanaIndexPatterns.map(({ title, id }) => ({
         inputDisplay:
@@ -194,16 +196,16 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         data-test-subj="indexPattern-switcher"
         placeholder={i18n.PICK_INDEX_PATTERNS}
         fullWidth
-        options={indexesPatternSelectOptions}
-        valueOfSelected={selectedOption}
+        options={kipSelectOptions}
+        valueOfSelected={kipId}
         onChange={onChangeSuper}
       />
     ),
-    [indexesPatternSelectOptions, onChangeSuper, selectedOption]
+    [kipSelectOptions, onChangeSuper, kipId]
   );
 
   useEffect(() => {
-    setSelectedOption((prevSelectedOption) =>
+    setKipId((prevSelectedOption) =>
       !deepEqual(selectedKipId, prevSelectedOption) && selectedKipId != null
         ? selectedKipId
         : prevSelectedOption

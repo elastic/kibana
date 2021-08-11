@@ -8,45 +8,12 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { StartServicesAccessor } from 'kibana/server';
 import type { SecuritySolutionPluginRouter } from '../../../types';
-import {
-  DEFAULT_INDEX_PATTERN_ID,
-  DEFAULT_TIME_FIELD,
-  SOURCERER_API_URL,
-} from '../../../../common/constants';
+import { DEFAULT_INDEX_PATTERN_ID, SOURCERER_API_URL } from '../../../../common/constants';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
-import { IndexPattern, IndexPatternsService } from '../../../../../../../src/plugins/data/common';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
-import { sourcererSchema } from './schema';
+import { getPatternListSchema, sourcererSchema } from './schema';
 import { StartPlugins } from '../../../plugin';
-
-const getKibanaIndexPattern = async (
-  indexPatternsService: IndexPatternsService,
-  patternList: string[],
-  patternId: string
-): Promise<IndexPattern> => {
-  let indexPattern: IndexPattern;
-  const patternListAsTitle = patternList.join();
-  try {
-    indexPattern = await indexPatternsService.get(patternId);
-    if (patternListAsTitle !== indexPattern.title) {
-      indexPattern.title = patternListAsTitle;
-      await indexPatternsService.updateSavedObject(indexPattern);
-    }
-  } catch (e) {
-    const error = transformError(e);
-    console.log('ERRRR', error);
-    if (error.statusCode === 404) {
-      indexPattern = await indexPatternsService.createAndSave({
-        id: patternId,
-        title: patternListAsTitle,
-        timeFieldName: DEFAULT_TIME_FIELD,
-      });
-    } else {
-      throw e;
-    }
-  }
-  return indexPattern;
-};
+import { findExistingIndices, getKibanaIndexPattern } from './helpers';
 
 export const createSourcererIndexPatternRoute = (
   router: SecuritySolutionPluginRouter,
@@ -81,6 +48,46 @@ export const createSourcererIndexPatternRoute = (
           DEFAULT_INDEX_PATTERN_ID
         );
         return response.ok({ body: pattern });
+      } catch (err) {
+        const error = transformError(err);
+        return siemResponse.error({
+          body:
+            error.statusCode === 403
+              ? 'Users with write permissions need to access the Elastic Security app to initialize the app source data.'
+              : error.message,
+          statusCode: error.statusCode,
+        });
+      }
+    }
+  );
+};
+
+export const getKipPatternListsRoute = (router: SecuritySolutionPluginRouter) => {
+  router.get(
+    {
+      path: SOURCERER_API_URL,
+      validate: {
+        query: buildRouteValidation(getPatternListSchema),
+      },
+      options: {
+        tags: ['access:securitySolution'],
+      },
+    },
+    async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+      const patternLists: string[][] = request.query.titles.map((title) => title.split(','));
+      const activePatternLists: boolean[][] = await Promise.all(
+        patternLists.map((patternList) =>
+          findExistingIndices(patternList, context.core.elasticsearch.client.asCurrentUser)
+        )
+      );
+      const body = patternLists.map((patternList, i) =>
+        patternList.filter((pattern, j) => activePatternLists[i][j])
+      );
+      console.log('EHHHH', JSON.stringify({ patternLists, activePatternLists, body }));
+
+      try {
+        return response.ok({ body });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

@@ -230,6 +230,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
+        console.log('indexFieldsSearch', { kipId, patternList, selectedPatterns });
         searchSubscription$.current = data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
             { kipId: selectedKipId, indices: patternList, onlyCheckIfIndicesExist: false },
@@ -241,7 +242,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                const selectablePatterns = response.indicesExist;
+                const selectablePatterns = patternList;
                 // ensures all selected patterns are selectable
                 const newSelectedPatterns = selectedPatterns.filter((pattern) =>
                   selectablePatterns.includes(pattern)
