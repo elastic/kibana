@@ -42,21 +42,7 @@ export const buildBulkBody = (
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc });
   const rule = buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {});
   const timestamp = new Date().toISOString();
-  let hostName = '';
-  let userName = '';
-  if (mergedDoc.fields) {
-    hostName = mergedDoc.fields['host.name'] != null ? mergedDoc.fields['host.name'] : hostName;
-    userName = mergedDoc.fields['user.name'] != null ? mergedDoc.fields['user.name'] : userName;
-  }
-  const reason = buildReasonMessage({
-    alertName: rule.name,
-    alertRiskScore: ruleSO.attributes.params.riskScore,
-    alertSeverity: ruleSO.attributes.params.severity,
-    hostName,
-    timestamp,
-    userName,
-  });
-
+  const reason = buildReasonMessage({ mergedDoc, rule, timestamp });
   const signal: Signal = {
     ...buildSignal([mergedDoc], rule, reason),
     ...additionalSignalFields(mergedDoc),
@@ -133,12 +119,7 @@ export const buildSignalFromSequence = (
   const rule = buildRuleWithoutOverrides(ruleSO);
   const timestamp = new Date().toISOString();
 
-  const reason = buildReasonMessage({
-    alertName: rule.name,
-    alertRiskScore: ruleSO.attributes.params.riskScore,
-    alertSeverity: ruleSO.attributes.params.severity,
-    timestamp,
-  });
+  const reason = buildReasonMessage({ rule, timestamp });
   const signal: Signal = buildSignal(events, rule, reason);
   const mergedEvents = objectArrayIntersection(events.map((event) => event._source));
   return {
@@ -170,21 +151,7 @@ export const buildSignalFromEvent = (
     ? buildRuleWithOverrides(ruleSO, mergedEvent._source ?? {})
     : buildRuleWithoutOverrides(ruleSO);
   const timestamp = new Date().toISOString();
-  let hostName = '';
-  let userName = '';
-  if (mergedEvent.fields) {
-    hostName = mergedEvent.fields['host.name'] != null ? mergedEvent.fields['host.name'] : hostName;
-    userName = mergedEvent.fields['user.name'] != null ? mergedEvent.fields['user.name'] : userName;
-  }
-  const reason = buildReasonMessage({
-    alertName: rule.name,
-    alertRiskScore: ruleSO.attributes.params.riskScore,
-    alertSeverity: ruleSO.attributes.params.severity,
-    hostName,
-    timestamp,
-    userName,
-  });
-
+  const reason = buildReasonMessage({ mergedDoc: mergedEvent, rule, timestamp });
   const signal: Signal = {
     ...buildSignal([mergedEvent], rule, reason),
     ...additionalSignalFields(mergedEvent),

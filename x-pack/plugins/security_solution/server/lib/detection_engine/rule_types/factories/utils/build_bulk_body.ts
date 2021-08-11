@@ -45,20 +45,8 @@ export const buildBulkBody = (
     : buildRuleWithoutOverrides(ruleSO);
   const filteredSource = filterSource(mergedDoc);
   const timestamp = new Date().toISOString();
-  let hostName = '';
-  let userName = '';
-  if (mergedDoc.fields) {
-    hostName = mergedDoc.fields['host.name'] != null ? mergedDoc.fields['host.name'] : hostName;
-    userName = mergedDoc.fields['user.name'] != null ? mergedDoc.fields['user.name'] : userName;
-  }
-  const reason = buildReasonMessage({
-    alertName: rule.name,
-    alertRiskScore: ruleSO.attributes.params.riskScore,
-    alertSeverity: ruleSO.attributes.params.severity,
-    hostName,
-    timestamp,
-    userName,
-  });
+
+  const reason = buildReasonMessage({ mergedDoc, rule, timestamp });
   if (isSourceDoc(mergedDoc)) {
     return {
       ...filteredSource,

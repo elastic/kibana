@@ -6,39 +6,56 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
+import { SignalSourceHit } from './types';
 
 export interface BuildReasonMessageArgs {
-  alertName: string;
-  alertSeverity: string;
-  alertRiskScore: number;
-  userName?: string;
+  rule: RulesSchema;
+  mergedDoc?: SignalSourceHit;
   timestamp: string;
-  hostName?: string;
 }
 
 export type BuildReasonMessage = (args: BuildReasonMessageArgs) => string;
 
-const buildCommonReasonMessage = ({
-  alertName,
-  alertSeverity,
-  alertRiskScore,
-  hostName,
+/**
+ * Currently all security solution rule types share a commone reason message string. This function composes that string
+ * In the future there may be different configurations based on the different rule types, so the plumbing has been put in place
+ * to more easily allow for this in the future.
+ * @export buildCommonReasonMessage - is only exported for testing purposes, and only used internally here.
+ */
+export const buildCommonReasonMessage = ({
+  rule,
+  mergedDoc,
   timestamp,
-  userName,
 }: BuildReasonMessageArgs) => {
+  if (!rule) {
+    // This should never happen, but in case, better to not show a malformed string
+    return '';
+  }
+  let hostName;
+  let userName;
+  let timestampForReason = timestamp;
+  if (mergedDoc?.fields) {
+    hostName = mergedDoc.fields['host.name'] != null ? mergedDoc.fields['host.name'] : hostName;
+    userName = mergedDoc.fields['user.name'] != null ? mergedDoc.fields['user.name'] : userName;
+    timestampForReason =
+      mergedDoc.fields['@timestamp'] != null ? mergedDoc.fields['@timestamp'] : timestamp;
+  }
+
   const isFieldEmpty = (field: string | string[] | undefined | null) =>
     !field || !field.length || (field.length === 1 && field[0] === '-');
 
   return i18n.translate('xpack.securitySolution.detectionEngine.signals.alertReasonDescription', {
     defaultMessage:
-      'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and risk score of {alertRiskScore} {userName, select, null {} other {by {userName} } } {hostName, select, null {} other {on {hostName} } }',
+      'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and risk score of {alertRiskScore}{userName, select, null {} other {{whitespace}by {userName}} }{hostName, select, null {} other {{whitespace}on {hostName}} }.',
     values: {
-      alertName,
-      alertSeverity,
-      alertRiskScore,
+      alertName: rule.name,
+      alertSeverity: rule.severity,
+      alertRiskScore: rule.risk_score,
       hostName: isFieldEmpty(hostName) ? 'null' : hostName,
-      timestamp,
+      timestamp: timestampForReason,
       userName: isFieldEmpty(userName) ? 'null' : userName,
+      whitespace: ' ', // there isn't support for the unicode /u0020 for whitespace, and leading spaces are deleted, so to prevent double-whitespace explicitly passing the space in.
     },
   });
 };
