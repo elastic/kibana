@@ -36,10 +36,16 @@ export function getAxesConfiguration(
   tables?: Record<string, Datatable>,
   formatFactory?: FormatFactory
 ): GroupsConfiguration {
-  const series: { auto: FormattedMetric[]; left: FormattedMetric[]; right: FormattedMetric[] } = {
+  const series: {
+    auto: FormattedMetric[];
+    left: FormattedMetric[];
+    right: FormattedMetric[];
+    bottom: FormattedMetric[];
+  } = {
     auto: [],
     left: [],
     right: [],
+    bottom: [],
   };
 
   layers?.forEach((layer) => {
