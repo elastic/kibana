@@ -6,13 +6,11 @@
  */
 
 import {
-  ALERT_OWNER,
+  ALERT_RULE_CONSUMER,
   ALERT_RULE_RISK_SCORE,
-  ALERT_RULE_SEVERITY,
   ALERT_STATUS,
-  CONSUMERS,
   ECS_VERSION,
-  RULE_ID,
+  ALERT_RULE_TYPE_ID,
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
@@ -28,14 +26,12 @@ import { requestMock, serverMock } from './__mocks__/server';
 const getMockAlert = (): ParsedTechnicalFields => ({
   [TIMESTAMP]: '2021-06-21T21:33:05.713Z',
   [ECS_VERSION]: '1.0.0',
-  [CONSUMERS]: [],
   [VERSION]: '7.13.0',
-  [RULE_ID]: 'apm.error_rate',
-  [ALERT_OWNER]: 'apm',
+  [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+  [ALERT_RULE_CONSUMER]: 'apm',
   [ALERT_STATUS]: 'open',
   [ALERT_RULE_RISK_SCORE]: 20,
   [SPACE_IDS]: ['fake-space-id'],
-  [ALERT_RULE_SEVERITY]: 'warning',
 });
 
 describe('getAlertByIdRoute', () => {

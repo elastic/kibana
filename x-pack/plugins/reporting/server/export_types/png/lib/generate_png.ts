@@ -11,7 +11,7 @@ import { finalize, map, tap } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
 import { LayoutParams, PreserveLayout } from '../../../lib/layouts';
-import { ScreenshotResults } from '../../../lib/screenshots';
+import { getScreenshots$, ScreenshotResults } from '../../../lib/screenshots';
 import { ConditionalHeaders } from '../../common';
 
 function getBase64DecodedSize(value: string) {
@@ -24,7 +24,9 @@ function getBase64DecodedSize(value: string) {
 }
 
 export async function generatePngObservableFactory(reporting: ReportingCore) {
-  const getScreenshots = await reporting.getScreenshotsObservable();
+  const config = reporting.getConfig();
+  const captureConfig = config.get('capture');
+  const { browserDriverFactory } = await reporting.getPluginStartDeps();
 
   return function generatePngObservable(
     logger: LevelLogger,
@@ -43,7 +45,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
 
     const apmScreenshots = apmTrans?.startSpan('screenshots_pipeline', 'setup');
     let apmBuffer: typeof apm.currentSpan;
-    const screenshots$ = getScreenshots({
+    const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, {
       logger,
       urls: [url],
       conditionalHeaders,

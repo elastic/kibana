@@ -11,12 +11,12 @@ import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks'
 import { getXyVisualization } from './xy_visualization';
 import { Operation } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({
     paletteService: chartPluginMock.createPaletteRegistry(),
-    data: dataPluginMock.createStartContract(),
+    fieldFormats: fieldFormatsServiceMock.createStartContract(),
   });
   let mockDatasource: ReturnType<typeof createMockDatasource>;
   let frame: ReturnType<typeof createMockFramePublicAPI>;

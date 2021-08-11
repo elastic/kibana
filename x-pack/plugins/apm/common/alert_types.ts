@@ -71,7 +71,7 @@ export const ALERT_TYPES_CONFIG: Record<
   },
   [AlertType.TransactionErrorRate]: {
     name: i18n.translate('xpack.apm.transactionErrorRateAlert.name', {
-      defaultMessage: 'Transaction error rate threshold',
+      defaultMessage: 'Failed transaction rate threshold',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
