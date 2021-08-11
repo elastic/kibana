@@ -18,6 +18,8 @@ import type {
   GetPackagePoliciesRequest,
   GetPackagePoliciesResponse,
   GetOnePackagePolicyResponse,
+  UpgradePackagePolicyDryRunResponse,
+  UpgradePackagePolicyResponse,
 } from '../../../common/types/rest_spec';
 
 import { sendRequest, useRequest } from './use_request';
@@ -63,3 +65,25 @@ export const sendGetOnePackagePolicy = (packagePolicyId: string) => {
     method: 'get',
   });
 };
+
+export function sendUpgradePackagePolicyDryRun(packagePolicyIds: string[]) {
+  return sendRequest<UpgradePackagePolicyDryRunResponse>({
+    path: packagePolicyRouteService.getUpgradePath(),
+    method: 'post',
+    body: JSON.stringify({
+      packagePolicyIds,
+      dryRun: true,
+    }),
+  });
+}
+
+export function sendUpgradePackagePolicy(packagePolicyIds: string[]) {
+  return sendRequest<UpgradePackagePolicyResponse>({
+    path: packagePolicyRouteService.getUpgradePath(),
+    method: 'post',
+    body: JSON.stringify({
+      packagePolicyIds,
+      dryRun: false,
+    }),
+  });
+}

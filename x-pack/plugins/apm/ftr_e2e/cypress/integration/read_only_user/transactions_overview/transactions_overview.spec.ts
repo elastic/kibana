@@ -11,9 +11,8 @@ import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
 const { start, end } = archives_metadata['apm_8.0.0'];
 
-const serviceOverviewPath = '/app/apm/services/opbeans-node/transactions';
-const baseUrl = url.format({
-  pathname: serviceOverviewPath,
+const serviceOverviewHref = url.format({
+  pathname: '/app/apm/services/opbeans-node/transactions',
   query: { rangeFrom: start, rangeTo: end },
 });
 
@@ -27,8 +26,8 @@ describe('Transactions Overview', () => {
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
-  it('persists transaction type selected when clicking on Overview tab', () => {
-    cy.visit(baseUrl);
+  it('persists transaction type selected when navigating to Overview tab', () => {
+    cy.visit(serviceOverviewHref);
     cy.get('[data-test-subj="headerFilterTransactionType"]').should(
       'have.value',
       'request'
@@ -38,8 +37,7 @@ describe('Transactions Overview', () => {
       'have.value',
       'Worker'
     );
-
-    cy.get('[data-test-subj="tab_overview"]').click();
+    cy.get('a[href*="/app/apm/services/opbeans-node/overview"]').click();
     cy.get('[data-test-subj="headerFilterTransactionType"]').should(
       'have.value',
       'Worker'
