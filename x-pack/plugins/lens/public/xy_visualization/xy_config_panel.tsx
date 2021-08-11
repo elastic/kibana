@@ -106,6 +106,7 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   const createTrigger = function () {
     return (
       <ToolbarButton
+        data-test-subj="lns_layer_settings"
         title={currentVisType.fullLabel || currentVisType.label}
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
         fullWidth
@@ -113,7 +114,7 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
       >
         <>
           <EuiIcon type={currentVisType.icon} />
-          <EuiText size="s" className="lnsChangeIndexPattern_title">
+          <EuiText size="s" className="lnsLayerPanelChartSwitch_title">
             {currentVisType.fullLabel || currentVisType.label}
           </EuiText>
         </>

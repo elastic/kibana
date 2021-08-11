@@ -19,8 +19,13 @@
   min-width: 0;
 }
 
+.lnsLayerPanel__settingsStaticHeaderIcon {
+  margin-right: $euiSizeS;
+  vertical-align: inherit;
+}
+
 .lnsLayerPanel__settingsStaticHeader {
-  padding-left: $euiSizeXS;
+  display: inline;
 }
 
 .lnsLayerPanel__row {
