@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import { Observable } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
+import { JsonObject } from '../../../../../../../node_modules/x-pack/plugins/infra/common/typed_json';
 import { IKibanaSearchRequest } from '../../../../../../../src/plugins/data/public';
 import { LogSourceColumnConfiguration } from '../../../../common/log_sources';
 import { LogEntryAfterCursor } from '../../../../common/log_entry';
@@ -55,7 +56,7 @@ export const useLogEntriesAfterRequest = ({
                     columns: columnOverrides,
                     endTimestamp: params?.extendTo ?? endTimestamp,
                     highlightPhrase,
-                    query,
+                    query: query as JsonObject,
                     size: params.size,
                     sourceId,
                     startTimestamp,

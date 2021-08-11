@@ -60,6 +60,7 @@ describe('ExpressionChart', () => {
           host: 'host.name',
           pod: 'kubernetes.pod.uid',
           tiebreaker: '_doc',
+          message: [],
         },
         anomalyThreshold: 20,
       },

@@ -58,8 +58,8 @@ export function getKqlQueryValues({
     influencersFilterQuery = esQuery.luceneStringToDsl(inputString);
   }
 
-  const clearSettings =
-    influencersFilterQuery?.match_all && Object.keys(influencersFilterQuery.match_all).length === 0;
+  const matchAll = (influencersFilterQuery?.match_all ?? {}) as object;
+  const clearSettings: boolean = Object.keys(matchAll).length === 0;
 
   return {
     clearSettings,

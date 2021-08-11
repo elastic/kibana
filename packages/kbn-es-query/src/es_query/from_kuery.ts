@@ -8,7 +8,7 @@
 
 import { Query } from '../filters';
 import { fromKueryExpression, toElasticsearchQuery, nodeTypes, KueryNode } from '../kuery';
-import { IndexPatternBase } from './types';
+import { BoolQuery, IndexPatternBase } from './types';
 
 /** @internal */
 export function buildQueryFromKuery(
@@ -16,7 +16,7 @@ export function buildQueryFromKuery(
   queries: Query[] = [],
   allowLeadingWildcards: boolean = false,
   dateFormatTZ?: string
-) {
+): BoolQuery {
   const queryASTs = queries.map((query) => {
     return fromKueryExpression(query.query, { allowLeadingWildcards });
   });

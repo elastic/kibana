@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { extend, defaults } from 'lodash';
 import { getTimeZoneFromSettings } from '../utils';
-import { DslQuery, isEsQueryString } from './es_query_dsl';
+import { isEsQueryString } from './es_query_dsl';
 
 /**
  * Decorate queries with default parameters
@@ -21,7 +22,7 @@ import { DslQuery, isEsQueryString } from './es_query_dsl';
  */
 
 export function decorateQuery(
-  query: DslQuery,
+  query: estypes.QueryDslQueryContainer,
   queryStringOptions: Record<string, any> | string,
   dateFormatTZ?: string
 ) {

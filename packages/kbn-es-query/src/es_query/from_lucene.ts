@@ -9,13 +9,14 @@
 import { Query } from '..';
 import { decorateQuery } from './decorate_query';
 import { luceneStringToDsl } from './lucene_string_to_dsl';
+import { BoolQuery } from './types';
 
 /** @internal */
 export function buildQueryFromLucene(
   queries: Query[],
   queryStringOptions: Record<string, any>,
   dateFormatTZ?: string
-) {
+): BoolQuery {
   const combinedQueries = (queries || []).map((query) => {
     const queryDsl = luceneStringToDsl(query.query);
 

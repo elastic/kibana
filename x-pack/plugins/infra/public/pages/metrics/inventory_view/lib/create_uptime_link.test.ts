@@ -16,6 +16,7 @@ const options: InfraWaffleMapOptions = {
     host: 'host.name',
     timestamp: '@timestanp',
     tiebreaker: '@timestamp',
+    message: [],
   },
   formatter: InfraFormatterType.percent,
   formatTemplate: '{{value}}',
