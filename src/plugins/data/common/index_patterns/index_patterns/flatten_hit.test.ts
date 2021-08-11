@@ -12,7 +12,7 @@ import { IndexPattern } from './index_pattern';
 import mockLogStashFields from './fixtures/logstash_fields';
 import { stubbedSavedObjectIndexPattern } from './fixtures/stubbed_saved_object_index_pattern';
 
-import { fieldFormatsMock } from '../../field_formats/mocks';
+import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
 import { flattenHitWrapper } from './flatten_hit';
 
 class MockFieldFormatter {}

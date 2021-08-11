@@ -15,6 +15,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
 import { useTheme } from '../../../hooks/use_theme';
+import { useApmParams } from '../../../hooks/use_apm_params';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -25,7 +26,11 @@ export function BackendErrorRateChart({ height }: { height: number }) {
 
   const theme = useTheme();
 
-  const { start, end } = useTimeRange();
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/backends/:backendName/overview');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const {
     urlParams: { kuery, environment },

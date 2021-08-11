@@ -19,19 +19,8 @@ import { CoreStart, PluginInitializerContext } from 'kibana/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { Storage } from '../../../../kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../navigation/public';
-import { createDocTableDirective } from './doc_table';
-import { createTableHeaderDirective } from './doc_table/components/table_header';
-import {
-  createToolBarPagerButtonsDirective,
-  createToolBarPagerTextDirective,
-} from './doc_table/components/pager';
 import { createContextAppLegacy } from '../components/context_app/context_app_legacy_directive';
-import { createTableRowDirective } from './doc_table/components/table_row';
-import { createPagerFactory } from './doc_table/lib/pager/pager_factory';
-import { createInfiniteScrollDirective } from './doc_table/infinite_scroll';
-import { createDocViewerDirective } from './doc_viewer';
 import { createDiscoverGridDirective } from './create_discover_grid_directive';
-import { createRenderCompleteDirective } from './directives/render_complete';
 import {
   configureAppAngularModule,
   PrivateProvider,
@@ -82,7 +71,6 @@ export function initializeInnerAngularModule(
     createLocalPrivateModule();
     createLocalPromiseModule();
     createLocalStorageModule();
-    createPagerFactoryModule();
     createDocTableModule();
     initialized = true;
   }
@@ -96,12 +84,10 @@ export function initializeInnerAngularModule(
         'discoverI18n',
         'discoverPrivate',
         'discoverDocTable',
-        'discoverPagerFactory',
         'discoverPromise',
       ])
       .config(watchMultiDecorator)
-      .directive('icon', (reactDirective) => reactDirective(EuiIcon))
-      .directive('renderComplete', createRenderCompleteDirective);
+      .directive('icon', (reactDirective) => reactDirective(EuiIcon));
   }
 
   return angular
@@ -114,11 +100,9 @@ export function initializeInnerAngularModule(
       'discoverPromise',
       'discoverLocalStorageProvider',
       'discoverDocTable',
-      'discoverPagerFactory',
     ])
     .config(watchMultiDecorator)
-    .run(registerListenEventListener)
-    .directive('renderComplete', createRenderCompleteDirective);
+    .run(registerListenEventListener);
 }
 
 function createLocalPromiseModule() {
@@ -150,20 +134,9 @@ const createLocalStorageService = function (type: string) {
   };
 };
 
-function createPagerFactoryModule() {
-  angular.module('discoverPagerFactory', []).factory('pagerFactory', createPagerFactory);
-}
-
 function createDocTableModule() {
   angular
-    .module('discoverDocTable', ['discoverPagerFactory', 'react'])
-    .directive('docTable', createDocTableDirective)
-    .directive('kbnTableHeader', createTableHeaderDirective)
-    .directive('toolBarPagerText', createToolBarPagerTextDirective)
-    .directive('kbnTableRow', createTableRowDirective)
-    .directive('toolBarPagerButtons', createToolBarPagerButtonsDirective)
-    .directive('kbnInfiniteScroll', createInfiniteScrollDirective)
+    .module('discoverDocTable', ['react'])
     .directive('discoverGrid', createDiscoverGridDirective)
-    .directive('docViewer', createDocViewerDirective)
     .directive('contextAppLegacy', createContextAppLegacy);
 }
