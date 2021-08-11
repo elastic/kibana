@@ -26,6 +26,13 @@ export const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   }
 
   .flyoutOverviewDescription {
+    .hoverActions-active {
+      .timelines__hoverActionButton,
+      .securitySolution__hoverActionButton {
+        opacity: 1;
+      }
+    }
+
     &:hover {
       .timelines__hoverActionButton,
       .securitySolution__hoverActionButton {

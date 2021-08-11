@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { stopPropagationAndPreventDefault } from '../../../../common';
@@ -33,7 +33,7 @@ export const NESTED_COLUMN = (field: string) =>
 export const COLUMN_TOGGLE_KEYBOARD_SHORTCUT = 'i';
 
 export interface ColumnToggleProps extends HoverActionComponentProps {
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
   isDisabled: boolean;
   isObjectArray: boolean;
   toggleColumn: (column: ColumnHeaderOptions) => void;

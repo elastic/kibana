@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -26,7 +26,7 @@ export const COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT = 'c';
 
 export interface CopyProps extends HoverActionComponentProps {
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
   isHoverAction?: boolean;
 }
 

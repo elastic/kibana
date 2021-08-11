@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { DraggableId } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 
@@ -45,7 +45,7 @@ const useGetHandleStartDragToTimeline = ({
 
 export interface AddToTimelineButtonProps extends HoverActionComponentProps {
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
   draggableId?: DraggableId;
   dataProvider?: DataProvider[] | DataProvider;
 }

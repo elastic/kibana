@@ -31,6 +31,7 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
     keyboardEvent,
     onFilterAdded,
     ownFocus,
+    onClick,
     showTooltip = false,
     value,
   }) => {
@@ -49,10 +50,14 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
           onFilterAdded();
         }
       }
+
+      if (onClick != null) {
+        onClick();
+      }
       if (closePopOver != null) {
         closePopOver();
       }
-    }, [closePopOver, field, filterManager, onFilterAdded, value]);
+    }, [closePopOver, field, filterManager, onClick, onFilterAdded, value]);
 
     useEffect(() => {
       if (!ownFocus) {

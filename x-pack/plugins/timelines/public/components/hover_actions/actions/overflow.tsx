@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -27,9 +27,10 @@ export const MORE_ACTIONS = i18n.translate('xpack.timelines.hoverActions.moreAct
 
 export const FILTER_OUT_VALUE_KEYBOARD_SHORTCUT = 'm';
 
-interface OverflowButtonProps extends HoverActionComponentProps {
+export interface OverflowButtonProps extends HoverActionComponentProps {
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
-  items: JSX.Element[];
+  items: Array<JSX.Element | null>;
+  isOverflowPopoverOpen: boolean;
 }
 
 const OverflowButton: React.FC<OverflowButtonProps> = React.memo(
@@ -39,46 +40,36 @@ const OverflowButton: React.FC<OverflowButtonProps> = React.memo(
     defaultFocusedButtonRef,
     field,
     items,
+    isOverflowPopoverOpen,
     keyboardEvent,
     ownFocus,
+    onClick,
     showTooltip = false,
     value,
   }) => {
-    const [isOverflowPopoverOpen, setOverflowPopover] = useState(false);
-
-    const onOverflowButtonClick = useCallback(() => {
-      setOverflowPopover(!isOverflowPopoverOpen);
-    }, [isOverflowPopoverOpen]);
-
-    const closeOverflowPopover = useCallback(() => {
-      if (closePopOver) {
-        closePopOver();
-      }
-      setOverflowPopover(false);
-    }, [closePopOver]);
-
     useEffect(() => {
       if (!ownFocus) {
         return;
       }
       if (keyboardEvent?.key === FILTER_OUT_VALUE_KEYBOARD_SHORTCUT) {
         stopPropagationAndPreventDefault(keyboardEvent);
-        onOverflowButtonClick();
+        if (onClick != null) {
+          onClick();
+        }
       }
-    }, [keyboardEvent, onOverflowButtonClick, ownFocus]);
+    }, [keyboardEvent, onClick, ownFocus]);
 
-    const overflowItems = useMemo(
+    const overflowItems: JSX.Element[] = useMemo(
       () =>
-        items.reduce<JSX.Element>((actionItems, item) => {
-          return item.isenabled ? [...actionItems, item.content] : actionItems;
+        items.filter((item) => {
+          return item != null;
         }, []),
       [items]
-    );
+    ) as JSX.Element[];
 
     const popover = useMemo(
       () => (
         <EuiPopover
-          id="contextMenuExample"
           button={
             Component ? (
               <Component
@@ -87,7 +78,7 @@ const OverflowButton: React.FC<OverflowButtonProps> = React.memo(
                 data-test-subj="add-to-timeline"
                 icon="boxesHorizontal"
                 iconType="boxesHorizontal"
-                onClick={onOverflowButtonClick}
+                onClick={onClick}
                 title={MORE_ACTIONS}
               >
                 {MORE_ACTIONS}
@@ -100,12 +91,12 @@ const OverflowButton: React.FC<OverflowButtonProps> = React.memo(
                 data-test-subj="more-actions"
                 iconSize="s"
                 iconType="boxesHorizontal"
-                onClick={onOverflowButtonClick}
+                onClick={onClick}
               />
             )
           }
           isOpen={isOverflowPopoverOpen}
-          closePopover={closeOverflowPopover}
+          closePopover={closePopOver}
           panelPaddingSize="none"
           anchorPosition="downLeft"
         >
@@ -115,9 +106,9 @@ const OverflowButton: React.FC<OverflowButtonProps> = React.memo(
       [
         Component,
         defaultFocusedButtonRef,
-        onOverflowButtonClick,
+        onClick,
         isOverflowPopoverOpen,
-        closeOverflowPopover,
+        closePopOver,
         overflowItems,
       ]
     );

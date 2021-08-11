@@ -39,10 +39,26 @@ export const AdditionalContent = styled.div`
 
 AdditionalContent.displayName = 'AdditionalContent';
 
-const StyledHoverActionsContainer = styled.div<{ $showTopN: boolean; $showOwnFocus: boolean }>`
+const StyledHoverActionsContainer = styled.div<{
+  $showTopN: boolean;
+  $showOwnFocus: boolean;
+  $isActive: boolean;
+}>`
   min-width: 138px;
   padding: ${(props) => `0 ${props.theme.eui.paddingSizes.s}`};
   display: flex;
+
+  ${(props) =>
+    props.$isActive
+      ? `
+    .hoverActions-active {
+      .timelines__hoverActionButton,
+      .securitySolution__hoverActionButton {
+        opacity: 1;
+      }
+    }
+  `
+      : ''}
 
   ${(props) =>
     props.$showOwnFocus
@@ -93,11 +109,6 @@ interface Props {
   values?: string[] | string | null;
 }
 
-interface OverflowItem {
-  isenabled: boolean;
-  content: JSX.Element;
-}
-
 /** Returns a value for the `disabled` prop of `EuiFocusTrap` */
 const isFocusTrapDisabled = ({
   ownFocus,
@@ -144,6 +155,24 @@ export const HoverActions: React.FC<Props> = React.memo(
       getOverflowButton,
     } = timelines.getHoverActions();
     const [stKeyboardEvent, setStKeyboardEvent] = useState<React.KeyboardEvent>();
+    const [isActive, setIsActive] = useState(false);
+    const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);
+
+    const onOverflowButtonClick = useCallback(() => {
+      setIsOverflowPopoverOpen(!isOverflowPopoverOpen);
+      setIsActive(true);
+    }, [isOverflowPopoverOpen, setIsActive, setIsOverflowPopoverOpen]);
+
+    const onOverflowPopoverClosed = useCallback(() => {
+      setIsOverflowPopoverOpen(false);
+      setIsActive(false);
+    }, [setIsActive, setIsOverflowPopoverOpen]);
+
+    const onShowTopNClicked = useCallback(() => {
+      toggleTopN();
+      onOverflowPopoverClosed();
+    }, [onOverflowPopoverClosed, toggleTopN]);
+
     const filterManagerBackup = useMemo(() => kibana.services.data.query.filterManager, [
       kibana.services.data.query.filterManager,
     ]);
@@ -216,102 +245,95 @@ export const HoverActions: React.FC<Props> = React.memo(
 
     const showFilters = values != null;
 
-    const overflowItems: OverflowItem[] = useMemo(
+    const overflowButtonRef = useRef(null);
+
+    const overflowItems: Array<JSX.Element | null> = useMemo(
       () => [
-        {
-          isenabled: showFilters,
-          content: (
-            <div data-test-subj="hover-actions-toggle-column" key="hover-actions-toggle-column">
-              {getColumnToggleButton({
-                Component: enableOverflowButton ? EuiContextMenuItem : undefined,
-                field,
-                isDisabled: isObjectArray && dataType !== 'geo_point',
-                isObjectArray,
-                keyboardEvent: stKeyboardEvent,
-                ownFocus,
-                showTooltip: enableOverflowButton ? false : true,
-                toggleColumn,
-                value: values,
-              })}
-            </div>
-          ),
-        },
-        {
-          isenabled:
-            showFilters && !enableOverflowButton && (draggableId != null || !isEmpty(dataProvider)),
-          content: (
-            <div data-test-subj="hover-actions-add-timeline" key="hover-actions-add-timeline">
-              {getAddToTimelineButton({
-                Component: enableOverflowButton ? EuiContextMenuItem : undefined,
-                dataProvider,
-                draggableId,
-                field,
-                keyboardEvent: stKeyboardEvent,
-                ownFocus,
-                showTooltip: enableOverflowButton ? false : true,
-                value: values,
-              })}
-            </div>
-          ),
-        },
-        {
-          isenabled: allowTopN({
-            browserField: getAllFieldsByName(browserFields)[field],
-            fieldName: field,
-          }),
-          content: (
-            <ShowTopNButton
-              Component={enableOverflowButton ? EuiContextMenuItem : undefined}
-              data-test-subj="hover-actions-show-top-n"
-              field={field}
-              key="hover-actions-show-top-n"
-              onClick={toggleTopN}
-              onFilterAdded={onFilterAdded}
-              ownFocus={ownFocus}
-              showTopN={showTopN}
-              showTooltip={enableOverflowButton ? false : true}
-              timelineId={timelineId}
-              value={values}
-            />
-          ),
-        },
-        {
-          isenabled: field != null,
-          content: (
-            <div data-test-subj="hover-actions-copy-button" key="hover-actions-copy-button">
-              {getCopyButton({
-                Component: enableOverflowButton ? EuiContextMenuItem : undefined,
-                field,
-                isHoverAction: true,
-                keyboardEvent: stKeyboardEvent,
-                ownFocus,
-                showTooltip: enableOverflowButton ? false : true,
-                value: values,
-              })}
-            </div>
-          ),
-        },
+        toggleColumn ? (
+          <div data-test-subj="hover-actions-toggle-column" key="hover-actions-toggle-column">
+            {getColumnToggleButton({
+              closePopOver: onOverflowPopoverClosed,
+              Component: enableOverflowButton ? EuiContextMenuItem : undefined,
+              field,
+              isDisabled: isObjectArray && dataType !== 'geo_point',
+              isObjectArray,
+              keyboardEvent: stKeyboardEvent,
+              ownFocus,
+              showTooltip: enableOverflowButton ? false : true,
+              toggleColumn,
+              value: values,
+            })}
+          </div>
+        ) : null,
+        showFilters && (draggableId != null || !isEmpty(dataProvider)) ? (
+          <div data-test-subj="hover-actions-add-timeline" key="hover-actions-add-timeline">
+            {getAddToTimelineButton({
+              closePopOver: onOverflowPopoverClosed,
+              Component: enableOverflowButton ? EuiContextMenuItem : undefined,
+              dataProvider,
+              draggableId,
+              field,
+              keyboardEvent: stKeyboardEvent,
+              ownFocus,
+              showTooltip: enableOverflowButton ? false : true,
+              value: values,
+            })}
+          </div>
+        ) : null,
+        allowTopN({
+          browserField: getAllFieldsByName(browserFields)[field],
+          fieldName: field,
+        }) ? (
+          <ShowTopNButton
+            Component={enableOverflowButton ? EuiContextMenuItem : undefined}
+            data-test-subj="hover-actions-show-top-n"
+            field={field}
+            key="hover-actions-show-top-n"
+            onClick={onShowTopNClicked}
+            onFilterAdded={onFilterAdded}
+            ownFocus={ownFocus}
+            showTopN={showTopN}
+            showTooltip={enableOverflowButton ? false : true}
+            timelineId={timelineId}
+            value={values}
+          />
+        ) : null,
+        field != null ? (
+          <div data-test-subj="hover-actions-copy-button" key="hover-actions-copy-button">
+            {getCopyButton({
+              closePopOver: onOverflowPopoverClosed,
+              Component: enableOverflowButton ? EuiContextMenuItem : undefined,
+              field,
+              isHoverAction: true,
+              keyboardEvent: stKeyboardEvent,
+              ownFocus,
+              showTooltip: enableOverflowButton ? false : true,
+              value: values,
+            })}
+          </div>
+        ) : null,
       ],
       [
-        browserFields,
-        dataProvider,
-        dataType,
-        draggableId,
-        field,
-        getAddToTimelineButton,
-        getColumnToggleButton,
-        getCopyButton,
-        isObjectArray,
-        onFilterAdded,
-        ownFocus,
-        showFilters,
-        enableOverflowButton,
-        showTopN,
-        stKeyboardEvent,
-        timelineId,
         toggleColumn,
-        toggleTopN,
+        getColumnToggleButton,
+        onOverflowPopoverClosed,
+        enableOverflowButton,
+        field,
+        isObjectArray,
+        dataType,
+        stKeyboardEvent,
+        ownFocus,
         values,
+        showFilters,
+        draggableId,
+        dataProvider,
+        getAddToTimelineButton,
+        browserFields,
+        onShowTopNClicked,
+        onFilterAdded,
+        showTopN,
+        timelineId,
+        getCopyButton,
       ]
     );
 
@@ -326,6 +348,8 @@ export const HoverActions: React.FC<Props> = React.memo(
           onKeyDown={onKeyDown}
           $showTopN={showTopN}
           $showOwnFocus={showOwnFocus}
+          $isActive={isActive}
+          className={isActive ? 'hoverActions-active' : ''}
         >
           <EuiScreenReaderOnly>
             <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(field)}</p>
@@ -337,24 +361,26 @@ export const HoverActions: React.FC<Props> = React.memo(
             <>
               <div data-test-subj="hover-actions-filter-for">
                 {getFilterForValueButton({
+                  closePopOver: onOverflowPopoverClosed,
                   defaultFocusedButtonRef,
                   field,
                   filterManager,
                   keyboardEvent: stKeyboardEvent,
                   onFilterAdded,
                   ownFocus,
-                  showTooltip: true,
+                  showTooltip: enableOverflowButton ? false : true,
                   value: values,
                 })}
               </div>
               <div data-test-subj="hover-actions-filter-out">
                 {getFilterOutValueButton({
+                  closePopOver: onOverflowPopoverClosed,
                   field,
                   filterManager,
                   keyboardEvent: stKeyboardEvent,
                   onFilterAdded,
                   ownFocus,
-                  showTooltip: true,
+                  showTooltip: enableOverflowButton ? false : true,
                   value: values,
                 })}
               </div>
@@ -363,17 +389,21 @@ export const HoverActions: React.FC<Props> = React.memo(
 
           {enableOverflowButton &&
             getOverflowButton({
+              closePopOver: onOverflowPopoverClosed,
+              defaultFocusedButtonRef: overflowButtonRef,
               field,
               keyboardEvent: stKeyboardEvent,
               ownFocus,
-              showTooltip: true,
+              onClick: onOverflowButtonClick,
+              showTooltip: enableOverflowButton ? false : true,
               value: values,
               items: overflowItems,
+              isOverflowPopoverOpen,
             })}
 
           {!enableOverflowButton &&
-            overflowItems.reduce<JSX.Element>((actionItems, item) => {
-              return item.isenabled ? [...actionItems, item.content] : actionItems;
+            overflowItems.filter((item) => {
+              return item != null;
             }, [])}
         </StyledHoverActionsContainer>
       </EuiFocusTrap>
