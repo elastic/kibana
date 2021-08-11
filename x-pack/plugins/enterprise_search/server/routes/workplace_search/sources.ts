@@ -219,7 +219,10 @@ export function registerAccountSourceSettingsRoute({
       validate: {
         body: schema.object({
           content_source: schema.object({
-            name: schema.string(),
+            name: schema.maybe(schema.string()),
+            indexing: schema.maybe(schema.object({
+              enabled: schema.maybe(schema.boolean())
+            }))
           }),
         }),
         params: schema.object({
@@ -567,7 +570,10 @@ export function registerOrgSourceSettingsRoute({
       validate: {
         body: schema.object({
           content_source: schema.object({
-            name: schema.string(),
+            name: schema.maybe(schema.string()),
+            indexing: schema.maybe(schema.object({
+              enabled: schema.maybe(schema.boolean())
+            }))
           }),
         }),
         params: schema.object({

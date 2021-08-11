@@ -111,6 +111,11 @@ export const SourceSettings: React.FC = () => {
     updateContentSource(id, { name: inputValue });
   };
 
+  const handleSynchronizeChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSynchronize(e.target.checked);
+    updateContentSource(id, { indexing: { enabled: e.target.checked } }); // why can't I use `synchronizeChecked` here instead of `e.target.checked`?
+  }
+
   const handleSourceRemoval = () => {
     /**
      * The modal was just hanging while the UI waited for the server to respond.
@@ -195,9 +200,7 @@ export const SourceSettings: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiSwitch
                 checked={synchronizeChecked}
-                onChange={(e) => setSynchronize(e.target.checked)}
-                // disabled={!hasPlatinumLicense}
-                // showLabel={false}
+                onChange={handleSynchronizeChange}
                 label={SYNC_MANAGEMENT_SYNCHRONIZE_LABEL}
                 data-test-subj="SynchronizeToggle"
               />
