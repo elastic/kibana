@@ -9,7 +9,7 @@
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import ReactResizeDetector from 'react-resize-detector';
 import ReactMonacoEditor from 'react-monaco-editor';
-import { htmlIdGenerator, EuiText, EuiToolTip, keys } from '@elastic/eui';
+import { htmlIdGenerator, EuiToolTip, keys } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
