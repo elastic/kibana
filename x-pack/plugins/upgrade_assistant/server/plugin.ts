@@ -19,7 +19,6 @@ import {
 
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { InfraPluginSetup } from '../../infra/server';
 
 import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
 import { ReindexWorker } from './lib/reindexing';
@@ -34,13 +33,11 @@ import {
 } from './saved_object_types';
 
 import { RouteDependencies } from './types';
-import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX_PATTERN } from '../common/constants';
 
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetup;
-  infra: InfraPluginSetup;
 }
 
 export class UpgradeAssistantServerPlugin implements Plugin {
@@ -70,7 +67,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
   setup(
     { http, getStartServices, savedObjects }: CoreSetup,
-    { usageCollection, features, licensing, infra }: PluginsSetup
+    { usageCollection, features, licensing }: PluginsSetup
   ) {
     this.licensing = licensing;
 
@@ -88,19 +85,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
           requiredClusterPrivileges: ['manage'],
           ui: [],
         },
-      ],
-    });
-
-    infra.defineInternalSourceConfiguration(DEPRECATION_LOGS_SOURCE_ID, {
-      name: 'deprecationLogs',
-      description: 'deprecation logs',
-      logIndices: {
-        type: 'index_name',
-        indexName: DEPRECATION_LOGS_INDEX_PATTERN,
-      },
-      logColumns: [
-        { timestampColumn: { id: 'timestampField' } },
-        { messageColumn: { id: 'messageField' } },
       ],
     });
 

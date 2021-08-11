@@ -62,7 +62,7 @@ export const WithAppDependencies = (Comp: any, overrides: Record<string, unknown
 
   return (
     <EuiThemeProvider>
-      <KibanaContextProvider services={{ ...startPluginDeps, startServices: contextValue }}>
+      <KibanaContextProvider services={{ ...startPluginDeps }}>
         <AppContextProvider value={{ ...contextValue, ...overrides }}>
           <Comp {...props} />
         </AppContextProvider>

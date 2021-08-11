@@ -16,7 +16,7 @@ import { KibanaDeprecationStats } from './kibana_stats';
 
 const i18nTexts = {
   resolveStepTitle: i18n.translate('xpack.upgradeAssistant.overview.resolveStepTitle', {
-    defaultMessage: 'Review deprecated settings and resolve issues.',
+    defaultMessage: 'Review deprecated settings and resolve issues',
   }),
 };
 

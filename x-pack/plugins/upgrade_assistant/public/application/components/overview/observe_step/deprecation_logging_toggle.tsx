@@ -45,23 +45,11 @@ const i18nTexts = {
       defaultMessage: 'Could not update logging state.',
     }
   ),
-  enabledMessage: i18n.translate(
-    'xpack.upgradeAssistant.overview.deprecationLogs.enabledToastMessage',
-    {
-      defaultMessage: 'Log deprecated actions.',
-    }
-  ),
-  disabledMessage: i18n.translate(
-    'xpack.upgradeAssistant.overview.deprecationLogs.disabledToastMessage',
-    {
-      defaultMessage: 'Do not log deprecated actions.',
-    }
-  ),
   errorLabel: i18n.translate('xpack.upgradeAssistant.overview.deprecationLogs.errorLabel', {
     defaultMessage: 'Error',
   }),
   buttonLabel: i18n.translate('xpack.upgradeAssistant.overview.deprecationLogs.buttonLabel', {
-    defaultMessage: 'Enable deprecation logs',
+    defaultMessage: 'Enable deprecation logging and indexing',
   }),
   deprecationWarningTitle: i18n.translate(
     'xpack.upgradeAssistant.overview.deprecationLogs.deprecationWarningTitle',

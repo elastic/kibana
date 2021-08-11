@@ -7,108 +7,26 @@
 
 import React, { FunctionComponent } from 'react';
 
-import {
-  EuiText,
-  EuiSpacer,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import type { DocLinksStart } from 'src/core/public';
 
 import { useDeprecationLogging } from './use_deprecation_logging';
-import { Collapsible } from './collapsible';
-import { ExternalLinks } from './external_links';
+// import { ExternalLinks } from './external_links';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
-import { LogStream } from '../../../../../../infra/public';
-import { DEPRECATION_LOGS_SOURCE_ID } from '../../../../../common/constants';
 
 const DeprecationLogsPreview: FunctionComponent = () => {
   const state = useDeprecationLogging();
 
-  const endTimestamp = Date.now();
-  const startTimestamp = endTimestamp - 1000 * 60 * 60 * 24 * 7; // 7 days
-  const showFooter = state.isEnabled && (!state.fetchError || !state.isLoading);
-
   return (
     <>
-      <DeprecationLoggingToggle {...state} />
+      <EuiPanel>
+        <DeprecationLoggingToggle {...state} />
+      </EuiPanel>
 
       <EuiSpacer size="l" />
-
-      <Collapsible showFooter={showFooter} renderFooter={<ExternalLinks />}>
-        {(() => {
-          if (state.isLoading) {
-            return (
-              <>
-                <EuiFlexGroup
-                  direction="column"
-                  alignItems="center"
-                  gutterSize="s"
-                  justifyContent="center"
-                  className="eui-fullHeight"
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiLoadingSpinner size="l" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText>
-                      <p>
-                        <FormattedMessage
-                          id="xpack.upgradeAssistant.overview.loadingDeprecationLogs"
-                          defaultMessage="Loading deprecation logs"
-                        />
-                      </p>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>
-            );
-          }
-
-          if (!state.isEnabled || state.fetchError) {
-            return (
-              <>
-                <EuiFlexGroup
-                  direction="column"
-                  alignItems="center"
-                  gutterSize="s"
-                  justifyContent="center"
-                  className="eui-fullHeight"
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiText>
-                      <p>
-                        <FormattedMessage
-                          id="xpack.upgradeAssistant.overview.emptyDeprecationLogs"
-                          defaultMessage="Deprecation logs will appear here when collected."
-                        />
-                      </p>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>
-            );
-          }
-
-          return (
-            <LogStream
-              height={200}
-              sourceId={DEPRECATION_LOGS_SOURCE_ID}
-              startTimestamp={startTimestamp}
-              endTimestamp={endTimestamp}
-              columns={[
-                { type: 'timestamp', header: false },
-                { type: 'message', header: false },
-              ]}
-            />
-          );
-        })()}
-      </Collapsible>
     </>
   );
 };
@@ -121,7 +39,7 @@ interface Props {
 export const getObserveStep = ({ docLinks, currentMajor }: Props): EuiStepProps => {
   return {
     title: i18n.translate('xpack.upgradeAssistant.overview.observeStepTitle', {
-      defaultMessage: 'Log deprecated API usage and update your applications.',
+      defaultMessage: 'Identify deprecated API use and update your applications',
     }),
     status: 'incomplete',
     children: (

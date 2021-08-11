@@ -74,7 +74,7 @@ export const useDeprecationLogging = (): DeprecationLoggingPreviewProps => {
 
   return {
     isEnabled,
-    isLoading: isLoading || isUpdating,
+    isLoading,
     isUpdating,
     toggleLogging,
     fetchError,

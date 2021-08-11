@@ -57,7 +57,7 @@ export const DeprecationsOverview: FunctionComponent = () => {
           defaultMessage: 'Upgrade Assistant',
         })}
         description={i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
-          defaultMessage: 'Get ready for the next version of Elastic Stack!',
+          defaultMessage: 'Get ready for the next version of the Elastic Stack!',
         })}
         rightSideItems={[
           <EuiButtonEmpty
