@@ -12,7 +12,7 @@ import {
   ALERT_SEVERITY_LEVEL,
   ALERT_STATUS,
   ALERT_START,
-  RULE_NAME,
+  ALERT_RULE_NAME,
 } from '@kbn/rule-data-utils/target/technical_field_names';
 
 import type { CellValueElementProps, TimelineNonEcsData } from '../../../../timelines/common';
@@ -93,7 +93,7 @@ export const getRenderCellValue = ({
         return asDuration(Number(value));
       case ALERT_SEVERITY_LEVEL:
         return <SeverityBadge severityLevel={value ?? undefined} />;
-      case RULE_NAME:
+      case ALERT_RULE_NAME:
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
         const decoratedAlerts = decorateResponse(
           [dataFieldEs] ?? [],
