@@ -33,8 +33,8 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
             {headerBackComponent && <>{headerBackComponent}</>}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiTitle size="l" data-test-subj="header-page-title">
-              <>{title}</>
+            <EuiTitle size="l">
+              <span data-test-subj="header-page-title">{title}</span>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
