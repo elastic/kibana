@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { KibanaPageTemplate, KibanaPageTemplateProps } from './page_template';
-export { KibanaPageTemplateSolutionNavAvatar } from './solution_nav';
+export * from './elastic_agent_card';
+export * from './elastic_beats_card';
+export * from './no_data_card';
