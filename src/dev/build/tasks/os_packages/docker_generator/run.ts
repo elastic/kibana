@@ -10,9 +10,8 @@ import { access, link, unlink, chmod } from 'fs';
 import { resolve } from 'path';
 import { promisify } from 'util';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, kibanaPackageJson } from '@kbn/dev-utils';
 
-import { branch } from '../../../../../../package.json';
 import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
 import { TemplateContext } from './template_context';
@@ -64,7 +63,7 @@ export async function runDockerGenerator(
     artifactTarball,
     imageFlavor,
     version,
-    branch,
+    branch: kibanaPackageJson.branch,
     license,
     artifactsDir,
     imageTag,
