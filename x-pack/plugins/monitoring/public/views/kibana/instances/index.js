@@ -18,7 +18,7 @@ import { SetupModeContext } from '../../../components/setup_mode/setup_mode_cont
 import {
   KIBANA_SYSTEM_ID,
   CODE_PATH_KIBANA,
-  ALERT_KIBANA_VERSION_MISMATCH,
+  RULE_KIBANA_VERSION_MISMATCH,
 } from '../../../../common/constants';
 
 uiRoutes.when('/kibana/instances', {
@@ -48,7 +48,7 @@ uiRoutes.when('/kibana/instances', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_KIBANA_VERSION_MISMATCH],
+            alertTypeIds: [RULE_KIBANA_VERSION_MISMATCH],
           },
         },
       });

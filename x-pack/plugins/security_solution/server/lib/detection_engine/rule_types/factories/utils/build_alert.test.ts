@@ -6,7 +6,7 @@
  */
 
 import {
-  ALERT_OWNER,
+  ALERT_RULE_CONSUMER,
   ALERT_RULE_NAMESPACE,
   ALERT_STATUS,
   ALERT_WORKFLOW_STATUS,
@@ -58,7 +58,7 @@ describe('buildAlert', () => {
     const expected = {
       '@timestamp': timestamp,
       [SPACE_IDS]: [SPACE_ID],
-      [ALERT_OWNER]: SERVER_APP_ID,
+      [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
       [ALERT_ANCESTORS]: [
         {
           id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
@@ -127,7 +127,7 @@ describe('buildAlert', () => {
     const expected = {
       '@timestamp': timestamp,
       [SPACE_IDS]: [SPACE_ID],
-      [ALERT_OWNER]: SERVER_APP_ID,
+      [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
       [ALERT_ANCESTORS]: [
         {
           id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
