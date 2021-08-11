@@ -82,7 +82,7 @@ function getDescription(state?: State) {
 
   return {
     icon: visualizationType.icon,
-    label: visualizationType.label,
+    label: visualizationType.fullLabel || visualizationType.label,
   };
 }
 

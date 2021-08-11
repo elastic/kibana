@@ -307,9 +307,9 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       > = {};
       Object.entries(props.visualizationMap).forEach(([visualizationId, v]) => {
         for (const visualizationType of v.visualizationTypes) {
-          const isSearchMatch = visualizationType.label
-            .toLowerCase()
-            .includes(lowercasedSearchTerm);
+          const isSearchMatch =
+            visualizationType.label.toLowerCase().includes(lowercasedSearchTerm) ||
+            visualizationType.fullLabel?.toLowerCase().includes(lowercasedSearchTerm);
           if (isSearchMatch) {
             grouped[visualizationType.groupLabel] = grouped[visualizationType.groupLabel] || {
               priority: 0,
@@ -349,17 +349,17 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
               visualizations
                 // alphabetical order within each group
                 .sort((a, b) => {
-                  return a.label.localeCompare(b.label);
+                  return (a.fullLabel || a.label).localeCompare(b.fullLabel || b.label);
                 })
                 .map(
                   (v): SelectableEntry => ({
-                    'aria-label': v.label,
+                    'aria-label': v.fullLabel || v.label,
                     className: 'lnsChartSwitch__option',
                     isGroupLabel: false,
                     key: `${v.visualizationId}:${v.id}`,
                     value: `${v.visualizationId}:${v.id}`,
                     'data-test-subj': `lnsChartSwitchPopover_${v.id}`,
-                    label: v.label,
+                    label: v.fullLabel || v.label,
                     prepend: (
                       <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />
                     ),
