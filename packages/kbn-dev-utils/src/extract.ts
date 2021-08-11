@@ -12,11 +12,15 @@ import Path from 'path';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
-import { lastValueFrom } from '@kbn/std';
 import Tar from 'tar';
 import Yauzl, { ZipFile, Entry } from 'yauzl';
 import * as Rx from 'rxjs';
 import { map, mergeMap, takeUntil } from 'rxjs/operators';
+
+const strComplete = (obs: Rx.Observable<unknown>) =>
+  new Promise<void>((resolve, reject) => {
+    obs.subscribe({ complete: resolve, error: reject });
+  });
 
 const asyncPipeline = promisify(pipeline);
 
@@ -36,6 +40,11 @@ interface Options {
    * Number of path segments to strip form paths in the archive, like --strip-components from tar
    */
   stripComponents?: number;
+
+  /**
+   * Write modified timestamps to extracted files
+   */
+  setModifiedTimes?: Date;
 }
 
 /**
@@ -43,7 +52,12 @@ interface Options {
  * for both archive types, only tested with familiar archives we create so might not
  * support some weird exotic zip features we don't use in our own snapshot/build tooling
  */
-export async function extract({ archivePath, targetDir, stripComponents = 0 }: Options) {
+export async function extract({
+  archivePath,
+  targetDir,
+  stripComponents = 0,
+  setModifiedTimes,
+}: Options) {
   await Fs.mkdir(targetDir, { recursive: true });
 
   if (archivePath.endsWith('.tar') || archivePath.endsWith('.tar.gz')) {
@@ -98,7 +112,7 @@ export async function extract({ archivePath, targetDir, stripComponents = 0 }: O
       }
 
       // file entry
-      return openReadStream$(entry).pipe(
+      const writeFile$ = openReadStream$(entry).pipe(
         mergeMap(async (readStream) => {
           if (!readStream) {
             throw new Error('no readstream provided by yauzl');
@@ -106,15 +120,23 @@ export async function extract({ archivePath, targetDir, stripComponents = 0 }: O
 
           // write the file contents to disk
           await asyncPipeline(readStream, createWriteStream(fileName));
-          // tell yauzl to read the next entry
-          zipFile.readEntry();
+
+          if (setModifiedTimes) {
+            // update the modified time of the file to match the zip entry
+            await Fs.utimes(fileName, setModifiedTimes, setModifiedTimes);
+          }
         })
       );
+
+      // tell yauzl to read the next entry
+      zipFile.readEntry();
+
+      return writeFile$;
     })
   );
 
   // trigger the initial 'entry' event, happens async so the event will be delivered after the observable is subscribed
   zipFile.readEntry();
 
-  await lastValueFrom(Rx.merge(entry$, error$));
+  await strComplete(Rx.merge(entry$, error$));
 }

@@ -328,7 +328,7 @@ export interface SavedObjectsResolveResponse<T = unknown> {
   /**
    * The ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`.
    */
-  aliasTargetId?: string;
+  alias_target_id?: string;
 }
 
 /**
