@@ -10,6 +10,7 @@ import React, { Component, Fragment, ReactNode } from 'react';
 import { EuiButtonEmpty, EuiIcon, EuiToolTip, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ILayer } from '../../../../../../classes/layers/layer';
+import { IVectorSource } from '../../../../../../classes/sources/vector_source';
 
 interface Footnote {
   icon: ReactNode;
@@ -125,6 +126,18 @@ export class TOCEntryButton extends Component<Props, State> {
           icon: <EuiIcon color="subdued" type="clock" size="s" />,
           message: i18n.translate('xpack.maps.layer.isUsingTimeFilter', {
             defaultMessage: 'Results narrowed by time filter',
+          }),
+        });
+      }
+      const source = this.props.layer.getSource();
+      if (
+        typeof source.isFilterByMapBounds === 'function' &&
+        (source as IVectorSource).isFilterByMapBounds()
+      ) {
+        footnotes.push({
+          icon: <EuiIcon color="subdued" type="stop" size="s" />,
+          message: i18n.translate('xpack.maps.layer.isUsingBoundsFilter', {
+            defaultMessage: 'Results narrowed by visible map area',
           }),
         });
       }
