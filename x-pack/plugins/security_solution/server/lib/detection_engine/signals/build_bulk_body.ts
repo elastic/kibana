@@ -47,10 +47,13 @@ export const buildBulkBody = (
     ...buildSignal([mergedDoc], rule, reason),
     ...additionalSignalFields(mergedDoc),
   };
-  const { threshold_result: thresholdResult, ...filteredSource } = mergedDoc._source || {
+  const event = buildEventTypeSignal(mergedDoc);
+  // Filter out any kibana.* fields from the generated signal - kibana.* fields are aliases
+  // in siem-signals so we can't write to them, but for signals-on-signals they'll be returned
+  // in the fields API response and merged into the mergedDoc source
+  const { threshold_result: thresholdResult, kibana, ...filteredSource } = mergedDoc._source || {
     threshold_result: null,
   };
-  const event = buildEventTypeSignal(mergedDoc);
   const signalHit: SignalHit = {
     ...filteredSource,
     '@timestamp': timestamp,
