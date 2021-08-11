@@ -201,8 +201,7 @@ export const CodeEditor: React.FC<Props> = ({
       <EuiToolTip
         display="block"
         content={
-          <div>
-            <EuiText>
+          <>
               <p>
                 {isReadOnly ? (
                   <FormattedMessage
@@ -216,9 +215,6 @@ export const CodeEditor: React.FC<Props> = ({
                   />
                 )}
               </p>
-            </EuiText>
-
-            <EuiText>
               <p>
                 {isReadOnly ? (
                   <FormattedMessage
@@ -232,8 +228,7 @@ export const CodeEditor: React.FC<Props> = ({
                   />
                 )}
               </p>
-            </EuiText>
-          </div>
+          </>
         }
       >
         <div
