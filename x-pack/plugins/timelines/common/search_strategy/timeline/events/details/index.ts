@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import { Inspect, Maybe } from '../../../common';

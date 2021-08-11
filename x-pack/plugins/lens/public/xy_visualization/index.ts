@@ -15,7 +15,7 @@ import type { FormatFactory } from '../../common';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
-  formatFactory: Promise<FormatFactory>;
+  formatFactory: FormatFactory;
   editorFrame: EditorFrameSetup;
   charts: ChartsPluginSetup;
 }
@@ -41,7 +41,7 @@ export class XyVisualization {
         getXyChartRenderer,
         getXyVisualization,
       } = await import('../async_services');
-      const [, { data, charts }] = await core.getStartServices();
+      const [, { charts, fieldFormats }] = await core.getStartServices();
       const palettes = await charts.palettes.getPalettes();
       expressions.registerFunction(() => legendConfig);
       expressions.registerFunction(() => yAxisConfig);
@@ -62,7 +62,7 @@ export class XyVisualization {
           timeZone: getTimeZone(core.uiSettings),
         })
       );
-      return getXyVisualization({ paletteService: palettes, data });
+      return getXyVisualization({ paletteService: palettes, fieldFormats });
     });
   }
 }
