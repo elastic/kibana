@@ -189,7 +189,16 @@ const EnrollmentTokenDetails: FunctionComponent<EnrollmentTokenDetailsProps> = (
 
 export function decodeEnrollmentToken(enrollmentToken: string) {
   try {
-    // TODO: validate token schema manually
-    return JSON.parse(atob(enrollmentToken)) as EnrollmentToken;
+    const json = JSON.parse(atob(enrollmentToken)) as EnrollmentToken;
+    if (
+      !Array.isArray(json.adr) ||
+      json.adr.some((adr) => typeof adr !== 'string') ||
+      typeof json.fgr !== 'string' ||
+      typeof json.key !== 'string' ||
+      typeof json.ver !== 'string'
+    ) {
+      return;
+    }
+    return json;
   } catch (error) {} // eslint-disable-line no-empty
 }
