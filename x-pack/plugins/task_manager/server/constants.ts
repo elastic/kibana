@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { FilterManager, FormFilter, UpdateFilter } from './filter_manager';
+export const TASK_MANAGER_INDEX = '.kibana_task_manager';
