@@ -24,10 +24,8 @@ import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 const { embeddable: strings } = RendererStrings;
 
 const embeddablesRegistry: {
-  [key: string]: IEmbeddable | Promise<IEmbeddable>;
+  [key: string]: { embeddable: IEmbeddable | Promise<IEmbeddable>; destroyFn?: () => void };
 } = {};
-
-let destroyFn: () => void;
 
 const encode = (input: EmbeddableInput) => btoa(JSON.stringify(input));
 const decode = (serializedInput: string) => JSON.parse(atob(serializedInput));
@@ -82,19 +80,14 @@ export const embeddableRendererFactory = (
           throw new EmbeddableFactoryNotFoundError(embeddableType);
         }
 
-        const embeddablePromise = factory
-          .createFromSavedObject(input.id, embeddableInput)
-          .then((embeddable) => {
-            embeddablesRegistry[uniqueId] = embeddable;
-            return embeddable;
-          });
-        embeddablesRegistry[uniqueId] = embeddablePromise;
+        const embeddablePromise = await factory.createFromSavedObject(input.id, embeddableInput);
+        embeddablesRegistry[uniqueId] = { embeddable: embeddablePromise };
 
         const embeddableObject = await (async () => embeddablePromise)();
 
         const palettes = await plugins.charts.palettes.getPalettes();
 
-        embeddablesRegistry[uniqueId] = embeddableObject;
+        embeddablesRegistry[uniqueId].embeddable = embeddableObject;
         ReactDOM.unmountComponentAtNode(domNode);
 
         const subscription = embeddableObject.getInput$().subscribe(function (updatedInput) {
@@ -116,7 +109,7 @@ export const embeddableRendererFactory = (
 
         ReactDOM.render(renderEmbeddable(embeddableObject), domNode, () => handlers.done());
 
-        destroyFn = () => {
+        const destroyFn = () => {
           subscription.unsubscribe();
           handlers.onEmbeddableDestroyed();
 
@@ -124,17 +117,21 @@ export const embeddableRendererFactory = (
 
           return ReactDOM.unmountComponentAtNode(domNode);
         };
+
+        embeddablesRegistry[uniqueId].destroyFn = destroyFn;
+
+        handlers.onDestroy(destroyFn);
       } else {
-        const embeddable = embeddablesRegistry[uniqueId];
+        const { embeddable, destroyFn } = embeddablesRegistry[uniqueId];
 
         if ('updateInput' in embeddable) {
           embeddable.updateInput(input);
           embeddable.reload();
         }
-      }
 
-      if (destroyFn) {
-        handlers.onDestroy(destroyFn);
+        if (destroyFn) {
+          handlers.onDestroy(destroyFn);
+        }
       }
     },
   });
