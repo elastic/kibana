@@ -20,7 +20,6 @@ import {
   EuiColorPickerProps,
   EuiToolTip,
   EuiIcon,
-  EuiSuperSelect,
   EuiPopover,
   EuiSelectable,
   EuiText,
