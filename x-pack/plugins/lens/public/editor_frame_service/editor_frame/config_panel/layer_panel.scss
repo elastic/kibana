@@ -9,27 +9,32 @@
   }
 }
 
+.lnsLayerPanel__layerHeader {
+  padding: $euiSize;
+  border-bottom: $euiBorderThin;
+}
+
+// fixes truncation for too long chart switcher labels
+.lnsLayerPanel__layerSettingsWrapper {
+  min-width: 0;
+}
+
 .lnsLayerPanel__settingsStaticHeader {
-  padding-left: 4px;
-  line-height: $euiButtonHeightSmall;
-}
-
-.lnsLayerPanel__settingsTitle {
-  font-weight: $euiFontWeightBold;
-}
-
-.lnsLayerPanel__settingsRemoveIcon {
-  align-self: center;
+  padding-left: $euiSizeXS;
 }
 
 .lnsLayerPanel__row {
   background: $euiColorLightestShade;
-  padding: $euiSizeS 0;
-  border-radius: $euiBorderRadius;
+  padding: $euiSize;
 
-  // Add margin to the top of the next same panel
+  // Add border to the top of the next same panel
   & + & {
-    margin-top: $euiSize;
+    border-top: $euiBorderThin;
+    margin-top: 0;
+  }
+  &:last-child {
+    border-bottom-right-radius: $euiBorderRadius;
+    border-bottom-left-radius: $euiBorderRadius;
   }
 }
 
@@ -44,10 +49,6 @@
 
 .lnsLayerPanel__group:empty {
   padding: 0;
-}
-
-.lnsLayerPanel__groupLabel {
-  padding: 0 $euiSizeS;
 }
 
 .lnsLayerPanel__error {
@@ -77,7 +78,7 @@
 }
 
 .lnsLayerPanel__dimensionContainer {
-  margin: 0 $euiSizeS $euiSizeS;
+  margin: 0 0 $euiSizeS;
   position: relative;
 
   &:last-child {
@@ -94,6 +95,7 @@
   padding: $euiSizeS;
   min-height: $euiSizeXXL - 2;
   word-break: break-word;
+  font-weight: $euiFontWeightRegular;
 }
 
 .lnsLayerPanel__triggerTextLabel {

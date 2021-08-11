@@ -7,7 +7,6 @@
 
 import React, { useState } from 'react';
 import {
-  EuiFlexItem,
   EuiToolTip,
   EuiButton,
   EuiPopover,
@@ -46,88 +45,84 @@ export function AddLayerButton({
   const supportedLayers = visualization.getSupportedLayers?.(visualizationState, layersMeta);
   if (supportedLayers?.length === 1) {
     return (
-      <EuiFlexItem grow={true} className="lnsConfigPanel__addLayerBtnWrapper">
-        <EuiToolTip
-          className="eui-fullWidth"
-          title={i18n.translate('xpack.lens.xyChart.addLayer', {
-            defaultMessage: 'Add a layer',
+      <EuiToolTip
+        display="block"
+        title={i18n.translate('xpack.lens.xyChart.addLayer', {
+          defaultMessage: 'Add a layer',
+        })}
+        content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
+          defaultMessage:
+            'Use multiple layers to combine visualization types or visualize different index patterns.',
+        })}
+        position="bottom"
+      >
+        <EuiButton
+          className="lnsConfigPanel__addLayerBtn"
+          fullWidth
+          size="s"
+          data-test-subj="lnsLayerAddButton"
+          aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
+            defaultMessage: 'Add layer',
           })}
-          content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
-            defaultMessage:
-              'Use multiple layers to combine visualization types or visualize different index patterns.',
-          })}
-          position="bottom"
+          fill
+          color="text"
+          onClick={() => onAddLayerClick(supportedLayers[0].type)}
+          iconType="layers"
         >
-          <EuiButton
-            className="lnsConfigPanel__addLayerBtn"
-            fullWidth
-            size="s"
-            data-test-subj="lnsLayerAddButton"
-            aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
-              defaultMessage: 'Add layer',
-            })}
-            fill
-            color="text"
-            onClick={() => onAddLayerClick(supportedLayers[0].type)}
-            iconType="layers"
-          >
-            {i18n.translate('xpack.lens.configPanel.addLayerButton', {
-              defaultMessage: 'Add layer',
-            })}
-          </EuiButton>
-        </EuiToolTip>
-      </EuiFlexItem>
+          {i18n.translate('xpack.lens.configPanel.addLayerButton', {
+            defaultMessage: 'Add layer',
+          })}
+        </EuiButton>
+      </EuiToolTip>
     );
   }
   return (
-    <EuiFlexItem grow={true} className="lnsConfigPanel__addLayerBtnWrapper">
-      <EuiPopover
-        data-test-subj="lnsConfigPanel__addLayerPopover"
-        button={
-          <EuiButton
-            className="lnsConfigPanel__addLayerBtn"
-            fullWidth
-            size="s"
-            data-test-subj="lnsLayerAddButton"
-            aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
-              defaultMessage: 'Add layer',
-            })}
-            fill
-            color="text"
-            onClick={() => toggleLayersChoice(!showLayersChoice)}
-            iconType="layers"
-          >
-            {i18n.translate('xpack.lens.configPanel.addLayerButton', {
-              defaultMessage: 'Add layer',
-            })}
-          </EuiButton>
-        }
-        isOpen={showLayersChoice}
-        closePopover={() => toggleLayersChoice(false)}
-        panelPaddingSize="none"
-        display="block"
-      >
-        <EuiContextMenuPanel
+    <EuiPopover
+      display="block"
+      data-test-subj="lnsConfigPanel__addLayerPopover"
+      button={
+        <EuiButton
+          className="lnsConfigPanel__addLayerBtn"
+          fullWidth
           size="s"
-          items={supportedLayers.map(({ type, label, icon, disabled, tooltipContent }) => {
-            return (
-              <EuiContextMenuItem
-                key={type}
-                data-test-subj={`lnsLayerAddButton-${type}`}
-                onClick={() => {
-                  onAddLayerClick(type);
-                  toggleLayersChoice(false);
-                }}
-                icon={icon && <EuiIcon size="m" type={icon} />}
-                disabled={disabled}
-                toolTipContent={tooltipContent}
-              >
-                {label}
-              </EuiContextMenuItem>
-            );
+          data-test-subj="lnsLayerAddButton"
+          aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
+            defaultMessage: 'Add layer',
           })}
-        />
-      </EuiPopover>
-    </EuiFlexItem>
+          fill
+          color="text"
+          onClick={() => toggleLayersChoice(!showLayersChoice)}
+          iconType="layers"
+        >
+          {i18n.translate('xpack.lens.configPanel.addLayerButton', {
+            defaultMessage: 'Add layer',
+          })}
+        </EuiButton>
+      }
+      isOpen={showLayersChoice}
+      closePopover={() => toggleLayersChoice(false)}
+      panelPaddingSize="none"
+    >
+      <EuiContextMenuPanel
+        size="s"
+        items={supportedLayers.map(({ type, label, icon, disabled, tooltipContent }) => {
+          return (
+            <EuiContextMenuItem
+              key={type}
+              data-test-subj={`lnsLayerAddButton-${type}`}
+              onClick={() => {
+                onAddLayerClick(type);
+                toggleLayersChoice(false);
+              }}
+              icon={icon && <EuiIcon size="m" type={icon} />}
+              disabled={disabled}
+              toolTipContent={tooltipContent}
+            >
+              {label}
+            </EuiContextMenuItem>
+          );
+        })}
+      />
+    </EuiPopover>
   );
 }

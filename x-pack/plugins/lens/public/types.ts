@@ -558,10 +558,6 @@ export interface VisualizationType {
    */
   label: string;
   /**
-   * Optional label used in visualization type search if chart switcher is expanded and for tooltips
-   */
-  fullLabel?: string;
-  /**
    * The group the visualization belongs to
    */
   groupLabel: string;

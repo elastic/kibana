@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
 import { NativeRenderer } from '../../../native_renderer';
 import { Visualization, VisualizationLayerWidgetProps } from '../../../types';
 
@@ -37,8 +37,10 @@ export function LayerSettings({
             <EuiIcon type={description.icon} />{' '}
           </EuiFlexItem>
         )}
-        <EuiFlexItem grow className={'lnsLayerPanel__settingsTitle'}>
-          {description.label}
+        <EuiFlexItem grow>
+          <EuiTitle size="xxs">
+            <h5>{description.label}</h5>
+          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

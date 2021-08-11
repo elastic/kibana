@@ -289,70 +289,72 @@ export function LayerPanel(
         className="lnsLayerPanel"
         style={{ visibility: isDimensionPanelOpen ? 'hidden' : 'visible' }}
       >
-        <EuiPanel data-test-subj={`lns-layerPanel-${layerIndex}`} paddingSize="s">
-          <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-            <EuiFlexItem grow className="lnsLayerPanel__settingsFlexItem">
-              <LayerSettings
-                layerId={layerId}
-                layerConfigProps={{
-                  ...layerVisualizationConfigProps,
-                  setState: props.updateVisualization,
-                }}
-                activeVisualization={activeVisualization}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} className="lnsLayerPanel__settingsRemoveIcon">
-              <RemoveLayerButton
-                onRemoveLayer={onRemoveLayer}
-                layerIndex={layerIndex}
-                isOnlyLayer={isOnlyLayer}
-                activeVisualization={activeVisualization}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-            {layerDatasource && (
-              <EuiFlexItem className="lnsLayerPanel__sourceFlexItem">
-                <NativeRenderer
-                  render={layerDatasource.renderLayerPanel}
-                  nativeProps={{
-                    layerId,
-                    state: layerDatasourceState,
-                    activeData: props.framePublicAPI.activeData,
-                    setState: (updater: unknown) => {
-                      const newState =
-                        typeof updater === 'function' ? updater(layerDatasourceState) : updater;
-                      // Look for removed columns
-                      const nextPublicAPI = layerDatasource.getPublicAPI({
-                        state: newState,
-                        layerId,
-                      });
-                      const nextTable = new Set(
-                        nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
-                      );
-                      const removed = datasourcePublicAPI
-                        .getTableSpec()
-                        .map(({ columnId }) => columnId)
-                        .filter((columnId) => !nextTable.has(columnId));
-                      let nextVisState = props.visualizationState;
-                      removed.forEach((columnId) => {
-                        nextVisState = activeVisualization.removeDimension({
-                          layerId,
-                          columnId,
-                          prevState: nextVisState,
-                          frame: framePublicAPI,
-                        });
-                      });
-
-                      props.updateAll(datasourceId, newState, nextVisState);
-                    },
+        <EuiPanel
+          data-test-subj={`lns-layerPanel-${layerIndex}`}
+          paddingSize="none"
+          hasBorder
+          hasShadow
+        >
+          <section className="lnsLayerPanel__layerHeader">
+            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+              <EuiFlexItem grow className="lnsLayerPanel__layerSettingsWrapper">
+                <LayerSettings
+                  layerId={layerId}
+                  layerConfigProps={{
+                    ...layerVisualizationConfigProps,
+                    setState: props.updateVisualization,
                   }}
+                  activeVisualization={activeVisualization}
                 />
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <RemoveLayerButton
+                  onRemoveLayer={onRemoveLayer}
+                  layerIndex={layerIndex}
+                  isOnlyLayer={isOnlyLayer}
+                  activeVisualization={activeVisualization}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            {layerDatasource && (
+              <NativeRenderer
+                render={layerDatasource.renderLayerPanel}
+                nativeProps={{
+                  layerId,
+                  state: layerDatasourceState,
+                  activeData: props.framePublicAPI.activeData,
+                  setState: (updater: unknown) => {
+                    const newState =
+                      typeof updater === 'function' ? updater(layerDatasourceState) : updater;
+                    // Look for removed columns
+                    const nextPublicAPI = layerDatasource.getPublicAPI({
+                      state: newState,
+                      layerId,
+                    });
+                    const nextTable = new Set(
+                      nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
+                    );
+                    const removed = datasourcePublicAPI
+                      .getTableSpec()
+                      .map(({ columnId }) => columnId)
+                      .filter((columnId) => !nextTable.has(columnId));
+                    let nextVisState = props.visualizationState;
+                    removed.forEach((columnId) => {
+                      nextVisState = activeVisualization.removeDimension({
+                        layerId,
+                        columnId,
+                        prevState: nextVisState,
+                        frame: framePublicAPI,
+                      });
+                    });
 
-          <EuiSpacer size="m" />
+                    props.updateAll(datasourceId, newState, nextVisState);
+                  },
+                }}
+              />
+            )}
+          </section>
 
           {groups.map((group, groupIndex) => {
             const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
@@ -365,7 +367,7 @@ export function LayerPanel(
                 }
                 fullWidth
                 label={
-                  <div className="lnsLayerPanel__groupLabel">
+                  <div>
                     {group.groupLabel}
                     {group.groupTooltip && (
                       <>

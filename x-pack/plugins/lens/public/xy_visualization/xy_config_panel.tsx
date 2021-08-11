@@ -21,6 +21,10 @@ import {
   EuiToolTip,
   EuiIcon,
   EuiSuperSelect,
+  EuiPopover,
+  EuiSelectable,
+  EuiText,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type {
@@ -46,6 +50,7 @@ import { PalettePicker, TooltipWrapper } from '../shared_components';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 import { getScaleType, getSortedAccessors } from './to_expression';
 import { VisualOptionsPopover } from './visual_options_popover/visual_options_popover';
+import { ToolbarButton } from '../../../../../src/plugins/kibana_react/public';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -89,46 +94,94 @@ const legendOptions: Array<{
 ];
 
 export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
+  const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const { state, layerId } = props;
   const horizontalOnly = isHorizontalChart(state.layers);
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
-
   if (!layer) {
     return null;
   }
+  const currentSeriesType = visualizationTypes.find(({ id }) => id === layer.seriesType)!;
 
-  const options = visualizationTypes
-    .filter((t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
-    .map((t) => ({
-      value: t.id,
-      inputDisplay: (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+  const createTrigger = function () {
+    return (
+      <ToolbarButton
+        title={currentSeriesType.label}
+        onClick={() => setPopoverIsOpen(!isPopoverOpen)}
+        fullWidth
+        size="s"
+      >
+        <>
+          <EuiIcon type={currentSeriesType.icon} />
+          <EuiText size="s" className="lnsChangeIndexPattern_title">
+            {currentSeriesType.label}
+          </EuiText>
+        </>
+        {/* <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type={t.icon} />
+            <EuiIcon type={currentSeriesType.icon} />
           </EuiFlexItem>
-          <EuiFlexItem grow>{t.label}</EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      'data-test-subj': `lnsXY_seriesType-${t.id}`,
-    }));
+          <EuiFlexItem grow>
+            <EuiText size="s" className="lnsChangeIndexPattern_title">
+              {currentSeriesType.label}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup> */}
+      </ToolbarButton>
+    );
+  };
 
-  // else show a super select with the chart options to pick from
   return (
-    <EuiSuperSelect
-      className="lnsLayerChartSwitch"
-      data-test-subj="lns_layer_settings"
-      compressed
-      fullWidth
-      options={options}
-      valueOfSelected={layer.seriesType}
-      onChange={(seriesType) => {
-        trackUiEvent('xy_change_layer_display');
-        props.setState(
-          updateLayer(state, { ...layer, seriesType: seriesType as SeriesType }, index)
-        );
-      }}
-    />
+    <>
+      <EuiPopover
+        panelClassName="lnsChangeIndexPatternPopover"
+        button={createTrigger()}
+        isOpen={isPopoverOpen}
+        closePopover={() => setPopoverIsOpen(false)}
+        display="block"
+        panelPaddingSize="s"
+        ownFocus
+      >
+        <EuiPopoverTitle>
+          {i18n.translate('xpack.lens.layerPanel.layerVisualizationType', {
+            defaultMessage: 'Layer visualization type',
+          })}
+        </EuiPopoverTitle>
+        <div>
+          <EuiSelectable<{
+            key?: string;
+            label: string;
+            value?: string;
+            checked?: 'on' | 'off';
+          }>
+            singleSelection="always"
+            options={visualizationTypes
+              .filter((t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
+              .map((t) => ({
+                value: t.id,
+                key: t.id,
+                checked: t.id === currentSeriesType.id ? 'on' : undefined,
+                prepend: <EuiIcon type={t.icon} />,
+                label: t.label,
+                'data-test-subj': `lnsXY_seriesType-${t.id}`,
+              }))}
+            onChange={(newOptions) => {
+              const chosenType = newOptions.find(({ checked }) => checked === 'on');
+              if (!chosenType) {
+                return;
+              }
+              const id = chosenType.value!;
+              trackUiEvent('xy_change_layer_display');
+              props.setState(updateLayer(state, { ...layer, seriesType: id as SeriesType }, index));
+              setPopoverIsOpen(false);
+            }}
+          >
+            {(list) => <>{list}</>}
+          </EuiSelectable>
+        </div>
+      </EuiPopover>
+    </>
   );
 }
 
