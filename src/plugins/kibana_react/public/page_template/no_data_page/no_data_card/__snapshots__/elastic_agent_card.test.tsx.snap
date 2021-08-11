@@ -14,7 +14,7 @@ exports[`ElasticAgentCard props button 1`] = `
     </EuiButton>
   }
   href="app/integrations/browse"
-  image="httpPrepend"
+  image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
   paddingSize="l"
   title="Add a Solution integration"
 />
@@ -34,7 +34,7 @@ exports[`ElasticAgentCard props href 1`] = `
     </EuiButton>
   }
   href="#"
-  image="httpPrepend"
+  image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
   paddingSize="l"
   title="Add a Solution integration"
 />
@@ -54,7 +54,7 @@ exports[`ElasticAgentCard props recommended 1`] = `
     </EuiButton>
   }
   href="app/integrations/browse"
-  image="httpPrepend"
+  image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
   paddingSize="l"
   title="Add a Solution integration"
 />
@@ -74,7 +74,7 @@ exports[`ElasticAgentCard renders 1`] = `
     </EuiButton>
   }
   href="app/integrations/browse"
-  image="httpPrepend"
+  image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
   paddingSize="l"
   title="Add a Solution integration"
 />

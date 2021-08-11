@@ -20,9 +20,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { KibanaPageTemplateProps, KibanaPageTemplateSolutionNavAvatar } from '../page_template';
+import { KibanaPageTemplateProps } from '../page_template';
 
 import { ElasticAgentCard, ElasticBeatsCard, NoDataCard } from './no_data_card';
+import { KibanaPageTemplateSolutionNavAvatar } from '../solution_nav';
 
 export const NO_DATA_PAGE_MAX_WIDTH = 950;
 export const NO_DATA_PAGE_TEMPLATE_PROPS: KibanaPageTemplateProps = {

@@ -12,28 +12,26 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 import { EuiButton, EuiCard } from '@elastic/eui';
-import { useKibana } from '../../context';
+import { useKibana } from '../../../context';
 import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
 
-export type ElasticAgentCardProps = NoDataPageActions & {
+export type ElasticBeatsCardProps = NoDataPageActions & {
   solution: string;
 };
 
-/**
- * Applies extra styling to a typical EuiAvatar
- */
-export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
-  solution,
-  recommended = true,
-  href = 'app/integrations/browse',
+export const ElasticBeatsCard: FunctionComponent<ElasticBeatsCardProps> = ({
+  recommended,
+  href = 'app/home#/tutorial',
   button,
+  solution,
   ...cardRest
 }) => {
   const {
-    services: { http },
+    services: { http, uiSettings },
   } = useKibana<CoreStart>();
   const addBasePath = http.basePath.prepend;
   const basePathUrl = '/plugins/kibanaReact/assets/';
+  const IS_DARK_THEME = uiSettings.get('theme:darkMode');
 
   const footer =
     typeof button !== 'string' && typeof button !== 'undefined' ? (
@@ -41,8 +39,8 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     ) : (
       <EuiButton href={href} onClick={cardRest?.onClick} target={cardRest?.target} fill>
         {button ||
-          i18n.translate('kibana-react.noDataPage.elasticAgentCard.buttonLabel', {
-            defaultMessage: 'Find a {solution} integration',
+          i18n.translate('kibana-react.noDataPage.elasticBeatsCard.buttonLabel', {
+            defaultMessage: 'Install Beats for {solution}',
             values: { solution },
           })}
       </EuiButton>
@@ -52,15 +50,16 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     <EuiCard
       paddingSize="l"
       href={href}
-      title={i18n.translate('kibana-react.noDataPage.elasticAgentCard.title', {
-        defaultMessage: 'Add a {solution} integration',
-        values: { solution },
+      title={i18n.translate('kibana-react.noDataPage.elasticBeatsCard.title', {
+        defaultMessage: 'Add data with Beats',
       })}
-      description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
-        defaultMessage: `The Elastic Agent provides a simple, unified way to
-        collect data from your machines.`,
+      description={i18n.translate('kibana-react.noDataPage.elasticBeatsCard.description', {
+        defaultMessage: `
+            Beats send data from hundreds or thousands of machines and systems to Logstash or Elasticsearch.`,
       })}
-      image={addBasePath(`${basePathUrl}elastic_agent_card.svg`)}
+      image={addBasePath(
+        `${basePathUrl}elastic_beats_card_${IS_DARK_THEME ? 'dark' : 'light'}.svg`
+      )}
       betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}
       footer={footer}
       {...(cardRest as any)}
