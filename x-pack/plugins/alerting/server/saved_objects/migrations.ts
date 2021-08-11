@@ -73,8 +73,7 @@ export function getMigrations(
     pipeMigrations(removeNullsFromSecurityRules)
   );
 
-  const migrationSecurityRules714 = createEsoMigration(
-    encryptedSavedObjects,
+  const migrationSecurityRules714 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
     (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSecuritySolutionRule(doc),
     pipeMigrations(removeNullAuthorFromSecurityRules)
   );
