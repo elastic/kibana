@@ -66,7 +66,17 @@ describe('resolveRuleRoute', () => {
   };
 
   const resolveResult: AsApiContract<ResolvedSanitizedRule<{ bar: boolean }>> = {
-    ...pick(mockedRule, 'consumer', 'name', 'schedule', 'tags', 'params', 'throttle', 'enabled'),
+    ...pick(
+      mockedRule,
+      'consumer',
+      'name',
+      'schedule',
+      'tags',
+      'params',
+      'throttle',
+      'enabled',
+      'alias_target_id'
+    ),
     rule_type_id: mockedRule.alertTypeId,
     notify_when: mockedRule.notifyWhen,
     mute_all: mockedRule.muteAll,
@@ -90,7 +100,6 @@ describe('resolveRuleRoute', () => {
       },
     ],
     outcome: 'aliasMatch',
-    alias_target_id: '2',
   };
 
   it('resolves a rule with proper parameters', async () => {
