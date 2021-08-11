@@ -16,7 +16,7 @@ export class ExampleCurrencyFormat extends FieldFormat {
   static title = 'Currency (example)';
 
   // 2. Specify field types that this formatter supports
-  static fieldType = KBN_FIELD_TYPES;
+  static fieldType = KBN_FIELD_TYPES.NUMBER;
 
   // Or pass an array in case supports multiple types
   // static fieldType = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.DATE];
