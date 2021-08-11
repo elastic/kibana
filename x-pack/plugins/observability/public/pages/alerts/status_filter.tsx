@@ -34,21 +34,22 @@ export function StatusFilter({ status = 'open', onChange }: StatusFilterProps) {
       </EuiFilterButton>
       <EuiFilterButton
         data-test-subj="StatusFilter closed button"
+        hasActiveFilters={status === 'acknowledged'}
+        onClick={() => onChange('acknowledged')}
+        withNext={true}
+      >
+        {i18n.translate('xpack.observability.alerts.statusFilter.acknowledgedButtonLabel', {
+          defaultMessage: 'Acknowledged',
+        })}
+      </EuiFilterButton>
+      <EuiFilterButton
+        data-test-subj="StatusFilter closed button"
         hasActiveFilters={status === 'closed'}
         onClick={() => onChange('closed')}
         withNext={true}
       >
         {i18n.translate('xpack.observability.alerts.statusFilter.closedButtonLabel', {
           defaultMessage: 'Closed',
-        })}
-      </EuiFilterButton>
-      <EuiFilterButton
-        data-test-subj="StatusFilter all button"
-        hasActiveFilters={status === 'all'}
-        onClick={() => onChange('all')}
-      >
-        {i18n.translate('xpack.observability.alerts.statusFilter.allButtonLabel', {
-          defaultMessage: 'All',
         })}
       </EuiFilterButton>
     </EuiFilterGroup>

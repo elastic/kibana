@@ -8,7 +8,12 @@ import * as t from 'io-ts';
 
 export type Maybe<T> = T | null | undefined;
 
-export const alertStatusRt = t.union([t.literal('all'), t.literal('open'), t.literal('closed')]);
+export const alertStatusRt = t.union([
+  t.literal('all'),
+  t.literal('open'),
+  t.literal('acknowledged'),
+  t.literal('closed'),
+]);
 export type AlertStatus = t.TypeOf<typeof alertStatusRt>;
 
 export interface ApmIndicesConfig {
