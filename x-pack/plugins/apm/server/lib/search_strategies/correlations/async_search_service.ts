@@ -109,15 +109,17 @@ export const asyncSearchServiceProvider = (
 
       // finish early if correlation analysis is not required.
       if (params.analyzeCorrelations === false) {
-        logMessage(
+        addLogMessage(
           `Finish service since correlation analysis wasn't requested.`
         );
-        progress.loadedHistogramStepsize = 1;
-        progress.loadedOverallHistogram = 1;
-        progress.loadedFieldCanditates = 1;
-        progress.loadedFieldValuePairs = 1;
-        progress.loadedHistograms = 1;
-        isRunning = false;
+        state.setProgress({
+          loadedHistogramStepsize: 1,
+          loadedOverallHistogram: 1,
+          loadedFieldCanditates: 1,
+          loadedFieldValuePairs: 1,
+          loadedHistograms: 1,
+        });
+        state.setIsRunning(false);
         return;
       }
 
