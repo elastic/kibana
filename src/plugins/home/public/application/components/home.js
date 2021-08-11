@@ -11,11 +11,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import {
-  KibanaPageTemplate,
-  overviewPageActions,
-  OverviewPageFooter,
-} from '../../../../kibana_react/public';
+import { KibanaPageTemplate, OverviewPageFooter } from '../../../../kibana_react/public';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import { FeatureCatalogueCategory } from '../../services';
 import { getServices } from '../kibana_services';
@@ -129,12 +125,6 @@ export class Home extends Component {
         pageHeader={{
           bottomBorder: false,
           pageTitle: <FormattedMessage id="home.header.title" defaultMessage="Welcome home" />,
-          rightSideItems: overviewPageActions({
-            addBasePath,
-            application,
-            showDevToolsLink: true,
-            showManagementLink: true,
-          }),
         }}
         template="empty"
       >
