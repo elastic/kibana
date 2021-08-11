@@ -166,13 +166,13 @@ export const RoleMappingsTable: React.FC<Props> = ({
 
   const onQueryChange = ({ queryText }: EuiSearchBarOnChangeArgs) => {
     const filteredItems = standardizedRoleMappings.filter((rm) => {
-      // JSON.stringify allows us to search all the role mapping fields
+      // JSON.stringify allows us to search all the object fields
       // without converting all the nested arrays and objects to strings manually
       // Some false-positives are possible, because the search is also performed on
       // object keys, but the simplicity of JSON.stringify seems to worth the tradeoff.
-      const normalizedRoleMappingString = JSON.stringify(rm).toLowerCase();
+      const normalizedTableItemString = JSON.stringify(rm).toLowerCase();
       const normalizedQuery = queryText.toLowerCase();
-      return normalizedRoleMappingString.indexOf(normalizedQuery) !== -1;
+      return normalizedTableItemString.indexOf(normalizedQuery) !== -1;
     });
 
     setItems(filteredItems);
