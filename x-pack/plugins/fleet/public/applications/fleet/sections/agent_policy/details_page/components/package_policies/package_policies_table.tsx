@@ -13,6 +13,7 @@ import {
   EuiInMemoryTable,
   EuiBadge,
   EuiButton,
+  EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -22,7 +23,8 @@ import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common';
 import { pagePathGetters } from '../../../../../../../constants';
 import type { AgentPolicy, PackagePolicy } from '../../../../../types';
 import { PackageIcon, PackagePolicyActionsMenu } from '../../../../../components';
-import { useCapabilities, useStartServices } from '../../../../../hooks';
+import { useCapabilities, useStartServices, useLink } from '../../../../../hooks';
+import { pkgKeyFromPackageInfo } from '../../../../../services';
 
 interface InMemoryPackagePolicy extends PackagePolicy {
   packageName?: string;
@@ -51,6 +53,8 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   agentPolicy,
   ...rest
 }) => {
+  const { getHref } = useLink();
+
   const { application } = useStartServices();
   const hasWriteCapabilities = useCapabilities().write;
 
@@ -89,10 +93,21 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         name: i18n.translate('xpack.fleet.policyDetails.packagePoliciesTable.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
-        render: (value: string) => (
-          <span className="eui-textTruncate" title={value}>
+        render: (value: string, packagePolicy: InMemoryPackagePolicy) => (
+          <EuiLink
+            className="eui-textTruncate"
+            title={value}
+            {...(hasWriteCapabilities
+              ? {
+                  href: getHref('edit_integration', {
+                    policyId: agentPolicy.id,
+                    packagePolicyId: packagePolicy.id,
+                  }),
+                }
+              : { disabled: true })}
+          >
             {value}
-          </span>
+          </EuiLink>
         ),
       },
       {
@@ -120,30 +135,39 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         ),
         render(packageTitle: string, packagePolicy: InMemoryPackagePolicy) {
           return (
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              {packagePolicy.package && (
-                <EuiFlexItem grow={false}>
-                  <PackageIcon
-                    packageName={packagePolicy.package.name}
-                    version={packagePolicy.package.version}
-                    size="m"
-                    tryApi={true}
-                  />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>{packageTitle}</EuiFlexItem>
-              {packagePolicy.package && (
-                <EuiFlexItem grow={false}>
-                  <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                    <FormattedMessage
-                      id="xpack.fleet.policyDetails.packagePoliciesTable.packageVersion"
-                      defaultMessage="v{version}"
-                      values={{ version: packagePolicy.package.version }}
+            <EuiLink
+              href={
+                packagePolicy.package &&
+                getHref('integration_details_overview', {
+                  pkgkey: pkgKeyFromPackageInfo(packagePolicy.package),
+                })
+              }
+            >
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                {packagePolicy.package && (
+                  <EuiFlexItem grow={false}>
+                    <PackageIcon
+                      packageName={packagePolicy.package.name}
+                      version={packagePolicy.package.version}
+                      size="m"
+                      tryApi={true}
                     />
-                  </EuiText>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>{packageTitle}</EuiFlexItem>
+                {packagePolicy.package && (
+                  <EuiFlexItem grow={false}>
+                    <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+                      <FormattedMessage
+                        id="xpack.fleet.policyDetails.packagePoliciesTable.packageVersion"
+                        defaultMessage="v{version}"
+                        values={{ version: packagePolicy.package.version }}
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiLink>
           );
         },
       },
@@ -174,7 +198,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         ],
       },
     ],
-    [agentPolicy]
+    [agentPolicy, getHref, hasWriteCapabilities]
   );
 
   return (
