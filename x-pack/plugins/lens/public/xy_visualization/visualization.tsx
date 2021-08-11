@@ -835,12 +835,12 @@ function getGroupsAvailableInData(
   dataLayers: State['layers'],
   datasourceLayers: Record<string, DatasourcePublicAPI>
 ) {
-  const hasDateHistogramSet = dataLayers.some(
-    checkScaleOperation('interval', 'date', datasourceLayers)
+  const hasNumberHistogram = dataLayers.some(
+    checkScaleOperation('interval', 'number', datasourceLayers)
   );
   return dataLayers.reduce(
     (memo, dataLayer) => {
-      if (!memo.x && !hasDateHistogramSet) {
+      if (!memo.x && hasNumberHistogram) {
         memo.x = Boolean(dataLayer.xAccessor);
       }
       if (!memo.yLeft) {
