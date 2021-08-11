@@ -1,7 +1,7 @@
 @import '../../../mixins';
 
 .lnsLayerPanel {
-  margin-bottom: $euiSizeS;
+  margin-bottom: $euiSize;
 
   // disable focus ring for mouse clicks, leave it for keyboard users
   &:focus:not(:focus-visible) {
