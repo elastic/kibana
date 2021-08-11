@@ -31,7 +31,7 @@ const mapTypeMessage: { [key: string]: string } = {
         'No living connections: Check the Elasticsearch Monitoring cluster network connection and refer to the Kibana logs for more information.',
     }
   ),
-  TimeoutError: i18n.translate('xpack.monitoring.errors.statusCodeErrorMessage', {
+  TimeoutError: i18n.translate('xpack.monitoring.errors.TimeoutErrorMessage', {
     defaultMessage:
       'Request timeout: Check the Elasticsearch Monitoring cluster network connection or the load level of the nodes.',
   }),
