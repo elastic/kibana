@@ -16,5 +16,6 @@ export const PanelContent: React.FC = (props) => {
     registerContent();
   }, [registerContent]);
 
-  return <div className="fieldEditor__flyoutPanel__content" {...props} />;
+  // Adding a tabIndex prop to the div as it is the body of the flyout which is scrollable.
+  return <div className="fieldEditor__flyoutPanel__content" tabIndex={0} {...props} />;
 };

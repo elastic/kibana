@@ -5,11 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'settings', 'header']);
+  const PageObjects = getPageObjects([
+    'common',
+    'settings',
+    'header',
+    'indexPatternFieldEditorObjects',
+  ]);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const a11y = getService('a11y');
@@ -58,6 +63,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.toggleRow('customLabelRow');
       await PageObjects.settings.setCustomLabel('custom label');
       await testSubjects.click('toggleAdvancedSetting');
+      // Let's make sure the field preview is visible before testing the snapshot
+      const isFieldPreviewVisible = await PageObjects.indexPatternFieldEditorObjects.isFieldPreviewVisible();
+      expect(isFieldPreviewVisible).to.be(true);
 
       await a11y.testAppSnapshot();
 

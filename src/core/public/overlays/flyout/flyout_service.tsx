@@ -82,6 +82,7 @@ export interface OverlayFlyoutOpenOptions {
   closeButtonAriaLabel?: string;
   ownFocus?: boolean;
   'data-test-subj'?: string;
+  'aria-label'?: string;
   size?: EuiFlyoutSize;
   maxWidth?: boolean | number | string;
   hideCloseButton?: boolean;

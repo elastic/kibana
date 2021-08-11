@@ -15,7 +15,7 @@ const INDEX_NAME = 'api-integration-test-field-preview';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const createIndex = async () => {
     await es.indices.create({

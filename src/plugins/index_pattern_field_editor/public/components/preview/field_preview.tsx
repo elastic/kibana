@@ -71,7 +71,11 @@ export const FieldPreview = () => {
   }, [reset]);
 
   return (
-    <div className="indexPatternFieldEditor__previewPannel">
+    <div
+      className="indexPatternFieldEditor__previewPannel"
+      // This tabIndex is for the scrollable area of the flyout panel.
+      tabIndex={0}
+    >
       {isEmptyPromptVisible ? (
         <FieldPreviewEmptyPrompt />
       ) : (
