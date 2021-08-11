@@ -8,15 +8,16 @@
 import { KibanaRequest, KibanaResponseFactory } from 'src/core/server';
 import type {
   BaseParams,
+  BaseParamsLegacyPDF,
   BasePayload,
-  ReportingUser,
   ReportingRequestHandlerContext,
+  ReportingUser,
 } from '../types';
 
 export type HandlerFunction = (
   user: ReportingUser,
   exportType: string,
-  jobParams: BaseParams,
+  jobParams: BaseParams | BaseParamsLegacyPDF,
   context: ReportingRequestHandlerContext,
   req: KibanaRequest,
   res: KibanaResponseFactory

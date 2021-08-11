@@ -5,35 +5,39 @@
  * 2.0.
  */
 
-import { compatibilityShimFactory } from './compatibility_shim';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { createMockLevelLogger } from '../../../test_helpers';
+import { compatibilityShim } from './compatibility_shim';
 
-const createMockLogger = () => ({
-  warn: jest.fn(),
-  error: jest.fn(),
+const mockRequestHandlerContext = {
+  core: coreMock.createRequestHandlerContext(),
+  reporting: { usesUiCapabilities: () => true },
+};
+const mockLogger = createMockLevelLogger();
+
+const mockKibanaRequest = httpServerMock.createKibanaRequest();
+const createMockSavedObject = (body: any) => ({
+  id: 'mockSavedObjectId123',
+  type: 'mockSavedObjectType',
+  references: [],
+  ...body,
+});
+const createMockJobParams = (body: any) => ({
+  ...body,
 });
 
-const createMockContext = () => {
-  return {
-    core: {
-      savedObjects: {
-        client: {
-          get: jest.fn(),
-        },
-      },
-    },
-  };
-};
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 test(`passes title through if provided`, async () => {
-  const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(mockLogger);
   const title = 'test title';
 
   const createJobMock = jest.fn();
-  await compatibilityShim(createJobMock)(
-    { title, relativeUrls: ['/something'] },
-    createMockContext(),
-    null
+  await compatibilityShim(createJobMock, mockLogger)(
+    createMockJobParams({ title, relativeUrls: ['/something'] }),
+    mockRequestHandlerContext,
+    mockKibanaRequest
   );
 
   expect(mockLogger.warn.mock.calls.length).toBe(0);
@@ -44,22 +48,18 @@ test(`passes title through if provided`, async () => {
 });
 
 test(`gets the title from the savedObject`, async () => {
-  const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(mockLogger);
-
   const createJobMock = jest.fn();
-  const context = createMockContext();
   const title = 'savedTitle';
-  context.core.savedObjects.client.get.mockReturnValue({
-    attributes: {
-      title,
-    },
-  });
+  mockRequestHandlerContext.core.savedObjects.client.get.mockResolvedValue(
+    createMockSavedObject({
+      attributes: { title },
+    })
+  );
 
-  await compatibilityShim(createJobMock)(
-    { objectType: 'search', savedObjectId: 'abc' },
-    context,
-    null
+  await compatibilityShim(createJobMock, mockLogger)(
+    createMockJobParams({ objectType: 'search', savedObjectId: 'abc' }),
+    mockRequestHandlerContext,
+    mockKibanaRequest
   );
 
   expect(mockLogger.warn.mock.calls.length).toBe(2);
@@ -73,20 +73,19 @@ test(`gets the title from the savedObject`, async () => {
 });
 
 test(`passes the objectType and savedObjectId to the savedObjectsClient`, async () => {
-  const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(mockLogger);
-
   const createJobMock = jest.fn();
-  const context = createMockContext();
-  context.core.savedObjects.client.get.mockReturnValue({
-    attributes: {
-      title: '',
-    },
-  });
+  const context = mockRequestHandlerContext;
+  context.core.savedObjects.client.get.mockResolvedValue(
+    createMockSavedObject({ attributes: { title: '' } })
+  );
 
   const objectType = 'search';
   const savedObjectId = 'abc';
-  await compatibilityShim(createJobMock)({ objectType, savedObjectId }, context, null);
+  await compatibilityShim(createJobMock, mockLogger)(
+    createMockJobParams({ objectType, savedObjectId }),
+    context,
+    mockKibanaRequest
+  );
 
   expect(mockLogger.warn.mock.calls.length).toBe(2);
   expect(mockLogger.warn.mock.calls[0][0]).toEqual(
@@ -104,16 +103,12 @@ test(`passes the objectType and savedObjectId to the savedObjectsClient`, async 
 });
 
 test(`logs no warnings when title and relativeUrls is passed`, async () => {
-  const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(mockLogger);
-
   const createJobMock = jest.fn();
-  const context = createMockContext();
 
-  await compatibilityShim(createJobMock)(
-    { title: 'Phenomenal Dashboard', relativeUrls: ['/abc', '/def'] },
-    context,
-    null
+  await compatibilityShim(createJobMock, mockLogger)(
+    createMockJobParams({ title: 'Phenomenal Dashboard', relativeUrls: ['/abc', '/def'] }),
+    mockRequestHandlerContext,
+    mockKibanaRequest
   );
 
   expect(mockLogger.warn.mock.calls.length).toBe(0);
@@ -121,12 +116,12 @@ test(`logs no warnings when title and relativeUrls is passed`, async () => {
 });
 
 test(`logs warning if title can not be provided`, async () => {
-  const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(mockLogger);
-
   const createJobMock = jest.fn();
-  const context = createMockContext();
-  await compatibilityShim(createJobMock)({ relativeUrls: ['/abc'] }, context, null);
+  await compatibilityShim(createJobMock, mockLogger)(
+    createMockJobParams({ relativeUrls: ['/abc'] }),
+    mockRequestHandlerContext,
+    mockKibanaRequest
+  );
 
   expect(mockLogger.warn.mock.calls.length).toBe(1);
   expect(mockLogger.warn.mock.calls[0][0]).toEqual(
@@ -136,21 +131,17 @@ test(`logs warning if title can not be provided`, async () => {
 });
 
 test(`logs deprecations when generating the title/relativeUrl using the savedObject`, async () => {
-  const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(mockLogger);
-
   const createJobMock = jest.fn();
-  const context = createMockContext();
-  context.core.savedObjects.client.get.mockReturnValue({
-    attributes: {
-      title: '',
-    },
-  });
+  mockRequestHandlerContext.core.savedObjects.client.get.mockResolvedValue(
+    createMockSavedObject({
+      attributes: { title: '' },
+    })
+  );
 
-  await compatibilityShim(createJobMock)(
-    { objectType: 'search', savedObjectId: 'abc' },
-    context,
-    null
+  await compatibilityShim(createJobMock, mockLogger)(
+    createMockJobParams({ objectType: 'search', savedObjectId: 'abc' }),
+    mockRequestHandlerContext,
+    mockKibanaRequest
   );
 
   expect(mockLogger.warn.mock.calls.length).toBe(2);
@@ -163,17 +154,13 @@ test(`logs deprecations when generating the title/relativeUrl using the savedObj
 });
 
 test(`passes objectType through`, async () => {
-  const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(mockLogger);
-
   const createJobMock = jest.fn();
-  const context = createMockContext();
 
   const objectType = 'foo';
-  await compatibilityShim(createJobMock)(
-    { title: 'test', relativeUrls: ['/something'], objectType },
-    context,
-    null
+  await compatibilityShim(createJobMock, mockLogger)(
+    createMockJobParams({ title: 'test', relativeUrls: ['/something'], objectType }),
+    mockRequestHandlerContext,
+    mockKibanaRequest
   );
 
   expect(mockLogger.warn.mock.calls.length).toBe(0);
@@ -184,13 +171,14 @@ test(`passes objectType through`, async () => {
 });
 
 test(`passes the relativeUrls through`, async () => {
-  const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(mockLogger);
-
   const createJobMock = jest.fn();
 
   const relativeUrls = ['/app/kibana#something', '/app/kibana#something-else'];
-  await compatibilityShim(createJobMock)({ title: 'test', relativeUrls }, null, null);
+  await compatibilityShim(createJobMock, mockLogger)(
+    createMockJobParams({ title: 'test', relativeUrls }),
+    mockRequestHandlerContext,
+    mockKibanaRequest
+  );
 
   expect(mockLogger.warn.mock.calls.length).toBe(0);
   expect(mockLogger.error.mock.calls.length).toBe(0);
@@ -199,16 +187,14 @@ test(`passes the relativeUrls through`, async () => {
   expect(createJobMock.mock.calls[0][0].relativeUrls).toBe(relativeUrls);
 });
 
-const testSavedObjectRelativeUrl = (objectType, expectedUrl) => {
+const testSavedObjectRelativeUrl = (objectType: string, expectedUrl: string) => {
   test(`generates the saved object relativeUrl for ${objectType}`, async () => {
-    const mockLogger = createMockLogger();
-    const compatibilityShim = compatibilityShimFactory(mockLogger);
     const createJobMock = jest.fn();
 
-    await compatibilityShim(createJobMock)(
-      { title: 'test', objectType, savedObjectId: 'abc' },
-      null,
-      null
+    await compatibilityShim(createJobMock, mockLogger)(
+      createMockJobParams({ title: 'test', objectType, savedObjectId: 'abc' }),
+      mockRequestHandlerContext,
+      mockKibanaRequest
     );
 
     expect(mockLogger.warn.mock.calls.length).toBe(1);
@@ -227,14 +213,17 @@ testSavedObjectRelativeUrl('visualization', '/app/kibana#/visualize/edit/abc?');
 testSavedObjectRelativeUrl('dashboard', '/app/kibana#/dashboard/abc?');
 
 test(`appends the queryString to the relativeUrl when generating from the savedObject`, async () => {
-  const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(mockLogger);
   const createJobMock = jest.fn();
 
-  await compatibilityShim(createJobMock)(
-    { title: 'test', objectType: 'search', savedObjectId: 'abc', queryString: 'foo=bar' },
-    null,
-    null
+  await compatibilityShim(createJobMock, mockLogger)(
+    createMockJobParams({
+      title: 'test',
+      objectType: 'search',
+      savedObjectId: 'abc',
+      queryString: 'foo=bar',
+    }),
+    mockRequestHandlerContext,
+    mockKibanaRequest
   );
 
   expect(mockLogger.warn.mock.calls.length).toBe(1);
@@ -250,43 +239,35 @@ test(`appends the queryString to the relativeUrl when generating from the savedO
 });
 
 test(`throw an Error if the objectType, savedObjectId and relativeUrls are provided`, async () => {
-  const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(mockLogger);
   const createJobMock = jest.fn();
 
-  const promise = compatibilityShim(createJobMock)(
-    {
+  const promise = compatibilityShim(createJobMock, mockLogger)(
+    createMockJobParams({
       title: 'test',
       objectType: 'something',
       relativeUrls: ['/something'],
       savedObjectId: 'abc',
-    },
-    null,
-    null
+    }),
+    mockRequestHandlerContext,
+    mockKibanaRequest
   );
 
   await expect(promise).rejects.toBeDefined();
 });
 
 test(`passes headers and request through`, async () => {
-  const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(mockLogger);
-
   const createJobMock = jest.fn();
 
-  const req = {};
-  const context = createMockContext();
-
-  await compatibilityShim(createJobMock)(
-    { title: 'test', relativeUrls: ['/something'] },
-    context,
-    req
+  await compatibilityShim(createJobMock, mockLogger)(
+    createMockJobParams({ title: 'test', relativeUrls: ['/something'] }),
+    mockRequestHandlerContext,
+    mockKibanaRequest
   );
 
   expect(mockLogger.warn.mock.calls.length).toBe(0);
   expect(mockLogger.error.mock.calls.length).toBe(0);
 
   expect(createJobMock.mock.calls.length).toBe(1);
-  expect(createJobMock.mock.calls[0][1]).toBe(context);
-  expect(createJobMock.mock.calls[0][2]).toBe(req);
+  expect(createJobMock.mock.calls[0][1]).toBe(mockRequestHandlerContext);
+  expect(createJobMock.mock.calls[0][2]).toBe(mockKibanaRequest);
 });
