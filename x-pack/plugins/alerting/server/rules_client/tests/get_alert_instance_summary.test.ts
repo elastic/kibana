@@ -72,6 +72,7 @@ const BaseAlertInstanceSummarySavedObject: SavedObject<RawAlert> = {
     tags: ['tag-1', 'tag-2'],
     alertTypeId: '123',
     consumer: 'alert-consumer',
+    legacyId: null,
     schedule: { interval: `${AlertInstanceSummaryIntervalSeconds}s` },
     actions: [],
     params: {},

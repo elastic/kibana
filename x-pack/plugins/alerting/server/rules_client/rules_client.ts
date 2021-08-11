@@ -1491,36 +1491,29 @@ export class RulesClient {
       notifyWhen,
       scheduledTaskId,
       params,
-      ...rawAlert
+      legacyId, // exclude from result because it is an internal variable
+      executionStatus,
+      schedule,
+      actions,
+      ...partialRawAlert
     }: Partial<RawAlert>,
     references: SavedObjectReference[] | undefined
   ): PartialAlert<Params> {
-    // Not the prettiest code here, but if we want to use most of the
-    // alert fields from the rawAlert using `...rawAlert` kind of access, we
-    // need to specifically delete the executionStatus as it's a different type
-    // in RawAlert and Alert.  Probably next time we need to do something similar
-    // here, we should look at redesigning the implementation of this method.
-    const rawAlertWithoutExecutionStatus: Partial<Omit<RawAlert, 'executionStatus'>> = {
-      ...rawAlert,
-    };
-    delete rawAlertWithoutExecutionStatus.executionStatus;
-    const executionStatus = alertExecutionStatusFromRaw(this.logger, id, rawAlert.executionStatus);
-
     return {
       id,
       notifyWhen,
-      ...rawAlertWithoutExecutionStatus,
+      ...partialRawAlert,
       // we currently only support the Interval Schedule type
       // Once we support additional types, this type signature will likely change
-      schedule: rawAlert.schedule as IntervalSchedule,
-      actions: rawAlert.actions
-        ? this.injectReferencesIntoActions(id, rawAlert.actions, references || [])
-        : [],
+      schedule: schedule as IntervalSchedule,
+      actions: actions ? this.injectReferencesIntoActions(id, actions, references || []) : [],
       params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),
-      ...(executionStatus ? { executionStatus } : {}),
+      ...(executionStatus
+        ? { executionStatus: alertExecutionStatusFromRaw(this.logger, id, executionStatus) }
+        : {}),
     };
   }
 
