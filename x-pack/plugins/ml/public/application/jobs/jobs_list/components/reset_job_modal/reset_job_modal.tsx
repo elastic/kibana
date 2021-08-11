@@ -22,8 +22,10 @@ import {
 
 import { resetJobs } from '../utils';
 import { RESETTING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
+import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
+import { OpenJobsWarningCallout } from './open_jobs_warning_callout';
 
-type ShowFunc = (jobs: Array<{ id: string }>) => void;
+type ShowFunc = (jobs: MlSummaryJob[]) => void;
 
 interface Props {
   setShowFunction(showFunc: ShowFunc): void;
@@ -35,6 +37,7 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
   const [resetting, setResetting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [jobIds, setJobIds] = useState<string[]>([]);
+  const [jobs, setJobs] = useState<MlSummaryJob[]>([]);
 
   useEffect(() => {
     if (typeof setShowFunction === 'function') {
@@ -47,8 +50,9 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
     };
   }, []);
 
-  const showModal = useCallback((jobs: Array<{ id: string }>) => {
-    setJobIds(jobs.map(({ id }) => id));
+  const showModal = useCallback((tempJobs: MlSummaryJob[]) => {
+    setJobIds(tempJobs.map(({ id }) => id));
+    setJobs(tempJobs);
     setModalVisible(true);
     setResetting(false);
   }, []);
@@ -86,7 +90,8 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <p>
+        <>
+          <OpenJobsWarningCallout jobs={jobs} />
           {resetting === true ? (
             <div>
               <FormattedMessage
@@ -115,7 +120,7 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
               />
             </EuiText>
           )}
-        </p>
+        </>
       </EuiModalBody>
       <>
         <EuiSpacer />

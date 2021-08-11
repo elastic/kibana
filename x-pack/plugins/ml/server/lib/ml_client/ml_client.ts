@@ -343,11 +343,13 @@ export function getMlClient(
         const { body } = await mlClient.getJobs<{ jobs: Job[] }>(...p);
         const jobs = await jobSavedObjectService.filterJobsForSpace<Job>(
           'anomaly-detector',
+          // TODO remove type assertion once es client types are correct
           body.jobs as Job[],
           'job_id'
         );
         await groupIdsCheck(
           p,
+          // TODO remove type assertion once es client types are correct
           body.jobs as Job[],
           jobs.map((j) => j.job_id)
         );

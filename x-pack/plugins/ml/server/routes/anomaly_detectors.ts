@@ -22,7 +22,6 @@ import {
   getModelSnapshotsSchema,
   updateModelSnapshotsSchema,
   updateModelSnapshotBodySchema,
-  resetJobSchema,
 } from './schemas/anomaly_detectors_schema';
 
 /**
@@ -315,7 +314,8 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     {
       path: '/api/ml/anomaly_detectors/{jobId}/_reset',
       validate: {
-        params: resetJobSchema,
+        params: jobIdSchema,
+        query: schema.object({ wait_for_completion: schema.maybe(schema.boolean()) }),
       },
       options: {
         tags: ['access:ml:canCloseJob'],
@@ -324,10 +324,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const options: { job_id: string; wait_for_completion?: boolean } = {
-          // TODO change this to correct resetJob request
+          // TODO change this to correct resetJob request type
           job_id: request.params.jobId,
-          ...(request.params.waitForCompletion !== undefined
-            ? { wait_for_completion: request.params.waitForCompletion }
+          ...(request.query.wait_for_completion !== undefined
+            ? { wait_for_completion: request.query.wait_for_completion }
             : {}),
         };
         const { body } = await mlClient.resetJob(options);

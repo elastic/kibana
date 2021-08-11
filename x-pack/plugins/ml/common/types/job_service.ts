@@ -52,6 +52,7 @@ export interface BulkCreateResults {
 export interface ResetJobsResponse {
   [jobId: string]: {
     reset: boolean;
+    task?: string;
     error?: ErrorType;
   };
 }

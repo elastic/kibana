@@ -151,8 +151,10 @@ export function jobsProvider(
     const results: ResetJobsResponse = {};
     for (const jobId of jobIds) {
       try {
-        await mlClient.resetJob({ job_id: jobId, wait_for_completion: false });
-        results[jobId] = { reset: true };
+        const {
+          body: { task },
+        } = await mlClient.resetJob({ job_id: jobId, wait_for_completion: false });
+        results[jobId] = { reset: true, task };
       } catch (error) {
         if (isRequestTimeout(error)) {
           return fillResultsWithTimeouts(results, jobId, jobIds, JOB_ACTION.RESET);
@@ -309,6 +311,7 @@ export function jobsProvider(
     if (jobResults && jobResults.jobs) {
       const job = jobResults.jobs.find((j) => j.job_id === jobId);
       if (job) {
+        // TODO remove type assertion once es client types are correct
         result.job = job as Job;
       }
     }

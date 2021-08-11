@@ -23,8 +23,9 @@ import {
 import { deleteJobs } from '../utils';
 import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import { DeleteJobCheckModal } from '../../../../components/delete_job_check_modal';
+import { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 
-type ShowFunc = (jobs: Array<{ id: string }>) => void;
+type ShowFunc = (jobs: MlSummaryJob[]) => void;
 
 interface Props {
   setShowFunction(showFunc: ShowFunc): void;
@@ -49,7 +50,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
     };
   }, []);
 
-  const showModal = useCallback((jobs: Array<{ id: string }>) => {
+  const showModal = useCallback((jobs: MlSummaryJob[]) => {
     setJobIds(jobs.map(({ id }) => id));
     setModalVisible(true);
     setDeleting(false);
