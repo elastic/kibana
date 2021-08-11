@@ -39,7 +39,11 @@ export const buildCommonReasonMessage = ({
     hostName = mergedDoc.fields['host.name'] != null ? mergedDoc.fields['host.name'] : hostName;
     userName = mergedDoc.fields['user.name'] != null ? mergedDoc.fields['user.name'] : userName;
     timestampForReason =
-      mergedDoc.fields['@timestamp'] != null ? mergedDoc.fields['@timestamp'] : timestamp;
+      mergedDoc.fields['@timestamp'] != null
+        ? mergedDoc.fields['@timestamp']
+        : mergedDoc._source && mergedDoc._source['@timestamp'] != null
+        ? mergedDoc._source['@timestamp']
+        : timestamp;
   }
 
   const isFieldEmpty = (field: string | string[] | undefined | null) =>
