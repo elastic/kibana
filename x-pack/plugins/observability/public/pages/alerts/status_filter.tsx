@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { AlertStatus } from '../../../common/typings';
@@ -15,43 +15,35 @@ export interface StatusFilterProps {
   onChange: (value: AlertStatus) => void;
 }
 
+const options: Array<{ id: AlertStatus; label: string }> = [
+  {
+    id: 'open',
+    label: i18n.translate('xpack.observability.alerts.statusFilter.openButtonLabel', {
+      defaultMessage: 'Open',
+    }),
+  },
+  {
+    id: 'acknowledged',
+    label: i18n.translate('xpack.observability.alerts.statusFilter.acknowledgedButtonLabel', {
+      defaultMessage: 'Acknowledged',
+    }),
+  },
+  {
+    id: 'closed',
+    label: i18n.translate('xpack.observability.alerts.statusFilter.closedButtonLabel', {
+      defaultMessage: 'Closed',
+    }),
+  },
+];
+
 export function StatusFilter({ status = 'open', onChange }: StatusFilterProps) {
   return (
-    <EuiFilterGroup
-      aria-label={i18n.translate('xpack.observability.alerts.statusFilterAriaLabel', {
-        defaultMessage: 'Filter alerts by open and closed status',
-      })}
-    >
-      <EuiFilterButton
-        data-test-subj="StatusFilter open button"
-        hasActiveFilters={status === 'open'}
-        onClick={() => onChange('open')}
-        withNext={true}
-      >
-        {i18n.translate('xpack.observability.alerts.statusFilter.openButtonLabel', {
-          defaultMessage: 'Open',
-        })}
-      </EuiFilterButton>
-      <EuiFilterButton
-        data-test-subj="StatusFilter closed button"
-        hasActiveFilters={status === 'acknowledged'}
-        onClick={() => onChange('acknowledged')}
-        withNext={true}
-      >
-        {i18n.translate('xpack.observability.alerts.statusFilter.acknowledgedButtonLabel', {
-          defaultMessage: 'Acknowledged',
-        })}
-      </EuiFilterButton>
-      <EuiFilterButton
-        data-test-subj="StatusFilter closed button"
-        hasActiveFilters={status === 'closed'}
-        onClick={() => onChange('closed')}
-        withNext={true}
-      >
-        {i18n.translate('xpack.observability.alerts.statusFilter.closedButtonLabel', {
-          defaultMessage: 'Closed',
-        })}
-      </EuiFilterButton>
-    </EuiFilterGroup>
+    <EuiButtonGroup
+      legend="Filter by"
+      color="primary"
+      options={options}
+      idSelected={status}
+      onChange={(id) => onChange(id as AlertStatus)}
+    />
   );
 }
