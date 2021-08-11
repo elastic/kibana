@@ -1007,6 +1007,49 @@ describe('AlertingAuthorization', () => {
       );
       expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
     });
+    test('throws if user has no privileges to any rule type', async () => {
+      const { authorization } = mockSecurity();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+      checkPrivileges.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: false,
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('myType', 'myOtherApp', 'rule', 'create'),
+              authorized: false,
+            },
+            {
+              privilege: mockAuthorizationAction('myType', 'myApp', 'rule', 'create'),
+              authorized: false,
+            },
+          ],
+        },
+      });
+      const alertAuthorization = new AlertingAuthorization({
+        request,
+        authorization,
+        ruleTypeRegistry,
+        features,
+        auditLogger,
+        getSpace,
+        getSpaceId,
+      });
+      ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
+      await expect(
+        alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'path.to.rule_type_id',
+            consumer: 'consumer-field',
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unauthorized some-user/find"`);
+      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
+    });
     test('creates an `ensureRuleTypeIsAuthorized` function which throws if type is unauthorized', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
