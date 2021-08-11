@@ -75,35 +75,6 @@ test('creates an alerting authorization client with proper constructor arguments
     auditLogger: expect.any(AlertingAuthorizationAuditLogger),
     getSpace: expect.any(Function),
     getSpaceId: expect.any(Function),
-    exemptConsumerIds: [],
-  });
-
-  expect(AlertingAuthorizationAuditLogger).toHaveBeenCalled();
-  expect(securityPluginSetup.audit.getLogger).toHaveBeenCalledWith(ALERTS_FEATURE_ID);
-});
-
-test('creates an alerting authorization client with proper constructor arguments when exemptConsumerIds are specified', async () => {
-  const factory = new AlertingAuthorizationClientFactory();
-  factory.initialize({
-    securityPluginSetup,
-    securityPluginStart,
-    ...alertingAuthorizationClientFactoryParams,
-  });
-  const request = KibanaRequest.from(fakeRequest);
-  const { AlertingAuthorizationAuditLogger } = jest.requireMock('./authorization/audit_logger');
-
-  factory.create(request, ['exemptConsumerA', 'exemptConsumerB']);
-
-  const { AlertingAuthorization } = jest.requireMock('./authorization/alerting_authorization');
-  expect(AlertingAuthorization).toHaveBeenCalledWith({
-    request,
-    authorization: securityPluginStart.authz,
-    ruleTypeRegistry: alertingAuthorizationClientFactoryParams.ruleTypeRegistry,
-    features: alertingAuthorizationClientFactoryParams.features,
-    auditLogger: expect.any(AlertingAuthorizationAuditLogger),
-    getSpace: expect.any(Function),
-    getSpaceId: expect.any(Function),
-    exemptConsumerIds: ['exemptConsumerA', 'exemptConsumerB'],
   });
 
   expect(AlertingAuthorizationAuditLogger).toHaveBeenCalled();
@@ -126,7 +97,6 @@ test('creates an alerting authorization client with proper constructor arguments
     auditLogger: expect.any(AlertingAuthorizationAuditLogger),
     getSpace: expect.any(Function),
     getSpaceId: expect.any(Function),
-    exemptConsumerIds: [],
   });
 
   expect(AlertingAuthorizationAuditLogger).toHaveBeenCalled();
