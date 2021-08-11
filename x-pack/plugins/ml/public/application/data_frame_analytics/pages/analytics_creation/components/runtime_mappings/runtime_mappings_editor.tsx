@@ -7,8 +7,9 @@
 
 import { isEqual } from 'lodash';
 import React, { memo, FC } from 'react';
-import { EuiCodeEditor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { CodeEditor } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { isRuntimeMappings } from '../../../../../../../common/util/runtime_field_utils';
 import { XJsonModeType } from './runtime_mappings';
 
@@ -31,13 +32,10 @@ export const RuntimeMappingsEditor: FC<Props> = memo(
     advancedRuntimeMappingsConfig,
   }) => {
     return (
-      <EuiCodeEditor
+      <CodeEditor
         data-test-subj="mlDataFrameAnalyticsAdvancedRuntimeMappingsEditor"
-        style={{ border: '1px solid #e3e6ef' }}
-        height="250px"
-        width="100%"
-        mode={xJsonMode}
-        value={advancedRuntimeMappingsConfig}
+        height={250}
+        languageId={'json'}
         onChange={(d: string) => {
           setAdvancedRuntimeMappingsConfig(d);
 
@@ -62,16 +60,24 @@ export const RuntimeMappingsEditor: FC<Props> = memo(
             setIsRuntimeMappingsEditorApplyButtonEnabled(false);
           }
         }}
-        setOptions={{
-          fontSize: '12px',
+        options={{
+          ariaLabel: i18n.translate(
+            'xpack.ml.dataframe.analytics.createWizard.runtimeMappings.advancedEditorAriaLabel',
+            {
+              defaultMessage: 'Advanced runtime editor',
+            }
+          ),
+          automaticLayout: true,
+          fontSize: 12,
+          scrollBeyondLastLine: false,
+          quickSuggestions: true,
+          minimap: {
+            enabled: false,
+          },
+          wordWrap: 'on',
+          wrappingIndent: 'indent',
         }}
-        theme="textmate"
-        aria-label={i18n.translate(
-          'xpack.ml.dataframe.analytics.createWizard.runtimeMappings.advancedEditorAriaLabel',
-          {
-            defaultMessage: 'Advanced runtime editor',
-          }
-        )}
+        value={advancedRuntimeMappingsConfig}
       />
     );
   },
