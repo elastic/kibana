@@ -15,10 +15,11 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { ViewType } from '../state';
 import {
@@ -144,19 +145,18 @@ export const TrustedAppsPage = memo(() => {
           >
             <EuiSpacer size="m" />
             <EuiFlexItem grow={false}>
-              <ControlPanel
-                totalItemCount={totalItemsCount}
-                currentViewType={location.view_type}
-                onViewTypeChange={handleViewTypeChange}
-              />
+              <EuiText color="subdued" size="xs" data-test-subj="trustedAppsListViewCountLabel">
+                {i18n.translate('xpack.securitySolution.trustedapps.list.totalCount', {
+                  defaultMessage:
+                    'Showing {totalItemsCount, plural, one {# trusted application} other {# trusted applications}}',
+                  values: { totalItemsCount },
+                })}
+              </EuiText>
 
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiHorizontalRule margin="none" />
-
-              {location.view_type === 'grid' && <TrustedAppsGrid />}
-              {location.view_type === 'list' && <TrustedAppsList />}
+              <TrustedAppsGrid />
             </EuiFlexItem>
           </EuiFlexGroup>
         </>

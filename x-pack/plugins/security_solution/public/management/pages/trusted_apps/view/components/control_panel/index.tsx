@@ -26,7 +26,7 @@ export const ControlPanel = memo<ControlPanelProps>(
           <EuiText color="subdued" size="xs" data-test-subj="trustedAppsListViewCountLabel">
             {i18n.translate('xpack.securitySolution.trustedapps.list.totalCount', {
               defaultMessage:
-                '{totalItemCount, plural, one {# trusted application} other {# trusted applications}}',
+                'Showing {totalItemCount, plural, one {# trusted application} other {# trusted applications}}',
               values: { totalItemCount },
             })}
           </EuiText>
