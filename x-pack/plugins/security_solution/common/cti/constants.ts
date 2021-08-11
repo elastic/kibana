@@ -69,5 +69,3 @@ export const CTI_DEFAULT_SOURCES = [
   'MISP',
   'Recorded Future',
 ];
-
-export const DEFAULT_CTI_SOURCE_INDEX = ['filebeat-*'];

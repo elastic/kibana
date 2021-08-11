@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { isEqual } from 'lodash';
 
 import { IndexPattern } from 'src/plugins/data/public';
-import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
+import { DEFAULT_INDEX_KEY, DEFAULT_THREAT_INDEX_KEY } from '../../../../../common/constants';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
@@ -136,9 +136,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
   const initialState = defaultValues ?? {
     ...stepDefineDefaultValue,
     index: indicesConfig,
+    threatIndex: threatIndicesConfig,
   };
   const { form } = useForm<DefineStepRule>({
     defaultValue: initialState,

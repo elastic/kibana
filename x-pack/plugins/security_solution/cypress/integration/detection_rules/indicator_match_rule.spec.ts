@@ -6,7 +6,11 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
-import { getIndexPatterns, getNewThreatIndicatorRule } from '../../objects/rule';
+import {
+  getIndexPatterns,
+  getNewThreatIndicatorRule,
+  getThreatIndexPatterns,
+} from '../../objects/rule';
 
 import {
   ALERT_RULE_METHOD,
@@ -156,8 +160,8 @@ describe('indicator match', () => {
       });
 
       describe('Indicator index patterns', () => {
-        it('Contains empty index pattern', () => {
-          getIndicatorIndicatorIndex().should('have.text', '');
+        it('Contains a predefined index pattern', () => {
+          getIndicatorIndex().should('have.text', getThreatIndexPatterns().join(''));
         });
 
         it('Does NOT show invalidation text on initial page load', () => {
