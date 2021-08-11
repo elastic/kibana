@@ -65,7 +65,7 @@ const DeprecationLogsPreview: FunctionComponent = () => {
 
       {canSeeExternalLinks && (
         <>
-          <EuiSpacer size="l" />
+          <EuiSpacer size="xl" />
           <EuiText>
             <h4>{i18nTexts.analyzeTitle}</h4>
           </EuiText>
