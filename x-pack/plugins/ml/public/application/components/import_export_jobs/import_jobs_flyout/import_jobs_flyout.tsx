@@ -47,6 +47,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
   const {
     jobs: { bulkCreateJobs },
     dataFrameAnalytics: { createDataFrameAnalytics },
+    filters: { filters: getFilters },
   } = useMlApiContext();
   const {
     services: {
@@ -129,7 +130,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       const validatedJobs = await jobImportService.validateJobs(
         loadedFile.jobs,
         loadedFile.jobType,
-        getIndexPatternTitles
+        getIndexPatternTitles,
+        getFilters
       );
 
       if (loadedFile.jobType === 'anomaly-detector') {
