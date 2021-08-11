@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenuItem, EuiText } from '@elastic/eui';
+import { EuiContextMenuItem } from '@elastic/eui';
 import React from 'react';
 import { FILTER_OPEN } from '../../alerts_filter_group';
 import * as i18n from '../../translations';
@@ -25,7 +25,7 @@ const OpenAlertStatusComponent: React.FC<OpenAlertStatusProps> = ({ onClick, dis
       onClick={onClick}
       disabled={disabled}
     >
-      <EuiText size="m">{i18n.ACTION_OPEN_ALERT}</EuiText>
+      {i18n.ACTION_OPEN_ALERT}
     </EuiContextMenuItem>
   );
 };
