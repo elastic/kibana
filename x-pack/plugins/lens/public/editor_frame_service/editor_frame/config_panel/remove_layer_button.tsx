@@ -46,6 +46,7 @@ export function RemoveLayerButton({
       color="danger"
       data-test-subj="lnsLayerRemove"
       aria-label={ariaLabel}
+      title={ariaLabel}
       onClick={() => {
         // If we don't blur the remove / clear button, it remains focused
         // which is a strange UX in this case. e.target.blur doesn't work
