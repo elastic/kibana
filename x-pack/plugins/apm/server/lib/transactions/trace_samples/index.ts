@@ -33,7 +33,7 @@ export async function getTransactionTraceSamples({
   setup: Setup & SetupTimeRange;
 }) {
   return withApmSpan('get_transaction_trace_samples', async () => {
-    const { noHits, hits } = await getTraceSamples({
+    return await getTraceSamples({
       environment,
       kuery,
       serviceName,
@@ -45,10 +45,5 @@ export async function getTransactionTraceSamples({
       sampleRangeTo,
       setup,
     });
-
-    return {
-      noHits,
-      hits,
-    };
   });
 }

@@ -70,13 +70,10 @@ export function useTransactionTraceSamplesFetcher({
         });
 
         if (response.noHits) {
-          return { noHits: true, traceSamples: [] };
+          return response;
         }
 
-        const traceSamples: TraceSample[] = response.hits.map((hit) => ({
-          transactionId: hit._source.transaction.id,
-          traceId: hit._source.trace.id,
-        }));
+        const { traceSamples } = response;
 
         const selectedSample =
           transactionId && traceId
