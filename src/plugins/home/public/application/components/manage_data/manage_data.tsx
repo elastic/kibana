@@ -106,7 +106,7 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
 
           <EuiFlexGroup className="homDataManage__content">
             {features.map((feature) => (
-              <EuiFlexItem key={feature.id}>
+              <EuiFlexItem className="homDataManage__item" key={feature.id}>
                 <Synopsis
                   description={feature.description}
                   iconType={feature.icon}
