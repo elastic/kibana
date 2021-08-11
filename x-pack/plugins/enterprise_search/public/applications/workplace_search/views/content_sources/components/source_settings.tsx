@@ -12,6 +12,7 @@ import { isEmpty } from 'lodash';
 
 import {
   EuiButton,
+  EuiButtonEvent,
   EuiConfirmModal,
   EuiFieldText,
   EuiFlexGroup,
@@ -42,6 +43,7 @@ import {
 import { SourceDataItem } from '../../../types';
 import { AddSourceLogic } from '../components/add_source/add_source_logic';
 import {
+  FORCE_SYNC_BUTTON,
   SOURCE_SETTINGS_HEADING,
   SOURCE_SETTINGS_TITLE,
   SOURCE_SETTINGS_DESCRIPTION,
@@ -49,16 +51,16 @@ import {
   SOURCE_CONFIG_TITLE,
   SOURCE_CONFIG_DESCRIPTION,
   SOURCE_CONFIG_LINK,
-  SYNC_MANAGEMENT_TITLE,
-  SYNC_MANAGEMENT_DESCRIPTION,
-  SYNC_MANAGEMENT_SYNCHRONIZE_LABEL,
-  SYNC_MANAGEMENT_THUMBNAILS_LABEL,
-  SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL,
   SOURCE_REMOVE_TITLE,
   SOURCE_REMOVE_DESCRIPTION,
   SYNC_DIAGNOSTICS_TITLE,
   SYNC_DIAGNOSTICS_DESCRIPTION,
   SYNC_DIAGNOSTICS_BUTTON,
+  SYNC_MANAGEMENT_TITLE,
+  SYNC_MANAGEMENT_DESCRIPTION,
+  SYNC_MANAGEMENT_SYNCHRONIZE_LABEL,
+  SYNC_MANAGEMENT_THUMBNAILS_LABEL,
+  SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL,
 } from '../constants';
 import { staticSourceData } from '../source_data';
 import { SourceLogic } from '../source_logic';
@@ -68,11 +70,24 @@ import { SourceLayout } from './source_layout';
 export const SourceSettings: React.FC = () => {
   const { http } = useValues(HttpLogic);
 
-  const { updateContentSource, removeContentSource } = useActions(SourceLogic);
+  const { updateContentSource, removeContentSource, forceSync } = useActions(SourceLogic);
   const { getSourceConfigData } = useActions(AddSourceLogic);
 
   const {
-    contentSource: { name, id, serviceType, indexing: {enabled, features: {contentExtraction: {enabled: contentExtractionEnabled}, thumbnails: {enabled: thumbnailsEnabled}}} },
+    contentSource: {
+      name,
+      id,
+      serviceType,
+      custom: isCustom,
+      isIndexedSource,
+      indexing: {
+        enabled,
+        features: {
+          contentExtraction: { enabled: contentExtractionEnabled },
+          thumbnails: { enabled: thumbnailsEnabled },
+        },
+      },
+    },
     buttonLoading,
   } = useValues(SourceLogic);
 
@@ -97,6 +112,7 @@ export const SourceSettings: React.FC = () => {
   const hideConfirm = () => setModalVisibility(false);
 
   const showConfig = isOrganization && !isEmpty(configuredFields);
+  const showSyncControls = isOrganization && isIndexedSource && !isCustom;
 
   const [synchronizeChecked, setSynchronize] = useState(enabled);
   const [thumbnailsChecked, setThumbnails] = useState(thumbnailsEnabled);
@@ -115,20 +131,28 @@ export const SourceSettings: React.FC = () => {
     updateContentSource(id, { name: inputValue });
   };
 
+  const submitForceSync = (e: EuiButtonEvent) => {
+    forceSync(id);
+  };
+
   const handleSynchronizeChange = (e: EuiSwitchEvent) => {
     setSynchronize(e.target.checked);
     updateContentSource(id, { indexing: { enabled: e.target.checked } });
-  }
+  };
 
   const handleThumbnailsChange = (e: EuiSwitchEvent) => {
     setThumbnails(e.target.checked);
-    updateContentSource(id, { indexing: { features: {thumbnails: { enabled: e.target.checked } } } });
-  }
+    updateContentSource(id, {
+      indexing: { features: { thumbnails: { enabled: e.target.checked } } },
+    });
+  };
 
   const handleContentExtractionChange = (e: EuiSwitchEvent) => {
     setContentExtraction(e.target.checked);
-    updateContentSource(id, { indexing: { features: {content_extraction: { enabled: e.target.checked } } } });
-  }
+    updateContentSource(id, {
+      indexing: { features: { content_extraction: { enabled: e.target.checked } } },
+    });
+  };
 
   const handleSourceRemoval = () => {
     /**
@@ -208,44 +232,56 @@ export const SourceSettings: React.FC = () => {
           </EuiFormRow>
         </ContentSection>
       )}
-      <ContentSection title={SYNC_MANAGEMENT_TITLE} description={SYNC_MANAGEMENT_DESCRIPTION}>
-        <EuiPanel
-          hasShadow={false}
-          hasBorder={true}
-        >
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiSwitch
-                checked={synchronizeChecked}
-                onChange={handleSynchronizeChange}
-                label={SYNC_MANAGEMENT_SYNCHRONIZE_LABEL}
-                data-test-subj="SynchronizeToggle"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiHorizontalRule/>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiSwitch
-                checked={thumbnailsChecked}
-                onChange={handleThumbnailsChange}
-                label={SYNC_MANAGEMENT_THUMBNAILS_LABEL}
-                data-test-subj="ThumbnailsToggle"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiSwitch
-                checked={contentExtractionChecked}
-                onChange={handleContentExtractionChange}
-                label={SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL}
-                data-test-subj="ContentExtractionToggle"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </ContentSection>
+      {showSyncControls && (
+        <ContentSection title={SYNC_MANAGEMENT_TITLE} description={SYNC_MANAGEMENT_DESCRIPTION}>
+          <EuiPanel
+            hasShadow={false}
+            hasBorder={true}
+            grow={false}
+          >
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  checked={synchronizeChecked}
+                  onChange={handleSynchronizeChange}
+                  label={SYNC_MANAGEMENT_SYNCHRONIZE_LABEL}
+                  data-test-subj="SynchronizeToggle"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  onClick={submitForceSync}
+                  data-test-subj="ForceSyncButton"
+                >
+                  {FORCE_SYNC_BUTTON}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiHorizontalRule />
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  checked={thumbnailsChecked}
+                  onChange={handleThumbnailsChange}
+                  label={SYNC_MANAGEMENT_THUMBNAILS_LABEL}
+                  data-test-subj="ThumbnailsToggle"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  checked={contentExtractionChecked}
+                  onChange={handleContentExtractionChange}
+                  label={SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL}
+                  data-test-subj="ContentExtractionToggle"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </ContentSection>
+      )}
       <ContentSection title={SYNC_DIAGNOSTICS_TITLE} description={SYNC_DIAGNOSTICS_DESCRIPTION}>
         <EuiButton
           target="_blank"

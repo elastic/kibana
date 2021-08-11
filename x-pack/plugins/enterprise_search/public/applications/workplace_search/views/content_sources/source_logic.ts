@@ -34,12 +34,28 @@ export interface SourceActions {
   searchContentSourceDocuments(sourceId: string): { sourceId: string };
   updateContentSource(
     sourceId: string,
-    source: { name?: string, indexing?: { enabled?: boolean, features?: { thumbnails?: { enabled: boolean }, content_extraction?: { enabled: boolean } } } }
-  ): { sourceId: string; source: { name: string, indexing: { enabled: boolean, features: { thumbnails: { enabled: boolean }, content_extraction: { enabled: boolean } } } } };
+    source: {
+      name?: string;
+      indexing?: {
+        enabled?: boolean;
+        features?: { thumbnails?: { enabled: boolean }; content_extraction?: { enabled: boolean } };
+      };
+    }
+  ): {
+    sourceId: string;
+    source: {
+      name: string;
+      indexing: {
+        enabled: boolean;
+        features: { thumbnails: { enabled: boolean }; content_extraction: { enabled: boolean } };
+      };
+    };
+  };
   resetSourceState(): void;
   removeContentSource(sourceId: string): { sourceId: string };
   initializeSource(sourceId: string): { sourceId: string };
   setButtonNotLoading(): void;
+  forceSync(sourceId: string): void;
 }
 
 interface SourceValues {
@@ -69,12 +85,27 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     initializeSource: (sourceId: string) => ({ sourceId }),
     initializeFederatedSummary: (sourceId: string) => ({ sourceId }),
     searchContentSourceDocuments: (sourceId: string) => ({ sourceId }),
-    updateContentSource: (sourceId: string, source: { name?: string, indexing?: { enabled?: boolean, features?: { thumbnails?: { enabled: boolean }, content_extraction?: { enabled: boolean } } } }) => ({ sourceId, source }),
+    updateContentSource: (
+      sourceId: string,
+      source: {
+        name?: string;
+        indexing?: {
+          enabled?: boolean;
+          features?: {
+            thumbnails?: { enabled: boolean };
+            content_extraction?: { enabled: boolean };
+          };
+        };
+      }
+    ) => ({ sourceId, source }),
     removeContentSource: (sourceId: string) => ({
       sourceId,
     }),
     resetSourceState: () => true,
     setButtonNotLoading: () => false,
+    forceSync: (sourceId: string) => ({
+      sourceId,
+    }),
   },
   reducers: {
     contentSource: [
@@ -202,14 +233,14 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     updateContentSource: async ({ sourceId, source }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/settings`
+        ? `/api/workplace_se;arch/org/sources/${sourceId}/settings`
         : `/api/workplace_search/account/sources/${sourceId}/settings`;
 
       try {
         const response = await HttpLogic.values.http.patch(route, {
           body: JSON.stringify({ content_source: source }),
         });
-        if(source.name) {
+        if (source.name) {
           actions.onUpdateSourceName(response.name);
         }
       } catch (e) {
@@ -254,6 +285,17 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     },
     resetSourceState: () => {
       clearFlashMessages();
+    },
+    forceSync: async ({ sourceId }) => {
+      const route = `/api/workplace_search/org/sources/${sourceId}/sync/jobs`;
+
+      try {
+        const response = await HttpLogic.values.http.post(route, {
+          body: JSON.stringify({ command: 'start', force_interrupt: true }),
+        });
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
   }),
 });

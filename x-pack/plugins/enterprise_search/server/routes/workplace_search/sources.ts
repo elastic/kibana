@@ -546,6 +546,32 @@ export function registerOrgSourceFederatedSummaryRoute({
   );
 }
 
+export function registerOrgSourceForceSyncRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.post(
+    {
+      path: '/api/workplace_search/org/sources/{id}/sync/jobs',
+      validate: {
+        body: schema.object({
+          command: schema.string(),
+          force_interrupt: schema.maybe(schema.boolean()),
+        }),
+        params: schema.object({
+          id: schema.string(),
+        }),
+        query: schema.object({
+          "job-type": schema.maybe(schema.string()),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/sources/:id/sync/jobs',
+    })
+  );
+}
+
 export function registerOrgSourceReauthPrepareRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -932,6 +958,7 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerOrgCreateSourceRoute(dependencies);
   registerOrgSourceDocumentsRoute(dependencies);
   registerOrgSourceFederatedSummaryRoute(dependencies);
+  registerOrgSourceForceSyncRoute(dependencies);
   registerOrgSourceReauthPrepareRoute(dependencies);
   registerOrgSourceSettingsRoute(dependencies);
   registerOrgPreSourceRoute(dependencies);

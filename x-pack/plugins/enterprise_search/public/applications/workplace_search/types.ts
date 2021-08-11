@@ -133,12 +133,12 @@ interface IndexingConfig {
   enabled: boolean;
   features: {
     contentExtraction: {
-      enabled: boolean
-    },
+      enabled: boolean;
+    };
     thumbnails: {
-      enabled: boolean
-    }
-  }
+      enabled: boolean;
+    };
+  };
 }
 
 export interface ContentSourceFullData extends ContentSourceDetails {
@@ -148,6 +148,7 @@ export interface ContentSourceFullData extends ContentSourceDetails {
   groups: Group[];
   indexing: IndexingConfig;
   custom: boolean;
+  isIndexedSource: boolean;
   accessToken: string;
   urlField: string;
   titleField: string;
