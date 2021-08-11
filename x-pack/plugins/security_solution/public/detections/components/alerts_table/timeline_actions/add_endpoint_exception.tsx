@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenuItem, EuiText } from '@elastic/eui';
+import { EuiContextMenuItem } from '@elastic/eui';
 import React from 'react';
 import * as i18n from '../translations';
 
@@ -27,7 +27,7 @@ const AddEndpointExceptionComponent: React.FC<AddEndpointExceptionProps> = ({
       onClick={onClick}
       disabled={disabled}
     >
-      <EuiText size="m">{i18n.ACTION_ADD_ENDPOINT_EXCEPTION}</EuiText>
+      {i18n.ACTION_ADD_ENDPOINT_EXCEPTION}
     </EuiContextMenuItem>
   );
 };
