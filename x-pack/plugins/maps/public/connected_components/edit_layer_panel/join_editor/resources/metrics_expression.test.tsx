@@ -8,9 +8,12 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { MetricsExpression } from './metrics_expression';
+import { AGG_TYPE } from '../../../../../common/constants';
 
 const defaultProps = {
   onChange: () => {},
+  metrics: [{ type: AGG_TYPE.COUNT }],
+  rightFields: [],
 };
 
 test('Should render default props', () => {
@@ -23,11 +26,10 @@ test('Should render metrics expression for metrics', () => {
   const component = shallow(
     <MetricsExpression
       {...defaultProps}
-      rightFields={['foobar', 'prop1']}
       metrics={[
-        { type: 'count', label: 'my count' }, // should ignore label
-        { type: 'max' }, // incomplete - no field, should not be included in expression
-        { type: 'max', field: 'prop1', label: 'mostest' }, // should ignore label
+        { type: AGG_TYPE.COUNT, label: 'my count' }, // should ignore label
+        { type: AGG_TYPE.MAX }, // incomplete - no field, should not be included in expression
+        { type: AGG_TYPE.MAX, field: 'prop1', label: 'mostest' }, // should ignore label
       ]}
     />
   );
