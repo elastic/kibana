@@ -67,7 +67,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
   const [authTokenUrl, setAuthTokenUrl] = useState<string | undefined>(undefined);
   const [redirectUrl, setRedirectTokenUrl] = useState<string | undefined>(undefined);
   const { docLinks, http } = useKibana().services;
-  const { from, host, port, secure, hasAuth, authType, tokenExpirationDate } = action.config;
+  const { from, host, port, secure, hasAuth, authType } = action.config;
   const {
     user,
     password,
@@ -76,7 +76,6 @@ export const EmailActionConnectorFields: React.FunctionComponent<
     clientSecret,
     oauthScope,
     refreshToken,
-    refreshTokenUrl,
   } = action.secrets;
   useEffect(() => {
     if (!action.id) {
@@ -653,7 +652,7 @@ async function getOAuth(
           window.clearInterval(intervalId);
           const authorizationCode = getQueryString('code', href);
           windowObjectReference.close();
-          const details = {
+          const details: any = {
             client_id: clientId,
             scope,
             redirect_uri: redirectUrl,
@@ -677,7 +676,7 @@ async function getOAuth(
               }
             )
             .then((res) => {
-              console.log(res);
+              // console.log(res);
               editActionSecrets('accessToken', res.access_token);
               editActionSecrets('refreshToken', res.refresh_token);
               editActionConfig('tokenExpirationDate', res.expires_in);

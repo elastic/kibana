@@ -6,7 +6,6 @@
  */
 
 import { EuiIconProps } from '@elastic/eui';
-import { NumberFormat } from 'src/plugins/data/common';
 import { UserConfiguredActionConnector } from '../../../types';
 
 export interface EmailActionParams {

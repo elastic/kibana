@@ -35,6 +35,12 @@ describe('connector validation', () => {
       secrets: {
         user: 'user',
         password: 'pass',
+        accessToken: null,
+        clientId: null,
+        clientSecret: null,
+        oauthScope: null,
+        refreshToken: null,
+        refreshTokenUrl: null,
       },
       id: 'test',
       actionTypeId: '.email',
@@ -46,6 +52,7 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: true,
+        authType: 'basic',
       },
     } as EmailActionConnector;
 
@@ -71,6 +78,12 @@ describe('connector validation', () => {
       secrets: {
         user: null,
         password: null,
+        accessToken: null,
+        clientId: null,
+        clientSecret: null,
+        oauthScope: null,
+        refreshToken: null,
+        refreshTokenUrl: null,
       },
       id: 'test',
       actionTypeId: '.email',
@@ -82,6 +95,7 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: false,
+        authType: 'basic',
       },
     } as EmailActionConnector;
 
@@ -137,6 +151,12 @@ describe('connector validation', () => {
       secrets: {
         user: 'user',
         password: null,
+        accessToken: null,
+        clientId: null,
+        clientSecret: null,
+        oauthScope: null,
+        refreshToken: null,
+        refreshTokenUrl: null,
       },
       id: 'test',
       actionTypeId: '.email',
@@ -148,6 +168,7 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: true,
+        authType: 'basic',
       },
     } as EmailActionConnector;
 
@@ -172,6 +193,12 @@ describe('connector validation', () => {
       secrets: {
         user: null,
         password: 'password',
+        accessToken: null,
+        clientId: null,
+        clientSecret: null,
+        oauthScope: null,
+        refreshToken: null,
+        refreshTokenUrl: null,
       },
       id: 'test',
       actionTypeId: '.email',
@@ -183,6 +210,7 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: true,
+        authType: 'basic',
       },
     } as EmailActionConnector;
 

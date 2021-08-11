@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
 import { ILicenseState } from '../lib';
 import { BASE_ACTION_API_PATH, RewriteResponseCase } from '../../common';
-import { ActionResult, ActionsRequestHandlerContext } from '../types';
+import { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
 
 const querySchema = schema.object({

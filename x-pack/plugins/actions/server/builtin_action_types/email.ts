@@ -96,8 +96,8 @@ const SecretsSchema = schema.object({
   password: schema.nullable(schema.string()),
   clientId: schema.nullable(schema.string()),
   clientSecret: schema.nullable(schema.string()),
-  accessToken: schema.maybe(schema.string()),
-  refreshToken: schema.maybe(schema.string()),
+  accessToken: schema.nullable(schema.string()),
+  refreshToken: schema.nullable(schema.string()),
   oauthScope: schema.nullable(schema.string()),
 });
 
