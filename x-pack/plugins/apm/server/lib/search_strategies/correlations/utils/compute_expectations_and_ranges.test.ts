@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { computeExpectationsAndRanges } from './aggregation_utils';
+import { computeExpectationsAndRanges } from './compute_expectations_and_ranges';
 
 describe('aggregation utils', () => {
   describe('computeExpectationsAndRanges', () => {
