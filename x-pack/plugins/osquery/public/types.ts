@@ -16,12 +16,13 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { getLazyOsqueryAction } from './shared_components';
+import { getLazyOsqueryAction, getLazyOsqueryIcon } from './shared_components';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
 export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
+  OsqueryIcon?: ReturnType<typeof getLazyOsqueryIcon>;
 }
 
 export interface AppPluginStartDependencies {

@@ -11,26 +11,32 @@ import React, { useMemo, useEffect, useState } from 'react';
 import { QueryClientProvider } from 'react-query';
 import { useAgentDetails } from '../../agents/use_agent_details';
 import { useAgentPolicy } from '../../agent_policies';
-import { useOsqueryIntegrationStatus } from '../../common/hooks';
 import { KibanaContextProvider, useKibana } from '../../common/lib/kibana';
 
 import { LiveQueryForm } from '../../live_queries/form';
 import { queryClient } from '../../query_client';
+import { OsqueryIcon } from '../../components/osquery_icon';
 
 interface OsqueryActionProps {
   metadata?: Record<string, any> | undefined;
 }
 
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
+  const { fleet } = useKibana().services;
   const permissions = useKibana().services.application.capabilities.osquery;
+  const [fleetAvailable, setFleetAvailable] = useState<boolean | null>(null);
 
   const agentId = metadata?.info?.agent?.id ?? null;
-  const { data: agentData, isFetched: agentFetched } = useAgentDetails({ agentId });
+  const { data: agentData, isFetched: agentFetched } = useAgentDetails({
+    agentId,
+    silent: true,
+    skip: !fleetAvailable || !agentId,
+  });
   const { data: agentPolicyData, isFetched: policyFetched } = useAgentPolicy({
     policyId: agentData?.item?.policy_id,
-    skip: !agentData,
+    skip: !fleetAvailable || !agentData,
+    silent: true,
   });
-  console.error('agentId', agentId, agentData, agentPolicyData);
 
   const osqueryAvailable = useMemo(() => {
     const osqueryPackageInstalled = find(agentPolicyData?.package_policies, [
@@ -40,6 +46,68 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
     return osqueryPackageInstalled?.enabled;
   }, [agentPolicyData?.package_policies]);
 
+  useEffect(() => {
+    const verifyFleet = async () => {
+      if (!fleet?.isInitialized) return false;
+
+      return setFleetAvailable(await fleet.isInitialized());
+    };
+    verifyFleet();
+  }, [fleet]);
+
+  if (!(permissions.runSavedQueries || permissions.writeLiveQueries)) {
+    return (
+      <EuiEmptyPrompt
+        icon={<OsqueryIcon />}
+        title={<h2>Osquery is unavailable</h2>}
+        titleSize="xs"
+        body={
+          <p>
+            {`Your user role doesn’t have Osquery permissions to run live queries. Administrators can update role permissions in Stack Management > Roles.`}
+          </p>
+        }
+      />
+    );
+  }
+
+  if (fleetAvailable === null) {
+    return <EuiLoadingContent lines={10} />;
+  }
+
+  if (!fleetAvailable) {
+    return (
+      <EuiEmptyPrompt
+        icon={<OsqueryIcon />}
+        title={<h2>Osquery is unavailable</h2>}
+        titleSize="xs"
+        body={
+          <p>
+            Fleet is disabled in this cluster. To run queries on this host, an administrator must
+            enable Fleet on the cluster, install Elastic Agent on this host, and then add the
+            <code>Osquery Manager</code> integration to the agent policy in Fleet.
+          </p>
+        }
+      />
+    );
+  }
+
+  if (!metadata?.info?.agent?.id) {
+    return (
+      <EuiEmptyPrompt
+        icon={<OsqueryIcon />}
+        title={<h2>Osquery is unavailable</h2>}
+        titleSize="xs"
+        body={
+          <p>
+            An Elastic Agent is not installed on this host. To run queries on this host, an
+            administrator must install Elastic Agent, and then add the Osquery Manager integration
+            to the agent policy in Fleet
+          </p>
+        }
+      />
+    );
+  }
+
   if (!agentFetched || !policyFetched) {
     return <EuiLoadingContent lines={10} />;
   }
@@ -47,9 +115,9 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
   if (!osqueryAvailable) {
     return (
       <EuiEmptyPrompt
-        iconType="alert"
-        iconColor="danger"
-        title={<h2>Error Osquery not installed</h2>}
+        icon={<OsqueryIcon />}
+        title={<h2>Osquery is unavailable</h2>}
+        titleSize="xs"
         body={
           <p>Osquery is not installed on this agent. Please contact your Kibana administrator.</p>
         }
@@ -58,15 +126,14 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
   }
 
   if (agentData?.item?.status !== 'online') {
-    console.error('active,', agentData?.item?.status);
     return (
       <EuiEmptyPrompt
-        iconType="alert"
-        iconColor="danger"
-        title={<h2>Error agent is inactive</h2>}
+        icon={<OsqueryIcon />}
+        title={<h2>Osquery is unavailable</h2>}
+        titleSize="xs"
         body={
           <p>
-            Agent has be `active` for running Osquery queries. Please contact your Kibana
+            Agent has to be online for running Osquery queries. Please contact your Kibana
             administrator.
           </p>
         }
@@ -74,25 +141,9 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
     );
   }
 
-  if (osqueryAvailable && (permissions.runSavedQueries || !permissions.writeLiveQueries)) {
-    return (
-      // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-      <LiveQueryForm defaultValue={{ agentSelection: { agents: [agentId] } }} agentId={agentId} />
-    );
-  }
-
   return (
-    <EuiEmptyPrompt
-      iconType="alert"
-      iconColor="danger"
-      title={<h2>Error missing permissions</h2>}
-      body={
-        <p>
-          You are missing a Kibana privilege to run osquery queries. Please contact your Kibana
-          administrator.
-        </p>
-      }
-    />
+    // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+    <LiveQueryForm defaultValue={{ agentSelection: { agents: [agentId] } }} agentId={agentId} />
   );
 };
 

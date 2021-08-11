@@ -247,8 +247,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     return (
       <EuiCallOut title="Missing privileges" color="danger" iconType="alert">
         <p>
-          You&apos;re missing <EuiCode>read</EuiCode> privileges to read from
-          <EuiCode>logs-{OSQUERY_INTEGRATION_NAME}.result*</EuiCode>.
+          {'Your user role doesn’t have index read permissions on the '}
+          <EuiCode>logs-{OSQUERY_INTEGRATION_NAME}.result*</EuiCode>
+          {
+            'index. Access to this index is required to view osquery results. Administrators can update role permissions in Stack Management > Roles.'
+          }
         </p>
       </EuiCallOut>
     );

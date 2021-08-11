@@ -6,3 +6,4 @@
  */
 
 export { getLazyOsqueryAction } from './lazy_osquery_action';
+export { getLazyOsqueryIcon } from './lazy_osquery_icon';

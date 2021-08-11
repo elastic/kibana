@@ -14,18 +14,21 @@ import { useKibana } from '../common/lib/kibana';
 
 interface UseAgentDetails {
   agentId: string;
+  silent?: boolean;
+  skip?: boolean;
 }
 
-export const useAgentDetails = ({ agentId }: UseAgentDetails) => {
+export const useAgentDetails = ({ agentId, silent, skip }: UseAgentDetails) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
   return useQuery<GetOneAgentResponse>(
     ['agentDetails', agentId],
     () => http.get(`/internal/osquery/fleet_wrapper/agents/${agentId}`),
     {
-      enabled: agentId.length > 0,
+      enabled: !skip && agentId.length > 0,
       onSuccess: () => setErrorToast(),
       onError: (error) =>
+        !silent &&
         setErrorToast(error as Error, {
           title: i18n.translate('xpack.osquery.agentDetails.fetchError', {
             defaultMessage: 'Error while fetching agent details',

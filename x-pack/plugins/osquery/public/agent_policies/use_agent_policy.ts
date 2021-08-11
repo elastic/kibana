@@ -12,11 +12,12 @@ import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
 interface UseAgentPolicy {
-  policyId: string;
+  policyId?: string;
+  silent?: boolean;
   skip?: boolean;
 }
 
-export const useAgentPolicy = ({ policyId, skip }: UseAgentPolicy) => {
+export const useAgentPolicy = ({ policyId, skip, silent }: UseAgentPolicy) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
@@ -29,6 +30,7 @@ export const useAgentPolicy = ({ policyId, skip }: UseAgentPolicy) => {
       select: (response) => response.item,
       onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
+        !silent &&
         setErrorToast(error, {
           title: i18n.translate('xpack.osquery.agent_policy_details.fetchError', {
             defaultMessage: 'Error while fetching agent policy details',

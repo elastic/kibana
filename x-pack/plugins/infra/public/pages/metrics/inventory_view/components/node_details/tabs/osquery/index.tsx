@@ -33,23 +33,48 @@ const TabComponent = (props: TabProps) => {
     services: { osquery },
   } = useKibanaContextForPlugin();
   const OsqueryAction = osquery?.OsqueryAction;
-  console.error('metadata', metadata);
+
+  // TODO: Add info when Osquery plugin in not available
+  if (loading || !OsqueryAction) {
+    return (
+      <TabContent>
+        <EuiLoadingContent lines={10} />
+      </TabContent>
+    );
+  }
 
   return (
     <TabContent>
-      {!OsqueryAction || loading ? (
-        <EuiLoadingContent lines={10} />
-      ) : (
-        <OsqueryAction metadata={metadata} />
-      )}
+      <OsqueryAction metadata={metadata} />
     </TabContent>
   );
 };
 
+const OSQUERY_TAB_NAME = i18n.translate('xpack.infra.nodeDetails.tabs.osquery', {
+  defaultMessage: 'Osquery',
+});
+
+const OsqueryTabName = React.memo(() => {
+  const {
+    services: { osquery },
+  } = useKibanaContextForPlugin();
+  const OsqueryIcon = osquery?.OsqueryIcon;
+
+  if (OsqueryIcon) {
+    return (
+      <>
+        <OsqueryIcon size="m" />
+        &nbsp;
+        {OSQUERY_TAB_NAME}
+      </>
+    );
+  }
+
+  return <>{OSQUERY_TAB_NAME}</>;
+});
+
 export const OsqueryTab = {
   id: 'osquery',
-  name: i18n.translate('xpack.infra.nodeDetails.tabs.osquery', {
-    defaultMessage: 'Osquery',
-  }),
+  name: <OsqueryTabName />,
   content: TabComponent,
 };
