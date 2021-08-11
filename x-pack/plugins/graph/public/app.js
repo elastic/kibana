@@ -19,7 +19,7 @@ import {
   getSavedWorkspace,
   deleteSavedWorkspace,
 } from './helpers/saved_workspace_utils';
-import { GraphApp } from './components/app';
+import { GraphApp } from './components/graph_app';
 
 export function initGraphApp(angularModule, deps) {
   const {
@@ -61,7 +61,7 @@ export function initGraphApp(angularModule, deps) {
         ['workspaceId', { watchDepth: 'reference' }],
         ['query', { watchDepth: 'reference' }],
         ['deps', { watchDepth: 'reference' }],
-        ['location', { watchDepth: 'reference' }],
+        ['locationUrl', { watchDepth: 'reference' }],
         ['route', { watchDepth: 'reference' }],
       ],
       {
@@ -115,7 +115,7 @@ export function initGraphApp(angularModule, deps) {
           $scope.workspaceId = $route.current.params.id;
           $scope.query = $route.current.params.query;
           $scope.deps = deps;
-          $scope.location = $location;
+          $scope.locationUrl = (path) => $location.url(path);
         },
         resolve: {
           savedWorkspace: function ($rootScope, $route, $location) {

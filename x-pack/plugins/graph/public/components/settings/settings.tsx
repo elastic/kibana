@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFlyoutHeader, EuiTitle, EuiTabs, EuiFlyoutBody, EuiTab } from '@elastic/eui';
+import * as Rx from 'rxjs';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { AdvancedSettingsForm } from './advanced_settings_form';
@@ -58,28 +59,37 @@ export interface DispatchProps {
   saveTemplate: (props: { index: number; template: UrlTemplate }) => void;
 }
 
-export interface SettingsProps {
+export interface SettingsWorkspaceProps {
   blocklistedNodes?: WorkspaceNode[];
   unblocklistNode?: (node: WorkspaceNode) => void;
   canEditDrillDownUrls: boolean;
 }
 
-export interface SettingsStateProps extends SettingsProps, StateProps, DispatchProps {}
+export interface AsObservable<P> {
+  observable: Readonly<Rx.Observable<P>>;
+}
+
+export interface SettingsStateProps extends StateProps, DispatchProps {}
 
 export function SettingsComponent({
-  canEditDrillDownUrls,
-  blocklistedNodes,
-  unblocklistNode,
+  observable,
   advancedSettings,
   urlTemplates,
   allFields,
   saveTemplate: saveTemplateAction,
   updateSettings: updateSettingsAction,
   removeTemplate: removeTemplateAction,
-}: SettingsStateProps & SettingsProps) {
+}: AsObservable<SettingsWorkspaceProps> & SettingsStateProps) {
+  const [SettingsWorkspaceProps, setWorkspaceProps] = useState<SettingsWorkspaceProps | undefined>(
+    undefined
+  );
   const [activeTab, setActiveTab] = useState(0);
 
-  if (!blocklistedNodes || !unblocklistNode) {
+  useEffect(() => {
+    observable.subscribe(setWorkspaceProps);
+  }, [observable]);
+
+  if (!SettingsWorkspaceProps) {
     return null;
   }
 
@@ -93,7 +103,7 @@ export function SettingsComponent({
         </EuiTitle>
         <EuiTabs style={{ margin: '0 -16px -25px' }}>
           {tabs
-            .filter(({ id }) => id !== 'drillDowns' || canEditDrillDownUrls)
+            .filter(({ id }) => id !== 'drillDowns' || SettingsWorkspaceProps.canEditDrillDownUrls)
             .map(({ title }, index) => (
               <EuiTab
                 key={title}
@@ -109,8 +119,8 @@ export function SettingsComponent({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <ActiveTabContent
-          blocklistedNodes={blocklistedNodes}
-          unblocklistNode={unblocklistNode}
+          blocklistedNodes={SettingsWorkspaceProps.blocklistedNodes}
+          unblocklistNode={SettingsWorkspaceProps.unblocklistNode}
           advancedSettings={advancedSettings}
           urlTemplates={urlTemplates}
           allFields={allFields}
@@ -123,7 +133,12 @@ export function SettingsComponent({
   );
 }
 
-export const Settings = connect<StateProps, DispatchProps, SettingsProps, GraphState>(
+export const Settings = connect<
+  StateProps,
+  DispatchProps,
+  AsObservable<SettingsWorkspaceProps>,
+  GraphState
+>(
   (state: GraphState) => ({
     advancedSettings: settingsSelector(state),
     urlTemplates: templatesSelector(state),

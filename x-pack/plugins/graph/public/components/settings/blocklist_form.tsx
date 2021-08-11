@@ -17,14 +17,14 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { SettingsProps } from './settings';
+import { SettingsWorkspaceProps } from './settings';
 import { LegacyIcon } from '../legacy_icon';
 import { useListKeys } from './use_list_keys';
 
 export function BlocklistForm({
   blocklistedNodes,
   unblocklistNode,
-}: Pick<SettingsProps, 'blocklistedNodes' | 'unblocklistNode'>) {
+}: Pick<SettingsWorkspaceProps, 'blocklistedNodes' | 'unblocklistNode'>) {
   const getListKey = useListKeys(blocklistedNodes || []);
   return (
     <>

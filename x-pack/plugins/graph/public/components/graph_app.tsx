@@ -22,7 +22,7 @@ import {
   SearchRequest,
   Workspace,
 } from '../types';
-import { createGraphStore, GraphStore } from '../state_management';
+import { createGraphStore } from '../state_management';
 import { createWorkspace } from '../angular/graph_client_workspace';
 import { GraphWorkspace } from './graph_workspace';
 import { GraphDependencies } from '../application';
@@ -35,7 +35,8 @@ export interface GraphWorkspaceProps {
   workspaceId: string;
   query: string;
   deps: GraphDependencies;
-  location: angular.ILocationService;
+  angularLocation: angular.ILocationService;
+  locationUrl: (path?: string) => string;
 }
 
 export const GraphApp = (props: GraphWorkspaceProps) => {
@@ -48,6 +49,7 @@ export const GraphApp = (props: GraphWorkspaceProps) => {
    */
   const workspaceRef = useRef<Workspace>();
   const workspace = workspaceRef.current;
+
   /**
    * `renderCounter` needs to force react state update on workspace changes
    */
@@ -86,10 +88,7 @@ export const GraphApp = (props: GraphWorkspaceProps) => {
           responseHandler(response);
         })
         .catch(handleHttpError)
-        .finally(() => {
-          setLoading(false);
-          // $scope.$digest();
-        });
+        .finally(() => setLoading(false));
     },
     [props.deps.coreStart.http, props.deps.toastNotifications, handleHttpError]
   );
@@ -111,67 +110,47 @@ export const GraphApp = (props: GraphWorkspaceProps) => {
           responseHandler(response);
         })
         .catch(handleHttpError)
-        .finally(() => {
-          setLoading(false);
-          // $scope.$digest();
-        });
+        .finally(() => setLoading(false));
     },
     [props.deps.coreStart.http, handleHttpError]
   );
 
-  const store = useMemo<GraphStore>(
-    () =>
-      createGraphStore({
-        basePath: props.deps.getBasePath(),
-        addBasePath: props.deps.addBasePath,
-        indexPatternProvider: props.indexPatternProvider,
-        indexPatterns: props.indexPatterns,
-        createWorkspace: (indexPattern, exploreControls) => {
-          const options = {
-            indexName: indexPattern,
-            vertex_fields: [],
-            // Here we have the opportunity to look up labels for nodes...
-            nodeLabeller() {
-              //   console.log(newNodes);
-            },
-            changeHandler() {
-              setRenderCounter((cur) => ++cur);
-            },
-            graphExploreProxy: callNodeProxy,
-            searchProxy: callSearchNodeProxy,
-            exploreControls,
-          };
-          const createdWorkspace = createWorkspace(options);
-          workspaceRef.current = createdWorkspace;
-          // setWorkspaceWrapper({ workspace: createdWorkspace });
-          return createdWorkspace;
-        },
-        getWorkspace: () => workspaceRef.current,
-        getSavedWorkspace: () => props.savedWorkspace,
-        notifications: props.deps.coreStart.notifications,
-        http: props.deps.coreStart.http,
-        overlays: props.deps.coreStart.overlays,
-        savedObjectsClient: props.deps.savedObjectsClient,
-        showSaveModal,
-        savePolicy: props.deps.graphSavePolicy,
-        changeUrl: (newUrl) => {
-          props.location.url(newUrl);
-        },
-        notifyReact: () => {
-          setRenderCounter((cur) => ++cur);
-        },
-        chrome: props.deps.chrome,
-        I18nContext: props.deps.coreStart.i18n.Context,
-      }),
-    [
-      callNodeProxy,
-      callSearchNodeProxy,
-      props.deps,
-      props.indexPatternProvider,
-      props.indexPatterns,
-      props.savedWorkspace,
-      props.location,
-    ]
+  const [store] = useState(() =>
+    createGraphStore({
+      basePath: props.deps.getBasePath(),
+      addBasePath: props.deps.addBasePath,
+      indexPatternProvider: props.indexPatternProvider,
+      indexPatterns: props.indexPatterns,
+      createWorkspace: (indexPattern, exploreControls) => {
+        const options = {
+          indexName: indexPattern,
+          vertex_fields: [],
+          // Here we have the opportunity to look up labels for nodes...
+          nodeLabeller() {
+            // console.log(newNodes);
+          },
+          changeHandler: () => setRenderCounter((cur) => ++cur),
+          graphExploreProxy: callNodeProxy,
+          searchProxy: callSearchNodeProxy,
+          exploreControls,
+        };
+        const createdWorkspace = createWorkspace(options);
+        workspaceRef.current = createdWorkspace;
+        return createdWorkspace;
+      },
+      getWorkspace: () => workspaceRef.current,
+      getSavedWorkspace: () => props.savedWorkspace,
+      notifications: props.deps.coreStart.notifications,
+      http: props.deps.coreStart.http,
+      overlays: props.deps.coreStart.overlays,
+      savedObjectsClient: props.deps.savedObjectsClient,
+      showSaveModal,
+      savePolicy: props.deps.graphSavePolicy,
+      changeUrl: (newUrl) => props.locationUrl(newUrl),
+      notifyReact: () => setRenderCounter((cur) => ++cur),
+      chrome: props.deps.chrome,
+      I18nContext: props.deps.coreStart.i18n.Context,
+    })
   );
 
   const services = useMemo(
@@ -200,7 +179,7 @@ export const GraphApp = (props: GraphWorkspaceProps) => {
             canEditDrillDownUrls={props.deps.canEditDrillDownUrls}
             toastNotifications={props.deps.toastNotifications}
             overlays={props.deps.overlays}
-            location={props.location}
+            locationUrl={props.locationUrl}
             query={props.query}
             indexPatterns={props.indexPatterns}
             savedWorkspace={props.savedWorkspace}

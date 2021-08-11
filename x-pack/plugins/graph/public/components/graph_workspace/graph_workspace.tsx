@@ -52,7 +52,7 @@ type GraphWorkspaceProps = Pick<
   counter: number;
   workspace?: Workspace;
   loading: boolean;
-  location: angular.ILocationService;
+  locationUrl: (path?: string) => string;
   query: string;
   indexPatterns: IndexPatternSavedObject[];
   savedWorkspace: GraphWorkspaceSavedObject;
@@ -73,7 +73,7 @@ interface GraphWorkspaceDispatchProps {
 const GraphWorkspaceComponent = ({
   workspace,
   loading,
-  location,
+  locationUrl,
   savedWorkspace,
   liveResponseFields,
   query,
@@ -217,7 +217,7 @@ const GraphWorkspaceComponent = ({
   return (
     <Fragment>
       <GraphTopNavMenu
-        location={location}
+        locationUrl={locationUrl}
         workspace={workspace}
         savedWorkspace={savedWorkspace}
         onSetMenus={setMenus}

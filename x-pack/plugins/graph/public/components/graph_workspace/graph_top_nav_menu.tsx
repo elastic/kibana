@@ -13,7 +13,8 @@ import { NavigationPublicPluginStart as NavigationStart } from '../../../../../.
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { datasourceSelector, hasFieldsSelector } from '../../state_management';
 import { GraphSavePolicy, GraphWorkspaceSavedObject, Workspace } from '../../types';
-import { Settings } from '../settings';
+import { AsObservable, Settings, SettingsWorkspaceProps } from '../settings';
+import { asSyncedObservable } from '../../helpers/as_observable';
 
 export interface MenuOptions {
   showSettings: boolean;
@@ -21,7 +22,7 @@ export interface MenuOptions {
 }
 
 interface GraphTopNavMenuProps {
-  location: angular.ILocationService;
+  locationUrl: (path?: string) => string;
   workspace: Workspace | undefined;
   onSetMenus: React.Dispatch<React.SetStateAction<MenuOptions>>;
   confirmWipeWorkspace: (
@@ -60,10 +61,10 @@ export const GraphTopNavMenu = (props: GraphTopNavMenuProps) => {
     }),
     run() {
       props.confirmWipeWorkspace(() => {
-        if (props.location.url() === '/workspace/') {
+        if (props.locationUrl() === '/workspace/') {
           location.reload();
         } else {
-          props.location.url('/workspace/');
+          props.locationUrl('/workspace/');
         }
       });
     },
@@ -138,14 +139,16 @@ export const GraphTopNavMenu = (props: GraphTopNavMenuProps) => {
       defaultMessage: 'Settings',
     }),
     run: () => {
+      const settingsObservable = (asSyncedObservable(() => ({
+        blocklistedNodes: props.workspace?.blocklistedNodes,
+        unblocklistNode: props.workspace?.unblocklist,
+        canEditDrillDownUrls: props.canEditDrillDownUrls,
+      })) as unknown) as AsObservable<SettingsWorkspaceProps>['observable'];
+
       props.coreStart.overlays.openFlyout(
         toMountPoint(
           <Provider store={store}>
-            <Settings
-              blocklistedNodes={props.workspace?.blocklistedNodes}
-              unblocklistNode={props.workspace?.unblocklist}
-              canEditDrillDownUrls={props.canEditDrillDownUrls}
-            />
+            <Settings observable={settingsObservable} />
           </Provider>
         ),
         {
