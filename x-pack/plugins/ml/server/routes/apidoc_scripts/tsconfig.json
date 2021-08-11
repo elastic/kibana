@@ -1,9 +1,7 @@
 {
   "extends": "../../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target",
-    "target": "es6",
-    "moduleResolution": "node"
+    "outDir": "./target/types"
   },
   "include": [
     "schema_worker.ts",

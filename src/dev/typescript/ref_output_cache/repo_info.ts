@@ -52,4 +52,20 @@ export class RepoInfo {
 
     return proc.stdout.trim();
   }
+
+  async getFilesChangesSinceSha(sha: string) {
+    this.log.debug('determining files changes since sha', sha);
+
+    const proc = await execa('git', ['diff', '--name-only', sha], {
+      cwd: this.dir,
+    });
+    const files = proc.stdout
+      .trim()
+      .split('\n')
+      .map((p) => Path.resolve(this.dir, p));
+
+    this.log.verbose('found the following changes compared to', sha, `\n - ${files.join('\n - ')}`);
+
+    return files;
+  }
 }
