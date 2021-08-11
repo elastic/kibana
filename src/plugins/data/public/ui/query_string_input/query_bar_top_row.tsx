@@ -59,6 +59,7 @@ export interface QueryBarTopRowProps {
   isClearable?: boolean;
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
+  timeRangeForSuggestionsOverride?: boolean;
 }
 
 // Needed for React.lazy
@@ -190,6 +191,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
             iconType={props.iconType}
             nonKqlMode={props.nonKqlMode}
             nonKqlModeHelpText={props.nonKqlModeHelpText}
+            timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
           />
         </AutocompleteFtuePopover>
       </EuiFlexItem>
