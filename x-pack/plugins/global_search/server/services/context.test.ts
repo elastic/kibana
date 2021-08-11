@@ -31,7 +31,6 @@ describe('getContextFactory', () => {
     expect(context).toEqual({
       core: {
         savedObjects: expect.any(Object),
-        elasticsearch: expect.any(Object),
         uiSettings: expect.any(Object),
         capabilities: expect.any(Object),
       },
