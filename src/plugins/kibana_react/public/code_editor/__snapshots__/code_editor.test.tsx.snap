@@ -129,26 +129,22 @@ exports[`<CodeEditor /> is rendered 1`] = `
   >
     <EuiToolTip
       content={
-        <div>
-          <EuiText>
-            <p>
-              <FormattedMessage
-                defaultMessage="Press Enter to start editing."
-                id="kibana-react.kibanaCodeEditor.startEditing"
-                values={Object {}}
-              />
-            </p>
-          </EuiText>
-          <EuiText>
-            <p>
-              <FormattedMessage
-                defaultMessage="Press Escape to stop editing."
-                id="kibana-react.kibanaCodeEditor.stopEditing"
-                values={Object {}}
-              />
-            </p>
-          </EuiText>
-        </div>
+        <React.Fragment>
+          <p>
+            <FormattedMessage
+              defaultMessage="Press Enter to start editing."
+              id="kibana-react.kibanaCodeEditor.startEditing"
+              values={Object {}}
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              defaultMessage="Press Escape to stop editing."
+              id="kibana-react.kibanaCodeEditor.stopEditing"
+              values={Object {}}
+            />
+          </p>
+        </React.Fragment>
       }
       delay="regular"
       display="block"

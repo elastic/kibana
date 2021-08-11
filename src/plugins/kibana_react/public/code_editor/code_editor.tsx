@@ -202,32 +202,32 @@ export const CodeEditor: React.FC<Props> = ({
         display="block"
         content={
           <>
-              <p>
-                {isReadOnly ? (
-                  <FormattedMessage
-                    id="kibana-react.kibanaCodeEditor.startEditingReadOnly"
-                    defaultMessage="Press Enter to start interacting with the code."
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="kibana-react.kibanaCodeEditor.startEditing"
-                    defaultMessage="Press Enter to start editing."
-                  />
-                )}
-              </p>
-              <p>
-                {isReadOnly ? (
-                  <FormattedMessage
-                    id="kibana-react.kibanaCodeEditor.stopEditingReadOnly"
-                    defaultMessage="Press Escape to stop interacting with the code."
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="kibana-react.kibanaCodeEditor.stopEditing"
-                    defaultMessage="Press Escape to stop editing."
-                  />
-                )}
-              </p>
+            <p>
+              {isReadOnly ? (
+                <FormattedMessage
+                  id="kibana-react.kibanaCodeEditor.startEditingReadOnly"
+                  defaultMessage="Press Enter to start interacting with the code."
+                />
+              ) : (
+                <FormattedMessage
+                  id="kibana-react.kibanaCodeEditor.startEditing"
+                  defaultMessage="Press Enter to start editing."
+                />
+              )}
+            </p>
+            <p>
+              {isReadOnly ? (
+                <FormattedMessage
+                  id="kibana-react.kibanaCodeEditor.stopEditingReadOnly"
+                  defaultMessage="Press Escape to stop interacting with the code."
+                />
+              ) : (
+                <FormattedMessage
+                  id="kibana-react.kibanaCodeEditor.stopEditing"
+                  defaultMessage="Press Escape to stop editing."
+                />
+              )}
+            </p>
           </>
         }
       >
