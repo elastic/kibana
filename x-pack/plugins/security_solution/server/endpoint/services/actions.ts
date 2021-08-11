@@ -13,10 +13,9 @@ import {
   EndpointAction,
   EndpointActionResponse,
   EndpointPendingActions,
-  HostMetadata,
 } from '../../../common/endpoint/types';
 import { catchAndWrapError } from '../utils';
-import { queryResponseToHostListResult } from '../routes/metadata/support/query_strategies';
+import { EndpointMetadataService } from './metadata';
 
 export const getAuditLogResponse = async ({
   elasticAgentId,
@@ -176,6 +175,7 @@ const getActivityLog = async ({
 
 export const getPendingActionCounts = async (
   esClient: ElasticsearchClient,
+  metadataService: EndpointMetadataService,
   /** The Fleet Agent IDs to be checked */
   agentIDs: string[]
 ): Promise<EndpointPendingActions[]> => {
@@ -207,6 +207,7 @@ export const getPendingActionCounts = async (
   // retrieve any responses to those action IDs from these agents
   const responses = await fetchActionResponseIdsByAgentId(
     esClient,
+    metadataService,
     recentActions.map((a) => a.action_id),
     agentIDs
   );
@@ -243,9 +244,15 @@ export const getPendingActionCounts = async (
  */
 const fetchActionResponseIdsByAgentId = async (
   esClient: ElasticsearchClient,
+  metadataService: EndpointMetadataService,
   actionIds: string[],
   agentIds: string[]
 ): Promise<Record<string, string[]>> => {
+  const actionResponsesByAgentId: Record<string, string[]> = agentIds.reduce((acc, agentId) => {
+    acc[agentId] = [];
+    return acc;
+  }, {} as Record<string, string[]>);
+
   const actionResponses = await esClient
     .search<EndpointActionResponse>(
       {
@@ -269,41 +276,18 @@ const fetchActionResponseIdsByAgentId = async (
     .catch(catchAndWrapError);
 
   if (actionResponses.length === 0) {
-    return {};
+    return actionResponsesByAgentId;
   }
 
   // Get the latest docs from the metadata datastream for the Elastic Agent IDs in the action responses
   // This will be used determine if we should withhold the action id from the returned list in cases where
   // the Endpoint might not yet have sent an updated metadata document.
-  const latestEndpointMetadataDocs = await esClient
-    .search<HostMetadata>({
-      body: {
-        query: {
-          bool: {
-            filter: [{ terms: { 'elastic.agent.id': agentIds } }],
-          },
-        },
-        collapse: {
-          field: 'elastic.agent.id',
-          inner_hits: {
-            name: 'most_recent',
-            size: 1,
-            sort: [{ 'event.created': 'desc' }],
-          },
-        },
-        aggs: {
-          total: {
-            cardinality: {
-              field: 'elastic.agent.id',
-            },
-          },
-        },
-      },
-    })
-    .then((result) => queryResponseToHostListResult(result.body).resultList)
-    .catch(catchAndWrapError);
+  const latestEndpointMetadataDocs = await metadataService.findHostMetadataForFleetAgents(
+    esClient,
+    agentIds
+  );
 
-  // Object of Elastic Agent Ids to event creatd date
+  // Object of Elastic Agent Ids to event created date
   const endpointLastEventCreated: Record<string, Date> = latestEndpointMetadataDocs.reduce(
     (acc, endpointMetadata) => {
       acc[endpointMetadata.elastic.agent.id] = new Date(endpointMetadata.event.created);
@@ -311,11 +295,6 @@ const fetchActionResponseIdsByAgentId = async (
     },
     {} as Record<string, Date>
   );
-
-  const actionResponsesByAgentId: Record<string, string[]> = agentIds.reduce((acc, agentId) => {
-    acc[agentId] = [];
-    return acc;
-  }, {} as Record<string, string[]>);
 
   for (const actionResponse of actionResponses) {
     const lastEndpointMetadataEventTimestamp = endpointLastEventCreated[actionResponse.agent_id];

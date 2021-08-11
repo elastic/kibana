@@ -24,8 +24,14 @@ import {
   FleetAgentNotFoundError,
   FleetAgentPolicyNotFoundError,
 } from './errors';
-import { getESQueryHostMetadataByID } from '../../routes/metadata/query_builders';
-import { queryResponseToHostResult } from '../../routes/metadata/support/query_strategies';
+import {
+  getESQueryHostMetadataByFleetAgentIds,
+  getESQueryHostMetadataByID,
+} from '../../routes/metadata/query_builders';
+import {
+  queryResponseToHostListResult,
+  queryResponseToHostResult,
+} from '../../routes/metadata/support/query_strategies';
 import {
   catchAndWrapError,
   DEFAULT_ENDPOINT_HOST_STATUS,
@@ -93,6 +99,26 @@ export class EndpointMetadataService {
     }
 
     throw new EndpointHostNotFoundError(`Endpoint with id ${endpointId} not found`);
+  }
+
+  /**
+   * Finda  list of Endpoint Host Metadata document associated with a given list of Fleet Agent Ids
+   * @param esClient
+   * @param fleetAgentIds
+   */
+  async findHostMetadataForFleetAgents(
+    esClient: ElasticsearchClient,
+    fleetAgentIds: string[]
+  ): Promise<HostMetadata[]> {
+    const query = getESQueryHostMetadataByFleetAgentIds(fleetAgentIds);
+
+    query.size = fleetAgentIds.length;
+
+    const searchResult = await esClient
+      .search<HostMetadata>(query, { ignore: [404] })
+      .catch(catchAndWrapError);
+
+    return queryResponseToHostListResult(searchResult.body).resultList;
   }
 
   /**
