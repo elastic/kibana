@@ -18,7 +18,7 @@ export interface BuildReasonMessageArgs {
 export type BuildReasonMessage = (args: BuildReasonMessageArgs) => string;
 
 /**
- * Currently all security solution rule types share a commone reason message string. This function composes that string
+ * Currently all security solution rule types share a common reason message string. This function composes that string
  * In the future there may be different configurations based on the different rule types, so the plumbing has been put in place
  * to more easily allow for this in the future.
  * @export buildCommonReasonMessage - is only exported for testing purposes, and only used internally here.
@@ -38,12 +38,13 @@ export const buildCommonReasonMessage = ({
   if (mergedDoc?.fields) {
     hostName = mergedDoc.fields['host.name'] != null ? mergedDoc.fields['host.name'] : hostName;
     userName = mergedDoc.fields['user.name'] != null ? mergedDoc.fields['user.name'] : userName;
-    timestampForReason =
-      mergedDoc.fields['@timestamp'] != null
-        ? mergedDoc.fields['@timestamp']
-        : mergedDoc._source && mergedDoc._source['@timestamp'] != null
-        ? mergedDoc._source['@timestamp']
-        : timestamp;
+    if (mergedDoc.fields['@timestamp'] != null) {
+      // If available use the @timestamp provided in the underlying doc
+      timestampForReason = mergedDoc.fields['@timestamp'];
+    } else if (mergedDoc._source && mergedDoc._source['@timestamp'] != null) {
+      // The fields api should be available, but just in case finally get it from _source
+      timestampForReason = mergedDoc._source['@timestamp'];
+    }
   }
 
   const isFieldEmpty = (field: string | string[] | undefined | null) =>
