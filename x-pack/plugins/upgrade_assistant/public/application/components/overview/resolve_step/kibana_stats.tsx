@@ -12,8 +12,6 @@ import {
   EuiCard,
   EuiStat,
   EuiSpacer,
-  EuiText,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -24,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import type { DomainDeprecationDetails } from 'kibana/public';
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useAppContext } from '../../../app_context';
+import { NoWarnings } from './no_warnings';
 
 const i18nTexts = {
   statsTitle: i18n.translate('xpack.upgradeAssistant.kibanaDeprecationStats.statsTitle', {
@@ -41,9 +40,6 @@ const i18nTexts = {
       defaultMessage: 'Critical',
     }
   ),
-  noWarningsText: i18n.translate('xpack.upgradeAssistant.esDeprecationStats.noWarningsText', {
-    defaultMessage: 'No warnings. Good to go!',
-  }),
   loadingError: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecationStats.loadingErrorMessage',
     {
@@ -131,14 +127,7 @@ export const KibanaDeprecationStats: FunctionComponent = () => {
       <EuiFlexGroup>
         {shouldRenderNothing && (
           <EuiFlexItem>
-            <EuiText color="success">
-              <EuiFlexGroup gutterSize="s" alignItems="center" className="upgRenderSuccessMessage">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="check" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>{i18nTexts.noWarningsText}</EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiText>
+            <NoWarnings />
           </EuiFlexItem>
         )}
 
@@ -157,13 +146,7 @@ export const KibanaDeprecationStats: FunctionComponent = () => {
                   <p>
                     {isLoading
                       ? i18nTexts.loadingText
-                      : i18nTexts.getCriticalDeprecationsMessage(
-                          kibanaDeprecations
-                            ? kibanaDeprecations.filter(
-                                (deprecation) => deprecation.level === 'critical'
-                              )?.length ?? 0
-                            : 0
-                        )}
+                      : i18nTexts.getCriticalDeprecationsMessage(criticalDeprecationsCount)}
                   </p>
                 </EuiScreenReaderOnly>
               )}
@@ -180,12 +163,12 @@ export const KibanaDeprecationStats: FunctionComponent = () => {
               description={i18nTexts.totalDeprecationsTitle}
               isLoading={isLoading}
             >
-              {error === undefined && (
+              {!error && (
                 <EuiScreenReaderOnly>
                   <p>
                     {isLoading
                       ? i18nTexts.loadingText
-                      : i18nTexts.getTotalDeprecationsMessage(kibanaDeprecations?.length ?? 0)}
+                      : i18nTexts.getTotalDeprecationsMessage(warningDeprecationsCount)}
                   </p>
                 </EuiScreenReaderOnly>
               )}

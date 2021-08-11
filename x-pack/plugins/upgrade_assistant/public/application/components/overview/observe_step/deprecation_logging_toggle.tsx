@@ -83,7 +83,6 @@ export const DeprecationLoggingToggle: FunctionComponent<DeprecationLoggingPrevi
   updateError,
   resendRequest,
   toggleLogging,
-  hasLoggerDeprecationWarning,
 }) => {
   if (isLoading) {
     return (

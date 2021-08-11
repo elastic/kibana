@@ -13,9 +13,7 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiCard,
-  EuiIcon,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -23,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useAppContext } from '../../../app_context';
 import { EsStatsErrors } from './es_stats_error';
+import { NoWarnings } from './no_warnings';
 
 const i18nTexts = {
   statsTitle: i18n.translate('xpack.upgradeAssistant.esDeprecationStats.statsTitle', {
@@ -42,9 +41,6 @@ const i18nTexts = {
   ),
   loadingText: i18n.translate('xpack.upgradeAssistant.esDeprecationStats.loadingText', {
     defaultMessage: 'Loading Elasticsearch deprecation stats…',
-  }),
-  noWarningsText: i18n.translate('xpack.upgradeAssistant.esDeprecationStats.noWarningsText', {
-    defaultMessage: 'No warnings. Good to go!',
   }),
   getCriticalDeprecationsMessage: (criticalDeprecations: number) =>
     i18n.translate('xpack.upgradeAssistant.esDeprecationStats.criticalDeprecationsLabel', {
@@ -96,14 +92,7 @@ export const ESDeprecationStats: FunctionComponent = () => {
       <EuiFlexGroup>
         {shouldRenderNothing && (
           <EuiFlexItem>
-            <EuiText color="success">
-              <EuiFlexGroup gutterSize="s" alignItems="center" className="upgRenderSuccessMessage">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="check" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>{i18nTexts.noWarningsText}</EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiText>
+            <NoWarnings />
           </EuiFlexItem>
         )}
 
@@ -139,7 +128,7 @@ export const ESDeprecationStats: FunctionComponent = () => {
               description={i18nTexts.totalDeprecationsTitle}
               isLoading={isLoading}
             >
-              {error === null && (
+              {!error && (
                 <EuiScreenReaderOnly>
                   <p>
                     {isLoading
