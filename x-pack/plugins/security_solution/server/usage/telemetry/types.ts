@@ -6,6 +6,13 @@
  */
 
 
+export interface PayloadResponse {
+	type: string,
+	payload_size: string,
+	response_code: number,
+	doc_lost: boolean
+}
+
 /* 
 * Info about Telemetry Trasmission to cloud 
 */
