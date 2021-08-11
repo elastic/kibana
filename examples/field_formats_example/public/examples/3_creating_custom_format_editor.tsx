@@ -16,7 +16,7 @@ import {
 import { ExampleCurrencyFormat } from './2_creating_custom_formatter';
 
 // 1. Create an editor component
-// NOTE: the `params` field is not type checked and a consumer have to know the `param` format that a particular `formatId` expects,
+// NOTE: the `params` field is not type checked and a consumer has to know the `param` format that a particular `formatId` expects,
 // https://github.com/elastic/kibana/issues/108158
 const ExampleCurrencyFormatEditor: FieldFormatEditor<{ currency: string }> = (props) => {
   return (

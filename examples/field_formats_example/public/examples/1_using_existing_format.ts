@@ -11,7 +11,7 @@ import { FieldFormatsStart } from '../../../../src/plugins/field_formats/public'
 
 // 1. Assume we have an existing field format configuration serialized and saved somewhere
 // In this case it is `bytes` field formatter with a configured `'0.00b'` pattern
-// NOTE: the `params` field is not type checked and a consumer have to know the `param` format that a particular `formatId` expects,
+// NOTE: the `params` field is not type checked and a consumer has to know the `param` format that a particular `formatId` expects,
 // https://github.com/elastic/kibana/issues/108158
 export const sampleSerializedFieldFormat: SerializedFieldFormat<{ pattern: string }> = {
   id: 'bytes',
