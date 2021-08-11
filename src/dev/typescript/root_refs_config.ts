@@ -11,6 +11,7 @@ import Fs from 'fs/promises';
 
 import dedent from 'dedent';
 import { REPO_ROOT, ToolingLog } from '@kbn/dev-utils';
+import normalize from 'normalize-path';
 
 import { PROJECTS } from './projects';
 
@@ -53,7 +54,7 @@ export async function updateRootRefsConfig(log: ToolingLog) {
   }
 
   const refs = PROJECTS.filter((p) => p.isCompositeProject())
-    .map((p) => `./${Path.relative(REPO_ROOT, p.tsConfigPath)}`)
+    .map((p) => `./${normalize(Path.relative(REPO_ROOT, p.tsConfigPath))}`)
     .sort((a, b) => a.localeCompare(b));
 
   log.debug('updating', ROOT_REFS_CONFIG_PATH);
