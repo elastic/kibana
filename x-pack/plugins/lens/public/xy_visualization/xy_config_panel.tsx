@@ -101,32 +101,22 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   if (!layer) {
     return null;
   }
-  const currentSeriesType = visualizationTypes.find(({ id }) => id === layer.seriesType)!;
+  const currentVisType = visualizationTypes.find(({ id }) => id === layer.seriesType)!;
 
   const createTrigger = function () {
     return (
       <ToolbarButton
-        title={currentSeriesType.label}
+        title={currentVisType.fullLabel || currentVisType.label}
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
         fullWidth
         size="s"
       >
         <>
-          <EuiIcon type={currentSeriesType.icon} />
+          <EuiIcon type={currentVisType.icon} />
           <EuiText size="s" className="lnsChangeIndexPattern_title">
-            {currentSeriesType.label}
+            {currentVisType.fullLabel || currentVisType.label}
           </EuiText>
         </>
-        {/* <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={currentSeriesType.icon} />
-          </EuiFlexItem>
-          <EuiFlexItem grow>
-            <EuiText size="s" className="lnsChangeIndexPattern_title">
-              {currentSeriesType.label}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup> */}
       </ToolbarButton>
     );
   };
@@ -160,9 +150,9 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
               .map((t) => ({
                 value: t.id,
                 key: t.id,
-                checked: t.id === currentSeriesType.id ? 'on' : undefined,
+                checked: t.id === currentVisType.id ? 'on' : undefined,
                 prepend: <EuiIcon type={t.icon} />,
-                label: t.label,
+                label: t.fullLabel || t.label,
                 'data-test-subj': `lnsXY_seriesType-${t.id}`,
               }))}
             onChange={(newOptions) => {
