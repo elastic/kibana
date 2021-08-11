@@ -12,9 +12,9 @@ import { Either, fromNullable, chain, getOrElse, toError } from 'fp-ts/Either';
 import { flow, pipe } from 'fp-ts/function';
 import * as TE from 'fp-ts/lib/TaskEither';
 import * as T from 'fp-ts/lib/Task';
-import { inspect } from 'util';
 import { ToolingLog } from '@kbn/dev-utils';
 import { FtrService } from '../../ftr_provider_context';
+import { format } from './utils';
 
 const pluck = (key: string) => (obj: any): Either<Error, string> =>
   fromNullable(new Error(`Missing ${key}`))(obj[key]);
@@ -58,14 +58,7 @@ export class SavedObjectInfoService extends FtrService {
 
   public async logSoTypes(log: ToolingLog, msg: string | null = null) {
     const print = (xs: any) =>
-      log.info(
-        `\n### Saved Object Types ${msg || 'Count: ' + xs.length}\n${inspect(xs, {
-          compact: false,
-          depth: 99,
-          breakLength: 80,
-          sorted: true,
-        })}`
-      );
+      log.info(`\n### Saved Object Types ${msg || 'Count: ' + xs.length}\n${format(xs)}`);
 
     pipe(await types(url.format(this.config.get('servers.elasticsearch'))), print);
   }
