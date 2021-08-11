@@ -119,7 +119,13 @@ There are 3 ways you can spin up the required environments to run our Cypress te
    - Enterprise Search:
      - Nothing extra is required to run Cypress tests, only what is already needed to run Kibana/Enterprise Search locally.
 2. Running Cypress against Kibana's functional test server:
-   - TODO
+   - :information_source: While we won't use the runner, we can still make use of Kibana's functional test server to help us spin up Elasticsearch and Kibana instances.
+     - NOTE: We recommend stopping any other local dev processes, to reduce issues with memory/performance
+   - From the `x-pack/` project folder, run `node scripts/functional_tests_server --config test/functional_enterprise_search/cypress.config.ts`
+   - Kibana:
+     - You will need to pass `--config baseUrl=http://localhost:5620` into your Cypress command.
+   - Enterprise Search:
+     - :warning: TODO: We _currently_ do not have a way of spinning up Enterprise Search from Kibana's FTR - for now, you can use local Enterprise Search (pointed at the FTR's `http://localhost:9220` Elasticsearch host instance)
 3. Running Cypress against Enterprise Search dockerized stack scripts
    - :warning: This is for Enterprise Search devs only, as this requires access to our closed source Enterprise Search repo
    - `stack_scripts/start-with-es-native-auth.sh --with-kibana`
