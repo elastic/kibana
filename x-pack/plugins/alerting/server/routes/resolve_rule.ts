@@ -34,7 +34,6 @@ const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<AlertTypeParams>
   executionStatus,
   actions,
   scheduledTaskId,
-  aliasTargetId,
   ...rest
 }) => ({
   ...rest,
@@ -58,7 +57,6 @@ const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<AlertTypeParams>
     params,
     connector_type_id: actionTypeId,
   })),
-  alias_target_id: aliasTargetId,
 });
 
 export const resolveRuleRoute = (

@@ -87,7 +87,7 @@ describe('resolve()', () => {
         ],
       },
       outcome: 'aliasMatch',
-      aliasTargetId: '2',
+      alias_target_id: '2',
     });
     const result = await rulesClient.resolve({ id: '1' });
     expect(result).toMatchInlineSnapshot(`
@@ -102,7 +102,7 @@ describe('resolve()', () => {
           },
         ],
         "alertTypeId": "123",
-        "aliasTargetId": "2",
+        "alias_target_id": "2",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
         "notifyWhen": "onActiveAlert",
@@ -184,7 +184,7 @@ describe('resolve()', () => {
         ],
       },
       outcome: 'aliasMatch',
-      aliasTargetId: '2',
+      alias_target_id: '2',
     });
     const result = await rulesClient.resolve({ id: '1' });
 
@@ -207,7 +207,7 @@ describe('resolve()', () => {
           },
         ],
         "alertTypeId": "123",
-        "aliasTargetId": "2",
+        "alias_target_id": "2",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
         "notifyWhen": "onActiveAlert",
@@ -249,7 +249,7 @@ describe('resolve()', () => {
         references: [],
       },
       outcome: 'aliasMatch',
-      aliasTargetId: '2',
+      alias_target_id: '2',
     });
     await expect(rulesClient.resolve({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Action reference \\"action_0\\" not found in alert id: 1"`
@@ -314,7 +314,7 @@ describe('resolve()', () => {
         ],
       },
       outcome: 'aliasMatch',
-      aliasTargetId: '2',
+      alias_target_id: '2',
     });
     await expect(rulesClient.resolve({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error injecting reference into rule params for rule id 1 - something went wrong!"`
@@ -353,7 +353,7 @@ describe('resolve()', () => {
           ],
         },
         outcome: 'aliasMatch',
-        aliasTargetId: '2',
+        alias_target_id: '2',
       });
     });
 
@@ -405,7 +405,7 @@ describe('resolve()', () => {
           references: [],
         },
         outcome: 'aliasMatch',
-        aliasTargetId: '2',
+        alias_target_id: '2',
       });
     });
 

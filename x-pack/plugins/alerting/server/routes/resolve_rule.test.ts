@@ -62,7 +62,7 @@ describe('resolveRuleRoute', () => {
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
     },
     outcome: 'aliasMatch',
-    aliasTargetId: '2',
+    alias_target_id: '2',
   };
 
   const resolveResult: AsApiContract<ResolvedSanitizedRule<{ bar: boolean }>> = {
