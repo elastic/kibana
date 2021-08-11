@@ -387,6 +387,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "${ALERT_RULE_PRODUCER}": Array [
               "apm",
             ],
+            "kibana.alert.rule.rule_type_id": Array [
+              "apm.transaction_error_rate",
+            ],
             "${ALERT_STATUS}": Array [
               "open",
             ],
