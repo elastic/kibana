@@ -22,6 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const kibanaServer = getService('kibanaServer');
 
   async function setDiscoverTimeRange() {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -36,8 +37,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load(
-          'x-pack/test/functional/es_archives/discover/feature_controls/spaces'
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/spaces'
+        );
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/custom_space',
+          { space: 'custom_space' }
         );
         await spacesService.create({
           id: 'custom_space',
@@ -48,8 +53,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload(
-          'x-pack/test/functional/es_archives/discover/feature_controls/spaces'
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/custom_space',
+          { space: 'custom_space' }
+        );
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/spaces'
         );
       });
 
@@ -84,8 +93,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load(
-          'x-pack/test/functional/es_archives/discover/feature_controls/spaces'
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/spaces'
         );
         await spacesService.create({
           id: 'custom_space',
@@ -96,8 +105,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload(
-          'x-pack/test/functional/es_archives/discover/feature_controls/spaces'
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/spaces'
         );
       });
 

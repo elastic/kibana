@@ -8,6 +8,7 @@
     "data",
     "charts",
     "expressions",
+    "fieldFormats",
     "inspector",
     "navigation",
     "urlForwarding",
@@ -36,7 +37,8 @@
     "savedObjects",
     "kibanaUtils",
     "kibanaReact",
-    "embeddable"
+    "embeddable",
+    "fieldFormats"
   ],
   "owner": {
     "name": "Kibana App",
