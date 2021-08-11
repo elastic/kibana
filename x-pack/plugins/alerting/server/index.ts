@@ -58,5 +58,18 @@ export const config: PluginConfigDescriptor<AlertsConfigType> = {
       'xpack.alerts.invalidateApiKeysTask.removalDelay',
       'xpack.alerting.invalidateApiKeysTask.removalDelay'
     ),
+    (settings, fromPath, addDeprecation) => {
+      if (
+        settings?.xpack?.alerting?.enabled === false ||
+        settings?.xpack?.alerting?.enabled === true
+      ) {
+        addDeprecation({
+          message: `"xpack.alerting.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
+          correctiveActions: {
+            manualSteps: [`Remove "xpack.alerting.enabled" from your kibana configs.`],
+          },
+        });
+      }
+    },
   ],
 };
