@@ -177,9 +177,9 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/reset_jobs Close jobs
-   * @apiName CloseJobs
-   * @apiDescription Closes one or more anomaly detection jobs
+   * @api {post} /api/ml/jobs/reset_jobs Reset multiple jobs
+   * @apiName ResetJobs
+   * @apiDescription Resets one or more anomaly detection jobs
    *
    * @apiSchema (body) jobIdsSchema
    */

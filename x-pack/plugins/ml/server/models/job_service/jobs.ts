@@ -151,11 +151,11 @@ export function jobsProvider(
     const results: ResetJobsResponse = {};
     for (const jobId of jobIds) {
       try {
-        await mlClient.resetJob({ job_id: jobId }); // CHANGE - add wait_for_completion
+        await mlClient.resetJob({ job_id: jobId, wait_for_completion: false });
         results[jobId] = { reset: true };
       } catch (error) {
         if (isRequestTimeout(error)) {
-          return fillResultsWithTimeouts(results, jobId, jobIds, JOB_ACTION.RESET); // CHANGE - make constant for 'delete', 'revert', 'reset'
+          return fillResultsWithTimeouts(results, jobId, jobIds, JOB_ACTION.RESET);
         } else {
           results[jobId] = { reset: false, error: error.body };
         }

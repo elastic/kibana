@@ -57,15 +57,15 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
     setModalVisible(false);
   }, []);
 
-  const resetJob = useCallback(() => {
+  const resetJob = useCallback(async () => {
     setResetting(true);
-    resetJobs(jobIds);
+    await resetJobs(jobIds);
+    closeModal();
 
     setTimeout(() => {
-      closeModal();
       refreshJobs();
     }, RESETTING_JOBS_REFRESH_INTERVAL_MS);
-  }, [refreshJobs]);
+  }, [jobIds, refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {
     return null;
