@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Serializable } from '@kbn/utility-types';
 import { get, flow, mapValues } from 'lodash';
 import {
   SavedObjectAttributes,
@@ -29,7 +30,6 @@ import {
   mergeMigrationFunctionMaps,
   MigrateFunction,
   MigrateFunctionsObject,
-  SerializableValue,
 } from '../../../kibana_utils/common';
 import { replaceIndexPatternReference } from './replace_index_pattern_reference';
 
@@ -154,8 +154,8 @@ function createExtractPanelReferencesMigration(
 }
 
 type ValueOrReferenceInput = SavedObjectEmbeddableInput & {
-  attributes?: SerializableValue;
-  savedVis?: SerializableValue;
+  attributes?: Serializable;
+  savedVis?: Serializable;
 };
 
 // Runs the embeddable migrations on each panel

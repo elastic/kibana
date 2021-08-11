@@ -14,6 +14,7 @@ import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 const omission = '...';
 
+/** @public */
 export class TruncateFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.TRUNCATE;
   static title = i18n.translate('fieldFormats.truncated_string.title', {

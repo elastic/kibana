@@ -17,16 +17,16 @@ import type {
   ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
   ALERT_START as ALERT_START_TYPED,
   ALERT_UUID as ALERT_UUID_TYPED,
-  RULE_ID as RULE_ID_TYPED,
-  RULE_NAME as RULE_NAME_TYPED,
+  ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
 } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
   ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
   ALERT_START as ALERT_START_NON_TYPED,
   ALERT_UUID as ALERT_UUID_NON_TYPED,
-  RULE_ID as RULE_ID_NON_TYPED,
-  RULE_NAME as RULE_NAME_NON_TYPED,
+  ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_NON_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import React, { Dispatch, SetStateAction } from 'react';
@@ -41,8 +41,8 @@ const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
 const ALERT_START: typeof ALERT_START_TYPED = ALERT_START_NON_TYPED;
 const ALERT_UUID: typeof ALERT_UUID_TYPED = ALERT_UUID_NON_TYPED;
-const RULE_ID: typeof RULE_ID_TYPED = RULE_ID_NON_TYPED;
-const RULE_NAME: typeof RULE_NAME_TYPED = RULE_NAME_NON_TYPED;
+const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED = ALERT_RULE_TYPE_ID_NON_TYPED;
+const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
 
 type Alert = ValuesType<
   APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>['alerts']
@@ -122,10 +122,10 @@ export function getAlertAnnotations({
     const severityLevel = parsed[ALERT_SEVERITY_LEVEL];
     const color = getAlertColor({ severityLevel, theme });
     const header = getAlertHeader({ severityLevel });
-    const formatter = getFormatter(parsed[RULE_ID]!);
+    const formatter = getFormatter(parsed[ALERT_RULE_TYPE_ID]!);
     const formatted = {
       link: undefined,
-      reason: parsed[RULE_NAME],
+      reason: parsed[ALERT_RULE_NAME],
       ...(formatter?.({
         fields: parsed,
         formatters: { asDuration, asPercent },

@@ -598,7 +598,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">) => any"
         ],
         "path": "src/plugins/presentation_util/common/lib/test_helpers/function_wrapper.ts",

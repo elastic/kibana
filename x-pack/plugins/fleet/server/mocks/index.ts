@@ -101,6 +101,7 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
 export const createMockAgentService = (): jest.Mocked<AgentService> => {
   return {
     getAgentStatusById: jest.fn(),
+    getAgentStatusForAgentPolicy: jest.fn(),
     authenticateAgentWithAccessToken: jest.fn(),
     getAgent: jest.fn(),
     listAgents: jest.fn(),

@@ -23,11 +23,15 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
+  "//packages/kbn-es-query",
+  "@npm//@elastic/elasticsearch",
   "@npm//tslib",
   "@npm//utility-types",
 ]
 
 TYPES_DEPS = [
+  "//packages/kbn-es-query",
+  "@npm//@elastic/elasticsearch",
   "@npm//tslib",
   "@npm//utility-types",
   "@npm//@types/jest",
@@ -45,6 +49,7 @@ ts_config(
   src = "tsconfig.json",
   deps = [
     "//:tsconfig.base.json",
+    "//:tsconfig.bazel.json",
   ],
 )
 

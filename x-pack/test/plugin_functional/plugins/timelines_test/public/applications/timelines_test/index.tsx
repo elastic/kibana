@@ -42,7 +42,7 @@ export function renderApp(
     ReactDOM.unmountComponentAtNode(parameters.element);
   };
 }
-const ALERT_CONSUMER = [AlertConsumers.SIEM];
+const ALERT_RULE_CONSUMER = [AlertConsumers.SIEM];
 
 const AppRoot = React.memo(
   ({
@@ -67,7 +67,7 @@ const AppRoot = React.memo(
             {(timelinesPluginSetup &&
               timelinesPluginSetup.getTGrid &&
               timelinesPluginSetup.getTGrid<'standalone'>({
-                alertConsumers: ALERT_CONSUMER,
+                alertConsumers: ALERT_RULE_CONSUMER,
                 type: 'standalone',
                 columns: [],
                 indexNames: [],
