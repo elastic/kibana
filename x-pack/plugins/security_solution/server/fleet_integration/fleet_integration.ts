@@ -9,7 +9,10 @@ import { KibanaRequest, Logger, RequestHandlerContext } from 'kibana/server';
 import { ExceptionListClient } from '../../../lists/server';
 import { PluginStartContract as AlertsStartContract } from '../../../alerting/server';
 import { SecurityPluginStart } from '../../../security/server';
-import { ExternalCallback } from '../../../fleet/server';
+import {
+  PostPackagePolicyCreateCallback,
+  PutPackagePolicyUpdateCallback,
+} from '../../../fleet/server';
 import { NewPackagePolicy, UpdatePackagePolicy } from '../../../fleet/common';
 import { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
 import { ManifestManager } from '../endpoint/services';
@@ -40,7 +43,7 @@ export const getPackagePolicyCreateCallback = (
   alerts: AlertsStartContract,
   licenseService: LicenseService,
   exceptionsClient: ExceptionListClient | undefined
-): ExternalCallback[1] => {
+): PostPackagePolicyCreateCallback => {
   return async (
     newPackagePolicy: NewPackagePolicy,
     context: RequestHandlerContext,
@@ -101,7 +104,7 @@ export const getPackagePolicyCreateCallback = (
 export const getPackagePolicyUpdateCallback = (
   logger: Logger,
   licenseService: LicenseService
-): ExternalCallback[1] => {
+): PutPackagePolicyUpdateCallback => {
   return async (
     newPackagePolicy: NewPackagePolicy
     // context: RequestHandlerContext,
