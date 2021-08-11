@@ -14,7 +14,9 @@ import { kueryRt, rangeRt } from './default_api_types';
 
 const fallbackToTransactionsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/fallback_to_transactions',
-  params: t.partial({ query: t.intersection([kueryRt, t.partial(rangeRt.props)]) }),
+  params: t.partial({
+    query: t.intersection([kueryRt, t.partial(rangeRt.props)]),
+  }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);

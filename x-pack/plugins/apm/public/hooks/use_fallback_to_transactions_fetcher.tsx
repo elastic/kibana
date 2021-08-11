@@ -21,7 +21,7 @@ export function useFallbackToTransactionsFetcher() {
         },
       });
     },
-    [kuery]
+    [kuery, start, end]
   );
 
   return data;

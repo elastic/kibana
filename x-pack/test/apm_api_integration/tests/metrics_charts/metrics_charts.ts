@@ -368,7 +368,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .toMatchInline(`
               Array [
                 0,
-                15,
+                3,
               ]
             `);
             });
