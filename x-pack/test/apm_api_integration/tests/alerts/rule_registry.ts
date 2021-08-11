@@ -363,9 +363,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "event.kind": Array [
               "signal",
             ],
-            "${ALERT_RULE_CONSUMER}": Array [
-              "apm",
-            ],
             "${ALERT_DURATION}": Array [
               0,
             ],
@@ -378,6 +375,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "${ALERT_ID}": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
+            "kibana.alert.rule.category": Array [
+              "Transaction error rate threshold",
+            ],
+            "kibana.alert.rule.consumer": Array [
+              "apm",
+            ],
+            "kibana.alert.rule.name": Array [
+              "Transaction error rate threshold | opbeans-go",
+            ],
             "${ALERT_RULE_PRODUCER}": Array [
               "apm",
             ],
@@ -389,15 +395,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ],
             "processor.event": Array [
               "transaction",
-            ],
-            "kibana.alert.rule.category": Array [
-              "Transaction error rate threshold",
-            ],
-            "kibana.alert.rule.rule_type_id": Array [
-              "apm.transaction_error_rate",
-            ],
-            "kibana.alert.rule.name": Array [
-              "Transaction error rate threshold | opbeans-go",
             ],
             "service.name": Array [
               "opbeans-go",

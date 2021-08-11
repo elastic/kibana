@@ -8,6 +8,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import {
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_TYPE_ID,
   EVENT_ACTION,
   EVENT_KIND,
   SPACE_IDS,
@@ -148,7 +149,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         bucket.most_recent_logs.hits.hits.map<IRuleStatusSOAttributes>((event) => {
           const logEntry = parseRuleExecutionLog(event._source);
           invariant(
-            logEntry[ALERT_RULE_ID],
+            logEntry[ALERT_RULE_ID] ?? '',
             'Malformed execution log entry: rule.id field not found'
           );
 
@@ -182,7 +183,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
               ]
             : undefined;
 
-          const alertId = logEntry[ALERT_RULE_ID];
+          const alertId = logEntry[ALERT_RULE_ID] ?? '';
           const statusDate = logEntry[TIMESTAMP];
           const lastFailureAt = lastFailure?.[TIMESTAMP];
           const lastFailureMessage = lastFailure?.[MESSAGE];
@@ -229,9 +230,10 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         [EVENT_ACTION]: metric,
         [EVENT_KIND]: 'metric',
         [getMetricField(metric)]: value,
-        [ALERT_RULE_ID]: ruleId,
+        [ALERT_RULE_ID]: ruleId ?? '',
         [TIMESTAMP]: new Date().toISOString(),
         [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
+        [ALERT_RULE_TYPE_ID]: SERVER_APP_ID,
       },
       namespace
     );
@@ -251,11 +253,12 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         [EVENT_KIND]: 'event',
         [EVENT_SEQUENCE]: this.sequence++,
         [MESSAGE]: message,
-        [ALERT_RULE_ID]: ruleId,
+        [ALERT_RULE_ID]: ruleId ?? '',
         [RULE_STATUS_SEVERITY]: statusSeverityDict[newStatus],
         [RULE_STATUS]: newStatus,
         [TIMESTAMP]: new Date().toISOString(),
         [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
+        [ALERT_RULE_TYPE_ID]: SERVER_APP_ID,
       },
       namespace
     );
