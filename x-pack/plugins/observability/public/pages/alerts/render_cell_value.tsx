@@ -11,7 +11,7 @@ import {
   ALERT_DURATION,
   ALERT_SEVERITY_LEVEL,
   ALERT_STATUS,
-  RULE_NAME,
+  ALERT_RULE_NAME,
   TIMESTAMP,
 } from '@kbn/rule-data-utils/target/technical_field_names';
 
@@ -93,7 +93,7 @@ export const getRenderCellValue = ({
         return asDuration(Number(value));
       case ALERT_SEVERITY_LEVEL:
         return <SeverityBadge severityLevel={value ?? undefined} />;
-      case RULE_NAME:
+      case ALERT_RULE_NAME:
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
         const decoratedAlerts = decorateResponse(
           [dataFieldEs] ?? [],

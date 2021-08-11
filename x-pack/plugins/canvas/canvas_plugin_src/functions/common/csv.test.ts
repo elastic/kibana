@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { SerializableRecord } from '@kbn/utility-types';
 import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { getFunctionErrors } from '../../../i18n';
 import { csv } from './csv';
-import { Datatable, ExecutionContext, SerializableState } from 'src/plugins/expressions';
+import { Datatable, ExecutionContext } from 'src/plugins/expressions';
 import { Adapters } from 'src/plugins/inspector';
 
 const errors = getFunctionErrors().csv;
@@ -39,7 +40,7 @@ one,1
 two,2
 fourty two,42`,
         },
-        {} as ExecutionContext<Adapters, SerializableState>
+        {} as ExecutionContext<Adapters, SerializableRecord>
       )
     ).toEqual(expected);
   });
@@ -55,7 +56,7 @@ two\t2
 fourty two\t42`,
           delimiter: '\t',
         },
-        {} as ExecutionContext<Adapters, SerializableState>
+        {} as ExecutionContext<Adapters, SerializableRecord>
       )
     ).toEqual(expected);
 
@@ -69,7 +70,7 @@ two%SPLIT%2
 fourty two%SPLIT%42`,
           delimiter: '%SPLIT%',
         },
-        {} as ExecutionContext<Adapters, SerializableState>
+        {} as ExecutionContext<Adapters, SerializableRecord>
       )
     ).toEqual(expected);
   });
@@ -82,7 +83,7 @@ fourty two%SPLIT%42`,
           data: `name,number\rone,1\rtwo,2\rfourty two,42`,
           newline: '\r',
         },
-        {} as ExecutionContext<Adapters, SerializableState>
+        {} as ExecutionContext<Adapters, SerializableRecord>
       )
     ).toEqual(expected);
   });
@@ -106,7 +107,7 @@ fourty two%SPLIT%42`,
           data: `foo," bar  ", baz, " buz "
 1,2,3,4`,
         },
-        {} as ExecutionContext<Adapters, SerializableState>
+        {} as ExecutionContext<Adapters, SerializableRecord>
       )
     ).toEqual(expectedResult);
   });
@@ -134,7 +135,7 @@ fourty two%SPLIT%42`,
 1,"  best  ",3, "  ok"
 "  good", bad, better   , " worst    " `,
         },
-        {} as ExecutionContext<Adapters, SerializableState>
+        {} as ExecutionContext<Adapters, SerializableRecord>
       )
     ).toEqual(expectedResult);
   });
@@ -149,7 +150,7 @@ one|1
 two.2
 fourty two,42`,
         },
-        {} as ExecutionContext<Adapters, SerializableState>
+        {} as ExecutionContext<Adapters, SerializableRecord>
       );
     }).toThrow(new RegExp(errors.invalidInputCSV().message));
   });

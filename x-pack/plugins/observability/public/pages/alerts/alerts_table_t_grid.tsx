@@ -15,7 +15,7 @@ import {
   ALERT_DURATION,
   ALERT_SEVERITY_LEVEL,
   ALERT_STATUS,
-  RULE_NAME,
+  ALERT_RULE_NAME,
   TIMESTAMP,
 } from '@kbn/rule-data-utils/target/technical_field_names';
 
@@ -108,7 +108,7 @@ export const columns: Array<
       defaultMessage: 'Reason',
     }),
     linkField: '*',
-    id: RULE_NAME,
+    id: ALERT_RULE_NAME,
   },
 ];
 
