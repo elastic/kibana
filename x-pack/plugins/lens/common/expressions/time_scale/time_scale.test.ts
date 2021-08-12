@@ -22,10 +22,11 @@ jest.mock('../../../../../../src/plugins/data/common/query/timefilter/get_time',
   };
 });
 
-import { timeScale, TimeScaleArgs } from './time_scale';
+import { getTimeScale, TimeScaleArgs } from './time_scale';
 
 describe('time_scale', () => {
   let timeScaleWrapped: (input: Datatable, args: TimeScaleArgs) => Promise<Datatable>;
+  const timeScale = getTimeScale(() => 'UTC');
 
   const emptyTable: Datatable = {
     type: 'datatable',

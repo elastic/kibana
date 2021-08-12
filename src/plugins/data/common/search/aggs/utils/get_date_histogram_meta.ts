@@ -17,7 +17,12 @@ import { BUCKET_TYPES } from '../buckets/bucket_agg_types';
  * If the column is not a column created by a date_histogram aggregation of the esaggs data source,
  * this function will return undefined.
  */
-export const getDateHistogramMetaDataByDatatableColumn = (column: DatatableColumn) => {
+export const getDateHistogramMetaDataByDatatableColumn = (
+  column: DatatableColumn,
+  defaults: Partial<{
+    timeZone: string;
+  }> = {}
+) => {
   if (column.meta.source !== 'esaggs') return;
   if (column.meta.sourceParams?.type !== BUCKET_TYPES.DATE_HISTOGRAM) return;
   const params = (column.meta.sourceParams.params as unknown) as AggParamsDateHistogram;
@@ -29,7 +34,7 @@ export const getDateHistogramMetaDataByDatatableColumn = (column: DatatableColum
 
   return {
     interval,
-    timeZone: params.used_time_zone,
+    timeZone: params.used_time_zone || defaults.timeZone,
     timeRange: column.meta.sourceParams.appliedTimeRange as TimeRange | undefined,
   };
 };
