@@ -342,9 +342,12 @@ export const ECSMappingEditorForm = ({
       ],
     },
     'value.field': {
-      label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.osqueryColumnFieldLabel', {
-        defaultMessage: 'Osquery results column',
-      }),
+      label: i18n.translate(
+        'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.osqueryColumnFieldLabel',
+        {
+          defaultMessage: 'Osquery results column',
+        }
+      ),
       type: FIELD_TYPES.COMBO_BOX,
       validations: [
         {
