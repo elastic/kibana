@@ -39,7 +39,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode }) => 
   return (
     <>
       <section className="homDataAdd" aria-labelledby="homDataAdd__title">
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems="flexEnd">
           <EuiFlexItem>
             <EuiTitle size="s">
               <h2 id="homDataAdd__title">
@@ -103,6 +103,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode }) => 
           <EuiFlexItem>
             <EuiImage
               alt="Illustration of Elastic data integrations"
+              className="homDataAdd__illustration"
               src={
                 addBasePath('/plugins/apm/assets/') +
                 (isDarkMode
