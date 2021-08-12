@@ -27,7 +27,7 @@ const noop = () => {};
 export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
   const { addError } = useAppToasts();
   const { data, uiSettings } = useKibana().services;
-  const defaultThreatIndices = uiSettings.get(DEFAULT_THREAT_INDEX_KEY);
+  const defaultThreatIndices = uiSettings.get<string[]>(DEFAULT_THREAT_INDEX_KEY);
 
   const dispatch = useDispatch();
   const [{ from, to }, setRange] = useState({

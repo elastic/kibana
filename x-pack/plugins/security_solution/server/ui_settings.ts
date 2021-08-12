@@ -25,7 +25,7 @@ import {
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_THREAT_INDEX_KEY,
-  DEFAULT_THREAT_INDEX_PATTERN,
+  DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
   DEFAULT_TRANSFORMS,
   DEFAULT_TRANSFORMS_SETTING,
@@ -107,7 +107,7 @@ export const initUiSettings = (
         defaultMessage: 'Threat indices',
       }),
       sensitive: true,
-      value: DEFAULT_THREAT_INDEX_PATTERN,
+      value: DEFAULT_THREAT_INDEX_VALUE,
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.defaultThreatIndexDescription',
         {

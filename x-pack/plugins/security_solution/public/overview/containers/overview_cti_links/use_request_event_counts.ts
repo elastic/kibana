@@ -16,7 +16,7 @@ import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
 
 export const useRequestEventCounts = (to: string, from: string) => {
   const { uiSettings } = useKibana().services;
-  const defaultThreatIndices = uiSettings.get(DEFAULT_THREAT_INDEX_KEY);
+  const defaultThreatIndices = uiSettings.get<string[]>(DEFAULT_THREAT_INDEX_KEY);
 
   const [filterQuery] = convertToBuildEsQuery({
     config: esQuery.getEsQueryConfig(uiSettings),

@@ -22,6 +22,8 @@ import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { schema } from '../step_define_rule/schema';
 import { QueryBarDefineRule } from '../query_bar';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
+import * as i18n from '../step_define_rule/translations';
+import { MyLabelButton } from '../step_define_rule';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -31,9 +33,13 @@ interface ThreatMatchInputProps {
   threatIndexPatterns: IndexPattern;
   indexPatterns: IndexPattern;
   threatIndexPatternsLoading: boolean;
+  threatIndexModified: boolean;
+  handleResetThreatIndices: () => void;
 }
 
 const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
+  threatIndexModified,
+  handleResetThreatIndices,
   threatMapping,
   indexPatterns,
   threatIndexPatterns,
@@ -57,7 +63,11 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
             path="threatIndex"
             config={{
               ...schema.threatIndex,
-              labelAppend: null,
+              labelAppend: threatIndexModified ? (
+                <MyLabelButton onClick={handleResetThreatIndices} iconType="refresh">
+                  {i18n.RESET_DEFAULT_INDEX}
+                </MyLabelButton>
+              ) : null,
             }}
             componentProps={{
               idAria: 'detectionEngineStepDefineRuleThreatMatchIndices',

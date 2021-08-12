@@ -102,7 +102,7 @@ const threatQueryBarDefaultValue: DefineStepRule['queryBar'] = {
   query: { ...stepDefineDefaultValue.queryBar.query, query: '*:*' },
 };
 
-const MyLabelButton = styled(EuiButtonEmpty)`
+export const MyLabelButton = styled(EuiButtonEmpty)`
   height: 18px;
   font-size: 12px;
 
@@ -135,6 +135,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
+  const [threatIndexModified, setThreatIndexModified] = useState(false);
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
   const initialState = defaultValues ?? {
@@ -208,6 +209,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setIndexModified(!isEqual(index, indicesConfig));
   }, [index, indicesConfig]);
 
+  useEffect(() => {
+    setThreatIndexModified(!isEqual(threatIndex, threatIndicesConfig));
+  }, [threatIndex, threatIndicesConfig]);
+
   /**
    * When a rule type is changed to or from a threat match this will modify the
    * default query string to either:
@@ -271,6 +276,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     indexField.setValue(indicesConfig);
   }, [getFields, indicesConfig]);
 
+  const handleResetThreatIndices = useCallback(() => {
+    const threatIndexField = getFields().threatIndex;
+    threatIndexField.setValue(threatIndicesConfig);
+  }, [getFields, threatIndicesConfig]);
+
   const handleOpenTimelineSearch = useCallback(() => {
     setOpenTimelineSearch(true);
   }, []);
@@ -295,14 +305,23 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const ThreatMatchInputChildren = useCallback(
     ({ threatMapping }) => (
       <ThreatMatchInput
-        threatBrowserFields={threatBrowserFields}
+        handleResetThreatIndices={handleResetThreatIndices}
         indexPatterns={indexPatterns as IndexPattern}
+        threatBrowserFields={threatBrowserFields}
+        threatIndexModified={threatIndexModified}
         threatIndexPatterns={threatIndexPatterns as IndexPattern}
-        threatMapping={threatMapping}
         threatIndexPatternsLoading={threatIndexPatternsLoading}
+        threatMapping={threatMapping}
       />
     ),
-    [threatBrowserFields, threatIndexPatternsLoading, threatIndexPatterns, indexPatterns]
+    [
+      handleResetThreatIndices,
+      indexPatterns,
+      threatBrowserFields,
+      threatIndexModified,
+      threatIndexPatterns,
+      threatIndexPatternsLoading,
+    ]
   );
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
