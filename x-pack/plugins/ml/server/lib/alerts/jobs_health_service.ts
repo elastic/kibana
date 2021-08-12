@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { memoize, keyBy } from 'lodash';
-import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { keyBy, memoize } from 'lodash';
+import { KibanaRequest, Logger, SavedObjectsClientContract } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
-import { Logger } from 'kibana/server';
 import { MlJob } from '@elastic/elasticsearch/api/types';
+import { Mutable } from 'utility-types';
+import { ALERT_ID, ALERT_RULE_NAME, EVENT_KIND, TIMESTAMP } from '@kbn/rule-data-utils';
 import { MlClient } from '../ml_client';
 import {
   AnomalyDetectionJobsHealthRuleParams,
@@ -22,6 +23,7 @@ import { GetGuards } from '../../shared_services/shared_services';
 import {
   AnomalyDetectionJobsHealthAlertContext,
   DelayedDataResponse,
+  JobsHealthExecutorOptions,
   MmlTestResponse,
   NotStartedDatafeedResponse,
 } from './register_jobs_monitoring_rule_type';
@@ -33,9 +35,12 @@ import { AnnotationService } from '../../models/annotation_service/annotation';
 import { annotationServiceProvider } from '../../models/annotation_service';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { isDefined } from '../../../common/types/guards';
-import { IRuleDataClient } from '../../../../rule_registry/server';
+import type { IRuleDataClient } from '../../../../rule_registry/server';
+import { getRuleData } from '../../../../rule_registry/server';
+import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 
 interface TestResult {
+  id: string;
   name: string;
   context: AnomalyDetectionJobsHealthAlertContext;
 }
@@ -169,7 +174,7 @@ export function jobsHealthServiceProvider(
           return {
             job_id: jobId,
             memory_status: modelSizeStats.memory_status,
-            log_time: modelSizeStats.log_time,
+            memory_log_time: modelSizeStats.log_time,
             model_bytes: modelSizeStats.model_bytes,
             model_bytes_memory_limit: modelSizeStats.model_bytes_memory_limit,
             peak_model_bytes: modelSizeStats.peak_model_bytes,
@@ -239,10 +244,10 @@ export function jobsHealthServiceProvider(
       return annotations;
     },
     /**
-     * Retrieves report grouped by test.
+     * Retrieves report grouped by test and updates alerting indices.
      */
     async getTestsResults(
-      ruleInstanceName: string,
+      executorOptions: JobsHealthExecutorOptions,
       { testsConfig, includeJobs, excludeJobs }: AnomalyDetectionJobsHealthRuleParams
     ): Promise<TestsResults> {
       const config = getResultJobsHealthRuleConfig(testsConfig);
@@ -252,8 +257,11 @@ export function jobsHealthServiceProvider(
       const jobs = await getResultJobs(includeJobs, excludeJobs);
       const jobIds = getJobIds(jobs);
 
+      const ruleExecutorData = getRuleData(executorOptions);
+      const timestamp = executorOptions.startedAt.toISOString();
+
       if (jobIds.length === 0) {
-        logger.warn(`Rule "${ruleInstanceName}" does not have associated jobs.`);
+        logger.warn(`Rule "${ruleExecutorData[ALERT_RULE_NAME]}" does not have associated jobs.`);
         return results;
       }
 
@@ -263,6 +271,7 @@ export function jobsHealthServiceProvider(
         const response = await this.getNotStartedDatafeeds(jobIds);
         if (response && response.length > 0) {
           results.push({
+            id: HEALTH_CHECK_NAMES.datafeed.id,
             name: HEALTH_CHECK_NAMES.datafeed.name,
             context: {
               results: response,
@@ -285,6 +294,7 @@ export function jobsHealthServiceProvider(
           }, 0);
 
           results.push({
+            id: HEALTH_CHECK_NAMES.mml.id,
             name: HEALTH_CHECK_NAMES.mml.name,
             context: {
               results: response,
@@ -320,6 +330,7 @@ export function jobsHealthServiceProvider(
 
         if (response.length > 0) {
           results.push({
+            id: HEALTH_CHECK_NAMES.delayedData.id,
             name: HEALTH_CHECK_NAMES.delayedData.name,
             context: {
               results: response,
@@ -333,6 +344,50 @@ export function jobsHealthServiceProvider(
               ),
             },
           });
+        }
+      }
+
+      if (ruleDataClient && results.length) {
+        logger.debug('Updating docs in the alert index');
+
+        if (ruleDataClient.isWriteEnabled()) {
+          logger.info('Writing results to the index');
+
+          const events: Array<Mutable<Partial<ParsedTechnicalFields>>> = [];
+          for (const alertResult of results) {
+            const checkResults = alertResult.context.results;
+            for (const checkResult of checkResults) {
+              const prefixResult = Object.entries(checkResult).reduce((acc, [key, val]) => {
+                acc[`ml.${key}`] = val;
+                return acc;
+              }, {} as Record<string, unknown>);
+
+              events.push({
+                ...prefixResult,
+                ...ruleExecutorData,
+                [TIMESTAMP]: timestamp,
+                // TODO confirm which event kind to use
+                [EVENT_KIND]: 'signal',
+                // we use name for creating alert instances
+                [ALERT_ID]: alertResult.name,
+              });
+            }
+          }
+
+          const body = events.flatMap((event) => {
+            return [{ index: {} }, event];
+          });
+
+          try {
+            await ruleDataClient.getWriter().bulk({
+              body,
+            });
+            logger.debug('.alerts-ml is successfully updated');
+          } catch (e) {
+            logger.error('Unable to update .alerts-ml index', e.meta);
+          }
+        } else {
+          logger.warn('Writing is disabled');
         }
       }
 

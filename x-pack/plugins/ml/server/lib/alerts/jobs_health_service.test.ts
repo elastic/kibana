@@ -11,8 +11,33 @@ import type { Logger } from 'kibana/server';
 import { MlClient } from '../ml_client';
 import { MlJob, MlJobStats } from '@elastic/elasticsearch/api/types';
 import { AnnotationService } from '../../models/annotation_service/annotation';
+import { JobsHealthExecutorOptions } from './register_jobs_monitoring_rule_type';
 
 const MOCK_DATE_NOW = 1487076708000;
+
+function getDefaultExecutorOptions(): JobsHealthExecutorOptions {
+  return ({
+    state: {},
+    startedAt: new Date('2021-08-12T13:13:39.396Z'),
+    previousStartedAt: new Date('2021-08-12T13:13:27.396Z'),
+    spaceId: 'default',
+    namespace: undefined,
+    name: 'ml-health-check',
+    tags: [],
+    createdBy: 'elastic',
+    updatedBy: 'elastic',
+    rule: {
+      name: 'ml-health-check',
+      tags: [],
+      consumer: 'alerts',
+      producer: 'ml',
+      ruleTypeId: 'xpack.ml.anomaly_detection_jobs_health',
+      ruleTypeName: 'Anomaly detection jobs health',
+      enabled: true,
+      schedule: { interval: '10s' },
+    },
+  } as unknown) as JobsHealthExecutorOptions;
+}
 
 describe('JobsHealthService', () => {
   const mlClient = ({
@@ -61,7 +86,7 @@ describe('JobsHealthService', () => {
               state: j === 'test_job_02' || 'test_job_01' ? 'opened' : 'closed',
               model_size_stats: {
                 memory_status: j === 'test_job_01' ? 'hard_limit' : 'ok',
-                log_time: 1626935914540,
+                memory_log_time: 1626935914540,
               },
             };
           }) as MlJobStats,
@@ -123,11 +148,14 @@ describe('JobsHealthService', () => {
     debug: jest.fn(),
   } as unknown) as jest.Mocked<Logger>;
 
+  const ruleDataClient = null;
+
   const jobHealthService: JobsHealthService = jobsHealthServiceProvider(
     mlClient,
     datafeedsService,
     annotationService,
-    logger
+    logger,
+    ruleDataClient
   );
 
   let dateNowSpy: jest.SpyInstance;
@@ -143,7 +171,7 @@ describe('JobsHealthService', () => {
 
   test('returns empty results when no jobs provided', async () => {
     // act
-    const executionResult = await jobHealthService.getTestsResults('testRule', {
+    const executionResult = await jobHealthService.getTestsResults(getDefaultExecutorOptions(), {
       testsConfig: null,
       includeJobs: {
         jobIds: ['*'],
@@ -151,13 +179,15 @@ describe('JobsHealthService', () => {
       },
       excludeJobs: null,
     });
-    expect(logger.warn).toHaveBeenCalledWith('Rule "testRule" does not have associated jobs.');
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Rule "ml-health-check" does not have associated jobs.'
+    );
     expect(datafeedsService.getDatafeedByJobId).not.toHaveBeenCalled();
     expect(executionResult).toEqual([]);
   });
 
   test('returns empty results and does not perform datafeed check when test is disabled', async () => {
-    const executionResult = await jobHealthService.getTestsResults('testRule', {
+    const executionResult = await jobHealthService.getTestsResults(getDefaultExecutorOptions(), {
       testsConfig: {
         datafeed: {
           enabled: false,
@@ -186,7 +216,7 @@ describe('JobsHealthService', () => {
   });
 
   test('takes into account delayed data params', async () => {
-    const executionResult = await jobHealthService.getTestsResults('testRule_04', {
+    const executionResult = await jobHealthService.getTestsResults(getDefaultExecutorOptions(), {
       testsConfig: {
         delayedData: {
           enabled: true,
@@ -216,6 +246,7 @@ describe('JobsHealthService', () => {
 
     expect(executionResult).toEqual([
       {
+        id: 'delayed_data',
         name: 'Data delay has occurred',
         context: {
           results: [
@@ -234,7 +265,7 @@ describe('JobsHealthService', () => {
   });
 
   test('returns results based on provided selection', async () => {
-    const executionResult = await jobHealthService.getTestsResults('testRule_03', {
+    const executionResult = await jobHealthService.getTestsResults(getDefaultExecutorOptions(), {
       testsConfig: null,
       includeJobs: {
         jobIds: [],
@@ -266,6 +297,7 @@ describe('JobsHealthService', () => {
 
     expect(executionResult).toEqual([
       {
+        id: 'datafeed_not_started',
         name: 'Datafeed is not started',
         context: {
           results: [
@@ -280,12 +312,12 @@ describe('JobsHealthService', () => {
         },
       },
       {
+        id: 'mml',
         name: 'Model memory limit reached',
         context: {
           results: [
             {
               job_id: 'test_job_01',
-              log_time: 1626935914540,
               memory_status: 'hard_limit',
             },
           ],
@@ -294,6 +326,7 @@ describe('JobsHealthService', () => {
         },
       },
       {
+        id: 'delayed_data',
         name: 'Data delay has occurred',
         context: {
           results: [

@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest } from 'kibana/server';
-import { MlDatafeedState, MlJobState, MlJobStats } from '@elastic/elasticsearch/api/types';
+import type { KibanaRequest } from 'kibana/server';
+import type { MlDatafeedState, MlJobState, MlJobStats } from '@elastic/elasticsearch/api/types';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
@@ -15,20 +15,21 @@ import {
   anomalyDetectionJobsHealthRuleParams,
   AnomalyDetectionJobsHealthRuleParams,
 } from '../../routes/schemas/alerting_schema';
-import { RegisterAlertParams } from './register_ml_alerts';
-import {
+import type { RegisterAlertParams } from './register_ml_alerts';
+import type {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeState,
 } from '../../../../alerting/common';
+import type { AlertExecutorOptions } from '../../../../alerting/server';
 
 type ModelSizeStats = MlJobStats['model_size_stats'];
 
 export interface MmlTestResponse {
   job_id: string;
   memory_status: ModelSizeStats['memory_status'];
-  log_time: ModelSizeStats['log_time'];
+  memory_log_time: ModelSizeStats['log_time'];
   model_bytes: ModelSizeStats['model_bytes'];
   model_bytes_memory_limit: ModelSizeStats['model_bytes_memory_limit'];
   peak_model_bytes: ModelSizeStats['peak_model_bytes'];
@@ -65,6 +66,14 @@ export type AnomalyDetectionJobsHealthAlertContext = {
 export const ANOMALY_DETECTION_JOB_REALTIME_ISSUE = 'anomaly_detection_realtime_issue';
 
 export type AnomalyDetectionJobRealtimeIssue = typeof ANOMALY_DETECTION_JOB_REALTIME_ISSUE;
+
+export type JobsHealthExecutorOptions = AlertExecutorOptions<
+  AnomalyDetectionJobsHealthRuleParams,
+  Record<string, unknown>,
+  Record<string, unknown>,
+  AnomalyDetectionJobsHealthAlertContext,
+  AnomalyDetectionJobRealtimeIssue
+>;
 
 export const REALTIME_ISSUE_DETECTED: ActionGroup<AnomalyDetectionJobRealtimeIssue> = {
   id: ANOMALY_DETECTION_JOB_REALTIME_ISSUE,
@@ -120,14 +129,17 @@ export function registerJobsMonitoringRuleType({
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,
-    async executor({ services, params, alertId, state, previousStartedAt, startedAt, name, rule }) {
+    async executor(options) {
+      const { services, params, name } = options;
+
       const fakeRequest = {} as KibanaRequest;
       const { getTestsResults } = mlServicesProviders.jobsHealthServiceProvider(
         services.savedObjectsClient,
         fakeRequest,
         logger
       );
-      const executionResult = await getTestsResults(name, params);
+
+      const executionResult = await getTestsResults(options, params);
 
       if (executionResult.length > 0) {
         logger.info(
