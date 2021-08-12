@@ -431,8 +431,7 @@ export class RulesClient {
     } catch (error) {
       this.auditLogger?.log(
         ruleAuditEvent({
-          // TODO - should this be a separate resolve action?
-          action: RuleAuditAction.GET,
+          action: RuleAuditAction.RESOLVE,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -441,8 +440,7 @@ export class RulesClient {
     }
     this.auditLogger?.log(
       ruleAuditEvent({
-        // TODO - should this be a separate resolve action?
-        action: RuleAuditAction.GET,
+        action: RuleAuditAction.RESOLVE,
         savedObject: { type: 'alert', id },
       })
     );

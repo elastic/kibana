@@ -415,7 +415,7 @@ describe('resolve()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'rule_get',
+            action: 'rule_resolve',
             outcome: 'success',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -431,7 +431,7 @@ describe('resolve()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'rule_get',
+            action: 'rule_resolve',
             outcome: 'failure',
           }),
           kibana: {
