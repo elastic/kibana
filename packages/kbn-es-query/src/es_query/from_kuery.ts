@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
 import { SerializableRecord } from '@kbn/utility-types';
 import { Query } from '../filters';
 import { fromKueryExpression, toElasticsearchQuery, nodeTypes, KueryNode } from '../kuery';
@@ -33,11 +32,7 @@ function buildQuery(
   config: SerializableRecord = {}
 ): BoolQuery {
   const compoundQueryAST = nodeTypes.function.buildNode('and', queryASTs);
-  const kueryQuery = toElasticsearchQuery(
-    compoundQueryAST,
-    indexPattern,
-    config
-  ) as estypes.QueryDslQueryContainer;
+  const kueryQuery = toElasticsearchQuery(compoundQueryAST, indexPattern, config);
 
   return Object.assign(
     {

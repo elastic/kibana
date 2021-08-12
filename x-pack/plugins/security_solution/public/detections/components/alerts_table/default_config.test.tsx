@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter, ExistsFilter } from '@kbn/es-query';
+import { ExistsFilter, Filter } from '@kbn/es-query';
 import { buildAlertsRuleIdFilter, buildThreatMatchFilter } from './default_config';
 
 jest.mock('./actions');

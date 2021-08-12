@@ -6,7 +6,6 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-
 import { isPopulatedObject } from '../util/object_utils';
 
 export function isMultiBucketAggregate(
