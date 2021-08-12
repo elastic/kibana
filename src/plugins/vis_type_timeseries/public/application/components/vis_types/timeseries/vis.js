@@ -187,7 +187,7 @@ class TimeseriesVisualization extends Component {
 
       const seriesGroupTickFormatter =
         seriesGroup.formatter === DATA_FORMATTERS.DEFAULT
-          ? createFieldFormatter(last(seriesGroup.metrics)?.field, fieldFormatMap, getConfig)
+          ? createFieldFormatter(last(seriesGroup.metrics)?.field, fieldFormatMap)
           : TimeseriesVisualization.getTickFormatter(seriesGroup, getConfig);
 
       const palette = {

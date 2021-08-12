@@ -69,7 +69,7 @@ class TableVis extends Component {
 
     // we should skip url field formatting for key if tsvb have drilldown_url
     if (fieldFormatMap[model.pivot_id]?.id !== FIELD_FORMAT_IDS.URL || !model.drilldown_url) {
-      const formatter = createFieldFormatter(model?.pivot_id, fieldFormatMap, undefined, 'html');
+      const formatter = createFieldFormatter(model?.pivot_id, fieldFormatMap, 'html');
       rowDisplay = <span dangerouslySetInnerHTML={{ __html: formatter(rowDisplay) }} />;
     }
 
@@ -86,7 +86,7 @@ class TableVis extends Component {
         const isFieldFormatter = column.formatter === DATA_FORMATTERS.DEFAULT;
         const field = last(column.metrics)?.field;
         const formatter = isFieldFormatter
-          ? createFieldFormatter(field, fieldFormatMap, getConfig, 'html')
+          ? createFieldFormatter(field, fieldFormatMap, 'html')
           : createTickFormatter(column.formatter, column.value_template, getConfig);
         // we should skip color field formatting for value if tsvb column have color_rules
         const hasColorRules = column.color_rules?.some(

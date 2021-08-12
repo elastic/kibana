@@ -7,7 +7,6 @@
  */
 
 import { BUCKET_TYPES, PANEL_TYPES } from '../../../../../common/enums';
-import { createFieldFormatAccessor } from '../../../../lib/vis_data/create_field_format_accessor';
 import type { Panel, PanelData, Series } from '../../../../../common/types';
 import type { FieldFormatsRegistry } from '../../../../../../field_formats/common';
 import type { createFieldsFetcher } from '../../../search_strategies/lib/fields_fetcher';
@@ -35,10 +34,8 @@ export function formatLabel(
 
     if (shouldFormatLabels) {
       const { indexPattern } = await cachedIndexPatternFetcher({ id: meta.index });
-      const getFieldFormatByName = createFieldFormatAccessor(
-        fieldFormatService,
-        indexPattern?.fieldFormatMap
-      );
+      const getFieldFormatByName = (fieldName: string) =>
+        fieldFormatService.deserialize(indexPattern?.fieldFormatMap?.[fieldName]);
 
       results
         .filter(({ seriesId }) => series.id === seriesId)

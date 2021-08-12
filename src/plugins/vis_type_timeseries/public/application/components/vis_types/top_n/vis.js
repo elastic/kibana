@@ -48,7 +48,7 @@ function TopNVisualization(props) {
     if (seriesConfig) {
       const tickFormatter =
         seriesConfig.formatter === DATA_FORMATTERS.DEFAULT
-          ? createFieldFormatter(last(seriesConfig.metrics)?.field, fieldFormatMap, getConfig)
+          ? createFieldFormatter(last(seriesConfig.metrics)?.field, fieldFormatMap)
           : createTickFormatter(seriesConfig.formatter, seriesConfig.value_template, getConfig);
 
       const value = getLastValue(item.data);

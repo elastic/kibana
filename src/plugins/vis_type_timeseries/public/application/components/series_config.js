@@ -9,10 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { last } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
-import React, { useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { DataFormatPicker } from './data_format_picker';
 import { createTextHandler } from './lib/create_text_handler';
-import { getSelectedFieldType } from './lib/get_selected_field_type';
+import { checkIfNumericMetric } from './lib/check_if_numeric_metric';
 import { YesNo } from './yes_no';
 import { IndexPattern } from './index_pattern';
 import {
@@ -37,10 +37,9 @@ export const SeriesConfig = (props) => {
     : props.indexPatternForQuery;
 
   const changeModelFormatter = useCallback((formatter) => props.onChange({ formatter }), [props]);
-  const selectedFieldType = getSelectedFieldType(
-    last(model.metrics)?.field,
-    props.fields,
-    seriesIndexPattern
+  const isNumericMetric = useMemo(
+    () => checkIfNumericMetric(last(model.metrics), props.fields, seriesIndexPattern),
+    [model.metrics, props.fields, seriesIndexPattern]
   );
 
   return (
@@ -49,7 +48,7 @@ export const SeriesConfig = (props) => {
         <DataFormatPicker
           formatterValue={model.formatter}
           changeModelFormatter={changeModelFormatter}
-          isNumericField={selectedFieldType ? selectedFieldType === 'number' : true}
+          shouldIncludeNumberOptions={isNumericMetric}
         />
         <EuiFlexItem grow={3}>
           <EuiFormRow

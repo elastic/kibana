@@ -7,31 +7,25 @@
  */
 
 import { isNumber } from 'lodash';
-import type { IUiSettingsClient } from 'kibana/public';
 import { getFieldFormats } from '../../../services';
+import { isEmptyValue, DISPLAY_EMPTY_VALUE } from '../../../../common/last_value_utils';
 import type { FieldFormatMap } from '../../../../../data/common';
 import type { FieldFormatsContentType } from '../../../../../field_formats/common';
 
 export const createFieldFormatter = (
   fieldName: string = '',
   fieldFormatMap?: FieldFormatMap,
-  getConfig?: IUiSettingsClient['get'],
   contextType?: FieldFormatsContentType
 ) => {
   const serializedFieldFormat = fieldFormatMap?.[fieldName];
-  const fieldFormats = getFieldFormats();
+  const fieldFormat = getFieldFormats().deserialize(serializedFieldFormat ?? { id: 'number' });
 
-  if (serializedFieldFormat) {
-    const fieldFormat = fieldFormats.deserialize(serializedFieldFormat);
-
-    return (value: unknown) => fieldFormat.convert(value, contextType);
-  } else {
-    const DecoratedFieldFormat = fieldFormats.getType('number');
-    const numberFormatter = DecoratedFieldFormat
-      ? new DecoratedFieldFormat({ pattern: '0,0.[00]' }, getConfig)
-      : undefined;
-
-    return (value: unknown) =>
-      isNumber(value) && numberFormatter ? numberFormatter.convert(value, 'text') : value;
-  }
+  return (value: unknown) => {
+    if (isEmptyValue(value)) {
+      return DISPLAY_EMPTY_VALUE;
+    }
+    return serializedFieldFormat || isNumber(value)
+      ? fieldFormat.convert(value, contextType)
+      : value;
+  };
 };

@@ -32,7 +32,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
-import { getSelectedFieldType } from '../../lib/get_selected_field_type';
+import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
 import { QueryBarWrapper } from '../../query_bar_wrapper';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 
@@ -114,8 +114,8 @@ export class TableSeriesConfig extends Component {
     });
 
     const changeModelFormatter = (formatter) => this.props.onChange({ formatter });
-    const selectedFieldType = getSelectedFieldType(
-      last(model.metrics)?.field,
+    const isNumericMetric = checkIfNumericMetric(
+      last(model.metrics),
       this.props.fields,
       this.props.indexPatternForQuery
     );
@@ -126,7 +126,7 @@ export class TableSeriesConfig extends Component {
           <DataFormatPicker
             formatterValue={model.formatter}
             changeModelFormatter={changeModelFormatter}
-            isNumericField={selectedFieldType ? selectedFieldType === 'number' : true}
+            shouldIncludeNumberOptions={isNumericMetric}
           />
           <EuiFlexItem grow={3}>
             <EuiFormRow

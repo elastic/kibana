@@ -49,7 +49,6 @@ export interface AnnotationRowProps {
   onChange: (partialModel: Partial<Annotation>) => void;
   handleAdd: () => void;
   handleDelete: () => void;
-  useKibanaIndexes?: boolean;
 }
 
 const getAnnotationDefaults = () => ({

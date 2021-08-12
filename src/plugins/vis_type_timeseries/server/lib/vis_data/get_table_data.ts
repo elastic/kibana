@@ -27,18 +27,15 @@ export async function getTableData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
   req: VisTypeTimeseriesVisDataRequest,
   panel: Panel,
-  {
-    esQueryConfig,
-    uiSettings,
-    indexPatternsService,
-    searchStrategyRegistry,
-    cachedIndexPatternFetcher,
-    buildSeriesMetaParams,
-  }: VisTypeTimeseriesRequestServices
+  services: VisTypeTimeseriesRequestServices
 ) {
-  const panelIndex = await cachedIndexPatternFetcher(panel.index_pattern);
+  const panelIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);
 
-  const strategy = await searchStrategyRegistry.getViableStrategy(requestContext, req, panelIndex);
+  const strategy = await services.searchStrategyRegistry.getViableStrategy(
+    requestContext,
+    req,
+    panelIndex
+  );
 
   if (!strategy) {
     throw new Error(
@@ -51,8 +48,8 @@ export async function getTableData(
   const { searchStrategy, capabilities } = strategy;
 
   const extractFields = createFieldsFetcher(req, {
-    indexPatternsService,
-    cachedIndexPatternFetcher,
+    indexPatternsService: services.indexPatternsService,
+    cachedIndexPatternFetcher: services.cachedIndexPatternFetcher,
     searchStrategy,
     capabilities,
   });
@@ -77,12 +74,12 @@ export async function getTableData(
     const body = await buildTableRequest({
       req,
       panel,
-      esQueryConfig,
+      esQueryConfig: services.esQueryConfig,
       seriesIndex: panelIndex,
       capabilities,
-      uiSettings,
+      uiSettings: services.uiSettings,
       buildSeriesMetaParams: () =>
-        buildSeriesMetaParams(panelIndex, Boolean(panel.use_kibana_indexes)),
+        services.buildSeriesMetaParams(panelIndex, Boolean(panel.use_kibana_indexes)),
     });
 
     const [resp] = await searchStrategy.search(requestContext, req, [

@@ -33,7 +33,7 @@ export const convertSeriesToVars = (series, model, getConfig = null, fieldFormat
 
         const formatter =
           seriesModel.formatter === DATA_FORMATTERS.DEFAULT
-            ? createFieldFormatter(last(seriesModel.metrics)?.field, fieldFormatMap, getConfig)
+            ? createFieldFormatter(last(seriesModel.metrics)?.field, fieldFormatMap)
             : createTickFormatter(seriesModel.formatter, seriesModel.value_template, getConfig);
         const lastValue = getLastValue(row.data);
 

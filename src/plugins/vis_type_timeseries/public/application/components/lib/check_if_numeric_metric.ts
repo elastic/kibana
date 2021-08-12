@@ -7,12 +7,21 @@
  */
 
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
+import { METRIC_TYPES } from '../../../../common/enums';
 
-import type { IndexPatternValue } from '../../../../common/types';
+import type { Metric, IndexPatternValue } from '../../../../common/types';
 import type { VisFields } from '../../lib/fetch_fields';
 
-export const getSelectedFieldType = (
-  selectedField: string,
+export const checkIfNumericMetric = (
+  metric: Metric,
   fields: VisFields,
   indexPattern: IndexPatternValue
-) => fields[getIndexPatternKey(indexPattern)].find(({ name }) => name === selectedField)?.type;
+) => {
+  if (metric?.type === METRIC_TYPES.TOP_HIT) {
+    const selectedField = fields[getIndexPatternKey(indexPattern)]?.find(
+      ({ name }) => name === metric?.field
+    );
+    return selectedField?.type === 'number';
+  }
+  return true;
+};

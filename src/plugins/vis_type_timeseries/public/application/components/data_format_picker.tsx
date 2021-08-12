@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { ChangeEvent, useCallback, useState } from 'react';
+import React, { ChangeEvent, useEffect, useMemo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
+  htmlIdGenerator,
   EuiComboBox,
   EuiFieldText,
   EuiFlexItem,
@@ -112,19 +113,30 @@ const getSelectedFormatter = (formatter: string) => {
 interface DataFormatPickerProps {
   formatterValue: string;
   changeModelFormatter: (formatter: string) => void;
-  isNumericField: boolean;
+  shouldIncludeNumberOptions: boolean;
 }
 
 export const DataFormatPicker = ({
   formatterValue,
   changeModelFormatter,
-  isNumericField,
+  shouldIncludeNumberOptions,
 }: DataFormatPickerProps) => {
+  const options = useMemo(() => getDataFormatPickerOptions(shouldIncludeNumberOptions), [
+    shouldIncludeNumberOptions,
+  ]);
   const [selectedFormatter, setSelectedFormatter] = useState(getSelectedFormatter(formatterValue));
   const [customFormatString, setCustomFormatString] = useState('');
   const [durationParams, setDurationParams] = useState(
     getDurationParams(selectedFormatter === DATA_FORMATTERS.DURATION ? formatterValue : 'ms,ms,')
   );
+
+  useEffect(() => {
+    // change the formatter to default if options do not include the selected one
+    if (!options.map(({ value }) => value).includes(selectedFormatter)) {
+      setSelectedFormatter(DATA_FORMATTERS.DEFAULT);
+      changeModelFormatter(DATA_FORMATTERS.DEFAULT);
+    }
+  }, [changeModelFormatter, options, selectedFormatter]);
 
   const handleChange = useCallback(
     (selectedOption: DATA_FORMATTERS) => {
@@ -174,6 +186,8 @@ export const DataFormatPicker = ({
     [handleDurationParamsChange]
   );
 
+  const htmlId = htmlIdGenerator();
+
   let duration;
   if (selectedFormatter === DATA_FORMATTERS.DURATION) {
     const { from, to, decimals = DEFAULT_OUTPUT_PRECISION } = durationParams;
@@ -184,6 +198,7 @@ export const DataFormatPicker = ({
       <>
         <EuiFlexItem grow={false}>
           <EuiFormRow
+            id={htmlId('from')}
             label={i18n.translate('visTypeTimeseries.dataFormatPicker.fromLabel', {
               defaultMessage: 'From',
             })}
@@ -200,6 +215,7 @@ export const DataFormatPicker = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow
+            id={htmlId('to')}
             label={i18n.translate('visTypeTimeseries.dataFormatPicker.toLabel', {
               defaultMessage: 'To',
             })}
@@ -218,6 +234,7 @@ export const DataFormatPicker = ({
         {selectedTo?.value !== 'humanize' && (
           <EuiFlexItem grow={false}>
             <EuiFormRow
+              id={htmlId('decimal')}
               label={i18n.translate('visTypeTimeseries.dataFormatPicker.decimalPlacesLabel', {
                 defaultMessage: 'Decimal places',
               })}
@@ -262,7 +279,7 @@ export const DataFormatPicker = ({
           <EuiFieldText
             value={customFormatString}
             onChange={handleCustomFormatStringChange}
-            disabled={!isNumericField}
+            disabled={!shouldIncludeNumberOptions}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -279,7 +296,7 @@ export const DataFormatPicker = ({
           fullWidth
         >
           <EuiSuperSelect
-            options={getDataFormatPickerOptions(isNumericField)}
+            options={options}
             valueOfSelected={selectedFormatter}
             onChange={handleChange}
             data-test-subj="tsvbDataFormatPicker"

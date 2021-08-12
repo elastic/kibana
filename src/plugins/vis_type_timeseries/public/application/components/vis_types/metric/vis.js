@@ -48,7 +48,7 @@ function MetricVisualization(props) {
       if (seriesDef) {
         newProps.formatter =
           seriesDef.formatter === DATA_FORMATTERS.DEFAULT
-            ? createFieldFormatter(last(seriesDef.metrics)?.field, fieldFormatMap, getConfig)
+            ? createFieldFormatter(last(seriesDef.metrics)?.field, fieldFormatMap)
             : createTickFormatter(seriesDef.formatter, seriesDef.value_template, getConfig);
       }
       if (i === 0 && colors.color) newProps.color = colors.color;

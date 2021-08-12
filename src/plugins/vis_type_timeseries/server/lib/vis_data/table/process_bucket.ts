@@ -10,11 +10,11 @@ import { get } from 'lodash';
 import { getLastValue } from '../../../../common/last_value_utils';
 import { overwrite, getActiveSeries } from '../helpers';
 import { buildTableResponse } from './build_response_body';
+import { createFieldsFetcher } from '../../search_strategies/lib/fields_fetcher';
 
 import type { Panel } from '../../../../common/types';
 import type { TableSearchRequestMeta } from '../request_processors/table/types';
-import type { PanelDataArray } from '../../../../common/types/vis_data';
-import type { createFieldsFetcher } from '../../search_strategies/lib/fields_fetcher';
+import { PanelDataArray } from '../../../../common/types/vis_data';
 
 function trendSinceLastBucket(data: PanelDataArray[]) {
   if (data.length < 2) {

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import PropTypes from 'prop-types';
 import { last } from 'lodash';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { DataFormatPicker } from '../../data_format_picker';
 import { createSelectHandler } from '../../lib/create_select_handler';
@@ -31,7 +31,7 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from '../../series_config_query_bar_with_ignore_global_filter';
 import { PalettePicker } from '../../palette_picker';
 import { getCharts } from '../../../../services';
-import { getSelectedFieldType } from '../../lib/get_selected_field_type';
+import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
 import { isPercentDisabled } from '../../lib/stacked';
 import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
 
@@ -332,10 +332,9 @@ export const TimeseriesConfig = injectI18n(function (props) {
     : props.indexPatternForQuery;
 
   const changeModelFormatter = useCallback((formatter) => props.onChange({ formatter }), [props]);
-  const selectedFieldType = getSelectedFieldType(
-    last(model.metrics)?.field,
-    props.fields,
-    seriesIndexPattern
+  const isNumericMetric = useMemo(
+    () => checkIfNumericMetric(last(model.metrics), props.fields, seriesIndexPattern),
+    [model.metrics, props.fields, seriesIndexPattern]
   );
 
   const initialPalette = model.palette ?? {
@@ -357,7 +356,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
         <DataFormatPicker
           formatterValue={model.formatter}
           changeModelFormatter={changeModelFormatter}
-          isNumericField={selectedFieldType ? selectedFieldType === 'number' : true}
+          shouldIncludeNumberOptions={isNumericMetric}
         />
         <EuiFlexItem grow={3}>
           <EuiFormRow
