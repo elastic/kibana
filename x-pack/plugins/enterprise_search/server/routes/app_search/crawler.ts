@@ -127,6 +127,29 @@ export function registerCrawlerRoutes({
     })
   );
 
+  router.put(
+    {
+      path: '/api/app_search/engines/{name}/crawler/domains/{id}',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+          id: schema.string(),
+        }),
+        body: schema.object({
+          crawl_rules: schema.arrayOf(
+            schema.object({
+              order: schema.number(),
+              id: schema.string(),
+            })
+          ),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/domains/:id',
+    })
+  );
+
   router.post(
     {
       path: '/api/app_search/crawler/validate_url',

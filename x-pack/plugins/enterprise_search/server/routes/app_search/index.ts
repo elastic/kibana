@@ -10,6 +10,7 @@ import { RouteDependencies } from '../../plugin';
 import { registerAnalyticsRoutes } from './analytics';
 import { registerApiLogsRoutes } from './api_logs';
 import { registerCrawlerRoutes } from './crawler';
+import { registerCrawlerCrawlRulesRoutes } from './crawler_crawl_rules';
 import { registerCrawlerEntryPointRoutes } from './crawler_entry_points';
 import { registerCredentialsRoutes } from './credentials';
 import { registerCurationsRoutes } from './curations';
@@ -46,4 +47,5 @@ export const registerAppSearchRoutes = (dependencies: RouteDependencies) => {
   registerOnboardingRoutes(dependencies);
   registerCrawlerRoutes(dependencies);
   registerCrawlerEntryPointRoutes(dependencies);
+  registerCrawlerCrawlRulesRoutes(dependencies);
 };
