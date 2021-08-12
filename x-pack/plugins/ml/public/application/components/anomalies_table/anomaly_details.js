@@ -231,7 +231,8 @@ function getDetailsItems(anomaly, filter) {
     title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.probabilityTitle', {
       defaultMessage: 'Probability',
     }),
-    description: Number.parseFloat(source.probability).toPrecision(3),
+    description:
+      source.probability !== undefined ? Number.parseFloat(source.probability).toPrecision(3) : '',
   });
 
   // If there was only one cause, the actual, typical and by_field
