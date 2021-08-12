@@ -15,3 +15,5 @@ export { PopularityField } from './popularity_field';
 export { ScriptField, ScriptSyntaxError } from './script_field';
 
 export { FormatField } from './format_field';
+
+export { GeoPointField } from './geo_point_field';

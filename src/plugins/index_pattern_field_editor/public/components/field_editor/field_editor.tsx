@@ -42,6 +42,7 @@ import {
   FormatField,
   PopularityField,
   ScriptSyntaxError,
+  GeoPointField,
 } from './form_fields';
 import { FormRow } from './form_row';
 import { AdvancedParametersSection } from './advanced_parameters_section';
@@ -120,6 +121,9 @@ const geti18nTexts = (): {
         }}
       />
     ),
+    geoPointDescription: i18n.translate('indexPatternFieldEditor.editor.form.geoPointValueDescription', {
+      defaultMessage: 'Select a latitude and longitide field to create a geo_point runtime field.',
+    }),
   },
   format: {
     title: i18n.translate('indexPatternFieldEditor.editor.form.formatTitle', {
@@ -168,7 +172,7 @@ const formDeserializer = (field: Field): FieldFormInternal => {
 const formSerializer = (field: FieldFormInternal): Field => {
   const { __meta__, type, ...rest } = field;
   return {
-    type: type[0].value!,
+    type: type !== undefined ? type[0].value : 'keyword',
     ...rest,
   };
 };
@@ -214,6 +218,32 @@ const FieldEditorComponent = ({
   const nameHasChanged = Boolean(field?.name) && field?.name !== updatedName;
   const typeHasChanged =
     Boolean(field?.type) && field?.type !== (updatedType && updatedType[0].value);
+
+  function getValueFormRow() {
+    if (fieldTypeToProcess !== 'runtime') {
+      return null;
+    }
+
+    const isGeoPoint = form.getFormData().type === 'geo_point';
+    const content = isGeoPoint
+      ? <GeoPointField existingConcreteFields={existingConcreteFields} />
+      : <ScriptField
+          existingConcreteFields={existingConcreteFields}
+          links={links}
+          syntaxError={syntaxError}
+        />;
+    return (
+      <FormRow
+        title={i18nTexts.value.title}
+        description={isGeoPoint ? i18nTexts.value.geoPointDescription : i18nTexts.value.description}
+        formFieldPath="__meta__.isValueVisible"
+        data-test-subj="valueRow"
+        withDividerRule
+      >
+        {content}
+      </FormRow>
+    );
+  }
 
   return (
     <Form
@@ -272,21 +302,7 @@ const FieldEditorComponent = ({
       </FormRow>
 
       {/* Set value */}
-      {fieldTypeToProcess === 'runtime' && (
-        <FormRow
-          title={i18nTexts.value.title}
-          description={i18nTexts.value.description}
-          formFieldPath="__meta__.isValueVisible"
-          data-test-subj="valueRow"
-          withDividerRule
-        >
-          <ScriptField
-            existingConcreteFields={existingConcreteFields}
-            links={links}
-            syntaxError={syntaxError}
-          />
-        </FormRow>
-      )}
+      {getValueFormRow()}
 
       {/* Set custom format */}
       <FormRow
