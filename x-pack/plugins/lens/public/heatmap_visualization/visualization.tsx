@@ -31,6 +31,7 @@ import { CUSTOM_PALETTE, getStopsForFixedMode } from '../shared_components';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
 import type { CustomPaletteParams } from '../../common';
+import { layerTypes } from '../../common';
 
 const groupLabelForBar = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
   defaultMessage: 'Heatmap',
@@ -63,7 +64,7 @@ export const isCellValueSupported = (op: OperationMetadata) => {
   return !isBucketed(op) && (op.scale === 'ordinal' || op.scale === 'ratio') && isNumericMetric(op);
 };
 
-function getInitialState(): Omit<HeatmapVisualizationState, 'layerId'> {
+function getInitialState(): Omit<HeatmapVisualizationState, 'layerId' | 'layerType'> {
   return {
     shape: CHART_SHAPES.HEATMAP,
     legend: {
@@ -138,6 +139,7 @@ export const getHeatmapVisualization = ({
     return (
       state || {
         layerId: addNewLayer(),
+        layerType: layerTypes.DATA,
         title: 'Empty Heatmap chart',
         ...getInitialState(),
       }
@@ -261,6 +263,23 @@ export const getHeatmapVisualization = ({
       </I18nProvider>,
       domElement
     );
+  },
+
+  getSupportedLayers() {
+    return [
+      {
+        type: layerTypes.DATA,
+        label: i18n.translate('xpack.lens.heatmap.addLayer', {
+          defaultMessage: 'Add visualization layer',
+        }),
+      },
+    ];
+  },
+
+  getLayerType(layerId, state) {
+    if (state?.layerId === layerId) {
+      return state.layerType;
+    }
   },
 
   toExpression(state, datasourceLayers, attributes): Ast | null {

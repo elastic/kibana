@@ -36,6 +36,7 @@ import { Filtering, setFilter } from './filtering';
 import { TimeShift } from './time_shift';
 import { DimensionEditor } from './dimension_editor';
 import { AdvancedOptions } from './advanced_options';
+import { layerTypes } from '../../../common';
 
 jest.mock('../loader');
 jest.mock('../query_input', () => ({
@@ -184,6 +185,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       dateRange: { fromDate: 'now-1d', toDate: 'now' },
       columnId: 'col1',
       layerId: 'first',
+      layerType: layerTypes.DATA,
       uniqueLabel: 'stuff',
       filterOperations: () => true,
       storage: {} as IStorageWrapper,
