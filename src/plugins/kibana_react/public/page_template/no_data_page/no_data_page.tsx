@@ -154,7 +154,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
           <p>
             <FormattedMessage
               id="kibana-react.noDataPage.intro"
-              defaultMessage="Add your data to get started or {link} about {solution}."
+              defaultMessage="Add your data to get started, or {link} about {solution}."
               values={{
                 solution,
                 link: (

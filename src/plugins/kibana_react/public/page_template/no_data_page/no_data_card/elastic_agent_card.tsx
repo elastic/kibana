@@ -42,7 +42,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
       <EuiButton href={href} onClick={cardRest?.onClick} target={cardRest?.target} fill>
         {button ||
           i18n.translate('kibana-react.noDataPage.elasticAgentCard.buttonLabel', {
-            defaultMessage: 'Find a {solution} integration',
+            defaultMessage: 'Find an integration for {solution}',
             values: { solution },
           })}
       </EuiButton>
