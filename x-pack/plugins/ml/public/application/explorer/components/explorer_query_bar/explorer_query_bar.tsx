@@ -51,9 +51,9 @@ export function getKqlQueryValues({
     influencersFilterQuery = luceneStringToDsl(inputString);
   }
 
-  const matchAll = influencersFilterQuery?.match_all ?? {};
-  const clearSettings: boolean = Object.keys(matchAll).length === 0;
-
+  const clearSettings = Boolean(
+    influencersFilterQuery?.match_all && Object.keys(influencersFilterQuery.match_all).length === 0
+  );
   return {
     clearSettings,
     settings: {
