@@ -15,11 +15,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
 } from 'src/core/server';
-import {
-  PackagePolicy,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  UpdatePackagePolicy,
-} from '../../../../../fleet/common';
+import { PackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../fleet/common';
 import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 import { ILicense } from '../../../../../licensing/common/types';
 import {
@@ -27,6 +23,8 @@ import {
   unsetPolicyFeaturesAccordingToLicenseLevel,
 } from '../../../../common/license/policy_config';
 import { LicenseService } from '../../../../common/license/license';
+import { PolicyData } from '../../../../common/endpoint/types';
+import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
 
 export class PolicyWatcher {
   private logger: Logger;
@@ -83,6 +81,7 @@ export class PolicyWatcher {
       page: number;
       perPage: number;
     };
+
     do {
       try {
         response = await this.policyService.list(this.makeInternalSOClient(this.soStart), {
@@ -96,33 +95,17 @@ export class PolicyWatcher {
         );
         return;
       }
-      response.items.forEach(async (policy) => {
-        const updatePolicy: UpdatePackagePolicy = {
-          name: policy.name,
-          description: policy.description,
-          namespace: policy.namespace,
-          enabled: policy.enabled,
-          policy_id: policy.policy_id,
-          output_id: policy.output_id,
-          package: policy.package,
-          inputs: policy.inputs,
-          version: policy.version,
-        };
-        const policyConfig = updatePolicy.inputs[0].config?.policy.value;
-        if (!isEndpointPolicyValidForLicense(policyConfig, license)) {
-          updatePolicy.inputs[0].config!.policy.value = unsetPolicyFeaturesAccordingToLicenseLevel(
-            policyConfig,
-            license
-          );
-          try {
-            await this.policyService.update(
-              this.makeInternalSOClient(this.soStart),
-              this.esClient,
-              policy.id,
-              updatePolicy
+
+      for (const policy of response.items as PolicyData[]) {
+        const updatePolicy = getPolicyDataForUpdate(policy);
+        const policyConfig = updatePolicy.inputs[0].config.policy.value;
+
+        try {
+          if (!isEndpointPolicyValidForLicense(policyConfig, license)) {
+            updatePolicy.inputs[0].config.policy.value = unsetPolicyFeaturesAccordingToLicenseLevel(
+              policyConfig,
+              license
             );
-          } catch (e) {
-            // try again for transient issues
             try {
               await this.policyService.update(
                 this.makeInternalSOClient(this.soStart),
@@ -130,14 +113,28 @@ export class PolicyWatcher {
                 policy.id,
                 updatePolicy
               );
-            } catch (ee) {
-              this.logger.warn(
-                `Unable to remove platinum features from policy ${policy.id}: ${ee.message}`
-              );
+            } catch (e) {
+              // try again for transient issues
+              try {
+                await this.policyService.update(
+                  this.makeInternalSOClient(this.soStart),
+                  this.esClient,
+                  policy.id,
+                  updatePolicy
+                );
+              } catch (ee) {
+                this.logger.warn(`Unable to remove platinum features from policy ${policy.id}`);
+                this.logger.warn(ee);
+              }
             }
           }
+        } catch (error) {
+          this.logger.warn(
+            `Failure while attempting to verify Endpoint Policy features for policy [${policy.id}]`
+          );
+          this.logger.warn(error);
         }
-      });
+      }
     } while (response.page * response.perPage < response.total);
   }
 }
