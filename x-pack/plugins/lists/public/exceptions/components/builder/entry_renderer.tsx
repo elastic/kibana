@@ -65,6 +65,7 @@ export interface EntryItemProps {
   onlyShowListOperators?: boolean;
   setErrorsExist: (arg: boolean) => void;
   isDisabled?: boolean;
+  operatorsList?: OperatorOption[];
 }
 
 export const BuilderEntryItem: React.FC<EntryItemProps> = ({
@@ -81,6 +82,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   setErrorsExist,
   showLabel,
   isDisabled = false,
+  operatorsList,
 }): JSX.Element => {
   const handleError = useCallback(
     (err: boolean): void => {
@@ -194,7 +196,9 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   );
 
   const renderOperatorInput = (isFirst: boolean): JSX.Element => {
-    const operatorOptions = onlyShowListOperators
+    const operatorOptions = operatorsList
+      ? operatorsList
+      : onlyShowListOperators
       ? EXCEPTION_OPERATORS_ONLY_LISTS
       : getOperatorOptions(
           entry,
