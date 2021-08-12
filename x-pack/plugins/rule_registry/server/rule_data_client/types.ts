@@ -7,7 +7,7 @@
 
 import { ApiResponse } from '@elastic/elasticsearch';
 import { BulkRequest, BulkResponse } from '@elastic/elasticsearch/api/types';
-import { ValidFeatureId } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import { ValidFeatureId } from '@kbn/rule-data-utils';
 
 import { ElasticsearchClient } from 'kibana/server';
 import { FieldDescriptor } from 'src/plugins/data/server';
