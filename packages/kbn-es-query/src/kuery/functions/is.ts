@@ -7,11 +7,12 @@
  */
 
 import { get, isUndefined } from 'lodash';
+import { estypes } from '@elastic/elasticsearch';
 import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import { IndexPatternBase, KueryNode, IndexPatternFieldBase } from '../..';
+import { IndexPatternBase, KueryNode, IndexPatternFieldBase, KueryQueryOptions } from '../..';
 
 import * as ast from '../ast';
 
@@ -40,9 +41,9 @@ export function buildNodeParams(fieldName: string, value: any, isPhrase: boolean
 export function toElasticsearchQuery(
   node: KueryNode,
   indexPattern?: IndexPatternBase,
-  config: Record<string, any> = {},
+  config: KueryQueryOptions = {},
   context: Record<string, any> = {}
-) {
+): estypes.QueryDslQueryContainer {
   const {
     arguments: [fieldNameArg, valueArg, isPhraseArg],
   } = node;
@@ -75,7 +76,7 @@ export function toElasticsearchQuery(
     return {
       multi_match: {
         type,
-        query: value,
+        query: (value as unknown) as string,
         lenient: true,
       },
     };

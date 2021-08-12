@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import * as ast from '../ast';
 import * as literal from '../node_types/literal';
-import { IndexPatternBase, KueryNode } from '../..';
+import { IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
 
 export function buildNodeParams(path: any, child: any) {
   const pathNode =
@@ -21,11 +22,11 @@ export function buildNodeParams(path: any, child: any) {
 export function toElasticsearchQuery(
   node: KueryNode,
   indexPattern?: IndexPatternBase,
-  config: Record<string, any> = {},
+  config: KueryQueryOptions = {},
   context: Record<string, any> = {}
-) {
+): estypes.QueryDslQueryContainer {
   const [path, child] = node.arguments;
-  const stringPath = ast.toElasticsearchQuery(path);
+  const stringPath = (ast.toElasticsearchQuery(path) as unknown) as string;
   const fullPath = context?.nested?.path ? `${context.nested.path}.${stringPath}` : stringPath;
 
   return {
@@ -34,7 +35,7 @@ export function toElasticsearchQuery(
       query: ast.toElasticsearchQuery(child, indexPattern, config, {
         ...context,
         nested: { path: fullPath },
-      }),
+      }) as estypes.QueryDslQueryContainer,
       score_mode: 'none',
     },
   };

@@ -10,7 +10,7 @@ import { JsonObject } from '@kbn/utility-types';
 import { estypes } from '@elastic/elasticsearch';
 import { nodeTypes } from '../node_types/index';
 import { KQLSyntaxError } from '../kuery_syntax_error';
-import { KueryNode, KueryParseOptions } from '../types';
+import { KueryNode, KueryParseOptions, KueryQueryOptions } from '../types';
 
 import { parse as parseKuery } from '../grammar';
 import { IndexPatternBase } from '../..';
@@ -62,18 +62,19 @@ export const fromKueryExpression = (
  *
  * IndexPattern isn't required, but if you pass one in, we can be more intelligent
  * about how we craft the queries (e.g. scripted fields)
+ *
  */
 export const toElasticsearchQuery = (
   node: KueryNode,
   indexPattern?: IndexPatternBase,
-  config?: Record<string, any>,
+  config: KueryQueryOptions = {},
   context?: Record<string, any>
 ): JsonObject => {
   if (!node || !node.type || !nodeTypes[node.type]) {
     return toElasticsearchQuery(nodeTypes.function.buildNode('and', []), indexPattern);
   }
 
+  // TODO: the return type of this function might be incorrect and it works only because of this casting
   const nodeType = (nodeTypes[node.type] as unknown) as any;
-
   return nodeType.toElasticsearchQuery(node, indexPattern, config, context);
 };

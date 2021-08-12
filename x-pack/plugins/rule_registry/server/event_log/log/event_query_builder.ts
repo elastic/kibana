@@ -7,8 +7,8 @@
 
 import { getFlattenedObject } from '@kbn/std';
 import { estypes } from '@elastic/elasticsearch';
-import { esKuery } from '../../../../../../src/plugins/data/server';
 
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { DeepPartial } from '../utils/utility_types';
 import { mergeFields } from '../utils/fields';
 import { EventLogParams } from './internal_api';
@@ -100,7 +100,7 @@ export class EventQueryBuilder<TEvent> implements IEventQueryBuilder<TEvent> {
     }
 
     if (this.kql) {
-      const dsl = esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(this.kql));
+      const dsl = toElasticsearchQuery(fromKueryExpression(this.kql));
       const queries = Array.isArray(dsl) ? dsl : [dsl];
       result.push(...queries);
     }

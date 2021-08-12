@@ -6,9 +6,9 @@
  */
 
 import { remove } from 'lodash';
-import { JsonObject } from '@kbn/utility-types';
 import { EsQueryConfig, nodeBuilder, toElasticsearchQuery, KueryNode } from '@kbn/es-query';
 
+import { estypes } from '@elastic/elasticsearch';
 import { RegistryAlertTypeWithAuth } from './alerting_authorization';
 
 export enum AlertingAuthorizationFilterType {
@@ -38,7 +38,7 @@ export function asFiltersByRuleTypeAndConsumer(
   ruleTypes: Set<RegistryAlertTypeWithAuth>,
   opts: AlertingAuthorizationFilterOpts,
   spaceId: string | undefined
-): KueryNode | JsonObject {
+): KueryNode | estypes.QueryDslQueryContainer {
   const kueryNode = nodeBuilder.or(
     Array.from(ruleTypes).reduce<KueryNode[]>((filters, { id, authorizedConsumers }) => {
       ensureFieldIsSafeForQuery('ruleTypeId', id);
@@ -75,7 +75,7 @@ export function asFiltersByRuleTypeAndConsumer(
 export function asFiltersBySpaceId(
   opts: AlertingAuthorizationFilterOpts,
   spaceId: string | undefined
-): KueryNode | JsonObject | undefined {
+): KueryNode | estypes.QueryDslQueryContainer | undefined {
   if (opts.fieldNames.spaceIds != null && spaceId != null) {
     const kueryNode = nodeBuilder.is(opts.fieldNames.spaceIds, spaceId);
 

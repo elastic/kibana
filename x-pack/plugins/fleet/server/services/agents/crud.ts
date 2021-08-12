@@ -9,14 +9,15 @@ import Boom from '@hapi/boom';
 import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
+import type { KueryNode } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+
 import type { AgentSOAttributes, Agent, BulkActionResult, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '../../services';
 import type { FleetServerAgent } from '../../../common';
 import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
 import { AGENT_SAVED_OBJECT_TYPE, AGENTS_INDEX } from '../../constants';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
-import type { KueryNode } from '../../../../../../src/plugins/data/server';
-import { esKuery } from '../../../../../../src/plugins/data/server';
 import { IngestManagerError, isESClientError, AgentNotFoundError } from '../../errors';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
@@ -35,9 +36,7 @@ function _joinFilters(filters: Array<string | undefined | KueryNode>): KueryNode
           return acc;
         }
         const kueryNode: KueryNode =
-          typeof kuery === 'string'
-            ? esKuery.fromKueryExpression(removeSOAttributes(kuery))
-            : kuery;
+          typeof kuery === 'string' ? fromKueryExpression(removeSOAttributes(kuery)) : kuery;
 
         if (!acc) {
           return kueryNode;
@@ -118,7 +117,7 @@ export async function getAgentsByKuery(
   }
 
   const kueryNode = _joinFilters(filters);
-  const body = kueryNode ? { query: esKuery.toElasticsearchQuery(kueryNode) } : {};
+  const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
   const res = await esClient.search<FleetServerAgent, {}>({
     index: AGENTS_INDEX,
     from: (page - 1) * perPage,
@@ -175,7 +174,7 @@ export async function countInactiveAgents(
   }
 
   const kueryNode = _joinFilters(filters);
-  const body = kueryNode ? { query: esKuery.toElasticsearchQuery(kueryNode) } : {};
+  const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
 
   const res = await esClient.search({
     index: AGENTS_INDEX,

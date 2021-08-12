@@ -10,14 +10,11 @@ import { EuiButtonGroup, EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } f
 import { i18n } from '@kbn/i18n';
 
 import { debounce } from 'lodash';
+import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
+import { estypes } from '@elastic/elasticsearch';
 import { Dictionary } from '../../../../../../../common/types/common';
 import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
-import {
-  esKuery,
-  esQuery,
-  Query,
-  QueryStringInput,
-} from '../../../../../../../../../../src/plugins/data/public';
+import { Query, QueryStringInput } from '../../../../../../../../../../src/plugins/data/public';
 
 import {
   SEARCH_QUERY_LANGUAGE,
@@ -93,16 +90,16 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
    */
   useEffect(() => {
     try {
-      let convertedQuery;
+      let convertedQuery: estypes.QueryDslQueryContainer = {};
       switch (query.language) {
         case SEARCH_QUERY_LANGUAGE.KUERY:
-          convertedQuery = esKuery.toElasticsearchQuery(
-            esKuery.fromKueryExpression(query.query as string),
+          convertedQuery = toElasticsearchQuery(
+            fromKueryExpression(query.query as string),
             indexPattern
           );
           break;
         case SEARCH_QUERY_LANGUAGE.LUCENE:
-          convertedQuery = esQuery.luceneStringToDsl(query.query as string);
+          convertedQuery = luceneStringToDsl(query.query as string);
           break;
         default:
           setErrorMessage({

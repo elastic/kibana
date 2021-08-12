@@ -6,8 +6,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
-import { esKuery } from '../../../../../src/plugins/data/server';
 import { AlertStatus } from '../../common/typings';
 
 export function alertStatusQuery(status: AlertStatus) {
@@ -41,6 +41,6 @@ export function kqlQuery(kql?: string): estypes.QueryDslQueryContainer[] {
     return [];
   }
 
-  const ast = esKuery.fromKueryExpression(kql);
-  return [esKuery.toElasticsearchQuery(ast)];
+  const ast = fromKueryExpression(kql);
+  return [toElasticsearchQuery(ast)];
 }
