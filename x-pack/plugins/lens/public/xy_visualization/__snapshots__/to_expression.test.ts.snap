@@ -107,6 +107,9 @@ Object {
                   "layerId": Array [
                     "first",
                   ],
+                  "layerType": Array [
+                    "data",
+                  ],
                   "seriesType": Array [
                     "area",
                   ],
