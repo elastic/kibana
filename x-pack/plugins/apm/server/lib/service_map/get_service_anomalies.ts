@@ -162,7 +162,7 @@ export async function getMLJobs(
   const mlJobs = response.jobs.filter(
     (job) => (job.custom_settings?.job_tags?.apm_ml_version ?? 0) >= 2
   );
-  if (environment && environment !== ENVIRONMENT_ALL.value) {
+  if (environment !== ENVIRONMENT_ALL.value) {
     const matchingMLJob = mlJobs.find(
       (job) => job.custom_settings?.job_tags?.environment === environment
     );

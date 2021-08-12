@@ -39,6 +39,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 comparisonStart: start,
                 comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             },
           });
@@ -69,6 +71,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 start,
                 end,
                 transactionType: 'request',
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             },
           });
@@ -138,6 +142,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 start,
                 end,
                 transactionType: 'request',
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             },
           });
@@ -206,6 +212,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 comparisonStart: start,
                 comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             },
           });

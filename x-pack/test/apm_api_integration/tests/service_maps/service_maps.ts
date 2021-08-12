@@ -25,7 +25,9 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
   registry.when('Service map with a basic license', { config: 'basic', archives: [] }, () => {
     it('is only be available to users with Platinum license (or higher)', async () => {
-      const response = await supertest.get(`/api/apm/service-map?start=${start}&end=${end}`);
+      const response = await supertest.get(
+        `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
+      );
 
       expect(response.status).to.be(403);
 
@@ -38,7 +40,9 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
   registry.when('Service map without data', { config: 'trial', archives: [] }, () => {
     describe('/api/apm/service-map', () => {
       it('returns an empty list', async () => {
-        const response = await supertest.get(`/api/apm/service-map?start=${start}&end=${end}`);
+        const response = await supertest.get(
+          `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
+        );
 
         expect(response.status).to.be(200);
         expect(response.body.elements.length).to.be(0);
@@ -50,6 +54,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         const q = querystring.stringify({
           start: metadata.start,
           end: metadata.end,
+          environment: 'ENVIRONMENT_ALL',
         });
         const response = await supertest.get(`/api/apm/service-map/service/opbeans-node?${q}`);
 
@@ -74,6 +79,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         const q = querystring.stringify({
           start: metadata.start,
           end: metadata.end,
+          environment: 'ENVIRONMENT_ALL',
         });
         const response = await supertest.get(`/api/apm/service-map/backend/postgres?${q}`);
 
@@ -97,7 +103,9 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       let response: PromiseReturnType<typeof supertest.get>;
 
       before(async () => {
-        response = await supertest.get(`/api/apm/service-map?start=${start}&end=${end}`);
+        response = await supertest.get(
+          `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
+        );
       });
 
       it('returns service map elements', () => {
@@ -148,7 +156,9 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       describe('with ML data', () => {
         describe('with the default apm user', () => {
           before(async () => {
-            response = await supertest.get(`/api/apm/service-map?start=${start}&end=${end}`);
+            response = await supertest.get(
+              `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
+            );
           });
 
           it('returns service map elements with anomaly stats', () => {
@@ -234,7 +244,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         describe('with a user that does not have access to ML', () => {
           before(async () => {
             response = await supertestAsApmReadUserWithoutMlAccess.get(
-              `/api/apm/service-map?start=${start}&end=${end}`
+              `/api/apm/service-map?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`
             );
           });
 
@@ -277,6 +287,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         const q = querystring.stringify({
           start: metadata.start,
           end: metadata.end,
+          environment: 'ENVIRONMENT_ALL',
         });
         const response = await supertest.get(`/api/apm/service-map/service/opbeans-node?${q}`);
 
@@ -301,6 +312,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         const q = querystring.stringify({
           start: metadata.start,
           end: metadata.end,
+          environment: 'ENVIRONMENT_ALL',
         });
         const response = await supertest.get(`/api/apm/service-map/backend/postgresql?${q}`);
 

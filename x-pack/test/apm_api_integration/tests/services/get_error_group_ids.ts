@@ -28,6 +28,8 @@ export async function getErrorGroupIds({
         start,
         end,
         transactionType: 'request',
+        environment: 'ENVIRONMENT_ALL',
+        kuery: '',
       },
     },
   });
