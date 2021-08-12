@@ -119,6 +119,12 @@ describe('get()', () => {
       Array [
         Object {
           "body": Object {
+            "fields": Array [
+              "kibana.alert.rule.rule_type_id",
+              "kibana.alert.rule.consumer",
+              "kibana.alert.workflow_status",
+              "kibana.space_ids",
+            ],
             "query": Object {
               "bool": Object {
                 "filter": Array [
