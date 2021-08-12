@@ -13,7 +13,6 @@ import deepEqual from 'fast-deep-equal';
 import { EuiSelectableOption } from '@elastic/eui';
 import { tap, debounceTime, map, distinctUntilChanged } from 'rxjs/operators';
 
-import { cloneDeep } from 'lodash';
 import { esFilters } from '../../../../../../data/public';
 import { OptionsListStrings } from './options_list_strings';
 import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
@@ -79,10 +78,10 @@ export class OptionsListEmbeddable extends Embeddable<
   private componentState: OptionsListComponentState;
   private componentStateSubject$ = new Subject<OptionsListComponentState>();
   private updateComponentState(changes: Partial<OptionsListComponentState>) {
-    this.componentState = cloneDeep({
+    this.componentState = {
       ...this.componentState,
       ...changes,
-    });
+    };
     this.componentStateSubject$.next(this.componentState);
   }
 
