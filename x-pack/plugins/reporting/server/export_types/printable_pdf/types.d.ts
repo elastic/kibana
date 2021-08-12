@@ -11,6 +11,7 @@ import { BaseParams, BasePayload } from '../../types';
 interface BaseParamsPDF {
   layout: LayoutParams;
   forceNow?: string;
+  // TODO: Add comment explaining this field
   relativeUrls: string[];
 }
 
