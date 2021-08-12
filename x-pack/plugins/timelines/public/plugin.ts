@@ -82,7 +82,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
         this.setStore(store);
       },
       getAddToCaseAction: (props) => {
-        return getAddToCaseLazy(props);
+        return getAddToCaseLazy(props, this._store!);
       },
       getAddToCasePopover: (props) => {
         return getAddToCasePopoverLazy(props, this._store!);

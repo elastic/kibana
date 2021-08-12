@@ -27,6 +27,7 @@ import type { Ecs } from '../../../../common/ecs';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { endpointAlertCheck } from '../../../common/utils/endpoint_alert_check';
 import { APP_ID } from '../../../../common/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 interface ActionsData {
   alertStatus: Status;
@@ -63,6 +64,8 @@ export const TakeActionDropdown = React.memo(
     timelineId: string;
   }) => {
     const casePermissions = useGetUserCasesPermissions();
+    const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
+
     const { timelines: timelinesUi } = useKibana().services;
     const insertTimelineHook = useInsertTimeline;
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -177,48 +180,62 @@ export const TakeActionDropdown = React.memo(
     );
 
     const panels = useMemo(() => {
-      return [
-        {
-          id: 0,
-          items: [
-            ...alertsActionItems,
-            ...addToCaseActionItem(timelineId),
-            ...hostIsolationAction,
-            ...investigateInTimelineAction,
-          ],
-        },
-        {
-          id: 1,
-          title: CHANGE_ALERT_STATUS,
-          content: <EuiContextMenuPanel size="s" items={actionItems} />,
-        },
-        {
-          id: 2,
-          title: ACTION_ADD_TO_CASE,
-          content: [
-            <>
-              {ecsData &&
-                timelinesUi.getAddToExistingCaseButton({
-                  ecsRowData: ecsData,
-                  useInsertTimeline: insertTimelineHook,
-                  casePermissions,
-                  appId: APP_ID,
-                  onClose: afterCaseSelection,
-                })}
-            </>,
-            <>
-              {ecsData &&
-                timelinesUi.getAddToNewCaseButton({
-                  ecsRowData: ecsData,
-                  useInsertTimeline: insertTimelineHook,
-                  casePermissions,
-                  appId: APP_ID,
-                  onClose: afterCaseSelection,
-                })}
-            </>,
-          ],
-        },
-      ];
+      if (tGridEnabled) {
+        return [
+          {
+            id: 0,
+            items: [
+              ...alertsActionItems,
+              ...addToCaseActionItem(timelineId),
+              ...hostIsolationAction,
+              ...investigateInTimelineAction,
+            ],
+          },
+          {
+            id: 1,
+            title: CHANGE_ALERT_STATUS,
+            content: <EuiContextMenuPanel size="s" items={actionItems} />,
+          },
+          {
+            id: 2,
+            title: ACTION_ADD_TO_CASE,
+            content: [
+              <>
+                {ecsData &&
+                  timelinesUi.getAddToExistingCaseButton({
+                    ecsRowData: ecsData,
+                    useInsertTimeline: insertTimelineHook,
+                    casePermissions,
+                    appId: APP_ID,
+                    onClose: afterCaseSelection,
+                  })}
+              </>,
+              <>
+                {ecsData &&
+                  timelinesUi.getAddToNewCaseButton({
+                    ecsRowData: ecsData,
+                    useInsertTimeline: insertTimelineHook,
+                    casePermissions,
+                    appId: APP_ID,
+                    onClose: afterCaseSelection,
+                  })}
+              </>,
+            ],
+          },
+        ];
+      } else {
+        return [
+          {
+            id: 0,
+            items: [...alertsActionItems, ...hostIsolationAction, ...investigateInTimelineAction],
+          },
+          {
+            id: 1,
+            title: CHANGE_ALERT_STATUS,
+            content: <EuiContextMenuPanel size="s" items={actionItems} />,
+          },
+        ];
+      }
     }, [
       alertsActionItems,
       hostIsolationAction,
@@ -230,6 +247,7 @@ export const TakeActionDropdown = React.memo(
       timelinesUi,
       actionItems,
       afterCaseSelection,
+      tGridEnabled,
     ]);
 
     const takeActionButton = useMemo(() => {
