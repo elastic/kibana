@@ -79,7 +79,7 @@ export const useAddToCase = ({
   useInsertTimeline,
   casePermissions,
   appId,
-  closeCallbacks = [],
+  onClose,
 }: AddToCaseActionProps): UseAddToCase => {
   const eventId = ecsRowData._id;
   const eventIndex = ecsRowData._index;
@@ -198,18 +198,18 @@ export const useAddToCase = ({
   const addNewCaseClick = useCallback(() => {
     closePopover();
     dispatch(tGridActions.setOpenAddToNewCase({ id: eventId, isOpen: true }));
-    if (closeCallbacks.length > 0) {
-      closeCallbacks.map((callback: Function) => callback());
+    if (onClose) {
+      onClose();
     }
-  }, [closePopover, closeCallbacks, dispatch, eventId]);
+  }, [onClose, closePopover, dispatch, eventId]);
 
   const addExistingCaseClick = useCallback(() => {
     closePopover();
     dispatch(tGridActions.setOpenAddToExistingCase({ id: eventId, isOpen: true }));
-    if (closeCallbacks.length > 0) {
-      closeCallbacks.map((callback: Function) => callback());
+    if (onClose) {
+      onClose();
     }
-  }, [closePopover, closeCallbacks, dispatch, eventId]);
+  }, [onClose, closePopover, dispatch, eventId]);
   return {
     addNewCaseClick,
     addExistingCaseClick,

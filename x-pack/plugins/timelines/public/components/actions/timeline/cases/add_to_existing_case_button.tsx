@@ -18,14 +18,14 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   useInsertTimeline,
   casePermissions,
   appId,
-  closeCallbacks,
+  onClose,
 }) => {
   const { addExistingCaseClick, isDisabled, userCanCrud } = useAddToCase({
     ecsRowData,
     useInsertTimeline,
     casePermissions,
     appId,
-    closeCallbacks,
+    onClose,
   });
   return (
     <>

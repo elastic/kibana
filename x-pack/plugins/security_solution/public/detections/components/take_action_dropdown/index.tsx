@@ -144,6 +144,10 @@ export const TakeActionDropdown = React.memo(
       onAddEventFilterClick: handleOnAddEventFilterClick,
     });
 
+    const onCaseSelection = useCallback(() => {
+      closePopoverHandler();
+    }, [closePopoverHandler]);
+
     const { actionItems } = useAlertsActions({
       alertStatus: actionsData.alertStatus,
       eventId: actionsData.eventId,
@@ -198,7 +202,7 @@ export const TakeActionDropdown = React.memo(
                   useInsertTimeline: insertTimelineHook,
                   casePermissions,
                   appId: 'securitySolution',
-                  closeCallbacks: [closePopoverHandler],
+                  onClose: onCaseSelection,
                 })}
             </>,
             <>
@@ -208,7 +212,7 @@ export const TakeActionDropdown = React.memo(
                   useInsertTimeline: insertTimelineHook,
                   casePermissions,
                   appId: 'securitySolution',
-                  closeCallbacks: [closePopoverHandler],
+                  onClose: onCaseSelection,
                 })}
             </>,
           ],
@@ -223,8 +227,8 @@ export const TakeActionDropdown = React.memo(
       insertTimelineHook,
       timelineId,
       timelinesUi,
-      closePopoverHandler,
       actionItems,
+      onCaseSelection,
     ]);
 
     const takeActionButton = useMemo(() => {

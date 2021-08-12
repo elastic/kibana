@@ -31,7 +31,7 @@ describe('AddToCaseAction', () => {
       read: true,
     },
     appId: 'securitySolution',
-    closeCallbacks: [],
+    onClose: () => null,
   };
 
   beforeEach(() => {

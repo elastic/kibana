@@ -25,7 +25,7 @@ export interface AddToCaseActionProps {
     read: boolean;
   } | null;
   appId: string;
-  closeCallbacks?: Function[];
+  onClose?: Function;
 }
 
 const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
@@ -34,7 +34,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   useInsertTimeline,
   casePermissions,
   appId,
-  closeCallbacks = [],
+  onClose,
 }) => {
   const eventId = ecsRowData._id;
   const eventIndex = ecsRowData._index;
@@ -49,7 +49,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     createCaseUrl,
     isAllCaseModalOpen,
     isCreateCaseFlyoutOpen,
-  } = useAddToCase({ ecsRowData, useInsertTimeline, casePermissions, appId, closeCallbacks });
+  } = useAddToCase({ ecsRowData, useInsertTimeline, casePermissions, appId, onClose });
 
   const getAllCasesSelectorModalProps = useMemo(() => {
     return {
