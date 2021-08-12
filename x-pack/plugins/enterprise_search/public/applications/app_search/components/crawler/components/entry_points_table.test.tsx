@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiFieldText } from '@elastic/eui';
 
-import { GenericEndpointInlineEditableTable } from '../../../../shared/tables/generic_endpoint_inline_editable_table/generic_endpoint_inline_editable_table';
+import { GenericEndpointInlineEditableTable } from '../../../../shared/tables/generic_endpoint_inline_editable_table';
 
 import { mountWithIntl } from '../../../../test_helpers';
 
