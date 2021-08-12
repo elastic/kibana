@@ -43,13 +43,18 @@ exports[`Should render default props 1`] = `
         values={Object {}}
       />
     </EuiFormHelpText>
-    <EuiFormErrorText>
-      <FormattedMessage
-        defaultMessage="JOIN must be set"
-        id="xpack.maps.layerPanel.metricsExpression.joinMustBeSetErrorMessage"
-        values={Object {}}
-      />
-    </EuiFormErrorText>
+    <MetricsEditor
+      allowMultipleMetrics={true}
+      fields={Array []}
+      metrics={
+        Array [
+          Object {
+            "type": "count",
+          },
+        ]
+      }
+      onChange={[Function]}
+    />
   </div>
 </EuiPopover>
 `;
@@ -99,12 +104,7 @@ exports[`Should render metrics expression for metrics 1`] = `
     </EuiFormHelpText>
     <MetricsEditor
       allowMultipleMetrics={true}
-      fields={
-        Array [
-          "foobar",
-          "prop1",
-        ]
-      }
+      fields={Array []}
       metrics={
         Array [
           Object {

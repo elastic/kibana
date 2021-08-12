@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Location } from 'history';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { IUrlParams } from '../../../context/url_params_context/types';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
+import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { TransactionsTable } from '../../shared/transactions_table';
@@ -40,6 +42,7 @@ function getRedirectLocation({
 }
 
 export function TransactionOverview() {
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher();
   const location = useLocation();
   const { urlParams } = useUrlParams();
   const { transactionType, serviceName } = useApmServiceContext();
@@ -55,6 +58,16 @@ export function TransactionOverview() {
 
   return (
     <>
+      {fallbackToTransactions && (
+        <>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <AggregatedTransactionsCallout />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+        </>
+      )}
       <TransactionCharts />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>
