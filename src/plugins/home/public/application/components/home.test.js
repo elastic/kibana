@@ -88,11 +88,6 @@ describe('home', () => {
   });
 
   describe('header', () => {
-    test('render', async () => {
-      const component = await renderHome();
-      expect(component).toMatchSnapshot();
-    });
-
     test('should show "Manage" link if stack management is available', async () => {
       const directoryEntry = {
         id: 'stack-management',

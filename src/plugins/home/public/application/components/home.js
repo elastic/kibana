@@ -111,9 +111,11 @@ export class Home extends Component {
   renderNormal() {
     const { addBasePath, solutions } = this.props;
     const { application, trackUiMetric } = getServices();
-    const isDarkMode = getServices().uiSettings.get('theme:darkMode');
+    const isDarkMode = getServices().uiSettings?.get('theme:darkMode') || false;
     const devTools = this.findDirectoryById('console');
     const manageDataFeatures = this.getFeaturesByCategory(FeatureCatalogueCategory.ADMIN);
+
+    console.log(getServices().uiSettings);
 
     // Show card for console if none of the manage data plugins are available, most likely in OSS
     if (manageDataFeatures.length < 1 && devTools) {

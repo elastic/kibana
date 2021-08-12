@@ -9,7 +9,7 @@
 import React from 'react';
 import { AddData } from './add_data';
 import { shallowWithIntl } from '@kbn/test/jest';
-import { FeatureCatalogueEntry, FeatureCatalogueCategory } from '../../../services';
+import { ApplicationStart } from 'kibana/public';
 
 jest.mock('../app_navigation_handler', () => {
   return {
@@ -27,45 +27,18 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
+const applicationStartMock = ({} as unknown) as ApplicationStart;
 
-const mockFeatures: FeatureCatalogueEntry[] = [
-  {
-    category: FeatureCatalogueCategory.DATA,
-    description: 'Ingest data from popular apps and services.',
-    showOnHomePage: true,
-    icon: 'indexOpen',
-    id: 'home_tutorial_directory',
-    order: 500,
-    path: '/app/home#/tutorial_directory',
-    title: 'Ingest data',
-  },
-  {
-    category: FeatureCatalogueCategory.ADMIN,
-    description: 'Add and manage your fleet of Elastic Agents and integrations.',
-    showOnHomePage: true,
-    icon: 'indexManagementApp',
-    id: 'ingestManager',
-    order: 510,
-    path: '/app/ingestManager',
-    title: 'Add Elastic Agent',
-  },
-  {
-    category: FeatureCatalogueCategory.DATA,
-    description: 'Import your own CSV, NDJSON, or log file',
-    showOnHomePage: true,
-    icon: 'document',
-    id: 'ml_file_data_visualizer',
-    order: 520,
-    path: '/app/ml#/filedatavisualizer',
-    title: 'Upload a file',
-  },
-];
+const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 
 describe('AddData', () => {
   test('render', () => {
     const component = shallowWithIntl(
-      <AddData addBasePath={addBasePathMock} features={mockFeatures} />
+      <AddData
+        addBasePath={addBasePathMock}
+        application={applicationStartMock}
+        isDarkMode={false}
+      />
     );
     expect(component).toMatchSnapshot();
   });

@@ -16,7 +16,7 @@ exports[`OverviewPageFooter render 1`] = `
           flush="both"
           iconType="home"
           onClick={[Function]}
-          size="xs"
+          size="s"
         >
           <FormattedMessage
             defaultMessage="Make this my landing page"
