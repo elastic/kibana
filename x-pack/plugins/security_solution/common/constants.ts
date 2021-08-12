@@ -59,9 +59,9 @@ export const SAVED_OBJECTS_MANAGEMENT_FEATURE_ID = 'Saved Objects Management';
 export const DEFAULT_SPACE_ID = 'default';
 
 // Document path where threat indicator fields are expected. Fields are used
-// to enrich signals, and are copied to threat.indicator.
+// to enrich signals, and are copied to threat.enrichments.
 export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
-export const INDICATOR_DESTINATION_PATH = 'threat.indicator';
+export const INDICATOR_DESTINATION_PATH = 'threat.enrichments';
 
 export enum SecurityPageName {
   administration = 'administration',

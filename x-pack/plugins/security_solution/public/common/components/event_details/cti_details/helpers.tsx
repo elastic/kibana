@@ -75,14 +75,14 @@ export const getEnrichmentValue = (enrichment: CtiEnrichment, field: string) =>
  */
 export const getShimmedIndicatorValue = (enrichment: CtiEnrichment, field: string) =>
   getEnrichmentValue(enrichment, field) ||
-  getEnrichmentValue(enrichment, `${DEFAULT_INDICATOR_SOURCE_PATH}.${field}`);
+  getEnrichmentValue(enrichment, `${DEFAULT_INDICATOR_SOURCE_PATH}.${field}`); // TODO I don't think this is ever going to find an alert that we care about
 
 export const getEnrichmentIdentifiers = (enrichment: CtiEnrichment): CtiEnrichmentIdentifiers => ({
   id: getEnrichmentValue(enrichment, MATCHED_ID),
   field: getEnrichmentValue(enrichment, MATCHED_FIELD),
   value: getEnrichmentValue(enrichment, MATCHED_ATOMIC),
   type: getEnrichmentValue(enrichment, MATCHED_TYPE),
-  provider: getShimmedIndicatorValue(enrichment, PROVIDER),
+  provider: getEnrichmentValue(enrichment, PROVIDER),
 });
 
 const buildEnrichmentId = (enrichment: CtiEnrichment): string => {

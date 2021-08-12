@@ -57,11 +57,9 @@ export const buildMatchedIndicator = ({
       throw new Error(`Expected indicator field to be an object, but found: ${indicator}`);
     }
     const atomic = get(matchedThreat?._source, query.value) as unknown;
-    const event = get(matchedThreat?._source, 'event') as unknown;
 
     return {
-      ...indicator,
-      event,
+      indicator,
       matched: {
         atomic,
         field: query.field,
@@ -100,10 +98,10 @@ export const enrichSignalThreatMatches = async (
       throw new Error(`Expected threat field to be an object, but found: ${threat}`);
     }
     // We are not using INDICATOR_DESTINATION_PATH here because the code above
-    // and below make assumptions about its current value, 'threat.indicator',
+    // and below make assumptions about its current value, 'threat.enrichments',
     // and making this code dynamic on an arbitrary path would introduce several
     // new issues.
-    const existingIndicatorValue = get(signalHit._source, 'threat.indicator') ?? [];
+    const existingIndicatorValue = get(signalHit._source, 'threat.enrichments') ?? [];
     const existingIndicators = [existingIndicatorValue].flat(); // ensure indicators is an array
 
     return {
@@ -112,7 +110,7 @@ export const enrichSignalThreatMatches = async (
         ...signalHit._source!,
         threat: {
           ...threat,
-          indicator: [...existingIndicators, ...matchedIndicators[i]],
+          enrichments: [...existingIndicators, ...matchedIndicators[i]],
         },
       },
     };

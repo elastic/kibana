@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  INDICATOR_DATASET,
   INDICATOR_MATCHED_TYPE,
   INDICATOR_PROVIDER,
   INDICATOR_REFERENCE,
@@ -22,7 +21,6 @@ import { HorizontalSpacer } from './helpers';
 interface IndicatorDetailsProps {
   contextId: string;
   eventId: string;
-  indicatorDataset: string | undefined;
   indicatorProvider: string | undefined;
   indicatorReference: string | undefined;
   indicatorType: string | undefined;
@@ -32,7 +30,6 @@ interface IndicatorDetailsProps {
 export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
   contextId,
   eventId,
-  indicatorDataset,
   indicatorProvider,
   indicatorReference,
   indicatorType,
@@ -57,28 +54,6 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
           value={indicatorType}
         />
       </EuiFlexItem>
-    )}
-    {indicatorDataset && (
-      <>
-        <EuiFlexItem grow={false}>
-          <HorizontalSpacer>
-            <FormattedMessage
-              defaultMessage="from"
-              id="xpack.securitySolution.alerts.rowRenderers.cti.threatMatch.datasetPreposition"
-            />
-          </HorizontalSpacer>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <DraggableBadge
-            contextId={contextId}
-            data-test-subj="threat-match-indicator-details-indicator-dataset"
-            eventId={eventId}
-            field={INDICATOR_DATASET}
-            isDraggable={isDraggable}
-            value={indicatorDataset}
-          />
-        </EuiFlexItem>
-      </>
     )}
     {indicatorProvider && (
       <>

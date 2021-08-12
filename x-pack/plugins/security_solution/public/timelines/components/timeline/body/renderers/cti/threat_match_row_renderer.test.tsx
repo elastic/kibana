@@ -31,7 +31,7 @@ describe('threatMatchRowRenderer', () => {
     it('is false for an alert with indicator data but no match', () => {
       const indicatorTypeData = getThreatMatchDetectionAlert({
         threat: {
-          indicator: [{ type: ['url'] }],
+          enrichments: [{ indicator: { type: ['url'] } }],
         },
       });
       expect(threatMatchRowRenderer.isInstance(indicatorTypeData)).toBe(false);
@@ -40,7 +40,7 @@ describe('threatMatchRowRenderer', () => {
     it('is false for an alert with threat match fields but no data', () => {
       const emptyThreatMatchData = getThreatMatchDetectionAlert({
         threat: {
-          indicator: [{ matched: { type: [] } }],
+          enrichments: [{ matched: { type: [] } }],
         },
       });
       expect(threatMatchRowRenderer.isInstance(emptyThreatMatchData)).toBe(false);
