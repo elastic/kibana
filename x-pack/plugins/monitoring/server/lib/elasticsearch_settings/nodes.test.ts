@@ -6,10 +6,11 @@
  */
 
 import { checkNodesSettings } from '.';
+import { LegacyRequest } from '../../types';
 
 describe('Elasticsearch Nodes Settings', () => {
-  const getReq = (response) => {
-    return {
+  const getReq = (response?: any) => {
+    return ({
       server: {
         newPlatform: {
           setup: {
@@ -23,12 +24,14 @@ describe('Elasticsearch Nodes Settings', () => {
         plugins: {
           elasticsearch: {
             getCluster() {
-              return { callWithRequest: () => Promise.resolve(response) };
+              return {
+                callWithRequest: () => Promise.resolve(response),
+              };
             },
           },
         },
       },
-    };
+    } as unknown) as LegacyRequest;
   };
 
   it('should return { found: false } given no response from ES', async () => {
