@@ -204,7 +204,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body).to.eql({
           statusCode: 404,
           error: 'Not Found',
-          message: 'Response Error',
+          message: '{}',
           attributes: {},
         });
       });
