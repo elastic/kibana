@@ -69,7 +69,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
       closeModal();
       refreshJobs();
     }, DELETING_JOBS_REFRESH_INTERVAL_MS);
-  }, [refreshJobs]);
+  }, [jobIds, refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {
     return null;
