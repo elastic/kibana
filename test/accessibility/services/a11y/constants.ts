@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { ReporterVersion } from 'axe-core';
+
 export const AXE_CONFIG = {
   rules: [
     {
@@ -43,7 +45,7 @@ export const AXE_CONFIG = {
 };
 
 export const AXE_OPTIONS = {
-  reporter: 'v2',
+  reporter: 'v2' as ReporterVersion,
   runOnly: ['wcag2a', 'wcag2aa'],
   rules: {
     'color-contrast': {

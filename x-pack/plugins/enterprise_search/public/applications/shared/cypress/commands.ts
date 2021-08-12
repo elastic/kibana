@@ -33,3 +33,19 @@ export const login = ({
     },
   });
 };
+
+/*
+ * Cypress setup/helpers
+ */
+
+// eslint-disable-next-line import/no-extraneous-dependencies
+import 'cypress-axe'; // eslint complains this should be in `dependencies` and not `devDependencies`, but these tests should only run on dev
+import { AXE_CONFIG, AXE_OPTIONS } from 'test/accessibility/services/a11y/constants';
+
+// @see https://github.com/component-driven/cypress-axe#cychecka11y for params
+export const checkA11y = ({ ...args } = {}) => {
+  cy.injectAxe();
+  cy.configureAxe(AXE_CONFIG);
+  const context = '.kbnAppWrapper'; // Scopes a11y checks to only our app
+  cy.checkA11y(context, { ...AXE_OPTIONS, ...args });
+};
