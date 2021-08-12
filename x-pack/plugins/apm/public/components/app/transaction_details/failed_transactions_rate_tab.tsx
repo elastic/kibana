@@ -9,6 +9,8 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { EuiBetaBadge } from '@elastic/eui';
+
 import {
   METRIC_TYPE,
   useTrackMetric,
@@ -55,11 +57,37 @@ function FailedTransactionsRateTab({}: TabContentProps) {
 
 export const failedTransactionsRateTab = {
   key: 'failedTransactionsRate',
-  label: i18n.translate(
-    'xpack.apm.transactionDetails.tabs.failedTransactionsRateLabel',
-    {
-      defaultMessage: 'Failed transaction rate',
-    }
+  label: (
+    <>
+      {i18n.translate(
+        'xpack.apm.transactionDetails.tabs.failedTransactionsRateLabel',
+        {
+          defaultMessage: 'Failed transaction rate',
+        }
+      )}{' '}
+      <EuiBetaBadge
+        label={i18n.translate(
+          'xpack.apm.transactionDetails.tabs.failedTransactionsRateBetaLabel',
+          {
+            defaultMessage: 'Beta',
+          }
+        )}
+        title={i18n.translate(
+          'xpack.apm.transactionDetails.tabs.failedTransactionsRateBetaTitle',
+          {
+            defaultMessage: 'Failed transaction rate',
+          }
+        )}
+        tooltipContent={i18n.translate(
+          'xpack.apm.transactionDetails.tabs.failedTransactionsRateBetaDescription',
+          {
+            defaultMessage:
+              'Failed transaction rate is not GA. Please help us by reporting any bugs.',
+          }
+        )}
+        size="s"
+      />
+    </>
   ),
   component: FailedTransactionsRateTab,
 };
