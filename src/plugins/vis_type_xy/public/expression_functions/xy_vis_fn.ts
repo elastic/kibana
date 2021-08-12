@@ -251,6 +251,16 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
       },
       fillOpacity: args.fillOpacity,
       fittingFunction: args.fittingFunction,
+      // @TODO: This part of `VisParams` has special details of esaggs query, but it seems to me,
+      // as a chart, it should know nothing from such information in the purpose of the reusability
+      // with other functions.
+      // For example, if we would like to use `essql`, `esdocs`, or even `demodata` functions,
+      // this chart vis would not fully support rendering of that data with flexibility.
+      //
+      // I propose to create a layer, some function, as `pointseries`, which would receive the data
+      // from some data source, process its output, prepare for rendering `xy_vis` and pass the result to current fn.
+      // And as a result, we would have always good, stable, customizable interface, without connection to the special data
+      // from the query result.
       dimensions: {
         x: args.xDimension,
         y: args.yDimension,
@@ -260,6 +270,7 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
         splitRow: args.splitRowDimension,
         splitColumn: args.splitColumnDimension,
       },
+      // ------------------------------------------------------------------------------------------------------------------
     } as VisParams;
 
     if (handlers?.inspectorAdapters?.tables) {

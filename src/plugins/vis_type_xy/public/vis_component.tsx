@@ -71,7 +71,7 @@ export type VisComponentType = typeof VisComponent;
 
 const VisComponent = (props: VisComponentProps) => {
   const [showLegend, setShowLegend] = useState<boolean>(() => {
-    // TODO: Check when this bwc can safely be removed
+    // @TODO: Check when this bwc can safely be removed
     const bwcLegendStateDefault =
       props.visParams.addLegend == null ? true : props.visParams.addLegend;
     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
@@ -210,17 +210,31 @@ const VisComponent = (props: VisComponentProps) => {
 
   const config = getConfig(visData, visParams);
   const timeZone = getTimeZone();
+
+  // @TODO: I think, { min, max, interval? } need to come to props to avoid relations with aggregations
   const xDomain =
     config.xAxis.scale.type === ScaleType.Ordinal ? undefined : getXDomain(config.aspects.x.params);
+  // -------------------------------------------------------------------------------------------------------
+
+  // @TODO: move this logic to the `pointseries` function or kind of that to separate
+  // view from logic of processing the result of fetching.
+  // This will enable the possibility to reuse `xy_vis` as a rendering function.
   const hasBars = visParams.seriesParams.some(
     ({ type, data: { id: paramId } }) =>
       type === ChartType.Histogram &&
       config.aspects.y.find(({ aggId }) => aggId === paramId) !== undefined
   );
+  // -------------------------------------------------------------------------------------------------------
+
+  // @TODO: move this logic from `xy_vis` function and renderer to a separate function, which would proceed
+  // the result of `esaggs` and pass ready visualization params to `xy_vis` function and renderer as a following step.
+  // Possibly, it makes sence to move this logic to `pointseries` function.
   const adjustedXDomain =
     config.xAxis.scale.type === ScaleType.Ordinal
       ? undefined
       : getAdjustedDomain(visData.rows, config.aspects.x, timeZone, xDomain, hasBars);
+  // -------------------------------------------------------------------------------------------------------
+
   const legendPosition = useMemo(() => config.legend.position ?? Position.Right, [
     config.legend.position,
   ]);
@@ -280,6 +294,8 @@ const VisComponent = (props: VisComponentProps) => {
       palettesRegistry,
     ]
   );
+
+  // @TODO: move this logic, related to aggregation types, to the other processing function, out of `xy_vis`.
   const xAccessor = getXAccessor(config.aspects.x);
 
   const splitSeriesAccessors = useMemo(
@@ -295,6 +311,7 @@ const VisComponent = (props: VisComponentProps) => {
   const splitChartRowAccessor = config.aspects.splitRow
     ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)(config.aspects.splitRow)
     : undefined;
+  // -------------------------------------------------------------------------------------------------------
 
   const renderSeries = useMemo(
     () =>

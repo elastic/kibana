@@ -82,6 +82,8 @@ export const renderAllSeries = (
       interpolate,
       type,
     }) => {
+      // @TODO: should move this special logic, related to aggs to the separate `fn`, out of `xy_vis` rendering logic
+      // it is not related to the visualization, those are details of querying/filtering data, not rendering.
       const yAspects = aspects.y.filter(({ aggId, aggType, accessor }) => {
         if (
           aggType === METRIC_TYPES.PERCENTILES ||
@@ -93,6 +95,8 @@ export const renderAllSeries = (
           return aggId === paramId && accessor !== null;
         }
       });
+      // ------------------------------------------------------------------------------------------------------------
+
       if (!show || !yAspects.length) {
         return null;
       }
