@@ -9,6 +9,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { BrushEndListener } from '@elastic/charts';
 import {
+  EuiBetaBadge,
   EuiCallOut,
   EuiCode,
   EuiAccordion,
@@ -293,58 +294,82 @@ export function MlLatencyCorrelations({
     <>
       <EuiFlexGroup>
         <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <EuiTitle size="xs">
-            <h5 data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">
-              {i18n.translate(
-                'xpack.apm.correlations.latencyCorrelations.panelTitle',
-                {
-                  defaultMessage:
-                    'Latency distribution for {name} (Log-Log Plot)',
-                  values: {
-                    name: transactionName ?? serviceName,
-                  },
-                }
-              )}
-            </h5>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
-            {selection && (
-              <>
-                <EuiFlexItem
-                  grow={false}
-                  style={{ flexDirection: 'row', alignItems: 'center' }}
-                >
-                  <EuiText size="xs">
-                    {i18n.translate(
-                      'xpack.apm.correlations.latencyCorrelations.selectionText',
-                      {
-                        defaultMessage: `Selection: {selectionFrom} - {selectionTo}ms`,
-                        values: {
-                          selectionFrom: Math.round(selection[0] / 1000),
-                          selectionTo: Math.round(selection[1] / 1000),
-                        },
-                      }
-                    )}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem
-                  grow={false}
-                  style={{ flexDirection: 'row', alignItems: 'center' }}
-                >
-                  <EuiButtonEmpty
-                    onClick={onClearSelection}
-                    iconType="cross"
-                    size="xs"
-                  >
-                    {clearSelectionButtonLabel}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </>
+          <EuiFlexGroup justifyContent="flexStart" gutterSize="xs">
+            <EuiFlexItem
+              grow={false}
+              style={{ flexDirection: 'row', alignItems: 'center' }}
+            >
+              <EuiTitle size="xs">
+                <h5 data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">
+                  {i18n.translate(
+                    'xpack.apm.correlations.latencyCorrelations.panelTitle',
+                    {
+                      defaultMessage:
+                        'Latency distribution for {name} (Log-Log Plot)',
+                      values: {
+                        name: transactionName ?? serviceName,
+                      },
+                    }
+                  )}
+                </h5>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+              style={{ flexDirection: 'row', alignItems: 'center' }}
+            />
+            {correlationAnalysisEnabled && (
+              <EuiBetaBadge
+                label={i18n.translate('xpack.apm.correlations.betaLabel', {
+                  defaultMessage: 'Beta',
+                })}
+                title={CORRELATIONS_TITLE}
+                tooltipContent={i18n.translate(
+                  'xpack.apm.correlations.betaDescription',
+                  {
+                    defaultMessage:
+                      'Correlations is not GA. Please help us by reporting any bugs.',
+                  }
+                )}
+              />
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
+        {selection && (
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
+              <EuiFlexItem
+                grow={false}
+                style={{ flexDirection: 'row', alignItems: 'center' }}
+              >
+                <EuiText size="xs">
+                  {i18n.translate(
+                    'xpack.apm.correlations.latencyCorrelations.selectionText',
+                    {
+                      defaultMessage: `Selection: {selectionFrom} - {selectionTo}ms`,
+                      values: {
+                        selectionFrom: Math.round(selection[0] / 1000),
+                        selectionTo: Math.round(selection[1] / 1000),
+                      },
+                    }
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+                style={{ flexDirection: 'row', alignItems: 'center' }}
+              >
+                <EuiButtonEmpty
+                  onClick={onClearSelection}
+                  iconType="cross"
+                  size="xs"
+                >
+                  {clearSelectionButtonLabel}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       <EuiSpacer size="s" />
@@ -504,3 +529,7 @@ export function MlLatencyCorrelations({
     </>
   );
 }
+
+const CORRELATIONS_TITLE = i18n.translate('xpack.apm.correlations.title', {
+  defaultMessage: 'Correlations',
+});
