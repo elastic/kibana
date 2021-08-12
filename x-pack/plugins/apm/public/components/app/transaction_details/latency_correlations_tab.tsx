@@ -20,7 +20,7 @@ import { useLicenseContext } from '../../../context/license/use_license_context'
 
 import { LicensePrompt } from '../../shared/license_prompt';
 
-import { MlLatencyCorrelations } from '../correlations/ml_latency_correlations_page';
+import { MlLatencyCorrelations } from '../correlations/ml_latency_correlations';
 
 import type { TabContentProps } from './types';
 
