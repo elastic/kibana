@@ -85,7 +85,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    */
   useEffect(() => {
     const pageTitleSuffix =
-      savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '&nbsp;';
+      savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
     chrome.docTitle.change(`Discover${pageTitleSuffix}`);
     setBreadcrumbsTitle(savedSearch, chrome);
     return () => {

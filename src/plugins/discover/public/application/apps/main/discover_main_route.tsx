@@ -131,8 +131,8 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
 
   if (!indexPattern || !savedSearch) {
     return (
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
+      <EuiFlexGroup justifyContent="spaceAround" alignItems="center">
+        <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="l" />
         </EuiFlexItem>
       </EuiFlexGroup>
