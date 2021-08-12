@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_STATUS } from '@kbn/rule-data-utils/target/technical_field_names';
+import { ALERT_STATUS } from '@kbn/rule-data-utils';
 import * as queries from './queries';
 
 describe('queries', () => {
