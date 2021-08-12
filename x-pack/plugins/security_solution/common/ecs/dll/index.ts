@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-export interface RegistryEcs {
-  hive?: string[];
-  key?: string[];
-  path?: string[];
-  value?: string[];
-  data?: RegistryEcsData;
-}
+import { CodeSignature } from '../file';
+import { ProcessPe } from '../process';
 
-export interface RegistryEcsData {
-  strings?: string[];
+export interface DllEcs {
+  path?: string;
+  code_signature?: CodeSignature;
+  pe?: ProcessPe;
 }
