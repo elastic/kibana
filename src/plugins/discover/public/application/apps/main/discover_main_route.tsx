@@ -10,6 +10,7 @@ import { History } from 'history';
 import { useParams } from 'react-router-dom';
 import type { SavedObject as SavedObjectDeprecated } from 'src/plugins/saved_objects/public';
 import { IndexPatternAttributes, SavedObject } from 'src/plugins/data/common';
+import { EuiFlexGroup, EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
 import { getState } from './services/discover_state';
@@ -129,7 +130,13 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
   }, [chrome, savedSearch]);
 
   if (!indexPattern || !savedSearch) {
-    return null;
+    return (
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>
+          <EuiLoadingSpinner size="l" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   return (
