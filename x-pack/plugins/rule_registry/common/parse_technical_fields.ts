@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { isLeft } from 'fp-ts/lib/Either';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { technicalRuleFieldMap } from './assets/field_maps/technical_rule_field_map';
 import { runtimeTypeFromFieldMap } from './field_map';
 
-const technicalFieldsRT = runtimeTypeFromFieldMap(technicalRuleFieldMap);
+const technicalFieldRuntimeType = runtimeTypeFromFieldMap(technicalRuleFieldMap);
 
-export const parseTechnicalFields = (fieldMap: unknown) => {
-  const decodedFieldMap = decodeOrThrow(technicalFieldsRT)(fieldMap);
+export const parseTechnicalFields = (input: unknown) => {
+  const validate = technicalFieldRuntimeType.decode(input);
 
-  return technicalFieldsRT.encode(decodedFieldMap);
+  if (isLeft(validate)) {
+    throw new Error(PathReporter.report(validate).join('\n'));
+  }
+
+  return technicalFieldRuntimeType.encode(validate.right);
 };
 
 export type ParsedTechnicalFields = ReturnType<typeof parseTechnicalFields>;
