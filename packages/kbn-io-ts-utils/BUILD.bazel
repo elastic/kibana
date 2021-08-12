@@ -1,6 +1,5 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler")
 
 PKG_BASE_NAME = "kbn-io-ts-utils"
 PKG_REQUIRE_NAME = "@kbn/io-ts-utils"
@@ -25,7 +24,7 @@ NPM_MODULE_EXTRA_FILES = [
   "package.json",
 ]
 
-RUNTIME_DEPS = [
+SRC_DEPS = [
   "//packages/kbn-config-schema",
   "@npm//fp-ts",
   "@npm//io-ts",
@@ -34,28 +33,12 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-config-schema",
   "@npm//@types/jest",
   "@npm//@types/lodash",
   "@npm//@types/node",
-  "@npm//fp-ts",
-  "@npm//io-ts",
-  "@npm//lodash",
-  "@npm//tslib",
 ]
 
-jsts_transpiler(
-  name = "target_node",
-  srcs = SRCS,
-  build_pkg_name = package_name(),
-)
-
-jsts_transpiler(
-  name = "target_web",
-  srcs = SRCS,
-  build_pkg_name = package_name(),
-  config_file = ".babelrc.browser"
-)
+DEPS = SRC_DEPS + TYPES_DEPS
 
 ts_config(
   name = "tsconfig",
@@ -67,14 +50,13 @@ ts_config(
 )
 
 ts_project(
-  name = "tsc_types",
+  name = "tsc",
   args = ['--pretty'],
   srcs = SRCS,
-  deps = TYPES_DEPS,
+  deps = DEPS,
   declaration = True,
   declaration_map = True,
-  emit_declaration_only = True,
-  out_dir = "target_types",
+  out_dir = "target",
   source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig",
@@ -83,7 +65,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
+  deps = DEPS + [":tsc"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
