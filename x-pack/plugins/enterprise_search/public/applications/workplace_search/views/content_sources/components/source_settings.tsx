@@ -20,7 +20,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -131,17 +130,17 @@ export const SourceSettings: React.FC = () => {
     updateContentSource(id, { name: inputValue });
   };
 
-  const submitSyncControls = (e) => {
-    let payload = {
-      indexing: {
-        enabled: synchronizeChecked,
-        features: {
-          content_extraction: { enabled: contentExtractionChecked },
-          thumbnails: { enabled: thumbnailsChecked },
+  const submitSyncControls = () => {
+    updateContentSource(id, {
+        indexing: {
+          enabled: synchronizeChecked,
+          features: {
+            content_extraction: { enabled: contentExtractionChecked },
+            thumbnails: { enabled: thumbnailsChecked },
+          },
         },
       },
-    }
-    updateContentSource(id, payload);
+    );
   };
 
   const handleSourceRemoval = () => {

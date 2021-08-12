@@ -105,6 +105,42 @@ describe('SourceSettings', () => {
     );
   });
 
+  it('handles sync controls submission', () => {
+    const wrapper = shallow(<SourceSettings />);
+
+    const synchronizeSwitch = wrapper.find('[data-test-subj="SynchronizeToggle"]');
+    const event = { target: { checked: false } };
+    synchronizeSwitch.prop('onChange')(event as any);
+
+    wrapper.find('[data-test-subj="SaveSyncControlsButton"]').simulate('click');
+
+    expect(updateContentSource).toHaveBeenCalledWith(fullContentSources[0].id, {
+      indexing: {
+        enabled: false,
+        features: {
+          content_extraction: { enabled: true },
+          thumbnails: { enabled: true },
+        },
+      },
+    });
+  });
+
+  it('disables the thumbnails switch when globally disabled', () => {
+    setMockValues({
+      ...mockValues,
+      contentSource: {
+        ...fullContentSources[0],
+        areThumbnailsConfigEnabled: false,
+      },
+    });
+
+    const wrapper = shallow(<SourceSettings />);
+
+    const synchronizeSwitch = wrapper.find('[data-test-subj="ThumbnailsToggle"]');
+
+    expect(synchronizeSwitch.prop('disabled')).toEqual(true);
+  });
+
   describe('DownloadDiagnosticsButton', () => {
     it('renders for org with correct href', () => {
       const wrapper = shallow(<SourceSettings />);
