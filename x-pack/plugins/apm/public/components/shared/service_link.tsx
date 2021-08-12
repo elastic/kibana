@@ -7,17 +7,19 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React from 'react';
+import { TypeOf } from '@kbn/typed-react-router-config';
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { truncate } from '../../utils/style';
 import { useApmRouter } from '../../hooks/use_apm_router';
 import { AgentIcon } from './agent_icon';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import { ApmRoutes } from '../routing/apm_route_config';
 
 const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
 interface ServiceLinkProps {
   agentName?: AgentName;
-  query: Record<string, string | undefined>;
+  query: TypeOf<ApmRoutes, '/services/:serviceName/overview'>['query'];
   serviceName: string;
 }
 
@@ -30,6 +32,7 @@ export function ServiceLink({
 
   return (
     <StyledLink
+      data-test-subj={`serviceLink_${agentName}`}
       href={link('/services/:serviceName/overview', {
         path: { serviceName },
         query,

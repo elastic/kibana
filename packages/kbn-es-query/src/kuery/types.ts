@@ -8,13 +8,19 @@
 
 import { NodeTypes } from './node_types';
 
+/** @public */
 export interface KueryNode {
   type: keyof NodeTypes;
   [key: string]: any;
 }
 
+/**
+ * TODO: Replace with real type
+ * @public
+ */
 export type DslQuery = any;
 
+/** @internal */
 export interface KueryParseOptions {
   helpers: {
     [key: string]: any;
@@ -26,3 +32,9 @@ export interface KueryParseOptions {
 }
 
 export { nodeTypes } from './node_types';
+
+/** @public */
+export interface KueryQueryOptions {
+  filtersInMustClause?: boolean;
+  dateFormatTZ?: string;
+}

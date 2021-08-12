@@ -56,6 +56,14 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
         ) {
           policyItem.inputs[0].config.policy.value.windows.popup.behavior_protection.message = DefaultPolicyNotificationMessage;
         }
+        if (policyItem.inputs[0].config.policy.value.mac.popup.behavior_protection.message === '') {
+          policyItem.inputs[0].config.policy.value.mac.popup.behavior_protection.message = DefaultPolicyNotificationMessage;
+        }
+        if (
+          policyItem.inputs[0].config.policy.value.linux.popup.behavior_protection.message === ''
+        ) {
+          policyItem.inputs[0].config.policy.value.linux.popup.behavior_protection.message = DefaultPolicyNotificationMessage;
+        }
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnPolicyDetailsData',

@@ -19,13 +19,18 @@ import {
   getMaxY,
   getResponseTimeTickFormatter,
 } from '../../shared/charts/transaction_charts/helper';
+import { useApmParams } from '../../../hooks/use_apm_params';
 
 export function BackendLatencyChart({ height }: { height: number }) {
   const { backendName } = useApmBackendContext();
 
   const theme = useTheme();
 
-  const { start, end } = useTimeRange();
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/backends/:backendName/overview');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const {
     urlParams: { kuery, environment },
@@ -65,7 +70,7 @@ export function BackendLatencyChart({ height }: { height: number }) {
       specs.push({
         data: data.currentTimeseries,
         type: 'linemark',
-        color: theme.eui.euiColorVis0,
+        color: theme.eui.euiColorVis1,
         title: i18n.translate('xpack.apm.backendLatencyChart.chartTitle', {
           defaultMessage: 'Latency',
         }),
@@ -85,7 +90,7 @@ export function BackendLatencyChart({ height }: { height: number }) {
     }
 
     return specs;
-  }, [data, theme.eui.euiColorVis0, theme.eui.euiColorMediumShade]);
+  }, [data, theme.eui.euiColorVis1, theme.eui.euiColorMediumShade]);
 
   const maxY = getMaxY(timeseries);
   const latencyFormatter = getDurationFormatter(maxY);

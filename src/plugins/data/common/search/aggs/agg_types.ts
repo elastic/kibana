@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FieldFormatsStartCommon } from '../../field_formats';
+import { FieldFormatsStartCommon } from '../../../../field_formats/common';
 
 import * as buckets from './buckets';
 import * as metrics from './metrics';

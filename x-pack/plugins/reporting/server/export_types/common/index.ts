@@ -10,6 +10,9 @@ export { getConditionalHeaders } from './get_conditional_headers';
 export { getFullUrls } from './get_full_urls';
 export { omitBlockedHeaders } from './omit_blocked_headers';
 export { validateUrls } from './validate_urls';
+export { generatePngObservableFactory } from './generate_png';
+export { getCustomLogo } from './get_custom_logo';
+export { setForceNow } from './set_force_now';
 
 export interface TimeRangeParams {
   min?: Date | string | number | null;

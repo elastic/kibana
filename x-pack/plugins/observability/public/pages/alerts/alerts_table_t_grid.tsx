@@ -5,28 +5,56 @@
  * 2.0.
  */
 
+/**
+ * We need to produce types and code transpilation at different folders during the build of the package.
+ * We have types and code at different imports because we don't want to import the whole package in the resulting webpack bundle for the plugin.
+ * This way plugins can do targeted imports to reduce the final code bundle
+ */
+import type {
+  AlertConsumers as AlertConsumersTyped,
+  ALERT_DURATION as ALERT_DURATION_TYPED,
+  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
+  ALERT_STATUS as ALERT_STATUS_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
+} from '@kbn/rule-data-utils';
+import {
+  ALERT_DURATION as ALERT_DURATION_NON_TYPED,
+  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
+  ALERT_STATUS as ALERT_STATUS_NON_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
+  TIMESTAMP,
+  // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
+} from '@kbn/rule-data-utils/target_node/technical_field_names';
+
+// @ts-expect-error importing from a place other than root because we want to limit what we import from this package
+import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
+
 import { EuiButtonIcon, EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 
 import React, { Suspense, useState } from 'react';
-import {
-  ALERT_DURATION,
-  ALERT_SEVERITY_LEVEL,
-  ALERT_STATUS,
-  ALERT_START,
-  RULE_NAME,
-} from '@kbn/rule-data-utils/target/technical_field_names';
-
 import type { TimelinesUIStart } from '../../../../timelines/public';
 import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import type { ActionProps, ColumnHeaderOptions, RowRenderer } from '../../../../timelines/common';
+import type {
+  ActionProps,
+  AlertStatus,
+  ColumnHeaderOptions,
+  RowRenderer,
+} from '../../../../timelines/common';
 
 import { getRenderCellValue } from './render_cell_value';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { decorateResponse } from './decorate_response';
+import { getDefaultCellActions } from './default_cell_actions';
 import { LazyAlertsFlyout } from '../..';
+
+const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
+const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
+const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
+const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
+const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
 
 interface AlertsTableTGridProps {
   indexName: string;
@@ -73,11 +101,11 @@ export const columns: Array<
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.observability.alertsTGrid.triggeredColumnDescription', {
-      defaultMessage: 'Triggered',
+    displayAsText: i18n.translate('xpack.observability.alertsTGrid.lastUpdatedColumnDescription', {
+      defaultMessage: 'Last updated',
     }),
-    id: ALERT_START,
-    initialWidth: 176,
+    id: TIMESTAMP,
+    initialWidth: 230,
   },
   {
     columnHeaderType: 'not-filtered',
@@ -101,13 +129,20 @@ export const columns: Array<
       defaultMessage: 'Reason',
     }),
     linkField: '*',
-    id: RULE_NAME,
+    id: ALERT_RULE_NAME,
   },
 ];
 
 const NO_ROW_RENDER: RowRenderer[] = [];
 
 const trailingControlColumns: never[] = [];
+
+const OBSERVABILITY_ALERT_CONSUMERS = [
+  AlertConsumers.APM,
+  AlertConsumers.LOGS,
+  AlertConsumers.INFRASTRUCTURE,
+  AlertConsumers.SYNTHETICS,
+];
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const { core, observabilityRuleTypeRegistry } = usePluginContext();
@@ -120,7 +155,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const leadingControlColumns = [
     {
       id: 'expand',
-      width: 20,
+      width: 40,
       headerCellRender: () => {
         return (
           <EventsThContent>
@@ -149,7 +184,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     },
     {
       id: 'view_in_app',
-      width: 20,
+      width: 40,
       headerCellRender: () => null,
       rowCellRender: ({ data }: ActionProps) => {
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
@@ -184,9 +219,11 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         </Suspense>
       )}
       {timelines.getTGrid<'standalone'>({
+        alertConsumers: OBSERVABILITY_ALERT_CONSUMERS,
         type: 'standalone',
         columns,
         deletedEventIds: [],
+        defaultCellActions: getDefaultCellActions({ enableFilterActions: false }),
         end: rangeTo,
         filters: [],
         indexNames: [indexName],
@@ -213,6 +250,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
             sortDirection: 'desc',
           },
         ],
+        filterStatus: status as AlertStatus,
         leadingControlColumns,
         trailingControlColumns,
         unit: (totalAlerts: number) =>

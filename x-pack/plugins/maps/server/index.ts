@@ -29,6 +29,30 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
       rootPath: string,
       addDeprecation: AddConfigDeprecation
     ) => {
+      if (_.get(completeConfig, 'xpack.maps.showMapVisualizationTypes') === undefined) {
+        return completeConfig;
+      }
+      addDeprecation({
+        message: i18n.translate('xpack.maps.deprecation.showMapVisualizationTypes.message', {
+          defaultMessage:
+            'xpack.maps.showMapVisualizationTypes is deprecated and is no longer used',
+        }),
+        correctiveActions: {
+          manualSteps: [
+            i18n.translate('xpack.maps.deprecation.showMapVisualizationTypes.step1', {
+              defaultMessage:
+                'Remove "xpack.maps.showMapVisualizationTypes" in the Kibana config file, CLI flag, or environment variable (in Docker only).',
+            }),
+          ],
+        },
+      });
+      return completeConfig;
+    },
+    (
+      completeConfig: Record<string, any>,
+      rootPath: string,
+      addDeprecation: AddConfigDeprecation
+    ) => {
       if (_.get(completeConfig, 'map.proxyElasticMapsServiceInMaps') === undefined) {
         return completeConfig;
       }
@@ -36,8 +60,7 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
         documentationUrl:
           'https://www.elastic.co/guide/en/kibana/current/maps-connect-to-ems.html#elastic-maps-server',
         message: i18n.translate('xpack.maps.deprecation.proxyEMS.message', {
-          defaultMessage:
-            'map.proxyElasticMapsServiceInMaps is deprecated and will be removed in 8.0.',
+          defaultMessage: 'map.proxyElasticMapsServiceInMaps is deprecated and is no longer used',
         }),
         correctiveActions: {
           manualSteps: [
@@ -63,7 +86,7 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
       }
       addDeprecation({
         message: i18n.translate('xpack.maps.deprecation.regionmap.message', {
-          defaultMessage: 'map.regionmap is deprecated and will be removed in 8.0.',
+          defaultMessage: 'map.regionmap is deprecated and is no longer used',
         }),
         correctiveActions: {
           manualSteps: [

@@ -15,6 +15,7 @@ import { alertsDefaultModel } from './default_headers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import * as i18n from './translations';
+import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
 import { useKibana } from '../../lib/kibana';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
@@ -104,6 +105,7 @@ const AlertsTableComponent: React.FC<Props> = ({
     <StatefulEventsViewer
       pageFilters={alertsFilter}
       defaultModel={alertsDefaultModel}
+      defaultCellActions={defaultCellActions}
       end={endDate}
       id={timelineId}
       renderCellValue={DefaultCellRenderer}
