@@ -11,16 +11,16 @@ import { EuiTextColor, EuiSpacer } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import {
-  LEGACY_ALERTS,
-  LEGACY_ALERT_DETAILS,
-  ALERT_REQUIRES_APP_CONTEXT,
+  LEGACY_RULES,
+  LEGACY_RULE_DETAILS,
+  RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
 
 export function createLegacyAlertTypes(): AlertTypeModel[] {
-  return LEGACY_ALERTS.map((legacyAlert) => {
+  return LEGACY_RULES.map((legacyAlert) => {
     return {
       id: legacyAlert,
-      description: LEGACY_ALERT_DETAILS[legacyAlert].description,
+      description: LEGACY_RULE_DETAILS[legacyAlert].description,
       iconClass: 'bell',
       documentationUrl(docLinks) {
         return `${docLinks.links.monitoring.alertsKibanaClusterAlerts}`;
@@ -38,7 +38,7 @@ export function createLegacyAlertTypes(): AlertTypeModel[] {
       ),
       defaultActionMessage: '{{context.internalFullMessage}}',
       validate: () => ({ errors: {} }),
-      requiresAppContext: ALERT_REQUIRES_APP_CONTEXT,
+      requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
     };
   });
 }

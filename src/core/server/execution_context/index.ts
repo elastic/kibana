@@ -14,7 +14,6 @@ export type {
   ExecutionContextSetup,
   ExecutionContextStart,
   IExecutionContext,
-  KibanaServerExecutionContext,
 } from './execution_context_service';
 export type { IExecutionContextContainer } from './execution_context_container';
 export { config } from './execution_context_config';
