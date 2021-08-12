@@ -20,10 +20,14 @@ export const format = (obj: unknown) =>
 export const noop = () => {};
 
 export const areValid = (flags: any) => {
-  if (flags.esUrl === '') throw createFlagError('please provide a single --esUrl flag');
+  if (flags.esUrl === '') throw createFlagError('please provide a single --esUrl flag.');
+  // TODO: Why isnt this flag throwing???
+  if (flags.type && flags.type.length === 0) throw createFlagError('please provide a comma-separated list of types.');
+
   return true;
 };
 
+// TODO: xs.length is stringified so its returning a much larger number for length
 export const print = (log: ToolingLog) => (msg: string | null = null) => (xs: any) =>
   log.success(`\n### Saved Object Types ${msg || 'Count: ' + xs.length}\n${xs}`);
 
