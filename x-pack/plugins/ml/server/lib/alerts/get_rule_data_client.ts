@@ -33,10 +33,50 @@ export function getRuleDataClient(
           settings: {
             number_of_shards: 1,
           },
+          // Mappings based on {@link AnomalyDetectionJobHealthResult}
           mappings: mappingFromFieldMap(
             {
               job_id: {
                 type: 'keyword',
+              },
+              job_state: {
+                type: 'keyword',
+              },
+              // datafeed
+              datafeed_id: {
+                type: 'keyword',
+              },
+              datafeed_state: {
+                type: 'keyword',
+              },
+              // mml
+              memory_status: {
+                type: 'keyword',
+              },
+              log_time: {
+                type: 'date',
+              },
+              model_bytes: {
+                type: 'long',
+              },
+              model_bytes_memory_limit: {
+                type: 'long',
+              },
+              peak_model_bytes: {
+                type: 'long',
+              },
+              model_bytes_exceeded: {
+                type: 'long',
+              },
+              // {@link DelayedDataResponse)
+              annotation: {
+                type: 'text',
+              },
+              missed_docs_count: {
+                type: 'long',
+              },
+              end_timestamp: {
+                type: 'date',
               },
             },
             'strict'
@@ -58,7 +98,6 @@ export function getRuleDataClient(
     await ruleDataService.updateIndexMappingsMatchingPattern(alertsIndexPattern);
   });
 
-  // initialize eagerly ?
   const initializeRuleDataTemplatesPromise = initializeRuleDataTemplates().catch((err) => {
     logger!.error(err);
   });
