@@ -16,7 +16,9 @@ import { isString } from 'lodash';
  *
  * @public
  */
-export function luceneStringToDsl(query: string | any): estypes.QueryDslQueryContainer {
+export function luceneStringToDsl(
+  query: string | estypes.QueryDslQueryContainer
+): estypes.QueryDslQueryContainer {
   if (isString(query)) {
     if (query.trim() === '') {
       return { match_all: {} };

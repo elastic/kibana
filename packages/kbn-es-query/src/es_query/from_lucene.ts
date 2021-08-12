@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SerializableRecord } from '@kbn/utility-types';
 import { Query } from '..';
 import { decorateQuery } from './decorate_query';
 import { luceneStringToDsl } from './lucene_string_to_dsl';
@@ -14,7 +15,7 @@ import { BoolQuery } from './types';
 /** @internal */
 export function buildQueryFromLucene(
   queries: Query[],
-  queryStringOptions: Record<string, any>,
+  queryStringOptions: SerializableRecord,
   dateFormatTZ?: string
 ): BoolQuery {
   const combinedQueries = (queries || []).map((query) => {

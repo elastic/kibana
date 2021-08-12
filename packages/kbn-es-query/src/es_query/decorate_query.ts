@@ -7,6 +7,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+import { SerializableRecord } from '@kbn/utility-types';
 import { extend, defaults } from 'lodash';
 import { getTimeZoneFromSettings } from '../utils';
 import { isEsQueryString } from './es_query_dsl';
@@ -23,7 +24,7 @@ import { isEsQueryString } from './es_query_dsl';
 
 export function decorateQuery(
   query: estypes.QueryDslQueryContainer,
-  queryStringOptions: Record<string, any> | string,
+  queryStringOptions: SerializableRecord | string,
   dateFormatTZ?: string
 ) {
   if (isEsQueryString(query)) {
