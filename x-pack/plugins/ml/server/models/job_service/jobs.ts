@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
@@ -14,6 +13,7 @@ import {
   parseTimeIntervalForJob,
 } from '../../../common/util/job_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
+import { getJobActionString } from '../../../common/constants/job_actions';
 import {
   MlSummaryJob,
   AuditMessage,
@@ -202,10 +202,6 @@ export function jobsProvider(
       // fail silently
     }
 
-    const deletingStr = i18n.translate('xpack.ml.models.jobService.deletingJob', {
-      defaultMessage: 'deleting',
-    });
-
     const jobs = fullJobsList.map((job) => {
       const hasDatafeed = isPopulatedObject(job.datafeed_config);
       const dataCounts = job.data_counts;
@@ -222,7 +218,7 @@ export function jobsProvider(
           parseTimeIntervalForJob(job.analysis_config?.bucket_span)
         ),
         memory_status: job.model_size_stats ? job.model_size_stats.memory_status : '',
-        jobState: job.deleting === true ? deletingStr : job.state,
+        jobState: job.blocked === undefined ? job.state : getJobActionString(job.blocked.reason),
         hasDatafeed,
         datafeedId:
           hasDatafeed && job.datafeed_config.datafeed_id ? job.datafeed_config.datafeed_id : '',
@@ -238,12 +234,12 @@ export function jobsProvider(
         isSingleMetricViewerJob: errorMessage === undefined,
         isNotSingleMetricViewerJobMessage: errorMessage,
         nodeName: job.node ? job.node.name : undefined,
-        deleting: job.deleting || undefined,
         blocked: job.blocked ?? undefined,
         awaitingNodeAssignment: isJobAwaitingNodeAssignment(job),
         alertingRules: job.alerting_rules,
         jobTags: job.custom_settings?.job_tags ?? {},
       };
+
       if (jobIds.find((j) => j === tempJob.id)) {
         tempJob.fullJob = job;
       }

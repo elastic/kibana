@@ -8,6 +8,7 @@
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 import { getIndexPatternNames } from '../../../../util/index_utils';
+import { JOB_ACTION } from '../../../../../../common/constants/job_actions';
 
 import {
   stopDatafeeds,
@@ -111,7 +112,7 @@ export function actionsMenuContent(
         defaultMessage: 'Reset job',
       }),
       icon: 'refresh',
-      enabled: (item) => isJobBlocked(item) === false && canResetJob,
+      enabled: (item) => isResetEnabled(item) && canResetJob,
       available: (item) => isResettable([item]),
       onClick: (item) => {
         showResetJobModal([item]);
@@ -188,8 +189,15 @@ export function actionsMenuContent(
   ];
 }
 
+function isResetEnabled(item) {
+  if (item.blocked === undefined || item.blocked.reason === JOB_ACTION.RESET) {
+    return true;
+  }
+  return false;
+}
+
 function isJobBlocked(item) {
-  return item.deleting === true || item.blocked !== undefined;
+  return item.blocked !== undefined;
 }
 
 function closeMenu(now = false) {

@@ -32,7 +32,6 @@ export interface MlSummaryJob {
   auditMessage?: Partial<AuditMessage>;
   isSingleMetricViewerJob: boolean;
   isNotSingleMetricViewerJobMessage?: string;
-  deleting?: boolean;
   blocked?: MlJobBlocked;
   latestTimestampSortValue?: number;
   earliestStartTimestampMs?: number;

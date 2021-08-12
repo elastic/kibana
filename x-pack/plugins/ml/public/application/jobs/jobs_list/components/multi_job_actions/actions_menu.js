@@ -51,7 +51,7 @@ class MultiJobActionsMenuUI extends Component {
   };
 
   render() {
-    const anyJobsDeleting = this.props.jobs.some((j) => j.deleting);
+    const anyJobsBlocked = this.props.jobs.some((j) => j.blocked !== undefined);
     const button = (
       <EuiButtonIcon
         size="s"
@@ -65,7 +65,7 @@ class MultiJobActionsMenuUI extends Component {
         )}
         color="text"
         disabled={
-          anyJobsDeleting || (this.canDeleteJob === false && this.canStartStopDatafeed === false)
+          anyJobsBlocked || (this.canDeleteJob === false && this.canStartStopDatafeed === false)
         }
         data-test-subj="mlADJobListMultiSelectManagementActionsButton"
       />

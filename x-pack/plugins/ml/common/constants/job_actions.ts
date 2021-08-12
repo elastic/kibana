@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const JOB_ACTION = {
   DELETE: 'delete',
   RESET: 'reset',
@@ -12,3 +14,22 @@ export const JOB_ACTION = {
 } as const;
 
 export type JobAction = typeof JOB_ACTION[keyof typeof JOB_ACTION];
+
+export function getJobActionString(action: JobAction) {
+  switch (action) {
+    case JOB_ACTION.DELETE:
+      return i18n.translate('xpack.ml.models.jobService.deletingJob', {
+        defaultMessage: 'deleting',
+      });
+    case JOB_ACTION.RESET:
+      return i18n.translate('xpack.ml.models.jobService.resettingJob', {
+        defaultMessage: 'resetting',
+      });
+    case JOB_ACTION.REVERT:
+      return i18n.translate('xpack.ml.models.jobService.revertingJob', {
+        defaultMessage: 'reverting',
+      });
+    default:
+      return '';
+  }
+}

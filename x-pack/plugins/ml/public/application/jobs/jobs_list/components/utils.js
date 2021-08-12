@@ -78,7 +78,9 @@ export function isClosable(jobs) {
 }
 
 export function isResettable(jobs) {
-  return jobs.some((j) => j.jobState === JOB_STATE.CLOSED);
+  return jobs.some(
+    (j) => j.jobState === JOB_STATE.CLOSED || j.blocked?.reason === JOB_ACTION.RESET
+  );
 }
 
 export function forceStartDatafeeds(jobs, start, end, finish = () => {}) {
