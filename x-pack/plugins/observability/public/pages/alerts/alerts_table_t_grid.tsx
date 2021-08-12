@@ -21,6 +21,7 @@ import {
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
 
+// @ts-expect-error
 import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 
 import { EuiButtonIcon, EuiDataGridColumn } from '@elastic/eui';
