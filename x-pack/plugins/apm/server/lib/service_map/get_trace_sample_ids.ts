@@ -29,7 +29,7 @@ export async function getTraceSampleIds({
   setup,
 }: {
   serviceName?: string;
-  environment?: string;
+  environment: string;
   setup: Setup & SetupTimeRange;
 }) {
   const { start, end, apmEventClient, config } = setup;

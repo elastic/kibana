@@ -12,6 +12,7 @@ import { useLocation } from 'react-router-dom';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { IUrlParams } from '../../../context/url_params_context/types';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { TransactionsTable } from '../../shared/transactions_table';
@@ -44,6 +45,10 @@ export function TransactionOverview() {
   const { urlParams } = useUrlParams();
   const { transactionType, serviceName } = useApmServiceContext();
 
+  const {
+    query: { kuery, environment },
+  } = useApmParams('/services/:serviceName/transactions');
+
   // redirect to first transaction type
   useRedirect(getRedirectLocation({ location, transactionType, urlParams }));
 
@@ -55,13 +60,15 @@ export function TransactionOverview() {
 
   return (
     <>
-      <TransactionCharts />
+      <TransactionCharts kuery={kuery} environment={environment} />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>
         <TransactionsTable
           hideViewTransactionsLink
           numberOfTransactionsPerPage={25}
           showAggregationAccurateCallout
+          environment={environment}
+          kuery={kuery}
         />
       </EuiPanel>
     </>

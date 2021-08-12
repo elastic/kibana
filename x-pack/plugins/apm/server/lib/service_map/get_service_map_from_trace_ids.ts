@@ -87,7 +87,7 @@ export async function getServiceMapFromTraceIds({
   setup: Setup & SetupTimeRange;
   traceIds: string[];
   serviceName?: string;
-  environment?: string;
+  environment: string;
 }) {
   const serviceMapFromTraceIdsScriptResponse = await fetchServicePathsFromTraceIds(
     setup,

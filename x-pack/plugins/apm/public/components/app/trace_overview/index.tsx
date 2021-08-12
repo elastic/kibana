@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { SearchBar } from '../../shared/search_bar';
@@ -19,7 +20,11 @@ const DEFAULT_RESPONSE: TracesAPIResponse = {
 
 export function TraceOverview() {
   const {
-    urlParams: { environment, kuery, start, end },
+    query: { environment, kuery },
+  } = useApmParams('/traces');
+
+  const {
+    urlParams: { start, end },
   } = useUrlParams();
   const { status, data = DEFAULT_RESPONSE } = useFetcher(
     (callApmApi) => {

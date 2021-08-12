@@ -11,6 +11,7 @@ import React, { useState } from 'react';
 import uuid from 'uuid';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { InstancesLatencyDistributionChart } from '../../shared/charts/instances_latency_distribution_chart';
@@ -69,9 +70,11 @@ export function ServiceOverviewInstancesChartAndTable({
   const { direction, field } = sort;
 
   const {
+    query: { environment, kuery },
+  } = useApmParams('/services/:serviceName/overview');
+
+  const {
     urlParams: {
-      environment,
-      kuery,
       latencyAggregationType,
       start,
       end,

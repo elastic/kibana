@@ -33,20 +33,17 @@ const INITIAL_STATE = {
 
 export function ServiceOverviewThroughputChart({
   height,
+  environment,
+  kuery,
 }: {
   height?: number;
+  environment: string;
+  kuery: string;
 }) {
   const theme = useTheme();
 
   const {
-    urlParams: {
-      environment,
-      kuery,
-      start,
-      end,
-      comparisonEnabled,
-      comparisonType,
-    },
+    urlParams: { start, end, comparisonEnabled, comparisonType },
   } = useUrlParams();
 
   const { transactionType, serviceName } = useApmServiceContext();

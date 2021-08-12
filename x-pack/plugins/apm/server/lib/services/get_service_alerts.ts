@@ -26,7 +26,7 @@ export async function getServiceAlerts({
   start: number;
   end: number;
   serviceName: string;
-  environment?: string;
+  environment: string;
   transactionType: string;
 }) {
   const response = await ruleDataClient.getReader().search({

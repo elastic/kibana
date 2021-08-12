@@ -30,7 +30,7 @@ export async function getTopAlerts({
         bool: {
           filter: [
             ...rangeQuery(start, end),
-            ...kqlQuery(kuery),
+            ...kqlQuery(kuery ?? ''),
             ...alertStatusQuery(status),
             { term: { [EVENT_KIND]: 'signal' } },
           ],

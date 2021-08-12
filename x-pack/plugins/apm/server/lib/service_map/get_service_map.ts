@@ -29,7 +29,7 @@ import { transformServiceMapResponses } from './transform_service_map_responses'
 export interface IEnvOptions {
   setup: Setup & SetupTimeRange;
   serviceName?: string;
-  environment?: string;
+  environment: string;
   searchAggregatedTransactions: boolean;
   logger: Logger;
 }
@@ -92,6 +92,7 @@ async function getServicesData(options: IEnvOptions) {
   const projection = getServicesProjection({
     setup,
     searchAggregatedTransactions,
+    kuery: '',
   });
 
   let filter = [

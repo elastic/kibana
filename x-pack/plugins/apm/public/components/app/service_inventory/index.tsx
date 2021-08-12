@@ -14,6 +14,7 @@ import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detecti
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useUpgradeAssistantHref } from '../../shared/Links/kibana';
 import { SearchBar } from '../../shared/search_bar';
@@ -33,16 +34,15 @@ const initialData = {
 
 let hasDisplayedToast = false;
 
-function useServicesFetcher() {
+function useServicesFetcher({
+  environment,
+  kuery,
+}: {
+  environment: string;
+  kuery: string;
+}) {
   const {
-    urlParams: {
-      environment,
-      kuery,
-      start,
-      end,
-      comparisonEnabled,
-      comparisonType,
-    },
+    urlParams: { start, end, comparisonEnabled, comparisonType },
   } = useUrlParams();
   const { core } = useApmPluginContext();
   const upgradeAssistantHref = useUpgradeAssistantHref();
@@ -155,12 +155,17 @@ function useServicesFetcher() {
 
 export function ServiceInventory() {
   const { core } = useApmPluginContext();
+
+  const {
+    query: { environment, kuery },
+  } = useApmParams('/services');
+
   const {
     servicesData,
     servicesStatus,
     comparisonData,
     isLoading,
-  } = useServicesFetcher();
+  } = useServicesFetcher({ environment, kuery });
 
   const {
     anomalyDetectionJobsData,
