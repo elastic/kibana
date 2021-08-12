@@ -43,6 +43,9 @@
           }
         }
       },
+      "reason": {
+        "type": "keyword"
+      },
       "rule": {
         "type": "object",
         "properties": {

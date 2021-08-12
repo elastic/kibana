@@ -22,11 +22,10 @@ import {
   Query,
   TimeRange,
   Filter,
-  IndexPatternField,
   IndexPattern,
   ISearchSource,
+  IndexPatternField,
 } from '../../../../data/common';
-import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { UiActionsStart } from '../../../../ui_actions/public';
@@ -38,23 +37,26 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
-import * as columnActions from '../angular/doc_table/actions/columns';
-import { getSortForSearchSource, getDefaultSort } from '../angular/doc_table';
+import * as columnActions from '../apps/main/components/doc_table/actions/columns';
 import { handleSourceColumnState } from '../angular/helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
+import { DocTableProps } from '../apps/main/components/doc_table/doc_table_wrapper';
+import { getDefaultSort, getSortForSearchSource } from '../apps/main/components/doc_table';
+import { SortOrder } from '../apps/main/components/doc_table/components/table_header/helpers';
 
-export interface SearchProps extends Partial<DiscoverGridProps> {
-  settings?: DiscoverGridSettings;
-  description?: string;
-  sharedItemTitle?: string;
-  inspectorAdapters?: Adapters;
+export type SearchProps = Partial<DiscoverGridProps> &
+  Partial<DocTableProps> & {
+    settings?: DiscoverGridSettings;
+    description?: string;
+    sharedItemTitle?: string;
+    inspectorAdapters?: Adapters;
 
-  filter?: (field: IndexPatternField, value: string[], operator: string) => void;
-  hits?: ElasticSearchHit[];
-  totalHitCount?: number;
-  onMoveColumn?: (column: string, index: number) => void;
-}
+    filter?: (field: IndexPatternField, value: string[], operator: string) => void;
+    hits?: ElasticSearchHit[];
+    totalHitCount?: number;
+    onMoveColumn?: (column: string, index: number) => void;
+  };
 
 interface SearchEmbeddableConfig {
   savedSearch: SavedSearch;
@@ -168,6 +170,14 @@ export class SavedSearchEmbeddable
     this.searchProps!.isLoading = true;
 
     this.updateOutput({ loading: true, error: undefined });
+    const executionContext = {
+      type: this.type,
+      name: 'discover',
+      id: this.savedSearch.id,
+      description: this.output.title || this.output.defaultTitle || '',
+      url: this.output.editUrl,
+      parent: this.input.executionContext,
+    };
 
     try {
       // Make the request
@@ -185,6 +195,7 @@ export class SavedSearchEmbeddable
                 'This request queries Elasticsearch to fetch the data for the search.',
             }),
           },
+          executionContext,
         })
         .toPromise();
       this.updateOutput({ loading: false, error: undefined });

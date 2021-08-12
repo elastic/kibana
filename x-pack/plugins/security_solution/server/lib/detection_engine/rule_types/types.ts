@@ -33,6 +33,7 @@ import { RuleParams } from '../schemas/rule_schemas';
 import { BuildRuleMessage } from '../signals/rule_messages';
 import { AlertAttributes, BulkCreate, WrapHits } from '../signals/types';
 import { AlertsFieldMap, RulesFieldMap } from './field_maps';
+import { ExperimentalFeatures } from '../../../../common/experimental_features';
 
 export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
   bulkCreateTimes: string[];
@@ -118,3 +119,14 @@ export type RACAlert = Exclude<
 
 export type RACSourceHit = SearchHit<RACAlert>;
 export type WrappedRACAlert = BaseHit<RACAlert>;
+
+export interface CreateRuleOptions {
+  experimentalFeatures: ExperimentalFeatures;
+  indexAlias: string;
+  lists: SetupPlugins['lists'];
+  logger: Logger;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
+  ruleDataClient: RuleDataClient;
+  version: string;
+  ruleDataService: IRuleDataPluginService;
+}

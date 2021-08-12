@@ -8,6 +8,8 @@
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { useUiTracker } from '../../../../../../observability/public';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -54,6 +56,8 @@ export function ServiceOverviewDependenciesTable() {
     query,
   });
 
+  const trackEvent = useUiTracker();
+
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
@@ -88,6 +92,13 @@ export function ServiceOverviewDependenciesTable() {
               kuery,
               rangeFrom,
               rangeTo,
+            }}
+            onClick={() => {
+              trackEvent({
+                app: 'apm',
+                metricType: METRIC_TYPE.CLICK,
+                metric: 'service_dependencies_to_backend_detail',
+              });
             }}
           />
         ) : (

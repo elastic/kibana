@@ -12,24 +12,24 @@ import { Expression, Props } from '../components/param_details_form/expression';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import {
-  ALERT_MEMORY_USAGE,
-  ALERT_DETAILS,
-  ALERT_REQUIRES_APP_CONTEXT,
+  RULE_MEMORY_USAGE,
+  RULE_DETAILS,
+  RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
 
 export function createMemoryUsageAlertType(): AlertTypeModel<MonitoringAlertTypeParams> {
   return {
-    id: ALERT_MEMORY_USAGE,
-    description: ALERT_DETAILS[ALERT_MEMORY_USAGE].description,
+    id: RULE_MEMORY_USAGE,
+    description: RULE_DETAILS[RULE_MEMORY_USAGE].description,
     iconClass: 'bell',
     documentationUrl(docLinks) {
       return `${docLinks.links.monitoring.alertsKibanaJvmThreshold}`;
     },
     alertParamsExpression: (props: Props) => (
-      <Expression {...props} paramDetails={ALERT_DETAILS[ALERT_MEMORY_USAGE].paramDetails} />
+      <Expression {...props} paramDetails={RULE_DETAILS[RULE_MEMORY_USAGE].paramDetails} />
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
-    requiresAppContext: ALERT_REQUIRES_APP_CONTEXT,
+    requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
   };
 }

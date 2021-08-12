@@ -1,6 +1,6 @@
 ---
-id: kibDevTutorialBuildAPlugin
-slug: /kibana-dev-docs/tutorials/anatomy-of-a-plugin
+id: kibDevAnatomyOfAPlugin
+slug: /kibana-dev-docs/anatomy-of-a-plugin
 title: Anatomy of a plugin
 summary: Anatomy of a Kibana plugin.
 date: 2021-08-03
@@ -22,22 +22,23 @@ The basic file structure of a Kibana plugin named demo that has both client-side
 ```
 plugins/
   demo
-    kibana.json [1]
+    kibana.json
+    tsconfig.json
     public
-      index.ts  [2]
-      plugin.ts [3]
+      index.ts
+      plugin.ts
     server
-      index.ts  [4]
-      plugin.ts [5]
+      index.ts
+      plugin.ts
     common
-      index.ts  [6]
+      index.ts
 ```
 
-### [1] kibana.json
+### kibana.json
 
 `kibana.json` is a static manifest file that is used to identify the plugin and to specify if this plugin has server-side code, browser-side code, or both:
 
-```
+```json
 {
   "id": "examplePluginId",
   "version": "1.0.0",
@@ -88,12 +89,38 @@ plugins/
   You don't need to declare a dependency on a plugin if you only wish to access its types.
 </DocCallOut>
 
-### [2] public/index.ts
+### tsconfig.json
+
+If you are developing in TypeScript (which we recommend), you will need to add a `tsconfig.json` file. Here is an example file that you would use if adding a plugin into the `examples` directory.
+
+```json
+{
+  "extends": "../../tsconfig.json", // Extend kibana/tsconfig.json
+  "compilerOptions": {
+    "outDir": "./target/types"
+  },
+  "include": [
+    "index.ts",
+    "../../typings/**/*",
+    // The following paths are optional, based on whether you have common code,
+    // or are building a client-side-only or server-side-only plugin.
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts"
+  ],
+  "exclude": [],
+  // If you import another plugin's types, point to their `tsconfig.json` file.
+  "references": [{ "path": "../../src/core/tsconfig.json" }]
+}
+```
+
+### public/index.ts
 
 `public/index.ts` is the entry point into the client-side code of this plugin. Everything exported from this file will be a part of the plugins <DocLink id="kibPlatformIntro" section="public-plugin-api" text="public API"/>. If the plugin only exists to export static utilities, consider using a package. Otherwise, this file must export a function named plugin, which will receive a standard set of
 core capabilities as an argument. It should return an instance of its plugin class for Kibana to load.
 
-```
+```ts
 import type { PluginInitializerContext } from 'kibana/server';
 import { DemoPlugin } from './plugin';
 
@@ -122,7 +149,7 @@ Using the non-`type` variation will increase the bundle size unnecessarily and m
 
 </DocCallOut>
 
-### [3] public/plugin.ts
+### public/plugin.ts
 
 `public/plugin.ts` is the client-side plugin definition itself. Technically speaking, it does not need to be a class or even a separate file from the entry
 point, but all plugins at Elastic should be consistent in this way.
@@ -147,11 +174,11 @@ export class DemoPlugin implements Plugin {
 }
 ```
 
-### [4] server/index.ts
+### server/index.ts
 
 `server/index.ts` is the entry-point into the server-side code of this plugin. It is identical in almost every way to the client-side entry-point:
 
-### [5] server/plugin.ts
+### server/plugin.ts
 
 `server/plugin.ts` is the server-side plugin definition. The shape of this plugin is the same as it’s client-side counter-part:
 
@@ -178,7 +205,7 @@ export class DemoPlugin implements Plugin {
 Kibana does not impose any technical restrictions on how the the internals of a plugin are architected, though there are certain
 considerations related to how plugins integrate with core APIs and APIs exposed by other plugins that may greatly impact how they are built.
 
-### [6] common/index.ts
+### common/index.ts
 
 `common/index.ts` is the entry-point into code that can be used both server-side or client side.
 
@@ -208,13 +235,15 @@ dependency in it’s kibana.json manifest file.
 
 ** foobar plugin.ts: **
 
-```
+```ts
 import type { Plugin } from 'kibana/server';
-export interface FoobarPluginSetup { [1]
+// [1]
+export interface FoobarPluginSetup {
   getFoo(): string;
 }
 
-export interface FoobarPluginStart { [1]
+// [1]
+export interface FoobarPluginStart {
   getBar(): string;
 }
 
@@ -256,7 +285,8 @@ With that specified in the plugin manifest, the appropriate interfaces are then 
 import type { CoreSetup, CoreStart } from 'kibana/server';
 import type { FoobarPluginSetup, FoobarPluginStart } from '../../foobar/server';
 
-interface DemoSetupPlugins { [1];
+// [1]
+interface DemoSetupPlugins {
   foobar: FoobarPluginSetup;
 }
 
@@ -265,13 +295,15 @@ interface DemoStartPlugins {
 }
 
 export class DemoPlugin {
-  public setup(core: CoreSetup, plugins: DemoSetupPlugins) { [2];
+  // [2]
+  public setup(core: CoreSetup, plugins: DemoSetupPlugins) {
     const { foobar } = plugins;
     foobar.getFoo(); // 'foo'
     foobar.getBar(); // throws because getBar does not exist
   }
 
-  public start(core: CoreStart, plugins: DemoStartPlugins) { [3];
+  //[3]
+  public start(core: CoreStart, plugins: DemoStartPlugins) {
     const { foobar } = plugins;
     foobar.getFoo(); // throws because getFoo does not exist
     foobar.getBar(); // 'bar'
