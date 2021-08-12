@@ -113,6 +113,7 @@ export const sampleAttributeCoreWebVital = {
         {
           accessors: ['y-axis-column-layer0', 'y-axis-column-1', 'y-axis-column-2'],
           layerId: 'layer0',
+          layerType: 'data',
           seriesType: 'bar_horizontal_percentage_stacked',
           xAccessor: 'x-axis-column-layer0',
           yConfig: [
