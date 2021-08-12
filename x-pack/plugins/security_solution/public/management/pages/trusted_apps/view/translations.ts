@@ -71,16 +71,16 @@ export const PROPERTY_TITLES: Readonly<
     defaultMessage: 'OS',
   }),
   created_at: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.createdAt', {
-    defaultMessage: 'Date Created',
+    defaultMessage: 'Date created',
   }),
   created_by: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.createdBy', {
-    defaultMessage: 'Created By',
+    defaultMessage: 'Created by',
   }),
   updated_at: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.updatedAt', {
-    defaultMessage: 'Date Modified',
+    defaultMessage: 'Date modified',
   }),
   updated_by: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.updatedBy', {
-    defaultMessage: 'Modified By',
+    defaultMessage: 'Modified by',
   }),
   description: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.description', {
     defaultMessage: 'Description',

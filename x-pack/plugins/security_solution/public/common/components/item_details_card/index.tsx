@@ -53,7 +53,8 @@ const groupChildrenByType = (
 
 const SummarySection = styled(EuiFlexItem)`
   background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
-  padding: ${({ theme }) => theme.eui.euiSize};
+  padding: ${({ theme }) => theme.eui.paddingSizes.m};
+  padding-top: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
 
 const DetailsSection = styled(EuiFlexItem)`
@@ -63,12 +64,14 @@ const DetailsSection = styled(EuiFlexItem)`
 const DescriptionListTitle = styled(EuiDescriptionListTitle)`
   &&& {
     width: 40%;
+    margin-top: ${({ theme }) => theme.eui.paddingSizes.s};
   }
 `;
 
 const DescriptionListDescription = styled(EuiDescriptionListDescription)`
   &&& {
     width: 60%;
+    margin-top: ${({ theme }) => theme.eui.paddingSizes.s};
   }
 `;
 

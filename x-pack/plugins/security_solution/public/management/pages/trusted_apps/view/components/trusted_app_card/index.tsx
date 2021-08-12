@@ -161,7 +161,6 @@ export const TrustedAppCard = memo<TrustedAppCardProps>(
         <ItemDetailsAction
           size="s"
           color="primary"
-          fill
           onClick={handleEdit}
           data-test-subj="trustedAppEditButton"
         >

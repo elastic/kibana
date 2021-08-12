@@ -74,9 +74,6 @@ export const TrustedAppsPage = memo(() => {
     show: undefined,
     id: undefined,
   }));
-  const handleViewTypeChange = useTrustedAppsNavigateCallback((viewType: ViewType) => ({
-    view_type: viewType,
-  }));
 
   const handleOnSearch = useCallback(
     (query: string, includedPolicies?: string, excludedPolicies?: string) => {
@@ -105,7 +102,7 @@ export const TrustedAppsPage = memo(() => {
     >
       <FormattedMessage
         id="xpack.securitySolution.trustedapps.list.addButton"
-        defaultMessage="Add Trusted Application"
+        defaultMessage="Add trusted application"
       />
     </EuiButton>
   );
@@ -167,7 +164,7 @@ export const TrustedAppsPage = memo(() => {
       title={
         <FormattedMessage
           id="xpack.securitySolution.trustedapps.list.pageTitle"
-          defaultMessage="Trusted Applications"
+          defaultMessage="Trusted applications"
         />
       }
       headerBackComponent={backButton}
