@@ -66,10 +66,14 @@ export const getFieldsBrowserLazy = (props: FieldBrowserProps, { store }: { stor
 };
 
 const AddToCaseLazy = lazy(() => import('../components/actions/timeline/cases/add_to_case_action'));
-export const getAddToCaseLazy = (props: AddToCaseActionProps) => {
+export const getAddToCaseLazy = (props: AddToCaseActionProps, store: Store) => {
   return (
     <Suspense fallback={<span />}>
-      <AddToCaseLazy {...props} />
+      <Provider store={store}>
+        <I18nProvider>
+          <AddToCaseLazy {...props} />
+        </I18nProvider>
+      </Provider>
     </Suspense>
   );
 };
