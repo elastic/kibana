@@ -122,12 +122,12 @@ describe('url state', () => {
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE).should(
       'have.attr',
       'title',
-      ABSOLUTE_DATE.startTimeTimeline
+      ABSOLUTE_DATE.startTime
     );
     cy.get(DATE_PICKER_END_DATE_POPOVER_BUTTON_TIMELINE).should(
       'have.attr',
       'title',
-      ABSOLUTE_DATE.endTimeTimeline
+      ABSOLUTE_DATE.endTime
     );
   });
 
