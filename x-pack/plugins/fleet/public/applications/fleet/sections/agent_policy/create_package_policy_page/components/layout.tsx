@@ -21,10 +21,10 @@ import {
 import { WithHeaderLayout } from '../../../../layouts';
 import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../types';
 import { PackageIcon } from '../../../../components';
-import type { CreatePackagePolicyFrom } from '../types';
+import type { EditPackagePolicyFrom } from '../types';
 
 export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
-  from: CreatePackagePolicyFrom;
+  from: EditPackagePolicyFrom;
   cancelUrl: string;
   onCancel?: React.ReactEventHandler;
   agentPolicy?: AgentPolicy;
@@ -48,11 +48,48 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
     'data-test-subj': dataTestSubj,
     tabs = [],
   }) => {
+    const isAdd = useMemo(() => ['package'].includes(from), [from]);
+    const isEdit = useMemo(() => ['edit', 'package-edit'].includes(from), [from]);
+    const isUpgrade = useMemo(
+      () =>
+        ['upgrade-from-fleet-policy-list', 'upgrade-from-integrations-policy-list'].includes(from),
+      [from]
+    );
+
     const pageTitle = useMemo(() => {
-      if (
-        (from === 'package' || from === 'package-edit' || from === 'edit' || from === 'policy') &&
-        packageInfo
-      ) {
+      if ((isAdd || isEdit || isUpgrade) && packageInfo) {
+        let pageTitleText = (
+          <FormattedMessage
+            id="xpack.fleet.createPackagePolicy.pageTitleWithPackageName"
+            defaultMessage="Add {packageName} integration"
+            values={{
+              packageName: integrationInfo?.title || packageInfo.title,
+            }}
+          />
+        );
+
+        if (isEdit) {
+          pageTitleText = (
+            <FormattedMessage
+              id="xpack.fleet.editPackagePolicy.editPageTitleWithPackageName"
+              defaultMessage="Edit {packageName} integration"
+              values={{
+                packageName: packageInfo.title,
+              }}
+            />
+          );
+        } else if (isUpgrade) {
+          pageTitleText = (
+            <FormattedMessage
+              id="xpack.fleet.editPackagePolicy.upgradePageTitleWithPackageName"
+              defaultMessage="Upgrade {packageName} integration"
+              values={{
+                packageName: packageInfo.title,
+              }}
+            />
+          );
+        }
+
         return (
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
@@ -66,32 +103,14 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
-                <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>
-                  {from === 'edit' || from === 'package-edit' ? (
-                    <FormattedMessage
-                      id="xpack.fleet.editPackagePolicy.pageTitleWithPackageName"
-                      defaultMessage="Edit {packageName} integration"
-                      values={{
-                        packageName: packageInfo.title,
-                      }}
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.fleet.createPackagePolicy.pageTitleWithPackageName"
-                      defaultMessage="Add {packageName} integration"
-                      values={{
-                        packageName: integrationInfo?.title || packageInfo.title,
-                      }}
-                    />
-                  )}
-                </h1>
+                <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>{pageTitleText}</h1>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         );
       }
 
-      return from === 'edit' || from === 'package-edit' ? (
+      return isEdit ? (
         <EuiText>
           <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>
             <FormattedMessage
@@ -112,31 +131,46 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
       );
     }, [
       dataTestSubj,
-      from,
       integrationInfo?.icons,
       integrationInfo?.name,
       integrationInfo?.title,
       packageInfo,
+      isAdd,
+      isEdit,
+      isUpgrade,
     ]);
 
     const pageDescription = useMemo(() => {
-      return from === 'edit' || from === 'package-edit' ? (
-        <FormattedMessage
-          id="xpack.fleet.editPackagePolicy.pageDescription"
-          defaultMessage="Modify integration settings and deploy changes to the selected agent policy."
-        />
-      ) : from === 'policy' ? (
-        <FormattedMessage
-          id="xpack.fleet.createPackagePolicy.pageDescriptionfromPolicy"
-          defaultMessage="Configure an integration for the selected agent policy."
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.fleet.createPackagePolicy.pageDescriptionfromPackage"
-          defaultMessage="Follow these instructions to add this integration to an agent policy."
-        />
-      );
-    }, [from]);
+      if (isEdit) {
+        return (
+          <FormattedMessage
+            id="xpack.fleet.editPackagePolicy.pageDescription"
+            defaultMessage="Modify integration settings and deploy changes to the selected agent policy."
+          />
+        );
+      } else if (isAdd) {
+        return (
+          <FormattedMessage
+            id="xpack.fleet.createPackagePolicy.pageDescriptionfromPolicy"
+            defaultMessage="Configure an integration for the selected agent policy."
+          />
+        );
+      } else if (isUpgrade) {
+        return (
+          <FormattedMessage
+            id="xpack.fleet.upgradePackagePolicy.pageDescriptionFromUpgrade"
+            defaultMessage="Upgrade this integration and deploy changes to the selected agent policy"
+          />
+        );
+      } else {
+        return (
+          <FormattedMessage
+            id="xpack.fleet.createPackagePolicy.pageDescriptionfromPackage"
+            defaultMessage="Follow these instructions to add this integration to an agent policy."
+          />
+        );
+      }
+    }, [isAdd, isEdit, isUpgrade]);
 
     const leftColumn = (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
@@ -167,7 +201,7 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
     );
 
     const rightColumn =
-      agentPolicy && (from === 'policy' || from === 'edit') ? (
+      agentPolicy && (isAdd || isEdit) ? (
         <EuiDescriptionList className="eui-textRight" textStyle="reverse">
           <EuiDescriptionListTitle>
             <FormattedMessage

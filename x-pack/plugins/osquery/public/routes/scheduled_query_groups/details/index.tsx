@@ -21,7 +21,7 @@ import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { useRouterNavigate } from '../../../common/lib/kibana';
+import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useScheduledQueryGroup } from '../../../scheduled_query_groups/use_scheduled_query_group';
 import { ScheduledQueryGroupQueriesTable } from '../../../scheduled_query_groups/scheduled_query_group_queries_table';
@@ -36,6 +36,7 @@ const Divider = styled.div`
 `;
 
 const ScheduledQueryGroupDetailsPageComponent = () => {
+  const permissions = useKibana().services.application.capabilities.osquery;
   const { scheduledQueryGroupId } = useParams<{ scheduledQueryGroupId: string }>();
   const scheduledQueryGroupsListProps = useRouterNavigate('scheduled_query_groups');
   const editQueryLinkProps = useRouterNavigate(
@@ -111,7 +112,12 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
           <Divider />
         </EuiFlexItem>
         <EuiFlexItem grow={false} key="edit_button">
-          <EuiButton fill {...editQueryLinkProps} iconType="pencil">
+          <EuiButton
+            fill
+            {...editQueryLinkProps}
+            iconType="pencil"
+            isDisabled={!permissions.writePacks}
+          >
             <FormattedMessage
               id="xpack.osquery.scheduledQueryDetailsPage.editQueryButtonLabel"
               defaultMessage="Edit"
@@ -120,7 +126,7 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [data?.policy_id, editQueryLinkProps]
+    [data?.policy_id, editQueryLinkProps, permissions]
   );
 
   return (

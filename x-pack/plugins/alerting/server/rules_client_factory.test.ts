@@ -21,7 +21,6 @@ import { securityMock } from '../../security/server/mocks';
 import { PluginStartContract as ActionsStartContract } from '../../actions/server';
 import { actionsMock, actionsAuthorizationMock } from '../../actions/server/mocks';
 import { LegacyAuditLogger } from '../../security/server';
-import { ALERTS_FEATURE_ID } from '../common';
 import { eventLogMock } from '../../event_log/server/mocks';
 import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
 import { alertingAuthorizationClientFactoryMock } from './alerting_authorization_client_factory.mock';
@@ -105,9 +104,7 @@ test('creates an alerts client with proper constructor arguments when security i
     includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
   });
 
-  expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request, [
-    ALERTS_FEATURE_ID,
-  ]);
+  expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request);
 
   expect(rulesClientFactoryParams.actions.getActionsAuthorizationWithRequest).toHaveBeenCalledWith(
     request
@@ -148,9 +145,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
     includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
   });
 
-  expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request, [
-    ALERTS_FEATURE_ID,
-  ]);
+  expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request);
 
   expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith({
     unsecuredSavedObjectsClient: savedObjectsClient,

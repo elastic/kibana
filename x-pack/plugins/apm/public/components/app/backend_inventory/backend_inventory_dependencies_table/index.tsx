@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -16,6 +17,7 @@ import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time
 import { DependenciesTable } from '../../../shared/dependencies_table';
 import { BackendLink } from '../../../shared/backend_link';
 import { DependenciesTableServiceMapLink } from '../../../shared/dependencies_table/dependencies_table_service_map_link';
+import { useUiTracker } from '../../../../../../observability/public';
 
 export function BackendInventoryDependenciesTable() {
   const {
@@ -27,6 +29,9 @@ export function BackendInventoryDependenciesTable() {
   } = useApmParams('/backends');
 
   const router = useApmRouter();
+
+  const trackEvent = useUiTracker();
+
   const serviceMapLink = router.link('/service-map', {
     query: {
       rangeFrom,
@@ -78,6 +83,13 @@ export function BackendInventoryDependenciesTable() {
             kuery,
             rangeFrom,
             rangeTo,
+          }}
+          onClick={() => {
+            trackEvent({
+              app: 'apm',
+              metricType: METRIC_TYPE.CLICK,
+              metric: 'backend_inventory_to_backend_detail',
+            });
           }}
         />
       );

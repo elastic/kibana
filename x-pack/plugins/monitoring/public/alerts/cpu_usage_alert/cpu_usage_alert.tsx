@@ -8,27 +8,23 @@
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-import {
-  ALERT_CPU_USAGE,
-  ALERT_DETAILS,
-  ALERT_REQUIRES_APP_CONTEXT,
-} from '../../../common/constants';
+import { RULE_CPU_USAGE, RULE_DETAILS, RULE_REQUIRES_APP_CONTEXT } from '../../../common/constants';
 import { validate, MonitoringAlertTypeParams } from '../components/param_details_form/validation';
 import { Expression, Props } from '../components/param_details_form/expression';
 
 export function createCpuUsageAlertType(): AlertTypeModel<MonitoringAlertTypeParams> {
   return {
-    id: ALERT_CPU_USAGE,
-    description: ALERT_DETAILS[ALERT_CPU_USAGE].description,
+    id: RULE_CPU_USAGE,
+    description: RULE_DETAILS[RULE_CPU_USAGE].description,
     iconClass: 'bell',
     documentationUrl(docLinks) {
       return `${docLinks.links.monitoring.alertsKibanaCpuThreshold}`;
     },
     alertParamsExpression: (props: Props) => (
-      <Expression {...props} paramDetails={ALERT_DETAILS[ALERT_CPU_USAGE].paramDetails} />
+      <Expression {...props} paramDetails={RULE_DETAILS[RULE_CPU_USAGE].paramDetails} />
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
-    requiresAppContext: ALERT_REQUIRES_APP_CONTEXT,
+    requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
   };
 }
