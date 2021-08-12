@@ -7,13 +7,13 @@
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { PersistenceServices } from '../../../../../../rule_registry/server';
-import { QUERY_ALERT_TYPE_ID } from '../../../../../common/constants';
-import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
-import { queryExecutor } from '../../signals/executors/query';
+import { INDICATOR_ALERT_TYPE_ID } from '../../../../../common/constants';
+import { threatRuleParams, ThreatRuleParams } from '../../schemas/rule_schemas';
+import { threatMatchExecutor } from '../../signals/executors/threat_match';
 import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
 import { CreateRuleOptions } from '../types';
 
-export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
+export const createIndicatorMatchAlertType = (createOptions: CreateRuleOptions) => {
   const {
     experimentalFeatures,
     indexAlias,
@@ -32,13 +32,13 @@ export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
     ruleDataClient,
     ruleDataService,
   });
-  return createSecurityRuleType<QueryRuleParams, {}, PersistenceServices, {}>({
-    id: QUERY_ALERT_TYPE_ID,
-    name: 'Custom Query Rule',
+  return createSecurityRuleType<ThreatRuleParams, {}, PersistenceServices, {}>({
+    id: INDICATOR_ALERT_TYPE_ID,
+    name: 'Indicator Match Rule',
     validate: {
       params: {
         validate: (object: unknown) => {
-          const [validated, errors] = validateNonExact(object, queryRuleParams);
+          const [validated, errors] = validateNonExact(object, threatRuleParams);
           if (errors != null) {
             throw new Error(errors);
           }
@@ -78,7 +78,7 @@ export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
         state,
       } = execOptions;
 
-      const result = await queryExecutor({
+      const result = await threatMatchExecutor({
         buildRuleMessage,
         bulkCreate,
         exceptionItems,

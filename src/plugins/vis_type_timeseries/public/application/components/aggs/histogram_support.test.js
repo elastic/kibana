@@ -27,7 +27,7 @@ const runTest = (aggType, name, test, additionalProps = {}) => {
       ...additionalProps,
     };
     const series = { ...SERIES, metrics: [metric] };
-    const panel = { ...PANEL, series };
+    const panel = PANEL;
 
     it(name, () => {
       const wrapper = mountWithIntl(
