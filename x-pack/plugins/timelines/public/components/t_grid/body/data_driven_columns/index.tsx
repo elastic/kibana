@@ -146,6 +146,7 @@ const TgridActionTdCell = ({
   actionsColumnWidth: number;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
 }) => {
+  console.log('width', { actionsColumnWidth, width });
   const displayWidth = width ? width : actionsColumnWidth;
   return (
     <EventsTdGroupActions
