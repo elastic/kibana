@@ -28,7 +28,18 @@ jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       timelines: {
-        getAddToCaseAction: () => <div data-test-subj="add-to-case-action">{'Add to case'}</div>,
+        getLastUpdated: jest.fn(),
+        getLoadingPanel: jest.fn(),
+        getFieldBrowser: jest.fn(),
+        getUseDraggableKeyboardWrapper: () =>
+          jest.fn().mockReturnValue({
+            onBlur: jest.fn(),
+            onKeyDown: jest.fn(),
+          }),
+        getAddToCasePopover: jest
+          .fn()
+          .mockReturnValue(<div data-test-subj="add-to-case-action">{'Add to case'}</div>),
+        getAddToCaseAction: jest.fn(),
       },
     },
   }),

@@ -31,7 +31,46 @@ import { useTimelineEvents } from '../../../timelines/containers';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
 
-jest.mock('../../lib/kibana');
+jest.mock('../../lib/kibana', () => {
+  const useKibana = jest.requireActual('../../lib/kibana');
+  return {
+    ...useKibana,
+    useKibana: jest.fn().mockReturnValue({
+      services: {
+        application: {
+          navigateToApp: jest.fn(),
+          getUrlForApp: jest.fn(),
+        },
+        uiSettings: {
+          get: jest.fn(),
+        },
+        savedObjects: {
+          client: {},
+        },
+        timelines: {
+          getLastUpdated: jest.fn(),
+          getLoadingPanel: jest.fn(),
+          getUseDraggableKeyboardWrapper: () =>
+            jest.fn().mockReturnValue({
+              onBlur: jest.fn(),
+              onKeyDown: jest.fn(),
+            }),
+          getAddToCasePopover: jest
+            .fn()
+            .mockReturnValue(<div data-test-subj="add-to-case-action">{'Add to case'}</div>),
+          getAddToCaseAction: jest.fn(),
+          getFieldBrowser: jest.fn().mockReturnValue(<div data-test-subj="field-browser" />),
+        },
+      },
+    }),
+    useToasts: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+    }),
+    useGetUserCasesPermissions: jest.fn(),
+  };
+});
 
 jest.mock('../../hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
