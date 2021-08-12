@@ -292,6 +292,7 @@ const EventsViewerComponent: React.FC<Props> = ({
     <StyledEuiPanel
       data-test-subj="events-viewer-panel"
       $isFullScreen={globalFullScreen && id !== TimelineId.active}
+      hasBorder
     >
       {canQueryTimeline ? (
         <EventDetailsWidthProvider>
