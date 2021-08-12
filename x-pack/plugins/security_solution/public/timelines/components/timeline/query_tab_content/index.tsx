@@ -13,7 +13,7 @@ import {
   EuiFlyoutFooter,
   EuiBadge,
 } from '@elastic/eui';
-import type { AlertConsumers } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';

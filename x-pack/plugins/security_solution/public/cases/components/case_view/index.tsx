@@ -7,7 +7,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import type { AlertConsumers } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import {
   getCaseDetailsUrl,

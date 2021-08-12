@@ -11,7 +11,7 @@ import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
 
 import { isEmpty } from 'lodash/fp';
-import type { AlertConsumers } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
