@@ -172,21 +172,10 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         },
       },
     };
-  } else if (action.type === 'endpointDetailsActivityLogUpdatePaging') {
-    return {
-      ...state,
-      endpointDetails: {
-        ...state.endpointDetails!,
-        activityLog: {
-          ...state.endpointDetails.activityLog,
-          paging: {
-            ...state.endpointDetails.activityLog.paging,
-            ...action.payload,
-          },
-        },
-      },
-    };
-  } else if (action.type === 'endpointDetailsActivityLogUpdateIsInvalidDateRange') {
+  } else if (
+    action.type === 'endpointDetailsActivityLogUpdatePaging' ||
+    action.type === 'endpointDetailsActivityLogUpdateIsInvalidDateRange'
+  ) {
     return {
       ...state,
       endpointDetails: {
@@ -315,9 +304,11 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       logData: createUninitialisedResourceState(),
       paging: {
         disabled: false,
+        isInvalidDateRange: false,
         page: 1,
         pageSize: 50,
-        isInvalidDateRange: false,
+        startDate: 'now-1d',
+        endDate: 'now',
       },
     };
 

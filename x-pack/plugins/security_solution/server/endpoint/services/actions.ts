@@ -31,8 +31,8 @@ export const getAuditLogResponse = async ({
   elasticAgentId: string;
   page: number;
   pageSize: number;
-  startDate?: string;
-  endDate?: string;
+  startDate: string;
+  endDate: string;
   context: SecuritySolutionRequestHandlerContext;
   logger: Logger;
 }): Promise<ActivityLog> => {
@@ -71,8 +71,8 @@ const getActivityLog = async ({
   elasticAgentId: string;
   size: number;
   from: number;
-  startDate?: string;
-  endDate?: string;
+  startDate: string;
+  endDate: string;
   logger: Logger;
 }) => {
   const options = {
@@ -84,13 +84,10 @@ const getActivityLog = async ({
 
   let actionsResult;
   let responsesResult;
-  const dateFilters = [];
-  if (startDate) {
-    dateFilters.push({ range: { '@timestamp': { gte: startDate } } });
-  }
-  if (endDate) {
-    dateFilters.push({ range: { '@timestamp': { lte: endDate } } });
-  }
+  const dateFilters = [
+    { range: { '@timestamp': { gte: startDate } } },
+    { range: { '@timestamp': { lte: endDate } } },
+  ];
 
   try {
     // fetch actions with matching agent_id

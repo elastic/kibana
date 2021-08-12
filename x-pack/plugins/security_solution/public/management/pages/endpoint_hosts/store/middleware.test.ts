@@ -258,6 +258,8 @@ describe('endpoint list middleware', () => {
       expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledWith({
         path: expect.any(String),
         query: {
+          end_date: 'now',
+          start_date: 'now-1d',
           page: 1,
           page_size: 50,
         },
@@ -278,6 +280,8 @@ describe('endpoint list middleware', () => {
       expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledWith({
         path: expect.any(String),
         query: {
+          end_date: 'now',
+          start_date: 'now-1d',
           page: 1,
           page_size: 50,
         },

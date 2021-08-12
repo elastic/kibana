@@ -41,8 +41,8 @@ export interface EndpointState {
         disabled?: boolean;
         page: number;
         pageSize: number;
-        startDate?: string;
-        endDate?: string;
+        startDate: string;
+        endDate: string;
         isInvalidDateRange: boolean;
       };
       logData: AsyncResourceState<ActivityLog>;

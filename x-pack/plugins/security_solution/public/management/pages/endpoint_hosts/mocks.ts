@@ -126,6 +126,8 @@ export const endpointActivityLogHttpMock = httpHandlerMockFactory<EndpointActivi
           body: {
             page: 1,
             pageSize: 50,
+            startDate: 'now-1d',
+            endDate: 'now',
             data: [
               {
                 type: 'response',

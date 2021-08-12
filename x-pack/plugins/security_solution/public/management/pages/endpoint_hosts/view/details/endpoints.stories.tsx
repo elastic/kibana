@@ -22,6 +22,8 @@ export const dummyEndpointActivityLog = (
   data: {
     page: 1,
     pageSize: 50,
+    startDate: moment().subtract(5, 'day').fromNow().toString(),
+    endDate: moment().toString(),
     data: [
       {
         type: 'action',

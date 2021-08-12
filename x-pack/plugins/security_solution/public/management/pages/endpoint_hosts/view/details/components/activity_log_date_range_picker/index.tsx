@@ -6,12 +6,11 @@
  */
 
 import { useDispatch } from 'react-redux';
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
-import moment from 'moment';
-import { EuiFlexGroup, EuiFlexItem, EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
+import dateMath from '@elastic/datemath';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
 
-import * as i18 from '../../../translations';
 import { useEndpointSelector } from '../../../hooks';
 import { getActivityLogDataPaging } from '../../../../store/selectors';
 
@@ -29,56 +28,62 @@ const StickyFlexItem = styled(EuiFlexItem)`
 
 export const DateRangePicker = memo(() => {
   const dispatch = useDispatch();
-  const { page, pageSize, startDate, endDate, isInvalidDateRange } = useEndpointSelector(
-    getActivityLogDataPaging
-  );
+  const { page, pageSize, startDate, endDate } = useEndpointSelector(getActivityLogDataPaging);
 
-  const onClear = useCallback(
-    ({ clearStart = false, clearEnd = false }: { clearStart?: boolean; clearEnd?: boolean }) => {
+  const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<
+    Array<{ start: string; end: string }>
+  >([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPaused, setIsPaused] = useState(true);
+  const [refreshInterval, setRefreshInterval] = useState();
+
+  const stopLoading = useCallback(() => {
+    setIsLoading(false);
+  }, [setIsLoading]);
+
+  const startLoading = useCallback(() => {
+    setTimeout(stopLoading, 1000);
+  }, [stopLoading]);
+
+  const onRefreshChange = useCallback(() => {
+    setIsPaused(isPaused);
+    setRefreshInterval(refreshInterval);
+    dispatch({
+      type: 'endpointDetailsActivityLogUpdatePaging',
+      payload: {
+        disabled: false,
+        page,
+        pageSize,
+        startDate,
+        endDate,
+      },
+    });
+  }, [dispatch, page, pageSize, startDate, endDate, isPaused, refreshInterval]);
+
+  const onTimeChange = useCallback(
+    ({ start, end }) => {
+      const recentlyUsedRange = recentlyUsedRanges.filter((e) => {
+        const isDuplicate = e.start === start && e.end === end;
+        return !isDuplicate;
+      });
+      recentlyUsedRange.unshift({ start, end });
+      setRecentlyUsedRanges(
+        recentlyUsedRange.length > 10 ? recentlyUsedRange.slice(0, 9) : recentlyUsedRange
+      );
+      setIsLoading(true);
+      startLoading();
       dispatch({
         type: 'endpointDetailsActivityLogUpdatePaging',
         payload: {
           disabled: false,
           page,
           pageSize,
-          startDate: clearStart ? undefined : startDate,
-          endDate: clearEnd ? undefined : endDate,
+          startDate: start ? dateMath.parse(start)?.toISOString() : undefined,
+          endDate: end ? dateMath.parse(end)?.toISOString() : undefined,
         },
       });
     },
-    [dispatch, endDate, startDate, page, pageSize]
-  );
-
-  const onChangeStartDate = useCallback(
-    (date) => {
-      dispatch({
-        type: 'endpointDetailsActivityLogUpdatePaging',
-        payload: {
-          disabled: false,
-          page,
-          pageSize,
-          startDate: date ? date?.toISOString() : undefined,
-          endDate: endDate ? endDate : undefined,
-        },
-      });
-    },
-    [dispatch, endDate, page, pageSize]
-  );
-
-  const onChangeEndDate = useCallback(
-    (date) => {
-      dispatch({
-        type: 'endpointDetailsActivityLogUpdatePaging',
-        payload: {
-          disabled: false,
-          page,
-          pageSize,
-          startDate: startDate ? startDate : undefined,
-          endDate: date ? date.toISOString() : undefined,
-        },
-      });
-    },
-    [dispatch, startDate, page, pageSize]
+    [dispatch, page, pageSize, recentlyUsedRanges, startLoading]
   );
 
   return (
@@ -86,38 +91,16 @@ export const DateRangePicker = memo(() => {
       <EuiFlexGroup justifyContent="flexEnd" responsive>
         <DatePickerWrapper>
           <EuiFlexItem>
-            <EuiDatePickerRange
-              fullWidth={true}
-              data-test-subj="activityLogDateRangePicker"
-              startDateControl={
-                <EuiDatePicker
-                  aria-label="Start date"
-                  endDate={endDate ? moment(endDate) : undefined}
-                  isInvalid={isInvalidDateRange}
-                  maxDate={moment(endDate) || moment()}
-                  onChange={onChangeStartDate}
-                  onClear={() => onClear({ clearStart: true })}
-                  placeholderText={i18.ACTIVITY_LOG.datePicker.startDate}
-                  selected={startDate ? moment(startDate) : undefined}
-                  showTimeSelect
-                  startDate={startDate ? moment(startDate) : undefined}
-                />
-              }
-              endDateControl={
-                <EuiDatePicker
-                  aria-label="End date"
-                  endDate={endDate ? moment(endDate) : undefined}
-                  isInvalid={isInvalidDateRange}
-                  maxDate={moment()}
-                  minDate={startDate ? moment(startDate) : undefined}
-                  onChange={onChangeEndDate}
-                  onClear={() => onClear({ clearEnd: true })}
-                  placeholderText={i18.ACTIVITY_LOG.datePicker.endDate}
-                  selected={endDate ? moment(endDate) : undefined}
-                  showTimeSelect
-                  startDate={startDate ? moment(startDate) : undefined}
-                />
-              }
+            <EuiSuperDatePicker
+              data-test-subj="activityLogSuperDatePicker"
+              end={dateMath.parse(endDate)?.toISOString()}
+              isLoading={isLoading}
+              isPaused={isPaused}
+              onTimeChange={onTimeChange}
+              onRefreshChange={onRefreshChange}
+              refreshInterval={refreshInterval}
+              start={dateMath.parse(startDate)?.toISOString()}
+              showUpdateButton={false}
             />
           </EuiFlexItem>
         </DatePickerWrapper>
