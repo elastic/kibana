@@ -20,6 +20,7 @@ const DatePickerWrapper = styled.div`
   background: white;
 `;
 const StickyFlexItem = styled(EuiFlexItem)`
+  max-width: 350px;
   position: sticky;
   top: ${(props) => props.theme.eui.euiSizeM};
   z-index: 1;
