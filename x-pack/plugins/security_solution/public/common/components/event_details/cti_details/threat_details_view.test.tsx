@@ -70,8 +70,8 @@ describe('ThreatDetailsView', () => {
       .hostNodes()
       .filterWhere((node) => node.text().includes('first_seen'));
     expect(firstSeenRows.map((node) => node.text())).toEqual([
-      `first_seen${mostRecentDate}`,
-      `first_seen${olderDate}`,
+      `indicator.first_seen${mostRecentDate}`,
+      `indicator.first_seen${olderDate}`,
     ]);
   });
 
