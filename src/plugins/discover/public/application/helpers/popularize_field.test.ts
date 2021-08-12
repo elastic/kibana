@@ -9,6 +9,20 @@
 import { IndexPattern, IndexPatternsService } from '../../../../data/public';
 import { popularizeField } from './popularize_field';
 
+const mockCapabilities = jest.fn().mockReturnValue({
+  indexPatterns: {
+    save: true,
+  },
+});
+
+jest.mock('../../kibana_services', () => ({
+  getServices: jest.fn(() => {
+    return {
+      capabilities: mockCapabilities(),
+    };
+  }),
+}));
+
 describe('Popularize field', () => {
   test('returns undefined if index pattern lacks id', async () => {
     const indexPattern = ({} as unknown) as IndexPattern;
@@ -67,5 +81,30 @@ describe('Popularize field', () => {
     } as unknown) as IndexPatternsService;
     const result = await popularizeField(indexPattern, fieldName, indexPatternsService);
     expect(result).toBeUndefined();
+  });
+
+  test('should not try to update index pattern without permissions', async () => {
+    const field = {
+      count: 0,
+    };
+    const indexPattern = ({
+      id: 'id',
+      fields: {
+        getByName: () => field,
+      },
+    } as unknown) as IndexPattern;
+    const fieldName = '@timestamp';
+    const indexPatternsService = ({
+      updateSavedObject: jest.fn(),
+    } as unknown) as IndexPatternsService;
+    mockCapabilities.mockReturnValue({
+      indexPatterns: {
+        save: false,
+      },
+    });
+    const result = await popularizeField(indexPattern, fieldName, indexPatternsService);
+    expect(result).toBeUndefined();
+    expect(indexPatternsService.updateSavedObject).not.toHaveBeenCalled();
+    expect(field.count).toEqual(0);
   });
 });

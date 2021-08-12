@@ -7,13 +7,15 @@
  */
 
 import { IndexPattern, IndexPatternsContract } from '../../../../data/public';
+import { getServices } from '../../kibana_services';
 
 async function popularizeField(
   indexPattern: IndexPattern,
   fieldName: string,
   indexPatternsService: IndexPatternsContract
 ) {
-  if (!indexPattern.id) return;
+  const { capabilities } = getServices();
+  if (!indexPattern.id || !capabilities.indexPatterns.save) return;
   const field = indexPattern.fields.getByName(fieldName);
   if (!field) {
     return;
