@@ -24,7 +24,7 @@ export const wrapHitsFactory = ({
   ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
   mergeStrategy: ConfigType['alertMergeStrategy'];
   spaceId: string | null | undefined;
-}): WrapHits => (events) => {
+}): WrapHits => (events, buildReasonMessage) => {
   try {
     const wrappedDocs: WrappedRACAlert[] = events.flatMap((doc) => [
       {
@@ -35,7 +35,14 @@ export const wrapHitsFactory = ({
           String(doc._version),
           ruleSO.attributes.params.ruleId ?? ''
         ),
-        _source: buildBulkBody(spaceId, ruleSO, doc as SignalSourceHit, mergeStrategy, true),
+        _source: buildBulkBody(
+          spaceId,
+          ruleSO,
+          doc as SignalSourceHit,
+          mergeStrategy,
+          true,
+          buildReasonMessage
+        ),
       },
     ]);
 
