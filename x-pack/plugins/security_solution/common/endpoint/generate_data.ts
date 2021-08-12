@@ -7,6 +7,7 @@
 
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
+import semverLte from 'semver/functions/lte';
 import { assertNever } from '@kbn/std';
 import {
   AlertEvent,
@@ -261,6 +262,7 @@ interface HostInfo {
     state?: {
       isolation: boolean;
     };
+    capabilities?: string[];
   };
 }
 
@@ -456,10 +458,13 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   private createHostData(): HostInfo {
     const hostName = this.randomHostname();
     const isIsolated = this.randomBoolean(0.3);
+    const agentVersion = this.randomVersion();
+    const minCapabilitiesVersion = '7.15.0';
+    const capabilities = ['isolation'];
 
     return {
       agent: {
-        version: this.randomVersion(),
+        version: agentVersion,
         id: this.seededUUIDv4(),
         type: 'endpoint',
       },
@@ -488,6 +493,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         state: {
           isolation: isIsolated,
         },
+        capabilities: semverLte(minCapabilitiesVersion, agentVersion) ? capabilities : [],
       },
     };
   }
