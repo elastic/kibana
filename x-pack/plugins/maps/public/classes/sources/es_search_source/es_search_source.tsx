@@ -441,7 +441,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       return false;
     }
     // For now we only support 1:1 index-pattern:index matches
-    return matchingIndexes.length === 1;
+    return matchingIndexes.length === 1 && matchingIndexes[0] === this.indexPattern.title;
   }
 
   _hasSort(): boolean {
