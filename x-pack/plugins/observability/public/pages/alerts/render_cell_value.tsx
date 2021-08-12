@@ -7,13 +7,21 @@
 import { EuiIconTip, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
+import type {
+  ALERT_DURATION as ALERT_DURATION_TYPED,
+  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
+  ALERT_START as ALERT_START_TYPED,
+  ALERT_STATUS as ALERT_STATUS_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
+} from '@kbn/rule-data-utils';
 import {
-  ALERT_DURATION,
-  ALERT_SEVERITY_LEVEL,
-  ALERT_STATUS,
-  ALERT_START,
-  RULE_NAME,
-} from '@kbn/rule-data-utils/target/technical_field_names';
+  ALERT_DURATION as ALERT_DURATION_NON_TYPED,
+  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
+  ALERT_START as ALERT_START_NON_TYPED,
+  ALERT_STATUS as ALERT_STATUS_NON_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
+  // @ts-expect-error
+} from '@kbn/rule-data-utils/target_node/technical_field_names';
 
 import type { CellValueElementProps, TimelineNonEcsData } from '../../../../timelines/common';
 import { TimestampTooltip } from '../../components/shared/timestamp_tooltip';
@@ -22,6 +30,12 @@ import { SeverityBadge } from './severity_badge';
 import { TopAlert } from '.';
 import { decorateResponse } from './decorate_response';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+
+const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
+const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
+const ALERT_START: typeof ALERT_START_TYPED = ALERT_START_NON_TYPED;
+const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
+const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
 
 export const getMappedNonEcsValue = ({
   data,
@@ -93,7 +107,7 @@ export const getRenderCellValue = ({
         return asDuration(Number(value));
       case ALERT_SEVERITY_LEVEL:
         return <SeverityBadge severityLevel={value ?? undefined} />;
-      case RULE_NAME:
+      case ALERT_RULE_NAME:
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
         const decoratedAlerts = decorateResponse(
           [dataFieldEs] ?? [],
