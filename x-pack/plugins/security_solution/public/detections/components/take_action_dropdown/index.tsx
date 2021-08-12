@@ -26,6 +26,7 @@ import { getFieldValue } from '../host_isolation/helpers';
 import type { Ecs } from '../../../../common/ecs';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { endpointAlertCheck } from '../../../common/utils/endpoint_alert_check';
+import { APP_ID } from '../../../../common/constants';
 
 interface ActionsData {
   alertStatus: Status;
@@ -201,7 +202,7 @@ export const TakeActionDropdown = React.memo(
                   ecsRowData: ecsData,
                   useInsertTimeline: insertTimelineHook,
                   casePermissions,
-                  appId: 'securitySolution',
+                  appId: APP_ID,
                   onClose: afterCaseSelection,
                 })}
             </>,
@@ -211,7 +212,7 @@ export const TakeActionDropdown = React.memo(
                   ecsRowData: ecsData,
                   useInsertTimeline: insertTimelineHook,
                   casePermissions,
-                  appId: 'securitySolution',
+                  appId: APP_ID,
                   onClose: afterCaseSelection,
                 })}
             </>,
