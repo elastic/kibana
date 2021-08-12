@@ -13,7 +13,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { getServices } from '../../kibana_services';
-import { PLUGIN_ID } from '../../../../common/constants';
 
 interface Props {
   addBasePath: (path: string) => string;
@@ -25,7 +24,7 @@ export const SolutionPanel: FC<Props> = ({ addBasePath, solution, apps = [] }) =
   const { trackUiMetric } = getServices();
 
   const getSolutionGraphicURL = (solutionId: string) =>
-    `/plugins/${PLUGIN_ID}/assets/solutions_${solutionId}_2x.png`;
+    `/plugins/kibanaReact/assets/solutions_${solutionId}_2x.png`;
 
   return (
     <EuiFlexItem

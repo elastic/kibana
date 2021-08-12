@@ -105,7 +105,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode }) => 
               alt="Illustration of Elastic data integrations"
               className="homDataAdd__illustration"
               src={
-                addBasePath('/plugins/apm/assets/') +
+                addBasePath('/plugins/kibanaReact/assets/') +
                 (isDarkMode
                   ? 'illustration_integrations_darkmode.svg'
                   : 'illustration_integrations_lightmode.svg')

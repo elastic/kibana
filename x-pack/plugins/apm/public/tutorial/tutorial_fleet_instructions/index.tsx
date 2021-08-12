@@ -107,7 +107,7 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
         </EuiFlexItem>
         <EuiFlexItem grow={3}>
           <EuiImage
-            src={`${basePath}/plugins/apm/assets/${
+            src={`${basePath}/plugins/kibanaReact/assets/${
               isDarkTheme
                 ? 'illustration_integrations_darkmode.svg'
                 : 'illustration_integrations_lightmode.svg'

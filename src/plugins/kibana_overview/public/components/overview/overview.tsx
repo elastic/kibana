@@ -65,7 +65,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
       .sort(sortByOrder);
 
   const getSolutionGraphicURL = (solutionId: string) =>
-    `/plugins/${PLUGIN_ID}/assets/solutions_${solutionId}_2x.png`;
+    `/plugins/kibanaReact/assets/solutions_${solutionId}_2x.png`;
 
   const findFeatureById = (featureId: string) => features.find(({ id }) => id === featureId);
   const kibanaApps = features.filter(({ solutionId }) => solutionId === 'kibana').sort(sortByOrder);
