@@ -6,13 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiAccordion,
-  EuiCallOut,
-  EuiCodeBlock,
-  EuiFormRow,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiAccordion, EuiCallOut, EuiCodeBlock, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EDITOR } from '../../../common/constants';
