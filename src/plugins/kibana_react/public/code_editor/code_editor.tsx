@@ -197,6 +197,26 @@ export const CodeEditor: React.FC<Props> = ({
   }, [stopEditing]);
 
   const renderPrompt = useCallback(() => {
+    const enterKey = (
+      <strong>
+        {i18n.translate('kibana-react.kibanaCodeEditor.enterKeyLabel', {
+          defaultMessage: 'Enter',
+          description:
+            'The name used for the Enter key on keyword. Will be {key} in kibana-react.kibanaCodeEditor.startEditing(ReadOnly).',
+        })}
+      </strong>
+    );
+
+    const escapeKey = (
+      <strong>
+        {i18n.translate('kibana-react.kibanaCodeEditor.escapeKeyLabel', {
+          defaultMessage: 'Esc',
+          description:
+            'The label of the Escape key as printed on the keyboard. Will be {key} inside kibana-react.kibanaCodeEditor.stopEditing(ReadOnly).',
+        })}
+      </strong>
+    );
+
     return (
       <EuiToolTip
         display="block"
@@ -206,12 +226,14 @@ export const CodeEditor: React.FC<Props> = ({
               {isReadOnly ? (
                 <FormattedMessage
                   id="kibana-react.kibanaCodeEditor.startEditingReadOnly"
-                  defaultMessage="Press Enter to start interacting with the code."
+                  defaultMessage="Press {key} to start interacting with the code."
+                  values={{ key: enterKey }}
                 />
               ) : (
                 <FormattedMessage
                   id="kibana-react.kibanaCodeEditor.startEditing"
-                  defaultMessage="Press Enter to start editing."
+                  defaultMessage="Press {key} to start editing."
+                  values={{ key: enterKey }}
                 />
               )}
             </p>
@@ -219,12 +241,14 @@ export const CodeEditor: React.FC<Props> = ({
               {isReadOnly ? (
                 <FormattedMessage
                   id="kibana-react.kibanaCodeEditor.stopEditingReadOnly"
-                  defaultMessage="Press Escape to stop interacting with the code."
+                  defaultMessage="Press {key} to stop interacting with the code."
+                  values={{ key: escapeKey }}
                 />
               ) : (
                 <FormattedMessage
                   id="kibana-react.kibanaCodeEditor.stopEditing"
-                  defaultMessage="Press Escape to stop editing."
+                  defaultMessage="Press {key} to stop editing."
+                  values={{ key: escapeKey }}
                 />
               )}
             </p>

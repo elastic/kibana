@@ -132,16 +132,28 @@ exports[`<CodeEditor /> is rendered 1`] = `
         <React.Fragment>
           <p>
             <FormattedMessage
-              defaultMessage="Press Enter to start editing."
+              defaultMessage="Press {key} to start editing."
               id="kibana-react.kibanaCodeEditor.startEditing"
-              values={Object {}}
+              values={
+                Object {
+                  "key": <strong>
+                    Enter
+                  </strong>,
+                }
+              }
             />
           </p>
           <p>
             <FormattedMessage
-              defaultMessage="Press Escape to stop editing."
+              defaultMessage="Press {key} to stop editing."
               id="kibana-react.kibanaCodeEditor.stopEditing"
-              values={Object {}}
+              values={
+                Object {
+                  "key": <strong>
+                    Esc
+                  </strong>,
+                }
+              }
             />
           </p>
         </React.Fragment>
