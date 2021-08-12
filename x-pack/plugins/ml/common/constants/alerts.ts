@@ -84,16 +84,18 @@ export const HEALTH_CHECK_NAMES: Record<
   },
 };
 
-export const JOB_ID = 'ml.job_id' as const;
-export const JOB_STATE = 'ml.job_state' as const;
-export const DATAFEED_ID = 'ml.datafeed_id' as const;
-export const DATAFEED_STATE = 'ml.datafeed_state' as const;
-export const MEMORY_STATUS = 'ml.memory_status' as const;
-export const MEMORY_LOG_TIME = 'ml.memory_log_time' as const;
-export const MODEL_BYTES = 'ml.model_bytes' as const;
-export const MODEL_BYTES_MEMORY_LIMIT = 'ml.model_bytes_memory_limit' as const;
-export const PEAK_MODEL_BYTES = 'ml.peak_model_bytes' as const;
-export const MODEL_BYTES_EXCEEDED = 'ml.model_bytes_exceeded' as const;
-export const ANNOTATION = 'ml.annotation' as const;
-export const MISSED_DOC_COUNT = 'ml.missed_docs_count' as const;
-export const END_TIMESTAMP = 'ml.end_timestamp' as const;
+const ML_NAMESPACE = 'ml' as const;
+
+export const JOB_ID = `${ML_NAMESPACE}.job_id` as const;
+export const JOB_STATE = `${ML_NAMESPACE}.job_state` as const;
+export const DATAFEED_ID = `${ML_NAMESPACE}.datafeed_id` as const;
+export const DATAFEED_STATE = `${ML_NAMESPACE}.datafeed_state` as const;
+export const MEMORY_STATUS = `${ML_NAMESPACE}.memory_status` as const;
+export const MEMORY_LOG_TIME = `${ML_NAMESPACE}.memory_log_time` as const;
+export const MODEL_BYTES = `${ML_NAMESPACE}.model_bytes` as const;
+export const MODEL_BYTES_MEMORY_LIMIT = `${ML_NAMESPACE}.model_bytes_memory_limit` as const;
+export const PEAK_MODEL_BYTES = `${ML_NAMESPACE}.peak_model_bytes` as const;
+export const MODEL_BYTES_EXCEEDED = `${ML_NAMESPACE}.model_bytes_exceeded` as const;
+export const ANNOTATION = `${ML_NAMESPACE}.annotation` as const;
+export const MISSED_DOC_COUNT = `${ML_NAMESPACE}.missed_docs_count` as const;
+export const END_TIMESTAMP = `${ML_NAMESPACE}.end_timestamp` as const;
