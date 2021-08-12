@@ -68,7 +68,7 @@ const OverflowButton: React.FC<OverflowButtonProps> = React.memo(
               <Component
                 aria-label={MORE_ACTIONS}
                 buttonRef={defaultFocusedButtonRef}
-                data-test-subj="add-to-timeline"
+                data-test-subj={`more-actions-${field}`}
                 icon="boxesHorizontal"
                 iconType="boxesHorizontal"
                 onClick={onClick}
@@ -81,7 +81,7 @@ const OverflowButton: React.FC<OverflowButtonProps> = React.memo(
                 aria-label={MORE_ACTIONS}
                 buttonRef={defaultFocusedButtonRef}
                 className="timelines__hoverActionButton"
-                data-test-subj="more-actions"
+                data-test-subj={`more-actions-${field}`}
                 iconSize="s"
                 iconType="boxesHorizontal"
                 onClick={onClick}
@@ -96,7 +96,15 @@ const OverflowButton: React.FC<OverflowButtonProps> = React.memo(
           <EuiContextMenuPanel items={items} />
         </EuiPopover>
       ),
-      [Component, defaultFocusedButtonRef, onClick, isOverflowPopoverOpen, closePopOver, items]
+      [
+        Component,
+        defaultFocusedButtonRef,
+        field,
+        onClick,
+        isOverflowPopoverOpen,
+        closePopOver,
+        items,
+      ]
     );
 
     return showTooltip ? (

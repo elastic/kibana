@@ -13,4 +13,5 @@ export const mockHoverActions = {
   getCopyButton: () => <>{'Copy button'}</>,
   getFilterForValueButton: () => <>{'Filter button'}</>,
   getFilterOutValueButton: () => <>{'Filter out button'}</>,
+  getOverflowButton: () => <>{'Overflow button'}</>,
 };
