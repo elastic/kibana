@@ -49,6 +49,7 @@ export const get = async (
           ...acc,
           {
             ...ua.attributes,
+            // TODO: move this functionality into the service
             action_id: ua.id,
             case_id: ua.references.find((r) => r.type === CASE_SAVED_OBJECT)?.id ?? '',
             comment_id: ua.references.find((r) => r.type === CASE_COMMENT_SAVED_OBJECT)?.id ?? null,

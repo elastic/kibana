@@ -14,7 +14,10 @@ import {
 } from '../../../../../../src/core/server';
 import { ESConnectorFields } from '../../services';
 import { ConnectorTypes, CaseType } from '../../../common';
-import { transformConnectorIdToReference, transformPushConnectorIdToReference } from './utils';
+import {
+  transformConnectorIdToReference,
+  transformPushConnectorIdToReference,
+} from '../../services/user_actions/transform';
 import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../../common';
 
 interface UnsanitizedCaseConnector {

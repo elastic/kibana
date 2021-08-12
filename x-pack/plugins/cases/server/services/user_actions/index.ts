@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectReference } from 'kibana/server';
+import { Logger, SavedObjectReference, SavedObjectsFindResponse } from 'kibana/server';
 
 import {
   CASE_SAVED_OBJECT,
@@ -13,6 +13,8 @@ import {
   CaseUserActionAttributes,
   MAX_DOCS_PER_PAGE,
   SUB_CASE_SAVED_OBJECT,
+  CaseUserActionsResponse,
+  CaseUserActionResponse,
 } from '../../../common';
 import { ClientArgs } from '..';
 
@@ -33,11 +35,16 @@ interface PostCaseUserActionArgs extends ClientArgs {
 export class CaseUserActionService {
   constructor(private readonly log: Logger) {}
 
-  public async getAll({ unsecuredSavedObjectsClient, caseId, subCaseId }: GetCaseUserActionArgs) {
+  public async getAll({
+    unsecuredSavedObjectsClient,
+    caseId,
+    subCaseId,
+  }: GetCaseUserActionArgs): Promise<SavedObjectsFindResponse<CaseUserActionResponse>> {
     try {
       const id = subCaseId ?? caseId;
       const type = subCaseId ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
 
+      // TODO: transform these into the right response
       return await unsecuredSavedObjectsClient.find<CaseUserActionAttributes>({
         type: CASE_USER_ACTION_SAVED_OBJECT,
         hasReference: { type, id },
@@ -52,11 +59,14 @@ export class CaseUserActionService {
     }
   }
 
-  public async bulkCreate({ unsecuredSavedObjectsClient, actions }: PostCaseUserActionArgs) {
+  public async bulkCreate({
+    unsecuredSavedObjectsClient,
+    actions,
+  }: PostCaseUserActionArgs): Promise<void> {
     try {
       this.log.debug(`Attempting to POST a new case user action`);
 
-      return await unsecuredSavedObjectsClient.bulkCreate<CaseUserActionAttributes>(
+      await unsecuredSavedObjectsClient.bulkCreate<CaseUserActionAttributes>(
         actions.map((action) => ({ type: CASE_USER_ACTION_SAVED_OBJECT, ...action }))
       );
     } catch (error) {

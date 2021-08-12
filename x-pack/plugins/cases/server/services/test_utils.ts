@@ -198,3 +198,7 @@ export const createSavedObjectReferences = ({
       ]
     : []),
 ];
+
+export const createConnectorObject = (overrides?: Partial<CaseConnector>) => ({
+  connector: { ...createJiraConnector(), ...(overrides && { ...overrides }) },
+});
