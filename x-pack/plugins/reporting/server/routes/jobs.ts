@@ -112,7 +112,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       const result = await jobsQuery.get(user, docId);
 
       if (!result) {
-        throw Boom.notFound();
+        return res.notFound();
       }
 
       const { jobtype: jobType } = result;

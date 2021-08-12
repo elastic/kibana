@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './preview';
+export { mountRedirectApp } from './mount_redirect_app';
