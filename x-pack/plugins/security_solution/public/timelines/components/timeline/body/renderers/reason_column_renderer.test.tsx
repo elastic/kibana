@@ -69,7 +69,7 @@ const browserFields: BrowserFields = {};
 
 const defaultProps = {
   columnName: REASON_FIELD_NAME,
-  eventId: 'test-vent-id',
+  eventId: 'test-event-id',
   field,
   timelineId: 'test-timeline-id',
   values: ['test-value'],
@@ -114,7 +114,7 @@ describe('reasonColumnRenderer', () => {
 
       const wrapper = render(<TestProviders>{renderedColumn}</TestProviders>);
 
-      expect(wrapper.queryByTestId('reson-cell-button')).not.toBeInTheDocument();
+      expect(wrapper.queryByTestId('reason-cell-button')).not.toBeInTheDocument();
     });
 
     it('render popover button when getRowRenderer finds a rowRenderer', () => {
@@ -127,7 +127,7 @@ describe('reasonColumnRenderer', () => {
 
       const wrapper = render(<TestProviders>{renderedColumn}</TestProviders>);
 
-      expect(wrapper.queryByTestId('reson-cell-button')).toBeInTheDocument();
+      expect(wrapper.queryByTestId('reason-cell-button')).toBeInTheDocument();
     });
 
     it('render rowRender inside a popover when reson field button is clicked', () => {
@@ -140,7 +140,7 @@ describe('reasonColumnRenderer', () => {
 
       const wrapper = render(<TestProviders>{renderedColumn}</TestProviders>);
 
-      fireEvent.click(wrapper.getByTestId('reson-cell-button'));
+      fireEvent.click(wrapper.getByTestId('reason-cell-button'));
 
       expect(wrapper.queryByTestId('test-row-render')).toBeInTheDocument();
     });

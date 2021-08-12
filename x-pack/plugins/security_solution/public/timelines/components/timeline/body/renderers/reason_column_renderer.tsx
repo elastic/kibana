@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import styled from 'styled-components';
 import { BrowserFields, ColumnHeaderOptions, RowRenderer } from '../../../../../../common';
@@ -105,27 +105,33 @@ const ReasonCell: React.FC<{
 
   const rowRenderer = useMemo(() => getRowRenderer(ecsData, rowRenderers), [ecsData, rowRenderers]);
 
-  const rowRender =
-    rowRenderer &&
-    rowRenderer.renderRow({
-      browserFields,
-      data: ecsData,
-      isDraggable: true,
-      timelineId,
-    });
+  const rowRender = useMemo(() => {
+    return (
+      rowRenderer &&
+      rowRenderer.renderRow({
+        browserFields,
+        data: ecsData,
+        isDraggable: true,
+        timelineId,
+      })
+    );
+  }, [rowRenderer, browserFields, ecsData, timelineId]);
+
+  const handleTogglePopOver = useCallback(() => setIsOpen(!isOpen), [setIsOpen, isOpen]);
+  const handleClosePopOver = useCallback(() => setIsOpen(false), [setIsOpen]);
 
   const button = useMemo(
     () => (
       <StyledEuiButtonEmpty
-        data-test-subj="reson-cell-button"
+        data-test-subj="reason-cell-button"
         size="xs"
         flush="left"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleTogglePopOver}
       >
         {value}
       </StyledEuiButtonEmpty>
     ),
-    [setIsOpen, isOpen, value]
+    [value, handleTogglePopOver]
   );
 
   return (
@@ -141,7 +147,7 @@ const ReasonCell: React.FC<{
           <EuiPopover
             isOpen={isOpen}
             anchorPosition="rightCenter"
-            closePopover={() => setIsOpen(false)}
+            closePopover={handleClosePopOver}
             button={button}
           >
             <EuiPopoverTitle paddingSize="s">
