@@ -23,6 +23,7 @@ import { useUserData } from '../../../../components/user_info';
 import { useSourcererScope } from '../../../../../common/containers/sourcerer';
 import { useParams } from 'react-router-dom';
 import { mockHistory, Router } from '../../../../../common/mock/router';
+import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -52,6 +53,34 @@ jest.mock('react-router-dom', () => {
     ...originalModule,
     useParams: jest.fn(),
     useHistory: jest.fn(),
+  };
+});
+
+jest.mock('../../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../../common/lib/kibana');
+
+  return {
+    ...original,
+    useUiSetting$: jest.fn().mockReturnValue([]),
+    useKibana: () => ({
+      services: {
+        application: {
+          navigateToUrl: jest.fn(),
+          capabilities: { actions: jest.fn().mockReturnValue({}) },
+        },
+        timelines: { ...mockTimelines },
+        data: {
+          query: {
+            filterManager: jest.fn().mockReturnValue({}),
+          },
+        },
+      },
+    }),
+    useToasts: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+    }),
   };
 });
 
