@@ -11,7 +11,7 @@ import { defaults, get } from 'lodash';
 import { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
 import { LevelLogger as Logger } from '../../lib';
-import { authorizedUserPreRoutingFactory } from '../lib/authorized_user_pre_routing';
+import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { DiagnosticResponse } from './';
 
 const KIBANA_MAX_SIZE_BYTES_PATH = 'csv.maxSizeBytes';
@@ -27,7 +27,6 @@ const numberToByteSizeValue = (value: number | ByteSizeValue) => {
 
 export const registerDiagnoseConfig = (reporting: ReportingCore, logger: Logger) => {
   const setupDeps = reporting.getPluginSetupDeps();
-  const userHandler = authorizedUserPreRoutingFactory(reporting);
   const { router } = setupDeps;
 
   router.post(
@@ -35,7 +34,7 @@ export const registerDiagnoseConfig = (reporting: ReportingCore, logger: Logger)
       path: `${API_DIAGNOSE_URL}/config`,
       validate: {},
     },
-    userHandler(async (user, context, req, res) => {
+    authorizedUserPreRouting(reporting, async (_user, _context, _req, res) => {
       const warnings = [];
       const { asInternalUser: elasticsearchClient } = await reporting.getEsClient();
       const config = reporting.getConfig();

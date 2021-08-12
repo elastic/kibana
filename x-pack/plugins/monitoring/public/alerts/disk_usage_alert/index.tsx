@@ -12,24 +12,24 @@ import { Expression, Props } from '../components/param_details_form/expression';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import {
-  ALERT_DISK_USAGE,
-  ALERT_DETAILS,
-  ALERT_REQUIRES_APP_CONTEXT,
+  RULE_DISK_USAGE,
+  RULE_DETAILS,
+  RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
 
 export function createDiskUsageAlertType(): AlertTypeModel<MonitoringAlertTypeParams> {
   return {
-    id: ALERT_DISK_USAGE,
-    description: ALERT_DETAILS[ALERT_DISK_USAGE].description,
+    id: RULE_DISK_USAGE,
+    description: RULE_DETAILS[RULE_DISK_USAGE].description,
     iconClass: 'bell',
     documentationUrl(docLinks) {
       return `${docLinks.links.monitoring.alertsKibanaDiskThreshold}`;
     },
     alertParamsExpression: (props: Props) => (
-      <Expression {...props} paramDetails={ALERT_DETAILS[ALERT_DISK_USAGE].paramDetails} />
+      <Expression {...props} paramDetails={RULE_DETAILS[RULE_DISK_USAGE].paramDetails} />
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
-    requiresAppContext: ALERT_REQUIRES_APP_CONTEXT,
+    requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
   };
 }

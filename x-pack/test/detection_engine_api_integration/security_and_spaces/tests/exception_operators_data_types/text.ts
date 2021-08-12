@@ -33,7 +33,8 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  describe('Rule exception operators for data type text', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/107911
+  describe.skip('Rule exception operators for data type text', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest);
       await createListsIndex(supertest);
@@ -50,7 +51,8 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/text_no_spaces');
     });
 
-    describe('"is" operator', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/107856
+    describe.skip('"is" operator', () => {
       it('should find all the text from the data set when no exceptions are set on the rule', async () => {
         const rule = getRuleForSignalTesting(['text']);
         const { id } = await createRule(supertest, rule);

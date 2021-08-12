@@ -9,7 +9,10 @@ import { EuiSelect, EuiExpression, EuiFieldNumber } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelectOption } from '@elastic/eui';
-import { getEnvironmentLabel } from '../../../common/environment_filter_values';
+import {
+  ENVIRONMENT_ALL,
+  getEnvironmentLabel,
+} from '../../../common/environment_filter_values';
 import { PopoverExpression } from './service_alert_trigger/popover_expression';
 
 const ALL_OPTION = i18n.translate('xpack.apm.alerting.fields.all_option', {
@@ -42,7 +45,7 @@ export function EnvironmentField({
 
   // "1" means "All" is the only option and we should not show a select.
   if (options.length === 1) {
-    return <EuiExpression description={title} value={currentValue} />;
+    return <EuiExpression description={title} value={ENVIRONMENT_ALL.text} />;
   }
 
   return (

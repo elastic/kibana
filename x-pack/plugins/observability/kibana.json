@@ -6,8 +6,16 @@
   },
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["xpack", "observability"],
-  "optionalPlugins": ["home", "discover", "lens", "licensing", "usageCollection"],
+  "configPath": [
+    "xpack",
+    "observability"
+  ],
+  "optionalPlugins": [
+    "home",
+    "lens",
+    "licensing",
+    "usageCollection"
+  ],
   "requiredPlugins": [
     "alerting",
     "cases",

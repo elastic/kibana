@@ -17,36 +17,37 @@ const mockedResponse: StatusResponse = {
   version: {
     number: '8.0.0',
     build_hash: '9007199254740991',
-    build_number: '12',
-    build_snapshot: 'XXXXXXXX',
+    build_number: 12,
+    build_snapshot: false,
   },
   status: {
     overall: {
-      id: 'overall',
-      state: 'yellow',
-      title: 'Yellow',
-      message: 'yellow',
-      uiColor: 'secondary',
+      level: 'degraded',
+      summary: 'yellow',
     },
-    statuses: [
-      {
-        id: 'plugin:1',
-        state: 'green',
-        title: 'Green',
-        message: 'Ready',
-        uiColor: 'secondary',
+    core: {
+      elasticsearch: {
+        level: 'available',
+        summary: 'Elasticsearch is available',
       },
-      {
-        id: 'plugin:2',
-        state: 'yellow',
-        title: 'Yellow',
-        message: 'Something is weird',
-        uiColor: 'warning',
+      savedObjects: {
+        level: 'available',
+        summary: 'SavedObjects service has completed migrations and is available',
       },
-    ],
+    },
+    plugins: {
+      '1': {
+        level: 'available',
+        summary: 'Ready',
+      },
+      '2': {
+        level: 'degraded',
+        summary: 'Something is weird',
+      },
+    },
   },
   metrics: {
-    collected_at: new Date('2020-01-01 01:00:00'),
+    last_updated: '2020-01-01 01:00:00',
     collection_interval_in_millis: 1000,
     os: {
       platform: 'darwin' as const,
@@ -80,6 +81,7 @@ const mockedResponse: StatusResponse = {
       disconnects: 1,
       total: 400,
       statusCodes: {},
+      status_codes: {},
     },
     concurrent_connections: 1,
   },
@@ -149,12 +151,35 @@ describe('response processing', () => {
     const data = await loadStatus({ http, notifications });
     expect(data.statuses).toEqual([
       {
+        id: 'core:elasticsearch',
+        state: {
+          id: 'available',
+          title: 'Green',
+          message: 'Elasticsearch is available',
+          uiColor: 'secondary',
+        },
+      },
+      {
+        id: 'core:savedObjects',
+        state: {
+          id: 'available',
+          title: 'Green',
+          message: 'SavedObjects service has completed migrations and is available',
+          uiColor: 'secondary',
+        },
+      },
+      {
         id: 'plugin:1',
-        state: { id: 'green', title: 'Green', message: 'Ready', uiColor: 'secondary' },
+        state: { id: 'available', title: 'Green', message: 'Ready', uiColor: 'secondary' },
       },
       {
         id: 'plugin:2',
-        state: { id: 'yellow', title: 'Yellow', message: 'Something is weird', uiColor: 'warning' },
+        state: {
+          id: 'degraded',
+          title: 'Yellow',
+          message: 'Something is weird',
+          uiColor: 'warning',
+        },
       },
     ]);
   });
@@ -162,10 +187,10 @@ describe('response processing', () => {
   test('includes the serverState', async () => {
     const data = await loadStatus({ http, notifications });
     expect(data.serverState).toEqual({
-      id: 'yellow',
+      id: 'degraded',
       title: 'Yellow',
       message: 'yellow',
-      uiColor: 'secondary',
+      uiColor: 'warning',
     });
   });
 

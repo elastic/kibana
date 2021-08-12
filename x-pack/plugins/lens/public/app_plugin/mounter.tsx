@@ -46,7 +46,14 @@ export async function getLensServices(
   startDependencies: LensPluginStartDependencies,
   attributeService: () => Promise<LensAttributeService>
 ): Promise<LensAppServices> {
-  const { data, navigation, embeddable, savedObjectsTagging, usageCollection } = startDependencies;
+  const {
+    data,
+    navigation,
+    embeddable,
+    savedObjectsTagging,
+    usageCollection,
+    fieldFormats,
+  } = startDependencies;
 
   const storage = new Storage(localStorage);
   const stateTransfer = embeddable?.getStateTransfer();
@@ -56,6 +63,7 @@ export async function getLensServices(
     data,
     storage,
     navigation,
+    fieldFormats,
     stateTransfer,
     usageCollection,
     savedObjectsTagging,
