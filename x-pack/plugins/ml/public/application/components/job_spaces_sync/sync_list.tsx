@@ -43,7 +43,7 @@ const SavedObjectsCreated: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncI
 
   const title = (
     <>
-      <EuiTitle size="xs">
+      <EuiTitle size="xs" data-test-subj="mlStackMgmtSyncFlyoutMissingObjectsTitle">
         <h3>
           <EuiTextColor color={items.length ? 'default' : 'subdued'}>
             <FormattedMessage
@@ -74,7 +74,7 @@ const SavedObjectsDeleted: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncI
 
   const title = (
     <>
-      <EuiTitle size="xs">
+      <EuiTitle size="xs" data-test-subj="mlStackMgmtSyncFlyoutUnmatchedObjectsTitle">
         <h3>
           <EuiTextColor color={items.length ? 'default' : 'subdued'}>
             <FormattedMessage
@@ -105,7 +105,7 @@ const DatafeedsAdded: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems 
 
   const title = (
     <>
-      <EuiTitle size="xs">
+      <EuiTitle size="xs" data-test-subj="mlStackMgmtSyncFlyoutObjectsMissingDatafeedTitle">
         <h3>
           <EuiTextColor color={items.length ? 'default' : 'subdued'}>
             <FormattedMessage
@@ -136,7 +136,7 @@ const DatafeedsRemoved: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItem
 
   const title = (
     <>
-      <EuiTitle size="xs">
+      <EuiTitle size="xs" data-test-subj="mlStackMgmtSyncFlyoutObjectsUnmatchedDatafeedTitle">
         <h3>
           <EuiTextColor color={items.length ? 'default' : 'subdued'}>
             <FormattedMessage

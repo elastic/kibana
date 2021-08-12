@@ -459,6 +459,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return await esSupertest.get(`/_ml/anomaly_detectors/${jobId}`).expect(200);
     },
 
+    async adJobExist(jobId: string) {
+      try {
+        await this.getAnomalyDetectionJob(jobId);
+        return true;
+      } catch (err) {
+        return false;
+      }
+    },
+
     async waitForAnomalyDetectionJobToExist(jobId: string, timeout: number = 5 * 1000) {
       await retry.waitForWithTimeout(`'${jobId}' to exist`, timeout, async () => {
         if (await this.getAnomalyDetectionJob(jobId)) {
@@ -513,6 +522,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       const datafeedId = `datafeed-${jobId}`;
       if ((await this.datafeedExist(datafeedId)) === true) {
         await this.deleteDatafeedES(datafeedId);
+      }
+
+      if ((await this.adJobExist(jobId)) === false) {
+        log.debug('> no such AD job found, nothing to delete.');
+        return;
       }
 
       await esSupertest
