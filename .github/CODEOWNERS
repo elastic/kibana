@@ -9,6 +9,9 @@
 /dev_docs @elastic/kibana-tech-leads
 /packages/kbn-docs-utils/ @elastic/kibana-tech-leads @elastic/kibana-operations
 
+# Virtual teams
+/x-pack/plugins/rule_registry/ @elastic/rac
+
 # App
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-app
 /x-pack/plugins/lens/ @elastic/kibana-app
