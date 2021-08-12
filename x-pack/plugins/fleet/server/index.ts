@@ -23,7 +23,14 @@ export {
   ArtifactsClientInterface,
   Artifact,
 } from './services';
-export { FleetSetupContract, FleetSetupDeps, FleetStartContract, ExternalCallback } from './plugin';
+
+export { FleetSetupContract, FleetSetupDeps, FleetStartContract } from './plugin';
+export type {
+  ExternalCallback,
+  PutPackagePolicyUpdateCallback,
+  PostPackagePolicyDeleteCallback,
+  PostPackagePolicyCreateCallback,
+} from './types';
 export { AgentNotFoundError } from './errors';
 
 export const config: PluginConfigDescriptor = {

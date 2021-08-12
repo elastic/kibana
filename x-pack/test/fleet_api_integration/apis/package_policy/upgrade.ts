@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 import {
   UpgradePackagePolicyDryRunResponse,
@@ -27,6 +28,8 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
+
+    setupFleetAndAgents(providerContext);
 
     describe('when package is installed', function () {
       before(async function () {
@@ -223,7 +226,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       describe('when "dryRun: true" is provided', function () {
-        it('should return a diff with errors', async function () {
+        it('should return a diff with missingVars', async function () {
           const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
             .post(`/api/fleet/package_policies/upgrade`)
             .set('kbn-xsrf', 'xxxx')
@@ -235,12 +238,13 @@ export default function (providerContext: FtrProviderContext) {
 
           expect(body.length).to.be(1);
           expect(body[0].diff?.length).to.be(2);
-          expect(body[0].hasErrors).to.be(true);
+          expect(body[0].hasErrors).to.be(false);
+          expect(body[0].diff?.[1].missingVars).to.contain('test_var');
         });
       });
 
       describe('when "dryRun: false" is provided', function () {
-        it('should respond with an error', async function () {
+        it('should succeed', async function () {
           const { body }: { body: UpgradePackagePolicyResponse } = await supertest
             .post(`/api/fleet/package_policies/upgrade`)
             .set('kbn-xsrf', 'xxxx')
@@ -251,7 +255,7 @@ export default function (providerContext: FtrProviderContext) {
             .expect(200);
 
           expect(body.length).to.be(1);
-          expect(body[0].success).to.be(false);
+          expect(body[0].success).to.be(true);
         });
       });
     });
