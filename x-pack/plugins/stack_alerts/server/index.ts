@@ -16,13 +16,13 @@ export const config: PluginConfigDescriptor<Config> = {
   deprecations: () => [
     (settings, fromPath, addDeprecation) => {
       if (
-        settings?.xpack?.stackAlerts?.enabled === false ||
-        settings?.xpack?.stackAlerts?.enabled === true
+        settings?.xpack?.stack_alerts?.enabled === false ||
+        settings?.xpack?.stack_alerts?.enabled === true
       ) {
         addDeprecation({
-          message: `"xpack.stackAlerts.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
+          message: `"xpack.stack_alerts.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
           correctiveActions: {
-            manualSteps: [`Remove "xpack.stackAlerts.enabled" from your kibana configs.`],
+            manualSteps: [`Remove "xpack.stack_alerts.enabled" from your kibana configs.`],
           },
         });
       }
