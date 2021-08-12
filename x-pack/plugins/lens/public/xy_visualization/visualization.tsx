@@ -26,7 +26,7 @@ import type {
 import { State, visualizationTypes, XYState } from './types';
 import { SeriesType, XYLayerConfig } from '../../common/expressions';
 import { LayerType, layerTypes } from '../../common';
-import { isHorizontalChart } from './state_helpers';
+import { isHorizontalChart, isPercentageSeries } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
@@ -914,12 +914,16 @@ function computeStaticValueForGroup(
   getColumnIdForGroup: (layer: XYLayerConfig) => string | undefined,
   dropForDateHistogram: (layer: XYLayerConfig) => boolean
 ) {
-  const index = dataLayers.findIndex(getColumnIdForGroup);
-  if (index > -1 && dataLayers[index]) {
-    if (dropForDateHistogram(dataLayers[index])) {
+  const dataLayer = dataLayers.find(getColumnIdForGroup);
+
+  if (dataLayer) {
+    if (isPercentageSeries(dataLayer?.seriesType)) {
+      return 0.75;
+    }
+    if (dropForDateHistogram(dataLayer)) {
       return;
     }
-    const columnId = getColumnIdForGroup(dataLayers[index]);
+    const columnId = getColumnIdForGroup(dataLayer);
     const tableId = Object.keys(activeData).find((key) =>
       activeData[key].columns.some(({ id }) => id === columnId)
     );
