@@ -9,10 +9,22 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiExpression, EuiFormHelpText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { IndexPattern, Query } from 'src/plugins/data/public';
+import { APP_ID } from '../../../../../common/constants';
 import { getData } from '../../../../kibana_services';
 
-export class WhereExpression extends Component {
-  state = {
+interface Props {
+  indexPattern: IndexPattern;
+  onChange: (whereQuery?: Query) => void;
+  whereQuery?: Query;
+}
+
+interface State {
+  isPopoverOpen: boolean;
+}
+
+export class WhereExpression extends Component<Props, State> {
+  state: State = {
     isPopoverOpen: false,
   };
 
@@ -28,7 +40,7 @@ export class WhereExpression extends Component {
     });
   };
 
-  _onQueryChange = ({ query }) => {
+  _onQueryChange = ({ query }: { query?: Query }) => {
     this.props.onChange(query);
     this._closePopover();
   };
@@ -73,6 +85,7 @@ export class WhereExpression extends Component {
             />
           </EuiFormHelpText>
           <SearchBar
+            appName={APP_ID}
             showFilterBar={false}
             showDatePicker={false}
             showQueryInput={true}
