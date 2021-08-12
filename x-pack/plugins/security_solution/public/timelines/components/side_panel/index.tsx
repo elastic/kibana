@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiFlyout, EuiFlyoutProps } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import type { AlertConsumers } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';

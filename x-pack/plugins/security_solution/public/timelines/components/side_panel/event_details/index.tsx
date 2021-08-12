@@ -17,7 +17,7 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import type { AlertConsumers } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { EntityType, useTimelineEventsDetails } from '../../../containers/details';

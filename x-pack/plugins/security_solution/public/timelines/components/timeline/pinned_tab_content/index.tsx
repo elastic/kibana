@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import type { AlertConsumers } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo, useCallback } from 'react';
 import styled from 'styled-components';
