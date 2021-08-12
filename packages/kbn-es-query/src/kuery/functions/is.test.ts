@@ -11,6 +11,7 @@ import { fields } from '../../filters/stubs';
 
 import * as is from './is';
 import { IndexPatternBase } from '../..';
+import { estypes } from '@elastic/elasticsearch';
 
 jest.mock('../grammar');
 
@@ -125,7 +126,9 @@ describe('kuery functions', () => {
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
-        expect(result.bool!.should!.length).toBe(indexPattern.fields.length);
+        expect((result.bool!.should! as estypes.QueryDslQueryContainer[]).length).toBe(
+          indexPattern.fields.length
+        );
       });
 
       test('should return an ES exists query when value is "*"', () => {
@@ -204,7 +207,9 @@ describe('kuery functions', () => {
         const node = nodeTypes.function.buildNode('is', 'script string', 'foo');
         const result = is.toElasticsearchQuery(node, indexPattern);
 
-        expect(result.bool!.should![0]).toHaveProperty('script');
+        expect((result.bool!.should as estypes.QueryDslQueryContainer[])[0]).toHaveProperty(
+          'script'
+        );
       });
 
       test('should support date fields without a dateFormat provided', () => {

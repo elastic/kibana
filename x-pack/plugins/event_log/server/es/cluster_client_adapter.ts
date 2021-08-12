@@ -228,9 +228,9 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     const namespaceQuery = namespace === undefined ? defaultNamespaceQuery : namedNamespaceQuery;
 
     const esClient = await this.elasticsearchClientPromise;
-    let dslFilterQuery: estypes.QueryDslQueryContainer;
+    let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
     try {
-      dslFilterQuery = filter ? toElasticsearchQuery(fromKueryExpression(filter)) : {};
+      dslFilterQuery = filter ? toElasticsearchQuery(fromKueryExpression(filter)) : [];
     } catch (err) {
       this.debug(`Invalid kuery syntax for the filter (${filter}) error:`, {
         message: err.message,

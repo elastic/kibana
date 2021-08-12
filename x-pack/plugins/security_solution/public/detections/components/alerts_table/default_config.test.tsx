@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
+import { Filter } from '@kbn/es-query';
 import { buildAlertsRuleIdFilter, buildThreatMatchFilter } from './default_config';
 
 jest.mock('./actions');
@@ -47,7 +47,6 @@ describe('alerts default_config', () => {
             type: 'exists',
             value: 'exists',
           },
-          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
           exists: {
             field: 'signal.rule.threat_mapping',
           },
