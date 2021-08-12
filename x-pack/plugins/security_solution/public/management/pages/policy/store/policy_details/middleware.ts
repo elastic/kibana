@@ -13,7 +13,6 @@ import {
   isOnPolicyDetailsPage,
   policyDetails,
   policyDetailsForUpdate,
-  getPolicyDataForUpdate,
 } from './selectors';
 import {
   sendGetPackagePolicy,
@@ -22,6 +21,7 @@ import {
 } from '../services/ingest';
 import { NewPolicyData, PolicyData } from '../../../../../../common/endpoint/types';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
+import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy/get_policy_data_for_update';
 
 export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = (
   coreStart
