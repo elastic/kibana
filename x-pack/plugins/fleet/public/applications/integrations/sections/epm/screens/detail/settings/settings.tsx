@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import semverLt from 'semver/functions/lt';
@@ -22,9 +22,14 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import type { PackageInfo } from '../../../../../types';
+import type { PackageInfo, UpgradePackagePolicyDryRunResponse } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
-import { useGetPackagePolicies, useGetPackageInstallStatus, useLink } from '../../../../../hooks';
+import {
+  useGetPackagePolicies,
+  useGetPackageInstallStatus,
+  useLink,
+  sendUpgradePackagePolicyDryRun,
+} from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 
 import { InstallationButton } from './installation_button';
@@ -79,14 +84,32 @@ interface Props {
 
 export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
   const { name, title, removable, latestVersion, version } = packageInfo;
+  const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse | null>();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { data: packagePoliciesData } = useGetPackagePolicies({
     perPage: 1000,
     page: 1,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${name}`,
   });
+
   const { status: installationStatus, version: installedVersion } = getPackageInstallStatus(name);
   const packageHasUsages = !!packagePoliciesData?.total;
+
+  const packagePolicyIds = useMemo(() => packagePoliciesData?.items.map(({ id }) => id), [
+    packagePoliciesData,
+  ]);
+
+  useEffect(() => {
+    const fetchDryRunData = async () => {
+      if (packagePolicyIds && packagePolicyIds.length) {
+        const { data } = await sendUpgradePackagePolicyDryRun(packagePolicyIds);
+
+        setDryRunData(data);
+      }
+    };
+
+    fetchDryRunData();
+  }, [packagePolicyIds]);
 
   const agentPolicyIds = Array.from(
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -173,8 +196,9 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                       version={latestVersion}
                       disabled={false}
                       isUpdate={true}
-                      packagePolicyCount={packagePoliciesData?.total}
+                      packagePolicyIds={packagePolicyIds}
                       agentPolicyIds={agentPolicyIds}
+                      dryRunData={dryRunData}
                     />
                   </p>
                 </>

@@ -9,9 +9,14 @@ import { EuiButton, EuiCheckbox, EuiConfirmModal, EuiFlexGroup, EuiFlexItem } fr
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { sumBy } from 'lodash';
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
-import type { GetAgentPoliciesResponse, PackageInfo } from '../../../../../types';
+import type {
+  GetAgentPoliciesResponse,
+  PackageInfo,
+  UpgradePackagePolicyDryRunResponse,
+} from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
   useCapabilities,
@@ -28,8 +33,9 @@ type InstallationButtonProps = Pick<PackageInfo, 'assets' | 'name' | 'title' | '
   disabled?: boolean;
   isUpdate?: boolean;
   latestVersion?: string;
-  packagePolicyCount?: number;
+  packagePolicyIds?: string[];
   agentPolicyIds?: string[];
+  dryRunData?: UpgradePackagePolicyDryRunResponse | null;
 };
 export function InstallationButton(props: InstallationButtonProps) {
   const {
@@ -40,7 +46,7 @@ export function InstallationButton(props: InstallationButtonProps) {
     disabled = true,
     isUpdate = false,
     latestVersion,
-    packagePolicyCount = 0,
+    packagePolicyIds = [],
     agentPolicyIds = [],
   } = props;
   const hasWriteCapabilites = useCapabilities().write;
@@ -73,6 +79,11 @@ export function InstallationButton(props: InstallationButtonProps) {
 
     fetchAgentPolicyData();
   }, [agentPolicyIds]);
+
+  const packagePolicyCount = useMemo(() => packagePolicyIds.length, [packagePolicyIds]);
+  const agentCount = useMemo(() => sumBy(agentPolicyData?.items, ({ agents }) => agents ?? 0), [
+    agentPolicyData,
+  ]);
 
   const toggleInstallModal = useCallback(() => {
     setIsInstallModalVisible(!isInstallModalVisible);
@@ -245,16 +256,16 @@ export function InstallationButton(props: InstallationButtonProps) {
       <FormattedMessage
         id="xpack.fleet.integrations.settings.confirmUpdateModal.body"
         defaultMessage="This action will deploy updates to all agents which use these policies.
-        Fleet has detected that {policyCountText} {policyCount, plural, one { is} other { are}} ready to be upgraded
-        and {policyCount, plural, one { is} other { are}} already in use by {agentCountText}."
+        Fleet has detected that {packagePolicyCountText} {packagePolicyCount, plural, one { is} other { are}} ready to be upgraded
+        and {packagePolicyCount, plural, one { is} other { are}} already in use by {agentCountText}."
         values={{
-          policyCount: packagePolicyCount,
-          policyCountText: (
+          packagePolicyCount,
+          packagePolicyCountText: (
             <strong>
               <FormattedMessage
                 id="xpack.fleet.integrations.confirmUpdateModal.body.policyCount"
-                defaultMessage="{policyCount, plural, one {# integration policy} other {# integration policies}}"
-                values={{ policyCount: packagePolicyCount }}
+                defaultMessage="{packagePolicyCount, plural, one {# integration policy} other {# integration policies}}"
+                values={{ packagePolicyCount }}
               />
             </strong>
           ),
@@ -263,7 +274,7 @@ export function InstallationButton(props: InstallationButtonProps) {
               <FormattedMessage
                 id="xpack.fleet.integrations.confirmUpdateModal.body.agentCount"
                 defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
-                values={{ agentCount: agentPolicyData?.total }}
+                values={{ agentCount }}
               />
             </strong>
           ),
