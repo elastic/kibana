@@ -101,3 +101,14 @@ export const MULTI_FIELD_BADGE = i18n.translate(
 export const ACTIONS = i18n.translate('xpack.securitySolution.eventDetails.table.actions', {
   defaultMessage: 'Actions',
 });
+
+export const REASON = i18n.translate('xpack.securitySolution.eventDetails.reason', {
+  defaultMessage: 'Reason',
+});
+
+export const VIEW_RULE_DETAIL_PAGE = i18n.translate(
+  'xpack.securitySolution.eventDetails.viewRuleDetailPage',
+  {
+    defaultMessage: 'View Rule detail page',
+  }
+);
