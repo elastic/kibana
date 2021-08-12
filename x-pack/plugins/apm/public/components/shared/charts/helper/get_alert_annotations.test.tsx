@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { ALERT_SEVERITY_LEVEL } from '@kbn/rule-data-utils/target/technical_field_names';
+import type { ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED } from '@kbn/rule-data-utils';
+// @ts-expect-error
+import { ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import { ValuesType } from 'utility-types';
 import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 import { ObservabilityRuleTypeRegistry } from '../../../../../../observability/public';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { getAlertAnnotations } from './get_alert_annotations';
+
+const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
 
 type Alert = ValuesType<
   APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>['alerts']

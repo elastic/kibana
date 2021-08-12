@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { ALERT_UUID } from '@kbn/rule-data-utils/target/technical_field_names';
+import type { ALERT_UUID as ALERT_UUID_TYPED } from '@kbn/rule-data-utils';
+// @ts-expect-error
+import { ALERT_UUID as ALERT_UUID_NON_TYPED } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import React, { ComponentType } from 'react';
 import type { TopAlertResponse } from '../';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
@@ -13,6 +15,8 @@ import { PluginContext, PluginContextValue } from '../../../context/plugin_conte
 import { createObservabilityRuleTypeRegistryMock } from '../../../rules/observability_rule_type_registry_mock';
 import { apmAlertResponseExample } from '../example_data';
 import { AlertsFlyout } from './';
+
+const ALERT_UUID: typeof ALERT_UUID_TYPED = ALERT_UUID_NON_TYPED;
 
 interface Args {
   alerts: TopAlertResponse[];

@@ -8,9 +8,13 @@
 import expect from '@kbn/expect';
 import { merge, omit } from 'lodash';
 import { format } from 'url';
-import { EVENT_KIND } from '@kbn/rule-data-utils/target/technical_field_names';
+import type { EVENT_KIND as EVENT_KIND_TYPED } from '@kbn/rule-data-utils';
+// @ts-expect-error
+import { EVENT_KIND as EVENT_KIND_NON_TYPED } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
+
+const EVENT_KIND: typeof EVENT_KIND_TYPED = EVENT_KIND_NON_TYPED;
 
 interface Alert {
   schedule: {
