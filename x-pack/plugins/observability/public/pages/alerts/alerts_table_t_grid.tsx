@@ -13,17 +13,16 @@ import type {
   ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
 } from '@kbn/rule-data-utils';
 import {
-  AlertConsumers as AlertConsumersNonTyped,
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
   ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
   ALERT_STATUS as ALERT_STATUS_NON_TYPED,
   ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
-  // @ts-expect-error
-} from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
-import {
   TIMESTAMP,
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
+
+import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
+
 import { EuiButtonIcon, EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
