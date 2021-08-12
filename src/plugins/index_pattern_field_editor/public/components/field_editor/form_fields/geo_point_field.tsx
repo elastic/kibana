@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiForm, EuiFormRow } from '@elastic/eui';
 
+import { getKbnFieldType, KBN_FIELD_TYPES } from '@kbn/field-types';
 import {
   UseField,
   useFormData,
@@ -21,8 +22,6 @@ import { RuntimeFieldPainlessError } from '../../../lib';
 import { schema } from '../form_schema';
 import type { FieldFormInternal } from '../field_editor';
 
-import { getKbnFieldType, KBN_FIELD_TYPES } from '@kbn/field-types';
-
 interface Props {
   existingConcreteFields?: Array<{ name: string; type: string }>;
 }
@@ -32,38 +31,40 @@ export const GeoPointField = React.memo(({ existingConcreteFields }: Props) => {
   const [lonFieldName, setLonFieldName] = useState<string | undefined>(undefined);
 
   const [options, setOptions] = useState<string[]>([]);
+  let setScriptSource;
 
   useEffect(() => {
     const numberFieldType = getKbnFieldType(KBN_FIELD_TYPES.NUMBER);
     setOptions(
-      existingConcreteFields.filter((field) => {
-        return numberFieldType.esTypes.includes(field.type);
-      })
-      .map((field) => {
-        return { value: field.name, label: field.name };
-      }));
+      existingConcreteFields
+        .filter((field) => {
+          return numberFieldType.esTypes.includes(field.type);
+        })
+        .map((field) => {
+          return { value: field.name, label: field.name };
+        })
+    );
   }, [existingConcreteFields]);
 
-  const sourceFieldConfig: FieldConfig<string> = useMemo(() => {
-    return {
-      ...schema.script.source,
-      validations: [
-        {
-          validator: () => {},
-        },
-      ],
-    };
-  });
+  useEffect(() => {
+    if (setScriptSource && latFieldName && lonFieldName) {
+      setScriptSource(`emit(doc['${latFieldName}'].value, doc['${lonFieldName}'].value)`);
+    }
+  }, [latFieldName, lonFieldName, setScriptSource]);
+
+  const sourceFieldConfig: FieldConfig<string> = {
+    ...schema.script.source,
+    validations: [
+      {
+        validator: () => {},
+      },
+    ],
+  };
 
   return (
     <UseField<string> path="script.source" config={sourceFieldConfig}>
       {({ value, setValue }) => {
-
-        useEffect(() => {
-          if (latFieldName && lonFieldName) {
-            setValue(`emit(doc['${latFieldName}'].value, doc['${lonFieldName}'].value)`);
-          }
-        }, [latFieldName, lonFieldName]);
+        setScriptSource = setValue;
 
         function onLatChange(selectedOptions: Array<EuiComboBoxOptionOption<string>>) {
           if (!selectedOptions.length) {

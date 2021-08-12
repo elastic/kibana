@@ -121,9 +121,13 @@ const geti18nTexts = (): {
         }}
       />
     ),
-    geoPointDescription: i18n.translate('indexPatternFieldEditor.editor.form.geoPointValueDescription', {
-      defaultMessage: 'Select a latitude and longitide field to create a geo_point runtime field.',
-    }),
+    geoPointDescription: i18n.translate(
+      'indexPatternFieldEditor.editor.form.geoPointValueDescription',
+      {
+        defaultMessage:
+          'Select a latitude and longitide field to create a geo_point runtime field.',
+      }
+    ),
   },
   format: {
     title: i18n.translate('indexPatternFieldEditor.editor.form.formatTitle', {
@@ -225,13 +229,15 @@ const FieldEditorComponent = ({
     }
 
     const isGeoPoint = form.getFormData().type === 'geo_point';
-    const content = isGeoPoint
-      ? <GeoPointField existingConcreteFields={existingConcreteFields} />
-      : <ScriptField
-          existingConcreteFields={existingConcreteFields}
-          links={links}
-          syntaxError={syntaxError}
-        />;
+    const content = isGeoPoint ? (
+      <GeoPointField existingConcreteFields={existingConcreteFields} />
+    ) : (
+      <ScriptField
+        existingConcreteFields={existingConcreteFields}
+        links={links}
+        syntaxError={syntaxError}
+      />
+    );
     return (
       <FormRow
         title={i18nTexts.value.title}
