@@ -41,7 +41,6 @@ export interface ColumnToggleProps extends HoverActionComponentProps {
 
 const ColumnToggleButton: React.FC<ColumnToggleProps> = React.memo(
   ({
-    closePopOver,
     Component,
     defaultFocusedButtonRef,
     field,
@@ -49,6 +48,7 @@ const ColumnToggleButton: React.FC<ColumnToggleProps> = React.memo(
     isObjectArray,
     keyboardEvent,
     ownFocus,
+    onClick,
     showTooltip = false,
     toggleColumn,
     value,
@@ -61,10 +61,10 @@ const ColumnToggleButton: React.FC<ColumnToggleProps> = React.memo(
         id: field,
         initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
       });
-      if (closePopOver != null) {
-        closePopOver();
+      if (onClick != null) {
+        onClick();
       }
-    }, [closePopOver, field, toggleColumn]);
+    }, [onClick, field, toggleColumn]);
 
     useEffect(() => {
       if (!ownFocus) {

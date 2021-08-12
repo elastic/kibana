@@ -24,7 +24,6 @@ export type FilterForValueProps = HoverActionComponentProps & FilterValueFnArgs;
 const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
   ({
     Component,
-    closePopOver,
     defaultFocusedButtonRef,
     field,
     filterManager,
@@ -54,10 +53,7 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
       if (onClick != null) {
         onClick();
       }
-      if (closePopOver != null) {
-        closePopOver();
-      }
-    }, [closePopOver, field, filterManager, onClick, onFilterAdded, value]);
+    }, [field, filterManager, onClick, onFilterAdded, value]);
 
     useEffect(() => {
       if (!ownFocus) {

@@ -18,7 +18,6 @@ export interface FilterValueFnArgs {
 }
 
 export interface HoverActionComponentProps {
-  closePopOver?: () => void;
   defaultFocusedButtonRef?: EuiButtonIconPropsForButton['buttonRef'];
   field: string;
   keyboardEvent?: React.KeyboardEvent;

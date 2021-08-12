@@ -53,13 +53,13 @@ export interface AddToTimelineButtonProps extends HoverActionComponentProps {
 const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
   ({
     Component,
-    closePopOver,
     dataProvider,
     defaultFocusedButtonRef,
     draggableId,
     field,
     keyboardEvent,
     ownFocus,
+    onClick,
     showTooltip = false,
     value,
   }) => {
@@ -84,10 +84,10 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
         });
       }
 
-      if (closePopOver != null) {
-        closePopOver();
+      if (onClick != null) {
+        onClick();
       }
-    }, [addSuccess, closePopOver, dataProvider, dispatch, draggableId, startDragToTimeline]);
+    }, [addSuccess, onClick, dataProvider, dispatch, draggableId, startDragToTimeline]);
 
     useEffect(() => {
       if (!ownFocus) {

@@ -28,8 +28,9 @@ export const MORE_ACTIONS = i18n.translate('xpack.timelines.hoverActions.moreAct
 export const FILTER_OUT_VALUE_KEYBOARD_SHORTCUT = 'm';
 
 export interface OverflowButtonProps extends HoverActionComponentProps {
+  closePopOver: () => void;
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
-  items: Array<JSX.Element | null>;
+  items: JSX.Element[];
   isOverflowPopoverOpen: boolean;
 }
 
@@ -58,14 +59,6 @@ const OverflowButton: React.FC<OverflowButtonProps> = React.memo(
         }
       }
     }, [keyboardEvent, onClick, ownFocus]);
-
-    const overflowItems: JSX.Element[] = useMemo(
-      () =>
-        items.filter((item) => {
-          return item != null;
-        }, []),
-      [items]
-    ) as JSX.Element[];
 
     const popover = useMemo(
       () => (
@@ -100,17 +93,10 @@ const OverflowButton: React.FC<OverflowButtonProps> = React.memo(
           panelPaddingSize="none"
           anchorPosition="downLeft"
         >
-          <EuiContextMenuPanel items={overflowItems} />
+          <EuiContextMenuPanel items={items} />
         </EuiPopover>
       ),
-      [
-        Component,
-        defaultFocusedButtonRef,
-        onClick,
-        isOverflowPopoverOpen,
-        closePopOver,
-        overflowItems,
-      ]
+      [Component, defaultFocusedButtonRef, onClick, isOverflowPopoverOpen, closePopOver, items]
     );
 
     return showTooltip ? (

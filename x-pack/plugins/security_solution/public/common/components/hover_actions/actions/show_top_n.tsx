@@ -29,6 +29,7 @@ const SHOW_TOP = (fieldName: string) =>
   });
 
 interface Props {
+  closePopOver?: () => void;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
   field: string;
@@ -43,6 +44,7 @@ interface Props {
 
 export const ShowTopNButton: React.FC<Props> = React.memo(
   ({
+    closePopOver,
     Component,
     field,
     onClick,
@@ -116,7 +118,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
           )
         }
         isOpen={showTopN}
-        closePopover={onClick}
+        closePopover={closePopOver}
       >
         <StatefulTopN
           browserFields={browserFields}
