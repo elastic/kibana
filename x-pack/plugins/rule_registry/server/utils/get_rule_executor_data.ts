@@ -5,35 +5,32 @@
  * 2.0.
  */
 
+import { AlertExecutorOptions } from '../../../alerting/server';
 import {
-  PRODUCER,
-  RULE_CATEGORY,
-  RULE_ID,
-  RULE_NAME,
-  RULE_UUID,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_UUID,
   TAGS,
 } from '../../common/technical_rule_data_field_names';
-import { AlertTypeExecutor, AlertTypeWithExecutor } from '../types';
 
 export interface RuleExecutorData {
-  [RULE_CATEGORY]: string;
-  [RULE_ID]: string;
-  [RULE_UUID]: string;
-  [RULE_NAME]: string;
-  [PRODUCER]: string;
+  [ALERT_RULE_CATEGORY]: string;
+  [ALERT_RULE_TYPE_ID]: string;
+  [ALERT_RULE_UUID]: string;
+  [ALERT_RULE_NAME]: string;
+  [ALERT_RULE_PRODUCER]: string;
   [TAGS]: string[];
 }
 
-export function getRuleExecutorData(
-  type: AlertTypeWithExecutor<any, any, any>,
-  options: Parameters<AlertTypeExecutor>[0]
-) {
+export function getRuleData(options: AlertExecutorOptions<any, any, any, any, any>) {
   return {
-    [RULE_ID]: type.id,
-    [RULE_UUID]: options.alertId,
-    [RULE_CATEGORY]: type.name,
-    [RULE_NAME]: options.name,
+    [ALERT_RULE_TYPE_ID]: options.rule.ruleTypeId,
+    [ALERT_RULE_UUID]: options.alertId,
+    [ALERT_RULE_CATEGORY]: options.rule.ruleTypeName,
+    [ALERT_RULE_NAME]: options.rule.name,
     [TAGS]: options.tags,
-    [PRODUCER]: type.producer,
+    [ALERT_RULE_PRODUCER]: options.rule.producer,
   };
 }

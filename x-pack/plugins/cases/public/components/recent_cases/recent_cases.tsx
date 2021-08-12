@@ -42,6 +42,7 @@ const usePrevious = (value: Partial<FilterOptions>) => {
   });
   return ref.current;
 };
+
 export const RecentCasesComp = ({
   caseDetailsNavigation,
   createCaseNavigation,

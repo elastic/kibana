@@ -222,12 +222,11 @@ export class JobCreator {
   }
 
   public get description(): string {
-    return this._job_config.description;
+    return this._job_config.description ?? '';
   }
 
   public get groups(): string[] {
-    // @ts-expect-error @elastic-elasticsearch FIXME groups is optional
-    return this._job_config.groups;
+    return this._job_config.groups ?? [];
   }
 
   public set groups(groups: string[]) {

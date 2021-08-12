@@ -6,8 +6,8 @@
  */
 
 import React, { createContext } from 'react';
-import { useParams } from 'react-router-dom';
 import { Annotation } from '../../../common/annotations';
+import { useApmParams } from '../../hooks/use_apm_params';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { useUrlParams } from '../url_params_context/use_url_params';
 
@@ -22,7 +22,10 @@ export function AnnotationsContextProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const { path } = useApmParams('/*');
+
+  const serviceName = 'serviceName' in path ? path.serviceName : undefined;
+
   const {
     urlParams: { environment, start, end },
   } = useUrlParams();

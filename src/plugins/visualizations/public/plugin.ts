@@ -31,8 +31,9 @@ import {
   createVisEmbeddableFromObject,
 } from './embeddable';
 import { TypesService } from './vis_types/types_service';
-import { range as rangeExpressionFunction } from './expression_functions/range';
-import { visDimension as visDimensionExpressionFunction } from './expression_functions/vis_dimension';
+import { range as rangeExpressionFunction } from '../common/expression_functions/range';
+import { visDimension as visDimensionExpressionFunction } from '../common/expression_functions/vis_dimension';
+import { xyDimension as xyDimensionExpressionFunction } from '../common/expression_functions/xy_dimension';
 
 import { createStartServicesGetter, StartServicesGetter } from '../../kibana_utils/public';
 import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
@@ -136,6 +137,7 @@ export class VisualizationsPlugin
 
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
+    expressions.registerFunction(xyDimensionExpressionFunction);
     const embeddableFactory = new VisualizeEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
@@ -180,7 +182,7 @@ export class VisualizationsPlugin
       showNewVisModal,
       /**
        * creates new instance of Vis
-       * @param {IIndexPattern} indexPattern - index pattern to use
+       * @param {IndexPattern} indexPattern - index pattern to use
        * @param {VisState} visState - visualization configuration
        */
       createVis: async (visType: string, visState: SerializedVis) =>

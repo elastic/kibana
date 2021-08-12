@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Capabilities, HttpSetup, SavedObjectReference } from 'kibana/public';
+import type { Capabilities, HttpSetup, SavedObjectReference } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Ast } from '@kbn/interpreter/target/common';

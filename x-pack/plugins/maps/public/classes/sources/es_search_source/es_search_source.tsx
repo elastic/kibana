@@ -9,8 +9,9 @@ import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
-import { IFieldType, IndexPattern } from 'src/plugins/data/public';
+import type { Filter, IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { AbstractESSource } from '../es_source';
 import { getHttp, getSearchService, getTimeFilter } from '../../../kibana_services';
 import {
@@ -311,6 +312,18 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         },
       },
     });
+    if (topHitsSplitField.type === 'string') {
+      const entityIsNotEmptyFilter = esFilters.buildPhraseFilter(
+        topHitsSplitField,
+        '',
+        indexPattern
+      );
+      entityIsNotEmptyFilter.meta.negate = true;
+      searchSource.setField('filter', [
+        ...(searchSource.getField('filter') as Filter[]),
+        entityIsNotEmptyFilter,
+      ]);
+    }
 
     const resp = await this._runEsQuery({
       requestId: this.getId(),
@@ -620,17 +633,17 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         ? i18n.translate('xpack.maps.esSearch.topHitsResultsTrimmedMsg', {
             defaultMessage: `Results limited to first {entityCount} entities of ~{totalEntities}.`,
             values: {
-              entityCount: meta.entityCount,
-              totalEntities: meta.totalEntities,
+              entityCount: meta.entityCount?.toLocaleString(),
+              totalEntities: meta.totalEntities?.toLocaleString(),
             },
           })
         : i18n.translate('xpack.maps.esSearch.topHitsEntitiesCountMsg', {
             defaultMessage: `Found {entityCount} entities.`,
-            values: { entityCount: meta.entityCount },
+            values: { entityCount: meta.entityCount?.toLocaleString() },
           });
       const docsPerEntityMsg = i18n.translate('xpack.maps.esSearch.topHitsSizeMsg', {
         defaultMessage: `Showing top {topHitsSize} documents per entity.`,
-        values: { topHitsSize: this._descriptor.topHitsSize },
+        values: { topHitsSize: this._descriptor.topHitsSize?.toLocaleString() },
       });
 
       return {
@@ -645,7 +658,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       return {
         tooltipContent: i18n.translate('xpack.maps.esSearch.resultsTrimmedMsg', {
           defaultMessage: `Results limited to first {count} documents.`,
-          values: { count: meta.resultsCount },
+          values: { count: meta.resultsCount?.toLocaleString() },
         }),
         areResultsTrimmed: true,
       };
@@ -654,7 +667,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return {
       tooltipContent: i18n.translate('xpack.maps.esSearch.featureCountMsg', {
         defaultMessage: `Found {count} documents.`,
-        values: { count: meta.resultsCount },
+        values: { count: meta.resultsCount?.toLocaleString() },
       }),
       areResultsTrimmed: false,
     };

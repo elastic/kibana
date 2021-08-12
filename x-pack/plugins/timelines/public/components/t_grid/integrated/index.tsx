@@ -4,6 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { AlertConsumers as AlertConsumersTyped } from '@kbn/rule-data-utils';
+// @ts-expect-error
+import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -12,18 +16,17 @@ import { useDispatch } from 'react-redux';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Direction } from '../../../../common/search_strategy';
-// eslint-disable-next-line no-duplicate-imports
 import type { DocValueFields } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
+import { TGridCellAction, TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   DataProvider,
   RowRenderer,
+  AlertStatus,
 } from '../../../../common/types/timeline';
 import {
   esQuery,
@@ -33,7 +36,6 @@ import {
   DataPublicPluginStart,
 } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import { Refetch } from '../../../store/t_grid/inputs';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { calculateTotalPages, combineQueries, resolverIsShowing } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
@@ -41,19 +43,16 @@ import { useTimelineEvents } from '../../../container';
 import { HeaderSection } from '../header_section';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
-import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../styles';
-import * as i18n from './translations';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem } from '../styles';
+import * as i18n from '../translations';
 import { ExitFullScreen } from '../../exit_full_screen';
 import { Sort } from '../body/sort';
 import { InspectButtonContainer } from '../../inspect';
 
-export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
-const UTILITY_BAR_HEIGHT = 19; // px
-const COMPACT_HEADER_HEIGHT = EVENTS_VIEWER_HEADER_HEIGHT - UTILITY_BAR_HEIGHT; // px
+const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 
-const UtilityBar = styled.div`
-  height: ${UTILITY_BAR_HEIGHT}px;
-`;
+export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
+const COMPACT_HEADER_HEIGHT = 36; // px
 
 const TitleText = styled.span`
   margin-right: 12px;
@@ -105,16 +104,20 @@ const HeaderFilterGroupWrapper = styled.header<{ show: boolean }>`
   ${({ show }) => (show ? '' : 'visibility: hidden;')}
 `;
 
+const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
+
 export interface TGridIntegratedProps {
   browserFields: BrowserFields;
   columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
+  defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
   docValueFields: DocValueFields[];
   end: string;
   filters: Filter[];
   globalFullScreen: boolean;
   headerFilterGroup?: React.ReactNode;
+  filterStatus?: AlertStatus;
   height?: number;
   id: TimelineId;
   indexNames: string[];
@@ -131,17 +134,18 @@ export interface TGridIntegratedProps {
   setGlobalFullScreen: (fullscreen: boolean) => void;
   start: string;
   sort: Sort[];
-  utilityBar?: (refetch: Refetch, totalCount: number) => React.ReactNode;
+  additionalFilters: React.ReactNode;
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId: string | undefined;
-  leadingControlColumns: ControlColumnProps[];
-  trailingControlColumns: ControlColumnProps[];
+  leadingControlColumns?: ControlColumnProps[];
+  trailingControlColumns?: ControlColumnProps[];
   data?: DataPublicPluginStart;
 }
 
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   browserFields,
   columns,
+  defaultCellActions,
   dataProviders,
   deletedEventIds,
   docValueFields,
@@ -149,6 +153,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   filters,
   globalFullScreen,
   headerFilterGroup,
+  filterStatus,
   id,
   indexNames,
   indexPattern,
@@ -164,7 +169,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   setGlobalFullScreen,
   start,
   sort,
-  utilityBar,
+  additionalFilters,
   graphEventId,
   leadingControlColumns,
   trailingControlColumns,
@@ -176,7 +181,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const [isQueryLoading, setIsQueryLoading] = useState(false);
 
   const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
-  const unit = useMemo(() => (n: number) => i18n.UNIT(n), []);
+  const unit = useMemo(() => (n: number) => i18n.ALERTS_UNIT(n), []);
   const { queryFields, title } = useDeepEqualSelector((state) =>
     getManageTimeline(state, id ?? '')
   );
@@ -236,8 +241,9 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const [
     loading,
-    { events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
+    { events, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
+    alertConsumers: SECURITY_ALERTS_CONSUMERS,
     docValueFields,
     fields,
     filterQuery: combinedQueries!.filterQuery,
@@ -254,14 +260,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
     [deletedEventIds.length, totalCount]
-  );
-
-  const subtitle = useMemo(
-    () =>
-      `${i18n.SHOWING}: ${totalCountMinusDeleted.toLocaleString()} ${
-        unit && unit(totalCountMinusDeleted)
-      }`,
-    [totalCountMinusDeleted, unit]
   );
 
   const nonDeletedEvents = useMemo(() => events.filter((e) => !deletedEventIds.includes(e._id)), [
@@ -295,43 +293,51 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               id={!resolverIsShowing(graphEventId) ? id : undefined}
               inspect={inspect}
               loading={loading}
-              height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
-              subtitle={utilityBar ? undefined : subtitle}
+              height={
+                headerFilterGroup == null ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT
+              }
               title={globalFullScreen ? titleWithExitFullScreen : justTitle}
             >
               {HeaderSectionContent}
             </HeaderSection>
-            {utilityBar && !resolverIsShowing(graphEventId) && (
-              <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
-            )}
             <EventsContainerLoading
               data-timeline-id={id}
               data-test-subj={`events-container-loading-${loading}`}
             >
+              <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+                <UpdatedFlexItem grow={false} show={!loading}>
+                  {!resolverIsShowing(graphEventId) && additionalFilters}
+                </UpdatedFlexItem>
+              </EuiFlexGroup>
+
               <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
                 <ScrollableFlexItem grow={1}>
                   <StatefulBody
                     activePage={pageInfo.activePage}
                     browserFields={browserFields}
                     data={nonDeletedEvents}
+                    defaultCellActions={defaultCellActions}
                     id={id}
                     isEventViewer={true}
+                    loadPage={loadPage}
                     onRuleChange={onRuleChange}
                     renderCellValue={renderCellValue}
                     rowRenderers={rowRenderers}
-                    sort={sort}
                     tabType={TimelineTabs.query}
                     totalPages={calculateTotalPages({
                       itemsCount: totalCountMinusDeleted,
                       itemsPerPage,
                     })}
+                    totalItems={totalCountMinusDeleted}
+                    unit={unit}
+                    filterStatus={filterStatus}
                     leadingControlColumns={leadingControlColumns}
                     trailingControlColumns={trailingControlColumns}
+                    refetch={refetch}
                   />
                   <Footer
                     activePage={pageInfo.activePage}
                     data-test-subj="events-viewer-footer"
-                    updatedAt={updatedAt}
                     height={footerHeight}
                     id={id}
                     isLive={isLive}

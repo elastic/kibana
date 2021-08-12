@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { useTrackPageview } from '../../../../../observability/public';
 import { isRumAgentName, isIosAgentName } from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -20,7 +19,9 @@ import { ServiceOverviewDependenciesTable } from './service_overview_dependencie
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
 import { ServiceOverviewInstancesChartAndTable } from './service_overview_instances_chart_and_table';
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
-import { ServiceOverviewTransactionsTable } from './service_overview_transactions_table';
+import { TransactionsTable } from '../../shared/transactions_table';
+import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
+import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -28,15 +29,9 @@ import { ServiceOverviewTransactionsTable } from './service_overview_transaction
  */
 export const chartHeight = 288;
 
-interface ServiceOverviewProps {
-  serviceName: string;
-}
-
-export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
-  const { agentName } = useApmServiceContext();
-
-  useTrackPageview({ app: 'apm', path: 'service_overview' });
-  useTrackPageview({ app: 'apm', path: 'service_overview', delay: 15000 });
+export function ServiceOverview() {
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher();
+  const { agentName, serviceName } = useApmServiceContext();
 
   // The default EuiFlexGroup breaks at 768, but we want to break at 992, so we
   // observe the window width and set the flex directions of rows accordingly
@@ -49,6 +44,11 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
     <AnnotationsContextProvider>
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
+          {fallbackToTransactions && (
+            <EuiFlexItem>
+              <AggregatedTransactionsCallout />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
               <LatencyChart height={200} />
@@ -65,7 +65,7 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
               </EuiFlexItem>
               <EuiFlexItem grow={7}>
                 <EuiPanel hasBorder={true}>
-                  <ServiceOverviewTransactionsTable serviceName={serviceName} />
+                  <TransactionsTable />
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -103,9 +103,7 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
               {!isRumAgent && (
                 <EuiFlexItem grow={7}>
                   <EuiPanel hasBorder={true}>
-                    <ServiceOverviewDependenciesTable
-                      serviceName={serviceName}
-                    />
+                    <ServiceOverviewDependenciesTable />
                   </EuiPanel>
                 </EuiFlexItem>
               )}

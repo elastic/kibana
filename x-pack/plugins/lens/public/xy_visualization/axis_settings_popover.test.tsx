@@ -9,6 +9,7 @@ import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test/jest';
 import { AxisSettingsPopover, AxisSettingsPopoverProps } from './axis_settings_popover';
 import { ToolbarPopover } from '../shared_components';
+import { layerTypes } from '../../common';
 
 describe('Axes Settings', () => {
   let props: AxisSettingsPopoverProps;
@@ -17,6 +18,7 @@ describe('Axes Settings', () => {
       layers: [
         {
           seriesType: 'bar',
+          layerType: layerTypes.DATA,
           layerId: 'first',
           splitAccessor: 'baz',
           xAccessor: 'foo',
@@ -34,6 +36,8 @@ describe('Axes Settings', () => {
       toggleGridlinesVisibility: jest.fn(),
       hasBarOrAreaOnAxis: false,
       hasPercentageAxis: false,
+      orientation: 0,
+      setOrientation: jest.fn(),
     };
   });
 
@@ -80,6 +84,28 @@ describe('Axes Settings', () => {
     expect(component.find('[data-test-subj="lnsshowyRightAxisGridlines"]').prop('checked')).toBe(
       false
     );
+  });
+
+  it('has selected the horizontal option on the orientation group', () => {
+    const component = shallow(<AxisSettingsPopover {...props} />);
+    expect(
+      component.find('[data-test-subj="lnsXY_axisOrientation_groups"]').prop('idSelected')
+    ).toEqual('xy_axis_orientation_horizontal');
+  });
+
+  it('should have called the setOrientation function on orientation button group change', () => {
+    const component = shallow(<AxisSettingsPopover {...props} />);
+    component
+      .find('[data-test-subj="lnsXY_axisOrientation_groups"]')
+      .simulate('change', 'xy_axis_orientation_angled');
+    expect(props.setOrientation).toHaveBeenCalled();
+  });
+
+  it('should disable the orientation group if the tickLabels are set to not visible', () => {
+    const component = shallow(<AxisSettingsPopover {...props} areTickLabelsVisible={false} />);
+    expect(
+      component.find('[data-test-subj="lnsXY_axisOrientation_groups"]').prop('isDisabled')
+    ).toEqual(true);
   });
 
   it('hides the endzone visibility flag if no setter is passed in', () => {

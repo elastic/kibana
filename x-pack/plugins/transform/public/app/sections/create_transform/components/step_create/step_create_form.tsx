@@ -12,7 +12,6 @@ import {
   EuiButton,
   EuiCard,
   EuiCopy,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -480,8 +479,8 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
           {created && (
             <Fragment>
               <EuiHorizontalRule />
-              <EuiFlexGrid gutterSize="l">
-                <EuiFlexItem style={PANEL_ITEM_STYLE}>
+              <EuiFlexGroup gutterSize="l">
+                <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
                   <EuiCard
                     icon={<EuiIcon size="xxl" type="list" />}
                     title={i18n.translate('xpack.transform.stepCreateForm.transformListCardTitle', {
@@ -498,7 +497,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                   />
                 </EuiFlexItem>
                 {started === true && createIndexPattern === true && indexPatternId === undefined && (
-                  <EuiFlexItem style={PANEL_ITEM_STYLE}>
+                  <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
                     <EuiPanel style={{ position: 'relative' }}>
                       <EuiProgress size="xs" color="primary" position="absolute" />
                       <EuiText color="subdued" size="s">
@@ -515,7 +514,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                   </EuiFlexItem>
                 )}
                 {isDiscoverAvailable && discoverLink !== undefined && (
-                  <EuiFlexItem style={PANEL_ITEM_STYLE}>
+                  <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
                     <EuiCard
                       icon={<EuiIcon size="xxl" type="discoverApp" />}
                       title={i18n.translate('xpack.transform.stepCreateForm.discoverCardTitle', {
@@ -532,7 +531,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                     />
                   </EuiFlexItem>
                 )}
-              </EuiFlexGrid>
+              </EuiFlexGroup>
             </Fragment>
           )}
         </EuiForm>

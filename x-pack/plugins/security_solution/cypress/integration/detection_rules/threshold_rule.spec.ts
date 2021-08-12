@@ -6,14 +6,17 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
-import { indexPatterns, newRule, newThresholdRule } from '../../objects/rule';
+import {
+  getIndexPatterns,
+  getNewRule,
+  getNewThresholdRule,
+  ThresholdRule,
+} from '../../objects/rule';
 
 import {
-  ALERT_RULE_METHOD,
   ALERT_RULE_NAME,
   ALERT_RULE_RISK_SCORE,
   ALERT_RULE_SEVERITY,
-  ALERT_RULE_VERSION,
   NUMBER_OF_ALERTS,
 } from '../../screens/alerts';
 
@@ -84,16 +87,16 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Detection rules, threshold', () => {
-  const expectedUrls = newThresholdRule.referenceUrls.join('');
-  const expectedFalsePositives = newThresholdRule.falsePositivesExamples.join('');
-  const expectedTags = newThresholdRule.tags.join('');
-  const expectedMitre = formatMitreAttackDescription(newThresholdRule.mitre);
-
-  const rule = { ...newThresholdRule };
+  let rule = getNewThresholdRule();
+  const expectedUrls = getNewThresholdRule().referenceUrls.join('');
+  const expectedFalsePositives = getNewThresholdRule().falsePositivesExamples.join('');
+  const expectedTags = getNewThresholdRule().tags.join('');
+  const expectedMitre = formatMitreAttackDescription(getNewThresholdRule().mitre);
 
   beforeEach(() => {
+    rule = getNewThresholdRule();
     cleanKibana();
-    createTimeline(newThresholdRule.timeline).then((response) => {
+    createTimeline(getNewThresholdRule().timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
@@ -149,7 +152,7 @@ describe('Detection rules, threshold', () => {
     cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
-      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns.join(''));
+      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));
       getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.customQuery);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Threshold');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
@@ -174,17 +177,33 @@ describe('Detection rules, threshold', () => {
 
     cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text()).to.be.lt(100));
     cy.get(ALERT_RULE_NAME).first().should('have.text', rule.name);
-    cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
-    cy.get(ALERT_RULE_METHOD).first().should('have.text', 'threshold');
     cy.get(ALERT_RULE_SEVERITY).first().should('have.text', rule.severity.toLowerCase());
     cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', rule.riskScore);
   });
 
-  it('Preview results', () => {
-    const previewRule = { ...newThresholdRule };
-    previewRule.index!.push('.siem-signals*');
+  it('Preview results of keyword using "host.name"', () => {
+    rule.index = [...rule.index, '.siem-signals*'];
 
-    createCustomRuleActivated(newRule);
+    createCustomRuleActivated(getNewRule());
+    goToManageAlertsDetectionRules();
+    waitForRulesTableToBeLoaded();
+    goToCreateNewRule();
+    selectThresholdRuleType();
+    fillDefineThresholdRule(rule);
+    previewResults();
+
+    cy.get(PREVIEW_HEADER_SUBTITLE).should('have.text', '3 unique hits');
+  });
+
+  it('Preview results of "ip" using "source.ip"', () => {
+    const previewRule: ThresholdRule = {
+      ...rule,
+      thresholdField: 'source.ip',
+      threshold: '1',
+    };
+    previewRule.index = [...previewRule.index, '.siem-signals*'];
+
+    createCustomRuleActivated(getNewRule());
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
     goToCreateNewRule();
@@ -192,6 +211,6 @@ describe('Detection rules, threshold', () => {
     fillDefineThresholdRule(previewRule);
     previewResults();
 
-    cy.get(PREVIEW_HEADER_SUBTITLE).should('have.text', '3 unique hits');
+    cy.get(PREVIEW_HEADER_SUBTITLE).should('have.text', '10 unique hits');
   });
 });

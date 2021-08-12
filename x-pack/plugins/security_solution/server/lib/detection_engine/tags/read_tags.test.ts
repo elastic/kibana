@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { getAlertMock, getFindResultWithMultiHits } from '../routes/__mocks__/request_responses';
 import { INTERNAL_RULE_ID_KEY, INTERNAL_IDENTIFIER } from '../../../../common/constants';
 import { readRawTags, readTags, convertTagsToSet, convertToTags, isTags } from './read_tags';
@@ -28,10 +28,10 @@ describe('read_tags', () => {
       result2.params.ruleId = 'rule-2';
       result2.tags = ['tag 1', 'tag 2', 'tag 3', 'tag 4'];
 
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
+      const rulesClient = rulesClientMock.create();
+      rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
 
-      const tags = await readRawTags({ alertsClient });
+      const tags = await readRawTags({ rulesClient });
       expect(tags).toEqual(['tag 1', 'tag 2', 'tag 3', 'tag 4']);
     });
 
@@ -46,10 +46,10 @@ describe('read_tags', () => {
       result2.params.ruleId = 'rule-2';
       result2.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];
 
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
+      const rulesClient = rulesClientMock.create();
+      rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
 
-      const tags = await readRawTags({ alertsClient });
+      const tags = await readRawTags({ rulesClient });
       expect(tags).toEqual(['tag 1', 'tag 2', 'tag 3', 'tag 4']);
     });
 
@@ -64,10 +64,10 @@ describe('read_tags', () => {
       result2.params.ruleId = 'rule-2';
       result2.tags = [];
 
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
+      const rulesClient = rulesClientMock.create();
+      rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
 
-      const tags = await readRawTags({ alertsClient });
+      const tags = await readRawTags({ rulesClient });
       expect(tags).toEqual([]);
     });
 
@@ -77,10 +77,10 @@ describe('read_tags', () => {
       result1.params.ruleId = 'rule-1';
       result1.tags = ['tag 1', 'tag 1', 'tag 1', 'tag 2'];
 
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
+      const rulesClient = rulesClientMock.create();
+      rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
 
-      const tags = await readRawTags({ alertsClient });
+      const tags = await readRawTags({ rulesClient });
       expect(tags).toEqual(['tag 1', 'tag 2']);
     });
 
@@ -90,10 +90,10 @@ describe('read_tags', () => {
       result1.params.ruleId = 'rule-1';
       result1.tags = [];
 
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
+      const rulesClient = rulesClientMock.create();
+      rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
 
-      const tags = await readRawTags({ alertsClient });
+      const tags = await readRawTags({ rulesClient });
       expect(tags).toEqual([]);
     });
   });
@@ -110,10 +110,10 @@ describe('read_tags', () => {
       result2.params.ruleId = 'rule-2';
       result2.tags = ['tag 1', 'tag 2', 'tag 3', 'tag 4'];
 
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
+      const rulesClient = rulesClientMock.create();
+      rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
 
-      const tags = await readTags({ alertsClient });
+      const tags = await readTags({ rulesClient });
       expect(tags).toEqual(['tag 1', 'tag 2', 'tag 3', 'tag 4']);
     });
 
@@ -128,10 +128,10 @@ describe('read_tags', () => {
       result2.params.ruleId = 'rule-2';
       result2.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];
 
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
+      const rulesClient = rulesClientMock.create();
+      rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
 
-      const tags = await readTags({ alertsClient });
+      const tags = await readTags({ rulesClient });
       expect(tags).toEqual(['tag 1', 'tag 2', 'tag 3', 'tag 4']);
     });
 
@@ -146,10 +146,10 @@ describe('read_tags', () => {
       result2.params.ruleId = 'rule-2';
       result2.tags = [];
 
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
+      const rulesClient = rulesClientMock.create();
+      rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
 
-      const tags = await readTags({ alertsClient });
+      const tags = await readTags({ rulesClient });
       expect(tags).toEqual([]);
     });
 
@@ -159,10 +159,10 @@ describe('read_tags', () => {
       result1.params.ruleId = 'rule-1';
       result1.tags = ['tag 1', 'tag 1', 'tag 1', 'tag 2'];
 
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
+      const rulesClient = rulesClientMock.create();
+      rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
 
-      const tags = await readTags({ alertsClient });
+      const tags = await readTags({ rulesClient });
       expect(tags).toEqual(['tag 1', 'tag 2']);
     });
 
@@ -172,10 +172,10 @@ describe('read_tags', () => {
       result1.params.ruleId = 'rule-1';
       result1.tags = [];
 
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
+      const rulesClient = rulesClientMock.create();
+      rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
 
-      const tags = await readTags({ alertsClient });
+      const tags = await readTags({ rulesClient });
       expect(tags).toEqual([]);
     });
 
@@ -189,10 +189,10 @@ describe('read_tags', () => {
         'tag 1',
       ];
 
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
+      const rulesClient = rulesClientMock.create();
+      rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
 
-      const tags = await readTags({ alertsClient });
+      const tags = await readTags({ rulesClient });
       expect(tags).toEqual(['tag 1']);
     });
 
@@ -222,10 +222,10 @@ describe('read_tags', () => {
         'tag 4',
       ];
 
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
+      const rulesClient = rulesClientMock.create();
+      rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
 
-      const tags = await readTags({ alertsClient });
+      const tags = await readTags({ rulesClient });
       expect(tags).toEqual(['tag 1', 'tag 2', 'tag 3', 'tag 4', 'tag 5']);
     });
   });

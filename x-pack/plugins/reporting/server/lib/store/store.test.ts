@@ -255,6 +255,7 @@ describe('ReportingStore', () => {
         headers: 'rp_test_headers',
         objectType: 'testOt',
         browserTimezone: 'ABC',
+        version: '7.14.0',
       },
       timeout: 30000,
     });
@@ -285,6 +286,7 @@ describe('ReportingStore', () => {
         headers: 'rp_test_headers',
         objectType: 'testOt',
         browserTimezone: 'BCD',
+        version: '7.14.0',
       },
       timeout: 30000,
     });
@@ -315,6 +317,7 @@ describe('ReportingStore', () => {
         headers: 'rp_test_headers',
         objectType: 'testOt',
         browserTimezone: 'CDE',
+        version: '7.14.0',
       },
       timeout: 30000,
     });
@@ -345,6 +348,7 @@ describe('ReportingStore', () => {
         headers: 'rp_test_headers',
         objectType: 'testOt',
         browserTimezone: 'utc',
+        version: '7.14.0',
       },
       timeout: 30000,
     });
@@ -390,6 +394,7 @@ describe('ReportingStore', () => {
         headers: 'rp_test_headers',
         objectType: 'testOt',
         browserTimezone: 'utc',
+        version: '7.14.0',
       },
       timeout: 30000,
     });

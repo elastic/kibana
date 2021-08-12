@@ -11,7 +11,6 @@ import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import { ApplicationStart as ApplicationStart_2 } from 'kibana/public';
 import Boom from '@hapi/boom';
 import { ConfigDeprecationProvider } from '@kbn/config';
-import * as CSS from 'csstype';
 import { DetailedPeerCertificate } from 'tls';
 import { EmbeddableStart as EmbeddableStart_2 } from 'src/plugins/embeddable/public/plugin';
 import { EnvironmentMode } from '@kbn/config';
@@ -29,6 +28,7 @@ import { I18nStart as I18nStart_2 } from 'src/core/public';
 import { IconType } from '@elastic/eui';
 import { IncomingHttpHeaders } from 'http';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import { KibanaExecutionContext as KibanaExecutionContext_2 } from 'src/core/public';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
@@ -44,7 +44,6 @@ import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
 import { PeerCertificate } from 'tls';
 import { PluginInitializerContext } from 'src/core/public';
-import * as PropTypes from 'prop-types';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams } from 'src/core/server/types';
 import React from 'react';
@@ -55,6 +54,7 @@ import { SavedObjectAttributes } from 'kibana/server';
 import { SavedObjectAttributes as SavedObjectAttributes_2 } from 'src/core/public';
 import { SavedObjectAttributes as SavedObjectAttributes_3 } from 'kibana/public';
 import { SchemaTypeError } from '@kbn/config-schema';
+import { SerializableRecord } from '@kbn/utility-types';
 import { SimpleSavedObject as SimpleSavedObject_2 } from 'src/core/public';
 import { Start as Start_2 } from 'src/plugins/inspector/public';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
@@ -95,8 +95,7 @@ export interface Adapters {
 //
 // @public (undocumented)
 export class AddPanelAction implements Action_3<ActionContext_2> {
-    // Warning: (ae-forgotten-export) The symbol "React" needs to be exported by the entry point index.d.ts
-    constructor(getFactory: EmbeddableStart_2['getEmbeddableFactory'], getAllFactories: EmbeddableStart_2['getEmbeddableFactories'], overlays: OverlayStart_2, notifications: NotificationsStart_2, SavedObjectFinder: React_2.ComponentType<any>, reportUiCounter?: ((appName: string, type: import("@kbn/analytics").UiCounterMetricType, eventNames: string | string[], count?: number | undefined) => void) | undefined);
+    constructor(getFactory: EmbeddableStart_2['getEmbeddableFactory'], getAllFactories: EmbeddableStart_2['getEmbeddableFactories'], overlays: OverlayStart_2, notifications: NotificationsStart_2, SavedObjectFinder: React.ComponentType<any>, reportUiCounter?: ((appName: string, type: import("@kbn/analytics").UiCounterMetricType, eventNames: string | string[], count?: number | undefined) => void) | undefined);
     // (undocumented)
     execute(context: ActionExecutionContext_2<ActionContext_2>): Promise<void>;
     // (undocumented)
@@ -321,7 +320,7 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
 // Warning: (ae-missing-release-tag) "EmbeddableChildPanel" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelProps, State_2> {
+export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelProps, State> {
     constructor(props: EmbeddableChildPanelProps);
     // (undocumented)
     [panel: string]: any;
@@ -419,11 +418,12 @@ export type EmbeddableInput = {
     id: string;
     lastReloadRequestTime?: number;
     hidePanelTitles?: boolean;
-    enhancements?: SerializableState;
+    enhancements?: SerializableRecord;
     disabledActions?: string[];
     disableTriggers?: boolean;
     searchSessionId?: string;
     syncColors?: boolean;
+    executionContext?: KibanaExecutionContext_2;
 };
 
 // Warning: (ae-missing-release-tag) "EmbeddableInstanceConfiguration" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -478,7 +478,7 @@ export interface EmbeddablePackageState {
 // Warning: (ae-missing-release-tag) "EmbeddablePanel" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export class EmbeddablePanel extends React.Component<Props, State_3> {
+export class EmbeddablePanel extends React.Component<Props, State_2> {
     constructor(props: Props);
     // (undocumented)
     closeMyContextMenuPanel: () => void;
@@ -621,7 +621,7 @@ export class EmbeddableStateTransfer {
 // Warning: (ae-missing-release-tag) "EnhancementRegistryDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface EnhancementRegistryDefinition<P extends SerializableState = SerializableState> extends PersistableStateDefinition<P> {
+export interface EnhancementRegistryDefinition<P extends SerializableRecord = SerializableRecord> extends PersistableStateDefinition<P> {
     // (undocumented)
     id: string;
 }
@@ -898,7 +898,6 @@ export const withEmbeddableSubscription: <I extends EmbeddableInput, O extends E
 
 // Warnings were encountered during analysis:
 //
-// src/plugins/embeddable/common/types.ts:31:3 - (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
 // src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx:25:3 - (ae-forgotten-export) The symbol "UsageCollectionStart" needs to be exported by the entry point index.d.ts
 // src/plugins/embeddable/public/lib/triggers/triggers.ts:35:5 - (ae-forgotten-export) The symbol "Datatable" needs to be exported by the entry point index.d.ts
 

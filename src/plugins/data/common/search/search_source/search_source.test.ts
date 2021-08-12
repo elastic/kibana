@@ -359,6 +359,69 @@ describe('SearchSource', () => {
         expect(request.fields).toEqual(['*']);
         expect(request._source).toEqual(false);
       });
+
+      test('includes queries in the "filter" clause by default', async () => {
+        searchSource.setField('query', {
+          query: 'agent.keyword : "Mozilla" ',
+          language: 'kuery',
+        });
+        const request = searchSource.getSearchRequestBody();
+        expect(request.query).toMatchInlineSnapshot(`
+          Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match_phrase": Object {
+                          "agent.keyword": "Mozilla",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+              "must": Array [],
+              "must_not": Array [],
+              "should": Array [],
+            },
+          }
+        `);
+      });
+
+      test('includes queries in the "must" clause if sorting by _score', async () => {
+        searchSource.setField('query', {
+          query: 'agent.keyword : "Mozilla" ',
+          language: 'kuery',
+        });
+        searchSource.setField('sort', [{ _score: SortDirection.asc }]);
+        const request = searchSource.getSearchRequestBody();
+        expect(request.query).toMatchInlineSnapshot(`
+          Object {
+            "bool": Object {
+              "filter": Array [],
+              "must": Array [
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match_phrase": Object {
+                          "agent.keyword": "Mozilla",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+              "must_not": Array [],
+              "should": Array [],
+            },
+          }
+        `);
+      });
     });
 
     describe('source filters handling', () => {
@@ -909,6 +972,16 @@ describe('SearchSource', () => {
         expect(callOptions.strategy).toBe(ES_SEARCH_STRATEGY);
       });
 
+      test('should remove searchSessionId when forcing ES_SEARCH_STRATEGY', async () => {
+        searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
+        const options = { sessionId: 'test' };
+        await searchSource.fetch$(options).toPromise();
+
+        const [, callOptions] = mockSearchMethod.mock.calls[0];
+        expect(callOptions.strategy).toBe(ES_SEARCH_STRATEGY);
+        expect(callOptions.sessionId).toBeUndefined();
+      });
+
       test('should not override strategy if set ', async () => {
         searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
         const options = { strategy: 'banana' };
@@ -933,27 +1006,27 @@ describe('SearchSource', () => {
         expect(next).toBeCalledTimes(2);
         expect(complete).toBeCalledTimes(1);
         expect(next.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "isPartial": true,
-            "isRunning": true,
-            "rawResponse": Object {
-              "test": 1,
-            },
-          },
-        ]
-        `);
+                  Array [
+                    Object {
+                      "isPartial": true,
+                      "isRunning": true,
+                      "rawResponse": Object {
+                        "test": 1,
+                      },
+                    },
+                  ]
+                `);
         expect(next.mock.calls[1]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "isPartial": false,
-            "isRunning": false,
-            "rawResponse": Object {
-              "test": 2,
-            },
-          },
-        ]
-        `);
+                  Array [
+                    Object {
+                      "isPartial": false,
+                      "isRunning": false,
+                      "rawResponse": Object {
+                        "test": 2,
+                      },
+                    },
+                  ]
+                `);
       });
 
       test('shareReplays result', async () => {

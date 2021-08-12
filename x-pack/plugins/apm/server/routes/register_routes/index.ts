@@ -18,9 +18,12 @@ import {
   routeValidationObject,
 } from '@kbn/server-route-repository';
 import { mergeRt, jsonRt } from '@kbn/io-ts-utils';
-import { UsageCollectionSetup } from '../../../../../../src/plugins/usage_collection/server';
 import { pickKeys } from '../../../common/utils/pick_keys';
-import { APMRouteHandlerResources, InspectResponse } from '../typings';
+import {
+  APMRouteHandlerResources,
+  InspectResponse,
+  TelemetryUsageCounter,
+} from '../typings';
 import type { ApmPluginRequestHandlerContext } from '../typings';
 
 const inspectRt = t.exact(
@@ -28,6 +31,13 @@ const inspectRt = t.exact(
     query: t.exact(t.partial({ _inspect: jsonRt.pipe(t.boolean) })),
   })
 );
+
+const CLIENT_CLOSED_REQUEST = {
+  statusCode: 499,
+  body: {
+    message: 'Client closed request',
+  },
+};
 
 export const inspectableEsQueriesMap = new WeakMap<
   KibanaRequest,
@@ -49,9 +59,7 @@ export function registerRoutes({
   repository: ServerRouteRepository<APMRouteHandlerResources>;
   config: APMRouteHandlerResources['config'];
   ruleDataClient: APMRouteHandlerResources['ruleDataClient'];
-  telemetryUsageCounter?: ReturnType<
-    UsageCollectionSetup['createUsageCounter']
-  >;
+  telemetryUsageCounter?: TelemetryUsageCounter;
 }) {
   const routes = repository.getRoutes();
 
@@ -89,23 +97,41 @@ export function registerRoutes({
             runtimeType
           );
 
-          const data: Record<string, any> | undefined | null = (await handler({
-            request,
-            context,
-            config,
-            logger,
-            core,
-            plugins,
-            params: merge(
-              {
-                query: {
-                  _inspect: false,
+          const { aborted, data } = await Promise.race([
+            handler({
+              request,
+              context,
+              config,
+              logger,
+              core,
+              plugins,
+              telemetryUsageCounter,
+              params: merge(
+                {
+                  query: {
+                    _inspect: false,
+                  },
                 },
-              },
-              validatedParams
-            ),
-            ruleDataClient,
-          })) as any;
+                validatedParams
+              ),
+              ruleDataClient,
+            }).then((value) => {
+              return {
+                aborted: false,
+                data: value as Record<string, any> | undefined | null,
+              };
+            }),
+            request.events.aborted$.toPromise().then(() => {
+              return {
+                aborted: true,
+                data: undefined,
+              };
+            }),
+          ]);
+
+          if (aborted) {
+            return response.custom(CLIENT_CLOSED_REQUEST);
+          }
 
           if (Array.isArray(data)) {
             throw new Error('Return type cannot be an array');
@@ -118,9 +144,6 @@ export function registerRoutes({
               }
             : { ...data };
 
-          // cleanup
-          inspectableEsQueriesMap.delete(request);
-
           if (!options.disableTelemetry && telemetryUsageCounter) {
             telemetryUsageCounter.incrementCounter({
               counterName: `${method.toUpperCase()} ${pathname}`,
@@ -131,6 +154,7 @@ export function registerRoutes({
           return response.ok({ body });
         } catch (error) {
           logger.error(error);
+
           if (!options.disableTelemetry && telemetryUsageCounter) {
             telemetryUsageCounter.incrementCounter({
               counterName: `${method.toUpperCase()} ${pathname}`,
@@ -147,16 +171,18 @@ export function registerRoutes({
             },
           };
 
+          if (error instanceof RequestAbortedError) {
+            return response.custom(merge(opts, CLIENT_CLOSED_REQUEST));
+          }
+
           if (Boom.isBoom(error)) {
             opts.statusCode = error.output.statusCode;
           }
 
-          if (error instanceof RequestAbortedError) {
-            opts.statusCode = 499;
-            opts.body.message = 'Client closed request';
-          }
-
           return response.custom(opts);
+        } finally {
+          // cleanup
+          inspectableEsQueriesMap.delete(request);
         }
       }
     );

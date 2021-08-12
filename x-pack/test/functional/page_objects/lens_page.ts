@@ -139,6 +139,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       if (opts.formula) {
+        // Formula takes time to open
+        await PageObjects.common.sleep(500);
         await this.typeFormula(opts.formula);
       }
 
@@ -807,17 +809,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsDatatable_dynamicColoring_groups_' + coloringType);
     },
 
-    async openTablePalettePanel() {
-      await testSubjects.click('lnsDatatable_dynamicColoring_trigger');
+    async openPalettePanel(chartType: string) {
+      await testSubjects.click(`${chartType}_dynamicColoring_trigger`);
     },
 
-    async closeTablePalettePanel() {
+    async closePalettePanel() {
       await testSubjects.click('lns-indexPattern-PalettePanelContainerBack');
     },
 
     // different picker from the next one
     async changePaletteTo(paletteName: string) {
-      await testSubjects.click('lnsDatatable_dynamicColoring_palette_picker');
+      await testSubjects.click(`lnsPalettePanel_dynamicColoring_palette_picker`);
       await testSubjects.click(`${paletteName}-palette`);
     },
 
@@ -842,7 +844,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async setColorStopValue(value: number | string) {
       await testSubjects.setValue(
-        'lnsDatatable_dynamicColoring_progression_custom_stops_value',
+        'lnsPalettePanel_dynamicColoring_progression_custom_stops_value',
         String(value)
       );
     },
@@ -1067,13 +1069,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async typeFormula(formula: string) {
-      // Formula takes time to open
-      await PageObjects.common.sleep(500);
       await find.byCssSelector('.monaco-editor');
       await find.clickByCssSelectorWhenNotDisabled('.monaco-editor');
       const input = await find.activeElement();
       await input.clearValueWithKeyboard({ charByChar: true });
       await input.type(formula);
+      // Debounce time for formula
+      await PageObjects.common.sleep(300);
+    },
+
+    async expectFormulaText(formula: string) {
+      const element = await find.byCssSelector('.monaco-editor');
+      expect(await element.getVisibleText()).to.equal(formula);
     },
 
     async filterLegend(value: string) {

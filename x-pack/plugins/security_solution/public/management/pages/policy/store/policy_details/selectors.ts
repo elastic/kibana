@@ -185,6 +185,8 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         events: windows.events,
         malware: windows.malware,
         ransomware: windows.ransomware,
+        memory_protection: windows.memory_protection,
+        behavior_protection: windows.behavior_protection,
         popup: windows.popup,
         antivirus_registration: windows.antivirus_registration,
       },
@@ -192,12 +194,14 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         advanced: mac.advanced,
         events: mac.events,
         malware: mac.malware,
+        behavior_protection: mac.behavior_protection,
         popup: mac.popup,
       },
       linux: {
         advanced: linux.advanced,
         events: linux.events,
         malware: linux.malware,
+        behavior_protection: linux.behavior_protection,
         popup: linux.popup,
       },
     };

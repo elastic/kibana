@@ -35,7 +35,7 @@ function parseAndExtract(
   label?: string
 ) {
   const { root, error } = tryToParse(text, operationDefinitionMap);
-  if (error || !root) {
+  if (error || root == null) {
     return { extracted: [], isValid: false };
   }
   // before extracting the data run the validation task and throw if invalid

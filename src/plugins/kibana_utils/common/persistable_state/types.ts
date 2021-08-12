@@ -6,17 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectReference } from '../../../../core/types';
-
-/**
- * Serializable state is something is a POJO JavaScript object that can be
- * serialized to a JSON string.
- */
-export type SerializableState = {
-  [key: string]: Serializable;
-};
-export type SerializableValue = string | number | boolean | null | undefined | SerializableState;
-export type Serializable = SerializableValue | SerializableValue[];
 
 /**
  * Versioned state is a POJO JavaScript object that can be serialized to JSON,
@@ -35,7 +26,7 @@ export type Serializable = SerializableValue | SerializableValue[];
  * };
  * ```
  */
-export interface VersionedState<S extends SerializableState = SerializableState> {
+export interface VersionedState<S extends SerializableRecord = SerializableRecord> {
   version: string;
   state: S;
 }
@@ -50,7 +41,7 @@ export interface VersionedState<S extends SerializableState = SerializableState>
  *
  * @todo Maybe rename it to `PersistableStateItem`?
  */
-export interface PersistableState<P extends SerializableState = SerializableState> {
+export interface PersistableState<P extends SerializableRecord = SerializableRecord> {
   /**
    * Function which reports telemetry information. This function is essentially
    * a "reducer" - it receives the existing "stats" object and returns an
@@ -99,23 +90,33 @@ export interface PersistableState<P extends SerializableState = SerializableStat
  * accumulated over time. Migration functions are keyed using semver version
  * of Kibana releases.
  */
-export type MigrateFunctionsObject = { [semver: string]: MigrateFunction };
+export type MigrateFunctionsObject = { [semver: string]: MigrateFunction<any, any> };
 export type MigrateFunction<
-  FromVersion extends SerializableState = SerializableState,
-  ToVersion extends SerializableState = SerializableState
+  FromVersion extends SerializableRecord = SerializableRecord,
+  ToVersion extends SerializableRecord = SerializableRecord
 > = (state: FromVersion) => ToVersion;
+
+/**
+ * migrate function runs the specified migration
+ * @param state
+ * @param version
+ */
+export type PersistableStateMigrateFn = (
+  state: SerializableRecord,
+  version: string
+) => SerializableRecord;
 
 /**
  * @todo Shall we remove this?
  */
-export type PersistableStateDefinition<P extends SerializableState = SerializableState> = Partial<
+export type PersistableStateDefinition<P extends SerializableRecord = SerializableRecord> = Partial<
   PersistableState<P>
 >;
 
 /**
  * @todo Add description.
  */
-export interface PersistableStateService<P extends SerializableState = SerializableState> {
+export interface PersistableStateService<P extends SerializableRecord = SerializableRecord> {
   /**
    * Function which reports telemetry information. This function is essentially
    * a "reducer" - it receives the existing "stats" object and returns an
@@ -151,23 +152,6 @@ export interface PersistableStateService<P extends SerializableState = Serializa
   extract(state: P): { state: P; references: SavedObjectReference[] };
 
   /**
-   * Migrate function runs a specified migration of a {@link PersistableState}
-   * item.
-   *
-   * When using this method it is up to consumer to make sure that the
-   * migration function are executed in the right semver order. To avoid such
-   * potentially error prone complexity, prefer using `migrateToLatest` method
-   * instead.
-   *
-   * @param state The old persistable state serializable state object, which
-   *              needs a migration.
-   * @param version Semver version of the migration to execute.
-   * @returns Persistable state object updated with the specified migration
-   *          applied to it.
-   */
-  migrate(state: SerializableState, version: string): SerializableState;
-
-  /**
    * A function which receives the state of an older object and version and
    * should migrate the state of the object to the latest possible version using
    * the `.migrations` dictionary provided on a {@link PersistableState} item.
@@ -176,5 +160,10 @@ export interface PersistableStateService<P extends SerializableState = Serializa
    * @param version Current semver version of the `state`.
    * @returns A serializable state object migrated to the latest state.
    */
-  migrateToLatest?: (state: VersionedState) => VersionedState<P>;
+  migrateToLatest?: (state: VersionedState) => P;
+
+  /**
+   * returns all registered migrations
+   */
+  getAllMigrations: () => MigrateFunctionsObject;
 }

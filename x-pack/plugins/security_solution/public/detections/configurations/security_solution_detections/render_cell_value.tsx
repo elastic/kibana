@@ -22,6 +22,7 @@ export const RenderCellValue: React.FC<
   columnId,
   data,
   eventId,
+  isDraggable,
   header,
   isDetails,
   isExpandable,
@@ -30,11 +31,15 @@ export const RenderCellValue: React.FC<
   rowIndex,
   setCellProps,
   timelineId,
+  ecsData,
+  rowRenderers,
+  browserFields,
 }) => (
   <DefaultCellRenderer
     columnId={columnId}
     data={data}
     eventId={eventId}
+    isDraggable={isDraggable}
     header={header}
     isDetails={isDetails}
     isExpandable={isExpandable}
@@ -43,5 +48,8 @@ export const RenderCellValue: React.FC<
     rowIndex={rowIndex}
     setCellProps={setCellProps}
     timelineId={timelineId}
+    ecsData={ecsData}
+    rowRenderers={rowRenderers}
+    browserFields={browserFields}
   />
 );

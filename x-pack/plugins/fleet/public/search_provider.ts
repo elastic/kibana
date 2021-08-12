@@ -21,7 +21,7 @@ import { sendGetPackages } from './hooks';
 import type { GetPackagesResponse } from './types';
 import { pagePathGetters } from './constants';
 
-const packageType = 'package';
+const packageType = 'integration';
 
 const createPackages$ = () =>
   from(sendGetPackages()).pipe(
@@ -45,10 +45,8 @@ const toSearchResult = (
     title: pkg.title,
     score: 80,
     url: {
-      // TODO: See https://github.com/elastic/kibana/issues/96134 for details about why we use '#' here. Below should be updated
-      // as part of migrating to non-hash based router.
       // prettier-ignore
-      path: `${application.getUrlForApp(INTEGRATIONS_PLUGIN_ID)}#${pagePathGetters.integration_details_overview({ pkgkey })[1]}`,
+      path: `${application.getUrlForApp(INTEGRATIONS_PLUGIN_ID)}${pagePathGetters.integration_details_overview({ pkgkey })[1]}`,
       prependBasePath: false,
     },
   };
@@ -70,7 +68,7 @@ export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResult
   };
 
   return {
-    id: 'packages',
+    id: 'integrations',
     getSearchableTypes: () => [packageType],
     find: ({ term, types }, { maxResults, aborted$ }) => {
       if (types?.includes(packageType) === false) {
@@ -94,19 +92,19 @@ export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResult
         coreStart: CoreStart,
         packagesResponse: GetPackagesResponse['response']
       ): GlobalSearchProviderResult[] => {
-        const packages = packagesResponse.slice(0, maxResults);
+        return packagesResponse
+          .flatMap(
+            includeAllPackages
+              ? (pkg) => toSearchResult(pkg, coreStart.application)
+              : (pkg) => {
+                  if (!term || !pkg.title.toLowerCase().includes(term)) {
+                    return [];
+                  }
 
-        return packages.flatMap(
-          includeAllPackages
-            ? (pkg) => toSearchResult(pkg, coreStart.application)
-            : (pkg) => {
-                if (!term || !pkg.title.toLowerCase().includes(term)) {
-                  return [];
+                  return toSearchResult(pkg, coreStart.application);
                 }
-
-                return toSearchResult(pkg, coreStart.application);
-              }
-        );
+          )
+          .slice(0, maxResults);
       };
 
       return combineLatest([coreStart$, getPackages$()]).pipe(

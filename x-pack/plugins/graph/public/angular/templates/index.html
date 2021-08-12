@@ -3,51 +3,14 @@
   <kbn-top-nav name="workspacesTopNav" config="topNavMenu" set-menu-mount-point="setHeaderActionMenu">
   </kbn-top-nav>
 
-  <div class="gphGraph__menus" ng-show="menus.showInspect">
-    <div>
-      <div
-        class="kuiLocalDropdownTitle"
-        i18n-id="xpack.graph.inspect.title"
-        i18n-default-message="Inspect"
-      ></div>
+  <inspect-panel
+    show-inspect="menus.showInspect"
+    last-request="workspace && workspace.lastRequest"
+    last-response="workspace && workspace.lastResponse"
+    index-pattern="selectedIndex">
+  </inspect-panel>
+  
 
-      <div
-        class="list-group-item"
-        ng-if="(workspace !== null)"
-      >
-        <small class="help-block">http://host:port/{{ selectedIndex.name }}/_graph/explore</small>
-        <ul class="nav nav-tabs">
-          <li ng-class="{active: spymode === 'request'}">
-            <a
-              ng-click="spymode='request'"
-              i18n-id="xpack.graph.inspect.requestTabTitle"
-              i18n-default-message="Request"
-            ></a>
-          </li>
-          <li ng-class="{active: spymode === 'response'}">
-            <a
-              ng-click="spymode='response'"
-              i18n-id="xpack.graph.inspect.responseTabTitle"
-              i18n-default-message="Response"
-            ></a>
-          </li>
-        </ul>
-
-        <div
-          ng-show="spymode == 'request'"
-          ui-ace="{ onLoad: aceLoaded, mode: 'json', advanced: { readOnly: true } }"
-          ng-model="workspace.lastRequest"
-          class="gphSettings__jsonView"
-        ></div>
-        <div
-          ng-show="spymode == 'response'"
-          ui-ace="{ onLoad: aceLoaded, mode: 'json', advanced: { readOnly: true } }"
-          ng-model="workspace.lastResponse"
-          class="gphSettings__jsonView"
-        ></div>
-      </div>
-    </div>
-  </div>
 
   <div
     graph-app

@@ -11,11 +11,8 @@ import {
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../common/elasticsearch_fieldnames';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../server/utils/queries';
+import { rangeQuery, kqlQuery } from '../../../observability/server';
+import { environmentQuery } from '../../common/utils/environment_query';
 import { SERVICE_NODE_NAME_MISSING } from '../../common/service_nodes';
 import { ProcessorEvent } from '../../common/processor_event';
 

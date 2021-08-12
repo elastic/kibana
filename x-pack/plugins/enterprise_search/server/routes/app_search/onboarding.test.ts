@@ -30,6 +30,7 @@ describe('engine routes', () => {
       mockRouter.callRoute({ body: {} });
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/onboarding/complete',
+        hasJsonResponse: false,
       });
     });
 

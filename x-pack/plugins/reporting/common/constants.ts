@@ -7,8 +7,6 @@
 
 export const PLUGIN_ID = 'reporting';
 
-export const BROWSER_TYPE = 'chromium';
-
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
   'xpack.reporting.jobCompletionNotifications';
 
@@ -63,10 +61,14 @@ export const CSV_REPORT_TYPE = 'CSV';
 export const CSV_JOB_TYPE = 'csv_searchsource';
 
 export const PDF_REPORT_TYPE = 'printablePdf';
+export const PDF_REPORT_TYPE_V2 = 'printablePdfV2';
 export const PDF_JOB_TYPE = 'printable_pdf';
+export const PDF_JOB_TYPE_V2 = 'printable_pdf_v2';
 
 export const PNG_REPORT_TYPE = 'PNG';
+export const PNG_REPORT_TYPE_V2 = 'pngV2';
 export const PNG_JOB_TYPE = 'PNG';
+export const PNG_JOB_TYPE_V2 = 'PNGV2';
 
 export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 
@@ -92,17 +94,27 @@ export const API_LIST_URL = `${API_BASE_URL}/jobs`;
 export const API_DIAGNOSE_URL = `${API_BASE_URL}/diagnose`;
 
 export const API_GET_ILM_POLICY_STATUS = `${API_BASE_URL}/ilm_policy_status`;
-export const API_CREATE_ILM_POLICY_URL = `${API_BASE_URL}/ilm_policy`;
 export const API_MIGRATE_ILM_POLICY_URL = `${API_BASE_URL}/deprecations/migrate_ilm_policy`;
+export const API_BASE_URL_V1 = '/api/reporting/v1'; //
 
 export const ILM_POLICY_NAME = 'kibana-reporting';
 
-// hacky endpoint: download CSV without queueing a report
-export const API_BASE_URL_V1 = '/api/reporting/v1'; //
-export const API_GENERATE_IMMEDIATE = `${API_BASE_URL_V1}/generate/immediate/csv_searchsource`;
-
 // Management UI route
 export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';
+
+export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
+
+/**
+ * A way to get the client side route for the reporting redirect app.
+ *
+ * This route currently expects a job ID and a locator that to use from that job so that it can redirect to the
+ * correct page.
+ *
+ * TODO: Accommodate 'forceNow' value that some visualizations may rely on
+ */
+export const getRedirectAppPathHome = () => {
+  return '/app/management/insightsAndAlerting/reporting/r';
+};
 
 // Statuses
 export enum JOB_STATUSES {
@@ -110,6 +122,18 @@ export enum JOB_STATUSES {
   PROCESSING = 'processing',
   COMPLETED = 'completed',
   FAILED = 'failed',
-  CANCELLED = 'cancelled',
   WARNINGS = 'completed_with_warnings',
 }
+
+// Test Subjects
+export const REPORT_TABLE_ID = 'reportJobListing';
+export const REPORT_TABLE_ROW_ID = 'reportJobRow';
+
+// Job params require a `version` field as of 7.15.0. For older jobs set with
+// automation that have no version value in the job params, we assume the
+// intended version is 7.14.0
+export const UNVERSIONED_VERSION = '7.14.0';
+
+// hacky endpoint: download CSV without queueing a report
+// FIXME: find a way to make these endpoints "generic" instead of hardcoded, as are the queued report export types
+export const API_GENERATE_IMMEDIATE = `${API_BASE_URL_V1}/generate/immediate/csv_searchsource`;

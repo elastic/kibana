@@ -6,7 +6,9 @@
 
 import { CoreSetup } from 'kibana/server';
 import { CoreStart } from 'kibana/server';
+import { KibanaExecutionContext } from 'src/core/public';
 import { Plugin } from 'kibana/server';
+import { SerializableRecord } from '@kbn/utility-types';
 
 // Warning: (ae-forgotten-export) The symbol "EmbeddableStateWithType" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "PersistableStateDefinition" needs to be exported by the entry point index.d.ts
@@ -23,8 +25,10 @@ export interface EmbeddableRegistryDefinition<P extends EmbeddableStateWithType 
 //
 // @public (undocumented)
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
+    // Warning: (ae-forgotten-export) The symbol "MigrateFunctionsObject" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    getMigrationVersions: () => string[];
+    getAllMigrations: () => MigrateFunctionsObject;
     // (undocumented)
     registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
     // (undocumented)
@@ -36,11 +40,10 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
 // @public (undocumented)
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType>;
 
-// Warning: (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "EnhancementRegistryDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface EnhancementRegistryDefinition<P extends SerializableState = SerializableState> extends PersistableStateDefinition<P> {
+export interface EnhancementRegistryDefinition<P extends SerializableRecord = SerializableRecord> extends PersistableStateDefinition<P> {
     // (undocumented)
     id: string;
 }

@@ -15,7 +15,9 @@ import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
+import { isWriteBlockException } from './es_errors';
 import { WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE } from './constants';
+import type { TargetIndexHadWriteBlock } from './index';
 
 /** @internal */
 export interface BulkOverwriteTransformedDocumentsParams {
@@ -24,6 +26,7 @@ export interface BulkOverwriteTransformedDocumentsParams {
   transformedDocs: SavedObjectsRawDoc[];
   refresh?: estypes.Refresh;
 }
+
 /**
  * Write the up-to-date transformed documents to the index, overwriting any
  * documents that are still on their outdated version.
@@ -34,7 +37,7 @@ export const bulkOverwriteTransformedDocuments = ({
   transformedDocs,
   refresh = false,
 }: BulkOverwriteTransformedDocumentsParams): TaskEither.TaskEither<
-  RetryableEsClientError,
+  RetryableEsClientError | TargetIndexHadWriteBlock,
   'bulk_index_succeeded'
 > => () => {
   return client
@@ -71,12 +74,19 @@ export const bulkOverwriteTransformedDocuments = ({
     .then((res) => {
       // Filter out version_conflict_engine_exception since these just mean
       // that another instance already updated these documents
-      const errors = (res.body.items ?? []).filter(
-        (item) => item.index?.error?.type !== 'version_conflict_engine_exception'
-      );
+      const errors = (res.body.items ?? [])
+        .filter((item) => item.index?.error)
+        .map((item) => item.index!.error!)
+        .filter(({ type }) => type !== 'version_conflict_engine_exception');
+
       if (errors.length === 0) {
         return Either.right('bulk_index_succeeded' as const);
       } else {
+        if (errors.every(isWriteBlockException)) {
+          return Either.left({
+            type: 'target_index_had_write_block' as const,
+          });
+        }
         throw new Error(JSON.stringify(errors));
       }
     })

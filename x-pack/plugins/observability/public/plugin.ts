@@ -109,7 +109,7 @@ export class Plugin
     createCallObservabilityApi(coreSetup.http);
 
     const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
-      pluginsSetup.triggersActionsUi.alertTypeRegistry
+      pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
 
     const mount = async (params: AppMountParameters<unknown>) => {

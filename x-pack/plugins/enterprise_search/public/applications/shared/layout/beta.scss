@@ -6,19 +6,18 @@
  */
 
 @include euiBreakpoint('m', 'l', 'xl') {
-  .kbnPageTemplateSolutionNav {
-    position: relative;
-    min-height: 100%;
+  .betaSidebarNotification {
+    .euiSideNav {
+      display: flex;
+      flex-direction: column;
 
-    // Nested to override EUI specificity
-    .betaNotificationSideNavItem {
-      margin-top: $euiSizeL;
+      .euiSideNav__content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
     }
-  }
-
-  .betaNotificationWrapper {
-    position: absolute;
-    bottom: 3px; // Without this 3px buffer, the popover won't render to the right
   }
 }
 

@@ -17,13 +17,9 @@ const ButtonContainer = styled(EuiFlexGroup)`
   padding: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
 
-const Title = styled(EuiText)<{ textcolor: 'primary' | 'warning' | 'danger' }>`
+const Title = styled(EuiText)<{ textcolor: 'primary' | 'warning' }>`
   color: ${({ theme, textcolor }) =>
-    textcolor === 'primary'
-      ? theme.eui.euiColorPrimary
-      : textcolor === 'warning'
-      ? theme.eui.euiColorWarningText
-      : theme.eui.euiColorDangerText};
+    textcolor === 'primary' ? theme.eui.euiColorPrimary : theme.eui.euiColorWarningText};
   margin-bottom: ${({ theme }) => theme.eui.paddingSizes.m};
 `;
 
@@ -39,16 +35,18 @@ export const CtiInnerPanel = ({
   title,
   body,
   button,
+  dataTestSubj,
 }: {
-  color: 'primary' | 'warning' | 'danger';
+  color: 'primary' | 'warning';
   title: string;
   body: string;
   button?: JSX.Element;
+  dataTestSubj: string;
 }) => {
-  const iconType = color === 'primary' ? 'iInCircle' : color === 'warning' ? 'help' : 'alert';
+  const iconType = color === 'primary' ? 'iInCircle' : 'help';
   return (
     <PanelContainer grow={false} color={color}>
-      <EuiFlexGroup direction={'column'}>
+      <EuiFlexGroup direction={'column'} data-test-subj={dataTestSubj}>
         <EuiFlexItem>
           <EuiFlexGroup direction={'row'}>
             <Icon type={iconType} size="m" color={color} />

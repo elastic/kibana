@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { newRule } from '../../objects/rule';
+import { getNewRule } from '../../objects/rule';
 import { PROVIDER_BADGE } from '../../screens/timeline';
 
 import {
@@ -27,7 +27,7 @@ describe('Alerts timeline', () => {
     loginAndWaitForPage(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(newRule);
+    createCustomRuleActivated(getNewRule());
     refreshPage();
     waitForAlertsToPopulate(500);
   });

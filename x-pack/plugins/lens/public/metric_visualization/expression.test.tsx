@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { metricChart, MetricChart } from './expression';
-import { LensMultiTable } from '../types';
+import { MetricChart, metricChart } from './expression';
+import { MetricConfig } from '../../common/expressions';
 import React from 'react';
 import { shallow } from 'enzyme';
-import { MetricConfig } from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
-import { IFieldFormat } from '../../../../../src/plugins/data/public';
+import type { IFieldFormat } from '../../../../../src/plugins/field_formats/common';
+import { layerTypes } from '../../common';
+import type { LensMultiTable } from '../../common';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -37,6 +38,7 @@ function sampleArgs() {
   const args: MetricConfig = {
     accessor: 'c',
     layerId: 'l1',
+    layerType: layerTypes.DATA,
     title: 'My fanci metric chart',
     description: 'Fancy chart description',
     metricTitle: 'My fanci metric chart',
@@ -46,6 +48,7 @@ function sampleArgs() {
   const noAttributesArgs: MetricConfig = {
     accessor: 'c',
     layerId: 'l1',
+    layerType: layerTypes.DATA,
     title: '',
     description: '',
     metricTitle: 'My fanci metric chart',
@@ -249,10 +252,16 @@ describe('metric_expression', () => {
           />
         )
       ).toMatchInlineSnapshot(`
-              <EmptyPlaceholder
-                icon={[Function]}
-              />
-          `);
+        <VisualizationContainer
+          className="lnsMetricExpression__container"
+          reportDescription=""
+          reportTitle=""
+        >
+          <EmptyPlaceholder
+            icon={[Function]}
+          />
+        </VisualizationContainer>
+      `);
     });
 
     test('it renders an EmptyPlaceholder when null value is passed as data', () => {
@@ -269,9 +278,15 @@ describe('metric_expression', () => {
           />
         )
       ).toMatchInlineSnapshot(`
-        <EmptyPlaceholder
-          icon={[Function]}
-        />
+        <VisualizationContainer
+          className="lnsMetricExpression__container"
+          reportDescription=""
+          reportTitle=""
+        >
+          <EmptyPlaceholder
+            icon={[Function]}
+          />
+        </VisualizationContainer>
       `);
     });
 

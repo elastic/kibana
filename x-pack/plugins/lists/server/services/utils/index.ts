@@ -6,9 +6,7 @@
  */
 
 export * from './calculate_scroll_math';
-export * from './decode_version';
 export * from './encode_decode_cursor';
-export * from './encode_hit_version';
 export * from './escape_query';
 export * from './find_source_type';
 export * from './find_source_value';

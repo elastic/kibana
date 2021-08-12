@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
 import {
   AppMountParameters,
   CoreSetup,
@@ -13,9 +12,6 @@ import {
   PluginInitializerContext,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
-  AppStatus,
-  AppNavLinkStatus,
-  AppUpdater,
 } from '../../../../src/core/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import {
@@ -25,55 +21,14 @@ import {
   AppPluginStartDependencies,
 } from './types';
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME } from '../common';
-import { Installation } from '../../fleet/common';
 import {
   LazyOsqueryManagedPolicyCreateImportExtension,
   LazyOsqueryManagedPolicyEditExtension,
   LazyOsqueryManagedCustomButtonExtension,
 } from './fleet_integration';
-
-export function toggleOsqueryPlugin(
-  updater$: Subject<AppUpdater>,
-  http: CoreStart['http'],
-  registerExtension?: StartPlugins['fleet']['registerExtension']
-) {
-  if (http.anonymousPaths.isAnonymous(window.location.pathname)) {
-    updater$.next(() => ({
-      status: AppStatus.inaccessible,
-      navLinkStatus: AppNavLinkStatus.hidden,
-    }));
-    return;
-  }
-
-  http
-    .fetch<Installation | undefined>(`/internal/osquery/status`)
-    .then((response) => {
-      const installed = response?.install_status === 'installed';
-
-      if (installed && registerExtension) {
-        registerExtension({
-          package: OSQUERY_INTEGRATION_NAME,
-          view: 'package-detail-custom',
-          Component: LazyOsqueryManagedCustomButtonExtension,
-        });
-      }
-
-      updater$.next(() => ({
-        navLinkStatus: installed ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
-      }));
-    })
-    .catch(() => {
-      updater$.next(() => ({
-        status: AppStatus.inaccessible,
-        navLinkStatus: AppNavLinkStatus.hidden,
-      }));
-    });
-}
+import { getLazyOsqueryAction } from './shared_components';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
-  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({
-    navLinkStatus: AppNavLinkStatus.hidden,
-  }));
   private kibanaVersion: string;
   private storage = new Storage(localStorage);
 
@@ -101,8 +56,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       id: 'osquery',
       title: PLUGIN_NAME,
       order: 9030,
-      updater$: this.appUpdater$,
-      navLinkStatus: AppNavLinkStatus.hidden,
       category: DEFAULT_APP_CATEGORIES.management,
       async mount(params: AppMountParameters) {
         // Get start services as specified in kibana.json
@@ -140,8 +93,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 
-      toggleOsqueryPlugin(this.appUpdater$, core.http, registerExtension);
-
       registerExtension({
         package: OSQUERY_INTEGRATION_NAME,
         view: 'package-policy-create',
@@ -153,14 +104,22 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         view: 'package-policy-edit',
         Component: LazyOsqueryManagedPolicyEditExtension,
       });
-    } else {
-      this.appUpdater$.next(() => ({
-        status: AppStatus.inaccessible,
-        navLinkStatus: AppNavLinkStatus.hidden,
-      }));
+
+      registerExtension({
+        package: OSQUERY_INTEGRATION_NAME,
+        view: 'package-detail-custom',
+        Component: LazyOsqueryManagedCustomButtonExtension,
+      });
     }
 
-    return {};
+    return {
+      OsqueryAction: getLazyOsqueryAction({
+        ...core,
+        ...plugins,
+        storage: this.storage,
+        kibanaVersion: this.kibanaVersion,
+      }),
+    };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function

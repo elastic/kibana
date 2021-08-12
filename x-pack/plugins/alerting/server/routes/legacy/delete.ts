@@ -28,9 +28,9 @@ export const deleteAlertRoute = (router: AlertingRouter, licenseState: ILicenseS
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
-      const alertsClient = context.alerting.getAlertsClient();
+      const rulesClient = context.alerting.getRulesClient();
       const { id } = req.params;
-      await alertsClient.delete({ id });
+      await rulesClient.delete({ id });
       return res.noContent();
     })
   );

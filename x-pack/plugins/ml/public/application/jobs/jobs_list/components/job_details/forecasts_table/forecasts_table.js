@@ -29,11 +29,7 @@ import {
   isTimeSeriesViewJob,
 } from '../../../../../../../common/util/job_utils';
 import { withKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
-import {
-  ML_APP_URL_GENERATOR,
-  ML_PAGES,
-} from '../../../../../../../common/constants/ml_url_generator';
-import { PLUGIN_ID } from '../../../../../../../common/constants/app';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../../common/constants/locator';
 import { timeFormatter } from '../../../../../../../common/util/date_utils';
 
 const MAX_FORECASTS = 500;
@@ -86,11 +82,8 @@ export class ForecastsTableUI extends Component {
   async openSingleMetricView(forecast) {
     const {
       services: {
-        application: { navigateToApp },
-
-        share: {
-          urlGenerators: { getUrlGenerator },
-        },
+        application: { navigateToUrl },
+        share,
       },
     } = this.props.kibana;
 
@@ -126,39 +119,39 @@ export class ForecastsTableUI extends Component {
       };
     }
 
-    const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
-    const singleMetricViewerForecastLink = await mlUrlGenerator.createUrl({
-      page: ML_PAGES.SINGLE_METRIC_VIEWER,
-      pageState: {
-        timeRange: {
-          from,
-          to,
-          mode: 'absolute',
-        },
-        refreshInterval: {
-          display: 'Off',
-          pause: true,
-          value: 0,
-        },
-        jobIds: [this.props.job.job_id],
-        query: {
-          query_string: {
-            analyze_wildcard: true,
-            query: '*',
+    const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
+    const singleMetricViewerForecastLink = await mlLocator.getUrl(
+      {
+        page: ML_PAGES.SINGLE_METRIC_VIEWER,
+        pageState: {
+          timeRange: {
+            from,
+            to,
+            mode: 'absolute',
           },
+          refreshInterval: {
+            display: 'Off',
+            pause: true,
+            value: 0,
+          },
+          jobIds: [this.props.job.job_id],
+          query: {
+            query_string: {
+              analyze_wildcard: true,
+              query: '*',
+            },
+          },
+          ...mlTimeSeriesExplorer,
         },
-        ...mlTimeSeriesExplorer,
       },
-      excludeBasePath: true,
-    });
+      { absolute: true }
+    );
     addItemToRecentlyAccessed(
       'timeseriesexplorer',
       this.props.job.job_id,
       singleMetricViewerForecastLink
     );
-    await navigateToApp(PLUGIN_ID, {
-      path: singleMetricViewerForecastLink,
-    });
+    await navigateToUrl(singleMetricViewerForecastLink);
   }
 
   render() {

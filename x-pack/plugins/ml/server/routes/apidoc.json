@@ -22,8 +22,6 @@
     "ValidateDataFrameAnalytics",
 
     "DataVisualizer",
-    "GetOverallStats",
-    "GetStatsForFields",
     "GetHistogramsForFields",
 
     "AnomalyDetectors",
@@ -34,6 +32,7 @@
     "GetAnomalyDetectorsStats",
     "GetAnomalyDetectorsStatsById",
     "CloseAnomalyDetectorsJob",
+    "ResetAnomalyDetectorsJob",
     "ValidateAnomalyDetector",
     "ForecastAnomalyDetector",
     "GetRecords",
@@ -73,6 +72,7 @@
     "ForceStartDatafeeds",
     "StopDatafeeds",
     "CloseJobs",
+    "ResetJobs",
     "JobsSummary",
     "JobsWithTimeRange",
     "GetJobForCloning",
@@ -91,6 +91,7 @@
     "DeletingJobTasks",
     "DeleteJobs",
     "RevertModelSnapshot",
+    "BulkCreateJobs",
 
     "Calendars",
     "PutCalendars",

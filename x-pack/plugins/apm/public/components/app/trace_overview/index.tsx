@@ -5,22 +5,23 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { useTrackPageview } from '../../../../../observability/public';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { SearchBar } from '../../shared/search_bar';
 import { TraceList } from './trace_list';
+import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
+import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
 
 type TracesAPIResponse = APIReturnType<'GET /api/apm/traces'>;
 const DEFAULT_RESPONSE: TracesAPIResponse = {
   items: [],
-  isAggregationAccurate: true,
-  bucketSize: 0,
 };
 
 export function TraceOverview() {
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher();
   const {
     urlParams: { environment, kuery, start, end },
   } = useUrlParams();
@@ -43,12 +44,17 @@ export function TraceOverview() {
     [environment, kuery, start, end]
   );
 
-  useTrackPageview({ app: 'apm', path: 'traces_overview' });
-  useTrackPageview({ app: 'apm', path: 'traces_overview', delay: 15000 });
-
   return (
     <>
       <SearchBar />
+
+      {fallbackToTransactions && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <AggregatedTransactionsCallout />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
 
       <TraceList
         items={data.items}

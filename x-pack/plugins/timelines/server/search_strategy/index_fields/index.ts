@@ -25,6 +25,7 @@ import {
 } from '../../../common/search_strategy/index_fields';
 
 const apmIndexPattern = 'apm-*-transaction*';
+const apmDataStreamsPattern = 'traces-apm*';
 
 export const indexFieldsProvider = (): ISearchStrategy<
   IndexFieldsStrategyRequest,
@@ -51,7 +52,10 @@ export const requestIndexFieldSearch = async (
   const responsesIndexFields = await Promise.all(
     dedupeIndices
       .map(async (index) => {
-        if (request.onlyCheckIfIndicesExist && index.includes(apmIndexPattern)) {
+        if (
+          request.onlyCheckIfIndicesExist &&
+          (index.includes(apmIndexPattern) || index.includes(apmDataStreamsPattern))
+        ) {
           // for apm index pattern check also if there's data https://github.com/elastic/kibana/issues/90661
           const searchResponse = await esClient.asCurrentUser.search({
             index,

@@ -196,6 +196,7 @@ exports[`Inspector Data View component should render empty state 1`] = `
         >
           <span
             className="euiTextColor euiTextColor--subdued"
+            style={Object {}}
           >
             <EuiSpacer
               size="m"
@@ -1169,7 +1170,6 @@ exports[`Inspector Data View component should render single table without select
                               >
                                 <EuiFlexGroup
                                   alignItems="center"
-                                  className=""
                                   gutterSize="s"
                                   key=".0"
                                   responsive={false}
@@ -2732,7 +2732,6 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                               >
                                 <EuiFlexGroup
                                   alignItems="center"
-                                  className=""
                                   gutterSize="s"
                                   key=".0"
                                   responsive={false}

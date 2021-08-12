@@ -109,10 +109,10 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       ...commonRouteDeps,
     });
 
-    if (http.notReadyServer && commonRouteDeps.config.allowAnonymous) {
-      http.notReadyServer.registerRoutes('', (notReadyRouter) => {
+    if (commonRouteDeps.config.allowAnonymous) {
+      http.registerPrebootRoutes('', (prebootRouter) => {
         registerStatusRoute({
-          router: notReadyRouter,
+          router: prebootRouter,
           ...commonRouteDeps,
           config: {
             ...commonRouteDeps.config,

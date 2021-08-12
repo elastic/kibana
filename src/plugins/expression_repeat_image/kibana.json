@@ -1,0 +1,15 @@
+{
+  "id": "expressionRepeatImage",
+  "owner": {
+    "name": "Kibana Presentation",
+    "githubTeam": "kibana-presentation"
+  },
+  "description": "Adds 'repeatImage' function and renderer to expressions",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["expressions", "presentationUtil"],
+  "optionalPlugins": [],
+  "requiredBundles": []
+}

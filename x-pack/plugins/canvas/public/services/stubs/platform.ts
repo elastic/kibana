@@ -24,6 +24,7 @@ export const platformServiceFactory: CanvasPlatformServiceFactory = () => ({
   getBasePathInterface: noop,
   getDocLinkVersion: () => 'dockLinkVersion',
   getElasticWebsiteUrl: () => 'https://elastic.co',
+  getKibanaVersion: () => 'kibanaVersion',
   getHasWriteAccess: () => true,
   getUISetting,
   setBreadcrumbs: noop,

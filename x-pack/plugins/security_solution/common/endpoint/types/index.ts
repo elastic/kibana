@@ -178,8 +178,6 @@ export interface HostResultList {
   request_page_size: number;
   /* the page index requested */
   request_page_index: number;
-  /* the version of the query strategy */
-  query_strategy_version: MetadataQueryStrategyVersions;
   /* policy IDs and versions */
   policy_info?: HostInfo['policy_info'];
 }
@@ -297,6 +295,46 @@ export type AlertEvent = Partial<{
       }>;
     }>;
   }>;
+  // disabling naming-convention to accommodate external field
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  Memory_protection: Partial<{
+    feature: ECSField<string>;
+    self_injection: ECSField<boolean>;
+  }>;
+  destination: Partial<{
+    port: ECSField<number>;
+    ip: ECSField<string>;
+  }>;
+  source: Partial<{
+    port: ECSField<number>;
+    ip: ECSField<string>;
+  }>;
+  registry: Partial<{
+    path: ECSField<string>;
+    value: ECSField<string>;
+    data: Partial<{
+      strings: ECSField<string>;
+    }>;
+  }>;
+  Target: Partial<{
+    process: Partial<{
+      thread: Partial<{
+        Ext: Partial<{
+          start_address_allocation_offset: ECSField<number>;
+          start_address_bytes_disasm_hash: ECSField<string>;
+          start_address_details: Partial<{
+            allocation_type: ECSField<string>;
+            allocation_size: ECSField<number>;
+            region_size: ECSField<number>;
+            region_protection: ECSField<string>;
+            memory_pe: Partial<{
+              imphash: ECSField<string>;
+            }>;
+          }>;
+        }>;
+      }>;
+    }>;
+  }>;
   process: Partial<{
     command_line: ECSField<string>;
     ppid: ECSField<number>;
@@ -330,7 +368,14 @@ export type AlertEvent = Partial<{
         >;
       }>;
       user: ECSField<string>;
+      malware_signature: Partial<{
+        all_names: ECSField<string>;
+        identifier: ECSField<string>;
+      }>;
     }>;
+  }>;
+  rule: Partial<{
+    id: ECSField<string>;
   }>;
   file: Partial<{
     owner: ECSField<string>;
@@ -402,22 +447,17 @@ export enum HostStatus {
    * Host is inactive as indicated by its checkin status during the last checkin window
    */
   INACTIVE = 'inactive',
-}
 
-export enum MetadataQueryStrategyVersions {
-  VERSION_1 = 'v1',
-  VERSION_2 = 'v2',
+  /**
+   * Host is unenrolled
+   */
+  UNENROLLED = 'unenrolled',
 }
 
 export type PolicyInfo = Immutable<{
   revision: number;
   id: string;
 }>;
-
-export interface HostMetadataInfo {
-  metadata: HostMetadata;
-  query_strategy_version: MetadataQueryStrategyVersions;
-}
 
 export type HostInfo = Immutable<{
   metadata: HostMetadata;
@@ -438,8 +478,6 @@ export type HostInfo = Immutable<{
      */
     endpoint: PolicyInfo;
   };
-  /* the version of the query strategy */
-  query_strategy_version: MetadataQueryStrategyVersions;
 }>;
 
 // HostMetadataDetails is now just HostMetadata
@@ -487,6 +525,7 @@ export type HostMetadata = Immutable<{
        */
       isolation?: boolean;
     };
+    capabilities?: string[];
   };
   agent: {
     id: string;
@@ -657,6 +696,8 @@ export type SafeEndpointEvent = Partial<{
     }>;
   }>;
   network: Partial<{
+    transport: ECSField<string>;
+    type: ECSField<string>;
     direction: ECSField<string>;
     forwarded_ip: ECSField<string>;
   }>;
@@ -844,6 +885,8 @@ export interface PolicyConfig {
       security: boolean;
     };
     malware: ProtectionFields;
+    memory_protection: ProtectionFields & SupportedFields;
+    behavior_protection: ProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
     logging: {
       file: string;
@@ -854,6 +897,14 @@ export interface PolicyConfig {
         enabled: boolean;
       };
       ransomware: {
+        message: string;
+        enabled: boolean;
+      };
+      memory_protection: {
+        message: string;
+        enabled: boolean;
+      };
+      behavior_protection: {
         message: string;
         enabled: boolean;
       };
@@ -870,8 +921,13 @@ export interface PolicyConfig {
       network: boolean;
     };
     malware: ProtectionFields;
+    behavior_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
+        message: string;
+        enabled: boolean;
+      };
+      behavior_protection: {
         message: string;
         enabled: boolean;
       };
@@ -888,8 +944,13 @@ export interface PolicyConfig {
       network: boolean;
     };
     malware: ProtectionFields;
+    behavior_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
+        message: string;
+        enabled: boolean;
+      };
+      behavior_protection: {
         message: string;
         enabled: boolean;
       };
@@ -909,16 +970,29 @@ export interface UIPolicyConfig {
    */
   windows: Pick<
     PolicyConfig['windows'],
-    'events' | 'malware' | 'ransomware' | 'popup' | 'antivirus_registration' | 'advanced'
+    | 'events'
+    | 'malware'
+    | 'ransomware'
+    | 'popup'
+    | 'antivirus_registration'
+    | 'advanced'
+    | 'memory_protection'
+    | 'behavior_protection'
   >;
   /**
    * Mac-specific policy configuration that is supported via the UI
    */
-  mac: Pick<PolicyConfig['mac'], 'malware' | 'events' | 'popup' | 'advanced'>;
+  mac: Pick<
+    PolicyConfig['mac'],
+    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection'
+  >;
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
-  linux: Pick<PolicyConfig['linux'], 'malware' | 'events' | 'popup' | 'advanced'>;
+  linux: Pick<
+    PolicyConfig['linux'],
+    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection'
+  >;
 }
 
 /** Policy:  Protection fields */

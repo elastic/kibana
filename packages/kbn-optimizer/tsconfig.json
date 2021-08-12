@@ -1,13 +1,16 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
-    "incremental": true,
-    "outDir": "./target",
+    "outDir": "./target/types",
     "declaration": true,
     "declarationMap": true,
     "rootDir": "./src",
     "sourceMap": true,
-    "sourceRoot": "../../../../packages/kbn-optimizer/src"
+    "sourceRoot": "../../../../packages/kbn-optimizer/src",
+    "types": [
+      "jest",
+      "node"
+    ]
   },
   "include": [
     "src/**/*"

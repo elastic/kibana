@@ -14,6 +14,7 @@ const errors = getFunctionErrors().alterColumn;
 
 describe('alterColumn', () => {
   const fn = functionWrapper(alterColumn);
+
   const nameColumnIndex = testTable.columns.findIndex(({ name }) => name === 'name');
   const timeColumnIndex = testTable.columns.findIndex(({ name }) => name === 'time');
   const priceColumnIndex = testTable.columns.findIndex(({ name }) => name === 'price');

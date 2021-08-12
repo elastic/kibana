@@ -55,8 +55,8 @@ export const formulaOperation: OperationDefinition<
 
     const visibleOperationsMap = filterByVisibleOperation(operationDefinitionMap);
     const { root, error } = tryToParse(column.params.formula, visibleOperationsMap);
-    if (error || !root) {
-      return [error!.message];
+    if (error || root == null) {
+      return error?.message ? [error.message] : [];
     }
 
     const errors = runASTValidation(root, layer, indexPattern, visibleOperationsMap);

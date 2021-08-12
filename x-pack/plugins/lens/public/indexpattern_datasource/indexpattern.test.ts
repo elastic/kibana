@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+import 'jest-canvas-mock';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { getIndexPatternDatasource, IndexPatternColumn } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource, FramePublicAPI } from '../types';
@@ -18,7 +20,7 @@ import { operationDefinitionMap, getErrorMessages } from './operations';
 import { createMockedFullReference } from './operations/mocks';
 import { indexPatternFieldEditorPluginMock } from 'src/plugins/index_pattern_field_editor/public/mocks';
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
-import React from 'react';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -172,6 +174,7 @@ describe('IndexPattern Data Source', () => {
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       data: dataPluginMock.createStartContract(),
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
       charts: chartPluginMock.createSetupContract(),
       indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
@@ -290,7 +293,7 @@ describe('IndexPattern Data Source', () => {
       expect(indexPatternDatasource.toExpression(state, 'first')).toEqual(null);
     });
 
-    it('should generate an empty expression when there is a formula without aggs', async () => {
+    it('should create a table when there is a formula without aggs', async () => {
       const queryBaseState: IndexPatternBaseState = {
         currentIndexPatternId: '1',
         layers: {
@@ -311,7 +314,21 @@ describe('IndexPattern Data Source', () => {
         },
       };
       const state = enrichBaseState(queryBaseState);
-      expect(indexPatternDatasource.toExpression(state, 'first')).toEqual(null);
+      expect(indexPatternDatasource.toExpression(state, 'first')).toEqual({
+        chain: [
+          {
+            function: 'createTable',
+            type: 'function',
+            arguments: { ids: [], names: [], rowCount: [1] },
+          },
+          {
+            arguments: { expression: [''], id: ['col1'], name: ['Formula'] },
+            function: 'mapColumn',
+            type: 'function',
+          },
+        ],
+        type: 'expression',
+      });
     });
 
     it('should generate an expression for an aggregated query', async () => {
@@ -383,7 +400,16 @@ describe('IndexPattern Data Source', () => {
                             true,
                           ],
                           "extended_bounds": Array [
-                            "{}",
+                            Object {
+                              "chain": Array [
+                                Object {
+                                  "arguments": Object {},
+                                  "function": "extendedBounds",
+                                  "type": "function",
+                                },
+                              ],
+                              "type": "expression",
+                            },
                           ],
                           "field": Array [
                             "timestamp",
@@ -598,7 +624,20 @@ describe('IndexPattern Data Source', () => {
                             true,
                           ],
                           "filter": Array [
-                            "{\\"language\\":\\"kuery\\",\\"query\\":\\"bytes > 5\\"}",
+                            Object {
+                              "chain": Array [
+                                Object {
+                                  "arguments": Object {
+                                    "q": Array [
+                                      "bytes > 5",
+                                    ],
+                                  },
+                                  "function": "kql",
+                                  "type": "function",
+                                },
+                              ],
+                              "type": "expression",
+                            },
                           ],
                           "id": Array [
                             "0-filter",

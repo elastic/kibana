@@ -18,11 +18,13 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DefaultFormatEditor, FormatEditorProps } from '../default';
+import { DefaultFormatEditor } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
+import { formatId } from './constants';
 
 import { context as contextType } from '../../../../../../kibana_react/public';
+import { FormatEditorProps } from '../types';
 
 interface OnChangeParam {
   type: string;
@@ -54,7 +56,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
   UrlFormatEditorFormatState
 > {
   static contextType = contextType;
-  static formatId = 'url';
+  static formatId = formatId;
   private get sampleIconPath() {
     const sampleIconPath = `/plugins/indexPatternManagement/assets/icons/{{value}}.png`;
     return this.context?.services.http

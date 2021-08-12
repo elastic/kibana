@@ -11,7 +11,6 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import {
   ExecutionContextSearch,
   Filter,
-  IIndexPattern,
   Query,
   TimefilterContract,
   TimeRange,
@@ -82,7 +81,7 @@ export type LensByReferenceInput = SavedObjectEmbeddableInput & LensBaseEmbeddab
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
 
 export interface LensEmbeddableOutput extends EmbeddableOutput {
-  indexPatterns?: IIndexPattern[];
+  indexPatterns?: IndexPattern[];
 }
 
 export interface LensEmbeddableDeps {
@@ -323,7 +322,18 @@ export class Embeddable
     if (this.input.onLoad) {
       this.input.onLoad(true);
     }
+
+    const executionContext = {
+      type: 'lens',
+      name: this.savedVis.visualizationType ?? '',
+      id: this.id,
+      description: this.savedVis.title || this.input.title || '',
+      url: this.output.editUrl,
+      parent: this.input.executionContext,
+    };
+
     const input = this.getInput();
+
     render(
       <ExpressionWrapper
         ExpressionRenderer={this.expressionRenderer}
@@ -339,6 +349,7 @@ export class Embeddable
         hasCompatibleActions={this.hasCompatibleActions}
         className={input.className}
         style={input.style}
+        executionContext={executionContext}
         canEdit={this.getIsEditable() && input.viewMode === 'edit'}
         onRuntimeError={() => {
           this.logError('runtime');

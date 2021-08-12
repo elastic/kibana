@@ -19,6 +19,7 @@ export interface CanvasPlatformService {
   getBasePathInterface: () => IBasePath;
   getDocLinkVersion: () => string;
   getElasticWebsiteUrl: () => string;
+  getKibanaVersion: () => string;
   getHasWriteAccess: () => boolean;
   getUISetting: (key: string, defaultValue?: any) => any;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;

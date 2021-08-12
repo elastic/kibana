@@ -25,14 +25,6 @@ interface ServiceOverviewInstancesChartAndTableProps {
   serviceName: string;
 }
 
-export interface MainStatsServiceInstanceItem {
-  serviceNodeName: string;
-  errorRate: number;
-  throughput: number;
-  latency: number;
-  cpuUsage: number;
-  memoryUsage: number;
-}
 type ApiResponseMainStats = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type ApiResponseDetailedStats = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
@@ -174,7 +166,6 @@ export function ServiceOverviewInstancesChartAndTable({
 
   const {
     data: detailedStatsData = INITIAL_STATE_DETAILED_STATISTICS,
-    status: detailedStatsStatus,
   } = useFetcher(
     (callApmApi) => {
       if (
@@ -236,10 +227,7 @@ export function ServiceOverviewInstancesChartAndTable({
             detailedStatsData={detailedStatsData}
             serviceName={serviceName}
             tableOptions={tableOptions}
-            isLoading={
-              mainStatsStatus === FETCH_STATUS.LOADING ||
-              detailedStatsStatus === FETCH_STATUS.LOADING
-            }
+            isLoading={mainStatsStatus === FETCH_STATUS.LOADING}
             onChangeTableOptions={(newTableOptions) => {
               setTableOptions({
                 pageIndex: newTableOptions.page?.index ?? 0,

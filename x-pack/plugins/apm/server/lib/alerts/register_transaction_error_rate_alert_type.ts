@@ -7,17 +7,26 @@
 
 import { schema } from '@kbn/config-schema';
 import { take } from 'rxjs/operators';
+import type {
+  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
+  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
+} from '@kbn/rule-data-utils';
 import {
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUE,
-} from '@kbn/rule-data-utils/target/technical_field_names';
+  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_NON_TYPED,
+  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
+  // @ts-expect-error
+} from '@kbn/rule-data-utils/target_node/technical_field_names';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
+import {
+  AlertType,
+  ALERT_TYPES_CONFIG,
+  APM_SERVER_FEATURE_ID,
+} from '../../../common/alert_types';
 import {
   EVENT_OUTCOME,
   PROCESSOR_EVENT,
@@ -28,11 +37,14 @@ import {
 import { EventOutcome } from '../../../common/event_outcome';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { asDecimalOrInteger } from '../../../common/utils/formatters';
-import { environmentQuery } from '../../../server/utils/queries';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
+
+const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED = ALERT_EVALUATION_THRESHOLD_NON_TYPED;
+const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED = ALERT_EVALUATION_VALUE_NON_TYPED;
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -75,7 +87,7 @@ export function registerTransactionErrorRateAlertType({
           apmActionVariables.interval,
         ],
       },
-      producer: 'apm',
+      producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: async ({ services, params: alertParams }) => {

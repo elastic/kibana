@@ -404,42 +404,58 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertConfigurationStepActive() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardConfigurationStep active');
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardConfigurationStep active', {
+        timeout: 3000,
+      });
     },
 
     async assertAdditionalOptionsStepActive() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardAdvancedStep active');
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardAdvancedStep active', {
+        timeout: 3000,
+      });
     },
 
     async assertDetailsStepActive() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardDetailsStep active');
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardDetailsStep active', {
+        timeout: 3000,
+      });
     },
 
     async assertCreateStepActive() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardCreateStep active');
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardCreateStep active', {
+        timeout: 3000,
+      });
     },
 
     async assertValidationStepActive() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardValidationStepWrapper active');
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardValidationStepWrapper active', {
+        timeout: 3000,
+      });
     },
 
     async continueToAdditionalOptionsStep() {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+      await retry.tryForTime(15 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabled(
+          'mlAnalyticsCreateJobWizardConfigurationStep active > mlAnalyticsCreateJobWizardContinueButton'
+        );
         await this.assertAdditionalOptionsStepActive();
       });
     },
 
     async continueToDetailsStep() {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+      await retry.tryForTime(15 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabled(
+          'mlAnalyticsCreateJobWizardAdvancedStep active > mlAnalyticsCreateJobWizardContinueButton'
+        );
         await this.assertDetailsStepActive();
       });
     },
 
     async continueToValidationStep() {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+      await retry.tryForTime(15 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabled(
+          'mlAnalyticsCreateJobWizardDetailsStep active > mlAnalyticsCreateJobWizardContinueButton'
+        );
         await this.assertValidationStepActive();
       });
     },
@@ -456,8 +472,10 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async continueToCreateStep() {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+      await retry.tryForTime(15 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabled(
+          'mlAnalyticsCreateJobWizardValidationStepWrapper active > mlAnalyticsCreateJobWizardContinueButton'
+        );
         await this.assertCreateStepActive();
       });
     },

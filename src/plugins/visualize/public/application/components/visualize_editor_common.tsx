@@ -13,12 +13,14 @@ import { EuiScreenReaderOnly } from '@elastic/eui';
 import { AppMountParameters } from 'kibana/public';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
+import { DeprecationWarning, LEGACY_CHARTS_LIBRARY } from './deprecation_vis_warning';
 import {
   SavedVisInstance,
   VisualizeAppState,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
+import { getUISettings } from '../../services';
 
 interface VisualizeEditorCommonProps {
   visInstance?: VisualizeEditorVisInstance;
@@ -37,6 +39,13 @@ interface VisualizeEditorCommonProps {
   embeddableId?: string;
 }
 
+const isXYAxis = (visType: string | undefined): boolean => {
+  if (!visType) {
+    return false;
+  }
+  return ['area', 'line', 'histogram', 'horizontal_bar', 'point_series'].includes(visType);
+};
+
 export const VisualizeEditorCommon = ({
   visInstance,
   appState,
@@ -53,6 +62,7 @@ export const VisualizeEditorCommon = ({
   embeddableId,
   visEditorRef,
 }: VisualizeEditorCommonProps) => {
+  const hasXYLegacyChartsEnabled = getUISettings().get(LEGACY_CHARTS_LIBRARY);
   return (
     <div className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}>
       {visInstance && appState && currentAppState && (
@@ -73,6 +83,9 @@ export const VisualizeEditorCommon = ({
         />
       )}
       {visInstance?.vis?.type?.stage === 'experimental' && <ExperimentalVisInfo />}
+      {/* Adds a deprecation warning for vislib xy axis charts */}
+      {/* Should be removed when this issue is closed https://github.com/elastic/kibana/issues/103209 */}
+      {isXYAxis(visInstance?.vis.type.name) && hasXYLegacyChartsEnabled && <DeprecationWarning />}
       {visInstance?.vis?.type?.getInfoMessage?.(visInstance.vis)}
       {visInstance && (
         <EuiScreenReaderOnly>

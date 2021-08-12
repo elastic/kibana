@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { exception } from '../../objects/exception';
-import { newRule } from '../../objects/rule';
+import { getException } from '../../objects/exception';
+import { getNewRule } from '../../objects/rule';
 
 import { ALERTS_COUNT, NUMBER_OF_ALERTS } from '../../screens/alerts';
 import { RULE_STATUS } from '../../screens/create_new_rule';
@@ -41,7 +41,7 @@ describe('From rule', () => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsIndexToBeCreated();
-    createCustomRule(newRule, 'rule_testing', '10s');
+    createCustomRule(getNewRule(), 'rule_testing', '10s');
     goToManageAlertsDetectionRules();
     goToRuleDetails();
 
@@ -64,7 +64,7 @@ describe('From rule', () => {
 
   it('Creates an exception and deletes it', () => {
     goToExceptionsTab();
-    addsExceptionFromRuleSettings(exception);
+    addsExceptionFromRuleSettings(getException());
     esArchiverLoad('auditbeat_for_exceptions2');
     waitForTheRuleToBeExecuted();
     goToAlertsTab();

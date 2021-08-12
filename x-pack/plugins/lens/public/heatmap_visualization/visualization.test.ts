@@ -19,12 +19,15 @@ import {
   LEGEND_FUNCTION,
 } from './constants';
 import { Position } from '@elastic/charts';
-import { HeatmapVisualizationState } from './types';
-import { DatasourcePublicAPI, Operation } from '../types';
+import type { HeatmapVisualizationState } from './types';
+import type { DatasourcePublicAPI, Operation } from '../types';
+import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { layerTypes } from '../../common';
 
 function exampleState(): HeatmapVisualizationState {
   return {
     layerId: 'test-layer',
+    layerType: layerTypes.DATA,
     legend: {
       isVisible: true,
       position: Position.Right,
@@ -40,6 +43,8 @@ function exampleState(): HeatmapVisualizationState {
   };
 }
 
+const paletteService = chartPluginMock.createPaletteRegistry();
+
 describe('heatmap', () => {
   let frame: ReturnType<typeof createMockFramePublicAPI>;
 
@@ -49,8 +54,9 @@ describe('heatmap', () => {
 
   describe('#intialize', () => {
     test('returns a default state', () => {
-      expect(getHeatmapVisualization({}).initialize(() => 'l1')).toEqual({
+      expect(getHeatmapVisualization({ paletteService }).initialize(() => 'l1')).toEqual({
         layerId: 'l1',
+        layerType: layerTypes.DATA,
         title: 'Empty Heatmap chart',
         shape: CHART_SHAPES.HEATMAP,
         legend: {
@@ -68,9 +74,9 @@ describe('heatmap', () => {
     });
 
     test('returns persisted state', () => {
-      expect(getHeatmapVisualization({}).initialize(() => 'test-layer', exampleState())).toEqual(
-        exampleState()
-      );
+      expect(
+        getHeatmapVisualization({ paletteService }).initialize(() => 'test-layer', exampleState())
+      ).toEqual(exampleState());
     });
   });
 
@@ -98,7 +104,9 @@ describe('heatmap', () => {
       };
 
       expect(
-        getHeatmapVisualization({}).getConfiguration({ state, frame, layerId: 'first' })
+        getHeatmapVisualization({
+          paletteService,
+        }).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
           {
@@ -125,11 +133,21 @@ describe('heatmap', () => {
             layerId: 'first',
             groupId: GROUP_ID.CELL,
             groupLabel: 'Cell value',
-            accessors: [{ columnId: 'v-accessor' }],
+            accessors: [
+              {
+                columnId: 'v-accessor',
+                triggerIcon: 'colorBy',
+                palette: [
+                  { color: 'blue', stop: 100 },
+                  { color: 'yellow', stop: 350 },
+                ],
+              },
+            ],
             filterOperations: isCellValueSupported,
             supportsMoreColumns: false,
             required: true,
             dataTestSubj: 'lnsHeatmap_cellPanel',
+            enableDimensionEditor: true,
           },
         ],
       });
@@ -143,7 +161,9 @@ describe('heatmap', () => {
       };
 
       expect(
-        getHeatmapVisualization({}).getConfiguration({ state, frame, layerId: 'first' })
+        getHeatmapVisualization({
+          paletteService,
+        }).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
           {
@@ -175,6 +195,7 @@ describe('heatmap', () => {
             supportsMoreColumns: true,
             required: true,
             dataTestSubj: 'lnsHeatmap_cellPanel',
+            enableDimensionEditor: true,
           },
         ],
       });
@@ -189,11 +210,14 @@ describe('heatmap', () => {
         yAccessor: 'y-accessor',
       };
       expect(
-        getHeatmapVisualization({}).setDimension({
+        getHeatmapVisualization({
+          paletteService,
+        }).setDimension({
           prevState,
           layerId: 'first',
           columnId: 'new-x-accessor',
           groupId: 'x',
+          frame,
         })
       ).toEqual({
         ...prevState,
@@ -210,15 +234,43 @@ describe('heatmap', () => {
         yAccessor: 'y-accessor',
       };
       expect(
-        getHeatmapVisualization({}).removeDimension({
+        getHeatmapVisualization({
+          paletteService,
+        }).removeDimension({
           prevState,
           layerId: 'first',
           columnId: 'x-accessor',
+          frame,
         })
       ).toEqual({
         ...exampleState(),
         yAccessor: 'y-accessor',
       });
+    });
+  });
+
+  describe('#getSupportedLayers', () => {
+    it('should return a single layer type', () => {
+      expect(
+        getHeatmapVisualization({
+          paletteService,
+        }).getSupportedLayers()
+      ).toHaveLength(1);
+    });
+  });
+
+  describe('#getLayerType', () => {
+    it('should return the type only if the layer is in the state', () => {
+      const state: HeatmapVisualizationState = {
+        ...exampleState(),
+        xAccessor: 'x-accessor',
+        valueAccessor: 'value-accessor',
+      };
+      const instance = getHeatmapVisualization({
+        paletteService,
+      });
+      expect(instance.getLayerType('test-layer', state)).toEqual(layerTypes.DATA);
+      expect(instance.getLayerType('foo', state)).toBeUndefined();
     });
   });
 
@@ -249,65 +301,81 @@ describe('heatmap', () => {
         title: 'Test',
       };
 
-      expect(getHeatmapVisualization({}).toExpression(state, datasourceLayers, attributes)).toEqual(
-        {
-          type: 'expression',
-          chain: [
-            {
-              type: 'function',
-              function: FUNCTION_NAME,
-              arguments: {
-                title: ['Test'],
-                description: [''],
-                xAccessor: ['x-accessor'],
-                yAccessor: [''],
-                valueAccessor: ['value-accessor'],
-                legend: [
-                  {
-                    type: 'expression',
-                    chain: [
-                      {
-                        type: 'function',
-                        function: LEGEND_FUNCTION,
-                        arguments: {
-                          isVisible: [true],
-                          position: [Position.Right],
-                        },
+      expect(
+        getHeatmapVisualization({
+          paletteService,
+        }).toExpression(state, datasourceLayers, attributes)
+      ).toEqual({
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: FUNCTION_NAME,
+            arguments: {
+              title: ['Test'],
+              description: [''],
+              xAccessor: ['x-accessor'],
+              yAccessor: [''],
+              valueAccessor: ['value-accessor'],
+              palette: [
+                {
+                  type: 'expression',
+                  chain: [
+                    {
+                      arguments: {
+                        name: ['mocked'],
                       },
-                    ],
-                  },
-                ],
-                gridConfig: [
-                  {
-                    type: 'expression',
-                    chain: [
-                      {
-                        type: 'function',
-                        function: HEATMAP_GRID_FUNCTION,
-                        arguments: {
-                          // grid
-                          strokeWidth: [],
-                          strokeColor: [],
-                          cellHeight: [],
-                          cellWidth: [],
-                          // cells
-                          isCellLabelVisible: [false],
-                          // Y-axis
-                          isYAxisLabelVisible: [true],
-                          yAxisLabelWidth: [],
-                          yAxisLabelColor: [],
-                          // X-axis
-                          isXAxisLabelVisible: [true],
-                        },
+                      type: 'function',
+                      function: 'system_palette',
+                    },
+                  ],
+                },
+              ],
+              legend: [
+                {
+                  type: 'expression',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: LEGEND_FUNCTION,
+                      arguments: {
+                        isVisible: [true],
+                        position: [Position.Right],
                       },
-                    ],
-                  },
-                ],
-              },
+                    },
+                  ],
+                },
+              ],
+              gridConfig: [
+                {
+                  type: 'expression',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: HEATMAP_GRID_FUNCTION,
+                      arguments: {
+                        // grid
+                        strokeWidth: [],
+                        strokeColor: [],
+                        cellHeight: [],
+                        cellWidth: [],
+                        // cells
+                        isCellLabelVisible: [false],
+                        // Y-axis
+                        isYAxisLabelVisible: [true],
+                        yAxisLabelWidth: [],
+                        yAxisLabelColor: [],
+                        // X-axis
+                        isXAxisLabelVisible: [true],
+                      },
+                    },
+                  ],
+                },
+              ],
             },
-          ],
-        }
-      );
+          },
+        ],
+      });
     });
 
     test('returns null with a missing value accessor', () => {
@@ -320,9 +388,11 @@ describe('heatmap', () => {
         title: 'Test',
       };
 
-      expect(getHeatmapVisualization({}).toExpression(state, datasourceLayers, attributes)).toEqual(
-        null
-      );
+      expect(
+        getHeatmapVisualization({
+          paletteService,
+        }).toExpression(state, datasourceLayers, attributes)
+      ).toEqual(null);
     });
   });
 
@@ -349,7 +419,11 @@ describe('heatmap', () => {
         xAccessor: 'x-accessor',
       };
 
-      expect(getHeatmapVisualization({}).toPreviewExpression!(state, datasourceLayers)).toEqual({
+      expect(
+        getHeatmapVisualization({
+          paletteService,
+        }).toPreviewExpression!(state, datasourceLayers)
+      ).toEqual({
         type: 'expression',
         chain: [
           {
@@ -361,6 +435,20 @@ describe('heatmap', () => {
               xAccessor: ['x-accessor'],
               yAccessor: [''],
               valueAccessor: [''],
+              palette: [
+                {
+                  type: 'expression',
+                  chain: [
+                    {
+                      arguments: {
+                        name: ['mocked'],
+                      },
+                      type: 'function',
+                      function: 'system_palette',
+                    },
+                  ],
+                },
+              ],
               legend: [
                 {
                   type: 'expression',
@@ -409,7 +497,11 @@ describe('heatmap', () => {
       const mockState = {
         shape: CHART_SHAPES.HEATMAP,
       } as HeatmapVisualizationState;
-      expect(getHeatmapVisualization({}).getErrorMessages(mockState)).toEqual(undefined);
+      expect(
+        getHeatmapVisualization({
+          paletteService,
+        }).getErrorMessages(mockState)
+      ).toEqual(undefined);
     });
 
     test('should return an error when the X accessor is missing', () => {
@@ -417,7 +509,11 @@ describe('heatmap', () => {
         shape: CHART_SHAPES.HEATMAP,
         valueAccessor: 'v-accessor',
       } as HeatmapVisualizationState;
-      expect(getHeatmapVisualization({}).getErrorMessages(mockState)).toEqual([
+      expect(
+        getHeatmapVisualization({
+          paletteService,
+        }).getErrorMessages(mockState)
+      ).toEqual([
         {
           longMessage: 'Configuration for the horizontal axis is missing.',
           shortMessage: 'Missing Horizontal axis.',
@@ -445,7 +541,11 @@ describe('heatmap', () => {
         shape: CHART_SHAPES.HEATMAP,
         valueAccessor: 'v-accessor',
       } as HeatmapVisualizationState;
-      expect(getHeatmapVisualization({}).getWarningMessages!(mockState, frame)).toEqual(undefined);
+      expect(
+        getHeatmapVisualization({
+          paletteService,
+        }).getWarningMessages!(mockState, frame)
+      ).toEqual(undefined);
     });
 
     test('should not return warning messages when the data table is empty', () => {
@@ -461,7 +561,11 @@ describe('heatmap', () => {
         valueAccessor: 'v-accessor',
         layerId: 'first',
       } as HeatmapVisualizationState;
-      expect(getHeatmapVisualization({}).getWarningMessages!(mockState, frame)).toEqual(undefined);
+      expect(
+        getHeatmapVisualization({
+          paletteService,
+        }).getWarningMessages!(mockState, frame)
+      ).toEqual(undefined);
     });
 
     test('should return a warning message when cell value data contains arrays', () => {
@@ -482,7 +586,11 @@ describe('heatmap', () => {
         valueAccessor: 'v-accessor',
         layerId: 'first',
       } as HeatmapVisualizationState;
-      expect(getHeatmapVisualization({}).getWarningMessages!(mockState, frame)).toHaveLength(1);
+      expect(
+        getHeatmapVisualization({
+          paletteService,
+        }).getWarningMessages!(mockState, frame)
+      ).toHaveLength(1);
     });
   });
 });

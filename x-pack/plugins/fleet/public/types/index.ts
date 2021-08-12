@@ -27,6 +27,7 @@ export {
   PackagePolicyPackage,
   Output,
   DataStream,
+  Settings,
   // API schema - misc setup, status
   GetFleetStatusResponse,
   // API schemas - Agent policy
@@ -49,6 +50,9 @@ export {
   UpdatePackagePolicyRequest,
   UpdatePackagePolicyResponse,
   GetPackagePoliciesResponse,
+  DryRunPackagePolicy,
+  UpgradePackagePolicyResponse,
+  UpgradePackagePolicyDryRunResponse,
   // API schemas - Data streams
   GetDataStreamsResponse,
   // API schemas - Agents
@@ -127,5 +131,5 @@ export {
 } from '../../common';
 
 export * from './intra_app_route_state';
-
 export * from './ui_extensions';
+export * from './in_memory_package_policy';

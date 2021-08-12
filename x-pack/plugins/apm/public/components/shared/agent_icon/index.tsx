@@ -12,7 +12,7 @@ import { getAgentIcon } from './get_agent_icon';
 import { useTheme } from '../../../hooks/use_theme';
 
 interface Props {
-  agentName: AgentName;
+  agentName?: AgentName;
 }
 
 export function AgentIcon(props: Props) {

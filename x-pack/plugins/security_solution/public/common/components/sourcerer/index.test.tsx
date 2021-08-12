@@ -39,6 +39,7 @@ const mockOptions = [
   { label: 'filebeat-*', value: 'filebeat-*' },
   { label: 'logs-*', value: 'logs-*' },
   { label: 'packetbeat-*', value: 'packetbeat-*' },
+  { label: 'traces-apm*', value: 'traces-apm*' },
   { label: 'winlogbeat-*', value: 'winlogbeat-*' },
 ];
 

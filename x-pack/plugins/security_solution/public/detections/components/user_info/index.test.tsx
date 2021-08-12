@@ -12,10 +12,11 @@ import { useUserInfo, ManageUserInfo } from './index';
 import { useKibana } from '../../../common/lib/kibana';
 import * as api from '../../containers/detection_engine/alerts/api';
 import { TestProviders } from '../../../common/mock/test_providers';
-import { UserPrivilegesProvider } from '../user_privileges';
+import { UserPrivilegesProvider } from '../../../common/components/user_privileges';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/detection_engine/alerts/api');
+jest.mock('../../../common/components/user_privileges/use_endpoint_privileges');
 
 describe('useUserInfo', () => {
   beforeAll(() => {

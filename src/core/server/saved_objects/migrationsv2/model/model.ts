@@ -9,8 +9,9 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 
+import { estypes } from '@elastic/elasticsearch';
 import { AliasAction, isLeftTypeof } from '../actions';
-import { AllActionStates, State } from '../types';
+import { AllActionStates, MigrationLog, State } from '../types';
 import type { ResponseType } from '../next';
 import { disableUnknownTypeMappingFields } from '../../migrations/core/migration_context';
 import {
@@ -318,6 +319,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     }
   } else if (stateP.controlState === 'CHECK_UNKNOWN_DOCUMENTS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+
     if (Either.isRight(res)) {
       const source = stateP.sourceIndex;
       const target = stateP.versionIndex;
@@ -336,17 +338,24 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           { add: { index: target, alias: stateP.versionAlias } },
           { remove_index: { index: stateP.tempIndex } },
         ]),
+
+        logs: [
+          ...stateP.logs,
+          ...(res.right.unknownDocs.length > 0
+            ? ([
+                {
+                  level: 'warning',
+                  message: `CHECK_UNKNOWN_DOCUMENTS ${extractUnknownDocFailureReason(
+                    res.right.unknownDocs,
+                    target
+                  )}`,
+                },
+              ] as MigrationLog[])
+            : []),
+        ],
       };
     } else {
-      if (isLeftTypeof(res.left, 'unknown_docs_found')) {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: extractUnknownDocFailureReason(res.left.unknownDocs, stateP.sourceIndex.value),
-        };
-      } else {
-        return throwBadResponse(stateP, res.left);
-      }
+      return throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -354,7 +363,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       // If the write block is successfully in place, proceed to the next step.
       return {
         ...stateP,
-        controlState: 'CREATE_REINDEX_TEMP',
+        controlState: 'CALCULATE_EXCLUDE_FILTERS',
       };
     } else if (isLeftTypeof(res.left, 'index_not_found_exception')) {
       // We don't handle the following errors as the migration algorithm
@@ -363,6 +372,31 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       return throwBadResponse(stateP, res.left as never);
     } else {
       return throwBadResponse(stateP, res.left);
+    }
+  } else if (stateP.controlState === 'CALCULATE_EXCLUDE_FILTERS') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+
+    if (Either.isRight(res)) {
+      const unusedTypesQuery: estypes.QueryDslQueryContainer = {
+        bool: {
+          filter: [stateP.unusedTypesQuery, res.right.excludeFilter],
+        },
+      };
+
+      return {
+        ...stateP,
+        controlState: 'CREATE_REINDEX_TEMP',
+        unusedTypesQuery,
+        logs: [
+          ...stateP.logs,
+          ...Object.entries(res.right.errorsByType).map(([soType, error]) => ({
+            level: 'warning' as const,
+            message: `Ignoring excludeOnUpgrade hook on type [${soType}] that failed with error: "${error.toString()}"`,
+          })),
+        ],
+      };
+    } else {
+      return throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'CREATE_REINDEX_TEMP') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -499,7 +533,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         transformErrors: [],
       };
     } else {
-      throwBadResponse(stateP, res);
+      if (isLeftTypeof(res.left, 'target_index_had_write_block')) {
+        // the temp index has a write block, meaning that another instance already finished and moved forward.
+        // close the PIT search and carry on with the happy path.
+        return {
+          ...stateP,
+          controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT',
+        };
+      }
+      throwBadResponse(stateP, res.left);
     }
   } else if (stateP.controlState === 'SET_TEMP_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -667,7 +709,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         hasTransformedDocs: true,
       };
     } else {
-      throwBadResponse(stateP, res);
+      throwBadResponse(stateP, res as never);
     }
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;

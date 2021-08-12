@@ -18,6 +18,7 @@ export const HOST_STATUS_TO_BADGE_COLOR = Object.freeze<
   [HostStatus.UPDATING]: 'primary',
   [HostStatus.OFFLINE]: 'default',
   [HostStatus.INACTIVE]: 'default',
+  [HostStatus.UNENROLLED]: 'default',
 });
 
 export const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze<

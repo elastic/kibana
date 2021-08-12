@@ -8,6 +8,7 @@
 import {
   ArtifactSourceMap,
   getPackagePolicyWithSourceMap,
+  getCleanedBundleFilePath,
 } from './source_maps';
 
 const packagePolicy = {
@@ -182,6 +183,21 @@ describe('Source maps', () => {
           },
         },
       });
+    });
+  });
+  describe('getCleanedBundleFilePath', () => {
+    it('cleans url', () => {
+      expect(
+        getCleanedBundleFilePath(
+          'http://localhost:8000/test/e2e/../e2e/general-usecase/bundle.js.map'
+        )
+      ).toEqual('http://localhost:8000/test/e2e/general-usecase/bundle.js.map');
+    });
+
+    it('returns same path when it is not a valid url', () => {
+      expect(
+        getCleanedBundleFilePath('/general-usecase/bundle.js.map')
+      ).toEqual('/general-usecase/bundle.js.map');
     });
   });
 });
