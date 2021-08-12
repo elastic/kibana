@@ -18332,7 +18332,6 @@
     "xpack.monitoring.updateLicenseButtonLabel": "ライセンスを更新",
     "xpack.monitoring.updateLicenseTitle": "ライセンスの更新",
     "xpack.monitoring.useAvailableLicenseDescription": "すでに新しいライセンスがある場合は、今すぐアップロードしてください。",
-    "xpack.observability.alerts.manageDetectionRulesButtonLabel": "検出ルールの管理",
     "xpack.observability.alerts.searchBarPlaceholder": "\"domain\": \"ecommerce\" AND (\"service.name\":\"ProductCatalogService\" …)",
     "xpack.observability.alerts.statusFilter.allButtonLabel": "すべて",
     "xpack.observability.alerts.statusFilter.closedButtonLabel": "終了",
