@@ -14,7 +14,8 @@ import {
 } from 'react-router-config';
 import qs from 'query-string';
 import { findLastIndex, merge, compact } from 'lodash';
-import { deepExactRt, mergeRt } from '@kbn/io-ts-utils';
+import { deepExactRt } from '@kbn/io-ts-utils/target/deep_exact_rt';
+import { mergeRt } from '@kbn/io-ts-utils/target/merge_rt';
 import { Route, Router } from './types';
 
 export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<TRoutes> {
