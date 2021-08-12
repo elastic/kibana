@@ -110,7 +110,7 @@ export class Home extends Component {
 
   renderNormal() {
     const { addBasePath, solutions, directories } = this.props;
-    const { application, docLinks, trackUiMetric } = getServices();
+    const { application, trackUiMetric } = getServices();
     const isDarkMode = getServices().uiSettings.get('theme:darkMode');
     const devTools = this.findDirectoryById('console');
     const addDataFeatures = this.getFeaturesByCategory(FeatureCatalogueCategory.DATA);
@@ -123,7 +123,6 @@ export class Home extends Component {
 
     console.log(application.capabilities.navLinks);
     console.log(addDataFeatures);
-    console.log(docLinks.links);
     console.log(isDarkMode);
 
     return (
@@ -143,12 +142,7 @@ export class Home extends Component {
           directories={directories}
         />
 
-        <AddData
-          addBasePath={addBasePath}
-          application={application}
-          docLinks={docLinks}
-          isDarkMode={isDarkMode}
-        />
+        <AddData addBasePath={addBasePath} application={application} isDarkMode={isDarkMode} />
 
         <ManageData
           addBasePath={addBasePath}

@@ -9,18 +9,18 @@
 import React, { FC, MouseEvent } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiImage,
-  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ApplicationStart, DocLinksStart } from 'kibana/public';
+import { ApplicationStart } from 'kibana/public';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 // @ts-expect-error untyped component
 import { Synopsis } from '../synopsis';
@@ -30,14 +30,11 @@ import { RedirectAppLinks } from '../../../../../kibana_react/public';
 interface Props {
   addBasePath: (path: string) => string;
   application: ApplicationStart;
-  docLinks: DocLinksStart;
   isDarkMode: boolean;
 }
 
-export const AddData: FC<Props> = ({ addBasePath, application, docLinks, isDarkMode }) => {
+export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode }) => {
   const { trackUiMetric } = getServices();
-
-  const { integrations: isIntegrationsEnabled } = application.capabilities.navLinks;
 
   return (
     <>
@@ -59,7 +56,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, docLinks, isDarkM
               <p>
                 <FormattedMessage
                   id="home.addData.text"
-                  defaultMessage="To begin your Kibana journey, we recommend adding your data via the Elastic Agent’s suite of data integrations. If the integration or features your looking for aren’t available, give our legacy Beats a try instead."
+                  defaultMessage="To start working with your data in Kibana, use one of Elastic’s many ingest options. You can collect data from an app or service or upload a file that contains your data. If you’re not ready to use your own data, add a sample data set and give Kibana a test drive."
                 />
               </p>
             </EuiText>
@@ -67,64 +64,40 @@ export const AddData: FC<Props> = ({ addBasePath, application, docLinks, isDarkM
             <EuiSpacer />
 
             <EuiFlexGroup gutterSize="m" responsive={false} wrap>
-              {isIntegrationsEnabled ? (
-                <EuiFlexItem grow={false}>
-                  <RedirectAppLinks application={application}>
-                    {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-                    <EuiButton
-                      fill
-                      href={addBasePath('/app/integrations')}
-                      onClick={(event: MouseEvent) => {
-                        trackUiMetric(METRIC_TYPE.CLICK, 'ingest_data_card_fleet');
-                        createAppNavigationHandler('/app/integrations')(event);
-                      }}
-                    >
-                      Find a data integration
-                    </EuiButton>
-                  </RedirectAppLinks>
-                </EuiFlexItem>
-              ) : null}
-
               <EuiFlexItem grow={false}>
                 <RedirectAppLinks application={application}>
                   {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                   <EuiButton
+                    data-test-subj="homeAddData"
+                    fill
                     href={addBasePath('/app/home#/tutorial_directory')}
+                    iconType="plusInCircle"
                     onClick={(event: MouseEvent) => {
                       trackUiMetric(METRIC_TYPE.CLICK, 'home_tutorial_directory');
                       createAppNavigationHandler('/app/home#/tutorial_directory')(event);
                     }}
                   >
-                    Setup Beats
+                    <FormattedMessage
+                      id="home.addData.addDataButtonLabel"
+                      defaultMessage="Add your data"
+                    />
                   </EuiButton>
                 </RedirectAppLinks>
               </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="addSampleData"
+                  href={addBasePath('#/tutorial_directory/sampleData')}
+                  iconType="documents"
+                >
+                  <FormattedMessage
+                    id="home.addData.sampleDataButtonLabel"
+                    defaultMessage="Try sample data"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
             </EuiFlexGroup>
-
-            {isIntegrationsEnabled ? (
-              <>
-                <EuiSpacer />
-
-                <EuiText color="subdued" size="xs">
-                  <p>
-                    <FormattedMessage
-                      id="home.addData.docs"
-                      defaultMessage="Confused on which to use? {docsLink}"
-                      values={{
-                        docsLink: (
-                          <EuiLink href={docLinks.links.addData} target="_blank">
-                            <FormattedMessage
-                              id="home.addData.docsLink"
-                              defaultMessage="Check our docs for more information"
-                            />
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  </p>
-                </EuiText>
-              </>
-            ) : null}
           </EuiFlexItem>
 
           <EuiFlexItem>
