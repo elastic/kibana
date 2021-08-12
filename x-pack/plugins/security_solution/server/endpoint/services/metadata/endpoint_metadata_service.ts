@@ -102,7 +102,7 @@ export class EndpointMetadataService {
   }
 
   /**
-   * Finda  list of Endpoint Host Metadata document associated with a given list of Fleet Agent Ids
+   * Find a  list of Endpoint Host Metadata document associated with a given list of Fleet Agent Ids
    * @param esClient
    * @param fleetAgentIds
    */

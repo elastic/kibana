@@ -239,6 +239,7 @@ export const getPendingActionCounts = async (
  * Returns back a map of elastic Agent IDs to array of Action IDs that have received a response.
  *
  * @param esClient
+ * @param metadataService
  * @param actionIds
  * @param agentIds
  */
