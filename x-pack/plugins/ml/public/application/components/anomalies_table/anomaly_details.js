@@ -190,7 +190,7 @@ function getDetailsItems(anomaly, filter) {
         position="left"
         content={i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.recordScoreTooltip', {
           defaultMessage:
-            'A normalized score between 0-100, which indicates the relative significance of the anomaly record result.',
+            'A normalized score between 0-100, which indicates the relative significance of the anomaly record result. This value might change as new data is analyzed.',
         })}
       >
         <span>
@@ -212,7 +212,7 @@ function getDetailsItems(anomaly, filter) {
           'xpack.ml.anomaliesTable.anomalyDetails.initialRecordScoreTooltip',
           {
             defaultMessage:
-              'A normalized score between 0-100, which indicates the relative significance of the anomaly record result. This is the initial value that was calculated at the time the bucket was processed.',
+              'A normalized score between 0-100, which indicates the relative significance of the anomaly record when the bucket was initially processed.',
           }
         )}
       >
