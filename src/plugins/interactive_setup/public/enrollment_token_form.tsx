@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextArea,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
@@ -152,39 +153,52 @@ interface EnrollmentTokenDetailsProps {
 }
 
 const EnrollmentTokenDetails: FunctionComponent<EnrollmentTokenDetailsProps> = ({ token }) => (
-  <EuiFlexGroup
-    responsive={false}
-    alignItems="center"
-    gutterSize="s"
-    style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}
-  >
-    <EuiFlexItem grow={false}>
-      <EuiText size="xs">
+  <EuiText size="xs">
+    <EuiFlexGroup
+      responsive={false}
+      alignItems="center"
+      gutterSize="s"
+      style={{ whiteSpace: 'nowrap' }}
+    >
+      <EuiFlexItem grow={false}>
         <FormattedMessage
           id="interactiveSetup.enrollmentTokenDetails.connectTo"
           defaultMessage="Connect to"
         />
-      </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiIcon type="lock" />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText size="xs">{token.adr[0]}</EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiIcon type="logoElasticsearch" />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText size="xs">
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="lock" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ overflow: 'hidden' }}>
+        <EuiToolTip
+          position="top"
+          content={token.adr[0]}
+          anchorClassName="clusterConfigurationForm__tooltip"
+        >
+          <span
+            style={{
+              display: 'block',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {token.adr[0]}
+          </span>
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="logoElasticsearch" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <FormattedMessage
           id="interactiveSetup.enrollmentTokenDetails.elasticsearchVersion"
           defaultMessage="Elasticsearch (v{version})"
           values={{ version: token.ver }}
         />
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiText>
 );
 
 export function decodeEnrollmentToken(enrollmentToken: string) {

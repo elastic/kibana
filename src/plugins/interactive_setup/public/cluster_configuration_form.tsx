@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
@@ -132,20 +133,30 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
 
   return (
     <EuiForm component="form" noValidate {...eventHandlers}>
-      <EuiFlexGroup
-        responsive={false}
-        alignItems="center"
-        gutterSize="s"
-        style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}
-      >
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false} style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
           <FormattedMessage
             id="interactiveSetup.clusterConfigurationForm.connectTo"
             defaultMessage="Connect to"
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <strong>{host}</strong>
+        <EuiFlexItem style={{ overflow: 'hidden' }}>
+          <EuiToolTip
+            position="top"
+            content={host}
+            anchorClassName="clusterConfigurationForm__tooltip"
+          >
+            <strong
+              style={{
+                display: 'block',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {host}
+            </strong>
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
