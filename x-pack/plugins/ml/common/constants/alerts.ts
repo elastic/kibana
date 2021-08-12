@@ -21,8 +21,12 @@ export const TOP_N_BUCKETS_COUNT = 1;
 
 export const ALL_JOBS_SELECTION = '*';
 
-export const HEALTH_CHECK_NAMES: Record<JobsHealthTests, { name: string; description: string }> = {
+export const HEALTH_CHECK_NAMES: Record<
+  JobsHealthTests,
+  { id: string; name: string; description: string }
+> = {
   datafeed: {
+    id: 'datafeed_not_started',
     name: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedCheckName', {
       defaultMessage: 'Datafeed is not started',
     }),
@@ -34,6 +38,7 @@ export const HEALTH_CHECK_NAMES: Record<JobsHealthTests, { name: string; descrip
     ),
   },
   mml: {
+    id: 'mml',
     name: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlCheckName', {
       defaultMessage: 'Model memory limit reached',
     }),
@@ -42,6 +47,7 @@ export const HEALTH_CHECK_NAMES: Record<JobsHealthTests, { name: string; descrip
     }),
   },
   delayedData: {
+    id: 'delayed_data',
     name: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataCheckName', {
       defaultMessage: 'Data delay has occurred',
     }),
@@ -53,6 +59,7 @@ export const HEALTH_CHECK_NAMES: Record<JobsHealthTests, { name: string; descrip
     ),
   },
   errorMessages: {
+    id: 'error_messages',
     name: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesCheckName', {
       defaultMessage: 'There are errors in the job messages',
     }),
@@ -64,6 +71,7 @@ export const HEALTH_CHECK_NAMES: Record<JobsHealthTests, { name: string; descrip
     ),
   },
   behindRealtime: {
+    id: 'behind_realtime',
     name: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.behindRealtimeCheckName', {
       defaultMessage: 'Job is running behind real-time',
     }),
@@ -75,3 +83,17 @@ export const HEALTH_CHECK_NAMES: Record<JobsHealthTests, { name: string; descrip
     ),
   },
 };
+
+export const JOB_ID = 'ml.job_id' as const;
+export const JOB_STATE = 'ml.job_state' as const;
+export const DATAFEED_ID = 'ml.datafeed_id' as const;
+export const DATAFEED_STATE = 'ml.datafeed_state' as const;
+export const MEMORY_STATUS = 'ml.memory_status' as const;
+export const MEMORY_LOG_TIME = 'ml.memory_log_time' as const;
+export const MODEL_BYTES = 'ml.model_bytes' as const;
+export const MODEL_BYTES_MEMORY_LIMIT = 'ml.model_bytes_memory_limit' as const;
+export const PEAK_MODEL_BYTES = 'ml.peak_model_bytes' as const;
+export const MODEL_BYTES_EXCEEDED = 'ml.model_bytes_exceeded' as const;
+export const ANNOTATION = 'ml.annotation' as const;
+export const MISSED_DOC_COUNT = 'ml.missed_docs_count' as const;
+export const END_TIMESTAMP = 'ml.end_timestamp' as const;

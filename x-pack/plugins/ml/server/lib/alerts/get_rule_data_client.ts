@@ -10,6 +10,21 @@ import { once } from 'lodash';
 import { IRuleDataClient, RuleRegistryPluginSetupContract } from '../../../../rule_registry/server';
 import { mappingFromFieldMap } from '../../../../rule_registry/common/mapping_from_field_map';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../../../rule_registry/common/assets';
+import {
+  DATAFEED_ID,
+  DATAFEED_STATE,
+  JOB_ID,
+  JOB_STATE,
+  MEMORY_STATUS,
+  MEMORY_LOG_TIME,
+  MODEL_BYTES,
+  MODEL_BYTES_MEMORY_LIMIT,
+  PEAK_MODEL_BYTES,
+  MODEL_BYTES_EXCEEDED,
+  ANNOTATION,
+  MISSED_DOC_COUNT,
+  END_TIMESTAMP,
+} from '../../../common/constants/alerts';
 
 export function getRuleDataClient(
   ruleRegistry: RuleRegistryPluginSetupContract,
@@ -36,46 +51,46 @@ export function getRuleDataClient(
           // Mappings based on {@link AnomalyDetectionJobHealthResult}
           mappings: mappingFromFieldMap(
             {
-              job_id: {
+              [JOB_ID]: {
                 type: 'keyword',
               },
-              job_state: {
+              [JOB_STATE]: {
                 type: 'keyword',
               },
               // datafeed
-              datafeed_id: {
+              [DATAFEED_ID]: {
                 type: 'keyword',
               },
-              datafeed_state: {
+              [DATAFEED_STATE]: {
                 type: 'keyword',
               },
               // mml
-              memory_status: {
+              [MEMORY_STATUS]: {
                 type: 'keyword',
               },
-              log_time: {
+              [MEMORY_LOG_TIME]: {
                 type: 'date',
               },
-              model_bytes: {
+              [MODEL_BYTES]: {
                 type: 'long',
               },
-              model_bytes_memory_limit: {
+              [MODEL_BYTES_MEMORY_LIMIT]: {
                 type: 'long',
               },
-              peak_model_bytes: {
+              [PEAK_MODEL_BYTES]: {
                 type: 'long',
               },
-              model_bytes_exceeded: {
+              [MODEL_BYTES_EXCEEDED]: {
                 type: 'long',
               },
               // {@link DelayedDataResponse)
-              annotation: {
+              [ANNOTATION]: {
                 type: 'text',
               },
-              missed_docs_count: {
+              [MISSED_DOC_COUNT]: {
                 type: 'long',
               },
-              end_timestamp: {
+              [END_TIMESTAMP]: {
                 type: 'date',
               },
             },
