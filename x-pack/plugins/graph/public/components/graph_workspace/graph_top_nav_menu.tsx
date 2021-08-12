@@ -62,8 +62,7 @@ export const GraphTopNavMenu = (props: GraphTopNavMenuProps) => {
     }),
     run() {
       props.confirmWipeWorkspace(() => {
-        const x = props.locationUrl();
-        if (x === '/workspace/') {
+        if (props.locationUrl() === '/workspace/') {
           props.reloadRoute();
         } else {
           props.locationUrl('/workspace/');
