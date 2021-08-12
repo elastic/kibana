@@ -2,16 +2,12 @@
   "id": "ruleRegistry",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "configPath": [
-    "xpack",
-    "ruleRegistry"
-  ],
-  "requiredPlugins": [
-    "alerting",
-    "data",
-    "spaces",
-    "triggersActionsUi"
-  ],
+  "owner": {
+    "name": "Kibana Alerting",
+    "githubTeam": "kibana-alerting-services"
+  },
+  "configPath": ["xpack", "ruleRegistry"],
+  "requiredPlugins": ["alerting", "data", "spaces", "triggersActionsUi"],
   "optionalPlugins": ["security"],
   "server": true
 }

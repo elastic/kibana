@@ -1,5 +1,9 @@
 {
   "id": "tileMap",
+  "owner": {
+    "name": "GIS",
+    "githubTeam": "kibana-gis"
+  },
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "ui": true,
@@ -13,9 +17,5 @@
     "data",
     "share"
   ],
-  "requiredBundles": [
-    "kibanaUtils",
-    "charts",
-    "visDefaultEditor"
-  ]
+  "requiredBundles": ["kibanaUtils", "charts", "visDefaultEditor"]
 }

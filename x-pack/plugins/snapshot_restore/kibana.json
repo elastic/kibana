@@ -3,21 +3,12 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": [
-    "licensing",
-    "management",
-    "features"
-  ],
-  "optionalPlugins": [
-    "usageCollection",
-    "security",
-    "cloud",
-    "home"
-  ],
+  "owner": {
+    "name": "Stack Management",
+    "githubTeam": "kibana-stack-management"
+  },
+  "requiredPlugins": ["licensing", "management", "features"],
+  "optionalPlugins": ["usageCollection", "security", "cloud", "home"],
   "configPath": ["xpack", "snapshot_restore"],
-  "requiredBundles": [
-    "esUiShared",
-    "kibanaReact",
-    "home"
-  ]
+  "requiredBundles": ["esUiShared", "kibanaReact", "home"]
 }

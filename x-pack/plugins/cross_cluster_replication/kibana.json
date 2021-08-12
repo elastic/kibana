@@ -3,6 +3,10 @@
   "version": "kibana",
   "server": true,
   "ui": true,
+  "owner": {
+    "name": "Stack Management",
+    "githubTeam": "kibana-stack-management"
+  },
   "requiredPlugins": [
     "home",
     "licensing",
@@ -12,13 +16,7 @@
     "indexManagement",
     "features"
   ],
-  "optionalPlugins": [
-    "usageCollection"
-  ],
+  "optionalPlugins": ["usageCollection"],
   "configPath": ["xpack", "ccr"],
-  "requiredBundles": [
-    "kibanaReact",
-    "esUiShared",
-    "data"
-  ]
+  "requiredBundles": ["kibanaReact", "esUiShared", "data"]
 }

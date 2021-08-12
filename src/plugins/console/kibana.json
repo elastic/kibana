@@ -3,6 +3,10 @@
   "version": "kibana",
   "server": true,
   "ui": true,
+  "owner": {
+    "name": "Stack Management",
+    "githubTeam": "kibana-stack-management"
+  },
   "requiredPlugins": ["devTools"],
   "optionalPlugins": ["usageCollection", "home"],
   "requiredBundles": ["esUiShared", "kibanaReact", "kibanaUtils", "home"]

@@ -1,9 +1,20 @@
 {
   "id": "stackAlerts",
+  "owner": {
+    "name": "Kibana Alerting",
+    "githubTeam": "kibana-alerting-services"
+  },
   "server": true,
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "requiredPlugins": ["alerting", "features", "triggersActionsUi", "kibanaReact", "savedObjects", "data"],
+  "requiredPlugins": [
+    "alerting",
+    "features",
+    "triggersActionsUi",
+    "kibanaReact",
+    "savedObjects",
+    "data"
+  ],
   "configPath": ["xpack", "stack_alerts"],
   "requiredBundles": ["esUiShared"],
   "ui": true

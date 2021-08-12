@@ -4,23 +4,12 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": [
-    "management",
-    "licensing",
-    "features"
-  ],
-  "optionalPlugins": [
-    "home",
-    "indexManagement",
-    "usageCollection",
-    "visTypeTimeseries"
-  ],
+  "owner": {
+    "name": "Stack Management",
+    "githubTeam": "kibana-stack-management"
+  },
+  "requiredPlugins": ["management", "licensing", "features"],
+  "optionalPlugins": ["home", "indexManagement", "usageCollection", "visTypeTimeseries"],
   "configPath": ["xpack", "rollup"],
-  "requiredBundles": [
-    "kibanaUtils",
-    "kibanaReact",
-    "home",
-    "esUiShared",
-    "data"
-  ]
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "home", "esUiShared", "data"]
 }
