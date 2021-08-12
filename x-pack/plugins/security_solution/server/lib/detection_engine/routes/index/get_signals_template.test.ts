@@ -109,8 +109,8 @@ describe('get_signals_template', () => {
     const constantKeywordsFound = recursiveConstantKeywordFound('', template);
     expect(constantKeywordsFound).toEqual([
       'template.mappings.properties.kibana.space_ids',
-      'template.mappings.properties.kibana.alert.consumers',
-      'template.mappings.properties.kibana.alert.producer',
+      'template.mappings.properties.kibana.alert.rule.consumer',
+      'template.mappings.properties.kibana.alert.rule.producer',
       'template.mappings.properties.kibana.alert.rule.rule_type_id',
     ]);
   });
