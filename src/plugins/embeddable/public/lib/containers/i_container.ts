@@ -63,6 +63,13 @@ export interface IContainer<
   getChild<E extends Embeddable<EmbeddableInput> = Embeddable<EmbeddableInput>>(id: string): E;
 
   /**
+   * Embeddables which have deferEmbeddableLoad set to true need to manually call setChildLoaded
+   * on their parent container to communicate when they have finished loading.
+   * @param embeddable - the embeddable to set
+   */
+  setChildLoaded<E extends IEmbeddable = IEmbeddable>(embeddable: E): void;
+
+  /**
    * Removes the embeddable with the given id.
    * @param embeddableId
    */
