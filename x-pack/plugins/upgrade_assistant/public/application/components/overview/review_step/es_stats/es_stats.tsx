@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { getDeprecationsUpperLimit } from '../../../../lib/utils';
 import { useAppContext } from '../../../../app_context';
 import { EsStatsErrors } from './es_stats_error';
 import { NoDeprecations } from '../no_deprecations';
@@ -100,7 +101,7 @@ export const ESDeprecationStats: FunctionComponent = () => {
           <EuiFlexItem>
             <EuiStat
               data-test-subj="criticalDeprecations"
-              title={error ? '--' : criticalDeprecations.length}
+              title={error ? '--' : getDeprecationsUpperLimit(criticalDeprecations.length)}
               titleElement="span"
               description={i18nTexts.criticalDeprecationsTitle}
               titleColor="danger"
@@ -123,7 +124,7 @@ export const ESDeprecationStats: FunctionComponent = () => {
           <EuiFlexItem>
             <EuiStat
               data-test-subj="totalDeprecations"
-              title={error ? '--' : allDeprecations.length}
+              title={error ? '--' : getDeprecationsUpperLimit(allDeprecations.length)}
               titleElement="span"
               description={i18nTexts.totalDeprecationsTitle}
               isLoading={isLoading}
