@@ -18,7 +18,7 @@ import { SetupModeContext } from '../../../components/setup_mode/setup_mode_cont
 import {
   CODE_PATH_LOGSTASH,
   LOGSTASH_SYSTEM_ID,
-  ALERT_LOGSTASH_VERSION_MISMATCH,
+  RULE_LOGSTASH_VERSION_MISMATCH,
 } from '../../../../common/constants';
 
 uiRoutes.when('/logstash/nodes', {
@@ -48,7 +48,7 @@ uiRoutes.when('/logstash/nodes', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_LOGSTASH_VERSION_MISMATCH],
+            alertTypeIds: [RULE_LOGSTASH_VERSION_MISMATCH],
           },
         },
       });

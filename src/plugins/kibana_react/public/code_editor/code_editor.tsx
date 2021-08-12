@@ -193,6 +193,9 @@ export class CodeEditor extends React.Component<Props, {}> {
             wordWrap: 'on',
             wrappingIndent: 'indent',
             matchBrackets: 'never',
+            fontFamily: 'Roboto Mono',
+            fontSize: 12,
+            lineHeight: 21,
             ...options,
           }}
         />

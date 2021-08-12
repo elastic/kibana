@@ -1,8 +1,7 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
     "allowJs": true,
-    "incremental": true,
     "declarationDir": "./target_types",
     "outDir": "target_node",
     "declaration": true,
