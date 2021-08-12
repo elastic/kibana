@@ -79,8 +79,6 @@ const mockSolutions = [
   {
     id: 'kibana',
     title: 'Kibana',
-    subtitle: 'Visualize & analyze',
-    appDescriptions: ['Analyze data in dashboards'],
     icon: 'logoKibana',
     path: 'kibana_landing_page',
     order: 1,
@@ -88,9 +86,7 @@ const mockSolutions = [
   {
     id: 'solution-2',
     title: 'Solution two',
-    subtitle: 'Subtitle for solution two',
     description: 'Description of solution two',
-    appDescriptions: ['Example use case'],
     icon: 'empty',
     path: 'path-to-solution-two',
     order: 2,
@@ -98,9 +94,7 @@ const mockSolutions = [
   {
     id: 'solution-3',
     title: 'Solution three',
-    subtitle: 'Subtitle for solution three',
     description: 'Description of solution three',
-    appDescriptions: ['Example use case'],
     icon: 'empty',
     path: 'path-to-solution-three',
     order: 3,
@@ -108,9 +102,7 @@ const mockSolutions = [
   {
     id: 'solution-4',
     title: 'Solution four',
-    subtitle: 'Subtitle for solution four',
     description: 'Description of solution four',
-    appDescriptions: ['Example use case'],
     icon: 'empty',
     path: 'path-to-solution-four',
     order: 4,
