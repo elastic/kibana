@@ -68,7 +68,7 @@ export class EndpointMetadataService {
    *
    * @private
    */
-  public get DANGEROUS_INTERNAL_SO_CLIENT() {
+  private get DANGEROUS_INTERNAL_SO_CLIENT() {
     // The INTERNAL SO client must be created during the first time its used. This is because creating it during
     // instance initialization (in `constructor(){}`) causes the SO Client to be invalid (perhaps because this
     // instantiation is happening during the plugin's the start phase)
