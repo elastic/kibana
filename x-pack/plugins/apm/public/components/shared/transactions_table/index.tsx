@@ -171,10 +171,7 @@ export function TransactionsTable({
     },
   } = data;
 
-  const {
-    data: transactionGroupDetailedStatistics,
-    status: transactionGroupDetailedStatisticsStatus,
-  } = useFetcher(
+  const { data: transactionGroupDetailedStatistics } = useFetcher(
     (callApmApi) => {
       if (
         transactionGroupsTotalItems &&
@@ -219,9 +216,7 @@ export function TransactionsTable({
     comparisonEnabled,
   });
 
-  const isLoading =
-    status === FETCH_STATUS.LOADING ||
-    transactionGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING;
+  const isLoading = status === FETCH_STATUS.LOADING;
 
   const pagination = {
     pageIndex,

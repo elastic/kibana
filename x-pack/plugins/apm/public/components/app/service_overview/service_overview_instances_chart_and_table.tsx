@@ -169,7 +169,6 @@ export function ServiceOverviewInstancesChartAndTable({
 
   const {
     data: detailedStatsData = INITIAL_STATE_DETAILED_STATISTICS,
-    status: detailedStatsStatus,
   } = useFetcher(
     (callApmApi) => {
       if (
@@ -231,10 +230,7 @@ export function ServiceOverviewInstancesChartAndTable({
             detailedStatsData={detailedStatsData}
             serviceName={serviceName}
             tableOptions={tableOptions}
-            isLoading={
-              mainStatsStatus === FETCH_STATUS.LOADING ||
-              detailedStatsStatus === FETCH_STATUS.LOADING
-            }
+            isLoading={mainStatsStatus === FETCH_STATUS.LOADING}
             onChangeTableOptions={(newTableOptions) => {
               setTableOptions({
                 pageIndex: newTableOptions.page?.index ?? 0,

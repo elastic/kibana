@@ -82,7 +82,7 @@ function useServicesFetcher({
 
   const { mainStatisticsData, requestId } = data;
 
-  const { data: comparisonData, status: comparisonStatus } = useFetcher(
+  const { data: comparisonData } = useFetcher(
     (callApmApi) => {
       if (start && end && mainStatisticsData.items.length) {
         return callApmApi({
@@ -146,12 +146,10 @@ function useServicesFetcher({
   ]);
 
   return {
-    servicesData: mainStatisticsData,
-    servicesStatus: mainStatisticsStatus,
+    mainStatisticsData,
+    mainStatisticsStatus,
     comparisonData,
-    isLoading:
-      mainStatisticsStatus === FETCH_STATUS.LOADING ||
-      comparisonStatus === FETCH_STATUS.LOADING,
+    isLoading: mainStatisticsStatus === FETCH_STATUS.LOADING,
   };
 }
 
@@ -164,8 +162,8 @@ export function ServiceInventory() {
 
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher();
   const {
-    servicesData,
-    servicesStatus,
+    mainStatisticsData,
+    mainStatisticsStatus,
     comparisonData,
     isLoading,
   } = useServicesFetcher({ environment, kuery });
@@ -205,13 +203,13 @@ export function ServiceInventory() {
         <EuiFlexItem>
           <ServiceList
             isLoading={isLoading}
-            items={servicesData.items}
+            items={mainStatisticsData.items}
             comparisonData={comparisonData}
             noItemsMessage={
               !isLoading && (
                 <NoServicesMessage
-                  historicalDataFound={servicesData.hasHistoricalData}
-                  status={servicesStatus}
+                  historicalDataFound={mainStatisticsData.hasHistoricalData}
+                  status={mainStatisticsStatus}
                 />
               )
             }

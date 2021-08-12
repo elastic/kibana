@@ -68,8 +68,6 @@ async function getConnectionData({
           chunks.map((traceIdsChunk) =>
             getServiceMapFromTraceIds({
               setup,
-              serviceName,
-              environment,
               traceIds: traceIdsChunk,
             })
           )
