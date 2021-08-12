@@ -35,7 +35,7 @@ import type {
   FramePublicAPI,
 } from '../types';
 import { State, visualizationTypes, XYState } from './types';
-import type { FormatFactory } from '../../common';
+import { FormatFactory, layerTypes } from '../../common';
 import {
   SeriesType,
   YAxisMode,
@@ -54,6 +54,8 @@ import { getAccessorColorConfig, getColorAssignments } from './color_assignment'
 import { getScaleType, getSortedAccessors } from './to_expression';
 import { VisualOptionsPopover } from './visual_options_popover/visual_options_popover';
 import { ToolbarButton } from '../../../../../src/plugins/kibana_react/public';
+import { LensIconChartBarThreshold } from '../assets/chart_bar_threshold';
+import { StaticHeader } from '../shared_components';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -105,7 +107,17 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   if (!layer) {
     return null;
   }
-
+  // if it's a threshold just draw a static text
+  if (layer.layerType === layerTypes.THRESHOLD) {
+    return (
+      <StaticHeader
+        icon={LensIconChartBarThreshold}
+        label={i18n.translate('xpack.lens.xyChart.layerThresholdLabel', {
+          defaultMessage: 'Thresholds',
+        })}
+      />
+    );
+  }
   const currentVisType = visualizationTypes.find(({ id }) => id === layer.seriesType)!;
 
   const createTrigger = function () {
