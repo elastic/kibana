@@ -54,6 +54,9 @@ describe('ContextApp test', () => {
         discover: {
           save: true,
         },
+        indexPatterns: {
+          save: true,
+        },
       },
       indexPatterns: indexPatternsMock,
       toastNotifications: { addDanger: () => {} },

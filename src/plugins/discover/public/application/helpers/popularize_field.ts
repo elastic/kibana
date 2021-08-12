@@ -15,7 +15,7 @@ async function popularizeField(
   indexPatternsService: IndexPatternsContract
 ) {
   const { capabilities } = getServices();
-  if (!indexPattern.id || !capabilities.indexPatterns.save) return;
+  if (!indexPattern.id || !capabilities?.indexPatterns?.save) return;
   const field = indexPattern.fields.getByName(fieldName);
   if (!field) {
     return;
