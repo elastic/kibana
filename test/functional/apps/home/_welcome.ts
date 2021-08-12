@@ -38,15 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('is displayed on a fresh install with Fleet system package index-patterns installed', async () => {
-      // TODO: figure out best way to have a clean state in Cloud before running this test
-      // const indexPatterns = await kibanaServer.savedObjects.find({
-      //   type: 'index-pattern',
-      //   fields: ['title'],
-      //   search: `*`,
-      //   searchFields: ['title'],
-      //   perPage: 1,
-      // });
-
+      // Load index-patterns installed by default in Cloud
       await kibanaServer.importExport.load(FLEET_ONBOARDING_ARCHIVE);
       await PageObjects.common.navigateToUrl('home', undefined, { disableWelcomePrompt: false });
       expect(await PageObjects.home.isWelcomeInterstitialDisplayed()).to.be(true);
