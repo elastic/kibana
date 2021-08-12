@@ -1583,10 +1583,6 @@ Object {
           "path": "signal.ancestors.type",
           "type": "alias",
         },
-        "kibana.alert.consumers": Object {
-          "type": "constant_keyword",
-          "value": "siem",
-        },
         "kibana.alert.depth": Object {
           "path": "signal.depth",
           "type": "alias",
@@ -1675,10 +1671,6 @@ Object {
           "path": "signal.original_time",
           "type": "alias",
         },
-        "kibana.alert.producer": Object {
-          "type": "constant_keyword",
-          "value": "siem",
-        },
         "kibana.alert.risk_score": Object {
           "path": "signal.rule.risk_score",
           "type": "alias",
@@ -1690,6 +1682,10 @@ Object {
         "kibana.alert.rule.building_block_type": Object {
           "path": "signal.rule.building_block_type",
           "type": "alias",
+        },
+        "kibana.alert.rule.consumer": Object {
+          "type": "constant_keyword",
+          "value": "siem",
         },
         "kibana.alert.rule.created_at": Object {
           "path": "signal.rule.created_at",
@@ -1750,6 +1746,10 @@ Object {
         "kibana.alert.rule.note": Object {
           "path": "signal.rule.note",
           "type": "alias",
+        },
+        "kibana.alert.rule.producer": Object {
+          "type": "constant_keyword",
+          "value": "siem",
         },
         "kibana.alert.rule.query": Object {
           "path": "signal.rule.query",

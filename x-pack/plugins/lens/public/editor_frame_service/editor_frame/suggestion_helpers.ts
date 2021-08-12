@@ -22,7 +22,13 @@ import {
   VisualizationMap,
 } from '../../types';
 import { DragDropIdentifier } from '../../drag_drop';
-import { LensDispatch, selectSuggestion, switchVisualization } from '../../state_management';
+import {
+  LensDispatch,
+  selectSuggestion,
+  switchVisualization,
+  DatasourceStates,
+  VisualizationState,
+} from '../../state_management';
 
 export interface Suggestion {
   visualizationId: string;
@@ -60,13 +66,7 @@ export function getSuggestions({
   mainPalette,
 }: {
   datasourceMap: DatasourceMap;
-  datasourceStates: Record<
-    string,
-    {
-      isLoading: boolean;
-      state: unknown;
-    }
-  >;
+  datasourceStates: DatasourceStates;
   visualizationMap: VisualizationMap;
   activeVisualizationId: string | null;
   subVisualizationId?: string;
@@ -143,13 +143,7 @@ export function getVisualizeFieldSuggestions({
   visualizeTriggerFieldContext,
 }: {
   datasourceMap: DatasourceMap;
-  datasourceStates: Record<
-    string,
-    {
-      isLoading: boolean;
-      state: unknown;
-    }
-  >;
+  datasourceStates: DatasourceStates;
   visualizationMap: VisualizationMap;
   activeVisualizationId: string | null;
   subVisualizationId?: string;
@@ -228,11 +222,10 @@ export function switchToSuggestion(
 
 export function getTopSuggestionForField(
   datasourceLayers: Record<string, DatasourcePublicAPI>,
-  activeVisualizationId: string | null,
+  visualization: VisualizationState,
+  datasourceStates: DatasourceStates,
   visualizationMap: Record<string, Visualization<unknown>>,
-  visualizationState: unknown,
   datasource: Datasource,
-  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
   field: DragDropIdentifier
 ) {
   const hasData = Object.values(datasourceLayers).some(
@@ -240,20 +233,20 @@ export function getTopSuggestionForField(
   );
 
   const mainPalette =
-    activeVisualizationId && visualizationMap[activeVisualizationId]?.getMainPalette
-      ? visualizationMap[activeVisualizationId].getMainPalette?.(visualizationState)
+    visualization.activeId && visualizationMap[visualization.activeId]?.getMainPalette
+      ? visualizationMap[visualization.activeId].getMainPalette?.(visualization.state)
       : undefined;
   const suggestions = getSuggestions({
     datasourceMap: { [datasource.id]: datasource },
     datasourceStates,
     visualizationMap:
-      hasData && activeVisualizationId
-        ? { [activeVisualizationId]: visualizationMap[activeVisualizationId] }
+      hasData && visualization.activeId
+        ? { [visualization.activeId]: visualizationMap[visualization.activeId] }
         : visualizationMap,
-    activeVisualizationId,
-    visualizationState,
+    activeVisualizationId: visualization.activeId,
+    visualizationState: visualization.state,
     field,
     mainPalette,
   });
-  return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
+  return suggestions.find((s) => s.visualizationId === visualization.activeId) || suggestions[0];
 }
