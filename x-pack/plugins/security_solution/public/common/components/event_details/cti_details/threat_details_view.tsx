@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { StyledEuiInMemoryTable } from '../summary_view';
 import { getSummaryColumns, SummaryRow, ThreatDetailsRow } from '../helpers';
-import { FIRST_SEEN, ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
+import { FIRST_SEEN, ENRICHMENT_TYPES, REFERENCE } from '../../../../../common/cti/constants';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { getFirstElement } from '../../../../../common/utils/data_retrieval';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
@@ -56,7 +56,7 @@ const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
   fieldName,
   value,
 }) => {
-  const tooltipChild = fieldName.match(FIRST_SEEN) ? (
+  const tooltipChild = fieldName.match(REFERENCE) ? (
     <EuiLink href={value} target="_blank">
       {value}
     </EuiLink>
