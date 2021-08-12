@@ -29,7 +29,7 @@ exports[`NoDataPage render 1`] = `
     >
       <p>
         <FormattedMessage
-          defaultMessage="Add your data to get started or {link} about {solution}."
+          defaultMessage="Add your data to get started, or {link} about {solution}."
           id="kibana-react.noDataPage.intro"
           values={
             Object {

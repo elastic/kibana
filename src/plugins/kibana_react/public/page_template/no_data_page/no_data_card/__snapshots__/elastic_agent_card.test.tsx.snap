@@ -50,7 +50,7 @@ exports[`ElasticAgentCard props recommended 1`] = `
       fill={true}
       href="app/integrations/browse"
     >
-      Find a Solution integration
+      Find an integration for Solution
     </EuiButton>
   }
   href="app/integrations/browse"
@@ -70,7 +70,7 @@ exports[`ElasticAgentCard renders 1`] = `
       fill={true}
       href="app/integrations/browse"
     >
-      Find a Solution integration
+      Find an integration for Solution
     </EuiButton>
   }
   href="app/integrations/browse"
