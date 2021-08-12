@@ -9,5 +9,11 @@
 module.exports = {
   preset: '@kbn/test/jest_integration',
   rootDir: '.',
-  roots: ['<rootDir>/src', '<rootDir>/packages'],
+  roots: ['<rootDir>/src', '<rootDir>/packages', '<rootDir>/x-pack'],
+  testPathIgnorePatterns: [
+    '<rootDir>/x-pack/test/',
+
+    // https://github.com/elastic/kibana/issues/108440
+    '<rootDir>/x-pack/plugins/task_manager/server/integration_tests/managed_configuration.test.ts',
+  ],
 };
