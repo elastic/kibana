@@ -10,6 +10,10 @@ import { i18n } from '@kbn/i18n';
 
 import { AggFunctionsMapping, UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
 import {
+  extendedBoundsToAst,
+  numericalRangeToAst,
+} from '../../../../../../../../src/plugins/data/common';
+import {
   buildExpressionFunction,
   Range,
 } from '../../../../../../../../src/plugins/expressions/public';
@@ -141,8 +145,9 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
         enabled: true,
         schema: 'segment',
         field: sourceField,
-        ranges: JSON.stringify(
-          params.ranges.filter(isValidRange).map<Partial<RangeType>>((range) => {
+        ranges: params.ranges
+          .filter(isValidRange)
+          .map<Partial<RangeType>>((range) => {
             if (isFullRange(range)) {
               return range;
             }
@@ -156,7 +161,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
             }
             return partialRange;
           })
-        ),
+          .map(numericalRangeToAst),
       }).toAst();
     }
     const maxBarsDefaultValue =
@@ -171,7 +176,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       interval: 'auto',
       has_extended_bounds: false,
       min_doc_count: false,
-      extended_bounds: JSON.stringify({ min: '', max: '' }),
+      extended_bounds: extendedBoundsToAst({}),
     }).toAst();
   },
   paramEditor: ({

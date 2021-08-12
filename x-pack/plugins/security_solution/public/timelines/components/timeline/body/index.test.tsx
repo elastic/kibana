@@ -68,6 +68,7 @@ jest.mock('../../../../common/lib/helpers/scheduler', () => ({
 
 describe('Body', () => {
   const mount = useMountAppended();
+  const mockRefetch = jest.fn();
   const props: StatefulBodyProps = {
     activePage: 0,
     browserFields: mockBrowserFields,
@@ -80,7 +81,7 @@ describe('Body', () => {
     isSelectAllChecked: false,
     loadingEventIds: [],
     pinnedEventIds: {},
-    refetch: jest.fn(),
+    refetch: mockRefetch,
     renderCellValue: DefaultCellRenderer,
     rowRenderers: defaultRowRenderers,
     selectedEventIds: {},
@@ -253,6 +254,7 @@ describe('Body', () => {
           params: {
             eventId: '1',
             indexName: undefined,
+            refetch: mockRefetch,
           },
           tabType: 'query',
           timelineId: 'timeline-test',
@@ -277,6 +279,7 @@ describe('Body', () => {
           params: {
             eventId: '1',
             indexName: undefined,
+            refetch: mockRefetch,
           },
           tabType: 'pinned',
           timelineId: 'timeline-test',
@@ -301,6 +304,7 @@ describe('Body', () => {
           params: {
             eventId: '1',
             indexName: undefined,
+            refetch: mockRefetch,
           },
           tabType: 'notes',
           timelineId: 'timeline-test',

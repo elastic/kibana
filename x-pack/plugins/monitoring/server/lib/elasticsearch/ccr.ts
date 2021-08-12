@@ -50,5 +50,5 @@ export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string
   const mbCcr = response.hits?.hits[0]?._source?.elasticsearch?.cluster?.stats?.stack?.xpack?.ccr;
   const isEnabled = legacyCcr?.enabled ?? mbCcr?.enabled;
   const isAvailable = legacyCcr?.available ?? mbCcr?.available;
-  return isEnabled && isAvailable;
+  return Boolean(isEnabled && isAvailable);
 }

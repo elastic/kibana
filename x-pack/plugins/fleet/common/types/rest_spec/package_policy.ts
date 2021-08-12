@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { PackagePolicy, NewPackagePolicy, UpdatePackagePolicy } from '../models';
+import type {
+  PackagePolicy,
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+  DryRunPackagePolicy,
+  PackagePolicyPackage,
+} from '../models';
 
 export interface GetPackagePoliciesRequest {
   query: {
@@ -56,4 +62,23 @@ export type DeletePackagePoliciesResponse = Array<{
   id: string;
   name?: string;
   success: boolean;
+  package?: PackagePolicyPackage;
 }>;
+
+export interface UpgradePackagePolicyBaseResponse {
+  name?: string;
+}
+
+export interface UpgradePackagePolicyDryRunResponseItem extends UpgradePackagePolicyBaseResponse {
+  hasErrors: boolean;
+  diff?: [PackagePolicy, DryRunPackagePolicy];
+}
+
+export type UpgradePackagePolicyDryRunResponse = UpgradePackagePolicyDryRunResponseItem[];
+
+export interface UpgradePackagePolicyResponseItem extends UpgradePackagePolicyBaseResponse {
+  id: string;
+  success: boolean;
+}
+
+export type UpgradePackagePolicyResponse = UpgradePackagePolicyResponseItem[];

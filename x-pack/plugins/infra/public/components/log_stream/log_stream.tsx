@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { buildEsQuery, Query, Filter } from '@kbn/es-query';
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { noop } from 'lodash';
-import { JsonValue } from '@kbn/common-utils';
-import { DataPublicPluginStart, esQuery, Filter } from '../../../../../../src/plugins/data/public';
+import { JsonValue } from '@kbn/utility-types';
+import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { LogEntryCursor } from '../../../common/log_entry';
 
@@ -18,7 +19,6 @@ import { BuiltEsQuery, useLogStream } from '../../containers/logs/log_stream';
 
 import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
 import { LogColumnRenderConfiguration } from '../../utils/log_column_render_configuration';
-import { Query } from '../../../../../../src/plugins/data/common';
 import { LogStreamErrorBoundary } from './log_stream_error_boundary';
 
 interface LogStreamPluginDeps {
@@ -123,9 +123,9 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
 
   const parsedQuery = useMemo<BuiltEsQuery | undefined>(() => {
     if (typeof query === 'object' && 'bool' in query) {
-      return mergeBoolQueries(query, esQuery.buildEsQuery(derivedIndexPattern, [], filters ?? []));
+      return mergeBoolQueries(query, buildEsQuery(derivedIndexPattern, [], filters ?? []));
     } else {
-      return esQuery.buildEsQuery(derivedIndexPattern, coerceToQueries(query), filters ?? []);
+      return buildEsQuery(derivedIndexPattern, coerceToQueries(query), filters ?? []);
     }
   }, [derivedIndexPattern, filters, query]);
 

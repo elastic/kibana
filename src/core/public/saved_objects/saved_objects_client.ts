@@ -7,7 +7,6 @@
  */
 
 import { pick, throttle, cloneDeep } from 'lodash';
-import { resolve as resolveUrl } from 'url';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
@@ -121,7 +120,7 @@ interface BatchQueueEntry {
   reject: (reason?: any) => void;
 }
 
-const join = (...uriComponents: Array<string | undefined>) =>
+const joinUriComponents = (...uriComponents: Array<string | undefined>) =>
   uriComponents
     .filter((comp): comp is string => Boolean(comp))
     .map(encodeURIComponent)
@@ -442,9 +441,13 @@ export class SavedObjectsClient {
 
     const path = `${this.getPath(['resolve'])}/${type}/${id}`;
     const request: Promise<SavedObjectsResolveResponse<T>> = this.savedObjectsFetch(path, {});
-    return request.then(({ saved_object: object, outcome, aliasTargetId }) => {
-      const savedObject = new SimpleSavedObject<T>(this, object);
-      return { savedObject, outcome, aliasTargetId };
+    return request.then((resolveResponse) => {
+      const simpleSavedObject = new SimpleSavedObject<T>(this, resolveResponse.saved_object);
+      return {
+        saved_object: simpleSavedObject,
+        outcome: resolveResponse.outcome,
+        alias_target_id: resolveResponse.alias_target_id,
+      };
     });
   };
 
@@ -511,7 +514,7 @@ export class SavedObjectsClient {
   }
 
   private getPath(path: Array<string | undefined>): string {
-    return resolveUrl(API_BASE_URL, join(...path));
+    return API_BASE_URL + joinUriComponents(...path);
   }
 
   /**

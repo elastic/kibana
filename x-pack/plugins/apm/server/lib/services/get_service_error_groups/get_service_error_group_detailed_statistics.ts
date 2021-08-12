@@ -159,7 +159,7 @@ export async function getServiceErrorGroupPeriods({
     previousPeriodPromise,
   ]);
 
-  const firtCurrentPeriod = currentPeriod.length ? currentPeriod[0] : undefined;
+  const firstCurrentPeriod = currentPeriod?.[0];
 
   return {
     currentPeriod: keyBy(currentPeriod, 'groupId'),
@@ -167,7 +167,7 @@ export async function getServiceErrorGroupPeriods({
       previousPeriod.map((errorRateGroup) => ({
         ...errorRateGroup,
         timeseries: offsetPreviousPeriodCoordinates({
-          currentPeriodTimeseries: firtCurrentPeriod?.timeseries,
+          currentPeriodTimeseries: firstCurrentPeriod?.timeseries,
           previousPeriodTimeseries: errorRateGroup.timeseries,
         }),
       })),

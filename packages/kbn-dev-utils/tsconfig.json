@@ -1,15 +1,14 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
-    "incremental": true,
-    "outDir": "target",
-    "stripInternal": false,
-    "target": "ES2019",
     "declaration": true,
     "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "outDir": "target_types",
     "rootDir": "src",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-dev-utils/src",
+    "stripInternal": false,
     "types": [
       "jest",
       "node"

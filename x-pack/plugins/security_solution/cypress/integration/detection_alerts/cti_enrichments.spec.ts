@@ -15,7 +15,7 @@ import {
   TABLE_ROWS,
   THREAT_CONTENT,
   THREAT_DETAILS_VIEW,
-  THREAT_INTEL_TAB,
+  ENRICHMENT_COUNT_NOTIFICATION,
   THREAT_SUMMARY_VIEW,
   TITLE,
 } from '../../screens/alerts_details';
@@ -89,7 +89,8 @@ describe('CTI Enrichment', () => {
       expectedEnrichment.forEach((enrichment) => {
         cy.wrap(elements)
           .eq(length - enrichment.line)
-          .should('have.text', enrichment.text);
+          .invoke('text')
+          .should('include', enrichment.text);
       });
     });
   });
@@ -141,7 +142,7 @@ describe('CTI Enrichment', () => {
     expandFirstAlert();
     openThreatIndicatorDetails();
 
-    cy.get(THREAT_INTEL_TAB).should('have.text', 'Threat Intel (1)');
+    cy.get(ENRICHMENT_COUNT_NOTIFICATION).should('have.text', '1');
     cy.get(THREAT_DETAILS_VIEW).within(() => {
       cy.get(TABLE_ROWS).should('have.length', expectedThreatIndicatorData.length);
       expectedThreatIndicatorData.forEach((row, index) => {
@@ -155,7 +156,8 @@ describe('CTI Enrichment', () => {
     });
   });
 
-  describe('with additional indicators', () => {
+  // https://github.com/elastic/kibana/pull/106889
+  describe.skip('with additional indicators', () => {
     before(() => {
       esArchiverLoad('threat_indicator2');
     });

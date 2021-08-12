@@ -24,7 +24,6 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
-import type { DiscoverStart } from '../../../../src/plugins/discover/public';
 import type {
   HomePublicPluginSetup,
   HomePublicPluginStart,
@@ -57,7 +56,6 @@ export interface ObservabilityPublicPluginsStart {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   lens: LensPublicStart;
-  discover: DiscoverStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -111,7 +109,7 @@ export class Plugin
     createCallObservabilityApi(coreSetup.http);
 
     const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
-      pluginsSetup.triggersActionsUi.alertTypeRegistry
+      pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
 
     const mount = async (params: AppMountParameters<unknown>) => {

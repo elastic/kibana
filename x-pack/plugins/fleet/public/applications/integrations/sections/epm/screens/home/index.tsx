@@ -141,7 +141,9 @@ const AvailablePackages: React.FC = memo(() => {
   const queryParams = new URLSearchParams(useLocation().search);
   const initialCategory = queryParams.get('category') || '';
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-  const { data: allPackagesRes, isLoading: isLoadingAllPackages } = useGetPackages();
+  const { data: allCategoryPackagesRes, isLoading: isLoadingAllPackages } = useGetPackages({
+    category: '',
+  });
   const { data: categoryPackagesRes, isLoading: isLoadingCategoryPackages } = useGetPackages({
     category: selectedCategory,
   });
@@ -151,6 +153,11 @@ const AvailablePackages: React.FC = memo(() => {
   const packages = useMemo(
     () => packageListToIntegrationsList(categoryPackagesRes?.response || []),
     [categoryPackagesRes]
+  );
+
+  const allPackages = useMemo(
+    () => packageListToIntegrationsList(allCategoryPackagesRes?.response || []),
+    [allCategoryPackagesRes]
   );
 
   const title = useMemo(
@@ -168,11 +175,11 @@ const AvailablePackages: React.FC = memo(() => {
         title: i18n.translate('xpack.fleet.epmList.allPackagesFilterLinkText', {
           defaultMessage: 'All',
         }),
-        count: allPackagesRes?.response?.length || 0,
+        count: allPackages?.length || 0,
       },
       ...(categoriesRes ? categoriesRes.response : []),
     ],
-    [allPackagesRes?.response?.length, categoriesRes]
+    [allPackages?.length, categoriesRes]
   );
 
   const controls = categories ? (
