@@ -8,10 +8,9 @@
 import React, { FunctionComponent } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiSpacer, EuiPanel, EuiCallOut } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiPanel } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
-import { useDeprecationLogging } from './use_deprecation_logging';
 import { ExternalLinks } from './external_links';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 
@@ -25,25 +24,9 @@ const i18nTexts = {
   analyzeTitle: i18n.translate('xpack.upgradeAssistant.overview.analyzeTitle', {
     defaultMessage: 'Analyze deprecation logs',
   }),
-  deprecationWarningTitle: i18n.translate(
-    'xpack.upgradeAssistant.overview.deprecationLogs.deprecationWarningTitle',
-    {
-      defaultMessage: 'Your logs are being written to the logs directory',
-    }
-  ),
-  deprecationWarningBody: i18n.translate(
-    'xpack.upgradeAssistant.overview.deprecationLogs.deprecationWarningBody',
-    {
-      defaultMessage:
-        'Go to your logs directory to view the deprecation logs or enable log collecting to see them in the UI.',
-    }
-  ),
 };
 
 const DeprecationLogsPreview: FunctionComponent = () => {
-  const state = useDeprecationLogging();
-  const canSeeExternalLinks = state.isEnabled && !state.isLoading && !state.fetchError;
-
   return (
     <>
       <EuiText>
@@ -51,28 +34,15 @@ const DeprecationLogsPreview: FunctionComponent = () => {
       </EuiText>
       <EuiSpacer size="m" />
       <EuiPanel>
-        <DeprecationLoggingToggle {...state} />
+        <DeprecationLoggingToggle />
       </EuiPanel>
 
-      {state.hasLoggerDeprecationWarning && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiCallOut title={i18nTexts.deprecationWarningTitle} color="warning" iconType="help">
-            <p>{i18nTexts.deprecationWarningBody}</p>
-          </EuiCallOut>
-        </>
-      )}
-
-      {canSeeExternalLinks && (
-        <>
-          <EuiSpacer size="xl" />
-          <EuiText>
-            <h4>{i18nTexts.analyzeTitle}</h4>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <ExternalLinks />
-        </>
-      )}
+      <EuiSpacer size="xl" />
+      <EuiText>
+        <h4>{i18nTexts.analyzeTitle}</h4>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <ExternalLinks />
     </>
   );
 };

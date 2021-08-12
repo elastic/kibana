@@ -9,9 +9,8 @@ import { useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { useAppContext } from '../../../app_context';
-import { ResponseError } from '../../../lib/api';
-import { DeprecationLoggingPreviewProps } from '../../types';
+import { useAppContext } from '../../../../app_context';
+import { ResponseError } from '../../../../lib/api';
 
 const i18nTexts = {
   enabledMessage: i18n.translate(
@@ -28,22 +27,27 @@ const i18nTexts = {
   ),
 };
 
-export const useDeprecationLogging = (): DeprecationLoggingPreviewProps => {
+export interface Props {
+  isEnabled: boolean;
+  isLoading: boolean;
+  isUpdating: boolean;
+  fetchError: ResponseError | null;
+  updateError: ResponseError | undefined;
+  resendRequest: () => void;
+  toggleLogging: () => void;
+}
+
+export const useDeprecationLogging = (): Props => {
   const { api, notifications } = useAppContext();
   const { data, error: fetchError, isLoading, resendRequest } = api.useLoadDeprecationLogging();
 
   const [isEnabled, setIsEnabled] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [hasLoggerDeprecationWarning, setLoggerDeprecationWarning] = useState(false);
   const [updateError, setUpdateError] = useState<ResponseError | undefined>();
 
   useEffect(() => {
     if (isLoading === false && data) {
       setIsEnabled(data.isEnabled);
-
-      if (!data?.isEnabled && data?.isLoggerDeprecationEnabled) {
-        setLoggerDeprecationWarning(true);
-      }
     }
   }, [data, isLoading]);
 
@@ -60,7 +64,6 @@ export const useDeprecationLogging = (): DeprecationLoggingPreviewProps => {
     });
 
     setIsUpdating(false);
-    setLoggerDeprecationWarning(false);
 
     if (updateDeprecationError) {
       setUpdateError(updateDeprecationError);
@@ -80,6 +83,5 @@ export const useDeprecationLogging = (): DeprecationLoggingPreviewProps => {
     fetchError,
     updateError,
     resendRequest,
-    hasLoggerDeprecationWarning,
   };
 };

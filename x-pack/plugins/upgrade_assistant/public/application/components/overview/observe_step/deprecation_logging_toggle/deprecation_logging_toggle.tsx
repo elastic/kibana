@@ -21,8 +21,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ResponseError } from '../../../lib/api';
-import { DeprecationLoggingPreviewProps } from '../../types';
+import { ResponseError } from '../../../../lib/api';
+import { useDeprecationLogging } from './use_deprecation_logging';
 
 const i18nTexts = {
   fetchErrorMessage: i18n.translate(
@@ -75,15 +75,17 @@ const ErrorDetailsLink = ({ error }: { error: ResponseError }) => {
   );
 };
 
-export const DeprecationLoggingToggle: FunctionComponent<DeprecationLoggingPreviewProps> = ({
-  isEnabled,
-  isLoading,
-  isUpdating,
-  fetchError,
-  updateError,
-  resendRequest,
-  toggleLogging,
-}) => {
+export const DeprecationLoggingToggle: FunctionComponent = () => {
+  const {
+    isEnabled,
+    isLoading,
+    isUpdating,
+    fetchError,
+    updateError,
+    resendRequest,
+    toggleLogging,
+  } = useDeprecationLogging();
+
   if (isLoading) {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" className="upgToggleLoading">
