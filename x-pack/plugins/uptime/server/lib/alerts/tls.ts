@@ -6,7 +6,7 @@
  */
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { ALERT_REASON } from '@kbn/rule-data-utils/target/technical_field_names';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { UptimeAlertTypeFactory } from './types';
 import { updateState, generateAlertMessage } from './common';
 import { TLS } from '../../../common/constants/alerts';
