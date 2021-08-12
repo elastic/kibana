@@ -132,15 +132,14 @@ export const SourceSettings: React.FC = () => {
 
   const submitSyncControls = () => {
     updateContentSource(id, {
-        indexing: {
-          enabled: synchronizeChecked,
-          features: {
-            content_extraction: { enabled: contentExtractionChecked },
-            thumbnails: { enabled: thumbnailsChecked },
-          },
+      indexing: {
+        enabled: synchronizeChecked,
+        features: {
+          content_extraction: { enabled: contentExtractionChecked },
+          thumbnails: { enabled: thumbnailsChecked },
         },
       },
-    );
+    });
   };
 
   const handleSourceRemoval = () => {
@@ -223,11 +222,7 @@ export const SourceSettings: React.FC = () => {
       )}
       {showSyncControls && (
         <ContentSection title={SYNC_MANAGEMENT_TITLE} description={SYNC_MANAGEMENT_DESCRIPTION}>
-          <EuiPanel
-            hasShadow={false}
-            hasBorder={true}
-            grow={false}
-          >
+          <EuiPanel hasShadow={false} hasBorder grow={false}>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiSwitch
@@ -253,7 +248,11 @@ export const SourceSettings: React.FC = () => {
                 <EuiSwitch
                   checked={thumbnailsChecked}
                   onChange={(e) => setThumbnails(e.target.checked)}
-                  label={areThumbnailsConfigEnabled ? SYNC_MANAGEMENT_THUMBNAILS_LABEL : SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL}
+                  label={
+                    areThumbnailsConfigEnabled
+                      ? SYNC_MANAGEMENT_THUMBNAILS_LABEL
+                      : SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL
+                  }
                   disabled={!areThumbnailsConfigEnabled}
                   data-test-subj="ThumbnailsToggle"
                 />

@@ -45,21 +45,21 @@ export const contentSources = [
 
 const defaultIndexing = {
   enabled: true,
-  defaultAction: "include",
+  defaultAction: 'include',
   rules: [],
   schedule: {
     intervals: [],
-    blocked: []
+    blocked: [],
   },
   features: {
     contentExtraction: {
-      enabled: true
+      enabled: true,
     },
     thumbnails: {
-      enabled: true
-    }
-  }
-}
+      enabled: true,
+    },
+  },
+};
 
 export const fullContentSources = [
   {

@@ -220,17 +220,25 @@ export function registerAccountSourceSettingsRoute({
         body: schema.object({
           content_source: schema.object({
             name: schema.maybe(schema.string()),
-            indexing: schema.maybe(schema.object({
-              enabled: schema.maybe(schema.boolean()),
-              features: schema.maybe(schema.object({
-                thumbnails: schema.maybe(schema.object({
-                  enabled: schema.boolean()
-                })),
-                content_extraction: schema.maybe(schema.object({
-                  enabled: schema.boolean()
-                }))
-              }))
-            }))
+            indexing: schema.maybe(
+              schema.object({
+                enabled: schema.maybe(schema.boolean()),
+                features: schema.maybe(
+                  schema.object({
+                    thumbnails: schema.maybe(
+                      schema.object({
+                        enabled: schema.boolean(),
+                      })
+                    ),
+                    content_extraction: schema.maybe(
+                      schema.object({
+                        enabled: schema.boolean(),
+                      })
+                    ),
+                  })
+                ),
+              })
+            ),
           }),
         }),
         params: schema.object({
@@ -579,17 +587,25 @@ export function registerOrgSourceSettingsRoute({
         body: schema.object({
           content_source: schema.object({
             name: schema.maybe(schema.string()),
-            indexing: schema.maybe(schema.object({
-              enabled: schema.maybe(schema.boolean()),
-              features: schema.maybe(schema.object({
-                thumbnails: schema.maybe(schema.object({
-                  enabled: schema.boolean()
-                })),
-                content_extraction: schema.maybe(schema.object({
-                  enabled: schema.boolean()
-                }))
-              }))
-            }))
+            indexing: schema.maybe(
+              schema.object({
+                enabled: schema.maybe(schema.boolean()),
+                features: schema.maybe(
+                  schema.object({
+                    thumbnails: schema.maybe(
+                      schema.object({
+                        enabled: schema.boolean(),
+                      })
+                    ),
+                    content_extraction: schema.maybe(
+                      schema.object({
+                        enabled: schema.boolean(),
+                      })
+                    ),
+                  })
+                ),
+              })
+            ),
           }),
         }),
         params: schema.object({

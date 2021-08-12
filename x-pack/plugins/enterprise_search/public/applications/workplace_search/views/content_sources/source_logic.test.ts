@@ -336,10 +336,10 @@ describe('SourceLogic', () => {
         const onUpdateSourceNameSpy = jest.spyOn(SourceLogic.actions, 'onUpdateSourceName');
         const promise = Promise.resolve(contentSource);
         http.patch.mockReturnValue(promise);
-        SourceLogic.actions.updateContentSource(contentSource.id, {indexing: {enabled: true}});
+        SourceLogic.actions.updateContentSource(contentSource.id, { indexing: { enabled: true } });
 
         expect(http.patch).toHaveBeenCalledWith('/api/workplace_search/org/sources/123/settings', {
-          body: JSON.stringify({ content_source: {indexing: {enabled: true}} }),
+          body: JSON.stringify({ content_source: { indexing: { enabled: true } } }),
         });
         await promise;
         expect(onUpdateSourceNameSpy).not.toHaveBeenCalledWith(contentSource.name);
