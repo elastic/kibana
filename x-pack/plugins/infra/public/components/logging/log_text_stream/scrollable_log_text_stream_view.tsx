@@ -61,7 +61,7 @@ interface ScrollableLogTextStreamViewProps {
   startLiveStreaming: () => void;
   hideScrollbar?: boolean;
   showColumnHeaders?: boolean;
-  renderLoadingState?: React.ReactNode;
+  renderLoadingState?: () => React.ReactNode;
   renderEmptyState?: (options: { handleReload: () => void }) => React.ReactNode;
 }
 

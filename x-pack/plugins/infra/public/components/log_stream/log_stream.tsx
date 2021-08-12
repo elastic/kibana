@@ -72,7 +72,7 @@ interface LogStreamContentProps {
   highlight?: string;
   columns?: LogColumnDefinition[];
   showColumnHeaders?: boolean;
-  renderLoadingState?: React.ReactNode;
+  renderLoadingState?: () => React.ReactNode;
   renderEmptyState?: (options: { handleReload: () => void }) => React.ReactNode;
 }
 
