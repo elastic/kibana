@@ -85,9 +85,11 @@ const ECSSchemaOptions = ECSSchema.map((ecs) => ({
   value: ecs,
 }));
 
+type ECSSchemaOption = typeof ECSSchemaOptions[0];
+
 interface ECSComboboxFieldProps {
   field: FieldHook<string>;
-  euiFieldProps: EuiComboBoxProps<typeof ECSSchemaOptions[0]>;
+  euiFieldProps: EuiComboBoxProps<ECSSchemaOption>;
   idAria?: string;
 }
 
@@ -98,9 +100,9 @@ export const ECSComboboxField: React.FC<ECSComboboxFieldProps> = ({
   ...rest
 }) => {
   const { setValue } = field;
-  const [selectedOptions, setSelected] = useState<
-    Array<EuiComboBoxOptionOption<typeof ECSSchemaOptions[0]>>
-  >([]);
+  const [selectedOptions, setSelected] = useState<Array<EuiComboBoxOptionOption<ECSSchemaOption>>>(
+    []
+  );
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
 
@@ -121,7 +123,10 @@ export const ECSComboboxField: React.FC<ECSComboboxFieldProps> = ({
         gutterSize="xs"
       >
         <EuiFlexItem grow={false}>
-          <FieldIcon type={typeMap[option.value.type] ?? option.value.type} />
+          {
+            // @ts-expect-error update types
+            <FieldIcon type={typeMap[option.value.type] ?? option.value.type} />
+          }
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__labelDisplay--expand">
@@ -139,7 +144,23 @@ export const ECSComboboxField: React.FC<ECSComboboxFieldProps> = ({
     []
   );
 
+  const prepend = useMemo(
+    () => (
+      <StyledFieldIcon
+        size="l"
+        type={
+          // @ts-expect-error update types
+          selectedOptions[0]?.value?.type === 'keyword' ? 'string' : selectedOptions[0]?.value?.type
+        }
+      />
+    ),
+    [selectedOptions]
+  );
+
+  const singleSelection = useMemo(() => ({ asPlainText: true }), []);
+
   useEffect(() => {
+    // @ts-expect-error update types
     setSelected(() => {
       if (!field.value.length) return [];
 
@@ -160,19 +181,10 @@ export const ECSComboboxField: React.FC<ECSComboboxFieldProps> = ({
       {...rest}
     >
       <EuiComboBox
-        prepend={
-          <StyledFieldIcon
-            size="l"
-            type={
-              selectedOptions[0]?.value?.type === 'keyword'
-                ? 'string'
-                : selectedOptions[0]?.value?.type
-            }
-          />
-        }
+        prepend={prepend}
         fullWidth
-        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-        singleSelection={{ asPlainText: true }}
+        singleSelection={singleSelection}
+        // @ts-expect-error update types
         options={ECSSchemaOptions}
         selectedOptions={selectedOptions}
         onChange={handleChange}
@@ -312,13 +324,15 @@ export const ECSMappingEditorForm = ({
   const currentFormData = useRef(defaultValue);
   const formSchema = {
     key: {
-      label: 'ECS field',
+      label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.ecsFieldLabel', {
+        defaultMessage: 'ECS field',
+      }),
       type: FIELD_TYPES.COMBO_BOX,
       validations: [
         {
           validator: fieldValidators.emptyField(
             i18n.translate(
-              'xpack.osquery.scheduledQueryGroup.form.policyIdFieldRequiredErrorMessage',
+              'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.ecsFieldRequiredErrorMessage',
               {
                 defaultMessage: 'ECS field is required.',
               }
@@ -328,13 +342,15 @@ export const ECSMappingEditorForm = ({
       ],
     },
     'value.field': {
-      label: 'Osquery results column',
+      label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.ecsFieldLabel', {
+        defaultMessage: 'Osquery results column',
+      }),
       type: FIELD_TYPES.COMBO_BOX,
       validations: [
         {
           validator: fieldValidators.emptyField(
             i18n.translate(
-              'xpack.osquery.scheduledQueryGroup.form.policyIdFieldRequiredErrorMessage',
+              'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.osqueryColumnFieldRequiredErrorMessage',
               {
                 defaultMessage: 'Osquery column is required.',
               }
@@ -518,7 +534,7 @@ export const ECSMappingEditorField = ({ field, query }: Props) => {
             }));
           }
 
-          if (astOsqueryTables[column.expr.table]) {
+          if (astOsqueryTables && astOsqueryTables[column.expr.table]) {
             const osqueryColumn = find(astOsqueryTables[column.expr.table], [
               'name',
               column.expr.column,

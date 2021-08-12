@@ -5,37 +5,22 @@
  * 2.0.
  */
 
+import { map, partialRight, pick } from 'lodash';
 import { promises as fs } from 'fs';
 import path from 'path';
 
 import { run } from '@kbn/dev-utils';
-interface DestField {
-  [key: string]: boolean | DestField;
-}
+
+const OSQUERY_COLUMN_SCHEMA_FIELDS = ['name', 'description', 'platforms', 'columns'];
 
 run(
   async ({ flags }) => {
     const schemaPath = path.resolve('./public/common/schemas/osquery/');
     const schemaFile = path.join(schemaPath, flags.schema_version as string);
     const schemaData = await require(schemaFile);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    function pullFields(destSchema: DestField, source: { [key: string]: any }) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const dest: { [key: string]: any } = {};
-      Object.keys(destSchema).forEach((key) => {
-        switch (typeof source[key]) {
-          case 'object':
-            dest[key] = pullFields(destSchema[key] as DestField, source[key]);
-            break;
-          default:
-            dest[key] = source[key];
-        }
-      });
-      return dest;
-    }
 
-    const mapFunc = pullFields.bind(null, { name: true, description: true, columns: true });
-    const formattedSchema = schemaData.map(mapFunc);
+    const formattedSchema = map(schemaData, partialRight(pick, OSQUERY_COLUMN_SCHEMA_FIELDS));
+
     await fs.writeFile(
       path.join(schemaPath, `v${flags.schema_version}-formatted.json`),
       JSON.stringify(formattedSchema)
