@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from '@kbn/rule-data-utils/target/technical_field_names';
+export * from '@kbn/rule-data-utils';
