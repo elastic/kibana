@@ -14,7 +14,8 @@ import { RetryService } from './retry';
 import { RandomnessService } from './randomness';
 import { SecurityServiceProvider } from './security';
 import { EsDeleteAllIndicesProvider } from './es_delete_all_indices';
-import { SavedObjectInfoProvider } from './saved_object_info';
+import { SavedObjectInfoService } from './saved_object_info';
+import { IndexPatternsService } from './index_patterns';
 
 export const services = {
   deployment: DeploymentService,
@@ -25,5 +26,6 @@ export const services = {
   randomness: RandomnessService,
   security: SecurityServiceProvider,
   esDeleteAllIndices: EsDeleteAllIndicesProvider,
-  savedObjectInfo: SavedObjectInfoProvider,
+  savedObjectInfo: SavedObjectInfoService,
+  indexPatterns: IndexPatternsService,
 };

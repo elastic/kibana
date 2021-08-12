@@ -28,15 +28,16 @@ import {
   getMissingIndexPatterns,
   getMissingVisualizationTypeError,
 } from '../error_helper';
+import { DatasourceStates } from '../../state_management';
 
 export async function initializeDatasources(
   datasourceMap: DatasourceMap,
-  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
+  datasourceStates: DatasourceStates,
   references?: SavedObjectReference[],
   initialContext?: VisualizeFieldContext,
   options?: InitializationOptions
 ) {
-  const states: Record<string, { isLoading: boolean; state: unknown }> = {};
+  const states: DatasourceStates = {};
   await Promise.all(
     Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
       if (datasourceStates[datasourceId]) {
@@ -57,8 +58,8 @@ export async function initializeDatasources(
 }
 
 export const createDatasourceLayers = memoizeOne(function createDatasourceLayers(
-  datasourceMap: DatasourceMap,
-  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>
+  datasourceStates: DatasourceStates,
+  datasourceMap: DatasourceMap
 ) {
   const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
   Object.keys(datasourceMap)
@@ -79,7 +80,7 @@ export const createDatasourceLayers = memoizeOne(function createDatasourceLayers
 });
 
 export async function persistedStateToExpression(
-  datasources: Record<string, Datasource>,
+  datasourceMap: DatasourceMap,
   visualizations: VisualizationMap,
   doc: Document
 ): Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }> {
@@ -98,7 +99,7 @@ export async function persistedStateToExpression(
   }
   const visualization = visualizations[visualizationType!];
   const datasourceStates = await initializeDatasources(
-    datasources,
+    datasourceMap,
     Object.fromEntries(
       Object.entries(persistedDatasourceStates).map(([id, state]) => [
         id,
@@ -110,7 +111,7 @@ export async function persistedStateToExpression(
     { isFullEditor: false }
   );
 
-  const datasourceLayers = createDatasourceLayers(datasources, datasourceStates);
+  const datasourceLayers = createDatasourceLayers(datasourceStates, datasourceMap);
 
   const datasourceId = getActiveDatasourceIdFromDoc(doc);
   if (datasourceId == null) {
@@ -121,7 +122,7 @@ export async function persistedStateToExpression(
   }
 
   const indexPatternValidation = validateRequiredIndexPatterns(
-    datasources[datasourceId],
+    datasourceMap[datasourceId],
     datasourceStates[datasourceId]
   );
 
@@ -133,7 +134,7 @@ export async function persistedStateToExpression(
   }
 
   const validationResult = validateDatasourceAndVisualization(
-    datasources[datasourceId],
+    datasourceMap[datasourceId],
     datasourceStates[datasourceId].state,
     visualization,
     visualizationState,
@@ -146,7 +147,7 @@ export async function persistedStateToExpression(
       description,
       visualization,
       visualizationState,
-      datasourceMap: datasources,
+      datasourceMap,
       datasourceStates,
       datasourceLayers,
     }),

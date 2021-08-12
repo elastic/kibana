@@ -33,7 +33,8 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  describe('Rule exception operators for data type text', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/107911
+  describe.skip('Rule exception operators for data type text', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest);
       await createListsIndex(supertest);

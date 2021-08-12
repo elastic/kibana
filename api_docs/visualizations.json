@@ -1256,7 +1256,7 @@
             "text": "SerializedFieldFormat"
           },
           "<Record<string, any>> | undefined; source?: string | undefined; sourceParams?: ",
-          "SerializableState",
+          "Serializable",
           " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; rows: Record<string, any>[]; }"
         ],
         "path": "src/plugins/visualizations/common/prepare_log_table.ts",
@@ -1773,7 +1773,7 @@
             "description": [],
             "signature": [
               "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
               {
                 "pluginId": "data",
@@ -2197,7 +2197,7 @@
             "description": [],
             "signature": [
               "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
               {
                 "pluginId": "data",
@@ -2926,7 +2926,9 @@
               "(() => string[]) | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "visualizations",
@@ -3056,7 +3058,31 @@
               " | undefined) => string[]) | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisTypeDefinition.getSupportedTriggers.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "common",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-common.VisParams",
+                    "text": "VisParams"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/visualizations/public/vis_types/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "visualizations",
@@ -3095,7 +3121,30 @@
               "[]>) | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisTypeDefinition.getUsedIndexPattern.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "visParams",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "common",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-common.VisParams",
+                    "text": "VisParams"
+                  }
+                ],
+                "path": "src/plugins/visualizations/public/vis_types/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "visualizations",
@@ -3281,7 +3330,39 @@
               ">) => React.ReactNode) | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisTypeDefinition.getInfoMessage.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "vis",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "public",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-public.Vis",
+                    "text": "Vis"
+                  },
+                  "<",
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "common",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-common.VisParams",
+                    "text": "VisParams"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/visualizations/public/vis_types/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "visualizations",
@@ -3399,7 +3480,31 @@
               "<TVisParams>>) | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisTypeDefinition.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "vis",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "public",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-public.Vis",
+                    "text": "Vis"
+                  },
+                  "<TVisParams>"
+                ],
+                "path": "src/plugins/visualizations/public/vis_types/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "visualizations",
@@ -3585,7 +3690,9 @@
               "(() => string[]) | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "visualizations",
@@ -3951,6 +4058,48 @@
         ],
         "path": "src/plugins/visualizations/public/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.vis",
+            "type": "Object",
+            "tags": [],
+            "label": "vis",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.Vis",
+                "text": "Vis"
+              },
+              "<TVisParams>"
+            ],
+            "path": "src/plugins/visualizations/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.VisToExpressionAstParams",
+                "text": "VisToExpressionAstParams"
+              }
+            ],
+            "path": "src/plugins/visualizations/public/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -4592,21 +4741,24 @@
           ],
           "path": "src/plugins/visualizations/public/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "visualizations",
-              "id": "def-public.visType",
+              "id": "def-public.VisualizationsStart.createVis.$1",
               "type": "string",
               "tags": [],
               "label": "visType",
               "description": [],
+              "signature": [
+                "string"
+              ],
               "path": "src/plugins/visualizations/public/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             },
             {
               "parentPluginId": "visualizations",
-              "id": "def-public.visState",
+              "id": "def-public.VisualizationsStart.createVis.$2",
               "type": "Object",
               "tags": [],
               "label": "visState",
@@ -4630,9 +4782,11 @@
                 ">"
               ],
               "path": "src/plugins/visualizations/public/plugin.ts",
-              "deprecated": false
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "visualizations",
@@ -4945,7 +5099,7 @@
             "text": "SerializedFieldFormat"
           },
           "<Record<string, any>> | undefined; source?: string | undefined; sourceParams?: ",
-          "SerializableState",
+          "Serializable",
           " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; rows: Record<string, any>[]; }"
         ],
         "path": "src/plugins/visualizations/common/prepare_log_table.ts",
@@ -5045,7 +5199,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/visualizations/common/expression_functions/range.ts",
@@ -5111,7 +5265,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
@@ -5184,7 +5338,7 @@
             "description": [],
             "signature": [
               "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
               {
                 "pluginId": "data",

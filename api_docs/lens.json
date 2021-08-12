@@ -627,26 +627,30 @@
             ],
             "path": "x-pack/plugins/lens/public/plugin.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "lens",
-                "id": "def-public.input",
+                "id": "def-public.LensPublicStart.navigateToPrefilledEditor.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "input",
                 "description": [],
                 "signature": [
-                  "LensByValueInput",
-                  " | ",
-                  "LensByReferenceInput"
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.LensEmbeddableInput",
+                    "text": "LensEmbeddableInput"
+                  }
                 ],
                 "path": "x-pack/plugins/lens/public/plugin.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "lens",
-                "id": "def-public.openInNewTab",
+                "id": "def-public.LensPublicStart.navigateToPrefilledEditor.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "openInNewTab",
@@ -655,9 +659,11 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/plugin.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "lens",
@@ -673,8 +679,8 @@
             ],
             "path": "x-pack/plugins/lens/public/plugin.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "lens",
@@ -692,8 +698,8 @@
             ],
             "path": "x-pack/plugins/lens/public/plugin.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2736,8 +2742,8 @@
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "section": "def-common.Serializable",
+                "text": "Serializable"
               },
               " | undefined; }> | Output>>; readonly fork: () => ",
               {
@@ -3630,15 +3636,38 @@
           },
           "<Record<string, any>> | undefined) => ",
           {
-            "pluginId": "data",
+            "pluginId": "fieldFormats",
             "scope": "common",
-            "docId": "kibDataFieldFormatsPluginApi",
+            "docId": "kibFieldFormatsPluginApi",
             "section": "def-common.FieldFormat",
             "text": "FieldFormat"
           }
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.mapping",
+            "type": "Object",
+            "tags": [],
+            "label": "mapping",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<Record<string, any>> | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {

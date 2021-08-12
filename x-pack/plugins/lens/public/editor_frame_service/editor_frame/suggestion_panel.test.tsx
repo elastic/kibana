@@ -16,12 +16,12 @@ import {
 } from '../../mocks';
 import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
-import { esFilters, IFieldType, IndexPattern } from '../../../../../../src/plugins/data/public';
-import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
+import { SuggestionPanel, SuggestionPanelProps, SuggestionPanelWrapper } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { mountWithProvider } from '../../mocks';
+import { LensAppState, PreviewState, setState, setToggleFullscreen } from '../../state_management';
 
 jest.mock('./suggestion_helpers');
 
@@ -38,6 +38,8 @@ describe('suggestion_panel', () => {
 
   let defaultProps: SuggestionPanelProps;
 
+  let preloadedState: Partial<LensAppState>;
+
   beforeEach(() => {
     mockVisualization = createMockVisualization();
     mockDatasource = createMockDatasource('a');
@@ -49,7 +51,7 @@ describe('suggestion_panel', () => {
         previewIcon: 'empty',
         score: 0.5,
         visualizationState: suggestion1State,
-        visualizationId: 'vis',
+        visualizationId: 'testVis',
         title: 'Suggestion1',
         keptLayerIds: ['a'],
       },
@@ -58,36 +60,58 @@ describe('suggestion_panel', () => {
         previewIcon: 'empty',
         score: 0.5,
         visualizationState: suggestion2State,
-        visualizationId: 'vis',
+        visualizationId: 'testVis',
         title: 'Suggestion2',
         keptLayerIds: ['a'],
       },
     ] as Suggestion[]);
 
-    defaultProps = {
-      activeDatasourceId: 'mock',
-      datasourceMap: {
-        mock: mockDatasource,
-      },
+    preloadedState = {
       datasourceStates: {
-        mock: {
+        testDatasource: {
           isLoading: false,
-          state: {},
+          state: '',
         },
       },
-      activeVisualizationId: 'vis',
+      visualization: {
+        activeId: 'testVis',
+        state: {},
+      },
+      activeDatasourceId: 'testDatasource',
+    };
+
+    defaultProps = {
+      datasourceMap: {
+        testDatasource: mockDatasource,
+      },
       visualizationMap: {
-        vis: mockVisualization,
+        testVis: mockVisualization,
         vis2: createMockVisualization(),
       },
-      visualizationState: {},
       ExpressionRenderer: expressionRendererMock,
       frame: createMockFramePublicAPI(),
     };
   });
 
+  it('should avoid completely to render SuggestionPanel when in fullscreen mode', async () => {
+    const { instance, lensStore } = await mountWithProvider(
+      <SuggestionPanelWrapper {...defaultProps} />
+    );
+    expect(instance.find(SuggestionPanel).exists()).toBe(true);
+
+    lensStore.dispatch(setToggleFullscreen());
+    instance.update();
+    expect(instance.find(SuggestionPanel).exists()).toBe(false);
+
+    lensStore.dispatch(setToggleFullscreen());
+    instance.update();
+    expect(instance.find(SuggestionPanel).exists()).toBe(true);
+  });
+
   it('should list passed in suggestions', async () => {
-    const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />);
+    const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />, {
+      preloadedState,
+    });
 
     expect(
       instance
@@ -98,62 +122,56 @@ describe('suggestion_panel', () => {
   });
 
   describe('uncommitted suggestions', () => {
-    let suggestionState: Pick<
-      SuggestionPanelProps,
-      'datasourceStates' | 'activeVisualizationId' | 'visualizationState'
-    >;
-    let stagedPreview: SuggestionPanelProps['stagedPreview'];
+    let suggestionState: Pick<LensAppState, 'datasourceStates' | 'visualization'>;
+    let stagedPreview: PreviewState;
     beforeEach(() => {
       suggestionState = {
         datasourceStates: {
-          mock: {
+          testDatasource: {
             isLoading: false,
-            state: {},
+            state: '',
           },
         },
-        activeVisualizationId: 'vis2',
-        visualizationState: {},
+        visualization: {
+          activeId: 'vis2',
+          state: {},
+        },
       };
 
       stagedPreview = {
-        datasourceStates: defaultProps.datasourceStates,
-        visualization: {
-          state: defaultProps.visualizationState,
-          activeId: defaultProps.activeVisualizationId,
-        },
+        datasourceStates: preloadedState.datasourceStates!,
+        visualization: preloadedState.visualization!,
       };
     });
 
     it('should not update suggestions if current state is moved to staged preview', async () => {
-      const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />);
+      const { instance, lensStore } = await mountWithProvider(
+        <SuggestionPanel {...defaultProps} />,
+        { preloadedState }
+      );
       getSuggestionsMock.mockClear();
-      instance.setProps({
-        stagedPreview,
-        ...suggestionState,
-      });
+      lensStore.dispatch(setState({ stagedPreview }));
       instance.update();
       expect(getSuggestionsMock).not.toHaveBeenCalled();
     });
 
     it('should update suggestions if staged preview is removed', async () => {
-      const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />);
+      const { instance, lensStore } = await mountWithProvider(
+        <SuggestionPanel {...defaultProps} />,
+        { preloadedState }
+      );
       getSuggestionsMock.mockClear();
-      instance.setProps({
-        stagedPreview,
-        ...suggestionState,
-      });
+      lensStore.dispatch(setState({ stagedPreview, ...suggestionState }));
       instance.update();
-      instance.setProps({
-        stagedPreview: undefined,
-        ...suggestionState,
-      });
+      lensStore.dispatch(setState({ stagedPreview: undefined, ...suggestionState }));
       instance.update();
       expect(getSuggestionsMock).toHaveBeenCalledTimes(1);
     });
 
     it('should highlight currently active suggestion', async () => {
-      const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />);
-
+      const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />, {
+        preloadedState,
+      });
       act(() => {
         instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
       });
@@ -189,12 +207,14 @@ describe('suggestion_panel', () => {
   });
 
   it('should dispatch visualization switch action if suggestion is clicked', async () => {
-    const { instance, lensStore } = await mountWithProvider(<SuggestionPanel {...defaultProps} />);
+    const { instance, lensStore } = await mountWithProvider(<SuggestionPanel {...defaultProps} />, {
+      preloadedState,
+    });
 
     act(() => {
       instance.find('button[data-test-subj="lnsSuggestion"]').at(1).simulate('click');
     });
-    instance.update();
+    // instance.update();
 
     expect(lensStore.dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -203,7 +223,7 @@ describe('suggestion_panel', () => {
           datasourceId: undefined,
           datasourceState: {},
           initialState: { suggestion1: true },
-          newVisualizationId: 'vis',
+          newVisualizationId: 'testVis',
         },
       })
     );
@@ -217,7 +237,7 @@ describe('suggestion_panel', () => {
         previewIcon: LensIconChartDatatable,
         score: 0.5,
         visualizationState: suggestion1State,
-        visualizationId: 'vis',
+        visualizationId: 'testVis',
         title: 'Suggestion1',
       },
       {
@@ -225,7 +245,7 @@ describe('suggestion_panel', () => {
         previewIcon: 'empty',
         score: 0.5,
         visualizationState: suggestion2State,
-        visualizationId: 'vis',
+        visualizationId: 'testVis',
         title: 'Suggestion2',
         previewExpression: 'test | expression',
       },
@@ -239,7 +259,9 @@ describe('suggestion_panel', () => {
 
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
 
-    const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />);
+    const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />, {
+      preloadedState,
+    });
 
     expect(instance.find(EuiIcon)).toHaveLength(1);
     expect(instance.find(EuiIcon).prop('type')).toEqual(LensIconChartDatatable);
@@ -252,17 +274,20 @@ describe('suggestion_panel', () => {
       indexPatterns: {},
     };
     mockDatasource.checkIntegrity.mockReturnValue(['a']);
-    const newProps = {
-      ...defaultProps,
+
+    const newPreloadedState = {
+      ...preloadedState,
       datasourceStates: {
-        mock: {
-          ...defaultProps.datasourceStates.mock,
+        testDatasource: {
+          ...preloadedState.datasourceStates!.testDatasource,
           state: missingIndexPatternsState,
         },
       },
     };
 
-    const { instance } = await mountWithProvider(<SuggestionPanel {...newProps} />);
+    const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />, {
+      preloadedState: newPreloadedState,
+    });
     expect(instance.html()).toEqual(null);
   });
 
@@ -274,7 +299,7 @@ describe('suggestion_panel', () => {
         previewIcon: 'empty',
         score: 0.5,
         visualizationState: suggestion1State,
-        visualizationId: 'vis',
+        visualizationId: 'testVis',
         title: 'Suggestion1',
       },
       {
@@ -282,7 +307,7 @@ describe('suggestion_panel', () => {
         previewIcon: 'empty',
         score: 0.5,
         visualizationState: suggestion2State,
-        visualizationId: 'vis',
+        visualizationId: 'testVis',
         title: 'Suggestion2',
       },
     ] as Suggestion[]);
@@ -291,18 +316,7 @@ describe('suggestion_panel', () => {
     (mockVisualization.toPreviewExpression as jest.Mock).mockReturnValueOnce('test | expression');
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
 
-    const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-    const field = ({ name: 'myfield' } as unknown) as IFieldType;
-
-    mountWithProvider(
-      <SuggestionPanel
-        {...defaultProps}
-        frame={{
-          ...createMockFramePublicAPI(),
-          filters: [esFilters.buildExistsFilter(field, indexPattern)],
-        }}
-      />
-    );
+    mountWithProvider(<SuggestionPanel {...defaultProps} frame={createMockFramePublicAPI()} />);
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
     const passedExpression = (expressionRendererMock as jest.Mock).mock.calls[0][0].expression;
