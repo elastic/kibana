@@ -16,6 +16,7 @@ import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../mocks';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { EuiColorPicker } from '@elastic/eui';
+import { layerTypes } from '../../common';
 
 describe('XY Config panels', () => {
   let frame: FramePublicAPI;
@@ -28,6 +29,7 @@ describe('XY Config panels', () => {
       layers: [
         {
           seriesType: 'bar',
+          layerType: layerTypes.DATA,
           layerId: 'first',
           splitAccessor: 'baz',
           xAccessor: 'foo',
@@ -319,6 +321,7 @@ describe('XY Config panels', () => {
             layers: [
               {
                 seriesType: 'bar',
+                layerType: layerTypes.DATA,
                 layerId: 'first',
                 splitAccessor: undefined,
                 xAccessor: 'foo',
@@ -358,6 +361,7 @@ describe('XY Config panels', () => {
             layers: [
               {
                 seriesType: 'bar',
+                layerType: layerTypes.DATA,
                 layerId: 'first',
                 splitAccessor: undefined,
                 xAccessor: 'foo',

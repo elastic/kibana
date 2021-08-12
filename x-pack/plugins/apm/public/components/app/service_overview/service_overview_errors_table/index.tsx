@@ -143,7 +143,6 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const {
     data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
-    status: errorGroupDetailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
       if (requestId && items.length && start && end && transactionType) {
@@ -220,10 +219,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
                 pageSizeOptions: [PAGE_SIZE],
                 hidePerPageOptions: true,
               }}
-              loading={
-                status === FETCH_STATUS.LOADING ||
-                errorGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING
-              }
+              loading={status === FETCH_STATUS.LOADING}
               onChange={(newTableOptions: {
                 page?: {
                   index: number;
