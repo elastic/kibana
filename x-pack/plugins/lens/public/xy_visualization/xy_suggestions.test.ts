@@ -6,19 +6,20 @@
  */
 
 import { getSuggestions } from './xy_suggestions';
-import { TableSuggestionColumn, VisualizationSuggestion, TableSuggestion } from '../types';
+import type { TableSuggestionColumn, VisualizationSuggestion, TableSuggestion } from '../types';
 import { State, XYState, visualizationTypes } from './types';
 import { generateId } from '../id_generator';
 import { getXyVisualization } from './xy_visualization';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { PaletteOutput } from 'src/plugins/charts/public';
+import { layerTypes } from '../../common';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 
 jest.mock('../id_generator');
 
 const xyVisualization = getXyVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
-  data: dataPluginMock.createStartContract(),
+  fieldFormats: fieldFormatsServiceMock.createStartContract(),
 });
 
 describe('xy_suggestions', () => {
@@ -157,12 +158,14 @@ describe('xy_suggestions', () => {
         layers: [
           {
             layerId: 'first',
+            layerType: layerTypes.DATA,
             seriesType: 'bar',
             accessors: ['bytes'],
             splitAccessor: undefined,
           },
           {
             layerId: 'second',
+            layerType: layerTypes.DATA,
             seriesType: 'bar',
             accessors: ['bytes'],
             splitAccessor: undefined,
@@ -270,6 +273,7 @@ describe('xy_suggestions', () => {
         layers: [
           {
             layerId: 'first',
+            layerType: layerTypes.DATA,
             seriesType: 'bar',
             xAccessor: 'date',
             accessors: ['bytes'],
@@ -311,6 +315,7 @@ describe('xy_suggestions', () => {
         layers: [
           {
             layerId: 'first',
+            layerType: layerTypes.DATA,
             seriesType: 'bar',
             xAccessor: 'date',
             accessors: ['bytes'],
@@ -318,6 +323,7 @@ describe('xy_suggestions', () => {
           },
           {
             layerId: 'second',
+            layerType: layerTypes.DATA,
             seriesType: 'bar',
             xAccessor: undefined,
             accessors: [],
@@ -547,6 +553,7 @@ describe('xy_suggestions', () => {
           {
             accessors: ['price', 'quantity'],
             layerId: 'first',
+            layerType: layerTypes.DATA,
             seriesType: 'bar',
             splitAccessor: 'product',
             xAccessor: 'date',
@@ -601,6 +608,7 @@ describe('xy_suggestions', () => {
         {
           accessors: [],
           layerId: 'first',
+          layerType: layerTypes.DATA,
           seriesType: 'line',
           splitAccessor: undefined,
           xAccessor: '',
@@ -639,6 +647,7 @@ describe('xy_suggestions', () => {
         {
           accessors: ['price'],
           layerId: 'first',
+          layerType: layerTypes.DATA,
           seriesType: 'bar',
           splitAccessor: undefined,
           xAccessor: 'date',
@@ -681,6 +690,7 @@ describe('xy_suggestions', () => {
         {
           accessors: ['price', 'quantity'],
           layerId: 'first',
+          layerType: layerTypes.DATA,
           seriesType: 'bar',
           splitAccessor: 'product',
           xAccessor: 'date',
@@ -724,6 +734,7 @@ describe('xy_suggestions', () => {
         {
           accessors: ['price', 'quantity'],
           layerId: 'first',
+          layerType: layerTypes.DATA,
           seriesType: 'bar',
           splitAccessor: 'dummyCol',
           xAccessor: 'product',
@@ -757,6 +768,7 @@ describe('xy_suggestions', () => {
         {
           accessors: ['price'],
           layerId: 'first',
+          layerType: layerTypes.DATA,
           seriesType: 'bar',
           splitAccessor: 'date',
           xAccessor: 'product',
@@ -797,6 +809,7 @@ describe('xy_suggestions', () => {
         {
           accessors: ['price', 'quantity'],
           layerId: 'first',
+          layerType: layerTypes.DATA,
           seriesType: 'bar',
           splitAccessor: 'dummyCol',
           xAccessor: 'product',
@@ -841,6 +854,7 @@ describe('xy_suggestions', () => {
         {
           accessors: ['price'],
           layerId: 'first',
+          layerType: layerTypes.DATA,
           seriesType: 'bar',
           splitAccessor: 'category',
           xAccessor: 'product',
@@ -886,6 +900,7 @@ describe('xy_suggestions', () => {
         {
           accessors: ['price', 'quantity'],
           layerId: 'first',
+          layerType: layerTypes.DATA,
           seriesType: 'bar',
           splitAccessor: 'dummyCol',
           xAccessor: 'product',
