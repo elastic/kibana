@@ -10,9 +10,12 @@ import { isNewInstance } from './new_instance_status';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '../../../../core/server/mocks';
 
 describe('isNewInstance', () => {
+  const esClient = elasticsearchServiceMock.createScopedClusterClient();
+  const soClient = savedObjectsClientMock.create();
+
+  beforeEach(() => jest.resetAllMocks());
+
   it('returns true when there are no index patterns', async () => {
-    const esClient = elasticsearchServiceMock.createScopedClusterClient();
-    const soClient = savedObjectsClientMock.create();
     soClient.find.mockResolvedValue({
       page: 1,
       per_page: 100,
@@ -22,12 +25,97 @@ describe('isNewInstance', () => {
     expect(await isNewInstance({ esClient, soClient })).toEqual(true);
   });
 
-  it.todo('returns false when there are any index patterns other than metrics-* or logs-*');
-  it.todo('returns true if only no logs or metrics indices contain data');
-  it.todo('returns true if only metrics-endpoint index contains data');
-  it.todo('returns true if only metrics-elastic_agent index contains data');
-  it.todo('returns true if only logs-elastic_agent index contains data');
-  it.todo('returns true if only apm indices contain data');
-  it.todo('returns false if any other logs or metrics indices contain data');
-  it.todo('returns false if an authentication error is thrown');
+  it('returns false when there are any index patterns other than metrics-* or logs-*', async () => {
+    soClient.find.mockResolvedValue({
+      page: 1,
+      per_page: 100,
+      total: 1,
+      saved_objects: [
+        {
+          id: '1',
+          references: [],
+          type: 'index-pattern',
+          score: 99,
+          attributes: { title: 'my-pattern-*' },
+        },
+      ],
+    });
+    expect(await isNewInstance({ esClient, soClient })).toEqual(false);
+  });
+
+  describe('when only metrics-* and logs-* index patterns exist', () => {
+    beforeEach(() => {
+      soClient.find.mockResolvedValue({
+        page: 1,
+        per_page: 100,
+        total: 2,
+        saved_objects: [
+          {
+            id: '1',
+            references: [],
+            type: 'index-pattern',
+            score: 99,
+            attributes: { title: 'metrics-*' },
+          },
+          {
+            id: '2',
+            references: [],
+            type: 'index-pattern',
+            score: 99,
+            attributes: { title: 'logs-*' },
+          },
+        ],
+      });
+    });
+
+    it('returns true if no logs or metrics indices exist', async () => {
+      esClient.asCurrentUser.cat.indices.mockReturnValue(
+        elasticsearchServiceMock.createSuccessTransportRequestPromise([])
+      );
+      expect(await isNewInstance({ esClient, soClient })).toEqual(true);
+    });
+
+    it('returns true if no logs or metrics indices contain data', async () => {
+      esClient.asCurrentUser.cat.indices.mockReturnValue(
+        elasticsearchServiceMock.createSuccessTransportRequestPromise([
+          { index: 'metrics-foo', docsCount: '0' },
+        ])
+      );
+      expect(await isNewInstance({ esClient, soClient })).toEqual(true);
+    });
+
+    it('returns true if only metrics-elastic_agent index contains data', async () => {
+      esClient.asCurrentUser.cat.indices.mockReturnValue(
+        elasticsearchServiceMock.createSuccessTransportRequestPromise([
+          { index: 'metrics-elastic_agent', docsCount: '100' },
+        ])
+      );
+      expect(await isNewInstance({ esClient, soClient })).toEqual(true);
+    });
+
+    it('returns true if only logs-elastic_agent index contains data', async () => {
+      esClient.asCurrentUser.cat.indices.mockReturnValue(
+        elasticsearchServiceMock.createSuccessTransportRequestPromise([
+          { index: 'logs-elastic_agent', docsCount: '100' },
+        ])
+      );
+      expect(await isNewInstance({ esClient, soClient })).toEqual(true);
+    });
+
+    it('returns false if any other logs or metrics indices contain data', async () => {
+      esClient.asCurrentUser.cat.indices.mockReturnValue(
+        elasticsearchServiceMock.createSuccessTransportRequestPromise([
+          { index: 'metrics-foo', docsCount: '100' },
+        ])
+      );
+      expect(await isNewInstance({ esClient, soClient })).toEqual(false);
+    });
+
+    it('returns false if an authentication error is thrown', async () => {
+      esClient.asCurrentUser.cat.indices.mockReturnValue(
+        elasticsearchServiceMock.createErrorTransportRequestPromise({})
+      );
+      expect(await isNewInstance({ esClient, soClient })).toEqual(false);
+    });
+  });
 });

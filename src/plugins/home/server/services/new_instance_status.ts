@@ -13,7 +13,6 @@ const LOGS_INDEX_PATTERN = 'metrics-*';
 const METRICS_INDEX_PATTERN = 'logs-*';
 
 const INDEX_PREFIXES_TO_IGNORE = [
-  'metrics-endpoint.metadata-', // ignore index created by default by endpoint transform
   'metrics-elastic_agent', // ignore index created by Fleet server itself
   'logs-elastic_agent', // ignore index created by Fleet server itself
 ];
@@ -58,7 +57,7 @@ export const isNewInstance = async ({ esClient, soClient }: Deps): Promise<boole
       // Ignore some data that is shipped by default
       .filter(({ index }) => !INDEX_PREFIXES_TO_IGNORE.some((prefix) => index?.startsWith(prefix)))
       // If any other logs and metrics indices have data, return false
-      .some(({ docsCount }) => !(docsCount ?? 0));
+      .some(({ docsCount }) => parseInt(docsCount ?? '0', 10) > 0);
 
     return !anyIndicesContainerUserData;
   } catch (e) {
