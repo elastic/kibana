@@ -25,4 +25,16 @@ curl -s -k \
  -H 'kbn-xsrf: 123' \
  -u hunter:changeme \
  -X POST ${KIBANA_URL}${SPACE_URL}/internal/rac/alerts/bulk_update \
--d "{\"query\": \"$QUERY\", \"status\":\"$STATUS\", \"index\":\".siem-signals*\"}" | jq .
+ -d "{\"ids\": [\"7e5bf32b8aa1a96b835200d8a6aad39079f03257129ad238a828152884690c86\"], \"status\":\"$STATUS\", \"index\":\".siem-signals-devin-hurley-default\"}" | jq .
+
+# -d "{\"query\": {\"bool\": {
+#     \"filter\": {
+#       \"terms\": {
+#         \"_id\": [         \"7e5bf32b8aa1a96b835200d8a6aad39079f03257129ad238a828152884690c86\"
+#         ]
+#       }
+#     }
+#   }}, \"status\":\"$STATUS\", \"index\":\".siem-signals-devin-hurley-default\"}" | jq .
+
+
+# 824ec1a1c9a0fcded6063e88353b828e414149b37f6d7cbe47a038d08aaa3285
