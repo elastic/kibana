@@ -344,7 +344,7 @@ export class AlertsClient {
         esQuery = { query: `_id:${id}`, language: 'kuery' };
       } else if (typeof query === 'string') {
         esQuery = { query, language: 'kuery' };
-      } else if (typeof query === 'object') {
+      } else if (query != null && typeof query === 'object') {
         esQuery = [];
       }
       const builtQuery = buildEsQuery(
@@ -357,7 +357,7 @@ export class AlertsClient {
         ],
         config
       );
-      if (typeof query === 'object') {
+      if (query != null && typeof query === 'object') {
         // @ts-expect-error
         builtQuery.bool.must.push(query);
       }
