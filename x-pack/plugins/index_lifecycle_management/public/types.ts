@@ -39,6 +39,5 @@ export interface AppServicesContext {
   breadcrumbService: BreadcrumbService;
   license: ILicense;
   cloud?: CloudSetup;
-  navigateToApp: ApplicationStart['navigateToApp'];
   getUrlForApp: ApplicationStart['getUrlForApp'];
 }

@@ -21,7 +21,6 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiSwitch,
-  EuiText,
   EuiPageHeader,
 } from '@elastic/eui';
 
@@ -39,6 +38,7 @@ import {
   WarmPhase,
   Timeline,
   FormErrorsCallout,
+  EditWarning,
 } from './components';
 import {
   createPolicyNameValidations,
@@ -179,23 +179,7 @@ export const EditPolicy: React.FunctionComponent = () => {
       <Form form={form}>
         {isNewPolicy ? null : (
           <Fragment>
-            <EuiText>
-              <p>
-                <strong>
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyMessage"
-                    defaultMessage="You are editing an existing policy"
-                  />
-                </strong>
-                .{' '}
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyExplanationMessage"
-                  defaultMessage="Any changes you make will affect the indices that are
-                              attached to this policy. Alternatively, you can save these changes in
-                              a new policy."
-                />
-              </p>
-            </EuiText>
+            <EditWarning />
             <EuiSpacer />
 
             <EuiFormRow>

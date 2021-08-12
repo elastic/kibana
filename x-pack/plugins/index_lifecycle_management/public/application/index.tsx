@@ -28,13 +28,11 @@ export const renderApp = (
   license: ILicense,
   cloud?: CloudSetup
 ): UnmountCallback => {
-  const { navigateToApp, getUrlForApp } = application;
+  const { getUrlForApp } = application;
   render(
     <RedirectAppLinks application={application}>
       <I18nContext>
-        <KibanaContextProvider
-          services={{ cloud, breadcrumbService, license, navigateToApp, getUrlForApp }}
-        >
+        <KibanaContextProvider services={{ cloud, breadcrumbService, license, getUrlForApp }}>
           <App history={history} />
         </KibanaContextProvider>
       </I18nContext>
