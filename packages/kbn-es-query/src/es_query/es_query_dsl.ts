@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { has } from 'lodash';
 
 export interface DslRangeQuery {
@@ -22,8 +22,8 @@ export interface DslMatchQuery {
   match: {
     [name: string]: {
       query: string;
-      operator: string;
-      zero_terms_query: string;
+      operator: estypes.QueryDslCombinedFieldsOperator;
+      zero_terms_query: estypes.QueryDslCombinedFieldsZeroTerms;
     };
   };
 }
