@@ -11,9 +11,9 @@ import classNames from 'classnames';
 import AceEditor, { IAceEditorProps } from 'react-ace';
 import { EuiI18n } from '@elastic/eui';
 // @ts-ignore
-import { htmlIdGenerator, keys, warnOnce } from '@elastic/eui/lib/services';
+import { htmlIdGenerator, keys } from '@elastic/eui/lib/services';
 
-import './index.scss';
+import './_index.scss';
 
 /**
  * Wraps Object.keys with proper typescript definition of the resulting array
@@ -81,11 +81,6 @@ export class EuiCodeEditor extends Component<EuiCodeEditorProps, EuiCodeEditorSt
 
   constructor(props: EuiCodeEditorProps) {
     super(props);
-    warnOnce(
-      'EuiCodeEditor',
-      `[EUI] - DEPRECATION: \`EuiCodeEditor\` is deprecated and will be removed in a future release.
-See https://ela.st/euicodeeditor for migration options.`
-    );
   }
 
   idGenerator = htmlIdGenerator();
