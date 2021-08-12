@@ -345,6 +345,8 @@ const VisComponent = (props: VisComponentProps) => {
         />
         <XYSettings
           {...config}
+          truncateLegend={visParams.truncateLegend}
+          maxLegendLines={visParams.maxLegendLines}
           showLegend={showLegend}
           onPointerUpdate={handleCursorUpdate}
           legendPosition={legendPosition}

@@ -114,6 +114,8 @@ export const getLineVisTypeDefinition = (
       fittingFunction: Fit.Linear,
       times: [],
       addTimeMarker: false,
+      truncateLegend: true,
+      maxLegendLines: 1,
       labels: {},
       radiusRatio: 9,
       thresholdLine: {

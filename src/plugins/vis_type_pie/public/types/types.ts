@@ -33,6 +33,8 @@ interface PieCommonParams {
   addLegend: boolean;
   legendPosition: Position;
   nestedLegend: boolean;
+  truncateLegend: boolean;
+  maxLegendLines: number;
   distinctColors: boolean;
   isDonut: boolean;
 }

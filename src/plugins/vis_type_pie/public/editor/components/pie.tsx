@@ -26,6 +26,7 @@ import {
   SwitchOption,
   SelectOption,
   PalettePicker,
+  LongLegendOptions,
 } from '../../../../vis_default_editor/public';
 import { VisEditorOptionsProps } from '../../../../visualizations/public';
 import { TruncateLabelsOption } from './truncate_labels';
@@ -168,6 +169,12 @@ const PieOptions = (props: PieOptionsProps) => {
                 setValue(paramName, value);
               }}
               data-test-subj="visTypePieNestedLegendSwitch"
+            />
+            <LongLegendOptions
+              data-test-subj="pieLongLegendsOptions"
+              truncateLegend={stateParams.truncateLegend ?? true}
+              maxLegendLines={stateParams.maxLegendLines ?? 1}
+              setValue={setValue}
             />
           </>
         )}

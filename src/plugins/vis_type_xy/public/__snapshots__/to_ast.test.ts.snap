@@ -32,6 +32,9 @@ Object {
     "legendPosition": Array [
       "top",
     ],
+    "maxLegendLines": Array [
+      1,
+    ],
     "palette": Array [
       "default",
     ],
@@ -51,6 +54,9 @@ Object {
       },
     ],
     "times": Array [],
+    "truncateLegend": Array [
+      true,
+    ],
     "type": Array [
       "area",
     ],

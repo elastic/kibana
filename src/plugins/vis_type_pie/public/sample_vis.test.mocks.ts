@@ -28,6 +28,8 @@ export const samplePieVis = {
         legendPosition: 'right',
         isDonut: true,
         nestedLegend: true,
+        truncateLegend: true,
+        maxLegendLines: 1,
         distinctColors: false,
         palette: 'kibana_palette',
         labels: {

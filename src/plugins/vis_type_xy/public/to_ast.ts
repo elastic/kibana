@@ -194,6 +194,8 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     type: vis.type.name as XyVisType,
     chartType: vis.params.type,
     addTimeMarker: vis.params.addTimeMarker,
+    truncateLegend: vis.params.truncateLegend,
+    maxLegendLines: vis.params.maxLegendLines,
     addLegend: vis.params.addLegend,
     addTooltip: vis.params.addTooltip,
     legendPosition: vis.params.legendPosition,

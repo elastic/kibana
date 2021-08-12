@@ -89,6 +89,19 @@ export const createPieVisFn = (): VisTypePieExpressionFunctionDefinition => ({
       }),
       default: false,
     },
+    truncateLegend: {
+      types: ['boolean'],
+      help: i18n.translate('visTypePie.function.args.truncateLegendHelpText', {
+        defaultMessage: 'Defines if the legend items will be truncated or not',
+      }),
+      default: true,
+    },
+    maxLegendLines: {
+      types: ['number'],
+      help: i18n.translate('visTypePie.function.args.maxLegendLinesHelpText', {
+        defaultMessage: 'Defines the number of lines per legend item',
+      }),
+    },
     distinctColors: {
       types: ['boolean'],
       help: i18n.translate('visTypePie.function.args.distinctColorsHelpText', {

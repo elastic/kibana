@@ -57,6 +57,7 @@ Object {
         "valuesFormat": "percent",
       },
       "legendPosition": "right",
+      "maxLegendLines": true,
       "metric": Object {
         "accessor": 0,
         "aggType": "count",
@@ -72,6 +73,7 @@ Object {
       },
       "splitColumn": undefined,
       "splitRow": undefined,
+      "truncateLegend": true,
     },
     "visData": Object {
       "columns": Array [

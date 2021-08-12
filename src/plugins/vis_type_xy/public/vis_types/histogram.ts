@@ -116,6 +116,8 @@ export const getHistogramVisTypeDefinition = (
       legendPosition: Position.Right,
       times: [],
       addTimeMarker: false,
+      truncateLegend: true,
+      maxLegendLines: 1,
       labels: {
         show: false,
       },
