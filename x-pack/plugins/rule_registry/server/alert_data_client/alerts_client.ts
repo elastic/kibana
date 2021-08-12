@@ -55,11 +55,14 @@ type AlertType = NonNullableProps<
   typeof ALERT_RULE_TYPE_ID | typeof ALERT_RULE_CONSUMER | typeof SPACE_IDS
 >;
 
-const isValidAlert = (source?: ParsedTechnicalFields): source is AlertType => {
+const isValidAlert = (source?: any): source is AlertType => {
   return (
-    source?.[ALERT_RULE_TYPE_ID] != null &&
-    source?.[ALERT_RULE_CONSUMER] != null &&
-    source?.[SPACE_IDS] != null
+    (source?._source?.[ALERT_RULE_TYPE_ID] != null &&
+      source?._source?.[ALERT_RULE_CONSUMER] != null &&
+      source?._source?.[SPACE_IDS] != null) ||
+    (source?.fields?.[ALERT_RULE_TYPE_ID][0] != null &&
+      source?.fields?.[ALERT_RULE_CONSUMER][0] != null &&
+      source?.fields?.[SPACE_IDS][0] != null)
   );
 };
 export interface ConstructorOptions {
@@ -218,6 +221,7 @@ export class AlertsClient {
       const config = getEsQueryConfig();
 
       let queryBody = {
+        fields: [ALERT_RULE_TYPE_ID, ALERT_RULE_CONSUMER, ALERT_WORKFLOW_STATUS, SPACE_IDS],
         query: await this.buildEsQueryWithAuthz(query, id, alertSpaceId, operation, config),
         sort: [
           {
@@ -245,7 +249,7 @@ export class AlertsClient {
         seq_no_primary_term: true,
       });
 
-      if (!result?.body.hits.hits.every((hit) => isValidAlert(hit._source))) {
+      if (!result?.body.hits.hits.every((hit) => isValidAlert(hit))) {
         const errorMessage = `Invalid alert found with id of "${id}" or with query "${query}" and operation ${operation}`;
         this.logger.error(errorMessage);
         throw Boom.badData(errorMessage);
@@ -307,21 +311,25 @@ export class AlertsClient {
         );
       }
 
-      const bulkUpdateRequest = mgetRes.body.docs.flatMap((item) => [
-        {
-          update: {
-            _index: item._index,
-            _id: item._id,
+      const bulkUpdateRequest = mgetRes.body.docs.flatMap((item) => {
+        const fieldToUpdate =
+          item?._source?.[ALERT_WORKFLOW_STATUS] == null
+            ? { signal: { status } }
+            : { [ALERT_WORKFLOW_STATUS]: status };
+        return [
+          {
+            update: {
+              _index: item._index,
+              _id: item._id,
+            },
           },
-        },
-        {
-          doc: {
-            [item?._source?.[ALERT_WORKFLOW_STATUS] == null
-              ? 'signal.status'
-              : ALERT_WORKFLOW_STATUS]: status,
+          {
+            doc: {
+              ...fieldToUpdate,
+            },
           },
-        },
-      ]);
+        ];
+      });
 
       const bulkUpdateResponse = await this.esClient.bulk({
         body: bulkUpdateRequest,
@@ -494,15 +502,18 @@ export class AlertsClient {
         throw Boom.notFound(errorMessage);
       }
 
+      const fieldToUpdate =
+        alert?.hits.hits[0]._source?.[ALERT_WORKFLOW_STATUS] == null
+          ? { signal: { status } }
+          : { [ALERT_WORKFLOW_STATUS]: status };
+
       const { body: response } = await this.esClient.update<ParsedTechnicalFields>({
         ...decodeVersion(_version),
         id,
         index,
         body: {
           doc: {
-            [alert?.hits.hits[0]._source?.[ALERT_WORKFLOW_STATUS] == null
-              ? 'signal.status'
-              : ALERT_WORKFLOW_STATUS]: status,
+            ...fieldToUpdate,
           },
         },
         refresh: 'wait_for',
@@ -557,8 +568,8 @@ export class AlertsClient {
               source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
                 ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}'
               }
-              if (ctx._source['signal.status'] != null) {
-                ctx._source['signal.status'] = '${status}'
+              if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                ctx._source.signal.status = '${status}'
               }`,
               lang: 'painless',
             } as InlineScript,
