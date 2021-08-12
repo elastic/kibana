@@ -51,7 +51,21 @@ describe('EuiCodeEditor', () => {
     let component: ReactWrapper;
 
     beforeEach(() => {
-      component = mount(<EuiCodeEditor />);
+      // Addresses problems with attaching to document.body.
+      // https://meganesulli.com/blog/managing-focus-with-react-and-jest/
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+
+      // We need to manually attach the element to document.body to assert against
+      // document.activeElement in our focus behavior tests, below.
+      component = mount(<EuiCodeEditor />, { attachTo: container });
+    });
+
+    afterEach(() => {
+      // We need to clean up after ourselves per https://github.com/enzymejs/enzyme/issues/2337.
+      if (component) {
+        component.unmount();
+      }
     });
 
     describe('hint element', () => {
@@ -84,9 +98,7 @@ describe('EuiCodeEditor', () => {
         expect(blurSpy).toHaveBeenCalled();
       });
 
-      // TODO: Fix this. document.activeElement resolves to be <body />, but the component behaves
-      // as expected in the browser.
-      test.skip('pressing escape in ace textbox will enable overlay', () => {
+      test('pressing escape in ace textbox will enable overlay', () => {
         // We cannot simulate the `commands` path, but this interaction still
         // serves as a fallback in cases where `commands` is unavailable.
         // @ts-ignore onFocusAce is known to exist
