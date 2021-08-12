@@ -63,7 +63,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
   const [authCodeUrl, setAuthCodeUrl] = useState<string | undefined>(undefined);
   const [authTokenUrl, setAuthTokenUrl] = useState<string | undefined>(undefined);
   const [redirectUrl, setRedirectTokenUrl] = useState<string | undefined>(undefined);
-  const { docLinks, http } = useKibana().services;
+  const { docLinks } = useKibana().services;
   const { from, host, port, secure, hasAuth, authType } = action.config;
   const {
     user,
@@ -634,8 +634,11 @@ async function getOAuth(
       if (href !== null) {
         /* As i was getting code and oauth-token i added for same, you can replace with your expected variables */
         if (href.match('code')) {
-          debugger;
-          console.log(windowObjectReference.json);
+          const res = windowObjectReference.json;
+          editActionSecrets('accessToken', `${res.token_type} ${res.access_token}`);
+          editActionSecrets('refreshToken', res.refresh_token);
+          editActionConfig('tokenExpirationDate', res.expires_in);
+          // console.log(windowObjectReference.json);
           window.clearInterval(intervalId);
           windowObjectReference.close();
         }
