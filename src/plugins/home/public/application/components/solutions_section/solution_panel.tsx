@@ -10,7 +10,7 @@ import { snakeCase } from 'lodash';
 import React, { FC, MouseEvent } from 'react';
 import { EuiCard, EuiFlexItem, EuiToken } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../';
+import { FeatureCatalogueSolution } from '../../../';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { getServices } from '../../kibana_services';
 
