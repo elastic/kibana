@@ -7,7 +7,7 @@
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
-import { esQuery } from '../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/public';
 import { MatrixHistogramType } from '../../../../common/search_strategy';
 import { EVENT_DATASET, DEFAULT_CTI_SOURCE_INDEX } from '../../../../common/cti/constants';
 import { useMatrixHistogram } from '../../../common/containers/matrix_histogram';
@@ -17,15 +17,12 @@ export const useRequestEventCounts = (to: string, from: string) => {
   const { uiSettings } = useKibana().services;
 
   const [filterQuery] = convertToBuildEsQuery({
-    config: esQuery.getEsQueryConfig(uiSettings),
+    config: getEsQueryConfig(uiSettings),
     indexPattern: {
       fields: [
         {
           name: 'event.kind',
-          aggregatable: true,
-          searchable: true,
           type: 'string',
-          esTypes: ['keyword'],
         },
       ],
       title: 'filebeat-*',
