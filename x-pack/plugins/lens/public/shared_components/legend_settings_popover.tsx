@@ -120,7 +120,9 @@ export interface LegendSettingsPopoverProps {
   groupPosition?: ToolbarButtonProps['groupPosition'];
 }
 
-const DEFAULT_MAX_LINES = 1;
+const DEFAULT_TRUNCATE_LINES = 1;
+const MAX_TRUNCATE_LINES = 5;
+const MIN_TRUNCATE_LINES = 1;
 
 export const MaxLinesInput = ({
   value,
@@ -136,12 +138,21 @@ export const MaxLinesInput = ({
     <EuiFieldNumber
       data-test-subj="lens-legend-max-lines-input"
       value={inputValue}
-      min={1}
-      max={5}
+      min={MIN_TRUNCATE_LINES}
+      max={MAX_TRUNCATE_LINES}
       compressed
       disabled={isDisabled}
       onChange={(e) => {
-        handleInputChange(Number(e.target.value));
+        const val = Number(e.target.value);
+        // we want to automatically change the values to the limits
+        // if the user enters a value that is outside the limits
+        if (val > MAX_TRUNCATE_LINES) {
+          handleInputChange(MAX_TRUNCATE_LINES);
+        } else if (val < MIN_TRUNCATE_LINES) {
+          handleInputChange(MIN_TRUNCATE_LINES);
+        } else {
+          handleInputChange(val);
+        }
       }}
     />
   );
@@ -215,7 +226,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
       <EuiFormRow
         display="columnCompressedSwitch"
         label={i18n.translate('xpack.lens.shared.truncateLegend', {
-          defaultMessage: 'Truncate legend text',
+          defaultMessage: 'Truncate text',
         })}
       >
         <TooltipWrapper
@@ -230,7 +241,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
           <EuiSwitch
             compressed
             label={i18n.translate('xpack.lens.shared.truncateLegend', {
-              defaultMessage: 'Truncate legend text',
+              defaultMessage: 'Truncate text',
             })}
             data-test-subj="lens-legend-truncate-switch"
             showLabel={false}
@@ -242,7 +253,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
       </EuiFormRow>
       <EuiFormRow
         label={i18n.translate('xpack.lens.shared.maxLinesLabel', {
-          defaultMessage: 'Maximum legend lines',
+          defaultMessage: 'Maximum lines',
         })}
         fullWidth
         display="columnCompressed"
@@ -263,7 +274,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
           display="block"
         >
           <MaxLinesInput
-            value={maxLines ?? DEFAULT_MAX_LINES}
+            value={maxLines ?? DEFAULT_TRUNCATE_LINES}
             setValue={onMaxLinesChange}
             isDisabled={mode === 'hide' || !truncate}
           />
