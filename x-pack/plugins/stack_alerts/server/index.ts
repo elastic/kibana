@@ -13,6 +13,21 @@ export { ID as INDEX_THRESHOLD_ID } from './alert_types/index_threshold/alert_ty
 export const config: PluginConfigDescriptor<Config> = {
   exposeToBrowser: {},
   schema: configSchema,
+  deprecations: () => [
+    (settings, fromPath, addDeprecation) => {
+      if (
+        settings?.xpack?.stackAlerts?.enabled === false ||
+        settings?.xpack?.stackAlerts?.enabled === true
+      ) {
+        addDeprecation({
+          message: `"xpack.stackAlerts.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
+          correctiveActions: {
+            manualSteps: [`Remove "xpack.stackAlerts.enabled" from your kibana configs.`],
+          },
+        });
+      }
+    },
+  ],
 };
 
 export const plugin = (ctx: PluginInitializerContext) => new AlertingBuiltinsPlugin(ctx);
