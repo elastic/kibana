@@ -15,13 +15,14 @@ export function buildQueryFromKuery(
   indexPattern: IndexPatternBase | undefined,
   queries: Query[] = [],
   allowLeadingWildcards: boolean = false,
-  dateFormatTZ?: string
+  dateFormatTZ?: string,
+  filtersInMustClause: boolean = false
 ) {
   const queryASTs = queries.map((query) => {
     return fromKueryExpression(query.query, { allowLeadingWildcards });
   });
 
-  return buildQuery(indexPattern, queryASTs, { dateFormatTZ });
+  return buildQuery(indexPattern, queryASTs, { dateFormatTZ, filtersInMustClause });
 }
 
 function buildQuery(
