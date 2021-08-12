@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const docTable = getService('docTable');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['context']);
   let expectedRowLength = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
 
@@ -73,10 +74,10 @@ export default function ({ getService, getPageObjects }) {
 
     it('should show 101 records when 50 newer and 50 older records are requests', async function () {
       const predecessorCountPicker = await PageObjects.context.getPredecessorCountPicker();
-      await predecessorCountPicker.setAttribute('value', 50);
+      testSubjects.setValue('predecessorsCountPicker', 50);
       await PageObjects.common.pressEnterKey();
       const successorCountPicker = await PageObjects.context.getSuccessorCountPicker();
-      await successorCountPicker.setAttribute('value', 50);
+      testSubjects.setValue('successorsCountPicker', 50);
       await PageObjects.common.pressEnterKey();
 
       await retry.waitFor(
