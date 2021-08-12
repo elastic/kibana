@@ -245,11 +245,28 @@ export function InstallationButton(props: InstallationButtonProps) {
       <FormattedMessage
         id="xpack.fleet.integrations.settings.confirmUpdateModal.body"
         defaultMessage="This action will deploy updates to all agents which use these policies.
-        Fleet has detected that {policyCount, plural, one {# integration policy is} other {# integration policies are}} ready to be upgraded
-        and {policyCount, plural, one { is} other { are}} already in use by {agentCount, plural, one {# agent} other {# agents}}"
+        Fleet has detected that {policyCountText} {policyCount, plural, one { is} other { are}} ready to be upgraded
+        and {policyCount, plural, one { is} other { are}} already in use by {agentCountText}."
         values={{
           policyCount: packagePolicyCount,
-          agentCount: agentPolicyData?.total,
+          policyCountText: (
+            <strong>
+              <FormattedMessage
+                id="xpack.fleet.integrations.confirmUpdateModal.body.policyCount"
+                defaultMessage="{policyCount, plural, one {# integration policy} other {# integration policies}}"
+                values={{ policyCount: packagePolicyCount }}
+              />
+            </strong>
+          ),
+          agentCountText: (
+            <strong>
+              <FormattedMessage
+                id="xpack.fleet.integrations.confirmUpdateModal.body.agentCount"
+                defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
+                values={{ agentCount: agentPolicyData?.total }}
+              />
+            </strong>
+          ),
         }}
       />
     </EuiConfirmModal>
