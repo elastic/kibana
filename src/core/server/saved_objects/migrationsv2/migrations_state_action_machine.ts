@@ -205,7 +205,7 @@ export async function migrationStateActionMachine({
       const req = getRequestDebugMeta(e.meta);
       const failedRequestMessage = `Unexpected Elasticsearch ResponseError: statusCode: ${
         req.statusCode
-      }, error: ${getErrorMessage(e)}, method: ${req.method}, url: ${req.url}`;
+      }, method: ${req.method}, url: ${req.url} error: ${getErrorMessage(e)},`;
       logger.error(logMessagePrefix + failedRequestMessage);
       dumpExecutionLog(logger, logMessagePrefix, executionLog);
       throw new Error(
