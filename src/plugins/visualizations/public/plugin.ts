@@ -54,7 +54,6 @@ import type {
   Plugin,
   ApplicationStart,
   SavedObjectsClientContract,
-  ExecutionContextServiceStart,
 } from '../../../core/public';
 import type { UsageCollectionSetup } from '../../usage_collection/public';
 import type { UiActionsStart } from '../../ui_actions/public';
@@ -104,7 +103,6 @@ export interface VisualizationsStartDeps {
   getAttributeService: EmbeddableStart['getAttributeService'];
   savedObjects: SavedObjectsStart;
   savedObjectsClient: SavedObjectsClientContract;
-  executionContext: ExecutionContextServiceStart;
 }
 
 /**
