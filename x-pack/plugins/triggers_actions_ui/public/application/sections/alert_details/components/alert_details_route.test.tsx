@@ -8,11 +8,15 @@
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { act } from 'react-dom/test-utils';
 import { createMemoryHistory, createLocation } from 'history';
 import { ToastsApi } from 'kibana/public';
 import { AlertDetailsRoute, getRuleData } from './alert_details_route';
 import { Alert } from '../../../../types';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { spacesOssPluginMock } from 'src/plugins/spaces_oss/public/mocks';
+import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
 
 class NotFoundError extends Error {
@@ -30,6 +34,17 @@ class NotFoundError extends Error {
 }
 
 describe('alert_details_route', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const spacesOssMock = spacesOssPluginMock.createStartContract();
+  async function setup() {
+    const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.spacesOss = spacesOssMock;
+  }
+
   it('render a loader while fetching data', () => {
     const rule = mockRule();
 
@@ -38,6 +53,81 @@ describe('alert_details_route', () => {
         <AlertDetailsRoute {...mockRouterProps(rule)} {...mockApis()} />
       ).containsMatchingElement(<CenterJustifiedSpinner />)
     ).toBeTruthy();
+  });
+
+  it('redirects to another page if fetched rule is an aliasMatch', async () => {
+    await setup();
+    const rule = mockRule();
+    const { loadAlert, resolveRule } = mockApis();
+
+    loadAlert.mockImplementationOnce(async () => {
+      throw new NotFoundError('OMG');
+    });
+    resolveRule.mockImplementationOnce(async () => ({
+      ...rule,
+      id: 'new_id',
+      outcome: 'aliasMatch',
+      alias_target_id: rule.id,
+    }));
+    const wrapper = mountWithIntl(
+      <AlertDetailsRoute
+        {...mockRouterProps(rule)}
+        {...{ ...mockApis(), loadAlert, resolveRule }}
+      />
+    );
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(loadAlert).toHaveBeenCalledWith(rule.id);
+    expect(resolveRule).toHaveBeenCalledWith(rule.id);
+    expect((spacesOssMock as any).ui.redirectLegacyUrl).toHaveBeenCalledWith(
+      `insightsAndAlerting/triggersActions/rule/new_id`,
+      `rule`
+    );
+  });
+
+  it('shows warning callout if fetched rule is a conflict', async () => {
+    await setup();
+    const rule = mockRule();
+    const ruleType = {
+      id: rule.alertTypeId,
+      name: 'type name',
+      authorizedConsumers: ['consumer'],
+    };
+    const { loadAlert, loadAlertTypes, loadActionTypes, resolveRule } = mockApis();
+
+    loadAlert.mockImplementationOnce(async () => {
+      throw new NotFoundError('OMG');
+    });
+    loadAlertTypes.mockImplementationOnce(async () => [ruleType]);
+    loadActionTypes.mockImplementation(async () => []);
+    resolveRule.mockImplementationOnce(async () => ({
+      ...rule,
+      id: 'new_id',
+      outcome: 'conflict',
+      alias_target_id: rule.id,
+    }));
+    const wrapper = mountWithIntl(
+      <AlertDetailsRoute
+        {...mockRouterProps(rule)}
+        {...{ ...mockApis(), loadAlert, loadAlertTypes, loadActionTypes, resolveRule }}
+      />
+    );
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(loadAlert).toHaveBeenCalledWith(rule.id);
+    expect(resolveRule).toHaveBeenCalledWith(rule.id);
+    expect((spacesOssMock as any).ui.components.getLegacyUrlConflict).toHaveBeenCalledWith({
+      currentObjectId: 'new_id',
+      objectNoun: 'rule',
+      otherObjectId: rule.id,
+      otherObjectPath: `insightsAndAlerting/triggersActions/rule/${rule.id}`,
+    });
   });
 });
 
