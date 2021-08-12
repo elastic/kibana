@@ -1639,6 +1639,10 @@ Object {
           "path": "signal.original_event.provider",
           "type": "alias",
         },
+        "kibana.alert.original_event.reason": Object {
+          "path": "signal.original_event.reason",
+          "type": "alias",
+        },
         "kibana.alert.original_event.risk_score": Object {
           "path": "signal.original_event.risk_score",
           "type": "alias",
@@ -1669,6 +1673,10 @@ Object {
         },
         "kibana.alert.original_time": Object {
           "path": "signal.original_time",
+          "type": "alias",
+        },
+        "kibana.alert.reason": Object {
+          "path": "signal.reason",
           "type": "alias",
         },
         "kibana.alert.risk_score": Object {
@@ -3249,6 +3257,9 @@ Object {
                 "provider": Object {
                   "type": "keyword",
                 },
+                "reason": Object {
+                  "type": "keyword",
+                },
                 "risk_score": Object {
                   "type": "float",
                 },
@@ -3317,6 +3328,9 @@ Object {
                   "type": "keyword",
                 },
               },
+            },
+            "reason": Object {
+              "type": "keyword",
             },
             "rule": Object {
               "properties": Object {
