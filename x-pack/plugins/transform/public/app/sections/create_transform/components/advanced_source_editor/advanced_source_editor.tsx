@@ -7,9 +7,9 @@
 
 import React, { FC } from 'react';
 
-import { EuiCodeEditor } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
+
+import { CodeEditor } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 import { StepDefineFormHook } from '../step_define';
 
@@ -23,12 +23,10 @@ export const AdvancedSourceEditor: FC<StepDefineFormHook> = ({
   },
 }) => {
   return (
-    <EuiCodeEditor
-      style={{ border: '1px solid #e3e6ef' }}
-      mode="json"
-      height="250px"
-      width="100%"
-      value={advancedEditorSourceConfig}
+    <CodeEditor
+      data-test-subj="transformAdvancedRuntimeMappingsEditor"
+      height={250}
+      languageId={'json'}
       onChange={(d: string) => {
         setSearchString(undefined);
         setAdvancedEditorSourceConfig(d);
@@ -48,13 +46,21 @@ export const AdvancedSourceEditor: FC<StepDefineFormHook> = ({
           setAdvancedSourceEditorApplyButtonEnabled(false);
         }
       }}
-      setOptions={{
-        fontSize: '12px',
+      options={{
+        ariaLabel: i18n.translate('xpack.transform.stepDefineForm.advancedSourceEditorAriaLabel', {
+          defaultMessage: 'Advanced query editor',
+        }),
+        automaticLayout: true,
+        fontSize: 12,
+        scrollBeyondLastLine: false,
+        quickSuggestions: true,
+        minimap: {
+          enabled: false,
+        },
+        wordWrap: 'on',
+        wrappingIndent: 'indent',
       }}
-      theme="textmate"
-      aria-label={i18n.translate('xpack.transform.stepDefineForm.advancedSourceEditorAriaLabel', {
-        defaultMessage: 'Advanced query editor',
-      })}
+      value={advancedEditorSourceConfig}
     />
   );
 };

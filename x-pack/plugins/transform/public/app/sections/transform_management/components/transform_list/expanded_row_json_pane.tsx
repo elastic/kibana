@@ -7,13 +7,7 @@
 
 import React, { FC } from 'react';
 
-import {
-  // @ts-ignore
-  EuiCodeEditor,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 interface Props {
   json: object;
@@ -25,13 +19,9 @@ export const ExpandedRowJsonPane: FC<Props> = ({ json }) => {
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiSpacer size="s" />
-          <EuiCodeEditor
+          <EuiCodeBlock fontSize="s" language="json" paddingSize="s" style={{ width: '100%' }}>
             value={JSON.stringify(json, null, 2)}
-            readOnly={true}
-            mode="json"
-            style={{ width: '100%' }}
-            theme="textmate"
-          />
+          </EuiCodeBlock>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>&nbsp;</EuiFlexItem>
       </EuiFlexGroup>
