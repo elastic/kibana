@@ -8,22 +8,14 @@
 import React from 'react';
 import moment from 'moment';
 
-import {
-  ALERT_END,
-  ALERT_REASON,
-  ALERT_START,
-  ALERT_STATUS,
-} from '@kbn/rule-data-utils/target/technical_field_names';
-
-import { ObservabilityRuleTypeModel } from '../../../../observability/public';
-import { ValidationResult } from '../../../../triggers_actions_ui/public';
-
-import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
-import { MonitorStatusTranslations } from '../../../common/translations';
-
-import { getMonitorRouteFromMonitorId } from './common';
+import { ALERT_END, ALERT_START, ALERT_STATUS, ALERT_REASON } from '@kbn/rule-data-utils';
 
 import { AlertTypeInitializer } from '.';
+import { getMonitorRouteFromMonitorId } from './common';
+import { MonitorStatusTranslations } from '../../../common/translations';
+import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
+import { ObservabilityRuleTypeModel } from '../../../../observability/public';
+import { ValidationResult } from '../../../../triggers_actions_ui/public';
 
 const { defaultActionMessage, description } = MonitorStatusTranslations;
 

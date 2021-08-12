@@ -14,28 +14,20 @@ const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerUnfreezeRoute({ router, lib }: RouteDependencies) {
+export function registerUnfreezeRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/unfreeze'), validate: { body: bodySchema } },
-    async (ctx, req, res) => {
-      const { indices = [] } = req.body as typeof bodySchema.type;
-      const params = {
-        path: `/${encodeURIComponent(indices.join(','))}/_unfreeze`,
-        method: 'POST',
-      };
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { indices = [] } = request.body as typeof bodySchema.type;
 
       try {
-        await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('transport.request', params);
-        return res.ok();
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        throw e;
+        await client.asCurrentUser.indices.unfreeze({
+          index: indices.join(','),
+        });
+        return response.ok();
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

@@ -13,7 +13,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_REASON,
-} from '@kbn/rule-data-utils/target/technical_field_names';
+} from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '../../../../alerting/common';
 import { updateState, generateAlertMessage } from './common';
 import { DURATION_ANOMALY } from '../../../common/constants/alerts';

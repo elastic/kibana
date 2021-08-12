@@ -132,9 +132,9 @@ export async function getPipeline(
   // Determine metrics' timeseries interval based on version's timespan
   const minIntervalSeconds = config.get('monitoring.ui.min_interval_seconds');
   const timeseriesInterval = calculateTimeseriesInterval(
-    version.firstSeen,
-    version.lastSeen,
-    minIntervalSeconds
+    Number(version.firstSeen),
+    Number(version.lastSeen),
+    Number(minIntervalSeconds)
   );
 
   const [stateDocument, statsAggregation] = await Promise.all([

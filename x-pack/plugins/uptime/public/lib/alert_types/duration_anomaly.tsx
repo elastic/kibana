@@ -7,17 +7,13 @@
 
 import React from 'react';
 import moment from 'moment';
-import {
-  ALERT_END,
-  ALERT_REASON,
-  ALERT_STATUS,
-} from '@kbn/rule-data-utils/target/technical_field_names';
+
+import { ALERT_END, ALERT_STATUS, ALERT_REASON } from '@kbn/rule-data-utils';
+
+import { AlertTypeInitializer } from '.';
+import { getMonitorRouteFromMonitorId } from './common';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { DurationAnomalyTranslations } from '../../../common/translations';
-import { AlertTypeInitializer } from '.';
-
-import { getMonitorRouteFromMonitorId } from './common';
-
 import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 
 const { defaultActionMessage, description } = DurationAnomalyTranslations;
