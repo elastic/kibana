@@ -425,9 +425,9 @@ class PackagePolicyService {
           name: packagePolicy.name,
           success: true,
           package: {
-            name: packagePolicy.name,
-            title: '',
-            version: packagePolicy.version || '',
+            name: packagePolicy.package?.name || '',
+            title: packagePolicy.package?.title || '',
+            version: packagePolicy.package?.version || '',
           },
         });
       } catch (error) {

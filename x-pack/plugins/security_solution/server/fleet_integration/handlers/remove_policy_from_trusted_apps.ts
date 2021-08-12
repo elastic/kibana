@@ -6,7 +6,6 @@
  */
 
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { RequestHandlerContext } from 'kibana/server';
 import { without } from 'lodash/fp';
 import { ExceptionListClient } from '../../../../lists/server';
 
@@ -29,7 +28,7 @@ export const removePolicyFromTrustedApps = async (
   const findTrustedAppsByPolicy = async (currentPage: number) => {
     return exceptionsClient.findExceptionListItem({
       listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
-      filter: `policy:${policy.id}`,
+      filter: `exception-list-agnostic.attributes.tags:"policy:${policy.id}"`,
       namespaceType: 'agnostic',
       page: currentPage,
       perPage: 50,

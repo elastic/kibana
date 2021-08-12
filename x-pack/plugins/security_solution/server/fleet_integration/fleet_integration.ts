@@ -30,6 +30,7 @@ import { createPolicyArtifactManifest } from './handlers/create_policy_artifact_
 import { createDefaultPolicy } from './handlers/create_default_policy';
 import { validatePolicyAgainstLicense } from './handlers/validate_policy_against_license';
 import { removePolicyFromTrustedApps } from './handlers/remove_policy_from_trusted_apps';
+import { ExperimentalFeatures } from '../../common/experimental_features';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
@@ -136,8 +137,8 @@ export const getPackagePolicyUpdateCallback = (
 };
 
 export const getPackagePolicyDeleteCallback = (
-  logger: Logger,
-  exceptionsClient: ExceptionListClient | undefined
+  exceptionsClient: ExceptionListClient | undefined,
+  experimentalFeatures: ExperimentalFeatures | undefined
 ): PostPackagePolicyDeleteCallback => {
   return async (deletePackagePolicy: DeletePackagePoliciesResponse): Promise<void> => {
     const promises: Array<Promise<void>> = [];
@@ -145,7 +146,10 @@ export const getPackagePolicyDeleteCallback = (
       if (!isEndpointPackagePolicy(policy)) {
         return undefined;
       }
-      promises.push(removePolicyFromTrustedApps(exceptionsClient, policy));
+
+      if (experimentalFeatures?.trustedAppsByPolicyEnabled) {
+        promises.push(removePolicyFromTrustedApps(exceptionsClient, policy));
+      }
     }
     Promise.all(promises);
   };
