@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ALERT_STATUS } from '@kbn/rule-data-utils/target/technical_field_names';
+import { ALERT_STATUS } from '@kbn/rule-data-utils';
 import { esKuery } from '../../../../../src/plugins/data/server';
 import { AlertStatus } from '../../common/typings';
 

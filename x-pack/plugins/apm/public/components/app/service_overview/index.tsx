@@ -21,6 +21,8 @@ import { ServiceOverviewInstancesChartAndTable } from './service_overview_instan
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
 import { TransactionsTable } from '../../shared/transactions_table';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
+import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -29,6 +31,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 export const chartHeight = 288;
 
 export function ServiceOverview() {
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher();
   const { agentName, serviceName } = useApmServiceContext();
   const {
     query: { environment, kuery },
@@ -48,6 +51,11 @@ export function ServiceOverview() {
     >
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
+          {fallbackToTransactions && (
+            <EuiFlexItem>
+              <AggregatedTransactionsCallout />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
               <LatencyChart

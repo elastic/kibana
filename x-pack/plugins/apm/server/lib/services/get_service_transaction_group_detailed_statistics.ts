@@ -29,7 +29,7 @@ import {
   getLatencyValue,
 } from '../helpers/latency_aggregation_type';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { calculateTransactionErrorPercentage } from '../helpers/transaction_error_rate';
+import { calculateFailedTransactionRate } from '../helpers/transaction_error_rate';
 
 export async function getServiceTransactionGroupDetailedStatistics({
   environment,
@@ -164,7 +164,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
     }));
     const errorRate = bucket.timeseries.buckets.map((timeseriesBucket) => ({
       x: timeseriesBucket.key,
-      y: calculateTransactionErrorPercentage(timeseriesBucket[EVENT_OUTCOME]),
+      y: calculateFailedTransactionRate(timeseriesBucket[EVENT_OUTCOME]),
     }));
     const transactionGroupTotalDuration =
       bucket.transaction_group_total_duration.value || 0;

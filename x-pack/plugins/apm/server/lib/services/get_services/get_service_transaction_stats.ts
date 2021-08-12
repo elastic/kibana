@@ -25,7 +25,7 @@ import {
 } from '../../helpers/aggregated_transactions';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
 import {
-  calculateTransactionErrorPercentage,
+  calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../helpers/transaction_error_rate';
 import { ServicesItemsSetup } from './get_services_items';
@@ -137,7 +137,7 @@ export async function getServiceTransactionStats({
           AGENT_NAME
         ] as AgentName,
         latency: topTransactionTypeBucket.avg_duration.value,
-        transactionErrorRate: calculateTransactionErrorPercentage(
+        transactionErrorRate: calculateFailedTransactionRate(
           topTransactionTypeBucket.outcomes
         ),
         throughput: calculateThroughput({

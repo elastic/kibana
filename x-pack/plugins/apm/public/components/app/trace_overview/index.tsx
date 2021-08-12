@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -12,6 +13,8 @@ import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { SearchBar } from '../../shared/search_bar';
 import { TraceList } from './trace_list';
+import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
+import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
 
 type TracesAPIResponse = APIReturnType<'GET /api/apm/traces'>;
 const DEFAULT_RESPONSE: TracesAPIResponse = {
@@ -19,6 +22,7 @@ const DEFAULT_RESPONSE: TracesAPIResponse = {
 };
 
 export function TraceOverview() {
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher();
   const {
     query: { environment, kuery },
   } = useApmParams('/traces');
@@ -48,6 +52,14 @@ export function TraceOverview() {
   return (
     <>
       <SearchBar />
+
+      {fallbackToTransactions && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <AggregatedTransactionsCallout />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
 
       <TraceList
         items={data.items}

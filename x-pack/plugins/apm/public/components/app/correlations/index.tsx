@@ -52,7 +52,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 const errorRateTab = {
   key: 'errorRate',
   label: i18n.translate('xpack.apm.correlations.tabs.errorRateLabel', {
-    defaultMessage: 'Error rate',
+    defaultMessage: 'Failed transaction rate',
   }),
   component: ErrorCorrelations,
 };
