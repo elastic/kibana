@@ -7,7 +7,7 @@
  */
 
 import { get, omit } from 'lodash';
-import { FieldFilter, getConvertedValueForField } from '../filters';
+import { getConvertedValueForField } from '../filters';
 import { Filter } from '../filters';
 import { IndexPatternBase } from './types';
 
@@ -23,7 +23,7 @@ export interface DeprecatedMatchPhraseFilter extends Filter {
   };
 }
 
-function isDeprecatedMatchPhraseFilter(filter: FieldFilter): filter is DeprecatedMatchPhraseFilter {
+function isDeprecatedMatchPhraseFilter(filter: Filter): filter is DeprecatedMatchPhraseFilter {
   const fieldName = filter.query && filter.query.match && Object.keys(filter.query.match)[0];
 
   return Boolean(fieldName && get(filter, ['query', 'match', fieldName, 'type']) === 'phrase');
