@@ -14,11 +14,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ALERT_DURATION,
-  ALERT_SEVERITY_LEVEL,
-  ALERT_UUID,
-} from '@kbn/rule-data-utils/target/technical_field_names';
+import { ALERT_DURATION, ALERT_SEVERITY_LEVEL, ALERT_UUID } from '@kbn/rule-data-utils';
 import React, { Suspense, useMemo, useState } from 'react';
 import { LazyAlertsFlyout } from '../..';
 import { asDuration } from '../../../common/utils/formatters';
