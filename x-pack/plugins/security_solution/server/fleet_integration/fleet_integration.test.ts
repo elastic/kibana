@@ -328,6 +328,7 @@ describe('ingest_integration tests ', () => {
         id: trustedAppItem.id,
         namespaceType: trustedAppItem.namespace_type,
       });
+      expect(updatedTrustedAppItem!.tags).toBe([]);
     });
   });
 });
