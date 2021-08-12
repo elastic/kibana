@@ -35,6 +35,11 @@ import {
   updateVisualizationState,
   useLensDispatch,
   useLensSelector,
+  VisualizationState,
+  DatasourceStates,
+  selectActiveDatasourceId,
+  selectVisualization,
+  selectDatasourceStates,
 } from '../../../state_management';
 import { generateId } from '../../../id_generator/id_generator';
 
@@ -111,9 +116,9 @@ function getCurrentVisualizationId(
 export const ChartSwitch = memo(function ChartSwitch(props: Props) {
   const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
   const dispatchLens = useLensDispatch();
-  const activeDatasourceId = useLensSelector((state) => state.lens.activeDatasourceId);
-  const visualization = useLensSelector((state) => state.lens.visualization);
-  const datasourceStates = useLensSelector((state) => state.lens.datasourceStates);
+  const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
+  const visualization = useLensSelector(selectVisualization);
+  const datasourceStates = useLensSelector(selectDatasourceStates);
 
   function removeLayers(layerIds: string[]) {
     const activeVisualization =
@@ -131,21 +136,22 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       );
     }
     layerIds.forEach((layerId) => {
-      const layerDatasourceId = Object.entries(props.datasourceMap).find(
-        ([datasourceId, datasource]) => {
+      const [layerDatasourceId] =
+        Object.entries(props.datasourceMap).find(([datasourceId, datasource]) => {
           return (
             datasourceStates[datasourceId] &&
             datasource.getLayers(datasourceStates[datasourceId].state).includes(layerId)
           );
-        }
-      )![0];
-      dispatchLens(
-        updateLayer({
-          layerId,
-          datasourceId: layerDatasourceId,
-          updater: props.datasourceMap[layerDatasourceId].removeLayer,
-        })
-      );
+        }) ?? [];
+      if (layerDatasourceId) {
+        dispatchLens(
+          updateLayer({
+            layerId,
+            datasourceId: layerDatasourceId,
+            updater: props.datasourceMap[layerDatasourceId].removeLayer,
+          })
+        );
+      }
     });
   }
 
@@ -498,11 +504,8 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
 function getTopSuggestion(
   props: Props,
   visualizationId: string,
-  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
-  visualization: {
-    activeId: string | null;
-    state: unknown;
-  },
+  datasourceStates: DatasourceStates,
+  visualization: VisualizationState,
   newVisualization: Visualization<unknown>,
   subVisualizationId?: string
 ): Suggestion | undefined {

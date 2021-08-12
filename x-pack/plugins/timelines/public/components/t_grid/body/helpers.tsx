@@ -147,6 +147,7 @@ export const allowSorting = ({
     'signal.parent.index',
     'signal.parent.rule',
     'signal.parent.type',
+    'signal.reason',
     'signal.rule.created_by',
     'signal.rule.description',
     'signal.rule.enabled',

@@ -155,7 +155,7 @@ describe('SavedObjectsClient', () => {
         http.fetch.mockResolvedValue({
           saved_object: doc,
           outcome: 'conflict',
-          aliasTargetId: 'another-id',
+          alias_target_id: 'another-id',
         } as SavedObjectsResolveResponse);
       });
     });
@@ -197,11 +197,11 @@ describe('SavedObjectsClient', () => {
 
     test('resolves with ResolvedSimpleSavedObject instance', async () => {
       const result = await savedObjectsClient.resolve(doc.type, doc.id);
-      expect(result.savedObject).toBeInstanceOf(SimpleSavedObject);
-      expect(result.savedObject.type).toBe(doc.type);
-      expect(result.savedObject.get('title')).toBe('Example title');
+      expect(result.saved_object).toBeInstanceOf(SimpleSavedObject);
+      expect(result.saved_object.type).toBe(doc.type);
+      expect(result.saved_object.get('title')).toBe('Example title');
       expect(result.outcome).toBe('conflict');
-      expect(result.aliasTargetId).toBe('another-id');
+      expect(result.alias_target_id).toBe('another-id');
     });
   });
 
