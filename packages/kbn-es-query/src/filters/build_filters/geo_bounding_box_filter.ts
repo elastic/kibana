@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { has } from 'lodash';
 import type { FieldFilter, Filter, FilterMeta, LatLon } from './types';
 
@@ -18,7 +19,7 @@ export type GeoBoundingBoxFilterMeta = FilterMeta & {
 
 export type GeoBoundingBoxFilter = Filter & {
   meta: GeoBoundingBoxFilterMeta;
-  geo_bounding_box: any;
+  geo_bounding_box: estypes.QueryDslQueryContainer['geo_bounding_box'];
 };
 
 /**

@@ -36,15 +36,8 @@ const dateComparators = {
  * An interface for all possible range filter params
  * @public
  */
-export interface RangeFilterParams {
-  from?: number | string;
-  to?: number | string;
-  gt?: number | string;
-  lt?: number | string;
-  gte?: number | string;
-  lte?: number | string;
-  format?: string;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface RangeFilterParams extends estypes.QueryDslRangeQuery {}
 
 const hasRangeKeys = (params: RangeFilterParams) =>
   Boolean(
@@ -68,13 +61,9 @@ export type RangeFilter = Filter &
   EsRangeFilter & {
     meta: RangeFilterMeta;
     script?: {
-      script: {
-        params: any;
-        lang: estypes.ScriptLanguage;
-        source: string;
-      };
+      script: estypes.InlineScript;
     };
-    match_all?: any;
+    match_all?: estypes.QueryDslQueryContainer['match_all'];
   };
 
 /**
@@ -126,7 +115,7 @@ export const buildRangeFilter = (
   indexPattern: IndexPatternBase,
   formattedValue?: string
 ): RangeFilter => {
-  const filter: any = { meta: { index: indexPattern.id, params: {} } };
+  const filter: RangeFilter = { meta: { index: indexPattern.id, params: {} }, range: {} };
 
   if (formattedValue) {
     filter.meta.formattedValue = formattedValue;
@@ -137,7 +126,7 @@ export const buildRangeFilter = (
   if ('gte' in params && 'gt' in params) throw new Error('gte and gt are mutually exclusive');
   if ('lte' in params && 'lt' in params) throw new Error('lte and lt are mutually exclusive');
 
-  const totalInfinite = ['gt', 'lt'].reduce((acc: number, op: any) => {
+  const totalInfinite = ['gt', 'lt'].reduce((acc, op) => {
     const key = op in params ? op : `${op}e`;
     const isInfinite = Math.abs(get(params, key)) === Infinity;
 
@@ -155,8 +144,10 @@ export const buildRangeFilter = (
     filter.match_all = {};
     filter.meta.field = field.name;
   } else if (field.scripted) {
-    filter.script = getRangeScript(field, params);
-    filter.script.script.params.value = formatValue(filter.script.script.params);
+    const scr = getRangeScript(field, params);
+    // TODO: type mismatch enforced
+    scr.script.params.value = formatValue(scr.script.params as any);
+    filter.script = scr;
 
     filter.meta.field = field.name;
   } else {
@@ -171,13 +162,13 @@ export const buildRangeFilter = (
  * @internal
  */
 export const getRangeScript = (field: IndexPatternFieldBase, params: RangeFilterParams) => {
-  const knownParams = mapValues(
-    pickBy(params, (val, key: any) => key in operators),
+  const knownParams: estypes.InlineScript['params'] = mapValues(
+    pickBy(params, (val, key) => key in operators),
     (value) => (field.type === 'number' && typeof value === 'string' ? parseFloat(value) : value)
   );
   let script = map(
     knownParams,
-    (val: any, key: string) => '(' + field.script + ')' + get(operators, key) + key
+    (_: unknown, key) => '(' + field.script + ')' + get(operators, key) + key
   ).join(' && ');
 
   // We must wrap painless scripts in a lambda in case they're more than a simple expression
@@ -201,7 +192,7 @@ export const getRangeScript = (field: IndexPatternFieldBase, params: RangeFilter
     script: {
       source: script,
       params: knownParams,
-      lang: field.lang,
+      lang: field.lang!,
     },
   };
 };

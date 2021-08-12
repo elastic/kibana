@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { has } from 'lodash';
 import type { FieldFilter, Filter, FilterMeta, LatLon } from './types';
 
@@ -17,7 +18,7 @@ export type GeoPolygonFilterMeta = FilterMeta & {
 
 export type GeoPolygonFilter = Filter & {
   meta: GeoPolygonFilterMeta;
-  geo_polygon: any;
+  geo_polygon: estypes.QueryDslQueryContainer['geo_polygon'];
 };
 
 /**

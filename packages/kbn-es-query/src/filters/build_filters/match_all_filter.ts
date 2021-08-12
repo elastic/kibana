@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { has } from 'lodash';
 import type { FieldFilter, Filter, FilterMeta } from './types';
 
@@ -16,7 +17,7 @@ export interface MatchAllFilterMeta extends FilterMeta {
 
 export type MatchAllFilter = Filter & {
   meta: MatchAllFilterMeta;
-  match_all: any;
+  match_all: estypes.QueryDslMatchAllQuery;
 };
 
 /**

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { ExistsFilter } from './exists_filter';
 import { GeoBoundingBoxFilter } from './geo_bounding_box_filter';
 import { GeoPolygonFilter } from './geo_polygon_filter';
@@ -28,12 +29,6 @@ export type FieldFilter =
   | RangeFilter
   | MatchAllFilter
   | MissingFilter;
-
-/**
- * A common type for filters supported by this package
- * @public
- **/
-export type FilterParams = any;
 
 /**
  * An enum of all types of filters supported by this package
@@ -65,9 +60,9 @@ export enum FilterStateStore {
 
 // eslint-disable-next-line
 export type FilterMeta = {
-  alias: string | null;
-  disabled: boolean;
-  negate: boolean;
+  alias?: string | null;
+  disabled?: boolean;
+  negate?: boolean;
   // controlledBy is there to identify who owns the filter
   controlledBy?: string;
   // index and type are optional only because when you create a new filter, there are no defaults
@@ -79,13 +74,11 @@ export type FilterMeta = {
   value?: string;
 };
 
-// eslint-disable-next-line
-export type Filter = {
+export type Filter = estypes.QueryDslQueryContainer & {
   $state?: {
     store: FilterStateStore;
   };
   meta: FilterMeta;
-  query?: any; // TODO: can we use the Query type her?
 };
 
 // eslint-disable-next-line
