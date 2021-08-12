@@ -371,7 +371,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
             "kibana.alert.reason": Array [
-              "Failed transaction rate is greater than 30% (current value is 50%) for opbeans-go",
+              "Failed transactions rate is greater than 30% (current value is 50%) for opbeans-go",
             ],
             "kibana.alert.rule.category": Array [
               "Failed transaction rate threshold",
