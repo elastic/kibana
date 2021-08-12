@@ -1,8 +1,7 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
-    "incremental": true,
-    "outDir": "./target",
+    "outDir": "./target/types",
     "stripInternal": false,
     "declaration": true,
     "declarationMap": true,

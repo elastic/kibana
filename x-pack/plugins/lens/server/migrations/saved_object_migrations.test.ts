@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import { migrations, LensDocShape } from './saved_object_migrations';
 import {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
   SavedObjectUnsanitizedDoc,
 } from 'src/core/server';
+import { LensDocShape715, VisStatePost715, VisStatePre715 } from './types';
+import { layerTypes } from '../../common';
 
 describe('Lens migrations', () => {
   describe('7.7.0 missing dimensions in XY', () => {
@@ -942,6 +945,188 @@ describe('Lens migrations', () => {
       expect((columns[1] as { params: {} }).params).toEqual({ interval: 'auto' });
       expect(columns[2].operationType).toEqual('my_unexpected_operation');
       expect((columns[2] as { params: {} }).params).toEqual({ timeZone: 'do not delete' });
+    });
+  });
+
+  describe('7.15.0 add layer type information', () => {
+    const context = ({ log: { warning: () => {} } } as unknown) as SavedObjectMigrationContext;
+    const example = ({
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: null,
+        state: {
+          datasourceMetaData: {
+            filterableIndexPatterns: [],
+          },
+          datasourceStates: {
+            indexpattern: {
+              currentIndexPatternId: 'logstash-*',
+              layers: {
+                '2': {
+                  columns: {
+                    '3': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'date_histogram',
+                      sourceField: '@timestamp',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { interval: 'auto', timeZone: 'Europe/Berlin' },
+                    },
+                    '4': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'date_histogram',
+                      sourceField: '@timestamp',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { interval: 'auto' },
+                    },
+                    '5': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'my_unexpected_operation',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { timeZone: 'do not delete' },
+                    },
+                  },
+                  columnOrder: ['3', '4', '5'],
+                },
+              },
+            },
+          },
+          visualization: {},
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+      },
+    } as unknown) as SavedObjectUnsanitizedDoc<LensDocShape715<unknown>>;
+
+    it('should add the layerType to a XY visualization', () => {
+      const xyExample = cloneDeep(example);
+      xyExample.attributes.visualizationType = 'lnsXY';
+      (xyExample.attributes as LensDocShape715<VisStatePre715>).state.visualization = ({
+        title: 'Empty XY chart',
+        legend: { isVisible: true, position: 'right' },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar_stacked',
+        layers: [
+          {
+            layerId: '1',
+            accessors: [
+              '5fea2a56-7b73-44b5-9a50-7f0c0c4f8fd0',
+              'e5efca70-edb5-4d6d-a30a-79384066987e',
+              '7ffb7bde-4f42-47ab-b74d-1b4fd8393e0f',
+            ],
+            position: 'top',
+            seriesType: 'bar_stacked',
+            showGridlines: false,
+            xAccessor: '2e57a41e-5a52-42d3-877f-bd211d903ef8',
+          },
+          {
+            layerId: '2',
+            accessors: [
+              '5fea2a56-7b73-44b5-9a50-7f0c0c4f8fd0',
+              'e5efca70-edb5-4d6d-a30a-79384066987e',
+              '7ffb7bde-4f42-47ab-b74d-1b4fd8393e0f',
+            ],
+            position: 'top',
+            seriesType: 'bar_stacked',
+            showGridlines: false,
+            xAccessor: '2e57a41e-5a52-42d3-877f-bd211d903ef8',
+          },
+        ],
+      } as unknown) as VisStatePre715;
+      const result = migrations['7.15.0'](xyExample, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
+      if ('layers' in state) {
+        for (const layer of state.layers) {
+          expect(layer.layerType).toEqual(layerTypes.DATA);
+        }
+      }
+    });
+
+    it('should add layer info to a pie visualization', () => {
+      const pieExample = cloneDeep(example);
+      pieExample.attributes.visualizationType = 'lnsPie';
+      (pieExample.attributes as LensDocShape715<VisStatePre715>).state.visualization = ({
+        shape: 'pie',
+        layers: [
+          {
+            layerId: '1',
+            groups: [],
+            metric: undefined,
+            numberDisplay: 'percent',
+            categoryDisplay: 'default',
+            legendDisplay: 'default',
+            nestedLegend: false,
+          },
+        ],
+      } as unknown) as VisStatePre715;
+      const result = migrations['7.15.0'](pieExample, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
+      if ('layers' in state) {
+        for (const layer of state.layers) {
+          expect(layer.layerType).toEqual(layerTypes.DATA);
+        }
+      }
+    });
+    it('should add layer info to a metric visualization', () => {
+      const metricExample = cloneDeep(example);
+      metricExample.attributes.visualizationType = 'lnsMetric';
+      (metricExample.attributes as LensDocShape715<VisStatePre715>).state.visualization = ({
+        layerId: '1',
+        accessor: undefined,
+      } as unknown) as VisStatePre715;
+      const result = migrations['7.15.0'](metricExample, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
+      expect('layerType' in state).toEqual(true);
+      if ('layerType' in state) {
+        expect(state.layerType).toEqual(layerTypes.DATA);
+      }
+    });
+    it('should add layer info to a datatable visualization', () => {
+      const datatableExample = cloneDeep(example);
+      datatableExample.attributes.visualizationType = 'lnsDatatable';
+      (datatableExample.attributes as LensDocShape715<VisStatePre715>).state.visualization = ({
+        layerId: '1',
+        accessor: undefined,
+      } as unknown) as VisStatePre715;
+      const result = migrations['7.15.0'](datatableExample, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
+      expect('layerType' in state).toEqual(true);
+      if ('layerType' in state) {
+        expect(state.layerType).toEqual(layerTypes.DATA);
+      }
+    });
+    it('should add layer info to a heatmap visualization', () => {
+      const heatmapExample = cloneDeep(example);
+      heatmapExample.attributes.visualizationType = 'lnsHeatmap';
+      (heatmapExample.attributes as LensDocShape715<VisStatePre715>).state.visualization = ({
+        layerId: '1',
+        accessor: undefined,
+      } as unknown) as VisStatePre715;
+      const result = migrations['7.15.0'](heatmapExample, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
+      expect('layerType' in state).toEqual(true);
+      if ('layerType' in state) {
+        expect(state.layerType).toEqual(layerTypes.DATA);
+      }
     });
   });
 });

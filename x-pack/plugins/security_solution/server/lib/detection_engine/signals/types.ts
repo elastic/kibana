@@ -35,6 +35,7 @@ import { RuleParams } from '../schemas/rule_schemas';
 import { GenericBulkCreateResponse } from './bulk_create_factory';
 import { EcsFieldMap } from '../../../../../rule_registry/common/assets/field_maps/ecs_field_map';
 import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
+import { BuildReasonMessage } from './reason_formatters';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -195,7 +196,7 @@ export const isAlertExecutor = (
   obj: SignalRuleAlertTypeDefinition
 ): obj is AlertType<
   RuleParams,
-  never, // Only use if defining useSavedObjectReferences hook
+  RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
@@ -206,7 +207,7 @@ export const isAlertExecutor = (
 
 export type SignalRuleAlertTypeDefinition = AlertType<
   RuleParams,
-  never, // Only use if defining useSavedObjectReferences hook
+  RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
@@ -238,6 +239,7 @@ export interface Signal {
   };
   original_time?: string;
   original_event?: SearchTypes;
+  reason?: string;
   status: Status;
   threshold_result?: ThresholdResult;
   original_signal?: SearchTypes;
@@ -281,9 +283,15 @@ export type BulkCreate = <T>(docs: Array<BaseHit<T>>) => Promise<GenericBulkCrea
 
 export type SimpleHit = BaseHit<{ '@timestamp': string }>;
 
-export type WrapHits = (hits: estypes.SearchHit[]) => SimpleHit[];
+export type WrapHits = (
+  hits: Array<estypes.SearchHit<SignalSource>>,
+  buildReasonMessage: BuildReasonMessage
+) => SimpleHit[];
 
-export type WrapSequences = (sequences: Array<EqlSequence<SignalSource>>) => SimpleHit[];
+export type WrapSequences = (
+  sequences: Array<EqlSequence<SignalSource>>,
+  buildReasonMessage: BuildReasonMessage
+) => SimpleHit[];
 
 export interface SearchAfterAndBulkCreateParams {
   tuple: {
@@ -303,6 +311,7 @@ export interface SearchAfterAndBulkCreateParams {
   pageSize: number;
   filter: unknown;
   buildRuleMessage: BuildRuleMessage;
+  buildReasonMessage: BuildReasonMessage;
   enrichment?: SignalsEnrichment;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
