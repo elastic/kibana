@@ -215,7 +215,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           actions: [],
           tags: ['apm', 'service.name:opbeans-go'],
           notifyWhen: 'onActionGroupChange',
-          name: 'Transaction error rate threshold | opbeans-go',
+          name: 'Failed transaction rate threshold | opbeans-go',
         };
 
         const { body: response, status } = await supertest
@@ -371,13 +371,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
             "kibana.alert.rule.category": Array [
-              "Transaction error rate threshold",
+              "Failed transaction rate threshold",
             ],
             "kibana.alert.rule.consumer": Array [
               "apm",
             ],
             "kibana.alert.rule.name": Array [
-              "Transaction error rate threshold | opbeans-go",
+              "Failed transaction rate threshold | opbeans-go",
             ],
             "kibana.alert.rule.producer": Array [
               "apm",
@@ -447,13 +447,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
             "kibana.alert.rule.category": Array [
-              "Transaction error rate threshold",
+              "Failed transaction rate threshold",
             ],
             "kibana.alert.rule.consumer": Array [
               "apm",
             ],
             "kibana.alert.rule.name": Array [
-              "Transaction error rate threshold | opbeans-go",
+              "Failed transaction rate threshold | opbeans-go",
             ],
             "kibana.alert.rule.producer": Array [
               "apm",
@@ -551,13 +551,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
             "kibana.alert.rule.category": Array [
-              "Transaction error rate threshold",
+              "Failed transaction rate threshold",
             ],
             "kibana.alert.rule.consumer": Array [
               "apm",
             ],
             "kibana.alert.rule.name": Array [
-              "Transaction error rate threshold | opbeans-go",
+              "Failed transaction rate threshold | opbeans-go",
             ],
             "kibana.alert.rule.producer": Array [
               "apm",
