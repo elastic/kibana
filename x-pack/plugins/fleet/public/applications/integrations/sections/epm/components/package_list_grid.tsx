@@ -205,7 +205,7 @@ function MissingIntegrationContent({
       <p>
         <FormattedMessage
           id="xpack.fleet.integrations.missing"
-          defaultMessage="Don't see an integration? Collect any logs or metrics using our {customInputsLink}, or set up {beatsTutorialLink}. Request new integrations using our {discussForumLink}."
+          defaultMessage="Don't see an integration? Collect any logs or metrics using our {customInputsLink}, or add data using {beatsTutorialLink}. Request new integrations using our {discussForumLink}."
           values={{
             customInputsLink: (
               <EuiLink onClick={handleCustomInputsLinkClick}>
@@ -226,8 +226,8 @@ function MissingIntegrationContent({
             beatsTutorialLink: (
               <EuiLink href={getUrlForApp('home', { path: '#/tutorial_directory' })}>
                 <FormattedMessage
-                  id="xpack.fleet.integrations.customInputsLink"
-                  defaultMessage="individual Beats"
+                  id="xpack.fleet.integrations.beatsModulesLink"
+                  defaultMessage="Beats modules"
                 />
               </EuiLink>
             ),
