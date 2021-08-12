@@ -149,10 +149,8 @@ export class MapEmbeddable
       return;
     }
 
-    // communicate to the parent that this embeddable's initialization is done.
-    if (this.parent?.isContainer) {
-      this.parent.setChildLoaded(this);
-    }
+    // deferred loading of this embeddable is complete
+    this.setInitializationFinished();
 
     this._isInitialized = true;
     if (this._domNode) {

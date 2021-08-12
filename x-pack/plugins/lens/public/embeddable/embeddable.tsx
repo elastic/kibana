@@ -487,10 +487,8 @@ export class Embeddable
       indexPatterns,
     });
 
-    // communicate to the parent that this embeddable's initialization is done.
-    if (this.parent?.isContainer) {
-      this.parent.setChildLoaded(this);
-    }
+    // deferred loading of this embeddable is complete
+    this.setInitializationFinished();
   }
 
   private getIsEditable() {

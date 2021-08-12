@@ -197,6 +197,16 @@ export abstract class Embeddable<
     return;
   }
 
+  /**
+   * communicate to the parent embeddable that this embeddable's initialization is finished.
+   * This only applies to embeddables which defer their loading state with deferEmbeddableLoad.
+   */
+  protected setInitializationFinished() {
+    if (this.deferEmbeddableLoad && this.parent?.isContainer) {
+      this.parent.setChildLoaded(this);
+    }
+  }
+
   protected updateOutput(outputChanges: Partial<TEmbeddableOutput>): void {
     const newOutput = {
       ...this.output,
