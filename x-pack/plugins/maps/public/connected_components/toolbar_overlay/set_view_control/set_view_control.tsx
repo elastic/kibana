@@ -22,15 +22,14 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiRadioGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import * as usng from 'usng.js';
+import { isNull } from 'lodash';
 import { MapCenter } from '../../../../common/descriptor_types';
 import { MapSettings } from '../../../reducers/map';
 
-import * as usng from 'usng.js';
-import { isNull } from 'lodash';
-
-export const COORDINATE_SYSTEM_DEGREES_DECIMAL = "dd";
-export const COORDINATE_SYSTEM_MGRS = "mgrs";
-export const COORDINATE_SYSTEM_UTM = "utm";
+export const COORDINATE_SYSTEM_DEGREES_DECIMAL = 'dd';
+export const COORDINATE_SYSTEM_MGRS = 'mgrs';
+export const COORDINATE_SYSTEM_UTM = 'utm';
 
 export const DEFAULT_SET_VIEW_COORDINATE_SYSTEM = COORDINATE_SYSTEM_DEGREES_DECIMAL;
 
@@ -39,16 +38,16 @@ const converter = new usng.Converter();
 const COORDINATE_SYSTEMS = [
   {
     id: COORDINATE_SYSTEM_DEGREES_DECIMAL,
-    label: 'Degrees Decimal'
+    label: 'Degrees Decimal',
   },
   {
     id: COORDINATE_SYSTEM_UTM,
-    label: 'UTM'
+    label: 'UTM',
   },
   {
     id: COORDINATE_SYSTEM_MGRS,
-    label: 'MGRS'
-  }
+    label: 'MGRS',
+  },
 ];
 
 export interface Props {
@@ -65,7 +64,7 @@ interface State {
   zoom: number | string;
   coord: string;
   mgrs: string;
-  utm: object
+  utm: { northing: string; easting: string; zoneNumber: any };
 }
 
 export class SetViewControl extends Component<Props, State> {
@@ -75,15 +74,16 @@ export class SetViewControl extends Component<Props, State> {
     lon: 0,
     zoom: 0,
     coord: DEFAULT_SET_VIEW_COORDINATE_SYSTEM,
-    mgrs: "",
-    utm: {}
+    mgrs: '',
+    utm: {
+      northing: '',
+      easting: '',
+      zoneNumber: '',
+    },
   };
 
-  static convertLatLonToUTM(lat, lon) {
-    const utmCoord = converter.LLtoUTM(
-      lat,
-      lon
-    );
+  static convertLatLonToUTM(lat: any, lon: any) {
+    const utmCoord = converter.LLtoUTM(lat, lon);
 
     let eastwest = 'E';
     if (utmCoord.easting < 0) {
@@ -94,54 +94,58 @@ export class SetViewControl extends Component<Props, State> {
       norwest = 'S';
     }
 
-    utmCoord.zoneLetter = isNaN(lat) ? '' : converter.UTMLetterDesignator(lat)
-    utmCoord.zone = `${utmCoord.zoneNumber}${utmCoord.zoneLetter}`
+    utmCoord.zoneLetter = isNaN(lat) ? '' : converter.UTMLetterDesignator(lat);
+    utmCoord.zone = `${utmCoord.zoneNumber}${utmCoord.zoneLetter}`;
     utmCoord.easting = Math.round(utmCoord.easting);
     utmCoord.northing = Math.round(utmCoord.northing);
-    utmCoord.str = `${utmCoord.zoneNumber}${utmCoord.zoneLetter} ${utmCoord.easting}${eastwest} ${utmCoord.northing}${norwest}`
+    utmCoord.str = `${utmCoord.zoneNumber}${utmCoord.zoneLetter} ${utmCoord.easting}${eastwest} ${utmCoord.northing}${norwest}`;
 
     return utmCoord;
   }
 
-  static convertLatLonToMGRS(lat, lon) {
-    const mgrsCoord = converter.LLtoMGRS(lat,lon, 5);
+  static convertLatLonToMGRS(lat: any, lon: any) {
+    const mgrsCoord = converter.LLtoMGRS(lat, lon, 5);
     return mgrsCoord;
   }
 
-  static getViewString(lat, lon, zoom) {
+  static getViewString(lat: any, lon: any, zoom: any) {
     return `${lat},${lon},${zoom}`;
   }
 
-  static convertMGRStoUSNG(mgrs){
-    let eastNorthSpace, squareIdEastSpace, gridZoneSquareIdSpace
-    for(let i = mgrs.length - 1; i > -1; i--){
+  static convertMGRStoUSNG(mgrs: any) {
+    let squareIdEastSpace;
+    for (let i = mgrs.length - 1; i > -1; i--) {
       // check if we have hit letters yet
-      if(isNaN(mgrs.substr(i,1))){
-          squareIdEastSpace = i + 1
-          break;
-      };
+      if (isNaN(mgrs.substr(i, 1))) {
+        squareIdEastSpace = i + 1;
+        break;
+      }
     }
-    gridZoneSquareIdSpace = squareIdEastSpace - 2
-    let numPartLength = mgrs.substr(squareIdEastSpace).length / 2;
+    const gridZoneSquareIdSpace = squareIdEastSpace ? squareIdEastSpace - 2 : -1;
+    const numPartLength = mgrs.substr(squareIdEastSpace).length / 2;
     // add the number split space
-    eastNorthSpace = squareIdEastSpace + numPartLength;
-    let stringArray = mgrs.split("");
-    
-    stringArray.splice(eastNorthSpace, 0, " ");
-    stringArray.splice(squareIdEastSpace, 0, " ");
-    stringArray.splice(gridZoneSquareIdSpace, 0, " ");
-    
-    let rejoinedArray = stringArray.join("");
+    const eastNorthSpace = squareIdEastSpace ? squareIdEastSpace + numPartLength : -1;
+    const stringArray = mgrs.split('');
+
+    stringArray.splice(eastNorthSpace, 0, ' ');
+    stringArray.splice(squareIdEastSpace, 0, ' ');
+    stringArray.splice(gridZoneSquareIdSpace, 0, ' ');
+
+    const rejoinedArray = stringArray.join('');
     return rejoinedArray;
-}
+  }
 
-static convertMGRStoLL(mgrs){
-  return mgrs ? converter.USNGtoLL(SetViewControl.convertMGRStoUSNG(mgrs)) : '';
-}
+  static convertMGRStoLL(mgrs: any) {
+    return mgrs ? converter.USNGtoLL(SetViewControl.convertMGRStoUSNG(mgrs)) : '';
+  }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
-    const nextView = SetViewControl.getViewString(nextProps.center.lat, nextProps.center.lon, nextProps.zoom);
-    
+  static getDerivedStateFromProps(nextProps: any, prevState: any) {
+    const nextView = SetViewControl.getViewString(
+      nextProps.center.lat,
+      nextProps.center.lon,
+      nextProps.zoom
+    );
+
     const utm = SetViewControl.convertLatLonToUTM(nextProps.center.lat, nextProps.center.lon);
     const mgrs = SetViewControl.convertLatLonToMGRS(nextProps.center.lat, nextProps.center.lon);
 
@@ -150,8 +154,8 @@ static convertMGRStoLL(mgrs){
         lat: nextProps.center.lat,
         lon: nextProps.center.lon,
         zoom: nextProps.zoom,
-        utm: utm,
-        mgrs: mgrs,
+        utm,
+        mgrs,
         prevView: nextView,
       };
     }
@@ -179,10 +183,10 @@ static convertMGRStoLL(mgrs){
     });
   };
 
-  _onCoordinateSystemChange = coordId => {
+  _onCoordinateSystemChange = (coordId: any) => {
     this.setState({
       coord: coordId,
-    }); 
+    });
   };
 
   _onLatChange = (evt: ChangeEvent<HTMLInputElement>) => {
@@ -201,37 +205,48 @@ static convertMGRStoLL(mgrs){
   };
 
   _onUTMZoneChange = (evt: ChangeEvent<HTMLInputElement>) => {
-    this._onUTMChange('zone', evt)
+    this._onUTMChange('zone', evt);
   };
 
   _onUTMEastingChange = (evt: ChangeEvent<HTMLInputElement>) => {
-    this._onUTMChange('easting', evt)
+    this._onUTMChange('easting', evt);
   };
 
   _onUTMNorthingChange = (evt: ChangeEvent<HTMLInputElement>) => {
-    this._onUTMChange('northing', evt)
+    this._onUTMChange('northing', evt);
   };
 
   _onMGRSChange = (evt: ChangeEvent<HTMLInputElement>) => {
-    this.setState({
-      ['mgrs']: isNull(evt.target.value) ? '' : evt.target.value
-    }, this._syncToMGRS)
+    this.setState(
+      {
+        ['mgrs']: isNull(evt.target.value) ? '' : evt.target.value,
+      },
+      this._syncToMGRS
+    );
   };
 
   _onUTMChange = (name: 'easting' | 'northing' | 'zone', evt: ChangeEvent<HTMLInputElement>) => {
-    let updateObj = {...this.state.utm};
+    const updateObj: { [name: string]: any } = { ...this.state.utm };
     updateObj[name] = isNull(evt.target.value) ? '' : evt.target.value;
-    this.setState({
-      ['utm']: updateObj
-    }, this._syncToUTM)
+    this.setState(
+      {
+        // @ts-ignore
+        ['utm']: updateObj,
+      },
+      this._syncToUTM
+    );
   };
 
-  _onChange = (name: 'lat' | 'lon' , evt: ChangeEvent<HTMLInputElement>) => {
+  _onChange = (name: 'lat' | 'lon', evt: ChangeEvent<HTMLInputElement>) => {
     const sanitizedValue = parseFloat(evt.target.value);
-    // @ts-expect-error
-    this.setState({
-      [name]: isNaN(sanitizedValue) ? '' : sanitizedValue,
-    }, this._syncToLatLon);
+
+    this.setState(
+      // @ts-ignore
+      {
+        [name]: isNaN(sanitizedValue) ? '' : sanitizedValue,
+      },
+      this._syncToLatLon
+    );
   };
 
   /**
@@ -239,29 +254,30 @@ static convertMGRStoLL(mgrs){
    */
   _syncToLatLon = () => {
     if (this.state.lat !== '' && this.state.lon !== '') {
-
       const utm = SetViewControl.convertLatLonToUTM(this.state.lat, this.state.lon);
       const mgrs = SetViewControl.convertLatLonToMGRS(this.state.lat, this.state.lon);
 
-      this.setState({mgrs: mgrs, utm: utm});
+      this.setState({ mgrs, utm });
     } else {
-      this.setState({mgrs: '', utm: {}});
+      this.setState({ mgrs: '', utm: { northing: '', easting: '', zoneNumber: '' } });
     }
-  }
+  };
 
   /**
    * Sync the current lat/lon to MGRS that is set
    */
-   _syncToMGRS = () => {
+  _syncToMGRS = () => {
     if (this.state.mgrs !== '') {
-      let lon, lat;
+      let lon;
+      let lat;
 
       try {
         const { north, east } = SetViewControl.convertMGRStoLL(this.state.mgrs);
         lat = north;
         lon = east;
-      } catch(err) {
-        console.log("error converting MGRS:" + this.state.mgrs, err);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.log('error converting MGRS:' + this.state.mgrs, err);
         return;
       }
 
@@ -270,29 +286,32 @@ static convertMGRStoLL(mgrs){
       this.setState({
         lat: isNaN(lat) ? '' : lat,
         lon: isNaN(lon) ? '' : lon,
-        utm: utm
+        utm,
       });
-
     } else {
       this.setState({
         lat: '',
         lon: '',
-        utm: {}
+        utm: {},
       });
     }
-  }
+  };
 
   /**
    * Sync the current lat/lon to UTM that is set
    */
   _syncToUTM = () => {
-    
     if (this.state.utm) {
-      let lat, lon;
+      let lat;
+      let lon;
       try {
-        ({ lat, lon } = converter.UTMtoLL(this.state.utm.northing, this.state.utm.easting, this.state.zoneNumber));
-      } catch(err) {
-        console.log("error converting UTM");
+        ({ lat, lon } = converter.UTMtoLL(
+          this.state.utm.northing,
+          this.state.utm.easting,
+          this.state.zoneNumber
+        ));
+      } catch (err) {
+        console.log('error converting UTM');
         return;
       }
 
@@ -301,17 +320,16 @@ static convertMGRStoLL(mgrs){
       this.setState({
         lat: isNaN(lat) ? '' : lat,
         lon: isNaN(lon) ? '' : lon,
-        mgrs: mgrs
+        mgrs,
       });
-
     } else {
       this.setState({
         lat: '',
         lon: '',
-        mgrs: ''
+        mgrs: '',
       });
     }
-  }
+  };
 
   _renderNumberFormRow = ({
     value,
@@ -350,7 +368,7 @@ static convertMGRStoLL(mgrs){
     let point;
     try {
       point = SetViewControl.convertMGRStoLL(value);
-    } catch(err) {
+    } catch (err) {
       point = undefined;
       console.log("error converting MGRS", err);
     }
@@ -409,10 +427,10 @@ static convertMGRStoLL(mgrs){
   _renderUTMEastingRow = ({ value, onChange, label, dataTestSubj }) => {
     let point;
     try {
-        point = converter.UTMtoLL(
+      point = converter.UTMtoLL(
         this.state.utm.northing,
         parseFloat(value),
-        this.state.utm.zoneNumber 
+        this.state.utm.zoneNumber
       );
     } catch {
       point = undefined;
@@ -503,7 +521,7 @@ static convertMGRStoLL(mgrs){
     });
 
     const { isInvalid: isUTMZoneInvalid, component: utmZoneRow } = this._renderUTMZoneRow({
-      value: (this.state.utm !== undefined) ? this.state.utm.zone : '',
+      value: this.state.utm !== undefined ? this.state.utm.zone : '',
       onChange: this._onUTMZoneChange,
       label: i18n.translate('xpack.maps.setViewControl.utmZoneLabel', {
         defaultMessage: 'UTM Zone',
@@ -512,7 +530,7 @@ static convertMGRStoLL(mgrs){
     });
 
     const { isInvalid: isUTMEastingInvalid, component: utmEastingRow } = this._renderUTMEastingRow({
-      value: (this.state.utm !== undefined) ? this.state.utm.easting : '',
+      value: this.state.utm !== undefined ? this.state.utm.easting : '',
       onChange: this._onUTMEastingChange,
       label: i18n.translate('xpack.maps.setViewControl.utmEastingLabel', {
         defaultMessage: 'UTM Easting',
@@ -520,8 +538,11 @@ static convertMGRStoLL(mgrs){
       dataTestSubj: 'utmEastingInput',
     });
 
-    const { isInvalid: isUTMNorthingInvalid, component: utmNorthingRow } = this._renderUTMNorthingRow({
-      value: (this.state.utm !== undefined) ? this.state.utm.northing : '',
+    const {
+      isInvalid: isUTMNorthingInvalid,
+      component: utmNorthingRow,
+    } = this._renderUTMNorthingRow({
+      value: this.state.utm !== undefined ? this.state.utm.northing : '',
       onChange: this._onUTMNorthingChange,
       label: i18n.translate('xpack.maps.setViewControl.utmNorthingLabel', {
         defaultMessage: 'UTM Northing',
@@ -541,7 +562,7 @@ static convertMGRStoLL(mgrs){
     });
 
     let coordinateInputs;
-    if (this.state.coord === "dd") {
+    if (this.state.coord === 'dd') {
       coordinateInputs = (
         <Fragment>
           {latFormRow}
@@ -549,7 +570,7 @@ static convertMGRStoLL(mgrs){
           {zoomFormRow}
         </Fragment>
       );
-    } else if (this.state.coord === "dms") {
+    } else if (this.state.coord === 'dms') {
       coordinateInputs = (
         <Fragment>
           {latFormRow}
@@ -557,7 +578,7 @@ static convertMGRStoLL(mgrs){
           {zoomFormRow}
         </Fragment>
       );
-    } else if (this.state.coord === "utm") {
+    } else if (this.state.coord === 'utm') {
       coordinateInputs = (
         <Fragment>
           {utmZoneRow}
@@ -566,7 +587,7 @@ static convertMGRStoLL(mgrs){
           {zoomFormRow}
         </Fragment>
       );
-    } else if (this.state.coord === "mgrs") {
+    } else if (this.state.coord === 'mgrs') {
       coordinateInputs = (
         <Fragment>
           {mgrsFormRow}
@@ -589,7 +610,8 @@ static convertMGRStoLL(mgrs){
               size="xs"
               onClick={() => {
                 this.setState({ isCoordPopoverOpen: !this.state.isCoordPopoverOpen });
-              }}>
+              }}
+            >
               Coordinate System
             </EuiButtonEmpty>
           }
