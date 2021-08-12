@@ -199,11 +199,13 @@ export async function migrationStateActionMachine({
     if (e instanceof EsErrors.ResponseError) {
       // Log the failed request. This is very similar to the
       // elasticsearch-service's debug logs, but we log everything in single
-      // line until we have sub-ms resolution in our cloud logs
+      // line until we have sub-ms resolution in our cloud logs. Because this
+      // is error level logs, we're also more careful and don't log the request
+      // body since this can very likely have sensitive saved objects.
       const req = getRequestDebugMeta(e.meta);
       const failedRequestMessage = `Unexpected Elasticsearch ResponseError: statusCode: ${
         req.statusCode
-      }, error: ${getErrorMessage(e)}, method: ${req.method}, url: ${req.url}, body: ${req.body}`;
+      }, error: ${getErrorMessage(e)}, method: ${req.method}, url: ${req.url}`;
       logger.error(logMessagePrefix + failedRequestMessage);
       dumpExecutionLog(logger, logMessagePrefix, executionLog);
       throw new Error(

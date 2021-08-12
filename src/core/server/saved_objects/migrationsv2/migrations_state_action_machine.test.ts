@@ -368,14 +368,14 @@ describe('migrationsStateActionMachine', () => {
         client: esClient,
       })
     ).rejects.toMatchInlineSnapshot(
-      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Please check the health of your Elasticsearch cluster and try again. Unexpected Elasticsearch ResponseError: statusCode: 200, error: [snapshot_in_progress_exception]: Cannot delete indices that are being snapshotted, method: POST, url: /mock, body: ]`
+      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Please check the health of your Elasticsearch cluster and try again. Unexpected Elasticsearch ResponseError: statusCode: 200, error: [snapshot_in_progress_exception]: Cannot delete indices that are being snapshotted, method: POST, url: /mock]`
     );
     expect(loggingSystemMock.collect(mockLogger)).toMatchInlineSnapshot(`
       Object {
         "debug": Array [],
         "error": Array [
           Array [
-            "[.my-so-index] Unexpected Elasticsearch ResponseError: statusCode: 200, error: [snapshot_in_progress_exception]: Cannot delete indices that are being snapshotted, method: POST, url: /mock, body: ",
+            "[.my-so-index] Unexpected Elasticsearch ResponseError: statusCode: 200, error: [snapshot_in_progress_exception]: Cannot delete indices that are being snapshotted, method: POST, url: /mock",
           ],
           Array [
             "[.my-so-index] migration failed, dumping execution log:",
