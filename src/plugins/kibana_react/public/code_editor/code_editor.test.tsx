@@ -7,9 +7,16 @@
  */
 
 import React from 'react';
-import { CodeEditor } from './code_editor';
+import { ReactWrapper } from 'enzyme';
+import { mountWithIntl, findTestSubject } from '@kbn/test/jest';
 import { monaco } from '@kbn/monaco';
-import { shallow } from 'enzyme';
+
+import { keys } from '@elastic/eui';
+
+// This import needs to come before './code_editor' below as it sets the jest.mocks
+import { mockedEditorInstance } from './code_editor.test.helpers';
+
+import { CodeEditor } from './code_editor';
 
 // disabled because this is a test, but also it seems we shouldn't need this?
 /* eslint-disable-next-line @kbn/eslint/module_migration */
@@ -36,64 +43,131 @@ const logs = `
 [Sun Mar 7 21:16:17 2004] [error] [client xx.xx.xx.xx] File does not exist: /home/httpd/twiki/view/Main/WebHome
 `;
 
-test('is rendered', () => {
-  const component = shallow(
-    <CodeEditor languageId="loglang" height={250} value={logs} onChange={() => {}} />
-  );
+describe('<CodeEditor />', () => {
+  test('is rendered', () => {
+    const component = mountWithIntl(
+      <CodeEditor languageId="loglang" height={250} value={logs} onChange={() => {}} />
+    );
 
-  expect(component).toMatchSnapshot();
-});
+    expect(component).toMatchSnapshot();
+  });
 
-test('editor mount setup', () => {
-  const suggestionProvider = {
-    provideCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position) => ({
-      suggestions: [],
-    }),
-  };
-  const hoverProvider = {
-    provideHover: (model: monaco.editor.ITextModel, position: monaco.Position) => ({
-      contents: [],
-    }),
-  };
+  test('editor mount setup', () => {
+    const suggestionProvider = {
+      provideCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position) => ({
+        suggestions: [],
+      }),
+    };
+    const hoverProvider = {
+      provideHover: (model: monaco.editor.ITextModel, position: monaco.Position) => ({
+        contents: [],
+      }),
+    };
 
-  const editorWillMount = jest.fn();
+    const editorWillMount = jest.fn();
 
-  monaco.languages.onLanguage = jest.fn((languageId, func) => {
-    expect(languageId).toBe('loglang');
+    monaco.languages.onLanguage = jest.fn((languageId, func) => {
+      expect(languageId).toBe('loglang');
 
-    // Call the function immediately so we can see our providers
-    // get setup without a monaco editor setting up completely
-    func();
-  }) as any;
+      // Call the function immediately so we can see our providers
+      // get setup without a monaco editor setting up completely
+      func();
+    }) as any;
 
-  monaco.languages.registerCompletionItemProvider = jest.fn();
-  monaco.languages.registerSignatureHelpProvider = jest.fn();
-  monaco.languages.registerHoverProvider = jest.fn();
+    monaco.languages.registerCompletionItemProvider = jest.fn();
+    monaco.languages.registerSignatureHelpProvider = jest.fn();
+    monaco.languages.registerHoverProvider = jest.fn();
 
-  monaco.editor.defineTheme = jest.fn();
+    monaco.editor.defineTheme = jest.fn();
 
-  const wrapper = shallow(
-    <CodeEditor
-      languageId="loglang"
-      value={logs}
-      onChange={() => {}}
-      editorWillMount={editorWillMount}
-      suggestionProvider={suggestionProvider}
-      hoverProvider={hoverProvider}
-    />
-  );
+    mountWithIntl(
+      <CodeEditor
+        languageId="loglang"
+        value={logs}
+        onChange={() => {}}
+        editorWillMount={editorWillMount}
+        suggestionProvider={suggestionProvider}
+        hoverProvider={hoverProvider}
+      />
+    );
 
-  const instance = wrapper.instance() as CodeEditor;
-  instance._editorWillMount(monaco);
+    // Verify our mount callback will be called
+    expect(editorWillMount.mock.calls.length).toBe(1);
 
-  // Verify our mount callback will be called
-  expect(editorWillMount.mock.calls.length).toBe(1);
+    // Verify that both, default and transparent theme will be setup
+    expect((monaco.editor.defineTheme as jest.Mock).mock.calls.length).toBe(2);
 
-  // Verify that both, default and transparent theme will be setup
-  expect((monaco.editor.defineTheme as jest.Mock).mock.calls.length).toBe(2);
+    // Verify our language features have been registered
+    expect((monaco.languages.onLanguage as jest.Mock).mock.calls.length).toBe(1);
+    expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(
+      1
+    );
+    expect((monaco.languages.registerHoverProvider as jest.Mock).mock.calls.length).toBe(1);
+  });
 
-  // Verify our language features have been registered
-  expect((monaco.languages.onLanguage as jest.Mock).mock.calls.length).toBe(1);
-  expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(1);
-  expect((monaco.languages.registerHoverProvider as jest.Mock).mock.calls.length).toBe(1);
+  describe('hint element', () => {
+    let component: ReactWrapper;
+    const getHint = (): ReactWrapper => findTestSubject(component, 'codeEditorHint');
+
+    beforeEach(() => {
+      component = mountWithIntl(
+        <CodeEditor languageId="loglang" height={250} value={logs} onChange={() => {}} />
+      );
+    });
+
+    test('should be tabable', () => {
+      const DOMnode = getHint().getDOMNode();
+      expect(DOMnode.getAttribute('tabindex')).toBe('0');
+      expect(DOMnode).toMatchSnapshot();
+    });
+
+    test('should be disabled when the ui monaco editor gains focus', async () => {
+      // Initially it is visible and active
+      expect((getHint().props() as any).className).not.toContain('isInactive');
+
+      getHint().simulate('keydown', { key: keys.ENTER });
+
+      expect((getHint().props() as any).className).toContain('isInactive');
+    });
+
+    test('should be enabled when hitting the ESC key', () => {
+      getHint().simulate('keydown', { key: keys.ENTER });
+
+      expect((getHint().props() as any).className).toContain('isInactive');
+
+      findTestSubject(component, 'monacoEditorTextarea').simulate('keydown', {
+        keyCode: monaco.KeyCode.Escape,
+      });
+
+      expect((getHint().props() as any).className).not.toContain('isInactive');
+    });
+
+    test('should detect that the suggestion menu is open and not show the hint on ESC', async () => {
+      getHint().simulate('keydown', { key: keys.ENTER });
+
+      expect((getHint().props() as any).className).toContain('isInactive');
+      expect(mockedEditorInstance?.__helpers__.areSuggestionsVisible()).toBe(false);
+
+      // Show the suggestions in the editor
+      mockedEditorInstance?.__helpers__.showSuggestions();
+      expect(mockedEditorInstance?.__helpers__.areSuggestionsVisible()).toBe(true);
+
+      // Hitting the ESC key with the suggestions visible
+      findTestSubject(component, 'monacoEditorTextarea').simulate('keydown', {
+        keyCode: monaco.KeyCode.Escape,
+      });
+
+      expect(mockedEditorInstance?.__helpers__.areSuggestionsVisible()).toBe(false);
+
+      // The keyboard hint is still **not** active
+      expect((getHint().props() as any).className).toContain('isInactive');
+
+      // Hitting a second time the ESC key should now show the hint
+      findTestSubject(component, 'monacoEditorTextarea').simulate('keydown', {
+        keyCode: monaco.KeyCode.Escape,
+      });
+
+      expect((getHint().props() as any).className).not.toContain('isInactive');
+    });
+  });
 });
