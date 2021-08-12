@@ -33,6 +33,7 @@ export const COORDINATE_SYSTEM_UTM = 'utm';
 
 export const DEFAULT_SET_VIEW_COORDINATE_SYSTEM = COORDINATE_SYSTEM_DEGREES_DECIMAL;
 
+// @ts-ignore
 const converter = new usng.Converter();
 
 const COORDINATE_SYSTEMS = [
@@ -64,7 +65,8 @@ interface State {
   zoom: number | string;
   coord: string;
   mgrs: string;
-  utm: { northing: string; easting: string; zoneNumber: any };
+  utm: { northing: string; easting: string; zoneNumber: any; zone: string };
+  isCoordPopoverOpen: boolean;
 }
 
 export class SetViewControl extends Component<Props, State> {
@@ -79,7 +81,9 @@ export class SetViewControl extends Component<Props, State> {
       northing: '',
       easting: '',
       zoneNumber: '',
+      zone: '',
     },
+    isCoordPopoverOpen: false,
   };
 
   static convertLatLonToUTM(lat: any, lon: any) {
@@ -259,7 +263,7 @@ export class SetViewControl extends Component<Props, State> {
 
       this.setState({ mgrs, utm });
     } else {
-      this.setState({ mgrs: '', utm: { northing: '', easting: '', zoneNumber: '' } });
+      this.setState({ mgrs: '', utm: { northing: '', easting: '', zoneNumber: '', zone: '' } });
     }
   };
 
@@ -292,7 +296,7 @@ export class SetViewControl extends Component<Props, State> {
       this.setState({
         lat: '',
         lon: '',
-        utm: {},
+        utm: { northing: '', easting: '', zoneNumber: '', zone: '' },
       });
     }
   };
@@ -308,9 +312,10 @@ export class SetViewControl extends Component<Props, State> {
         ({ lat, lon } = converter.UTMtoLL(
           this.state.utm.northing,
           this.state.utm.easting,
-          this.state.zoneNumber
+          this.state.utm.zoneNumber
         ));
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.log('error converting UTM');
         return;
       }
@@ -364,13 +369,24 @@ export class SetViewControl extends Component<Props, State> {
     };
   };
 
-  _renderMGRSFormRow = ({ value, onChange, label, dataTestSubj }) => {
+  _renderMGRSFormRow = ({
+    value,
+    onChange,
+    label,
+    dataTestSubj,
+  }: {
+    value: string | number;
+    onChange: (evt: ChangeEvent<HTMLInputElement>) => void;
+    label: string;
+    dataTestSubj: string;
+  }) => {
     let point;
     try {
       point = SetViewControl.convertMGRStoLL(value);
     } catch (err) {
       point = undefined;
-      console.log("error converting MGRS", err);
+      // eslint-disable-next-line no-console
+      console.log('error converting MGRS', err);
     }
 
     const isInvalid = value === '' || point === undefined;
@@ -391,7 +407,17 @@ export class SetViewControl extends Component<Props, State> {
     };
   };
 
-  _renderUTMZoneRow = ({ value, onChange, label, dataTestSubj }) => {
+  _renderUTMZoneRow = ({
+    value,
+    onChange,
+    label,
+    dataTestSubj,
+  }: {
+    value: string | number;
+    onChange: (evt: ChangeEvent<HTMLInputElement>) => void;
+    label: string;
+    dataTestSubj: string;
+  }) => {
     // const zoneNum = ( value ) ? parseInt(value.substring(0, value.length - 1)) : '';
     // const zoneLetter = ( value ) ? value.substring(value.length - 1, value.length) : '';
 
@@ -424,14 +450,20 @@ export class SetViewControl extends Component<Props, State> {
     };
   };
 
-  _renderUTMEastingRow = ({ value, onChange, label, dataTestSubj }) => {
+  _renderUTMEastingRow = ({
+    value,
+    onChange,
+    label,
+    dataTestSubj,
+  }: {
+    value: string | number;
+    onChange: (evt: ChangeEvent<HTMLInputElement>) => void;
+    label: string;
+    dataTestSubj: string;
+  }) => {
     let point;
     try {
-      point = converter.UTMtoLL(
-        this.state.utm.northing,
-        parseFloat(value),
-        this.state.utm.zoneNumber
-      );
+      point = converter.UTMtoLL(this.state.utm.northing, value, this.state.utm.zoneNumber);
     } catch {
       point = undefined;
     }
@@ -453,14 +485,20 @@ export class SetViewControl extends Component<Props, State> {
     };
   };
 
-  _renderUTMNorthingRow = ({ value, onChange, label, dataTestSubj }) => {
+  _renderUTMNorthingRow = ({
+    value,
+    onChange,
+    label,
+    dataTestSubj,
+  }: {
+    value: string | number;
+    onChange: (evt: ChangeEvent<HTMLInputElement>) => void;
+    label: string;
+    dataTestSubj: string;
+  }) => {
     let point;
     try {
-      point = converter.UTMtoLL(
-        parseFloat(value),
-        this.state.utm.easting,
-        this.state.utm.zoneNumber
-      );
+      point = converter.UTMtoLL(value, this.state.utm.easting, this.state.utm.zoneNumber);
     } catch {
       point = undefined;
     }
