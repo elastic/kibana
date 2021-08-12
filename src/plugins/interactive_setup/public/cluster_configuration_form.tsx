@@ -140,22 +140,9 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
             defaultMessage="Connect to"
           />
         </EuiFlexItem>
-        <EuiFlexItem style={{ overflow: 'hidden' }}>
-          <EuiToolTip
-            position="top"
-            content={host}
-            anchorClassName="clusterConfigurationForm__tooltip"
-          >
-            <strong
-              style={{
-                display: 'block',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              {host}
-            </strong>
+        <EuiFlexItem grow={false} style={{ overflow: 'hidden' }}>
+          <EuiToolTip position="top" content={host} anchorClassName="eui-displayBlock">
+            <strong className="eui-displayBlock eui-textTruncate">{host}</strong>
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -169,12 +156,14 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
             })}
             error={form.errors.username}
             isInvalid={form.touched.username && !!form.errors.username}
+            fullWidth
           >
             <EuiFieldText
               icon="user"
               name="username"
               value={form.values.username}
               isInvalid={form.touched.username && !!form.errors.username}
+              fullWidth
             />
           </EuiFormRow>
           <EuiFormRow
@@ -183,12 +172,14 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
             })}
             error={form.errors.password}
             isInvalid={form.touched.password && !!form.errors.password}
+            fullWidth
           >
             <EuiFieldPassword
               type="dual"
               name="password"
               value={form.values.password}
               isInvalid={form.touched.password && !!form.errors.password}
+              fullWidth
             />
           </EuiFormRow>
           <EuiSpacer />
@@ -231,6 +222,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
             })}
             error={form.errors.caCert}
             isInvalid={form.touched.caCert && !!form.errors.caCert}
+            fullWidth
           >
             <EuiCheckableCard
               id="trustCaCert"

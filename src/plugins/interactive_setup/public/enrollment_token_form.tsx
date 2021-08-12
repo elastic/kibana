@@ -108,6 +108,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
         error={form.errors.token}
         isInvalid={form.touched.token && !!form.errors.token}
         helpText={enrollmentToken && <EnrollmentTokenDetails token={enrollmentToken} />}
+        fullWidth
       >
         <EuiTextArea
           name="token"
@@ -116,6 +117,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
           placeholder={i18n.translate('interactiveSetup.enrollmentTokenForm.tokenPlaceholder', {
             defaultMessage: 'Paste enrollment token from terminal',
           })}
+          fullWidth
         />
       </EuiFormRow>
       <EuiSpacer />
@@ -170,21 +172,8 @@ const EnrollmentTokenDetails: FunctionComponent<EnrollmentTokenDetailsProps> = (
         <EuiIcon type="lock" />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ overflow: 'hidden' }}>
-        <EuiToolTip
-          position="top"
-          content={token.adr[0]}
-          anchorClassName="clusterConfigurationForm__tooltip"
-        >
-          <span
-            style={{
-              display: 'block',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {token.adr[0]}
-          </span>
+        <EuiToolTip position="top" content={token.adr[0]} anchorClassName="eui-displayBlock">
+          <span className="eui-displayBlock eui-textTruncate">{token.adr[0]}</span>
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

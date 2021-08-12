@@ -92,11 +92,13 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
         })}
         error={form.errors.host}
         isInvalid={form.touched.host && !!form.errors.host}
+        fullWidth
       >
         <EuiFieldText
           name="host"
           value={form.values.host}
           isInvalid={form.touched.host && !!form.errors.host}
+          fullWidth
         />
       </EuiFormRow>
       <EuiSpacer />

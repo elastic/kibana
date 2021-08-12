@@ -3,9 +3,7 @@
 }
 
 .interactiveSetup__header {
-  position: relative;
   padding: $euiSizeXL;
-  z-index: 10;
 }
 
 .interactiveSetup__logo {
@@ -16,14 +14,8 @@
 }
 
 .interactiveSetup__content {
-  position: relative;
   margin: auto;
-  max-width: 512px;
+  max-width: map-get($euiBreakpoints, 's') - $euiSizeXL;
   padding-left: $euiSizeXL;
   padding-right: $euiSizeXL;
-  z-index: 10;
-}
-
-.clusterConfigurationForm__tooltip {
-  display: block;
 }
