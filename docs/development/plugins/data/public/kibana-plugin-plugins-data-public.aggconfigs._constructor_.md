@@ -13,7 +13,7 @@ constructor(indexPattern: IndexPattern, configStates: Pick<Pick<{
         type: string;
         enabled?: boolean | undefined;
         id?: string | undefined;
-        params?: {} | import("@kbn/common-utils").SerializableRecord | undefined;
+        params?: {} | import("@kbn/utility-types").SerializableRecord | undefined;
         schema?: string | undefined;
     }, "schema" | "enabled" | "id" | "params"> & Pick<{
         type: string | IAggType;
@@ -27,6 +27,6 @@ constructor(indexPattern: IndexPattern, configStates: Pick<Pick<{
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  indexPattern | <code>IndexPattern</code> |  |
-|  configStates | <code>Pick&lt;Pick&lt;{</code><br/><code>        type: string;</code><br/><code>        enabled?: boolean &#124; undefined;</code><br/><code>        id?: string &#124; undefined;</code><br/><code>        params?: {} &#124; import(&quot;@kbn/common-utils&quot;).SerializableRecord &#124; undefined;</code><br/><code>        schema?: string &#124; undefined;</code><br/><code>    }, &quot;schema&quot; &#124; &quot;enabled&quot; &#124; &quot;id&quot; &#124; &quot;params&quot;&gt; &amp; Pick&lt;{</code><br/><code>        type: string &#124; IAggType;</code><br/><code>    }, &quot;type&quot;&gt; &amp; Pick&lt;{</code><br/><code>        type: string &#124; IAggType;</code><br/><code>    }, never&gt;, &quot;schema&quot; &#124; &quot;type&quot; &#124; &quot;enabled&quot; &#124; &quot;id&quot; &#124; &quot;params&quot;&gt;[] &#124; undefined</code> |  |
+|  configStates | <code>Pick&lt;Pick&lt;{</code><br/><code>        type: string;</code><br/><code>        enabled?: boolean &#124; undefined;</code><br/><code>        id?: string &#124; undefined;</code><br/><code>        params?: {} &#124; import(&quot;@kbn/utility-types&quot;).SerializableRecord &#124; undefined;</code><br/><code>        schema?: string &#124; undefined;</code><br/><code>    }, &quot;schema&quot; &#124; &quot;enabled&quot; &#124; &quot;id&quot; &#124; &quot;params&quot;&gt; &amp; Pick&lt;{</code><br/><code>        type: string &#124; IAggType;</code><br/><code>    }, &quot;type&quot;&gt; &amp; Pick&lt;{</code><br/><code>        type: string &#124; IAggType;</code><br/><code>    }, never&gt;, &quot;schema&quot; &#124; &quot;type&quot; &#124; &quot;enabled&quot; &#124; &quot;id&quot; &#124; &quot;params&quot;&gt;[] &#124; undefined</code> |  |
 |  opts | <code>AggConfigsOptions</code> |  |
 
