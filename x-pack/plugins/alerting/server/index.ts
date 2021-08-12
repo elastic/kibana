@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { get } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { RulesClient as RulesClientClass } from './rules_client';
 import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
@@ -59,10 +59,8 @@ export const config: PluginConfigDescriptor<AlertsConfigType> = {
       'xpack.alerting.invalidateApiKeysTask.removalDelay'
     ),
     (settings, fromPath, addDeprecation) => {
-      if (
-        settings?.xpack?.alerting?.enabled === false ||
-        settings?.xpack?.alerting?.enabled === true
-      ) {
+      const alerting = get(settings, fromPath);
+      if (alerting?.enabled === false || alerting?.enabled === true) {
         addDeprecation({
           message: `"xpack.alerting.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
           correctiveActions: {

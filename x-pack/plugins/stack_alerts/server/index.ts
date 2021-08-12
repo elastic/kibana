@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { get } from 'lodash';
 import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 import { AlertingBuiltinsPlugin } from './plugin';
 import { configSchema, Config } from '../common/config';
@@ -15,10 +15,8 @@ export const config: PluginConfigDescriptor<Config> = {
   schema: configSchema,
   deprecations: () => [
     (settings, fromPath, addDeprecation) => {
-      if (
-        settings?.xpack?.stack_alerts?.enabled === false ||
-        settings?.xpack?.stack_alerts?.enabled === true
-      ) {
+      const stackAlerts = get(settings, fromPath);
+      if (stackAlerts?.enabled === false || stackAlerts?.enabled === true) {
         addDeprecation({
           message: `"xpack.stack_alerts.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
           correctiveActions: {
