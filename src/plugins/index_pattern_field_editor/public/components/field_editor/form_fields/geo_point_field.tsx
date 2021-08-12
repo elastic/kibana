@@ -22,6 +22,10 @@ import { RuntimeFieldPainlessError } from '../../../lib';
 import { schema } from '../form_schema';
 import type { FieldFormInternal } from '../field_editor';
 
+const requiredMsg = i18n.translate('indexPatternFieldEditor.editor.form.required', {
+  defaultMessage: 'Required',
+});
+
 interface Props {
   existingConcreteFields?: Array<{ name: string; type: string }>;
 }
@@ -56,14 +60,34 @@ export const GeoPointField = React.memo(({ existingConcreteFields }: Props) => {
     ...schema.script.source,
     validations: [
       {
-        validator: () => {},
+        validator: () => {
+          if (!latFieldName) {
+            return {
+              message: i18n.translate(
+                'indexPatternFieldEditor.editor.form.latitudeValidationMessage',
+                {
+                  defaultMessage: 'Latitude field required.',
+                }
+              ),
+            };
+          } else if (!lonFieldName) {
+            return {
+              message: i18n.translate(
+                'indexPatternFieldEditor.editor.form.longitudeValidationMessage',
+                {
+                  defaultMessage: 'Longitude field required.',
+                }
+              ),
+            };
+          }
+        },
       },
     ],
   };
 
   return (
     <UseField<string> path="script.source" config={sourceFieldConfig}>
-      {({ value, setValue }) => {
+      {({ value, setValue, isValid }) => {
         setScriptSource = setValue;
 
         // populate lat and lon fields from value when loading page from existing field
@@ -95,6 +119,8 @@ export const GeoPointField = React.memo(({ existingConcreteFields }: Props) => {
               label={i18n.translate('indexPatternFieldEditor.editor.form.geoPointLatTitle', {
                 defaultMessage: 'Latitude field',
               })}
+              error={!isValid && !latFieldName ? requiredMsg : null}
+              isInvalid={!isValid && !latFieldName}
             >
               <EuiComboBox
                 singleSelection={true}
@@ -107,6 +133,8 @@ export const GeoPointField = React.memo(({ existingConcreteFields }: Props) => {
               label={i18n.translate('indexPatternFieldEditor.editor.form.geoPointLonTitle', {
                 defaultMessage: 'Longitude field',
               })}
+              error={!isValid && !latFieldName ? requiredMsg : null}
+              isInvalid={!isValid && !latFieldName}
             >
               <EuiComboBox
                 singleSelection={true}
