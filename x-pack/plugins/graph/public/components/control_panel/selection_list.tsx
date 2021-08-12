@@ -9,14 +9,13 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { Workspace, WorkspaceNode } from '../../types';
-import { Detail } from './control_panel';
 
 interface SelectionListProps {
   workspace: Workspace;
   selectSelected: (node: WorkspaceNode) => void;
   isColorDark: (color: string) => boolean;
   isSelectedSelected: (node: WorkspaceNode) => boolean;
-  setDetail: React.Dispatch<React.SetStateAction<Detail | undefined>>;
+  onDeselectNode: (node: WorkspaceNode) => void;
 }
 
 export const SelectionList = ({
@@ -24,7 +23,7 @@ export const SelectionList = ({
   isColorDark,
   selectSelected,
   isSelectedSelected,
-  setDetail,
+  onDeselectNode,
 }: SelectionListProps) => {
   return (
     <div className="gphSelectionList">
@@ -46,12 +45,10 @@ export const SelectionList = ({
 
         const onSelectedFieldClick = () => {
           selectSelected(n);
+          workspace.changeHandler();
         };
 
-        const deselectNode = () => {
-          workspace.deselectNode(n);
-          setDetail(undefined);
-        };
+        const deselectNode = () => onDeselectNode(n);
 
         return (
           <div aria-hidden="true" className={fieldClasses} onClick={onSelectedFieldClick}>

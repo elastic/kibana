@@ -37,6 +37,7 @@ interface GraphTopNavMenuProps {
   capabilities: Record<string, boolean | Record<string, boolean>>;
   coreStart: CoreStart;
   canEditDrillDownUrls: boolean;
+  reloadRoute: () => void;
 }
 
 export const GraphTopNavMenu = (props: GraphTopNavMenuProps) => {
@@ -61,8 +62,9 @@ export const GraphTopNavMenu = (props: GraphTopNavMenuProps) => {
     }),
     run() {
       props.confirmWipeWorkspace(() => {
-        if (props.locationUrl() === '/workspace/') {
-          location.reload();
+        const x = props.locationUrl();
+        if (x === '/workspace/') {
+          props.reloadRoute();
         } else {
           props.locationUrl('/workspace/');
         }

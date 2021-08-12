@@ -8,20 +8,19 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
-import { TermIntersect, Workspace } from '../../types';
+import { ControlType, TermIntersect, Workspace } from '../../types';
 import { VennDiagram } from '../venn_diagram';
-import { Detail } from './control_panel';
 
 interface MergeCandidatesProps {
   workspace: Workspace;
   mergeCandidates: TermIntersect[];
-  setDetail: (data?: Partial<Detail>) => void;
+  onSetControl: (control: ControlType) => void;
 }
 
 export const MergeCandidates = ({
   workspace,
   mergeCandidates,
-  setDetail,
+  onSetControl,
 }: MergeCandidatesProps) => {
   const performMerge = (parentId: string, childId: string) => {
     const tempMergeCandidates = [...mergeCandidates];
@@ -39,7 +38,7 @@ export const MergeCandidates = ({
       }
     }
     workspace.mergeIds(parentId, childId);
-    setDetail(undefined);
+    onSetControl('none');
   };
 
   return (

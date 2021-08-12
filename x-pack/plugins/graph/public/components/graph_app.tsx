@@ -37,6 +37,7 @@ export interface GraphWorkspaceProps {
   deps: GraphDependencies;
   angularLocation: angular.ILocationService;
   locationUrl: (path?: string) => string;
+  reloadRoute: () => void;
 }
 
 export const GraphApp = (props: GraphWorkspaceProps) => {
@@ -168,7 +169,7 @@ export const GraphApp = (props: GraphWorkspaceProps) => {
       <KibanaContextProvider services={services}>
         <Provider store={store}>
           <GraphWorkspace
-            counter={renderCounter}
+            renderCounter={renderCounter}
             workspace={workspace}
             loading={loading}
             setHeaderActionMenu={props.deps.setHeaderActionMenu}
@@ -180,6 +181,7 @@ export const GraphApp = (props: GraphWorkspaceProps) => {
             toastNotifications={props.deps.toastNotifications}
             overlays={props.deps.overlays}
             locationUrl={props.locationUrl}
+            reloadRoute={props.reloadRoute}
             query={props.query}
             indexPatterns={props.indexPatterns}
             savedWorkspace={props.savedWorkspace}

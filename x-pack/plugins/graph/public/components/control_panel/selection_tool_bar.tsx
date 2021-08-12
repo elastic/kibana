@@ -8,15 +8,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
-import { Workspace } from '../../types';
-import { Detail } from './control_panel';
+import { ControlType, Workspace } from '../../types';
 
 interface SelectionToolBarProps {
   workspace: Workspace;
-  setDetail: (data?: Partial<Detail>) => void;
+  onSetControl: (data: ControlType) => void;
 }
 
-export const SelectionToolBar = ({ workspace, setDetail }: SelectionToolBarProps) => {
+export const SelectionToolBar = ({ workspace, onSetControl }: SelectionToolBarProps) => {
   const haveNodes = workspace.nodes.length === 0;
 
   const selectAllButtonMsg = i18n.translate(
@@ -45,20 +44,24 @@ export const SelectionToolBar = ({ workspace, setDetail }: SelectionToolBarProps
   );
 
   const onSelectAllClick = () => {
-    setDetail(undefined);
+    onSetControl('none');
     workspace.selectAll();
+    workspace.changeHandler();
   };
   const onSelectNoneClick = () => {
-    setDetail(undefined);
+    onSetControl('none');
     workspace.selectNone();
+    workspace.changeHandler();
   };
   const onInvertSelectionClick = () => {
-    setDetail(undefined);
+    onSetControl('none');
     workspace.selectInvert();
+    workspace.changeHandler();
   };
   const onSelectNeighboursClick = () => {
-    setDetail(undefined);
+    onSetControl('none');
     workspace.selectNeighbours();
+    workspace.changeHandler();
   };
 
   return (

@@ -8,18 +8,17 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
-import { Workspace, WorkspaceField } from '../../types';
-import { Detail } from './control_panel';
+import { ControlType, Workspace, WorkspaceField } from '../../types';
 
 interface ControlPanelToolBarProps {
   workspace: Workspace;
   liveResponseFields: WorkspaceField[];
-  setDetail: (data?: Partial<Detail>) => void;
+  onSetControl: (action: ControlType) => void;
 }
 
 export const ControlPanelToolBar = ({
   workspace,
-  setDetail,
+  onSetControl,
   liveResponseFields,
 }: ControlPanelToolBarProps) => {
   const haveNodes = workspace.nodes.length === 0;
@@ -70,20 +69,18 @@ export const ControlPanelToolBar = ({
   const onUndoClick = () => workspace.undo();
   const onRedoClick = () => workspace.redo();
   const onExpandButtonClick = () => {
-    setDetail(undefined);
+    onSetControl('none');
     workspace.expandSelecteds({ toFields: liveResponseFields });
   };
   const onAddLinksClick = () => workspace.fillInGraph();
   const onRemoveVerticesClick = () => {
-    setDetail(undefined);
+    onSetControl('none');
     workspace.deleteSelection();
   };
   const onBlockListClick = () => workspace.blocklistSelection();
-  const onCustomStyleClick = () => setDetail({ showStyle: true });
-  const onDrillDownClick = () => setDetail({ showDrillDowns: true });
-  const onRunLayoutClick = () => {
-    workspace.runLayout();
-  };
+  const onCustomStyleClick = () => onSetControl('style');
+  const onDrillDownClick = () => onSetControl('drillDowns');
+  const onRunLayoutClick = () => workspace.runLayout();
   const onPauseLayoutClick = () => {
     workspace.stopLayout();
     workspace.changeHandler();

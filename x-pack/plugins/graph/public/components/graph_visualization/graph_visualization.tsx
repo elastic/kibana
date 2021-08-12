@@ -9,14 +9,21 @@ import React, { useRef } from 'react';
 import classNames from 'classnames';
 import d3, { ZoomEvent } from 'd3';
 import { isColorDark, hexToRgb } from '@elastic/eui';
-import { GroupAwareWorkspaceNode, GroupAwareWorkspaceEdge } from '../../types';
+import {
+  GroupAwareWorkspaceNode,
+  GroupAwareWorkspaceEdge,
+  Workspace,
+  WorkspaceNode,
+  TermIntersect,
+  ControlType,
+} from '../../types';
 import { makeNodeId } from '../../services/persistence';
 
 export interface GraphVisualizationProps {
-  nodes: GroupAwareWorkspaceNode[];
-  edges: GroupAwareWorkspaceEdge[];
-  edgeClick: (edge: GroupAwareWorkspaceEdge) => void;
-  nodeClick: (node: GroupAwareWorkspaceNode, e: React.MouseEvent<Element, MouseEvent>) => void;
+  workspace: Workspace;
+  onSetControl: (control: ControlType) => void;
+  selectSelected: (node: WorkspaceNode) => void;
+  onSetMergeCandidates: (terms: TermIntersect[]) => void;
 }
 
 function registerZooming(element: SVGSVGElement) {
@@ -38,12 +45,49 @@ function registerZooming(element: SVGSVGElement) {
 }
 
 export function GraphVisualization({
-  nodes,
-  edges,
-  edgeClick,
-  nodeClick,
+  workspace,
+  selectSelected,
+  onSetControl,
+  onSetMergeCandidates,
 }: GraphVisualizationProps) {
   const svgRoot = useRef<SVGSVGElement | null>(null);
+
+  const nodeClick = (n: GroupAwareWorkspaceNode, event: React.MouseEvent) => {
+    // Selection logic - shift key+click helps selects multiple nodes
+    // Without the shift key we deselect all prior selections (perhaps not
+    // a great idea for touch devices with no concept of shift key)
+    if (!event.shiftKey) {
+      const prevSelection = n.isSelected;
+      workspace.selectNone();
+      n.isSelected = prevSelection;
+    }
+    if (workspace.toggleNodeSelection(n)) {
+      selectSelected(n);
+    } else {
+      onSetControl('none');
+    }
+    workspace.changeHandler();
+  };
+
+  const handleMergeCandidatesCallback = (termIntersects: TermIntersect[]) => {
+    const mergeCandidates: TermIntersect[] = [];
+    termIntersects.forEach((ti) => {
+      mergeCandidates.push({
+        id1: ti.id1,
+        id2: ti.id2,
+        term1: ti.term1,
+        term2: ti.term2,
+        v1: ti.v1,
+        v2: ti.v2,
+        overlap: ti.overlap,
+      });
+    });
+    onSetMergeCandidates(mergeCandidates);
+    onSetControl('mergeTerms');
+  };
+
+  const edgeClick = (edge: GroupAwareWorkspaceEdge) =>
+    workspace.getAllIntersections(handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
 
   return (
     <svg
@@ -62,8 +106,8 @@ export function GraphVisualization({
     >
       <g>
         <g>
-          {edges &&
-            edges.map((edge) => (
+          {workspace.edges &&
+            workspace.edges.map((edge) => (
               <line
                 key={`${makeNodeId(edge.source.data.field, edge.source.data.term)}-${makeNodeId(
                   edge.target.data.field,
@@ -84,8 +128,8 @@ export function GraphVisualization({
               />
             ))}
         </g>
-        {nodes &&
-          nodes
+        {workspace.nodes &&
+          workspace.nodes
             .filter((node) => !node.parent)
             .map((node) => (
               <g

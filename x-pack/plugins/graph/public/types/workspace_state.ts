@@ -74,9 +74,9 @@ export interface TermIntersect {
 export interface Workspace {
   options: WorkspaceOptions;
   nodesMap: Record<string, WorkspaceNode>;
-  nodes: WorkspaceNode[];
+  nodes: GroupAwareWorkspaceNode[];
   selectedNodes: WorkspaceNode[];
-  edges: WorkspaceEdge[];
+  edges: GroupAwareWorkspaceEdge[];
   blocklistedNodes: WorkspaceNode[];
   undoLog: string;
   redoLog: string;
@@ -179,3 +179,5 @@ export interface GroupAwareWorkspaceEdge extends WorkspaceEdge {
   topTarget: GroupAwareWorkspaceNode;
   topSrc: GroupAwareWorkspaceNode;
 }
+
+export type ControlType = 'style' | 'drillDowns' | 'editLabel' | 'mergeTerms' | 'none';

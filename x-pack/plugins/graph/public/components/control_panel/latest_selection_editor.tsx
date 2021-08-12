@@ -13,45 +13,39 @@ import { Workspace, WorkspaceNode } from '../../types';
 
 interface LatestSelectionEditorProps {
   workspace: Workspace;
-  latestNodeSelection: WorkspaceNode;
+  chosenNode: WorkspaceNode;
 }
 
-export const LatestSelectionEditor = ({
-  workspace,
-  latestNodeSelection,
-}: LatestSelectionEditorProps) => {
+export const LatestSelectionEditor = ({ workspace, chosenNode }: LatestSelectionEditorProps) => {
   const groupButtonMsg = i18n.translate('xpack.graph.sidebar.groupButtonTooltip', {
     defaultMessage: 'group the currently selected items into {latestSelectionLabel}',
-    values: { latestSelectionLabel: latestNodeSelection.label },
+    values: { latestSelectionLabel: chosenNode.label },
   });
   const ungroupButtonMsg = i18n.translate('xpack.graph.sidebar.ungroupButtonTooltip', {
     defaultMessage: 'ung§roup {latestSelectionLabel}',
-    values: { latestSelectionLabel: latestNodeSelection.label },
+    values: { latestSelectionLabel: chosenNode.label },
   });
 
   const onGroupButtonClick = () => {
-    workspace.groupSelections(latestNodeSelection);
+    workspace.groupSelections(chosenNode);
   };
   const onClickUngroup = () => {
-    workspace.ungroup(latestNodeSelection);
+    workspace.ungroup(chosenNode);
   };
-  const onChangeSelectedVerticeLabel = (event: React.ChangeEvent<HTMLInputElement>) => {
-    latestNodeSelection.label = event.target.value;
+  const onChangeSelectedVertexLabel = (event: React.ChangeEvent<HTMLInputElement>) => {
+    chosenNode.label = event.target.value;
     workspace.changeHandler();
   };
 
   return (
     <div className="gphSidebar__panel">
       <div className="gphSidebar__header">
-        {latestNodeSelection.icon && (
-          <span className="kuiIcon {{latestNodeSelection.icon.class}}" />
-        )}
-        {latestNodeSelection.data.field} {latestNodeSelection.data.term}
+        {chosenNode.icon && <span className="kuiIcon {{latestNodeSelection.icon.class}}" />}
+        {chosenNode.data.field} {chosenNode.data.term}
       </div>
 
       {(workspace.selectedNodes.length > 1 ||
-        (workspace.selectedNodes.length > 0 &&
-          workspace.selectedNodes[0] !== latestNodeSelection)) && (
+        (workspace.selectedNodes.length > 0 && workspace.selectedNodes[0] !== chosenNode)) && (
         <EuiToolTip content={groupButtonMsg}>
           <button
             className="kuiButton kuiButton--basic kuiButton--iconText kuiButton--small"
@@ -63,7 +57,7 @@ export const LatestSelectionEditor = ({
         </EuiToolTip>
       )}
 
-      {latestNodeSelection.numChildren > 0 && (
+      {chosenNode.numChildren > 0 && (
         <EuiToolTip content={ungroupButtonMsg}>
           <button
             className="kuiButton kuiButton--basic kuiButton--iconText kuiButton--small"
@@ -87,11 +81,11 @@ export const LatestSelectionEditor = ({
           </label>
           <div className="col-sm-9">
             <input
+              ref={(element) => element && (element.value = chosenNode.label)}
               type="text"
               id="labelEdit"
               className="form-control input-sm"
-              value={latestNodeSelection.label}
-              onChange={onChangeSelectedVerticeLabel}
+              onChange={onChangeSelectedVertexLabel}
             />
             <div className="help-block">
               {i18n.translate('xpack.graph.sidebar.displayLabelHelpText', {

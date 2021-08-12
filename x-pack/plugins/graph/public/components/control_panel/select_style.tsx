@@ -26,7 +26,10 @@ export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
 
       <div className="form-group form-group-sm gphFormGroup--small">
         {colors.map((c) => {
-          const onSelectColor = () => workspace.colorSelected(c);
+          const onSelectColor = () => {
+            workspace.colorSelected(c);
+            workspace.changeHandler();
+          };
           return (
             <span
               aria-hidden="true"

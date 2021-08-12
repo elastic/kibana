@@ -8,7 +8,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
-import { TermIntersect, UrlTemplate, Workspace, WorkspaceField, WorkspaceNode } from '../../types';
+import {
+  ControlType,
+  TermIntersect,
+  UrlTemplate,
+  Workspace,
+  WorkspaceField,
+  WorkspaceNode,
+} from '../../types';
 import { urlTemplateRegex } from '../../helpers/url_template';
 import { SelectionToolBar } from './selection_tool_bar';
 import { ControlPanelToolBar } from './control_panel_tool_bar';
@@ -20,24 +27,20 @@ import { DrillDowns } from './drill_downs';
 import { UrlTemplateButtons } from './url_template_buttons';
 import { GraphState, liveResponseFieldsSelector, templatesSelector } from '../../state_management';
 
-export type Detail = Partial<{
-  showDrillDowns: boolean;
-  showStyle: boolean;
-  latestNodeSelection: WorkspaceNode;
-  mergeCandidates: TermIntersect[];
-}>;
-
 export interface TargetOptions {
   toFields: WorkspaceField[];
 }
 
 interface ControlPanelProps {
+  renderCounter: number;
   workspace: Workspace;
-  detail?: Detail;
+  control: ControlType;
+  chosenNode?: WorkspaceNode;
   colors: string[];
-  setDetail: React.Dispatch<React.SetStateAction<Detail | undefined>>;
-  isSelectedSelected: (node: WorkspaceNode) => boolean;
+  mergeCandidates: TermIntersect[];
+  onSetControl: (control: ControlType) => void;
   selectSelected: (node: WorkspaceNode) => void;
+  isSelectedSelected: (node: WorkspaceNode) => boolean;
   isColorDark: (color: string) => boolean;
 }
 
@@ -50,17 +53,15 @@ const ControlPanelComponent = ({
   workspace,
   liveResponseFields,
   urlTemplates,
-  detail,
+  control,
+  chosenNode,
   colors,
-  setDetail,
+  mergeCandidates,
+  onSetControl,
   isSelectedSelected,
   selectSelected,
   isColorDark,
 }: ControlPanelProps & ControlPanelStateProps) => {
-  if (!workspace) {
-    return null;
-  }
-
   const hasNodes = workspace.nodes.length === 0;
 
   const openUrlTemplate = (template: UrlTemplate) => {
@@ -69,12 +70,18 @@ const ControlPanelComponent = ({
     window.open(newUrl, '_blank');
   };
 
+  const onDeselectNode = (node: WorkspaceNode) => {
+    workspace.deselectNode(node);
+    workspace.changeHandler();
+    onSetControl('none');
+  };
+
   return (
     <div id="sidebar" className="gphSidebar">
       <ControlPanelToolBar
         workspace={workspace}
         liveResponseFields={liveResponseFields}
-        setDetail={setDetail}
+        onSetControl={onSetControl}
       />
 
       <div>
@@ -83,13 +90,13 @@ const ControlPanelComponent = ({
             defaultMessage: 'Selections',
           })}
         </div>
-        <SelectionToolBar workspace={workspace} setDetail={setDetail} />
+        <SelectionToolBar workspace={workspace} onSetControl={onSetControl} />
         <SelectionList
           workspace={workspace}
           selectSelected={selectSelected}
           isColorDark={isColorDark}
           isSelectedSelected={isSelectedSelected}
-          setDetail={setDetail}
+          onDeselectNode={onDeselectNode}
         />
       </div>
       <UrlTemplateButtons
@@ -97,23 +104,20 @@ const ControlPanelComponent = ({
         hasNodes={hasNodes}
         openUrlTemplate={openUrlTemplate}
       />
-      {detail?.showDrillDowns && (
+      {control === 'drillDowns' && (
         <DrillDowns urlTemplates={urlTemplates} openUrlTemplate={openUrlTemplate} />
       )}
-      {detail?.showStyle && workspace.selectedNodes.length > 0 && (
+      {control === 'style' && workspace.selectedNodes.length > 0 && (
         <SelectStyle workspace={workspace} colors={colors} />
       )}
-      {detail?.latestNodeSelection && (
-        <LatestSelectionEditor
-          workspace={workspace}
-          latestNodeSelection={detail.latestNodeSelection}
-        />
+      {control === 'editLabel' && chosenNode && (
+        <LatestSelectionEditor workspace={workspace} chosenNode={chosenNode} />
       )}
-      {detail?.mergeCandidates && detail.mergeCandidates.length > 0 && (
+      {control === 'mergeTerms' && mergeCandidates.length > 0 && (
         <MergeCandidates
           workspace={workspace}
-          mergeCandidates={detail.mergeCandidates}
-          setDetail={setDetail}
+          mergeCandidates={mergeCandidates}
+          onSetControl={onSetControl}
         />
       )}
     </div>

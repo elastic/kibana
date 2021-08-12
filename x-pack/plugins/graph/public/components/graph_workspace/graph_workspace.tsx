@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment, memo, useCallback, useEffect, useState } from 'react';
+import React, { Fragment, memo, useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, hexToRgb, isColorDark } from '@elastic/eui';
 import { connect } from 'react-redux';
 import { SearchBar } from '../search_bar';
 import {
@@ -20,14 +20,23 @@ import {
 } from '../../state_management';
 import { FieldManager } from '../field_manager';
 import { IndexPattern } from '../../../../../../src/plugins/data/public';
-import { IndexPatternProvider, IndexPatternSavedObject, WorkspaceField } from '../../types';
+import {
+  ControlType,
+  IndexPatternProvider,
+  IndexPatternSavedObject,
+  TermIntersect,
+  WorkspaceField,
+  WorkspaceNode,
+} from '../../types';
 import { GraphTopNavMenu, MenuOptions } from './graph_top_nav_menu';
 import { InspectPanel } from '../inspect_panel';
 import { GuidancePanel } from '../guidance_panel';
 import { GraphTitle } from '../graph_title';
-import { GraphView } from './graph_view';
 import { GraphWorkspaceSavedObject, Workspace } from '../../types';
 import { GraphDependencies } from '../../application';
+import { ControlPanel } from '../control_panel';
+import { GraphVisualization } from '../graph_visualization';
+import { colorChoices } from '../../helpers/style_choices';
 
 /**
  * Each component, which depends on `worksapce`
@@ -49,7 +58,7 @@ type GraphWorkspaceProps = Pick<
   | 'toastNotifications'
   | 'overlays'
 > & {
-  counter: number;
+  renderCounter: number;
   workspace?: Workspace;
   loading: boolean;
   locationUrl: (path?: string) => string;
@@ -57,6 +66,7 @@ type GraphWorkspaceProps = Pick<
   indexPatterns: IndexPatternSavedObject[];
   savedWorkspace: GraphWorkspaceSavedObject;
   indexPatternProvider: IndexPatternProvider;
+  reloadRoute: () => void;
 };
 
 interface GraphWorkspaceStateProps {
@@ -71,6 +81,7 @@ interface GraphWorkspaceDispatchProps {
 }
 
 const GraphWorkspaceComponent = ({
+  renderCounter,
   workspace,
   loading,
   locationUrl,
@@ -87,10 +98,11 @@ const GraphWorkspaceComponent = ({
   coreStart,
   graphSavePolicy,
   navigation,
+  canEditDrillDownUrls,
   initializeWorkspace: initializeWorkspaceAction,
   loadSavedWorkspace: loadSavedWorkspaceAction,
   setHeaderActionMenu,
-  canEditDrillDownUrls,
+  reloadRoute,
 }: GraphWorkspaceProps & GraphWorkspaceStateProps & GraphWorkspaceDispatchProps) => {
   const [initialQuery, setInitialQuery] = useState<string>();
   const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern>();
@@ -100,7 +112,24 @@ const GraphWorkspaceComponent = ({
     showInspect: false,
   });
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [mergeCandidates, setMergeCandidates] = useState<TermIntersect[]>([]);
+  const [control, setControl] = useState<ControlType>('none');
+  const chosenNode = useRef<WorkspaceNode | undefined>(undefined);
   const isInitialized = Boolean(workspaceInitialized || savedWorkspace.id);
+
+  const selectSelected = useCallback((node: WorkspaceNode) => {
+    chosenNode.current = node;
+    setControl('editLabel');
+  }, []);
+
+  const onSetControl = useCallback((newControl: ControlType) => {
+    chosenNode.current = undefined;
+    setControl(newControl);
+  }, []);
+
+  const isSelectedSelected = useCallback((node: WorkspaceNode) => chosenNode.current === node, []);
+
+  const isHexColorDark = useCallback((color) => isColorDark(...hexToRgb(color)), []);
 
   // Deal with situation of request to open saved workspace
   useEffect(() => {
@@ -214,20 +243,25 @@ const GraphWorkspaceComponent = ({
     [hasFields, overlays]
   );
 
+  const onSetMergeCandidates = useCallback((terms: TermIntersect[]) => {
+    setMergeCandidates(terms);
+  }, []);
+
   return (
     <Fragment>
       <GraphTopNavMenu
-        locationUrl={locationUrl}
         workspace={workspace}
         savedWorkspace={savedWorkspace}
-        onSetMenus={setMenus}
-        confirmWipeWorkspace={confirmWipeWorkspace}
-        setHeaderActionMenu={setHeaderActionMenu}
         graphSavePolicy={graphSavePolicy}
         navigation={navigation}
         capabilities={capabilities}
         coreStart={coreStart}
         canEditDrillDownUrls={canEditDrillDownUrls}
+        locationUrl={locationUrl}
+        reloadRoute={reloadRoute}
+        onSetMenus={setMenus}
+        confirmWipeWorkspace={confirmWipeWorkspace}
+        setHeaderActionMenu={setHeaderActionMenu}
       />
 
       <InspectPanel
@@ -260,7 +294,31 @@ const GraphWorkspaceComponent = ({
         </div>
       )}
 
-      {isInitialized && workspace && <GraphView workspace={workspace} />}
+      {isInitialized && workspace && (
+        <div className="gphGraph__container" id="GraphSvgContainer">
+          <div className="gphVisualization">
+            <GraphVisualization
+              workspace={workspace}
+              selectSelected={selectSelected}
+              onSetControl={onSetControl}
+              onSetMergeCandidates={onSetMergeCandidates}
+            />
+          </div>
+
+          <ControlPanel
+            renderCounter={renderCounter}
+            workspace={workspace}
+            control={control}
+            chosenNode={chosenNode.current}
+            colors={colorChoices}
+            mergeCandidates={mergeCandidates}
+            isSelectedSelected={isSelectedSelected}
+            selectSelected={selectSelected}
+            isColorDark={isHexColorDark}
+            onSetControl={onSetControl}
+          />
+        </div>
+      )}
     </Fragment>
   );
 };

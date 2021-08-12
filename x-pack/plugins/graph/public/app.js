@@ -62,7 +62,7 @@ export function initGraphApp(angularModule, deps) {
         ['query', { watchDepth: 'reference' }],
         ['deps', { watchDepth: 'reference' }],
         ['locationUrl', { watchDepth: 'reference' }],
-        ['route', { watchDepth: 'reference' }],
+        ['reloadRoute', { watchDepth: 'reference' }],
       ],
       {
         restrict: 'A',
@@ -116,6 +116,7 @@ export function initGraphApp(angularModule, deps) {
           $scope.query = $route.current.params.query;
           $scope.deps = deps;
           $scope.locationUrl = (path) => $location.url(path);
+          $scope.reloadRoute = () => $route.reload();
         },
         resolve: {
           savedWorkspace: function ($rootScope, $route, $location) {
