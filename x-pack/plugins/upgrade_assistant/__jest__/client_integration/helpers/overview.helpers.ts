@@ -75,4 +75,8 @@ export type OverviewTestSubjects =
   | 'updateLoggingError'
   | 'fetchLoggingError'
   | 'noDeprecationsLabel'
+  | 'viewObserveLogs'
+  | 'viewDiscoverLogs'
+  | 'upgradeSetupDocsLink'
+  | 'upgradeSetupCloudLink'
   | 'upgradeStatusError';

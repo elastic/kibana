@@ -17,7 +17,6 @@ describe('Overview - Review Step', () => {
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(mockedResponses.esDeprecations);
-    httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({ isEnabled: true });
 
     await act(async () => {
       const deprecationService = deprecationsServiceMock.createStartContract();
@@ -77,6 +76,94 @@ describe('Overview - Review Step', () => {
       const { exists } = testBed;
 
       expect(exists('noDeprecationsLabel')).toBe(true);
+    });
+
+    describe('Renders ES errors', () => {
+      test('handles network failure', async () => {
+        const error = {
+          statusCode: 500,
+          error: 'Internal server error',
+          message: 'Internal server error',
+        };
+
+        httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
+
+        await act(async () => {
+          testBed = await setupOverviewPage();
+        });
+
+        const { component, exists } = testBed;
+
+        component.update();
+
+        expect(exists('esRequestErrorIconTip')).toBe(true);
+      });
+
+      test('handles unauthorized error', async () => {
+        const error = {
+          statusCode: 403,
+          error: 'Forbidden',
+          message: 'Forbidden',
+        };
+
+        httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
+
+        await act(async () => {
+          testBed = await setupOverviewPage();
+        });
+
+        const { component, exists } = testBed;
+
+        component.update();
+
+        expect(exists('unauthorizedErrorIconTip')).toBe(true);
+      });
+
+      test('handles partially upgraded error', async () => {
+        const error = {
+          statusCode: 426,
+          error: 'Upgrade required',
+          message: 'There are some nodes running a different version of Elasticsearch',
+          attributes: {
+            allNodesUpgraded: false,
+          },
+        };
+
+        httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
+
+        await act(async () => {
+          testBed = await setupOverviewPage({ isReadOnlyMode: false });
+        });
+
+        const { component, exists } = testBed;
+
+        component.update();
+
+        expect(exists('partiallyUpgradedErrorIconTip')).toBe(true);
+      });
+
+      test('handles upgrade error', async () => {
+        const error = {
+          statusCode: 426,
+          error: 'Upgrade required',
+          message: 'There are some nodes running a different version of Elasticsearch',
+          attributes: {
+            allNodesUpgraded: true,
+          },
+        };
+
+        httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
+
+        await act(async () => {
+          testBed = await setupOverviewPage({ isReadOnlyMode: false });
+        });
+
+        const { component, exists } = testBed;
+
+        component.update();
+
+        expect(exists('upgradedErrorIconTip')).toBe(true);
+      });
     });
   });
 

@@ -60,7 +60,11 @@ export const getUpgradeStep = ({
     callToAction = (
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton href={cloudDeploymentUrl} target="_blank">
+          <EuiButton
+            href={cloudDeploymentUrl}
+            target="_blank"
+            data-test-subj="upgradeSetupCloudLink"
+          >
             <FormattedMessage
               id="xpack.upgradeAssistant.overview.upgradeStepCloudLink"
               defaultMessage="Upgrade on Cloud"
@@ -69,7 +73,11 @@ export const getUpgradeStep = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiLink href={docLinks.links.elasticsearch.setupUpgrade} target="_blank">
+          <EuiLink
+            href={docLinks.links.elasticsearch.setupUpgrade}
+            target="_blank"
+            data-test-subj="upgradeSetupDocsLink"
+          >
             <FormattedMessage
               id="xpack.upgradeAssistant.overview.upgradeGuideLink"
               defaultMessage="View upgrade guide"
@@ -80,7 +88,11 @@ export const getUpgradeStep = ({
     );
   } else {
     callToAction = (
-      <EuiButton href={docLinks.links.elasticsearch.setupUpgrade} target="_blank">
+      <EuiButton
+        href={docLinks.links.elasticsearch.setupUpgrade}
+        target="_blank"
+        data-test-subj="upgradeSetupDocsLink"
+      >
         {i18nTexts.upgradeStepLink}
         <EuiIcon type="popout" size="s" style={{ marginLeft: 4 }} />
       </EuiButton>

@@ -7,11 +7,7 @@
 
 import { get } from 'lodash';
 import { IScopedClusterClient } from 'src/core/server';
-
-interface DeprecationLoggingStatus {
-  isEnabled: boolean;
-  isLoggerDeprecationEnabled: boolean;
-}
+import { DeprecationLoggingStatus } from '../../common/types';
 
 export async function getDeprecationLoggingStatus(
   dataClient: IScopedClusterClient

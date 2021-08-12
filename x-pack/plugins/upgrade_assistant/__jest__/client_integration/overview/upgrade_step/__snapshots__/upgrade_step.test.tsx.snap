@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Overview - Upgrade Step Step 3 - Upgrade stack Shows upgrade cta and link to docs for cloud installations 1`] = `"/upgrade_on_cloud"`;

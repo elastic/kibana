@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Overview - Identify Step Step 2 - Analyze logs Has a link to see logs in discover app 1`] = `"/app/discover/"`;
+
+exports[`Overview - Identify Step Step 2 - Analyze logs Has a link to see logs in observability app 1`] = `"/app/logs/stream?sourceId=deprecation_logs"`;

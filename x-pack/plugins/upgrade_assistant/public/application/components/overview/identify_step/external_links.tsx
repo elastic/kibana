@@ -43,15 +43,7 @@ const DiscoverAppLink: FunctionComponent = () => {
   useEffect(() => {
     const getDiscoveryUrl = async () => {
       const indexPatternId = await getDeprecationIndexPatternId(dataService);
-
-      const appLocation = await discoverService?.locator?.getLocation({
-        indexPatternId,
-        timeRange: {
-          to: 'now',
-          from: 'now-7d',
-          mode: 'relative',
-        },
-      });
+      const appLocation = await discoverService?.locator?.getLocation({ indexPatternId });
 
       const result = application?.getUrlForApp(appLocation?.app as string, {
         path: appLocation?.path,
@@ -63,7 +55,7 @@ const DiscoverAppLink: FunctionComponent = () => {
   }, [dataService, discoverService, application]);
 
   return (
-    <EuiLink href={discoveryUrl} target="_blank">
+    <EuiLink href={discoveryUrl} target="_blank" data-test-subj="viewDiscoverLogs">
       <FormattedMessage
         id="xpack.upgradeAssistant.overview.viewDiscoverResultsAction"
         defaultMessage="Analyse logs in Discover "
@@ -79,7 +71,7 @@ const ObserveAppLink: FunctionComponent = () => {
   );
 
   return (
-    <EuiLink href={logStreamUrl} target="_blank">
+    <EuiLink href={logStreamUrl} target="_blank" data-test-subj="viewObserveLogs">
       <FormattedMessage
         id="xpack.upgradeAssistant.overview.viewObserveResultsAction"
         defaultMessage="View deprecation logs in Observability"
