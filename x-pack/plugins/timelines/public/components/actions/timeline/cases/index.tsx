@@ -7,3 +7,5 @@
 
 export * from './add_to_case_action';
 export * from './toaster_content';
+export * from './add_to_existing_case_button';
+export * from './add_to_new_case_button';
