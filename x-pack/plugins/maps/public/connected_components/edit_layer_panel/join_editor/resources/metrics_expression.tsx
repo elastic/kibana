@@ -6,7 +6,6 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import {
   EuiPopover,
@@ -16,12 +15,24 @@ import {
   EuiFormHelpText,
 } from '@elastic/eui';
 
-import { MetricsEditor } from '../../../../components/metrics_editor';
+import { IFieldType } from 'src/plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { MetricsEditor } from '../../../../components/metrics_editor';
 import { AGG_TYPE } from '../../../../../common/constants';
+import { AggDescriptor, FieldedAggDescriptor } from '../../../../../common/descriptor_types';
 
-export class MetricsExpression extends Component {
-  state = {
+interface Props {
+  metrics: AggDescriptor[];
+  rightFields: IFieldType[];
+  onChange: (metrics: AggDescriptor[]) => void;
+}
+
+interface State {
+  isPopoverOpen: boolean;
+}
+
+export class MetricsExpression extends Component<Props, State> {
+  state: State = {
     isPopoverOpen: false,
   };
 
@@ -61,23 +72,23 @@ export class MetricsExpression extends Component {
 
   render() {
     const metricExpressions = this.props.metrics
-      .filter(({ type, field }) => {
-        if (type === AGG_TYPE.COUNT) {
+      .filter((metric: AggDescriptor) => {
+        if (metric.type === AGG_TYPE.COUNT) {
           return true;
         }
 
-        if (field) {
+        if ((metric as FieldedAggDescriptor).field) {
           return true;
         }
         return false;
       })
-      .map(({ type, field }) => {
+      .map((metric: AggDescriptor) => {
         // do not use metric label so field and aggregation are not obscured.
-        if (type === AGG_TYPE.COUNT) {
-          return 'count';
+        if (metric.type === AGG_TYPE.COUNT) {
+          return AGG_TYPE.COUNT;
         }
 
-        return `${type} ${field}`;
+        return `${metric.type} ${(metric as FieldedAggDescriptor).field}`;
       });
     const useMetricDescription = i18n.translate(
       'xpack.maps.layerPanel.metricsExpression.useMetricsDescription',
@@ -101,7 +112,7 @@ export class MetricsExpression extends Component {
             onClick={this._togglePopover}
             description={useMetricDescription}
             uppercase={false}
-            value={metricExpressions.length > 0 ? metricExpressions.join(', ') : 'count'}
+            value={metricExpressions.length > 0 ? metricExpressions.join(', ') : AGG_TYPE.COUNT}
           />
         }
       >
@@ -124,13 +135,3 @@ export class MetricsExpression extends Component {
     );
   }
 }
-
-MetricsExpression.propTypes = {
-  metrics: PropTypes.array,
-  rightFields: PropTypes.array,
-  onChange: PropTypes.func.isRequired,
-};
-
-MetricsExpression.defaultProps = {
-  metrics: [{ type: AGG_TYPE.COUNT }],
-};
