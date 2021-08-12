@@ -141,6 +141,7 @@ export const LensTopNavMenu = ({
 }: LensTopNavMenuProps) => {
   const {
     data,
+    fieldFormats,
     navigation,
     uiSettings,
     application,
@@ -232,7 +233,7 @@ export const LensTopNavMenu = ({
               if (formulaDetected) {
                 return i18n.translate('xpack.lens.app.downloadButtonFormulasWarning', {
                   defaultMessage:
-                    'Your CSV contains characters which spreadsheet applications can interpret as formulas',
+                    'Your CSV contains characters that spreadsheet applications might interpret as formulas.',
                 });
               }
             }
@@ -255,7 +256,7 @@ export const LensTopNavMenu = ({
                     content: exporters.datatableToCSV(datatable, {
                       csvSeparator: uiSettings.get('csv:separator', ','),
                       quoteValues: uiSettings.get('csv:quoteValues', true),
-                      formatFactory: data.fieldFormats.deserialize,
+                      formatFactory: fieldFormats.deserialize,
                       escapeFormulaValues: false,
                     }),
                     type: exporters.CSV_MIME_TYPE,
@@ -305,7 +306,7 @@ export const LensTopNavMenu = ({
       activeData,
       attributeService,
       dashboardFeatureFlag.allowByValueEmbeddables,
-      data.fieldFormats.deserialize,
+      fieldFormats.deserialize,
       getIsByValueMode,
       initialInput,
       isLinkedToOriginatingApp,
