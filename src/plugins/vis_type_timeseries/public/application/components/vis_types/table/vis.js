@@ -68,7 +68,7 @@ class TableVis extends Component {
     );
 
     // we should skip url field formatting for key if tsvb have drilldown_url
-    if (fieldFormatMap[model.pivot_id]?.id !== FIELD_FORMAT_IDS.URL || !model.drilldown_url) {
+    if (fieldFormatMap?.[model.pivot_id]?.id !== FIELD_FORMAT_IDS.URL || !model.drilldown_url) {
       const formatter = createFieldFormatter(model?.pivot_id, fieldFormatMap, 'html');
       rowDisplay = <span dangerouslySetInnerHTML={{ __html: formatter(rowDisplay) }} />;
     }
@@ -93,7 +93,9 @@ class TableVis extends Component {
           ({ value, operator, text }) => value || operator || text
         );
         const value =
-          isFieldFormatter && fieldFormatMap[field]?.id === FIELD_FORMAT_IDS.COLOR && hasColorRules
+          isFieldFormatter &&
+          fieldFormatMap?.[field]?.id === FIELD_FORMAT_IDS.COLOR &&
+          hasColorRules
             ? item.last
             : formatter(item.last);
 
