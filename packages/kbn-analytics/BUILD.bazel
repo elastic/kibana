@@ -50,6 +50,7 @@ ts_config(
   src = "tsconfig.json",
   deps = [
     "//:tsconfig.base.json",
+    "//:tsconfig.bazel.json",
   ],
 )
 
@@ -59,6 +60,7 @@ ts_config(
   deps = [
     "//:tsconfig.base.json",
     "//:tsconfig.browser.json",
+    "//:tsconfig.browser_bazel.json",
   ],
 )
 
@@ -70,7 +72,6 @@ ts_project(
   declaration = True,
   declaration_map = True,
   emit_declaration_only = True,
-  incremental = False,
   out_dir = "target_types",
   root_dir = "src",
   source_map = True,
