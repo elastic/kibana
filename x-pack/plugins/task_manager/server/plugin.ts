@@ -31,6 +31,7 @@ import { createMonitoringStats, MonitoringStats } from './monitoring';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTask } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
+import { TASK_MANAGER_INDEX } from './constants';
 
 export type TaskManagerSetupContract = {
   /**
@@ -114,7 +115,7 @@ export class TaskManagerPlugin
     }
 
     return {
-      index: this.config.index,
+      index: TASK_MANAGER_INDEX,
       addMiddleware: (middleware: Middleware) => {
         this.assertStillInSetup('add Middleware');
         this.middleware = addMiddlewareToChain(this.middleware, middleware);
@@ -134,7 +135,7 @@ export class TaskManagerPlugin
       serializer,
       savedObjectsRepository,
       esClient: elasticsearch.createClient('taskManager').asInternalUser,
-      index: this.config!.index,
+      index: TASK_MANAGER_INDEX,
       definitions: this.definitions,
       taskManagerId: `kibana:${this.taskManagerId!}`,
     });

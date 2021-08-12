@@ -37,3 +37,4 @@ export type {
   GetResponse,
   DeleteDocumentResponse,
 } from './client';
+export { isSupportedEsServer } from './supported_server_response_check';

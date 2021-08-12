@@ -9,7 +9,7 @@ import { TaskManagerConfig } from '../config';
 import { of, Subject } from 'rxjs';
 import { take, bufferCount } from 'rxjs/operators';
 import { createMonitoringStatsStream, AggregatedStat } from './monitoring_stats_stream';
-import { JsonValue } from '@kbn/common-utils';
+import { JsonValue } from '@kbn/utility-types';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -19,7 +19,6 @@ describe('createMonitoringStatsStream', () => {
   const configuration: TaskManagerConfig = {
     enabled: true,
     max_workers: 10,
-    index: 'foo',
     max_attempts: 9,
     poll_interval: 6000000,
     version_conflict_threshold: 80,
