@@ -116,7 +116,7 @@ export const KibanaDeprecationStats: FunctionComponent = () => {
               size="l"
               content={i18nTexts.loadingError}
               iconProps={{
-                'data-test-subj': 'requestErrorIconTip',
+                'data-test-subj': 'kibanaRequestErrorIconTip',
               }}
             />
           )}

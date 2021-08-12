@@ -64,7 +64,8 @@ export type OverviewTestSubjects =
   | 'kibanaStatsPanel.totalDeprecations'
   | 'kibanaStatsPanel.criticalDeprecations'
   | 'deprecationLoggingFormRow'
-  | 'requestErrorIconTip'
+  | 'esRequestErrorIconTip'
+  | 'kibanaRequestErrorIconTip'
   | 'partiallyUpgradedErrorIconTip'
   | 'upgradedErrorIconTip'
   | 'unauthorizedErrorIconTip'
@@ -73,4 +74,5 @@ export type OverviewTestSubjects =
   | 'upgradeAssistantDeprecationToggle'
   | 'updateLoggingError'
   | 'fetchLoggingError'
+  | 'noDeprecationsLabel'
   | 'upgradeStatusError';

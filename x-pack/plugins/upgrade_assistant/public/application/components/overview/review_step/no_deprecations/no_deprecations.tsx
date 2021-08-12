@@ -26,7 +26,9 @@ export const NoDeprecations: FunctionComponent = () => {
         <EuiFlexItem grow={false}>
           <EuiIcon type="check" />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{i18nTexts.noDeprecationsText}</EuiFlexItem>
+        <EuiFlexItem grow={false} data-test-subj="noDeprecationsLabel">
+          {i18nTexts.noDeprecationsText}
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiText>
   );

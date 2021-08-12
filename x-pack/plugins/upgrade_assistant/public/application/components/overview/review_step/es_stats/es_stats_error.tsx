@@ -69,7 +69,7 @@ export const EsStatsErrors: React.FunctionComponent<Props> = ({ error }) => {
           size="m"
           content={message}
           iconProps={{
-            'data-test-subj': 'requestErrorIconTip',
+            'data-test-subj': 'esRequestErrorIconTip',
           }}
         />
       );

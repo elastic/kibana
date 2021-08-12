@@ -1,0 +1,126 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { act } from 'react-dom/test-utils';
+import { deprecationsServiceMock } from 'src/core/public/mocks';
+
+import * as mockedResponses from './mocked_responses';
+import { OverviewTestBed, setupOverviewPage, setupEnvironment } from '../../helpers';
+
+describe('Overview - Review Step', () => {
+  let testBed: OverviewTestBed;
+  const { server, httpRequestsMockHelpers } = setupEnvironment();
+
+  beforeEach(async () => {
+    httpRequestsMockHelpers.setLoadEsDeprecationsResponse(mockedResponses.esDeprecations);
+    httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({ isEnabled: true });
+
+    await act(async () => {
+      const deprecationService = deprecationsServiceMock.createStartContract();
+      deprecationService.getAllDeprecations = jest
+        .fn()
+        .mockReturnValue(mockedResponses.kibanaDeprecations);
+
+      testBed = await setupOverviewPage({
+        deprecations: deprecationService,
+      });
+    });
+
+    const { component } = testBed;
+    component.update();
+  });
+
+  afterAll(() => {
+    server.restore();
+  });
+
+  describe('ES deprecations', () => {
+    test('Shows deprecation warning and critical counts', () => {
+      const { exists, find } = testBed;
+
+      expect(exists('esStatsPanel')).toBe(true);
+      expect(find('esStatsPanel.totalDeprecations').text()).toContain('2');
+      expect(find('esStatsPanel.criticalDeprecations').text()).toContain('1');
+    });
+
+    test('Handles network failure', async () => {
+      const error = {
+        statusCode: 500,
+        error: 'Cant retrieve deprecations error',
+        message: 'Cant retrieve deprecations error',
+      };
+
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
+
+      await act(async () => {
+        testBed = await setupOverviewPage();
+      });
+
+      const { component, exists } = testBed;
+
+      component.update();
+
+      expect(exists('esRequestErrorIconTip')).toBe(true);
+    });
+
+    test('Hides deprecation counts if it doesnt have any', async () => {
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(mockedResponses.esDeprecationsEmpty);
+
+      await act(async () => {
+        testBed = await setupOverviewPage();
+      });
+
+      const { exists } = testBed;
+
+      expect(exists('noDeprecationsLabel')).toBe(true);
+    });
+  });
+
+  describe('Kibana deprecations', () => {
+    test('Show deprecation warning and critical counts', () => {
+      const { exists, find } = testBed;
+
+      expect(exists('kibanaStatsPanel')).toBe(true);
+      expect(find('kibanaStatsPanel.totalDeprecations').text()).toContain('1');
+      expect(find('kibanaStatsPanel.criticalDeprecations').text()).toContain('1');
+    });
+
+    test('Handles network failure', async () => {
+      await act(async () => {
+        const deprecationService = deprecationsServiceMock.createStartContract();
+        deprecationService.getAllDeprecations = jest
+          .fn()
+          .mockRejectedValue(new Error('Internal Server Error'));
+
+        testBed = await setupOverviewPage({
+          deprecations: deprecationService,
+        });
+      });
+
+      const { component, exists } = testBed;
+
+      component.update();
+
+      expect(exists('kibanaRequestErrorIconTip')).toBe(true);
+    });
+
+    test('Hides deprecation count if it doesnt have any', async () => {
+      await act(async () => {
+        const deprecationService = deprecationsServiceMock.createStartContract();
+        deprecationService.getAllDeprecations = jest.fn().mockRejectedValue([]);
+
+        testBed = await setupOverviewPage({
+          deprecations: deprecationService,
+        });
+      });
+
+      const { exists } = testBed;
+
+      expect(exists('noDeprecationsLabel')).toBe(true);
+    });
+  });
+});
