@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import React from 'react';
 import { ReactWrapper } from 'enzyme';
 
 // Tests are executed in a jsdom environment who does not have sizing methods,
@@ -45,8 +45,7 @@ import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/pu
 import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 import { mockDataPlugin, mountWithProvider } from '../../mocks';
-import { setState, setToggleFullscreen } from '../../state_management';
-import { FrameLayout } from './frame_layout';
+import { setState } from '../../state_management';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -213,7 +212,7 @@ describe('editor_frame', () => {
       const props = {
         ...getDefaultProps(),
         visualizationMap: {
-          testVis: { ...mockVisualization, toExpression: () => 'vis' },
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         },
         datasourceMap: {
           testDatasource: {
@@ -246,7 +245,7 @@ describe('editor_frame', () => {
       expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
         "kibana
         | lens_merge_tables layerIds=\\"first\\" tables={datasource}
-        | vis"
+        | testVis"
       `);
     });
 
@@ -263,7 +262,7 @@ describe('editor_frame', () => {
       const props = {
         ...getDefaultProps(),
         visualizationMap: {
-          testVis: { ...mockVisualization, toExpression: () => 'vis' },
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         },
         datasourceMap: {
           testDatasource: {
@@ -368,7 +367,7 @@ describe('editor_frame', () => {
             },
             Object {
               "arguments": Object {},
-              "function": "vis",
+              "function": "testVis",
               "type": "function",
             },
           ],
@@ -1099,46 +1098,6 @@ describe('editor_frame', () => {
           state: suggestionVisState,
         })
       );
-    });
-
-    it('should avoid completely to compute suggestion when in fullscreen mode', async () => {
-      const props = {
-        ...getDefaultProps(),
-        initialContext: {
-          indexPatternId: '1',
-          fieldName: 'test',
-        },
-        visualizationMap: {
-          testVis: mockVisualization,
-        },
-        datasourceMap: {
-          testDatasource: mockDatasource,
-          testDatasource2: mockDatasource2,
-        },
-
-        ExpressionRenderer: expressionRendererMock,
-      };
-
-      const { instance: el, lensStore } = await mountWithProvider(<EditorFrame {...props} />, {
-        data: props.plugins.data,
-      });
-      instance = el;
-
-      expect(
-        instance.find(FrameLayout).prop('suggestionsPanel') as ReactElement
-      ).not.toBeUndefined();
-
-      lensStore.dispatch(setToggleFullscreen());
-      instance.update();
-
-      expect(instance.find(FrameLayout).prop('suggestionsPanel') as ReactElement).toBe(false);
-
-      lensStore.dispatch(setToggleFullscreen());
-      instance.update();
-
-      expect(
-        instance.find(FrameLayout).prop('suggestionsPanel') as ReactElement
-      ).not.toBeUndefined();
     });
   });
 });

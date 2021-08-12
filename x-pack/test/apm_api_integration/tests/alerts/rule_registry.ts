@@ -13,6 +13,7 @@ import {
   ALERT_STATUS,
   ALERT_UUID,
   EVENT_KIND,
+  ALERT_RULE_UUID,
 } from '@kbn/rule-data-utils';
 import { merge, omit } from 'lodash';
 import { format } from 'url';
@@ -214,7 +215,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           actions: [],
           tags: ['apm', 'service.name:opbeans-go'],
           notifyWhen: 'onActionGroupChange',
-          name: 'Transaction error rate threshold | opbeans-go',
+          name: 'Failed transaction rate threshold | opbeans-go',
         };
 
         const { body: response, status } = await supertest
@@ -345,7 +346,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           any
         >;
 
-        const exclude = ['@timestamp', ALERT_START, ALERT_UUID, 'rule.uuid'];
+        const exclude = ['@timestamp', ALERT_START, ALERT_UUID, ALERT_RULE_UUID];
 
         const toCompare = omit(alertEvent, exclude);
 
@@ -369,14 +370,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "kibana.alert.id": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
-            "kibana.alert.owner": Array [
-              "apm",
-            ],
-            "kibana.alert.producer": Array [
-              "apm",
-            ],
             "kibana.alert.reason": Array [
-              "Transaction error rate is greater than 30% (current value is 50%) for opbeans-go",
+              "Failed transaction rate is greater than 30% (current value is 50%) for opbeans-go",
+            ],
+            "kibana.alert.rule.category": Array [
+              "Failed transaction rate threshold",
+            ],
+            "kibana.alert.rule.consumer": Array [
+              "apm",
+            ],
+            "kibana.alert.rule.name": Array [
+              "Failed transaction rate threshold | opbeans-go",
+            ],
+            "kibana.alert.rule.producer": Array [
+              "apm",
+            ],
+            "kibana.alert.rule.rule_type_id": Array [
+              "apm.transaction_error_rate",
             ],
             "kibana.alert.status": Array [
               "open",
@@ -386,15 +396,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ],
             "processor.event": Array [
               "transaction",
-            ],
-            "rule.category": Array [
-              "Transaction error rate threshold",
-            ],
-            "rule.id": Array [
-              "apm.transaction_error_rate",
-            ],
-            "rule.name": Array [
-              "Transaction error rate threshold | opbeans-go",
             ],
             "service.name": Array [
               "opbeans-go",
@@ -448,6 +449,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "kibana.alert.id": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
+<<<<<<< HEAD
             "kibana.alert.owner": Array [
               "apm",
             ],
@@ -456,6 +458,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ],
             "kibana.alert.reason": Array [
               "Transaction error rate is greater than 30% (current value is 50%) for opbeans-go",
+=======
+            "kibana.alert.rule.category": Array [
+              "Failed transaction rate threshold",
+            ],
+            "kibana.alert.rule.consumer": Array [
+              "apm",
+            ],
+            "kibana.alert.rule.name": Array [
+              "Failed transaction rate threshold | opbeans-go",
+            ],
+            "kibana.alert.rule.producer": Array [
+              "apm",
+            ],
+            "kibana.alert.rule.rule_type_id": Array [
+              "apm.transaction_error_rate",
+>>>>>>> 2ebdf3e629ad46c8e4396aab2759e21e899ba996
             ],
             "kibana.alert.status": Array [
               "open",
@@ -465,15 +483,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ],
             "processor.event": Array [
               "transaction",
-            ],
-            "rule.category": Array [
-              "Transaction error rate threshold",
-            ],
-            "rule.id": Array [
-              "apm.transaction_error_rate",
-            ],
-            "rule.name": Array [
-              "Transaction error rate threshold | opbeans-go",
             ],
             "service.name": Array [
               "opbeans-go",
@@ -555,6 +564,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "kibana.alert.id": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
+<<<<<<< HEAD
             "kibana.alert.owner": Array [
               "apm",
             ],
@@ -563,6 +573,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ],
             "kibana.alert.reason": Array [
               "Transaction error rate is greater than 30% (current value is 50%) for opbeans-go",
+=======
+            "kibana.alert.rule.category": Array [
+              "Failed transaction rate threshold",
+            ],
+            "kibana.alert.rule.consumer": Array [
+              "apm",
+            ],
+            "kibana.alert.rule.name": Array [
+              "Failed transaction rate threshold | opbeans-go",
+            ],
+            "kibana.alert.rule.producer": Array [
+              "apm",
+            ],
+            "kibana.alert.rule.rule_type_id": Array [
+              "apm.transaction_error_rate",
+>>>>>>> 2ebdf3e629ad46c8e4396aab2759e21e899ba996
             ],
             "kibana.alert.status": Array [
               "closed",
@@ -572,15 +598,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ],
             "processor.event": Array [
               "transaction",
-            ],
-            "rule.category": Array [
-              "Transaction error rate threshold",
-            ],
-            "rule.id": Array [
-              "apm.transaction_error_rate",
-            ],
-            "rule.name": Array [
-              "Transaction error rate threshold | opbeans-go",
             ],
             "service.name": Array [
               "opbeans-go",

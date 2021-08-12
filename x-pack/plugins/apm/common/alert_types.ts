@@ -81,7 +81,7 @@ export function formatTransactionErrorRateReason({
   asPercent: AsPercent;
 }) {
   return i18n.translate('xpack.apm.alertTypes.transactionErrorRate.reason', {
-    defaultMessage: `Transaction error rate is greater than {threshold} (current value is {measured}) for {serviceName}`,
+    defaultMessage: `Failed transactions rate is greater than {threshold} (current value is {measured}) for {serviceName}`,
     values: {
       threshold: asPercent(threshold, 100),
       measured: asPercent(measured, 100),
@@ -155,7 +155,7 @@ export const ALERT_TYPES_CONFIG: Record<
   },
   [AlertType.TransactionErrorRate]: {
     name: i18n.translate('xpack.apm.transactionErrorRateAlert.name', {
-      defaultMessage: 'Transaction error rate threshold',
+      defaultMessage: 'Failed transaction rate threshold',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
