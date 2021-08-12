@@ -148,7 +148,7 @@ export function getColumns({
       field: 'errorRate',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnErrorRate',
-        { defaultMessage: 'Error rate' }
+        { defaultMessage: 'Failed transaction rate' }
       ),
       width: `${unit * 8}px`,
       render: (_, { serviceNodeName, errorRate }) => {

@@ -8,7 +8,8 @@
 import { PaletteOutput } from 'src/plugins/charts/public';
 import { DataType, SuggestionRequest } from '../types';
 import { suggestions } from './suggestions';
-import type { PieVisualizationState } from '../../common/expressions';
+import { PieVisualizationState } from '../../common/expressions';
+import { layerTypes } from '../../common';
 
 describe('suggestions', () => {
   describe('pie', () => {
@@ -56,6 +57,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 groups: [],
                 metric: 'a',
                 numberDisplay: 'hidden',
@@ -484,6 +486,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 groups: ['a'],
                 metric: 'b',
 
@@ -505,6 +508,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 groups: ['a'],
                 metric: 'b',
 
@@ -536,6 +540,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 groups: [],
                 metric: 'a',
 
@@ -585,6 +590,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 groups: ['a', 'b'],
                 metric: 'e',
                 numberDisplay: 'value',
@@ -633,6 +639,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 groups: ['a', 'b'],
                 metric: 'e',
                 numberDisplay: 'percent',
@@ -669,6 +676,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 groups: ['a'],
                 metric: 'b',
 
@@ -689,6 +697,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 groups: ['a'],
                 metric: 'b',
 
