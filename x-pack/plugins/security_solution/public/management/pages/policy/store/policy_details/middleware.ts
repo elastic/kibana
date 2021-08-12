@@ -112,7 +112,7 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
               return sendPutPackagePolicy(
                 http,
                 id,
-                getPolicyDataForUpdate(latestUpdatedPolicyItem) as NewPolicyData
+                getPolicyDataForUpdate(latestUpdatedPolicyItem)
               );
             });
           }

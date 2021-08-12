@@ -66,7 +66,7 @@ export const policyDetailsForUpdate: (
   state: Immutable<PolicyDetailsState>
 ) => Immutable<NewPolicyData> | undefined = createSelector(licensedPolicy, (policy) => {
   if (policy) {
-    return getPolicyDataForUpdate(policy);
+    return getPolicyDataForUpdate(policy) as Immutable<NewPolicyData>;
   }
 });
 

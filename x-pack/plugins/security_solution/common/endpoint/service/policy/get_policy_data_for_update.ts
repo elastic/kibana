@@ -5,53 +5,26 @@
  * 2.0.
  */
 
-import { Immutable, NewPolicyData, PolicyData } from '../../types';
+import { cloneDeep } from 'lodash';
+import { MaybeImmutable, NewPolicyData, PolicyData } from '../../types';
 
 /**
  * Given a Policy Data (package policy) object, return back a new object with only the field
  * needed for an Update/Create API action
  * @param policy
  */
-export const getPolicyDataForUpdate = (
-  policy: PolicyData | Immutable<PolicyData>
-): NewPolicyData | Immutable<NewPolicyData> => {
+export const getPolicyDataForUpdate = (policy: MaybeImmutable<PolicyData>): NewPolicyData => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { id, revision, created_by, created_at, updated_by, updated_at, ...newPolicy } = policy;
+  // cast to `NewPolicyData` (mutable) since we cloned the entire object
+  const policyDataForUpdate = cloneDeep(newPolicy) as NewPolicyData;
+  const endpointPolicy = policyDataForUpdate.inputs[0].config.policy.value;
 
   // trim custom malware notification string
-  return {
-    ...newPolicy,
-    inputs: (newPolicy as Immutable<NewPolicyData>).inputs.map((input) => ({
-      ...input,
-      config: input.config && {
-        ...input.config,
-        policy: {
-          ...input.config.policy,
-          value: {
-            ...input.config.policy.value,
-            windows: {
-              ...input.config.policy.value.windows,
-              popup: {
-                ...input.config.policy.value.windows.popup,
-                malware: {
-                  ...input.config.policy.value.windows.popup.malware,
-                  message: input.config.policy.value.windows.popup.malware.message.trim(),
-                },
-              },
-            },
-            mac: {
-              ...input.config.policy.value.mac,
-              popup: {
-                ...input.config.policy.value.mac.popup,
-                malware: {
-                  ...input.config.policy.value.mac.popup.malware,
-                  message: input.config.policy.value.mac.popup.malware.message.trim(),
-                },
-              },
-            },
-          },
-        },
-      },
-    })),
-  };
+  [
+    endpointPolicy.windows.popup.malware,
+    endpointPolicy.mac.popup.malware,
+  ].forEach((objWithMessage) => objWithMessage.message.trim());
+
+  return policyDataForUpdate;
 };
