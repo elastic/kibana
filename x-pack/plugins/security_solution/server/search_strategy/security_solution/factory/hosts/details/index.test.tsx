@@ -18,6 +18,7 @@ import {
 } from '../../../../../../../../../src/core/server';
 import { EndpointAppContext } from '../../../../../endpoint/types';
 import { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
+import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
 
 const mockDeps = {
   esClient: {} as IScopedClusterClient,
@@ -30,12 +31,7 @@ const mockDeps = {
     },
     config: jest.fn().mockResolvedValue({}),
     experimentalFeatures: {
-      trustedAppsByPolicyEnabled: false,
-      excludePoliciesInFilterEnabled: false,
-      metricsEntitiesEnabled: false,
-      ruleRegistryEnabled: false,
-      tGridEnabled: false,
-      uebaEnabled: false,
+      ...allowedExperimentalValues,
     },
     service: {} as EndpointAppContextService,
   } as EndpointAppContext,
