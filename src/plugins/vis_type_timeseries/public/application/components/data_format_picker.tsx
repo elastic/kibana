@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { ChangeEvent, useEffect, useMemo, useCallback, useState } from 'react';
+import React, { ChangeEvent, useMemo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -129,14 +129,6 @@ export const DataFormatPicker = ({
   const [durationParams, setDurationParams] = useState(
     getDurationParams(selectedFormatter === DATA_FORMATTERS.DURATION ? formatterValue : 'ms,ms,')
   );
-
-  useEffect(() => {
-    // change the formatter to default if options do not include the selected one
-    if (!options.map(({ value }) => value).includes(selectedFormatter)) {
-      setSelectedFormatter(DATA_FORMATTERS.DEFAULT);
-      changeModelFormatter(DATA_FORMATTERS.DEFAULT);
-    }
-  }, [changeModelFormatter, options, selectedFormatter]);
 
   const handleChange = useCallback(
     (selectedOption: DATA_FORMATTERS) => {

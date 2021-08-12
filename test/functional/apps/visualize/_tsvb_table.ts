@@ -85,6 +85,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'OS Variance of bytes\nwin 8 2,707,941.822\nwin xp 2,595,612.24\nwin 7 16,055,541.306\nios 6,505,206.56\nosx 1,016,620.667';
         await visualBuilder.selectAggType('Variance');
         await visualBuilder.setFieldForAggregation('bytes');
+        await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('number');
 
         const tableData = await visualBuilder.getViewTable();
         expect(tableData).to.be(EXPECTED);

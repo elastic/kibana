@@ -6,34 +6,38 @@
  * Side Public License, v 1.
  */
 
-import React, { HTMLAttributes } from 'react';
+import React, { useMemo, useEffect, HTMLAttributes } from 'react';
 // @ts-ignore
 import { aggToComponent } from '../lib/agg_to_component';
 // @ts-ignore
 import { isMetricEnabled } from '../../lib/check_ui_restrictions';
+// @ts-expect-error not typed yet
+import { seriesChangeHandler } from '../lib/series_change_handler';
+import { checkIfNumericMetric } from '../lib/check_if_numeric_metric';
 import { UnsupportedAgg } from './unsupported_agg';
 import { TemporaryUnsupportedAgg } from './temporary_unsupported_agg';
-import type { Metric, Panel, Series } from '../../../../common/types';
-import { DragHandleProps } from '../../../types';
-import { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
-import { IFieldType } from '../../../../../data/common/index_patterns/fields';
+import { DATA_FORMATTERS } from '../../../../common/enums';
+import type { Metric, Panel, Series, SanitizedFieldType } from '../../../../common/types';
+import type { DragHandleProps } from '../../../types';
+import type { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 
 interface AggProps extends HTMLAttributes<HTMLElement> {
   disableDelete: boolean;
-  fields: IFieldType[];
+  fields: Record<string, SanitizedFieldType[]>;
+  name: string;
   model: Metric;
   panel: Panel;
   series: Series;
   siblings: Metric[];
   uiRestrictions: TimeseriesUIRestrictions;
   dragHandleProps: DragHandleProps;
+  onChange: (part: Partial<Series>) => void;
   onAdd: () => void;
-  onChange: () => void;
   onDelete: () => void;
 }
 
 export function Agg(props: AggProps) {
-  const { model, uiRestrictions } = props;
+  const { model, uiRestrictions, series, name, onChange, fields, siblings } = props;
 
   let Component = aggToComponent[model.type];
 
@@ -52,6 +56,21 @@ export function Agg(props: AggProps) {
     ? props.series.series_index_pattern
     : props.panel.index_pattern;
 
+  const onAggChange = useMemo(
+    () => seriesChangeHandler({ name, model: series, onChange }, siblings),
+    [name, onChange, siblings, series]
+  );
+
+  useEffect(() => {
+    const isNumericMetric = checkIfNumericMetric(model, fields, indexPattern);
+    const isNumberFormatter = ![DATA_FORMATTERS.DEFAULT, DATA_FORMATTERS.CUSTOM].includes(
+      series.formatter as DATA_FORMATTERS
+    );
+    if (!isNumericMetric && isNumberFormatter) {
+      onChange({ formatter: DATA_FORMATTERS.DEFAULT });
+    }
+  }, [indexPattern, model, onChange, fields, series.formatter]);
+
   return (
     <div className={props.className} style={style}>
       <Component
@@ -59,7 +78,7 @@ export function Agg(props: AggProps) {
         disableDelete={props.disableDelete}
         model={props.model}
         onAdd={props.onAdd}
-        onChange={props.onChange}
+        onChange={onAggChange}
         onDelete={props.onDelete}
         panel={props.panel}
         series={props.series}

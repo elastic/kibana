@@ -46,6 +46,8 @@ export class TableSeriesConfig extends Component {
     }
   }
 
+  changeModelFormatter = (formatter) => this.props.onChange({ formatter });
+
   render() {
     const defaults = { offset_time: '', value_template: '{{value}}' };
     const model = { ...defaults, ...this.props.model };
@@ -113,7 +115,6 @@ export class TableSeriesConfig extends Component {
       return model.aggregate_function === option.value;
     });
 
-    const changeModelFormatter = (formatter) => this.props.onChange({ formatter });
     const isNumericMetric = checkIfNumericMetric(
       last(model.metrics),
       this.props.fields,
@@ -125,7 +126,7 @@ export class TableSeriesConfig extends Component {
         <EuiFlexGroup gutterSize="s">
           <DataFormatPicker
             formatterValue={model.formatter}
-            changeModelFormatter={changeModelFormatter}
+            changeModelFormatter={this.changeModelFormatter}
             shouldIncludeNumberOptions={isNumericMetric}
           />
           <EuiFlexItem grow={3}>
