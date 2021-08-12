@@ -23,7 +23,7 @@ export const parseAlert = (observabilityRuleTypeRegistry: ObservabilityRuleTypeR
   const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[ALERT_RULE_TYPE_ID]!);
   const formatted = {
     link: undefined,
-    reason: parsedFields[ALERT_RULE_NAME]!,
+    reason: parsedFields[ALERT_RULE_NAME] ?? '',
     ...(formatter?.({ fields: parsedFields, formatters: { asDuration, asPercent } }) ?? {}),
   };
 
@@ -31,6 +31,6 @@ export const parseAlert = (observabilityRuleTypeRegistry: ObservabilityRuleTypeR
     ...formatted,
     fields: parsedFields,
     active: parsedFields[ALERT_STATUS] !== 'closed',
-    start: new Date(parsedFields[ALERT_START]!).getTime(),
+    start: new Date(parsedFields[ALERT_START] ?? 0).getTime(),
   };
 };
