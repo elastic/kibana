@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -55,9 +62,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
 
   // In a future milestone we'll have a page dedicated to rule management in
   // observability. For now link to the settings page.
-  const manageDetectionRulesHref = prepend(
-    '/app/management/insightsAndAlerting/triggersActions/alerts'
-  );
+  const manageRulesHref = prepend('/app/management/insightsAndAlerting/triggersActions/alerts');
 
   const { data: dynamicIndexPatternResp } = useFetcher(({ signal }) => {
     return callObservabilityApi({
@@ -116,11 +121,11 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
           </>
         ),
         rightSideItems: [
-          <EuiButton fill href={manageDetectionRulesHref} iconType="gear">
-            {i18n.translate('xpack.observability.alerts.manageDetectionRulesButtonLabel', {
-              defaultMessage: 'Manage detection rules',
+          <EuiButtonEmpty href={manageRulesHref}>
+            {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
+              defaultMessage: 'Manage Rules',
             })}
-          </EuiButton>,
+          </EuiButtonEmpty>,
         ],
       }}
     >
