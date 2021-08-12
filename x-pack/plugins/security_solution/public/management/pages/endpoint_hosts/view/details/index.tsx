@@ -7,7 +7,6 @@
 import React, { useCallback, memo } from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
 import { useEndpointSelector } from '../hooks';
 import { uiQueryParams } from '../../store/selectors';
 
@@ -16,7 +15,6 @@ import { EndpointDetails } from './endpoint_details';
 
 export const EndpointDetailsFlyout = memo(() => {
   const history = useHistory();
-  const dispatch = useDispatch();
   const queryParams = useEndpointSelector(uiQueryParams);
   const {
     selected_endpoint: selectedEndpoint,
