@@ -119,7 +119,7 @@ export class Welcome extends React.Component<Props> {
     const { urlBasePath, telemetry } = this.props;
     return (
       <EuiPortal>
-        <div className="homWelcome">
+        <div className="homWelcome" data-test-subj="homeWelcomeInterstitial">
           <header className="homWelcome__header">
             <div className="homWelcome__content eui-textCenter">
               <EuiSpacer size="xl" />

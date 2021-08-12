@@ -41,7 +41,7 @@ export default function () {
         )}`,
         `--elasticsearch.username=${kibanaServerTestUser.username}`,
         `--elasticsearch.password=${kibanaServerTestUser.password}`,
-        `--home.disableWelcomeScreen=true`,
+        // `--home.disableWelcomeScreen=true`,
         // Needed for async search functional tests to introduce a delay
         `--data.search.aggs.shardDelay.enabled=true`,
         `--security.showInsecureClusterWarning=false`,
