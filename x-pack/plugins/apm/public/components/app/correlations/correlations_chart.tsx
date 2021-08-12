@@ -26,7 +26,10 @@ import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { i18n } from '@kbn/i18n';
 
-import { getDurationFormatter } from '../../../../common/utils/formatters';
+import {
+  getDurationUnitKey,
+  getUnitLabelAndConvertedValue,
+} from '../../../../common/utils/formatters';
 
 import { HistogramItem } from '../../../../common/search_strategies/correlations/types';
 
@@ -145,30 +148,14 @@ export function CorrelationsChart({
     },
   ];
 
-  const xMax = Math.max(...(overallHistogram ?? []).map((d) => d.key)) ?? 0;
-
-  // We want y axis ticks for 1, 10, 100, 1000 ...
-  // First get the actual max of y values
+  // This will create y axis ticks for 1, 10, 100, 1000 ...
   const yMax =
     Math.max(...(overallHistogram ?? []).map((d) => d.doc_count)) ?? 0;
-  // The axis treats the ticks number as a best effort/recommendation.
-  // By counting the digits of yMax we make sure it's one less than what we want.
-  // The axis will then round up the ticks and we won't overshoot with many tick values.
-  const yTicks = ('' + Math.round(yMax)).length;
-  // Up the maximum y domain value to the next nice log label,
-  // e.g. if the actual max is 234, we'll up it to 1000.
-  const yDomainMax = parseInt(
-    `1${new Array(('' + Math.round(yMax)).length).fill(0).join('')}`,
-    10
-  );
-
-  // Log based axis cannot start a 0. Use a small positive number instead.
+  const yTicks = Math.ceil(Math.log10(yMax));
   const yAxisDomain = {
     min: 0.9,
-    max: yDomainMax,
+    max: Math.pow(10, yTicks),
   };
-
-  const durationFormatter = getDurationFormatter(xMax);
 
   const histogram = replaceHistogramDotsWithBars(originalHistogram);
 
@@ -205,7 +192,17 @@ export function CorrelationsChart({
             id="x-axis"
             title=""
             position={Position.Bottom}
-            tickFormat={(d) => durationFormatter(d).formatted}
+            tickFormat={(d) => {
+              const unit = getDurationUnitKey(d, 1);
+              const converted = getUnitLabelAndConvertedValue(unit, d);
+              const convertedValueParts = converted.convertedValue.split('.');
+              const convertedValue =
+                convertedValueParts.length === 2 &&
+                convertedValueParts[1] === '0'
+                  ? convertedValueParts[0]
+                  : converted.convertedValue;
+              return `${convertedValue}${converted.unitLabel}`;
+            }}
           />
           <Axis
             id="y-axis"
