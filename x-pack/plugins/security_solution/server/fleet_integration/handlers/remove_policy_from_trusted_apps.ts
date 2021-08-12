@@ -19,7 +19,7 @@ interface DeletePolicy {
  * Removes policy from trusted apps
  */
 export const removePolicyFromTrustedApps = async (
-  exceptionsClient: ExceptionListClient | undefined,
+  exceptionsClient: ExceptionListClient,
   policy: DeletePolicy
 ) => {
   if (!exceptionsClient) return;

@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
-import { createNewPackagePolicyMock } from '../../../fleet/common/mocks';
+import { createNewPackagePolicyMock, deletePackagePolicyMock } from '../../../fleet/common/mocks';
 import {
   policyFactory,
   policyFactoryWithoutPaidFeatures,
@@ -14,6 +14,7 @@ import {
 import { buildManifestManagerMock } from '../endpoint/services/artifacts/manifest_manager/manifest_manager.mock';
 import {
   getPackagePolicyCreateCallback,
+  getPackagePolicyDeleteCallback,
   getPackagePolicyUpdateCallback,
 } from './fleet_integration';
 import { KibanaRequest } from 'kibana/server';
@@ -35,6 +36,7 @@ import { getMockArtifacts, toArtifactRecords } from '../endpoint/lib/artifacts/m
 import { Manifest } from '../endpoint/lib/artifacts';
 import { NewPackagePolicy } from '../../../fleet/common/types/models';
 import { ManifestSchema } from '../../common/endpoint/schema/manifest';
+import { ExperimentalFeatures } from '../../common/experimental_features';
 
 describe('ingest_integration tests ', () => {
   let endpointAppContextMock: EndpointAppContextServiceStartContract;
@@ -280,6 +282,52 @@ describe('ingest_integration tests ', () => {
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       const updatedPolicyConfig = await callback(policyConfig, ctx, req);
       expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
+    });
+  });
+
+  describe.skip('package policy delete callback with trusted apps by policy enabled', () => {
+    const invokeDeleteCallback = async (
+      experimentalFeatures?: ExperimentalFeatures
+    ): Promise<void> => {
+      const callback = getPackagePolicyDeleteCallback(exceptionListClient, experimentalFeatures);
+      await callback(deletePackagePolicyMock(), ctx, req);
+    };
+
+    beforeEach(() => {});
+
+    it('removes policy from trusted app', async () => {
+      const removedPolicies = deletePackagePolicyMock();
+      const trustedAppsList = await exceptionListClient.createTrustedAppsList();
+
+      const policyId = removedPolicies[0].id;
+      const trustedAppItem = await exceptionListClient.createExceptionListItem({
+        listId: trustedAppsList!.list_id,
+        comments: [],
+        entries: [],
+        itemId: '1',
+        namespaceType: 'agnostic',
+        name: 'TA with policy assigned',
+        osTypes: [],
+        description: 'TA with policy assigned ',
+        meta: undefined,
+        tags: [`policy:${policyId}`],
+        type: 'simple',
+      });
+
+      await invokeDeleteCallback({
+        metricsEntitiesEnabled: false,
+        ruleRegistryEnabled: false,
+        tGridEnabled: false,
+        trustedAppsByPolicyEnabled: true, // Needs to be enabled, it needs also a test with this disabled.
+        excludePoliciesInFilterEnabled: false,
+        uebaEnabled: false,
+      });
+      // TODO: check that TA has been updated
+      const updatedTrustedAppItem = await exceptionListClient.getExceptionListItem({
+        itemId: trustedAppItem.item_id,
+        id: trustedAppItem.id,
+        namespaceType: trustedAppItem.namespace_type,
+      });
     });
   });
 });

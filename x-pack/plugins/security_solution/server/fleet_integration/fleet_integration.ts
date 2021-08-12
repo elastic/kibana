@@ -141,6 +141,9 @@ export const getPackagePolicyDeleteCallback = (
   experimentalFeatures: ExperimentalFeatures | undefined
 ): PostPackagePolicyDeleteCallback => {
   return async (deletePackagePolicy: DeletePackagePoliciesResponse): Promise<void> => {
+    if (!exceptionsClient) {
+      return;
+    }
     const promises: Array<Promise<void>> = [];
     for (const policy of deletePackagePolicy) {
       if (isEndpointPackagePolicy(policy)) {
