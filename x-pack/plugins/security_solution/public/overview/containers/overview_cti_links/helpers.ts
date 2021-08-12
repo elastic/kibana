@@ -14,8 +14,8 @@ export interface CtiListItem {
   count: number;
 }
 
-export const EMPTY_LIST_ITEMS: CtiListItem[] = CTI_DEFAULT_SOURCES.map((item) => ({
-  title: item,
+export const EMPTY_LIST_ITEMS: CtiListItem[] = Object.keys(CTI_DEFAULT_SOURCES).map((title) => ({
+  title,
   count: 0,
   path: '',
 }));
@@ -37,7 +37,7 @@ export const OVERVIEW_DASHBOARD_LINK_TITLE = 'Overview';
 export const getListItemsWithoutLinks = (eventCounts: EventCounts): CtiListItem[] => {
   return EMPTY_LIST_ITEMS.map((item) => ({
     ...item,
-    count: eventCounts[item.title.replace(' ', '').toLowerCase()] ?? 0,
+    count: eventCounts[CTI_DEFAULT_SOURCES[item.title]] ?? 0,
   }));
 };
 
@@ -58,15 +58,12 @@ export const createLinkFromDashboardSO = (
       : undefined;
   return {
     title,
-    count:
-      typeof title === 'string'
-        ? eventCountsByDataset[title.replace(' ', '').toLowerCase()]
-        : undefined,
+    count: typeof title === 'string' ? eventCountsByDataset[CTI_DEFAULT_SOURCES[title]] : undefined,
     path,
   };
 };
 
-export const emptyEventCountsByDataset = CTI_DEFAULT_SOURCES.reduce((acc, item) => {
-  acc[item.toLowerCase().replace(' ', '')] = 0;
+export const emptyEventCountsByDataset = Object.values(CTI_DEFAULT_SOURCES).reduce((acc, id) => {
+  acc[id] = 0;
   return acc;
 }, {} as { [key: string]: number });
