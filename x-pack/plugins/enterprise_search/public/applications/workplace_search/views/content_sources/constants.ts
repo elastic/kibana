@@ -370,13 +370,6 @@ export const SYNC_DIAGNOSTICS_BUTTON = i18n.translate(
   }
 );
 
-export const FORCE_SYNC_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.forceSyncButton',
-  {
-    defaultMessage: 'Sync',
-  }
-);
-
 export const SOURCE_NAME_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.sourceName.label',
   {

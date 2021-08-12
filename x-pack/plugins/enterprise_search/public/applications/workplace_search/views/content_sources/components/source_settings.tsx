@@ -43,7 +43,6 @@ import {
 import { SourceDataItem } from '../../../types';
 import { AddSourceLogic } from '../components/add_source/add_source_logic';
 import {
-  FORCE_SYNC_BUTTON,
   SOURCE_SETTINGS_HEADING,
   SOURCE_SETTINGS_TITLE,
   SOURCE_SETTINGS_DESCRIPTION,
@@ -70,7 +69,7 @@ import { SourceLayout } from './source_layout';
 export const SourceSettings: React.FC = () => {
   const { http } = useValues(HttpLogic);
 
-  const { updateContentSource, removeContentSource, forceSync } = useActions(SourceLogic);
+  const { updateContentSource, removeContentSource } = useActions(SourceLogic);
   const { getSourceConfigData } = useActions(AddSourceLogic);
 
   const {
@@ -129,10 +128,6 @@ export const SourceSettings: React.FC = () => {
   const submitNameChange = (e: FormEvent) => {
     e.preventDefault();
     updateContentSource(id, { name: inputValue });
-  };
-
-  const submitForceSync = (e: EuiButtonEvent) => {
-    forceSync(id);
   };
 
   const handleSynchronizeChange = (e: EuiSwitchEvent) => {
@@ -247,15 +242,6 @@ export const SourceSettings: React.FC = () => {
                   label={SYNC_MANAGEMENT_SYNCHRONIZE_LABEL}
                   data-test-subj="SynchronizeToggle"
                 />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  color="primary"
-                  onClick={submitForceSync}
-                  data-test-subj="ForceSyncButton"
-                >
-                  {FORCE_SYNC_BUTTON}
-                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule />

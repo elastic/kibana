@@ -55,7 +55,6 @@ export interface SourceActions {
   removeContentSource(sourceId: string): { sourceId: string };
   initializeSource(sourceId: string): { sourceId: string };
   setButtonNotLoading(): void;
-  forceSync(sourceId: string): void;
 }
 
 interface SourceValues {
@@ -103,9 +102,6 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     }),
     resetSourceState: () => true,
     setButtonNotLoading: () => false,
-    forceSync: (sourceId: string) => ({
-      sourceId,
-    }),
   },
   reducers: {
     contentSource: [
@@ -285,17 +281,6 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     },
     resetSourceState: () => {
       clearFlashMessages();
-    },
-    forceSync: async ({ sourceId }) => {
-      const route = `/api/workplace_search/org/sources/${sourceId}/sync/jobs`;
-
-      try {
-        const response = await HttpLogic.values.http.post(route, {
-          body: JSON.stringify({ command: 'start', force_interrupt: true }),
-        });
-      } catch (e) {
-        flashAPIErrors(e);
-      }
     },
   }),
 });
