@@ -70,7 +70,6 @@ export interface ISource {
   getMaxZoom(): number;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
   getUpdateDueToTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean;
-  getType(): string;
 }
 
 export class AbstractSource implements ISource {
@@ -83,10 +82,6 @@ export class AbstractSource implements ISource {
   }
 
   destroy(): void {}
-
-  getType(): string {
-    return this._descriptor.type;
-  }
 
   cloneDescriptor(): AbstractSourceDescriptor {
     return copyPersistentState(this._descriptor);

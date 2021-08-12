@@ -117,4 +117,8 @@ export class TileLayer extends AbstractLayer {
   getLayerTypeIconName() {
     return 'grid';
   }
+
+  isBasemap(order: number): boolean {
+    return order === 0;
+  }
 }
