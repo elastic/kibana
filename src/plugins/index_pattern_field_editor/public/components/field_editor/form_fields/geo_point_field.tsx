@@ -66,11 +66,19 @@ export const GeoPointField = React.memo(({ existingConcreteFields }: Props) => {
       {({ value, setValue }) => {
         setScriptSource = setValue;
 
+        // populate lat and lon fields from value when loading page from existing field
+        if (value && !latFieldName && !lonFieldName) {
+          const matches = Array.from(value.matchAll(/\[(.*?)\]/g));
+          if (matches.length === 2) {
+            setLatFieldName(matches[0][1].replaceAll("'", ''));
+            setLonFieldName(matches[1][1].replaceAll("'", ''));
+          }
+        }
+
         function onLatChange(selectedOptions: Array<EuiComboBoxOptionOption<string>>) {
           if (!selectedOptions.length) {
             return;
           }
-
           setLatFieldName(selectedOptions[0].value);
         }
 
@@ -78,7 +86,6 @@ export const GeoPointField = React.memo(({ existingConcreteFields }: Props) => {
           if (!selectedOptions.length) {
             return;
           }
-
           setLonFieldName(selectedOptions[0].value);
         }
 
