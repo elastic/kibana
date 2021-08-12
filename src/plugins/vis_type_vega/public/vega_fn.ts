@@ -64,6 +64,7 @@ export const createVegaFn = (
       filters: get(input, 'filters') as any,
       visParams: { spec: args.spec },
       searchSessionId: context.getSearchSessionId(),
+      executionContext: context.getExecutionContext(),
     });
 
     return {
