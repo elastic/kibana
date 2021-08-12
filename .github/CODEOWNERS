@@ -107,6 +107,8 @@
 /x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
 /x-pack/test/functional_with_es_ssl/apps/uptime  @elastic/uptime
 /x-pack/test/functional/apps/uptime @elastic/uptime
+/x-pack/test/functional/es_archives/uptime @elastic/uptime
+/x-pack/test/functional/services/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
 
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
@@ -157,6 +159,7 @@
 
 # Maps
 #CC# /x-pack/plugins/maps/ @elastic/kibana-gis
+/x-pack/plugins/maps/ @elastic/kibana-gis
 /x-pack/test/api_integration/apis/maps/ @elastic/kibana-gis
 /x-pack/test/functional/apps/maps/ @elastic/kibana-gis
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
@@ -164,7 +167,9 @@
 /x-pack/plugins/stack_alerts/server/alert_types/geo_containment @elastic/kibana-gis
 /x-pack/plugins/stack_alerts/public/alert_types/geo_containment @elastic/kibana-gis
 #CC# /src/plugins/maps_legacy/ @elastic/kibana-gis
+/src/plugins/maps_legacy/ @elastic/kibana-gis
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
+/x-pack/plugins/file_upload @elastic/kibana-gis
 /src/plugins/tile_map/ @elastic/kibana-gis
 /src/plugins/region_map/ @elastic/kibana-gis
 /packages/kbn-mapbox-gl @elastic/kibana-gis
