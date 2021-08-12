@@ -11,13 +11,13 @@ import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
-    initialEntries: ['/es_deprecations/cluster'],
-    componentRoutePath: '/es_deprecations/:tabName',
+    initialEntries: ['/es_deprecations'],
+    componentRoutePath: '/es_deprecations',
   },
   doMountAsync: true,
 };
 
-export type ClusterTestBed = TestBed<ClusterTestSubjects> & {
+export type ElasticsearchTestBed = TestBed<ElasticsearchTestSubjects> & {
   actions: ReturnType<typeof createActions>;
 };
 
@@ -25,25 +25,25 @@ const createActions = (testBed: TestBed) => {
   /**
    * User Actions
    */
-  const clickTab = (tabName: string) => {
-    const { find } = testBed;
-    const camelcaseTabName = tabName.charAt(0).toUpperCase() + tabName.slice(1);
+  // const clickTab = (tabName: string) => {
+  //   const { find } = testBed;
+  //   const camelcaseTabName = tabName.charAt(0).toUpperCase() + tabName.slice(1);
 
-    find(`upgradeAssistant${camelcaseTabName}Tab`).simulate('click');
-  };
+  //   find(`upgradeAssistant${camelcaseTabName}Tab`).simulate('click');
+  // };
 
-  const clickExpandAll = () => {
-    const { find } = testBed;
-    find('expandAll').simulate('click');
-  };
+  // const clickExpandAll = () => {
+  //   const { find } = testBed;
+  //   find('expandAll').simulate('click');
+  // };
 
   return {
-    clickTab,
-    clickExpandAll,
+    // clickTab,
+    // clickExpandAll,
   };
 };
 
-export const setup = async (overrides?: Record<string, unknown>): Promise<ClusterTestBed> => {
+export const setup = async (overrides?: Record<string, unknown>): Promise<ElasticsearchTestBed> => {
   const initTestBed = registerTestBed(
     WithAppDependencies(EsDeprecationsContent, overrides),
     testBedConfig
@@ -56,7 +56,7 @@ export const setup = async (overrides?: Record<string, unknown>): Promise<Cluste
   };
 };
 
-export type ClusterTestSubjects =
+export type ElasticsearchTestSubjects =
   | 'expandAll'
   | 'deprecationsContainer'
   | 'permissionsError'

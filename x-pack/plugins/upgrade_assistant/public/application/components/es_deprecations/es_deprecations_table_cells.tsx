@@ -53,7 +53,10 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
   // "Issue" column
   if (fieldName === 'message') {
     return (
-      <EuiLink data-test-subj="deprecationMessageLink" onClick={openFlyout}>
+      <EuiLink
+        data-test-subj={`deprecation-${deprecation.correctiveAction?.type ?? 'default'}`}
+        onClick={openFlyout}
+      >
         {deprecation.message}
       </EuiLink>
     );

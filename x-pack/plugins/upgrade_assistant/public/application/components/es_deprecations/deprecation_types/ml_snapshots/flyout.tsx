@@ -98,7 +98,7 @@ export const FixSnapshotsFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
+        <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2>{i18nTexts.flyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -113,7 +113,7 @@ export const FixSnapshotsFlyout = ({
               }
               color="danger"
               iconType="alert"
-              data-test-subj="upgradeSnapshotError"
+              data-test-subj="resolveSnapshotError"
             >
               {snapshotState.error.message}
             </EuiCallOut>

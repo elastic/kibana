@@ -69,7 +69,7 @@ export const MlSnapshotsStatusCell: React.FunctionComponent = () => {
 
   if (snapshotState.status === 'in_progress') {
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="mlActionStatusCell">
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
@@ -86,7 +86,7 @@ export const MlSnapshotsStatusCell: React.FunctionComponent = () => {
 
   if (snapshotState.status === 'complete') {
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="mlActionStatusCell">
         <EuiFlexItem grow={false}>
           <EuiIcon type="check" color="success" />
         </EuiFlexItem>
@@ -103,7 +103,7 @@ export const MlSnapshotsStatusCell: React.FunctionComponent = () => {
 
   if (snapshotState.status === 'error') {
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="mlActionStatusCell">
         <EuiFlexItem grow={false}>
           <EuiIcon type="alert" color="danger" />
         </EuiFlexItem>

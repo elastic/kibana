@@ -109,7 +109,7 @@ export const EsDeprecationsContent = withRouter(({ history }: RouteComponentProp
             href={docLinks.links.upgradeAssistant}
             target="_blank"
             iconType="help"
-            data-test-subj="documentationLink"
+            data-test-subj="uaDocumentationLink"
           >
             {i18nTexts.docLinkText}
           </EuiButtonEmpty>,
@@ -120,6 +120,7 @@ export const EsDeprecationsContent = withRouter(({ history }: RouteComponentProp
             <EuiToolTip position="bottom" content={i18nTexts.backupDataButton.tooltipText}>
               <EuiButton
                 fill
+                data-test-subj="snapshotRestoreLink"
                 href={getUrlForApp('management', {
                   path: 'data/snapshot_restore',
                 })}
@@ -133,6 +134,7 @@ export const EsDeprecationsContent = withRouter(({ history }: RouteComponentProp
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="esApiDocumentationLink"
               href={docLinks.links.elasticsearch.deprecationInfo}
               iconType="popout"
               iconSide="right"

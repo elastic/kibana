@@ -132,6 +132,10 @@ export async function getUpgradeAssistantStatus(
           'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
         details:
           "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+        _meta: {
+          snapshot_id: '1627343998',
+          job_id: 'my_job',
+        },
       },
     ],
   };
@@ -148,14 +152,15 @@ export async function getUpgradeAssistantStatus(
         ] as MigrationDeprecationInfoDeprecation[];
 
         const enrichedDeprecationInfo = deprecationsByType.map(
-          ({ details, level, message, url }) => {
+          // @ts-expect-error @elastic/elasticsearch _meta not available yet in MigrationDeprecationInfoResponse
+          ({ details, level, message, url, _meta: metadata }) => {
             return {
               details,
               message,
               url,
               type: deprecationType as keyof MigrationDeprecationInfoResponse,
               isCritical: level === 'critical',
-              correctiveAction: getCorrectiveAction(message),
+              correctiveAction: getCorrectiveAction(message, metadata),
             };
           }
         );

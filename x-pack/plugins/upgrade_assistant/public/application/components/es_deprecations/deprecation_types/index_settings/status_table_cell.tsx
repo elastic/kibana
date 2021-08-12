@@ -42,7 +42,11 @@ export const IndexSettingsStatusCell: React.FunctionComponent<Props> = ({ status
   const { statusType } = status;
   if (statusType === 'in_progress') {
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        data-test-subj="indexSettingsActionStatusCell"
+      >
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
@@ -55,7 +59,11 @@ export const IndexSettingsStatusCell: React.FunctionComponent<Props> = ({ status
 
   if (statusType === 'complete') {
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        data-test-subj="indexSettingsActionStatusCell"
+      >
         <EuiFlexItem grow={false}>
           <EuiIcon type="check" color="success" />
         </EuiFlexItem>

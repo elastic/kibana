@@ -6,12 +6,13 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { MlAction, UpgradeAssistantStatus } from '../../common/types';
+import type { MlAction, UpgradeAssistantStatus } from '../../common/types';
+import { indexSettingDeprecations } from '../../common/constants';
 
-import { ClusterTestBed, setupClusterPage, setupEnvironment } from './helpers';
+import { ElasticsearchTestBed, setupElasticsearchPage, setupEnvironment } from './helpers';
 
-describe('Cluster tab', () => {
-  let testBed: ClusterTestBed;
+describe('Elasticsearch deprecations', () => {
+  let testBed: ElasticsearchTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   afterAll(() => {
@@ -23,9 +24,10 @@ describe('Cluster tab', () => {
     const jobId = 'deprecation_check_job';
     const upgradeStatusMockResponse: UpgradeAssistantStatus = {
       readyForUpgrade: false,
-      cluster: [
+      deprecations: [
         {
-          level: 'critical',
+          isCritical: true,
+          type: 'ml_settings',
           message:
             'model snapshot [1] for job [deprecation_check_job] needs to be deleted or upgraded',
           details:
@@ -37,72 +39,69 @@ describe('Cluster tab', () => {
             jobId,
           },
         },
+        {
+          isCritical: false,
+          type: 'index_settings',
+          message: indexSettingDeprecations.translog.deprecationMessage,
+          details: 'deprecation details',
+          url: 'doc_url',
+          index: 'my_index',
+          correctiveAction: {
+            type: 'indexSetting',
+            deprecatedSettings: indexSettingDeprecations.translog.settings,
+          },
+        },
       ],
-      indices: [],
     };
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(upgradeStatusMockResponse);
-      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({ isEnabled: true });
-
-      await act(async () => {
-        testBed = await setupClusterPage({ isReadOnlyMode: false });
+      httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
+        nodeId: 'my_node',
+        snapshotId,
+        jobId,
+        status: 'idle',
       });
 
-      const { actions, component } = testBed;
-
-      component.update();
-
-      // Navigate to the cluster tab
       await act(async () => {
-        actions.clickTab('cluster');
+        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
       });
 
-      component.update();
+      testBed.component.update();
     });
 
     test('renders deprecations', () => {
-      const { exists } = testBed;
-      expect(exists('clusterTabContent')).toBe(true);
-      expect(exists('deprecationsContainer')).toBe(true);
+      const { exists, find } = testBed;
+      // Verify container exists
+      expect(exists('esDeprecationsContent')).toBe(true);
+
+      // Verify links exist
+      expect(exists('esDeprecationsContent.uaDocumentationLink')).toBe(true);
+      expect(exists('esDeprecationsContent.snapshotRestoreLink')).toBe(true);
+      expect(exists('esDeprecationsContent.esApiDocumentationLink')).toBe(true);
+
+      // Verify one deprecation in the table
+      expect(find('deprecationTableRow').length).toEqual(2);
     });
 
-    describe('fix ml snapshots button', () => {
-      let flyout: Element | null;
-
+    describe('Machine Learning snapshots deprecation', () => {
       beforeEach(async () => {
-        const { component, actions, exists, find } = testBed;
-
-        expect(exists('deprecationsContainer')).toBe(true);
-
-        // Open all deprecations
-        actions.clickExpandAll();
-
-        // The data-test-subj is derived from the deprecation message
-        const accordionTestSubj = `depgroup_${upgradeStatusMockResponse.cluster[0].message
-          .split(' ')
-          .join('_')}`;
+        const { component, find } = testBed;
 
         await act(async () => {
-          find(`${accordionTestSubj}.fixMlSnapshotsButton`).simulate('click');
+          find('deprecation-mlSnapshot').at(0).simulate('click');
         });
 
         component.update();
 
-        // We need to read the document "body" as the flyout is added there and not inside
-        // the component DOM tree.
-        flyout = document.body.querySelector('[data-test-subj="fixSnapshotsFlyout"]');
-
-        expect(flyout).not.toBe(null);
-        expect(flyout!.textContent).toContain('Upgrade or delete model snapshot');
+        expect(find('mlSnapshotDetails')).not.toBe(null);
+        expect(find('mlSnapshotDetails.flyoutTitle').text()).toContain(
+          'Upgrade or delete model snapshot'
+        );
       });
 
       test('upgrades snapshots', async () => {
-        const { component } = testBed;
-
-        const upgradeButton: HTMLButtonElement | null = flyout!.querySelector(
-          '[data-test-subj="upgradeSnapshotButton"]'
-        );
+        const { component, find } = testBed;
 
         httpRequestsMockHelpers.setUpgradeMlSnapshotResponse({
           nodeId: 'my_node',
@@ -111,8 +110,17 @@ describe('Cluster tab', () => {
           status: 'in_progress',
         });
 
+        httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
+          nodeId: 'my_node',
+          snapshotId,
+          jobId,
+          status: 'complete',
+        });
+
+        expect(find('mlSnapshotDetails.upgradeSnapshotButton').text()).toEqual('Upgrade');
+
         await act(async () => {
-          upgradeButton!.click();
+          find('mlSnapshotDetails.upgradeSnapshotButton').simulate('click');
         });
 
         component.update();
@@ -128,14 +136,24 @@ describe('Cluster tab', () => {
         expect(statusRequest.url).toBe(
           `/api/upgrade_assistant/ml_snapshots/${jobId}/${snapshotId}`
         );
+
+        // Verify the "Status" column of the table is updated
+        expect(find('mlActionStatusCell').text()).toContain('Upgrade complete');
+
+        // Reopen the flyout
+        await act(async () => {
+          find('deprecation-mlSnapshot').at(0).simulate('click');
+        });
+
+        component.update();
+
+        // Flyout actions should not be visible if deprecation was resolved
+        expect(find('mlSnapshotDetails.upgradeSnapshotButton').length).toBe(0);
+        expect(find('mlSnapshotDetails.deleteSnapshotButton').length).toBe(0);
       });
 
       test('handles upgrade failure', async () => {
         const { component, find } = testBed;
-
-        const upgradeButton: HTMLButtonElement | null = flyout!.querySelector(
-          '[data-test-subj="upgradeSnapshotButton"]'
-        );
 
         const error = {
           statusCode: 500,
@@ -144,9 +162,16 @@ describe('Cluster tab', () => {
         };
 
         httpRequestsMockHelpers.setUpgradeMlSnapshotResponse(undefined, error);
+        httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
+          nodeId: 'my_node',
+          snapshotId,
+          jobId,
+          status: 'error',
+          error,
+        });
 
         await act(async () => {
-          upgradeButton!.click();
+          find('mlSnapshotDetails.upgradeSnapshotButton').simulate('click');
         });
 
         component.update();
@@ -155,32 +180,41 @@ describe('Cluster tab', () => {
         expect(upgradeRequest.method).toBe('POST');
         expect(upgradeRequest.url).toBe('/api/upgrade_assistant/ml_snapshots');
 
-        const accordionTestSubj = `depgroup_${upgradeStatusMockResponse.cluster[0].message
-          .split(' ')
-          .join('_')}`;
+        // Verify the "Status" column of the table is updated
+        expect(find('mlActionStatusCell').text()).toContain('Upgrade failed');
 
-        expect(find(`${accordionTestSubj}.fixMlSnapshotsButton`).text()).toEqual('Failed');
+        // Reopen the flyout
+        await act(async () => {
+          find('deprecation-mlSnapshot').at(0).simulate('click');
+        });
+
+        component.update();
+
+        // Verify the flyout shows an error message
+        expect(find('mlSnapshotDetails.resolveSnapshotError').text()).toContain(
+          'Error upgrading snapshot'
+        );
+        // Verify the upgrade button text changes
+        expect(find('mlSnapshotDetails.upgradeSnapshotButton').text()).toEqual('Retry upgrade');
       });
 
       test('deletes snapshots', async () => {
-        const { component } = testBed;
-
-        const deleteButton: HTMLButtonElement | null = flyout!.querySelector(
-          '[data-test-subj="deleteSnapshotButton"]'
-        );
+        const { component, find } = testBed;
 
         httpRequestsMockHelpers.setDeleteMlSnapshotResponse({
           acknowledged: true,
         });
 
+        expect(find('mlSnapshotDetails.deleteSnapshotButton').text()).toEqual('Delete');
+
         await act(async () => {
-          deleteButton!.click();
+          find('mlSnapshotDetails.deleteSnapshotButton').simulate('click');
         });
 
         component.update();
 
         const request = server.requests[server.requests.length - 1];
-        const mlDeprecation = upgradeStatusMockResponse.cluster[0];
+        const mlDeprecation = upgradeStatusMockResponse.deprecations[0];
 
         expect(request.method).toBe('DELETE');
         expect(request.url).toBe(
@@ -188,14 +222,20 @@ describe('Cluster tab', () => {
             (mlDeprecation.correctiveAction! as MlAction).jobId
           }/${(mlDeprecation.correctiveAction! as MlAction).snapshotId}`
         );
+
+        // Verify the "Status" column of the table is updated
+        expect(find('mlActionStatusCell').at(0).text()).toEqual('Deletion complete');
+
+        // Reopen the flyout
+        await act(async () => {
+          find('deprecation-mlSnapshot').at(0).simulate('click');
+        });
+
+        component.update();
       });
 
       test('handles delete failure', async () => {
         const { component, find } = testBed;
-
-        const deleteButton: HTMLButtonElement | null = flyout!.querySelector(
-          '[data-test-subj="deleteSnapshotButton"]'
-        );
 
         const error = {
           statusCode: 500,
@@ -206,13 +246,13 @@ describe('Cluster tab', () => {
         httpRequestsMockHelpers.setDeleteMlSnapshotResponse(undefined, error);
 
         await act(async () => {
-          deleteButton!.click();
+          find('mlSnapshotDetails.deleteSnapshotButton').simulate('click');
         });
 
         component.update();
 
         const request = server.requests[server.requests.length - 1];
-        const mlDeprecation = upgradeStatusMockResponse.cluster[0];
+        const mlDeprecation = upgradeStatusMockResponse.deprecations[0];
 
         expect(request.method).toBe('DELETE');
         expect(request.url).toBe(
@@ -221,11 +261,73 @@ describe('Cluster tab', () => {
           }/${(mlDeprecation.correctiveAction! as MlAction).snapshotId}`
         );
 
-        const accordionTestSubj = `depgroup_${upgradeStatusMockResponse.cluster[0].message
-          .split(' ')
-          .join('_')}`;
+        // Verify the "Status" column of the table is updated
+        expect(find('mlActionStatusCell').at(0).text()).toEqual('Deletion failed');
 
-        expect(find(`${accordionTestSubj}.fixMlSnapshotsButton`).text()).toEqual('Failed');
+        // Reopen the flyout
+        await act(async () => {
+          find('deprecation-mlSnapshot').at(0).simulate('click');
+        });
+
+        component.update();
+
+        // Verify the flyout shows an error message
+        expect(find('mlSnapshotDetails.resolveSnapshotError').text()).toContain(
+          'Error deleting snapshot'
+        );
+        // Verify the upgrade button text changes
+        expect(find('mlSnapshotDetails.deleteSnapshotButton').text()).toEqual('Retry delete');
+      });
+    });
+
+    describe('Index settings deprecations', () => {
+      it('removes deprecated index settings', async () => {
+        const { component, find } = testBed;
+        const indexSettingDeprecation = upgradeStatusMockResponse.deprecations[1];
+
+        await act(async () => {
+          find('deprecation-indexSetting').at(0).simulate('click');
+        });
+
+        component.update();
+
+        expect(find('indexSettingsDetails')).not.toBe(null);
+        expect(find('indexSettingsDetails.flyoutTitle').text()).toContain(
+          indexSettingDeprecation.message
+        );
+
+        httpRequestsMockHelpers.setUpdateIndexSettingsResponse({
+          acknowledged: true,
+        });
+
+        await act(async () => {
+          find('deleteSettingsButton').simulate('click');
+        });
+
+        component.update();
+
+        const request = server.requests[server.requests.length - 1];
+
+        expect(request.method).toBe('POST');
+        expect(request.url).toBe(
+          `/api/upgrade_assistant/${indexSettingDeprecation.index!}/index_settings`
+        );
+        expect(request.status).toEqual(200);
+
+        // Verify the "Status" column of the table is updated
+        expect(find('indexSettingsActionStatusCell').at(0).text()).toEqual(
+          'Deprecated settings removed'
+        );
+
+        // Reopen the flyout
+        await act(async () => {
+          find('deprecation-indexSetting').at(0).simulate('click');
+        });
+
+        component.update();
+
+        // Verify the action button no longer displays
+        expect(find('indexSettingsDetails.deleteSettingsButton').length).toEqual(0);
       });
     });
   });
@@ -234,25 +336,24 @@ describe('Cluster tab', () => {
     beforeEach(async () => {
       const noDeprecationsResponse = {
         readyForUpgrade: false,
-        cluster: [],
-        indices: [],
+        deprecations: [],
       };
 
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(noDeprecationsResponse);
 
       await act(async () => {
-        testBed = await setupClusterPage({ isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
       });
 
-      const { component } = testBed;
-
-      component.update();
+      testBed.component.update();
     });
 
     test('renders prompt', () => {
       const { exists, find } = testBed;
       expect(exists('noDeprecationsPrompt')).toBe(true);
-      expect(find('noDeprecationsPrompt').text()).toContain('Ready to upgrade!');
+      expect(find('noDeprecationsPrompt').text()).toContain(
+        'Your Elasticsearch configuration is up to date'
+      );
     });
   });
 
@@ -267,7 +368,7 @@ describe('Cluster tab', () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setupClusterPage({ isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
       });
 
       const { component, exists, find } = testBed;
@@ -295,7 +396,7 @@ describe('Cluster tab', () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setupClusterPage({ isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
       });
 
       const { component, exists, find } = testBed;
@@ -304,7 +405,7 @@ describe('Cluster tab', () => {
 
       expect(exists('upgradedCallout')).toBe(true);
       expect(find('upgradedCallout').text()).toContain(
-        'Your configuration is up to date. Kibana and all Elasticsearch nodes are running the same version.'
+        'All Elasticsearch nodes have been upgraded.'
       );
     });
 
@@ -321,7 +422,7 @@ describe('Cluster tab', () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setupClusterPage({ isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
       });
 
       const { component, exists, find } = testBed;
@@ -344,7 +445,7 @@ describe('Cluster tab', () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setupClusterPage({ isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
       });
 
       const { component, exists, find } = testBed;

@@ -104,7 +104,7 @@ export const RemoveIndexSettingsFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
+        <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2>{message}</h2>
         </EuiTitle>
         <EuiText>
