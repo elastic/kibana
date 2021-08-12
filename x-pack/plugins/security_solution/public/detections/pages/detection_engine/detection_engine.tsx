@@ -19,7 +19,7 @@ import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { isTab, LastUpdatedAt } from '../../../../../timelines/public';
+import { isTab } from '../../../../../timelines/public';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SecurityPageName } from '../../../app/types';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -128,7 +128,10 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const loading = userInfoLoading || listsConfigLoading;
-  const { navigateToUrl } = useKibana().services.application;
+  const {
+    application: { navigateToUrl },
+    timelines: timelinesUi,
+  } = useKibana().services;
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
@@ -297,7 +300,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                   <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <LastUpdatedAt updatedAt={updatedAt || 0} />
+                  {timelinesUi.getLastUpdated({ updatedAt: updatedAt || 0 })}
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="m" />

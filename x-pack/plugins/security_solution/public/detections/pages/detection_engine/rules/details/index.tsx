@@ -32,7 +32,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { Dispatch } from 'redux';
-import { isTab, LastUpdatedAt } from '../../../../../../../timelines/public';
+import { isTab } from '../../../../../../../timelines/public';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
@@ -256,6 +256,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       application: {
         capabilities: { actions },
       },
+      timelines: timelinesUi,
     },
   } = useKibana();
   const hasActionsPrivileges = useMemo(() => {
@@ -756,7 +757,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <LastUpdatedAt updatedAt={updatedAt || 0} />
+                    {timelinesUi.getLastUpdated({ updatedAt: updatedAt || 0 })}
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="l" />
