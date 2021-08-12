@@ -7,9 +7,10 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFormRow, EuiCodeEditor } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import { debounce } from 'lodash';
 
+import { EuiCodeEditor } from '../code_editor';
 import { useJson, OnJsonEditorUpdateHandler } from './use_json';
 
 interface Props<T extends object = { [key: string]: any }> {
