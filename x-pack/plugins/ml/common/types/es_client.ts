@@ -8,7 +8,7 @@
 import { estypes } from '@elastic/elasticsearch';
 
 import { JsonObject } from '@kbn/utility-types';
-import { buildEsQuery, DslQuery } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 
 import { isPopulatedObject } from '../util/object_utils';
 
@@ -26,4 +26,7 @@ export const ES_CLIENT_TOTAL_HITS_RELATION: Record<
   GTE: 'gte',
 } as const;
 
-export type InfluencersFilterQuery = ReturnType<typeof buildEsQuery> | DslQuery | JsonObject;
+export type InfluencersFilterQuery =
+  | ReturnType<typeof buildEsQuery>
+  | estypes.QueryDslQueryContainer
+  | JsonObject;

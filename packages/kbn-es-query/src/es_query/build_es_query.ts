@@ -7,11 +7,12 @@
  */
 
 import { groupBy, has, isEqual } from 'lodash';
+import { SerializableRecord } from '@kbn/utility-types';
 import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
 import { Filter, Query } from '../filters';
-import { IndexPatternBase } from './types';
+import { BoolQuery, IndexPatternBase } from './types';
 import { KueryQueryOptions } from '../kuery';
 
 /**
@@ -20,7 +21,7 @@ import { KueryQueryOptions } from '../kuery';
  */
 export type EsQueryConfig = KueryQueryOptions & {
   allowLeadingWildcards: boolean;
-  queryStringOptions: Record<string, any>;
+  queryStringOptions: SerializableRecord;
   ignoreFilterIfFieldNotInIndex: boolean;
 };
 
@@ -49,11 +50,11 @@ export function buildEsQuery(
     queryStringOptions: {},
     ignoreFilterIfFieldNotInIndex: false,
   }
-) {
+): { bool: BoolQuery } {
   queries = Array.isArray(queries) ? queries : [queries];
   filters = Array.isArray(filters) ? filters : [filters];
 
-  const validQueries = queries.filter((query: any) => has(query, 'query'));
+  const validQueries = queries.filter((query) => has(query, 'query'));
   const queriesByLanguage = groupBy(validQueries, 'language');
   const kueryQuery = buildQueryFromKuery(
     indexPattern,
