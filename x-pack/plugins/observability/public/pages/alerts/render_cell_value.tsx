@@ -10,17 +10,15 @@ import React, { useEffect } from 'react';
 import type {
   ALERT_DURATION as ALERT_DURATION_TYPED,
   ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
-  ALERT_START as ALERT_START_TYPED,
   ALERT_STATUS as ALERT_STATUS_TYPED,
   ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
 } from '@kbn/rule-data-utils';
-import { TIMESTAMP } from '@kbn/rule-data-utils/target/technical_field_names';
 import {
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
   ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
-  ALERT_START as ALERT_START_NON_TYPED,
   ALERT_STATUS as ALERT_STATUS_NON_TYPED,
   ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
+  TIMESTAMP,
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
 

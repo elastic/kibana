@@ -20,12 +20,15 @@ import {
   ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
+import {
+  TIMESTAMP,
+  // @ts-expect-error
+} from '@kbn/rule-data-utils/target_node/technical_field_names';
 import { EuiButtonIcon, EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 
 import React, { Suspense, useState } from 'react';
-import { TIMESTAMP } from '@kbn/rule-data-utils/target/technical_field_names';
 import type { TimelinesUIStart } from '../../../../timelines/public';
 import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
