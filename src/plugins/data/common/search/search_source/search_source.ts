@@ -79,6 +79,7 @@ import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patt
 import {
   AggConfigs,
   ES_SEARCH_STRATEGY,
+  EsQuerySortValue,
   IEsSearchResponse,
   ISearchGeneric,
   ISearchOptions,
@@ -833,7 +834,14 @@ export class SearchSource {
       body.fields = filteredDocvalueFields;
     }
 
-    const esQueryConfigs = getEsQueryConfig({ get: getConfig });
+    // If sorting by _score, build queries in the "must" clause instead of "filter" clause to enable scoring
+    const filtersInMustClause = (body.sort ?? []).some((sort: EsQuerySortValue[]) =>
+      sort.hasOwnProperty('_score')
+    );
+    const esQueryConfigs = {
+      ...getEsQueryConfig({ get: getConfig }),
+      filtersInMustClause,
+    };
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
     if (highlightAll && body.query) {

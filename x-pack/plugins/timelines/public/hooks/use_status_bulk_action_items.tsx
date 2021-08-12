@@ -57,11 +57,11 @@ export const useStatusBulkActionItems = ({
         // TODO: Only delete those that were successfully updated from updatedRules
         setEventsDeleted({ eventIds, isDeleted: true });
 
-        if (response.version_conflicts > 0 && eventIds.length === 1) {
+        if (response.version_conflicts && eventIds.length === 1) {
           throw new Error(i18n.BULK_ACTION_FAILED_SINGLE_ALERT);
         }
 
-        onUpdateSuccess(response.updated, response.version_conflicts, status);
+        onUpdateSuccess(response.updated ?? 0, response.version_conflicts ?? 0, status);
       } catch (error) {
         onUpdateFailure(status, error);
       } finally {
