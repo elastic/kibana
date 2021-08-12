@@ -14,6 +14,15 @@ interface Props {
   localstorageId: string;
 }
 
+const LabelContainer = styled.span`
+  max-width: 72%;
+  float: left;
+  &:hover,
+  &:focus {
+    text-decoration: underline;
+  }
+`;
+
 const StyledBadge = styled(EuiBadge)`
   margin-left: 8px;
 `;
@@ -44,7 +53,9 @@ export function NavNameWithBadge({ label, badgeLabel, localstorageId }: Props) {
   const isBadgeVisible = getBadgeVisibility(localstorageId);
   return (
     <>
-      <span>{label}</span>
+      <LabelContainer className="eui-textTruncate">
+        <span>{label}</span>
+      </LabelContainer>
       {isBadgeVisible && <StyledBadge color="accent">{badgeLabel}</StyledBadge>}
     </>
   );
