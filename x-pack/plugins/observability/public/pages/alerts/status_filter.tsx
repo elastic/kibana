@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonGroup } from '@elastic/eui';
+import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { AlertStatus } from '../../../common/typings';
@@ -15,24 +15,27 @@ export interface StatusFilterProps {
   onChange: (value: AlertStatus) => void;
 }
 
-const options: Array<{ id: AlertStatus; label: string }> = [
+const options: EuiButtonGroupOptionProps[] = [
   {
     id: 'open',
     label: i18n.translate('xpack.observability.alerts.statusFilter.openButtonLabel', {
       defaultMessage: 'Open',
     }),
+    'data-test-subj': 'StatusFilter open button',
   },
   {
     id: 'acknowledged',
     label: i18n.translate('xpack.observability.alerts.statusFilter.acknowledgedButtonLabel', {
       defaultMessage: 'Acknowledged',
     }),
+    'data-test-subj': 'StatusFilter acknowledged button',
   },
   {
     id: 'closed',
     label: i18n.translate('xpack.observability.alerts.statusFilter.closedButtonLabel', {
       defaultMessage: 'Closed',
     }),
+    'data-test-subj': 'StatusFilter closed button',
   },
 ];
 

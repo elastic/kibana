@@ -14,13 +14,13 @@ describe('StatusFilter', () => {
   describe('render', () => {
     it('renders', () => {
       const onChange = jest.fn();
-      const status: AlertStatus = 'all';
+      const status: AlertStatus = 'open';
       const props = { onChange, status };
 
       expect(() => render(<StatusFilter {...props} />)).not.toThrowError();
     });
 
-    (['all', 'open', 'closed'] as AlertStatus[]).map((status) => {
+    (['open', 'acknowledged', 'closed'] as AlertStatus[]).map((status) => {
       describe(`when clicking the ${status} button`, () => {
         it('calls the onChange callback with "${status}"', () => {
           const onChange = jest.fn();
