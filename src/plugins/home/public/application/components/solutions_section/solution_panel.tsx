@@ -17,10 +17,9 @@ import { getServices } from '../../kibana_services';
 interface Props {
   addBasePath: (path: string) => string;
   solution: FeatureCatalogueSolution;
-  apps?: FeatureCatalogueEntry[];
 }
 
-export const SolutionPanel: FC<Props> = ({ addBasePath, solution, apps = [] }) => {
+export const SolutionPanel: FC<Props> = ({ addBasePath, solution }) => {
   const { trackUiMetric } = getServices();
 
   const getSolutionGraphicURL = (solutionId: string) =>

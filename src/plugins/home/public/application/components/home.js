@@ -109,21 +109,16 @@ export class Home extends Component {
       .sort((directoryA, directoryB) => directoryA.order - directoryB.order);
 
   renderNormal() {
-    const { addBasePath, solutions, directories } = this.props;
+    const { addBasePath, solutions } = this.props;
     const { application, trackUiMetric } = getServices();
     const isDarkMode = getServices().uiSettings.get('theme:darkMode');
     const devTools = this.findDirectoryById('console');
-    const addDataFeatures = this.getFeaturesByCategory(FeatureCatalogueCategory.DATA);
     const manageDataFeatures = this.getFeaturesByCategory(FeatureCatalogueCategory.ADMIN);
 
     // Show card for console if none of the manage data plugins are available, most likely in OSS
     if (manageDataFeatures.length < 1 && devTools) {
       manageDataFeatures.push(devTools);
     }
-
-    console.log(application.capabilities.navLinks);
-    console.log(addDataFeatures);
-    console.log(isDarkMode);
 
     return (
       <KibanaPageTemplate
@@ -136,11 +131,7 @@ export class Home extends Component {
       >
         <EuiSpacer size="m" />
 
-        <SolutionsSection
-          addBasePath={addBasePath}
-          solutions={solutions}
-          directories={directories}
-        />
+        <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
 
         <AddData addBasePath={addBasePath} application={application} isDarkMode={isDarkMode} />
 
@@ -198,20 +189,6 @@ export class Home extends Component {
 
 Home.propTypes = {
   addBasePath: PropTypes.func.isRequired,
-  directories: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-      subtitle: PropTypes.string,
-      description: PropTypes.string.isRequired,
-      icon: PropTypes.string.isRequired,
-      path: PropTypes.string.isRequired,
-      showOnHomePage: PropTypes.bool.isRequired,
-      category: PropTypes.string.isRequired,
-      order: PropTypes.number,
-      solutionId: PropTypes.string,
-    })
-  ),
   solutions: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
