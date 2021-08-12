@@ -19,7 +19,7 @@ import { useKibana as _useKibana } from '../../../../src/plugins/kibana_react/pu
 import { KibanaContext } from './types';
 export const useKibana = () => _useKibana<KibanaContext>();
 
-export type { SerializableState } from 'src/plugins/kibana_utils/common';
+export type { SerializableRecord } from '@kbn/utility-types';
 
 export type { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 
