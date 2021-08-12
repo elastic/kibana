@@ -65,8 +65,13 @@ export const ActionCell: React.FC<Props> = React.memo(
       });
     }, []);
 
+    const closeTopN = useCallback(() => {
+      setShowTopN(false);
+    }, []);
+
     return (
       <HoverActions
+        closeTopN={closeTopN}
         dataType={data.type}
         dataProvider={actionCellConfig?.dataProvider}
         enableOverflowButton={true}
