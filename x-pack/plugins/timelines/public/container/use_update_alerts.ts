@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { UpdateDocumentByQueryResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { AlertStatus } from '../../../timelines/common';
 
@@ -27,7 +28,7 @@ export const useUpdateAlertsStatus = (): {
     index: string;
     ids?: string[];
     query?: object;
-  }) => Promise<UpdateDocumentByQueryResponse>;
+  }) => Promise<estypes.UpdateByQueryResponse>;
 } => {
   const { http } = useKibana().services;
   return {
