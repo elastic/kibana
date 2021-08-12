@@ -213,7 +213,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
               color="danger"
               iconType="trash"
               onClick={handleRemoveClick}
-              disabled={isRemoveDisabled}
+              isDisabled={isRemoveDisabled}
               aria-label={i18n.translate(
                 'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.removeLabel',
                 { defaultMessage: 'Remove Entry' }
