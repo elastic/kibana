@@ -16,7 +16,3 @@ const OsqueryIconComponent: React.FC<OsqueryIconProps> = (props) => (
 );
 
 export const OsqueryIcon = React.memo(OsqueryIconComponent);
-
-// For shared_components purpose
-// eslint-disable-next-line import/no-default-export
-export { OsqueryIcon as default };

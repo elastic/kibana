@@ -35,7 +35,7 @@ const TabComponent = (props: TabProps) => {
   // @ts-expect-error
   const OsqueryAction = osquery?.OsqueryAction;
 
-  // TODO: Add info when Osquery plugin in not available
+  // TODO: Add info when Osquery plugin is not available
   if (loading || !OsqueryAction) {
     return (
       <TabContent>
@@ -51,32 +51,10 @@ const TabComponent = (props: TabProps) => {
   );
 };
 
-const OSQUERY_TAB_NAME = i18n.translate('xpack.infra.nodeDetails.tabs.osquery', {
-  defaultMessage: 'Osquery',
-});
-
-const OsqueryTabName = React.memo(() => {
-  const {
-    services: { osquery },
-  } = useKibanaContextForPlugin();
-  // @ts-expect-error
-  const OsqueryIcon = osquery?.OsqueryIcon;
-
-  if (OsqueryIcon) {
-    return (
-      <>
-        <OsqueryIcon size="m" />
-        &nbsp;
-        {OSQUERY_TAB_NAME}
-      </>
-    );
-  }
-
-  return <>{OSQUERY_TAB_NAME}</>;
-});
-
 export const OsqueryTab = {
   id: 'osquery',
-  name: <OsqueryTabName />,
+  name: i18n.translate('xpack.infra.nodeDetails.tabs.osquery', {
+    defaultMessage: 'Osquery',
+  }),
   content: TabComponent,
 };
