@@ -136,41 +136,46 @@ export const staticValueOperation: OperationDefinition<
   },
 
   paramEditor: function StaticValueEditor({
-    activeData,
     layer,
-    layerId,
-    indexPattern,
     updateLayer,
     currentColumn,
     columnId,
+    activeData,
+    layerId,
+    indexPattern,
   }) {
+    const onChange = useCallback(
+      (newValue) => {
+        updateLayer({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            [columnId]: {
+              ...currentColumn,
+              label: currentColumn?.customLabel ? currentColumn.label : ofName(newValue),
+              params: {
+                ...currentColumn.params,
+                value: newValue,
+              },
+            },
+          },
+        });
+      },
+      [layer, currentColumn, columnId, updateLayer]
+    );
+
     const { inputValue, handleInputChange } = useDebouncedValue<string | undefined>(
       {
         value: currentColumn?.params?.value || String(defaultValue),
-        onChange: (newValue) => {
-          updateLayer({
-            ...layer,
-            columns: {
-              ...layer.columns,
-              [columnId]: {
-                ...currentColumn,
-                label: currentColumn?.customLabel ? currentColumn.label : ofName(newValue),
-                params: {
-                  ...currentColumn.params,
-                  value: newValue,
-                },
-              },
-            },
-          });
-        },
+        onChange,
       },
       { allowFalsyValue: true }
     );
 
     const onChangeHandler = useCallback(
-      (value: string) => {
-        const newValue = value === '' ? undefined : value;
-        handleInputChange(newValue);
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.currentTarget.value;
+        handleInputChange(value === '' ? undefined : value);
       },
       [handleInputChange]
     );
@@ -187,10 +192,7 @@ export const staticValueOperation: OperationDefinition<
           data-test-subj="lns-indexPattern-percentile-input"
           compressed
           value={inputValue ?? ''}
-          onChange={(e) => {
-            const newValue = e.currentTarget.value;
-            onChangeHandler(newValue);
-          }}
+          onChange={onChangeHandler}
         />
       </div>
     );

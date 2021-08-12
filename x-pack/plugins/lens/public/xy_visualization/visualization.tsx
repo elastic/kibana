@@ -14,7 +14,8 @@ import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { getSuggestions } from './xy_suggestions';
-import { XyToolbar, DimensionEditor, LayerHeader } from './xy_config_panel';
+import { XyToolbar, DimensionEditor } from './xy_config_panel';
+import { LayerHeader } from './xy_config_panel/layer_header';
 import type {
   Visualization,
   OperationMetadata,

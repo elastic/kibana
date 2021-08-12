@@ -8,15 +8,15 @@
 import React from 'react';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test/jest';
 import { EuiButtonGroupProps, EuiButtonGroup } from '@elastic/eui';
-import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
+import { LayerContextMenu, XyToolbar, DimensionEditor } from '.';
 import { AxisSettingsPopover } from './axis_settings_popover';
-import { FramePublicAPI } from '../types';
-import { State } from './types';
+import { FramePublicAPI } from '../../types';
+import { State } from '../types';
 import { Position } from '@elastic/charts';
-import { createMockFramePublicAPI, createMockDatasource } from '../mocks';
+import { createMockFramePublicAPI, createMockDatasource } from '../../mocks';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { EuiColorPicker } from '@elastic/eui';
-import { layerTypes } from '../../common';
+import { layerTypes } from '../../../common';
 
 describe('XY Config panels', () => {
   let frame: FramePublicAPI;
