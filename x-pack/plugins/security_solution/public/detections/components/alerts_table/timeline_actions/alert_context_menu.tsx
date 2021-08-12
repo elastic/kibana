@@ -72,6 +72,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
+  const afterCaseSelection = useCallback(() => {
+    setPopover(false);
+  }, []);
   const ruleId = get(0, ecsRowData?.signal?.rule?.id);
   const ruleName = get(0, ecsRowData?.signal?.rule?.name);
   const { timelines: timelinesUi } = useKibana().services;
@@ -84,8 +87,16 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       useInsertTimeline: insertTimelineHook,
       casePermissions,
       appId: APP_ID,
+      onClose: afterCaseSelection,
     };
-  }, [ariaRowindex, ecsRowData, casePermissions, insertTimelineHook, columnValues]);
+  }, [
+    ariaRowindex,
+    columnValues,
+    ecsRowData,
+    insertTimelineHook,
+    casePermissions,
+    afterCaseSelection,
+  ]);
 
   const addToCaseAction = useMemo(
     () =>
