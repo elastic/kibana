@@ -56,6 +56,7 @@ function FailedTransactionsRateTab({}: TabContentProps) {
 }
 
 export const failedTransactionsRateTab = {
+  dataTestSubj: 'apmFailedTransactionsRateTabButton',
   key: 'failedTransactionsRate',
   label: (
     <>

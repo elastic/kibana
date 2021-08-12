@@ -291,7 +291,7 @@ export function MlLatencyCorrelations({
 
   return (
     <>
-      <EuiFlexGroup>
+      <EuiFlexGroup data-test-subj="apmCorrelationsTabContent">
         <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
           <EuiTitle size="xs">
             <h5 data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">

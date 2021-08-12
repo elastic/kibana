@@ -81,8 +81,9 @@ export function TransactionDetailsTabs() {
   return (
     <>
       <EuiTabs>
-        {tabs.map(({ key, label }) => (
+        {tabs.map(({ dataTestSubj, key, label }) => (
           <EuiTab
+            data-test-subj={dataTestSubj}
             key={key}
             isSelected={key === currentTab}
             onClick={() => {
