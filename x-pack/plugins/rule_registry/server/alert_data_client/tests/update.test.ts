@@ -139,7 +139,7 @@ describe('update()', () => {
         Object {
           "body": Object {
             "doc": Object {
-              "kibana.alert.workflow_status": "closed",
+              "${ALERT_WORKFLOW_STATUS}": "closed",
             },
           },
           "id": "1",

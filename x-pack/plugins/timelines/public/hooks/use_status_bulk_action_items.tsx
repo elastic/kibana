@@ -57,7 +57,7 @@ export const useStatusBulkActionItems = ({
         const response = await updateAlertStatus({
           index: indexName,
           status,
-          ...(query ? { query: JSON.parse(query) } : { ids: eventIds }),
+          query: query ? JSON.parse(query) : getUpdateAlertsQuery(eventIds),
         });
 
         // TODO: Only delete those that were successfully updated from updatedRules

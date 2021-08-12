@@ -153,7 +153,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   rowRenderers,
   setRefetch,
   start,
-  sort: initialSort,
+  sort,
   graphEventId,
   leadingControlColumns,
   trailingControlColumns,
@@ -171,7 +171,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     itemsPerPage: itemsPerPageStore,
     itemsPerPageOptions: itemsPerPageOptionsStore,
     queryFields,
-    sort: sortFromRedux,
     title,
   } = useDeepEqualSelector((state) => getTGrid(state, STANDALONE_ID ?? ''));
 
@@ -212,9 +211,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     [columnsHeader, queryFields]
   );
 
-  const [sort, setSort] = useState(initialSort);
-  useEffect(() => setSort(sortFromRedux), [sortFromRedux]);
-
   const sortField = useMemo(
     () =>
       sort.map(({ columnId, columnType, sortDirection }) => ({
@@ -229,7 +225,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     loading,
     { events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
-    alertConsumers,
     docValueFields: [],
     excludeEcsData: true,
     fields,
@@ -310,7 +305,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         defaultColumns: columns,
         footerText,
         loadingText,
-        sort,
         unit,
       })
     );
@@ -349,7 +343,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                   <StatefulBody
                     activePage={pageInfo.activePage}
                     browserFields={browserFields}
-                    filterQuery={filterQuery}
                     data={nonDeletedEvents}
                     defaultCellActions={defaultCellActions}
                     id={STANDALONE_ID}
@@ -364,12 +357,13 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       itemsPerPage: itemsPerPageStore,
                     })}
                     totalItems={totalCountMinusDeleted}
+                    indexNames={indexNames}
+                    filterQuery={filterQuery}
                     unit={unit}
                     filterStatus={filterStatus}
                     leadingControlColumns={leadingControlColumns}
                     trailingControlColumns={trailingControlColumns}
                     refetch={refetch}
-                    indexNames={indexNames}
                   />
                   <Footer
                     activePage={pageInfo.activePage}

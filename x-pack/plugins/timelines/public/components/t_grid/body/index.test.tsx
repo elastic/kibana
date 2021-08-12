@@ -80,6 +80,8 @@ describe('Body', () => {
     leadingControlColumns: [],
     trailingControlColumns: [],
     filterStatus: 'open',
+    filterQuery: '',
+    indexNames: [''],
     refetch: jest.fn(),
   };
 
