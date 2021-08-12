@@ -17,10 +17,9 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
-import { EntityType, useTimelineEventsDetails } from '../../../containers/details';
+import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
@@ -50,10 +49,8 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 `;
 
 interface EventDetailsPanelProps {
-  alertConsumers?: AlertConsumers[];
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
-  entityType?: EntityType;
   expandedEvent: {
     eventId: string;
     indexName: string;
@@ -68,10 +65,8 @@ interface EventDetailsPanelProps {
 }
 
 const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
-  alertConsumers,
   browserFields,
   docValueFields,
-  entityType,
   expandedEvent,
   handleOnEventClosed,
   isFlyoutView,
@@ -79,9 +74,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   timelineId,
 }) => {
   const [loading, detailsData] = useTimelineEventsDetails({
-    alertConsumers,
     docValueFields,
-    entityType,
     indexName: expandedEvent.indexName ?? '',
     eventId: expandedEvent.eventId ?? '',
     skip: !expandedEvent.eventId,
