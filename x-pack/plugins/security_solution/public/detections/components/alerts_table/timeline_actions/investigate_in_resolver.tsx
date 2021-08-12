@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { get } from 'lodash/fp';
 import {
@@ -29,9 +29,9 @@ interface InvestigateInResolverProps {
 export const useInvestigateInResolverContextItem = ({
   timelineId,
   ecsData,
-}: InvestigateInResolverProps[]) => {
+}: InvestigateInResolverProps) => {
   const dispatch = useDispatch();
-  const isDisabled = true; // = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
+  const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
   const handleClick = useCallback(() => {
     dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
     if (timelineId === TimelineId.active) {

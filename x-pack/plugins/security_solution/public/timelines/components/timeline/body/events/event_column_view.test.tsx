@@ -134,41 +134,6 @@ describe('EventColumnView', () => {
     expect(wrapper.find('[data-test-subj="pin"]').exists()).toBe(false);
   });
 
-  test('it render AddToCaseAction if timelineId === TimelineId.detectionsPage', () => {
-    const wrapper = mount(<EventColumnView {...props} timelineId={TimelineId.detectionsPage} />, {
-      wrappingComponent: TestProviders,
-    });
-
-    expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeTruthy();
-  });
-
-  test('it render AddToCaseAction if timelineId === TimelineId.detectionsRulesDetailsPage', () => {
-    const wrapper = mount(
-      <EventColumnView {...props} timelineId={TimelineId.detectionsRulesDetailsPage} />,
-      {
-        wrappingComponent: TestProviders,
-      }
-    );
-
-    expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeTruthy();
-  });
-
-  test('it render AddToCaseAction if timelineId === TimelineId.active', () => {
-    const wrapper = mount(<EventColumnView {...props} timelineId={TimelineId.active} />, {
-      wrappingComponent: TestProviders,
-    });
-
-    expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeTruthy();
-  });
-
-  test('it does NOT render AddToCaseAction when timelineId is not in the allowed list', () => {
-    const wrapper = mount(<EventColumnView {...props} timelineId="timeline-test" />, {
-      wrappingComponent: TestProviders,
-    });
-
-    expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeFalsy();
-  });
-
   test('it renders a custom control column in addition to the default control column', () => {
     const wrapper = mount(
       <EventColumnView

@@ -170,7 +170,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
           onRuleChange={onRuleChange}
         />
       </>
-      {/* {timelinesUi.getAddToCaseAction(addToCaseActionProps)}*/}
     </ActionsContainer>
   );
 };
