@@ -172,7 +172,7 @@ export const TrustedAppsPage = memo(() => {
       }
       headerBackComponent={backButton}
       subtitle={ABOUT_TRUSTED_APPS}
-      actions={doEntriesExist ? addButton : <></>}
+      actions={doEntriesExist || (isCheckingIfEntriesExists && didEntriesExist) ? addButton : <></>}
     >
       <TrustedAppsNotifications />
 
