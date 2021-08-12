@@ -33,7 +33,6 @@ context('Enterprise Search Overview', () => {
     // This only appears to occur for setup guides - I haven't (yet?) run into it on other pages
     cy.on('uncaught:exception', (err) => {
       if (err.message.includes('> ResizeObserver loop limit exceeded')) return false;
-      return true; // re-throw other valid errors
     });
 
     cy.visit(`${overviewPath}/setup_guide`);
