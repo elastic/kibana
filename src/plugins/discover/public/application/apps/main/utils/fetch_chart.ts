@@ -53,7 +53,7 @@ export function fetchChart(
   const executionContext = {
     type: 'application',
     name: 'discover',
-    description: 'fetch chart data',
+    description: 'fetch chart data and total hits',
     url: window.location.pathname,
     id: '',
   };
