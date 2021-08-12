@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export type ItemWithAnID = {
-  id: number | string | null;
-  created_at?: string;
-} & object;
+export { GenericEndpointInlineEditableTable } from './generic_endpoint_inline_editable_table';
