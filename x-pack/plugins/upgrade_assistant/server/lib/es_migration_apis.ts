@@ -18,127 +18,127 @@ import { esIndicesStateCheck } from './es_indices_state_check';
 export async function getUpgradeAssistantStatus(
   dataClient: IScopedClusterClient
 ): Promise<UpgradeAssistantStatus> {
-  // const { body: deprecations } = await dataClient.asCurrentUser.migration.deprecations();
+  const { body: deprecations } = await dataClient.asCurrentUser.migration.deprecations();
 
   // TODO temp mock data
-  const deprecations: MigrationDeprecationInfoResponse = {
-    cluster_settings: [
-      {
-        level: 'warning',
-        message: "A Cluster name cannot contain ':'",
-        url:
-          'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
-        details:
-          "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
-      },
-      {
-        level: 'warning',
-        message: "A Cluster name cannot contain ':'",
-        url:
-          'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
-        details:
-          "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
-      },
-      {
-        level: 'warning',
-        message: "A Cluster name cannot contain ':'",
-        url:
-          'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
-        details:
-          "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
-      },
-      {
-        level: 'warning',
-        message: "A Cluster name cannot contain ':'",
-        url:
-          'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
-        details:
-          "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
-      },
-      {
-        level: 'warning',
-        message: "D Cluster name cannot contain ':'",
-        url:
-          'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
-        details:
-          "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
-      },
-      {
-        level: 'warning',
-        message: "E Cluster name cannot contain ':'",
-        url:
-          'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
-        details:
-          "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
-      },
-      {
-        level: 'warning',
-        message: "F Cluster name cannot contain ':'",
-        url:
-          'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
-        details:
-          "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
-      },
-      {
-        level: 'warning',
-        message: "G Cluster name cannot contain ':'",
-        url:
-          'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
-        details:
-          "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
-      },
-      {
-        level: 'warning',
-        message: "A Cluster name cannot contain ':'",
-        url:
-          'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
-        details:
-          "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
-      },
-    ],
-    node_settings: [
-      {
-        level: 'critical',
-        message: "B Cluster name cannot contain ':'",
-        url:
-          'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
-        details:
-          "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
-      },
-    ],
-    index_settings: {
-      logs2: [
-        {
-          level: 'warning',
-          message: 'translog retention settings are ignored',
-          url:
-            'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_index_name',
-          details: "This index is named [logs:apache], which contains the illegal character ':'.",
-        },
-        {
-          level: 'critical',
-          message: 'Index created before 7.0',
-          url:
-            'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
-          details: 'This index was created using version: 6.8.13',
-        },
-      ],
-    },
-    ml_settings: [
-      {
-        level: 'critical',
-        message: 'model snapshot [1627343998] for job [my_job] needs to be deleted or upgraded',
-        url:
-          'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
-        details:
-          "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
-        _meta: {
-          snapshot_id: '1627343998',
-          job_id: 'my_job',
-        },
-      },
-    ],
-  };
+  // const deprecations: MigrationDeprecationInfoResponse = {
+  //   cluster_settings: [
+  //     {
+  //       level: 'warning',
+  //       message: "A Cluster name cannot contain ':'",
+  //       url:
+  //         'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
+  //       details:
+  //         "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+  //     },
+  //     {
+  //       level: 'warning',
+  //       message: "A Cluster name cannot contain ':'",
+  //       url:
+  //         'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
+  //       details:
+  //         "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+  //     },
+  //     {
+  //       level: 'warning',
+  //       message: "A Cluster name cannot contain ':'",
+  //       url:
+  //         'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
+  //       details:
+  //         "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+  //     },
+  //     {
+  //       level: 'warning',
+  //       message: "A Cluster name cannot contain ':'",
+  //       url:
+  //         'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
+  //       details:
+  //         "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+  //     },
+  //     {
+  //       level: 'warning',
+  //       message: "D Cluster name cannot contain ':'",
+  //       url:
+  //         'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
+  //       details:
+  //         "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+  //     },
+  //     {
+  //       level: 'warning',
+  //       message: "E Cluster name cannot contain ':'",
+  //       url:
+  //         'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
+  //       details:
+  //         "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+  //     },
+  //     {
+  //       level: 'warning',
+  //       message: "F Cluster name cannot contain ':'",
+  //       url:
+  //         'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
+  //       details:
+  //         "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+  //     },
+  //     {
+  //       level: 'warning',
+  //       message: "G Cluster name cannot contain ':'",
+  //       url:
+  //         'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
+  //       details:
+  //         "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+  //     },
+  //     {
+  //       level: 'warning',
+  //       message: "A Cluster name cannot contain ':'",
+  //       url:
+  //         'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
+  //       details:
+  //         "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+  //     },
+  //   ],
+  //   node_settings: [
+  //     {
+  //       level: 'critical',
+  //       message: "B Cluster name cannot contain ':'",
+  //       url:
+  //         'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
+  //       details:
+  //         "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+  //     },
+  //   ],
+  //   index_settings: {
+  //     logs2: [
+  //       {
+  //         level: 'warning',
+  //         message: 'translog retention settings are ignored',
+  //         url:
+  //           'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_index_name',
+  //         details: "This index is named [logs:apache], which contains the illegal character ':'.",
+  //       },
+  //       {
+  //         level: 'critical',
+  //         message: 'Index created before 7.0',
+  //         url:
+  //           'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
+  //         details: 'This index was created using version: 6.8.13',
+  //       },
+  //     ],
+  //   },
+  //   ml_settings: [
+  //     {
+  //       level: 'critical',
+  //       message: 'model snapshot [1627343998] for job [my_job] needs to be deleted or upgraded',
+  //       url:
+  //         'https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name',
+  //       details:
+  //         "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
+  //       _meta: {
+  //         snapshot_id: '1627343998',
+  //         job_id: 'my_job',
+  //       },
+  //     },
+  //   ],
+  // };
 
   const getCombinedDeprecations = async () => {
     const indices = await getCombinedIndexInfos(deprecations, dataClient);
@@ -152,14 +152,23 @@ export async function getUpgradeAssistantStatus(
         ] as MigrationDeprecationInfoDeprecation[];
 
         const enrichedDeprecationInfo = deprecationsByType.map(
-          // @ts-expect-error @elastic/elasticsearch _meta not available yet in MigrationDeprecationInfoResponse
-          ({ details, level, message, url, _meta: metadata }) => {
+          ({
+            details,
+            level,
+            message,
+            url,
+            // @ts-expect-error @elastic/elasticsearch _meta not available yet in MigrationDeprecationInfoResponse
+            _meta: metadata,
+            // @ts-expect-error @elastic/elasticsearch resolve_during_rolling_upgrade not available yet in MigrationDeprecationInfoResponse
+            resolve_during_rolling_upgrade: resolveDuringUpgrade,
+          }) => {
             return {
               details,
               message,
               url,
               type: deprecationType as keyof MigrationDeprecationInfoResponse,
               isCritical: level === 'critical',
+              resolveDuringUpgrade,
               correctiveAction: getCorrectiveAction(message, metadata),
             };
           }
@@ -193,7 +202,14 @@ const getCombinedIndexInfos = async (
     (indexDeprecations, indexName) => {
       return indexDeprecations.concat(
         deprecations.index_settings[indexName].map(
-          ({ details, message, url, level }) =>
+          ({
+            details,
+            message,
+            url,
+            level,
+            // @ts-expect-error @elastic/elasticsearch resolve_during_rolling_upgrade not available yet in MigrationDeprecationInfoResponse
+            resolve_during_rolling_upgrade: resolveDuringUpgrade,
+          }) =>
             ({
               details,
               message,
@@ -202,6 +218,7 @@ const getCombinedIndexInfos = async (
               type: 'index_settings',
               isCritical: level === 'critical',
               correctiveAction: getCorrectiveAction(message),
+              resolveDuringUpgrade,
             } as EnrichedDeprecationInfo)
         )
       );

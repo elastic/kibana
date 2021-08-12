@@ -27,7 +27,7 @@ describe('Upgrade Assistant Telemetry SavedObject UIOpen', () => {
         savedObjects: { createInternalRepository: () => internalRepo } as any,
       });
 
-      expect(internalRepo.incrementCounter).toHaveBeenCalledTimes(4);
+      expect(internalRepo.incrementCounter).toHaveBeenCalledTimes(3);
       expect(internalRepo.incrementCounter).toHaveBeenCalledWith(
         UPGRADE_ASSISTANT_TYPE,
         UPGRADE_ASSISTANT_DOC_ID,

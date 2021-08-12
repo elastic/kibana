@@ -160,7 +160,9 @@ describe('Kibana deprecations', () => {
     test('renders prompt', () => {
       const { exists, find } = testBed;
       expect(exists('noDeprecationsPrompt')).toBe(true);
-      expect(find('noDeprecationsPrompt').text()).toContain('Ready to upgrade!');
+      expect(find('noDeprecationsPrompt').text()).toContain(
+        'Your Kibana configuration is up to date'
+      );
     });
   });
 

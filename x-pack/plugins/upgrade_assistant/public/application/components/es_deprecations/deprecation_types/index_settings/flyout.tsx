@@ -138,7 +138,7 @@ export const RemoveIndexSettingsFlyout = ({
 
         {/* Hide the prompt to remove settings if the deprecation has been resolved */}
         {statusType !== 'complete' && (
-          <>
+          <div data-test-subj="removeSettingsPrompt">
             <EuiSpacer />
 
             <EuiTitle size="xs">
@@ -158,7 +158,7 @@ export const RemoveIndexSettingsFlyout = ({
                 )}
               </ul>
             </EuiText>
-          </>
+          </div>
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

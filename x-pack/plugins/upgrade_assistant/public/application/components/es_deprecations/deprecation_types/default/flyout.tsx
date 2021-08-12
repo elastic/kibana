@@ -61,11 +61,11 @@ export const DefaultDeprecationFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
+        <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2>{message}</h2>
         </EuiTitle>
         {index && (
-          <EuiText>
+          <EuiText data-test-subj="flyoutDescription">
             <p>
               <EuiTextColor color="subdued">{i18nTexts.getFlyoutDescription(index)}</EuiTextColor>
             </p>

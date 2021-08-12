@@ -215,6 +215,7 @@ export interface EnrichedDeprecationInfo
   isCritical: boolean;
   index?: string;
   correctiveAction?: ReindexAction | MlAction | IndexSettingAction;
+  resolveDuringUpgrade: boolean;
 }
 
 export interface UpgradeAssistantStatus {

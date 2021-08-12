@@ -27,6 +27,7 @@ describe('Elasticsearch deprecations', () => {
       deprecations: [
         {
           isCritical: true,
+          resolveDuringUpgrade: false,
           type: 'ml_settings',
           message:
             'model snapshot [1] for job [deprecation_check_job] needs to be deleted or upgraded',
@@ -41,6 +42,7 @@ describe('Elasticsearch deprecations', () => {
         },
         {
           isCritical: false,
+          resolveDuringUpgrade: false,
           type: 'index_settings',
           message: indexSettingDeprecations.translog.deprecationMessage,
           details: 'deprecation details',
@@ -49,6 +51,27 @@ describe('Elasticsearch deprecations', () => {
           correctiveAction: {
             type: 'indexSetting',
             deprecatedSettings: indexSettingDeprecations.translog.settings,
+          },
+        },
+        {
+          isCritical: false,
+          resolveDuringUpgrade: false,
+          type: 'index_settings',
+          message: 'multi-fields within multi-fields',
+          details: 'deprecation details',
+          url: 'doc_url',
+          index: 'nested_multi-fields',
+        },
+        {
+          isCritical: true,
+          resolveDuringUpgrade: false,
+          type: 'index_settings',
+          message: 'Index created before 7.0',
+          details: 'deprecation details',
+          url: 'doc_url',
+          index: 'reindex_index',
+          correctiveAction: {
+            type: 'reindex',
           },
         },
       ],
@@ -80,11 +103,11 @@ describe('Elasticsearch deprecations', () => {
       expect(exists('esDeprecationsContent.snapshotRestoreLink')).toBe(true);
       expect(exists('esDeprecationsContent.esApiDocumentationLink')).toBe(true);
 
-      // Verify one deprecation in the table
-      expect(find('deprecationTableRow').length).toEqual(2);
+      // Verify all deprecations appear in the table
+      expect(find('deprecationTableRow').length).toEqual(upgradeStatusMockResponse.deprecations.length);
     });
 
-    describe('Machine Learning snapshots deprecation', () => {
+    describe('ML snapshots deprecation', () => {
       beforeEach(async () => {
         const { component, find } = testBed;
 
@@ -280,10 +303,12 @@ describe('Elasticsearch deprecations', () => {
       });
     });
 
-    describe('Index settings deprecations', () => {
-      it('removes deprecated index settings', async () => {
+    describe('index settings deprecation', () => {
+      const indexSettingDeprecation = upgradeStatusMockResponse.deprecations[1];
+
+      beforeEach(async () => {
         const { component, find } = testBed;
-        const indexSettingDeprecation = upgradeStatusMockResponse.deprecations[1];
+
 
         await act(async () => {
           find('deprecation-indexSetting').at(0).simulate('click');
@@ -295,6 +320,11 @@ describe('Elasticsearch deprecations', () => {
         expect(find('indexSettingsDetails.flyoutTitle').text()).toContain(
           indexSettingDeprecation.message
         );
+        expect(find('removeSettingsPrompt')).not.toBe(null);
+      })
+
+      it('removes deprecated index settings', async () => {
+        const { component, find } = testBed;
 
         httpRequestsMockHelpers.setUpdateIndexSettingsResponse({
           acknowledged: true,
@@ -326,10 +356,97 @@ describe('Elasticsearch deprecations', () => {
 
         component.update();
 
+        // Verify prompt to remove setting no longer displays
+        expect(find('removeSettingsPrompt').length).toEqual(0);
         // Verify the action button no longer displays
         expect(find('indexSettingsDetails.deleteSettingsButton').length).toEqual(0);
       });
+
+      it('handles failure', async () => {
+        const { component, find } = testBed;
+        const error = {
+          statusCode: 500,
+          error: 'Remove index settings error',
+          message: 'Remove index settings error',
+        };
+
+        httpRequestsMockHelpers.setUpdateIndexSettingsResponse(undefined, error);
+
+        await act(async () => {
+          find('deleteSettingsButton').simulate('click');
+        });
+
+        component.update();
+
+        const request = server.requests[server.requests.length - 1];
+
+        expect(request.method).toBe('POST');
+        expect(request.url).toBe(
+          `/api/upgrade_assistant/${indexSettingDeprecation.index!}/index_settings`
+        );
+        expect(request.status).toEqual(500);
+
+        // Verify the "Status" column of the table is updated
+        expect(find('indexSettingsActionStatusCell').at(0).text()).toEqual(
+          'Settings removal failed'
+        );
+
+        // Reopen the flyout
+        await act(async () => {
+          find('deprecation-indexSetting').at(0).simulate('click');
+        });
+
+        component.update();
+
+        // Verify the flyout shows an error message
+        expect(find('indexSettingsDetails.deleteSettingsError').text()).toContain(
+          'Error deleting index settings'
+        );
+        // Verify the remove settings button text changes
+        expect(find('indexSettingsDetails.deleteSettingsButton').text()).toEqual('Retry removing deprecated settings');
+      })
     });
+
+    describe('default deprecation', () => {
+      it('renders a flyout with deprecation details', async () => {
+        const multiFieldsDeprecation = upgradeStatusMockResponse.deprecations[2];
+        const { component, find } = testBed;
+
+
+        await act(async () => {
+          find('deprecation-default').at(0).simulate('click');
+        });
+
+        component.update();
+
+        expect(find('defaultDeprecationDetails')).not.toBe(null);
+        expect(find('defaultDeprecationDetails.flyoutTitle').text()).toContain(
+          multiFieldsDeprecation.message
+        );
+        expect(find('defaultDeprecationDetails.flyoutDescription').text()).toContain(
+          multiFieldsDeprecation.index
+        );
+      })
+    })
+
+    describe('reindex deprecation', () => {
+      it('renders a flyout with reindexing details', async () => {
+        const reindexDeprecation = upgradeStatusMockResponse.deprecations[3];
+        const { component, find } = testBed;
+
+
+        await act(async () => {
+          find('deprecation-reindex').at(0).simulate('click');
+        });
+
+        component.update();
+
+        expect(find('reindexDetails')).not.toBe(null);
+        expect(find('reindexDetails.flyoutTitle').text()).toContain(
+          `Reindex ${reindexDeprecation.index}`
+        );
+      })
+    })
   });
 
   describe('no deprecations', () => {

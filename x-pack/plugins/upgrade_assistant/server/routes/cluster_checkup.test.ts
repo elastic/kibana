@@ -44,9 +44,7 @@ describe('cluster checkup API', () => {
   describe('GET /api/upgrade_assistant/reindex/{indexName}.json', () => {
     it('returns state', async () => {
       MigrationApis.getUpgradeAssistantStatus.mockResolvedValue({
-        cluster: [],
-        indices: [],
-        nodes: [],
+        deprecations: [],
       });
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
@@ -54,16 +52,17 @@ describe('cluster checkup API', () => {
       })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       expect(resp.status).toEqual(200);
-      expect(JSON.stringify(resp.payload)).toMatchInlineSnapshot(
-        `"{\\"cluster\\":[],\\"indices\\":[],\\"nodes\\":[]}"`
-      );
+      expect(JSON.stringify(resp.payload)).toMatchInlineSnapshot(`"{\\"deprecations\\":[]}"`);
     });
 
     it('returns an 403 error if it throws forbidden', async () => {
-      const e: any = new Error(`you can't go here!`);
-      e.statusCode = 403;
+      const error = {
+        name: 'ResponseError',
+        message: `you can't go here!`,
+        statusCode: 403,
+      };
 
-      MigrationApis.getUpgradeAssistantStatus.mockRejectedValue(e);
+      MigrationApis.getUpgradeAssistantStatus.mockRejectedValue(error);
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
         pathPattern: '/api/upgrade_assistant/status',

@@ -76,7 +76,11 @@ export const IndexSettingsStatusCell: React.FunctionComponent<Props> = ({ status
 
   if (statusType === 'error') {
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        data-test-subj="indexSettingsActionStatusCell"
+      >
         <EuiFlexItem grow={false}>
           <EuiIcon type="alert" color="danger" />
         </EuiFlexItem>

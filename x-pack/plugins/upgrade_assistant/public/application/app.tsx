@@ -50,11 +50,11 @@ export const AppWithRouter = ({ history }: { history: ScopedHistory }) => {
 export const RootComponent = ({ i18n, history, ...contextValue }: AppDependencies) => {
   return (
     <i18n.Context>
-      <GlobalFlyoutProvider>
-        <AppContextProvider value={contextValue}>
+      <AppContextProvider value={contextValue}>
+        <GlobalFlyoutProvider>
           <AppWithRouter history={history} />
-        </AppContextProvider>
-      </GlobalFlyoutProvider>
+        </GlobalFlyoutProvider>
+      </AppContextProvider>
     </i18n.Context>
   );
 };
