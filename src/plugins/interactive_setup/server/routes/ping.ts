@@ -42,8 +42,8 @@ export function definePingRoute({ router, core, logger }: RouteDefinitionParams)
 
       const client = core.elasticsearch.createClient('ping', {
         hosts: request.body.hosts,
-        username: undefined,
-        password: undefined,
+        username: '',
+        password: '',
         ssl: { verificationMode: 'none' },
       });
 
