@@ -6,15 +6,18 @@
  */
 
 import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
-import { CTI_DEFAULT_SOURCES } from '../../../../common/cti/constants';
+import { CTI_DATASET_KEY_MAP } from '../../../../common/cti/constants';
 
 export interface CtiListItem {
   path: string;
-  title: string;
+  title: CtiDatasetTitle;
   count: number;
 }
 
-export const EMPTY_LIST_ITEMS: CtiListItem[] = Object.keys(CTI_DEFAULT_SOURCES).map((title) => ({
+export type CtiDatasetTitle = keyof typeof CTI_DATASET_KEY_MAP;
+export const ctiTitles = Object.keys(CTI_DATASET_KEY_MAP) as CtiDatasetTitle[];
+
+export const EMPTY_LIST_ITEMS: CtiListItem[] = ctiTitles.map((title) => ({
   title,
   count: 0,
   path: '',
@@ -37,7 +40,7 @@ export const OVERVIEW_DASHBOARD_LINK_TITLE = 'Overview';
 export const getListItemsWithoutLinks = (eventCounts: EventCounts): CtiListItem[] => {
   return EMPTY_LIST_ITEMS.map((item) => ({
     ...item,
-    count: eventCounts[CTI_DEFAULT_SOURCES[item.title]] ?? 0,
+    count: eventCounts[CTI_DATASET_KEY_MAP[item.title]] ?? 0,
   }));
 };
 
@@ -58,12 +61,12 @@ export const createLinkFromDashboardSO = (
       : undefined;
   return {
     title,
-    count: typeof title === 'string' ? eventCountsByDataset[CTI_DEFAULT_SOURCES[title]] : undefined,
+    count: typeof title === 'string' ? eventCountsByDataset[CTI_DATASET_KEY_MAP[title]] : undefined,
     path,
   };
 };
 
-export const emptyEventCountsByDataset = Object.values(CTI_DEFAULT_SOURCES).reduce((acc, id) => {
+export const emptyEventCountsByDataset = Object.values(CTI_DATASET_KEY_MAP).reduce((acc, id) => {
   acc[id] = 0;
   return acc;
 }, {} as { [key: string]: number });

@@ -60,7 +60,7 @@ export const EVENT_ENRICHMENT_INDICATOR_FIELD_MAP = {
 export const DEFAULT_EVENT_ENRICHMENT_FROM = 'now-30d';
 export const DEFAULT_EVENT_ENRICHMENT_TO = 'now';
 
-export const CTI_DEFAULT_SOURCES: { [key: string]: string } = {
+export const CTI_DATASET_KEY_MAP: { [key: string]: string } = {
   'Abuse URL': 'threatintel.abuseurl',
   'Abuse Malware': 'threatintel.abusemalware',
   'AlienVault OTX': 'threatintel.otx',
