@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import { asSingleUserRoleMapping, wsSingleUserRoleMapping, asRoleMapping } from './__mocks__/roles';
+import {
+  asSingleUserRoleMapping,
+  wsSingleUserRoleMapping,
+  asRoleMapping,
+  wsRoleMapping,
+} from './__mocks__/roles';
 
 import React from 'react';
 
 import { shallow, mount } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 
-import { EuiInMemoryTable, EuiTextColor, EuiBadge } from '@elastic/eui';
+import { EuiInMemoryTable, EuiTextColor, EuiBadge, EuiTableRow } from '@elastic/eui';
+import type { EuiSearchBarProps } from '@elastic/eui';
 
 import { engines } from '../../app_search/__mocks__/engines.mock';
 
@@ -114,5 +121,28 @@ describe('UsersTable', () => {
     const cell = wrapper.find('[data-test-subj="UsernameCell"]');
 
     expect(cell.find(EuiBadge)).toHaveLength(1);
+  });
+
+  it('handles search', () => {
+    const wrapper = mount(
+      <UsersTable
+        {...props}
+        singleUserRoleMappings={[
+          { ...wsSingleUserRoleMapping, roleMapping: { ...wsRoleMapping, roleType: 'admin' } },
+          { ...wsSingleUserRoleMapping, roleMapping: { ...wsRoleMapping, roleType: 'user' } },
+        ]}
+      />
+    );
+    const roleMappingsTable = wrapper.find('[data-test-subj="UsersTable"]').first();
+    const searchProp = roleMappingsTable.prop('search') as EuiSearchBarProps;
+
+    act(() => {
+      if (searchProp.onChange) {
+        searchProp.onChange({ queryText: 'admin' } as any);
+      }
+    });
+    wrapper.update();
+
+    expect(wrapper.find(EuiTableRow)).toHaveLength(1);
   });
 });
