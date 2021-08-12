@@ -175,7 +175,7 @@ describe('GET remote clusters', () => {
           causes: undefined,
           error: undefined,
         },
-        message: 'Response Error',
+        message: '{"message":"test error"}',
       });
 
       expect(getSettingsMockFn).toHaveBeenCalled();
