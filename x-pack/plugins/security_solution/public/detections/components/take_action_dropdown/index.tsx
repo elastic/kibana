@@ -15,13 +15,10 @@ import { TimelineEventsDetailsItem, TimelineNonEcsData } from '../../../../commo
 import { useExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';
 import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_investigate_in_timeline';
-/* Todo: Uncomment case action after getAddToCaseAction is split into action and modal
-import {
-    ACTION_ADD_TO_CASE
-} from '../alerts_table/translations';
+import { ACTION_ADD_TO_CASE } from '../alerts_table/translations';
 import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
 import { useInsertTimeline } from '../../../cases/components/use_insert_timeline';
-import { addToCaseActionItem } from './helpers'; */
+import { addToCaseActionItem } from './helpers';
 import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
 import { CHANGE_ALERT_STATUS } from './translations';
@@ -64,11 +61,9 @@ export const TakeActionDropdown = React.memo(
     onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
     timelineId: string;
   }) => {
-    /* Todo: Uncomment case action after getAddToCaseAction is split into action and modal
     const casePermissions = useGetUserCasesPermissions();
     const { timelines: timelinesUi } = useKibana().services;
     const insertTimelineHook = useInsertTimeline;
-    */
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const actionsData = useMemo(
@@ -149,6 +144,10 @@ export const TakeActionDropdown = React.memo(
       onAddEventFilterClick: handleOnAddEventFilterClick,
     });
 
+    const afterCaseSelection = useCallback(() => {
+      closePopoverHandler();
+    }, [closePopoverHandler]);
+
     const { actionItems } = useAlertsActions({
       alertStatus: actionsData.alertStatus,
       eventId: actionsData.eventId,
@@ -176,14 +175,13 @@ export const TakeActionDropdown = React.memo(
       [eventFilterActions, exceptionActions, isEvent, actionsData.ruleId]
     );
 
-    const panels = useMemo(
-      () => [
+    const panels = useMemo(() => {
+      return [
         {
           id: 0,
           items: [
             ...alertsActionItems,
-            /* Todo: Uncomment case action after getAddToCaseAction is split into action and modal
-            ...addToCaseActionItem(timelineId),*/
+            ...addToCaseActionItem(timelineId),
             ...hostIsolationAction,
             ...investigateInTimelineAction,
           ],
@@ -193,25 +191,45 @@ export const TakeActionDropdown = React.memo(
           title: CHANGE_ALERT_STATUS,
           content: <EuiContextMenuPanel size="s" items={actionItems} />,
         },
-        /* Todo: Uncomment case action after getAddToCaseAction is split into action and modal
         {
           id: 2,
           title: ACTION_ADD_TO_CASE,
-          content: (
+          content: [
             <>
               {ecsData &&
-                timelinesUi.getAddToCaseAction({
+                timelinesUi.getAddToExistingCaseButton({
                   ecsRowData: ecsData,
                   useInsertTimeline: insertTimelineHook,
                   casePermissions,
-                  showIcon: false,
+                  appId: 'securitySolution',
+                  onClose: afterCaseSelection,
                 })}
-            </>
-          ),
-        },*/
-      ],
-      [actionItems, alertsActionItems, hostIsolationAction, investigateInTimelineAction]
-    );
+            </>,
+            <>
+              {ecsData &&
+                timelinesUi.getAddToNewCaseButton({
+                  ecsRowData: ecsData,
+                  useInsertTimeline: insertTimelineHook,
+                  casePermissions,
+                  appId: 'securitySolution',
+                  onClose: afterCaseSelection,
+                })}
+            </>,
+          ],
+        },
+      ];
+    }, [
+      alertsActionItems,
+      hostIsolationAction,
+      investigateInTimelineAction,
+      ecsData,
+      casePermissions,
+      insertTimelineHook,
+      timelineId,
+      timelinesUi,
+      actionItems,
+      afterCaseSelection,
+    ]);
 
     const takeActionButton = useMemo(() => {
       return (

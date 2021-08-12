@@ -21,6 +21,9 @@ import {
   getTGridLazy,
   getFieldsBrowserLazy,
   getAddToCaseLazy,
+  getAddToExistingCaseButtonLazy,
+  getAddToNewCaseButtonLazy,
+  getAddToCasePopoverLazy,
 } from './methods';
 import type { TimelinesUIStart, TGridProps, TimelinesStartPlugins } from './types';
 import { tGridReducer } from './store/t_grid/reducer';
@@ -80,6 +83,15 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       },
       getAddToCaseAction: (props) => {
         return getAddToCaseLazy(props);
+      },
+      getAddToCasePopover: (props) => {
+        return getAddToCasePopoverLazy(props, this._store!);
+      },
+      getAddToExistingCaseButton: (props) => {
+        return getAddToExistingCaseButtonLazy(props, this._store!);
+      },
+      getAddToNewCaseButton: (props) => {
+        return getAddToNewCaseButtonLazy(props, this._store!);
       },
     };
   }
