@@ -144,8 +144,8 @@ function useServicesFetcher() {
   ]);
 
   return {
-    servicesData: mainStatisticsData,
-    servicesStatus: mainStatisticsStatus,
+    mainStatisticsData,
+    mainStatisticsStatus,
     comparisonData,
     isLoading: mainStatisticsStatus === FETCH_STATUS.LOADING,
   };
@@ -154,8 +154,8 @@ function useServicesFetcher() {
 export function ServiceInventory() {
   const { core } = useApmPluginContext();
   const {
-    servicesData,
-    servicesStatus,
+    mainStatisticsData,
+    mainStatisticsStatus,
     comparisonData,
     isLoading,
   } = useServicesFetcher();
@@ -190,13 +190,13 @@ export function ServiceInventory() {
         <EuiFlexItem>
           <ServiceList
             isLoading={isLoading}
-            items={servicesData.items}
+            items={mainStatisticsData.items}
             comparisonData={comparisonData}
             noItemsMessage={
               !isLoading && (
                 <NoServicesMessage
-                  historicalDataFound={servicesData.hasHistoricalData}
-                  status={servicesStatus}
+                  historicalDataFound={mainStatisticsData.hasHistoricalData}
+                  status={mainStatisticsStatus}
                 />
               )
             }
