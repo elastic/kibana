@@ -7,20 +7,24 @@
 import { EuiIconTip, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
+/**
+ * We need to produce types and code transpilation at different folders during the build of the package.
+ * We have types and code at different imports because we don't want to import the whole package in the resulting webpack bundle for the plugin.
+ * This way plugins can do targeted imports to reduce the final code bundle
+ */
 import type {
   ALERT_DURATION as ALERT_DURATION_TYPED,
   ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
-  ALERT_START as ALERT_START_TYPED,
   ALERT_STATUS as ALERT_STATUS_TYPED,
   ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
 } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
   ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
-  ALERT_START as ALERT_START_NON_TYPED,
   ALERT_STATUS as ALERT_STATUS_NON_TYPED,
   ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
-  // @ts-expect-error
+  TIMESTAMP,
+  // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
 
 import type { CellValueElementProps, TimelineNonEcsData } from '../../../../timelines/common';
@@ -33,7 +37,6 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
-const ALERT_START: typeof ALERT_START_TYPED = ALERT_START_NON_TYPED;
 const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
 const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
 
@@ -101,7 +104,7 @@ export const getRenderCellValue = ({
             type="check"
           />
         );
-      case ALERT_START:
+      case TIMESTAMP:
         return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
       case ALERT_DURATION:
         return asDuration(Number(value));

@@ -140,6 +140,9 @@ describe('ServiceOverview', () => {
       'GET /api/apm/services/{serviceName}/annotation/search': {
         annotations: [],
       },
+      'GET /api/apm/fallback_to_transactions': {
+        fallbackToTransactions: false,
+      },
     };
     /* eslint-enable @typescript-eslint/naming-convention */
 

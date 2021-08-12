@@ -526,9 +526,12 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           rowIndex,
           setCellProps,
           timelineId: tabType != null ? `${id}-${tabType}` : id,
+          ecsData: data[rowIndex].ecs,
+          browserFields,
+          rowRenderers,
         });
       },
-      [columnHeaders, data, id, renderCellValue, tabType, theme]
+      [columnHeaders, data, id, renderCellValue, tabType, theme, browserFields, rowRenderers]
     );
 
     return (
