@@ -12,12 +12,12 @@ import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import { InnerFieldItem, FieldItemProps } from './field_item';
 import { coreMock } from 'src/core/public/mocks';
 import { mountWithIntl } from '@kbn/test/jest';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { IndexPattern } from './types';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { documentField } from './document_field';
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
+import { FieldFormatsStart } from '../../../../../src/plugins/field_formats/public';
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
@@ -29,7 +29,6 @@ describe('IndexPattern Field Item', () => {
   let defaultProps: FieldItemProps;
   let indexPattern: IndexPattern;
   let core: ReturnType<typeof coreMock['createSetup']>;
-  let data: DataPublicPluginStart;
 
   beforeEach(() => {
     indexPattern = {
@@ -84,11 +83,15 @@ describe('IndexPattern Field Item', () => {
     } as IndexPattern;
 
     core = coreMock.createSetup();
-    data = dataPluginMock.createStartContract();
     core.http.post.mockClear();
     defaultProps = {
       indexPattern,
-      data,
+      fieldFormats: ({
+        ...fieldFormatsServiceMock.createStartContract(),
+        getDefaultInstance: jest.fn(() => ({
+          convert: jest.fn((s: unknown) => JSON.stringify(s)),
+        })),
+      } as unknown) as FieldFormatsStart,
       core,
       highlight: '',
       dateRange: {
@@ -112,12 +115,6 @@ describe('IndexPattern Field Item', () => {
       hasSuggestionForField: () => false,
       uiActions: uiActionsPluginMock.createStartContract(),
     };
-
-    data.fieldFormats = ({
-      getDefaultInstance: jest.fn(() => ({
-        convert: jest.fn((s: unknown) => JSON.stringify(s)),
-      })),
-    } as unknown) as DataPublicPluginStart['fieldFormats'];
   });
 
   it('should display displayName of a field', () => {

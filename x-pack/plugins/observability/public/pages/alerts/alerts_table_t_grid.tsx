@@ -5,19 +5,28 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import type {
+  AlertConsumers as AlertConsumersTyped,
+  ALERT_DURATION as ALERT_DURATION_TYPED,
+  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
+  ALERT_STATUS as ALERT_STATUS_TYPED,
+  ALERT_START as ALERT_START_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
+} from '@kbn/rule-data-utils';
+import {
+  AlertConsumers as AlertConsumersNonTyped,
+  ALERT_DURATION as ALERT_DURATION_NON_TYPED,
+  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
+  ALERT_STATUS as ALERT_STATUS_NON_TYPED,
+  ALERT_START as ALERT_START_NON_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
+  // @ts-expect-error
+} from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 import { EuiButtonIcon, EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 
 import React, { Suspense, useState } from 'react';
-import {
-  ALERT_DURATION,
-  ALERT_SEVERITY_LEVEL,
-  ALERT_STATUS,
-  ALERT_START,
-  RULE_NAME,
-} from '@kbn/rule-data-utils/target/technical_field_names';
 
 import type { TimelinesUIStart } from '../../../../timelines/public';
 import type { TopAlert } from './';
@@ -34,6 +43,13 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { decorateResponse } from './decorate_response';
 import { getDefaultCellActions } from './default_cell_actions';
 import { LazyAlertsFlyout } from '../..';
+
+const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
+const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
+const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
+const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
+const ALERT_START: typeof ALERT_START_TYPED = ALERT_START_NON_TYPED;
+const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
 
 interface AlertsTableTGridProps {
   indexName: string;
@@ -108,7 +124,7 @@ export const columns: Array<
       defaultMessage: 'Reason',
     }),
     linkField: '*',
-    id: RULE_NAME,
+    id: ALERT_RULE_NAME,
   },
 ];
 
