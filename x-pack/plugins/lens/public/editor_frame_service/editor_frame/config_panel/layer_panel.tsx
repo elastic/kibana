@@ -296,7 +296,7 @@ export function LayerPanel(
           hasBorder
           hasShadow
         >
-          <section className="lnsLayerPanel__layerHeader">
+          <header className="lnsLayerPanel__layerHeader">
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
               <EuiFlexItem grow className="lnsLayerPanel__layerSettingsWrapper">
                 <LayerSettings
@@ -354,7 +354,7 @@ export function LayerPanel(
                 }}
               />
             )}
-          </section>
+          </header>
 
           {groups.map((group, groupIndex) => {
             const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
