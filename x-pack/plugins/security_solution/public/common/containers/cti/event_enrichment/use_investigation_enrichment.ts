@@ -68,18 +68,22 @@ export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
   }, [addError, error]);
 
   const prevEventFields = usePrevious(eventFields);
+  const prevRange = usePrevious(range);
 
   useEffect(() => {
-    if (!isEmpty(eventFields) && !isEqual(eventFields, prevEventFields)) {
+    if (
+      !isEmpty(eventFields) &&
+      (!isEqual(eventFields, prevEventFields) || !isEqual(range, prevRange))
+    ) {
       start({
         data: kibana.services.data,
-        timerange: { to: range.to, from: range.from, interval: '' },
+        timerange: { ...range, interval: '' },
         defaultIndex: DEFAULT_CTI_SOURCE_INDEX,
         eventFields,
         filterQuery: '',
       });
     }
-  }, [start, kibana.services.data, range.to, range.from, eventFields, prevEventFields]);
+  }, [start, kibana.services.data, range, prevRange, eventFields, prevEventFields]);
 
   return {
     result: isEmpty(eventFields) ? noEnrichments : result,

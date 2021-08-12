@@ -23,7 +23,6 @@ const NoIntelligenceCTA: React.FC<{}> = () => {
   }/filebeat-module-threatintel.html`;
   return (
     <>
-      <span>{i18n.INDICATOR_TOOLTIP_CONTENT}</span>
       <span>{i18n.IF_CTI_NOT_ENABLED}</span>
       <span>
         <EuiLink href={threatIntelDocsUrl} target="_blank">

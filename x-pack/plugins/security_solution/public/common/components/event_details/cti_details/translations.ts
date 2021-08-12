@@ -44,13 +44,6 @@ export const INVESTIGATION_TOOLTIP_CONTENT = i18n.translate(
   }
 );
 
-export const NO_INDICATOR_ENRICHMENTS_TITLE = i18n.translate(
-  'xpack.securitySolution.alertDetails.noIndicatorEnrichmentsTitle',
-  {
-    defaultMessage: 'No Indicator Matches Found',
-  }
-);
-
 export const NO_INDICATOR_ENRICHMENTS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.alertDetails.noIndicatorEnrichmentsDescription',
   {
@@ -81,19 +74,11 @@ export const NO_ENRICHMENTS_FOUND_TITLE = i18n.translate(
   }
 );
 
-export const NO_ENRICHMENTS_FOUND_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.alertDetails.noEnrichmentsFoundDescription',
-  {
-    defaultMessage:
-      'We did not find threat intelligence that matches any of the indicator match rules, or any enrichment for this alert.',
-  }
-);
-
 export const IF_CTI_NOT_ENABLED = i18n.translate(
   'xpack.securitySolution.alertDetails.ifCtiNotEnabled',
   {
     defaultMessage:
-      "If you haven't enabled any threat intelligence sources and want to learn more about this capability, ",
+      "We haven’t found field value matched a threat intelligence indicator with a rule you created. If you haven't enabled any threat intelligence sources and want to learn more about this capability, ",
   }
 );
 
