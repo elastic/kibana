@@ -105,7 +105,7 @@ export const columns: Array<
       defaultMessage: 'Last updated',
     }),
     id: TIMESTAMP,
-    initialWidth: 176,
+    initialWidth: 230,
   },
   {
     columnHeaderType: 'not-filtered',
