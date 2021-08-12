@@ -47,7 +47,7 @@ export const ReorderableTable = <Item extends object>({
     <div className={classNames(className, 'reorderableTable')}>
       <HeaderRow columns={columns} leftAction={!disableReordering ? <></> : undefined} />
 
-      {items.length === 0 && (
+      {items.length === 0 && unreorderableItems.length === 0 && (
         <EuiFlexGroup alignItems="center" justifyContent="center">
           <EuiFlexItem data-test-subj="NoItems" className="reorderableTableNoItems">
             {noItemsMessage}
@@ -71,20 +71,6 @@ export const ReorderableTable = <Item extends object>({
             )}
             onReorder={onReorder}
           />
-          {unreorderableItems.length > 0 && (
-            <BodyRows
-              items={unreorderableItems}
-              renderItem={(item, itemIndex) => (
-                <BodyRow
-                  key={`table_draggable_row_${itemIndex}`}
-                  columns={columns}
-                  item={item}
-                  additionalProps={rowProps(item)}
-                  leftAction={<></>}
-                />
-              )}
-            />
-          )}
         </>
       )}
 
@@ -97,6 +83,21 @@ export const ReorderableTable = <Item extends object>({
               columns={columns}
               item={item}
               additionalProps={rowProps(item)}
+            />
+          )}
+        />
+      )}
+
+      {unreorderableItems.length > 0 && (
+        <BodyRows
+          items={unreorderableItems}
+          renderItem={(item, itemIndex) => (
+            <BodyRow
+              key={`table_draggable_row_${itemIndex}`}
+              columns={columns}
+              item={item}
+              additionalProps={rowProps(item)}
+              leftAction={<></>}
             />
           )}
         />
