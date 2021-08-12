@@ -16,6 +16,7 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiTitle,
+  EuiToken,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
@@ -25,7 +26,6 @@ import {
   KibanaPageTemplate,
   overviewPageActions,
   OverviewPageFooter,
-  KibanaPageTemplateSolutionNavAvatar,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { FetchResult } from '../../../../../../src/plugins/newsfeed/public';
 import {
@@ -205,10 +205,12 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                             description={description ? description : ''}
                             href={addBasePath(path)}
                             icon={
-                              <KibanaPageTemplateSolutionNavAvatar
-                                name={title}
+                              <EuiToken
+                                className="kbnOverviewSolution__icon"
+                                fill="light"
                                 iconType={icon}
-                                size="xxl"
+                                shape="circle"
+                                size="l"
                               />
                             }
                             image={addBasePath(getSolutionGraphicURL(snakeCase(id)))}
