@@ -35,7 +35,7 @@ import { Logger, ElasticsearchClient, EcsEventOutcome } from '../../../../../src
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import { AuditLogger } from '../../../security/server';
 import {
-  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
   SPACE_IDS,
@@ -80,7 +80,7 @@ export interface BulkUpdateOptions<Params extends AlertTypeParams> {
   ids: string[] | undefined | null;
   status: STATUS_VALUES;
   index: string;
-  query: string | undefined | null;
+  query: object | string | undefined | null;
 }
 
 interface GetAlertParams {
@@ -90,7 +90,7 @@ interface GetAlertParams {
 
 interface SingleSearchAfterAndAudit {
   id: string | null | undefined;
-  query: string | null | undefined;
+  query: object | string | null | undefined;
   index?: string;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
   lastSortIds: Array<string | number> | undefined;
@@ -315,7 +315,11 @@ export class AlertsClient {
           },
         },
         {
-          doc: { [ALERT_STATUS]: status },
+          doc: {
+            [item?._source?.[ALERT_WORKFLOW_STATUS] == null
+              ? 'signal.status'
+              : ALERT_WORKFLOW_STATUS]: status,
+          },
         },
       ]);
 
@@ -330,7 +334,7 @@ export class AlertsClient {
   }
 
   private async buildEsQueryWithAuthz(
-    query: string | null | undefined,
+    query: object | string | null | undefined,
     id: string | null | undefined,
     alertSpaceId: string,
     operation: WriteOperations.Update | ReadOperations.Get | ReadOperations.Find,
@@ -345,15 +349,28 @@ export class AlertsClient {
         },
         operation
       );
-      return buildEsQuery(
+      let esQuery;
+      if (id != null) {
+        esQuery = { query: `_id:${id}`, language: 'kuery' };
+      } else if (typeof query === 'string') {
+        esQuery = { query, language: 'kuery' };
+      } else if (query != null && typeof query === 'object') {
+        esQuery = [];
+      }
+      const builtQuery = buildEsQuery(
         undefined,
-        { query: query == null ? `_id:${id}` : query, language: 'kuery' },
+        esQuery == null ? { query: ``, language: 'kuery' } : esQuery,
         [
           (authzFilter as unknown) as Filter,
           ({ term: { [SPACE_IDS]: alertSpaceId } } as unknown) as Filter,
         ],
         config
       );
+      if (query != null && typeof query === 'object') {
+        // @ts-expect-error
+        builtQuery.bool.must.push(query);
+      }
+      return builtQuery;
     } catch (exc) {
       this.logger.error(exc);
       throw Boom.expectationFailed(
@@ -373,7 +390,7 @@ export class AlertsClient {
     operation,
   }: {
     index: string;
-    query: string;
+    query: object | string;
     operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
   }) {
     let lastSortIds;
@@ -436,7 +453,7 @@ export class AlertsClient {
       // first search for the alert by id, then use the alert info to check if user has access to it
       const alert = await this.singleSearchAfterAndAudit({
         id,
-        query: null,
+        query: undefined,
         index,
         operation: ReadOperations.Get,
         lastSortIds: undefined,
@@ -483,7 +500,9 @@ export class AlertsClient {
         index,
         body: {
           doc: {
-            [ALERT_STATUS]: status,
+            [alert?.hits.hits[0]._source?.[ALERT_WORKFLOW_STATUS] == null
+              ? 'signal.status'
+              : ALERT_WORKFLOW_STATUS]: status,
           },
         },
         refresh: 'wait_for',
@@ -535,8 +554,8 @@ export class AlertsClient {
           refresh: true,
           body: {
             script: {
-              source: `if (ctx._source['${ALERT_STATUS}'] != null) {
-                ctx._source['${ALERT_STATUS}'] = '${status}'
+              source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
+                ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}'
               }
               if (ctx._source['signal.status'] != null) {
                 ctx._source['signal.status'] = '${status}'

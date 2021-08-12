@@ -6,6 +6,7 @@
  */
 import expect from '@kbn/expect';
 
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import {
   superUser,
   globalRead,
@@ -26,6 +27,7 @@ import {
   secOnlySpacesAll,
   noKibanaPrivileges,
 } from '../../../common/lib/authentication/users';
+
 import type { User } from '../../../common/lib/authentication/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
@@ -119,14 +121,30 @@ export default ({ getService }: FtrProviderContext) => {
           items.map((item) => expect(item.update.result).to.eql('updated'));
         });
 
-        it(`${username} should bulk update alerts which match query in ${space}/${index}`, async () => {
+        it(`${username} should bulk update alerts which match KQL query string in ${space}/${index}`, async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts'); // since this is a success case, reload the test data immediately beforehand
           const { body: updated } = await supertestWithoutAuth
             .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/bulk_update`)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .send({
               status: 'closed',
-              query: 'kibana.alert.status: open',
+              query: `${ALERT_WORKFLOW_STATUS}: open`,
+              index,
+            });
+          expect(updated.statusCode).to.eql(200);
+          expect(updated.body.updated).to.greaterThan(0);
+        });
+
+        it(`${username} should bulk update alerts which match query in DSL in ${space}/${index}`, async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts'); // since this is a success case, reload the test data immediately beforehand
+          const { body: updated } = await supertestWithoutAuth
+            .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/bulk_update`)
+            .auth(username, password)
+            .set('kbn-xsrf', 'true')
+            .send({
+              status: 'closed',
+              query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
               index,
             });
           expect(updated.statusCode).to.eql(200);

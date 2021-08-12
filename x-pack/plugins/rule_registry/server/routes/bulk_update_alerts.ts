@@ -31,7 +31,7 @@ export const bulkUpdateAlertsRoute = (router: IRouter<RacRequestHandlerContext>)
               status: t.union([t.literal('open'), t.literal('closed')]),
               index: t.string,
               ids: t.undefined,
-              query: t.string,
+              query: t.union([t.object, t.string]),
             }),
           ])
         ),
