@@ -1,8 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "./target",
-    "skipLibCheck": true
+    "outDir": "./target/types"
   },
   "include": [
     "index.ts",
@@ -12,5 +11,9 @@
     "server/**/*.ts",
     "../../typings/**/*"
   ],
-  "exclude": []
+  "exclude": [],
+  "references": [
+    { "path": "../../src/core/tsconfig.json" },
+    { "path": "../developer_examples/tsconfig.json" }
+  ]
 }

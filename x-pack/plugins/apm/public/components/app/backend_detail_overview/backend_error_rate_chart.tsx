@@ -15,17 +15,26 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
 import { useTheme } from '../../../hooks/use_theme';
+import { useApmParams } from '../../../hooks/use_apm_params';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
 }
 
-export function BackendErrorRateChart({ height }: { height: number }) {
+export function BackendFailedTransactionRateChart({
+  height,
+}: {
+  height: number;
+}) {
   const { backendName } = useApmBackendContext();
 
   const theme = useTheme();
 
-  const { start, end } = useTimeRange();
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/backends/:backendName/overview');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const {
     urlParams: { kuery, environment },
@@ -67,7 +76,7 @@ export function BackendErrorRateChart({ height }: { height: number }) {
         type: 'linemark',
         color: theme.eui.euiColorVis7,
         title: i18n.translate('xpack.apm.backendErrorRateChart.chartTitle', {
-          defaultMessage: 'Error rate',
+          defaultMessage: 'Failed transaction rate',
         }),
       });
     }

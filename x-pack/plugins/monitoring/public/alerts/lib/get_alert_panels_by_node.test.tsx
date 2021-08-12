@@ -6,17 +6,17 @@
  */
 
 import {
-  ALERT_CPU_USAGE,
-  ALERT_LOGSTASH_VERSION_MISMATCH,
-  ALERT_THREAD_POOL_WRITE_REJECTIONS,
+  RULE_CPU_USAGE,
+  RULE_LOGSTASH_VERSION_MISMATCH,
+  RULE_THREAD_POOL_WRITE_REJECTIONS,
 } from '../../../common/constants';
 import { AlertSeverity } from '../../../common/enums';
 import { getAlertPanelsByNode } from './get_alert_panels_by_node';
 import {
-  ALERT_LICENSE_EXPIRATION,
-  ALERT_NODES_CHANGED,
-  ALERT_DISK_USAGE,
-  ALERT_MEMORY_USAGE,
+  RULE_LICENSE_EXPIRATION,
+  RULE_NODES_CHANGED,
+  RULE_DISK_USAGE,
+  RULE_MEMORY_USAGE,
 } from '../../../common/constants';
 import { AlertExecutionStatusValues } from '../../../../alerting/common';
 import { AlertState } from '../../../common/types/alerts';
@@ -88,7 +88,7 @@ describe('getAlertPanelsByNode', () => {
     }
 
     return {
-      rawAlert: {
+      sanitizedRule: {
         id: `${type}_${firingCount}`,
         alertTypeId: type,
         name: `${type}_label`,
@@ -103,17 +103,17 @@ describe('getAlertPanelsByNode', () => {
 
   it('should properly group for alerts in each category', () => {
     const alerts = [
-      getAlert(ALERT_NODES_CHANGED, 2),
-      getAlert(ALERT_DISK_USAGE, 1),
-      getAlert(ALERT_LICENSE_EXPIRATION, 2),
+      getAlert(RULE_NODES_CHANGED, 2),
+      getAlert(RULE_DISK_USAGE, 1),
+      getAlert(RULE_LICENSE_EXPIRATION, 2),
       {
         states: [
           { firing: true, meta: {}, state: { cluster, ui, nodeId: 'es1', nodeName: 'es_name_1' } },
         ],
-        rawAlert: {
-          id: `${ALERT_NODES_CHANGED}_3`,
-          alertTypeId: ALERT_NODES_CHANGED,
-          name: `${ALERT_NODES_CHANGED}_label_2`,
+        sanitizedRule: {
+          id: `${RULE_NODES_CHANGED}_3`,
+          alertTypeId: RULE_NODES_CHANGED,
+          name: `${RULE_NODES_CHANGED}_label_2`,
           ...mockAlert,
         },
       },
@@ -123,16 +123,16 @@ describe('getAlertPanelsByNode', () => {
   });
 
   it('should properly group for alerts in a single category', () => {
-    const alerts = [getAlert(ALERT_MEMORY_USAGE, 2)];
+    const alerts = [getAlert(RULE_MEMORY_USAGE, 2)];
     const result = getAlertPanelsByNode(panelTitle, alerts, stateFilter);
     expect(result).toMatchSnapshot();
   });
 
   it('should not show any alert if none are firing', () => {
     const alerts = [
-      getAlert(ALERT_LOGSTASH_VERSION_MISMATCH, 0),
-      getAlert(ALERT_CPU_USAGE, 0),
-      getAlert(ALERT_THREAD_POOL_WRITE_REJECTIONS, 0),
+      getAlert(RULE_LOGSTASH_VERSION_MISMATCH, 0),
+      getAlert(RULE_CPU_USAGE, 0),
+      getAlert(RULE_THREAD_POOL_WRITE_REJECTIONS, 0),
     ];
     const result = getAlertPanelsByNode(panelTitle, alerts, stateFilter);
     expect(result).toMatchSnapshot();

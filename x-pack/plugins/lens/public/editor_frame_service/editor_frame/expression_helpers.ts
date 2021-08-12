@@ -6,18 +6,13 @@
  */
 
 import { Ast, fromExpression, ExpressionFunctionAST } from '@kbn/interpreter/common';
+import { DatasourceStates } from '../../state_management';
 import { Visualization, DatasourcePublicAPI, DatasourceMap } from '../../types';
 
 export function prependDatasourceExpression(
   visualizationExpression: Ast | string | null,
   datasourceMap: DatasourceMap,
-  datasourceStates: Record<
-    string,
-    {
-      isLoading: boolean;
-      state: unknown;
-    }
-  >
+  datasourceStates: DatasourceStates
 ): Ast | null {
   const datasourceExpressions: Array<[string, Ast | string]> = [];
 
@@ -81,13 +76,7 @@ export function buildExpression({
   visualization: Visualization | null;
   visualizationState: unknown;
   datasourceMap: DatasourceMap;
-  datasourceStates: Record<
-    string,
-    {
-      isLoading: boolean;
-      state: unknown;
-    }
-  >;
+  datasourceStates: DatasourceStates;
   datasourceLayers: Record<string, DatasourcePublicAPI>;
 }): Ast | null {
   if (visualization === null) {
