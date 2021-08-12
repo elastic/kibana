@@ -24,17 +24,21 @@ export const fetchConnectors = async (): Promise<ActionConnector[]> => {
   const response = (await apiService.get(API_URLS.RULE_CONNECTORS)) as Array<
     AsApiContract<ActionConnector>
   >;
-  /* eslint-disable @typescript-eslint/naming-convention */
   return response.map(
-    ({ connector_type_id, referenced_by_count, is_preconfigured, is_missing_secrets, ...res }) => ({
+    ({
+      connector_type_id: actionTypeId,
+      referenced_by_count: referencedByCount,
+      is_preconfigured: isPreconfigured,
+      is_missing_secrets: isMissingSecrets,
+      ...res
+    }) => ({
       ...res,
-      actionTypeId: connector_type_id,
-      referencedByCount: referenced_by_count,
-      isPreconfigured: is_preconfigured,
-      isMissingSecrets: is_missing_secrets,
+      actionTypeId,
+      referencedByCount,
+      isPreconfigured,
+      isMissingSecrets,
     })
   );
-  /* eslint-enable @typescript-eslint/naming-convention */
 };
 
 export interface NewAlertParams extends AlertTypeParams {
@@ -135,19 +139,17 @@ export const fetchActionTypes = async (): Promise<ActionType[]> => {
   const response = (await apiService.get(API_URLS.CONNECTOR_TYPES)) as Array<
     AsApiContract<ActionType>
   >;
-  /* eslint-disable @typescript-eslint/naming-convention */
   return response.map<ActionType>(
     ({
-      enabled_in_config,
-      enabled_in_license,
-      minimum_license_required,
+      enabled_in_config: enabledInConfig,
+      enabled_in_license: enabledInLicense,
+      minimum_license_required: minimumLicenseRequired,
       ...res
     }: AsApiContract<ActionType>) => ({
       ...res,
-      enabledInConfig: enabled_in_config,
-      enabledInLicense: enabled_in_license,
-      minimumLicenseRequired: minimum_license_required,
+      enabledInConfig,
+      enabledInLicense,
+      minimumLicenseRequired,
     })
   );
-  /* eslint-enable @typescript-eslint/naming-convention */
 };
