@@ -15,14 +15,14 @@ import { ESDeprecationStats } from './es_stats';
 import { KibanaDeprecationStats } from './kibana_stats';
 
 const i18nTexts = {
-  resolveStepTitle: i18n.translate('xpack.upgradeAssistant.overview.resolveStepTitle', {
+  reviewStepTitle: i18n.translate('xpack.upgradeAssistant.overview.reviewStepTitle', {
     defaultMessage: 'Review deprecated settings and resolve issues',
   }),
 };
 
-export const getResolveStep = ({ currentMajor }: { currentMajor: number }): EuiStepProps => {
+export const getReviewStep = ({ currentMajor }: { currentMajor: number }): EuiStepProps => {
   return {
-    title: i18nTexts.resolveStepTitle,
+    title: i18nTexts.reviewStepTitle,
     status: 'incomplete',
     children: (
       <>

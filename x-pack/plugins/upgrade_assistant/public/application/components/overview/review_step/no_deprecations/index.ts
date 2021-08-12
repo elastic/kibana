@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getObserveStep } from './observe_step';
+export { NoDeprecations } from './no_deprecations';

@@ -18,10 +18,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
-import { useAppContext } from '../../../app_context';
+import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { useAppContext } from '../../../../app_context';
 import { EsStatsErrors } from './es_stats_error';
-import { NoDeprecations } from './no_deprecations';
+import { NoDeprecations } from '../no_deprecations';
 
 const i18nTexts = {
   statsTitle: i18n.translate('xpack.upgradeAssistant.esDeprecationStats.statsTitle', {

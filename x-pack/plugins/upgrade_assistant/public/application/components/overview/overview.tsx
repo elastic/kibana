@@ -20,8 +20,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useAppContext } from '../../app_context';
-import { getResolveStep } from './resolve_step';
-import { getObserveStep } from './observe_step';
+import { getReviewStep } from './review_step';
+import { getIdentifyStep } from './identify_step';
 import { getUpgradeStep } from './upgrade_step';
 
 export const DeprecationsOverview: FunctionComponent = () => {
@@ -92,8 +92,8 @@ export const DeprecationsOverview: FunctionComponent = () => {
 
           <EuiSteps
             steps={[
-              getResolveStep({ currentMajor }),
-              getObserveStep(),
+              getReviewStep({ currentMajor }),
+              getIdentifyStep(),
               getUpgradeStep({ docLinks, isCloudEnabled, cloudDeploymentUrl, currentMajor }),
             ]}
           />

@@ -20,9 +20,9 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import type { DomainDeprecationDetails } from 'kibana/public';
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
-import { useAppContext } from '../../../app_context';
-import { NoDeprecations } from './no_deprecations';
+import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { useAppContext } from '../../../../app_context';
+import { NoDeprecations } from '../no_deprecations';
 
 const i18nTexts = {
   statsTitle: i18n.translate('xpack.upgradeAssistant.kibanaDeprecationStats.statsTitle', {

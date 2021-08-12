@@ -15,7 +15,7 @@ import { ExternalLinks } from './external_links';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 
 const i18nTexts = {
-  observeStepTitle: i18n.translate('xpack.upgradeAssistant.overview.observeStepTitle', {
+  identifyStepTitle: i18n.translate('xpack.upgradeAssistant.overview.identifyStepTitle', {
     defaultMessage: 'Identify deprecated API use and update your applications',
   }),
   toggleTitle: i18n.translate('xpack.upgradeAssistant.overview.toggleTitle', {
@@ -47,9 +47,9 @@ const DeprecationLogsPreview: FunctionComponent = () => {
   );
 };
 
-export const getObserveStep = (): EuiStepProps => {
+export const getIdentifyStep = (): EuiStepProps => {
   return {
-    title: i18nTexts.observeStepTitle,
+    title: i18nTexts.identifyStepTitle,
     status: 'incomplete',
     children: <DeprecationLogsPreview />,
   };

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getResolveStep } from './resolve_step';
+export { KibanaDeprecationStats } from './kibana_stats';

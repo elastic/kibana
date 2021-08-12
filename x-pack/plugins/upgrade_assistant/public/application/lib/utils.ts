@@ -8,6 +8,8 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { tryCatch, fold } from 'fp-ts/lib/Either';
 
+import { DEPRECATION_WARNING_UPPER_LIMIT } from '../../../common/constants';
+
 export const validateRegExpString = (s: string) =>
   pipe(
     tryCatch(
@@ -19,3 +21,11 @@ export const validateRegExpString = (s: string) =>
       () => ''
     )
   );
+
+export const getDeprecationsUpperLimit = (count: number) => {
+  if (count > DEPRECATION_WARNING_UPPER_LIMIT) {
+    return `${DEPRECATION_WARNING_UPPER_LIMIT}+`;
+  }
+
+  return count.toString();
+};
