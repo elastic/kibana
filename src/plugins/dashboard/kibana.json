@@ -1,5 +1,10 @@
 {
   "id": "dashboard",
+  "owner": {
+    "name": "Kibana Presentation",
+    "githubTeam": "kibana-presentation"
+  },
+  "description": "Adds the Dashboard app to Kibana",
   "version": "kibana",
   "requiredPlugins": [
     "data",
@@ -15,12 +20,8 @@
     "visualizations"
   ],
   "optionalPlugins": ["home", "spaces", "savedObjectsTaggingOss", "usageCollection"],
+>>>>>>> 4291a1507bd... [Presentation] Adds owner to presentation team plugin kibana.json. Updated CODEOWNERS (#108408)
   "server": true,
   "ui": true,
-  "requiredBundles": [
-    "home",
-    "kibanaReact",
-    "kibanaUtils",
-    "presentationUtil"
-  ]
+  "requiredBundles": ["home", "kibanaReact", "kibanaUtils", "presentationUtil"]
 }
