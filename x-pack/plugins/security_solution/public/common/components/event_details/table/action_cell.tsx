@@ -6,21 +6,21 @@
  */
 
 import React, { useCallback, useState, useRef } from 'react';
-import { getDraggableId } from '@kbn/securitysolution-t-grid';
 import { HoverActions } from '../../hover_actions';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
-import { EventFieldsData } from '../types';
-import { useGetTimelineId } from '../../drag_and_drop/draggable_wrapper_hover_content';
+import { EventFieldsData, FieldsData } from '../types';
+import { useGetTimelineId } from '../../drag_and_drop/use_get_timeline_id_from_dom';
 import { ColumnHeaderOptions } from '../../../../../common/types/timeline';
 import { BrowserField } from '../../../containers/source';
 
 interface Props {
   contextId: string;
-  data: EventFieldsData;
+  data: FieldsData | EventFieldsData;
   disabled?: boolean;
   eventId: string;
-  fieldFromBrowserField: Readonly<Record<string, Partial<BrowserField>>>;
-  getLinkValue: (field: string) => string | null;
+  fieldFromBrowserField?: BrowserField;
+  getLinkValue?: (field: string) => string | null;
+  linkValue?: string | null | undefined;
   onFilterAdded?: () => void;
   timelineId?: string;
   toggleColumn?: (column: ColumnHeaderOptions) => void;
@@ -34,6 +34,7 @@ export const ActionCell: React.FC<Props> = React.memo(
     eventId,
     fieldFromBrowserField,
     getLinkValue,
+    linkValue,
     onFilterAdded,
     timelineId,
     toggleColumn,
@@ -47,7 +48,7 @@ export const ActionCell: React.FC<Props> = React.memo(
       fieldFromBrowserField,
       fieldType: data.type,
       isObjectArray: data.isObjectArray,
-      linkValue: getLinkValue(data.field),
+      linkValue: (getLinkValue && getLinkValue(data.field)) ?? linkValue,
       values,
     });
 
@@ -64,11 +65,10 @@ export const ActionCell: React.FC<Props> = React.memo(
       });
     }, []);
 
-    const draggableIds = actionCellConfig?.idList.map((id) => getDraggableId(id));
     return (
       <HoverActions
         dataType={data.type}
-        draggableIds={draggableIds?.length ? draggableIds : undefined}
+        dataProvider={actionCellConfig?.dataProvider}
         field={data.field}
         goGetTimelineId={setGoGetTimelineId}
         isObjectArray={data.isObjectArray}

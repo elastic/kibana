@@ -8,7 +8,8 @@
 
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionsStart, ExpressionsSetup } from '../../expressions/public';
-import { shapeRenderer } from './expression_renderers';
+import { shapeRenderer, progressRenderer } from './expression_renderers';
+import { shapeFunction, progressFunction } from '../common/expression_functions';
 
 interface SetupDeps {
   expressions: ExpressionsSetup;
@@ -24,7 +25,10 @@ export type ExpressionShapePluginStart = void;
 export class ExpressionShapePlugin
   implements Plugin<ExpressionShapePluginSetup, ExpressionShapePluginStart, SetupDeps, StartDeps> {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionShapePluginSetup {
+    expressions.registerFunction(shapeFunction);
+    expressions.registerFunction(progressFunction);
     expressions.registerRenderer(shapeRenderer);
+    expressions.registerRenderer(progressRenderer);
   }
 
   public start(core: CoreStart): ExpressionShapePluginStart {}

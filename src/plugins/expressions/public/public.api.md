@@ -9,7 +9,7 @@ import { CoreStart } from 'src/core/public';
 import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';
 import { EventEmitter } from 'events';
-import { IExecutionContextContainer } from 'src/core/public';
+import { KibanaExecutionContext } from 'src/core/public';
 import { KibanaRequest } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { ObservableLike } from '@kbn/utility-types';
@@ -17,6 +17,7 @@ import { PackageInfo } from '@kbn/config';
 import { Plugin as Plugin_2 } from 'src/core/public';
 import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core/public';
 import React from 'react';
+import { SerializableRecord } from '@kbn/utility-types';
 import { UnwrapObservable } from '@kbn/utility-types';
 import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 
@@ -51,7 +52,7 @@ export function buildExpression(initialState?: ExpressionAstFunctionBuilder[] | 
 // @public
 export function buildExpressionFunction<FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition>(fnName: InferFunctionDefinition<FnDef>['name'],
 initialArgs: {
-    [K in keyof FunctionArgs<FnDef>]: FunctionArgs<FnDef>[K] | ExpressionAstExpressionBuilder | ExpressionAstExpressionBuilder[];
+    [K in keyof FunctionArgs<FnDef>]: FunctionArgs<FnDef>[K] | ExpressionAstExpressionBuilder | ExpressionAstExpressionBuilder[] | ExpressionAstExpression | ExpressionAstExpression[];
 }): ExpressionAstFunctionBuilder<FnDef>;
 
 // Warning: (ae-missing-release-tag) "Datatable" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -133,13 +134,12 @@ export class Execution<Input = unknown, Output = unknown, InspectorAdapters exte
 // @public (undocumented)
 export type ExecutionContainer<Output = ExpressionValue> = StateContainer<ExecutionState<Output>, ExecutionPureTransitions<Output>>;
 
-// Warning: (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "ExecutionContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters, ExecutionContextSearch extends SerializableState_2 = SerializableState_2> {
+export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters, ExecutionContextSearch extends SerializableRecord = SerializableRecord> {
     abortSignal: AbortSignal;
-    getExecutionContext: () => IExecutionContextContainer | undefined;
+    getExecutionContext: () => KibanaExecutionContext | undefined;
     getKibanaRequest?: () => KibanaRequest;
     getSearchContext: () => ExecutionContextSearch;
     getSearchSessionId: () => string | undefined;
@@ -213,6 +213,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     fork(): Executor<Context>;
     // @deprecated (undocumented)
     readonly functions: FunctionsRegistry;
+    // Warning: (ae-forgotten-export) The symbol "MigrateFunctionsObject" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    getAllMigrations(): MigrateFunctionsObject;
     // (undocumented)
     getFunction(name: string): ExpressionFunction | undefined;
     // (undocumented)
@@ -225,10 +229,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     //
     // (undocumented)
     inject(ast: ExpressionAstExpression, references: SavedObjectReference[]): ExpressionAstExpression;
-    // Warning: (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "VersionedState" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    migrate(ast: SerializableState, version: string): ExpressionAstExpression;
+    migrateToLatest(state: VersionedState): ExpressionAstExpression;
     // (undocumented)
     registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
     // (undocumented)
@@ -352,7 +356,7 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     inputTypes: string[] | undefined;
     // (undocumented)
     migrations: {
-        [key: string]: (state: SerializableState) => SerializableState;
+        [key: string]: (state: SerializableRecord) => SerializableRecord;
     };
     name: string;
     // (undocumented)
@@ -599,6 +603,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
     };
     // (undocumented)
     readonly fork: () => ExpressionsService;
+    getAllMigrations: () => import("../../../kibana_utils/common").MigrateFunctionsObject;
     // (undocumented)
     readonly getFunction: ExpressionsServiceStart['getFunction'];
     readonly getFunctions: () => ReturnType<Executor['getFunctions']>;
@@ -609,7 +614,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
     readonly getType: ExpressionsServiceStart['getType'];
     readonly getTypes: () => ReturnType<Executor['getTypes']>;
     readonly inject: (state: ExpressionAstExpression, references: SavedObjectReference[]) => ExpressionAstExpression;
-    readonly migrate: (state: SerializableState, version: string) => ExpressionAstExpression;
+    migrateToLatest: (state: VersionedState) => ExpressionAstExpression;
     readonly registerFunction: (functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)) => void;
     // (undocumented)
     readonly registerRenderer: (definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)) => void;
@@ -759,7 +764,7 @@ export type ExpressionValueConverter<I extends ExpressionValue, O extends Expres
 // @public (undocumented)
 export type ExpressionValueError = ExpressionValueBoxed<'error', {
     error: ErrorLike;
-    info?: SerializableState;
+    info?: SerializableRecord;
 }>;
 
 // Warning: (ae-missing-release-tag) "ExpressionValueFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -903,7 +908,7 @@ export interface IExpressionLoaderParams {
     // (undocumented)
     disableCaching?: boolean;
     // (undocumented)
-    executionContext?: IExecutionContextContainer;
+    executionContext?: KibanaExecutionContext;
     // (undocumented)
     hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
     // (undocumented)
@@ -918,7 +923,7 @@ export interface IExpressionLoaderParams {
     // (undocumented)
     renderMode?: RenderMode;
     // (undocumented)
-    searchContext?: SerializableState_2;
+    searchContext?: SerializableRecord;
     // (undocumented)
     searchSessionId?: string;
     // (undocumented)

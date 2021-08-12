@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import {
   getUsageStats,
   combineStats,
@@ -12,12 +12,11 @@ import {
   ensureTimeSpan,
   KibanaUsageStats,
 } from './get_kibana_stats';
-import { SearchResponse } from 'elasticsearch';
 
 describe('Get Kibana Stats', () => {
   describe('Make a map of usage stats for each cluster', () => {
     test('passes through if there are no kibana instances', () => {
-      const rawStats = {} as SearchResponse<KibanaUsageStats>;
+      const rawStats = {} as estypes.SearchResponse<KibanaUsageStats>;
       expect(getUsageStats(rawStats)).toStrictEqual({});
     });
 

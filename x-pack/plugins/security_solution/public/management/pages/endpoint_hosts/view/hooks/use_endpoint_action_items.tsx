@@ -41,6 +41,7 @@ export const useEndpointActionItems = (
       const isolationSupported = isIsolationSupported({
         osName: endpointMetadata.host.os.name,
         version: endpointMetadata.agent.version,
+        capabilities: endpointMetadata.Endpoint.capabilities,
       });
       const {
         show,
@@ -120,13 +121,13 @@ export const useEndpointActionItems = (
           'data-test-subj': 'agentPolicyLink',
           navigateAppId: 'fleet',
           navigateOptions: {
-            path: `#${
+            path: `${
               pagePathGetters.policy_details({
                 policyId: fleetAgentPolicies[endpointPolicyId],
               })[1]
             }`,
           },
-          href: `${getAppUrl({ appId: 'fleet' })}#${
+          href: `${getAppUrl({ appId: 'fleet' })}${
             pagePathGetters.policy_details({
               policyId: fleetAgentPolicies[endpointPolicyId],
             })[1]
@@ -145,13 +146,13 @@ export const useEndpointActionItems = (
           'data-test-subj': 'agentDetailsLink',
           navigateAppId: 'fleet',
           navigateOptions: {
-            path: `#${
+            path: `${
               pagePathGetters.agent_details({
                 agentId: fleetAgentId,
               })[1]
             }`,
           },
-          href: `${getAppUrl({ appId: 'fleet' })}#${
+          href: `${getAppUrl({ appId: 'fleet' })}${
             pagePathGetters.agent_details({
               agentId: fleetAgentId,
             })[1]
@@ -169,17 +170,17 @@ export const useEndpointActionItems = (
           'data-test-subj': 'agentPolicyReassignLink',
           navigateAppId: 'fleet',
           navigateOptions: {
-            path: `#${
+            path: `${
               pagePathGetters.agent_details({
                 agentId: fleetAgentId,
               })[1]
-            }/activity?openReassignFlyout=true`,
+            }?openReassignFlyout=true`,
           },
-          href: `${getAppUrl({ appId: 'fleet' })}#${
+          href: `${getAppUrl({ appId: 'fleet' })}${
             pagePathGetters.agent_details({
               agentId: fleetAgentId,
             })[1]
-          }/activity?openReassignFlyout=true`,
+          }?openReassignFlyout=true`,
           children: (
             <FormattedMessage
               id="xpack.securitySolution.endpoint.actions.agentPolicyReassign"

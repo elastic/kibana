@@ -98,6 +98,12 @@ export { searchForOutdatedDocuments } from './search_for_outdated_documents';
 export type { BulkOverwriteTransformedDocumentsParams } from './bulk_overwrite_transformed_documents';
 export { bulkOverwriteTransformedDocuments } from './bulk_overwrite_transformed_documents';
 
+export type {
+  CalculateExcludeFiltersParams,
+  CalculatedExcludeFilter,
+} from './calculate_exclude_filters';
+export { calculateExcludeFilters } from './calculate_exclude_filters';
+
 export { pickupUpdatedMappings, waitForTask, waitForIndexStatusYellow };
 export type { AliasNotFound, RemoveIndexNotAConcreteIndex };
 

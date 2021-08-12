@@ -47,7 +47,6 @@ import {
 } from '../notifications/schedule_notification_actions';
 import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
-import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
 import { TelemetryEventsSender } from '../../telemetry/sender';
 import { eqlExecutor } from './executors/eql';
@@ -69,27 +68,40 @@ import { bulkCreateFactory } from './bulk_create_factory';
 import { wrapHitsFactory } from './wrap_hits_factory';
 import { wrapSequencesFactory } from './wrap_sequences_factory';
 import { ConfigType } from '../../../config';
+import { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { injectReferences, extractReferences } from './saved_object_references';
+import { RuleExecutionLogClient } from '../rule_execution_log/rule_execution_log_client';
+import { IRuleDataPluginService } from '../rule_execution_log/types';
 
 export const signalRulesAlertType = ({
   logger,
   eventsTelemetry,
+  experimentalFeatures,
   version,
   ml,
   lists,
   mergeStrategy,
+  ruleDataService,
 }: {
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
+  experimentalFeatures: ExperimentalFeatures;
   version: string;
   ml: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;
   mergeStrategy: ConfigType['alertMergeStrategy'];
+  ruleDataService: IRuleDataPluginService;
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
     name: 'SIEM signal',
     actionGroups: siemRuleActionGroups,
     defaultActionGroupId: 'default',
+    useSavedObjectReferences: {
+      extractReferences: (params) => extractReferences({ logger, params }),
+      injectReferences: (params, savedObjectReferences) =>
+        injectReferences({ logger, params, savedObjectReferences }),
+    },
     validate: {
       params: {
         validate: (object: unknown): RuleParams => {
@@ -121,8 +133,12 @@ export const signalRulesAlertType = ({
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
       let result = createSearchAfterReturnType();
-      const ruleStatusClient = ruleStatusSavedObjectsClientFactory(services.savedObjectsClient);
+      const ruleStatusClient = new RuleExecutionLogClient({
+        ruleDataService,
+        savedObjectsClient: services.savedObjectsClient,
+      });
       const ruleStatusService = await ruleStatusServiceFactory({
+        spaceId,
         alertId,
         ruleStatusClient,
       });
@@ -153,7 +169,12 @@ export const signalRulesAlertType = ({
         if (!isMachineLearningParams(params)) {
           const index = params.index;
           const hasTimestampOverride = timestampOverride != null && !isEmpty(timestampOverride);
-          const inputIndices = await getInputIndex(services, version, index);
+          const inputIndices = await getInputIndex({
+            services,
+            version,
+            index,
+            experimentalFeatures,
+          });
           const [privileges, timestampFieldCaps] = await Promise.all([
             checkPrivileges(services, inputIndices),
             services.scopedClusterClient.asCurrentUser.fieldCaps({
@@ -268,6 +289,7 @@ export const signalRulesAlertType = ({
               rule: thresholdRuleSO,
               tuple,
               exceptionItems,
+              experimentalFeatures,
               services,
               version,
               logger,
@@ -285,6 +307,7 @@ export const signalRulesAlertType = ({
               tuple,
               listClient,
               exceptionItems,
+              experimentalFeatures,
               services,
               version,
               searchAfterSize,
@@ -303,6 +326,7 @@ export const signalRulesAlertType = ({
               tuple,
               listClient,
               exceptionItems,
+              experimentalFeatures,
               services,
               version,
               searchAfterSize,
@@ -320,6 +344,7 @@ export const signalRulesAlertType = ({
               rule: eqlRuleSO,
               tuple,
               exceptionItems,
+              experimentalFeatures,
               services,
               version,
               searchAfterSize,
@@ -389,12 +414,8 @@ export const signalRulesAlertType = ({
           logger.info(
             buildRuleMessage(
               `[+] Finished indexing ${result.createdSignalsCount}  ${
-                !isEmpty(result.totalToFromTuples)
-                  ? `signals searched between date ranges ${JSON.stringify(
-                      result.totalToFromTuples,
-                      null,
-                      2
-                    )}`
+                !isEmpty(tuples)
+                  ? `signals searched between date ranges ${JSON.stringify(tuples, null, 2)}`
                   : ''
               }`
             )

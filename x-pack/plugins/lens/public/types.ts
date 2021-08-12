@@ -16,11 +16,10 @@ import {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   Datatable,
-  SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
-import { DateRange } from '../common';
-import { Query, Filter, IFieldFormat } from '../../../../src/plugins/data/public';
+import type { DateRange, LayerType } from '../common';
+import { Query, Filter } from '../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
 import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/embeddable/public';
 import {
@@ -37,8 +36,6 @@ import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
-export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
-
 export interface PublicAPIProps<T> {
   state: T;
   layerId: string;
@@ -48,10 +45,13 @@ export interface EditorFrameProps {
   showNoDataPopover: () => void;
 }
 
+export type VisualizationMap = Record<string, Visualization>;
+export type DatasourceMap = Record<string, Datasource>;
+
 export interface EditorFrameInstance {
   EditorFrameContainer: (props: EditorFrameProps) => React.ReactElement;
-  datasourceMap: Record<string, Datasource>;
-  visualizationMap: Record<string, Visualization>;
+  datasourceMap: DatasourceMap;
+  visualizationMap: VisualizationMap;
 }
 
 export interface EditorFrameSetup {
@@ -175,6 +175,17 @@ export interface Datasource<T = unknown, P = unknown> {
   clearLayer: (state: T, layerId: string) => T;
   getLayers: (state: T) => string[];
   removeColumn: (props: { prevState: T; layerId: string; columnId: string }) => T;
+  initializeDimension?: (
+    state: T,
+    layerId: string,
+    value: {
+      columnId: string;
+      label: string;
+      dataType: string;
+      staticValue?: unknown;
+      groupId: string;
+    }
+  ) => T;
 
   renderDataPanel: (
     domElement: Element,
@@ -256,6 +267,11 @@ export interface Datasource<T = unknown, P = unknown> {
   getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
 }
 
+export interface DatasourceFixAction<T> {
+  label: string;
+  newState: (frame: FrameDatasourceAPI) => Promise<T>;
+}
+
 /**
  * This is an API provided to visualizations by the frame, which calls the publicAPI on the datasource
  */
@@ -315,6 +331,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
   isFullscreen: boolean;
+  layerType: LayerType | undefined;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
@@ -387,15 +404,6 @@ export interface OperationMetadata {
   // introduce a raw document datasource, this should be considered here.
 }
 
-export interface LensMultiTable {
-  type: 'lens_multitable';
-  tables: Record<string, Datatable>;
-  dateRange?: {
-    fromDate: Date;
-    toDate: Date;
-  };
-}
-
 export interface VisualizationConfigProps<T = unknown> {
   layerId: string;
   frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
@@ -453,6 +461,7 @@ interface VisualizationDimensionChangeProps<T> {
   layerId: string;
   columnId: string;
   prevState: T;
+  frame: Pick<FramePublicAPI, 'datasourceLayers'>;
 }
 
 /**
@@ -525,10 +534,11 @@ export interface FramePublicAPI {
    * If accessing, make sure to check whether expected columns actually exist.
    */
   activeData?: Record<string, Datatable>;
+}
+export interface FrameDatasourceAPI extends FramePublicAPI {
   dateRange: DateRange;
   query: Query;
   filters: Filter[];
-  searchSessionId: string;
 }
 
 /**
@@ -548,7 +558,7 @@ export interface VisualizationType {
    */
   label: string;
   /**
-   * Optional label used in chart type search if chart switcher is expanded and for tooltips
+   * Optional label used in visualization type search if chart switcher is expanded and for tooltips
    */
   fullLabel?: string;
   /**
@@ -604,20 +614,42 @@ export interface Visualization<T = unknown> {
   /** Optional, if the visualization supports multiple layers */
   removeLayer?: (state: T, layerId: string) => T;
   /** Track added layers in internal state */
-  appendLayer?: (state: T, layerId: string) => T;
+  appendLayer?: (state: T, layerId: string, type: LayerType) => T;
+
+  /** Retrieve a list of supported layer types with initialization data */
+  getSupportedLayers: (
+    state?: T,
+    frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>
+  ) => Array<{
+    type: LayerType;
+    label: string;
+    icon?: IconType;
+    disabled?: boolean;
+    tooltipContent?: string;
+    initialDimensions?: Array<{
+      groupId: string;
+      columnId: string;
+      dataType: string;
+      label: string;
+      staticValue: unknown;
+    }>;
+  }>;
+  getLayerType: (layerId: string, state?: T) => LayerType | undefined;
+  /* returns the type of removal operation to perform for the specific layer in the current state */
+  getRemoveOperation?: (state: T, layerId: string) => 'remove' | 'clear';
 
   /**
    * For consistency across different visualizations, the dimension configuration UI is standardized
    */
   getConfiguration: (
     props: VisualizationConfigProps<T>
-  ) => { groups: VisualizationDimensionGroupConfig[] };
+  ) => { groups: VisualizationDimensionGroupConfig[]; supportStaticValue?: boolean };
 
   /**
-   * Popover contents that open when the user clicks the contextMenuIcon. This can be used
-   * for extra configurability, such as for styling the legend or axis
+   * Header rendered as layer title This can be used for both static and dynamic content lioke
+   * for extra configurability, such as for switch chart type
    */
-  renderLayerContextMenu?: (
+  renderLayerHeader?: (
     domElement: Element,
     props: VisualizationLayerWidgetProps<T>
   ) => ((cleanupElement: Element) => void) | void;
@@ -629,14 +661,6 @@ export interface Visualization<T = unknown> {
     domElement: Element,
     props: VisualizationToolbarProps<T>
   ) => ((cleanupElement: Element) => void) | void;
-  /**
-   * Visualizations can provide a custom icon which will open a layer-specific popover
-   * If no icon is provided, gear icon is default
-   */
-  getLayerContextMenuIcon?: (opts: {
-    state: T;
-    layerId: string;
-  }) => { icon: IconType | 'gear'; label: string } | undefined;
 
   /**
    * The frame is telling the visualization to update or set a dimension based on user interaction

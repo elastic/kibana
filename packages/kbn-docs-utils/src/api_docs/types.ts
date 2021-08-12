@@ -172,7 +172,7 @@ export interface ApiDeclaration {
   /**
    * Used to create links to github to view the code for this API.
    */
-  source: SourceLink;
+  path: string;
 
   /**
    * Other plugins that reference this API item (along with SourceLink info for each reference).
@@ -193,11 +193,6 @@ export interface ApiDeclaration {
    * Is this API deprecated or not?
    */
   deprecated?: boolean;
-}
-
-export interface SourceLink {
-  path: string;
-  lineNumber: number;
 }
 
 /**
@@ -225,16 +220,25 @@ export interface MissingApiItemMap {
 
 export interface ApiReference {
   plugin: string;
-  link: SourceLink;
+  path: string;
 }
 
-export interface ReferencedDeprecations {
+// A mapping of plugin id to a list of every deprecated API it uses, and where it's referenced.
+export interface ReferencedDeprecationsByPlugin {
+  // Key is the plugin id.
   [key: string]: Array<{ deprecatedApi: ApiDeclaration; ref: ApiReference }>;
 }
+
+// A mapping of deprecated API id to the places that are still referencing it.
+export interface ReferencedDeprecationsByAPI {
+  [key: string]: { deprecatedApi: ApiDeclaration; references: ApiReference[] };
+}
+
 export interface ApiStats {
   missingComments: ApiDeclaration[];
   isAnyType: ApiDeclaration[];
   noReferences: ApiDeclaration[];
   apiCount: number;
   missingExports: number;
+  deprecatedAPIsReferencedCount: number;
 }

@@ -42,8 +42,9 @@ import {
 } from '../../../../common/components/exceptions/viewer/exception_item';
 import { EventFilterDeleteModal } from './components/event_filter_delete_modal';
 
-import { SearchBar } from '../../../components/search_bar';
+import { SearchExceptions } from '../../../components/search_exceptions';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
+import { ABOUT_EVENT_FILTERS } from './translations';
 
 type EventListPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -187,7 +188,6 @@ export const EventFiltersListPage = memo(() => {
 
   return (
     <AdministrationListPage
-      beta={false}
       headerBackComponent={backButton}
       title={
         <FormattedMessage
@@ -195,11 +195,7 @@ export const EventFiltersListPage = memo(() => {
           defaultMessage="Event Filters"
         />
       }
-      subtitle={i18n.translate('xpack.securitySolution.eventFilters.aboutInfo', {
-        defaultMessage:
-          'Add an event filter to exclude high volume or unwanted events from being written to Elasticsearch. Event ' +
-          'filters are processed by the Endpoint Security integration, and are applied to hosts running this integration on their agents.',
-      })}
+      subtitle={ABOUT_EVENT_FILTERS}
       actions={
         doesDataExist && (
           <EuiButton
@@ -229,7 +225,7 @@ export const EventFiltersListPage = memo(() => {
 
       {doesDataExist && (
         <>
-          <SearchBar
+          <SearchExceptions
             defaultValue={location.filter}
             onSearch={handleOnSearch}
             placeholder={i18n.translate('xpack.securitySolution.eventFilter.search.placeholder', {

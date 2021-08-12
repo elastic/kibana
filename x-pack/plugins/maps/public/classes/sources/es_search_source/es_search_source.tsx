@@ -9,8 +9,9 @@ import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
-import { IFieldType, IndexPattern } from 'src/plugins/data/public';
+import type { Filter, IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { AbstractESSource } from '../es_source';
 import {
   getHttp,
@@ -321,6 +322,18 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         },
       },
     });
+    if (topHitsSplitField.type === 'string') {
+      const entityIsNotEmptyFilter = esFilters.buildPhraseFilter(
+        topHitsSplitField,
+        '',
+        indexPattern
+      );
+      entityIsNotEmptyFilter.meta.negate = true;
+      searchSource.setField('filter', [
+        ...(searchSource.getField('filter') as Filter[]),
+        entityIsNotEmptyFilter,
+      ]);
+    }
 
     const resp = await this._runEsQuery({
       requestId: this.getId(),
