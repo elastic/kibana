@@ -99,7 +99,7 @@ export const TableVisControls = memo(
         position="top"
         content={i18n.translate('visTypeTable.vis.controls.exportButtonFormulasWarning', {
           defaultMessage:
-            'Your CSV contains characters which spreadsheet applications can interpret as formulas',
+            'Your CSV contains characters that spreadsheet applications might interpret as formulas.',
         })}
       >
         {button}

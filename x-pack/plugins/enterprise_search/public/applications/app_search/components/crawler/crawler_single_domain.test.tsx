@@ -57,15 +57,17 @@ describe('CrawlerSingleDomain', () => {
     expect(wrapper.prop('pageHeader').pageTitle).toEqual('https://elastic.co');
   });
 
-  it('uses a placeholder for the page title and page chrome if a domain has not been set', () => {
+  it('does not render a page header and uses placeholder chrome while loading', () => {
     setMockValues({
       ...MOCK_VALUES,
+      dataLoading: true,
       domain: null,
     });
 
     const wrapper = shallow(<CrawlerSingleDomain />);
 
-    expect(wrapper.prop('pageHeader').pageTitle).toEqual('Loading...');
+    expect(wrapper.prop('pageChrome')).toContain('...');
+    expect(wrapper.prop('pageHeader')).toBeUndefined();
   });
 
   it('contains a crawler status banner', () => {
