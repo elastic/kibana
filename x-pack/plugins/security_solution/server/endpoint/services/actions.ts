@@ -17,6 +17,8 @@ import {
 import { catchAndWrapError } from '../utils';
 import { EndpointMetadataService } from './metadata';
 
+const PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME = 300000; // 300k ms === 5 minutes
+
 export const getAuditLogResponse = async ({
   elasticAgentId,
   page,
@@ -282,7 +284,8 @@ const fetchActionResponseIdsByAgentId = async (
 
   // Get the latest docs from the metadata datastream for the Elastic Agent IDs in the action responses
   // This will be used determine if we should withhold the action id from the returned list in cases where
-  // the Endpoint might not yet have sent an updated metadata document.
+  // the Endpoint might not yet have sent an updated metadata document (which would be representative of
+  // the state of the endpoint post-action)
   const latestEndpointMetadataDocs = await metadataService.findHostMetadataForFleetAgents(
     esClient,
     agentIds
@@ -299,12 +302,15 @@ const fetchActionResponseIdsByAgentId = async (
 
   for (const actionResponse of actionResponses) {
     const lastEndpointMetadataEventTimestamp = endpointLastEventCreated[actionResponse.agent_id];
-
-    // FIXME: need to account for the action expiration time or include some arbitrary check here so that we don't get potential pending actions forever.
+    const actionCompletedAtTimestamp = new Date(actionResponse.completed_at);
+    // If enough time has lapsed in checking for updated Endpoint metadata doc (we don't want keep checking it forever)
+    const enoughTimeHasLapsed =
+      Date.now() - actionCompletedAtTimestamp.getTime() > PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME;
 
     if (
       !lastEndpointMetadataEventTimestamp ||
-      lastEndpointMetadataEventTimestamp > new Date(actionResponse.completed_at)
+      enoughTimeHasLapsed ||
+      lastEndpointMetadataEventTimestamp > actionCompletedAtTimestamp
     ) {
       actionResponsesByAgentId[actionResponse.agent_id].push(actionResponse.action_id);
     }
