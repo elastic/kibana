@@ -1,8 +1,8 @@
 {
   "id": "uiActionsEnhanced",
   "owner": {
-    "name": "Kibana Alerting",
-    "githubTeam": "kibana-alerting-services"
+    "name": "Kibana App Services",
+    "githubTeam": "kibana-app-services"
   },
   "version": "kibana",
   "configPath": ["xpack", "ui_actions_enhanced"],
