@@ -263,18 +263,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   });
 
   const filterQuery = useMemo(() => {
-    console.log('getCombinedFilterQuery', {
-      config: esQuery.getEsQueryConfig(uiSettings),
-      dataProviders,
-      indexPattern,
-      browserFields,
-      filters,
-      kqlQuery: query,
-      kqlMode,
-      isEventViewer: true,
-      from: start,
-      to: end,
-    });
     return getCombinedFilterQuery({
       config: esQuery.getEsQueryConfig(uiSettings),
       dataProviders,
@@ -288,7 +276,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       to: end,
     });
   }, [uiSettings, dataProviders, indexPattern, browserFields, filters, start, end, query, kqlMode]);
-  console.log('getCombinedFilterQuery', JSON.parse(filterQuery));
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),

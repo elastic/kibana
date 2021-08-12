@@ -32,9 +32,7 @@ export const useUpdateAlertsStatus = (): {
 } => {
   const { http } = useKibana().services;
   return {
-    updateAlertStatus: async ({ status: alertStatus, index, ids, query }) => {
-      const status: string = alertStatus === 'in-progress' ? 'acknowledged' : alertStatus;
-
+    updateAlertStatus: async ({ status, index, ids, query }) => {
       const { body } = await http!.fetch(RAC_ALERTS_BULK_UPDATE_URL, {
         method: 'POST',
         body: JSON.stringify({ index, status, ...(query ? { query } : { ids }) }),
