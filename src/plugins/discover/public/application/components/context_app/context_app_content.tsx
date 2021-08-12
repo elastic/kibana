@@ -125,7 +125,6 @@ export function ContextAppContent({
   };
 
   const legacyDocTableProps = () => {
-    // @ts-expect-error doesn't implement full DocTableLegacyProps interface
     return {
       columns,
       indexPattern,
