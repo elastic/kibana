@@ -62,9 +62,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
 
   // In a future milestone we'll have a page dedicated to rule management in
   // observability. For now link to the settings page.
-  const manageDetectionRulesHref = prepend(
-    '/app/management/insightsAndAlerting/triggersActions/alerts'
-  );
+  const manageRulesHref = prepend('/app/management/insightsAndAlerting/triggersActions/alerts');
 
   const { data: dynamicIndexPatternResp } = useFetcher(({ signal }) => {
     return callObservabilityApi({
@@ -123,7 +121,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
           </>
         ),
         rightSideItems: [
-          <EuiButtonEmpty href={manageDetectionRulesHref}>
+          <EuiButtonEmpty href={manageRulesHref}>
             {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
               defaultMessage: 'Manage Rules',
             })}
