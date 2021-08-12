@@ -151,7 +151,7 @@ export function KueryBar(props: { prepend?: React.ReactNode | string }) {
   return (
     <Typeahead
       isLoading={state.isLoadingSuggestions}
-      initialValue={decodeURIComponent(kuery)}
+      initialValue={kuery}
       onChange={onChange}
       onSubmit={onSubmit}
       suggestions={state.suggestions}

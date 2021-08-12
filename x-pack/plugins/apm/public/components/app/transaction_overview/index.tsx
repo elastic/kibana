@@ -43,14 +43,16 @@ function getRedirectLocation({
 }
 
 export function TransactionOverview() {
-  const { fallbackToTransactions } = useFallbackToTransactionsFetcher();
+  const {
+    query: { environment, kuery },
+  } = useApmParams('/services/:serviceName/transactions');
+
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
+  });
   const location = useLocation();
   const { urlParams } = useUrlParams();
   const { transactionType, serviceName } = useApmServiceContext();
-
-  const {
-    query: { kuery, environment },
-  } = useApmParams('/services/:serviceName/transactions');
 
   // redirect to first transaction type
   useRedirect(getRedirectLocation({ location, transactionType, urlParams }));

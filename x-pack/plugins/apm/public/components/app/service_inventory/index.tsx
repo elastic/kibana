@@ -160,7 +160,9 @@ export function ServiceInventory() {
     query: { environment, kuery },
   } = useApmParams('/services');
 
-  const { fallbackToTransactions } = useFallbackToTransactionsFetcher();
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
+  });
   const {
     mainStatisticsData,
     mainStatisticsStatus,

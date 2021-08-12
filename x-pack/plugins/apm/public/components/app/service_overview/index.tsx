@@ -31,11 +31,13 @@ import { AggregatedTransactionsCallout } from '../../shared/aggregated_transacti
 export const chartHeight = 288;
 
 export function ServiceOverview() {
-  const { fallbackToTransactions } = useFallbackToTransactionsFetcher();
   const { agentName, serviceName } = useApmServiceContext();
   const {
     query: { environment, kuery },
   } = useApmParams('/services/:serviceName/overview');
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
+  });
 
   // The default EuiFlexGroup breaks at 768, but we want to break at 992, so we
   // observe the window width and set the flex directions of rows accordingly

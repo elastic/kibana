@@ -22,10 +22,12 @@ const DEFAULT_RESPONSE: TracesAPIResponse = {
 };
 
 export function TraceOverview() {
-  const { fallbackToTransactions } = useFallbackToTransactionsFetcher();
   const {
     query: { environment, kuery },
   } = useApmParams('/traces');
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
+  });
 
   const {
     urlParams: { start, end },
