@@ -7,7 +7,7 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 import { get, has, isPlainObject } from 'lodash';
-import type { FieldFilter, Filter, FilterMeta } from './types';
+import type { Filter, FilterMeta } from './types';
 import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
 import { getConvertedValueForField } from './get_converted_value_for_field';
 
@@ -38,7 +38,7 @@ export type PhraseFilter = Filter & {
  *
  * @public
  */
-export const isPhraseFilter = (filter: FieldFilter): filter is PhraseFilter => {
+export const isPhraseFilter = (filter: Filter): filter is PhraseFilter => {
   const isMatchPhraseQuery = has(filter, 'query.match_phrase');
   const matchQueryPart: estypes.QueryDslMultiMatchQuery[] = get(filter, 'query.match', []);
   const isDeprecatedMatchPhraseQuery =
@@ -53,7 +53,7 @@ export const isPhraseFilter = (filter: FieldFilter): filter is PhraseFilter => {
  *
  * @public
  */
-export const isScriptedPhraseFilter = (filter: FieldFilter): filter is PhraseFilter =>
+export const isScriptedPhraseFilter = (filter: Filter): filter is PhraseFilter =>
   has(filter, 'script.script.params.value');
 
 /** @internal */

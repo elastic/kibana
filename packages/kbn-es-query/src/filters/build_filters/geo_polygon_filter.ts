@@ -8,7 +8,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { has } from 'lodash';
-import type { FieldFilter, Filter, FilterMeta, LatLon } from './types';
+import type { Filter, FilterMeta, LatLon } from './types';
 
 export type GeoPolygonFilterMeta = FilterMeta & {
   params: {
@@ -27,7 +27,7 @@ export type GeoPolygonFilter = Filter & {
  *
  * @public
  */
-export const isGeoPolygonFilter = (filter: FieldFilter): filter is GeoPolygonFilter =>
+export const isGeoPolygonFilter = (filter: Filter): filter is GeoPolygonFilter =>
   has(filter, 'geo_polygon');
 
 /**

@@ -7,7 +7,7 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 import { map, reduce, mapValues, has, get, keys, pickBy } from 'lodash';
-import type { FieldFilter, Filter, FilterMeta } from './types';
+import type { Filter, FilterMeta } from './types';
 import type { IndexPatternBase, IndexPatternFieldBase } from '../../es_query';
 
 const OPERANDS_IN_RANGE = 2;
@@ -72,7 +72,7 @@ export type RangeFilter = Filter &
  *
  * @public
  */
-export const isRangeFilter = (filter?: FieldFilter): filter is RangeFilter => has(filter, 'range');
+export const isRangeFilter = (filter?: Filter): filter is RangeFilter => has(filter, 'range');
 
 /**
  *
@@ -81,7 +81,7 @@ export const isRangeFilter = (filter?: FieldFilter): filter is RangeFilter => ha
  *
  * @public
  */
-export const isScriptedRangeFilter = (filter: FieldFilter): filter is RangeFilter => {
+export const isScriptedRangeFilter = (filter: Filter): filter is RangeFilter => {
   const params: RangeFilterParams = get(filter, 'script.script.params', {});
 
   return hasRangeKeys(params);

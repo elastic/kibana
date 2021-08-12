@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FieldFilter, Filter, FilterMeta, FILTERS } from './types';
+import { Filter, FilterMeta, FILTERS } from './types';
 import { getPhraseScript } from './phrase_filter';
 import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
 
@@ -25,7 +25,7 @@ export type PhrasesFilter = Filter & {
  *
  * @public
  */
-export const isPhrasesFilter = (filter: FieldFilter): filter is PhrasesFilter =>
+export const isPhrasesFilter = (filter: Filter): filter is PhrasesFilter =>
   filter?.meta?.type === FILTERS.PHRASES;
 
 /** @internal */

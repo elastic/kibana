@@ -8,7 +8,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { has } from 'lodash';
-import type { FieldFilter, Filter, FilterMeta, LatLon } from './types';
+import type { Filter, FilterMeta, LatLon } from './types';
 
 export type GeoBoundingBoxFilterMeta = FilterMeta & {
   params: {
@@ -28,7 +28,7 @@ export type GeoBoundingBoxFilter = Filter & {
  *
  * @public
  */
-export const isGeoBoundingBoxFilter = (filter: FieldFilter): filter is GeoBoundingBoxFilter =>
+export const isGeoBoundingBoxFilter = (filter: Filter): filter is GeoBoundingBoxFilter =>
   has(filter, 'geo_bounding_box');
 
 /**

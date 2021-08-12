@@ -79,6 +79,9 @@ export type Filter = estypes.QueryDslQueryContainer & {
     store: FilterStateStore;
   };
   meta: FilterMeta;
+
+  // TODO: research me!
+  query?: Record<string, any>;
 };
 
 // eslint-disable-next-line
