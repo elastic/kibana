@@ -424,30 +424,7 @@ async function endpointDetailsListMiddleware({
       });
     }
 
-    try {
-      const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
-        coreStart.http,
-        endpointResponse.hosts,
-        nonExistingPolicies(getState())
-      );
-      if (ingestPolicies?.packagePolicy !== undefined) {
-        dispatch({
-          type: 'serverReturnedEndpointNonExistingPolicies',
-          payload: ingestPolicies.packagePolicy,
-        });
-      }
-      if (ingestPolicies?.agentPolicy !== undefined) {
-        dispatch({
-          type: 'serverReturnedEndpointAgentPolicies',
-          payload: ingestPolicies.agentPolicy,
-        });
-      }
-    } catch (error) {
-      // TODO should handle the error instead of logging it to the browser
-      // Also this is an anti-pattern we shouldn't use
-      // Ignore Errors, since this should not hinder the user's ability to use the UI
-      logError(error);
-    }
+    dispatchIngestPolicies({ http: coreStart.http, hosts: endpointResponse.hosts, store });
   } catch (error) {
     dispatch({
       type: 'serverFailedToReturnEndpointList',
@@ -714,30 +691,7 @@ async function endpointDetailsMiddleware({
         payload: response,
       });
 
-      try {
-        const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
-          coreStart.http,
-          response.hosts,
-          nonExistingPolicies(getState())
-        );
-        if (ingestPolicies?.packagePolicy !== undefined) {
-          dispatch({
-            type: 'serverReturnedEndpointNonExistingPolicies',
-            payload: ingestPolicies.packagePolicy,
-          });
-        }
-        if (ingestPolicies?.agentPolicy !== undefined) {
-          dispatch({
-            type: 'serverReturnedEndpointAgentPolicies',
-            payload: ingestPolicies.agentPolicy,
-          });
-        }
-      } catch (error) {
-        // TODO should handle the error instead of logging it to the browser
-        // Also this is an anti-pattern we shouldn't use
-        // Ignore Errors, since this should not hinder the user's ability to use the UI
-        logError(error);
-      }
+      dispatchIngestPolicies({ http: coreStart.http, hosts: response.hosts, store });
     } catch (error) {
       dispatch({
         type: 'serverFailedToReturnEndpointList',
@@ -819,5 +773,41 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
       type: 'metadataTransformStatsChanged',
       payload: createFailedResourceState<TransformStats[]>(error),
     });
+  }
+}
+
+async function dispatchIngestPolicies({
+  store,
+  hosts,
+  http,
+}: {
+  store: EndpointPageStore;
+  hosts: HostResultList['hosts'];
+  http: HttpStart;
+}) {
+  const { getState, dispatch } = store;
+  try {
+    const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
+      http,
+      hosts,
+      nonExistingPolicies(getState())
+    );
+    if (ingestPolicies?.packagePolicy !== undefined) {
+      dispatch({
+        type: 'serverReturnedEndpointNonExistingPolicies',
+        payload: ingestPolicies.packagePolicy,
+      });
+    }
+    if (ingestPolicies?.agentPolicy !== undefined) {
+      dispatch({
+        type: 'serverReturnedEndpointAgentPolicies',
+        payload: ingestPolicies.agentPolicy,
+      });
+    }
+  } catch (error) {
+    // TODO should handle the error instead of logging it to the browser
+    // Also this is an anti-pattern we shouldn't use
+    // Ignore Errors, since this should not hinder the user's ability to use the UI
+    logError(error);
   }
 }
