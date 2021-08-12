@@ -79,7 +79,7 @@ export const IndexSetupRow: React.FC<{
                   />
                 }
                 type="alert"
-                color="warning" 
+                color="warning"
               />
             ) : null}
           </>
@@ -98,7 +98,8 @@ export const IndexSetupRow: React.FC<{
             availableDatasets={datasets}
             datasetFilter={index.datasetFilter}
             isDisabled={!isSelected || isDisabled}
-            onChangeDatasetFilter={changeDatasetFilter} />
+            onChangeDatasetFilter={changeDatasetFilter}
+          />
         ) : null}
       </>
       <EuiSpacer size="l" />
