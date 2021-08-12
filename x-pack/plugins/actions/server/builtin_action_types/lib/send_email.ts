@@ -76,7 +76,6 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
   } else if (hasAuth && transport.type === 'oauth2') {
     transportConfig.auth = {
       type: 'OAuth2',
-      // user: 'user@example.com',
       clientId: transport.clientId,
       clientSecret: transport.clientSecret,
       refreshToken: transport.refreshToken,

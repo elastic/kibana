@@ -6,8 +6,6 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import crypto from 'crypto';
-
 import {
   EuiFieldText,
   EuiFlexItem,
@@ -23,7 +21,6 @@ import {
   EuiButton,
   EuiText,
 } from '@elastic/eui';
-import { HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink } from '@elastic/eui';
@@ -572,10 +569,10 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                     onClick={() => {
                       if (authCodeUrl && authTokenUrl) {
                         getOAuth(
-                          http,
                           oauthScope ?? '',
                           redirectUrl ?? '',
                           clientId ?? '',
+                          clientSecret ?? '',
                           editActionSecrets,
                           editActionConfig,
                           authCodeUrl,
@@ -604,28 +601,23 @@ function nullableString(str: string | null | undefined) {
 }
 
 async function getOAuth(
-  http: HttpSetup,
   scope: string,
   redirectUrl: string,
   clientId: string,
+  clientSecret: string,
   editActionSecrets: (property: string, value: unknown) => void,
   editActionConfig: (property: string, value: unknown) => void,
   authUrl: string,
   tokenUrl: string
 ) {
-  // const scope = 'https://outlook.office.com/SMTP.Send';
-  // const redirectUrl = 'https://localhost:5601/ntm/api/actions/connector/oauth_code';
-
-  function base64URLEncode(str: Buffer) {
-    return str.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-  }
-  const verifier = base64URLEncode(crypto.randomBytes(32));
-  function sha256(buffer: string) {
-    return crypto.createHash('sha256').update(buffer).digest();
-  }
-  const challenge = base64URLEncode(sha256(verifier));
-  // https://login.microsoftonline.com/017707da-2f93-4a0b-83b0-b64da7903fb2/oauth2/v2.0/authorize
-  const r = `${authUrl}?client_id=${clientId}&response_type=code&redirect_uri=${redirectUrl}&response_mode=query&scope=${scope}&state=12345&code_challenge=${challenge}&code_challenge_method=S256&prompt=consent`;
+  const state: string = btoa(
+    JSON.stringify({
+      client_id: clientId,
+      redirect_uri: redirectUrl,
+      client_secret: clientSecret,
+    })
+  );
+  const r = `${authUrl}?client_id=${clientId}&response_type=code&redirect_uri=${redirectUrl}&include_granted_scopes=true&access_type=offline&response_mode=query&scope=${scope}&state=${state}&prompt=consent`;
   openSignInWindow(r, 'test');
   let loopCount = 600;
   const intervalId = window.setInterval(async () => {
@@ -640,51 +632,16 @@ async function getOAuth(
         // console.log('Error:', e); // Handle any errors here
       }
       if (href !== null) {
-        // Method for getting query parameters from query string
-        const getQueryString = function (field: any, url: string) {
-          const windowLocationUrl = url ? url : href;
-          const reg = new RegExp('[?&]' + field + '=([^&#]*)', 'i');
-          const string = reg.exec(windowLocationUrl!);
-          return string ? string[1] : null;
-        };
         /* As i was getting code and oauth-token i added for same, you can replace with your expected variables */
         if (href.match('code')) {
+          debugger;
+          console.log(windowObjectReference.json);
           window.clearInterval(intervalId);
-          const authorizationCode = getQueryString('code', href);
           windowObjectReference.close();
-          const details: any = {
-            client_id: clientId,
-            scope,
-            redirect_uri: redirectUrl,
-            grant_type: 'authorization_code',
-            // client_secret: '.YoSkd9b0Pp_3n94qRZP.1ZykOi4m_2jQY',
-            code: authorizationCode,
-            state: '1234',
-            code_verifier: verifier,
-          };
-          http
-            .post(
-              // 'https://login.microsoftonline.com/017707da-2f93-4a0b-83b0-b64da7903fb2/oauth2/v2.0/token',
-              tokenUrl,
-              {
-                headers: {
-                  'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                },
-                body: Object.keys(details)
-                  .map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(details[key]))
-                  .join('&'),
-              }
-            )
-            .then((res) => {
-              // console.log(res);
-              editActionSecrets('accessToken', res.access_token);
-              editActionSecrets('refreshToken', res.refresh_token);
-              editActionConfig('tokenExpirationDate', res.expires_in);
-            });
         }
       }
     }
-  }, 100);
+  }, 3000);
 }
 
 // eslint-disable-next-line import/no-default-export
