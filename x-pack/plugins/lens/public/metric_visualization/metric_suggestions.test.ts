@@ -106,6 +106,7 @@ describe('metric_suggestions', () => {
         "state": Object {
           "accessor": "bytes",
           "layerId": "l1",
+          "layerType": "data",
         },
         "title": "Avg bytes",
       }
