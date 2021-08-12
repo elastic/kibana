@@ -320,6 +320,13 @@ export const SYNC_MANAGEMENT_THUMBNAILS_LABEL = i18n.translate(
   }
 );
 
+export const SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sync.management.thumbnails.globalConfig.label',
+  {
+    defaultMessage: 'Sync thumbnails - disabled at global configuration level',
+  }
+);
+
 export const SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sync.management.content_extraction.label',
   {

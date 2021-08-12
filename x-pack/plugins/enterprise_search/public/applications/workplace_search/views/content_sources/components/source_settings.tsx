@@ -12,14 +12,13 @@ import { isEmpty } from 'lodash';
 
 import {
   EuiButton,
-  EuiButtonEvent,
   EuiConfirmModal,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiPanel,
+  EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
@@ -59,6 +58,7 @@ import {
   SYNC_MANAGEMENT_DESCRIPTION,
   SYNC_MANAGEMENT_SYNCHRONIZE_LABEL,
   SYNC_MANAGEMENT_THUMBNAILS_LABEL,
+  SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL,
   SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL,
 } from '../constants';
 import { staticSourceData } from '../source_data';
@@ -79,6 +79,7 @@ export const SourceSettings: React.FC = () => {
       serviceType,
       custom: isCustom,
       isIndexedSource,
+      areThumbnailsConfigEnabled,
       indexing: {
         enabled,
         features: {
@@ -130,23 +131,17 @@ export const SourceSettings: React.FC = () => {
     updateContentSource(id, { name: inputValue });
   };
 
-  const handleSynchronizeChange = (e: EuiSwitchEvent) => {
-    setSynchronize(e.target.checked);
-    updateContentSource(id, { indexing: { enabled: e.target.checked } });
-  };
-
-  const handleThumbnailsChange = (e: EuiSwitchEvent) => {
-    setThumbnails(e.target.checked);
-    updateContentSource(id, {
-      indexing: { features: { thumbnails: { enabled: e.target.checked } } },
-    });
-  };
-
-  const handleContentExtractionChange = (e: EuiSwitchEvent) => {
-    setContentExtraction(e.target.checked);
-    updateContentSource(id, {
-      indexing: { features: { content_extraction: { enabled: e.target.checked } } },
-    });
+  const submitSyncControls = (e) => {
+    let payload = {
+      indexing: {
+        enabled: synchronizeChecked,
+        features: {
+          content_extraction: { enabled: contentExtractionChecked },
+          thumbnails: { enabled: thumbnailsChecked },
+        },
+      },
+    }
+    updateContentSource(id, payload);
   };
 
   const handleSourceRemoval = () => {
@@ -238,19 +233,29 @@ export const SourceSettings: React.FC = () => {
               <EuiFlexItem grow={false}>
                 <EuiSwitch
                   checked={synchronizeChecked}
-                  onChange={handleSynchronizeChange}
+                  onChange={(e) => setSynchronize(e.target.checked)}
                   label={SYNC_MANAGEMENT_SYNCHRONIZE_LABEL}
                   data-test-subj="SynchronizeToggle"
                 />
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  onClick={submitSyncControls}
+                  data-test-subj="SaveSyncControlsButton"
+                >
+                  {SAVE_CHANGES_BUTTON}
+                </EuiButton>
+              </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiHorizontalRule />
+            <EuiSpacer />
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiSwitch
                   checked={thumbnailsChecked}
-                  onChange={handleThumbnailsChange}
-                  label={SYNC_MANAGEMENT_THUMBNAILS_LABEL}
+                  onChange={(e) => setThumbnails(e.target.checked)}
+                  label={areThumbnailsConfigEnabled ? SYNC_MANAGEMENT_THUMBNAILS_LABEL : SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL}
+                  disabled={!areThumbnailsConfigEnabled}
                   data-test-subj="ThumbnailsToggle"
                 />
               </EuiFlexItem>
@@ -259,7 +264,7 @@ export const SourceSettings: React.FC = () => {
               <EuiFlexItem grow={false}>
                 <EuiSwitch
                   checked={contentExtractionChecked}
-                  onChange={handleContentExtractionChange}
+                  onChange={(e) => setContentExtraction(e.target.checked)}
                   label={SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL}
                   data-test-subj="ContentExtractionToggle"
                 />

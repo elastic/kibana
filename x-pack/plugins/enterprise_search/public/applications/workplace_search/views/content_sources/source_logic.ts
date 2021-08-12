@@ -229,7 +229,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     updateContentSource: async ({ sourceId, source }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? `/api/workplace_se;arch/org/sources/${sourceId}/settings`
+        ? `/api/workplace_search/org/sources/${sourceId}/settings`
         : `/api/workplace_search/account/sources/${sourceId}/settings`;
 
       try {
