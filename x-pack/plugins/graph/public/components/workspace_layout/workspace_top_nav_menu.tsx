@@ -21,7 +21,7 @@ export interface MenuOptions {
   showInspect: boolean;
 }
 
-interface GraphTopNavMenuProps {
+interface WorkspaceTopNavMenuProps {
   locationUrl: (path?: string) => string;
   workspace: Workspace | undefined;
   onSetMenus: React.Dispatch<React.SetStateAction<MenuOptions>>;
@@ -40,7 +40,7 @@ interface GraphTopNavMenuProps {
   reloadRoute: () => void;
 }
 
-export const GraphTopNavMenu = (props: GraphTopNavMenuProps) => {
+export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
   const store = useStore();
 
   // register things for legacy angular UI

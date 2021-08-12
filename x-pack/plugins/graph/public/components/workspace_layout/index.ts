@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './graph_workspace';
+export * from './workspace_layout';

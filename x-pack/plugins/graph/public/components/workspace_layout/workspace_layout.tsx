@@ -28,7 +28,7 @@ import {
   WorkspaceField,
   WorkspaceNode,
 } from '../../types';
-import { GraphTopNavMenu, MenuOptions } from './graph_top_nav_menu';
+import { WorkspaceTopNavMenu, MenuOptions } from './workspace_top_nav_menu';
 import { InspectPanel } from '../inspect_panel';
 import { GuidancePanel } from '../guidance_panel';
 import { GraphTitle } from '../graph_title';
@@ -47,7 +47,7 @@ const SearchBarMemoized = memo(SearchBar);
 const FieldManagerMemoized = memo(FieldManager);
 const GuidancePanelMemoized = memo(GuidancePanel);
 
-type GraphWorkspaceProps = Pick<
+type WorkspaceLayoutProps = Pick<
   GraphDependencies,
   | 'setHeaderActionMenu'
   | 'graphSavePolicy'
@@ -69,18 +69,18 @@ type GraphWorkspaceProps = Pick<
   reloadRoute: () => void;
 };
 
-interface GraphWorkspaceStateProps {
+interface WorkspaceLayoutStateProps {
   liveResponseFields: WorkspaceField[];
   workspaceInitialized: boolean;
   hasFields: boolean;
 }
 
-interface GraphWorkspaceDispatchProps {
+interface WorkspaceLayoutDispatchProps {
   initializeWorkspace: () => void;
   loadSavedWorkspace: (savedWorkspace: GraphWorkspaceSavedObject) => void;
 }
 
-const GraphWorkspaceComponent = ({
+const WorkspaceLayoutComponent = ({
   renderCounter,
   workspace,
   loading,
@@ -103,7 +103,7 @@ const GraphWorkspaceComponent = ({
   loadSavedWorkspace: loadSavedWorkspaceAction,
   setHeaderActionMenu,
   reloadRoute,
-}: GraphWorkspaceProps & GraphWorkspaceStateProps & GraphWorkspaceDispatchProps) => {
+}: WorkspaceLayoutProps & WorkspaceLayoutStateProps & WorkspaceLayoutDispatchProps) => {
   const [initialQuery, setInitialQuery] = useState<string>();
   const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern>();
   const [noIndexPatterns, setNoIndexPatterns] = useState<boolean>(false);
@@ -249,7 +249,7 @@ const GraphWorkspaceComponent = ({
 
   return (
     <Fragment>
-      <GraphTopNavMenu
+      <WorkspaceTopNavMenu
         workspace={workspace}
         savedWorkspace={savedWorkspace}
         graphSavePolicy={graphSavePolicy}
@@ -323,9 +323,9 @@ const GraphWorkspaceComponent = ({
   );
 };
 
-export const GraphWorkspace = connect<
-  GraphWorkspaceStateProps,
-  GraphWorkspaceDispatchProps,
+export const WorkspaceLayout = connect<
+  WorkspaceLayoutStateProps,
+  WorkspaceLayoutDispatchProps,
   {},
   GraphState
 >(
@@ -342,4 +342,4 @@ export const GraphWorkspace = connect<
       dispatch(loadSavedWorkspace(savedWorkspace));
     },
   })
-)(GraphWorkspaceComponent);
+)(WorkspaceLayoutComponent);

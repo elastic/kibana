@@ -24,7 +24,7 @@ import {
 } from '../types';
 import { createGraphStore } from '../state_management';
 import { createWorkspace } from '../angular/graph_client_workspace';
-import { GraphWorkspace } from './graph_workspace';
+import { WorkspaceLayout } from './workspace_layout';
 import { GraphDependencies } from '../application';
 import { formatHttpError } from '../helpers/format_http_error';
 
@@ -40,7 +40,7 @@ export interface GraphWorkspaceProps {
   reloadRoute: () => void;
 }
 
-export const GraphApp = (props: GraphWorkspaceProps) => {
+export const GraphWorkspace = (props: GraphWorkspaceProps) => {
   /**
    * It's temporary workaround, which should be removed
    * after migration `workspace` to redux.
@@ -168,7 +168,7 @@ export const GraphApp = (props: GraphWorkspaceProps) => {
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <Provider store={store}>
-          <GraphWorkspace
+          <WorkspaceLayout
             renderCounter={renderCounter}
             workspace={workspace}
             loading={loading}
