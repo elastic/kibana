@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useMemo, useState } from 'react';
 
@@ -13,10 +13,12 @@ import styled from 'styled-components';
 import { BrowserFields, ColumnHeaderOptions, RowRenderer } from '../../../../../../common';
 import { Ecs } from '../../../../../../common/ecs';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
+import { eventRendererNames } from '../../../row_renderers_browser/catalog';
 import { ColumnRenderer } from './column_renderer';
 import { REASON_FIELD_NAME } from './constants';
 import { getRowRenderer } from './get_row_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
+import * as i18n from './translations';
 
 export const reasonColumnRenderer: ColumnRenderer = {
   isInstance: isEqual(REASON_FIELD_NAME),
@@ -135,13 +137,16 @@ const ReasonCell: React.FC<{
         value={`${value}`}
         tooltipContent={value}
       >
-        {rowRender ? (
+        {rowRenderer && rowRender ? (
           <EuiPopover
             isOpen={isOpen}
             anchorPosition="rightCenter"
             closePopover={() => setIsOpen(false)}
             button={button}
           >
+            <EuiPopoverTitle paddingSize="s">
+              {i18n.EVENT_RENDERER_POPOVER_TITLE(eventRendererNames[rowRenderer.id] ?? '')}
+            </EuiPopoverTitle>
             {rowRender}
           </EuiPopover>
         ) : (
