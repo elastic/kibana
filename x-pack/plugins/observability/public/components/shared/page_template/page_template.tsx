@@ -72,7 +72,7 @@ export function ObservabilityPageTemplate({
               exact: !!entry.matchFullPath,
               strict: !entry.ignoreTrailingSlash,
             }) != null;
-          const badgeLocalStorageId = `nav_item_badge_visible_${entry.app}${entry.path}`;
+          const badgeLocalStorageId = `observability.nav_item_badge_visible_${entry.app}${entry.path}`;
           return {
             id: `${sectionIndex}.${entryIndex}`,
             name: entry.sideBadgeLabel ? (
