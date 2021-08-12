@@ -8,12 +8,13 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { decorators } from './decorators';
 import { getEuiSelectableOptions, flightFields, flightFieldLabels, FlightField } from './flights';
 import { OptionsListEmbeddableFactory, OptionsListEmbeddable } from '../control_types/options_list';
 import { ControlFrame } from '../control_frame/control_frame';
+import { ControlGroupEuiComponent } from '../control_group/control_group_eui_component';
 
 export default {
   title: 'Input Controls',
@@ -44,8 +45,6 @@ const storybookArgTypes = {
 };
 
 const OptionsListStoryComponent = ({ fields, twoLine }: OptionsListStorybookArgs) => {
-  const [embeddables, setEmbeddables] = useState<OptionsListEmbeddable[]>([]);
-
   const optionsListEmbeddableFactory = useMemo(
     () =>
       new OptionsListEmbeddableFactory(
@@ -55,33 +54,20 @@ const OptionsListStoryComponent = ({ fields, twoLine }: OptionsListStorybookArgs
     []
   );
 
-  useEffect(() => {
-    const embeddableCreatePromises = fields.map((field) => {
-      return optionsListEmbeddableFactory.create({
-        field,
-        id: '',
-        indexPattern: '',
-        multiSelect: true,
-        twoLineLayout: twoLine,
-        title: flightFieldLabels[field as FlightField],
-      });
-    });
-    Promise.all(embeddableCreatePromises).then((newEmbeddables) => setEmbeddables(newEmbeddables));
-  }, [fields, optionsListEmbeddableFactory, twoLine]);
-
   return (
-    <EuiFlexGroup alignItems="center" wrap={true} gutterSize={'s'}>
-      {embeddables.map((embeddable) => (
-        <EuiFlexItem key={embeddable.getInput().field}>
-          <ControlFrame twoLine={twoLine} embeddable={embeddable} />
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
+    <ControlGroupEuiComponent
+      fields={fields}
+      twoLine={twoLine}
+      optionsListEmbeddableFactory={optionsListEmbeddableFactory}
+    />
   );
 };
 
 export const OptionsListStory = ({ fields, twoLine }: OptionsListStorybookArgs) => (
-  <OptionsListStoryComponent fields={fields} twoLine={twoLine} />
+  <>
+    <OptionsListStoryComponent fields={fields} twoLine={twoLine} />
+    <EuiSpacer size="xxl" />
+  </>
 );
 
 OptionsListStory.args = storybookArgs;
