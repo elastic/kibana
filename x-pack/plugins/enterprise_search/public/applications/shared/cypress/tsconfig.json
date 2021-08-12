@@ -3,6 +3,6 @@
   "include": ["./**/*"],
   "compilerOptions": {
     "outDir": "../../../../target/cypress/types/shared",
-    "types": ["cypress", "node"]
+    "types": ["cypress", "cypress-axe", "node"]
   }
 }
