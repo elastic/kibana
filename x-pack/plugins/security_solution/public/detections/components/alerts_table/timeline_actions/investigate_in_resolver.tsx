@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import { get } from 'lodash/fp';
 import {
   setActiveTabTimeline,
   updateTimelineGraphEventId,
 } from '../../../../timelines/store/timeline/actions';
 import { TimelineId, TimelineTabs } from '../../../../../common';
-import { isInvestigateInResolverActionEnabled } from '../../../../timelines/components/timeline/body/helpers';
 import { ACTION_INVESTIGATE_IN_RESOLVER } from '../../../../timelines/components/timeline/body/translations';
 import { Ecs } from '../../../../../common/ecs';
 
+export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) =>
+  (get(['agent', 'type', 0], ecsData) === 'endpoint' ||
+    (get(['agent', 'type', 0], ecsData) === 'winlogbeat' &&
+      get(['event', 'module', 0], ecsData) === 'sysmon')) &&
+  get(['process', 'entity_id'], ecsData)?.length === 1 &&
+  get(['process', 'entity_id', 0], ecsData) !== '';
 interface InvestigateInResolverProps {
   timelineId: string;
   ecsData: Ecs;
@@ -23,18 +29,21 @@ interface InvestigateInResolverProps {
 export const useInvestigateInResolverContextItem = ({
   timelineId,
   ecsData,
-}: InvestigateInResolverProps) => {
+}: InvestigateInResolverProps[]) => {
   const dispatch = useDispatch();
-  const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
+  const isDisabled = true; // = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
   const handleClick = useCallback(() => {
     dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
     if (timelineId === TimelineId.active) {
       dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph }));
     }
   }, [dispatch, ecsData._id, timelineId]);
-  return {
-    disabled: isDisabled,
-    name: ACTION_INVESTIGATE_IN_RESOLVER,
-    onClick: handleClick,
-  };
+  return isDisabled
+    ? []
+    : [
+        {
+          name: ACTION_INVESTIGATE_IN_RESOLVER,
+          onClick: handleClick,
+        },
+      ];
 };

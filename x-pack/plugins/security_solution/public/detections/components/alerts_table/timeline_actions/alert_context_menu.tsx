@@ -210,29 +210,45 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     timelineId,
     ecsData: ecsRowData,
   });
+  const endpointException = useMemo(
+    () =>
+      disabledAddEndpointException
+        ? []
+        : [
+            {
+              name: i18n.ACTION_ADD_ENDPOINT_EXCEPTION,
+              onClick: handleEndpointExceptionModal,
+            },
+          ],
+    [disabledAddEndpointException, handleEndpointExceptionModal]
+  );
+  const ruleException = useMemo(
+    () =>
+      disabledAddException
+        ? []
+        : [
+            {
+              name: i18n.ACTION_ADD_EXCEPTION,
+              onClick: handleDetectionExceptionModal,
+            },
+          ],
+    [disabledAddException, handleDetectionExceptionModal]
+  );
   const items: EuiContextMenuPanelItemDescriptor[] = useMemo(
     () =>
       !isEvent && ruleId
         ? [
-            investigateInResolverAction,
+            ...investigateInResolverAction,
             ...addToCaseAction.actionItem,
             {
               name: CHANGE_ALERT_STATUS,
               panel: 1,
             },
-            {
-              name: i18n.ACTION_ADD_ENDPOINT_EXCEPTION,
-              onClick: handleEndpointExceptionModal,
-              disabled: disabledAddEndpointException,
-            },
-            {
-              name: i18n.ACTION_ADD_EXCEPTION,
-              onClick: handleDetectionExceptionModal,
-              disabled: disabledAddException,
-            },
+            ...endpointException,
+            ...ruleException,
           ]
         : [
-            investigateInResolverAction,
+            ...investigateInResolverAction,
             ...addToCaseAction.actionItem,
             {
               name: i18n.ACTION_ADD_EVENT_FILTER,
@@ -241,13 +257,11 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           ],
     [
       addToCaseAction.actionItem,
-      disabledAddEndpointException,
-      disabledAddException,
-      handleDetectionExceptionModal,
-      handleEndpointExceptionModal,
+      endpointException,
       handleOnAddEventFilterClick,
       investigateInResolverAction,
       isEvent,
+      ruleException,
       ruleId,
     ]
   );
