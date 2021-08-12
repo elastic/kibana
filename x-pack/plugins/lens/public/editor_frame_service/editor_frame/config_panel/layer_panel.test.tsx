@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiFormRow } from '@elastic/eui';
-import { Visualization } from '../../../types';
+import { FramePublicAPI, Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { ChildDragDropProvider, DragDrop } from '../../../drag_drop';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
@@ -56,9 +56,10 @@ describe('LayerPanel', () => {
   let mockVisualization2: jest.Mocked<Visualization>;
 
   let mockDatasource: DatasourceMock;
+  let frame: FramePublicAPI;
 
   function getDefaultProps() {
-    const frame = createMockFramePublicAPI();
+    frame = createMockFramePublicAPI();
     frame.datasourceLayers = {
       first: mockDatasource.publicAPIMock,
     };
@@ -119,27 +120,27 @@ describe('LayerPanel', () => {
   describe('layer reset and remove', () => {
     it('should show the reset button when single layer', async () => {
       const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
-      expect(instance.find('[data-test-subj="lnsLayerRemove"]').first().text()).toContain(
-        'Reset layer'
-      );
+      expect(
+        instance.find('[data-test-subj="lnsLayerRemove"]').first().props()['aria-label']
+      ).toContain('Reset layer');
     });
 
     it('should show the delete button when multiple layers', async () => {
       const { instance } = await mountWithProvider(
         <LayerPanel {...getDefaultProps()} isOnlyLayer={false} />
       );
-      expect(instance.find('[data-test-subj="lnsLayerRemove"]').first().text()).toContain(
-        'Delete layer'
-      );
+      expect(
+        instance.find('[data-test-subj="lnsLayerRemove"]').first().props()['aria-label']
+      ).toContain('Delete layer');
     });
 
     it('should show to reset visualization for visualizations only allowing a single layer', async () => {
       const layerPanelAttributes = getDefaultProps();
       delete layerPanelAttributes.activeVisualization.removeLayer;
       const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
-      expect(instance.find('[data-test-subj="lnsLayerRemove"]').first().text()).toContain(
-        'Reset visualization'
-      );
+      expect(
+        instance.find('[data-test-subj="lnsLayerRemove"]').first().props()['aria-label']
+      ).toContain('Reset visualization');
     });
 
     it('should call the clear callback', async () => {
@@ -901,12 +902,14 @@ describe('LayerPanel', () => {
           droppedItem: draggingOperation,
         })
       );
-      expect(mockVis.setDimension).toHaveBeenCalledWith({
-        columnId: 'c',
-        groupId: 'b',
-        layerId: 'first',
-        prevState: 'state',
-      });
+      expect(mockVis.setDimension).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columnId: 'c',
+          groupId: 'b',
+          layerId: 'first',
+          prevState: 'state',
+        })
+      );
       expect(mockVis.removeDimension).toHaveBeenCalledWith(
         expect.objectContaining({
           columnId: 'a',
