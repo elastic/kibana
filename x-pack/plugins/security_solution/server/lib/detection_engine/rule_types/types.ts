@@ -23,7 +23,7 @@ import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
 import {
   AlertTypeWithExecutor,
   PersistenceServices,
-  RuleDataClient,
+  IRuleDataClient,
 } from '../../../../../rule_registry/server';
 import { BaseHit } from '../../../../common/detection_engine/types';
 import { ConfigType } from '../../../config';
@@ -96,7 +96,7 @@ export type CreateSecurityRuleTypeFactory = (options: {
   lists: SetupPlugins['lists'];
   logger: Logger;
   mergeStrategy: ConfigType['alertMergeStrategy'];
-  ruleDataClient: RuleDataClient;
+  ruleDataClient: IRuleDataClient;
   ruleDataService: IRuleDataPluginService;
 }) => <
   TParams extends RuleParams & { index: string[] | undefined },
@@ -124,7 +124,7 @@ export interface CreateRuleOptions {
   lists: SetupPlugins['lists'];
   logger: Logger;
   mergeStrategy: ConfigType['alertMergeStrategy'];
-  ruleDataClient: RuleDataClient;
+  ruleDataClient: IRuleDataClient;
   version: string;
   ruleDataService: IRuleDataPluginService;
 }

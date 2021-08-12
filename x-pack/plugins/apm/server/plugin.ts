@@ -119,9 +119,6 @@ export class APMPlugin
         {
           name: 'mappings',
           version: 0,
-          settings: {
-            number_of_shards: 1,
-          },
           mappings: mappingFromFieldMap(
             {
               [SERVICE_NAME]: {

@@ -18,7 +18,7 @@ import {
 import moment from 'moment';
 
 import { mappingFromFieldMap } from '../../../../../../rule_registry/common/mapping_from_field_map';
-import { Dataset, RuleDataClient } from '../../../../../../rule_registry/server';
+import { Dataset, IRuleDataClient } from '../../../../../../rule_registry/server';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { invariant } from '../../../../../common/utils/invariant';
@@ -71,7 +71,7 @@ interface IRuleRegistryLogClient {
  */
 export class RuleRegistryLogClient implements IRuleRegistryLogClient {
   private sequence = 0;
-  private ruleDataClient: RuleDataClient;
+  private ruleDataClient: IRuleDataClient;
 
   constructor(ruleDataService: IRuleDataPluginService) {
     this.ruleDataClient = ruleDataService.initializeIndex({
@@ -83,9 +83,6 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         {
           name: 'mappings',
           version: 0,
-          settings: {
-            number_of_shards: 1,
-          },
           mappings: mappingFromFieldMap(ruleExecutionFieldMap, 'strict'),
         },
       ],

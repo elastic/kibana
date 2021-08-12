@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { left, right } from 'fp-ts/lib/Either';
+
 import { ElasticsearchClient, Logger } from 'kibana/server';
 
-import { RuleDataClient } from '../rule_data_client';
-import { IndexNames } from './index_names';
+import { IRuleDataClient, RuleDataClient, WaitResult } from '../rule_data_client';
+import { IndexInfo } from './index_info';
 import { IndexOptions } from './index_options';
-import { ResourceNames } from './resource_names';
-import { ResourceInstaller, Resources } from './resource_installer';
+import { ResourceInstaller } from './resource_installer';
+import { joinWithDash } from './utils';
 
 interface ConstructorOptions {
   getClusterClient: () => Promise<ElasticsearchClient>;
@@ -20,77 +22,132 @@ interface ConstructorOptions {
   index: string;
 }
 
+/**
+ * A service for creating and using Elasticsearch indices for alerts-as-data.
+ */
 export class RuleDataPluginService {
-  private readonly resourceNames: ResourceNames;
   private readonly resourceInstaller: ResourceInstaller;
-  private readonly installCommonResources: () => Promise<void>;
+  private installCommonResources: Promise<'ok' | Error>;
+  private isInitialized: boolean;
 
   constructor(private readonly options: ConstructorOptions) {
-    this.resourceNames = new ResourceNames({ indexPrefixFromConfig: options.index });
     this.resourceInstaller = new ResourceInstaller({
-      resourceNames: this.resourceNames,
+      getResourceName: (name) => this.getResourceName(name),
       getClusterClient: options.getClusterClient,
       logger: options.logger,
       isWriteEnabled: options.isWriteEnabled,
     });
 
-    this.installCommonResources = this.resourceInstaller.memoizeInstallation(Resources.common, () =>
-      this.resourceInstaller.installResourcesSharedBetweenAllIndices()
-    );
+    this.installCommonResources = Promise.resolve('ok');
+    this.isInitialized = false;
   }
 
-  public getResourcePrefix() {
-    return this.resourceNames.getFullPrefix();
+  /**
+   * Returns a full resource prefix.
+   *   - it's '.alerts' by default
+   *   - it can be adjusted by the user via Kibana config
+   */
+  public getResourcePrefix(): string {
+    // TODO: https://github.com/elastic/kibana/issues/106432
+    return this.options.index;
   }
 
-  public getResourceName(...relativeNameSegments: string[]) {
-    return this.resourceNames.getFullName(...relativeNameSegments);
+  /**
+   * Prepends a relative resource name with a full resource prefix, which
+   * starts with '.alerts' and can optionally include a user-defined part in it.
+   * @returns Full name of the resource.
+   * @example 'security.alerts' => '.alerts-security.alerts'
+   */
+  public getResourceName(relativeName: string): string {
+    return joinWithDash(this.getResourcePrefix(), relativeName);
   }
 
+  /**
+   * If write is enabled, everything works as usual.
+   * If it's disabled, writing to all alerts-as-data indices will be disabled,
+   * and also Elasticsearch resources associated with the indices will not be
+   * installed.
+   */
   public isWriteEnabled(): boolean {
     return this.options.isWriteEnabled;
   }
 
+  /**
+   * Installs common Elasticsearch resources used by all alerts-as-data indices.
+   */
   public initializeService(): void {
-    this.installCommonResources().catch((e) => {
-      this.options.logger.error(e);
-    });
+    // Run the installation of common resources and handle exceptions.
+    // NOTE: this promise cannot reject, otherwise it will lead to an
+    // unhandled promise rejection shutting down Kibana process.
+    this.installCommonResources = this.resourceInstaller
+      .installCommonResources()
+      .then(() => 'ok')
+      .catch((e) => {
+        this.options.logger.error(e);
+        return e; // propagates it to the index initialization phase
+      });
+
+    this.isInitialized = true;
   }
 
-  public initializeIndex(indexOptions: IndexOptions): RuleDataClient {
-    const { feature, registrationContext, dataset, secondaryAlias } = indexOptions;
+  /**
+   * Initializes alerts-as-data index and starts index bootstrapping right away.
+   * @param indexOptions Index parameters: names and resources.
+   * @returns Client for reading and writing data to this index.
+   */
+  public initializeIndex(indexOptions: IndexOptions): IRuleDataClient {
+    if (!this.isInitialized) {
+      throw new Error(
+        'Rule data service is not initialized. Make sure to call initializeService() in the rule registry plugin setup phase'
+      );
+    }
 
-    const indexNames = new IndexNames({
-      resourceNames: this.resourceNames,
-      registrationContext,
-      dataset,
-      secondaryAlias: secondaryAlias ?? null,
+    const indexInfo = new IndexInfo({
+      getResourceName: (name) => this.getResourceName(name),
+      indexOptions,
     });
 
-    const installIndexResources = this.resourceInstaller.memoizeInstallation(
-      Resources.forIndex,
-      async () => {
-        await this.installCommonResources();
-        await this.resourceInstaller.installResourcesSharedBetweenIndexNamespaces(
-          indexOptions,
-          indexNames
-        );
+    const waitUntilClusterClientAvailable = async (): Promise<WaitResult> => {
+      try {
+        const clusterClient = await this.options.getClusterClient();
+        return left(clusterClient);
+      } catch (e) {
+        this.options.logger.error(e);
+        return right(e);
+      }
+    };
+
+    const waitUntilIndexResourcesInstalled = async (): Promise<WaitResult> => {
+      try {
+        const result = await this.installCommonResources;
+        if (result !== 'ok') {
+          return right(result);
+        }
+
+        await this.resourceInstaller.installIndexLevelResources(indexInfo);
 
         const clusterClient = await this.options.getClusterClient();
-        return { clusterClient };
+        return left(clusterClient);
+      } catch (e) {
+        this.options.logger.error(e);
+        return right(e);
       }
-    );
+    };
 
-    // Start installation eagerly
-    const installPromise = installIndexResources();
+    // Start initialization now, including installation of index resources.
+    // Let's unblock read operations since installation can take quite some time.
+    // Write operations will have to wait, of course.
+    // NOTE: these promises cannot reject, otherwise it will lead to an
+    // unhandled promise rejection shutting down Kibana process.
+    const waitUntilReadyForReading = waitUntilClusterClientAvailable();
+    const waitUntilReadyForWriting = waitUntilIndexResourcesInstalled();
 
     return new RuleDataClient({
-      feature,
-      indexNames,
-      indexOptions,
+      indexInfo,
       resourceInstaller: this.resourceInstaller,
       isWriteEnabled: this.isWriteEnabled(),
-      waitUntilIndexIsReady: () => installPromise,
+      waitUntilReadyForReading,
+      waitUntilReadyForWriting,
     });
   }
 }

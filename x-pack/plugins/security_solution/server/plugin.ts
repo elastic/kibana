@@ -32,7 +32,7 @@ import { PluginStartContract as CasesPluginStartContract } from '../../cases/ser
 import { ECS_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
 import { SecurityPluginSetup as SecuritySetup, SecurityPluginStart } from '../../security/server';
 import {
-  RuleDataClient,
+  IRuleDataClient,
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
   Dataset,
@@ -204,7 +204,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const isRuleRegistryEnabled = experimentalFeatures.ruleRegistryEnabled;
 
     const { ruleDataService } = plugins.ruleRegistry;
-    let ruleDataClient: RuleDataClient | null = null;
+    let ruleDataClient: IRuleDataClient | null = null;
 
     if (isRuleRegistryEnabled) {
       // NOTE: this is not used yet
@@ -228,9 +228,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           {
             name: 'mappings',
             version: 0,
-            settings: {
-              number_of_shards: 1,
-            },
             mappings: mappingFromFieldMap(
               { ...alertsFieldMap, ...rulesFieldMap, ...ctiFieldMap },
               false

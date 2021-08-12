@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { RuleDataPluginService } from './';
+import { RuleDataPluginService } from './rule_data_plugin_service';
 
 type Schema = PublicMethodsOf<RuleDataPluginService>;
 

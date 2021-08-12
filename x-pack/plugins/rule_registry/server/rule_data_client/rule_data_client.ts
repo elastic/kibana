@@ -6,38 +6,31 @@
  */
 
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { ValidFeatureId } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import { Either, isLeft } from 'fp-ts/lib/Either';
 
 import { ElasticsearchClient } from 'kibana/server';
 import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
 
 import { RuleDataWriteDisabledError } from '../rule_data_plugin_service/errors';
-import { IndexNames } from '../rule_data_plugin_service/index_names';
-import { IndexOptions } from '../rule_data_plugin_service/index_options';
+import { IndexInfo } from '../rule_data_plugin_service/index_info';
 import { ResourceInstaller } from '../rule_data_plugin_service/resource_installer';
 import { IRuleDataClient, IRuleDataReader, IRuleDataWriter } from './types';
 
-/**
- * The purpose of the `feature` param is to force the user to update
- * the data structure which contains the mapping of consumers to alerts
- * as data indices. The idea is it is typed such that it forces the
- * user to go to the code and modify it. At least until a better system
- * is put in place or we move the alerts as data client out of rule registry.
- */
 interface ConstructorOptions {
-  feature: ValidFeatureId;
-  indexNames: IndexNames;
-  indexOptions: IndexOptions;
+  indexInfo: IndexInfo;
   resourceInstaller: ResourceInstaller;
   isWriteEnabled: boolean;
-  waitUntilIndexIsReady: () => Promise<{ clusterClient: ElasticsearchClient }>;
+  waitUntilReadyForReading: Promise<WaitResult>;
+  waitUntilReadyForWriting: Promise<WaitResult>;
 }
+
+export type WaitResult = Either<ElasticsearchClient, Error>;
 
 export class RuleDataClient implements IRuleDataClient {
   constructor(private readonly options: ConstructorOptions) {}
 
   public get indexName(): string {
-    return this.options.indexNames.baseName;
+    return this.options.indexInfo.baseName;
   }
 
   public isWriteEnabled(): boolean {
@@ -45,45 +38,50 @@ export class RuleDataClient implements IRuleDataClient {
   }
 
   public getReader(options: { namespace?: string } = {}): IRuleDataReader {
-    const { indexNames, waitUntilIndexIsReady } = this.options;
+    const { indexInfo } = this.options;
+    const indexPattern = indexInfo.getPatternForReading(options.namespace);
 
-    // Because namespace is user-defined in general, by default we want to
-    // ignore namespace when reading, and search over all the namespaces.
-    const namespace = options.namespace || '*';
-    const indexAliasOrPattern = indexNames.getPrimaryAlias(namespace);
+    const waitUntilReady = async () => {
+      const result = await this.options.waitUntilReadyForReading;
+      if (isLeft(result)) {
+        return result.left;
+      } else {
+        throw result.right;
+      }
+    };
 
     return {
       search: async (request) => {
-        const { clusterClient } = await waitUntilIndexIsReady();
+        const clusterClient = await waitUntilReady();
 
         const { body } = (await clusterClient.search({
           ...request,
-          index: indexAliasOrPattern,
+          index: indexPattern,
         })) as { body: any };
 
         return body;
       },
 
       getDynamicIndexPattern: async () => {
-        const { clusterClient } = await waitUntilIndexIsReady();
+        const clusterClient = await waitUntilReady();
         const indexPatternsFetcher = new IndexPatternsFetcher(clusterClient);
 
         try {
           const fields = await indexPatternsFetcher.getFieldsForWildcard({
-            pattern: indexAliasOrPattern,
+            pattern: indexPattern,
           });
 
           return {
             fields,
             timeFieldName: '@timestamp',
-            title: indexAliasOrPattern,
+            title: indexPattern,
           };
         } catch (err) {
           if (err.output?.payload?.code === 'no_matching_indices') {
             return {
               fields: [],
               timeFieldName: '@timestamp',
-              title: indexAliasOrPattern,
+              title: indexPattern,
             };
           }
           throw err;
@@ -93,11 +91,20 @@ export class RuleDataClient implements IRuleDataClient {
   }
 
   public getWriter(options: { namespace?: string } = {}): IRuleDataWriter {
-    const { indexNames, indexOptions, resourceInstaller, waitUntilIndexIsReady } = this.options;
+    const { indexInfo, resourceInstaller } = this.options;
 
     const namespace = options.namespace || 'default';
-    const alias = indexNames.getPrimaryAlias(namespace);
+    const alias = indexInfo.getPrimaryAlias(namespace);
     const isWriteEnabled = this.isWriteEnabled();
+
+    const waitUntilReady = async () => {
+      const result = await this.options.waitUntilReadyForWriting;
+      if (isLeft(result)) {
+        return result.left;
+      } else {
+        throw result.right;
+      }
+    };
 
     return {
       bulk: async (request) => {
@@ -105,7 +112,7 @@ export class RuleDataClient implements IRuleDataClient {
           throw new RuleDataWriteDisabledError();
         }
 
-        const { clusterClient } = await waitUntilIndexIsReady();
+        const clusterClient = await waitUntilReady();
 
         const requestWithDefaultParameters = {
           ...request,
@@ -125,7 +132,7 @@ export class RuleDataClient implements IRuleDataClient {
                 ))
             ) {
               return resourceInstaller
-                .createWriteTargetIfNeeded(indexOptions, indexNames, namespace)
+                .installNamespaceLevelResources(indexInfo, namespace)
                 .then(() => {
                   return clusterClient.bulk(requestWithDefaultParameters).then((retryResponse) => {
                     if (retryResponse.body.errors) {

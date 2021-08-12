@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, isEmpty, once } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { estypes } from '@elastic/elasticsearch';
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
@@ -19,21 +19,13 @@ import { technicalComponentTemplate } from '../../common/assets/component_templa
 import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
 import { defaultLifecyclePolicy } from '../../common/assets/lifecycle_policies/default_lifecycle_policy';
 
-import { ResourceNames } from './resource_names';
-import { IndexNames } from './index_names';
-import { IndexOptions } from './index_options';
+import { IndexInfo } from './index_info';
 import { incrementIndexName } from './utils';
 
-export enum Resources {
-  common = 'common resources shared between all indices',
-  forIndex = 'resources for a particular index',
-  forNamespace = 'resources for a particular namespace',
-}
-
-const INSTALLATION_TIMEOUT = 60000;
+const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
 
 interface ConstructorOptions {
-  resourceNames: ResourceNames;
+  getResourceName(relativeName: string): string;
   getClusterClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
   isWriteEnabled: boolean;
@@ -42,130 +34,132 @@ interface ConstructorOptions {
 export class ResourceInstaller {
   constructor(private readonly options: ConstructorOptions) {}
 
-  private getResourceName(...relativeNameSegments: string[]) {
-    return this.options.resourceNames.getFullName(...relativeNameSegments);
-  }
-
-  public memoizeInstallation<T>(
-    resources: Resources,
-    installResources: () => Promise<T>
-  ): () => Promise<T> {
-    return once(async () => {
-      try {
-        return await Promise.race([
-          installResources(),
-          new Promise<T>((resolve, reject) => {
-            setTimeout(() => {
-              const msg = `Timeout: it took more than ${INSTALLATION_TIMEOUT}ms`;
-              reject(new Error(msg));
-            }, INSTALLATION_TIMEOUT);
-          }),
-        ]);
-      } catch (e) {
-        this.options.logger.error(e);
-
-        const reason = e?.message || 'Unknown reason';
-        throw new Error(`Failure installing ${resources}. ${reason}`);
-      }
-    });
-  }
-
-  public async installResourcesSharedBetweenAllIndices(): Promise<void> {
-    const { logger, isWriteEnabled } = this.options;
-
-    if (!isWriteEnabled) {
-      logger.info(`Write is disabled; not installing ${Resources.common}`);
-      return;
-    }
-
-    logger.info(`Installing ${Resources.common}`);
-
-    await this.createOrUpdateLifecyclePolicy({
-      policy: this.getResourceName(DEFAULT_ILM_POLICY_ID),
-      body: defaultLifecyclePolicy,
-    });
-
-    await this.createOrUpdateComponentTemplate({
-      name: this.getResourceName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
-      body: technicalComponentTemplate,
-    });
-
-    await this.createOrUpdateComponentTemplate({
-      name: this.getResourceName(ECS_COMPONENT_TEMPLATE_NAME),
-      body: ecsComponentTemplate,
-    });
-
-    logger.info(`Installed ${Resources.common}`);
-  }
-
-  public async installResourcesSharedBetweenIndexNamespaces(
-    indexOptions: IndexOptions,
-    indexNames: IndexNames
+  private async installWithTimeout(
+    resources: string,
+    installer: () => Promise<void>
   ): Promise<void> {
-    const { logger, isWriteEnabled } = this.options;
-    const { componentTemplates, ilmPolicy } = indexOptions;
+    try {
+      const installResources = async (): Promise<void> => {
+        const { logger, isWriteEnabled } = this.options;
 
-    if (!isWriteEnabled) {
-      logger.info(`Write is disabled; not installing ${Resources.forIndex}`);
-      return;
-    }
+        if (!isWriteEnabled) {
+          logger.info(`Write is disabled; not installing ${resources}`);
+          return;
+        }
 
-    logger.info(`Installing ${Resources.forIndex}`);
+        logger.info(`Installing ${resources}`);
+        await installer();
+        logger.info(`Installed ${resources}`);
+      };
 
-    if (ilmPolicy != null) {
-      await this.createOrUpdateLifecyclePolicy({
-        policy: indexNames.getIlmPolicyName(),
-        body: { policy: ilmPolicy },
-      });
-    }
-
-    await Promise.all(
-      componentTemplates.map(async (ct) => {
-        await this.createOrUpdateComponentTemplate({
-          name: indexNames.getComponentTemplateName(ct.name),
-          body: {
-            // TODO: difference?
-            // template: {
-            //   settings: ct.settings,
-            //   mappings: ct.mappings,
-            //   version: ct.version,
-            //   _meta: ct._meta,
-            // },
-            template: { settings: {} },
-            settings: ct.settings,
-            mappings: ct.mappings,
-            version: ct.version,
-            _meta: ct._meta,
-          },
+      const throwTimeoutException = (): Promise<void> => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            const msg = `Timeout: it took more than ${INSTALLATION_TIMEOUT}ms`;
+            reject(new Error(msg));
+          }, INSTALLATION_TIMEOUT);
         });
-      })
-    );
+      };
 
-    // TODO: Update all existing namespaced index templates matching this index' base name
+      await Promise.race([installResources(), throwTimeoutException()]);
+    } catch (e) {
+      this.options.logger.error(e);
 
-    await this.updateIndexMappings(indexNames);
-
-    logger.info(`Installed ${Resources.forIndex}`);
+      const reason = e?.message || 'Unknown reason';
+      throw new Error(`Failure installing ${resources}. ${reason}`);
+    }
   }
 
-  private async updateIndexMappings(indexNames: IndexNames) {
+  // -----------------------------------------------------------------------------------------------
+  // Common resources
+
+  /**
+   * Installs common, library-level resources shared between all indices:
+   *   - default ILM policy
+   *   - component template containing technical fields
+   *   - component template containing all standard ECS fields
+   */
+  public async installCommonResources(): Promise<void> {
+    await this.installWithTimeout('common resources shared between all indices', async () => {
+      const { getResourceName } = this.options;
+
+      // We can install them in parallel
+      await Promise.all([
+        this.createOrUpdateLifecyclePolicy({
+          policy: getResourceName(DEFAULT_ILM_POLICY_ID),
+          body: defaultLifecyclePolicy,
+        }),
+
+        this.createOrUpdateComponentTemplate({
+          name: getResourceName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
+          body: technicalComponentTemplate,
+        }),
+
+        this.createOrUpdateComponentTemplate({
+          name: getResourceName(ECS_COMPONENT_TEMPLATE_NAME),
+          body: ecsComponentTemplate,
+        }),
+      ]);
+    });
+  }
+
+  // -----------------------------------------------------------------------------------------------
+  // Index-level resources
+
+  /**
+   * Installs index-level resources shared between all namespaces of this index:
+   *   - custom ILM policy if it was provided
+   *   - component templates
+   *   - attempts to update mappings of existing concrete indices
+   */
+  public async installIndexLevelResources(indexInfo: IndexInfo): Promise<void> {
+    await this.installWithTimeout(`resources for index ${indexInfo.baseName}`, async () => {
+      const { componentTemplates, ilmPolicy } = indexInfo.indexOptions;
+
+      if (ilmPolicy != null) {
+        await this.createOrUpdateLifecyclePolicy({
+          policy: indexInfo.getIlmPolicyName(),
+          body: { policy: ilmPolicy },
+        });
+      }
+
+      await Promise.all(
+        componentTemplates.map(async (ct) => {
+          await this.createOrUpdateComponentTemplate({
+            name: indexInfo.getComponentTemplateName(ct.name),
+            body: {
+              template: {
+                settings: ct.settings ?? {},
+                mappings: ct.mappings,
+              },
+              version: ct.version,
+              _meta: ct._meta,
+            },
+          });
+        })
+      );
+
+      // TODO: Update all existing namespaced index templates matching this index' base name
+
+      await this.updateIndexMappings(indexInfo);
+    });
+  }
+
+  private async updateIndexMappings(indexInfo: IndexInfo) {
     const { logger, getClusterClient } = this.options;
     const clusterClient = await getClusterClient();
 
-    logger.debug(`Updating mappings of existing indices`);
+    logger.debug(`Updating mappings of existing concrete indices for ${indexInfo.baseName}`);
 
     const { body: aliasesResponse } = await clusterClient.indices.getAlias({
-      index: indexNames.basePattern,
+      index: indexInfo.basePattern,
     });
 
-    const writeIndicesAndAliases: Array<{ index: string; alias: string }> = [];
-    Object.entries(aliasesResponse).forEach(([index, aliases]) => {
-      Object.entries(aliases.aliases).forEach(([aliasName, aliasProperties]) => {
-        if (aliasProperties.is_write_index) {
-          writeIndicesAndAliases.push({ index, alias: aliasName });
-        }
-      });
-    });
+    const writeIndicesAndAliases = Object.entries(aliasesResponse).flatMap(([index, { aliases }]) =>
+      Object.entries(aliases)
+        .filter(([, aliasProperties]) => aliasProperties.is_write_index)
+        .map(([aliasName]) => ({ index, alias: aliasName }))
+    );
 
     await Promise.all(
       writeIndicesAndAliases.map((indexAndAlias) =>
@@ -222,17 +216,28 @@ export class ResourceInstaller {
     }
   }
 
-  public async createWriteTargetIfNeeded(
-    indexOptions: IndexOptions,
-    indexNames: IndexNames,
+  // -----------------------------------------------------------------------------------------------
+  // Namespace-level resources
+
+  /**
+   * Installs resources tied to concrete namespace of an index:
+   *   - namespaced index template
+   *   - concrete index (write target) if it doesn't exist
+   */
+  public async installNamespaceLevelResources(
+    indexInfo: IndexInfo,
     namespace: string
-  ) {
+  ): Promise<void> {
+    await this.createWriteTargetIfNeeded(indexInfo, namespace);
+  }
+
+  private async createWriteTargetIfNeeded(indexInfo: IndexInfo, namespace: string) {
     const { logger, getClusterClient } = this.options;
     const clusterClient = await getClusterClient();
 
-    const primaryNamespacedAlias = indexNames.getPrimaryAlias(namespace);
-    const primaryNamespacedPattern = indexNames.getPrimaryAliasPattern(namespace);
-    const initialIndexName = indexNames.getConcreteIndexInitialName(namespace);
+    const primaryNamespacedAlias = indexInfo.getPrimaryAlias(namespace);
+    const primaryNamespacedPattern = indexInfo.getPrimaryAliasPattern(namespace);
+    const initialIndexName = indexInfo.getConcreteIndexInitialName(namespace);
 
     logger.debug(`Creating write target for ${primaryNamespacedAlias}`);
 
@@ -242,7 +247,7 @@ export class ResourceInstaller {
     });
 
     if (!indicesExist) {
-      await this.installNamespacedIndexTemplate(indexOptions, indexNames, namespace);
+      await this.installNamespacedIndexTemplate(indexInfo, namespace);
 
       try {
         await clusterClient.indices.create({
@@ -292,29 +297,29 @@ export class ResourceInstaller {
     }
   }
 
-  private async installNamespacedIndexTemplate(
-    indexOptions: IndexOptions,
-    indexNames: IndexNames,
-    namespace: string
-  ) {
-    const { logger } = this.options;
+  private async installNamespacedIndexTemplate(indexInfo: IndexInfo, namespace: string) {
+    const { logger, getResourceName } = this.options;
+    const {
+      componentTemplateRefs,
+      componentTemplates,
+      indexTemplate,
+      ilmPolicy,
+    } = indexInfo.indexOptions;
 
-    const primaryNamespacedAlias = indexNames.getPrimaryAlias(namespace);
-    const primaryNamespacedPattern = indexNames.getPrimaryAliasPattern(namespace);
-    const secondaryNamespacedAlias = indexNames.getSecondaryAlias(namespace);
+    const primaryNamespacedAlias = indexInfo.getPrimaryAlias(namespace);
+    const primaryNamespacedPattern = indexInfo.getPrimaryAliasPattern(namespace);
+    const secondaryNamespacedAlias = indexInfo.getSecondaryAlias(namespace);
 
     logger.debug(`Installing index template for ${primaryNamespacedAlias}`);
 
-    const technicalComponentNames = [this.getResourceName(TECHNICAL_COMPONENT_TEMPLATE_NAME)];
-    const referencedComponentNames = indexOptions.componentTemplateRefs.map((ref) =>
-      this.getResourceName(ref)
+    const technicalComponentNames = [getResourceName(TECHNICAL_COMPONENT_TEMPLATE_NAME)];
+    const referencedComponentNames = componentTemplateRefs.map((ref) => getResourceName(ref));
+    const ownComponentNames = componentTemplates.map((template) =>
+      indexInfo.getComponentTemplateName(template.name)
     );
-    const ownComponentNames = indexOptions.componentTemplates.map((template) =>
-      indexNames.getComponentTemplateName(template.name)
-    );
-    const ilmPolicyName = indexOptions.ilmPolicy
-      ? indexNames.getIlmPolicyName()
-      : this.getResourceName(DEFAULT_ILM_POLICY_ID);
+    const ilmPolicyName = ilmPolicy
+      ? indexInfo.getIlmPolicyName()
+      : getResourceName(DEFAULT_ILM_POLICY_ID);
 
     // TODO: need a way to update this template if/when we decide to make changes to the
     // built in index template. Probably do it as part of updateIndexMappingsForAsset?
@@ -327,7 +332,7 @@ export class ResourceInstaller {
     // the namespace values can really only come from the existing templates that we're trying to update
     // - maybe we want to store the namespace as a _meta field on the index template for easy retrieval
     await this.createOrUpdateIndexTemplate({
-      name: indexNames.getIndexTemplateName(namespace),
+      name: indexInfo.getIndexTemplateName(namespace),
       body: {
         index_patterns: [primaryNamespacedPattern],
 
@@ -335,7 +340,7 @@ export class ResourceInstaller {
         // - first go external component templates referenced by this index (e.g. the common full ECS template)
         // - then we include own component templates registered with this index
         // - finally, we include technical component templates to make sure the index gets all the
-        //   mappings and settings required by all Kibana plugins using rule_registry to work properly
+        //   mappings and settings required by all Kibana plugins using rule registry to work properly
         composed_of: [
           ...referencedComponentNames,
           ...ownComponentNames,
@@ -362,11 +367,11 @@ export class ResourceInstaller {
         },
 
         _meta: {
-          ...indexOptions.indexTemplate._meta,
+          ...indexTemplate._meta,
           namespace,
         },
 
-        version: indexOptions.indexTemplate.version,
+        version: indexTemplate.version,
 
         // By setting the priority to namespace.length, we ensure that if one namespace is a prefix of another namespace
         // then newly created indices will use the matching template with the *longest* namespace
