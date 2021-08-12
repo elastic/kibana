@@ -76,6 +76,7 @@ If many other users will be interacting with your remote cluster, you'll want to
 [source,bash]
 ----
 kibana.index: '.{YourGitHubHandle}-kibana'
+xpack.task_manager.index: '.{YourGitHubHandle}-task-manager-kibana'
 ----
 
 ==== Running remote clusters
