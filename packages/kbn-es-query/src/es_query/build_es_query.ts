@@ -12,17 +12,17 @@ import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
 import { Filter, Query } from '../filters';
 import { IndexPatternBase } from './types';
+import { KueryQueryOptions } from '../kuery';
 
 /**
  * Configurations to be used while constructing an ES query.
  * @public
  */
-export interface EsQueryConfig {
+export type EsQueryConfig = KueryQueryOptions & {
   allowLeadingWildcards: boolean;
   queryStringOptions: Record<string, any>;
   ignoreFilterIfFieldNotInIndex: boolean;
-  dateFormatTZ?: string;
-}
+};
 
 function removeMatchAll<T>(filters: T[]) {
   return filters.filter(
@@ -59,7 +59,8 @@ export function buildEsQuery(
     indexPattern,
     queriesByLanguage.kuery,
     config.allowLeadingWildcards,
-    config.dateFormatTZ
+    config.dateFormatTZ,
+    config.filtersInMustClause
   );
   const luceneQuery = buildQueryFromLucene(
     queriesByLanguage.lucene,
