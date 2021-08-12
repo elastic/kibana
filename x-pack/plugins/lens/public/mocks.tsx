@@ -310,9 +310,11 @@ export function mockDataPlugin(sessionIdSubject = new Subject<string>()) {
       state$: new Observable(),
     },
     indexPatterns: {
-      get: jest.fn((id) => {
-        return new Promise((resolve) => resolve({ id, isTimeBased: () => true }));
-      }),
+      get: jest
+        .fn()
+        .mockImplementation((id) =>
+          Promise.resolve({ id, isTimeBased: () => true } as IndexPattern)
+        ),
     },
     search: createMockSearchService(),
     nowProvider: {
