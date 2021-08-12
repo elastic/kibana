@@ -53,7 +53,7 @@ function LatencyCorrelationsTab({}: TabContentProps) {
 export const latencyCorrelationsTab = {
   key: 'latencyCorrelations',
   label: i18n.translate('xpack.apm.transactionDetails.tabs.latencyLabel', {
-    defaultMessage: 'Latency correlations analysis',
+    defaultMessage: 'Latency correlations',
   }),
   component: LatencyCorrelationsTab,
 };
