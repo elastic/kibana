@@ -51,6 +51,7 @@ import {
   TRANSACTION_TYPE,
 } from '../common/elasticsearch_fieldnames';
 import { tutorialProvider } from './tutorial';
+import { apmErrorCorrelationsSearchStrategyProvider } from './lib/search_strategies/error_correlation/search_strategy';
 
 export class APMPlugin
   implements
@@ -255,13 +256,25 @@ export class APMPlugin
           coreStart.savedObjects.createInternalRepository()
         );
 
+        const includeFrozen = await coreStart.uiSettings
+          .asScopedToClient(savedObjectsClient)
+          .get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
+
+        // Register APM latency correlations strategy
         plugins.data.search.registerSearchStrategy(
           'apmCorrelationsSearchStrategy',
           apmCorrelationsSearchStrategyProvider(
             boundGetApmIndices,
-            await coreStart.uiSettings
-              .asScopedToClient(savedObjectsClient)
-              .get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN)
+            includeFrozen
+          )
+        );
+
+        // Register APM error correlations strategy
+        plugins.data.search.registerSearchStrategy(
+          'apmErrorCorrelationsSearchStrategy',
+          apmErrorCorrelationsSearchStrategyProvider(
+            boundGetApmIndices,
+            includeFrozen
           )
         );
       })();

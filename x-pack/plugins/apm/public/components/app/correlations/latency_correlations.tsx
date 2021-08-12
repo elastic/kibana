@@ -194,6 +194,7 @@ export function LatencyCorrelations({ onClose }: Props) {
               'xpack.apm.correlations.latency.percentageColumnName',
               { defaultMessage: '% of slow transactions' }
             )}
+            // @ts-expect-error: this file to be removed
             significantTerms={
               hasFieldNames && correlationsData
                 ? correlationsData?.significantTerms

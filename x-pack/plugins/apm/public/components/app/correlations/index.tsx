@@ -25,7 +25,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { MlLatencyCorrelations } from './ml_latency_correlations';
-import { ErrorCorrelations } from './error_correlations';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { createHref } from '../../shared/Links/url_helpers';
 import {
@@ -50,13 +49,17 @@ import {
   TRANSACTION_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { MlFailureCorrelations } from './ml_failure_correlations';
 
-const errorRateTab = {
+const failureCorrelationsTab = {
   key: 'errorRate',
-  label: i18n.translate('xpack.apm.correlations.tabs.errorRateLabel', {
-    defaultMessage: 'Failed transaction rate',
-  }),
-  component: ErrorCorrelations,
+  label: i18n.translate(
+    'xpack.apm.correlations.tabs.failureCorrelationsLabel',
+    {
+      defaultMessage: 'Failure correlations',
+    }
+  ),
+  component: MlFailureCorrelations,
 };
 const latencyCorrelationsTab = {
   key: 'latencyCorrelations',
@@ -65,7 +68,7 @@ const latencyCorrelationsTab = {
   }),
   component: MlLatencyCorrelations,
 };
-const tabs = [latencyCorrelationsTab, errorRateTab];
+const tabs = [latencyCorrelationsTab, failureCorrelationsTab];
 
 export function Correlations() {
   const license = useLicenseContext();

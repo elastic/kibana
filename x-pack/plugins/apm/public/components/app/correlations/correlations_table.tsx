@@ -12,44 +12,35 @@ import {
   EuiLink,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { asInteger, asPercent } from '../../../../common/utils/formatters';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { createHref, push } from '../../shared/Links/url_helpers';
-import { ImpactBar } from '../../shared/ImpactBar';
 import { useUiTracker } from '../../../../../observability/public';
 import { useTheme } from '../../../hooks/use_theme';
+import type { SelectedSignificantTerm } from '../../../../common/search_strategies/correlations/types';
 
+export type { SelectedSignificantTerm };
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
-type CorrelationsApiResponse =
-  | APIReturnType<'GET /api/apm/correlations/errors/failed_transactions'>
-  | APIReturnType<'GET /api/apm/correlations/latency/slow_transactions'>;
 
-export type SignificantTerm = CorrelationsApiResponse['significantTerms'][0];
-
-export type SelectedSignificantTerm = Pick<
-  SignificantTerm,
-  'fieldName' | 'fieldValue'
->;
+export type SelectedSignificantCorrelationTerm<
+  T extends SelectedSignificantTerm
+> = Pick<T, 'fieldName' | 'fieldValue'>;
 
 interface Props<T> {
   significantTerms?: T[];
   status: FETCH_STATUS;
   percentageColumnName?: string;
-  setSelectedSignificantTerm: (term: SelectedSignificantTerm | null) => void;
+  setSelectedSignificantTerm: (term: T | null) => void;
   selectedTerm?: { fieldName: string; fieldValue: string };
-  onFilter: () => void;
-  columns?: Array<EuiBasicTableColumn<T>>;
+  onFilter?: () => void;
+  columns: Array<EuiBasicTableColumn<T>>;
 }
 
-export function CorrelationsTable<T extends SignificantTerm>({
+export function CorrelationsTable<T extends SelectedSignificantTerm>({
   significantTerms,
   status,
-  percentageColumnName,
   setSelectedSignificantTerm,
   onFilter,
   columns,
@@ -57,7 +48,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
 }: Props<T>) {
   const euiTheme = useTheme();
   const trackApmEvent = useUiTracker({ app: 'apm' });
-  const trackSelectSignificantTerm = useCallback(
+  const trackSelectSignificantCorrelationTerm = useCallback(
     () =>
       debounce(
         () => trackApmEvent({ metric: 'select_significant_term' }),
@@ -92,139 +83,98 @@ export function CorrelationsTable<T extends SignificantTerm>({
     setPageSize(size);
   }, []);
 
-  const tableColumns: Array<EuiBasicTableColumn<T>> = columns ?? [
-    {
-      width: '116px',
-      field: 'impact',
-      name: i18n.translate(
-        'xpack.apm.correlations.correlationsTable.impactLabel',
-        { defaultMessage: 'Impact' }
-      ),
-      render: (_: any, term: T) => {
-        return <ImpactBar size="m" value={term.impact * 100} />;
-      },
-    },
-    {
-      field: 'percentage',
-      name:
-        percentageColumnName ??
-        i18n.translate(
-          'xpack.apm.correlations.correlationsTable.percentageLabel',
-          { defaultMessage: 'Percentage' }
-        ),
-      render: (_: any, term: T) => {
-        return (
-          <EuiToolTip
-            position="right"
-            content={`${asInteger(term.valueCount)} / ${asInteger(
-              term.fieldCount
-            )}`}
-          >
-            <>{asPercent(term.valueCount, term.fieldCount)}</>
-          </EuiToolTip>
-        );
-      },
-    },
-    {
-      field: 'fieldName',
-      name: i18n.translate(
-        'xpack.apm.correlations.correlationsTable.fieldNameLabel',
-        { defaultMessage: 'Field name' }
-      ),
-    },
-    {
-      field: 'fieldValue',
-      name: i18n.translate(
-        'xpack.apm.correlations.correlationsTable.fieldValueLabel',
-        { defaultMessage: 'Field value' }
-      ),
-      render: (_: any, term: T) => String(term.fieldValue).slice(0, 50),
-    },
-    {
-      width: '100px',
-      actions: [
+  const handleOnFilter = useCallback(() => (onFilter ? onFilter : () => {}), [
+    onFilter,
+  ]);
+  const tableColumns: Array<EuiBasicTableColumn<T>> = columns
+    ? [
+        ...columns,
         {
+          width: '100px',
+          actions: [
+            {
+              name: i18n.translate(
+                'xpack.apm.correlations.correlationsTable.filterLabel',
+                { defaultMessage: 'Filter' }
+              ),
+              description: i18n.translate(
+                'xpack.apm.correlations.correlationsTable.filterDescription',
+                { defaultMessage: 'Filter by value' }
+              ),
+              icon: 'plusInCircle',
+              type: 'icon',
+              onClick: (term: T) => {
+                push(history, {
+                  query: {
+                    kuery: `${term.fieldName}:"${encodeURIComponent(
+                      term.fieldValue
+                    )}"`,
+                  },
+                });
+                handleOnFilter();
+                trackApmEvent({ metric: 'correlations_term_include_filter' });
+              },
+            },
+            {
+              name: i18n.translate(
+                'xpack.apm.correlations.correlationsTable.excludeLabel',
+                { defaultMessage: 'Exclude' }
+              ),
+              description: i18n.translate(
+                'xpack.apm.correlations.correlationsTable.excludeDescription',
+                { defaultMessage: 'Filter out value' }
+              ),
+              icon: 'minusInCircle',
+              type: 'icon',
+              onClick: (term: T) => {
+                push(history, {
+                  query: {
+                    kuery: `not ${term.fieldName}:"${encodeURIComponent(
+                      term.fieldValue
+                    )}"`,
+                  },
+                });
+                handleOnFilter();
+                trackApmEvent({ metric: 'correlations_term_exclude_filter' });
+              },
+            },
+          ],
           name: i18n.translate(
-            'xpack.apm.correlations.correlationsTable.filterLabel',
+            'xpack.apm.correlations.correlationsTable.actionsLabel',
             { defaultMessage: 'Filter' }
           ),
-          description: i18n.translate(
-            'xpack.apm.correlations.correlationsTable.filterDescription',
-            { defaultMessage: 'Filter by value' }
-          ),
-          icon: 'plusInCircle',
-          type: 'icon',
-          onClick: (term: T) => {
-            push(history, {
-              query: {
-                kuery: `${term.fieldName}:"${encodeURIComponent(
-                  term.fieldValue
-                )}"`,
-              },
-            });
-            onFilter();
-            trackApmEvent({ metric: 'correlations_term_include_filter' });
+          render: (_: any, term: T) => {
+            return (
+              <>
+                <EuiLink
+                  href={createHref(history, {
+                    query: {
+                      kuery: `${term.fieldName}:"${encodeURIComponent(
+                        term.fieldValue
+                      )}"`,
+                    },
+                  })}
+                >
+                  <EuiIcon type="magnifyWithPlus" />
+                </EuiLink>
+                &nbsp;/&nbsp;
+                <EuiLink
+                  href={createHref(history, {
+                    query: {
+                      kuery: `not ${term.fieldName}:"${encodeURIComponent(
+                        term.fieldValue
+                      )}"`,
+                    },
+                  })}
+                >
+                  <EuiIcon type="magnifyWithMinus" />
+                </EuiLink>
+              </>
+            );
           },
         },
-        {
-          name: i18n.translate(
-            'xpack.apm.correlations.correlationsTable.excludeLabel',
-            { defaultMessage: 'Exclude' }
-          ),
-          description: i18n.translate(
-            'xpack.apm.correlations.correlationsTable.excludeDescription',
-            { defaultMessage: 'Filter out value' }
-          ),
-          icon: 'minusInCircle',
-          type: 'icon',
-          onClick: (term: T) => {
-            push(history, {
-              query: {
-                kuery: `not ${term.fieldName}:"${encodeURIComponent(
-                  term.fieldValue
-                )}"`,
-              },
-            });
-            onFilter();
-            trackApmEvent({ metric: 'correlations_term_exclude_filter' });
-          },
-        },
-      ],
-      name: i18n.translate(
-        'xpack.apm.correlations.correlationsTable.actionsLabel',
-        { defaultMessage: 'Filter' }
-      ),
-      render: (_: any, term: T) => {
-        return (
-          <>
-            <EuiLink
-              href={createHref(history, {
-                query: {
-                  kuery: `${term.fieldName}:"${encodeURIComponent(
-                    term.fieldValue
-                  )}"`,
-                },
-              })}
-            >
-              <EuiIcon type="magnifyWithPlus" />
-            </EuiLink>
-            &nbsp;/&nbsp;
-            <EuiLink
-              href={createHref(history, {
-                query: {
-                  kuery: `not ${term.fieldName}:"${encodeURIComponent(
-                    term.fieldValue
-                  )}"`,
-                },
-              })}
-            >
-              <EuiIcon type="magnifyWithMinus" />
-            </EuiLink>
-          </>
-        );
-      },
-    },
-  ];
+      ]
+    : [];
 
   return (
     <EuiBasicTable
@@ -238,7 +188,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
         return {
           onMouseEnter: () => {
             setSelectedSignificantTerm(term);
-            trackSelectSignificantTerm();
+            trackSelectSignificantCorrelationTerm();
           },
           onMouseLeave: () => setSelectedSignificantTerm(null),
           style:

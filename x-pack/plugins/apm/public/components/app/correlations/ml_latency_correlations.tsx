@@ -32,10 +32,7 @@ import {
   CorrelationsChart,
   replaceHistogramDotsWithBars,
 } from './correlations_chart';
-import {
-  CorrelationsTable,
-  SelectedSignificantTerm,
-} from './correlations_table';
+import { CorrelationsTable } from './correlations_table';
 import { useCorrelations } from './use_correlations';
 import { push } from '../../shared/Links/url_helpers';
 import {
@@ -136,7 +133,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
   const [
     selectedSignificantTerm,
     setSelectedSignificantTerm,
-  ] = useState<SelectedSignificantTerm | null>(null);
+  ] = useState<MlCorrelationsTerms | null>(null);
 
   let selectedHistogram = histograms.length > 0 ? histograms[0] : undefined;
 
@@ -379,10 +376,8 @@ export function MlLatencyCorrelations({ onClose }: Props) {
 
       <div data-test-subj="apmCorrelationsTable">
         {histograms.length > 0 && selectedHistogram !== undefined && (
-          <CorrelationsTable
-            // @ts-ignore correlations don't have the same column format other tables have
+          <CorrelationsTable<MlCorrelationsTerms>
             columns={mlCorrelationColumns}
-            // @ts-expect-error correlations don't have the same significant term other tables have
             significantTerms={histogramTerms}
             status={FETCH_STATUS.SUCCESS}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
