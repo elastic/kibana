@@ -35,6 +35,7 @@ describe('setDeprecationLogging', () => {
             'cluster.deprecation_indexing.enabled': true,
           },
           transient: {
+            'logger.deprecation': 'WARN',
             'cluster.deprecation_indexing.enabled': true,
           },
         },
@@ -53,6 +54,7 @@ describe('setDeprecationLogging', () => {
             'cluster.deprecation_indexing.enabled': false,
           },
           transient: {
+            'logger.deprecation': 'ERROR',
             'cluster.deprecation_indexing.enabled': false,
           },
         },

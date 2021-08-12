@@ -49,6 +49,23 @@ describe('Overview - Identify Step', () => {
       expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(false);
     });
 
+    test('shows callout when only loggerDeprecation is enabled', async () => {
+      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({
+        isEnabled: false,
+        isLoggerDeprecationEnabled: true,
+      });
+
+      await act(async () => {
+        testBed = await setupOverviewPage();
+      });
+
+      const { exists, component } = testBed;
+
+      component.update();
+
+      expect(exists('deprecationWarningCallout')).toBe(true);
+    });
+
     test('handles network error when updating logging state', async () => {
       const error = {
         statusCode: 500,

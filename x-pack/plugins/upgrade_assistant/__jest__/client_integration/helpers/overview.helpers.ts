@@ -79,4 +79,5 @@ export type OverviewTestSubjects =
   | 'viewDiscoverLogs'
   | 'upgradeSetupDocsLink'
   | 'upgradeSetupCloudLink'
+  | 'deprecationWarningCallout'
   | 'upgradeStatusError';

@@ -8,10 +8,11 @@
 import React, { FunctionComponent } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiSpacer, EuiPanel } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiPanel, EuiCallOut } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { ExternalLinks } from './external_links';
+import { useDeprecationLogging } from './use_deprecation_logging';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 
 const i18nTexts = {
@@ -24,9 +25,24 @@ const i18nTexts = {
   analyzeTitle: i18n.translate('xpack.upgradeAssistant.overview.analyzeTitle', {
     defaultMessage: 'Analyze deprecation logs',
   }),
+  deprecationWarningTitle: i18n.translate(
+    'xpack.upgradeAssistant.overview.deprecationLogs.deprecationWarningTitle',
+    {
+      defaultMessage: 'Your logs are being written to the logs directory',
+    }
+  ),
+  deprecationWarningBody: i18n.translate(
+    'xpack.upgradeAssistant.overview.deprecationLogs.deprecationWarningBody',
+    {
+      defaultMessage:
+        'Go to your logs directory to view the deprecation logs or enable log collecting to see them in the UI.',
+    }
+  ),
 };
 
 const DeprecationLogsPreview: FunctionComponent = () => {
+  const state = useDeprecationLogging();
+
   return (
     <>
       <EuiText>
@@ -34,8 +50,22 @@ const DeprecationLogsPreview: FunctionComponent = () => {
       </EuiText>
       <EuiSpacer size="m" />
       <EuiPanel>
-        <DeprecationLoggingToggle />
+        <DeprecationLoggingToggle {...state} />
       </EuiPanel>
+
+      {state.hasLoggerDeprecationWarning && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            title={i18nTexts.deprecationWarningTitle}
+            color="warning"
+            iconType="help"
+            data-test-subj="deprecationWarningCallout"
+          >
+            <p>{i18nTexts.deprecationWarningBody}</p>
+          </EuiCallOut>
+        </>
+      )}
 
       <EuiSpacer size="xl" />
       <EuiText>
