@@ -50,7 +50,7 @@ describe('ThreatDetailsView', () => {
     // this simulates a legacy enrichment from the old indicator match rule,
     // where first_seen is available at the top level
     const existingEnrichment = buildEventEnrichmentMock({
-      first_seen: [mostRecentDate],
+      'indicator.first_seen': [mostRecentDate],
     });
     delete existingEnrichment['threatintel.indicator.first_seen'];
     const newEnrichment = buildEventEnrichmentMock({

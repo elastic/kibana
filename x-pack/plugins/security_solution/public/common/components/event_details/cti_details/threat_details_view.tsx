@@ -86,7 +86,7 @@ const buildThreatDetailsItems = (enrichment: CtiEnrichment) =>
     .sort()
     .map((field) => {
       const displayField = field.startsWith(DEFAULT_INDICATOR_SOURCE_PATH)
-        ? field.replace(`${DEFAULT_INDICATOR_SOURCE_PATH}.`, '')
+        ? field.replace(`${DEFAULT_INDICATOR_SOURCE_PATH}`, 'indicator')
         : field;
 
       return {
