@@ -310,6 +310,7 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
     static runtimeId: number;
     // (undocumented)
     readonly runtimeId: number;
+    protected setInitializationFinished(): void;
     // (undocumented)
     supportedTriggers(): string[];
     // (undocumented)
