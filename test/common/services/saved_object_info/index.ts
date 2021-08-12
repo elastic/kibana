@@ -16,9 +16,7 @@ export { SavedObjectInfoService } from './saved_object_info';
 export const runSavedObjInfoSvc = () =>
   run(
     async ({ flags, log }) =>
-      areValid(flags)
-        ? pipe(await types(flags.esUrl as string)(), payload, print(log)())
-        : noop(),
+      areValid(flags) ? pipe(await types(flags.esUrl as string)(), payload, print(log)()) : noop(),
     {
       description: `
 
