@@ -10,6 +10,7 @@ import React, { ChangeEvent } from 'react';
 import { get } from 'lodash';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { TSVB_DEFAULT_COLOR } from '../../../../../common/constants';
 
 import { AddDeleteButtons } from '../../add_delete_buttons';
 import { ColorPicker, ColorProps } from '../../color_picker';
@@ -46,7 +47,7 @@ export const MultiValueRow = ({
   const onColorPickerChange = (props: ColorProps) =>
     onChange({
       ...model,
-      color: props.color || '#68BC00',
+      color: props?.color || TSVB_DEFAULT_COLOR,
     });
 
   return (

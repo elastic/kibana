@@ -10,6 +10,7 @@ import React from 'react';
 import { last } from 'lodash';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { TSVB_DEFAULT_COLOR } from '../../../../../common/constants';
 import { MultiValueRow } from './multi_value_row';
 
 interface PercentileRankValuesProps {
@@ -38,7 +39,7 @@ export const PercentileRankValues = (props: PercentileRankValuesProps) => {
       values.filter((item, currentIndex) => id !== currentIndex),
       colors.filter((item, currentIndex) => id !== currentIndex)
     );
-  const onAddValue = () => onChange([...values, ''], [...colors, '#68BC00']);
+  const onAddValue = () => onChange([...values, ''], [...colors, TSVB_DEFAULT_COLOR]);
 
   const renderRow = ({
     rowModel,
@@ -69,7 +70,7 @@ export const PercentileRankValues = (props: PercentileRankValuesProps) => {
           rowModel: {
             id: values.length - 1,
             value: last(values) || '',
-            color: last(colors) || '#68BC00',
+            color: last(colors) || TSVB_DEFAULT_COLOR,
           },
           disableAddRow: true,
           disableDeleteRow: true,
@@ -81,7 +82,7 @@ export const PercentileRankValues = (props: PercentileRankValuesProps) => {
             rowModel: {
               id,
               value: value || '',
-              color: colors[id] || '#68BC00',
+              color: colors[id] || TSVB_DEFAULT_COLOR,
             },
             disableAddRow: disableAdd,
             disableDeleteRow: disableDelete || array.length < 2,

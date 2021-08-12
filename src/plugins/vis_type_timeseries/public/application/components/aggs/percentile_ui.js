@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
+import { TSVB_DEFAULT_COLOR } from '../../../../common/constants';
 import { collectionActions } from '../lib/collection_actions';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import uuid from 'uuid';
@@ -27,7 +28,7 @@ import { ColorPicker } from '../color_picker';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const newPercentile = (opts) => {
-  return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2, color: '#68BC00' }, opts);
+  return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2, color: TSVB_DEFAULT_COLOR }, opts);
 };
 
 export class Percentiles extends Component {
@@ -48,7 +49,7 @@ export class Percentiles extends Component {
   }
 
   renderRow = (row, i, items) => {
-    const defaults = { value: '', percentile: '', shade: '', color: '#68BC00' };
+    const defaults = { value: '', percentile: '', shade: '', color: TSVB_DEFAULT_COLOR };
     const model = { ...defaults, ...row };
     const { panel, seriesId } = this.props;
     const flexItemStyle = { minWidth: 100 };

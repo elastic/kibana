@@ -28,6 +28,8 @@ import { PercentileRankValues } from './percentile_rank_values';
 
 import { KBN_FIELD_TYPES } from '../../../../../../data/public';
 import type { Metric, Panel, SanitizedFieldType, Series } from '../../../../../common/types';
+import { TSVB_DEFAULT_COLOR } from '../../../../../common/constants';
+
 import { DragHandleProps } from '../../../../types';
 import { PercentileHdr } from '../percentile_hdr';
 
@@ -49,7 +51,7 @@ interface PercentileRankAggProps {
 
 export const PercentileRankAgg = (props: PercentileRankAggProps) => {
   const { panel, fields, indexPattern } = props;
-  const defaults = { values: [''], colors: ['#68BC00'] };
+  const defaults = { values: [''], colors: [TSVB_DEFAULT_COLOR] };
   const model = { ...defaults, ...props.model };
 
   const htmlId = htmlIdGenerator();
