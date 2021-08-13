@@ -274,7 +274,7 @@ export class AlertingPlugin {
     // Routes
     const router = core.http.createRouter<AlertingRequestHandlerContext>();
     // Register routes
-    defineRoutes(router, this.licenseState, plugins.encryptedSavedObjects);
+    defineRoutes(router, this.licenseState, this.logger, plugins.encryptedSavedObjects);
 
     return {
       registerType<

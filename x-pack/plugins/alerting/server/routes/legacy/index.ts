@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter, Logger } from 'kibana/server';
 import { ILicenseState } from '../../lib';
 import { AlertingRequestHandlerContext } from '../../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
@@ -31,10 +31,11 @@ import { healthRoute } from './health';
 export function defineLegacyRoutes(
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState,
+  logger: Logger,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
   aggregateAlertRoute(router, licenseState);
-  createAlertRoute(router, licenseState);
+  createAlertRoute(router, licenseState, logger);
   deleteAlertRoute(router, licenseState);
   findAlertRoute(router, licenseState);
   getAlertRoute(router, licenseState);

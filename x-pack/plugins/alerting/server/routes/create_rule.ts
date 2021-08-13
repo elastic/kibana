@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter, Logger } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { validateDurationSchema, ILicenseState, AlertTypeDisabledError } from '../lib';
 import { CreateOptions } from '../rules_client';
@@ -95,7 +95,8 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
 
 export const createRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  logger: Logger
 ) => {
   router.post(
     {
@@ -115,6 +116,14 @@ export const createRuleRoute = (
           const rulesClient = context.alerting.getRulesClient();
           const rule = req.body;
           const params = req.params;
+
+          const shouldWarnId = params?.id && rulesClient.getSpaceId();
+          if (shouldWarnId) {
+            logger.warn(
+              `POST ${BASE_ALERTING_API_PATH}/rule/${params?.id}: Usage of "id" has been deprecated and will be removed in 8.0.0`
+            );
+          }
+
           try {
             const createdRule: SanitizedAlert<AlertTypeParams> = await rulesClient.create<AlertTypeParams>(
               {
@@ -127,6 +136,13 @@ export const createRuleRoute = (
             );
             return res.ok({
               body: rewriteBodyRes(createdRule),
+              ...(shouldWarnId
+                ? {
+                    headers: {
+                      warning: `199 kibana POST ${BASE_ALERTING_API_PATH}/rule/${params?.id}: Usage of "id" has been deprecated and will be removed in 8.0.0`,
+                    },
+                  }
+                : {}),
             });
           } catch (e) {
             if (e instanceof AlertTypeDisabledError) {

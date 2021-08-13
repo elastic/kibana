@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Logger } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
@@ -43,7 +44,11 @@ export const bodySchema = schema.object({
   notifyWhen: schema.nullable(schema.string({ validate: validateNotifyWhenType })),
 });
 
-export const createAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
+export const createAlertRoute = (
+  router: AlertingRouter,
+  licenseState: ILicenseState,
+  logger: Logger
+) => {
   router.post(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id?}`,
@@ -67,6 +72,14 @@ export const createAlertRoute = (router: AlertingRouter, licenseState: ILicenseS
         const alert = req.body;
         const params = req.params;
         const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as AlertNotifyWhenType) : null;
+
+        const shouldWarnId = params?.id && rulesClient.getSpaceId();
+        if (shouldWarnId) {
+          logger.warn(
+            `POST ${LEGACY_BASE_ALERT_API_PATH}/alert/${params?.id}: Usage of "id" has been deprecated and will be removed in 8.0.0`
+          );
+        }
+
         try {
           const alertRes: SanitizedAlert<AlertTypeParams> = await rulesClient.create<AlertTypeParams>(
             {
@@ -76,6 +89,13 @@ export const createAlertRoute = (router: AlertingRouter, licenseState: ILicenseS
           );
           return res.ok({
             body: alertRes,
+            ...(shouldWarnId
+              ? {
+                  headers: {
+                    warning: `199 kibana POST ${LEGACY_BASE_ALERT_API_PATH}/alert/${params?.id}: Usage of "id" has been deprecated and will be removed in 8.0.0`,
+                  },
+                }
+              : {}),
           });
         } catch (e) {
           if (e instanceof AlertTypeDisabledError) {
