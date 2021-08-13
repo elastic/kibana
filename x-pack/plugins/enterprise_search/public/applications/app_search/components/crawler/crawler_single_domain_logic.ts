@@ -14,7 +14,7 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { ENGINE_CRAWLER_PATH } from '../../routes';
 import { EngineLogic, generateEnginePath } from '../engine';
 
-import { CrawlerDomain, EntryPoint } from './types';
+import { CrawlerDomain, EntryPoint, Sitemap } from './types';
 import { crawlerDomainServerToClient, getDeleteDomainSuccessMessage } from './utils';
 
 export interface CrawlerSingleDomainValues {
@@ -27,6 +27,7 @@ interface CrawlerSingleDomainActions {
   fetchDomainData(domainId: string): { domainId: string };
   onReceiveDomainData(domain: CrawlerDomain): { domain: CrawlerDomain };
   updateEntryPoints(entryPoints: EntryPoint[]): { entryPoints: EntryPoint[] };
+  updateSitemaps(entryPoints: Sitemap[]): { sitemaps: Sitemap[] };
 }
 
 export const CrawlerSingleDomainLogic = kea<
@@ -38,6 +39,7 @@ export const CrawlerSingleDomainLogic = kea<
     fetchDomainData: (domainId) => ({ domainId }),
     onReceiveDomainData: (domain) => ({ domain }),
     updateEntryPoints: (entryPoints) => ({ entryPoints }),
+    updateSitemaps: (sitemaps) => ({ sitemaps }),
   },
   reducers: {
     dataLoading: [
@@ -52,6 +54,8 @@ export const CrawlerSingleDomainLogic = kea<
         onReceiveDomainData: (_, { domain }) => domain,
         updateEntryPoints: (currentDomain, { entryPoints }) =>
           ({ ...currentDomain, entryPoints } as CrawlerDomain),
+        updateSitemaps: (currentDomain, { sitemaps }) =>
+          ({ ...currentDomain, sitemaps } as CrawlerDomain),
       },
     ],
   },
