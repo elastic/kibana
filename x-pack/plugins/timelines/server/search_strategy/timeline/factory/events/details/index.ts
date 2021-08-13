@@ -39,7 +39,6 @@ export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.detail
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineDetailsQuery(indexName, eventId, docValueFields))],
     };
-
     if (response.isRunning) {
       return {
         ...response,
