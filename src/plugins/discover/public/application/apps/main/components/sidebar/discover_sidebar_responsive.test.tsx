@@ -12,13 +12,9 @@ import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-expect-error
 import realHits from '../../../../../__fixtures__/real_hits.js';
-// @ts-expect-error
-import stubbedLogstashFields from '../../../../../__fixtures__/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
-import { coreMock } from '../../../../../../../../core/public/mocks';
 import { IndexPatternAttributes } from '../../../../../../../data/common';
-import { getStubIndexPattern } from '../../../../../../../data/public/test_utils';
 import { SavedObject } from '../../../../../../../../core/types';
 import {
   DiscoverSidebarResponsive,
@@ -28,6 +24,7 @@ import { DiscoverServices } from '../../../../../build_services';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { FetchStatus } from '../../../../types';
 import { DataDocuments$ } from '../../services/use_saved_search';
+import { stubLogstashIndexPattern } from '../../../../../../../data/common/stubs';
 
 const mockServices = ({
   history: () => ({
@@ -56,18 +53,8 @@ jest.mock('../../../../../kibana_services', () => ({
   getServices: () => mockServices,
 }));
 
-jest.mock('./lib/get_index_pattern_field_list', () => ({
-  getIndexPatternFieldList: jest.fn((indexPattern) => indexPattern.fields),
-}));
-
 function getCompProps(): DiscoverSidebarResponsiveProps {
-  const indexPattern = getStubIndexPattern(
-    'logstash-*',
-    (cfg: unknown) => cfg,
-    'time',
-    stubbedLogstashFields(),
-    coreMock.createSetup()
-  );
+  const indexPattern = stubLogstashIndexPattern;
 
   // @ts-expect-error _.each() is passing additional args to flattenHit
   const hits = (each(cloneDeep(realHits), indexPattern.flattenHit) as Array<
@@ -80,13 +67,6 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     { id: '2', attributes: { title: 'c' } } as SavedObject<IndexPatternAttributes>,
   ];
 
-  const fieldCounts: Record<string, number> = {};
-
-  for (const hit of hits) {
-    for (const key of Object.keys(indexPattern.flattenHit(hit))) {
-      fieldCounts[key] = (fieldCounts[key] || 0) + 1;
-    }
-  }
   return {
     columns: ['extension'],
     documents$: new BehaviorSubject({

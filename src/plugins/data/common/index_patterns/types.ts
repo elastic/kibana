@@ -53,10 +53,10 @@ export interface IIndexPattern extends IndexPatternBase {
  * Interface for an index pattern saved object
  */
 export interface IndexPatternAttributes {
-  type: string;
   fields: string;
   title: string;
-  typeMeta: string;
+  type?: string;
+  typeMeta?: string;
   timeFieldName?: string;
   intervalName?: string;
   sourceFilters?: string;

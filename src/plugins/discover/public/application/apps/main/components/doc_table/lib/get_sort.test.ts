@@ -7,50 +7,44 @@
  */
 
 import { getSort, getSortArray } from './get_sort';
-// @ts-expect-error
-import FixturesStubbedLogstashIndexPatternProvider from '../../../../../../__fixtures__/stubbed_logstash_index_pattern';
-import { IndexPattern } from '../../../../../../kibana_services';
+import {
+  stubIndexPattern,
+  stubIndexPatternWithoutTimeField,
+} from '../../../../../../../../data/common/stubs';
 
 describe('docTable', function () {
-  let indexPattern: IndexPattern;
-
-  beforeEach(() => {
-    indexPattern = FixturesStubbedLogstashIndexPatternProvider() as IndexPattern;
-  });
-
   describe('getSort function', function () {
     test('should be a function', function () {
       expect(typeof getSort === 'function').toBeTruthy();
     });
 
     test('should return an array of objects', function () {
-      expect(getSort([['bytes', 'desc']], indexPattern)).toEqual([{ bytes: 'desc' }]);
-
-      delete indexPattern.timeFieldName;
-      expect(getSort([['bytes', 'desc']], indexPattern)).toEqual([{ bytes: 'desc' }]);
+      expect(getSort([['bytes', 'desc']], stubIndexPattern)).toEqual([{ bytes: 'desc' }]);
+      expect(getSort([['bytes', 'desc']], stubIndexPatternWithoutTimeField)).toEqual([
+        { bytes: 'desc' },
+      ]);
     });
 
     test('should passthrough arrays of objects', () => {
-      expect(getSort([{ bytes: 'desc' }], indexPattern)).toEqual([{ bytes: 'desc' }]);
+      expect(getSort([{ bytes: 'desc' }], stubIndexPattern)).toEqual([{ bytes: 'desc' }]);
     });
 
     test('should return an empty array when passed an unsortable field', function () {
-      expect(getSort([['non-sortable', 'asc']], indexPattern)).toEqual([]);
-      expect(getSort([['lol_nope', 'asc']], indexPattern)).toEqual([]);
+      expect(getSort([['non-sortable', 'asc']], stubIndexPattern)).toEqual([]);
+      expect(getSort([['lol_nope', 'asc']], stubIndexPattern)).toEqual([]);
 
-      delete indexPattern.timeFieldName;
-      expect(getSort([['non-sortable', 'asc']], indexPattern)).toEqual([]);
+      expect(getSort([['non-sortable', 'asc']], stubIndexPatternWithoutTimeField)).toEqual([]);
     });
 
     test('should return an empty array ', function () {
-      expect(getSort([], indexPattern)).toEqual([]);
-      expect(getSort([['foo', 'bar']], indexPattern)).toEqual([]);
-      expect(getSort([{ foo: 'bar' }], indexPattern)).toEqual([]);
+      expect(getSort([], stubIndexPattern)).toEqual([]);
+      expect(getSort([['foo', 'bar']], stubIndexPattern)).toEqual([]);
+      expect(getSort([{ foo: 'bar' }], stubIndexPattern)).toEqual([]);
     });
 
     test('should convert a legacy sort to an array of objects', function () {
-      expect(getSort(['foo', 'desc'], indexPattern)).toEqual([{ foo: 'desc' }]);
-      expect(getSort(['foo', 'asc'], indexPattern)).toEqual([{ foo: 'asc' }]);
+      expect(getSort(['foo', 'desc'], stubIndexPattern)).toEqual([{ foo: 'desc' }]);
+      expect(getSort(['foo', 'asc'], stubIndexPattern)).toEqual([{ foo: 'asc' }]);
     });
   });
 
@@ -60,26 +54,26 @@ describe('docTable', function () {
     });
 
     test('should return an array of arrays for sortable fields', function () {
-      expect(getSortArray([['bytes', 'desc']], indexPattern)).toEqual([['bytes', 'desc']]);
+      expect(getSortArray([['bytes', 'desc']], stubIndexPattern)).toEqual([['bytes', 'desc']]);
     });
 
     test('should return an array of arrays from an array of elasticsearch sort objects', function () {
-      expect(getSortArray([{ bytes: 'desc' }], indexPattern)).toEqual([['bytes', 'desc']]);
+      expect(getSortArray([{ bytes: 'desc' }], stubIndexPattern)).toEqual([['bytes', 'desc']]);
     });
 
     test('should sort by an empty array when an unsortable field is given', function () {
-      expect(getSortArray([{ 'non-sortable': 'asc' }], indexPattern)).toEqual([]);
-      expect(getSortArray([{ lol_nope: 'asc' }], indexPattern)).toEqual([]);
+      expect(getSortArray([{ 'non-sortable': 'asc' }], stubIndexPattern)).toEqual([]);
+      expect(getSortArray([{ lol_nope: 'asc' }], stubIndexPattern)).toEqual([]);
 
-      delete indexPattern.timeFieldName;
-      expect(getSortArray([{ 'non-sortable': 'asc' }], indexPattern)).toEqual([]);
+      expect(getSortArray([{ 'non-sortable': 'asc' }], stubIndexPatternWithoutTimeField)).toEqual(
+        []
+      );
     });
 
     test('should return an empty array when passed an empty sort array', () => {
-      expect(getSortArray([], indexPattern)).toEqual([]);
+      expect(getSortArray([], stubIndexPattern)).toEqual([]);
 
-      delete indexPattern.timeFieldName;
-      expect(getSortArray([], indexPattern)).toEqual([]);
+      expect(getSortArray([], stubIndexPatternWithoutTimeField)).toEqual([]);
     });
   });
 });

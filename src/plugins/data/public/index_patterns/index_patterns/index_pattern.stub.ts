@@ -23,7 +23,7 @@ export const createStubIndexPattern = ({
     shortDotsEnable?: boolean;
     metaFields?: string[];
   };
-  deps: {
+  deps?: {
     fieldFormats?: FieldFormatsStartCommon;
     core?: CoreSetup;
   };
@@ -33,7 +33,7 @@ export const createStubIndexPattern = ({
     opts,
     deps: {
       fieldFormats:
-        deps?.fieldFormats ?? getFieldFormatsRegistry(deps.core ?? coreMock.createSetup()),
+        deps?.fieldFormats ?? getFieldFormatsRegistry(deps?.core ?? coreMock.createSetup()),
     },
   });
 };

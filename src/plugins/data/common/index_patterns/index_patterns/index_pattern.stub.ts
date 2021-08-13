@@ -27,7 +27,7 @@ export const createStubIndexPattern = ({
 }): IndexPattern => {
   const indexPattern = new IndexPattern({
     spec,
-    metaFields: opts?.metaFields,
+    metaFields: opts?.metaFields ?? ['_id', '_type', '_source'],
     shortDotsEnable: opts?.shortDotsEnable,
     fieldFormats: deps?.fieldFormats ?? fieldFormatsMock,
   });
