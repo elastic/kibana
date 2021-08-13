@@ -62,6 +62,8 @@ export const DEFAULT_SPACE_ID = 'default';
 // to enrich signals, and are copied to threat.enrichments.
 export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
 export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
+export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex';
+export const DEFAULT_THREAT_INDEX_VALUE = ['filebeat-*'];
 
 export enum SecurityPageName {
   administration = 'administration',
