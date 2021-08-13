@@ -7,12 +7,13 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const TEST_INDEX_PATTERN = 'date_nanos_custom_timestamp';
 const TEST_DEFAULT_CONTEXT_SIZE = 1;
 const TEST_STEP_SIZE = 3;
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const docTable = getService('docTable');
   const security = getService('security');
