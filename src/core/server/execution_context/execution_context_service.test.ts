@@ -378,6 +378,26 @@ describe('ExecutionContextService', () => {
 
         expect(result).toBeUndefined();
       });
+      it('executes provided function when disabled', async () => {
+        const coreWithDisabledService = mockCoreContext.create();
+        coreWithDisabledService.configService.atPath.mockReturnValue(
+          new BehaviorSubject({ enabled: false })
+        );
+        const disabledService = new ExecutionContextService(coreWithDisabledService).setup();
+        const fn = jest.fn();
+
+        disabledService.withContext(
+          {
+            type: 'type-b',
+            name: 'name-b',
+            id: 'id-b',
+            description: 'description-b',
+          },
+          fn
+        );
+
+        expect(fn).toHaveBeenCalledTimes(1);
+      });
     });
 
     describe('getAsHeader', () => {
