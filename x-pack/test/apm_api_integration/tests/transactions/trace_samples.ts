@@ -57,7 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct number of samples', () => {
-        expectSnapshot(response.body.traceSamples.length).toMatchInline(`10`);
+        expectSnapshot(response.body.traceSamples.length).toMatchInline(`15`);
       });
 
       it('returns the correct samples', () => {
