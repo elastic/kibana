@@ -62,7 +62,8 @@ export function ServiceOverviewInstancesTable({
   detailedStatsData: detailedStatsData,
   isLoading,
 }: Props) {
-  const { agentName } = useApmServiceContext();
+  const { agentMetadataDetails } = useApmServiceContext();
+  const agentName = agentMetadataDetails?.service?.agent.name;
   const {
     urlParams: { latencyAggregationType, comparisonEnabled },
   } = useUrlParams();

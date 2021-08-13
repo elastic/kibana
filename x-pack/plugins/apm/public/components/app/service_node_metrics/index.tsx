@@ -49,7 +49,9 @@ export function ServiceNodeMetrics() {
   const {
     urlParams: { kuery, start, end },
   } = useUrlParams();
-  const { agentName, serviceName } = useApmServiceContext();
+  const { agentMetadataDetails, serviceName } = useApmServiceContext();
+
+  const agentName = agentMetadataDetails?.service?.agent.name;
 
   const apmRouter = useApmRouter();
 

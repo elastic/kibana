@@ -7,15 +7,19 @@
 
 import { useFetcher } from '../../hooks/use_fetcher';
 import { useUrlParams } from '../url_params_context/use_url_params';
+import { APIReturnType } from '../../services/rest/createCallApmApi';
 
-export function useServiceAgentNameFetcher(serviceName?: string) {
+export type AgentMetadataDetails = APIReturnType<'GET /api/apm/services/{serviceName}/metadata/details'>;
+
+export function useAgentMetadataDetailsFetcher(serviceName?: string) {
   const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
-  const { data, error, status } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/agent_name',
+          isCachable: true,
+          endpoint: 'GET /api/apm/services/{serviceName}/metadata/details',
           params: {
             path: { serviceName },
             query: { start, end },
@@ -26,10 +30,5 @@ export function useServiceAgentNameFetcher(serviceName?: string) {
     [serviceName, start, end]
   );
 
-  return {
-    agentName: data?.agentName,
-    serviceRuntimeName: data?.serviceRuntimeName,
-    status,
-    error,
-  };
+  return { agentMetadataDetails: data, agentMetadataDetailsStatus: status };
 }

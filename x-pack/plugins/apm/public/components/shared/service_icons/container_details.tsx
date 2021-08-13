@@ -10,12 +10,10 @@ import { EuiDescriptionListProps } from '@elastic/eui/src/components/description
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asInteger } from '../../../../common/utils/formatters';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
-
-type ServiceDetailsReturnType = APIReturnType<'GET /api/apm/services/{serviceName}/metadata/details'>;
+import { AgentMetadataDetails } from '../../../context/apm_service/use_agent_metadata_details_fetcher';
 
 interface Props {
-  container: ServiceDetailsReturnType['container'];
+  container: AgentMetadataDetails['container'];
 }
 
 export function ContainerDetails({ container }: Props) {

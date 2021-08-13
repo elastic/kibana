@@ -13,9 +13,12 @@ import {
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
 import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
-import { useServiceAgentNameFetcher } from './use_service_agent_name_fetcher';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
 import { useServiceAlertsFetcher } from './use_service_alerts_fetcher';
+import {
+  useAgentMetadataDetailsFetcher,
+  AgentMetadataDetails,
+} from './use_agent_metadata_details_fetcher';
 import { useApmParams } from '../../hooks/use_apm_params';
 
 export type APMServiceAlert = ValuesType<
@@ -24,11 +27,10 @@ export type APMServiceAlert = ValuesType<
 
 export const APMServiceContext = createContext<{
   serviceName: string;
-  agentName?: string;
   transactionType?: string;
   transactionTypes: string[];
   alerts: APMServiceAlert[];
-  serviceRuntimeName?: string;
+  agentMetadataDetails?: AgentMetadataDetails;
 }>({ serviceName: '', transactionTypes: [], alerts: [] });
 
 export function ApmServiceContextProvider({
@@ -41,9 +43,8 @@ export function ApmServiceContextProvider({
     query,
   } = useApmParams('/services/:serviceName');
 
-  const { agentName, serviceRuntimeName } = useServiceAgentNameFetcher(
-    serviceName
-  );
+  const { agentMetadataDetails } = useAgentMetadataDetailsFetcher(serviceName);
+  const agentName = agentMetadataDetails?.service?.agent.name;
 
   const transactionTypes = useServiceTransactionTypesFetcher(serviceName);
 
@@ -59,11 +60,10 @@ export function ApmServiceContextProvider({
     <APMServiceContext.Provider
       value={{
         serviceName,
-        agentName,
         transactionType,
         transactionTypes,
         alerts,
-        serviceRuntimeName,
+        agentMetadataDetails,
       }}
       children={children}
     />

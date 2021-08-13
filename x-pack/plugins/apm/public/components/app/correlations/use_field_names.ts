@@ -16,8 +16,8 @@ interface IndexPattern {
 }
 
 export function useFieldNames() {
-  const { agentName } = useApmServiceContext();
-  const isRumAgent = isRumAgentName(agentName);
+  const { agentMetadataDetails } = useApmServiceContext();
+  const isRumAgent = isRumAgentName(agentMetadataDetails?.service?.agent.name);
   const { indexPattern } = useDynamicIndexPatternFetcher();
 
   const [defaultFieldNames, setDefaultFieldNames] = useState(

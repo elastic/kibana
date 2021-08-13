@@ -23,7 +23,8 @@ export function useServiceMetricChartsFetcher({
   const {
     urlParams: { environment, kuery, start, end },
   } = useUrlParams();
-  const { agentName, serviceName } = useApmServiceContext();
+  const { agentMetadataDetails, serviceName } = useApmServiceContext();
+  const agentName = agentMetadataDetails?.service?.agent.name;
 
   const { data = INITIAL_DATA, error, status } = useFetcher(
     (callApmApi) => {

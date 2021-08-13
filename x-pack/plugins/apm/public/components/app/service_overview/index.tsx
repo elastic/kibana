@@ -31,7 +31,9 @@ export const chartHeight = 288;
 
 export function ServiceOverview() {
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher();
-  const { agentName, serviceName } = useApmServiceContext();
+  const { agentMetadataDetails, serviceName } = useApmServiceContext();
+
+  const agentName = agentMetadataDetails?.service?.agent.name;
 
   // The default EuiFlexGroup breaks at 768, but we want to break at 992, so we
   // observe the window width and set the flex directions of rows accordingly

@@ -153,10 +153,13 @@ export function isJVMsTabHidden({
 }
 
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
-  const { agentName, serviceRuntimeName } = useApmServiceContext();
+  const { agentMetadataDetails } = useApmServiceContext();
   const { config } = useApmPluginContext();
 
   const router = useApmRouter();
+
+  const agentName = agentMetadataDetails?.service?.agent.name;
+  const serviceRuntimeName = agentMetadataDetails?.service?.runtime?.name;
 
   const {
     path: { serviceName },

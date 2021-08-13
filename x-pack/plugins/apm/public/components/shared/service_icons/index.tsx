@@ -17,6 +17,7 @@ import { CloudDetails } from './cloud_details';
 import { ContainerDetails } from './container_details';
 import { IconPopover } from './icon_popover';
 import { ServiceDetails } from './service_details';
+import { useAgentMetadataDetailsFetcher } from '../../../context/apm_service/use_agent_metadata_details_fetcher';
 
 interface Props {
   serviceName: string;
@@ -86,21 +87,10 @@ export function ServiceIcons({ serviceName }: Props) {
     [serviceName, start, end]
   );
 
-  const { data: details, status: detailsFetchStatus } = useFetcher(
-    (callApmApi) => {
-      if (selectedIconPopover && serviceName && start && end) {
-        return callApmApi({
-          isCachable: true,
-          endpoint: 'GET /api/apm/services/{serviceName}/metadata/details',
-          params: {
-            path: { serviceName },
-            query: { start, end },
-          },
-        });
-      }
-    },
-    [selectedIconPopover, serviceName, start, end]
-  );
+  const {
+    agentMetadataDetails,
+    agentMetadataDetailsStatus,
+  } = useAgentMetadataDetailsFetcher(serviceName);
 
   const isLoading = !icons && iconsFetchStatus === FETCH_STATUS.LOADING;
 
@@ -118,7 +108,7 @@ export function ServiceIcons({ serviceName }: Props) {
       title: i18n.translate('xpack.apm.serviceIcons.service', {
         defaultMessage: 'Service',
       }),
-      component: <ServiceDetails service={details?.service} />,
+      component: <ServiceDetails service={agentMetadataDetails?.service} />,
     },
     {
       key: 'container',
@@ -129,7 +119,9 @@ export function ServiceIcons({ serviceName }: Props) {
       title: i18n.translate('xpack.apm.serviceIcons.container', {
         defaultMessage: 'Container',
       }),
-      component: <ContainerDetails container={details?.container} />,
+      component: (
+        <ContainerDetails container={agentMetadataDetails?.container} />
+      ),
     },
     {
       key: 'cloud',
@@ -140,7 +132,7 @@ export function ServiceIcons({ serviceName }: Props) {
       title: i18n.translate('xpack.apm.serviceIcons.cloud', {
         defaultMessage: 'Cloud',
       }),
-      component: <CloudDetails cloud={details?.cloud} />,
+      component: <CloudDetails cloud={agentMetadataDetails?.cloud} />,
     },
   ];
 
@@ -153,7 +145,7 @@ export function ServiceIcons({ serviceName }: Props) {
               <IconPopover
                 isOpen={selectedIconPopover === item.key}
                 icon={item.icon}
-                detailsFetchStatus={detailsFetchStatus}
+                detailsFetchStatus={agentMetadataDetailsStatus}
                 title={item.title}
                 onClick={() => {
                   setSelectedIconPopover((prevSelectedIconPopover) =>

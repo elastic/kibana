@@ -42,7 +42,8 @@ function getEnvironmentDefinition(environment?: string) {
 }
 
 export function AnalyzeDataButton() {
-  const { agentName, serviceName } = useApmServiceContext();
+  const { agentMetadataDetails, serviceName } = useApmServiceContext();
+  const agentName = agentMetadataDetails?.service?.agent.name;
   const { services } = useKibana();
   const { urlParams } = useUrlParams();
   const { rangeTo, rangeFrom, environment } = urlParams;
