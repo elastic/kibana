@@ -6,10 +6,7 @@
  */
 
 import { groupBy } from 'lodash';
-import {
-  DEFAULT_INDICATOR_SOURCE_PATH,
-  INDICATOR_DESTINATION_PATH,
-} from '../../../../../common/constants';
+import { INDICATOR_DESTINATION_PATH } from '../../../../../common/constants';
 import {
   ENRICHMENT_TYPES,
   MATCHED_ATOMIC,
@@ -68,21 +65,22 @@ export const getEnrichmentValue = (enrichment: CtiEnrichment, field: string) =>
   getFirstElement(enrichment[field]) as string | undefined;
 
 /**
- * These fields (e.g. 'x') may be in one of two keys depending on whether it's
- * a new enrichment ('threatintel.indicator.x') or an old indicator alert
- * (simply 'x'). Once enrichment has been normalized and we support the new ECS
- * fields, this value should always be 'indicator.x';
+ * These fields (e.g. 'indicator.ip') may be in one of three places depending on whether it's:
+ *   * a queried, legacy filebeat indicator ('threatintel.indicator.ip')
+ *   * a queried, ECS 1.11 filebeat indicator ('threat.indicator.ip')
+ *   * an existing indicator from an enriched alert ('indicator.ip')
  */
 export const getShimmedIndicatorValue = (enrichment: CtiEnrichment, field: string) =>
   getEnrichmentValue(enrichment, field) ||
-  getEnrichmentValue(enrichment, `${DEFAULT_INDICATOR_SOURCE_PATH}.${field}`); // TODO I don't think this is ever going to find an alert that we care about
+  getEnrichmentValue(enrichment, `threatintel.${field}`) ||
+  getEnrichmentValue(enrichment, `threat.${field}`);
 
 export const getEnrichmentIdentifiers = (enrichment: CtiEnrichment): CtiEnrichmentIdentifiers => ({
   id: getEnrichmentValue(enrichment, MATCHED_ID),
   field: getEnrichmentValue(enrichment, MATCHED_FIELD),
   value: getEnrichmentValue(enrichment, MATCHED_ATOMIC),
   type: getEnrichmentValue(enrichment, MATCHED_TYPE),
-  provider: getEnrichmentValue(enrichment, PROVIDER),
+  provider: getShimmedIndicatorValue(enrichment, PROVIDER),
 });
 
 const buildEnrichmentId = (enrichment: CtiEnrichment): string => {
