@@ -15,7 +15,7 @@ import {
 } from '../../common';
 import { createConnectorObject, createExternalService, createJiraConnector } from '../test_utils';
 import {
-  extractConnectorIdFromActionDetails,
+  extractConnectorIdHelper,
   extractConnectorIdFromJson,
   extractConnectorId,
   transformConnectorIdToReference,
@@ -333,13 +333,13 @@ describe('user action transform utils', () => {
     });
   });
 
-  describe('extractConnectorIdFromActionDetails', () => {
+  describe('extractConnectorIdHelper', () => {
     it('throws an error when action details has a circular reference', () => {
       const circularRef = { prop: {} };
       circularRef.prop = circularRef;
 
       expect(() => {
-        extractConnectorIdFromActionDetails({
+        extractConnectorIdHelper({
           action: 'a',
           actionFields: [],
           actionDetails: circularRef,
@@ -349,9 +349,9 @@ describe('user action transform utils', () => {
     });
 
     describe('create action', () => {
-      it('returns no references and untransformed json when stringifiedJson is not a valid connector', () => {
+      it('returns no references and untransformed json when actionDetails is not a valid connector', () => {
         expect(
-          extractConnectorIdFromActionDetails({
+          extractConnectorIdHelper({
             action: 'create',
             actionFields: ['connector'],
             actionDetails: { a: 'hello' },
@@ -367,7 +367,7 @@ describe('user action transform utils', () => {
 
       it('returns no references and untransformed json when the action is create and action fields does not contain connector', () => {
         expect(
-          extractConnectorIdFromActionDetails({
+          extractConnectorIdHelper({
             action: 'create',
             actionFields: ['', 'something', 'onnector'],
             actionDetails: { a: 'hello' },
@@ -384,7 +384,7 @@ describe('user action transform utils', () => {
       it('returns the stringified json without the id', () => {
         const jiraConnector = createConnectorObject();
 
-        const { transformedActionDetails } = extractConnectorIdFromActionDetails({
+        const { transformedActionDetails } = extractConnectorIdHelper({
           action: 'create',
           actionFields: ['connector'],
           actionDetails: jiraConnector,
@@ -409,7 +409,7 @@ describe('user action transform utils', () => {
       it('removes the connector.id when the connector is none', () => {
         const connector = { connector: getNoneCaseConnector() };
 
-        const { transformedActionDetails } = extractConnectorIdFromActionDetails({
+        const { transformedActionDetails } = extractConnectorIdHelper({
           action: 'create',
           actionFields: ['connector'],
           actionDetails: connector,
@@ -433,7 +433,7 @@ describe('user action transform utils', () => {
       it('does not return a reference when the connector is none', () => {
         const connector = { connector: getNoneCaseConnector() };
 
-        const { references } = extractConnectorIdFromActionDetails({
+        const { references } = extractConnectorIdHelper({
           action: 'create',
           actionFields: ['connector'],
           actionDetails: connector,
@@ -446,7 +446,7 @@ describe('user action transform utils', () => {
       it('returns a reference to the connector.id', () => {
         const connector = createConnectorObject();
 
-        const { references } = extractConnectorIdFromActionDetails({
+        const { references } = extractConnectorIdHelper({
           action: 'create',
           actionFields: ['connector'],
           actionDetails: connector,
@@ -467,7 +467,7 @@ describe('user action transform utils', () => {
       it('returns an old reference name to the connector.id', () => {
         const connector = createConnectorObject();
 
-        const { references } = extractConnectorIdFromActionDetails({
+        const { references } = extractConnectorIdHelper({
           action: 'create',
           actionFields: ['connector'],
           actionDetails: connector,
@@ -487,9 +487,9 @@ describe('user action transform utils', () => {
     });
 
     describe('update action', () => {
-      it('returns no references and untransformed json when stringifiedJson is not a valid connector', () => {
+      it('returns no references and untransformed json when actionDetails is not a valid connector', () => {
         expect(
-          extractConnectorIdFromActionDetails({
+          extractConnectorIdHelper({
             action: 'update',
             actionFields: ['connector'],
             actionDetails: { a: 'hello' },
@@ -505,7 +505,7 @@ describe('user action transform utils', () => {
 
       it('returns no references and untransformed json when the action is update and action fields does not contain connector', () => {
         expect(
-          extractConnectorIdFromActionDetails({
+          extractConnectorIdHelper({
             action: 'update',
             actionFields: ['', 'something', 'onnector'],
             actionDetails: 5,
@@ -522,7 +522,7 @@ describe('user action transform utils', () => {
       it('returns the stringified json without the id', () => {
         const jiraConnector = createJiraConnector();
 
-        const { transformedActionDetails } = extractConnectorIdFromActionDetails({
+        const { transformedActionDetails } = extractConnectorIdHelper({
           action: 'update',
           actionFields: ['connector'],
           actionDetails: jiraConnector,
@@ -547,7 +547,7 @@ describe('user action transform utils', () => {
       it('returns the stringified json without the id when the connector is none', () => {
         const connector = getNoneCaseConnector();
 
-        const { transformedActionDetails } = extractConnectorIdFromActionDetails({
+        const { transformedActionDetails } = extractConnectorIdHelper({
           action: 'update',
           actionFields: ['connector'],
           actionDetails: connector,
@@ -568,7 +568,7 @@ describe('user action transform utils', () => {
       it('returns a reference to the connector.id', () => {
         const jiraConnector = createJiraConnector();
 
-        const { references } = extractConnectorIdFromActionDetails({
+        const { references } = extractConnectorIdHelper({
           action: 'update',
           actionFields: ['connector'],
           actionDetails: jiraConnector,
@@ -589,7 +589,7 @@ describe('user action transform utils', () => {
       it('does not return a reference when the connector is none', () => {
         const connector = getNoneCaseConnector();
 
-        const { references } = extractConnectorIdFromActionDetails({
+        const { references } = extractConnectorIdHelper({
           action: 'update',
           actionFields: ['connector'],
           actionDetails: connector,
@@ -602,7 +602,7 @@ describe('user action transform utils', () => {
       it('returns an old reference name to the connector.id', () => {
         const jiraConnector = createJiraConnector();
 
-        const { references } = extractConnectorIdFromActionDetails({
+        const { references } = extractConnectorIdHelper({
           action: 'update',
           actionFields: ['connector'],
           actionDetails: jiraConnector,
@@ -622,9 +622,9 @@ describe('user action transform utils', () => {
     });
 
     describe('push action', () => {
-      it('returns no references and untransformed json when stringifiedJson is not a valid external_service', () => {
+      it('returns no references and untransformed json when actionDetails is not a valid external_service', () => {
         expect(
-          extractConnectorIdFromActionDetails({
+          extractConnectorIdHelper({
             action: 'push-to-service',
             actionFields: ['pushed'],
             actionDetails: { a: 'hello' },
@@ -640,7 +640,7 @@ describe('user action transform utils', () => {
 
       it('returns no references and untransformed json when the action is push-to-service and action fields does not contain pushed', () => {
         expect(
-          extractConnectorIdFromActionDetails({
+          extractConnectorIdHelper({
             action: 'push-to-service',
             actionFields: ['', 'something', 'ushed'],
             actionDetails: { a: 'hello' },
@@ -657,7 +657,7 @@ describe('user action transform utils', () => {
       it('returns the stringified json without the connector_id', () => {
         const externalService = createExternalService();
 
-        const { transformedActionDetails } = extractConnectorIdFromActionDetails({
+        const { transformedActionDetails } = extractConnectorIdHelper({
           action: 'push-to-service',
           actionFields: ['pushed'],
           actionDetails: externalService,
@@ -685,7 +685,7 @@ describe('user action transform utils', () => {
       it('returns a reference to the connector_id', () => {
         const externalService = createExternalService();
 
-        const { references } = extractConnectorIdFromActionDetails({
+        const { references } = extractConnectorIdHelper({
           action: 'push-to-service',
           actionFields: ['pushed'],
           actionDetails: externalService,
@@ -706,7 +706,7 @@ describe('user action transform utils', () => {
       it('returns an old reference name to the connector_id', () => {
         const externalService = createExternalService();
 
-        const { references } = extractConnectorIdFromActionDetails({
+        const { references } = extractConnectorIdHelper({
           action: 'push-to-service',
           actionFields: ['pushed'],
           actionDetails: externalService,
@@ -1011,11 +1011,11 @@ describe('user action transform utils', () => {
         expect(
           extractConnectorIdFromJson({
             actionFields: [],
-            stringifiedJson: undefined,
+            actionDetails: undefined,
             fieldType: UserActionFieldType.New,
           })
         ).toEqual({
-          transformedJson: undefined,
+          transformedActionDetails: undefined,
           references: [],
         });
       });
@@ -1024,12 +1024,12 @@ describe('user action transform utils', () => {
         expect(
           extractConnectorIdFromJson({ action: 'a', fieldType: UserActionFieldType.New })
         ).toEqual({
-          transformedJson: undefined,
+          transformedActionDetails: undefined,
           references: [],
         });
       });
 
-      it('returns no references and undefined transformed json when stringifiedJson is undefined', () => {
+      it('returns no references and undefined transformed json when actionDetails is undefined', () => {
         expect(
           extractConnectorIdFromJson({
             action: 'a',
@@ -1037,35 +1037,35 @@ describe('user action transform utils', () => {
             fieldType: UserActionFieldType.New,
           })
         ).toEqual({
-          transformedJson: undefined,
+          transformedActionDetails: undefined,
           references: [],
         });
       });
 
-      it('returns no references and undefined transformed json when stringifiedJson is null', () => {
+      it('returns no references and undefined transformed json when actionDetails is null', () => {
         expect(
           extractConnectorIdFromJson({
             action: 'a',
             actionFields: [],
-            stringifiedJson: null,
+            actionDetails: null,
             fieldType: UserActionFieldType.New,
           })
         ).toEqual({
-          transformedJson: null,
+          transformedActionDetails: null,
           references: [],
         });
       });
 
-      it('returns no references and undefined transformed json when stringifiedJson is invalid json', () => {
+      it('returns no references and undefined transformed json when actionDetails is invalid json', () => {
         expect(
           extractConnectorIdFromJson({
             action: 'a',
             actionFields: [],
-            stringifiedJson: '{a',
+            actionDetails: '{a',
             fieldType: UserActionFieldType.New,
           })
         ).toEqual({
-          transformedJson: '{a',
+          transformedActionDetails: '{a',
           references: [],
         });
       });
@@ -1075,14 +1075,14 @@ describe('user action transform utils', () => {
       it('returns the stringified json without the id', () => {
         const jiraConnector = createConnectorObject();
 
-        const { transformedJson } = extractConnectorIdFromJson({
+        const { transformedActionDetails } = extractConnectorIdFromJson({
           action: 'create',
           actionFields: ['connector'],
-          stringifiedJson: JSON.stringify(jiraConnector),
+          actionDetails: JSON.stringify(jiraConnector),
           fieldType: UserActionFieldType.New,
         });
 
-        expect(JSON.parse(transformedJson!)).toMatchInlineSnapshot(`
+        expect(JSON.parse(transformedActionDetails!)).toMatchInlineSnapshot(`
           Object {
             "connector": Object {
               "fields": Object {
@@ -1103,7 +1103,7 @@ describe('user action transform utils', () => {
         const { references } = extractConnectorIdFromJson({
           action: 'create',
           actionFields: ['connector'],
-          stringifiedJson: JSON.stringify(jiraConnector),
+          actionDetails: JSON.stringify(jiraConnector),
           fieldType: UserActionFieldType.New,
         })!;
 
@@ -1123,14 +1123,14 @@ describe('user action transform utils', () => {
       it('returns the stringified json without the id', () => {
         const jiraConnector = createJiraConnector();
 
-        const { transformedJson } = extractConnectorIdFromJson({
+        const { transformedActionDetails } = extractConnectorIdFromJson({
           action: 'update',
           actionFields: ['connector'],
-          stringifiedJson: JSON.stringify(jiraConnector),
+          actionDetails: JSON.stringify(jiraConnector),
           fieldType: UserActionFieldType.New,
         });
 
-        const transformedConnetor = JSON.parse(transformedJson!);
+        const transformedConnetor = JSON.parse(transformedActionDetails!);
         expect(transformedConnetor).not.toHaveProperty('id');
         expect(transformedConnetor).toMatchInlineSnapshot(`
           Object {
@@ -1151,7 +1151,7 @@ describe('user action transform utils', () => {
         const { references } = extractConnectorIdFromJson({
           action: 'update',
           actionFields: ['connector'],
-          stringifiedJson: JSON.stringify(jiraConnector),
+          actionDetails: JSON.stringify(jiraConnector),
           fieldType: UserActionFieldType.New,
         })!;
 
@@ -1171,14 +1171,14 @@ describe('user action transform utils', () => {
       it('returns the stringified json without the connector_id', () => {
         const externalService = createExternalService();
 
-        const { transformedJson } = extractConnectorIdFromJson({
+        const { transformedActionDetails } = extractConnectorIdFromJson({
           action: 'push-to-service',
           actionFields: ['pushed'],
-          stringifiedJson: JSON.stringify(externalService),
+          actionDetails: JSON.stringify(externalService),
           fieldType: UserActionFieldType.New,
         });
 
-        const transformedExternalService = JSON.parse(transformedJson!);
+        const transformedExternalService = JSON.parse(transformedActionDetails!);
         expect(transformedExternalService).not.toHaveProperty('connector_id');
         expect(transformedExternalService).toMatchInlineSnapshot(`
           Object {
@@ -1202,7 +1202,7 @@ describe('user action transform utils', () => {
         const { references } = extractConnectorIdFromJson({
           action: 'push-to-service',
           actionFields: ['pushed'],
-          stringifiedJson: JSON.stringify(externalService),
+          actionDetails: JSON.stringify(externalService),
           fieldType: UserActionFieldType.New,
         })!;
 

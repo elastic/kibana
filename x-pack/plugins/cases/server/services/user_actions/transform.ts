@@ -28,44 +28,34 @@ import {
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { UserActionFieldType } from './types';
 
-const ConnectorIdReferenceName: Record<UserActionFieldType, ConnectorIdRefNameType> = {
-  [UserActionFieldType.New]: CONNECTOR_ID_REFERENCE_NAME,
-  [UserActionFieldType.Old]: USER_ACTION_OLD_ID_REF_NAME,
-};
-
-const PushConnectorIdReferenceName: Record<UserActionFieldType, PushConnectorIdRefNameType> = {
-  [UserActionFieldType.New]: PUSH_CONNECTOR_ID_REFERENCE_NAME,
-  [UserActionFieldType.Old]: USER_ACTION_OLD_PUSH_ID_REF_NAME,
-};
-
 export function extractConnectorIdFromJson({
   action,
   actionFields,
-  stringifiedJson,
+  actionDetails,
   fieldType,
 }: {
   action?: string;
   actionFields?: string[];
-  stringifiedJson?: string | null;
+  actionDetails?: string | null;
   fieldType: UserActionFieldType;
-}): { transformedJson?: string | null; references: SavedObjectReference[] } {
-  const defResult = { transformedJson: stringifiedJson, references: [] };
+}): { transformedActionDetails?: string | null; references: SavedObjectReference[] } {
+  const defResult = { transformedActionDetails: actionDetails, references: [] };
 
-  if (!action || !actionFields || !stringifiedJson) {
+  if (!action || !actionFields || !actionDetails) {
     return defResult;
   }
 
   try {
-    const decodedJson = JSON.parse(stringifiedJson);
+    const decodedJson = JSON.parse(actionDetails);
 
-    const { transformedActionDetails, references } = extractConnectorIdFromActionDetails({
+    const { transformedActionDetails, references } = extractConnectorIdHelper({
       action,
       actionFields,
       actionDetails: decodedJson,
       fieldType,
     });
 
-    return { transformedJson: transformedActionDetails, references };
+    return { transformedActionDetails, references };
   } catch (error) {
     return defResult;
   }
@@ -91,7 +81,7 @@ export function extractConnectorId({
   }
 
   try {
-    return extractConnectorIdFromActionDetails({
+    return extractConnectorIdHelper({
       action,
       actionFields,
       actionDetails,
@@ -110,7 +100,7 @@ function encodeActionDetails(actionDetails: Record<string, unknown>): string | n
   }
 }
 
-export function extractConnectorIdFromActionDetails({
+export function extractConnectorIdHelper({
   action,
   actionFields,
   actionDetails,
@@ -166,6 +156,11 @@ function isCreateCaseConnector(
 export function isCreateConnector(action?: string, actionFields?: string[]): boolean {
   return action === 'create' && actionFields?.includes('connector') === true;
 }
+
+export const ConnectorIdReferenceName: Record<UserActionFieldType, ConnectorIdRefNameType> = {
+  [UserActionFieldType.New]: CONNECTOR_ID_REFERENCE_NAME,
+  [UserActionFieldType.Old]: USER_ACTION_OLD_ID_REF_NAME,
+};
 
 interface ExtractedConnector {
   transformedActionDetails: unknown;
@@ -281,6 +276,14 @@ export function isPush(action?: string, actionFields?: string[]): boolean {
   return action === 'push-to-service' && actionFields?.includes('pushed') === true;
 }
 
+export const PushConnectorIdReferenceName: Record<
+  UserActionFieldType,
+  PushConnectorIdRefNameType
+> = {
+  [UserActionFieldType.New]: PUSH_CONNECTOR_ID_REFERENCE_NAME,
+  [UserActionFieldType.Old]: USER_ACTION_OLD_PUSH_ID_REF_NAME,
+};
+
 function transformPushConnector(
   externalService: CaseExternalService,
   fieldType: UserActionFieldType
@@ -296,10 +299,6 @@ function transformPushConnector(
   };
 }
 
-interface ExternalService {
-  external_service: {} | null;
-}
-
 type PushConnectorIdRefNameType =
   | typeof PUSH_CONNECTOR_ID_REFERENCE_NAME
   | typeof USER_ACTION_OLD_PUSH_ID_REF_NAME;
@@ -307,7 +306,10 @@ type PushConnectorIdRefNameType =
 export const transformPushConnectorIdToReference = (
   referenceName: PushConnectorIdRefNameType,
   external_service?: { connector_id?: string | null } | null
-): { transformedPushConnector: ExternalService; references: SavedObjectReference[] } => {
+): {
+  transformedPushConnector: { external_service: {} | null };
+  references: SavedObjectReference[];
+} => {
   const { connector_id: pushConnectorId, ...restExternalService } = external_service ?? {};
 
   const references = createConnectorReference(

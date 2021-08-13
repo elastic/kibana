@@ -44,22 +44,22 @@ export function userActionsConnectorIdMigration(
   const { references = [] } = doc;
 
   const {
-    transformedJson: transformedNewValue,
+    transformedActionDetails: transformedNewValue,
     references: newValueRefs,
   } = extractConnectorIdFromJson({
     action,
     actionFields: action_field,
-    stringifiedJson: new_value,
+    actionDetails: new_value,
     fieldType: UserActionFieldType.New,
   });
 
   const {
-    transformedJson: transformedOldValue,
+    transformedActionDetails: transformedOldValue,
     references: oldValueRefs,
   } = extractConnectorIdFromJson({
     action,
     actionFields: action_field,
-    stringifiedJson: old_value,
+    actionDetails: old_value,
     fieldType: UserActionFieldType.Old,
   });
 

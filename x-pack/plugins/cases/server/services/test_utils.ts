@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectReference } from 'kibana/server';
+import { SavedObject, SavedObjectReference, SavedObjectsFindResult } from 'kibana/server';
 import { ESConnectorFields } from '.';
 import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common';
 import {
@@ -201,4 +201,11 @@ export const createSavedObjectReferences = ({
 
 export const createConnectorObject = (overrides?: Partial<CaseConnector>) => ({
   connector: { ...createJiraConnector(), ...(overrides && { ...overrides }) },
+});
+
+export const createSOFindResponse = <T>(savedObjects: Array<SavedObjectsFindResult<T>>) => ({
+  saved_objects: savedObjects,
+  total: savedObjects.length,
+  per_page: savedObjects.length,
+  page: 1,
 });

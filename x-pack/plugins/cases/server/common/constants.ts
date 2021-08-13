@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../common';
+
 /**
  * The name of the saved object reference indicating the action connector ID. This is stored in the Saved Object reference
  * field's name property.
@@ -27,3 +29,18 @@ export const USER_ACTION_OLD_ID_REF_NAME = 'oldConnectorId';
  * for a user action's old_value field.
  */
 export const USER_ACTION_OLD_PUSH_ID_REF_NAME = 'oldPushConnectorId';
+
+/**
+ * The name of the saved object reference indicating the caseId reference
+ */
+export const CASE_REF_NAME = `associated-${CASE_SAVED_OBJECT}`;
+
+/**
+ * The name of the saved object reference indicating the commentId reference
+ */
+export const COMMENT_REF_NAME = `associated-${CASE_COMMENT_SAVED_OBJECT}`;
+
+/**
+ * The name of the saved object reference indicating the subCaseId reference
+ */
+export const SUB_CASE_REF_NAME = `associated-${SUB_CASE_SAVED_OBJECT}`;

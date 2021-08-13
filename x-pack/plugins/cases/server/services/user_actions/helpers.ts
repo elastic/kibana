@@ -25,6 +25,7 @@ import { isTwoArraysDifference } from '../../client/utils';
 import { UserActionItem } from '.';
 import { extractConnectorId } from './transform';
 import { UserActionFieldType } from './types';
+import { CASE_REF_NAME, COMMENT_REF_NAME, SUB_CASE_REF_NAME } from '../../common';
 
 interface BuildCaseUserActionParams {
   action: UserAction;
@@ -121,14 +122,14 @@ const transformNewUserAction = ({
 const createCaseReferences = (caseId: string, subCaseId?: string): SavedObjectReference[] => [
   {
     type: CASE_SAVED_OBJECT,
-    name: `associated-${CASE_SAVED_OBJECT}`,
+    name: CASE_REF_NAME,
     id: caseId,
   },
   ...(subCaseId
     ? [
         {
           type: SUB_CASE_SAVED_OBJECT,
-          name: `associated-${SUB_CASE_SAVED_OBJECT}`,
+          name: SUB_CASE_REF_NAME,
           id: subCaseId,
         },
       ]
@@ -149,7 +150,7 @@ export const buildCommentUserActionItem = (params: BuildCommentUserActionItem): 
       ...references,
       {
         type: CASE_COMMENT_SAVED_OBJECT,
-        name: `associated-${CASE_COMMENT_SAVED_OBJECT}`,
+        name: COMMENT_REF_NAME,
         id: commentId,
       },
     ],
