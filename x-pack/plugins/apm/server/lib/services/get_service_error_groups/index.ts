@@ -39,8 +39,8 @@ export async function getServiceErrorGroups({
   sortField,
   transactionType,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
   size: number;

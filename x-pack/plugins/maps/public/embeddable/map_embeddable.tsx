@@ -95,6 +95,7 @@ export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
   implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput> {
   type = MAP_SAVED_OBJECT_TYPE;
+  deferEmbeddableLoad = true;
 
   private _isActive: boolean;
   private _savedMap: SavedMap;
@@ -147,6 +148,9 @@ export class MapEmbeddable
       this.onFatalError(e);
       return;
     }
+
+    // deferred loading of this embeddable is complete
+    this.setInitializationFinished();
 
     this._isInitialized = true;
     if (this._domNode) {

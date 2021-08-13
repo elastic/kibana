@@ -61,8 +61,8 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   additionalFilters = [],
   operationName,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
