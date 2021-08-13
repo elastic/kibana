@@ -31,11 +31,10 @@ export const print = (log: ToolingLog) => (msg: string | null = null) => ({ xs, 
 
 export const expectedFlags = () => ({
   string: ['esUrl'],
-  boolean: ['soTypes', 'detectionRules'],
+  boolean: ['soTypes'],
   help: `
 --esUrl             Required, tells the app which url to point to
 --soTypes           Not Required, tells the svc to show the types within the .kibana index
---detectionRules    Not required, tells the svc to show the detection rules.
         `,
 });
 
