@@ -21,6 +21,7 @@ import {
   setOpenAddToExistingCase,
   setOpenAddToNewCase,
   setSelected,
+  setTimelineUpdatedAt,
   toggleDetailPanel,
   updateColumns,
   updateIsLoading,
@@ -234,6 +235,16 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
       [id]: {
         ...state.timelineById[id],
         isCreateNewCaseOpen: isOpen,
+      },
+    },
+  }))
+  .case(setTimelineUpdatedAt, (state, { id, updated }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        updated,
       },
     },
   }))
