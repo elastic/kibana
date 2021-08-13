@@ -42,10 +42,10 @@ export interface MlSummaryJob {
 export interface AuditMessage {
   job_id: string;
   msgTime: number;
-  level: string;
+  level?: string;
   highestLevel: string;
   highestLevelText: string;
-  text: string;
+  text?: string;
   cleared?: boolean;
 }
 

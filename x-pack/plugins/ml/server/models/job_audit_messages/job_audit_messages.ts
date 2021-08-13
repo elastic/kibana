@@ -14,6 +14,7 @@ import { MESSAGE_LEVEL } from '../../../common/constants/message_levels';
 import type { JobSavedObjectService } from '../../saved_objects';
 import type { MlClient } from '../../lib/ml_client';
 import type { JobMessage } from '../../../common/types/audit_message';
+import { AuditMessage } from '../../../common/types/anomaly_detection_jobs';
 
 const SIZE = 1000;
 const LEVEL = { system_info: -1, info: 0, warning: 1, error: 2 } as const;
@@ -45,7 +46,7 @@ const anomalyDetectorTypeFilter = {
   },
 };
 
-export function isClearable(index: unknown): boolean {
+export function isClearable(index?: string): boolean {
   if (typeof index === 'string') {
     const match = index.match(/\d{6}$/);
     return match !== null && !!match.length && Number(match[match.length - 1]) >= 2;
@@ -178,7 +179,7 @@ export function jobAuditMessagesProvider(
   }
 
   // search highest, most recent audit messages for all jobs for the last 24hrs.
-  async function getAuditMessagesSummary(jobIds: string[]) {
+  async function getAuditMessagesSummary(jobIds: string[]): Promise<AuditMessage[]> {
     // TODO This is the current default value of the cluster setting `search.max_buckets`.
     // This should possibly consider the real settings in a future update.
     const maxBuckets = 10000;
@@ -269,12 +270,7 @@ export function jobAuditMessagesProvider(
 
     let messagesPerJob: LevelsPerJob[] = [];
 
-    const jobMessages: Array<{
-      job_id: string;
-      highestLevelText: string;
-      highestLevel: string;
-      msgTime: number;
-    }> = [];
+    const jobMessages: AuditMessage[] = [];
 
     const bodyAgg = body.aggregations as {
       levelsPerJob?: estypes.AggregationsTermsAggregate<LevelsPerJob>;
@@ -334,6 +330,7 @@ export function jobAuditMessagesProvider(
         }
       }
     });
+
     return jobMessages;
   }
 
