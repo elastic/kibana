@@ -32,14 +32,14 @@ interface Props {
 }
 
 export const ManageData: FC<Props> = ({ addBasePath, application, features }) => {
-  const { trackUiMetric } = getServices();
-
-  const {
-    management: isManagementEnabled,
-    dev_tools: isDevToolsEnabled,
-  } = application.capabilities.navLinks;
-
   if (features.length) {
+    const { trackUiMetric } = getServices();
+
+    const {
+      management: isManagementEnabled,
+      dev_tools: isDevToolsEnabled,
+    } = application.capabilities.navLinks;
+
     return (
       <>
         <section

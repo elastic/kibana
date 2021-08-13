@@ -10,7 +10,12 @@ import React, { FC } from 'react';
 import { EuiFlexGroup, EuiHorizontalRule, EuiScreenReaderOnly } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SolutionPanel } from './solution_panel';
-import { FeatureCatalogueSolution } from '../../../';
+import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../';
+
+const sortByOrder = (
+  { order: orderA = 0 }: FeatureCatalogueSolution | FeatureCatalogueEntry,
+  { order: orderB = 0 }: FeatureCatalogueSolution | FeatureCatalogueEntry
+) => orderA - orderB;
 
 interface Props {
   addBasePath: (path: string) => string;
@@ -19,6 +24,8 @@ interface Props {
 
 export const SolutionsSection: FC<Props> = ({ addBasePath, solutions }) => {
   if (solutions.length) {
+    solutions = solutions.sort(sortByOrder);
+
     return (
       <>
         <section aria-labelledby="homSolutions__title" className="homSolutions">
