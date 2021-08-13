@@ -94,14 +94,14 @@ function ErrorGroupHeader({
 
 export function ErrorGroupDetails() {
   const { urlParams } = useUrlParams();
-  const { environment, kuery, start, end } = urlParams;
+  const { start, end } = urlParams;
   const { serviceName } = useApmServiceContext();
 
   const apmRouter = useApmRouter();
 
   const {
     path: { groupId },
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, environment, kuery },
   } = useApmParams('/services/:serviceName/errors/:groupId');
 
   useBreadcrumb({
@@ -114,6 +114,8 @@ export function ErrorGroupDetails() {
       query: {
         rangeFrom,
         rangeTo,
+        environment,
+        kuery,
       },
     }),
   });
@@ -144,6 +146,8 @@ export function ErrorGroupDetails() {
   const { errorDistributionData } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId,
+    environment,
+    kuery,
   });
 
   if (!errorGroupData || !errorDistributionData) {

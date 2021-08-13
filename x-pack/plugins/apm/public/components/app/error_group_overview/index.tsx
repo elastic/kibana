@@ -36,6 +36,8 @@ export function ErrorGroupOverview() {
   const { errorDistributionData } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId: undefined,
+    environment,
+    kuery,
   });
 
   const { data: errorGroupListData } = useFetcher(

@@ -49,7 +49,7 @@ export const SetupGuide: React.FC = () => {
         <p>
           <FormattedMessage
             id="xpack.enterpriseSearch.workplaceSearch.setupGuide.description"
-            defaultMessage="Elastic Workplace Search unifies your content platforms (Google Drive, Salesforce) into a personalized search experience."
+            defaultMessage="Unify your content platforms, such as Google Drive and Salesforce, into a personalized search experience."
           />
         </p>
       </EuiTitle>

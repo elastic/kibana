@@ -21,11 +21,17 @@ import {
   HOSTNAME,
   POD_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
+import { useApmParams } from '../../../hooks/use_apm_params';
 
 export function ServiceLogs() {
   const { serviceName } = useApmServiceContext();
+
   const {
-    urlParams: { environment, kuery, start, end },
+    query: { environment, kuery },
+  } = useApmParams('/services/:serviceName/logs');
+
+  const {
+    urlParams: { start, end },
   } = useUrlParams();
 
   const { data, status } = useFetcher(

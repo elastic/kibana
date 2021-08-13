@@ -46,6 +46,12 @@ import { TaskEither } from 'fp-ts/lib/TaskEither';
 
 const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
+  settings: {
+    es: {
+      license: 'basic',
+      esArgs: ['http.max_content_length=10Kb'],
+    },
+  },
 });
 let esServer: kbnTestServer.TestElasticsearchUtils;
 
@@ -1472,11 +1478,11 @@ describe('migration actions', () => {
       });
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                Object {
-                  "_tag": "Right",
-                  "right": "bulk_index_succeeded",
-                }
-              `);
+        Object {
+          "_tag": "Right",
+          "right": "bulk_index_succeeded",
+        }
+      `);
     });
     it('resolves right even if there were some version_conflict_engine_exception', async () => {
       const existingDocs = ((await searchForOutdatedDocuments(client, {
@@ -1501,7 +1507,7 @@ describe('migration actions', () => {
                 }
               `);
     });
-    it('resolves left if there are write_block errors', async () => {
+    it('resolves left target_index_had_write_block if there are write_block errors', async () => {
       const newDocs = ([
         { _source: { title: 'doc 5' } },
         { _source: { title: 'doc 6' } },
@@ -1515,13 +1521,34 @@ describe('migration actions', () => {
           refresh: 'wait_for',
         })()
       ).resolves.toMatchInlineSnapshot(`
-              Object {
-                "_tag": "Left",
-                "left": Object {
-                  "type": "target_index_had_write_block",
-                },
-              }
-            `);
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "type": "target_index_had_write_block",
+          },
+        }
+      `);
+    });
+    it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
+      const newDocs = new Array(10000).fill({
+        _source: {
+          title:
+            'how do I create a document thats large enoug to exceed the limits without typing long sentences',
+        },
+      }) as SavedObjectsRawDoc[];
+      const task = bulkOverwriteTransformedDocuments({
+        client,
+        index: 'existing_index_with_docs',
+        transformedDocs: newDocs,
+      });
+      await expect(task()).resolves.toMatchInlineSnapshot(`
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "type": "request_entity_too_large_exception",
+          },
+        }
+      `);
     });
   });
 });

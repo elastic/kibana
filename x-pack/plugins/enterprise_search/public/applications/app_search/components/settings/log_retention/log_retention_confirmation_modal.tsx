@@ -20,7 +20,7 @@ export const LogRetentionConfirmationModal: React.FC = () => {
   const CANNOT_BE_RECOVERED_TEXT = i18n.translate(
     'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.recovery',
     {
-      defaultMessage: 'Once your data has been removed, it cannot be recovered.',
+      defaultMessage: 'You cannot recover deleted data.',
     }
   );
 
@@ -72,7 +72,7 @@ export const LogRetentionConfirmationModal: React.FC = () => {
                   'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.analytics.description',
                   {
                     defaultMessage:
-                      'When disabling Analytics Logs, all your engines will immediately stop indexing Analytics Logs. Your existing data will be deleted in accordance with the storage timeframes outlined above.',
+                      'When you disable writing, engines stop logging analytics events. Your existing data is deleted according to the storage time frame.',
                   }
                 )}
               </p>
@@ -117,7 +117,7 @@ export const LogRetentionConfirmationModal: React.FC = () => {
                   'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.api.description',
                   {
                     defaultMessage:
-                      'When disabling API Logs, all your engines will immediately stop indexing API Logs. Your existing data will be deleted in accordance with the storage timeframes outlined above.',
+                      'When you disable writing, engines stop logging API events. Your existing data is deleted according to the storage time frame.',
                   }
                 )}
               </p>

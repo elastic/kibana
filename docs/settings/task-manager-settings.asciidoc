@@ -22,6 +22,9 @@ Task Manager runs background tasks by polling for work on an interval.  You can 
 | `xpack.task_manager.request_capacity`
   | How many requests can Task Manager buffer before it rejects new requests.  Defaults to 1000.
 
+| `xpack.task_manager.index`
+  | The name of the index used to store task information.  Defaults to `.kibana_task_manager`.
+
   | `xpack.task_manager.max_workers`
   | The maximum number of tasks that this Kibana instance will run simultaneously.  Defaults to 10.
     Starting in 8.0, it will not be possible to set the value greater than 100.

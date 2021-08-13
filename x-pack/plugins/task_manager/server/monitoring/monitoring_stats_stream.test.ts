@@ -19,6 +19,7 @@ describe('createMonitoringStatsStream', () => {
   const configuration: TaskManagerConfig = {
     enabled: true,
     max_workers: 10,
+    index: 'foo',
     max_attempts: 9,
     poll_interval: 6000000,
     version_conflict_threshold: 80,

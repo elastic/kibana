@@ -24,49 +24,52 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('Breakdown when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles the empty state', async () => {
       const response = await supertest.get(
-        `/api/apm/services/opbeans-node/transaction/charts/breakdown?start=${start}&end=${end}&transactionType=${transactionType}`
+        `/api/apm/services/opbeans-node/transaction/charts/breakdown?start=${start}&end=${end}&transactionType=${transactionType}&environment=ENVIRONMENT_ALL&kuery=`
       );
       expect(response.status).to.be(200);
       expect(response.body).to.eql({ timeseries: [] });
     });
   });
 
-  registry.when('when data is loaded', { config: 'basic', archives: [archiveName] }, () => {
-    it('returns the transaction breakdown for a service', async () => {
-      const response = await supertest.get(
-        `/api/apm/services/opbeans-node/transaction/charts/breakdown?start=${start}&end=${end}&transactionType=${transactionType}`
-      );
+  registry.when(
+    'Breakdown when data is loaded',
+    { config: 'basic', archives: [archiveName] },
+    () => {
+      it('returns the transaction breakdown for a service', async () => {
+        const response = await supertest.get(
+          `/api/apm/services/opbeans-node/transaction/charts/breakdown?start=${start}&end=${end}&transactionType=${transactionType}&environment=ENVIRONMENT_ALL&kuery=`
+        );
 
-      expect(response.status).to.be(200);
-      expectSnapshot(response.body).toMatch();
-    });
-    it('returns the transaction breakdown for a transaction group', async () => {
-      const response = await supertest.get(
-        `/api/apm/services/opbeans-node/transaction/charts/breakdown?start=${start}&end=${end}&transactionType=${transactionType}&transactionName=${transactionName}`
-      );
+        expect(response.status).to.be(200);
+        expectSnapshot(response.body).toMatch();
+      });
+      it('returns the transaction breakdown for a transaction group', async () => {
+        const response = await supertest.get(
+          `/api/apm/services/opbeans-node/transaction/charts/breakdown?start=${start}&end=${end}&transactionType=${transactionType}&transactionName=${transactionName}&environment=ENVIRONMENT_ALL&kuery=`
+        );
 
-      expect(response.status).to.be(200);
+        expect(response.status).to.be(200);
 
-      const { timeseries } = response.body;
+        const { timeseries } = response.body;
 
-      const numberOfSeries = timeseries.length;
+        const numberOfSeries = timeseries.length;
 
-      expectSnapshot(numberOfSeries).toMatchInline(`1`);
+        expectSnapshot(numberOfSeries).toMatchInline(`1`);
 
-      const { title, color, type, data, hideLegend, legendValue } = timeseries[0];
+        const { title, color, type, data, hideLegend, legendValue } = timeseries[0];
 
-      const nonNullDataPoints = data.filter((y: number | null) => y !== null);
+        const nonNullDataPoints = data.filter((y: number | null) => y !== null);
 
-      expectSnapshot(nonNullDataPoints.length).toMatchInline(`61`);
+        expectSnapshot(nonNullDataPoints.length).toMatchInline(`61`);
 
-      expectSnapshot(
-        data.slice(0, 5).map(({ x, y }: { x: number; y: number | null }) => {
-          return {
-            x: new Date(x ?? NaN).toISOString(),
-            y,
-          };
-        })
-      ).toMatchInline(`
+        expectSnapshot(
+          data.slice(0, 5).map(({ x, y }: { x: number; y: number | null }) => {
+            return {
+              x: new Date(x ?? NaN).toISOString(),
+              y,
+            };
+          })
+        ).toMatchInline(`
         Array [
           Object {
             "x": "2021-08-03T06:50:00.000Z",
@@ -91,22 +94,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]
       `);
 
-      expectSnapshot(title).toMatchInline(`"app"`);
-      expectSnapshot(color).toMatchInline(`"#54b399"`);
-      expectSnapshot(type).toMatchInline(`"areaStacked"`);
-      expectSnapshot(hideLegend).toMatchInline(`false`);
-      expectSnapshot(legendValue).toMatchInline(`"100%"`);
+        expectSnapshot(title).toMatchInline(`"app"`);
+        expectSnapshot(color).toMatchInline(`"#54b399"`);
+        expectSnapshot(type).toMatchInline(`"areaStacked"`);
+        expectSnapshot(hideLegend).toMatchInline(`false`);
+        expectSnapshot(legendValue).toMatchInline(`"100%"`);
 
-      expectSnapshot(data).toMatch();
-    });
-    it('returns the transaction breakdown sorted by name', async () => {
-      const response = await supertest.get(
-        `/api/apm/services/opbeans-node/transaction/charts/breakdown?start=${start}&end=${end}&transactionType=${transactionType}`
-      );
+        expectSnapshot(data).toMatch();
+      });
+      it('returns the transaction breakdown sorted by name', async () => {
+        const response = await supertest.get(
+          `/api/apm/services/opbeans-node/transaction/charts/breakdown?start=${start}&end=${end}&transactionType=${transactionType}&environment=ENVIRONMENT_ALL&kuery=`
+        );
 
-      expect(response.status).to.be(200);
-      expectSnapshot(response.body.timeseries.map((serie: { title: string }) => serie.title))
-        .toMatchInline(`
+        expect(response.status).to.be(200);
+        expectSnapshot(response.body.timeseries.map((serie: { title: string }) => serie.title))
+          .toMatchInline(`
           Array [
             "app",
             "http",
@@ -114,6 +117,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "redis",
           ]
         `);
-    });
-  });
+      });
+    }
+  );
 }
