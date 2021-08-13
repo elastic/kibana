@@ -7,6 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 
 import { HttpLogic } from '../../../shared/http';
@@ -19,11 +21,18 @@ import {
   CrawlRequestFromServer,
   CrawlerStatus,
 } from './types';
-import {
-  crawlerDataServerToClient,
-  crawlRequestServerToClient,
-  getDeleteDomainSuccessMessage,
-} from './utils';
+import { crawlerDataServerToClient, crawlRequestServerToClient } from './utils';
+
+export const DELETE_DOMAIN_MESSAGE = (domainUrl: string) =>
+  i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.domainsTable.action.delete.successMessage',
+    {
+      defaultMessage: "Domain '{domainUrl}' was deleted",
+      values: {
+        domainUrl,
+      },
+    }
+  );
 
 const POLLING_DURATION = 1000;
 const POLLING_DURATION_ON_FAILURE = 5000;
@@ -136,7 +145,7 @@ export const CrawlerOverviewLogic = kea<
         );
         const crawlerData = crawlerDataServerToClient(response);
         actions.onReceiveCrawlerData(crawlerData);
-        flashSuccessToast(getDeleteDomainSuccessMessage(domain.url));
+        flashSuccessToast(DELETE_DOMAIN_MESSAGE(domain.url));
       } catch (e) {
         flashAPIErrors(e);
       }

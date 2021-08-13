@@ -17,7 +17,6 @@ import { EuiFieldText } from '@elastic/eui';
 
 import { ContentSection } from '../../../components/shared/content_section';
 
-import { BrandingSection } from './branding_section';
 import { Customize } from './customize';
 
 describe('Customize', () => {
@@ -33,7 +32,6 @@ describe('Customize', () => {
     const wrapper = shallow(<Customize />);
 
     expect(wrapper.find(ContentSection)).toHaveLength(1);
-    expect(wrapper.find(BrandingSection)).toHaveLength(2);
   });
 
   it('handles input change', () => {

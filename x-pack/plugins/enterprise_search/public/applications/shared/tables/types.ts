@@ -6,6 +6,6 @@
  */
 
 export type ItemWithAnID = {
-  id: number | string | null;
+  id: number | null;
   created_at?: string;
 } & object;

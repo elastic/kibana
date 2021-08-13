@@ -32,7 +32,6 @@ export interface GenericEndpointInlineEditableTableProps
   onDelete(item: ItemWithAnID, items: ItemWithAnID[]): void;
   onUpdate(item: ItemWithAnID, items: ItemWithAnID[]): void;
   onReorder?(items: ItemWithAnID[]): void;
-  disableReordering?: boolean;
 }
 
 export const GenericEndpointInlineEditableTable = ({

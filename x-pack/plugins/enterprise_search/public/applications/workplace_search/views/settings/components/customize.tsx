@@ -9,14 +9,7 @@ import React, { FormEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiButton,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
 import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { ContentSection } from '../../../components/shared/content_section';
@@ -27,25 +20,11 @@ import {
   CUSTOMIZE_NAME_LABEL,
   CUSTOMIZE_NAME_BUTTON,
 } from '../../../constants';
-import { LOGO_DESCRIPTION, LOGO_HELP_TEXT, ICON_DESCRIPTION, ICON_HELP_TEXT } from '../constants';
 import { SettingsLogic } from '../settings_logic';
 
-import { BrandingSection } from './branding_section';
-
 export const Customize: React.FC = () => {
-  const {
-    onOrgNameInputChange,
-    updateOrgName,
-    setStagedIcon,
-    setStagedLogo,
-    updateOrgLogo,
-    updateOrgIcon,
-    resetOrgLogo,
-    resetOrgIcon,
-  } = useActions(SettingsLogic);
-  const { dataLoading, orgNameInputValue, icon, stagedIcon, logo, stagedLogo } = useValues(
-    SettingsLogic
-  );
+  const { onOrgNameInputChange, updateOrgName } = useActions(SettingsLogic);
+  const { orgNameInputValue } = useValues(SettingsLogic);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -59,7 +38,6 @@ export const Customize: React.FC = () => {
         pageTitle: CUSTOMIZE_HEADER_TITLE,
         description: CUSTOMIZE_HEADER_DESCRIPTION,
       }}
-      isLoading={dataLoading}
     >
       <form onSubmit={handleSubmit}>
         <ContentSection>
@@ -85,28 +63,6 @@ export const Customize: React.FC = () => {
           </EuiFormRow>
         </ContentSection>
       </form>
-      <EuiSpacer size="s" />
-      <BrandingSection
-        imageType="logo"
-        description={LOGO_DESCRIPTION}
-        helpText={LOGO_HELP_TEXT}
-        image={logo}
-        stagedImage={stagedLogo}
-        stageImage={setStagedLogo}
-        saveImage={updateOrgLogo}
-        resetImage={resetOrgLogo}
-      />
-      <EuiSpacer size="xl" />
-      <BrandingSection
-        imageType="icon"
-        description={ICON_DESCRIPTION}
-        helpText={ICON_HELP_TEXT}
-        image={icon}
-        stagedImage={stagedIcon}
-        stageImage={setStagedIcon}
-        saveImage={updateOrgIcon}
-        resetImage={resetOrgIcon}
-      />
     </WorkplaceSearchPageTemplate>
   );
 };

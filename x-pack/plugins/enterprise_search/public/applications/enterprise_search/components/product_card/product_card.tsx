@@ -37,7 +37,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, image }) => {
   const LAUNCH_BUTTON_TEXT = i18n.translate(
     'xpack.enterpriseSearch.overview.productCard.launchButton',
     {
-      defaultMessage: 'Open {productName}',
+      defaultMessage: 'Launch {productName}',
       values: { productName: product.NAME },
     }
   );
@@ -45,7 +45,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, image }) => {
   const SETUP_BUTTON_TEXT = i18n.translate(
     'xpack.enterpriseSearch.overview.productCard.setupButton',
     {
-      defaultMessage: 'Set up {productName}',
+      defaultMessage: 'Setup {productName}',
       values: { productName: product.NAME },
     }
   );

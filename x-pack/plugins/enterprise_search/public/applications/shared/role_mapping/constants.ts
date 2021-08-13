@@ -219,7 +219,7 @@ export const ROLE_MAPPINGS_HEADING_BUTTON = i18n.translate(
 
 export const ROLE_MAPPINGS_NO_RESULTS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.noResults.message',
-  { defaultMessage: 'No matching role mappings found' }
+  { defaultMessage: 'Create a new role mapping' }
 );
 
 export const ROLES_DISABLED_TITLE = i18n.translate(
