@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import { ClusterGetSettingsResponse } from '@elastic/elasticsearch/api/types';
 import { checkClusterSettings } from '.';
+import { LegacyRequest } from '../../types';
 
 describe('Elasticsearch Cluster Settings', () => {
-  const makeResponse = (property, response = {}) => {
+  const makeResponse = (
+    property: keyof ClusterGetSettingsResponse,
+    response: any = {}
+  ): ClusterGetSettingsResponse => {
     const result = {
       persistent: {},
       transient: {},
@@ -18,8 +23,8 @@ describe('Elasticsearch Cluster Settings', () => {
     return result;
   };
 
-  const getReq = (response) => {
-    return {
+  const getReq = (response: ClusterGetSettingsResponse) => {
+    return ({
       server: {
         newPlatform: {
           setup: {
@@ -40,20 +45,14 @@ describe('Elasticsearch Cluster Settings', () => {
           },
         },
       },
-    };
+    } as unknown) as LegacyRequest;
   };
-
-  it('should return { found: false } given no response from ES', async () => {
-    const mockReq = getReq(makeResponse('ignore', {}));
-    const result = await checkClusterSettings(mockReq);
-    expect(result).toEqual({ found: false });
-  });
 
   it('should find default collection interval reason', async () => {
     const setting = {
       xpack: { monitoring: { collection: { interval: -1 } } },
     };
-    const makeExpected = (source) => ({
+    const makeExpected = (source: keyof ClusterGetSettingsResponse) => ({
       found: true,
       reason: {
         context: `cluster ${source}`,
@@ -82,7 +81,7 @@ describe('Elasticsearch Cluster Settings', () => {
     const setting = {
       xpack: { monitoring: { exporters: { myCoolExporter: {} } } },
     };
-    const makeExpected = (source) => ({
+    const makeExpected = (source: keyof ClusterGetSettingsResponse) => ({
       found: true,
       reason: {
         context: `cluster ${source}`,
@@ -111,7 +110,7 @@ describe('Elasticsearch Cluster Settings', () => {
     const setting = {
       xpack: { monitoring: { enabled: 'false' } },
     };
-    const makeExpected = (source) => ({
+    const makeExpected = (source: keyof ClusterGetSettingsResponse) => ({
       found: true,
       reason: {
         context: `cluster ${source}`,
