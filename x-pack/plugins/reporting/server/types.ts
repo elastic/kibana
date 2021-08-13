@@ -30,11 +30,11 @@ import { ReportTaskParams } from './lib/tasks';
 export interface ReportingSetupDeps {
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetup;
+  screenshotMode: ScreenshotModePluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
-  screenshotMode: ScreenshotModePluginSetup;
 }
 
 export interface ReportingStartDeps {
