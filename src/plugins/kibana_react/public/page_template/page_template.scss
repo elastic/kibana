@@ -10,4 +10,8 @@
   &.kbnPageTemplate__pageSideBar--shrink {
     min-width: $euiSizeXXL;
   }
+
+  .kbnPageTemplate--centeredBody & {
+    border-right: $euiBorderThin;
+  }
 }
