@@ -22,7 +22,6 @@ describe('test useDiscoverState', () => {
       return useDiscoverState({
         services: discoverServiceMock,
         history,
-        initialIndexPattern: indexPatternMock,
         initialSavedSearch: savedSearchMock,
       });
     });
@@ -40,7 +39,6 @@ describe('test useDiscoverState', () => {
       return useDiscoverState({
         services: discoverServiceMock,
         history,
-        initialIndexPattern: indexPatternMock,
         initialSavedSearch: savedSearchMock,
       });
     });
@@ -57,7 +55,6 @@ describe('test useDiscoverState', () => {
       return useDiscoverState({
         services: discoverServiceMock,
         history,
-        initialIndexPattern: indexPatternMock,
         initialSavedSearch: savedSearchMock,
       });
     });

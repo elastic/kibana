@@ -12,17 +12,13 @@ import { setBreadcrumbsTitle } from '../../helpers/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
 import { useDiscoverState } from './services/use_discover_state';
 import { useUrl } from './services/use_url';
-import { IndexPattern, IndexPatternAttributes, SavedObject } from '../../../../../data/common';
+import { IndexPatternAttributes, SavedObject } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
 export interface DiscoverMainProps {
-  /**
-   * Current IndexPattern
-   */
-  indexPattern: IndexPattern;
   /**
    * Instance of browser history
    */
@@ -51,7 +47,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     [history]
   );
   const initialSavedSearch = props.savedSearch;
-  const initialIndexPattern = props.indexPattern;
 
   /**
    * State related logic
@@ -71,7 +66,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   } = useDiscoverState({
     services,
     history,
-    initialIndexPattern,
     initialSavedSearch,
   });
 

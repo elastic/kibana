@@ -141,7 +141,6 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
 
   return (
     <DiscoverMainAppMemoized
-      indexPattern={indexPattern}
       history={history}
       indexPatternList={indexPatternList}
       savedSearch={savedSearch}

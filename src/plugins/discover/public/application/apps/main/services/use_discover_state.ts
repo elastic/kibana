@@ -10,7 +10,6 @@ import { isEqual } from 'lodash';
 import { History } from 'history';
 import { getState } from './discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
-import { IndexPattern } from '../../../../../../data/public';
 import { DiscoverServices } from '../../../../build_services';
 import { SavedSearch } from '../../../../saved_searches';
 import { loadIndexPattern } from '../utils/resolve_index_pattern';
@@ -34,7 +33,6 @@ export function useDiscoverState({
   services: DiscoverServices;
   initialSavedSearch: SavedSearch;
   history: History;
-  initialIndexPattern: IndexPattern;
 }) {
   const { uiSettings: config, data, filterManager, indexPatterns } = services;
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);

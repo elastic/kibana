@@ -27,7 +27,6 @@ describe('DiscoverMainApp', () => {
     }) as unknown) as Array<SavedObject<IndexPatternAttributes>>;
 
     const props = {
-      indexPattern: indexPatternMock,
       indexPatternList,
       services: discoverServiceMock,
       savedSearch: savedSearchMock,
