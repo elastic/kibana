@@ -17,6 +17,7 @@ import {
   KibanaPageTemplateProps,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import type { NavigationSection } from '../../../services/navigation_registry';
+import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 
 export type WrappedPageTemplateProps = Pick<
   KibanaPageTemplateProps,
@@ -71,15 +72,28 @@ export function ObservabilityPageTemplate({
               exact: !!entry.matchFullPath,
               strict: !entry.ignoreTrailingSlash,
             }) != null;
-
+          const badgeLocalStorageId = `observability.nav_item_badge_visible_${entry.app}${entry.path}`;
           return {
             id: `${sectionIndex}.${entryIndex}`,
-            name: entry.label,
+            name: entry.sideBadgeLabel ? (
+              <NavNameWithBadge
+                label={entry.label}
+                badgeLabel={entry.sideBadgeLabel}
+                localstorageId={badgeLocalStorageId}
+              />
+            ) : (
+              entry.label
+            ),
             href,
             isSelected,
             onClick: (event) => {
               if (entry.onClick) {
                 entry.onClick(event);
+              }
+
+              // When side badge is defined hides it when the item is clicked
+              if (entry.sideBadgeLabel) {
+                hideBadge(badgeLocalStorageId);
               }
 
               if (

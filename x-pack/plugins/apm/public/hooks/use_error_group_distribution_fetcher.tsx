@@ -11,12 +11,16 @@ import { useFetcher } from './use_fetcher';
 export function useErrorGroupDistributionFetcher({
   serviceName,
   groupId,
+  kuery,
+  environment,
 }: {
   serviceName: string;
   groupId: string | undefined;
+  kuery: string;
+  environment: string;
 }) {
   const {
-    urlParams: { environment, kuery, start, end },
+    urlParams: { start, end },
   } = useUrlParams();
   const { data } = useFetcher(
     (callApmApi) => {
