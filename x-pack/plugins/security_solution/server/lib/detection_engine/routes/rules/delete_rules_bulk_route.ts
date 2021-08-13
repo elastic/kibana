@@ -6,6 +6,8 @@
  */
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { PublicContract } from '@kbn/utility-types';
+
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import {
@@ -24,6 +26,7 @@ import { transformValidateBulkError } from './validate';
 import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '../utils';
 import { deleteRules } from '../../rules/delete_rules';
 import { readRules } from '../../rules/read_rules';
+import { RuleDataClient } from '../../../../../../rule_registry/server';
 
 type Config = RouteConfig<unknown, unknown, QueryRulesBulkSchemaDecoded, 'delete' | 'post'>;
 type Handler = RequestHandler<
@@ -34,7 +37,11 @@ type Handler = RequestHandler<
   'delete' | 'post'
 >;
 
-export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
+export const deleteRulesBulkRoute = (
+  router: SecuritySolutionPluginRouter,
+  ruleDataClient?: PublicContract<RuleDataClient> | null
+) => {
+  const isRuleRegistryEnabled = ruleDataClient != null;
   const config: Config = {
     validate: {
       body: buildRouteValidation<typeof queryRulesBulkSchema, QueryRulesBulkSchemaDecoded>(
@@ -72,7 +79,7 @@ export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
         }
 
         try {
-          const rule = await readRules({ rulesClient, id, ruleId });
+          const rule = await readRules({ rulesClient, id, ruleId, isRuleRegistryEnabled });
           if (!rule) {
             return getIdBulkError({ id, ruleId });
           }

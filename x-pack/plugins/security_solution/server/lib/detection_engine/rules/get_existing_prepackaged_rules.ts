@@ -9,6 +9,7 @@ import { INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
 import { RulesClient } from '../../../../../alerting/server';
 import { RuleAlertType, isAlertTypes } from './types';
 import { findRules } from './find_rules';
+import { RuleParams } from '../schemas/rule_schemas';
 
 export const FILTER_NON_PREPACKED_RULES = `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:false"`;
 export const FILTER_PREPACKED_RULES = `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`;
@@ -29,6 +30,7 @@ export const getRulesCount = async ({
   filter: string;
 }): Promise<number> => {
   const firstRule = await findRules({
+    isRuleRegistryEnabled: false, // TODO: support RAC
     rulesClient,
     filter,
     perPage: 1,
@@ -48,7 +50,8 @@ export const getRules = async ({
   filter: string;
 }): Promise<RuleAlertType[]> => {
   const count = await getRulesCount({ rulesClient, filter });
-  const rules = await findRules({
+  const rules = await findRules<RuleParams>({
+    isRuleRegistryEnabled: false, // TODO: support RAC
     rulesClient,
     filter,
     perPage: count,
@@ -58,7 +61,8 @@ export const getRules = async ({
     fields: undefined,
   });
 
-  if (isAlertTypes(rules.data)) {
+  if (isAlertTypes(false, rules.data)) {
+    // TODO: support RAC
     return rules.data;
   } else {
     // If this was ever true, you have a really messed up system.

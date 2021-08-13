@@ -33,7 +33,7 @@ import {
 import { RuleActions } from '../../rule_actions/types';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { RuleParams } from '../../schemas/rule_schemas';
-import { AlertTypeParams, SanitizedAlert } from '../../../../../../alerting/common';
+import { SanitizedAlert } from '../../../../../../alerting/common';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -114,7 +114,7 @@ export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<R
   return alerts.map((alert) => transformAlertToRule(alert));
 };
 
-export const transformFindAlerts = <TRuleParams extends AlertTypeParams>(
+export const transformFindAlerts = <TRuleParams extends RuleParams>(
   findResults: FindResult<TRuleParams>,
   ruleActions: { [key: string]: RuleActions | undefined },
   ruleStatuses: { [key: string]: IRuleStatusSOAttributes[] | undefined },
@@ -147,7 +147,8 @@ export const transform = (
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<RulesSchema> | null => {
-  if (isAlertType(alert)) {
+  if (isAlertType(false, alert)) {
+    // TODO: support RAC
     return transformAlertToRule(
       alert,
       ruleActions,
@@ -164,7 +165,8 @@ export const transformOrBulkError = (
   ruleActions: RuleActions,
   ruleStatus?: unknown
 ): Partial<RulesSchema> | BulkError => {
-  if (isAlertType(alert)) {
+  if (isAlertType(false, alert)) {
+    // TODO: support RAC
     if (isRuleStatusFindType(ruleStatus) && ruleStatus?.saved_objects.length > 0) {
       return transformAlertToRule(alert, ruleActions, ruleStatus?.saved_objects[0] ?? ruleStatus);
     } else {
@@ -184,7 +186,8 @@ export const transformOrImportError = (
   alert: PartialAlert<RuleParams>,
   existingImportSuccessError: ImportSuccessError
 ): ImportSuccessError => {
-  if (isAlertType(alert)) {
+  if (isAlertType(false, alert)) {
+    // TODO: support RAC
     return createSuccessObject(existingImportSuccessError);
   } else {
     return createImportErrorObject({

@@ -108,6 +108,7 @@ import { SIGNALS_ID } from '../../../../common/constants';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
+import { ruleTypeMappings } from '../signals/utils';
 
 export type RuleAlertType = Alert<RuleParams>;
 
@@ -191,15 +192,19 @@ export interface Clients {
 }
 
 export const isAlertTypes = (
+  isRuleRegistryEnabled: boolean,
   partialAlert: Array<PartialAlert<RuleParams>>
 ): partialAlert is RuleAlertType[] => {
-  return partialAlert.every((rule) => isAlertType(rule));
+  return partialAlert.every((rule) => isAlertType(isRuleRegistryEnabled, rule));
 };
 
 export const isAlertType = (
+  isRuleRegistryEnabled: boolean,
   partialAlert: PartialAlert<RuleParams>
 ): partialAlert is RuleAlertType => {
-  return partialAlert.alertTypeId === SIGNALS_ID;
+  return isRuleRegistryEnabled
+    ? Object.values(ruleTypeMappings).includes(partialAlert.alertTypeId as string)
+    : partialAlert.alertTypeId === SIGNALS_ID;
 };
 
 export const isRuleStatusSavedObjectType = (
@@ -327,6 +332,7 @@ export interface PatchRulesOptions {
 }
 
 export interface ReadRuleOptions {
+  isRuleRegistryEnabled: boolean;
   rulesClient: RulesClient;
   id: IdOrUndefined;
   ruleId: RuleIdOrUndefined;

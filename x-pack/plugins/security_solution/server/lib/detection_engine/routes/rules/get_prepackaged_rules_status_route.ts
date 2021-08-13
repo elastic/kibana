@@ -59,6 +59,7 @@ export const getPrepackagedRulesStatusRoute = (
           config.prebuiltRulesFromSavedObjects
         );
         const customRules = await findRules({
+          isRuleRegistryEnabled: false, // TODO: support RAC
           rulesClient,
           perPage: 1,
           page: 1,

@@ -56,6 +56,7 @@ export const readRawTags = async ({
 }): Promise<string[]> => {
   // Get just one record so we can get the total count
   const firstTags = await findRules({
+    isRuleRegistryEnabled: false, // TODO: support RAC
     rulesClient,
     fields: ['tags'],
     perPage: 1,
@@ -66,6 +67,7 @@ export const readRawTags = async ({
   });
   // Get all the rules to aggregate over all the tags of the rules
   const rules = await findRules({
+    isRuleRegistryEnabled: false, // TODO: support RAC
     rulesClient,
     fields: ['tags'],
     perPage: firstTags.total,

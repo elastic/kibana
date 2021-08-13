@@ -60,7 +60,8 @@ export const transformValidateBulkError = (
   ruleActions?: RuleActions | null,
   ruleStatus?: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>
 ): RulesSchema | BulkError => {
-  if (isAlertType(alert)) {
+  if (isAlertType(false, alert)) {
+    // TODO: support RAC
     if (ruleStatus && ruleStatus?.length > 0 && isRuleStatusSavedObjectType(ruleStatus[0])) {
       const transformed = transformAlertToRule(alert, ruleActions, ruleStatus[0]);
       const [validated, errors] = validateNonExact(transformed, rulesSchema);

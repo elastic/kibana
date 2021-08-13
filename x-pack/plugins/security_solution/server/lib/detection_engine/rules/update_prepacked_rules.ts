@@ -132,7 +132,12 @@ export const createPromises = (
       exceptions_list: exceptionsList,
     } = rule;
 
-    const existingRule = await readRules({ rulesClient, ruleId, id: undefined });
+    const existingRule = await readRules({
+      isRuleRegistryEnabled: false,
+      rulesClient,
+      ruleId,
+      id: undefined,
+    }); // TODO: support RAC
 
     // TODO: Fix these either with an is conversion or by better typing them within io-ts
     const filters: PartialFilter[] | undefined = filtersObject as PartialFilter[];

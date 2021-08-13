@@ -255,7 +255,12 @@ describe('utils', () => {
 
   describe('transformFindAlerts', () => {
     test('outputs empty data set when data set is empty correct', () => {
-      const output = transformFindAlerts({ data: [], page: 1, perPage: 0, total: 0 }, {}, {});
+      const output = transformFindAlerts(
+        { data: [], page: 1, perPage: 0, total: 0 },
+        {},
+        {},
+        false
+      ); // TODO: support RAC
       expect(output).toEqual({ data: [], page: 1, perPage: 0, total: 0 });
     });
 
@@ -268,7 +273,8 @@ describe('utils', () => {
           data: [getAlertMock(getQueryRuleParams())],
         },
         {},
-        {}
+        {},
+        false // TODO: support RAC
       );
       const expected = getOutputRuleAlertForRest();
       expect(output).toEqual({

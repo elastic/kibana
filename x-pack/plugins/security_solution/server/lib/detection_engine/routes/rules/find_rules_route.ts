@@ -22,7 +22,7 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import { transformFindAlerts } from './utils';
 import { getBulkRuleActionsSavedObject } from '../../rule_actions/get_bulk_rule_actions_saved_object';
 import { RACRuleParams, RuleParams } from '../../schemas/rule_schemas';
-import { AlertTypeParams, RulesClient } from '../../../../../../alerting/server';
+import { RulesClient } from '../../../../../../alerting/server';
 import { RuleExecutionLogClient } from '../../rule_execution_log/rule_execution_log_client';
 import { SavedObjectsClientContract } from '../../../../../../../../src/core/server';
 
@@ -50,7 +50,7 @@ export const findRulesRoute = (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
 
-      const findAndTransform = async <TRuleParams extends AlertTypeParams>(opts: {
+      const findAndTransform = async <TRuleParams extends RuleParams>(opts: {
         execLogClient: RuleExecutionLogClient;
         query: FindRulesSchemaDecoded;
         rulesClient: RulesClient;

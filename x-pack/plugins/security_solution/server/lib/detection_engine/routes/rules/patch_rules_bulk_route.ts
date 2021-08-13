@@ -122,7 +122,12 @@ export const patchRulesBulkRoute = (
               throwHttpError(await mlAuthz.validateRuleType(type));
             }
 
-            const existingRule = await readRules({ rulesClient, ruleId, id });
+            const existingRule = await readRules({
+              isRuleRegistryEnabled: false, // TODO: support RAC
+              rulesClient,
+              ruleId,
+              id,
+            });
             if (existingRule?.params.type) {
               // reject an unauthorized modification of an ML rule
               throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));

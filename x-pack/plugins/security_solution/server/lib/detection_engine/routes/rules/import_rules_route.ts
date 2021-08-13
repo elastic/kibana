@@ -201,7 +201,12 @@ export const importRulesRoute = (
 
                   throwHttpError(await mlAuthz.validateRuleType(type));
 
-                  const rule = await readRules({ rulesClient, ruleId, id: undefined });
+                  const rule = await readRules({
+                    isRuleRegistryEnabled: false, // TODO: support RAC
+                    rulesClient,
+                    ruleId,
+                    id: undefined,
+                  });
                   if (rule == null) {
                     await createRules({
                       rulesClient,

@@ -16,6 +16,7 @@ import {
   InternalRuleCreateBase,
   InternalRACRuleCreate,
   BaseRACRuleParams,
+  RuleParams,
 } from './rule_schemas';
 import { assertUnreachable } from '../../../../common/utility_types';
 import {
@@ -259,7 +260,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
 
 // TODO: separate out security solution defined common params from Alerting framework common params
 // so we can explicitly specify the return type of this function
-export const commonParamsCamelToSnake = (params: AlertTypeParams) => {
+export const commonParamsCamelToSnake = <TParams extends RuleParams>(params: TParams) => {
   return {
     description: params.description,
     risk_score: params.riskScore,
@@ -289,7 +290,7 @@ export const commonParamsCamelToSnake = (params: AlertTypeParams) => {
   };
 };
 
-export const internalRuleToAPIResponse = <TRuleParams extends AlertTypeParams>(
+export const internalRuleToAPIResponse = <TRuleParams extends RuleParams>(
   rule: SanitizedAlert<TRuleParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: IRuleStatusSOAttributes,

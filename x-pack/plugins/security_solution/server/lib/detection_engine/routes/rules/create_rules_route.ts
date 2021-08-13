@@ -68,6 +68,7 @@ export const createRulesRoute = (
 
       if (request.body.rule_id != null) {
         const rule = await readRules({
+          isRuleRegistryEnabled,
           rulesClient,
           ruleId: request.body.rule_id,
           id: undefined,
@@ -152,31 +153,21 @@ export const createRulesRoute = (
     }
   };
 
-  if (isRuleRegistryEnabled) {
-    router.post(
-      {
-        path: DETECTION_ENGINE_RULES_URL,
-        validate: {
-          body: buildRouteValidation(racCreateRulesSchema),
-        },
-        options: {
-          tags: ['access:securitySolution'],
-        },
+  const factory = isRuleRegistryEnabled
+    ? handleRequestFactory<RACCreateRulesSchema>()
+    : handleRequestFactory<CreateRulesSchema>();
+  const schema = isRuleRegistryEnabled ? racCreateRulesSchema : createRulesSchema;
+
+  router.post(
+    {
+      path: DETECTION_ENGINE_RULES_URL,
+      validate: {
+        body: buildRouteValidation(schema),
       },
-      handleRequestFactory<RACCreateRulesSchema>()
-    );
-  } else {
-    router.post(
-      {
-        path: DETECTION_ENGINE_RULES_URL,
-        validate: {
-          body: buildRouteValidation(createRulesSchema),
-        },
-        options: {
-          tags: ['access:securitySolution'],
-        },
+      options: {
+        tags: ['access:securitySolution'],
       },
-      handleRequestFactory<CreateRulesSchema>()
-    );
-  }
+    },
+    factory
+  );
 };

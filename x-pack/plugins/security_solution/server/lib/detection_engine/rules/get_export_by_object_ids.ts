@@ -15,6 +15,7 @@ import { transformAlertToRule } from '../routes/rules/utils';
 import { transformDataToNdjson } from '../../../utils/read_stream/create_stream_from_ndjson';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { findRules } from './find_rules';
+import { RuleParams } from '../schemas/rule_schemas';
 
 interface ExportSuccessRule {
   statusCode: 200;
@@ -64,7 +65,8 @@ export const getRulesFromObjects = async (
       return `alert.attributes.tags: (${joinedIds})`;
     })
     .join(' OR ');
-  const rules = await findRules({
+  const rules = await findRules<RuleParams>({
+    isRuleRegistryEnabled: false, // TODO: support RAC
     rulesClient,
     filter,
     page: 1,
@@ -77,7 +79,7 @@ export const getRulesFromObjects = async (
     const matchingRule = rules.data.find((rule) => rule.params.ruleId === ruleId);
     if (
       matchingRule != null &&
-      isAlertType(matchingRule) &&
+      isAlertType(false, matchingRule) && // TODO: support RAC
       matchingRule.params.immutable !== true
     ) {
       return {

@@ -25,6 +25,7 @@ export const updateRules = async ({
   ruleUpdate,
 }: UpdateRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
   const existingRule = await readRules({
+    isRuleRegistryEnabled: false, // TODO: support RAC
     rulesClient,
     ruleId: ruleUpdate.rule_id,
     id: ruleUpdate.id,
