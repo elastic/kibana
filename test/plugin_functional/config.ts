@@ -60,6 +60,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--corePluginDeprecations.noLongerUsed=still_using',
         // for testing set buffer duration to 0 to immediately flush counters into saved objects.
         '--usageCollection.usageCounters.bufferDuration=0',
+        '--execution_context.enabled=true',
         ...plugins.map(
           (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),
