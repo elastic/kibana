@@ -232,16 +232,7 @@ export function CorrelationsChart({
             field !== undefined &&
             value !== undefined && (
               <AreaSeries
-                id={i18n.translate(
-                  'xpack.apm.correlations.latency.chart.selectedTermLatencyDistributionLabel',
-                  {
-                    defaultMessage: '{fieldName}:{fieldValue}',
-                    values: {
-                      fieldName: field,
-                      fieldValue: value,
-                    },
-                  }
-                )}
+                id={`${field}:${value}`}
                 xScaleType={ScaleType.Log}
                 yScaleType={ScaleType.Log}
                 data={histogram}
