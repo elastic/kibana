@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import {
-  ML_NOTIFICATION_INDEX_PATTERN,
-  ML_NOTIFICATION_INDEX_02,
-} from '../../../common/constants/index_patterns';
-import { MESSAGE_LEVEL } from '../../../common/constants/message_levels';
 import moment from 'moment';
+import type { IScopedClusterClient } from 'kibana/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
+import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import { MESSAGE_LEVEL } from '../../../common/constants/message_levels';
+import type { JobSavedObjectService } from '../../saved_objects';
+import type { MlClient } from '../../lib/ml_client';
+import type { JobMessage } from '../../../common/types/audit_message';
+import { AuditMessage } from '../../../common/types/anomaly_detection_jobs';
 
 const SIZE = 1000;
-const LEVEL = { system_info: -1, info: 0, warning: 1, error: 2 };
+const LEVEL = { system_info: -1, info: 0, warning: 1, error: 2 } as const;
+
+type LevelName = keyof typeof LEVEL;
+type LevelValue = typeof LEVEL[keyof typeof LEVEL];
 
 // filter to match job_type: 'anomaly_detector' or no job_type field at all
 // if no job_type field exist, we can assume the message is for an anomaly detector job
@@ -39,16 +46,40 @@ const anomalyDetectorTypeFilter = {
   },
 };
 
-export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
+export function isClearable(index?: string): boolean {
+  if (typeof index === 'string') {
+    const match = index.match(/\d{6}$/);
+    return match !== null && !!match.length && Number(match[match.length - 1]) >= 2;
+  }
+  return false;
+}
+
+export function jobAuditMessagesProvider(
+  { asInternalUser }: IScopedClusterClient,
+  mlClient: MlClient
+) {
   // search for audit messages,
   // jobId is optional. without it, all jobs will be listed.
   // from is optional and should be a string formatted in ES time units. e.g. 12h, 1d, 7d
-  async function getJobAuditMessages(jobSavedObjectService, { jobId, from, start, end }) {
+  async function getJobAuditMessages(
+    jobSavedObjectService: JobSavedObjectService,
+    {
+      jobId,
+      from,
+      start,
+      end,
+    }: {
+      jobId?: string;
+      from?: string;
+      start?: string;
+      end?: string;
+    }
+  ) {
     let gte = null;
     if (jobId !== undefined && from === undefined) {
       const jobs = await mlClient.getJobs({ job_id: jobId });
-      if (jobs.count > 0 && jobs.jobs !== undefined) {
-        gte = moment(jobs.jobs[0].create_time).valueOf();
+      if (jobs.body.count > 0 && jobs.body.jobs !== undefined) {
+        gte = moment(jobs.body.jobs[0].create_time).valueOf();
       }
     } else if (from !== undefined) {
       gte = `now-${from}`;
@@ -115,7 +146,7 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
       });
     }
 
-    const { body } = await asInternalUser.search({
+    const { body } = await asInternalUser.search<JobMessage>({
       index: ML_NOTIFICATION_INDEX_PATTERN,
       ignore_unavailable: true,
       size: SIZE,
@@ -125,14 +156,14 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
       },
     });
 
-    let messages = [];
-    if (body.hits.total.value > 0) {
+    let messages: JobMessage[] = [];
+    if ((body.hits.total as estypes.SearchTotalHits).value > 0) {
       messages = body.hits.hits.map((hit) => ({
         clearable: hit._index === ML_NOTIFICATION_INDEX_02,
         ...hit._source,
       }));
     }
-    messages = await jobSavedObjectService.filterJobsForSpace(
+    messages = await jobSavedObjectService.filterJobsForSpace<JobMessage>(
       'anomaly-detector',
       messages,
       'job_id'
@@ -141,13 +172,14 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
   }
 
   // search highest, most recent audit messages for all jobs for the last 24hrs.
-  async function getAuditMessagesSummary(jobIds) {
+  async function getAuditMessagesSummary(jobIds: string[]): Promise<AuditMessage[]> {
     // TODO This is the current default value of the cluster setting `search.max_buckets`.
     // This should possibly consider the real settings in a future update.
     const maxBuckets = 10000;
-    let levelsPerJobAggSize = maxBuckets;
+    const levelsPerJobAggSize =
+      Array.isArray(jobIds) && jobIds.length > 0 ? jobIds.length : maxBuckets;
 
-    const query = {
+    const query: QueryDslQueryContainer = {
       bool: {
         filter: [
           {
@@ -158,6 +190,15 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
             },
           },
           anomalyDetectorTypeFilter,
+          ...(Array.isArray(jobIds) && jobIds.length > 0
+            ? [
+                {
+                  terms: {
+                    job_id: jobIds,
+                  },
+                },
+              ]
+            : []),
         ],
         must_not: {
           term: {
@@ -220,22 +261,39 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
       },
     });
 
-    let messagesPerJob = [];
-    const jobMessages = [];
+    interface LevelsPerJob {
+      key: string;
+      levels: estypes.AggregationsTermsAggregate<{
+        key: LevelName;
+        latestMessage: estypes.AggregationsTermsAggregate<{
+          key: string;
+          latestMessage: estypes.AggregationsValueAggregate;
+        }>;
+      }>;
+    }
+
+    let messagesPerJob: LevelsPerJob[] = [];
+
+    const jobMessages: AuditMessage[] = [];
+
+    const bodyAgg = body.aggregations as {
+      levelsPerJob?: estypes.AggregationsTermsAggregate<LevelsPerJob>;
+    };
+
     if (
-      body.hits.total.value > 0 &&
-      body.aggregations &&
-      body.aggregations.levelsPerJob &&
-      body.aggregations.levelsPerJob.buckets &&
-      body.aggregations.levelsPerJob.buckets.length
+      (body.hits.total as estypes.SearchTotalHits).value > 0 &&
+      bodyAgg &&
+      bodyAgg.levelsPerJob &&
+      bodyAgg.levelsPerJob.buckets &&
+      bodyAgg.levelsPerJob.buckets.length
     ) {
-      messagesPerJob = body.aggregations.levelsPerJob.buckets;
+      messagesPerJob = bodyAgg.levelsPerJob.buckets;
     }
 
     messagesPerJob.forEach((job) => {
       // ignore system messages (id==='')
       if (job.key !== '' && job.levels && job.levels.buckets && job.levels.buckets.length) {
-        let highestLevel = 0;
+        let highestLevel: LevelValue = 0;
         let highestLevelText = '';
         let msgTime = 0;
 
@@ -256,6 +314,7 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
                 // note the time in ms for the highest level
                 // so we can filter them out later if they're earlier than the
                 // job's create time.
+
                 if (msg.latestMessage && msg.latestMessage.value_as_string) {
                   const time = moment(msg.latestMessage.value_as_string);
                   msgTime = time.valueOf();
@@ -275,13 +334,14 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
         }
       }
     });
+
     return jobMessages;
   }
 
   const clearedTime = new Date().getTime();
 
   // Sets 'cleared' to true for messages in the last 24hrs and index new message for clear action
-  async function clearJobAuditMessages(jobId) {
+  async function clearJobAuditMessages(jobId: string): Promise<{ success: boolean; last_cleared: number }> {
     const newClearedMessage = {
       job_id: jobId,
       job_type: 'anomaly_detection',
@@ -333,8 +393,8 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
     return { success: true, last_cleared: clearedTime };
   }
 
-  function levelToText(level) {
-    return Object.keys(LEVEL)[Object.values(LEVEL).indexOf(level)];
+  function levelToText(level: LevelValue): LevelName {
+    return (Object.keys(LEVEL) as LevelName[])[Object.values(LEVEL).indexOf(level)];
   }
 
   return {
