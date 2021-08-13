@@ -41,7 +41,7 @@ You can configure the following settings in the `kibana.yml` file.
 [cols="2*<"]
 |===
 | `xpack.actions.enabled`
-  | Feature toggle that enables Actions in {kib}.
+  | Deprecated. This will be removed in 8.0. Feature toggle that enables Actions in {kib}.
   If `false`, all features dependent on Actions are disabled, including the *Observability* and *Security* apps.  Default: `true`.
 
 | `xpack.actions.allowedHosts` {ess-icon}
