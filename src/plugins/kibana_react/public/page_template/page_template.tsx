@@ -24,7 +24,7 @@ import {
   KibanaPageTemplateSolutionNavProps,
 } from './solution_nav/solution_nav';
 
-import { NoDataPage, NoDataPageProps, NO_DATA_PAGE_TEMPLATE_PROPS } from '../no_data_page';
+import { NoDataPage, NoDataPageProps, NO_DATA_PAGE_TEMPLATE_PROPS } from './no_data_page';
 
 /**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
