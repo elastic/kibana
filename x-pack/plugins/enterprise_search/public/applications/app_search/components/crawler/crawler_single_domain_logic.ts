@@ -7,13 +7,15 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 
 import { HttpLogic } from '../../../shared/http';
-import { EngineLogic } from '../engine';
+import { KibanaLogic } from '../../../shared/kibana';
+import { ENGINE_CRAWLER_PATH } from '../../routes';
+import { EngineLogic, generateEnginePath } from '../engine';
 
-import { CrawlerDomain } from './types';
-import { crawlerDomainServerToClient } from './utils';
+import { CrawlerDomain, EntryPoint } from './types';
+import { crawlerDomainServerToClient, getDeleteDomainSuccessMessage } from './utils';
 
 export interface CrawlerSingleDomainValues {
   dataLoading: boolean;
@@ -21,8 +23,10 @@ export interface CrawlerSingleDomainValues {
 }
 
 interface CrawlerSingleDomainActions {
+  deleteDomain(domain: CrawlerDomain): { domain: CrawlerDomain };
   fetchDomainData(domainId: string): { domainId: string };
   onReceiveDomainData(domain: CrawlerDomain): { domain: CrawlerDomain };
+  updateEntryPoints(entryPoints: EntryPoint[]): { entryPoints: EntryPoint[] };
 }
 
 export const CrawlerSingleDomainLogic = kea<
@@ -30,8 +34,10 @@ export const CrawlerSingleDomainLogic = kea<
 >({
   path: ['enterprise_search', 'app_search', 'crawler', 'crawler_single_domain'],
   actions: {
+    deleteDomain: (domain) => ({ domain }),
     fetchDomainData: (domainId) => ({ domainId }),
     onReceiveDomainData: (domain) => ({ domain }),
+    updateEntryPoints: (entryPoints) => ({ entryPoints }),
   },
   reducers: {
     dataLoading: [
@@ -44,10 +50,25 @@ export const CrawlerSingleDomainLogic = kea<
       null,
       {
         onReceiveDomainData: (_, { domain }) => domain,
+        updateEntryPoints: (currentDomain, { entryPoints }) =>
+          ({ ...currentDomain, entryPoints } as CrawlerDomain),
       },
     ],
   },
   listeners: ({ actions }) => ({
+    deleteDomain: async ({ domain }) => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+
+      try {
+        await http.delete(`/api/app_search/engines/${engineName}/crawler/domains/${domain.id}`);
+
+        flashSuccessToast(getDeleteDomainSuccessMessage(domain.url));
+        KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CRAWLER_PATH));
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
     fetchDomainData: async ({ domainId }) => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
