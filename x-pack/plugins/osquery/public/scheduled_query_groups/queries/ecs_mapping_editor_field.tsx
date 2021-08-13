@@ -522,47 +522,50 @@ export const ECSMappingEditorField = ({ field, query }: Props) => {
        Advanced query
        select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
       */
-      const suggestions = ast?.columns
-        // @ts-expect-error update types
-        ?.map((column) => {
-          if (column.expr.column === '*') {
-            return astOsqueryTables[column.expr.table].map((osqueryColumn) => ({
-              label: osqueryColumn.name,
-              value: {
-                name: osqueryColumn.name,
-                description: osqueryColumn.description,
-                table: column.expr.table,
-                suggestion_label: `${osqueryColumn.name}`,
-              },
-            }));
-          }
-
-          if (astOsqueryTables && astOsqueryTables[column.expr.table]) {
-            const osqueryColumn = find(astOsqueryTables[column.expr.table], [
-              'name',
-              column.expr.column,
-            ]);
-
-            if (osqueryColumn) {
-              const label = column.as ?? column.expr.column;
-
-              return [
-                {
-                  label: column.as ?? column.expr.column,
-                  value: {
-                    name: osqueryColumn.name,
-                    description: osqueryColumn.description,
-                    table: column.expr.table,
-                    suggestion_label: `${label}`,
-                  },
+      console.error('ast?.columns', ast?.columns, typeof ast?.columns);
+      const suggestions =
+        isArray(ast?.columns) &&
+        ast?.columns
+          // @ts-expect-error update types
+          ?.map((column) => {
+            if (column.expr.column === '*') {
+              return astOsqueryTables[column.expr.table].map((osqueryColumn) => ({
+                label: osqueryColumn.name,
+                value: {
+                  name: osqueryColumn.name,
+                  description: osqueryColumn.description,
+                  table: column.expr.table,
+                  suggestion_label: `${osqueryColumn.name}`,
                 },
-              ];
+              }));
             }
-          }
 
-          return [];
-        })
-        .flat();
+            if (astOsqueryTables && astOsqueryTables[column.expr.table]) {
+              const osqueryColumn = find(astOsqueryTables[column.expr.table], [
+                'name',
+                column.expr.column,
+              ]);
+
+              if (osqueryColumn) {
+                const label = column.as ?? column.expr.column;
+
+                return [
+                  {
+                    label: column.as ?? column.expr.column,
+                    value: {
+                      name: osqueryColumn.name,
+                      description: osqueryColumn.description,
+                      table: column.expr.table,
+                      suggestion_label: `${label}`,
+                    },
+                  },
+                ];
+              }
+            }
+
+            return [];
+          })
+          .flat();
 
       return sortBy(suggestions, 'value.suggestion_label');
     });
