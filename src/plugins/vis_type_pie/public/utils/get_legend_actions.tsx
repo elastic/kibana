@@ -29,7 +29,7 @@ export const getLegendActions = (
   return ({ series: [pieSeries] }) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [isfilterable, setIsfilterable] = useState(true);
-    const filterData = useMemo(() => getFilterEventData(pieSeries), [pieSeries, getFilterEventData]);
+    const filterData = useMemo(() => getFilterEventData(pieSeries), [pieSeries]);
 
     useEffect(() => {
       (async () => setIsfilterable(await canFilter(filterData, actions)))();

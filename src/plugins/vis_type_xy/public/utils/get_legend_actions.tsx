@@ -24,7 +24,7 @@ export const getLegendActions = (
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [isfilterable, setIsfilterable] = useState(false);
     const series = xySeries as XYChartSeriesIdentifier;
-    const filterData = useMemo(() => getFilterEventData(series), [getFilterEventData, series]);
+    const filterData = useMemo(() => getFilterEventData(series), [series]);
 
     useEffect(() => {
       (async () => setIsfilterable(await canFilter(filterData)))();
