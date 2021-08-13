@@ -7,16 +7,9 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
-import {
-  EuiIcon,
-  EuiLink,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { createHref, push } from '../../shared/Links/url_helpers';
 import { useUiTracker } from '../../../../../observability/public';
 import { useTheme } from '../../../hooks/use_theme';
 import type { SelectedSignificantTerm } from '../../../../common/search_strategies/correlations/types';
@@ -42,7 +35,6 @@ export function CorrelationsTable<T extends SelectedSignificantTerm>({
   significantTerms,
   status,
   setSelectedSignificantTerm,
-  onFilter,
   columns,
   selectedTerm,
 }: Props<T>) {
@@ -56,7 +48,6 @@ export function CorrelationsTable<T extends SelectedSignificantTerm>({
       ),
     [trackApmEvent]
   );
-  const history = useHistory();
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -83,98 +74,7 @@ export function CorrelationsTable<T extends SelectedSignificantTerm>({
     setPageSize(size);
   }, []);
 
-  const handleOnFilter = useCallback(() => (onFilter ? onFilter : () => {}), [
-    onFilter,
-  ]);
-  const tableColumns: Array<EuiBasicTableColumn<T>> = columns
-    ? [
-        ...columns,
-        {
-          width: '100px',
-          actions: [
-            {
-              name: i18n.translate(
-                'xpack.apm.correlations.correlationsTable.filterLabel',
-                { defaultMessage: 'Filter' }
-              ),
-              description: i18n.translate(
-                'xpack.apm.correlations.correlationsTable.filterDescription',
-                { defaultMessage: 'Filter by value' }
-              ),
-              icon: 'plusInCircle',
-              type: 'icon',
-              onClick: (term: T) => {
-                push(history, {
-                  query: {
-                    kuery: `${term.fieldName}:"${encodeURIComponent(
-                      term.fieldValue
-                    )}"`,
-                  },
-                });
-                handleOnFilter();
-                trackApmEvent({ metric: 'correlations_term_include_filter' });
-              },
-            },
-            {
-              name: i18n.translate(
-                'xpack.apm.correlations.correlationsTable.excludeLabel',
-                { defaultMessage: 'Exclude' }
-              ),
-              description: i18n.translate(
-                'xpack.apm.correlations.correlationsTable.excludeDescription',
-                { defaultMessage: 'Filter out value' }
-              ),
-              icon: 'minusInCircle',
-              type: 'icon',
-              onClick: (term: T) => {
-                push(history, {
-                  query: {
-                    kuery: `not ${term.fieldName}:"${encodeURIComponent(
-                      term.fieldValue
-                    )}"`,
-                  },
-                });
-                handleOnFilter();
-                trackApmEvent({ metric: 'correlations_term_exclude_filter' });
-              },
-            },
-          ],
-          name: i18n.translate(
-            'xpack.apm.correlations.correlationsTable.actionsLabel',
-            { defaultMessage: 'Filter' }
-          ),
-          render: (_: any, term: T) => {
-            return (
-              <>
-                <EuiLink
-                  href={createHref(history, {
-                    query: {
-                      kuery: `${term.fieldName}:"${encodeURIComponent(
-                        term.fieldValue
-                      )}"`,
-                    },
-                  })}
-                >
-                  <EuiIcon type="magnifyWithPlus" />
-                </EuiLink>
-                &nbsp;/&nbsp;
-                <EuiLink
-                  href={createHref(history, {
-                    query: {
-                      kuery: `not ${term.fieldName}:"${encodeURIComponent(
-                        term.fieldValue
-                      )}"`,
-                    },
-                  })}
-                >
-                  <EuiIcon type="magnifyWithMinus" />
-                </EuiLink>
-              </>
-            );
-          },
-        },
-      ]
-    : [];
+  const tableColumns: Array<EuiBasicTableColumn<T>> = columns ?? [];
 
   return (
     <EuiBasicTable

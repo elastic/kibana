@@ -19,9 +19,12 @@ import {
   EuiSpacer,
   EuiText,
   EuiBadge,
+  EuiIcon,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useHistory } from 'react-router-dom';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { CorrelationsTable } from './correlations_table';
@@ -40,6 +43,8 @@ import { isErrorMessage } from './utils/is_error_message';
 import { Summary } from '../../shared/Summary';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { getFailureCorrelationImpactLabel } from './utils/get_failure_correlation_impact_label';
+import { createHref, push } from '../../shared/Links/url_helpers';
+import { useUiTracker } from '../../../../../observability/public';
 
 interface Props {
   onClose: () => void;
@@ -54,6 +59,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
   const {
     core: { notifications, uiSettings },
   } = useApmPluginContext();
+  const trackApmEvent = useUiTracker({ app: 'apm' });
 
   const { serviceName, transactionType } = useApmServiceContext();
   const { urlParams } = useUrlParams();
@@ -115,6 +121,9 @@ export function MlFailureCorrelations({ onClose }: Props) {
       : undefined;
   }, [selectedSignificantTerm, result]);
 
+  const history = useHistory();
+  const handleOnFilter = onClose;
+
   const errorCorrelationsColumns: Array<
     EuiBasicTableColumn<ErrorCorrelationValue>
   > = useMemo(
@@ -170,8 +179,92 @@ export function MlFailureCorrelations({ onClose }: Props) {
         ),
         render: (fieldValue: string) => String(fieldValue).slice(0, 50),
       },
+      {
+        width: '100px',
+        actions: [
+          {
+            name: i18n.translate(
+              'xpack.apm.correlations.correlationsTable.filterLabel',
+              { defaultMessage: 'Filter' }
+            ),
+            description: i18n.translate(
+              'xpack.apm.correlations.correlationsTable.filterDescription',
+              { defaultMessage: 'Filter by value' }
+            ),
+            icon: 'plusInCircle',
+            type: 'icon',
+            onClick: (term: ErrorCorrelationValue) => {
+              push(history, {
+                query: {
+                  kuery: `${term.fieldName}:"${encodeURIComponent(
+                    term.fieldValue
+                  )}"`,
+                },
+              });
+              handleOnFilter();
+              trackApmEvent({ metric: 'correlations_term_include_filter' });
+            },
+          },
+          {
+            name: i18n.translate(
+              'xpack.apm.correlations.correlationsTable.excludeLabel',
+              { defaultMessage: 'Exclude' }
+            ),
+            description: i18n.translate(
+              'xpack.apm.correlations.correlationsTable.excludeDescription',
+              { defaultMessage: 'Filter out value' }
+            ),
+            icon: 'minusInCircle',
+            type: 'icon',
+            onClick: (term: ErrorCorrelationValue) => {
+              push(history, {
+                query: {
+                  kuery: `not ${term.fieldName}:"${encodeURIComponent(
+                    term.fieldValue
+                  )}"`,
+                },
+              });
+              handleOnFilter();
+              trackApmEvent({ metric: 'correlations_term_exclude_filter' });
+            },
+          },
+        ],
+        name: i18n.translate(
+          'xpack.apm.correlations.correlationsTable.actionsLabel',
+          { defaultMessage: 'Filter' }
+        ),
+        render: (_: any, term: ErrorCorrelationValue) => {
+          return (
+            <>
+              <EuiLink
+                href={createHref(history, {
+                  query: {
+                    kuery: `${term.fieldName}:"${encodeURIComponent(
+                      term.fieldValue
+                    )}"`,
+                  },
+                })}
+              >
+                <EuiIcon type="magnifyWithPlus" />
+              </EuiLink>
+              &nbsp;/&nbsp;
+              <EuiLink
+                href={createHref(history, {
+                  query: {
+                    kuery: `not ${term.fieldName}:"${encodeURIComponent(
+                      term.fieldValue
+                    )}"`,
+                  },
+                })}
+              >
+                <EuiIcon type="magnifyWithMinus" />
+              </EuiLink>
+            </>
+          );
+        },
+      },
     ],
-    []
+    [handleOnFilter, history, trackApmEvent]
   );
 
   useEffect(() => {
