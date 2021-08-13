@@ -10,4 +10,4 @@ export const MESSAGE_LEVEL = {
   INFO: 'info',
   SUCCESS: 'success',
   WARNING: 'warning',
-};
+} as const;
