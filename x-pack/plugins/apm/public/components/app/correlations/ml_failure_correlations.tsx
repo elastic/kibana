@@ -31,7 +31,7 @@ import { CorrelationsTable } from './correlations_table';
 import { enableInspectEsQueries } from '../../../../../observability/public';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { LatencyCorrelationsHelpPopover } from './ml_latency_correlations_help_popover';
+import { FailureCorrelationsHelpPopover } from './ml_failure_correlations_help_popover';
 import { useCorrelationsSearchStrategy } from './use_correlations_search_strategy';
 import {
   BaseSearchStrategyResponse,
@@ -325,11 +325,12 @@ export function MlFailureCorrelations({ onClose }: Props) {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <LatencyCorrelationsHelpPopover />
+          <FailureCorrelationsHelpPopover />
         </EuiFlexItem>
       </EuiFlexGroup>
       {selectedTerm ? (
         <>
+          <EuiSpacer size="m" />
           <Summary
             items={[
               <EuiBadge color="hollow">
