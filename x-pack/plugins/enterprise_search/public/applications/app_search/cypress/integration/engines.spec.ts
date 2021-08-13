@@ -5,4 +5,14 @@
  * 2.0.
  */
 
-export const TASK_MANAGER_INDEX = '.kibana_task_manager';
+import { login } from '../support/commands';
+
+context('Engines', () => {
+  beforeEach(() => {
+    login();
+  });
+
+  it('renders', () => {
+    cy.contains('Engines');
+  });
+});

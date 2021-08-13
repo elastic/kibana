@@ -6,17 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ALERT_STATUS } from '@kbn/rule-data-utils';
 import { esKuery } from '../../../../../src/plugins/data/server';
-import { AlertStatus } from '../../common/typings';
-
-export function alertStatusQuery(status: AlertStatus) {
-  if (status === 'all') {
-    return [];
-  }
-
-  return [{ term: { [ALERT_STATUS]: status } }];
-}
 
 export function rangeQuery(
   start?: number,

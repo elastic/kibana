@@ -139,11 +139,11 @@ export function ServiceOverviewThroughputChart({
               data.throughputUnit === 'minute'
                 ? i18n.translate('xpack.apm.serviceOverview.tpmHelp', {
                     defaultMessage:
-                      'Throughput is measured in tpm (transactions per minute)',
+                      'Throughput is measured in transactions per minute (tpm)',
                   })
                 : i18n.translate('xpack.apm.serviceOverview.tpsHelp', {
                     defaultMessage:
-                      'Throughput is measured in tps (transactions per second)',
+                      'Throughput is measured in transactions per second (tps)',
                   })
             }
             position="right"

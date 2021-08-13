@@ -22,9 +22,6 @@ jest.mock('../contexts/kibana/use_create_url', () => {
 
 jest.mock('../contexts/kibana', () => {
   return {
-    useMlUrlGenerator: () => ({
-      createUrl: jest.fn(),
-    }),
     useNavigateToPath: () => jest.fn(),
     useNotifications: jest.fn(),
   };
