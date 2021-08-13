@@ -22,6 +22,7 @@ export type {
 export { Direction } from '../common/search_strategy/common';
 export { tGridReducer } from './store/t_grid/reducer';
 export type { TGridModelForTimeline, TimelineState, TimelinesUIStart } from './types';
+export { TGridType, SortDirection } from './types';
 export {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,

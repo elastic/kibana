@@ -66,6 +66,9 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
         href: createCaseUrl,
         onClick: goToCreateCase,
       },
+      hooks: {
+        useInsertTimeline,
+      },
       hiddenStatuses: [CaseStatuses.closed, StatusAll],
       onRowClick: onCaseClicked,
       updateCase: onCaseSuccess,
@@ -86,6 +89,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     rule?.name,
     appId,
     dispatch,
+    useInsertTimeline,
   ]);
 
   const closeCaseFlyoutOpen = useCallback(() => {

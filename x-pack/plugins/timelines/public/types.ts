@@ -18,6 +18,7 @@ import type {
   UseDraggableKeyboardWrapper,
   UseDraggableKeyboardWrapperProps,
 } from './components';
+export type { SortDirection } from '../common';
 import type { TGridIntegratedProps } from './components/t_grid/integrated';
 import type { TGridStandaloneProps } from './components/t_grid/standalone';
 import type { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';

@@ -5,11 +5,38 @@
  * 2.0.
  */
 import { getOr } from 'lodash/fp';
+import { CombinedState } from 'redux';
 import { createSelector } from 'reselect';
-import { TGridModel } from '.';
+import { TGridModel, State } from '.';
 import { tGridDefaults, getTGridManageDefaults } from './defaults';
 
+interface TGridById {
+  [id: string]: TGridModel;
+}
+
+interface EmbeddedStateShape {
+  timeline: {
+    [id: string]: TGridModel;
+  };
+}
+
+type EmbeddedState = CombinedState<EmbeddedStateShape>;
+type StandaloneOrEmbeddedState = State | EmbeddedState;
+
 const getDefaultTgrid = (id: string) => ({ ...tGridDefaults, ...getTGridManageDefaults(id) });
+
+const standaloneTGridById = (state: State): TGridById => state.timelineById;
+
+const embeddedTGridById = (state: EmbeddedState): TGridModel => state.timeline.timelineById;
+
+export const activeCaseFlowId = createSelector(standaloneTGridById, (tGrid) => {
+  return (
+    tGrid &&
+    Object.entries(tGrid)
+      .map(([id, data]) => (data.isAddToExistingCaseOpen || data.isCreateNewCaseOpen ? id : null))
+      .find((id) => id)
+  );
+});
 
 export const selectTGridById = (state: unknown, timelineId: string): TGridModel => {
   return getOr(

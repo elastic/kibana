@@ -12,7 +12,7 @@ import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { Case, SubCase } from '../../../cases/common';
 import { TimelinesStartServices } from '../types';
 import { tGridActions } from '../store/t_grid';
-import { useDeepEqualSelector } from './use_selector';
+import { useShallowEqualSelector } from './use_selector';
 import { createUpdateSuccessToaster } from '../components/actions/timeline/cases/helpers';
 import { AddToCaseActionProps } from '../components/actions/timeline/cases/add_to_case_action';
 
@@ -87,7 +87,7 @@ export const useAddToCase = ({
   const dispatch = useDispatch();
   // TODO: use correct value in standalone or integrated.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const timelineById = useDeepEqualSelector((state: any) => {
+  const timelineById = useShallowEqualSelector((state: any) => {
     if (state.timeline) {
       return state.timeline.timelineById[eventId];
     } else {
@@ -109,7 +109,7 @@ export const useAddToCase = ({
     }
   }, [timelineById]);
   const {
-    application: { navigateToApp, getUrlForApp },
+    application: { navigateToApp, getUrlForApp, navigateToUrl },
     notifications: { toasts },
   } = useKibana<TimelinesStartServices>().services;
 
@@ -122,12 +122,17 @@ export const useAddToCase = ({
 
   const onViewCaseClick = useCallback(
     (id) => {
-      navigateToApp(appId, {
-        deepLinkId: appId === 'securitySolution' ? 'case' : 'cases',
-        path: getCaseDetailsUrl({ id }),
-      });
+      const caseDetailsUrl = getCaseDetailsUrl({ id });
+      const appUrl = getUrlForApp(appId);
+      const fullCaseUrl = `${appUrl}/cases/${caseDetailsUrl}`;
+      // TODO: not working for observability cases?
+      // navigateToApp(appId, {
+      //   deepLinkId: appId === 'securitySolution' ? 'case' : 'cases',
+      //   path: getCaseDetailsUrl({ id }),
+      // });
+      navigateToUrl(fullCaseUrl);
     },
-    [navigateToApp, appId]
+    [navigateToUrl, appId, getUrlForApp]
   );
   const currentSearch = useLocation().search;
   const urlSearch = useMemo(() => currentSearch, [currentSearch]);
