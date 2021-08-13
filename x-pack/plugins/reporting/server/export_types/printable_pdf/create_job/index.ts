@@ -23,20 +23,20 @@ export const createJobFnFactory: CreateJobFnFactory<
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
   return compatibilityShim(async function createJobFn(
-    jobParams: JobParamsPDF,
+    { relativeUrls, ...jobParams }: JobParamsPDF,
     _context: ReportingRequestHandlerContext,
     req: KibanaRequest
   ) {
-    const serializedEncryptedHeaders = await crypto.encrypt(req.headers);
+    validateUrls(relativeUrls);
 
-    validateUrls(jobParams.relativeUrls);
+    const serializedEncryptedHeaders = await crypto.encrypt(req.headers);
 
     const payload: TaskPayloadPDF = {
       ...jobParams,
       headers: serializedEncryptedHeaders,
       spaceId: reporting.getSpaceId(req, logger),
       forceNow: new Date().toISOString(),
-      objects: jobParams.relativeUrls.map((u) => ({ relativeUrl: u })),
+      objects: relativeUrls.map((u) => ({ relativeUrl: u })),
     };
 
     return payload;
