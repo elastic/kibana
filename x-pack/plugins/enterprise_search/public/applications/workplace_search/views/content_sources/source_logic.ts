@@ -34,22 +34,10 @@ export interface SourceActions {
   searchContentSourceDocuments(sourceId: string): { sourceId: string };
   updateContentSource(
     sourceId: string,
-    source: {
-      name?: string;
-      indexing?: {
-        enabled?: boolean;
-        features?: { thumbnails?: { enabled: boolean }; content_extraction?: { enabled: boolean } };
-      };
-    }
+    source: SourceUpdatePayload
   ): {
     sourceId: string;
-    source: {
-      name: string;
-      indexing: {
-        enabled: boolean;
-        features: { thumbnails: { enabled: boolean }; content_extraction: { enabled: boolean } };
-      };
-    };
+    source: ContentSourceFullData;
   };
   resetSourceState(): void;
   removeContentSource(sourceId: string): { sourceId: string };
@@ -72,6 +60,17 @@ interface SearchResultsResponse {
   meta: Meta;
 }
 
+interface SourceUpdatePayload {
+  name?: string;
+  indexing?: {
+    enabled?: boolean;
+    features?: {
+      thumbnails?: { enabled: boolean };
+      content_extraction?: { enabled: boolean };
+    };
+  };
+}
+
 export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
   path: ['enterprise_search', 'workplace_search', 'source_logic'],
   actions: {
@@ -84,19 +83,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     initializeSource: (sourceId: string) => ({ sourceId }),
     initializeFederatedSummary: (sourceId: string) => ({ sourceId }),
     searchContentSourceDocuments: (sourceId: string) => ({ sourceId }),
-    updateContentSource: (
-      sourceId: string,
-      source: {
-        name?: string;
-        indexing?: {
-          enabled?: boolean;
-          features?: {
-            thumbnails?: { enabled: boolean };
-            content_extraction?: { enabled: boolean };
-          };
-        };
-      }
-    ) => ({ sourceId, source }),
+    updateContentSource: (sourceId: string, source: SourceUpdatePayload) => ({ sourceId, source }),
     removeContentSource: (sourceId: string) => ({
       sourceId,
     }),
