@@ -94,7 +94,7 @@ exports[`StatusMessage should show that no indices exist 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="No data streams, indices, or index aliases match your pattern."
+        defaultMessage="No data streams, indices, or index aliases match your index pattern."
         id="indexPatternEditor.status.noSystemIndicesLabel"
         values={Object {}}
       />
@@ -111,7 +111,7 @@ exports[`StatusMessage should show that system indices exist 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="No data streams, indices, or index aliases match your pattern."
+        defaultMessage="No data streams, indices, or index aliases match your index pattern."
         id="indexPatternEditor.status.noSystemIndicesLabel"
         values={Object {}}
       />

@@ -77,7 +77,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         <span>
           <FormattedMessage
             id="indexPatternEditor.status.noSystemIndicesWithPromptLabel"
-            defaultMessage="No data streams, indices, or index aliases match your pattern."
+            defaultMessage="No data streams, indices, or index aliases match your index pattern."
           />
         </span>
       );
@@ -86,7 +86,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         <span>
           <FormattedMessage
             id="indexPatternEditor.status.noSystemIndicesLabel"
-            defaultMessage="No data streams, indices, or index aliases match your pattern."
+            defaultMessage="No data streams, indices, or index aliases match your index pattern."
           />
         </span>
       );
