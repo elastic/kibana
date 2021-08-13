@@ -179,7 +179,6 @@
     "@turf/length": "^6.0.2",
     "@types/react-router-config": "^5.0.2",
     "@types/redux-logger": "^3.0.8",
-    "@types/simple-oauth2": "^4.1.1",
     "JSONStream": "1.3.5",
     "abort-controller": "^3.0.0",
     "abortcontroller-polyfill": "^1.4.0",
