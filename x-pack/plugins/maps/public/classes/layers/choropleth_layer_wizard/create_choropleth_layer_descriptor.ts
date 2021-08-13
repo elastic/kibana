@@ -64,6 +64,7 @@ function createChoroplethLayerDescriptor({
           metrics: [metricsDescriptor],
           applyGlobalQuery: true,
           applyGlobalTime: true,
+          respondToForceRefresh: true,
         },
       },
     ],

@@ -1,0 +1,31 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { DataFilters, MapQuery, VectorSourceRequestMeta } from '../../../common/descriptor_types';
+import { IVectorSource } from '../sources/vector_source';
+import { ITermJoinSource } from '../sources/term_join_source';
+
+export function buildVectorRequestMeta(
+  source: IVectorSource | ITermJoinSource,
+  fieldNames: string[],
+  dataFilters: DataFilters,
+  sourceQuery: MapQuery
+): VectorSourceRequestMeta {
+  return {
+    ...dataFilters,
+    fieldNames: _.uniq(fieldNames).sort(),
+    geogridPrecision:
+      typeof dataFilters.zoom === 'number'
+        ? source.getGeoGridPrecision(dataFilters.zoom)
+        : undefined,
+    sourceQuery: sourceQuery ? sourceQuery : undefined,
+    applyGlobalQuery: source.getApplyGlobalQuery(),
+    applyGlobalTime: source.getApplyGlobalTime(),
+    sourceMeta: source.getSyncMeta(),
+    respondToForceRefresh: source.isESSource() ? source.getRespondToForceRefresh() : false,
+  };
+}

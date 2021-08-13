@@ -15,6 +15,7 @@ import { ESGeoGridSource } from '../../sources/es_geo_grid_source';
 import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from '../vector_layer';
 import { DataRequestContext } from '../../../actions';
 import { DataRequestAbortError } from '../../util/data_request';
+import { buildVectorRequestMeta } from '../build_vector_request_meta';
 
 const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__'; // unique name to store scaled value for weighting
 
@@ -94,24 +95,17 @@ export class HeatmapLayer extends AbstractLayer {
       return;
     }
 
-    const sourceQuery = this.getQuery() as MapQuery;
     try {
       await syncVectorSource({
         layerId: this.getId(),
         layerName: await this.getDisplayName(this.getSource()),
         prevDataRequest: this.getSourceDataRequest(),
-        requestMeta: {
-          ...syncContext.dataFilters,
-          fieldNames: this.getSource().getFieldNames(),
-          geogridPrecision:
-            typeof syncContext.dataFilters.zoom === 'number'
-              ? this.getSource().getGeoGridPrecision(syncContext.dataFilters.zoom)
-              : undefined,
-          sourceQuery: sourceQuery ? sourceQuery : undefined,
-          applyGlobalQuery: this.getSource().getApplyGlobalQuery(),
-          applyGlobalTime: this.getSource().getApplyGlobalTime(),
-          sourceMeta: this.getSource().getSyncMeta(),
-        },
+        requestMeta: buildVectorRequestMeta(
+          this.getSource(),
+          this.getSource().getFieldNames(),
+          syncContext.dataFilters,
+          this.getQuery() as MapQuery
+        ),
         syncContext,
         source: this.getSource(),
         getUpdateDueToTimeslice: () => {

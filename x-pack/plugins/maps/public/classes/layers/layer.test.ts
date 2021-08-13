@@ -84,6 +84,7 @@ describe('cloneDescriptor', () => {
               type: SOURCE_TYPES.ES_TERM_SOURCE,
               applyGlobalQuery: true,
               applyGlobalTime: true,
+              respondToForceRefresh: true,
             },
           },
         ],

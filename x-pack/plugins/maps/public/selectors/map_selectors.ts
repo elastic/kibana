@@ -183,8 +183,9 @@ export const getQuery = ({ map }: MapStoreState): MapQuery | undefined => map.ma
 
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
 
-export const getForceRefreshTriggeredFromGlobalQueryTime = ({ map }: MapStoreState): Filter[] =>
-  map.mapState.forceRefreshTriggeredFromGlobalQueryTime;
+export const getForceRefreshTriggeredFromGlobalQueryTime = ({
+  map,
+}: MapStoreState): boolean | undefined => map.mapState.forceRefreshTriggeredFromGlobalQueryTime;
 
 export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =>
   map.mapState.searchSessionId;

@@ -70,6 +70,7 @@ import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { ITermJoinSource } from '../../sources/term_join_source';
 import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from './utils';
 import { JoinState, performInnerJoins } from './perform_inner_joins';
+import { buildVectorRequestMeta } from '../build_vector_request_meta';
 
 export interface VectorLayerArguments {
   source: IVectorSource;
@@ -337,23 +338,20 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceDataRequestId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
-    const searchFilters: VectorJoinSourceRequestMeta = {
-      ...dataFilters,
-      fieldNames: joinSource.getFieldNames(),
-      sourceQuery: joinSource.getWhereQuery(),
-      applyGlobalQuery: joinSource.getApplyGlobalQuery(),
-      applyGlobalTime: joinSource.getApplyGlobalTime(),
-      sourceMeta: joinSource.getSyncMeta(),
-      respondToForceRefresh: this.supportsElasticsearchFilters()
-        ? joinSource.getRespondToForceRefresh()
-        : false,
-    };
+
+    const joinRequestMeta = buildVectorRequestMeta(
+      joinSource,
+      joinSource.getFieldNames(),
+      dataFilters,
+      joinSource.getWhereQuery()
+    );
+
     const prevDataRequest = this.getDataRequest(sourceDataId);
 
     const canSkipFetch = await canSkipSourceUpdate({
       source: joinSource,
       prevDataRequest,
-      nextRequestMeta: searchFilters,
+      nextRequestMeta: joinRequestMeta,
       extentAware: false, // join-sources are term-aggs that are spatially unaware (e.g. ESTermSource/TableSource).
       getUpdateDueToTimeslice: () => {
         return true;
@@ -368,10 +366,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     try {
-      startLoading(sourceDataId, requestToken, searchFilters);
+      startLoading(sourceDataId, requestToken, joinRequestMeta);
       const leftSourceName = await this._source.getDisplayName();
       const propertiesMap = await joinSource.getPropertiesMap(
-        searchFilters,
+        joinRequestMeta,
         leftSourceName,
         join.getLeftField().getName(),
         registerCancelCallback.bind(null, requestToken)
@@ -415,21 +413,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     if (timesliceMaskFieldName) {
       fieldNames.push(timesliceMaskFieldName);
     }
-
-    const sourceQuery = this.getQuery() as MapQuery;
-    return {
-      ...dataFilters,
-      fieldNames: _.uniq(fieldNames).sort(),
-      geogridPrecision:
-        typeof dataFilters.zoom === 'number'
-          ? source.getGeoGridPrecision(dataFilters.zoom)
-          : undefined,
-      sourceQuery: sourceQuery ? sourceQuery : undefined,
-      applyGlobalQuery: source.getApplyGlobalQuery(),
-      applyGlobalTime: source.getApplyGlobalTime(),
-      sourceMeta: source.getSyncMeta(),
-      respondToForceRefresh: source.getRespondToForceRefresh(),
-    };
+    return buildVectorRequestMeta(source, fieldNames, dataFilters, this.getQuery() as MapQuery);
   }
 
   async _syncSourceStyleMeta(

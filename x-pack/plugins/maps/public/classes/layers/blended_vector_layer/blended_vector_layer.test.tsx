@@ -86,6 +86,7 @@ describe('getSource', () => {
         geoField: sourceDescriptor.geoField,
         applyGlobalQuery: sourceDescriptor.applyGlobalQuery,
         applyGlobalTime: sourceDescriptor.applyGlobalTime,
+        respondToForceRefresh: sourceDescriptor.respondToForceRefresh,
       };
       expect(abstractEsSourceDescriptor).toEqual({
         type: sourceDescriptor.type,

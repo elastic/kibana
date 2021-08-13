@@ -228,10 +228,6 @@ export function clearGoto() {
   return { type: CLEAR_GOTO };
 }
 
-function generateQueryTimestamp() {
-  return new Date().toISOString();
-}
-
 export function setQuery({
   query,
   timeFilters,
