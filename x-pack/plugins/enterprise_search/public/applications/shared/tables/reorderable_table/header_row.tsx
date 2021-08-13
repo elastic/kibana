@@ -24,7 +24,7 @@ export const HeaderRow = <Item extends object>({ columns, leftAction }: HeaderRo
     <div className="reorderableTableHeader">
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFlexGroup>
+          <EuiFlexGroup responsive={false} wrap={false}>
             {!!leftAction && <Cell {...DRAGGABLE_UX_STYLE}>{leftAction}</Cell>}
             {columns.map((column, columnIndex) => (
               <Cell key={`table_header_cell_${columnIndex}`} {...column}>

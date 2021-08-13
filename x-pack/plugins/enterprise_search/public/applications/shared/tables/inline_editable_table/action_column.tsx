@@ -98,8 +98,8 @@ export const ActionColumn = <Item extends ItemWithAnID>({
       </EuiFlexItem>
       <EuiFlexItem grow={null}>
         {!canRemoveLastItem && displayedItems.length === 1 ? (
-          <EuiToolTip content={lastItemWarning}>
-            <EuiButtonEmpty size="xs" disabled>
+          <EuiToolTip content={lastItemWarning} display="block">
+            <EuiButtonEmpty size="xs" style={{ width: '100%' }} disabled>
               {DELETE_BUTTON_LABEL}
             </EuiButtonEmpty>
           </EuiToolTip>

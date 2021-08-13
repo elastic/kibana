@@ -31,7 +31,7 @@ export const BodyRow = <Item extends object>({
     <div className="reorderableTableRow">
       <EuiFlexGroup data-test-subj="row" alignItems="center" {...(additionalProps || {})}>
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="flexStart">
+          <EuiFlexGroup alignItems="flexStart" responsive={false} wrap={false}>
             {!!leftAction && <Cell {...DRAGGABLE_UX_STYLE}>{leftAction}</Cell>}
             {columns.map((column, columnIndex) => (
               <Cell
