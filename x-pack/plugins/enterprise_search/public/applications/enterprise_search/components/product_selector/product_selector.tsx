@@ -64,13 +64,13 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ access }) => {
           })}
         </h1>
         <p>
-         {config.host
-           ? i18n.translate('xpack.enterpriseSearch.overview.subheading', {
-               defaultMessage: 'Add search to your app or organization.',
-             })
-           : i18n.translate('xpack.enterpriseSearch.overview.setupHeading', {
-               defaultMessage: 'Choose a product to set up and get started.',
-             })}
+          {config.host
+            ? i18n.translate('xpack.enterpriseSearch.overview.subheading', {
+                defaultMessage: 'Add search to your app or organization.',
+              })
+            : i18n.translate('xpack.enterpriseSearch.overview.setupHeading', {
+                defaultMessage: 'Choose a product to set up and get started.',
+              })}
         </p>
       </EuiText>
 
