@@ -241,7 +241,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
               expect(response?.headers?.warning).to.eql(
-                `199 kibana POST /api/alerting/rule/${predefinedRuleId}: Usage of "id" has been deprecated and will be removed in 8.0.0`
+                `199 kibana "Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the docs for more details."`
               );
 
               const taskRecord = await getScheduledTask(response.body.scheduled_task_id);

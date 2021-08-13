@@ -276,12 +276,12 @@ describe('createRuleRoute', () => {
     expect(await handler(context, req, res)).toEqual({
       body: expectedResult,
       headers: {
-        warning: `199 kibana POST /api/alerting/rule/custom-id: Usage of "id" has been deprecated and will be removed in 8.0.0`,
+        warning: `199 kibana "Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the docs for more details."`,
       },
     });
 
     expect(logger.warn).toHaveBeenCalledWith(
-      `POST /api/alerting/rule/custom-id: Usage of "id" has been deprecated and will be removed in 8.0.0`
+      `POST /api/alerting/rule/custom-id: Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the docs for more details.`
     );
     expect(rulesClient.getSpaceId).toHaveBeenCalled();
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
@@ -324,7 +324,7 @@ describe('createRuleRoute', () => {
     expect(res.ok).toHaveBeenCalledWith({
       body: expectedResult,
       headers: {
-        warning: `199 kibana POST /api/alerting/rule/custom-id: Usage of "id" has been deprecated and will be removed in 8.0.0`,
+        warning: `199 kibana "Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the docs for more details."`,
       },
     });
   });
