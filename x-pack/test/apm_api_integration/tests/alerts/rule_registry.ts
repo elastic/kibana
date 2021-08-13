@@ -8,12 +8,10 @@
 import expect from '@kbn/expect';
 import {
   ALERT_DURATION,
-  ALERT_END,
-  ALERT_START,
+  ALERT_END, ALERT_RULE_UUID, ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
-  EVENT_KIND,
-  ALERT_RULE_UUID,
+  EVENT_KIND
 } from '@kbn/rule-data-utils';
 import { merge, omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -388,6 +386,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "apm.transaction_error_rate",
             ],
             "kibana.alert.status": Array [
+              "open",
+            ],
+            "kibana.alert.workflow_status": Array [
               "open",
             ],
             "kibana.space_ids": Array [

@@ -199,6 +199,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.alert.status": "open",
+              "kibana.alert.workflow_status": "open",
               "kibana.space_ids": Array [
                 "spaceId",
               ],
@@ -221,6 +222,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.alert.status": "open",
+              "kibana.alert.workflow_status": "open",
               "kibana.space_ids": Array [
                 "spaceId",
               ],
