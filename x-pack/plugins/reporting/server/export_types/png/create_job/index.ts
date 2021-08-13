@@ -22,6 +22,7 @@ export const createJobFnFactory: CreateJobFnFactory<
     validateUrls([jobParams.relativeUrl]);
 
     return {
+      isDeprecated: true,
       headers: serializedEncryptedHeaders,
       spaceId: reporting.getSpaceId(req, logger),
       forceNow: new Date().toISOString(),
