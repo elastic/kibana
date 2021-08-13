@@ -16,15 +16,24 @@ import {
 } from '@elastic/eui';
 
 import * as i18n from './translations';
+import {
+  DEFAULT_EVENT_ENRICHMENT_FROM,
+  DEFAULT_EVENT_ENRICHMENT_TO,
+} from '../../../../../common/cti/constants';
 
 export interface RangePickerProps {
+  range: { to: string; from: string };
   setRange: ({ to, from }: { to: string; from: string }) => void;
   loading: boolean;
 }
 
-export const EnrichmentRangePicker: React.FC<RangePickerProps> = ({ setRange, loading }) => {
-  const [startDate, setStartDate] = useState<moment.Moment | null>(moment().subtract(30, 'd'));
-  const [endDate, setEndDate] = useState<moment.Moment | null>(moment());
+export const EnrichmentRangePicker: React.FC<RangePickerProps> = ({ range, setRange, loading }) => {
+  const [startDate, setStartDate] = useState<moment.Moment | null>(
+    range.from === DEFAULT_EVENT_ENRICHMENT_FROM ? moment().subtract(30, 'd') : moment(range.from)
+  );
+  const [endDate, setEndDate] = useState<moment.Moment | null>(
+    range.to === DEFAULT_EVENT_ENRICHMENT_TO ? moment() : moment(range.to)
+  );
 
   const onButtonClick = useCallback(() => {
     if (startDate && endDate && startDate.isBefore(endDate)) {

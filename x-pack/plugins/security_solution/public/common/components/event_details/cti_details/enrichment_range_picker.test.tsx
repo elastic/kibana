@@ -17,6 +17,7 @@ describe('EnrichmentRangePicker', () => {
   const rangePickerProps = {
     loading: false,
     setRange: setRangeSpy,
+    range: { to: 'now', from: 'now-30d' },
   };
 
   it('renders a date picker and a button', () => {

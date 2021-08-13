@@ -87,6 +87,7 @@ export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
 
   return {
     result: isEmpty(eventFields) ? noEnrichments : result,
+    range,
     setRange,
     loading,
   };
