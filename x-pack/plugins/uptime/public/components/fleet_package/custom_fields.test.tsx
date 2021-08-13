@@ -33,7 +33,11 @@ const defaultHTTPConfig = defaultConfig[DataStream.HTTP];
 const defaultTCPConfig = defaultConfig[DataStream.TCP];
 
 describe('<CustomFields />', () => {
-  const WrappedComponent = ({ validate = defaultValidation, typeEditable = false }) => {
+  const WrappedComponent = ({
+    validate = defaultValidation,
+    typeEditable = false,
+    dataStreams = [DataStream.HTTP, DataStream.TCP, DataStream.ICMP, DataStream.BROWSER],
+  }) => {
     return (
       <HTTPContextProvider>
         <MonitorTypeContextProvider>
@@ -41,7 +45,11 @@ describe('<CustomFields />', () => {
             <BrowserContextProvider>
               <ICMPSimpleFieldsContextProvider>
                 <TLSFieldsContextProvider>
-                  <CustomFields validate={validate} typeEditable={typeEditable} />
+                  <CustomFields
+                    validate={validate}
+                    typeEditable={typeEditable}
+                    dataStreams={dataStreams}
+                  />
                 </TLSFieldsContextProvider>
               </ICMPSimpleFieldsContextProvider>
             </BrowserContextProvider>
@@ -260,5 +268,26 @@ describe('<CustomFields />', () => {
     const timeoutError2 = getByText('Timeout cannot be more than the monitor interval');
 
     expect(timeoutError2).toBeInTheDocument();
+  });
+
+  it('does not show monitor options that are not contained in datastreams', async () => {
+    const { getByText, queryByText, queryByLabelText } = render(
+      <WrappedComponent
+        dataStreams={[DataStream.HTTP, DataStream.TCP, DataStream.ICMP]}
+        typeEditable
+      />
+    );
+
+    const monitorType = queryByLabelText('Monitor Type') as HTMLInputElement;
+
+    // resolve errors
+    fireEvent.click(monitorType);
+
+    waitFor(() => {
+      expect(getByText('http')).toBeInTheDocument();
+      expect(getByText('tcp')).toBeInTheDocument();
+      expect(getByText('icmp')).toBeInTheDocument();
+      expect(queryByText('browser')).not.toBeInTheDocument();
+    });
   });
 });

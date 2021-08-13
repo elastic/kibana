@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import { PackagePolicyCreateExtensionComponentProps } from '../../../../fleet/public';
 import { useTrackPageview } from '../../../../observability/public';
 import {
@@ -100,6 +100,13 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
 
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate' });
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate', delay: 15000 });
+
+    const dataStreams: DataStream[] = useMemo(() => {
+      return newPolicy.inputs.map((input) => {
+        return input.type.replace(/synthetics\//g, '') as DataStream;
+      });
+    }, [newPolicy]);
+
     useUpdatePolicy({
       monitorType,
       defaultConfig: defaultConfig[monitorType],
@@ -123,7 +130,7 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    return <CustomFields typeEditable validate={validate[monitorType]} />;
+    return <CustomFields typeEditable validate={validate[monitorType]} dataStreams={dataStreams} />;
   }
 );
 SyntheticsPolicyCreateExtension.displayName = 'SyntheticsPolicyCreateExtension';
