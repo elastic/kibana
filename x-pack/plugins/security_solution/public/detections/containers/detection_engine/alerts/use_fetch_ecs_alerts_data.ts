@@ -14,7 +14,7 @@ import {
 } from '../../../../cases/components/case_view/helpers';
 import { Ecs } from '../../../../../common/ecs';
 
-import { ALERTS_AS_DATA_FIND_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
 
 export const useFetchEcsAlertsData = ({
@@ -34,16 +34,13 @@ export const useFetchEcsAlertsData = ({
     const abortCtrl = new AbortController();
 
     const fetchAlert = async () => {
-      // TODO: DEVIN REMOVE DEFAULT .SIEM-SIGNALS-DEFAULT string
       try {
         setIsLoading(true);
         const alertResponse = await KibanaServices.get().http.fetch<
           estypes.SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
-        >(ALERTS_AS_DATA_FIND_URL, {
+        >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
           method: 'POST',
-          body: JSON.stringify({
-            ...buildAlertsQuery(alertIds ?? []),
-          }),
+          body: JSON.stringify(buildAlertsQuery(alertIds ?? [])),
         });
 
         setAlertEcsData(

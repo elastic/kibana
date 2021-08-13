@@ -264,8 +264,6 @@ export class AlertsClient {
         seq_no_primary_term: true,
       });
 
-      this.logger.debug(`RESULT: ${JSON.stringify(result, null, 2)}`);
-
       if (!result?.body.hits.hits.every((hit) => isValidAlert(hit))) {
         const errorMessage = `Invalid alert found with id of "${id}" or with query "${query}" and operation ${operation}`;
         this.logger.error(errorMessage);
@@ -382,7 +380,6 @@ export class AlertsClient {
         [
           (authzFilter as unknown) as Filter,
           ({ term: { [SPACE_IDS]: alertSpaceId } } as unknown) as Filter,
-          // typeof query === 'object' ? ((query as unknown) as Filter) : ({} as Filter),
         ],
         config
       );
@@ -638,8 +635,6 @@ export class AlertsClient {
         operation: ReadOperations.Find,
         lastSortIds: undefined,
       });
-
-      this.logger.info(`Found: ${JSON.stringify(alertsSearchResponse, null, 2)}`);
 
       if (alertsSearchResponse == null) {
         const errorMessage = `Unable to retrieve alert details for alert with query and operation ${ReadOperations.Find}`;
