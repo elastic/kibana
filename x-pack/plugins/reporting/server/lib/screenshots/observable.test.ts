@@ -69,7 +69,7 @@ describe('Screenshot Observable Pipeline', () => {
   it('pipelines a single url into screenshot and timeRange', async () => {
     const result = await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
       logger,
-      urls: ['/welcome/home/start/index.htm'],
+      urlsOrUrlLocatorTuples: ['/welcome/home/start/index.htm'],
       conditionalHeaders: {} as ConditionalHeaders,
       layout: mockLayout,
       browserTimezone: 'UTC',
@@ -129,7 +129,10 @@ describe('Screenshot Observable Pipeline', () => {
     // test
     const result = await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
       logger,
-      urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php'],
+      urlsOrUrlLocatorTuples: [
+        '/welcome/home/start/index2.htm',
+        '/welcome/home/start/index.php3?page=./home.php',
+      ],
       conditionalHeaders: {} as ConditionalHeaders,
       layout: mockLayout,
       browserTimezone: 'UTC',
@@ -228,7 +231,7 @@ describe('Screenshot Observable Pipeline', () => {
       const getScreenshot = async () => {
         return await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
           logger,
-          urls: [
+          urlsOrUrlLocatorTuples: [
             '/welcome/home/start/index2.htm',
             '/welcome/home/start/index.php3?page=./home.php3',
           ],
@@ -322,7 +325,7 @@ describe('Screenshot Observable Pipeline', () => {
       const getScreenshot = async () => {
         return await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
           logger,
-          urls: ['/welcome/home/start/index.php3?page=./home.php3'],
+          urlsOrUrlLocatorTuples: ['/welcome/home/start/index.php3?page=./home.php3'],
           conditionalHeaders: {} as ConditionalHeaders,
           layout: mockLayout,
           browserTimezone: 'UTC',
@@ -352,7 +355,7 @@ describe('Screenshot Observable Pipeline', () => {
 
       const screenshots = await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
         logger,
-        urls: ['/welcome/home/start/index.php3?page=./home.php3'],
+        urlsOrUrlLocatorTuples: ['/welcome/home/start/index.php3?page=./home.php3'],
         conditionalHeaders: {} as ConditionalHeaders,
         layout: mockLayout,
         browserTimezone: 'UTC',
