@@ -21,7 +21,11 @@ function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
 }
 
-export function BackendErrorRateChart({ height }: { height: number }) {
+export function BackendFailedTransactionRateChart({
+  height,
+}: {
+  height: number;
+}) {
   const { backendName } = useApmBackendContext();
 
   const theme = useTheme();
@@ -72,7 +76,7 @@ export function BackendErrorRateChart({ height }: { height: number }) {
         type: 'linemark',
         color: theme.eui.euiColorVis7,
         title: i18n.translate('xpack.apm.backendErrorRateChart.chartTitle', {
-          defaultMessage: 'Error rate',
+          defaultMessage: 'Failed transaction rate',
         }),
       });
     }
