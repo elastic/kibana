@@ -9,6 +9,8 @@ import React, { FC } from 'react';
 
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 interface Props {
   json: object;
   dataTestSubj: string;
@@ -20,6 +22,12 @@ export const ExpandedRowJsonPane: FC<Props> = ({ json, dataTestSubj }) => {
       <EuiFlexItem>
         <EuiSpacer size="s" />
         <EuiCodeBlock
+          aria-label={i18n.translate(
+            'xpack.ml.dataframe.analyticsList.analyticsDetails.expandedRowJsonPane',
+            {
+              defaultMessage: 'JSON of data frame analytics configuration',
+            }
+          )}
           style={{ width: '100%' }}
           language="json"
           fontSize="s"

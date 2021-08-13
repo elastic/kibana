@@ -32,53 +32,54 @@ export const RuntimeMappingsEditor: FC<Props> = memo(
     advancedRuntimeMappingsConfig,
   }) => {
     return (
-      <CodeEditor
-        data-test-subj="mlDataFrameAnalyticsAdvancedRuntimeMappingsEditor"
-        height={250}
-        languageId={'json'}
-        onChange={(d: string) => {
-          setAdvancedRuntimeMappingsConfig(d);
+      <div data-test-subj="mlDataFrameAnalyticsAdvancedRuntimeMappingsEditor">
+        <CodeEditor
+          height={250}
+          languageId={'json'}
+          onChange={(d: string) => {
+            setAdvancedRuntimeMappingsConfig(d);
 
-          // Disable the "Apply"-Button if the config hasn't changed.
-          if (advancedEditorRuntimeMappingsLastApplied === d) {
-            setIsRuntimeMappingsEditorApplyButtonEnabled(false);
-            return;
-          }
-
-          // Enable Apply button so user can remove previously created runtime field
-          if (d === '') {
-            setIsRuntimeMappingsEditorApplyButtonEnabled(true);
-            return;
-          }
-
-          // Try to parse the string passed on from the editor.
-          // If parsing fails, the "Apply"-Button will be disabled
-          try {
-            const parsedJson = JSON.parse(convertToJson(d));
-            setIsRuntimeMappingsEditorApplyButtonEnabled(isRuntimeMappings(parsedJson));
-          } catch (e) {
-            setIsRuntimeMappingsEditorApplyButtonEnabled(false);
-          }
-        }}
-        options={{
-          ariaLabel: i18n.translate(
-            'xpack.ml.dataframe.analytics.createWizard.runtimeMappings.advancedEditorAriaLabel',
-            {
-              defaultMessage: 'Advanced runtime editor',
+            // Disable the "Apply"-Button if the config hasn't changed.
+            if (advancedEditorRuntimeMappingsLastApplied === d) {
+              setIsRuntimeMappingsEditorApplyButtonEnabled(false);
+              return;
             }
-          ),
-          automaticLayout: true,
-          fontSize: 12,
-          scrollBeyondLastLine: false,
-          quickSuggestions: true,
-          minimap: {
-            enabled: false,
-          },
-          wordWrap: 'on',
-          wrappingIndent: 'indent',
-        }}
-        value={advancedRuntimeMappingsConfig}
-      />
+
+            // Enable Apply button so user can remove previously created runtime field
+            if (d === '') {
+              setIsRuntimeMappingsEditorApplyButtonEnabled(true);
+              return;
+            }
+
+            // Try to parse the string passed on from the editor.
+            // If parsing fails, the "Apply"-Button will be disabled
+            try {
+              const parsedJson = JSON.parse(convertToJson(d));
+              setIsRuntimeMappingsEditorApplyButtonEnabled(isRuntimeMappings(parsedJson));
+            } catch (e) {
+              setIsRuntimeMappingsEditorApplyButtonEnabled(false);
+            }
+          }}
+          options={{
+            ariaLabel: i18n.translate(
+              'xpack.ml.dataframe.analytics.createWizard.runtimeMappings.advancedEditorAriaLabel',
+              {
+                defaultMessage: 'Advanced runtime editor',
+              }
+            ),
+            automaticLayout: true,
+            fontSize: 12,
+            scrollBeyondLastLine: false,
+            quickSuggestions: true,
+            minimap: {
+              enabled: false,
+            },
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+          }}
+          value={advancedRuntimeMappingsConfig}
+        />
+      </div>
     );
   },
   (prevProps, nextProps) => isEqual(pickProps(prevProps), pickProps(nextProps))
