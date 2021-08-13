@@ -25,7 +25,7 @@ import QueryStringInputUI from './query_string_input';
 
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../mocks';
-import { stubIndexPatternWithFields } from '../../stubs';
+import { stubIndexPattern } from '../../stubs';
 import { KibanaContextProvider, withKibana } from 'src/plugins/kibana_react/public';
 
 jest.useFakeTimers();
@@ -97,7 +97,7 @@ describe('QueryStringInput', () => {
       wrapQueryStringInputInContext({
         query: kqlQuery,
         onSubmit: noop,
-        indexPatterns: [stubIndexPatternWithFields],
+        indexPatterns: [stubIndexPattern],
       })
     );
 
@@ -110,7 +110,7 @@ describe('QueryStringInput', () => {
       wrapQueryStringInputInContext({
         query: luceneQuery,
         onSubmit: noop,
-        indexPatterns: [stubIndexPatternWithFields],
+        indexPatterns: [stubIndexPattern],
       })
     );
     expect(component.find(QueryLanguageSwitcher).prop('language')).toBe(luceneQuery.language);
@@ -121,7 +121,7 @@ describe('QueryStringInput', () => {
       wrapQueryStringInputInContext({
         query: kqlQuery,
         onSubmit: noop,
-        indexPatterns: [stubIndexPatternWithFields],
+        indexPatterns: [stubIndexPattern],
         disableAutoFocus: true,
       })
     );
@@ -135,7 +135,7 @@ describe('QueryStringInput', () => {
       wrapQueryStringInputInContext({
         query: kqlQuery,
         onSubmit: noop,
-        indexPatterns: [stubIndexPatternWithFields],
+        indexPatterns: [stubIndexPattern],
         disableAutoFocus: true,
         appName: 'discover',
       })
@@ -151,7 +151,7 @@ describe('QueryStringInput', () => {
         {
           query: kqlQuery,
           onSubmit: mockCallback,
-          indexPatterns: [stubIndexPatternWithFields],
+          indexPatterns: [stubIndexPattern],
           disableAutoFocus: true,
           appName: 'discover',
         },
@@ -169,7 +169,7 @@ describe('QueryStringInput', () => {
       wrapQueryStringInputInContext({
         query: luceneQuery,
         onSubmit: noop,
-        indexPatterns: [stubIndexPatternWithFields],
+        indexPatterns: [stubIndexPattern],
         disableLanguageSwitcher: true,
       })
     );
@@ -181,7 +181,7 @@ describe('QueryStringInput', () => {
       wrapQueryStringInputInContext({
         query: luceneQuery,
         onSubmit: noop,
-        indexPatterns: [stubIndexPatternWithFields],
+        indexPatterns: [stubIndexPattern],
         iconType: 'search',
       })
     );
@@ -195,7 +195,7 @@ describe('QueryStringInput', () => {
       wrapQueryStringInputInContext({
         query: kqlQuery,
         onSubmit: mockCallback,
-        indexPatterns: [stubIndexPatternWithFields],
+        indexPatterns: [stubIndexPattern],
         disableAutoFocus: true,
       })
     );
@@ -216,7 +216,7 @@ describe('QueryStringInput', () => {
       wrapQueryStringInputInContext({
         query: kqlQuery,
         onBlur: mockCallback,
-        indexPatterns: [stubIndexPatternWithFields],
+        indexPatterns: [stubIndexPattern],
         disableAutoFocus: true,
       })
     );
@@ -235,7 +235,7 @@ describe('QueryStringInput', () => {
       wrapQueryStringInputInContext({
         query: kqlQuery,
         onChangeQueryInputFocus: mockCallback,
-        indexPatterns: [stubIndexPatternWithFields],
+        indexPatterns: [stubIndexPattern],
         disableAutoFocus: true,
       })
     );
@@ -260,7 +260,7 @@ describe('QueryStringInput', () => {
       wrapQueryStringInputInContext({
         query: kqlQuery,
         onChangeQueryInputFocus: mockCallback,
-        indexPatterns: [stubIndexPatternWithFields],
+        indexPatterns: [stubIndexPattern],
         disableAutoFocus: true,
       })
     );
@@ -287,7 +287,7 @@ describe('QueryStringInput', () => {
       wrapQueryStringInputInContext({
         query: kqlQuery,
         onSubmit: mockCallback,
-        indexPatterns: [stubIndexPatternWithFields],
+        indexPatterns: [stubIndexPattern],
         disableAutoFocus: true,
         submitOnBlur: true,
       })
@@ -313,7 +313,7 @@ describe('QueryStringInput', () => {
       wrapQueryStringInputInContext({
         query: kqlQuery,
         onSubmit: mockCallback,
-        indexPatterns: [stubIndexPatternWithFields],
+        indexPatterns: [stubIndexPattern],
         disableAutoFocus: true,
       })
     );
@@ -335,7 +335,7 @@ describe('QueryStringInput', () => {
       wrapQueryStringInputInContext({
         query: kqlQuery,
         onSubmit: noop,
-        indexPatterns: [stubIndexPatternWithFields],
+        indexPatterns: [stubIndexPattern],
         disableAutoFocus: true,
         persistedLog: mockPersistedLog,
       })
@@ -374,7 +374,7 @@ describe('QueryStringInput', () => {
       wrapQueryStringInputInContext({
         query: kqlQuery,
         onChange: mockCallback,
-        indexPatterns: [stubIndexPatternWithFields],
+        indexPatterns: [stubIndexPattern],
         disableAutoFocus: true,
       })
     );

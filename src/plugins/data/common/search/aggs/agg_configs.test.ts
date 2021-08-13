@@ -11,17 +11,15 @@ import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockAggTypesRegistry } from './test_helpers';
-import type { IndexPatternField } from '../../index_patterns';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
-import { stubIndexPattern, stubIndexPatternWithFields } from '../../../common/stubs';
+import { IndexPattern } from '../../index_patterns/';
+import { stubIndexPattern } from '../../stubs';
 import { IEsSearchResponse } from '..';
 
 describe('AggConfigs', () => {
-  let indexPattern: IndexPattern;
+  const indexPattern: IndexPattern = stubIndexPattern;
   let typesRegistry: AggTypesRegistryStart;
 
   beforeEach(() => {
-    indexPattern = stubIndexPatternWithFields as IndexPattern;
     typesRegistry = mockAggTypesRegistry();
   });
 
@@ -229,11 +227,6 @@ describe('AggConfigs', () => {
   });
 
   describe('#toDsl', () => {
-    beforeEach(() => {
-      indexPattern = stubIndexPattern as IndexPattern;
-      indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
-    });
-
     it('uses the sorted aggs', () => {
       const configStates = [{ enabled: true, type: 'avg', params: { field: 'bytes' } }];
       const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
@@ -349,17 +342,9 @@ describe('AggConfigs', () => {
           params: { field: 'bytes', timeShift: '1d' },
         },
       ];
-      indexPattern.fields.push({
-        name: 'timestamp',
-        type: 'date',
-        esTypes: ['date'],
-        aggregatable: true,
-        filterable: true,
-        searchable: true,
-      } as IndexPatternField);
 
       const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
-      ac.timeFields = ['timestamp'];
+      ac.timeFields = ['@timestamp'];
       ac.timeRange = {
         from: '2021-05-05T00:00:00.000Z',
         to: '2021-05-10T00:00:00.000Z',
@@ -374,7 +359,7 @@ describe('AggConfigs', () => {
         Object {
           "0": Object {
             "range": Object {
-              "timestamp": Object {
+              "@timestamp": Object {
                 "gte": "2021-05-05T00:00:00.000Z",
                 "lte": "2021-05-10T00:00:00.000Z",
               },
@@ -382,7 +367,7 @@ describe('AggConfigs', () => {
           },
           "86400000": Object {
             "range": Object {
-              "timestamp": Object {
+              "@timestamp": Object {
                 "gte": "2021-05-04T00:00:00.000Z",
                 "lte": "2021-05-09T00:00:00.000Z",
               },
@@ -533,8 +518,6 @@ describe('AggConfigs', () => {
 
   describe('#postFlightTransform', () => {
     it('merges together splitted responses for multiple shifts', () => {
-      indexPattern = stubIndexPattern as IndexPattern;
-      indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
       const configStates = [
         {
           enabled: true,
@@ -691,8 +674,6 @@ describe('AggConfigs', () => {
     });
 
     it('shifts date histogram keys and renames doc_count properties for single shift', () => {
-      indexPattern = stubIndexPattern as IndexPattern;
-      indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
       const configStates = [
         {
           enabled: true,

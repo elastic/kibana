@@ -7,3 +7,4 @@
  */
 
 export * from '../common/stubs';
+export { createStubIndexPattern } from './index_patterns/index_patterns/index_pattern.stub';

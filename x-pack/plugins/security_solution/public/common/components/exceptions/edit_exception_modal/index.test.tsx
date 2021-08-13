@@ -13,10 +13,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { EditExceptionModal } from './';
 import { useCurrentUser } from '../../../../common/lib/kibana';
 import { useFetchIndex } from '../../../containers/source';
-import {
-  stubIndexPattern,
-  stubIndexPatternWithFields,
-} from 'src/plugins/data/common/index_patterns/index_pattern.stub';
+import { stubIndexPattern, createStubIndexPattern } from 'src/plugins/data/common/stubs';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
@@ -82,7 +79,21 @@ describe('When the edit exception modal is opened', () => {
     (useFetchIndex as jest.Mock).mockImplementation(() => [
       false,
       {
-        indexPatterns: stubIndexPatternWithFields,
+        indexPatterns: createStubIndexPattern({
+          spec: {
+            id: '1234',
+            title: 'logstash-*',
+            fields: {
+              response: {
+                name: 'response',
+                type: 'number',
+                esTypes: ['integer'],
+                aggregatable: true,
+                searchable: true,
+              },
+            },
+          },
+        }),
       },
     ]);
     (useCurrentUser as jest.Mock).mockReturnValue({ username: 'test-username' });
