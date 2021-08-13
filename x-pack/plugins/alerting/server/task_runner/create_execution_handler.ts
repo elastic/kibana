@@ -95,6 +95,7 @@ export function createExecutionHandler<
   alertParams,
   supportsEphemeralTasks,
   maxEphemeralActionsPerAlert,
+  kibanaVersion,
 }: CreateExecutionHandlerOptions<
   Params,
   ExtractedParams,
@@ -224,7 +225,7 @@ export function createExecutionHandler<
             },
             { type: 'action', id: action.id, type_id: action.actionTypeId, ...namespace },
           ],
-          version: '1.0.1',
+          version: kibanaVersion,
         },
         rule: {
           id: alertId,
