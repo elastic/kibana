@@ -30,7 +30,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const agentId = metadata?.info?.agent?.id ?? undefined;
   const { data: agentData, isFetched: agentFetched } = useAgentDetails({
-    agentId: agentId + 'aaaas',
+    agentId,
     silent: true,
     skip: !agentId,
   });
@@ -83,8 +83,8 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
         titleSize="xs"
         body={
           <p>
-            An Elastic Agent is not installed on this host. To run queries, install Elastic Agent
-            on the host, and then add the Osquery Manager integration to the agent policy in Fleet.
+            An Elastic Agent is not installed on this host. To run queries, install Elastic Agent on
+            the host, and then add the Osquery Manager integration to the agent policy in Fleet.
           </p>
         }
       />
