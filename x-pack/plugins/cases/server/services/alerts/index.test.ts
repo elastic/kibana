@@ -8,7 +8,7 @@
 import { KibanaRequest } from 'kibana/server';
 import { CaseStatuses } from '../../../common';
 import { AlertService, AlertServiceContract } from '.';
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { ruleRegistryMocks } from '../../../../rule_registry/server/mocks';
 
 describe('updateAlertsStatus', () => {
