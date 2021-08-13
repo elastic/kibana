@@ -13,16 +13,20 @@ import type { APMServiceAlert } from './apm_service_context';
 export function useServiceAlertsFetcher({
   serviceName,
   transactionType,
+  environment,
+  kuery,
 }: {
   serviceName?: string;
   transactionType?: string;
+  environment: string;
+  kuery: string;
 }) {
   const {
     plugins: { observability },
   } = useApmPluginContext();
 
   const {
-    urlParams: { start, end, environment },
+    urlParams: { start, end },
   } = useUrlParams();
 
   const experimentalAlertsEnabled = observability.isAlertingExperienceEnabled();

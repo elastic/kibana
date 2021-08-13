@@ -59,12 +59,16 @@ interface Props {
   hideViewTransactionsLink?: boolean;
   numberOfTransactionsPerPage?: number;
   showAggregationAccurateCallout?: boolean;
+  environment: string;
+  kuery: string;
 }
 
 export function TransactionsTable({
   hideViewTransactionsLink = false,
   numberOfTransactionsPerPage = 5,
   showAggregationAccurateCallout = false,
+  environment,
+  kuery,
 }: Props) {
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
@@ -88,8 +92,6 @@ export function TransactionsTable({
       latencyAggregationType,
       comparisonType,
       comparisonEnabled,
-      environment,
-      kuery,
     },
   } = useUrlParams();
 
