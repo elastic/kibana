@@ -25,11 +25,11 @@ export function ServiceProfiling() {
   const { serviceName } = useApmServiceContext();
 
   const {
-    query: { environment },
+    query: { environment, kuery },
   } = useApmParams('/services/:serviceName/profiling');
 
   const {
-    urlParams: { kuery, start, end },
+    urlParams: { start, end },
   } = useUrlParams();
 
   const { data = DEFAULT_DATA } = useFetcher(

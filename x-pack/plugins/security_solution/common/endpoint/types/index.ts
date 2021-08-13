@@ -525,6 +525,7 @@ export type HostMetadata = Immutable<{
        */
       isolation?: boolean;
     };
+    capabilities?: string[];
   };
   agent: {
     id: string;

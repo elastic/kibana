@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { DslQuery, Filter } from '@kbn/es-query';
+import { BoolQuery } from '@kbn/es-query';
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -274,12 +274,7 @@ export type BulkResponseErrorAggregation = Record<string, { count: number; statu
  * TODO: Remove this if/when the return filter has its own type exposed
  */
 export interface QueryFilter {
-  bool: {
-    must: DslQuery[];
-    filter: Filter[];
-    should: unknown[];
-    must_not: Filter[];
-  };
+  bool: BoolQuery;
 }
 
 export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;

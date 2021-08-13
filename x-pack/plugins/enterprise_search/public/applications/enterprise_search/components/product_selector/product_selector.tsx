@@ -71,7 +71,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ access }) => {
               <p>
                 {config.host
                   ? i18n.translate('xpack.enterpriseSearch.overview.subheading', {
-                      defaultMessage: 'Select a product to get started.',
+                      defaultMessage: 'Add search to your app or organization.',
                     })
                   : i18n.translate('xpack.enterpriseSearch.overview.setupHeading', {
                       defaultMessage: 'Choose a product to set up and get started.',
