@@ -67,6 +67,7 @@ function getLensAttributes(
       {
         accessors: ['col2'],
         layerId: 'layer1',
+        layerType: 'data',
         seriesType: 'bar_stacked',
         xAccessor: 'col1',
         yConfig: [{ forAccessor: 'col2', color }],

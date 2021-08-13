@@ -86,7 +86,7 @@ export class Job {
     let smallMessage;
     if (status === PENDING) {
       smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.pendingStatusReachedText', {
-        defaultMessage: 'Waiting for job to be processed.',
+        defaultMessage: 'Waiting for job to process.',
       });
     } else if (status === PROCESSING) {
       smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.attemptXofY', {
@@ -139,8 +139,7 @@ export class Job {
   getStatusLabel() {
     return (
       <>
-        {this.getStatus()}
-        {this.getStatusMessage()}
+        {this.getStatus()} {this.getStatusMessage()}
       </>
     );
   }
@@ -184,14 +183,14 @@ export class Job {
         warnings.push(
           i18n.translate('xpack.reporting.jobWarning.csvContainsFormulas', {
             defaultMessage:
-              'Your CSV contains characters which spreadsheet applications can interpret as formulas.',
+              'Your CSV contains characters that spreadsheet applications might interpret as formulas.',
           })
         );
       }
       if (this.max_size_reached) {
         warnings.push(
           i18n.translate('xpack.reporting.jobWarning.maxSizeReachedTooltip', {
-            defaultMessage: 'Max size reached, contains partial data.',
+            defaultMessage: 'Your search reached the max size and contains partial data.',
           })
         );
       }

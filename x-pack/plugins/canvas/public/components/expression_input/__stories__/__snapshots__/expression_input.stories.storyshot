@@ -18,15 +18,38 @@ exports[`Storyshots components/ExpressionInput default 1`] = `
         onFocus={[Function]}
       >
         <div
-          className="react-monaco-editor-container"
-          style={
-            Object {
-              "height": "100%",
-              "width": "100%",
+          className="kibanaCodeEditor"
+        >
+          <span
+            className="euiToolTipAnchor euiToolTipAnchor--displayBlock"
+            onKeyUp={[Function]}
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            <div
+              aria-label="Code Editor"
+              className="kibanaCodeEditor__keyboardHint"
+              data-test-subj="codeEditorHint"
+              id="generated-id"
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
+          </span>
+          <div
+            className="react-monaco-editor-container"
+            style={
+              Object {
+                "height": "100%",
+                "width": "100%",
+              }
             }
-          }
-        />
-        <div />
+          />
+          <div />
+        </div>
       </div>
     </div>
   </div>

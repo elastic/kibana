@@ -8,13 +8,20 @@ import Boom from '@hapi/boom';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
-import {
-  mapConsumerToIndexName,
-  isValidFeatureId,
-  getSafeSortIds,
+import type {
+  getEsQueryConfig as getEsQueryConfigTyped,
+  getSafeSortIds as getSafeSortIdsTyped,
+  isValidFeatureId as isValidFeatureIdTyped,
+  mapConsumerToIndexName as mapConsumerToIndexNameTyped,
   STATUS_VALUES,
-  getEsQueryConfig,
-} from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+} from '@kbn/rule-data-utils';
+import {
+  getEsQueryConfig as getEsQueryConfigNonTyped,
+  getSafeSortIds as getSafeSortIdsNonTyped,
+  isValidFeatureId as isValidFeatureIdNonTyped,
+  mapConsumerToIndexName as mapConsumerToIndexNameNonTyped,
+  // @ts-expect-error
+} from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 
 import { InlineScript, QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { AlertTypeParams, AlertingAuthorizationFilterType } from '../../../alerting/server';
@@ -34,6 +41,11 @@ import {
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
+
+const getEsQueryConfig: typeof getEsQueryConfigTyped = getEsQueryConfigNonTyped;
+const getSafeSortIds: typeof getSafeSortIdsTyped = getSafeSortIdsNonTyped;
+const isValidFeatureId: typeof isValidFeatureIdTyped = isValidFeatureIdNonTyped;
+const mapConsumerToIndexName: typeof mapConsumerToIndexNameTyped = mapConsumerToIndexNameNonTyped;
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> &

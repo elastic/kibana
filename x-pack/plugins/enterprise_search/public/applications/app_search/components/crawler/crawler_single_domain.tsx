@@ -11,22 +11,25 @@ import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiCode, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiCode, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { getEngineBreadcrumbs } from '../engine';
+import { EngineLogic, getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
 
 import { CrawlerStatusBanner } from './components/crawler_status_banner';
 import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
 import { DeleteDomainPanel } from './components/delete_domain_panel';
+import { EntryPointsTable } from './components/entry_points_table';
 import { ManageCrawlsPopover } from './components/manage_crawls_popover/manage_crawls_popover';
+import { SitemapsTable } from './components/sitemaps_table';
 import { CRAWLER_TITLE } from './constants';
 import { CrawlerSingleDomainLogic } from './crawler_single_domain_logic';
 
 export const CrawlerSingleDomain: React.FC = () => {
   const { domainId } = useParams() as { domainId: string };
+  const { engineName } = EngineLogic.values;
 
   const { dataLoading, domain } = useValues(CrawlerSingleDomainLogic);
 
@@ -51,6 +54,18 @@ export const CrawlerSingleDomain: React.FC = () => {
     >
       <CrawlerStatusBanner />
       <EuiSpacer size="l" />
+      {domain && (
+        <>
+          <EuiPanel paddingSize="l" hasBorder>
+            <EntryPointsTable domain={domain} engineName={engineName} items={domain.entryPoints} />
+          </EuiPanel>
+          <EuiSpacer size="xl" />
+          <EuiPanel paddingSize="l" hasBorder>
+            <SitemapsTable domain={domain} engineName={engineName} items={domain.sitemaps} />
+          </EuiPanel>
+          <EuiSpacer size="xl" />
+        </>
+      )}
       <EuiTitle size="s">
         <h2>
           {i18n.translate(
