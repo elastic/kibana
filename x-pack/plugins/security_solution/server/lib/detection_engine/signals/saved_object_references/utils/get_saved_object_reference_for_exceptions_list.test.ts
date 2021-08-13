@@ -7,10 +7,7 @@
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { SavedObjectReference } from 'src/core/server';
-import {
-  EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME,
-  getSavedObjectReferenceForExceptionsList,
-} from '.';
+import { getSavedObjectReferenceForExceptionsList } from '.';
 import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
 
 describe('get_saved_object_reference_for_exceptions_list', () => {
@@ -24,7 +21,7 @@ describe('get_saved_object_reference_for_exceptions_list', () => {
   const mockSavedObjectReferences = (): SavedObjectReference[] => [
     {
       id: '123',
-      name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_0`,
+      name: `exception-list_0`,
       type: EXCEPTION_LIST_NAMESPACE,
     },
   ];
@@ -33,6 +30,7 @@ describe('get_saved_object_reference_for_exceptions_list', () => {
     expect(
       getSavedObjectReferenceForExceptionsList({
         logger,
+        namespaceType: 'single',
         index: 0,
         savedObjectReferences: mockSavedObjectReferences(),
       })
@@ -44,13 +42,14 @@ describe('get_saved_object_reference_for_exceptions_list', () => {
       mockSavedObjectReferences()[0],
       {
         id: '345',
-        name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_1`,
+        name: `exception-list_1`,
         type: EXCEPTION_LIST_NAMESPACE,
       },
     ];
     expect(
       getSavedObjectReferenceForExceptionsList({
         logger,
+        namespaceType: 'single',
         index: 1,
         savedObjectReferences,
       })
@@ -61,6 +60,7 @@ describe('get_saved_object_reference_for_exceptions_list', () => {
     expect(
       getSavedObjectReferenceForExceptionsList({
         logger,
+        namespaceType: 'single',
         index: 100,
         savedObjectReferences: mockSavedObjectReferences(),
       })
@@ -71,6 +71,7 @@ describe('get_saved_object_reference_for_exceptions_list', () => {
     expect(
       getSavedObjectReferenceForExceptionsList({
         logger,
+        namespaceType: 'single',
         index: 0,
         savedObjectReferences: [{ ...mockSavedObjectReferences()[0], name: 'other-name_0' }],
       })
@@ -81,6 +82,7 @@ describe('get_saved_object_reference_for_exceptions_list', () => {
     expect(
       getSavedObjectReferenceForExceptionsList({
         logger,
+        namespaceType: 'single',
         index: 0,
         savedObjectReferences: [
           { ...mockSavedObjectReferences()[0], name: 'other-name_0' },
@@ -93,11 +95,12 @@ describe('get_saved_object_reference_for_exceptions_list', () => {
   test('returns found reference, even if the reference is mixed with other references and has an index of 1', () => {
     const additionalException: SavedObjectReference = {
       ...mockSavedObjectReferences()[0],
-      name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_1`,
+      name: `exception-list_1`,
     };
     expect(
       getSavedObjectReferenceForExceptionsList({
         logger,
+        namespaceType: 'single',
         index: 1,
         savedObjectReferences: [
           { ...mockSavedObjectReferences()[0], name: 'other-name_0' },
@@ -112,6 +115,7 @@ describe('get_saved_object_reference_for_exceptions_list', () => {
     expect(() =>
       getSavedObjectReferenceForExceptionsList({
         logger,
+        namespaceType: 'single',
         index: -1,
         savedObjectReferences: mockSavedObjectReferences(),
       })
@@ -122,6 +126,7 @@ describe('get_saved_object_reference_for_exceptions_list', () => {
     expect(() =>
       getSavedObjectReferenceForExceptionsList({
         logger,
+        namespaceType: 'single',
         index: NaN,
         savedObjectReferences: mockSavedObjectReferences(),
       })

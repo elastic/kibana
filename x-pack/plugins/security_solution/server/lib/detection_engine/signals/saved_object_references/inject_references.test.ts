@@ -7,7 +7,6 @@
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { SavedObjectReference } from 'src/core/server';
-import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './utils';
 import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
 import { injectReferences } from './inject_references';
 import { RuleParams } from '../../schemas/rule_schemas';
@@ -26,7 +25,7 @@ describe('inject_references', () => {
   const mockSavedObjectReferences = (): SavedObjectReference[] => [
     {
       id: '123',
-      name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_0`,
+      name: 'exception-list-agnostic_0',
       type: EXCEPTION_LIST_NAMESPACE,
     },
   ];

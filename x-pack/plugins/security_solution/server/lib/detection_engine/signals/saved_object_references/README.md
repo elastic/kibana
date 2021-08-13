@@ -56,12 +56,12 @@ to any newly saved rule:
           "other data... other data": "other data...other data",
           "references" : [
             {
-              "name" : "param:exceptionsList_0",
+              "name" : "param:exceptions-list-agnostic_0",
               "id" : "endpoint_list",
-              "type" : "exception-list"
+              "type" : "exception-list-agnostic"
             },
             {
-              "name" : "param:exceptionsList_1",
+              "name" : "param:exceptions-list_1",
               "id" : "50e3bd70-ef1b-11eb-ad71-7de7959be71c",
               "type" : "exception-list"
             }
@@ -77,7 +77,7 @@ The structure is that the alerting framework in conjunction with this code will 
 {
   "references" : [
     {
-      "name" : "param:exceptionsList_1",
+      "name" : "param:exceptions-list_1",
       "id" : "50e3bd70-ef1b-11eb-ad71-7de7959be71c",
       "type" : "exception-list"
     }

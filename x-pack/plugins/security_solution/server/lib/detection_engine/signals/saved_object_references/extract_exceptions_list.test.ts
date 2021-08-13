@@ -8,8 +8,10 @@
 import { extractExceptionsList } from './extract_exceptions_list';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { RuleParams } from '../../schemas/rule_schemas';
-import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
-import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './utils';
+import {
+  EXCEPTION_LIST_NAMESPACE,
+  EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
+} from '@kbn/securitysolution-list-constants';
 
 describe('extract_exceptions_list', () => {
   type FuncReturn = ReturnType<typeof extractExceptionsList>;
@@ -47,26 +49,26 @@ describe('extract_exceptions_list', () => {
     ).toEqual<FuncReturn>([
       {
         id: '123',
-        name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_0`,
-        type: EXCEPTION_LIST_NAMESPACE,
+        name: 'exception-list-agnostic_0',
+        type: EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
       },
     ]);
   });
 
-  test('It returns two exception lists transformed into a saved object references', () => {
+  test('It returns 2 exception lists transformed into a saved object references', () => {
     const twoInputs: RuleParams['exceptionsList'] = [
       mockExceptionsList()[0],
-      { ...mockExceptionsList()[0], id: '976' },
+      { ...mockExceptionsList()[0], id: '976', namespace_type: 'single' },
     ];
     expect(extractExceptionsList({ logger, exceptionsList: twoInputs })).toEqual<FuncReturn>([
       {
         id: '123',
-        name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_0`,
-        type: EXCEPTION_LIST_NAMESPACE,
+        name: 'exception-list-agnostic_0',
+        type: EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
       },
       {
         id: '976',
-        name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_1`,
+        name: 'exception-list_1',
         type: EXCEPTION_LIST_NAMESPACE,
       },
     ]);

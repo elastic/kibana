@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './constants';
+import { SavedObjectType } from '@kbn/securitysolution-list-utils';
 import { getSavedObjectNamePattern } from './get_saved_object_name_pattern';
 
 /**
@@ -14,10 +14,16 @@ import { getSavedObjectNamePattern } from './get_saved_object_name_pattern';
  * @returns The pattern of "exceptionsList_${index}"
  * @throws TypeError if index is less than zero
  */
-export const getSavedObjectNamePatternForExceptionsList = (index: number): string => {
+export const getSavedObjectNamePatternForExceptionsList = ({
+  savedObjectType,
+  index,
+}: {
+  savedObjectType: SavedObjectType;
+  index: number;
+}): string => {
   if (!(index >= 0)) {
     throw new TypeError(`"index" should alway be >= 0 instead of: ${index}`);
   } else {
-    return getSavedObjectNamePattern({ name: EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME, index });
+    return getSavedObjectNamePattern({ name: savedObjectType, index });
   }
 };

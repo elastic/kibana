@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './constants';
 export * from './get_saved_object_name_pattern_for_exception_list';
 export * from './get_saved_object_name_pattern';
 export * from './get_saved_object_reference_for_exceptions_list';
