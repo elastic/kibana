@@ -33,7 +33,6 @@ export const WithAppDependencies = (Comp: any, overrides: Record<string, unknown
   apiService.setup((mockHttpClient as unknown) as HttpSetup);
   breadcrumbService.setup(() => '');
 
-  // if (!services?.http?.fetch || !services?.data?.indexPatterns) {
   const contextValue = {
     http: (mockHttpClient as unknown) as HttpSetup,
     docLinks: docLinksServiceMock.createStartContract(),
