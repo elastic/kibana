@@ -24,6 +24,7 @@ jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
   overviewPageActions: jest.fn().mockReturnValue([]),
   OverviewPageFooter: jest.fn().mockReturnValue(<></>),
   KibanaPageTemplate: jest.fn().mockReturnValue(<></>),
+  KibanaPageTemplateSolutionNavAvatar: jest.fn().mockReturnValue(<></>),
 }));
 
 jest.mock('../../lib/ui_metric', () => ({
