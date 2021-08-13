@@ -43,6 +43,21 @@ export const alertsFieldMap: FieldMap = {
     array: false,
     required: true,
   },
+  'kibana.alert.group': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'kibana.alert.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'kibana.alert.group.index': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'kibana.alert.original_event': {
     type: 'object',
     array: false,
@@ -177,6 +192,11 @@ export const alertsFieldMap: FieldMap = {
     type: 'date',
     array: false,
     required: true,
+  },
+  'kibana.alert.reason': {
+    type: 'keyword',
+    array: false,
+    required: false,
   },
   'kibana.alert.threat': {
     type: 'object',

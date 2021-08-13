@@ -15,12 +15,15 @@ import { DateRange } from '../../common';
 import { LensAppServices } from '../app_plugin/types';
 import { DatasourceMap, VisualizationMap } from '../types';
 
+export interface VisualizationState {
+  activeId: string | null;
+  state: unknown;
+}
+
+export type DatasourceStates = Record<string, { state: unknown; isLoading: boolean }>;
 export interface PreviewState {
-  visualization: {
-    activeId: string | null;
-    state: unknown;
-  };
-  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>;
+  visualization: VisualizationState;
+  datasourceStates: DatasourceStates;
 }
 export interface EditorFrameState extends PreviewState {
   activeDatasourceId: string | null;

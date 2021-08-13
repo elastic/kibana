@@ -57,11 +57,11 @@ export const useStatusBulkActionItems = ({
         // TODO: Only delete those that were successfully updated from updatedRules
         setEventsDeleted({ eventIds, isDeleted: true });
 
-        if (response.version_conflicts > 0 && eventIds.length === 1) {
+        if (response.version_conflicts && eventIds.length === 1) {
           throw new Error(i18n.BULK_ACTION_FAILED_SINGLE_ALERT);
         }
 
-        onUpdateSuccess(response.updated, response.version_conflicts, status);
+        onUpdateSuccess(response.updated ?? 0, response.version_conflicts ?? 0, status);
       } catch (error) {
         onUpdateFailure(status, error);
       } finally {
@@ -83,21 +83,33 @@ export const useStatusBulkActionItems = ({
     const actionItems = [];
     if (currentStatus !== FILTER_OPEN) {
       actionItems.push(
-        <EuiContextMenuItem key="open" onClick={() => onClickUpdate(FILTER_OPEN)}>
+        <EuiContextMenuItem
+          key="open"
+          data-test-subj="open-alert-status"
+          onClick={() => onClickUpdate(FILTER_OPEN)}
+        >
           {i18n.BULK_ACTION_OPEN_SELECTED}
         </EuiContextMenuItem>
       );
     }
     if (currentStatus !== FILTER_IN_PROGRESS) {
       actionItems.push(
-        <EuiContextMenuItem key="progress" onClick={() => onClickUpdate(FILTER_IN_PROGRESS)}>
+        <EuiContextMenuItem
+          key="progress"
+          data-test-subj="in-progress-alert-status"
+          onClick={() => onClickUpdate(FILTER_IN_PROGRESS)}
+        >
           {i18n.BULK_ACTION_IN_PROGRESS_SELECTED}
         </EuiContextMenuItem>
       );
     }
     if (currentStatus !== FILTER_CLOSED) {
       actionItems.push(
-        <EuiContextMenuItem key="close" onClick={() => onClickUpdate(FILTER_CLOSED)}>
+        <EuiContextMenuItem
+          key="close"
+          data-test-subj="close-alert-status"
+          onClick={() => onClickUpdate(FILTER_CLOSED)}
+        >
           {i18n.BULK_ACTION_CLOSE_SELECTED}
         </EuiContextMenuItem>
       );

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { DslQuery, EsQueryConfig } from '@kbn/es-query';
-
-import { Filter, Query, esQuery } from '../../../../../../src/plugins/data/server';
+import { BoolQuery, EsQueryConfig, Query, buildEsQuery } from '@kbn/es-query';
 
 import { escapeQuotes } from './escape_query';
 
@@ -21,7 +19,7 @@ export interface GetQueryFilterWithListIdOptions {
 }
 
 export interface GetQueryFilterReturn {
-  bool: { must: DslQuery[]; filter: Filter[]; should: never[]; must_not: Filter[] };
+  bool: BoolQuery;
 }
 
 export const getQueryFilter = ({ filter }: GetQueryFilterOptions): GetQueryFilterReturn => {
@@ -36,7 +34,7 @@ export const getQueryFilter = ({ filter }: GetQueryFilterOptions): GetQueryFilte
     queryStringOptions: { analyze_wildcard: true },
   };
 
-  return esQuery.buildEsQuery(undefined, kqlQuery, [], config);
+  return buildEsQuery(undefined, kqlQuery, [], config);
 };
 
 export const getQueryFilterWithListId = ({

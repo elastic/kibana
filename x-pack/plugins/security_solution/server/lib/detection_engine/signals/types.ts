@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { DslQuery, Filter } from '@kbn/es-query';
+import { BoolQuery } from '@kbn/es-query';
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -33,6 +33,9 @@ import { BuildRuleMessage } from './rule_messages';
 import { TelemetryEventsSender } from '../../telemetry/sender';
 import { RuleParams } from '../schemas/rule_schemas';
 import { GenericBulkCreateResponse } from './bulk_create_factory';
+import { EcsFieldMap } from '../../../../../rule_registry/common/assets/field_maps/ecs_field_map';
+import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
+import { BuildReasonMessage } from './reason_formatters';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -119,6 +122,7 @@ export interface SignalSource {
     original_time?: string;
     threshold_result?: ThresholdResult;
   };
+  kibana?: SearchTypes;
 }
 
 export interface BulkItem {
@@ -166,6 +170,12 @@ export interface GetResponse {
   _source: SearchTypes;
 }
 
+export type EventHit = Exclude<TypeOfFieldMap<EcsFieldMap>, '@timestamp'> & {
+  '@timestamp': string;
+  [key: string]: SearchTypes;
+};
+export type WrappedEventHit = BaseHit<EventHit>;
+
 export type SignalSearchResponse = estypes.SearchResponse<SignalSource>;
 export type SignalSourceHit = estypes.SearchHit<SignalSource>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
@@ -186,7 +196,7 @@ export const isAlertExecutor = (
   obj: SignalRuleAlertTypeDefinition
 ): obj is AlertType<
   RuleParams,
-  never, // Only use if defining useSavedObjectReferences hook
+  RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
@@ -197,7 +207,7 @@ export const isAlertExecutor = (
 
 export type SignalRuleAlertTypeDefinition = AlertType<
   RuleParams,
-  never, // Only use if defining useSavedObjectReferences hook
+  RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
@@ -229,6 +239,7 @@ export interface Signal {
   };
   original_time?: string;
   original_event?: SearchTypes;
+  reason?: string;
   status: Status;
   threshold_result?: ThresholdResult;
   original_signal?: SearchTypes;
@@ -263,12 +274,7 @@ export type BulkResponseErrorAggregation = Record<string, { count: number; statu
  * TODO: Remove this if/when the return filter has its own type exposed
  */
 export interface QueryFilter {
-  bool: {
-    must: DslQuery[];
-    filter: Filter[];
-    should: unknown[];
-    must_not: Filter[];
-  };
+  bool: BoolQuery;
 }
 
 export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;
@@ -277,9 +283,15 @@ export type BulkCreate = <T>(docs: Array<BaseHit<T>>) => Promise<GenericBulkCrea
 
 export type SimpleHit = BaseHit<{ '@timestamp': string }>;
 
-export type WrapHits = (hits: estypes.SearchHit[]) => SimpleHit[];
+export type WrapHits = (
+  hits: Array<estypes.SearchHit<SignalSource>>,
+  buildReasonMessage: BuildReasonMessage
+) => SimpleHit[];
 
-export type WrapSequences = (sequences: Array<EqlSequence<SignalSource>>) => SimpleHit[];
+export type WrapSequences = (
+  sequences: Array<EqlSequence<SignalSource>>,
+  buildReasonMessage: BuildReasonMessage
+) => SimpleHit[];
 
 export interface SearchAfterAndBulkCreateParams {
   tuple: {
@@ -299,6 +311,7 @@ export interface SearchAfterAndBulkCreateParams {
   pageSize: number;
   filter: unknown;
   buildRuleMessage: BuildRuleMessage;
+  buildReasonMessage: BuildReasonMessage;
   enrichment?: SignalsEnrichment;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
