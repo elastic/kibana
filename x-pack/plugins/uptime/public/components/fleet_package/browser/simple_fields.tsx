@@ -24,6 +24,20 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
   const handleInputChange = ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
     setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
   };
+  const onChangeSourceField = useCallback(
+    ({ zipUrl, folder, username, password, inlineScript, params }) => {
+      setFields((prevFields) => ({
+        ...prevFields,
+        [ConfigKeys.SOURCE_ZIP_URL]: zipUrl,
+        [ConfigKeys.SOURCE_ZIP_FOLDER]: folder,
+        [ConfigKeys.SOURCE_ZIP_USERNAME]: username,
+        [ConfigKeys.SOURCE_ZIP_PASSWORD]: password,
+        [ConfigKeys.SOURCE_INLINE]: inlineScript,
+        [ConfigKeys.PARAMS]: params,
+      }));
+    },
+    [setFields]
+  );
 
   return (
     <>
@@ -63,20 +77,7 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
         }
       >
         <SourceField
-          onChange={useCallback(
-            ({ zipUrl, folder, username, password, inlineScript, params }) => {
-              setFields((prevFields) => ({
-                ...prevFields,
-                [ConfigKeys.SOURCE_ZIP_URL]: zipUrl,
-                [ConfigKeys.SOURCE_ZIP_FOLDER]: folder,
-                [ConfigKeys.SOURCE_ZIP_USERNAME]: username,
-                [ConfigKeys.SOURCE_ZIP_PASSWORD]: password,
-                [ConfigKeys.SOURCE_INLINE]: inlineScript,
-                [ConfigKeys.PARAMS]: params,
-              }));
-            },
-            [setFields]
-          )}
+          onChange={onChangeSourceField}
           defaultConfig={useMemo(
             () => ({
               zipUrl: defaultValues[ConfigKeys.SOURCE_ZIP_URL],
@@ -125,10 +126,17 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
         }
         isInvalid={!!validate[ConfigKeys.TIMEOUT]?.(fields)}
         error={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.error"
-            defaultMessage="Timeout must be 0 or greater and less than schedule interval"
-          />
+          parseInt(fields[ConfigKeys.TIMEOUT], 10) < 0 ? (
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.lessThanZeroError"
+              defaultMessage="Timeout must be less than 0"
+            />
+          ) : (
+            <FormattedMessage
+              id="pack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.lessThanIntervalError"
+              defaultMessage="Timeout cannot be more than the monitor interval"
+            />
+          )
         }
         helpText={
           <FormattedMessage

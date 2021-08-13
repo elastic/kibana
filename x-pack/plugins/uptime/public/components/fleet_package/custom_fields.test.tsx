@@ -235,7 +235,7 @@ describe('<CustomFields />', () => {
     const urlError = getByText('URL is required');
     const monitorIntervalError = getByText('Monitor interval is required');
     const maxRedirectsError = getByText('Max redirects must be 0 or greater');
-    const timeoutError = getByText('Timeout must be 0 or greater and less than schedule interval');
+    const timeoutError = getByText('Timeout must be less than 0');
 
     expect(urlError).toBeInTheDocument();
     expect(monitorIntervalError).toBeInTheDocument();
@@ -251,15 +251,13 @@ describe('<CustomFields />', () => {
     expect(queryByText('URL is required')).not.toBeInTheDocument();
     expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
     expect(queryByText('Max redirects must be 0 or greater')).not.toBeInTheDocument();
-    expect(
-      queryByText('Timeout must be 0 or greater and less than schedule interval')
-    ).not.toBeInTheDocument();
+    expect(queryByText('Timeout must be less than 0')).not.toBeInTheDocument();
 
     // create more errors
     fireEvent.change(monitorIntervalNumber, { target: { value: '1' } }); // 1 minute
     fireEvent.change(timeout, { target: { value: '61' } }); // timeout cannot be more than monitor interval
 
-    const timeoutError2 = getByText('Timeout must be 0 or greater and less than schedule interval');
+    const timeoutError2 = getByText('Timeout cannot be more than the monitor interval');
 
     expect(timeoutError2).toBeInTheDocument();
   });

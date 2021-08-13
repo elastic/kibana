@@ -144,10 +144,17 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
         }
         isInvalid={!!validate[ConfigKeys.TIMEOUT]?.(fields)}
         error={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.error"
-            defaultMessage="Timeout must be 0 or greater and less than schedule interval"
-          />
+          parseInt(fields[ConfigKeys.TIMEOUT], 10) < 0 ? (
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.lessThanZeroError"
+              defaultMessage="Timeout must be less than 0"
+            />
+          ) : (
+            <FormattedMessage
+              id="pack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.lessThanIntervalError"
+              defaultMessage="Timeout cannot be more than the monitor interval"
+            />
+          )
         }
         helpText={
           <FormattedMessage
