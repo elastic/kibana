@@ -9,11 +9,9 @@ import { formatMitreAttackDescription } from '../../helpers/rules';
 import { getEqlRule, getEqlSequenceRule, getIndexPatterns } from '../../objects/rule';
 
 import {
-  ALERT_RULE_METHOD,
   ALERT_RULE_NAME,
   ALERT_RULE_RISK_SCORE,
   ALERT_RULE_SEVERITY,
-  ALERT_RULE_VERSION,
   NUMBER_OF_ALERTS,
 } from '../../screens/alerts';
 import {
@@ -169,8 +167,6 @@ describe('Detection rules, EQL', () => {
 
     cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts);
     cy.get(ALERT_RULE_NAME).first().should('have.text', this.rule.name);
-    cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
-    cy.get(ALERT_RULE_METHOD).first().should('have.text', 'eql');
     cy.get(ALERT_RULE_SEVERITY).first().should('have.text', this.rule.severity.toLowerCase());
     cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', this.rule.riskScore);
   });
@@ -221,8 +217,6 @@ describe('Detection rules, sequence EQL', () => {
 
     cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfSequenceAlerts);
     cy.get(ALERT_RULE_NAME).first().should('have.text', this.rule.name);
-    cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
-    cy.get(ALERT_RULE_METHOD).first().should('have.text', 'eql');
     cy.get(ALERT_RULE_SEVERITY).first().should('have.text', this.rule.severity.toLowerCase());
     cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', this.rule.riskScore);
   });

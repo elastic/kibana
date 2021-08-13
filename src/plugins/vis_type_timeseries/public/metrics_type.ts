@@ -11,6 +11,7 @@ import uuid from 'uuid/v4';
 import { TSVB_EDITOR_NAME } from './application/editor_controller';
 import { PANEL_TYPES, TOOLTIP_MODES } from '../common/enums';
 import { isStringTypeIndexPattern } from '../common/index_patterns_utils';
+import { TSVB_DEFAULT_COLOR } from '../common/constants';
 import { toExpressionAst } from './to_ast';
 import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
 import { getDataStart } from './services';
@@ -30,7 +31,7 @@ export const metricsVisDefinition = {
       series: [
         {
           id: uuid(),
-          color: '#68BC00',
+          color: TSVB_DEFAULT_COLOR,
           split_mode: 'everything',
           palette: {
             type: 'palette',
