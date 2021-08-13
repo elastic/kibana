@@ -31,16 +31,31 @@ export function GrokDebuggerPageProvider({ getPageObjects, getService }: FtrProv
       );
     },
 
-    async setPatternInput(value) {
+    async setPatternInput(pattern) {
       await aceEditor.setValue(
         'grokDebuggerContainer > acePatternInput > codeEditorContainer',
-        value
+        pattern
       );
     },
 
-    async executeGrokSimulation(input, pattern) {
+    async setCustomPatternInput(customPattern) {
+      await aceEditor.setValue(
+        'grokDebuggerContainer > aceCustomPatternsInput > codeEditorContainer',
+        customPattern
+      );
+    },
+
+    async toggleSetCustomPattern() {
+      await testSubjects.click('grokDebuggerContainer > btnToggleCustomPatternsInput');
+    },
+
+    async executeGrokSimulation(input, pattern, isCustomPattern: boolean) {
       await this.setEventInput(input);
-      await this.setPatternInput(pattern);
+      if (isCustomPattern) {
+        await this.setCustomPatternInput(pattern);
+      } else {
+        await this.setPatternInput(pattern);
+      }
       await (await this.simulateButton()).click();
       await retry.waitFor('Output to not be empty', async () => {
         const value = JSON.parse(await this.getEventOutput());
@@ -49,6 +64,29 @@ export function GrokDebuggerPageProvider({ getPageObjects, getService }: FtrProv
       });
       log.debug(await this.getEventOutput());
       return await this.getEventOutput();
+    },
+
+    // This needs to be fixed to work with the new test functionality. This method is skipped currently.
+    async assertPatternInputSyntaxHighlighting(expectedHighlights) {
+      const patternInputElement = await testSubjects.find(SUBJ_UI_ACE_PATTERN_INPUT);
+      const highlightedElements = await patternInputElement.findAllByXpath(
+        './/div[@class="ace_line"]/*'
+      );
+
+      expect(highlightedElements.length).to.be(expectedHighlights.length);
+      await Promise.all(
+        highlightedElements.map(async (element, index) => {
+          const highlightClass = await element.getAttribute('class');
+          const highlightedContent = await element.getVisibleText();
+
+          const expectedHighlight = expectedHighlights[index];
+          const expectedHighlightClass = `ace_${expectedHighlight.token}`;
+          const expectedHighlightedContent = expectedHighlight.content;
+
+          expect(highlightClass).to.be(expectedHighlightClass);
+          expect(highlightedContent).to.be(expectedHighlightedContent);
+        })
+      );
     },
   };
 }

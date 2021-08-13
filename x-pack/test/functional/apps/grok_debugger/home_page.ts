@@ -40,29 +40,61 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const patternInput = '%{USERNAME:u}';
       const response = await PageObjects.grokDebugger.executeGrokSimulation(
         eventInput,
-        patternInput
+        patternInput,
+        false
       );
       expect(response).to.eql('{\n  "u": "SegerCommaBob"\n}');
     });
 
-    describe.skip('input with custom grok patterns', async () => {
-      it('accepts and parses the input', async () => {
-        await grokDebugger.setEventInput('Seger Comma Bob');
-        await grokDebugger.setPatternInput('%{FIRSTNAME:f} %{MIDDLENAME:m} %{LASTNAME:l}');
+    it.skip('Accept and parse input with custom in grok pattern', async () => {
+      const eventInput = 'Seger Comma Bob';
+      const customPatternInput = '%{FIRSTNAME:f} %{MIDDLENAME:m} %{LASTNAME:l}';
 
-        await grokDebugger.toggleCustomPatternsInput();
-        await grokDebugger.setCustomPatternsInput(
-          'FIRSTNAME %{WORD}\nMIDDLENAME %{WORD}\nLASTNAME %{WORD}'
-        );
+      const response = await PageObjects.grokDebugger.executeGrokSimulation(
+        eventInput,
+        customPatternInput,
+        true
+      );
+      expect(response).to.eql({ f: 'Seger', m: 'Comma', l: 'Bob' });
+    });
 
-        await grokDebugger.clickSimulate();
+    it.skip('applies the correct CSS classes', async () => {
+      const grokPattern = '\\[(?:-|%{NUMBER:bytes:int})\\]';
 
-        await grokDebugger.assertEventOutput({ f: 'Seger', m: 'Comma', l: 'Bob' });
-      });
+      await grokDebugger.setPatternInput(grokPattern);
 
-      after(async () => {
-        await security.testUser.restoreDefaults();
-      });
+      const GROK_START = 'grokStart';
+      const GROK_PATTERN_NAME = 'grokPatternName';
+      const GROK_SEPARATOR = 'grokSeparator';
+      const GROK_FIELD_NAME = 'grokFieldName';
+      const GROK_FIELD_TYPE = 'grokFieldType';
+      const GROK_END = 'grokEnd';
+      const GROK_ESCAPE = 'grokEscape';
+      const GROK_ESCAPED = 'grokEscaped';
+      const GROK_REGEX = 'grokRegex';
+
+      await grokDebugger.assertPatternInputSyntaxHighlighting([
+        { token: GROK_ESCAPE, content: '\\' },
+        { token: GROK_ESCAPED, content: '[' },
+        { token: GROK_REGEX, content: '(' },
+        { token: GROK_REGEX, content: '?' },
+        { token: GROK_REGEX, content: ':' },
+        { token: GROK_REGEX, content: '|' },
+        { token: GROK_START, content: '%{' },
+        { token: GROK_PATTERN_NAME, content: 'NUMBER' },
+        { token: GROK_SEPARATOR, content: ':' },
+        { token: GROK_FIELD_NAME, content: 'bytes' },
+        { token: GROK_SEPARATOR, content: ':' },
+        { token: GROK_FIELD_TYPE, content: 'int' },
+        { token: GROK_END, content: '}' },
+        { token: GROK_REGEX, content: ')' },
+        { token: GROK_ESCAPE, content: '\\' },
+        { token: GROK_ESCAPED, content: ']' },
+      ]);
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
   });
 };
