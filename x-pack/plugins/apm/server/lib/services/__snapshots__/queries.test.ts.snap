@@ -53,58 +53,6 @@ Object {
 }
 `;
 
-exports[`services queries fetches the service agent name 1`] = `
-Object {
-  "apm": Object {
-    "events": Array [
-      "error",
-      "transaction",
-      "metric",
-    ],
-  },
-  "body": Object {
-    "aggs": Object {
-      "agents": Object {
-        "aggs": Object {
-          "serviceRuntimeName": Object {
-            "terms": Object {
-              "field": "service.runtime.name",
-              "size": 1,
-            },
-          },
-        },
-        "terms": Object {
-          "field": "agent.name",
-          "size": 1,
-        },
-      },
-    },
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "term": Object {
-              "service.name": "foo",
-            },
-          },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
-            },
-          },
-        ],
-      },
-    },
-    "size": 0,
-  },
-  "terminateAfter": 1,
-}
-`;
-
 exports[`services queries fetches the service items 1`] = `
 Array [
   Object {

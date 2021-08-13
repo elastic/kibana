@@ -12,9 +12,10 @@ import { createKibanaReactContext } from '../../../../../../../../src/plugins/ki
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { AnalyzeDataButton } from './analyze_data_button';
+import { AgentMetadataDetails } from '../../../../context/apm_service/use_agent_metadata_details_fetcher';
 
 interface Args {
-  agentName: string;
+  agentMetadataDetails: AgentMetadataDetails;
   canShowDashboard: boolean;
   environment?: string;
   serviceName: string;
@@ -25,7 +26,12 @@ export default {
   component: AnalyzeDataButton,
   decorators: [
     (StoryComponent: ComponentType, { args }: StoryContext) => {
-      const { agentName, canShowDashboard, environment, serviceName } = args;
+      const {
+        agentMetadataDetails,
+        canShowDashboard,
+        environment,
+        serviceName,
+      } = args;
 
       const KibanaContext = createKibanaReactContext(({
         application: {
@@ -39,7 +45,12 @@ export default {
           params={{ environment, rangeFrom: 'now-15m', rangeTo: 'now' }}
         >
           <APMServiceContext.Provider
-            value={{ agentName, alerts: [], transactionTypes: [], serviceName }}
+            value={{
+              agentMetadataDetails,
+              alerts: [],
+              transactionTypes: [],
+              serviceName,
+            }}
           >
             <KibanaContext.Provider>
               <StoryComponent />
@@ -55,8 +66,19 @@ export const Example: Story<Args> = () => {
   return <AnalyzeDataButton />;
 };
 Example.args = {
-  agentName: 'iOS/swift',
   canShowDashboard: true,
   environment: 'testEnvironment',
   serviceName: 'testServiceName',
+  agentMetadataDetails: {
+    service: {
+      runtime: {
+        name: 'foo',
+        version: '1',
+      },
+      agent: {
+        name: 'iOS/swift',
+        version: '1.2',
+      },
+    },
+  },
 };

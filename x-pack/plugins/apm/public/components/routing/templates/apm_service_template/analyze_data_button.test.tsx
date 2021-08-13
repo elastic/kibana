@@ -19,7 +19,18 @@ const { Example } = composeStories(stories);
 describe('AnalyzeDataButton', () => {
   describe('with a non-RUM and non-mobile agent', () => {
     it('renders nothing', () => {
-      render(<Example agentName="java" />);
+      render(
+        <Example
+          agentMetadataDetails={{
+            service: {
+              agent: {
+                name: 'java',
+                version: '1.2',
+              },
+            },
+          }}
+        />
+      );
 
       expect(screen.queryByRole('link')).not.toBeInTheDocument();
     });
@@ -35,7 +46,18 @@ describe('AnalyzeDataButton', () => {
 
   describe('with a RUM agent', () => {
     it('uses a ux dataType', () => {
-      render(<Example agentName="rum-js" />);
+      render(
+        <Example
+          agentMetadataDetails={{
+            service: {
+              agent: {
+                name: 'rum-js',
+                version: '1.2',
+              },
+            },
+          }}
+        />
+      );
 
       expect((screen.getByRole('link') as HTMLAnchorElement).href).toEqual(
         'http://localhost/app/observability/exploratory-view#?sr=(apm-series:(dt:ux,isNew:!t,op:average,rdf:(service.environment:!(testEnvironment),service.name:!(testServiceName)),rt:kpi-over-time,time:(from:now-15m,to:now)))'
@@ -45,7 +67,18 @@ describe('AnalyzeDataButton', () => {
 
   describe('with a mobile agent', () => {
     it('uses a mobile dataType', () => {
-      render(<Example agentName="iOS/swift" />);
+      render(
+        <Example
+          agentMetadataDetails={{
+            service: {
+              agent: {
+                name: 'iOS/swift',
+                version: '1.2',
+              },
+            },
+          }}
+        />
+      );
 
       expect((screen.getByRole('link') as HTMLAnchorElement).href).toEqual(
         'http://localhost/app/observability/exploratory-view#?sr=(apm-series:(dt:mobile,isNew:!t,op:average,rdf:(service.environment:!(testEnvironment),service.name:!(testServiceName)),rt:kpi-over-time,time:(from:now-15m,to:now)))'
