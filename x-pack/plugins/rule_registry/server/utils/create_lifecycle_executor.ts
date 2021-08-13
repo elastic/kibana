@@ -24,16 +24,17 @@ import {
   ALERT_DURATION,
   ALERT_END,
   ALERT_ID,
-  ALERT_START,
-  ALERT_STATUS,
-  ALERT_UUID,
-  EVENT_ACTION,
-  EVENT_KIND,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
-  TIMESTAMP,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
+  EVENT_ACTION,
+  EVENT_KIND,
   SPACE_IDS,
+  TIMESTAMP,
 } from '../../common/technical_rule_data_field_names';
 import { RuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
@@ -157,6 +158,7 @@ export const createLifecycleExecutor = (
         [ALERT_ID]: id,
         [ALERT_RULE_TYPE_ID]: rule.ruleTypeId,
         [ALERT_RULE_CONSUMER]: rule.consumer,
+        [ALERT_WORKFLOW_STATUS]: 'open', // TODO: how do we prevent overwriting this field back to "open"?
       };
       return alertInstanceFactory(id);
     },
