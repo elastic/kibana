@@ -13,13 +13,17 @@ import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
 import { useTheme } from './use_theme';
 import { getTimeRangeComparison } from '../components/shared/time_comparison/get_time_range_comparison';
 
-export function useTransactionLatencyChartsFetcher() {
+export function useTransactionLatencyChartsFetcher({
+  kuery,
+  environment,
+}: {
+  kuery: string;
+  environment: string;
+}) {
   const { transactionType, serviceName } = useApmServiceContext();
   const theme = useTheme();
   const {
     urlParams: {
-      environment,
-      kuery,
       start,
       end,
       transactionName,
