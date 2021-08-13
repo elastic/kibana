@@ -8,16 +8,16 @@
 import { EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
 import React, { memo } from 'react';
 
-import { RuleStatusType } from '../../../containers/detection_engine/rules';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { getStatusColor } from './helpers';
 import * as i18n from './translations';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 interface RuleStatusProps {
   children: React.ReactNode | null | undefined;
   statusDate: string | null | undefined;
-  status: RuleStatusType | null | undefined;
+  status: RuleExecutionStatus | null | undefined;
 }
 
 const RuleStatusComponent: React.FC<RuleStatusProps> = ({ children, statusDate, status }) => {

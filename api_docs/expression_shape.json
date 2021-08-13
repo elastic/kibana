@@ -596,8 +596,8 @@
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -891,11 +891,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -1403,11 +1405,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {

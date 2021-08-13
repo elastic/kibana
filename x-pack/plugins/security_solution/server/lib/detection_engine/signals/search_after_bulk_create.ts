@@ -34,6 +34,7 @@ export const searchAfterAndBulkCreate = async ({
   filter,
   pageSize,
   buildRuleMessage,
+  buildReasonMessage,
   enrichment = identity,
   bulkCreate,
   wrapHits,
@@ -146,7 +147,7 @@ export const searchAfterAndBulkCreate = async ({
           );
         }
         const enrichedEvents = await enrichment(filteredEvents);
-        const wrappedDocs = wrapHits(enrichedEvents.hits.hits);
+        const wrappedDocs = wrapHits(enrichedEvents.hits.hits, buildReasonMessage);
 
         const {
           bulkCreateDuration: bulkDuration,
@@ -155,6 +156,7 @@ export const searchAfterAndBulkCreate = async ({
           success: bulkSuccess,
           errors: bulkErrors,
         } = await bulkCreate(wrappedDocs);
+
         toReturn = mergeReturns([
           toReturn,
           createSearchAfterReturnType({

@@ -128,7 +128,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       {
         timeRange: {
@@ -168,7 +167,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       {
         timeRange: {
@@ -212,7 +210,6 @@ describe('embeddable', () => {
             },
             errors: [{ shortMessage: '', longMessage: 'my validation error' }],
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       {} as LensEmbeddableInput
     );
@@ -256,7 +253,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       {} as LensEmbeddableInput
     );
@@ -295,7 +291,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -337,7 +332,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -386,7 +380,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -433,7 +426,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -487,7 +479,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       input
     );
@@ -541,7 +532,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       input
     );
@@ -594,7 +584,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       input
     );
@@ -636,7 +625,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -678,7 +666,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -720,7 +707,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       { id: '123', timeRange, query, filters } as LensEmbeddableInput
     );
@@ -777,7 +763,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       ({ id: '123', onLoad } as unknown) as LensEmbeddableInput
     );
@@ -850,7 +835,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       ({ id: '123', onFilter } as unknown) as LensEmbeddableInput
     );
@@ -898,7 +882,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       ({ id: '123', onBrushEnd } as unknown) as LensEmbeddableInput
     );
@@ -946,7 +929,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       ({ id: '123', onTableRowClick } as unknown) as LensEmbeddableInput
     );

@@ -5,18 +5,12 @@
  * 2.0.
  */
 export const sampleAttributeKpi = {
-  description: 'undefined',
+  title: 'Prefilled from exploratory view app',
+  description: '',
+  visualizationType: 'lnsXY',
   references: [
-    {
-      id: 'apm-*',
-      name: 'indexpattern-datasource-current-indexpattern',
-      type: 'index-pattern',
-    },
-    {
-      id: 'apm-*',
-      name: 'indexpattern-datasource-layer-layer0',
-      type: 'index-pattern',
-    },
+    { id: 'apm-*', name: 'indexpattern-datasource-current-indexpattern', type: 'index-pattern' },
+    { id: 'apm-*', name: 'indexpattern-datasource-layer-layer0', type: 'index-pattern' },
   ],
   state: {
     datasourceStates: {
@@ -26,27 +20,25 @@ export const sampleAttributeKpi = {
             columnOrder: ['x-axis-column-layer0', 'y-axis-column-layer0'],
             columns: {
               'x-axis-column-layer0': {
+                sourceField: '@timestamp',
                 dataType: 'date',
                 isBucketed: true,
                 label: '@timestamp',
                 operationType: 'date_histogram',
-                params: {
-                  interval: 'auto',
-                },
+                params: { interval: 'auto' },
                 scale: 'interval',
-                sourceField: '@timestamp',
               },
               'y-axis-column-layer0': {
                 dataType: 'number',
-                filter: {
-                  language: 'kuery',
-                  query: 'transaction.type: page-load and processor.event: transaction',
-                },
                 isBucketed: false,
-                label: 'test-series',
+                label: 'Page views',
                 operationType: 'count',
                 scale: 'ratio',
                 sourceField: 'Records',
+                filter: {
+                  query: 'transaction.type: page-load and processor.event: transaction',
+                  language: 'kuery',
+                },
               },
             },
             incompleteColumns: {},
@@ -54,51 +46,27 @@ export const sampleAttributeKpi = {
         },
       },
     },
-    filters: [],
-    query: {
-      language: 'kuery',
-      query: '',
-    },
     visualization: {
-      axisTitlesVisibilitySettings: {
-        x: true,
-        yLeft: true,
-        yRight: true,
-      },
-      curveType: 'CURVE_MONOTONE_X',
+      legend: { isVisible: true, position: 'right' },
+      valueLabels: 'hide',
       fittingFunction: 'Linear',
-      gridlinesVisibilitySettings: {
-        x: true,
-        yLeft: true,
-        yRight: true,
-      },
+      curveType: 'CURVE_MONOTONE_X',
+      axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      preferredSeriesType: 'line',
       layers: [
         {
           accessors: ['y-axis-column-layer0'],
           layerId: 'layer0',
+          layerType: 'data',
           seriesType: 'line',
+          yConfig: [{ forAccessor: 'y-axis-column-layer0' }],
           xAccessor: 'x-axis-column-layer0',
-          yConfig: [
-            {
-              color: 'green',
-              forAccessor: 'y-axis-column-layer0',
-            },
-          ],
         },
       ],
-      legend: {
-        isVisible: true,
-        position: 'right',
-      },
-      preferredSeriesType: 'line',
-      tickLabelsVisibilitySettings: {
-        x: true,
-        yLeft: true,
-        yRight: true,
-      },
-      valueLabels: 'hide',
     },
+    query: { query: '', language: 'kuery' },
+    filters: [],
   },
-  title: 'Prefilled from exploratory view app',
-  visualizationType: 'lnsXY',
 };

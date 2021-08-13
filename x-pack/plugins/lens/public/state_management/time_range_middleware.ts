@@ -10,7 +10,10 @@ import moment from 'moment';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { setState, LensDispatch } from '.';
 import { LensAppState } from './types';
-import { getResolvedDateRange, containsDynamicMath, TIME_LAG_PERCENTAGE_LIMIT } from '../utils';
+import { getResolvedDateRange, containsDynamicMath } from '../utils';
+
+const TIME_LAG_PERCENTAGE_LIMIT = 0.02;
+const TIME_LAG_MIN_LIMIT = 10000; // for a small timerange to avoid infinite data refresh timelag minimum is TIME_LAG_ABSOLUTE ms
 
 /**
  * checks if TIME_LAG_PERCENTAGE_LIMIT passed to renew searchSessionId
@@ -48,8 +51,8 @@ function updateTimeRange(data: DataPublicPluginStart, dispatch: LensDispatch) {
   // calculate lag of managed "now" for date math
   const nowDiff = Date.now() - data.nowProvider.get().valueOf();
 
-  // if the lag is signifcant, start a new session to clear the cache
-  if (nowDiff > timeRangeLength * TIME_LAG_PERCENTAGE_LIMIT) {
+  // if the lag is significant, start a new session to clear the cache
+  if (nowDiff > Math.max(timeRangeLength * TIME_LAG_PERCENTAGE_LIMIT, TIME_LAG_MIN_LIMIT)) {
     dispatch(
       setState({
         searchSessionId: data.search.session.start(),

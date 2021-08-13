@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';
 
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../../common/components/exceptions/add_exception_comments';
@@ -119,7 +120,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     const exceptionBuilderComponentMemo = useMemo(
       () =>
         ExceptionBuilder.getExceptionBuilderComponentLazy({
-          allowLargeValueLists: true,
+          allowLargeValueLists: false,
           httpService: http,
           autocompleteService: data.autocomplete,
           exceptionListItems: [exception as ExceptionListItemSchema],
@@ -135,6 +136,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           idAria: 'alert-exception-builder',
           onChange: handleOnBuilderChange,
           listTypeSpecificIndexPatternFilter: filterIndexPatterns,
+          operatorsList: EVENT_FILTERS_OPERATORS,
         }),
       [data, handleOnBuilderChange, http, indexPatterns, exception]
     );
