@@ -106,17 +106,15 @@ export function MlLatencyCorrelations({
     cancelFetch,
     overallHistogram: originalOverallHistogram,
   } = useCorrelations({
-    params: {
-      environment,
-      kuery,
-      serviceName,
-      transactionName,
-      transactionType,
-      start,
-      end,
-      percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-      analyzeCorrelations: correlationAnalysisEnabled,
-    },
+    environment,
+    kuery,
+    serviceName,
+    transactionName,
+    transactionType,
+    start,
+    end,
+    percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+    analyzeCorrelations: correlationAnalysisEnabled,
   });
 
   const overallHistogram = useMemo(

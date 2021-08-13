@@ -21,10 +21,6 @@ import type {
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApmPluginStartDeps } from '../../../plugin';
 
-interface CorrelationsOptions {
-  params: SearchServiceParams;
-}
-
 interface RawResponse {
   percentileThresholdValue?: number;
   took: number;
@@ -34,7 +30,7 @@ interface RawResponse {
   ccsWarning: boolean;
 }
 
-export const useCorrelations = ({ params }: CorrelationsOptions) => {
+export const useCorrelations = (params: SearchServiceParams) => {
   const {
     services: { data },
   } = useKibana<ApmPluginStartDeps>();
