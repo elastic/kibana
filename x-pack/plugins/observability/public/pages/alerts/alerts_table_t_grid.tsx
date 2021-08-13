@@ -5,28 +5,34 @@
  * 2.0.
  */
 
+/**
+ * We need to produce types and code transpilation at different folders during the build of the package.
+ * We have types and code at different imports because we don't want to import the whole package in the resulting webpack bundle for the plugin.
+ * This way plugins can do targeted imports to reduce the final code bundle
+ */
 import type {
   AlertConsumers as AlertConsumersTyped,
   ALERT_DURATION as ALERT_DURATION_TYPED,
   ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
   ALERT_STATUS as ALERT_STATUS_TYPED,
-  ALERT_START as ALERT_START_TYPED,
   ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
 } from '@kbn/rule-data-utils';
 import {
-  AlertConsumers as AlertConsumersNonTyped,
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
   ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
   ALERT_STATUS as ALERT_STATUS_NON_TYPED,
-  ALERT_START as ALERT_START_NON_TYPED,
   ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
-  // @ts-expect-error
-} from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
+  TIMESTAMP,
+  // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
+} from '@kbn/rule-data-utils/target_node/technical_field_names';
+
+// @ts-expect-error importing from a place other than root because we want to limit what we import from this package
+import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
+
 import { EuiButtonIcon, EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useMemo, useState } from 'react';
 
 import type { TimelinesUIStart } from '../../../../timelines/public';
 import type { TopAlert } from './';
@@ -40,15 +46,14 @@ import type {
 
 import { getRenderCellValue } from './render_cell_value';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { decorateResponse } from './decorate_response';
 import { getDefaultCellActions } from './default_cell_actions';
 import { LazyAlertsFlyout } from '../..';
+import { parseAlert } from './parse_alert';
 
 const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
 const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
-const ALERT_START: typeof ALERT_START_TYPED = ALERT_START_NON_TYPED;
 const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
 
 interface AlertsTableTGridProps {
@@ -96,11 +101,11 @@ export const columns: Array<
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.observability.alertsTGrid.triggeredColumnDescription', {
-      defaultMessage: 'Triggered',
+    displayAsText: i18n.translate('xpack.observability.alertsTGrid.lastUpdatedColumnDescription', {
+      defaultMessage: 'Last updated',
     }),
-    id: ALERT_START,
-    initialWidth: 176,
+    id: TIMESTAMP,
+    initialWidth: 230,
   },
   {
     columnHeaderType: 'not-filtered',
@@ -147,6 +152,10 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
 
+  const parseObservabilityAlert = useMemo(() => parseAlert(observabilityRuleTypeRegistry), [
+    observabilityRuleTypeRegistry,
+  ]);
+
   const leadingControlColumns = [
     {
       id: 'expand',
@@ -162,11 +171,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       },
       rowCellRender: ({ data }: ActionProps) => {
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
-        const decoratedAlerts = decorateResponse(
-          [dataFieldEs] ?? [],
-          observabilityRuleTypeRegistry
-        );
-        const alert = decoratedAlerts[0];
+        const alert = parseObservabilityAlert(dataFieldEs);
         return (
           <EuiButtonIcon
             size="s"
@@ -183,19 +188,14 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       headerCellRender: () => null,
       rowCellRender: ({ data }: ActionProps) => {
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
-        const decoratedAlerts = decorateResponse(
-          [dataFieldEs] ?? [],
-          observabilityRuleTypeRegistry
-        );
-        const alert = decoratedAlerts[0];
+        const alert = parseObservabilityAlert(dataFieldEs);
         return (
           <EuiButtonIcon
             size="s"
-            target="_blank"
-            rel="nofollow noreferrer"
             href={prepend(alert.link ?? '')}
-            iconType="inspect"
+            iconType="eye"
             color="text"
+            aria-label="View alert in app"
           />
         );
       },

@@ -61,6 +61,14 @@ export interface IEmbeddable<
   readonly id: string;
 
   /**
+   * If set to true, defer embeddable load tells the container that this embeddable
+   * type isn't completely loaded when the constructor returns. This embeddable
+   * will have to manually call setChildLoaded on its parent when all of its initial
+   * output is finalized. For instance, after loading a saved object.
+   */
+  readonly deferEmbeddableLoad: boolean;
+
+  /**
    * Unique ID an embeddable is assigned each time it is initialized. This ID
    * is different for different instances of the same embeddable. For example,
    * if the same dashboard is rendered twice on the screen, all embeddable

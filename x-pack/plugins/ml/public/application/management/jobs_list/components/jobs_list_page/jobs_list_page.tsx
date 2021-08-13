@@ -241,7 +241,7 @@ export const JobsListPage: FC<{
                 description={
                   <FormattedMessage
                     id="xpack.ml.management.jobsList.jobsListTagline"
-                    defaultMessage="View machine learning analytics and anomaly detection jobs."
+                    defaultMessage="View, export, and import machine learning analytics and anomaly detection jobs."
                   />
                 }
                 rightSideItems={[docsLink]}

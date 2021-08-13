@@ -23,6 +23,6 @@ export function pushNewItemToKueryBar({
   const newItem = `${key} :"${value}"`;
   const nextKuery = isEmpty(kuery) ? newItem : `${kuery} and ${newItem}`;
   push(history, {
-    query: { kuery: encodeURIComponent(nextKuery) },
+    query: { kuery: nextKuery },
   });
 }
