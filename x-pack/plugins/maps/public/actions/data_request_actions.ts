@@ -117,7 +117,7 @@ function getDataRequestContext(
   dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
   getState: () => MapStoreState,
   layerId: string,
-  forceRefresh: boolean = false
+  forceRefreshDueToDrawing: boolean = false
 ): DataRequestContext {
   return {
     dataFilters: getDataFilters(getState()),
@@ -141,7 +141,7 @@ function getDataRequestContext(
     },
     registerCancelCallback: (requestToken: symbol, callback: () => void) =>
       dispatch(registerCancelCallback(requestToken, callback)),
-    forceRefreshDueToDrawing: forceRefresh,
+    forceRefreshDueToDrawing,
   };
 }
 

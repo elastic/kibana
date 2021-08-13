@@ -177,6 +177,7 @@ export function mapExtentChanged(mapExtentState: MapExtentState) {
       mapState: {
         ...dataFilters,
         ...mapExtentState,
+        forceRefreshTriggeredFromGlobalQueryTime: false,
       },
     });
 
@@ -252,11 +253,6 @@ export function setQuery({
     getState: () => MapStoreState
   ) => {
     const prevQuery = getQuery(getState());
-    // const prevTriggeredAt =
-    //   prevQuery && prevQuery.queryLastTriggeredAt
-    //     ? prevQuery.queryLastTriggeredAt
-    //     : generateQueryTimestamp();
-
     const prevTimeFilters = getTimeFilters(getState());
 
     function getNextTimeslice() {
