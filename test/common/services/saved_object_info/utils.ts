@@ -24,7 +24,6 @@ export const areValid = (flags: any) => {
   return true;
 };
 
-// TODO: xs.length is stringified so its returning a much larger number for length
 // @ts-ignore
 export const print = (log: ToolingLog) => (msg: string | null = null) => ({ xs, count }) =>
   log.success(`\n### Saved Object Types ${msg || 'Count: ' + count}\n${xs}`);

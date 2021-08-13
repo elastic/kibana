@@ -1,24 +1,5 @@
 # Saved Objects Info Svc w/ CLI
 
-## Used in code 
-
-Get a reference to the svc
-```typescript
-// Pre FTR Service
-const savedObjectInfo = getService('savedObjectInfo');
-
-// Post FTR Service
-private readonly savedObjectInfo = this.ctx.getService('savedObjectInfo');
-```
-
-Use the svc
-
-```typescript
-log.info(
-  `\n### SAVED OBJECT TYPES IN index: [.kibana]: \n${await savedObjectInfo.getTypesPretty()}`
-);
-```
-
 ## Used via the cli
 
 Run the cli 
@@ -31,7 +12,6 @@ Run the cli
 Result
 
 ```shell
- info
       ### types:
 
       [
@@ -52,6 +32,4 @@ Result
           key: 'space'
         }
       ]
-
- λ
 ```
