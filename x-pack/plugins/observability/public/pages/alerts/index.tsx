@@ -22,14 +22,11 @@ import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
-import type { ObservabilityAPIReturnType } from '../../services/call_observability_api/types';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTableTGrid } from './alerts_table_t_grid';
 import { StatusFilter } from './status_filter';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { callObservabilityApi } from '../../services/call_observability_api';
-
-export type TopAlertResponse = ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>[number];
 
 export interface TopAlert {
   fields: ParsedTechnicalFields;
