@@ -14,7 +14,7 @@ export async function getFallbackToTransactions({
   kuery,
 }: {
   setup: Setup & Partial<SetupTimeRange>;
-  kuery?: string;
+  kuery: string;
 }): Promise<boolean> {
   const searchAggregatedTransactions =
     config['xpack.apm.searchAggregatedTransactions'];

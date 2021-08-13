@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { getRequestBase } from './get_request_base';
 
 describe('correlations', () => {
@@ -13,6 +14,8 @@ describe('correlations', () => {
       const requestBase = getRequestBase({
         index: 'apm-*',
         includeFrozen: true,
+        environment: ENVIRONMENT_ALL.value,
+        kuery: '',
       });
       expect(requestBase).toEqual({
         index: 'apm-*',
@@ -24,6 +27,8 @@ describe('correlations', () => {
     it('defaults ignore_throttled to true', () => {
       const requestBase = getRequestBase({
         index: 'apm-*',
+        environment: ENVIRONMENT_ALL.value,
+        kuery: '',
       });
       expect(requestBase).toEqual({
         index: 'apm-*',
