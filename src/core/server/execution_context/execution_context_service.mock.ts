@@ -6,11 +6,20 @@
  * Side Public License, v 1.
  */
 
+import { KibanaExecutionContext } from 'kibana/public';
 import type {
   IExecutionContext,
   InternalExecutionContextSetup,
   ExecutionContextSetup,
 } from './execution_context_service';
+
+// attempted removal of any: unsuccessful! In theory, replaceable with <R>/R
+function withContextMock(
+  context: KibanaExecutionContext | undefined,
+  fn: (...args: any[]) => any
+): any {
+  return fn();
+}
 
 const createExecutionContextMock = () => {
   const mock: jest.Mocked<IExecutionContext> = {
@@ -21,6 +30,7 @@ const createExecutionContextMock = () => {
     getParentContextFrom: jest.fn(),
     getAsHeader: jest.fn(),
   };
+  mock.withContext.mockImplementation(withContextMock);
   return mock;
 };
 const createInternalSetupContractMock = () => {
@@ -33,6 +43,7 @@ const createSetupContractMock = () => {
     withContext: jest.fn(),
     setRequestId: jest.fn(),
   };
+  mock.withContext.mockImplementation(withContextMock);
   return mock;
 };
 

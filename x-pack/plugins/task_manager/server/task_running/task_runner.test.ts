@@ -25,7 +25,9 @@ import { mockLogger } from '../test_utils';
 import { throwUnrecoverableError } from './errors';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
+import { executionContextServiceMock } from '../../../../../src/core/server/mocks';
 
+const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 
 let fakeTimer: sinon.SinonFakeTimers;
@@ -1465,6 +1467,7 @@ describe('TaskManagerRunner', () => {
       instance,
       definitions,
       onTaskEvent: opts.onTaskEvent,
+      executionContext,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {
