@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { EuiBadge, EuiBasicTableColumn, EuiInMemoryTable, EuiTextColor } from '@elastic/eui';
+import type { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 
 import { ASRoleMapping } from '../../app_search/types';
 import { SingleUserRoleMapping } from '../../shared/types';
@@ -73,6 +74,8 @@ export const UsersTable: React.FC<Props> = ({
     invitation: user.invitation,
   })) as unknown) as Array<Omit<SharedUser, 'elasticsearchUser | roleMapping'>>;
 
+  const [items, setItems] = useState(users);
+
   const columns: Array<EuiBasicTableColumn<SharedUser>> = [
     {
       field: 'username',
@@ -134,7 +137,22 @@ export const UsersTable: React.FC<Props> = ({
     pageSize: 10,
   };
 
+  const onQueryChange = ({ queryText }: EuiSearchBarOnChangeArgs) => {
+    const filteredItems = users.filter((user) => {
+      // JSON.stringify allows us to search all the object fields
+      // without converting all the nested arrays and objects to strings manually
+      // Some false-positives are possible, because the search is also performed on
+      // object keys, but the simplicity of JSON.stringify seems to worth the tradeoff.
+      const normalizedTableItemString = JSON.stringify(user).toLowerCase();
+      const normalizedQuery = queryText.toLowerCase();
+      return normalizedTableItemString.indexOf(normalizedQuery) !== -1;
+    });
+
+    setItems(filteredItems);
+  };
+
   const search = {
+    onChange: onQueryChange,
     box: {
       incremental: true,
       fullWidth: false,
@@ -147,7 +165,7 @@ export const UsersTable: React.FC<Props> = ({
     <EuiInMemoryTable
       data-test-subj="UsersTable"
       columns={columns}
-      items={users}
+      items={items}
       search={search}
       pagination={pagination}
       message={NO_USERS_LABEL}
