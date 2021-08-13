@@ -12,6 +12,7 @@ import {
   KibanaRequest,
   CoreStart,
   IContextProvider,
+  SharedGlobalConfig,
 } from 'src/core/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
@@ -20,7 +21,7 @@ import { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
 import { defineRoutes } from './routes';
 import { SpacesPluginStart } from '../../spaces/server';
 
-import { RuleRegistryPluginConfig } from './config';
+import { INDEX_PREFIX, RuleRegistryPluginConfig } from './config';
 import { RuleDataPluginService } from './rule_data_plugin_service';
 import { EventLogService, IEventLogService } from './event_log';
 import { AlertsClient } from './alert_data_client/alerts_client';
@@ -53,6 +54,7 @@ export class RuleRegistryPlugin
       RuleRegistryPluginStartDependencies
     > {
   private readonly config: RuleRegistryPluginConfig;
+  private readonly legacyConfig: SharedGlobalConfig;
   private readonly logger: Logger;
   private eventLogService: EventLogService | null;
   private readonly alertsClientFactory: AlertsClientFactory;
@@ -61,6 +63,8 @@ export class RuleRegistryPlugin
 
   constructor(initContext: PluginInitializerContext) {
     this.config = initContext.config.get<RuleRegistryPluginConfig>();
+    // TODO: Can be removed in 8.0.0. Exists to work around multi-tenancy users.
+    this.legacyConfig = initContext.config.legacy.get();
     this.logger = initContext.logger.get();
     this.eventLogService = null;
     this.ruleDataService = null;
@@ -82,10 +86,25 @@ export class RuleRegistryPlugin
 
     this.security = plugins.security;
 
+    const isWriteEnabled = (config: RuleRegistryPluginConfig, legacyConfig: SharedGlobalConfig) => {
+      const hasEnabledWrite = config.write.enabled;
+      const hasSetKibanaIndex = legacyConfig.kibana.index;
+      const hasSetUnsafeAccess = config.unsafe.legacyMultiTenancy.enabled;
+
+      if (!hasEnabledWrite) return false;
+
+      // Not using legacy multi-tenancy
+      if (!hasSetKibanaIndex) {
+        return hasEnabledWrite;
+      } else {
+        return hasSetUnsafeAccess;
+      }
+    };
+
     const service = new RuleDataPluginService({
       logger: this.logger,
-      isWriteEnabled: this.config.write.enabled,
-      index: this.config.index,
+      isWriteEnabled: isWriteEnabled(this.config, this.legacyConfig),
+      index: INDEX_PREFIX,
       getClusterClient: async () => {
         const deps = await startDependencies;
         return deps.core.elasticsearch.client.asInternalUser;
@@ -112,8 +131,8 @@ export class RuleRegistryPlugin
 
     const eventLogService = new EventLogService({
       config: {
-        indexPrefix: this.config.index,
-        isWriteEnabled: this.config.write.enabled,
+        indexPrefix: INDEX_PREFIX,
+        isWriteEnabled: isWriteEnabled(this.config, this.legacyConfig),
       },
       dependencies: {
         clusterClient: startDependencies.then((deps) => deps.core.elasticsearch.client),
