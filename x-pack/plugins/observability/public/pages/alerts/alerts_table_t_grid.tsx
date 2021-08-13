@@ -39,7 +39,7 @@ import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import type {
   ActionProps,
-  AlertStatus,
+  AlertWorkflowStatus,
   ColumnHeaderOptions,
   RowRenderer,
 } from '../../../../timelines/common';
@@ -245,7 +245,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
             sortDirection: 'desc',
           },
         ],
-        filterStatus: status as AlertStatus,
+        filterStatus: workflowStatus as AlertWorkflowStatus,
         leadingControlColumns,
         trailingControlColumns,
         unit: (totalAlerts: number) =>

@@ -100,4 +100,7 @@ export interface BulkActionsObjectProp {
 }
 export type BulkActionsProp = boolean | BulkActionsObjectProp;
 
-export type AlertStatus = 'open' | 'closed' | 'in-progress';
+export type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
+
+// for backwards compatibility while we switch everything to use AlertWorkflowStatus
+export type AlertStatus = AlertWorkflowStatus | 'in-progress';
