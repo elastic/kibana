@@ -8,7 +8,6 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -129,8 +128,6 @@ export class Home extends Component {
         }}
         template="empty"
       >
-        <EuiSpacer size="m" />
-
         <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
 
         <AddData addBasePath={addBasePath} application={application} isDarkMode={isDarkMode} />

@@ -15,9 +15,6 @@ exports[`home change home route should render a link to change the default route
   }
   template="empty"
 >
-  <EuiSpacer
-    size="m"
-  />
   <SolutionsSection
     addBasePath={[Function]}
     solutions={Array []}
@@ -54,9 +51,6 @@ exports[`home directories should not render directory entry when showOnHomePage 
   }
   template="empty"
 >
-  <EuiSpacer
-    size="m"
-  />
   <SolutionsSection
     addBasePath={[Function]}
     solutions={Array []}
@@ -93,9 +87,6 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
   }
   template="empty"
 >
-  <EuiSpacer
-    size="m"
-  />
   <SolutionsSection
     addBasePath={[Function]}
     solutions={Array []}
@@ -144,9 +135,6 @@ exports[`home directories should render solutions in the "solution section" 1`] 
   }
   template="empty"
 >
-  <EuiSpacer
-    size="m"
-  />
   <SolutionsSection
     addBasePath={[Function]}
     solutions={
@@ -214,9 +202,6 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
   }
   template="empty"
 >
-  <EuiSpacer
-    size="m"
-  />
   <SolutionsSection
     addBasePath={[Function]}
     solutions={Array []}
@@ -253,9 +238,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
   }
   template="empty"
 >
-  <EuiSpacer
-    size="m"
-  />
   <SolutionsSection
     addBasePath={[Function]}
     solutions={Array []}
@@ -292,9 +274,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
   }
   template="empty"
 >
-  <EuiSpacer
-    size="m"
-  />
   <SolutionsSection
     addBasePath={[Function]}
     solutions={Array []}
@@ -331,9 +310,6 @@ exports[`home should render home component 1`] = `
   }
   template="empty"
 >
-  <EuiSpacer
-    size="m"
-  />
   <SolutionsSection
     addBasePath={[Function]}
     solutions={Array []}
@@ -370,9 +346,6 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
   }
   template="empty"
 >
-  <EuiSpacer
-    size="m"
-  />
   <SolutionsSection
     addBasePath={[Function]}
     solutions={Array []}
@@ -409,9 +382,6 @@ exports[`home welcome should show the normal home page if welcome screen is disa
   }
   template="empty"
 >
-  <EuiSpacer
-    size="m"
-  />
   <SolutionsSection
     addBasePath={[Function]}
     solutions={Array []}
@@ -455,9 +425,6 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
   }
   template="empty"
 >
-  <EuiSpacer
-    size="m"
-  />
   <SolutionsSection
     addBasePath={[Function]}
     solutions={Array []}
