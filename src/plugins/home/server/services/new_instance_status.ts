@@ -9,12 +9,12 @@
 import type { IScopedClusterClient, SavedObjectsClientContract } from '../../../../core/server';
 import type { IndexPatternSavedObjectAttrs } from '../../../data/common/index_patterns/index_patterns';
 
-const LOGS_INDEX_PATTERN = 'metrics-*';
-const METRICS_INDEX_PATTERN = 'logs-*';
+const LOGS_INDEX_PATTERN = 'logs-*';
+const METRICS_INDEX_PATTERN = 'metrics-*';
 
 const INDEX_PREFIXES_TO_IGNORE = [
-  'metrics-elastic_agent', // ignore index created by Fleet server itself
-  'logs-elastic_agent', // ignore index created by Fleet server itself
+  '.ds-metrics-elastic_agent', // ignore index created by Fleet server itself
+  '.ds-logs-elastic_agent', // ignore index created by Fleet server itself
 ];
 
 interface Deps {
@@ -28,7 +28,7 @@ export const isNewInstance = async ({ esClient, soClient }: Deps): Promise<boole
     fields: ['title'],
     search: `*`,
     searchFields: ['title'],
-    perPage: 1,
+    perPage: 100,
   });
 
   // If there are no index patterns, assume this is a new instance
@@ -57,11 +57,11 @@ export const isNewInstance = async ({ esClient, soClient }: Deps): Promise<boole
       // Ignore some data that is shipped by default
       .filter(({ index }) => !INDEX_PREFIXES_TO_IGNORE.some((prefix) => index?.startsWith(prefix)))
       // If any other logs and metrics indices have data, return false
-      .some(({ docsCount }) => parseInt(docsCount ?? '0', 10) > 0);
+      .some((catResult) => parseInt(catResult['docs.count'] ?? '0', 10) > 0);
 
     return !anyIndicesContainerUserData;
   } catch (e) {
-    // If any errors are encoutnered return false to be safe
+    // If any errors are encountered return false to be safe
     return false;
   }
 };
