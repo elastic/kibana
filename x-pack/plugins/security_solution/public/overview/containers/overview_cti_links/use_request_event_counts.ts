@@ -30,7 +30,7 @@ export const useRequestEventCounts = (to: string, from: string) => {
           esTypes: ['keyword'],
         },
       ],
-      title: defaultThreatIndices,
+      title: defaultThreatIndices.toString(),
     },
     queries: [{ query: 'event.type:indicator', language: 'kuery' }],
     filters: [],

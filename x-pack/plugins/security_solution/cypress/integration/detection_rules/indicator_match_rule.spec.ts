@@ -164,6 +164,7 @@ describe('indicator match', () => {
         });
 
         it('Shows invalidation text if you try to continue without filling it out', () => {
+          getIndicatorIndicatorIndex().type(`{backspace}{enter}`);
           getDefineContinueButton().click();
           getIndexPatternInvalidationText().should('exist');
         });
