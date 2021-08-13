@@ -87,6 +87,11 @@ export const TrustedAppsPage = memo(() => {
 
   const showCreateFlyout = !!location.show;
 
+  const canDisplayContent = useCallback(
+    () => doEntriesExist || (isCheckingIfEntriesExists && didEntriesExist),
+    [didEntriesExist, doEntriesExist, isCheckingIfEntriesExists]
+  );
+
   const backButton = useMemo(() => {
     if (routeState && routeState.onBackButtonNavigateTo) {
       return <BackToExternalAppButton {...routeState} />;
@@ -121,7 +126,7 @@ export const TrustedAppsPage = memo(() => {
         />
       )}
 
-      {doEntriesExist || (isCheckingIfEntriesExists && didEntriesExist) ? (
+      {canDisplayContent() ? (
         <>
           <SearchExceptions
             defaultValue={location.filter}
@@ -164,7 +169,6 @@ export const TrustedAppsPage = memo(() => {
   return (
     <AdministrationListPage
       data-test-subj="trustedAppsListPage"
-      beta={false}
       title={
         <FormattedMessage
           id="xpack.securitySolution.trustedapps.list.pageTitle"
@@ -173,7 +177,7 @@ export const TrustedAppsPage = memo(() => {
       }
       headerBackComponent={backButton}
       subtitle={ABOUT_TRUSTED_APPS}
-      actions={doEntriesExist ? addButton : <></>}
+      actions={canDisplayContent() ? addButton : <></>}
     >
       <TrustedAppsNotifications />
 

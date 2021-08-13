@@ -29,13 +29,13 @@ export async function getServiceErrorGroupDetailedStatistics({
   start,
   end,
 }: {
-  kuery?: string;
+  kuery: string;
   serviceName: string;
   setup: Setup;
   numBuckets: number;
   transactionType: string;
   groupIds: string[];
-  environment?: string;
+  environment: string;
   start: number;
   end: number;
 }): Promise<Array<{ groupId: string; timeseries: Coordinate[] }>> {
@@ -117,13 +117,13 @@ export async function getServiceErrorGroupPeriods({
   comparisonStart,
   comparisonEnd,
 }: {
-  kuery?: string;
+  kuery: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
   numBuckets: number;
   transactionType: string;
   groupIds: string[];
-  environment?: string;
+  environment: string;
   comparisonStart?: number;
   comparisonEnd?: number;
 }) {
@@ -159,7 +159,7 @@ export async function getServiceErrorGroupPeriods({
     previousPeriodPromise,
   ]);
 
-  const firtCurrentPeriod = currentPeriod.length ? currentPeriod[0] : undefined;
+  const firstCurrentPeriod = currentPeriod?.[0];
 
   return {
     currentPeriod: keyBy(currentPeriod, 'groupId'),
@@ -167,7 +167,7 @@ export async function getServiceErrorGroupPeriods({
       previousPeriod.map((errorRateGroup) => ({
         ...errorRateGroup,
         timeseries: offsetPreviousPeriodCoordinates({
-          currentPeriodTimeseries: firtCurrentPeriod?.timeseries,
+          currentPeriodTimeseries: firstCurrentPeriod?.timeseries,
           previousPeriodTimeseries: errorRateGroup.timeseries,
         }),
       })),
