@@ -24,7 +24,7 @@ export const SolutionPanel: FC<Props> = ({ addBasePath, solution }) => {
   const { trackUiMetric } = getServices();
 
   const getSolutionGraphicURL = (solutionId: string) =>
-    `/plugins/kibanaReact/assets/solutions_${solutionId}_2x.png`;
+    `/plugins/kibanaReact/assets/solutions_${solutionId}.svg`;
 
   return (
     <EuiFlexItem
@@ -48,7 +48,7 @@ export const SolutionPanel: FC<Props> = ({ addBasePath, solution }) => {
           createAppNavigationHandler(solution.path)(event);
         }}
         title={solution.title}
-        titleElement="h3"
+        titleElement="h2"
       />
     </EuiFlexItem>
   );
