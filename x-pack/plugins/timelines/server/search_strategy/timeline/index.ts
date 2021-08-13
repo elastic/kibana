@@ -8,11 +8,17 @@
 import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import { from } from 'rxjs';
-import {
-  isValidFeatureId,
-  mapConsumerToIndexName,
+
+import type {
   AlertConsumers,
-} from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+  mapConsumerToIndexName as mapConsumerToIndexNameTyped,
+  isValidFeatureId as isValidFeatureIdTyped,
+} from '@kbn/rule-data-utils';
+import {
+  mapConsumerToIndexName as mapConsumerToIndexNameNonTyped,
+  isValidFeatureId as isValidFeatureIdNonTyped,
+  // @ts-expect-error
+} from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 
 import {
   AlertingAuthorizationEntity,
@@ -37,6 +43,9 @@ import {
   ENHANCED_ES_SEARCH_STRATEGY,
   ISearchOptions,
 } from '../../../../../../src/plugins/data/common';
+
+const mapConsumerToIndexName: typeof mapConsumerToIndexNameTyped = mapConsumerToIndexNameNonTyped;
+const isValidFeatureId: typeof isValidFeatureIdTyped = isValidFeatureIdNonTyped;
 
 export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTypes>(
   data: PluginStart,

@@ -19,7 +19,7 @@ import {
   UrlGeneratorsStart,
 } from './url_generators/url_generator_service';
 import { UrlService } from '../common/url_service';
-import { RedirectManager } from './url_service';
+import { RedirectManager, RedirectOptions } from './url_service';
 
 export interface ShareSetupDependencies {
   securityOss?: SecurityOssPluginSetup;
@@ -42,6 +42,12 @@ export type SharePluginSetup = ShareMenuRegistrySetup & {
    * Utilities to work with URL locators and short URLs.
    */
   url: UrlService;
+
+  /**
+   * Accepts serialized values for extracting a locator, migrating state from a provided version against
+   * the locator, then using the locator to navigate.
+   */
+  navigate(options: RedirectOptions): void;
 };
 
 /** @public */
@@ -57,12 +63,20 @@ export type SharePluginStart = ShareMenuManagerStart & {
    * Utilities to work with URL locators and short URLs.
    */
   url: UrlService;
+
+  /**
+   * Accepts serialized values for extracting a locator, migrating state from a provided version against
+   * the locator, then using the locator to navigate.
+   */
+  navigate(options: RedirectOptions): void;
 };
 
 export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   private readonly shareMenuRegistry = new ShareMenuRegistry();
   private readonly shareContextMenu = new ShareMenuManager();
   private readonly urlGeneratorsService = new UrlGeneratorsService();
+
+  private redirectManager?: RedirectManager;
   private url?: UrlService;
 
   public setup(core: CoreSetup, plugins: ShareSetupDependencies): SharePluginSetup {
@@ -87,15 +101,16 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
       },
     });
 
-    const redirectManager = new RedirectManager({
+    this.redirectManager = new RedirectManager({
       url: this.url,
     });
-    redirectManager.registerRedirectApp(core);
+    this.redirectManager.registerRedirectApp(core);
 
     return {
       ...this.shareMenuRegistry.setup(),
       urlGenerators: this.urlGeneratorsService.setup(core),
       url: this.url,
+      navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
     };
   }
 
@@ -108,6 +123,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
       ),
       urlGenerators: this.urlGeneratorsService.start(core),
       url: this.url!,
+      navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
     };
   }
 }
