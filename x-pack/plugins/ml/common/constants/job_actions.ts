@@ -33,3 +33,11 @@ export function getJobActionString(action: JobAction) {
       return '';
   }
 }
+
+export const JOB_ACTION_TASK: Record<string, JobAction> = {
+  'cluster:admin/xpack/ml/job/delete': JOB_ACTION.DELETE,
+  'cluster:admin/xpack/ml/job/reset': JOB_ACTION.RESET,
+  'cluster:admin/xpack/ml/job/model_snapshots/revert': JOB_ACTION.REVERT,
+};
+
+export const JOB_ACTION_TASKS = Object.keys(JOB_ACTION_TASK);

@@ -42,7 +42,7 @@ import { RefreshJobsListButton } from '../refresh_jobs_list_button';
 import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import { JobListMlAnomalyAlertFlyout } from '../../../../../alerting/ml_alerting_flyout';
 
-let deletingJobsRefreshTimeout = null;
+let blockingJobsRefreshTimeout = null;
 
 const filterJobsDebounce = debounce((jobsSummaryList, filterClauses, callback) => {
   const ss = filterJobs(jobsSummaryList, filterClauses);
@@ -63,7 +63,7 @@ export class JobsListView extends Component {
       selectedJobs: [],
       itemIdToExpandedRowMap: {},
       filterClauses: [],
-      deletingJobIds: [],
+      blockingJobIds: [],
       jobsAwaitingNodeCount: 0,
     };
 
@@ -107,7 +107,7 @@ export class JobsListView extends Component {
 
   componentWillUnmount() {
     if (this.props.isManagementTable === undefined) {
-      deletingJobsRefreshTimeout = null;
+      blockingJobsRefreshTimeout = null;
     }
     this._isMounted = false;
   }
@@ -372,7 +372,7 @@ export class JobsListView extends Component {
           // if there are some jobs in a deleting state, start polling for
           // deleting jobs so we can update the jobs list once the
           // deleting tasks are over
-          this.checkDeletingJobTasks(forceRefresh);
+          this.checkBlockingJobTasks(forceRefresh);
         }
       } catch (error) {
         console.error(error);
@@ -381,18 +381,18 @@ export class JobsListView extends Component {
     }
   }
 
-  async checkDeletingJobTasks(forceRefresh = false) {
+  async checkBlockingJobTasks(forceRefresh = false) {
     if (this._isMounted === false) {
       return;
     }
 
-    const { jobIds: taskJobIds } = await ml.jobs.deletingJobTasks();
-
+    const { jobs } = await ml.jobs.blockingJobTasks();
+    const blockingJobIds = Object.keys(jobs);
     const taskListHasChanged =
-      isEqual(taskJobIds.sort(), this.state.deletingJobIds.sort()) === false;
+      isEqual(blockingJobIds.sort(), this.state.blockingJobIds.sort()) === false;
 
     this.setState({
-      deletingJobIds: taskJobIds,
+      blockingJobIds,
     });
 
     // only reload the jobs list if the contents of the task list has changed
@@ -401,10 +401,10 @@ export class JobsListView extends Component {
       this.refreshJobSummaryList();
     }
 
-    if (taskJobIds.length > 0 && deletingJobsRefreshTimeout === null) {
-      deletingJobsRefreshTimeout = setTimeout(() => {
-        deletingJobsRefreshTimeout = null;
-        this.checkDeletingJobTasks();
+    if (blockingJobIds.length > 0 && blockingJobsRefreshTimeout === null) {
+      blockingJobsRefreshTimeout = setTimeout(() => {
+        blockingJobsRefreshTimeout = null;
+        this.checkBlockingJobTasks();
       }, DELETING_JOBS_REFRESH_INTERVAL_MS);
     }
   }

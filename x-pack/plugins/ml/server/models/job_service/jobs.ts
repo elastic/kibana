@@ -13,7 +13,13 @@ import {
   parseTimeIntervalForJob,
 } from '../../../common/util/job_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
-import { getJobActionString } from '../../../common/constants/job_actions';
+import {
+  getJobActionString,
+  JOB_ACTION_TASK,
+  JOB_ACTION_TASKS,
+  JOB_ACTION,
+  JobAction,
+} from '../../../common/constants/job_actions';
 import {
   MlSummaryJob,
   AuditMessage,
@@ -30,7 +36,6 @@ import {
   ResetJobsResponse,
 } from '../../../common/types/job_service';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
-import { JOB_ACTION } from '../../../common/constants/job_actions';
 import { datafeedsProvider, MlDatafeedsResponse, MlDatafeedsStatsResponse } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { resultsServiceProvider } from '../results_service';
@@ -478,21 +483,25 @@ export function jobsProvider(
     return jobs;
   }
 
-  async function deletingJobTasks() {
-    const actions = ['cluster:admin/xpack/ml/job/delete'];
-    const detailed = true;
-    const jobIds: string[] = [];
+  async function blockingJobTasks() {
+    const jobs: Array<Record<string, JobAction>> = [];
     try {
       const { body } = await asInternalUser.tasks.list({
-        actions,
-        detailed,
+        actions: JOB_ACTION_TASKS,
+        detailed: true,
       });
 
-      if (body.nodes) {
-        Object.keys(body.nodes).forEach((nodeId) => {
-          const tasks = body.nodes![nodeId].tasks;
-          Object.keys(tasks).forEach((taskId) => {
-            jobIds.push(tasks[taskId].description!.replace(/^delete-job-/, ''));
+      if (body.nodes !== undefined) {
+        Object.values(body.nodes).forEach(({ tasks }) => {
+          Object.values(tasks).forEach(({ action, description }) => {
+            if (description === undefined) {
+              return;
+            }
+            if (JOB_ACTION_TASK[action] === JOB_ACTION.DELETE) {
+              jobs.push({ [description.replace(/^delete-job-/, '')]: JOB_ACTION.DELETE });
+            } else {
+              jobs.push({ [description]: JOB_ACTION_TASK[action] });
+            }
           });
         });
       }
@@ -500,12 +509,16 @@ export function jobsProvider(
       // if the user doesn't have permission to load the task list,
       // use the jobs list to get the ids of deleting jobs
       const {
-        body: { jobs },
-      } = await mlClient.getJobs<MlJobsResponse>();
+        body: { jobs: tempJobs },
+      } = await mlClient.getJobs();
 
-      jobIds.push(...jobs.filter((j) => j.deleting === true).map((j) => j.job_id));
+      jobs.push(
+        ...(tempJobs as Job[]) // change once es client types are correct
+          .filter((j) => j.blocked !== undefined)
+          .map((j) => ({ [j.job_id]: j.blocked.reason }))
+      );
     }
-    return { jobIds };
+    return { jobs };
   }
 
   // Checks if each of the jobs in the specified list of IDs exist.
@@ -638,7 +651,7 @@ export function jobsProvider(
     jobsWithTimerange,
     getJobForCloning,
     createFullJobsList,
-    deletingJobTasks,
+    blockingJobTasks,
     jobsExist,
     getAllJobAndGroupIds,
     getLookBackProgress,

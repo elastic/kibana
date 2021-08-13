@@ -456,13 +456,13 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JobService
    *
-   * @api {get} /api/ml/jobs/deleting_jobs_tasks Get deleting  job tasks
-   * @apiName DeletingJobTasks
-   * @apiDescription Gets the ids of deleting anomaly detection jobs
+   * @api {get} /api/ml/jobs/blocking_jobs_tasks Get blocking job tasks
+   * @apiName BlockingJobTasks
+   * @apiDescription Gets the ids of deleting, resetting or reverting anomaly detection jobs
    */
   router.get(
     {
-      path: '/api/ml/jobs/deleting_jobs_tasks',
+      path: '/api/ml/jobs/blocking_jobs_tasks',
       validate: false,
       options: {
         tags: ['access:ml:canGetJobs'],
@@ -470,8 +470,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, response }) => {
       try {
-        const { deletingJobTasks } = jobServiceProvider(client, mlClient);
-        const resp = await deletingJobTasks();
+        const { blockingJobTasks } = jobServiceProvider(client, mlClient);
+        const resp = await blockingJobTasks();
 
         return response.ok({
           body: resp,

@@ -18,6 +18,7 @@ import type {
   IndicesOptions,
 } from '../../../../common/types/anomaly_detection_jobs';
 import type { JobMessage } from '../../../../common/types/audit_message';
+import type { JobAction } from '../../../../common/constants/job_actions';
 import type { AggFieldNamePair, RuntimeMappings } from '../../../../common/types/fields';
 import type { ExistingJobsAndGroups } from '../job_service';
 import type {
@@ -182,9 +183,9 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  deletingJobTasks() {
-    return httpService.http<any>({
-      path: `${ML_BASE_PATH}/jobs/deleting_jobs_tasks`,
+  blockingJobTasks() {
+    return httpService.http<Record<string, JobAction>>({
+      path: `${ML_BASE_PATH}/jobs/blocking_jobs_tasks`,
       method: 'GET',
     });
   },
