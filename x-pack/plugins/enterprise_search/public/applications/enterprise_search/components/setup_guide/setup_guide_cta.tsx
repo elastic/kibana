@@ -26,7 +26,7 @@ export const SetupGuideCta: React.FC = () => (
     color="transparent"
   >
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-      <EuiFlexItem className="enterpriseSearchSetupCta__text">
+      <EuiFlexItem>
         <EuiTitle size="s">
           <h2>{PRODUCT_SELECTOR_CALLOUT_HEADING}</h2>
         </EuiTitle>
