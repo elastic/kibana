@@ -32,6 +32,10 @@ const applicationStartMock = ({
   capabilities: { navLinks: { management: true, dev_tools: true } },
 } as unknown) as ApplicationStart;
 
+const applicationStartMockRestricted = ({
+  capabilities: { navLinks: { management: false, dev_tools: false } },
+} as unknown) as ApplicationStart;
+
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 
 const mockFeatures: FeatureCatalogueEntry[] = [
@@ -93,6 +97,17 @@ describe('ManageData', () => {
   test('render null without any features', () => {
     const component = shallowWithIntl(
       <ManageData addBasePath={addBasePathMock} application={applicationStartMock} features={[]} />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  test('hide dev tools and stack management links if unavailable', () => {
+    const component = shallowWithIntl(
+      <ManageData
+        addBasePath={addBasePathMock}
+        application={applicationStartMockRestricted}
+        features={mockFeatures}
+      />
     );
     expect(component).toMatchSnapshot();
   });

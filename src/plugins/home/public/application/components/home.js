@@ -115,8 +115,6 @@ export class Home extends Component {
     const devTools = this.findDirectoryById('console');
     const manageDataFeatures = this.getFeaturesByCategory(FeatureCatalogueCategory.ADMIN);
 
-    console.log(getServices().uiSettings);
-
     // Show card for console if none of the manage data plugins are available, most likely in OSS
     if (manageDataFeatures.length < 1 && devTools) {
       manageDataFeatures.push(devTools);

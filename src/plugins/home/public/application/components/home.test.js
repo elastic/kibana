@@ -87,44 +87,6 @@ describe('home', () => {
     expect(component).toMatchSnapshot();
   });
 
-  describe('header', () => {
-    test('should show "Manage" link if stack management is available', async () => {
-      const directoryEntry = {
-        id: 'stack-management',
-        title: 'Management',
-        description: 'Your center console for managing the Elastic Stack.',
-        icon: 'managementApp',
-        path: 'management_landing_page',
-        category: FeatureCatalogueCategory.ADMIN,
-        showOnHomePage: false,
-      };
-
-      const component = await renderHome({
-        directories: [directoryEntry],
-      });
-
-      expect(component).toMatchSnapshot();
-    });
-
-    test('should show "Dev tools" link if console is available', async () => {
-      const directoryEntry = {
-        id: 'console',
-        title: 'Console',
-        description: 'Skip cURL and use a JSON interface to work with your data in Console.',
-        icon: 'consoleApp',
-        path: 'path-to-dev-tools',
-        category: FeatureCatalogueCategory.ADMIN,
-        showOnHomePage: false,
-      };
-
-      const component = await renderHome({
-        directories: [directoryEntry],
-      });
-
-      expect(component).toMatchSnapshot();
-    });
-  });
-
   describe('directories', () => {
     test('should render solutions in the "solution section"', async () => {
       const solutionEntry1 = {
@@ -158,24 +120,6 @@ describe('home', () => {
 
       const component = await renderHome({
         solutions: [solutionEntry1, solutionEntry2, solutionEntry3, solutionEntry4],
-      });
-
-      expect(component).toMatchSnapshot();
-    });
-
-    test('should render DATA directory entry in "Ingest your data" panel', async () => {
-      const directoryEntry = {
-        id: 'dashboard',
-        title: 'Dashboard',
-        description: 'Display and share a collection of visualizations and saved searches.',
-        icon: 'dashboardApp',
-        path: 'dashboard_landing_page',
-        showOnHomePage: true,
-        category: FeatureCatalogueCategory.DATA,
-      };
-
-      const component = await renderHome({
-        directories: [directoryEntry],
       });
 
       expect(component).toMatchSnapshot();
