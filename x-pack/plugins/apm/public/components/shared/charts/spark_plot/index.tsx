@@ -79,7 +79,12 @@ export function SparkPlot({
   const Sparkline = hasComparisonSeries ? LineSeries : AreaSeries;
 
   return (
-    <EuiFlexGroup gutterSize="m" responsive={false}>
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+      gutterSize="m"
+      responsive={false}
+      alignItems="flexEnd"
+    >
       <EuiFlexItem grow={false}>
         {hasValidTimeseries(series) ? (
           <Chart size={chartSize}>
