@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MockedLogger, loggerMock } from '@kbn/logging/target/mocks';
 import { createAlertRoute } from './create';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
@@ -15,6 +16,7 @@ import { Alert } from '../../../common/alert';
 import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
 
 const rulesClient = rulesClientMock.create();
+let logger: MockedLogger;
 
 jest.mock('../../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -22,6 +24,7 @@ jest.mock('../../lib/license_api_access.ts', () => ({
 
 beforeEach(() => {
   jest.resetAllMocks();
+  logger = loggerMock.create();
 });
 
 describe('createAlertRoute', () => {
@@ -79,7 +82,7 @@ describe('createAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createAlertRoute(router, licenseState);
+    createAlertRoute(router, licenseState, logger);
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -97,6 +100,7 @@ describe('createAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({ body: createResult });
 
+    expect(logger.warn).not.toHaveBeenCalled();
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
     expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -138,7 +142,7 @@ describe('createAlertRoute', () => {
     });
   });
 
-  it('allows providing a custom id', async () => {
+  it('allows providing a custom id in default space', async () => {
     const expectedResult = {
       ...createResult,
       id: 'custom-id',
@@ -146,7 +150,7 @@ describe('createAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createAlertRoute(router, licenseState);
+    createAlertRoute(router, licenseState, logger);
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -165,6 +169,8 @@ describe('createAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({ body: expectedResult });
 
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(rulesClient.getSpaceId).toHaveBeenCalled();
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
     expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -206,11 +212,92 @@ describe('createAlertRoute', () => {
     });
   });
 
+  it('allows providing a custom id in non-default space but logs warning and returns warning header', async () => {
+    const expectedResult = {
+      ...createResult,
+      id: 'custom-id',
+    };
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    createAlertRoute(router, licenseState, logger);
+
+    const [config, handler] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id?}"`);
+
+    rulesClient.create.mockResolvedValueOnce(expectedResult);
+    rulesClient.getSpaceId.mockReturnValueOnce('another-space');
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        params: { id: 'custom-id' },
+        body: mockedAlert,
+      },
+      ['ok']
+    );
+
+    expect(await handler(context, req, res)).toEqual({
+      body: expectedResult,
+      headers: {
+        warning: `199 kibana POST /api/alerts/alert/custom-id: Usage of "id" has been deprecated and will be removed in 8.0.0`,
+      },
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      `POST /api/alerts/alert/custom-id: Usage of "id" has been deprecated and will be removed in 8.0.0`
+    );
+    expect(rulesClient.getSpaceId).toHaveBeenCalled();
+    expect(rulesClient.create).toHaveBeenCalledTimes(1);
+    expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "data": Object {
+            "actions": Array [
+              Object {
+                "group": "default",
+                "id": "2",
+                "params": Object {
+                  "foo": true,
+                },
+              },
+            ],
+            "alertTypeId": "1",
+            "consumer": "bar",
+            "name": "abc",
+            "notifyWhen": "onActionGroupChange",
+            "params": Object {
+              "bar": true,
+            },
+            "schedule": Object {
+              "interval": "10s",
+            },
+            "tags": Array [
+              "foo",
+            ],
+            "throttle": "30s",
+          },
+          "options": Object {
+            "id": "custom-id",
+          },
+        },
+      ]
+    `);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expectedResult,
+      headers: {
+        warning: `199 kibana POST /api/alerts/alert/custom-id: Usage of "id" has been deprecated and will be removed in 8.0.0`,
+      },
+    });
+  });
+
   it('ensures the license allows creating alerts', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createAlertRoute(router, licenseState);
+    createAlertRoute(router, licenseState, logger);
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -231,7 +318,7 @@ describe('createAlertRoute', () => {
       throw new Error('OMG');
     });
 
-    createAlertRoute(router, licenseState);
+    createAlertRoute(router, licenseState, logger);
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -248,7 +335,7 @@ describe('createAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createAlertRoute(router, licenseState);
+    createAlertRoute(router, licenseState, logger);
 
     const [, handler] = router.post.mock.calls[0];
 
