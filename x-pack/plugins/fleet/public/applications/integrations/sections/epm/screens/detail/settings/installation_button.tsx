@@ -34,7 +34,6 @@ type InstallationButtonProps = Pick<PackageInfo, 'assets' | 'name' | 'title' | '
   isUpdate?: boolean;
   latestVersion?: string;
   packagePolicyIds?: string[];
-  agentPolicyIds?: string[];
   dryRunData?: UpgradePackagePolicyDryRunResponse | null;
 };
 export function InstallationButton(props: InstallationButtonProps) {
@@ -47,7 +46,6 @@ export function InstallationButton(props: InstallationButtonProps) {
     isUpdate = false,
     latestVersion,
     packagePolicyIds = [],
-    agentPolicyIds = [],
   } = props;
   const hasWriteCapabilites = useCapabilities().write;
   const installPackage = useInstallPackage();
@@ -66,11 +64,14 @@ export function InstallationButton(props: InstallationButtonProps) {
 
   useEffect(() => {
     const fetchAgentPolicyData = async () => {
-      if (agentPolicyIds && agentPolicyIds.length) {
+      if (packagePolicyIds) {
         const { data } = await sendGetAgentPolicies({
           perPage: 1000,
           page: 1,
-          kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.id:${agentPolicyIds.join(' or ')}`,
+          // Fetch all agent policies that include one of the eligible package policies
+          kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:${packagePolicyIds
+            .map((id) => `"${id}"`)
+            .join(' or ')}`,
         });
 
         setAgentPolicyData(data);
@@ -78,7 +79,7 @@ export function InstallationButton(props: InstallationButtonProps) {
     };
 
     fetchAgentPolicyData();
-  }, [agentPolicyIds]);
+  }, [packagePolicyIds]);
 
   const packagePolicyCount = useMemo(() => packagePolicyIds.length, [packagePolicyIds]);
   const agentCount = useMemo(() => sumBy(agentPolicyData?.items, ({ agents }) => agents ?? 0), [

@@ -111,11 +111,6 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
     fetchDryRunData();
   }, [packagePolicyIds]);
 
-  const agentPolicyIds = Array.from(
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    new Set(packagePoliciesData?.items.map(({ policy_id }) => policy_id))
-  );
-
   const updateAvailable =
     installedVersion && semverLt(installedVersion, latestVersion) ? true : false;
 
@@ -197,7 +192,6 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                       disabled={false}
                       isUpdate={true}
                       packagePolicyIds={packagePolicyIds}
-                      agentPolicyIds={agentPolicyIds}
                       dryRunData={dryRunData}
                     />
                   </p>
