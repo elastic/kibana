@@ -20,11 +20,11 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { StatsList } from './stats_list';
 
-export function BackendContents({ nodeData }: ContentsProps) {
+export function BackendContents({ nodeData, environment }: ContentsProps) {
   const { query } = useApmParams('/*');
   const apmRouter = useApmRouter();
   const {
-    urlParams: { environment, start, end },
+    urlParams: { start, end },
   } = useUrlParams();
 
   const backendName = nodeData.label;
