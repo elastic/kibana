@@ -41,6 +41,12 @@ beforeEach(() => {
   alertingAuthMock.getAuthorizationFilter.mockImplementation(async () =>
     Promise.resolve({ filter: [] })
   );
+  // @ts-expect-error
+  alertingAuthMock.getAugmentedRuleTypesWithAuthorization.mockImplementation(async () => {
+    const authorizedRuleTypes = new Set();
+    authorizedRuleTypes.add({ producer: 'apm' });
+    return Promise.resolve({ authorizedRuleTypes });
+  });
   alertingAuthMock.ensureAuthorized.mockImplementation(
     // @ts-expect-error
     async ({
@@ -72,7 +78,7 @@ describe('bulkUpdate()', () => {
   describe('ids', () => {
     describe('audit log', () => {
       test('logs successful event in audit logger', async () => {
-        const indexName = '.alerts-observability-apm.alerts';
+        const indexName = '.alerts-observability-apm';
         const alertsClient = new AlertsClient(alertsClientParams);
         esClientMock.mget.mockResolvedValueOnce(
           elasticsearchClientMock.createApiResponse({
@@ -101,7 +107,7 @@ describe('bulkUpdate()', () => {
                 {
                   update: {
                     _id: fakeAlertId,
-                    _index: '.alerts-observability-apm.alerts',
+                    _index: '.alerts-observability-apm',
                     result: 'updated',
                     status: 200,
                   },
@@ -129,7 +135,7 @@ describe('bulkUpdate()', () => {
       });
 
       test('audit error access if user is unauthorized for given alert', async () => {
-        const indexName = '.alerts-observability-apm.alerts';
+        const indexName = '.alerts-observability-apm';
         const alertsClient = new AlertsClient(alertsClientParams);
         esClientMock.mget.mockResolvedValueOnce(
           elasticsearchClientMock.createApiResponse({
@@ -175,7 +181,7 @@ describe('bulkUpdate()', () => {
       });
 
       test('logs multiple error events in audit logger', async () => {
-        const indexName = '.alerts-observability-apm.alerts';
+        const indexName = '.alerts-observability-apm';
         const alertsClient = new AlertsClient(alertsClientParams);
         esClientMock.mget.mockResolvedValueOnce(
           elasticsearchClientMock.createApiResponse({
@@ -251,7 +257,7 @@ describe('bulkUpdate()', () => {
   describe('query', () => {
     describe('audit log', () => {
       test('logs successful event in audit logger', async () => {
-        const indexName = '.alerts-observability-apm.alerts';
+        const indexName = '.alerts-observability-apm';
         const alertsClient = new AlertsClient(alertsClientParams);
         esClientMock.search.mockResolvedValueOnce(
           elasticsearchClientMock.createApiResponse({
@@ -270,7 +276,7 @@ describe('bulkUpdate()', () => {
                 hits: [
                   {
                     _id: fakeAlertId,
-                    _index: '.alerts-observability-apm.alerts',
+                    _index: '.alerts-observability-apm',
                     _source: {
                       [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                       [ALERT_RULE_CONSUMER]: 'apm',
@@ -311,7 +317,7 @@ describe('bulkUpdate()', () => {
       });
 
       test('audit error access if user is unauthorized for given alert', async () => {
-        const indexName = '.alerts-observability-apm.alerts';
+        const indexName = '.alerts-observability-apm';
         const alertsClient = new AlertsClient(alertsClientParams);
         esClientMock.search.mockResolvedValueOnce(
           elasticsearchClientMock.createApiResponse({
@@ -330,7 +336,7 @@ describe('bulkUpdate()', () => {
                 hits: [
                   {
                     _id: fakeAlertId,
-                    _index: '.alerts-observability-apm.alerts',
+                    _index: '.alerts-observability-apm',
                     _source: {
                       [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
                       [ALERT_RULE_CONSUMER]: 'apm',
@@ -372,7 +378,7 @@ describe('bulkUpdate()', () => {
       });
 
       test('logs multiple error events in audit logger', async () => {
-        const indexName = '.alerts-observability-apm.alerts';
+        const indexName = '.alerts-observability-apm';
         const alertsClient = new AlertsClient(alertsClientParams);
         esClientMock.search.mockResolvedValueOnce(
           elasticsearchClientMock.createApiResponse({
@@ -391,7 +397,7 @@ describe('bulkUpdate()', () => {
                 hits: [
                   {
                     _id: successfulAuthzHit,
-                    _index: '.alerts-observability-apm.alerts',
+                    _index: '.alerts-observability-apm',
                     _source: {
                       [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                       [ALERT_RULE_CONSUMER]: 'apm',
@@ -401,7 +407,7 @@ describe('bulkUpdate()', () => {
                   },
                   {
                     _id: unsuccessfulAuthzHit,
-                    _index: '.alerts-observability-apm.alerts',
+                    _index: '.alerts-observability-apm',
                     _source: {
                       [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
                       [ALERT_RULE_CONSUMER]: 'apm',

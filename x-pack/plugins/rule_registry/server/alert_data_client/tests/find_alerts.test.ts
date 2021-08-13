@@ -41,6 +41,12 @@ beforeEach(() => {
   alertingAuthMock.getAuthorizationFilter.mockImplementation(async () =>
     Promise.resolve({ filter: [] })
   );
+  // @ts-expect-error
+  alertingAuthMock.getAugmentedRuleTypesWithAuthorization.mockImplementation(async () => {
+    const authorizedRuleTypes = new Set();
+    authorizedRuleTypes.add({ producer: 'apm' });
+    return Promise.resolve({ authorizedRuleTypes });
+  });
 
   alertingAuthMock.ensureAuthorized.mockImplementation(
     // @ts-expect-error
@@ -246,7 +252,7 @@ describe('find()', () => {
   });
 
   test('audit error access if user is unauthorized for given alert', async () => {
-    const indexName = '.alerts-observability-apm.alerts';
+    const indexName = '.alerts-observability-apm';
     const fakeAlertId = 'myfakeid1';
     // fakeRuleTypeId will cause authz to fail
     const fakeRuleTypeId = 'fake.rule';

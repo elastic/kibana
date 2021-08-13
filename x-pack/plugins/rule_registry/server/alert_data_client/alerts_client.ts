@@ -13,6 +13,7 @@ import {
   ALERT_WORKFLOW_STATUS,
   getEsQueryConfig as getEsQueryConfigTyped,
   getSafeSortIds as getSafeSortIdsTyped,
+  validFeatureIds,
   isValidFeatureId as isValidFeatureIdTyped,
   mapConsumerToIndexName as mapConsumerToIndexNameTyped,
   STATUS_VALUES,
@@ -229,6 +230,21 @@ export class AlertsClient {
         throw Boom.failedDependency(`fetchAlertAndAudit threw an error: ${errorMessage}`);
       }
 
+      // ensureAllAuthorized builds an authorization filter
+      // if we only relied on that we would get back an empty hits array
+      // with nothing the do authorization on
+      // so we need to check if the user is authorized for the index first
+      // then continue with the rest of the procedure
+      if (index != null) {
+        const authorizedIndices = await this.getAuthorizedAlertsIndices(validFeatureIds);
+        if (authorizedIndices?.includes(index)) {
+          this.logger.debug(`authorized access to ${index}`);
+        } else {
+          this.logger.error(`unauthorized access to ${index}`);
+          throw Boom.forbidden(`unauthorized access to ${index}`);
+        }
+      }
+
       const config = getEsQueryConfig();
 
       let queryBody = {
@@ -309,6 +325,15 @@ export class AlertsClient {
     operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update;
   }) {
     try {
+      if (indexName != null) {
+        const authorizedIndices = await this.getAuthorizedAlertsIndices(validFeatureIds);
+        if (authorizedIndices?.includes(indexName)) {
+          this.logger.debug(`authorized access to ${indexName}`);
+        } else {
+          this.logger.error(`unauthorized access to ${indexName}`);
+          throw Boom.forbidden(`unauthorized access to ${indexName}`);
+        }
+      }
       const mgetRes = await this.esClient.mget<ParsedTechnicalFields>({
         index: indexName,
         body: {
@@ -570,7 +595,7 @@ export class AlertsClient {
         });
 
         if (!fetchAndAuditResponse?.auditedAlerts) {
-          throw Boom.unauthorized('Failed to audit alerts');
+          throw Boom.forbidden('Failed to audit alerts');
         }
 
         // executes updateByQuery with query + authorization filter
