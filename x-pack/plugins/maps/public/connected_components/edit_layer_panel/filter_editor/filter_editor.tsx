@@ -212,9 +212,6 @@ export class FilterEditor extends Component<Props, State> {
   render() {
     const globalTimeCheckbox = this.state.isSourceTimeAware ? (
       <GlobalTimeCheckbox
-        label={i18n.translate('xpack.maps.filterEditor.applyGlobalTimeCheckboxLabel', {
-          defaultMessage: `Apply global time to layer data`,
-        })}
         applyGlobalTime={this.props.layer.getSource().getApplyGlobalTime()}
         setApplyGlobalTime={this._onApplyGlobalTimeChange}
       />
@@ -243,23 +240,19 @@ export class FilterEditor extends Component<Props, State> {
         <EuiHorizontalRule size="full" margin="s" />
 
         <GlobalFilterCheckbox
-          label={i18n.translate('xpack.maps.filterEditor.applyGlobalQueryCheckboxLabel', {
-            defaultMessage: `Apply global filter to layer data`,
-          })}
           applyGlobalQuery={this.props.layer.getSource().getApplyGlobalQuery()}
           setApplyGlobalQuery={this._onApplyGlobalQueryChange}
         />
 
         {globalTimeCheckbox}
         <ForceRefreshCheckbox
-          label={i18n.translate('xpack.maps.filterEditor.respondToForceRefreshLabel', {
-            defaultMessage: `Refresh layer on global refresh`,
-          })}
           respondToForceRefresh={this.props.layer.getSource().getRespondToForceRefresh()}
           setRespondToForceRefresh={this._onRespondToForceRefreshChange}
           isDisabled={
             !this.props.layer.getSource().getApplyGlobalQuery() &&
-            !this.props.layer.getSource().getApplyGlobalTime()
+            (this.state.isSourceTimeAware
+              ? !this.props.layer.getSource().getApplyGlobalTime()
+              : true)
           }
         />
       </Fragment>

@@ -6,28 +6,38 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   applyGlobalQuery: boolean;
-  label: string;
   setApplyGlobalQuery: (applyGlobalQuery: boolean) => void;
 }
 
-export function GlobalFilterCheckbox({ applyGlobalQuery, label, setApplyGlobalQuery }: Props) {
+export function GlobalFilterCheckbox({ applyGlobalQuery, setApplyGlobalQuery }: Props) {
   const onApplyGlobalQueryChange = (event: EuiSwitchEvent) => {
     setApplyGlobalQuery(event.target.checked);
   };
 
   return (
     <EuiFormRow display="columnCompressedSwitch">
-      <EuiSwitch
-        label={label}
-        checked={applyGlobalQuery}
-        onChange={onApplyGlobalQueryChange}
-        data-test-subj="mapLayerPanelApplyGlobalQueryCheckbox"
-        compressed
-      />
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('xpack.maps.filterEditor.applyGlobalFilterHelp', {
+          defaultMessage:
+            'Whether the query and filters from the global query bar should be applied to the layer.',
+        })}
+      >
+        <EuiSwitch
+          label={i18n.translate('xpack.maps.filterEditor.applyGlobalQueryCheckboxLabel', {
+            defaultMessage: `Apply global filter to layer data`,
+          })}
+          checked={applyGlobalQuery}
+          onChange={onApplyGlobalQueryChange}
+          data-test-subj="mapLayerPanelApplyGlobalQueryCheckbox"
+          compressed
+        />
+      </EuiToolTip>
     </EuiFormRow>
   );
 }
