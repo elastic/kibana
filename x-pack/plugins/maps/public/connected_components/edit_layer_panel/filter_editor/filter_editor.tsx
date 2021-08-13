@@ -257,6 +257,10 @@ export class FilterEditor extends Component<Props, State> {
           })}
           respondToForceRefresh={this.props.layer.getSource().getRespondToForceRefresh()}
           setRespondToForceRefresh={this._onRespondToForceRefreshChange}
+          isDisabled={
+            !this.props.layer.getSource().getApplyGlobalQuery() &&
+            !this.props.layer.getSource().getApplyGlobalTime()
+          }
         />
       </Fragment>
     );

@@ -43,7 +43,7 @@ import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
 import { registerSource } from '../source_registry';
 import {
-  DataMeta,
+  DataRequestMeta,
   ESSearchSourceDescriptor,
   Timeslice,
   VectorSourceRequestMeta,
@@ -790,7 +790,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return indexPattern.timeFieldName ? indexPattern.timeFieldName : null;
   }
 
-  getUpdateDueToTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean {
+  getUpdateDueToTimeslice(prevMeta: DataRequestMeta, timeslice?: Timeslice): boolean {
     if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
       return true;
     }

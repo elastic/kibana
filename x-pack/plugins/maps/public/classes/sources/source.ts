@@ -16,7 +16,7 @@ import { FieldFormatter, LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../common/
 import {
   AbstractSourceDescriptor,
   Attribution,
-  DataMeta,
+  DataRequestMeta,
   Timeslice,
 } from '../../../common/descriptor_types';
 import { LICENSED_FEATURES } from '../../licensed_features';
@@ -70,7 +70,7 @@ export interface ISource {
   getMinZoom(): number;
   getMaxZoom(): number;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
-  getUpdateDueToTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean;
+  getUpdateDueToTimeslice(prevMeta: DataRequestMeta, timeslice?: Timeslice): boolean;
 }
 
 export class AbstractSource implements ISource {
@@ -206,7 +206,7 @@ export class AbstractSource implements ISource {
     return [];
   }
 
-  getUpdateDueToTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean {
+  getUpdateDueToTimeslice(prevMeta: DataRequestMeta, timeslice?: Timeslice): boolean {
     return true;
   }
 }

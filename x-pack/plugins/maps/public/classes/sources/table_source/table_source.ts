@@ -9,7 +9,7 @@ import uuid from 'uuid';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import {
   MapExtent,
-  MapFilters,
+  DataFilters,
   MapQuery,
   TableSourceDescriptor,
   VectorJoinSourceRequestMeta,
@@ -187,7 +187,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   // Could be useful to implement, e.g. to preview raw csv data
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: MapFilters & {
+    searchFilters: DataFilters & {
       applyGlobalQuery: boolean;
       applyGlobalTime: boolean;
       fieldNames: string[];

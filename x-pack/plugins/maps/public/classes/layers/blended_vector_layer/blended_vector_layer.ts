@@ -290,16 +290,17 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   async syncData(syncContext: DataRequestContext) {
     const dataRequestId = ACTIVE_COUNT_DATA_ID;
     const requestToken = Symbol(`layer-active-count:${this.getId()}`);
-    const searchFilters: VectorSourceRequestMeta = await this._getSearchFilters(
+    const searchFilters: VectorSourceRequestMeta = await this._getVectorSourceRequestMeta(
       syncContext.dataFilters,
       this.getSource(),
       this.getCurrentStyle()
     );
     const source = this.getSource();
-    const canSkipFetch = await canSkipSourceUpdate({
+
+    const canSkipSourceFetch = await canSkipSourceUpdate({
       source,
       prevDataRequest: this.getDataRequest(dataRequestId),
-      nextMeta: searchFilters,
+      nextRequestMeta: searchFilters,
       extentAware: source.isFilterByMapBounds(),
       getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
         return this._getUpdateDueToTimesliceFromSourceRequestMeta(source, timeslice);
@@ -308,7 +309,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
 
     let activeSource;
     let activeStyle;
-    if (canSkipFetch) {
+    if (canSkipSourceFetch) {
       // Even when source fetch is skipped, need to call super._syncData to sync StyleMeta and formatters
       if (this._isClustered) {
         activeSource = this._clusterSource;

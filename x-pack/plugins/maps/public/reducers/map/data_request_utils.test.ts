@@ -7,7 +7,7 @@
 
 jest.mock('../../actions', () => ({}));
 
-import { DataMeta, DataRequestDescriptor } from '../../../common/descriptor_types';
+import { DataRequestMeta, DataRequestDescriptor } from '../../../common/descriptor_types';
 import {
   getDataRequest,
   setDataRequest,
@@ -157,7 +157,7 @@ describe('startDataRequest', () => {
   const REQUEST_TOKEN = Symbol('request');
   const DATA_META_AT_START = {
     prop1: 'value',
-  } as DataMeta;
+  } as DataRequestMeta;
 
   test('Should return unmodified state if layer not found', () => {
     const state = ({
@@ -278,7 +278,7 @@ describe('stopDataRequest', () => {
       ],
     } as unknown) as MapState;
     const stateClone = _.cloneDeep(state);
-    const reponseMeta = { responseProp1: 'response' } as DataMeta;
+    const reponseMeta = { responseProp1: 'response' } as DataRequestMeta;
     const data = { prop1: 'new data' };
     expect(stopDataRequest(state, 'layer1', 'source', REQUEST_TOKEN, reponseMeta, data)).toEqual({
       layerList: [

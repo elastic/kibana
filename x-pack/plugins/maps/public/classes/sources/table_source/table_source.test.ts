@@ -8,7 +8,7 @@
 import { TableSource } from './table_source';
 import { FIELD_ORIGIN } from '../../../../common/constants';
 import {
-  MapFilters,
+  DataFilters,
   MapQuery,
   VectorJoinSourceRequestMeta,
   VectorSourceSyncMeta,
@@ -178,7 +178,7 @@ describe('TableSource', () => {
       try {
         await tableSource.getGeoJsonWithMeta(
           'foobar',
-          ({} as unknown) as MapFilters & {
+          ({} as unknown) as DataFilters & {
             applyGlobalQuery: boolean;
             applyGlobalTime: boolean;
             fieldNames: string[];

@@ -21,7 +21,7 @@ export type MapExtent = {
 };
 
 export type MapQuery = Query & {
-  queryLastTriggeredAt?: string;
+  // queryLastTriggeredAt?: string;
 };
 
 export type MapCenter = {

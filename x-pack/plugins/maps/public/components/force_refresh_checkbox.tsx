@@ -12,12 +12,14 @@ interface Props {
   respondToForceRefresh: boolean;
   label: string;
   setRespondToForceRefresh: (applyGlobalTime: boolean) => void;
+  isDisabled: boolean;
 }
 
 export function ForceRefreshCheckbox({
   respondToForceRefresh,
   label,
   setRespondToForceRefresh,
+  isDisabled,
 }: Props) {
   const onRespondRoForceRefreshChange = (event: EuiSwitchEvent) => {
     setRespondToForceRefresh(event.target.checked);
@@ -31,6 +33,7 @@ export function ForceRefreshCheckbox({
         onChange={onRespondRoForceRefreshChange}
         data-test-subj="mapLayerPanelRespondToForceRefreshCheckbox"
         compressed
+        disabled={isDisabled}
       />
     </EuiFormRow>
   );

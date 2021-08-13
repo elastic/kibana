@@ -103,7 +103,10 @@ export class HeatmapLayer extends AbstractLayer {
         requestMeta: {
           ...syncContext.dataFilters,
           fieldNames: this.getSource().getFieldNames(),
-          geogridPrecision: this.getSource().getGeoGridPrecision(syncContext.dataFilters.zoom),
+          geogridPrecision:
+            typeof syncContext.dataFilters.zoom === 'number'
+              ? this.getSource().getGeoGridPrecision(syncContext.dataFilters.zoom)
+              : undefined,
           sourceQuery: sourceQuery ? sourceQuery : undefined,
           applyGlobalQuery: this.getSource().getApplyGlobalQuery(),
           applyGlobalTime: this.getSource().getApplyGlobalTime(),

@@ -115,7 +115,7 @@ export class TiledVectorLayer extends VectorLayer {
     dataFilters,
   }: DataRequestContext) {
     const requestToken: symbol = Symbol(`layer-${this.getId()}-${SOURCE_DATA_REQUEST_ID}`);
-    const searchFilters: VectorSourceRequestMeta = await this._getSearchFilters(
+    const searchFilters: VectorSourceRequestMeta = await this._getVectorSourceRequestMeta(
       dataFilters,
       this.getSource(),
       this._style as IVectorStyle
@@ -132,7 +132,7 @@ export class TiledVectorLayer extends VectorLayer {
           extentAware: false, // spatial extent knowledge is already fully automated by tile-loading based on pan-zooming
           source: this.getSource(),
           prevDataRequest,
-          nextMeta: searchFilters,
+          nextRequestMeta: searchFilters,
           getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
             // TODO use meta features to determine if tiles already contain features for timeslice.
             return true;

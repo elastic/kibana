@@ -48,7 +48,7 @@ import {
 } from '../../util/mb_filter_expressions';
 import {
   DynamicStylePropertyOptions,
-  MapFilters,
+  DataFilters,
   MapQuery,
   StyleMetaDescriptor,
   Timeslice,
@@ -344,13 +344,16 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       applyGlobalQuery: joinSource.getApplyGlobalQuery(),
       applyGlobalTime: joinSource.getApplyGlobalTime(),
       sourceMeta: joinSource.getSyncMeta(),
+      respondToForceRefresh: this.supportsElasticsearchFilters()
+        ? joinSource.getRespondToForceRefresh()
+        : false,
     };
     const prevDataRequest = this.getDataRequest(sourceDataId);
 
     const canSkipFetch = await canSkipSourceUpdate({
       source: joinSource,
       prevDataRequest,
-      nextMeta: searchFilters,
+      nextRequestMeta: searchFilters,
       extentAware: false, // join-sources are term-aggs that are spatially unaware (e.g. ESTermSource/TableSource).
       getUpdateDueToTimeslice: () => {
         return true;
@@ -397,8 +400,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return await Promise.all(joinSyncs);
   }
 
-  async _getSearchFilters(
-    dataFilters: MapFilters,
+  async _getVectorSourceRequestMeta(
+    dataFilters: DataFilters,
     source: IVectorSource,
     style: IVectorStyle
   ): Promise<VectorSourceRequestMeta> {
@@ -417,11 +420,15 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),
-      geogridPrecision: source.getGeoGridPrecision(dataFilters.zoom),
+      geogridPrecision:
+        typeof dataFilters.zoom === 'number'
+          ? source.getGeoGridPrecision(dataFilters.zoom)
+          : undefined,
       sourceQuery: sourceQuery ? sourceQuery : undefined,
       applyGlobalQuery: source.getApplyGlobalQuery(),
       applyGlobalTime: source.getApplyGlobalTime(),
       sourceMeta: source.getSyncMeta(),
+      respondToForceRefresh: source.getRespondToForceRefresh(),
     };
   }
 
@@ -635,6 +642,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       return;
     }
 
+    const meta = await this._getVectorSourceRequestMeta(syncContext.dataFilters, source, style);
     try {
       await this._syncSourceStyleMeta(syncContext, source, style);
       await this._syncSourceFormatters(syncContext, source, style);
@@ -642,7 +650,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         layerId: this.getId(),
         layerName: await this.getDisplayName(source),
         prevDataRequest: this.getSourceDataRequest(),
-        requestMeta: await this._getSearchFilters(syncContext.dataFilters, source, style),
+        requestMeta: meta,
         syncContext,
         source,
         getUpdateDueToTimeslice: (timeslice?: Timeslice) => {

@@ -19,7 +19,7 @@ export type Timeslice = {
 };
 
 // Global map state passed to every layer.
-export type MapFilters = {
+export type DataFilters = {
   buffer?: MapExtent; // extent with additional buffer
   extent?: MapExtent; // map viewport
   filters: Filter[];
@@ -28,8 +28,10 @@ export type MapFilters = {
   searchSessionId?: string;
   timeFilters: TimeRange;
   timeslice?: Timeslice;
-  zoom: number;
-  isReadOnly: boolean;
+  zoom?: number;
+  isReadOnly?: boolean;
+  searchSessionMapBuffer?: MapExtent;
+  forceRefreshTriggeredFromGlobalQueryTime?: boolean;
 };
 
 export type ESSearchSourceSyncMeta = {
@@ -61,9 +63,10 @@ export type VectorSourceSyncMeta =
   | ESTermSourceSyncMeta
   | null;
 
-export type VectorSourceRequestMeta = MapFilters & {
+export type VectorSourceRequestMeta = DataFilters & {
   applyGlobalQuery: boolean;
   applyGlobalTime: boolean;
+  respondToForceRefresh: boolean;
   fieldNames: string[];
   geogridPrecision?: number;
   timesiceMaskField?: string;
@@ -75,7 +78,7 @@ export type VectorJoinSourceRequestMeta = Omit<VectorSourceRequestMeta, 'geogrid
   sourceQuery?: Query;
 };
 
-export type VectorStyleRequestMeta = MapFilters & {
+export type VectorStyleRequestMeta = DataFilters & {
   dynamicStyleFields: string[];
   isTimeAware: boolean;
   sourceQuery: MapQuery;
@@ -108,7 +111,7 @@ export type VectorTileLayerMeta = {
 };
 
 // Partial because objects are justified downstream in constructors
-export type DataMeta = Partial<
+export type DataRequestMeta = Partial<
   VectorSourceRequestMeta &
     VectorJoinSourceRequestMeta &
     VectorStyleRequestMeta &
@@ -135,8 +138,8 @@ export type StyleMetaData = {
 
 export type DataRequestDescriptor = {
   dataId: string;
-  dataMetaAtStart?: DataMeta | null;
+  dataRequestMetaAtStart?: DataRequestMeta | null;
   dataRequestToken?: symbol;
   data?: object;
-  dataMeta?: DataMeta;
+  dataRequestMeta?: DataRequestMeta;
 };

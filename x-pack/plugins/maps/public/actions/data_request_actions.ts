@@ -45,21 +45,26 @@ import {
 } from './map_action_constants';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer';
-import { DataMeta, MapExtent, MapFilters } from '../../common/descriptor_types';
+import { DataRequestMeta, MapExtent, DataFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
 import { scaleBounds, turfBboxToBounds } from '../../common/elasticsearch_util';
 
 const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 
 export type DataRequestContext = {
-  startLoading(dataId: string, requestToken: symbol, requestMeta?: DataMeta): void;
-  stopLoading(dataId: string, requestToken: symbol, data: object, resultsMeta?: DataMeta): void;
+  startLoading(dataId: string, requestToken: symbol, requestMeta?: DataRequestMeta): void;
+  stopLoading(
+    dataId: string,
+    requestToken: symbol,
+    data: object,
+    resultsMeta?: DataRequestMeta
+  ): void;
   onLoadError(dataId: string, requestToken: symbol, errorMessage: string): void;
   onJoinError(errorMessage: string): void;
   updateSourceData(newData: unknown): void;
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;
   registerCancelCallback(requestToken: symbol, callback: () => void): void;
-  dataFilters: MapFilters;
+  dataFilters: DataFilters;
   forceRefreshDueToDrawing: boolean;
 };
 
@@ -116,9 +121,9 @@ function getDataRequestContext(
 ): DataRequestContext {
   return {
     dataFilters: getDataFilters(getState()),
-    startLoading: (dataId: string, requestToken: symbol, meta: DataMeta) =>
+    startLoading: (dataId: string, requestToken: symbol, meta: DataRequestMeta) =>
       dispatch(startDataLoad(layerId, dataId, requestToken, meta)),
-    stopLoading: (dataId: string, requestToken: symbol, data: object, meta: DataMeta) =>
+    stopLoading: (dataId: string, requestToken: symbol, data: object, meta: DataRequestMeta) =>
       dispatch(endDataLoad(layerId, dataId, requestToken, data, meta)),
     onLoadError: (dataId: string, requestToken: symbol, errorMessage: string) =>
       dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
@@ -176,7 +181,11 @@ export function syncDataForLayer(layer: ILayer, forceRefreshDueToDrawing: boolea
       layer.getId(),
       forceRefreshDueToDrawing
     );
-    if (!layer.isVisible() || !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)) {
+    if (
+      !layer.isVisible() ||
+      (typeof dataRequestContext.dataFilters.zoom === 'number' &&
+        !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom))
+    ) {
       return;
     }
     await layer.syncData(dataRequestContext);
@@ -204,7 +213,12 @@ function setLayerDataLoadErrorStatus(layerId: string, errorMessage: string | nul
   };
 }
 
-function startDataLoad(layerId: string, dataId: string, requestToken: symbol, meta: DataMeta) {
+function startDataLoad(
+  layerId: string,
+  dataId: string,
+  requestToken: symbol,
+  meta: DataRequestMeta
+) {
   return (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
@@ -237,7 +251,7 @@ function endDataLoad(
   dataId: string,
   requestToken: symbol,
   data: object,
-  meta: DataMeta
+  meta: DataRequestMeta
 ) {
   return (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,

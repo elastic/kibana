@@ -57,7 +57,7 @@ import {
   MapCenter,
   MapCenterAndZoom,
   MapExtent,
-  MapFilters,
+  DataFilters,
   Timeslice,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
@@ -256,10 +256,10 @@ export function setQuery({
     getState: () => MapStoreState
   ) => {
     const prevQuery = getQuery(getState());
-    const prevTriggeredAt =
-      prevQuery && prevQuery.queryLastTriggeredAt
-        ? prevQuery.queryLastTriggeredAt
-        : generateQueryTimestamp();
+    // const prevTriggeredAt =
+    //   prevQuery && prevQuery.queryLastTriggeredAt
+    //     ? prevQuery.queryLastTriggeredAt
+    //     : generateQueryTimestamp();
 
     const prevTimeFilters = getTimeFilters(getState());
 
@@ -274,21 +274,21 @@ export function setQuery({
       return timeslice ? timeslice : getTimeslice(getState());
     }
 
-    const nextQueryContext: MapFilters = {
+    const nextQueryContext: DataFilters = {
+      forceRefreshTriggeredFromGlobalQueryTime: forceRefresh,
       timeFilters: timeFilters ? timeFilters : prevTimeFilters,
       timeslice: getNextTimeslice(),
       query: {
         ...(query ? query : prevQuery),
         // ensure query changes to trigger re-fetch when "Refresh" clicked
-        queryLastTriggeredAt: forceRefresh ? generateQueryTimestamp() : prevTriggeredAt,
+        // queryLastTriggeredAt: forceRefresh ? generateQueryTimestamp() : prevTriggeredAt,
       },
       filters: filters ? filters : getFilters(getState()),
       searchSessionId: searchSessionId ? searchSessionId : getSearchSessionId(getState()),
       searchSessionMapBuffer,
-      forceRefresh,
     };
 
-    const prevQueryContext: MapFilters = {
+    const prevQueryContext: DataFilters = {
       timeFilters: prevTimeFilters,
       timeslice: getTimeslice(getState()),
       query: prevQuery,
@@ -297,7 +297,10 @@ export function setQuery({
       searchSessionMapBuffer: getSearchSessionMapBuffer(getState()),
     };
 
-    if (_.isEqual(nextQueryContext, prevQueryContext)) {
+    if (
+      !forceRefresh &&
+      _.isEqual(nextQueryContext, { forceRefresh: false, ...prevQueryContext })
+    ) {
       // do nothing if query context has not changed
       return;
     }
