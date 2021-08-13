@@ -9,12 +9,37 @@ export default function ({ loadTestFile, getService }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
+  const log = getService('log');
+  const supertest = getService('supertest');
 
   describe('maps app visual regression', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+      );
+      //Find the missing references manually, use the below API to delete it after successful import.
+      log.info('Delete index pattern');
+      log.debug('id: ' + 'idThatDoesNotExitForESGeoGridSource');
+      log.debug('id: ' + 'idThatDoesNotExitForESSearchSource');
+      log.debug('id: ' + 'idThatDoesNotExitForESJoinSource');
+      await supertest
+        .delete('/api/index_patterns/index_pattern/' + 'idThatDoesNotExitForESGeoGridSource')
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      await supertest
+        .delete('/api/index_patterns/index_pattern/' + 'idThatDoesNotExitForESSearchSource')
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      await supertest
+        .delete('/api/index_patterns/index_pattern/' + 'idThatDoesNotExitForESJoinSource')
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
       await esArchiver.load('x-pack/test/functional/es_archives/maps/data');
-      await esArchiver.load('x-pack/test/functional/es_archives/maps/kibana');
+
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
@@ -23,7 +48,9 @@ export default function ({ loadTestFile, getService }) {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/maps/data');
-      await esArchiver.unload('x-pack/test/functional/es_archives/maps/kibana');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+      );
     });
 
     this.tags('ciGroup10');
