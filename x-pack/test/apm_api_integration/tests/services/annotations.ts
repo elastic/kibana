@@ -279,7 +279,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         };
 
         const response = await request({
-          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}`,
+          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}&environment=ENVIRONMENT_ALL`,
           method: 'GET',
         });
 
@@ -312,7 +312,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         ).to.be(200);
 
         const response = await request({
-          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}`,
+          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}&environment=ENVIRONMENT_ALL`,
           method: 'GET',
         });
 
@@ -340,7 +340,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         ).to.be(200);
 
         const responseFromEarlierRange = await request({
-          url: `/api/apm/services/${serviceName}/annotation/search?start=${earlierRange.start}&end=${earlierRange.end}`,
+          url: `/api/apm/services/${serviceName}/annotation/search?start=${earlierRange.start}&end=${earlierRange.end}&environment=ENVIRONMENT_ALL`,
           method: 'GET',
         });
 
@@ -387,7 +387,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         };
 
         const allEnvironmentsResponse = await request({
-          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}`,
+          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}&environment=ENVIRONMENT_ALL`,
           method: 'GET',
         });
 

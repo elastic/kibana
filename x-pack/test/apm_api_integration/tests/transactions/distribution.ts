@@ -23,6 +23,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     end: metadata.end,
     transactionName: 'APIRestController#stats',
     transactionType: 'request',
+    environment: 'ENVIRONMENT_ALL',
+    kuery: '',
   })}`;
 
   registry.when(

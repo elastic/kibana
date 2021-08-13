@@ -26,6 +26,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       fieldNames: 'user_agent.name,user_agent.os.name,url.original',
       maxLatency: 3581640.00000003,
       distributionInterval: 238776,
+      environment: 'ENVIRONMENT_ALL',
+      kuery: '',
     },
   });
   registry.when(
