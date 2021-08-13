@@ -639,6 +639,7 @@ class AgentPolicyService {
       } catch (error) {
         const logger = appContextService.getLogger();
         logger.error(`An error occurred executing external callback: ${error}`);
+        logger.error(error);
       }
     }
 
