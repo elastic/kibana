@@ -7,8 +7,10 @@
 import Boom from '@hapi/boom';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
+import { estypes } from '@elastic/elasticsearch';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
-import type {
+import {
+  ALERT_WORKFLOW_STATUS,
   getEsQueryConfig as getEsQueryConfigTyped,
   getSafeSortIds as getSafeSortIdsTyped,
   isValidFeatureId as isValidFeatureIdTyped,
@@ -55,11 +57,14 @@ type AlertType = NonNullableProps<
   typeof ALERT_RULE_TYPE_ID | typeof ALERT_RULE_CONSUMER | typeof SPACE_IDS
 >;
 
-const isValidAlert = (source?: ParsedTechnicalFields): source is AlertType => {
+const isValidAlert = (source?: estypes.SearchHit<any>): source is AlertType => {
   return (
-    source?.[ALERT_RULE_TYPE_ID] != null &&
-    source?.[ALERT_RULE_CONSUMER] != null &&
-    source?.[SPACE_IDS] != null
+    (source?._source?.[ALERT_RULE_TYPE_ID] != null &&
+      source?._source?.[ALERT_RULE_CONSUMER] != null &&
+      source?._source?.[SPACE_IDS] != null) ||
+    (source?.fields?.[ALERT_RULE_TYPE_ID][0] != null &&
+      source?.fields?.[ALERT_RULE_CONSUMER][0] != null &&
+      source?.fields?.[SPACE_IDS][0] != null)
   );
 };
 export interface ConstructorOptions {
@@ -227,6 +232,7 @@ export class AlertsClient {
       const config = getEsQueryConfig();
 
       let queryBody = {
+        fields: [ALERT_RULE_TYPE_ID, ALERT_RULE_CONSUMER, ALERT_WORKFLOW_STATUS, SPACE_IDS],
         query: await this.buildEsQueryWithAuthz(query, id, alertSpaceId, operation, config),
         aggs,
         _source,
@@ -258,7 +264,9 @@ export class AlertsClient {
         seq_no_primary_term: true,
       });
 
-      if (!result?.body.hits.hits.every((hit) => isValidAlert(hit._source))) {
+      this.logger.debug(`RESULT: ${JSON.stringify(result, null, 2)}`);
+
+      if (!result?.body.hits.hits.every((hit) => isValidAlert(hit))) {
         const errorMessage = `Invalid alert found with id of "${id}" or with query "${query}" and operation ${operation}`;
         this.logger.error(errorMessage);
         throw Boom.badData(errorMessage);
@@ -379,7 +387,6 @@ export class AlertsClient {
         config
       );
       if (query != null && typeof query === 'object') {
-        // @ts-expect-error
         builtQuery.bool.must.push(query);
       }
 
@@ -615,6 +622,9 @@ export class AlertsClient {
     _source?: string[] | undefined;
     size?: number | undefined;
   }) {
+    this.logger.debug(
+      JSON.stringify({ query, aggs, _source, track_total_hits, size, index }, null, 2)
+    );
     try {
       // first search for the alert by id, then use the alert info to check if user has access to it
       const alertsSearchResponse = await this.singleSearchAfterAndAudit({

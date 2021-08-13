@@ -43,6 +43,7 @@ import type { AlertsStackByField } from '../common/types';
 import { KpiPanel, StackBySelect } from '../common/components';
 
 import { useInspectButton } from '../common/hooks';
+import { fetchQueryRuleRegistryAlerts } from '../../../containers/detection_engine/alerts/api';
 
 const defaultTotalAlertsObj: AlertsTotal = {
   value: 0,
@@ -116,12 +117,16 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       request,
       refetch,
     } = useQueryAlerts<{}, AlertsAggregation>({
-      query: getAlertsHistogramQuery(
-        selectedStackByOption,
-        from,
-        to,
-        buildCombinedQueries(combinedQueries)
-      ),
+      fetchMethod: fetchQueryRuleRegistryAlerts,
+      query: {
+        index: signalIndexName,
+        ...getAlertsHistogramQuery(
+          selectedStackByOption,
+          from,
+          to,
+          buildCombinedQueries(combinedQueries)
+        ),
+      },
       indexName: signalIndexName,
     });
 
