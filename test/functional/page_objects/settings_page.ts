@@ -357,7 +357,12 @@ export class SettingsPageObject extends FtrService {
       }
 
       await this.header.waitUntilLoadingHasFinished();
-      await this.clickAddNewIndexPatternButton();
+      const flyOut = await this.testSubjects.exists('createAnyway');
+      if (flyOut) {
+        await this.testSubjects.click('createAnyway');
+      } else {
+        await this.clickAddNewIndexPatternButton();
+      }
       await this.header.waitUntilLoadingHasFinished();
       if (!isStandardIndexPattern) {
         await this.selectRollupIndexPatternType();
