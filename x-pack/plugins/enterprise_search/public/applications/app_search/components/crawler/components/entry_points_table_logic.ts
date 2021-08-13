@@ -7,6 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import { clearFlashMessages, flashSuccessToast } from '../../../../shared/flash_messages';
 
 import { CrawlerSingleDomainLogic } from '../crawler_single_domain_logic';
@@ -49,7 +51,15 @@ export const EntryPointsTableLogic = kea<
     onDelete: ({ entryPoint, entryPoints }) => {
       CrawlerSingleDomainLogic.actions.updateEntryPoints(entryPoints);
       clearFlashMessages();
-      flashSuccessToast(`Entry point "${entryPoint.value}" was removed.`);
+      flashSuccessToast(
+        i18n.translate(
+          'xpack.enterpriseSearch.appSearch.crawler.entryPointsTable.deleteSuccessToastMessage',
+          {
+            defaultMessage: 'Entry point "{value}" was removed.',
+            values: { value: entryPoint.value },
+          }
+        )
+      );
     },
     onUpdate: ({ entryPoints }) => {
       CrawlerSingleDomainLogic.actions.updateEntryPoints(entryPoints);
