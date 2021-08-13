@@ -71,26 +71,35 @@ const i18nTexts = {
   ),
 };
 
-const cellTypeToLabelMap = {
-  type: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.typeColumnTitle', {
-    defaultMessage: 'Type',
-  }),
-  index: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.sourceColumnTitle', {
-    defaultMessage: 'Source',
-  }),
-  message: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.issueColumnTitle', {
-    defaultMessage: 'Issue',
-  }),
-  correctiveAction: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.table.statusColumnTitle',
-    {
+const cellToLabelMap = {
+  correctiveAction: {
+    label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.statusColumnTitle', {
       defaultMessage: 'Status',
-    }
-  ),
+    }),
+    width: '4px',
+  },
+  message: {
+    label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.issueColumnTitle', {
+      defaultMessage: 'Issue',
+    }),
+    width: '36px',
+  },
+  type: {
+    label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.typeColumnTitle', {
+      defaultMessage: 'Type',
+    }),
+    width: '10px',
+  },
+  index: {
+    label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.nameColumnTitle', {
+      defaultMessage: 'Name',
+    }),
+    width: '24px',
+  },
 };
 
-const cellTypes = Object.keys(cellTypeToLabelMap) as DeprecationTableColumns[];
-const pageSizeOptions = [10, 20, 50];
+const cellTypes = Object.keys(cellToLabelMap) as DeprecationTableColumns[];
+const pageSizeOptions = [50, 100, 200];
 
 const renderTableRowCells = (deprecation: EnrichedDeprecationInfo) => {
   const { correctiveAction } = deprecation;
@@ -143,7 +152,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
     sortField: 'correctiveAction',
   });
 
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(pageSizeOptions[0]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState<Query>(EuiSearchBar.Query.MATCH_ALL);
   const [searchError, setSearchError] = useState<{ message: string } | undefined>(undefined);
@@ -179,21 +188,23 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
   }, []);
 
   useEffect(() => {
-    const { firstItemIndex, lastItemIndex } = pager;
+    const { setTotalItems, goToPageIndex } = pager;
     const deprecationsFilteredByQuery = EuiSearchBar.Query.execute(searchQuery, deprecations);
     const deprecationsSortedByFieldType = getSortedItems(deprecationsFilteredByQuery, sortConfig);
-    // Filter deprecations by current page and number of items per page
-    const visibleDeprecations = deprecationsSortedByFieldType.slice(
-      firstItemIndex,
-      lastItemIndex + 1
-    );
-    setFilteredDeprecations(visibleDeprecations);
-  }, [deprecations, sortConfig, pager, searchQuery]);
+
+    setTotalItems(deprecationsSortedByFieldType.length);
+    setFilteredDeprecations(deprecationsSortedByFieldType);
+
+    // Reset pagination if the filtered results return a different length
+    if (deprecationsSortedByFieldType.length !== filteredDeprecations.length) {
+      goToPageIndex(0);
+    }
+  }, [deprecations, sortConfig, pager, searchQuery, filteredDeprecations.length]);
 
   return (
     <div>
       <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem>
+        <EuiFlexItem data-test-subj="searchBarContainer">
           <EuiSearchBar
             box={{
               placeholder: i18nTexts.searchPlaceholderLabel,
@@ -234,7 +245,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
       </EuiFlexGroup>
 
       {searchError && (
-        <>
+        <div data-test-subj="invalidSearchQueryMessage">
           <EuiSpacer size="l" />
 
           <EuiCallOut
@@ -242,22 +253,23 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
             color="danger"
             title={`Invalid search: ${searchError.message}`}
           />
-        </>
+        </div>
       )}
 
       <EuiSpacer size="m" />
 
       <EuiTable id="es_deprecations_table">
         <EuiTableHeader>
-          {Object.entries(cellTypeToLabelMap).map(([fieldName, label]) => {
+          {Object.entries(cellToLabelMap).map(([fieldName, cell]) => {
             return (
               <EuiTableHeaderCell
-                key={label}
+                width={cell.width}
+                key={cell.label}
                 onSort={() => handleSort(fieldName as DeprecationTableColumns)}
                 isSorted={sortConfig.sortField === fieldName}
                 isSortAscending={sortConfig.isSortAscending}
               >
-                {label}
+                {cell.label}
               </EuiTableHeaderCell>
             );
           })}
@@ -265,7 +277,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
 
         {filteredDeprecations.length === 0 ? (
           <EuiTableBody>
-            <EuiTableRow>
+            <EuiTableRow data-test-subj="noDeprecationsRow">
               <EuiTableRowCell align="center" colSpan={cellTypes.length} isMobileFullWidth={true}>
                 {i18nTexts.noDeprecationsMessage}
               </EuiTableRowCell>
@@ -273,13 +285,18 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
           </EuiTableBody>
         ) : (
           <EuiTableBody>
-            {filteredDeprecations.map((deprecation, index) => {
-              return (
-                <EuiTableRow data-test-subj="deprecationTableRow" key={`deprecation-row-${index}`}>
-                  {renderTableRowCells(deprecation)}
-                </EuiTableRow>
-              );
-            })}
+            {filteredDeprecations
+              .slice(pager.firstItemIndex, pager.lastItemIndex + 1)
+              .map((deprecation, index) => {
+                return (
+                  <EuiTableRow
+                    data-test-subj="deprecationTableRow"
+                    key={`deprecation-row-${index}`}
+                  >
+                    {renderTableRowCells(deprecation)}
+                  </EuiTableRow>
+                );
+              })}
           </EuiTableBody>
         )}
       </EuiTable>

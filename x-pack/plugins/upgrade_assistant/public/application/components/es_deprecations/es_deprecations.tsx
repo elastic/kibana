@@ -28,7 +28,7 @@ import { NoDeprecationsPrompt } from '../shared';
 
 const i18nTexts = {
   pageTitle: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageTitle', {
-    defaultMessage: 'Elasticsearch deprecation issues',
+    defaultMessage: 'Elasticsearch deprecation warnings',
   }),
   pageDescription: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageDescription', {
     defaultMessage:
@@ -46,11 +46,6 @@ const i18nTexts = {
     }),
     tooltipText: i18n.translate('xpack.upgradeAssistant.esDeprecations.backupDataTooltipText', {
       defaultMessage: 'Take a snapshot before you make any changes.',
-    }),
-  },
-  deprecationIssuesButton: {
-    label: i18n.translate('xpack.upgradeAssistant.esDeprecations.deprecationIssuesButtonLabel', {
-      defaultMessage: 'Learn more about deprecation issues',
     }),
   },
 };
@@ -119,29 +114,15 @@ export const EsDeprecationsContent = withRouter(({ history }: RouteComponentProp
           <EuiFlexItem grow={false}>
             <EuiToolTip position="bottom" content={i18nTexts.backupDataButton.tooltipText}>
               <EuiButton
-                fill
                 data-test-subj="snapshotRestoreLink"
                 href={getUrlForApp('management', {
                   path: 'data/snapshot_restore',
                 })}
-                iconType="popout"
-                iconSide="right"
                 target="_blank"
               >
                 {i18nTexts.backupDataButton.label}
               </EuiButton>
             </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="esApiDocumentationLink"
-              href={docLinks.links.elasticsearch.deprecationInfo}
-              iconType="popout"
-              iconSide="right"
-              target="_blank"
-            >
-              {i18nTexts.deprecationIssuesButton.label}
-            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageHeader>

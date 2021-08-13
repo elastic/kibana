@@ -99,9 +99,7 @@ describe('Elasticsearch deprecations', () => {
       expect(exists('esDeprecationsContent')).toBe(true);
 
       // Verify links exist
-      expect(exists('esDeprecationsContent.uaDocumentationLink')).toBe(true);
       expect(exists('esDeprecationsContent.snapshotRestoreLink')).toBe(true);
-      expect(exists('esDeprecationsContent.esApiDocumentationLink')).toBe(true);
 
       // Verify all deprecations appear in the table
       expect(find('deprecationTableRow').length).toEqual(
@@ -111,7 +109,7 @@ describe('Elasticsearch deprecations', () => {
 
     describe('ML snapshots deprecation', () => {
       beforeEach(async () => {
-        const { component, find } = testBed;
+        const { component, find, exists } = testBed;
 
         await act(async () => {
           find('deprecation-mlSnapshot').at(0).simulate('click');
@@ -119,7 +117,7 @@ describe('Elasticsearch deprecations', () => {
 
         component.update();
 
-        expect(find('mlSnapshotDetails')).not.toBe(null);
+        expect(exists('mlSnapshotDetails')).toBe(true);
         expect(find('mlSnapshotDetails.flyoutTitle').text()).toContain(
           'Upgrade or delete model snapshot'
         );
@@ -309,7 +307,7 @@ describe('Elasticsearch deprecations', () => {
       const indexSettingDeprecation = upgradeStatusMockResponse.deprecations[1];
 
       beforeEach(async () => {
-        const { component, find } = testBed;
+        const { component, find, exists } = testBed;
 
         await act(async () => {
           find('deprecation-indexSetting').at(0).simulate('click');
@@ -317,11 +315,11 @@ describe('Elasticsearch deprecations', () => {
 
         component.update();
 
-        expect(find('indexSettingsDetails')).not.toBe(null);
+        expect(exists('indexSettingsDetails')).toBe(true);
         expect(find('indexSettingsDetails.flyoutTitle').text()).toContain(
           indexSettingDeprecation.message
         );
-        expect(find('removeSettingsPrompt')).not.toBe(null);
+        expect(exists('removeSettingsPrompt')).toBe(true);
       });
 
       it('removes deprecated index settings', async () => {
@@ -413,7 +411,7 @@ describe('Elasticsearch deprecations', () => {
     describe('default deprecation', () => {
       it('renders a flyout with deprecation details', async () => {
         const multiFieldsDeprecation = upgradeStatusMockResponse.deprecations[2];
-        const { component, find } = testBed;
+        const { component, find, exists } = testBed;
 
         await act(async () => {
           find('deprecation-default').at(0).simulate('click');
@@ -421,7 +419,7 @@ describe('Elasticsearch deprecations', () => {
 
         component.update();
 
-        expect(find('defaultDeprecationDetails')).not.toBe(null);
+        expect(exists('defaultDeprecationDetails')).toBe(true);
         expect(find('defaultDeprecationDetails.flyoutTitle').text()).toContain(
           multiFieldsDeprecation.message
         );
@@ -434,7 +432,7 @@ describe('Elasticsearch deprecations', () => {
     describe('reindex deprecation', () => {
       it('renders a flyout with reindexing details', async () => {
         const reindexDeprecation = upgradeStatusMockResponse.deprecations[3];
-        const { component, find } = testBed;
+        const { component, find, exists } = testBed;
 
         await act(async () => {
           find('deprecation-reindex').at(0).simulate('click');
@@ -442,9 +440,123 @@ describe('Elasticsearch deprecations', () => {
 
         component.update();
 
-        expect(find('reindexDetails')).not.toBe(null);
+        expect(exists('reindexDetails')).toBe(true);
         expect(find('reindexDetails.flyoutTitle').text()).toContain(
           `Reindex ${reindexDeprecation.index}`
+        );
+      });
+    });
+
+    describe('search bar', () => {
+      it('filters results by "critical" status', async () => {
+        const { component, find } = testBed;
+
+        await act(async () => {
+          // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
+          find('searchBarContainer').find('.euiFilterButton').at(0).simulate('click');
+        });
+
+        component.update();
+
+        const criticalDeprecations = upgradeStatusMockResponse.deprecations.filter(
+          (deprecation) => deprecation.isCritical
+        );
+
+        expect(find('deprecationTableRow').length).toEqual(criticalDeprecations.length);
+
+        // TODO move action to helpers file
+        await act(async () => {
+          // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
+          find('searchBarContainer').find('.euiFilterButton').at(0).simulate('click');
+        });
+
+        component.update();
+
+        expect(find('deprecationTableRow').length).toEqual(
+          upgradeStatusMockResponse.deprecations.length
+        );
+      });
+
+      it('filters results by type', async () => {
+        const { component, find } = testBed;
+
+        await act(async () => {
+          // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
+          find('searchBarContainer')
+            .find('.euiPopover')
+            .find('.euiFilterButton')
+            .at(0)
+            .simulate('click');
+        });
+
+        component.update();
+
+        // We need to read the document "body" as the filter dropdown options are added there and not inside
+        // the component DOM tree.
+        const clusterFilterButton: HTMLButtonElement | null = document.body.querySelector(
+          '.euiFilterSelect__items .euiFilterSelectItem'
+        );
+
+        expect(clusterFilterButton).not.toBe(null);
+
+        await act(async () => {
+          clusterFilterButton!.click();
+        });
+
+        component.update();
+
+        const clusterDeprecations = upgradeStatusMockResponse.deprecations.filter(
+          (deprecation) => deprecation.type === 'cluster_settings'
+        );
+
+        expect(find('deprecationTableRow').length).toEqual(clusterDeprecations.length);
+      });
+
+      it('filters results by query string', async () => {
+        const { find, component } = testBed;
+        const multiFieldsDeprecation = upgradeStatusMockResponse.deprecations[3];
+
+        await act(async () => {
+          find('searchBarContainer')
+            .find('input')
+            .simulate('keyup', { target: { value: multiFieldsDeprecation.message } });
+        });
+
+        component.update();
+
+        expect(find('deprecationTableRow').length).toEqual(1);
+        expect(find('deprecationTableRow').at(0).text()).toContain(multiFieldsDeprecation.message);
+      });
+
+      it('shows error for invalid search queries', async () => {
+        const { find, component, exists } = testBed;
+
+        await act(async () => {
+          find('searchBarContainer')
+            .find('input')
+            .simulate('keyup', { target: { value: '%' } });
+        });
+
+        component.update();
+
+        expect(exists('invalidSearchQueryMessage')).toBe(true);
+        expect(find('invalidSearchQueryMessage').text()).toContain('Invalid search');
+      });
+
+      it('shows message when search query does not return results', async () => {
+        const { find, component, exists } = testBed;
+
+        await act(async () => {
+          find('searchBarContainer')
+            .find('input')
+            .simulate('keyup', { target: { value: 'foobarbaz' } });
+        });
+
+        component.update();
+
+        expect(exists('noDeprecationsRow')).toBe(true);
+        expect(find('noDeprecationsRow').text()).toContain(
+          'No Elasticsearch deprecation issues found'
         );
       });
     });
