@@ -12,7 +12,6 @@ import usePrevious from 'react-use/lib/usePrevious';
 
 import { EventFields } from '../../../../../common/search_strategy/security_solution/cti';
 import {
-  DEFAULT_CTI_SOURCE_INDEX,
   DEFAULT_EVENT_ENRICHMENT_FROM,
   DEFAULT_EVENT_ENRICHMENT_TO,
 } from '../../../../../common/cti/constants';
@@ -21,6 +20,7 @@ import { useKibana } from '../../../lib/kibana';
 import { inputsActions } from '../../../store/actions';
 import * as i18n from './translations';
 import { useEventEnrichmentComplete } from '.';
+import { DEFAULT_THREAT_INDEX_KEY } from '../../../../../common/constants';
 
 export const QUERY_ID = 'investigation_time_enrichment';
 const noop = () => {};
@@ -28,7 +28,9 @@ const noEnrichments = { enrichments: [] };
 
 export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
   const { addError } = useAppToasts();
-  const kibana = useKibana();
+  const { data, uiSettings } = useKibana().services;
+  const defaultThreatIndices = uiSettings.get<string[]>(DEFAULT_THREAT_INDEX_KEY);
+
   const dispatch = useDispatch();
 
   const [range, setRange] = useState({
@@ -76,14 +78,14 @@ export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
       (!isEqual(eventFields, prevEventFields) || !isEqual(range, prevRange))
     ) {
       start({
-        data: kibana.services.data,
+        data,
         timerange: { ...range, interval: '' },
-        defaultIndex: DEFAULT_CTI_SOURCE_INDEX,
+        defaultIndex: defaultThreatIndices,
         eventFields,
         filterQuery: '',
       });
     }
-  }, [start, kibana.services.data, range, prevRange, eventFields, prevEventFields]);
+  }, [from, start, data, to, eventFields, range, prevRange, defaultThreatIndices]);
 
   return {
     result: isEmpty(eventFields) ? noEnrichments : result,

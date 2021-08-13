@@ -14,6 +14,10 @@ import {
   EndpointActionResponse,
   EndpointPendingActions,
 } from '../../../common/endpoint/types';
+import { catchAndWrapError } from '../utils';
+import { EndpointMetadataService } from './metadata';
+
+const PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME = 300000; // 300k ms === 5 minutes
 
 export const getAuditLogResponse = async ({
   elasticAgentId,
@@ -173,6 +177,8 @@ const getActivityLog = async ({
 
 export const getPendingActionCounts = async (
   esClient: ElasticsearchClient,
+  metadataService: EndpointMetadataService,
+  /** The Fleet Agent IDs to be checked */
   agentIDs: string[]
 ): Promise<EndpointPendingActions[]> => {
   // retrieve the unexpired actions for the given hosts
@@ -197,40 +203,25 @@ export const getPendingActionCounts = async (
       },
       { ignore: [404] }
     )
-    .then((result) => result.body?.hits?.hits?.map((a) => a._source!) || []);
+    .then((result) => result.body?.hits?.hits?.map((a) => a._source!) || [])
+    .catch(catchAndWrapError);
 
   // retrieve any responses to those action IDs from these agents
-  const actionIDs = recentActions.map((a) => a.action_id);
-  const responses = await esClient
-    .search<EndpointActionResponse>(
-      {
-        index: AGENT_ACTIONS_RESULTS_INDEX,
-        size: 10000,
-        from: 0,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                { terms: { action_id: actionIDs } }, // get results for these actions
-                { terms: { agent_id: agentIDs } }, // ignoring responses from agents we're not looking for
-              ],
-            },
-          },
-        },
-      },
-      { ignore: [404] }
-    )
-    .then((result) => result.body?.hits?.hits?.map((a) => a._source!) || []);
+  const responses = await fetchActionResponseIds(
+    esClient,
+    metadataService,
+    recentActions.map((a) => a.action_id),
+    agentIDs
+  );
+  const pending: EndpointPendingActions[] = [];
 
-  // respond with action-count per agent
-  const pending: EndpointPendingActions[] = agentIDs.map((aid) => {
-    const responseIDsFromAgent = responses
-      .filter((r) => r.agent_id === aid)
-      .map((r) => r.action_id);
-    return {
-      agent_id: aid,
+  for (const agentId of agentIDs) {
+    const responseIDsFromAgent = responses[agentId];
+
+    pending.push({
+      agent_id: agentId,
       pending_actions: recentActions
-        .filter((a) => a.agents.includes(aid) && !responseIDsFromAgent.includes(a.action_id))
+        .filter((a) => a.agents.includes(agentId) && !responseIDsFromAgent.includes(a.action_id))
         .map((a) => a.data.command)
         .reduce((acc, cur) => {
           if (cur in acc) {
@@ -240,8 +231,93 @@ export const getPendingActionCounts = async (
           }
           return acc;
         }, {} as EndpointPendingActions['pending_actions']),
-    };
-  });
+    });
+  }
 
   return pending;
+};
+
+/**
+ * Returns back a map of elastic Agent IDs to array of Action IDs that have received a response.
+ *
+ * @param esClient
+ * @param metadataService
+ * @param actionIds
+ * @param agentIds
+ */
+const fetchActionResponseIds = async (
+  esClient: ElasticsearchClient,
+  metadataService: EndpointMetadataService,
+  actionIds: string[],
+  agentIds: string[]
+): Promise<Record<string, string[]>> => {
+  const actionResponsesByAgentId: Record<string, string[]> = agentIds.reduce((acc, agentId) => {
+    acc[agentId] = [];
+    return acc;
+  }, {} as Record<string, string[]>);
+
+  const actionResponses = await esClient
+    .search<EndpointActionResponse>(
+      {
+        index: AGENT_ACTIONS_RESULTS_INDEX,
+        size: 10000,
+        from: 0,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                { terms: { action_id: actionIds } }, // get results for these actions
+                { terms: { agent_id: agentIds } }, // ONLY responses for the agents we are interested in (ignore others)
+              ],
+            },
+          },
+        },
+      },
+      { ignore: [404] }
+    )
+    .then((result) => result.body?.hits?.hits?.map((a) => a._source!) || [])
+    .catch(catchAndWrapError);
+
+  if (actionResponses.length === 0) {
+    return actionResponsesByAgentId;
+  }
+
+  // Get the latest docs from the metadata datastream for the Elastic Agent IDs in the action responses
+  // This will be used determine if we should withhold the action id from the returned list in cases where
+  // the Endpoint might not yet have sent an updated metadata document (which would be representative of
+  // the state of the endpoint post-action)
+  const latestEndpointMetadataDocs = await metadataService.findHostMetadataForFleetAgents(
+    esClient,
+    agentIds
+  );
+
+  // Object of Elastic Agent Ids to event created date
+  const endpointLastEventCreated: Record<string, Date> = latestEndpointMetadataDocs.reduce(
+    (acc, endpointMetadata) => {
+      acc[endpointMetadata.elastic.agent.id] = new Date(endpointMetadata.event.created);
+      return acc;
+    },
+    {} as Record<string, Date>
+  );
+
+  for (const actionResponse of actionResponses) {
+    const lastEndpointMetadataEventTimestamp = endpointLastEventCreated[actionResponse.agent_id];
+    const actionCompletedAtTimestamp = new Date(actionResponse.completed_at);
+    // If enough time has lapsed in checking for updated Endpoint metadata doc so that we don't keep
+    // checking it forever.
+    // It uses the `@timestamp` in order to ensure we are looking at times that were set by the server
+    const enoughTimeHasLapsed =
+      Date.now() - new Date(actionResponse['@timestamp']).getTime() >
+      PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME;
+
+    if (
+      !lastEndpointMetadataEventTimestamp ||
+      enoughTimeHasLapsed ||
+      lastEndpointMetadataEventTimestamp > actionCompletedAtTimestamp
+    ) {
+      actionResponsesByAgentId[actionResponse.agent_id].push(actionResponse.action_id);
+    }
+  }
+
+  return actionResponsesByAgentId;
 };
