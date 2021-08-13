@@ -182,7 +182,7 @@ export const GraphWorkspace = (props: GraphWorkspaceProps) => {
             overlays={props.deps.overlays}
             locationUrl={props.locationUrl}
             reloadRoute={props.reloadRoute}
-            query={props.query}
+            urlQuery={props.query}
             indexPatterns={props.indexPatterns}
             savedWorkspace={props.savedWorkspace}
             indexPatternProvider={props.indexPatternProvider}

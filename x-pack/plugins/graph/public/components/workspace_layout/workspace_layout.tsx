@@ -43,7 +43,6 @@ import { colorChoices } from '../../helpers/style_choices';
  * should not be memoized, since it will not get updates.
  * This behaviour should be changed after migrating `worksapce` to redux
  */
-const SearchBarMemoized = memo(SearchBar);
 const FieldManagerMemoized = memo(FieldManager);
 const GuidancePanelMemoized = memo(GuidancePanel);
 
@@ -62,7 +61,7 @@ type WorkspaceLayoutProps = Pick<
   workspace?: Workspace;
   loading: boolean;
   locationUrl: (path?: string) => string;
-  query: string;
+  urlQuery: string;
   indexPatterns: IndexPatternSavedObject[];
   savedWorkspace: GraphWorkspaceSavedObject;
   indexPatternProvider: IndexPatternProvider;
@@ -87,7 +86,7 @@ const WorkspaceLayoutComponent = ({
   locationUrl,
   savedWorkspace,
   liveResponseFields,
-  query,
+  urlQuery,
   hasFields,
   overlays,
   workspaceInitialized,
@@ -163,13 +162,13 @@ const WorkspaceLayoutComponent = ({
   const submit = useCallback(
     (searchTerm: string) => {
       initializeWorkspaceAction();
-      // type casting is safe, at this point workspace should be loaded
       const numHops = 2;
+      // type casting is safe, at this point workspace should be loaded
       const curWorkspace = workspace as Workspace;
       if (searchTerm.startsWith('{')) {
         try {
-          const searchQuery = JSON.parse(searchTerm);
-          if (searchQuery.vertices) {
+          const query = JSON.parse(searchTerm);
+          if (query.vertices) {
             // Is a graph explore request
             curWorkspace.callElasticsearch(query);
           } else {
@@ -183,18 +182,18 @@ const WorkspaceLayoutComponent = ({
       }
       curWorkspace.simpleSearch(searchTerm, liveResponseFields, numHops);
     },
-    [handleError, initializeWorkspaceAction, liveResponseFields, query, workspace]
+    [handleError, initializeWorkspaceAction, liveResponseFields, workspace]
   );
 
   // Allow URLs to include a user-defined text query
   useEffect(() => {
-    if (query) {
-      setInitialQuery(query);
+    if (urlQuery) {
+      setInitialQuery(urlQuery);
       if (workspace) {
-        submit(query);
+        submit(urlQuery);
       }
     }
-  }, [query, submit, workspace]);
+  }, [urlQuery, submit, workspace]);
 
   const onIndexPatternChange = useCallback(
     (indexPattern?: IndexPattern) => setCurrentIndexPattern(indexPattern),
@@ -243,9 +242,10 @@ const WorkspaceLayoutComponent = ({
     [hasFields, overlays]
   );
 
-  const onSetMergeCandidates = useCallback((terms: TermIntersect[]) => {
-    setMergeCandidates(terms);
-  }, []);
+  const onSetMergeCandidates = useCallback(
+    (terms: TermIntersect[]) => setMergeCandidates(terms),
+    []
+  );
 
   return (
     <Fragment>
@@ -273,7 +273,7 @@ const WorkspaceLayoutComponent = ({
 
       {isInitialized && <GraphTitle />}
       <div className="gphGraph__bar">
-        <SearchBarMemoized
+        <SearchBar
           isLoading={loading}
           initialQuery={initialQuery}
           currentIndexPattern={currentIndexPattern}
