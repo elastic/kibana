@@ -14,6 +14,7 @@ import { EventFieldsBrowser } from './event_fields_browser';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { TimelineTabs } from '../../../../common/types/timeline';
+import { get } from 'lodash/fp';
 
 jest.mock('../../lib/kibana');
 
@@ -116,7 +117,7 @@ describe('EventFieldsBrowser', () => {
       expect(wrapper.find('[data-test-subj="hover-actions-filter-out"]').exists()).toBeTruthy();
     });
 
-    test('it renders an add to timeline button', () => {
+    test('it renders an overflow button', () => {
       const wrapper = mount(
         <TestProviders>
           <EventFieldsBrowser
@@ -129,7 +130,7 @@ describe('EventFieldsBrowser', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="hover-actions-add-timeline"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="more-actions-@timestamp"]').exists()).toBeTruthy();
     });
 
     test('it renders a column toggle button', () => {
@@ -146,8 +147,26 @@ describe('EventFieldsBrowser', () => {
       );
 
       expect(
-        wrapper.find('[data-test-subj="hover-actions-toggle-column"]').first().exists()
-      ).toBeTruthy();
+        get(['items', 0, 'key'], wrapper.find('[data-test-subj="more-actions-@timestamp"]').props())
+      ).toEqual('hover-actions-toggle-column');
+    });
+
+    test('it renders an add to timeline button', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <EventFieldsBrowser
+            browserFields={mockBrowserFields}
+            data={mockDetailItemData}
+            eventId={eventId}
+            timelineId="test"
+            timelineTabType={TimelineTabs.query}
+          />
+        </TestProviders>
+      );
+
+      expect(
+        get(['items', 1, 'key'], wrapper.find('[data-test-subj="more-actions-@timestamp"]').props())
+      ).toEqual('hover-actions-add-timeline');
     });
 
     test('it renders a copy button', () => {
@@ -163,7 +182,9 @@ describe('EventFieldsBrowser', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="hover-actions-copy-button"]').exists()).toBeTruthy();
+      expect(
+        get(['items', 2, 'key'], wrapper.find('[data-test-subj="more-actions-@timestamp"]').props())
+      ).toEqual('hover-actions-copy-button');
     });
   });
 

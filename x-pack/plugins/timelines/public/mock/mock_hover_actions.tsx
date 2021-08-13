@@ -13,5 +13,9 @@ export const mockHoverActions = {
   getCopyButton: () => <>{'Copy button'}</>,
   getFilterForValueButton: () => <>{'Filter button'}</>,
   getFilterOutValueButton: () => <>{'Filter out button'}</>,
-  getOverflowButton: () => <>{'Overflow button'}</>,
+  getOverflowButton: (props: { field: string }) => (
+    <div data-test-subj={`more-actions-${props.field}`} {...props}>
+      {'Overflow button'}
+    </div>
+  ),
 };
