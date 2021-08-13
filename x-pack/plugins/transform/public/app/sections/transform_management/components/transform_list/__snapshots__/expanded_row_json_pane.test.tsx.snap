@@ -10,7 +10,9 @@ exports[`Transform: Transform List Expanded Row <ExpandedRowJsonPane /> Minimal 
         size="s"
       />
       <EuiCodeBlock
+        aria-label="JSON of transform configuration"
         fontSize="s"
+        isCopyable={true}
         language="json"
         paddingSize="s"
         style={
