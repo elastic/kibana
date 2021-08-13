@@ -31,11 +31,21 @@ exports[`StatusMessage should render with no partial matches 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="The index pattern you entered doesn't match any data streams, indices, or index aliases. You can match {allIndicesLength} below."
+        defaultMessage="The index pattern you entered doesn't match any data streams, indices, or index aliases. You can match {strongIndices}."
         id="indexPatternEditor.status.notMatchLabel.notMatchDetail"
         values={
           Object {
-            "allIndicesLength": 2,
+            "strongIndices": <strong>
+              <FormattedMessage
+                defaultMessage="{indicesLength, plural, one {# source} other {# sources} }"
+                id="indexPatternEditor.status.notMatchLabel.allIndicesLabel"
+                values={
+                  Object {
+                    "indicesLength": 2,
+                  }
+                }
+              />
+            </strong>,
           }
         }
       />
@@ -52,11 +62,22 @@ exports[`StatusMessage should render with partial matches 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="Your index pattern doesn't match any data streams, indices, or index aliases, but you have {matchedIndicesLength} that {matchedIndicesLength, plural, one {is} other {are} } similar."
+        defaultMessage="Your index pattern doesn't match any data streams, indices, or index aliases, but {strongIndices} {matchedIndicesLength, plural, one {is} other {are} } similar."
         id="indexPatternEditor.status.partialMatchLabel.partialMatchDetail"
         values={
           Object {
             "matchedIndicesLength": 1,
+            "strongIndices": <strong>
+              <FormattedMessage
+                defaultMessage="{indicesLength, plural, one {# source} other {# sources} }"
+                id="indexPatternEditor.status.notMatchLabel.allIndicesLabel"
+                values={
+                  Object {
+                    "indicesLength": 2,
+                  }
+                }
+              />
+            </strong>,
           }
         }
       />
