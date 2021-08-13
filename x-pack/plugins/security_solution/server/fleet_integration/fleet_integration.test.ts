@@ -29,6 +29,7 @@ import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { ProtectionModes } from '../../common/endpoint/types';
 import type { SecuritySolutionRequestHandlerContext } from '../types';
 import { getExceptionListClientMock } from '../../../lists/server/services/exception_lists/exception_list_client.mock';
+import { getExceptionListSchemaMock } from '../../../lists/common/schemas/response/exception_list_schema.mock';
 import { ExceptionListClient } from '../../../lists/server';
 import { InternalArtifactCompleteSchema } from '../endpoint/schemas/artifacts';
 import { ManifestManager } from '../endpoint/services/artifacts/manifest_manager';
@@ -37,6 +38,8 @@ import { Manifest } from '../endpoint/lib/artifacts';
 import { NewPackagePolicy } from '../../../fleet/common/types/models';
 import { ManifestSchema } from '../../common/endpoint/schema/manifest';
 import { ExperimentalFeatures } from '../../common/experimental_features';
+import { DeletePackagePoliciesResponse } from '../../../fleet/common';
+import { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 describe('ingest_integration tests ', () => {
   let endpointAppContextMock: EndpointAppContextServiceStartContract;
@@ -293,24 +296,18 @@ describe('ingest_integration tests ', () => {
       await callback(deletePackagePolicyMock(), ctx, req);
     };
 
-    const removedPolicies = deletePackagePolicyMock();
-
-    const policyId = removedPolicies[0].id;
-    const fakeTA = {
-      listId: 'fake',
-      comments: [],
-      entries: [],
-      item_id: '1',
-      namespace_type: 'agnostic',
-      name: 'TA with policy assigned',
-      os_types: [],
-      description: 'TA with policy assigned ',
-      meta: undefined,
-      tags: [`policy:${policyId}`],
-      type: 'simple',
-    };
+    let removedPolicies: DeletePackagePoliciesResponse;
+    let policyId: string;
+    let fakeTA: ExceptionListSchema;
 
     beforeEach(() => {
+      removedPolicies = deletePackagePolicyMock();
+      policyId = removedPolicies[0].id;
+      fakeTA = {
+        ...getExceptionListSchemaMock(),
+        tags: [`policy:${policyId}`],
+      };
+
       exceptionListClient.findExceptionListItem = jest
         .fn()
         .mockResolvedValueOnce({ data: [fakeTA], total: 1 });
@@ -341,7 +338,6 @@ describe('ingest_integration tests ', () => {
 
       expect(exceptionListClient.updateExceptionListItem).toHaveBeenCalledWith({
         ...fakeTA,
-        itemId: fakeTA.item_id,
         namespaceType: fakeTA.namespace_type,
         osTypes: fakeTA.os_types,
         tags: [],
