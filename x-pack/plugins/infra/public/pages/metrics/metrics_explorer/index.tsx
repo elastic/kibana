@@ -21,6 +21,7 @@ import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
 import { useSavedViewContext } from '../../../containers/saved_view/saved_view';
 import { MetricsPageTemplate } from '../page_template';
 import { metricsExplorerTitle } from '../../../translations';
+import { SavedViewsToolbarControls } from '../../../components/saved_views/toolbar_control';
 
 interface MetricsExplorerPageProps {
   source: MetricsSourceConfigurationProperties;
@@ -86,6 +87,15 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
       <MetricsPageTemplate
         pageHeader={{
           pageTitle: metricsExplorerTitle,
+          rightSideItems: [
+            <SavedViewsToolbarControls
+              viewState={{
+                options,
+                chartOptions,
+                currentTimerange,
+              }}
+            />,
+          ],
         }}
       >
         <MetricsExplorerToolbar
