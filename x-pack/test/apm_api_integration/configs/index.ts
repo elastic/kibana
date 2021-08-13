@@ -27,7 +27,6 @@ const apmFtrConfigs = {
     license: 'trial' as const,
     kibanaConfig: {
       'migrations.enableV2': 'false',
-      'xpack.ruleRegistry.index': '.kibana-alerts',
       'xpack.ruleRegistry.write.enabled': 'true',
     },
   },
