@@ -27,8 +27,8 @@ export async function getUpstreamServicesForBackend({
   end: number;
   backendName: string;
   numBuckets: number;
-  kuery?: string;
-  environment?: string;
+  kuery: string;
+  environment: string;
   offset?: string;
 }) {
   const statsItems = await getConnectionStats({
