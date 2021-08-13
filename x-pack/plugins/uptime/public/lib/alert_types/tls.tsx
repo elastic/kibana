@@ -33,7 +33,7 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   defaultActionMessage,
   requiresAppContext: false,
   format: ({ fields }) => ({
-    reason: fields[ALERT_REASON],
+    reason: fields[ALERT_REASON] || '',
     link: `/app/uptime${CERTIFICATES_ROUTE}`,
   }),
 });

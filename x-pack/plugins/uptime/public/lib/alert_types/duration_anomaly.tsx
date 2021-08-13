@@ -36,7 +36,7 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   defaultActionMessage,
   requiresAppContext: true,
   format: ({ fields }) => ({
-    reason: fields[ALERT_REASON],
+    reason: fields[ALERT_REASON] || '',
     link: getMonitorRouteFromMonitorId({
       monitorId: fields['monitor.id']!,
       dateRangeEnd: fields[ALERT_STATUS] === 'open' ? 'now' : fields[ALERT_END]!,
