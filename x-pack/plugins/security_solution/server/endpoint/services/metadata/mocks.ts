@@ -14,6 +14,10 @@ import {
 } from '../../../../../fleet/server/mocks';
 import { AgentPolicyServiceInterface, AgentService } from '../../../../../fleet/server';
 
+/**
+ * Endpoint Metadata Service test context. Includes an instance of `EndpointMetadataService` along with the
+ * dependencies that were used to initialize that instance.
+ */
 export interface EndpointMetadataServiceTestContextMock {
   savedObjectsStart: jest.Mocked<SavedObjectsServiceStart>;
   agentService: jest.Mocked<AgentService>;
