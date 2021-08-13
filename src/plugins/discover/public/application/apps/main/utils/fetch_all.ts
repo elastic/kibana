@@ -14,7 +14,7 @@ import {
   sendResetMsg,
 } from '../services/use_saved_search_messages';
 import { updateSearchSource } from './update_search_source';
-import { SortOrder } from '../../../../saved_searches/types';
+import { SavedSearch, SortOrder } from '../../../../saved_searches/types';
 import { fetchDocuments } from './fetch_documents';
 import { fetchTotalHits } from './fetch_total_hits';
 import { fetchChart } from './fetch_chart';
@@ -27,20 +27,27 @@ import { SavedSearchData } from '../services/use_saved_search';
 import { DiscoverServices } from '../../../../build_services';
 import { ReduxLikeStateContainer } from '../../../../../../kibana_utils/common';
 
+export interface FetchAllDeps {
+  abortController: AbortController;
+  appStateContainer: ReduxLikeStateContainer<AppState>;
+  inspectorAdapters: Adapters;
+  data: DataPublicPluginStart;
+  initialFetchStatus: FetchStatus;
+  searchSessionId: string;
+  savedSearch: SavedSearch;
+  services: DiscoverServices;
+  useNewFieldsApi: boolean;
+}
+
+export interface FetchAllSubDeps extends FetchAllDeps {
+  onResults: (foundDocuments: boolean) => void;
+}
+
 export function fetchAll(
   dataSubjects: SavedSearchData,
   searchSource: SearchSource,
   reset = false,
-  fetchDeps: {
-    abortController: AbortController;
-    appStateContainer: ReduxLikeStateContainer<AppState>;
-    inspectorAdapters: Adapters;
-    data: DataPublicPluginStart;
-    initialFetchStatus: FetchStatus;
-    searchSessionId: string;
-    services: DiscoverServices;
-    useNewFieldsApi: boolean;
-  }
+  fetchDeps: FetchAllDeps
 ) {
   const { initialFetchStatus, appStateContainer, services, useNewFieldsApi, data } = fetchDeps;
 

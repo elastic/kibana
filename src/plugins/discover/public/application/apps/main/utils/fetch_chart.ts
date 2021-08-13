@@ -13,15 +13,13 @@ import {
   search,
   SearchSource,
 } from '../../../../../../data/public';
-import { Adapters } from '../../../../../../inspector';
 import { getChartAggConfigs, getDimensions } from './index';
 import { tabifyAggResponse } from '../../../../../../data/common';
 import { buildPointSeriesData } from '../components/chart/point_series';
 import { FetchStatus } from '../../../types';
 import { SavedSearchData } from '../services/use_saved_search';
-import { AppState } from '../services/discover_state';
-import { ReduxLikeStateContainer } from '../../../../../../kibana_utils/common';
 import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messages';
+import { FetchAllSubDeps } from './fetch_all';
 
 export function fetchChart(
   data$: SavedSearchData,
@@ -32,15 +30,9 @@ export function fetchChart(
     data,
     inspectorAdapters,
     onResults,
+    savedSearch,
     searchSessionId,
-  }: {
-    abortController: AbortController;
-    appStateContainer: ReduxLikeStateContainer<AppState>;
-    data: DataPublicPluginStart;
-    inspectorAdapters: Adapters;
-    onResults: (foundDocuments: boolean) => void;
-    searchSessionId: string;
-  }
+  }: FetchAllSubDeps
 ) {
   const { charts$, totalHits$ } = data$;
 
@@ -55,7 +47,7 @@ export function fetchChart(
     name: 'discover',
     description: 'fetch chart data and total hits',
     url: window.location.pathname,
-    id: '',
+    id: savedSearch.id,
   };
 
   const fetch$ = searchSource

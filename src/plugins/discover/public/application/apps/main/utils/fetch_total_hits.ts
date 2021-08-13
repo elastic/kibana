@@ -8,15 +8,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { filter } from 'rxjs/operators';
-import {
-  DataPublicPluginStart,
-  isCompleteResponse,
-  SearchSource,
-} from '../../../../../../data/public';
-import { Adapters } from '../../../../../../inspector/common';
+import { isCompleteResponse, SearchSource } from '../../../../../../data/public';
 import { FetchStatus } from '../../../types';
 import { SavedSearchData } from '../services/use_saved_search';
 import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messages';
+import { FetchAllSubDeps } from './fetch_all';
 
 export function fetchTotalHits(
   data$: SavedSearchData,
@@ -26,14 +22,9 @@ export function fetchTotalHits(
     data,
     inspectorAdapters,
     onResults,
+    savedSearch,
     searchSessionId,
-  }: {
-    abortController: AbortController;
-    data: DataPublicPluginStart;
-    onResults: (foundDocuments: boolean) => void;
-    inspectorAdapters: Adapters;
-    searchSessionId: string;
-  }
+  }: FetchAllSubDeps
 ) {
   const { totalHits$ } = data$;
   const indexPattern = searchSource.getField('index');
@@ -51,7 +42,7 @@ export function fetchTotalHits(
     name: 'discover',
     description: 'fetch total hits',
     url: window.location.pathname,
-    id: '',
+    id: savedSearch.id,
   };
 
   const fetch$ = searchSource

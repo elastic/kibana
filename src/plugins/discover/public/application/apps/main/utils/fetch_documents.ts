@@ -7,13 +7,12 @@
  */
 import { i18n } from '@kbn/i18n';
 import { filter } from 'rxjs/operators';
-import { Adapters } from '../../../../../../inspector/common';
 import { isCompleteResponse, SearchSource } from '../../../../../../data/common';
 import { FetchStatus } from '../../../types';
 import { SavedSearchData } from '../services/use_saved_search';
 import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messages';
 import { SAMPLE_SIZE_SETTING } from '../../../../../common';
-import { DiscoverServices } from '../../../../build_services';
+import { FetchAllSubDeps } from './fetch_all';
 
 export const fetchDocuments = (
   data$: SavedSearchData,
@@ -23,14 +22,9 @@ export const fetchDocuments = (
     inspectorAdapters,
     onResults,
     searchSessionId,
+    savedSearch,
     services,
-  }: {
-    abortController: AbortController;
-    inspectorAdapters: Adapters;
-    onResults: (foundDocuments: boolean) => void;
-    searchSessionId: string;
-    services: DiscoverServices;
-  }
+  }: FetchAllSubDeps
 ) => {
   const { documents$, totalHits$ } = data$;
 
@@ -46,7 +40,7 @@ export const fetchDocuments = (
     name: 'discover',
     description: 'fetch documents',
     url: window.location.pathname,
-    id: '',
+    id: savedSearch.id,
   };
 
   const fetch$ = searchSource

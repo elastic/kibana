@@ -24,6 +24,7 @@ import { FetchStatus } from '../../../types';
 import { fetchAll } from '../utils/fetch_all';
 import { useBehaviorSubject } from '../utils/use_behavior_subject';
 import { sendResetMsg } from './use_saved_search_messages';
+import { SavedSearch } from '../../../../saved_searches';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -78,6 +79,7 @@ export interface DataChartsMessage extends DataMsg {
  */
 export const useSavedSearch = ({
   initialFetchStatus,
+  savedSearch,
   searchSessionManager,
   searchSource,
   services,
@@ -85,6 +87,7 @@ export const useSavedSearch = ({
   useNewFieldsApi,
 }: {
   initialFetchStatus: FetchStatus;
+  savedSearch: SavedSearch;
   searchSessionManager: DiscoverSearchSessionManager;
   searchSource: SearchSource;
   services: DiscoverServices;
@@ -92,7 +95,7 @@ export const useSavedSearch = ({
   useNewFieldsApi: boolean;
 }) => {
   const { data, filterManager } = services;
-  const timefilter = data.query.timefilter.timefilter;
+  const { timefilter } = data.query.timefilter;
 
   const inspectorAdapters = useMemo(() => ({ requests: new RequestAdapter() }), []);
 
@@ -179,6 +182,7 @@ export const useSavedSearch = ({
           inspectorAdapters,
           data,
           initialFetchStatus,
+          savedSearch,
           searchSessionId: searchSessionManager.getNextSearchSessionId(),
           services,
           useNewFieldsApi,
@@ -207,6 +211,7 @@ export const useSavedSearch = ({
     inspectorAdapters,
     main$,
     refetch$,
+    savedSearch,
     searchSessionManager,
     searchSessionManager.newSearchSessionIdFromURL$,
     searchSource,
