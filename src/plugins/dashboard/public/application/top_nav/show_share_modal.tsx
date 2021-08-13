@@ -17,6 +17,7 @@ import { dashboardUrlParams } from '../dashboard_router';
 import { shareModalStrings } from '../../dashboard_strings';
 import { DashboardAppCapabilities, DashboardState } from '../../types';
 import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
+import { DASHBOARD_APP_LOCATOR, DashboardAppLocatorParams } from '../../locator';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -104,21 +105,26 @@ export function ShowShareModal({
     );
   };
 
+  const params: DashboardAppLocatorParams = {
+    ...stateToRawDashboardState({ state: currentDashboardState, version: kibanaVersion }),
+    forwardStateToHistory: true,
+  };
+
   share.toggleShareContextMenu({
     isDirty,
     anchorElement,
     allowEmbed: true,
     allowShortUrl: dashboardCapabilities.createShortUrl,
-    shareableUrl: setStateToKbnUrl(
-      '_a',
-      stateToRawDashboardState({ state: currentDashboardState, version: kibanaVersion }),
-      { useHash: false, storeInHashQuery: true },
-      unhashUrl(window.location.href)
-    ),
+    shareableUrl: unhashUrl(window.location.href),
     objectId: savedDashboard.id,
     objectType: 'dashboard',
     sharingData: {
       title: savedDashboard.title,
+      locatorParams: {
+        id: DASHBOARD_APP_LOCATOR,
+        version: kibanaVersion,
+        params,
+      },
     },
     embedUrlParamExtensions: [
       {

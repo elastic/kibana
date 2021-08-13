@@ -10,6 +10,8 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
 import type { LocatorDefinition, LocatorPublic } from '../../share/public';
 import type { SavedDashboardPanel } from '../common/types';
+import type { DashboardPanelMap } from './types';
+import { convertSavedDashboardPanelToPanelState } from '../common/embeddable/embeddable_saved_object_converters';
 import { esFilters } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { ViewMode } from '../../embeddable/public';
@@ -95,6 +97,10 @@ export interface DashboardAppLocatorDependencies {
   getDashboardFilterFields: (dashboardId: string) => Promise<Filter[]>;
 }
 
+export type ForwardedDashboardState = Omit<DashboardAppLocator, 'panels'> & {
+  panels: DashboardPanelMap;
+};
+
 export class DashboardAppLocatorDefinition implements LocatorDefinition<DashboardAppLocatorParams> {
   public readonly id = DASHBOARD_APP_LOCATOR;
 
@@ -103,6 +109,7 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
   public readonly getLocation = async (params: DashboardAppLocatorParams) => {
     const useHash = params.useHash ?? this.deps.useHashedUrl;
     const hash = params.dashboardId ? `view/${params.dashboardId}` : `create`;
+    const forwardStateToHistory = params.forwardStateToHistory ?? false;
 
     const getSavedFiltersFromDestinationDashboardIfNeeded = async (): Promise<Filter[]> => {
       if (params.preserveSavedFilters === false) return [];
@@ -123,18 +130,38 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       ...params.filters,
     ];
 
-    let path = setStateToKbnUrl(
-      '_a',
-      cleanEmptyKeys({
-        query: params.query,
-        filters: filters?.filter((f) => !esFilters.isFilterPinned(f)),
-        viewMode: params.viewMode,
-        panels: params.panels,
-        savedQuery: params.savedQuery,
-      }),
-      { useHash },
-      `#/${hash}`
-    );
+    let path: string;
+    let state: Record<string, unknown>;
+
+    if (forwardStateToHistory) {
+      path = `#/${hash}`;
+      const panelsMap: DashboardPanelMap = {};
+
+      params.panels?.forEach((panel) => {
+        panelsMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
+      });
+
+      state = {
+        ...params,
+        panels: panelsMap,
+        filters,
+      };
+    } else {
+      path = setStateToKbnUrl(
+        '_a',
+        cleanEmptyKeys({
+          query: params.query,
+          filters: filters?.filter((f) => !esFilters.isFilterPinned(f)),
+          viewMode: params.viewMode,
+          panels: params.panels,
+          savedQuery: params.savedQuery,
+        }),
+        { useHash },
+        `#/${hash}`
+      );
+
+      state = {};
+    }
 
     path = setStateToKbnUrl<QueryState>(
       '_g',
@@ -154,7 +181,7 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
     return {
       app: DashboardConstants.DASHBOARDS_ID,
       path,
-      state: {},
+      state,
     };
   };
 }
