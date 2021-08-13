@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getSavedObjectNamePattern } from './get_saved_object_name_pattern';
 import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './constants';
+import { getSavedObjectNamePattern } from './get_saved_object_name_pattern';
 
 /**
  * Given an index this will return the pattern of "exceptionsList_${index}"

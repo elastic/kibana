@@ -6,8 +6,8 @@
  */
 
 import { Logger, SavedObjectReference } from 'src/core/server';
-import { getSavedObjectReference } from './get_saved_object_reference';
 import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './constants';
+import { getSavedObjectReference } from './get_saved_object_reference';
 
 /**
  * Given an index and a saved object reference, this will return the specific "exceptionsList" saved object reference
