@@ -48,7 +48,7 @@ describe('Home page', () => {
 
   it('includes services with only metric documents', () => {
     cy.visit(
-      `${serviceInventoryHref}&kuery=not%2520(processor.event%2520%253A%2522transaction%2522%2520)`
+      `${serviceInventoryHref}&kuery=not%20(processor.event%3A%22transaction%22)`
     );
     cy.contains('opbeans-python');
     cy.contains('opbeans-java');

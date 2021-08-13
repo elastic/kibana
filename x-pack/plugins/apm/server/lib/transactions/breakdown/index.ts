@@ -32,8 +32,8 @@ export async function getTransactionBreakdown({
   transactionName,
   transactionType,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   transactionName?: string;

@@ -81,6 +81,36 @@ describe('CrawlerSingleDomainLogic', () => {
         });
       });
     });
+
+    describe('updateSitemaps', () => {
+      beforeEach(() => {
+        mount({
+          domain: {
+            id: '507f1f77bcf86cd799439011',
+            sitemaps: [],
+          },
+        });
+
+        CrawlerSingleDomainLogic.actions.updateSitemaps([
+          {
+            id: '1234',
+            url: 'http://www.example.com/sitemap.xml',
+          },
+        ]);
+      });
+
+      it('should update the sitemaps on the domain', () => {
+        expect(CrawlerSingleDomainLogic.values.domain).toEqual({
+          id: '507f1f77bcf86cd799439011',
+          sitemaps: [
+            {
+              id: '1234',
+              url: 'http://www.example.com/sitemap.xml',
+            },
+          ],
+        });
+      });
+    });
   });
 
   describe('listeners', () => {
