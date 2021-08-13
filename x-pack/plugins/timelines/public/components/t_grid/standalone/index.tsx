@@ -297,7 +297,13 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
 
   return (
     <InspectButtonContainer>
-      <StyledEuiPanel data-test-subj="events-viewer-panel" $isFullScreen={false}>
+      <StyledEuiPanel
+        data-test-subj="events-viewer-panel"
+        $isFullScreen={false}
+        hasBorder={false}
+        hasShadow={false}
+        paddingSize="s"
+      >
         {canQueryTimeline ? (
           <>
             <HeaderSection

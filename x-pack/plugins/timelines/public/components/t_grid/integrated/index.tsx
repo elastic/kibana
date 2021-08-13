@@ -286,7 +286,13 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   return (
     <InspectButtonContainer>
-      <StyledEuiPanel data-test-subj="events-viewer-panel" $isFullScreen={globalFullScreen}>
+      <StyledEuiPanel
+        hasBorder={false}
+        hasShadow={false}
+        paddingSize="none"
+        data-test-subj="events-viewer-panel"
+        $isFullScreen={globalFullScreen}
+      >
         {canQueryTimeline ? (
           <>
             <HeaderSection
