@@ -1,0 +1,78 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ElasticBeatsCard props button 1`] = `
+<EuiCard
+  description="
+            Beats send data from hundreds or thousands of machines and systems to Logstash or Elasticsearch."
+  footer={
+    <EuiButton
+      fill={true}
+      href="app/home#/tutorial"
+    >
+      Button
+    </EuiButton>
+  }
+  href="app/home#/tutorial"
+  image="/plugins/kibanaReact/assets/elastic_beats_card_light.svg"
+  paddingSize="l"
+  title="Add data with Beats"
+/>
+`;
+
+exports[`ElasticBeatsCard props href 1`] = `
+<EuiCard
+  description="
+            Beats send data from hundreds or thousands of machines and systems to Logstash or Elasticsearch."
+  footer={
+    <EuiButton
+      fill={true}
+      href="#"
+    >
+      Button
+    </EuiButton>
+  }
+  href="#"
+  image="/plugins/kibanaReact/assets/elastic_beats_card_light.svg"
+  paddingSize="l"
+  title="Add data with Beats"
+/>
+`;
+
+exports[`ElasticBeatsCard props recommended 1`] = `
+<EuiCard
+  betaBadgeLabel="Recommended"
+  description="
+            Beats send data from hundreds or thousands of machines and systems to Logstash or Elasticsearch."
+  footer={
+    <EuiButton
+      fill={true}
+      href="app/home#/tutorial"
+    >
+      Install Beats for Solution
+    </EuiButton>
+  }
+  href="app/home#/tutorial"
+  image="/plugins/kibanaReact/assets/elastic_beats_card_light.svg"
+  paddingSize="l"
+  title="Add data with Beats"
+/>
+`;
+
+exports[`ElasticBeatsCard renders 1`] = `
+<EuiCard
+  description="
+            Beats send data from hundreds or thousands of machines and systems to Logstash or Elasticsearch."
+  footer={
+    <EuiButton
+      fill={true}
+      href="app/home#/tutorial"
+    >
+      Install Beats for Solution
+    </EuiButton>
+  }
+  href="app/home#/tutorial"
+  image="/plugins/kibanaReact/assets/elastic_beats_card_light.svg"
+  paddingSize="l"
+  title="Add data with Beats"
+/>
+`;

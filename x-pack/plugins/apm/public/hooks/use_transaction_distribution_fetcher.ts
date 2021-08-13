@@ -24,13 +24,17 @@ const INITIAL_DATA = {
 
 export function useTransactionDistributionFetcher({
   transactionName,
+  kuery,
+  environment,
 }: {
   transactionName: string;
+  kuery: string;
+  environment: string;
 }) {
   const { serviceName, transactionType } = useApmServiceContext();
 
   const {
-    urlParams: { environment, kuery, start, end, transactionId, traceId },
+    urlParams: { start, end, transactionId, traceId },
   } = useUrlParams();
 
   const history = useHistory();

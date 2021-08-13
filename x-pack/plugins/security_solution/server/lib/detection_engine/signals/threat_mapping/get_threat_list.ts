@@ -54,7 +54,6 @@ export const getThreatList = async ({
   );
   const { body: response } = await esClient.search<ThreatListDoc>({
     body: {
-      // @ts-expect-error ESBoolQuery is not assignale to QueryDslQueryContainer
       query: queryFilter,
       fields: [
         {
@@ -126,7 +125,6 @@ export const getThreatListCount = async ({
   );
   const { body: response } = await esClient.count({
     body: {
-      // @ts-expect-error ESBoolQuery is not assignale to QueryDslQueryContainer
       query: queryFilter,
     },
     ignore_unavailable: true,

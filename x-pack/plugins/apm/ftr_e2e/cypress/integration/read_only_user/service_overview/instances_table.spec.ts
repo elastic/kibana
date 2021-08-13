@@ -67,8 +67,7 @@ describe('Instances table', () => {
       cy.contains('opbeans-java');
       cy.contains(serviceNodeName);
     });
-    // For some reason the details panel is not opening after clicking on the button.
-    it.skip('shows instance details', () => {
+    it('shows instance details', () => {
       apisToIntercept.map(({ endpoint, name }) => {
         cy.intercept('GET', endpoint).as(name);
       });
@@ -88,8 +87,7 @@ describe('Instances table', () => {
         cy.contains('Service');
       });
     });
-    // For some reason the tooltip is not opening after clicking on the button.
-    it.skip('shows actions available', () => {
+    it('shows actions available', () => {
       apisToIntercept.map(({ endpoint, name }) => {
         cy.intercept('GET', endpoint).as(name);
       });
