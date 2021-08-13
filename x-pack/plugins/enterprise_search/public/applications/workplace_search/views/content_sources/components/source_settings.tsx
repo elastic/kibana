@@ -17,7 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiPanel,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
