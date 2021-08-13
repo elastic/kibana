@@ -136,11 +136,6 @@ export const useAddToCase = ({
       const caseDetailsUrl = getCaseDetailsUrl({ id });
       const appUrl = getUrlForApp(appId);
       const fullCaseUrl = `${appUrl}/cases/${caseDetailsUrl}`;
-      // TODO: not working for observability cases?
-      // navigateToApp(appId, {
-      //   deepLinkId: appId === 'securitySolution' ? 'case' : 'cases',
-      //   path: getCaseDetailsUrl({ id }),
-      // });
       navigateToUrl(fullCaseUrl);
     },
     [navigateToUrl, appId, getUrlForApp]
