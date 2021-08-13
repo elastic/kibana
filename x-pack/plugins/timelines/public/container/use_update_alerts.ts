@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { CoreStart } from '../../../../../src/core/public';
 
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { AlertStatus } from '../../../timelines/common';
@@ -15,9 +16,10 @@ export const RAC_ALERTS_BULK_UPDATE_URL = '/internal/rac/alerts/bulk_update';
 /**
  * Update alert status by query
  *
- * @param query of alerts to update
- * @param status to update to('open' / 'closed' / 'in-progress')
- * @param signal AbortSignal for cancelling request
+ * @param status to update to('open' / 'closed' / 'acknowledged')
+ * @param index index to be updated
+ * @param query optional query object to update alerts by query.
+ * @param ids optional array of alert ids to update. Ignored if query passed.
  *
  * @throws An error if response is not OK
  */
@@ -29,11 +31,10 @@ export const useUpdateAlertsStatus = (): {
     query?: object;
   }) => Promise<estypes.UpdateByQueryResponse>;
 } => {
-  const { http } = useKibana().services;
+  const { http } = useKibana<CoreStart>().services;
   return {
     updateAlertStatus: async ({ status, index, ids, query }) => {
-      const { body } = await http!.fetch(RAC_ALERTS_BULK_UPDATE_URL, {
-        method: 'POST',
+      const { body } = await http.post(RAC_ALERTS_BULK_UPDATE_URL, {
         body: JSON.stringify({ index, status, ...(query ? { query } : { ids }) }),
       });
       return body;

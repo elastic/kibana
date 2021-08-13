@@ -5,6 +5,7 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
+import { estypes } from '@elastic/elasticsearch';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
@@ -50,12 +51,12 @@ const mapConsumerToIndexName: typeof mapConsumerToIndexNameTyped = mapConsumerTo
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> &
   { [K in Props]-?: NonNullable<Obj[K]> };
-type AlertType = NonNullableProps<
+type AlertType = { _index: string; _id: string } & NonNullableProps<
   ParsedTechnicalFields,
   typeof ALERT_RULE_TYPE_ID | typeof ALERT_RULE_CONSUMER | typeof SPACE_IDS
 >;
 
-const isValidAlert = (source?: any): source is AlertType => {
+const isValidAlert = (source?: estypes.SearchHit<any>): source is AlertType => {
   return (
     (source?._source?.[ALERT_RULE_TYPE_ID] != null &&
       source?._source?.[ALERT_RULE_CONSUMER] != null &&
