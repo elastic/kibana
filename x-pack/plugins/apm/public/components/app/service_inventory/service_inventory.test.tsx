@@ -98,143 +98,9 @@ describe('ServiceInventory', () => {
 
   it('should render services, when list is not empty', async () => {
     // mock rest requests
-    httpGet.mockResolvedValueOnce({
-      hasLegacyData: false,
-      hasHistoricalData: true,
-      items: [
-        {
-          serviceName: 'My Python Service',
-          agentName: 'python',
-          transactionsPerMinute: 100,
-          errorsPerMinute: 200,
-          avgResponseTime: 300,
-          environments: ['test', 'dev'],
-          healthStatus: ServiceHealthStatus.warning,
-        },
-        {
-          serviceName: 'My Go Service',
-          agentName: 'go',
-          transactionsPerMinute: 400,
-          errorsPerMinute: 500,
-          avgResponseTime: 600,
-          environments: [],
-          severity: ServiceHealthStatus.healthy,
-        },
-      ],
-    });
-
-    const { container, findByText } = render(<ServiceInventory />, { wrapper });
-
-    // wait for requests to be made
-    await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
-    await findByText('My Python Service');
-
-    expect(container.querySelectorAll('.euiTableRow')).toHaveLength(2);
-  });
-
-  it('should render getting started message, when list is empty and no historical data is found', async () => {
-    httpGet.mockResolvedValueOnce({
-      hasLegacyData: false,
-      hasHistoricalData: false,
-      items: [],
-    });
-
-    const { findByText } = render(<ServiceInventory />, { wrapper });
-
-    // wait for requests to be made
-    await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
-
-    // wait for elements to be rendered
-    const gettingStartedMessage = await findByText(
-      "Looks like you don't have any APM services installed. Let's add some!"
-    );
-
-    expect(gettingStartedMessage).not.toBeEmptyDOMElement();
-  });
-
-  it('should render empty message, when list is empty and historical data is found', async () => {
-    httpGet.mockResolvedValueOnce({
-      hasLegacyData: false,
-      hasHistoricalData: true,
-      items: [],
-    });
-
-    const { findByText } = render(<ServiceInventory />, { wrapper });
-
-    // wait for requests to be made
-    await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
-    const noServicesText = await findByText('No services found');
-
-    expect(noServicesText).not.toBeEmptyDOMElement();
-  });
-
-  describe('when legacy data is found', () => {
-    it('renders an upgrade migration notification', async () => {
-      httpGet.mockResolvedValueOnce({
-        hasLegacyData: true,
-        hasHistoricalData: true,
-        items: [],
-      });
-
-      render(<ServiceInventory />, { wrapper });
-
-      // wait for requests to be made
-      await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
-
-      expect(addWarning).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          title: 'Legacy data was detected within the selected time range',
-        })
-      );
-    });
-  });
-
-  describe('when legacy data is not found', () => {
-    it('does not render an upgrade migration notification', async () => {
-      httpGet.mockResolvedValueOnce({
-        hasLegacyData: false,
-        hasHistoricalData: true,
-        items: [],
-      });
-
-      render(<ServiceInventory />, { wrapper });
-
-      // wait for requests to be made
-      await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
-
-      expect(addWarning).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('when ML data is not found', () => {
-    it('does not render the health column', async () => {
-      httpGet.mockResolvedValueOnce({
-        hasLegacyData: false,
-        hasHistoricalData: true,
-        items: [
-          {
-            serviceName: 'My Python Service',
-            agentName: 'python',
-            transactionsPerMinute: 100,
-            errorsPerMinute: 200,
-            avgResponseTime: 300,
-            environments: ['test', 'dev'],
-          },
-        ],
-      });
-
-      const { queryByText } = render(<ServiceInventory />, { wrapper });
-
-      // wait for requests to be made
-      await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
-
-      expect(queryByText('Health')).toBeNull();
-    });
-  });
-
-  describe('when ML data is found', () => {
-    it('renders the health column', async () => {
-      httpGet.mockResolvedValueOnce({
+    httpGet
+      .mockResolvedValueOnce({ fallbackToTransactions: false })
+      .mockResolvedValueOnce({
         hasLegacyData: false,
         hasHistoricalData: true,
         items: [
@@ -247,13 +113,161 @@ describe('ServiceInventory', () => {
             environments: ['test', 'dev'],
             healthStatus: ServiceHealthStatus.warning,
           },
+          {
+            serviceName: 'My Go Service',
+            agentName: 'go',
+            transactionsPerMinute: 400,
+            errorsPerMinute: 500,
+            avgResponseTime: 600,
+            environments: [],
+            severity: ServiceHealthStatus.healthy,
+          },
         ],
       });
+
+    const { container, findByText } = render(<ServiceInventory />, { wrapper });
+
+    // wait for requests to be made
+    await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(2));
+    await findByText('My Python Service');
+
+    expect(container.querySelectorAll('.euiTableRow')).toHaveLength(2);
+  });
+
+  it('should render getting started message, when list is empty and no historical data is found', async () => {
+    httpGet
+      .mockResolvedValueOnce({ fallbackToTransactions: false })
+      .mockResolvedValueOnce({
+        hasLegacyData: false,
+        hasHistoricalData: false,
+        items: [],
+      });
+
+    const { findByText } = render(<ServiceInventory />, { wrapper });
+
+    // wait for requests to be made
+    await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(2));
+
+    // wait for elements to be rendered
+    const gettingStartedMessage = await findByText(
+      "Looks like you don't have any APM services installed. Let's add some!"
+    );
+
+    expect(gettingStartedMessage).not.toBeEmptyDOMElement();
+  });
+
+  it('should render empty message, when list is empty and historical data is found', async () => {
+    httpGet
+      .mockResolvedValueOnce({ fallbackToTransactions: false })
+      .mockResolvedValueOnce({
+        hasLegacyData: false,
+        hasHistoricalData: true,
+        items: [],
+      });
+
+    const { findByText } = render(<ServiceInventory />, { wrapper });
+
+    // wait for requests to be made
+    await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(2));
+    const noServicesText = await findByText('No services found');
+
+    expect(noServicesText).not.toBeEmptyDOMElement();
+  });
+
+  describe('when legacy data is found', () => {
+    it('renders an upgrade migration notification', async () => {
+      httpGet
+        .mockResolvedValueOnce({ fallbackToTransactions: false })
+        .mockResolvedValueOnce({
+          hasLegacyData: true,
+          hasHistoricalData: true,
+          items: [],
+        });
+
+      render(<ServiceInventory />, { wrapper });
+
+      // wait for requests to be made
+      await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(2));
+
+      expect(addWarning).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          title: 'Legacy data was detected within the selected time range',
+        })
+      );
+    });
+  });
+
+  describe('when legacy data is not found', () => {
+    it('does not render an upgrade migration notification', async () => {
+      httpGet
+        .mockResolvedValueOnce({ fallbackToTransactions: false })
+        .mockResolvedValueOnce({
+          hasLegacyData: false,
+          hasHistoricalData: true,
+          items: [],
+        });
+
+      render(<ServiceInventory />, { wrapper });
+
+      // wait for requests to be made
+      await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(2));
+
+      expect(addWarning).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when ML data is not found', () => {
+    it('does not render the health column', async () => {
+      httpGet
+        .mockResolvedValueOnce({ fallbackToTransactions: false })
+        .mockResolvedValueOnce({
+          hasLegacyData: false,
+          hasHistoricalData: true,
+          items: [
+            {
+              serviceName: 'My Python Service',
+              agentName: 'python',
+              transactionsPerMinute: 100,
+              errorsPerMinute: 200,
+              avgResponseTime: 300,
+              environments: ['test', 'dev'],
+            },
+          ],
+        });
+
+      const { queryByText } = render(<ServiceInventory />, { wrapper });
+
+      // wait for requests to be made
+      await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(2));
+
+      expect(queryByText('Health')).toBeNull();
+    });
+  });
+
+  describe('when ML data is found', () => {
+    it('renders the health column', async () => {
+      httpGet
+        .mockResolvedValueOnce({ fallbackToTransactions: false })
+        .mockResolvedValueOnce({
+          hasLegacyData: false,
+          hasHistoricalData: true,
+          items: [
+            {
+              serviceName: 'My Python Service',
+              agentName: 'python',
+              transactionsPerMinute: 100,
+              errorsPerMinute: 200,
+              avgResponseTime: 300,
+              environments: ['test', 'dev'],
+              healthStatus: ServiceHealthStatus.warning,
+            },
+          ],
+        });
 
       const { queryAllByText } = render(<ServiceInventory />, { wrapper });
 
       // wait for requests to be made
-      await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(2));
 
       expect(queryAllByText('Health').length).toBeGreaterThan(1);
     });

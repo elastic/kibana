@@ -21,7 +21,7 @@ import type { ILicense } from '../../../licensing/public';
 import { IlmPolicyMigrationStatus, ReportApiJSON } from '../../common/types';
 import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
 import { Job } from '../lib/job';
-import { InternalApiClientClientProvider, ReportingAPIClient } from '../lib/reporting_api_client';
+import { InternalApiClientProvider, ReportingAPIClient } from '../lib/reporting_api_client';
 import { KibanaContextProvider } from '../shared_imports';
 import { ListingProps as Props, ReportListing } from '.';
 
@@ -84,7 +84,7 @@ describe('ReportListing', () => {
   const createTestBed = registerTestBed(
     (props?: Partial<Props>) => (
       <KibanaContextProvider services={{ http: httpService, application: applicationService }}>
-        <InternalApiClientClientProvider apiClient={reportingAPIClient as ReportingAPIClient}>
+        <InternalApiClientProvider apiClient={reportingAPIClient as ReportingAPIClient}>
           <IlmPolicyStatusContextProvider>
             <ReportListing
               license$={license$}
@@ -96,7 +96,7 @@ describe('ReportListing', () => {
               {...props}
             />
           </IlmPolicyStatusContextProvider>
-        </InternalApiClientClientProvider>
+        </InternalApiClientProvider>
       </KibanaContextProvider>
     ),
     { memoryRouter: { wrapComponent: false } }

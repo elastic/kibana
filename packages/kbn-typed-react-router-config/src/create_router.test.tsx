@@ -61,6 +61,7 @@ describe('createRouter', () => {
               params: t.type({
                 query: t.type({
                   aggregationType: t.string,
+                  kuery: t.string,
                 }),
               }),
             },
@@ -112,7 +113,7 @@ describe('createRouter', () => {
         },
       });
 
-      history.push('/traces?rangeFrom=now-15m&rangeTo=now&aggregationType=avg');
+      history.push('/traces?rangeFrom=now-15m&rangeTo=now&aggregationType=avg&kuery=');
 
       const topTracesParams = router.getParams('/traces', history.location);
 
@@ -122,6 +123,7 @@ describe('createRouter', () => {
           rangeFrom: 'now-15m',
           rangeTo: 'now',
           aggregationType: 'avg',
+          kuery: '',
         },
       });
 
@@ -154,6 +156,22 @@ describe('createRouter', () => {
           rangeFrom: 'now-15m',
           rangeTo: 'now',
           maxNumNodes: 3,
+        },
+      });
+
+      history.push(
+        '/traces?rangeFrom=now-15m&rangeTo=now&aggregationType=avg&kuery=service.name%3A%22metricbeat%22'
+      );
+
+      const topTracesParams = router.getParams('/traces', history.location);
+
+      expect(topTracesParams).toEqual({
+        path: {},
+        query: {
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          aggregationType: 'avg',
+          kuery: 'service.name:"metricbeat"',
         },
       });
     });
@@ -280,10 +298,26 @@ describe('createRouter', () => {
         query: {
           rangeTo: 'now',
           aggregationType: 'avg',
+          kuery: '',
         },
       });
 
-      expect(href).toEqual('/traces?aggregationType=avg&rangeFrom=now-30m&rangeTo=now');
+      expect(href).toEqual('/traces?aggregationType=avg&kuery=&rangeFrom=now-30m&rangeTo=now');
+    });
+
+    it('encodes query parameters', () => {
+      const href = router.link('/traces', {
+        // @ts-ignore
+        query: {
+          rangeTo: 'now',
+          aggregationType: 'avg',
+          kuery: 'service.name:"metricbeat"',
+        },
+      });
+
+      expect(href).toEqual(
+        '/traces?aggregationType=avg&kuery=service.name%3A%22metricbeat%22&rangeFrom=now-30m&rangeTo=now'
+      );
     });
   });
 });

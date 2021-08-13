@@ -158,4 +158,50 @@ export function registerCrawlerRoutes({
       path: '/api/as/v0/engines/:name/crawler/process_crawls',
     })
   );
+
+  router.get(
+    {
+      path: '/api/app_search/engines/{name}/crawler/crawl_schedule',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+    })
+  );
+
+  router.put(
+    {
+      path: '/api/app_search/engines/{name}/crawler/crawl_schedule',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+        body: schema.object({
+          unit: schema.string(),
+          frequency: schema.number(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+    })
+  );
+
+  router.delete(
+    {
+      path: '/api/app_search/engines/{name}/crawler/crawl_schedule',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+    })
+  );
 }

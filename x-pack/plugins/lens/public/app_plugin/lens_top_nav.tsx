@@ -233,7 +233,7 @@ export const LensTopNavMenu = ({
               if (formulaDetected) {
                 return i18n.translate('xpack.lens.app.downloadButtonFormulasWarning', {
                   defaultMessage:
-                    'Your CSV contains characters which spreadsheet applications can interpret as formulas',
+                    'Your CSV contains characters that spreadsheet applications might interpret as formulas.',
                 });
               }
             }
