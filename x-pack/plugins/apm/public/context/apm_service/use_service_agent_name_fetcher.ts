@@ -26,5 +26,10 @@ export function useServiceAgentNameFetcher(serviceName?: string) {
     [serviceName, start, end]
   );
 
-  return { agentName: data?.agentName, status, error };
+  return {
+    agentName: data?.agentName,
+    serviceRuntimeName: data?.serviceRuntimeName,
+    status,
+    error,
+  };
 }

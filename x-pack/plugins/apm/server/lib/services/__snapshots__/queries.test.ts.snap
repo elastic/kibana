@@ -65,6 +65,14 @@ Object {
   "body": Object {
     "aggs": Object {
       "agents": Object {
+        "aggs": Object {
+          "serviceRuntimeName": Object {
+            "terms": Object {
+              "field": "service.runtime.name",
+              "size": 1,
+            },
+          },
+        },
         "terms": Object {
           "field": "agent.name",
           "size": 1,

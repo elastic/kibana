@@ -9,6 +9,7 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import {
   AGENT_NAME,
   SERVICE_NAME,
+  SERVICE_RUNTIME_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../observability/server';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
@@ -49,6 +50,14 @@ export async function getServiceAgentName({
       aggs: {
         agents: {
           terms: { field: AGENT_NAME, size: 1 },
+          aggs: {
+            serviceRuntimeName: {
+              terms: {
+                field: SERVICE_RUNTIME_NAME,
+                size: 1,
+              },
+            },
+          },
         },
       },
     },
@@ -58,6 +67,10 @@ export async function getServiceAgentName({
     'get_service_agent_name',
     params
   );
-  const agentName = aggregations?.agents.buckets[0]?.key as string | undefined;
-  return { agentName };
+  const agentAgg = aggregations?.agents.buckets[0];
+  const agentName = agentAgg?.key as string | undefined;
+  const serviceRuntimeName = agentAgg?.serviceRuntimeName.buckets[0]?.key as
+    | string
+    | undefined;
+  return { agentName, serviceRuntimeName };
 }

@@ -28,6 +28,7 @@ export const APMServiceContext = createContext<{
   transactionType?: string;
   transactionTypes: string[];
   alerts: APMServiceAlert[];
+  serviceRuntimeName?: string;
 }>({ serviceName: '', transactionTypes: [], alerts: [] });
 
 export function ApmServiceContextProvider({
@@ -40,7 +41,9 @@ export function ApmServiceContextProvider({
     query,
   } = useApmParams('/services/:serviceName');
 
-  const { agentName } = useServiceAgentNameFetcher(serviceName);
+  const { agentName, serviceRuntimeName } = useServiceAgentNameFetcher(
+    serviceName
+  );
 
   const transactionTypes = useServiceTransactionTypesFetcher(serviceName);
 
@@ -60,6 +63,7 @@ export function ApmServiceContextProvider({
         transactionType,
         transactionTypes,
         alerts,
+        serviceRuntimeName,
       }}
       children={children}
     />

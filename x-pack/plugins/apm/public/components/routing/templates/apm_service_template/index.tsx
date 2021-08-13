@@ -15,6 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
+import { isJRubyServiceRuntimeName } from '../../../../../common/service_runtime_name';
 import {
   isIosAgentName,
   isJavaAgentName,
@@ -123,8 +124,36 @@ function TemplateWithContext({
   );
 }
 
+export function isMetricsTabHidden({
+  agentName,
+  serviceRuntimeName,
+}: {
+  agentName?: string;
+  serviceRuntimeName?: string;
+}) {
+  return (
+    !agentName ||
+    isRumAgentName(agentName) ||
+    isJavaAgentName(agentName) ||
+    isIosAgentName(agentName) ||
+    isJRubyServiceRuntimeName(serviceRuntimeName)
+  );
+}
+
+export function isJVMsTabHidden({
+  agentName,
+  serviceRuntimeName,
+}: {
+  agentName?: string;
+  serviceRuntimeName?: string;
+}) {
+  return !(
+    isJavaAgentName(agentName) || isJRubyServiceRuntimeName(serviceRuntimeName)
+  );
+}
+
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
-  const { agentName } = useApmServiceContext();
+  const { agentName, serviceRuntimeName } = useApmServiceContext();
   const { config } = useApmPluginContext();
 
   const router = useApmRouter();
@@ -192,11 +221,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
-      hidden:
-        !agentName ||
-        isRumAgentName(agentName) ||
-        isJavaAgentName(agentName) ||
-        isIosAgentName(agentName),
+      hidden: isMetricsTabHidden({ agentName, serviceRuntimeName }),
     },
     {
       key: 'nodes',
@@ -207,7 +232,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
         defaultMessage: 'JVMs',
       }),
-      hidden: !isJavaAgentName(agentName),
+      hidden: isJVMsTabHidden({ agentName, serviceRuntimeName }),
     },
     {
       key: 'service-map',
