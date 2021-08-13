@@ -155,8 +155,7 @@ setup(core: CoreSetup, plugins: PluginsSetup) {
           label: 'A solution section',
           sortKey: 200,
           entries: [
-            { label: 'Home Page', app: 'exampleA', path: '/', matchFullPath: true },
-            { label: 'Example Page', app: 'exampleA', path: '/example', sideBadgeLabel: 'NEW'  },
+            { label: 'Backends', app: 'exampleA', path: '/example', sideBadgeLabel: 'NEW'  },
           ],
         }
       ])
@@ -164,4 +163,9 @@ setup(core: CoreSetup, plugins: PluginsSetup) {
   }
 
 ```
+![Badge example](./badge.png)
+
+The badge is going to be shown until user clicks on the menu item for the first time. Then we'll save an information at local storage, following this pattern `observability.nav_item_badge_visible_${app}${path}`, the above example would save `observability.nav_item_badge_visible_exampleA/example`. And the badge is removed. It'll only show again if the item saved at local storage is removed or set to `false`.
+
+
 
