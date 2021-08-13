@@ -48,9 +48,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ access }) => {
     <KibanaPageTemplate {...NO_DATA_PAGE_TEMPLATE_PROPS} className="enterpriseSearchOverview">
       <SetPageChrome />
       <SendTelemetry action="viewed" metric="overview" />
-
       <TrialCallout />
-
       <EuiText textAlign="center">
         <KibanaPageTemplateSolutionNavAvatar
           name="Enterprise Search"
@@ -66,13 +64,13 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ access }) => {
           })}
         </h1>
         <p>
-          {config.host
-            ? i18n.translate('xpack.enterpriseSearch.overview.subheading', {
-                defaultMessage: 'Select a product to get started.',
-              })
-            : i18n.translate('xpack.enterpriseSearch.overview.setupHeading', {
-                defaultMessage: 'Choose a product to set up and get started.',
-              })}
+         {config.host
+           ? i18n.translate('xpack.enterpriseSearch.overview.subheading', {
+               defaultMessage: 'Add search to your app or organization.',
+             })
+           : i18n.translate('xpack.enterpriseSearch.overview.setupHeading', {
+               defaultMessage: 'Choose a product to set up and get started.',
+             })}
         </p>
       </EuiText>
 
