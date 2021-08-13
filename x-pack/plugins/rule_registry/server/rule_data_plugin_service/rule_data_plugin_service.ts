@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { left, right } from 'fp-ts/lib/Either';
+import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
 
@@ -27,7 +27,7 @@ interface ConstructorOptions {
  */
 export class RuleDataPluginService {
   private readonly resourceInstaller: ResourceInstaller;
-  private installCommonResources: Promise<'ok' | Error>;
+  private installCommonResources: Promise<Either<Error, 'ok'>>;
   private isInitialized: boolean;
 
   constructor(private readonly options: ConstructorOptions) {
@@ -38,7 +38,7 @@ export class RuleDataPluginService {
       isWriteEnabled: options.isWriteEnabled,
     });
 
-    this.installCommonResources = Promise.resolve('ok');
+    this.installCommonResources = Promise.resolve(right('ok'));
     this.isInitialized = false;
   }
 
@@ -77,14 +77,12 @@ export class RuleDataPluginService {
    */
   public initializeService(): void {
     // Run the installation of common resources and handle exceptions.
-    // NOTE: this promise cannot reject, otherwise it will lead to an
-    // unhandled promise rejection shutting down Kibana process.
     this.installCommonResources = this.resourceInstaller
       .installCommonResources()
-      .then(() => 'ok')
+      .then(() => right('ok' as const))
       .catch((e) => {
         this.options.logger.error(e);
-        return e; // propagates it to the index initialization phase
+        return left(e); // propagates it to the index initialization phase
       });
 
     this.isInitialized = true;
@@ -110,27 +108,27 @@ export class RuleDataPluginService {
     const waitUntilClusterClientAvailable = async (): Promise<WaitResult> => {
       try {
         const clusterClient = await this.options.getClusterClient();
-        return left(clusterClient);
+        return right(clusterClient);
       } catch (e) {
         this.options.logger.error(e);
-        return right(e);
+        return left(e);
       }
     };
 
     const waitUntilIndexResourcesInstalled = async (): Promise<WaitResult> => {
       try {
         const result = await this.installCommonResources;
-        if (result !== 'ok') {
-          return right(result);
+        if (isLeft(result)) {
+          return result;
         }
 
         await this.resourceInstaller.installIndexLevelResources(indexInfo);
 
         const clusterClient = await this.options.getClusterClient();
-        return left(clusterClient);
+        return right(clusterClient);
       } catch (e) {
         this.options.logger.error(e);
-        return right(e);
+        return left(e);
       }
     };
 

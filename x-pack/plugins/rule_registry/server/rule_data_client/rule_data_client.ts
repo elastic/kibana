@@ -24,7 +24,7 @@ interface ConstructorOptions {
   waitUntilReadyForWriting: Promise<WaitResult>;
 }
 
-export type WaitResult = Either<ElasticsearchClient, Error>;
+export type WaitResult = Either<Error, ElasticsearchClient>;
 
 export class RuleDataClient implements IRuleDataClient {
   constructor(private readonly options: ConstructorOptions) {}
@@ -44,9 +44,9 @@ export class RuleDataClient implements IRuleDataClient {
     const waitUntilReady = async () => {
       const result = await this.options.waitUntilReadyForReading;
       if (isLeft(result)) {
-        return result.left;
+        throw result.left;
       } else {
-        throw result.right;
+        return result.right;
       }
     };
 
@@ -100,9 +100,9 @@ export class RuleDataClient implements IRuleDataClient {
     const waitUntilReady = async () => {
       const result = await this.options.waitUntilReadyForWriting;
       if (isLeft(result)) {
-        return result.left;
+        throw result.left;
       } else {
-        throw result.right;
+        return result.right;
       }
     };
 
