@@ -38,7 +38,9 @@ export default function ({ getService, getPageObjects }) {
     before('initialize tests', async () => {
       log.debug('Dashboard View Mode:initTests');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.load('x-pack/test/functional/es_archives/dashboard_view_mode');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/dashboard_view_mode'
+      );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await browser.setWindowSize(1600, 1000);
 
@@ -53,6 +55,12 @@ export default function ({ getService, getPageObjects }) {
         PageObjects.dashboard.getTestVisualizationNames()
       );
       await PageObjects.dashboard.saveDashboard(dashboardName);
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/dashboard_view_mode'
+      );
     });
 
     describe('Dashboard viewer', () => {
