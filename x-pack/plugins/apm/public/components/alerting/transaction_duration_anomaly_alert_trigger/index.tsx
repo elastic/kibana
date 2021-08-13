@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { defaults, omit } from 'lodash';
 import React from 'react';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { ANOMALY_SEVERITY } from '../../../../common/ml_constants';
 import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
@@ -60,6 +61,7 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
       windowSize: 15,
       windowUnit: 'm',
       anomalySeverityType: ANOMALY_SEVERITY.CRITICAL,
+      environment: ENVIRONMENT_ALL.value,
     }
   );
 

@@ -15,7 +15,7 @@ import type { FormatFactory } from '../../common';
 export interface PieVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;
   expressions: ExpressionsSetup;
-  formatFactory: Promise<FormatFactory>;
+  formatFactory: FormatFactory;
   charts: ChartsPluginSetup;
 }
 

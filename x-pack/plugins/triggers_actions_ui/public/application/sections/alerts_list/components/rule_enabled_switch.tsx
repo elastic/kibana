@@ -10,7 +10,7 @@ import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
 
 import { Alert, AlertTableItem } from '../../../../types';
 
-interface ComponentOpts {
+export interface ComponentOpts {
   item: AlertTableItem;
   onAlertChanged: () => void;
   enableAlert: (alert: Alert) => Promise<void>;
