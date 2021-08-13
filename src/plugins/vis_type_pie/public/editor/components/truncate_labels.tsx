@@ -8,7 +8,7 @@
 
 import React, { ChangeEvent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
+import { EuiFormRow, EuiFieldNumber, EuiIconTip } from '@elastic/eui';
 
 export interface TruncateLabelsOptionProps {
   disabled?: boolean;
@@ -27,6 +27,14 @@ function TruncateLabelsOption({ disabled, value = null, setValue }: TruncateLabe
       })}
       fullWidth
       display="rowCompressed"
+      labelAppend={
+        <EuiIconTip
+          content="Number of characters for labels positioned outside the chart."
+          position="top"
+          type="iInCircle"
+          color="subdued"
+        />
+      }
     >
       <EuiFieldNumber
         data-test-subj="pieLabelTruncateInput"

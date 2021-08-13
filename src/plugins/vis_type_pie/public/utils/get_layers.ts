@@ -151,12 +151,7 @@ export const getLayers = (
       showAccessor: (d: Datum) => d !== EMPTY_SLICE,
       nodeLabel: (d: unknown) => {
         if (col.format) {
-          const formattedLabel = formatter.deserialize(col.format).convert(d) ?? '';
-          if (visParams.labels.truncate && formattedLabel.length <= visParams.labels.truncate) {
-            return formattedLabel;
-          } else {
-            return `${formattedLabel.slice(0, Number(visParams.labels.truncate))}\u2026`;
-          }
+          return formatter.deserialize(col.format).convert(d) ?? '';
         }
         return String(d);
       },

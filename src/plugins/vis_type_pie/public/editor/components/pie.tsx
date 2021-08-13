@@ -283,7 +283,13 @@ const PieOptions = (props: PieOptionsProps) => {
             />
           </>
         )}
-        <TruncateLabelsOption value={stateParams.labels.truncate} setValue={setLabels} />
+        <TruncateLabelsOption
+          value={stateParams.labels.truncate}
+          setValue={setLabels}
+          disabled={
+            props.showElasticChartsOptions && stateParams.labels.position === LabelPositions.INSIDE
+          }
+        />
       </EuiPanel>
     </>
   );
