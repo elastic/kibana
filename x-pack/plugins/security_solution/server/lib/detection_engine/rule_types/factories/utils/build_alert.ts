@@ -6,6 +6,7 @@
  */
 
 import {
+  ALERT_REASON,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAMESPACE,
   ALERT_STATUS,
@@ -92,7 +93,8 @@ export const removeClashes = (doc: SimpleHit) => {
 export const buildAlert = (
   docs: SimpleHit[],
   rule: RulesSchema,
-  spaceId: string | null | undefined
+  spaceId: string | null | undefined,
+  reason: string
 ): RACAlert => {
   const removedClashes = docs.map(removeClashes);
   const parents = removedClashes.map(buildParent);
@@ -110,6 +112,7 @@ export const buildAlert = (
     [ALERT_STATUS]: 'open',
     [ALERT_WORKFLOW_STATUS]: 'open',
     [ALERT_DEPTH]: depth,
+    [ALERT_REASON]: reason,
     ...flattenWithPrefix(ALERT_RULE_NAMESPACE, rule),
   } as unknown) as RACAlert;
 };

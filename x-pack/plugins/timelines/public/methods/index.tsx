@@ -7,7 +7,9 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n/react';
 import type { Store } from 'redux';
+import { Provider } from 'react-redux';
 import type { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import type { TGridProps } from '../types';
@@ -64,10 +66,59 @@ export const getFieldsBrowserLazy = (props: FieldBrowserProps, { store }: { stor
 };
 
 const AddToCaseLazy = lazy(() => import('../components/actions/timeline/cases/add_to_case_action'));
-export const getAddToCaseLazy = (props: AddToCaseActionProps) => {
+export const getAddToCaseLazy = (props: AddToCaseActionProps, store: Store) => {
+  return (
+    <Suspense fallback={<span />}>
+      <Provider store={store}>
+        <I18nProvider>
+          <AddToCaseLazy {...props} />
+        </I18nProvider>
+      </Provider>
+    </Suspense>
+  );
+};
+
+const AddToCasePopover = lazy(
+  () => import('../components/actions/timeline/cases/add_to_case_action_button')
+);
+export const getAddToCasePopoverLazy = (props: AddToCaseActionProps, store: Store) => {
+  return (
+    <Suspense fallback={<span />}>
+      <Provider store={store}>
+        <I18nProvider>
+          <AddToCasePopover {...props} />
+        </I18nProvider>
+      </Provider>
+    </Suspense>
+  );
+};
+
+const AddToExistingButton = lazy(
+  () => import('../components/actions/timeline/cases/add_to_existing_case_button')
+);
+export const getAddToExistingCaseButtonLazy = (props: AddToCaseActionProps, store: Store) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <AddToCaseLazy {...props} />
+      <Provider store={store}>
+        <I18nProvider>
+          <AddToExistingButton {...props} />
+        </I18nProvider>
+      </Provider>
+    </Suspense>
+  );
+};
+
+const AddToNewCaseButton = lazy(
+  () => import('../components/actions/timeline/cases/add_to_new_case_button')
+);
+export const getAddToNewCaseButtonLazy = (props: AddToCaseActionProps, store: Store) => {
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <Provider store={store}>
+        <I18nProvider>
+          <AddToNewCaseButton {...props} />
+        </I18nProvider>
+      </Provider>
     </Suspense>
   );
 };

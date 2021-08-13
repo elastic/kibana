@@ -45,6 +45,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   'signal.status',
   'signal.group.id',
   'signal.original_time',
+  'signal.reason',
   'signal.rule.filters',
   'signal.rule.from',
   'signal.rule.language',

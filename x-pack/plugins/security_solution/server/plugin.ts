@@ -66,6 +66,7 @@ import {
   NOTIFICATIONS_ID,
   QUERY_ALERT_TYPE_ID,
   DEFAULT_SPACE_ID,
+  INDICATOR_ALERT_TYPE_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
@@ -94,6 +95,9 @@ import { rulesFieldMap } from './lib/detection_engine/rule_types/field_maps/rule
 import { RuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/rule_execution_log_client';
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
+import { createIndicatorMatchAlertType } from './lib/detection_engine/rule_types/indicator_match/create_indicator_match_alert_type';
+import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
+import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -231,7 +235,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               settings: {
                 number_of_shards: 1,
               },
-              mappings: mappingFromFieldMap({ ...alertsFieldMap, ...rulesFieldMap }, false),
+              mappings: mappingFromFieldMap(
+                { ...alertsFieldMap, ...rulesFieldMap, ...ctiFieldMap },
+                false
+              ),
             },
           },
         });
@@ -264,18 +271,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
 
       // Register rule types via rule-registry
-      this.setupPlugins.alerting.registerType(
-        createQueryAlertType({
-          experimentalFeatures,
-          indexAlias,
-          lists: plugins.lists,
-          logger: this.logger,
-          mergeStrategy: this.config.alertMergeStrategy,
-          ruleDataClient,
-          version: this.context.env.packageInfo.version,
-          ruleDataService,
-        })
-      );
+      const createRuleOptions: CreateRuleOptions = {
+        experimentalFeatures,
+        indexAlias,
+        lists: plugins.lists,
+        logger: this.logger,
+        mergeStrategy: this.config.alertMergeStrategy,
+        ruleDataClient,
+        ruleDataService,
+        version: this.context.env.packageInfo.version,
+      };
+
+      this.setupPlugins.alerting.registerType(createQueryAlertType(createRuleOptions));
+      this.setupPlugins.alerting.registerType(createIndicatorMatchAlertType(createRuleOptions));
     }
 
     // TODO We need to get the endpoint routes inside of initRoutes
@@ -295,7 +303,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerTrustedAppsRoutes(router, endpointContext);
     registerActionRoutes(router, endpointContext);
 
-    const racRuleTypes = [QUERY_ALERT_TYPE_ID];
+    const racRuleTypes = [QUERY_ALERT_TYPE_ID, INDICATOR_ALERT_TYPE_ID];
     const ruleTypes = [
       SIGNALS_ID,
       NOTIFICATIONS_ID,

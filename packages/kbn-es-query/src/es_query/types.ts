@@ -49,3 +49,10 @@ export interface IndexPatternBase {
   id?: string;
   title?: string;
 }
+
+export interface BoolQuery {
+  must: estypes.QueryDslQueryContainer[];
+  must_not: estypes.QueryDslQueryContainer[];
+  filter: estypes.QueryDslQueryContainer[];
+  should: estypes.QueryDslQueryContainer[];
+}

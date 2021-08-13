@@ -1,7 +1,7 @@
 @import '../../../mixins';
 
 .lnsLayerPanel {
-  margin-bottom: $euiSizeS;
+  margin-bottom: $euiSize;
 
   // disable focus ring for mouse clicks, leave it for keyboard users
   &:focus:not(:focus-visible) {
@@ -9,26 +9,41 @@
   }
 }
 
-.lnsLayerPanel__sourceFlexItem {
-  max-width: calc(100% - #{$euiSize * 3.625});
+.lnsLayerPanel__layerHeader {
+  padding: $euiSize;
+  border-bottom: $euiBorderThin;
 }
 
-.lnsLayerPanel__settingsFlexItem:empty + .lnsLayerPanel__sourceFlexItem {
-  max-width: calc(100% - #{$euiSizeS});
+// fixes truncation for too long chart switcher labels
+.lnsLayerPanel__layerSettingsWrapper {
+  min-width: 0;
 }
 
-.lnsLayerPanel__settingsFlexItem:empty {
-  margin: 0;
+.lnsLayerPanel__settingsStaticHeader {
+  padding-left: $euiSizeXS;
+}
+
+.lnsLayerPanel__settingsStaticHeaderIcon {
+  margin-right: $euiSizeS;
+  vertical-align: inherit;
+}
+
+.lnsLayerPanel__settingsStaticHeaderTitle {
+  display: inline;
 }
 
 .lnsLayerPanel__row {
   background: $euiColorLightestShade;
-  padding: $euiSizeS 0;
-  border-radius: $euiBorderRadius;
+  padding: $euiSize;
 
-  // Add margin to the top of the next same panel
+  // Add border to the top of the next same panel
   & + & {
-    margin-top: $euiSize;
+    border-top: $euiBorderThin;
+    margin-top: 0;
+  }
+  &:last-child {
+    border-bottom-right-radius: $euiBorderRadius;
+    border-bottom-left-radius: $euiBorderRadius;
   }
 }
 
@@ -43,10 +58,6 @@
 
 .lnsLayerPanel__group:empty {
   padding: 0;
-}
-
-.lnsLayerPanel__groupLabel {
-  padding: 0 $euiSizeS;
 }
 
 .lnsLayerPanel__error {
@@ -76,7 +87,7 @@
 }
 
 .lnsLayerPanel__dimensionContainer {
-  margin: 0 $euiSizeS $euiSizeS;
+  margin: 0 0 $euiSizeS;
   position: relative;
 
   &:last-child {
@@ -93,6 +104,7 @@
   padding: $euiSizeS;
   min-height: $euiSizeXXL - 2;
   word-break: break-word;
+  font-weight: $euiFontWeightRegular;
 }
 
 .lnsLayerPanel__triggerTextLabel {
