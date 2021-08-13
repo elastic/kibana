@@ -8,16 +8,16 @@
 // import { CTI_ROW_RENDERER_FIELDS } from '../../../../../../common/cti/constants';
 
 // TODO: share with security_solution/common/cti/constants.ts
-export const INDICATOR_DESTINATION_PATH = 'threat.enrichments';
+export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
 
 export const MATCHED_ATOMIC = 'matched.atomic';
 export const MATCHED_FIELD = 'matched.field';
 export const MATCHED_TYPE = 'matched.type';
 export const INDICATOR_MATCH_SUBFIELDS = [MATCHED_ATOMIC, MATCHED_FIELD, MATCHED_TYPE];
 
-export const INDICATOR_MATCHED_ATOMIC = `${INDICATOR_DESTINATION_PATH}.${MATCHED_ATOMIC}`;
-export const INDICATOR_MATCHED_FIELD = `${INDICATOR_DESTINATION_PATH}.${MATCHED_FIELD}`;
-export const INDICATOR_MATCHED_TYPE = `${INDICATOR_DESTINATION_PATH}.${MATCHED_TYPE}`;
+export const INDICATOR_MATCHED_ATOMIC = `${ENRICHMENT_DESTINATION_PATH}.${MATCHED_ATOMIC}`;
+export const INDICATOR_MATCHED_FIELD = `${ENRICHMENT_DESTINATION_PATH}.${MATCHED_FIELD}`;
+export const INDICATOR_MATCHED_TYPE = `${ENRICHMENT_DESTINATION_PATH}.${MATCHED_TYPE}`;
 
 export const EVENT_DATASET = 'event.dataset';
 
@@ -26,10 +26,10 @@ export const LAST_SEEN = 'indicator.last_seen';
 export const PROVIDER = 'indicator.provider';
 export const REFERENCE = 'indicator.reference';
 
-export const INDICATOR_FIRSTSEEN = `${INDICATOR_DESTINATION_PATH}.${FIRST_SEEN}`;
-export const INDICATOR_LASTSEEN = `${INDICATOR_DESTINATION_PATH}.${LAST_SEEN}`;
-export const INDICATOR_PROVIDER = `${INDICATOR_DESTINATION_PATH}.${PROVIDER}`;
-export const INDICATOR_REFERENCE = `${INDICATOR_DESTINATION_PATH}.${REFERENCE}`;
+export const INDICATOR_FIRSTSEEN = `${ENRICHMENT_DESTINATION_PATH}.${FIRST_SEEN}`;
+export const INDICATOR_LASTSEEN = `${ENRICHMENT_DESTINATION_PATH}.${LAST_SEEN}`;
+export const INDICATOR_PROVIDER = `${ENRICHMENT_DESTINATION_PATH}.${PROVIDER}`;
+export const INDICATOR_REFERENCE = `${ENRICHMENT_DESTINATION_PATH}.${REFERENCE}`;
 
 export const CTI_ROW_RENDERER_FIELDS = [
   INDICATOR_MATCHED_ATOMIC,

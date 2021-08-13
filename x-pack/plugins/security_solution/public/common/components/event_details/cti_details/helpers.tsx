@@ -6,7 +6,7 @@
  */
 
 import { groupBy } from 'lodash';
-import { INDICATOR_DESTINATION_PATH } from '../../../../../common/constants';
+import { ENRICHMENT_DESTINATION_PATH } from '../../../../../common/constants';
 import {
   ENRICHMENT_TYPES,
   MATCHED_ATOMIC,
@@ -32,7 +32,7 @@ export const parseExistingEnrichments = (
   data: TimelineEventsDetailsItem[]
 ): TimelineEventsDetailsItem[][] => {
   const threatIndicatorField = data.find(
-    ({ field, originalValue }) => field === INDICATOR_DESTINATION_PATH && originalValue
+    ({ field, originalValue }) => field === ENRICHMENT_DESTINATION_PATH && originalValue
   );
   if (!threatIndicatorField) {
     return [];

@@ -6,12 +6,12 @@
  */
 
 import { get } from 'lodash';
-import { INDICATOR_DESTINATION_PATH } from '../../../../../common/constants';
+import { ENRICHMENT_DESTINATION_PATH } from '../../../../../common/constants';
 import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
 
 import { getThreatListItemMock } from './build_threat_mapping_filter.mock';
 import {
-  buildMatchedIndicator,
+  buildEnrichments,
   enrichSignalThreatMatches,
   groupAndMergeSignalMatches,
 } from './enrich_signal_threat_matches';
@@ -73,7 +73,7 @@ describe('groupAndMergeSignalMatches', () => {
   });
 });
 
-describe('buildMatchedIndicator', () => {
+describe('buildEnrichments', () => {
   let threats: ThreatListItem[];
   let queries: ThreatMatchNamedQuery[];
   let indicatorPath: string;
@@ -107,75 +107,75 @@ describe('buildMatchedIndicator', () => {
   });
 
   it('returns an empty list if queries is empty', () => {
-    const indicators = buildMatchedIndicator({
+    const enrichments = buildEnrichments({
       queries: [],
       threats,
       indicatorPath,
     });
 
-    expect(indicators).toEqual([]);
+    expect(enrichments).toEqual([]);
   });
 
   it('returns the value of the matched indicator as matched.atomic', () => {
-    const [indicator] = buildMatchedIndicator({
+    const [enrichment] = buildEnrichments({
       queries,
       threats,
       indicatorPath,
     });
 
-    expect(get(indicator, 'matched.atomic')).toEqual('domain_1');
+    expect(get(enrichment, 'matched.atomic')).toEqual('domain_1');
   });
 
   it('does not enrich from other fields in the indicator document', () => {
-    const [indicator] = buildMatchedIndicator({
+    const [enrichment] = buildEnrichments({
       queries,
       threats,
       indicatorPath,
     });
-    expect(Object.keys(indicator)).toEqual(['indicator', 'matched']);
+    expect(Object.keys(enrichment)).toEqual(['indicator', 'matched']);
   });
 
   it('returns the _id of the matched indicator as matched.id', () => {
-    const [indicator] = buildMatchedIndicator({
+    const [enrichment] = buildEnrichments({
       queries,
       threats,
       indicatorPath,
     });
 
-    expect(get(indicator, 'matched.id')).toEqual('123');
+    expect(get(enrichment, 'matched.id')).toEqual('123');
   });
 
   it('returns the _index of the matched indicator as matched.index', () => {
-    const [indicator] = buildMatchedIndicator({
+    const [enrichment] = buildEnrichments({
       queries,
       threats,
       indicatorPath,
     });
 
-    expect(get(indicator, 'matched.index')).toEqual('threat-index');
+    expect(get(enrichment, 'matched.index')).toEqual('threat-index');
   });
 
   it('returns the field of the matched indicator as matched.field', () => {
-    const [indicator] = buildMatchedIndicator({
+    const [enrichment] = buildEnrichments({
       queries,
       threats,
       indicatorPath,
     });
 
-    expect(get(indicator, 'matched.field')).toEqual('event.field');
+    expect(get(enrichment, 'matched.field')).toEqual('event.field');
   });
 
   it('returns the type of the enrichment as an indicator match type', () => {
-    const [indicator] = buildMatchedIndicator({
+    const [enrichment] = buildEnrichments({
       queries,
       threats,
       indicatorPath,
     });
 
-    expect(get(indicator, 'matched.type')).toEqual(ENRICHMENT_TYPES.IndicatorMatchRule);
+    expect(get(enrichment, 'matched.type')).toEqual(ENRICHMENT_TYPES.IndicatorMatchRule);
   });
 
-  it('returns indicators for each provided query', () => {
+  it('returns enrichments for each provided query', () => {
     threats = [
       getThreatListItemMock({
         _id: '123',
@@ -209,23 +209,23 @@ describe('buildMatchedIndicator', () => {
       getNamedQueryMock({ id: '456', value: 'threat.indicator.other' }),
       getNamedQueryMock({ id: '456', value: 'threat.indicator.domain' }),
     ];
-    const indicators = buildMatchedIndicator({
+    const enrichments = buildEnrichments({
       queries,
       threats,
       indicatorPath,
     });
 
-    expect(indicators).toHaveLength(queries.length);
+    expect(enrichments).toHaveLength(queries.length);
   });
 
   it('returns the indicator data specified at threat.indicator by default', () => {
-    const indicators = buildMatchedIndicator({
+    const enrichments = buildEnrichments({
       queries,
       threats,
       indicatorPath,
     });
 
-    expect(indicators).toEqual([
+    expect(enrichments).toEqual([
       {
         indicator: {
           domain: 'domain_1',
@@ -263,13 +263,13 @@ describe('buildMatchedIndicator', () => {
       }),
     ];
 
-    const indicators = buildMatchedIndicator({
+    const enrichments = buildEnrichments({
       queries,
       threats,
       indicatorPath: 'custom.indicator.path',
     });
 
-    expect(indicators).toEqual([
+    expect(enrichments).toEqual([
       {
         indicator: {
           indicator_field: 'indicator_field_1',
@@ -295,13 +295,13 @@ describe('buildMatchedIndicator', () => {
       }),
     ];
 
-    const indicators = buildMatchedIndicator({
+    const enrichments = buildEnrichments({
       queries,
       threats,
       indicatorPath,
     });
 
-    expect(indicators).toEqual([
+    expect(enrichments).toEqual([
       {
         indicator: {},
         matched: {
@@ -323,13 +323,13 @@ describe('buildMatchedIndicator', () => {
       }),
     ];
 
-    const indicators = buildMatchedIndicator({
+    const enrichments = buildEnrichments({
       queries,
       threats,
       indicatorPath,
     });
 
-    expect(indicators).toEqual([
+    expect(enrichments).toEqual([
       {
         indicator: {},
         matched: {
@@ -358,13 +358,13 @@ describe('buildMatchedIndicator', () => {
       }),
     ];
 
-    const indicators = buildMatchedIndicator({
+    const enrichments = buildEnrichments({
       queries,
       threats,
       indicatorPath,
     });
 
-    expect(indicators).toEqual([
+    expect(enrichments).toEqual([
       {
         indicator: {
           domain: 'foo',
@@ -395,7 +395,7 @@ describe('buildMatchedIndicator', () => {
     ];
 
     expect(() =>
-      buildMatchedIndicator({
+      buildEnrichments({
         queries,
         threats,
         indicatorPath,
@@ -416,7 +416,7 @@ describe('buildMatchedIndicator', () => {
     ];
 
     expect(() =>
-      buildMatchedIndicator({
+      buildEnrichments({
         queries,
         threats,
         indicatorPath,
@@ -480,9 +480,9 @@ describe('enrichSignalThreatMatches', () => {
       indicatorPath
     );
     const [enrichedHit] = enrichedSignals.hits.hits;
-    const indicators = get(enrichedHit._source, INDICATOR_DESTINATION_PATH);
+    const enrichments = get(enrichedHit._source, ENRICHMENT_DESTINATION_PATH);
 
-    expect(indicators).toEqual([
+    expect(enrichments).toEqual([
       { existing: 'indicator' },
       {
         indicator: {
@@ -513,9 +513,9 @@ describe('enrichSignalThreatMatches', () => {
       indicatorPath
     );
     const [enrichedHit] = enrichedSignals.hits.hits;
-    const indicators = get(enrichedHit._source, INDICATOR_DESTINATION_PATH);
+    const enrichments = get(enrichedHit._source, ENRICHMENT_DESTINATION_PATH);
 
-    expect(indicators).toEqual([
+    expect(enrichments).toEqual([
       {
         indicator: {},
         matched: {
@@ -550,9 +550,9 @@ describe('enrichSignalThreatMatches', () => {
       indicatorPath
     );
     const [enrichedHit] = enrichedSignals.hits.hits;
-    const indicators = get(enrichedHit._source, INDICATOR_DESTINATION_PATH);
+    const enrichments = get(enrichedHit._source, ENRICHMENT_DESTINATION_PATH);
 
-    expect(indicators).toEqual([
+    expect(enrichments).toEqual([
       { indicator: { existing: 'indicator' } },
       { indicator: { existing: 'indicator2' } },
       {
@@ -616,9 +616,9 @@ describe('enrichSignalThreatMatches', () => {
       'custom_threat.custom_indicator'
     );
     const [enrichedHit] = enrichedSignals.hits.hits;
-    const indicators = get(enrichedHit._source, INDICATOR_DESTINATION_PATH);
+    const enrichments = get(enrichedHit._source, ENRICHMENT_DESTINATION_PATH);
 
-    expect(indicators).toEqual([
+    expect(enrichments).toEqual([
       {
         indicator: {
           domain: 'custom_domain',
@@ -636,7 +636,7 @@ describe('enrichSignalThreatMatches', () => {
     ]);
   });
 
-  it('merges duplicate matched signals into a single signal with multiple indicators', async () => {
+  it('merges duplicate matched signals into a single signal with multiple enrichments', async () => {
     getMatchedThreats = async () => [
       getThreatListItemMock({
         _id: '123',
@@ -680,9 +680,9 @@ describe('enrichSignalThreatMatches', () => {
     expect(enrichedSignals.hits.hits).toHaveLength(1);
 
     const [enrichedHit] = enrichedSignals.hits.hits;
-    const indicators = get(enrichedHit._source, INDICATOR_DESTINATION_PATH);
+    const enrichments = get(enrichedHit._source, ENRICHMENT_DESTINATION_PATH);
 
-    expect(indicators).toEqual([
+    expect(enrichments).toEqual([
       {
         indicator: {
           domain: 'domain_1',
