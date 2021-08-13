@@ -1,26 +1,71 @@
 - [Introduction](#introduction)
 - [Algorithm steps](#algorithm-steps)
   - [INIT](#init)
+    - [Next action](#next-action)
+    - [New control state](#new-control-state)
   - [CREATE_NEW_TARGET](#create_new_target)
+    - [Next action](#next-action-1)
+    - [New control state](#new-control-state-1)
   - [LEGACY_SET_WRITE_BLOCK](#legacy_set_write_block)
+    - [Next action](#next-action-2)
+    - [New control state](#new-control-state-2)
   - [LEGACY_CREATE_REINDEX_TARGET](#legacy_create_reindex_target)
+    - [Next action](#next-action-3)
+    - [New control state](#new-control-state-3)
   - [LEGACY_REINDEX](#legacy_reindex)
+    - [Next action](#next-action-4)
+    - [New control state](#new-control-state-4)
   - [LEGACY_REINDEX_WAIT_FOR_TASK](#legacy_reindex_wait_for_task)
+    - [Next action](#next-action-5)
+    - [New control state](#new-control-state-5)
   - [LEGACY_DELETE](#legacy_delete)
+    - [Next action](#next-action-6)
+    - [New control state](#new-control-state-6)
   - [WAIT_FOR_YELLOW_SOURCE](#wait_for_yellow_source)
+    - [Next action](#next-action-7)
+    - [New control state](#new-control-state-7)
   - [SET_SOURCE_WRITE_BLOCK](#set_source_write_block)
+    - [Next action](#next-action-8)
+    - [New control state](#new-control-state-8)
   - [CREATE_REINDEX_TEMP](#create_reindex_temp)
+    - [Next action](#next-action-9)
+    - [New control state](#new-control-state-9)
   - [REINDEX_SOURCE_TO_TEMP_OPEN_PIT](#reindex_source_to_temp_open_pit)
+    - [Next action](#next-action-10)
+    - [New control state](#new-control-state-10)
   - [REINDEX_SOURCE_TO_TEMP_READ](#reindex_source_to_temp_read)
+    - [Next action](#next-action-11)
+    - [New control state](#new-control-state-11)
   - [REINDEX_SOURCE_TO_TEMP_INDEX](#reindex_source_to_temp_index)
+    - [Next action](#next-action-12)
+    - [New control state](#new-control-state-12)
+  - [REINDEX_SOURCE_TO_TEMP_INDEX_BULK](#reindex_source_to_temp_index_bulk)
+    - [Next action](#next-action-13)
+    - [New control state](#new-control-state-13)
   - [REINDEX_SOURCE_TO_TEMP_CLOSE_PIT](#reindex_source_to_temp_close_pit)
+    - [Next action](#next-action-14)
+    - [New control state](#new-control-state-14)
   - [SET_TEMP_WRITE_BLOCK](#set_temp_write_block)
+    - [Next action](#next-action-15)
+    - [New control state](#new-control-state-15)
   - [CLONE_TEMP_TO_TARGET](#clone_temp_to_target)
+    - [Next action](#next-action-16)
+    - [New control state](#new-control-state-16)
   - [OUTDATED_DOCUMENTS_SEARCH](#outdated_documents_search)
+    - [Next action](#next-action-17)
+    - [New control state](#new-control-state-17)
   - [OUTDATED_DOCUMENTS_TRANSFORM](#outdated_documents_transform)
+    - [Next action](#next-action-18)
+    - [New control state](#new-control-state-18)
   - [UPDATE_TARGET_MAPPINGS](#update_target_mappings)
+    - [Next action](#next-action-19)
+    - [New control state](#new-control-state-19)
   - [UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK](#update_target_mappings_wait_for_task)
+    - [Next action](#next-action-20)
+    - [New control state](#new-control-state-20)
   - [MARK_VERSION_INDEX_READY_CONFLICT](#mark_version_index_ready_conflict)
+    - [Next action](#next-action-21)
+    - [New control state](#new-control-state-21)
 - [Manual QA Test Plan](#manual-qa-test-plan)
   - [1. Legacy pre-migration](#1-legacy-pre-migration)
   - [2. Plugins enabled/disabled](#2-plugins-enableddisabled)
@@ -245,15 +290,31 @@ Read the next batch of outdated documents from the source index by using search 
 
 ## REINDEX_SOURCE_TO_TEMP_INDEX
 ### Next action
-`transformRawDocs` + `bulkIndexTransformedDocuments`
+`transformRawDocs`
 
-1. Transform the current batch of documents
-2. Use the bulk API create action to write a batch of up-to-date documents. The create action ensures that there will be only one write per reindexed document even if multiple Kibana instances are performing this step. Ignore any create errors because of documents that already exist in the temporary index. Use `refresh=false` to speed up the create actions, the `UPDATE_TARGET_MAPPINGS` step will ensure that the index is refreshed before we start serving traffic.
-
+Transform the current batch of documents
+  
 In order to support sharing saved objects to multiple spaces in 8.0, the
 transforms will also regenerate document `_id`'s. To ensure that this step
 remains idempotent, the new `_id` is deterministically generated using UUIDv5
 ensuring that each Kibana instance generates the same new `_id` for the same document.
+### New control state
+  → `REINDEX_SOURCE_TO_TEMP_INDEX_BULK`
+## REINDEX_SOURCE_TO_TEMP_INDEX_BULK
+### Next action
+`bulkIndexTransformedDocuments`
+
+Use the bulk API create action to write a batch of up-to-date documents. The
+create action ensures that there will be only one write per reindexed document
+even if multiple Kibana instances are performing this step. Use
+`refresh=false` to speed up the create actions, the `UPDATE_TARGET_MAPPINGS`
+step will ensure that the index is refreshed before we start serving traffic.
+
+The following errors are ignored because it means another instance already
+completed this step:
+ - documents already exist in the temp index
+ - temp index has a write block
+ - temp index is not found
 ### New control state
   → `REINDEX_SOURCE_TO_TEMP_READ`
    
