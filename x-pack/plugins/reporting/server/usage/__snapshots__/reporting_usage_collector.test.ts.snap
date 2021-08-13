@@ -1,79 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`data modeling with empty data 1`] = `
+exports[`data modeling usage data pre-7.15.0 1`] = `
 Object {
   "PNG": Object {
     "available": true,
-    "total": 0,
-  },
-  "_all": 0,
-  "available": true,
-  "browser_type": undefined,
-  "csv": Object {
-    "available": true,
-    "total": 0,
-  },
-  "csv_searchsource": Object {
-    "available": true,
-    "total": 0,
-  },
-  "enabled": true,
-  "last7Days": Object {
-    "PNG": Object {
-      "available": true,
-      "total": 0,
-    },
-    "_all": 0,
-    "csv": Object {
-      "available": true,
-      "total": 0,
-    },
-    "csv_searchsource": Object {
-      "available": true,
-      "total": 0,
-    },
-    "printable_pdf": Object {
-      "app": Object {
-        "dashboard": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "layout": Object {
-        "preserve_layout": 0,
-        "print": 0,
-      },
-      "total": 0,
-    },
-    "status": Object {
-      "completed": 0,
-      "failed": 0,
-    },
-    "statuses": Object {},
-  },
-  "printable_pdf": Object {
-    "app": Object {
-      "dashboard": 0,
-      "visualization": 0,
-    },
-    "available": true,
-    "layout": Object {
-      "preserve_layout": 0,
-      "print": 0,
-    },
-    "total": 0,
-  },
-  "status": Object {
-    "completed": 0,
-    "failed": 0,
-  },
-  "statuses": Object {},
-}
-`;
-
-exports[`data modeling with normal looking usage data 1`] = `
-Object {
-  "PNG": Object {
-    "available": true,
+    "deprecated": 0,
     "total": 3,
   },
   "_all": 12,
@@ -81,25 +12,30 @@ Object {
   "browser_type": undefined,
   "csv": Object {
     "available": true,
+    "deprecated": 0,
     "total": 0,
   },
   "csv_searchsource": Object {
     "available": true,
+    "deprecated": 0,
     "total": 0,
   },
   "enabled": true,
   "last7Days": Object {
     "PNG": Object {
       "available": true,
+      "deprecated": 0,
       "total": 1,
     },
     "_all": 1,
     "csv": Object {
       "available": true,
+      "deprecated": 0,
       "total": 0,
     },
     "csv_searchsource": Object {
       "available": true,
+      "deprecated": 0,
       "total": 0,
     },
     "printable_pdf": Object {
@@ -108,6 +44,7 @@ Object {
         "visualization": 0,
       },
       "available": true,
+      "deprecated": 0,
       "layout": Object {
         "preserve_layout": 0,
         "print": 0,
@@ -134,6 +71,7 @@ Object {
       "visualization": 3,
     },
     "available": true,
+    "deprecated": 0,
     "layout": Object {
       "preserve_layout": 9,
       "print": 0,
@@ -169,10 +107,185 @@ Object {
 }
 `;
 
+exports[`data modeling usage data with meta.isDeprecated jobTypes 1`] = `
+Object {
+  "PNG": Object {
+    "available": true,
+    "deprecated": 0,
+    "total": 0,
+  },
+  "_all": 9,
+  "available": true,
+  "browser_type": undefined,
+  "csv": Object {
+    "available": true,
+    "deprecated": 4,
+    "total": 4,
+  },
+  "csv_searchsource": Object {
+    "available": true,
+    "deprecated": 0,
+    "total": 5,
+  },
+  "enabled": true,
+  "last7Days": Object {
+    "PNG": Object {
+      "available": true,
+      "deprecated": 0,
+      "total": 0,
+    },
+    "_all": 9,
+    "csv": Object {
+      "available": true,
+      "deprecated": 4,
+      "total": 4,
+    },
+    "csv_searchsource": Object {
+      "available": true,
+      "deprecated": 0,
+      "total": 5,
+    },
+    "printable_pdf": Object {
+      "app": Object {
+        "dashboard": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "status": Object {
+      "completed": 9,
+      "failed": 0,
+    },
+    "statuses": Object {
+      "completed": Object {
+        "csv": Object {
+          "search": 4,
+        },
+        "csv_searchsource": Object {
+          "search": 5,
+        },
+      },
+    },
+  },
+  "printable_pdf": Object {
+    "app": Object {
+      "dashboard": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "status": Object {
+    "completed": 9,
+    "failed": 0,
+  },
+  "statuses": Object {
+    "completed": Object {
+      "csv": Object {
+        "search": 4,
+      },
+      "csv_searchsource": Object {
+        "search": 5,
+      },
+    },
+  },
+}
+`;
+
+exports[`data modeling with empty data 1`] = `
+Object {
+  "PNG": Object {
+    "available": true,
+    "deprecated": 0,
+    "total": 0,
+  },
+  "_all": 0,
+  "available": true,
+  "browser_type": undefined,
+  "csv": Object {
+    "available": true,
+    "deprecated": 0,
+    "total": 0,
+  },
+  "csv_searchsource": Object {
+    "available": true,
+    "deprecated": 0,
+    "total": 0,
+  },
+  "enabled": true,
+  "last7Days": Object {
+    "PNG": Object {
+      "available": true,
+      "deprecated": 0,
+      "total": 0,
+    },
+    "_all": 0,
+    "csv": Object {
+      "available": true,
+      "deprecated": 0,
+      "total": 0,
+    },
+    "csv_searchsource": Object {
+      "available": true,
+      "deprecated": 0,
+      "total": 0,
+    },
+    "printable_pdf": Object {
+      "app": Object {
+        "dashboard": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "status": Object {
+      "completed": 0,
+      "failed": 0,
+    },
+    "statuses": Object {},
+  },
+  "printable_pdf": Object {
+    "app": Object {
+      "dashboard": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "status": Object {
+    "completed": 0,
+    "failed": 0,
+  },
+  "statuses": Object {},
+}
+`;
+
 exports[`data modeling with sparse data 1`] = `
 Object {
   "PNG": Object {
     "available": true,
+    "deprecated": 0,
     "total": 1,
   },
   "_all": 4,
@@ -180,25 +293,30 @@ Object {
   "browser_type": undefined,
   "csv": Object {
     "available": true,
+    "deprecated": 1,
     "total": 1,
   },
   "csv_searchsource": Object {
     "available": true,
+    "deprecated": 0,
     "total": 0,
   },
   "enabled": true,
   "last7Days": Object {
     "PNG": Object {
       "available": true,
+      "deprecated": 0,
       "total": 1,
     },
     "_all": 4,
     "csv": Object {
       "available": true,
+      "deprecated": 1,
       "total": 1,
     },
     "csv_searchsource": Object {
       "available": true,
+      "deprecated": 0,
       "total": 0,
     },
     "printable_pdf": Object {
@@ -208,6 +326,7 @@ Object {
         "visualization": 0,
       },
       "available": true,
+      "deprecated": 0,
       "layout": Object {
         "preserve_layout": 2,
         "print": 0,
@@ -238,6 +357,7 @@ Object {
       "visualization": 0,
     },
     "available": true,
+    "deprecated": 0,
     "layout": Object {
       "preserve_layout": 2,
       "print": 0,

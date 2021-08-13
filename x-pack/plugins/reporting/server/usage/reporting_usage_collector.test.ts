@@ -188,7 +188,8 @@ describe('data modeling', () => {
   beforeAll(async () => {
     mockCore = await createMockReportingCore(createMockConfigSchema());
   });
-  test('with normal looking usage data', async () => {
+
+  test('usage data pre-7.15.0', async () => {
     const plugins = getPluginsMock();
     const collector = getReportingUsageCollector(
       mockCore,
@@ -233,6 +234,147 @@ describe('data modeling', () => {
           },
         },
       } as SearchResponse) // prettier-ignore
+    );
+    const usageStats = await collector.fetch(collectorFetchContext);
+    expect(usageStats).toMatchSnapshot();
+  });
+
+  test('usage data with meta.isDeprecated jobTypes', async () => {
+    const plugins = getPluginsMock();
+    const collector = getReportingUsageCollector(
+      mockCore,
+      plugins.usageCollection,
+      getLicenseMock(),
+      exportTypesRegistry,
+      function isReady() {
+        return Promise.resolve(true);
+      }
+    );
+    collectorFetchContext = getMockFetchClients(
+      getResponseMock({
+        aggregations: {
+          ranges: {
+            buckets: {
+              all: {
+                doc_count: 9,
+                layoutTypes: {
+                  doc_count: 0,
+                  pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+                },
+                statusByApp: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [
+                    {
+                      key: 'completed',
+                      doc_count: 9,
+                      jobTypes: {
+                        doc_count_error_upper_bound: 0,
+                        sum_other_doc_count: 0,
+                        buckets: [
+                          {
+                            key: 'csv_searchsource',
+                            doc_count: 5,
+                            appNames: {
+                              doc_count_error_upper_bound: 0,
+                              sum_other_doc_count: 0,
+                              buckets: [{ key: 'search', doc_count: 5 }],
+                            },
+                          },
+                          {
+                            key: 'csv',
+                            doc_count: 4,
+                            appNames: {
+                              doc_count_error_upper_bound: 0,
+                              sum_other_doc_count: 0,
+                              buckets: [{ key: 'search', doc_count: 4 }],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+                objectTypes: {
+                  doc_count: 0,
+                  pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+                },
+                statusTypes: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [{ key: 'completed', doc_count: 9 }],
+                },
+                jobTypes: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [
+                    { key: 'csv_searchsource', doc_count: 5, isDeprecated: { doc_count: 0 } },
+                    { key: 'csv', doc_count: 4, isDeprecated: { doc_count: 4 } },
+                  ],
+                },
+              },
+              last7Days: {
+                doc_count: 9,
+                layoutTypes: {
+                  doc_count: 0,
+                  pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+                },
+                statusByApp: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [
+                    {
+                      key: 'completed',
+                      doc_count: 9,
+                      jobTypes: {
+                        doc_count_error_upper_bound: 0,
+                        sum_other_doc_count: 0,
+                        buckets: [
+                          {
+                            key: 'csv_searchsource',
+                            doc_count: 5,
+                            appNames: {
+                              doc_count_error_upper_bound: 0,
+                              sum_other_doc_count: 0,
+                              buckets: [{ key: 'search', doc_count: 5 }],
+                            },
+                          },
+                          {
+                            key: 'csv',
+                            doc_count: 4,
+                            appNames: {
+                              doc_count_error_upper_bound: 0,
+                              sum_other_doc_count: 0,
+                              buckets: [{ key: 'search', doc_count: 4 }],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+                objectTypes: {
+                  doc_count: 0,
+                  pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+                },
+                statusTypes: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [{ key: 'completed', doc_count: 9 }],
+                },
+                jobTypes: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [
+                    { key: 'csv_searchsource', doc_count: 5, isDeprecated: { doc_count: 0 } },
+                    { key: 'csv', doc_count: 4, isDeprecated: { doc_count: 4 } },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      })
     );
     const usageStats = await collector.fetch(collectorFetchContext);
     expect(usageStats).toMatchSnapshot();
@@ -471,6 +613,9 @@ describe('Ready for collection observable', () => {
             "available": Object {
               "type": "boolean",
             },
+            "deprecated": Object {
+              "type": "long",
+            },
             "total": Object {
               "type": "long",
             },
@@ -488,6 +633,9 @@ describe('Ready for collection observable', () => {
             "available": Object {
               "type": "boolean",
             },
+            "deprecated": Object {
+              "type": "long",
+            },
             "total": Object {
               "type": "long",
             },
@@ -495,6 +643,9 @@ describe('Ready for collection observable', () => {
           "csv_searchsource": Object {
             "available": Object {
               "type": "boolean",
+            },
+            "deprecated": Object {
+              "type": "long",
             },
             "total": Object {
               "type": "long",
@@ -508,6 +659,9 @@ describe('Ready for collection observable', () => {
               "available": Object {
                 "type": "boolean",
               },
+              "deprecated": Object {
+                "type": "long",
+              },
               "total": Object {
                 "type": "long",
               },
@@ -519,6 +673,9 @@ describe('Ready for collection observable', () => {
               "available": Object {
                 "type": "boolean",
               },
+              "deprecated": Object {
+                "type": "long",
+              },
               "total": Object {
                 "type": "long",
               },
@@ -526,6 +683,9 @@ describe('Ready for collection observable', () => {
             "csv_searchsource": Object {
               "available": Object {
                 "type": "boolean",
+              },
+              "deprecated": Object {
+                "type": "long",
               },
               "total": Object {
                 "type": "long",
@@ -546,6 +706,9 @@ describe('Ready for collection observable', () => {
               "available": Object {
                 "type": "boolean",
               },
+              "deprecated": Object {
+                "type": "long",
+              },
               "layout": Object {
                 "preserve_layout": Object {
                   "type": "long",
@@ -559,9 +722,6 @@ describe('Ready for collection observable', () => {
               },
             },
             "status": Object {
-              "cancelled": Object {
-                "type": "long",
-              },
               "completed": Object {
                 "type": "long",
               },
@@ -579,52 +739,6 @@ describe('Ready for collection observable', () => {
               },
             },
             "statuses": Object {
-              "cancelled": Object {
-                "PNG": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "csv": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "csv_searchsource": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "printable_pdf": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-              },
               "completed": Object {
                 "PNG": Object {
                   "canvas workpad": Object {
@@ -872,6 +986,9 @@ describe('Ready for collection observable', () => {
             "available": Object {
               "type": "boolean",
             },
+            "deprecated": Object {
+              "type": "long",
+            },
             "layout": Object {
               "preserve_layout": Object {
                 "type": "long",
@@ -885,9 +1002,6 @@ describe('Ready for collection observable', () => {
             },
           },
           "status": Object {
-            "cancelled": Object {
-              "type": "long",
-            },
             "completed": Object {
               "type": "long",
             },
@@ -905,52 +1019,6 @@ describe('Ready for collection observable', () => {
             },
           },
           "statuses": Object {
-            "cancelled": Object {
-              "PNG": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "csv": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "csv_searchsource": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "printable_pdf": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-            },
             "completed": Object {
               "PNG": Object {
                 "canvas workpad": Object {
