@@ -19,14 +19,14 @@ import { useTransactionTraceSamplesFetcher } from '../../../hooks/use_transactio
 import { HeightRetainer } from '../../shared/HeightRetainer';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 
-import { failedTransactionsRateTab } from './failed_transactions_rate_tab';
+import { failedTransactionsCorrelationsTab } from './failed_transactions_correlations_tab';
 import { latencyCorrelationsTab } from './latency_correlations_tab';
 import { traceSamplesTab } from './trace_samples_tab';
 
 const tabs = [
   traceSamplesTab,
   latencyCorrelationsTab,
-  failedTransactionsRateTab,
+  failedTransactionsCorrelationsTab,
 ];
 
 export function TransactionDetailsTabs() {

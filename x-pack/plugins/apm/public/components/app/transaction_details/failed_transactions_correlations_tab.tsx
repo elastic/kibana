@@ -26,7 +26,7 @@ import { ErrorCorrelations } from '../correlations/error_correlations';
 
 import type { TabContentProps } from './types';
 
-function FailedTransactionsRateTab({}: TabContentProps) {
+function FailedTransactionsCorrelationsTab({}: TabContentProps) {
   const license = useLicenseContext();
 
   const hasActivePlatinumLicense = isActivePlatinumLicense(license);
@@ -46,41 +46,41 @@ function FailedTransactionsRateTab({}: TabContentProps) {
   ) : (
     <LicensePrompt
       text={i18n.translate(
-        'xpack.apm.failedTransactionsRate.licenseCheckText',
+        'xpack.apm.failedTransactionsCorrelations.licenseCheckText',
         {
-          defaultMessage: `To use the failed transactions rate feature, you must be subscribed to an Elastic Platinum license.`,
+          defaultMessage: `To use the failed transactions correlations feature, you must be subscribed to an Elastic Platinum license.`,
         }
       )}
     />
   );
 }
 
-export const failedTransactionsRateTab = {
-  dataTestSubj: 'apmFailedTransactionsRateTabButton',
-  key: 'failedTransactionsRate',
+export const failedTransactionsCorrelationsTab = {
+  dataTestSubj: 'apmFailedTransactionsCorrelationsTabButton',
+  key: 'failedTransactionsCorrelations',
   label: (
     <>
       {i18n.translate(
-        'xpack.apm.transactionDetails.tabs.failedTransactionsRateLabel',
+        'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsLabel',
         {
-          defaultMessage: 'Failed transaction rate',
+          defaultMessage: 'Failed transaction correlations',
         }
       )}{' '}
       <EuiBetaBadge
         label={i18n.translate(
-          'xpack.apm.transactionDetails.tabs.failedTransactionsRateBetaLabel',
+          'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaLabel',
           {
             defaultMessage: 'Beta',
           }
         )}
         title={i18n.translate(
-          'xpack.apm.transactionDetails.tabs.failedTransactionsRateBetaTitle',
+          'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaTitle',
           {
             defaultMessage: 'Failed transaction rate',
           }
         )}
         tooltipContent={i18n.translate(
-          'xpack.apm.transactionDetails.tabs.failedTransactionsRateBetaDescription',
+          'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaDescription',
           {
             defaultMessage:
               'Failed transaction rate is not GA. Please help us by reporting any bugs.',
@@ -90,5 +90,5 @@ export const failedTransactionsRateTab = {
       />
     </>
   ),
-  component: FailedTransactionsRateTab,
+  component: FailedTransactionsCorrelationsTab,
 };
