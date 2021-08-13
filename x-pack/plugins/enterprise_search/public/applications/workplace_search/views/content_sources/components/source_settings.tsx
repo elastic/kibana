@@ -222,53 +222,54 @@ export const SourceSettings: React.FC = () => {
       )}
       {showSyncControls && (
         <ContentSection title={SYNC_MANAGEMENT_TITLE} description={SYNC_MANAGEMENT_DESCRIPTION}>
-          <EuiPanel hasShadow={false} hasBorder grow={false}>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  checked={synchronizeChecked}
-                  onChange={(e) => setSynchronize(e.target.checked)}
-                  label={SYNC_MANAGEMENT_SYNCHRONIZE_LABEL}
-                  data-test-subj="SynchronizeToggle"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  color="primary"
-                  onClick={submitSyncControls}
-                  data-test-subj="SaveSyncControlsButton"
-                >
-                  {SAVE_CHANGES_BUTTON}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer />
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  checked={thumbnailsChecked}
-                  onChange={(e) => setThumbnails(e.target.checked)}
-                  label={
-                    areThumbnailsConfigEnabled
-                      ? SYNC_MANAGEMENT_THUMBNAILS_LABEL
-                      : SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL
-                  }
-                  disabled={!areThumbnailsConfigEnabled}
-                  data-test-subj="ThumbnailsToggle"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  checked={contentExtractionChecked}
-                  onChange={(e) => setContentExtraction(e.target.checked)}
-                  label={SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL}
-                  data-test-subj="ContentExtractionToggle"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                checked={synchronizeChecked}
+                onChange={(e) => setSynchronize(e.target.checked)}
+                label={SYNC_MANAGEMENT_SYNCHRONIZE_LABEL}
+                data-test-subj="SynchronizeToggle"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                checked={thumbnailsChecked}
+                onChange={(e) => setThumbnails(e.target.checked)}
+                label={
+                  areThumbnailsConfigEnabled
+                    ? SYNC_MANAGEMENT_THUMBNAILS_LABEL
+                    : SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL
+                }
+                disabled={!areThumbnailsConfigEnabled}
+                data-test-subj="ThumbnailsToggle"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                checked={contentExtractionChecked}
+                onChange={(e) => setContentExtraction(e.target.checked)}
+                label={SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL}
+                data-test-subj="ContentExtractionToggle"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="primary"
+                onClick={submitSyncControls}
+                data-test-subj="SaveSyncControlsButton"
+              >
+                {SAVE_CHANGES_BUTTON}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </ContentSection>
       )}
       <ContentSection title={SYNC_DIAGNOSTICS_TITLE} description={SYNC_DIAGNOSTICS_DESCRIPTION}>
