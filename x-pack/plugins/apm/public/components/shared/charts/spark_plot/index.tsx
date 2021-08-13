@@ -73,7 +73,7 @@ export function SparkPlot({
 
   const chartSize = {
     height: theme.eui.euiSizeL,
-    width: compact ? unit * 3 : unit * 4,
+    width: compact ? unit * 4 : unit * 5,
   };
 
   const Sparkline = hasComparisonSeries ? LineSeries : AreaSeries;
