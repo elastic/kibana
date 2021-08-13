@@ -107,6 +107,7 @@ export class Job {
     if (this.isDeprecated) {
       deprecatedMessage = (
         <EuiText size="s">
+          {' '}
           <EuiTextColor color="warning">
             {i18n.translate('xpack.reporting.jobStatusDetail.deprecatedText', {
               defaultMessage: `This is a deprecated export type. Automation of this report will need to be re-created for compatibility with future versions of Kibana.`,

@@ -7845,6 +7845,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                           <div
                             className="euiText euiText--small"
                           >
+                             
                             <EuiTextColor
                               color="warning"
                             >
@@ -8924,6 +8925,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                           <div
                             className="euiText euiText--small"
                           >
+                             
                             <EuiTextColor
                               color="warning"
                             >
