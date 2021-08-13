@@ -37,17 +37,15 @@ export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
  * Http request headers to read.
  * @public
  */
-export type Headers = { [header in KnownHeaders]?: string | string[] | undefined } & {
+export interface Headers {
   [header: string]: string | string[] | undefined;
-};
+}
 
 /**
  * Http response headers to set.
  * @public
  */
-export type ResponseHeaders =
-  | Record<KnownHeaders, string | string[]>
-  | Record<string, string | string[]>;
+export type ResponseHeaders = Record<string, string | string[]>;
 
 const normalizeHeaderField = (field: string) => field.trim().toLowerCase();
 
