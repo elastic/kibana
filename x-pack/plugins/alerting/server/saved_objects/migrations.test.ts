@@ -1054,7 +1054,7 @@ describe('successful migrations', () => {
               id: '123',
               list_id: '456',
               type: 'detection',
-              namespace_type: 'single',
+              namespace_type: 'agnostic',
             },
             {
               id: '789',
@@ -1072,7 +1072,7 @@ describe('successful migrations', () => {
           {
             name: 'param:exceptionsList_0',
             id: '123',
-            type: 'exception-list',
+            type: 'exception-list-agnostic',
           },
           {
             name: 'param:exceptionsList_1',
@@ -1100,7 +1100,7 @@ describe('successful migrations', () => {
               id: '789',
               list_id: '0123',
               type: 'detection',
-              namespace_type: 'single',
+              namespace_type: 'agnostic',
             },
             {
               id: '101112',
@@ -1123,7 +1123,7 @@ describe('successful migrations', () => {
           {
             name: 'param:exceptionsList_1',
             id: '789',
-            type: 'exception-list',
+            type: 'exception-list-agnostic',
           },
           {
             name: 'param:exceptionsList_2',

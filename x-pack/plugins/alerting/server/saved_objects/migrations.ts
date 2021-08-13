@@ -515,7 +515,10 @@ function addExceptionListsToReferences(
             {
               name: `param:exceptionsList_${index}`,
               id: String(exceptionItem.id),
-              type: 'exception-list',
+              type:
+                exceptionItem.namespace_type === 'agnostic'
+                  ? 'exception-list-agnostic'
+                  : 'exception-list',
             },
           ];
         }
