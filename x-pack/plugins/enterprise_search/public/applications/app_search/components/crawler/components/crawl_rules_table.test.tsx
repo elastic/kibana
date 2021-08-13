@@ -15,8 +15,6 @@ import { EuiFieldText, EuiSelect } from '@elastic/eui';
 
 import { GenericEndpointInlineEditableTable } from '../../../../shared/tables/generic_endpoint_inline_editable_table';
 
-import { mountWithIntl } from '../../../../test_helpers';
-
 import { CrawlerPolicies, CrawlerRules } from '../types';
 
 import { CrawlRulesTable } from './crawl_rules_table';
