@@ -19,7 +19,8 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
             interval: -1,
           },
         },
-        context
+        context,
+        false
       );
       expect(result).toEqual({
         found: true,
@@ -39,7 +40,8 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
             enabled: false,
           },
         },
-        context
+        context,
+        false
       );
       expect(result).toEqual({
         found: true,
@@ -61,7 +63,8 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
             coolExporterToIgnore: {},
           },
         },
-        context
+        context,
+        false
       );
       expect(result).toEqual({
         found: true,
@@ -76,14 +79,14 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
 
   describe('collection interval', () => {
     it('should not flag collection interval if value is > 0', async () => {
-      const result = await findReason({ collection: { interval: 1 } }, context);
+      const result = await findReason({ collection: { interval: 1 } }, context, false);
       expect(result).toEqual({ found: false });
     });
 
     it('should flag collection interval for any invalid value', async () => {
       let result;
 
-      result = await findReason({ collection: { interval: 0 } }, context);
+      result = await findReason({ collection: { interval: 0 } }, context, false);
       expect(result).toEqual({
         found: true,
         reason: {
@@ -93,7 +96,7 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
         },
       });
 
-      result = await findReason({ collection: { interval: -10 } }, context);
+      result = await findReason({ collection: { interval: -10 } }, context, false);
       expect(result).toEqual({
         found: true,
         reason: {
@@ -103,7 +106,7 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
         },
       });
 
-      result = await findReason({ collection: { interval: null } }, context);
+      result = await findReason({ collection: { interval: null } }, context, false);
       expect(result).toEqual({
         found: true,
         reason: {
@@ -116,16 +119,16 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
   });
 
   it('should not flag enabled if value is true', async () => {
-    const result = await findReason({ enabled: true }, context);
+    const result = await findReason({ enabled: true }, context, false);
     expect(result).toEqual({ found: false });
   });
 
   it('should not flag exporters if value is undefined/null', async () => {
     let result;
-    result = await findReason({ exporters: undefined }, context);
+    result = await findReason({ exporters: undefined }, context, false);
     expect(result).toEqual({ found: false });
 
-    result = await findReason({ exporters: null }, context);
+    result = await findReason({ exporters: null }, context, false);
     expect(result).toEqual({ found: false });
   });
 
@@ -151,7 +154,7 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
           },
         },
       };
-      const result = await findReason(input, context);
+      const result = await findReason(input, context, false);
       expect(result).toEqual({
         found: true,
         reason: {
@@ -204,7 +207,7 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
           },
         },
       };
-      const result = await findReason(input, context);
+      const result = await findReason(input, context, false);
       expect(result).toEqual({
         found: true,
         reason: {
@@ -236,7 +239,7 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
           },
         },
       };
-      const result = await findReason(input, context);
+      const result = await findReason(input, context, false);
       expect(result).toEqual({ found: false });
     });
   });
