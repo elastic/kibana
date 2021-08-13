@@ -10,9 +10,10 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import type { ExpressionRenderDefinition } from 'src/plugins/expressions';
 import { RegionMapVisRenderValue } from './region_map_fn';
 import { RegionMapVisualization } from './region_map_visualization';
+import { REGION_MAP_RENDER } from './types';
 
 export const regionMapRenderer = {
-  name: 'region_map_vis',
+  name: REGION_MAP_RENDER,
   reuseDomNode: true,
   render: async (domNode, { filters, query, timeRange, visConfig }, handlers) => {
     handlers.onDestroy(() => {

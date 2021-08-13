@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { VisTypeDefinition } from '../../../../../../src/plugins/visualizations/public';
 import { toExpressionAst } from './to_ast';
-import { MapTypes, TileMapVisParams } from './types';
+import { MapTypes, TileMapVisParams, TILE_MAP_VIS_TYPE } from './types';
 import { TileMapEditor } from './tile_map_editor';
 
 export const title = i18n.translate('xpack.maps.tileMap.vis.title', {
@@ -16,7 +16,7 @@ export const title = i18n.translate('xpack.maps.tileMap.vis.title', {
 });
 
 export const tileMapVisType = {
-  name: 'tile_map',
+  name: TILE_MAP_VIS_TYPE,
   title,
   icon: 'visMapCoordinate',
   description: i18n.translate('xpack.maps.tileMap.vis.description', {

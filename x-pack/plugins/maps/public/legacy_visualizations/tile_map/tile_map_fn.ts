@@ -12,14 +12,14 @@ import type {
   ExpressionFunctionDefinition,
   Render,
 } from '../../../../../../src/plugins/expressions/public';
-import { TileMapVisConfig } from './types';
+import { TILE_MAP_RENDER, TILE_MAP_VIS_TYPE, TileMapVisConfig } from './types';
 
 interface Arguments {
   visConfig: string;
 }
 
 export interface TileMapVisRenderValue {
-  visType: 'tile_map';
+  visType: typeof TILE_MAP_VIS_TYPE;
   visConfig: TileMapVisConfig;
   filters?: Filter[];
   query?: Query;
@@ -49,9 +49,9 @@ export const createTileMapFn = (): TileMapExpressionFunctionDefinition => ({
   async fn(input, args) {
     return {
       type: 'render',
-      as: 'tile_map_vis',
+      as: TILE_MAP_RENDER,
       value: {
-        visType: 'tile_map',
+        visType: TILE_MAP_VIS_TYPE,
         visConfig: JSON.parse(args.visConfig),
         filters: input.filters,
         query: Array.isArray(input.query) ? input.query[0] : input.query,

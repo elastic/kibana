@@ -12,14 +12,14 @@ import type {
   ExpressionFunctionDefinition,
   Render,
 } from '../../../../../../src/plugins/expressions/public';
-import { RegionMapVisConfig } from './types';
+import { REGION_MAP_RENDER, REGION_MAP_VIS_TYPE, RegionMapVisConfig } from './types';
 
 interface Arguments {
   visConfig: string;
 }
 
 export interface RegionMapVisRenderValue {
-  visType: 'region_map';
+  visType: typeof REGION_MAP_VIS_TYPE;
   visConfig: RegionMapVisConfig;
   filters?: Filter[];
   query?: Query;
@@ -49,9 +49,9 @@ export const createRegionMapFn = (): RegionMapExpressionFunctionDefinition => ({
   async fn(input, args) {
     return {
       type: 'render',
-      as: 'region_map_vis',
+      as: REGION_MAP_RENDER,
       value: {
-        visType: 'region_map',
+        visType: REGION_MAP_VIS_TYPE,
         visConfig: JSON.parse(args.visConfig),
         filters: input.filters,
         query: Array.isArray(input.query) ? input.query[0] : input.query,

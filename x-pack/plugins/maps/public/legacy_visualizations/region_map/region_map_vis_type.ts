@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { VisTypeDefinition } from '../../../../../../src/plugins/visualizations/public';
 import { toExpressionAst } from './to_ast';
-import { RegionMapVisParams } from './types';
+import { REGION_MAP_VIS_TYPE, RegionMapVisParams } from './types';
 import { RegionMapEditor } from './region_map_editor';
 
 export const title = i18n.translate('xpack.maps.regionMapMap.vis.title', {
@@ -16,7 +16,7 @@ export const title = i18n.translate('xpack.maps.regionMapMap.vis.title', {
 });
 
 export const regionMapVisType = {
-  name: 'region_map',
+  name: REGION_MAP_VIS_TYPE,
   title,
   icon: 'visMapRegion',
   description: i18n.translate('xpack.maps.regionMap.vis.description', {
