@@ -300,10 +300,10 @@ describe('ingest_integration tests ', () => {
       listId: 'fake',
       comments: [],
       entries: [],
-      itemId: '1',
-      namespaceType: 'agnostic',
+      item_id: '1',
+      namespace_type: 'agnostic',
       name: 'TA with policy assigned',
-      osTypes: [],
+      os_types: [],
       description: 'TA with policy assigned ',
       meta: undefined,
       tags: [`policy:${policyId}`],
@@ -341,6 +341,9 @@ describe('ingest_integration tests ', () => {
 
       expect(exceptionListClient.updateExceptionListItem).toHaveBeenCalledWith({
         ...fakeTA,
+        itemId: fakeTA.item_id,
+        namespaceType: fakeTA.namespace_type,
+        osTypes: fakeTA.os_types,
         tags: [],
       });
     });

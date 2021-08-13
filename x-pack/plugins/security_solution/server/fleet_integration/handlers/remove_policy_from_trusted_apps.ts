@@ -6,8 +6,7 @@
  */
 
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { without } from 'lodash/fp';
-import { ExceptionListClient, UpdateExceptionListItemOptions } from '../../../../lists/server';
+import { ExceptionListClient } from '../../../../lists/server';
 
 interface DeletePolicy {
   id: string;
@@ -53,8 +52,11 @@ export const removePolicyFromTrustedApps = async (
   for (const trustedApp of trustedApps) {
     updates.push(
       exceptionsClient.updateExceptionListItem({
-        ...((trustedApp as unknown) as UpdateExceptionListItemOptions),
-        tags: without(trustedApp.tags, `policy:${policy.id}`),
+        ...trustedApp,
+        itemId: trustedApp.item_id,
+        namespaceType: trustedApp.namespace_type,
+        osTypes: trustedApp.os_types,
+        tags: trustedApp.tags.filter((currentPolicy) => currentPolicy !== `policy:${policy.id}`),
       })
     );
   }

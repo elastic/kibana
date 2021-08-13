@@ -144,14 +144,14 @@ export const getPackagePolicyDeleteCallback = (
     if (!exceptionsClient) {
       return;
     }
-    const promises: Array<Promise<void>> = [];
+    const policiesToRemove: Array<Promise<void>> = [];
     for (const policy of deletePackagePolicy) {
       if (isEndpointPackagePolicy(policy)) {
         if (experimentalFeatures?.trustedAppsByPolicyEnabled) {
-          promises.push(removePolicyFromTrustedApps(exceptionsClient, policy));
+          policiesToRemove.push(removePolicyFromTrustedApps(exceptionsClient, policy));
         }
       }
     }
-    await Promise.all(promises);
+    await Promise.all(policiesToRemove);
   };
 };

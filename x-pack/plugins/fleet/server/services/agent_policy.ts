@@ -12,6 +12,8 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   SavedObjectsBulkUpdateResponse,
+  KibanaRequest,
+  RequestHandlerContext,
 } from 'src/core/server';
 
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
@@ -39,6 +41,7 @@ import {
   packageToPackagePolicy,
   AGENT_POLICY_INDEX,
 } from '../../common';
+import type { DeletePackagePoliciesResponse } from '../../common';
 import type {
   DeleteAgentPolicyResponse,
   Settings,
@@ -585,7 +588,9 @@ class AgentPolicyService {
   public async delete(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    id: string
+    id: string,
+    context: RequestHandlerContext,
+    request: KibanaRequest<unknown, unknown, unknown, any>
   ): Promise<DeleteAgentPolicyResponse> {
     const agentPolicy = await this.get(soClient, id, false);
     if (!agentPolicy) {
@@ -616,7 +621,7 @@ class AgentPolicyService {
     }
 
     if (agentPolicy.package_policies && agentPolicy.package_policies.length) {
-      await packagePolicyService.delete(
+      const body: DeletePackagePoliciesResponse = await packagePolicyService.delete(
         soClient,
         esClient,
         agentPolicy.package_policies as string[],
@@ -624,6 +629,17 @@ class AgentPolicyService {
           skipUnassignFromAgentPolicies: true,
         }
       );
+      try {
+        await packagePolicyService.runExternalCallbacks(
+          'postPackagePolicyDelete',
+          body,
+          context,
+          request
+        );
+      } catch (error) {
+        const logger = appContextService.getLogger();
+        logger.error(`An error occurred executing external callback: ${error}`);
+      }
     }
 
     if (agentPolicy.is_preconfigured) {
