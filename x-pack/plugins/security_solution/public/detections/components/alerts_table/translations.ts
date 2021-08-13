@@ -223,6 +223,16 @@ export const IN_PROGRESS_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
     }
   );
 
+export const ACKNOWLEDGED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.alerts.acknowledgedAlertSuccessToastMessage',
+    {
+      values: { totalAlerts },
+      defaultMessage:
+        'Successfully marked {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}} as acknowledged.',
+    }
+  );
+
 export const CLOSED_ALERT_FAILED_TOAST = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.closedAlertFailedToastMessage',
   {
@@ -241,6 +251,13 @@ export const IN_PROGRESS_ALERT_FAILED_TOAST = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.inProgressAlertFailedToastMessage',
   {
     defaultMessage: 'Failed to mark alert(s) as in progress',
+  }
+);
+
+export const ACKNOWLEDGED_ALERT_FAILED_TOAST = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.acknowledgedAlertFailedToastMessage',
+  {
+    defaultMessage: 'Failed to mark alert(s) as acknowledged',
   }
 );
 

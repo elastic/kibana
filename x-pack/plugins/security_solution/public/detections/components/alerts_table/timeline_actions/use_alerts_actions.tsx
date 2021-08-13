@@ -7,20 +7,18 @@
 
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { timelineActions } from '../../../../timelines/store/timeline';
-import { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
-import * as i18nCommon from '../../../../common/translations';
-import * as i18n from '../translations';
-
-import {
-  useStateToaster,
-  displaySuccessToast,
-  displayErrorToast,
-} from '../../../../common/components/toasters';
 import { useStatusBulkActionItems } from '../../../../../../timelines/public';
+import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import {
+  displayErrorToast,
+  displaySuccessToast,
+  useStateToaster,
+} from '../../../../common/components/toasters';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import * as i18nCommon from '../../../../common/translations';
+import { timelineActions } from '../../../../timelines/store/timeline';
+import * as i18n from '../translations';
+import { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
 
 interface Props {
   alertStatus?: Status;
@@ -45,7 +43,7 @@ export const useAlertsActions = ({ alertStatus, closePopover, eventId, timelineI
           text: i18nCommon.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
         });
       } else {
-        let title: string;
+        let title = '';
         switch (newStatus) {
           case 'closed':
             title = i18n.CLOSED_ALERT_SUCCESS_TOAST(updated);
@@ -55,8 +53,11 @@ export const useAlertsActions = ({ alertStatus, closePopover, eventId, timelineI
             break;
           case 'in-progress':
             title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(updated);
+            break;
+          case 'acknowledged':
+            title = i18n.ACKNOWLEDGED_ALERT_SUCCESS_TOAST(updated);
+            break;
         }
-
         displaySuccessToast(title, dispatchToaster);
       }
     },
@@ -65,7 +66,7 @@ export const useAlertsActions = ({ alertStatus, closePopover, eventId, timelineI
 
   const onAlertStatusUpdateFailure = useCallback(
     (newStatus: Status, error: Error) => {
-      let title: string;
+      let title = '';
       closePopover();
 
       switch (newStatus) {
@@ -77,6 +78,10 @@ export const useAlertsActions = ({ alertStatus, closePopover, eventId, timelineI
           break;
         case 'in-progress':
           title = i18n.IN_PROGRESS_ALERT_FAILED_TOAST;
+          break;
+        case 'acknowledged':
+          title = i18n.ACKNOWLEDGED_ALERT_FAILED_TOAST;
+          break;
       }
       displayErrorToast(title, [error.message], dispatchToaster);
     },
