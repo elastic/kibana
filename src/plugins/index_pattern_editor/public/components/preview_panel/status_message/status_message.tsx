@@ -26,20 +26,9 @@ const NoMatchStatusMessage = (allIndicesLength: number) => (
     <FormattedMessage
       id="indexPatternEditor.status.notMatchLabel.notMatchDetail"
       defaultMessage="The index pattern you entered doesn't match any data streams, indices, or index aliases.
-  You can match {strongIndices}, below."
+  You can match {allIndicesLength} below."
       values={{
-        strongIndices: (
-          <strong>
-            <FormattedMessage
-              id="indexPatternEditor.status.notMatchLabel.allIndicesLabel"
-              defaultMessage="{indicesLength, plural,
-            one {# source}
-            other {# sources}
-          }"
-              values={{ indicesLength: allIndicesLength }}
-            />
-          </strong>
-        ),
+        allIndicesLength,
       }}
     />
   </span>
@@ -76,8 +65,8 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
           <FormattedMessage
             id="indexPatternEditor.status.matchAnyLabel.matchAnyDetail"
             defaultMessage="Your index pattern can match {sourceCount, plural,
-              one {your # source}
-              other {any of your # sources}
+              one {# source}
+              other {# sources}
             }."
             values={{ sourceCount: allIndicesLength }}
           />
@@ -127,25 +116,13 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
       <span>
         <FormattedMessage
           id="indexPatternEditor.status.partialMatchLabel.partialMatchDetail"
-          defaultMessage="Your index pattern doesn't match any data streams, indices, or index aliases, but you have {strongIndices} that
+          defaultMessage="Your index pattern doesn't match any data streams, indices, or index aliases, but you have {matchedIndicesLength} that
           {matchedIndicesLength, plural,
             one {is}
             other {are}
           } similar."
           values={{
             matchedIndicesLength: partialMatchedIndices.length,
-            strongIndices: (
-              <strong>
-                <FormattedMessage
-                  id="indexPatternEditor.status.partialMatchLabel.strongIndicesLabel"
-                  defaultMessage="{matchedIndicesLength, plural,
-                    one {source}
-                    other {# sources}
-                  }"
-                  values={{ matchedIndicesLength: partialMatchedIndices.length }}
-                />
-              </strong>
-            ),
           }}
         />
       </span>

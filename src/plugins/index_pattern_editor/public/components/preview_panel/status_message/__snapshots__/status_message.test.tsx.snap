@@ -31,21 +31,11 @@ exports[`StatusMessage should render with no partial matches 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="The index pattern you entered doesn't match any data streams, indices, or index aliases. You can match {strongIndices}, below."
+        defaultMessage="The index pattern you entered doesn't match any data streams, indices, or index aliases. You can match {allIndicesLength} below."
         id="indexPatternEditor.status.notMatchLabel.notMatchDetail"
         values={
           Object {
-            "strongIndices": <strong>
-              <FormattedMessage
-                defaultMessage="{indicesLength, plural, one {# source} other {# sources} }"
-                id="indexPatternEditor.status.notMatchLabel.allIndicesLabel"
-                values={
-                  Object {
-                    "indicesLength": 2,
-                  }
-                }
-              />
-            </strong>,
+            "allIndicesLength": 2,
           }
         }
       />
@@ -62,22 +52,11 @@ exports[`StatusMessage should render with partial matches 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="Your index pattern doesn't match any data streams, indices, or index aliases, but you have {strongIndices} that {matchedIndicesLength, plural, one {is} other {are} } similar."
+        defaultMessage="Your index pattern doesn't match any data streams, indices, or index aliases, but you have {matchedIndicesLength} that {matchedIndicesLength, plural, one {is} other {are} } similar."
         id="indexPatternEditor.status.partialMatchLabel.partialMatchDetail"
         values={
           Object {
             "matchedIndicesLength": 1,
-            "strongIndices": <strong>
-              <FormattedMessage
-                defaultMessage="{matchedIndicesLength, plural, one {source} other {# sources} }"
-                id="indexPatternEditor.status.partialMatchLabel.strongIndicesLabel"
-                values={
-                  Object {
-                    "matchedIndicesLength": 1,
-                  }
-                }
-              />
-            </strong>,
           }
         }
       />
@@ -94,7 +73,7 @@ exports[`StatusMessage should render without a query 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="Your index pattern can match {sourceCount, plural, one {your # source} other {any of your # sources} }."
+        defaultMessage="Your index pattern can match {sourceCount, plural, one {# source} other {# sources} }."
         id="indexPatternEditor.status.matchAnyLabel.matchAnyDetail"
         values={
           Object {
