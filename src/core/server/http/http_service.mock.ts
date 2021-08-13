@@ -87,6 +87,15 @@ const createInternalPrebootContractMock = () => {
     csp: CspConfig.DEFAULT,
     externalUrl: ExternalUrlConfig.DEFAULT,
     auth: createAuthMock(),
+    server: ({
+      name: 'http-preboot-server-test',
+      version: 'kibana',
+      route: jest.fn(),
+      start: jest.fn(),
+      stop: jest.fn(),
+      config: jest.fn().mockReturnValue(configMock.create()),
+      // @ts-expect-error somehow it thinks that `Server` isn't a `Construtable`
+    } as unknown) as jest.MockedClass<Server>,
   };
   return mock;
 };
@@ -130,6 +139,7 @@ const createInternalSetupContractMock = () => {
     getAuthHeaders: jest.fn(),
     getServerInfo: jest.fn(),
     registerPrebootRoutes: jest.fn(),
+    registerRouterAfterListening: jest.fn(),
   };
   mock.createCookieSessionStorageFactory.mockResolvedValue(sessionStorageMock.createFactory());
   mock.createRouter.mockImplementation(() => mockRouter.create());

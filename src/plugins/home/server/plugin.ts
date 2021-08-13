@@ -25,9 +25,11 @@ interface HomeServerPluginSetupDependencies {
 }
 
 export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServerPluginStart> {
-  constructor(private readonly initContext: PluginInitializerContext) {}
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this.sampleDataRegistry = new SampleDataRegistry(this.initContext);
+  }
   private readonly tutorialsRegistry = new TutorialsRegistry();
-  private readonly sampleDataRegistry = new SampleDataRegistry(this.initContext);
+  private readonly sampleDataRegistry: SampleDataRegistry;
 
   public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
     core.capabilities.registerProvider(capabilitiesProvider);

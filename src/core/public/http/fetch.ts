@@ -181,10 +181,10 @@ export class Fetch {
   }
 
   private shorthand(method: string): HttpHandler {
-    return (pathOrOptions: string | HttpFetchOptionsWithPath, options?: HttpFetchOptions) => {
+    return ((pathOrOptions: string | HttpFetchOptionsWithPath, options?: HttpFetchOptions) => {
       const optionsWithPath = validateFetchArguments(pathOrOptions, options);
       return this.fetch({ ...optionsWithPath, method });
-    };
+    }) as HttpHandler;
   }
 }
 
