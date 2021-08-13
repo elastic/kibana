@@ -27,7 +27,6 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   httpServiceMock,
-  executionContextServiceMock,
 } from '../../../../../src/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
 import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
@@ -98,7 +97,11 @@ describe('Task Runner', () => {
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     encryptedSavedObjectsClient,
     logger: loggingSystemMock.create().get(),
-    executionContext: executionContextServiceMock.createSetupContract(),
+    executionContext: {
+      // we don't use executionContextServiceMock because the test reset the mock implementation in beforeEach
+      withContext: (ctx, fn) => fn(),
+      setRequestId: jest.fn(),
+    },
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
     basePathService: httpServiceMock.createBasePath(),
     eventLogger: eventLoggerMock.create(),
