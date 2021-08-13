@@ -61,7 +61,6 @@ yarn_install(
   ],
   exports_directories_only = True,
   symlink_node_modules = True,
-  strict_visibility = False,
   quiet = False,
   frozen_lockfile = False,
 )
