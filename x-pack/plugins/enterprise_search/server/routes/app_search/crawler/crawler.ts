@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../plugin';
+import { RouteDependencies } from '../../../plugin';
 
 export function registerCrawlerRoutes({
   router,

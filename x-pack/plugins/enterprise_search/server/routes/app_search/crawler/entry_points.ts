@@ -7,29 +7,27 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../plugin';
+import { RouteDependencies } from '../../../plugin';
 
-export function registerCrawlerCrawlRulesRoutes({
+export function registerEntryPointRoutes({
   router,
   enterpriseSearchRequestHandler,
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules',
+      path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points',
       validate: {
         params: schema.object({
           engineName: schema.string(),
           domainId: schema.string(),
         }),
         body: schema.object({
-          pattern: schema.string(),
-          policy: schema.string(),
-          rule: schema.string(),
+          value: schema.string(),
         }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/crawl_rules',
+      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/entry_points',
       params: {
         respond_with: 'index',
       },
@@ -39,23 +37,20 @@ export function registerCrawlerCrawlRulesRoutes({
   router.put(
     {
       path:
-        '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
+        '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
           domainId: schema.string(),
-          crawlRuleId: schema.string(),
+          entryPointId: schema.string(),
         }),
         body: schema.object({
-          order: schema.number(),
-          pattern: schema.string(),
-          policy: schema.string(),
-          rule: schema.string(),
+          value: schema.string(),
         }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/crawl_rules/:crawlRuleId',
+      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/entry_points/:entryPointId',
       params: {
         respond_with: 'index',
       },
@@ -65,17 +60,17 @@ export function registerCrawlerCrawlRulesRoutes({
   router.delete(
     {
       path:
-        '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
+        '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
           domainId: schema.string(),
-          crawlRuleId: schema.string(),
+          entryPointId: schema.string(),
         }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/crawl_rules/:crawlRuleId',
+      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/entry_points/:entryPointId',
       params: {
         respond_with: 'index',
       },

@@ -7,27 +7,29 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../plugin';
+import { RouteDependencies } from '../../../plugin';
 
-export function registerCrawlerSitemapRoutes({
+export function registerCrawlRulesRoutes({
   router,
   enterpriseSearchRequestHandler,
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps',
+      path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules',
       validate: {
         params: schema.object({
           engineName: schema.string(),
           domainId: schema.string(),
         }),
         body: schema.object({
-          url: schema.string(),
+          pattern: schema.string(),
+          policy: schema.string(),
+          rule: schema.string(),
         }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/sitemaps',
+      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/crawl_rules',
       params: {
         respond_with: 'index',
       },
@@ -36,20 +38,24 @@ export function registerCrawlerSitemapRoutes({
 
   router.put(
     {
-      path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
+      path:
+        '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
           domainId: schema.string(),
-          sitemapId: schema.string(),
+          crawlRuleId: schema.string(),
         }),
         body: schema.object({
-          url: schema.string(),
+          order: schema.number(),
+          pattern: schema.string(),
+          policy: schema.string(),
+          rule: schema.string(),
         }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/sitemaps/:sitemapId',
+      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/crawl_rules/:crawlRuleId',
       params: {
         respond_with: 'index',
       },
@@ -58,17 +64,18 @@ export function registerCrawlerSitemapRoutes({
 
   router.delete(
     {
-      path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
+      path:
+        '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
           domainId: schema.string(),
-          sitemapId: schema.string(),
+          crawlRuleId: schema.string(),
         }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/sitemaps/:sitemapId',
+      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/crawl_rules/:crawlRuleId',
       params: {
         respond_with: 'index',
       },

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { mockDependencies, mockRequestHandler, MockRouter } from '../../__mocks__';
+import { mockDependencies, mockRequestHandler, MockRouter } from '../../../__mocks__';
 
-import { registerCrawlerCrawlRulesRoutes } from './crawler_crawl_rules';
+import { registerCrawlRulesRoutes } from './crawl_rules';
 
 describe('crawler crawl rules routes', () => {
   describe('POST /api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules', () => {
@@ -20,7 +20,7 @@ describe('crawler crawl rules routes', () => {
         path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules',
       });
 
-      registerCrawlerCrawlRulesRoutes({
+      registerCrawlRulesRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });
@@ -64,7 +64,7 @@ describe('crawler crawl rules routes', () => {
           '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
       });
 
-      registerCrawlerCrawlRulesRoutes({
+      registerCrawlRulesRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });
@@ -109,7 +109,7 @@ describe('crawler crawl rules routes', () => {
           '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
       });
 
-      registerCrawlerCrawlRulesRoutes({
+      registerCrawlRulesRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });

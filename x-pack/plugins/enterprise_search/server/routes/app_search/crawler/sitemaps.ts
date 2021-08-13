@@ -7,27 +7,27 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../plugin';
+import { RouteDependencies } from '../../../plugin';
 
-export function registerCrawlerEntryPointRoutes({
+export function registerSitemapRoutes({
   router,
   enterpriseSearchRequestHandler,
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points',
+      path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps',
       validate: {
         params: schema.object({
           engineName: schema.string(),
           domainId: schema.string(),
         }),
         body: schema.object({
-          value: schema.string(),
+          url: schema.string(),
         }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/entry_points',
+      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/sitemaps',
       params: {
         respond_with: 'index',
       },
@@ -36,21 +36,20 @@ export function registerCrawlerEntryPointRoutes({
 
   router.put(
     {
-      path:
-        '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
+      path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
           domainId: schema.string(),
-          entryPointId: schema.string(),
+          sitemapId: schema.string(),
         }),
         body: schema.object({
-          value: schema.string(),
+          url: schema.string(),
         }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/entry_points/:entryPointId',
+      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/sitemaps/:sitemapId',
       params: {
         respond_with: 'index',
       },
@@ -59,18 +58,17 @@ export function registerCrawlerEntryPointRoutes({
 
   router.delete(
     {
-      path:
-        '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
+      path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
           domainId: schema.string(),
-          entryPointId: schema.string(),
+          sitemapId: schema.string(),
         }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/entry_points/:entryPointId',
+      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/sitemaps/:sitemapId',
       params: {
         respond_with: 'index',
       },

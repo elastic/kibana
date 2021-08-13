@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { mockDependencies, mockRequestHandler, MockRouter } from '../../__mocks__';
+import { mockDependencies, mockRequestHandler, MockRouter } from '../../../__mocks__';
 
-import { registerCrawlerSitemapRoutes } from './crawler_sitemaps';
+import { registerEntryPointRoutes } from './entry_points';
 
-describe('crawler sitemap routes', () => {
-  describe('POST /api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps', () => {
+describe('crawler entry point routes', () => {
+  describe('POST /api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps',
+        path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points',
       });
 
-      registerCrawlerSitemapRoutes({
+      registerEntryPointRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });
@@ -28,7 +28,7 @@ describe('crawler sitemap routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/sitemaps',
+        path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/entry_points',
         params: {
           respond_with: 'index',
         },
@@ -39,7 +39,7 @@ describe('crawler sitemap routes', () => {
       const request = {
         params: { engineName: 'some-engine', domainId: '1234' },
         body: {
-          url: 'http://www.example.com/sitemaps.xml',
+          value: 'test',
         },
       };
       mockRouter.shouldValidate(request);
@@ -51,7 +51,7 @@ describe('crawler sitemap routes', () => {
     });
   });
 
-  describe('PUT /api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}', () => {
+  describe('PUT /api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
@@ -59,10 +59,10 @@ describe('crawler sitemap routes', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path:
-          '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
+          '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
       });
 
-      registerCrawlerSitemapRoutes({
+      registerEntryPointRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });
@@ -70,7 +70,7 @@ describe('crawler sitemap routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/sitemaps/:sitemapId',
+        path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/entry_points/:entryPointId',
         params: {
           respond_with: 'index',
         },
@@ -79,9 +79,9 @@ describe('crawler sitemap routes', () => {
 
     it('validates correctly with required params', () => {
       const request = {
-        params: { engineName: 'some-engine', domainId: '1234', sitemapId: '5678' },
+        params: { engineName: 'some-engine', domainId: '1234', entryPointId: '5678' },
         body: {
-          url: 'http://www.example.com/sitemaps.xml',
+          value: 'test',
         },
       };
       mockRouter.shouldValidate(request);
@@ -93,7 +93,7 @@ describe('crawler sitemap routes', () => {
     });
   });
 
-  describe('DELETE /api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}', () => {
+  describe('DELETE /api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
@@ -101,10 +101,10 @@ describe('crawler sitemap routes', () => {
       mockRouter = new MockRouter({
         method: 'delete',
         path:
-          '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
+          '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
       });
 
-      registerCrawlerSitemapRoutes({
+      registerEntryPointRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });
@@ -112,7 +112,7 @@ describe('crawler sitemap routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/sitemaps/:sitemapId',
+        path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/entry_points/:entryPointId',
         params: {
           respond_with: 'index',
         },
@@ -121,7 +121,7 @@ describe('crawler sitemap routes', () => {
 
     it('validates correctly with required params', () => {
       const request = {
-        params: { engineName: 'some-engine', domainId: '1234', sitemapId: '5678' },
+        params: { engineName: 'some-engine', domainId: '1234', entryPointId: '5678' },
       };
       mockRouter.shouldValidate(request);
     });
