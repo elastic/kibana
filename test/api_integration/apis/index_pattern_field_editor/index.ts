@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { getRandomString } from '@kbn/test/jest';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export { registerTestBed, TestBed } from '@kbn/test/jest';
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('index pattern field editor', () => {
+    loadTestFile(require.resolve('./field_preview'));
+  });
+}
