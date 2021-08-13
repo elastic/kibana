@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCheckbox, EuiConfirmModal, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiCheckbox,
+  EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -24,6 +32,7 @@ import {
   useGetPackageInstallStatus,
   useInstallPackage,
   sendGetAgentPolicies,
+  sendUpgradePackagePolicy,
 } from '../../../../../hooks';
 
 import { ConfirmPackageUninstall } from './confirm_package_uninstall';
@@ -46,6 +55,7 @@ export function InstallationButton(props: InstallationButtonProps) {
     isUpdate = false,
     latestVersion,
     packagePolicyIds = [],
+    dryRunData,
   } = props;
   const hasWriteCapabilites = useCapabilities().write;
   const installPackage = useInstallPackage();
@@ -61,10 +71,11 @@ export function InstallationButton(props: InstallationButtonProps) {
   const [isUpdateModalVisible, setIsUpdateModalVisible] = useState<boolean>(false);
   const [upgradePackagePolicies, setUpgradePackagePolicies] = useState<boolean>(false);
   const [agentPolicyData, setAgentPolicyData] = useState<GetAgentPoliciesResponse | null>();
+  const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchAgentPolicyData = async () => {
-      if (packagePolicyIds) {
+      if (packagePolicyIds && packagePolicyIds.length > 0) {
         const { data } = await sendGetAgentPolicies({
           perPage: 1000,
           page: 1,
@@ -85,6 +96,9 @@ export function InstallationButton(props: InstallationButtonProps) {
   const agentCount = useMemo(() => sumBy(agentPolicyData?.items, ({ agents }) => agents ?? 0), [
     agentPolicyData,
   ]);
+  const conflictCount = useMemo(() => dryRunData?.filter((item) => item.hasErrors).length, [
+    dryRunData,
+  ]);
 
   const toggleInstallModal = useCallback(() => {
     setIsInstallModalVisible(!isInstallModalVisible);
@@ -99,10 +113,27 @@ export function InstallationButton(props: InstallationButtonProps) {
     toggleInstallModal();
   }, [installPackage, name, title, toggleInstallModal, version]);
 
-  const handleClickUpdate = useCallback(() => {
-    installPackage({ name, version, title, fromUpdate: true });
-    setIsUpdateModalVisible(false);
-  }, [installPackage, name, title, version]);
+  const handleClickUpdate = useCallback(
+    async (upgradePolicies: boolean = false) => {
+      await installPackage({ name, version, title, fromUpdate: true });
+      if (!upgradePolicies) {
+        return;
+      }
+
+      setIsUpgradingPackagePolicies(true);
+
+      await sendUpgradePackagePolicy(
+        // Only upgrade policies that don't have conflicts
+        packagePolicyIds.filter(
+          (id) => !dryRunData?.find((dryRunRecord) => dryRunRecord.diff?.[0].id === id)?.hasErrors
+        )
+      );
+
+      setIsUpgradingPackagePolicies(false);
+      setIsUpdateModalVisible(false);
+    },
+    [installPackage, name, title, version, dryRunData, packagePolicyIds]
+  );
 
   const handleClickUninstall = useCallback(() => {
     uninstallPackage({ name, version, title, redirectToVersion: latestVersion ?? version });
@@ -156,7 +187,7 @@ export function InstallationButton(props: InstallationButtonProps) {
         <EuiButton
           iconType={'refresh'}
           isLoading={isInstalling}
-          onClick={upgradePackagePolicies ? toggleUpdateModal : handleClickUpdate}
+          onClick={upgradePackagePolicies ? toggleUpdateModal : () => handleClickUpdate(false)}
         >
           <FormattedMessage
             id="xpack.fleet.integrations.updatePackage.updatePackageButtonLabel"
@@ -239,12 +270,14 @@ export function InstallationButton(props: InstallationButtonProps) {
 
   const updateModal = (
     <EuiConfirmModal
+      isLoading={isInstalling || isUpgradingPackagePolicies}
+      maxWidth={568}
       onCancel={toggleUpdateModal}
       cancelButtonText={i18n.translate(
         'xpack.fleet.integrations.settings.confirmUpdateModal.cancel',
         { defaultMessage: 'Cancel' }
       )}
-      onConfirm={handleClickUpdate}
+      onConfirm={() => handleClickUpdate(true)}
       confirmButtonText={i18n.translate(
         'xpack.fleet.integrations.settings.confirmUpdateModal.confirm',
         { defaultMessage: 'Upgrade {packageName} and policies', values: { packageName: title } }
@@ -254,33 +287,63 @@ export function InstallationButton(props: InstallationButtonProps) {
         values: { packageName: title },
       })}
     >
-      <FormattedMessage
-        id="xpack.fleet.integrations.settings.confirmUpdateModal.body"
-        defaultMessage="This action will deploy updates to all agents which use these policies.
-        Fleet has detected that {packagePolicyCountText} {packagePolicyCount, plural, one { is} other { are}} ready to be upgraded
-        and {packagePolicyCount, plural, one { is} other { are}} already in use by {agentCountText}."
-        values={{
-          packagePolicyCount,
-          packagePolicyCountText: (
-            <strong>
+      <>
+        {conflictCount && conflictCount > 0 ? (
+          <>
+            <EuiCallOut
+              color="warning"
+              iconType="alert"
+              title={i18n.translate(
+                'xpack.fleet.integrations.settings.confirmUpdateModal.conflictCallOut.title',
+                { defaultMessage: 'Some integration policies have conflicts' }
+              )}
+            >
+              <strong>
+                <FormattedMessage
+                  id="xpack.fleet.integrations.settings.confirmUpdateModal.conflictCallOut.integrationPolicyCount"
+                  defaultMessage="{conflictCount, plural, one { # integration policy} other { # integration policies}}"
+                  values={{ conflictCount }}
+                />
+              </strong>{' '}
               <FormattedMessage
-                id="xpack.fleet.integrations.confirmUpdateModal.body.policyCount"
-                defaultMessage="{packagePolicyCount, plural, one {# integration policy} other {# integration policies}}"
-                values={{ packagePolicyCount }}
+                id="xpack.fleet.integrations.settings.confirmUpdateModal.conflictCallOut.body"
+                defaultMessage="{conflictCount, plural, one { has} other { have}} conflicts and will not be upgraded automatically.
+                  You can manually resolve these conflicts via agent policy settings in Fleet after performing this upgrade."
+                values={{ conflictCount }}
               />
-            </strong>
-          ),
-          agentCountText: (
-            <strong>
-              <FormattedMessage
-                id="xpack.fleet.integrations.confirmUpdateModal.body.agentCount"
-                defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
-                values={{ agentCount }}
-              />
-            </strong>
-          ),
-        }}
-      />
+            </EuiCallOut>
+
+            <EuiSpacer size="l" />
+          </>
+        ) : null}
+        <FormattedMessage
+          id="xpack.fleet.integrations.settings.confirmUpdateModal.body"
+          defaultMessage="This action will deploy updates to all agents which use these policies.
+          Fleet has detected that {packagePolicyCountText} {packagePolicyCount, plural, one { is} other { are}} ready to be upgraded
+          and {packagePolicyCount, plural, one { is} other { are}} already in use by {agentCountText}."
+          values={{
+            packagePolicyCount,
+            packagePolicyCountText: (
+              <strong>
+                <FormattedMessage
+                  id="xpack.fleet.integrations.confirmUpdateModal.body.policyCount"
+                  defaultMessage="{packagePolicyCount, plural, one {# integration policy} other {# integration policies}}"
+                  values={{ packagePolicyCount }}
+                />
+              </strong>
+            ),
+            agentCountText: (
+              <strong>
+                <FormattedMessage
+                  id="xpack.fleet.integrations.confirmUpdateModal.body.agentCount"
+                  defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
+                  values={{ agentCount }}
+                />
+              </strong>
+            ),
+          }}
+        />
+      </>
     </EuiConfirmModal>
   );
 
