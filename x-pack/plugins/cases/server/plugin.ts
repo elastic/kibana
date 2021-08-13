@@ -132,12 +132,9 @@ export class CasePlugin {
       ruleRegistryPluginStart: plugins.ruleRegistry,
     });
 
-    const client = core.elasticsearch.client;
-
     const getCasesClientWithRequest = async (request: KibanaRequest): Promise<CasesClient> => {
       return this.clientFactory.create({
         request,
-        scopedClusterClient: client.asScoped(request).asCurrentUser,
         savedObjectsService: core.savedObjects,
       });
     };
@@ -163,7 +160,6 @@ export class CasePlugin {
 
           return this.clientFactory.create({
             request,
-            scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
             savedObjectsService: savedObjects,
           });
         },

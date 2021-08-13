@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  KibanaRequest,
-  SavedObjectsServiceStart,
-  Logger,
-  ElasticsearchClient,
-} from 'kibana/server';
+import { KibanaRequest, SavedObjectsServiceStart, Logger } from 'kibana/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../../security/server';
 import { SAVED_OBJECT_TYPES } from '../../common';
 import { Authorization } from '../authorization/authorization';
@@ -68,12 +63,10 @@ export class CasesClientFactory {
    */
   public async create({
     request,
-    scopedClusterClient,
     savedObjectsService,
   }: {
     request: KibanaRequest;
     savedObjectsService: SavedObjectsServiceStart;
-    scopedClusterClient: ElasticsearchClient;
   }): Promise<CasesClient> {
     if (!this.isInitialized || !this.options) {
       throw new Error('CasesClientFactory must be initialized before calling create');
@@ -95,7 +88,6 @@ export class CasesClientFactory {
 
     return createCasesClient({
       alertsService: new AlertService(),
-      scopedClusterClient,
       unsecuredSavedObjectsClient: savedObjectsService.getScopedClient(request, {
         includedHiddenTypes: SAVED_OBJECT_TYPES,
         // this tells the security plugin to not perform SO authorization and audit logging since we are handling
