@@ -18,6 +18,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const metadata = archives_metadata[archiveName];
 
   const url = `/api/apm/services/opbeans-java/transactions/traces/samples?${qs.stringify({
+    environment: 'ENVIRONMENT_ALL',
+    kuery: '',
     start: metadata.start,
     end: metadata.end,
     transactionName: 'APIRestController#stats',
@@ -102,6 +104,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             Object {
               "traceId": "ca7a2072e7974ae84b5096706c6b6255",
               "transactionId": "92ab7f2ef11685dd",
+            },
+            Object {
+              "traceId": "d250e2a1bad40f78653d8858db65326b",
+              "transactionId": "6fcd12599c1b57fa",
+            },
+            Object {
+              "traceId": "2ca82e99453c58584c4b8de9a8ba4ec3",
+              "transactionId": "8fa2ca73976ce1e7",
+            },
+            Object {
+              "traceId": "45b3d1a86003938687a55e49bf3610b8",
+              "transactionId": "a707456bda99ee98",
+            },
+            Object {
+              "traceId": "7483bd52150d1c93a858c60bfdd0c138",
+              "transactionId": "e20e701ff93bdb55",
+            },
+            Object {
+              "traceId": "a21ea39b41349a4614a86321d965c957",
+              "transactionId": "338bd7908cbf7f2d",
             },
           ]
         `);
