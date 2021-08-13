@@ -264,11 +264,7 @@ export function LatencyCorrelations() {
               {i18n.translate(
                 'xpack.apm.correlations.latencyCorrelations.panelTitle',
                 {
-                  defaultMessage:
-                    'Latency distribution for {name} (Log-Log Plot)',
-                  values: {
-                    name: transactionName ?? serviceName,
-                  },
+                  defaultMessage: 'Latency distribution',
                 }
               )}
             </h5>

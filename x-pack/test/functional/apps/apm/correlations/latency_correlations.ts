@@ -19,7 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testData = {
     latencyCorrelationsTab: 'Latency correlations',
-    logLogChartTitle: 'Latency distribution for GET /api/stats (Log-Log Plot)',
+    logLogChartTitle: 'Latency distribution',
     serviceName: 'opbeans-go',
     transactionsTab: 'Transactions',
     transaction: 'GET /api/stats',

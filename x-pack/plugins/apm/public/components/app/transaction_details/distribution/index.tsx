@@ -124,11 +124,7 @@ export function TransactionDistribution({
               {i18n.translate(
                 'xpack.apm.transactionDetails.distribution.panelTitle',
                 {
-                  defaultMessage:
-                    'Latency distribution for {name} (Log-Log Plot)',
-                  values: {
-                    name: transactionName ?? serviceName,
-                  },
+                  defaultMessage: 'Latency distribution',
                 }
               )}
             </h5>
