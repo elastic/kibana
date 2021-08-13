@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EuiPanelTo } from '../../../shared/react_router_helpers';
@@ -22,6 +22,8 @@ export const SetupGuideCta: React.FC = () => (
     paddingSize="l"
     className="enterpriseSearchSetupCta"
     data-test-subj="setupGuideLink"
+    hasBorder
+    color="transparent"
   >
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
       <EuiFlexItem className="enterpriseSearchSetupCta__text">
@@ -36,7 +38,7 @@ export const SetupGuideCta: React.FC = () => (
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <img src={CtaImage} alt="" className="enterpriseSearchSetupCta__image" />
+        <EuiImage src={CtaImage} alt="" className="enterpriseSearchSetupCta__image" />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanelTo>
