@@ -155,7 +155,7 @@ export const ICMPSimpleFields = memo<Props>(({ validate }) => {
             />
           ) : (
             <FormattedMessage
-              id="pack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.lessThanIntervalError"
+              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.moreThanIntervalError"
               defaultMessage="Timeout cannot be more than the monitor interval"
             />
           )
