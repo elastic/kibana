@@ -6,8 +6,8 @@
  */
 
 import { find } from 'lodash';
-import { EuiErrorBoundary, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
-import React, { useMemo, useEffect, useState } from 'react';
+import { EuiErrorBoundary, EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { QueryClientProvider } from 'react-query';
 import { useAgentDetails } from '../../agents/use_agent_details';
 import { useAgentPolicy } from '../../agent_policies';
@@ -26,92 +26,77 @@ interface OsqueryActionProps {
 }
 
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
-  const { fleet } = useKibana().services;
   const permissions = useKibana().services.application.capabilities.osquery;
-  const [fleetAvailable, setFleetAvailable] = useState<boolean | undefined>(undefined);
   const agentId = metadata?.info?.agent?.id ?? undefined;
-  const { data: agentData, isFetched: agentFetched } = useAgentDetails({
+  const {
+    data: agentData,
+    isFetched: agentFetched,
+    isError: agentError,
+    isLoading: agentLoading,
+  } = useAgentDetails({
     agentId,
     silent: true,
-    skip: !fleetAvailable || !agentId,
+    skip: !agentId,
   });
-  const { data: agentPolicyData, isFetched: policyFetched } = useAgentPolicy({
+  const {
+    data: agentPolicyData,
+    isFetched: policyFetched,
+    isError: policyError,
+    isLoading: policyLoading,
+  } = useAgentPolicy({
     policyId: agentData?.item?.policy_id,
-    skip: !fleetAvailable || !agentData,
+    skip: !agentData,
     silent: true,
   });
 
   const osqueryAvailable = useMemo(() => {
+    if (policyError) return false;
+
     const osqueryPackageInstalled = find(agentPolicyData?.package_policies, [
       'package.name',
       'osquery_manager',
     ]);
     return osqueryPackageInstalled?.enabled;
-  }, [agentPolicyData?.package_policies]);
-
-  useEffect(() => {
-    const verifyFleet = async () => {
-      if (!fleet?.isInitialized) return false;
-
-      return setFleetAvailable(await fleet.isInitialized());
-    };
-    verifyFleet();
-  }, [fleet]);
+  }, [agentPolicyData?.package_policies, policyError]);
 
   if (!(permissions.runSavedQueries || permissions.writeLiveQueries)) {
     return (
       <EuiEmptyPrompt
         icon={<OsqueryIcon />}
-        title={<h2>Osquery is unavailable</h2>}
+        title={<h2>Permissions denied</h2>}
         titleSize="xs"
         body={
           <p>
-            {`Your user role doesn’t have Osquery permissions to run live queries. Administrators can update role permissions in Stack Management > Roles.`}
+            To access this page, ask your administrator for <EuiCode>osquery</EuiCode> Kibana
+            privileges.
           </p>
         }
       />
     );
   }
 
-  if (fleetAvailable === undefined) {
+  if (!agentFetched && agentLoading) {
     return <EuiLoadingContent lines={10} />;
   }
 
-  if (!fleetAvailable) {
+  if (!agentId || (agentFetched && agentError)) {
     return (
       <EuiEmptyPrompt
         icon={<OsqueryIcon />}
-        title={<h2>Osquery is unavailable</h2>}
+        title={<h2>Osquery is not available</h2>}
         titleSize="xs"
         body={
           <p>
-            Fleet is disabled in this cluster. To run queries on this host, an administrator must
-            enable Fleet on the cluster, install Elastic Agent on this host, and then add the
-            <code>Osquery Manager</code> integration to the agent policy in Fleet.
+            An Elastic Agent is not installed on this host. To run queries on the host, install
+            Elastic Agent on the host, and then add the Osquery Manager integration to the agent
+            policy in Fleet.
           </p>
         }
       />
     );
   }
 
-  if (!metadata?.info?.agent?.id) {
-    return (
-      <EuiEmptyPrompt
-        icon={<OsqueryIcon />}
-        title={<h2>Osquery is unavailable</h2>}
-        titleSize="xs"
-        body={
-          <p>
-            An Elastic Agent is not installed on this host. To run queries on this host, an
-            administrator must install Elastic Agent, and then add the Osquery Manager integration
-            to the agent policy in Fleet
-          </p>
-        }
-      />
-    );
-  }
-
-  if (!agentFetched || !policyFetched) {
+  if (!policyFetched && policyLoading) {
     return <EuiLoadingContent lines={10} />;
   }
 
@@ -119,10 +104,13 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
     return (
       <EuiEmptyPrompt
         icon={<OsqueryIcon />}
-        title={<h2>Osquery is unavailable</h2>}
+        title={<h2>Osquery is not available</h2>}
         titleSize="xs"
         body={
-          <p>Osquery is not installed on this agent. Please contact your Kibana administrator.</p>
+          <p>
+            The Osquery Manager integration is not added to the agent policy. To run queries on the
+            host, add the Osquery Manager integration to the agent policy in Fleet.
+          </p>
         }
       />
     );
@@ -132,12 +120,12 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
     return (
       <EuiEmptyPrompt
         icon={<OsqueryIcon />}
-        title={<h2>Osquery is unavailable</h2>}
+        title={<h2>Osquery is not available</h2>}
         titleSize="xs"
         body={
           <p>
-            Agent has to be online for running Osquery queries. Please contact your Kibana
-            administrator.
+            To run queries on this host, the Elastic Agent must be active. Check the status of this
+            agent in Fleet.
           </p>
         }
       />

@@ -52,12 +52,12 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
     return (
       <EuiEmptyPrompt
         icon={<OsqueryIcon />}
-        title={<h2>Osquery results cannot be displayed</h2>}
+        title={<h2>Permission denied</h2>}
         titleSize="xs"
         body={
           <p>
-            You are not authorized to view osquery results. Ask your administrator to update your
-            user role to have index <EuiCode>read</EuiCode> permissions on the{' '}
+            To view query results, ask your administrator to update your user role to have index{' '}
+            <EuiCode>read</EuiCode> privileges on the{' '}
             <EuiCode>logs-{OSQUERY_INTEGRATION_NAME}.result*</EuiCode> index.
           </p>
         }
