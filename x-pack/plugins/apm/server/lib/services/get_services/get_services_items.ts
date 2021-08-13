@@ -6,13 +6,12 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { joinByKey } from '../../../../common/utils/join_by_key';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getHealthStatuses } from './get_health_statuses';
 import { getServicesFromMetricDocuments } from './get_services_from_metric_documents';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
+import { mergeServiceStats } from './merge_service_stats';
 
 export type ServicesItemsSetup = Setup & SetupTimeRange;
 
@@ -25,8 +24,8 @@ export async function getServicesItems({
   searchAggregatedTransactions,
   logger,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
   logger: Logger;
@@ -53,31 +52,10 @@ export async function getServicesItems({
       }),
     ]);
 
-    const foundServiceNames = transactionStats.map(
-      ({ serviceName }) => serviceName
-    );
-
-    const servicesWithOnlyMetricDocuments = servicesFromMetricDocuments.filter(
-      ({ serviceName }) => !foundServiceNames.includes(serviceName)
-    );
-
-    const allServiceNames = foundServiceNames.concat(
-      servicesWithOnlyMetricDocuments.map(({ serviceName }) => serviceName)
-    );
-
-    // make sure to exclude health statuses from services
-    // that are not found in APM data
-    const matchedHealthStatuses = healthStatuses.filter(({ serviceName }) =>
-      allServiceNames.includes(serviceName)
-    );
-
-    return joinByKey(
-      asMutableArray([
-        ...transactionStats,
-        ...servicesWithOnlyMetricDocuments,
-        ...matchedHealthStatuses,
-      ] as const),
-      'serviceName'
-    );
+    return mergeServiceStats({
+      transactionStats,
+      servicesFromMetricDocuments,
+      healthStatuses,
+    });
   });
 }

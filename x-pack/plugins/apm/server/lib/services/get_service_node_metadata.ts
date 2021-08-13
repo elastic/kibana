@@ -13,6 +13,7 @@ import {
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { getServiceNodesProjection } from '../../projections/service_nodes';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 export async function getServiceNodeMetadata({
   kuery,
@@ -20,7 +21,7 @@ export async function getServiceNodeMetadata({
   serviceNodeName,
   setup,
 }: {
-  kuery?: string;
+  kuery: string;
   serviceName: string;
   serviceNodeName: string;
   setup: Setup & SetupTimeRange;
@@ -33,6 +34,7 @@ export async function getServiceNodeMetadata({
       setup,
       serviceName,
       serviceNodeName,
+      environment: ENVIRONMENT_ALL.value,
     }),
     {
       body: {

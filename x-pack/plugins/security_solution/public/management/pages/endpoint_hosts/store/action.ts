@@ -166,6 +166,13 @@ export interface EndpointDetailsActivityLogUpdatePaging {
   };
 }
 
+export interface EndpointDetailsLoad {
+  type: 'endpointDetailsLoad';
+  payload: {
+    endpointId: string;
+  };
+}
+
 export interface EndpointDetailsActivityLogUpdateIsInvalidDateRange {
   type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange';
   payload: {
@@ -187,6 +194,7 @@ export type EndpointAction =
   | EndpointDetailsActivityLogUpdatePaging
   | EndpointDetailsActivityLogUpdateIsInvalidDateRange
   | EndpointDetailsActivityLogChanged
+  | EndpointDetailsLoad
   | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse
   | ServerReturnedPoliciesForOnboarding

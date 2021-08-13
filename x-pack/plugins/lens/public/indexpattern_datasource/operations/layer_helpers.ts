@@ -51,6 +51,7 @@ interface ColumnChange {
   targetGroup?: string;
   shouldResetLabel?: boolean;
   incompleteParams?: ColumnAdvancedParams;
+  initialParams?: { params: Record<string, unknown> }; // TODO: bind this to the op parameter
 }
 
 interface ColumnCopy {
@@ -398,6 +399,7 @@ export function replaceColumn({
     if (previousDefinition.input === 'managedReference') {
       // If the transition is incomplete, leave the managed state until it's finished.
       tempLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern });
+
       const hypotheticalLayer = insertNewColumn({
         layer: tempLayer,
         columnId,

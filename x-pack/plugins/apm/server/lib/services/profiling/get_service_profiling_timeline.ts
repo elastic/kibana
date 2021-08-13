@@ -32,10 +32,10 @@ export async function getServiceProfilingTimeline({
   environment,
   setup,
 }: {
-  kuery?: string;
+  kuery: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
-  environment?: string;
+  environment: string;
 }) {
   const { apmEventClient, start, end } = setup;
 
