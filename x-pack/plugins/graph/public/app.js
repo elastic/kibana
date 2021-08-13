@@ -19,7 +19,7 @@ import {
   getSavedWorkspace,
   deleteSavedWorkspace,
 } from './helpers/saved_workspace_utils';
-import { GraphApp } from './components/graph_app';
+import { GraphWorkspace } from './components/graph_workspace';
 
 export function initGraphApp(angularModule, deps) {
   const {
@@ -53,7 +53,7 @@ export function initGraphApp(angularModule, deps) {
 
   app.directive('graphWorkspace', function (reactDirective) {
     return reactDirective(
-      GraphApp,
+      GraphWorkspace,
       [
         ['indexPatternProvider', { watchDepth: 'reference' }],
         ['indexPatterns', { watchDepth: 'reference' }],
