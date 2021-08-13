@@ -8,8 +8,9 @@
 
 import { snakeCase } from 'lodash';
 import React, { FC, MouseEvent } from 'react';
-import { EuiCard, EuiFlexItem, EuiToken } from '@elastic/eui';
+import { EuiCard, EuiFlexItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { KibanaPageTemplateSolutionNavAvatar } from '../../../../../kibana_react/public';
 import { FeatureCatalogueSolution } from '../../../';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { getServices } from '../../kibana_services';
@@ -35,11 +36,10 @@ export const SolutionPanel: FC<Props> = ({ addBasePath, solution }) => {
         description={solution.description}
         href={addBasePath(solution.path)}
         icon={
-          <EuiToken
-            className="homSolutionPanel__icon"
+          <KibanaPageTemplateSolutionNavAvatar
+            name={solution.title}
             iconType={solution.icon}
-            shape="circle"
-            size="l"
+            size="xl"
           />
         }
         image={addBasePath(getSolutionGraphicURL(snakeCase(solution.id)))}
