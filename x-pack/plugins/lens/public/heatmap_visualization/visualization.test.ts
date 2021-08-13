@@ -22,10 +22,12 @@ import { Position } from '@elastic/charts';
 import type { HeatmapVisualizationState } from './types';
 import type { DatasourcePublicAPI, Operation } from '../types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { layerTypes } from '../../common';
 
 function exampleState(): HeatmapVisualizationState {
   return {
     layerId: 'test-layer',
+    layerType: layerTypes.DATA,
     legend: {
       isVisible: true,
       position: Position.Right,
@@ -54,6 +56,7 @@ describe('heatmap', () => {
     test('returns a default state', () => {
       expect(getHeatmapVisualization({ paletteService }).initialize(() => 'l1')).toEqual({
         layerId: 'l1',
+        layerType: layerTypes.DATA,
         title: 'Empty Heatmap chart',
         shape: CHART_SHAPES.HEATMAP,
         legend: {
@@ -214,6 +217,7 @@ describe('heatmap', () => {
           layerId: 'first',
           columnId: 'new-x-accessor',
           groupId: 'x',
+          frame,
         })
       ).toEqual({
         ...prevState,
@@ -236,11 +240,37 @@ describe('heatmap', () => {
           prevState,
           layerId: 'first',
           columnId: 'x-accessor',
+          frame,
         })
       ).toEqual({
         ...exampleState(),
         yAccessor: 'y-accessor',
       });
+    });
+  });
+
+  describe('#getSupportedLayers', () => {
+    it('should return a single layer type', () => {
+      expect(
+        getHeatmapVisualization({
+          paletteService,
+        }).getSupportedLayers()
+      ).toHaveLength(1);
+    });
+  });
+
+  describe('#getLayerType', () => {
+    it('should return the type only if the layer is in the state', () => {
+      const state: HeatmapVisualizationState = {
+        ...exampleState(),
+        xAccessor: 'x-accessor',
+        valueAccessor: 'value-accessor',
+      };
+      const instance = getHeatmapVisualization({
+        paletteService,
+      });
+      expect(instance.getLayerType('test-layer', state)).toEqual(layerTypes.DATA);
+      expect(instance.getLayerType('foo', state)).toBeUndefined();
     });
   });
 

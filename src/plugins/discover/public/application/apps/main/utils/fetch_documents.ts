@@ -41,6 +41,14 @@ export const fetchDocuments = (
 
   sendLoadingMsg(documents$);
 
+  const executionContext = {
+    type: 'application',
+    name: 'discover',
+    description: 'fetch documents',
+    url: window.location.pathname,
+    id: '',
+  };
+
   const fetch$ = searchSource
     .fetch$({
       abortSignal: abortController.signal,
@@ -54,6 +62,7 @@ export const fetchDocuments = (
           defaultMessage: 'This request queries Elasticsearch to fetch the documents.',
         }),
       },
+      executionContext,
     })
     .pipe(filter((res) => isCompleteResponse(res)));
 

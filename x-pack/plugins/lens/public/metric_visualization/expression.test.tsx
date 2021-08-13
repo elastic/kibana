@@ -11,6 +11,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import type { IFieldFormat } from '../../../../../src/plugins/field_formats/common';
+import { layerTypes } from '../../common';
 import type { LensMultiTable } from '../../common';
 
 function sampleArgs() {
@@ -37,6 +38,7 @@ function sampleArgs() {
   const args: MetricConfig = {
     accessor: 'c',
     layerId: 'l1',
+    layerType: layerTypes.DATA,
     title: 'My fanci metric chart',
     description: 'Fancy chart description',
     metricTitle: 'My fanci metric chart',
@@ -46,6 +48,7 @@ function sampleArgs() {
   const noAttributesArgs: MetricConfig = {
     accessor: 'c',
     layerId: 'l1',
+    layerType: layerTypes.DATA,
     title: '',
     description: '',
     metricTitle: 'My fanci metric chart',
