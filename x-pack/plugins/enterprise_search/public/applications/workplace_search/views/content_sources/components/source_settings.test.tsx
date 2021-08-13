@@ -148,7 +148,9 @@ describe('SourceSettings', () => {
   it('handles disabling content extraction', () => {
     const wrapper = shallow(<SourceSettings />);
 
-    const contentExtractionSwitch = wrapper.find('[data-test-subj="ContentExtractionToggle"]').first();
+    const contentExtractionSwitch = wrapper
+      .find('[data-test-subj="ContentExtractionToggle"]')
+      .first();
     const event = { target: { checked: false } };
     contentExtractionSwitch.prop('onChange')?.(event as any);
 
