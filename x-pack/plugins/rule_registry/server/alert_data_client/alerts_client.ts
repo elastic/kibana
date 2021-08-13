@@ -130,6 +130,15 @@ export class AlertsClient {
     };
   }
 
+  private getAlertStatusFieldUpdate(
+    source: ParsedTechnicalFields | undefined,
+    status: STATUS_VALUES
+  ) {
+    return source?.[ALERT_WORKFLOW_STATUS] == null
+      ? { signal: { status } }
+      : { [ALERT_WORKFLOW_STATUS]: status };
+  }
+
   /**
    * Accepts an array of ES documents and executes ensureAuthorized for the given operation
    * @param items
@@ -313,10 +322,7 @@ export class AlertsClient {
       }
 
       const bulkUpdateRequest = mgetRes.body.docs.flatMap((item) => {
-        const fieldToUpdate =
-          item?._source?.[ALERT_WORKFLOW_STATUS] == null
-            ? { signal: { status } }
-            : { [ALERT_WORKFLOW_STATUS]: status };
+        const fieldToUpdate = this.getAlertStatusFieldUpdate(item?._source, status);
         return [
           {
             update: {
@@ -508,12 +514,10 @@ export class AlertsClient {
         this.logger.error(errorMessage);
         throw Boom.notFound(errorMessage);
       }
-
-      const fieldToUpdate =
-        alert?.hits.hits[0]._source?.[ALERT_WORKFLOW_STATUS] == null
-          ? { signal: { status } }
-          : { [ALERT_WORKFLOW_STATUS]: status };
-
+      const fieldToUpdate = this.getAlertStatusFieldUpdate(
+        alert?.hits.hits[0]._source,
+        status as STATUS_VALUES
+      );
       const { body: response } = await this.esClient.update<ParsedTechnicalFields>({
         ...decodeVersion(_version),
         id,

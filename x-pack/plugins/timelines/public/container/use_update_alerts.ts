@@ -10,8 +10,7 @@ import { CoreStart } from '../../../../../src/core/public';
 
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { AlertStatus } from '../../../timelines/common';
-
-export const RAC_ALERTS_BULK_UPDATE_URL = '/internal/rac/alerts/bulk_update';
+import { RAC_ALERTS_BULK_UPDATE_URL } from '../../common/constants';
 
 /**
  * Update alert status by query

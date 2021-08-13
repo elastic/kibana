@@ -9,10 +9,8 @@ import expect from '@kbn/expect';
 
 import type { estypes } from '@elastic/elasticsearch';
 import { Signal } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
-import {
-  RAC_ALERTS_BULK_UPDATE_URL,
-  DETECTION_ENGINE_QUERY_SIGNALS_URL,
-} from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../plugins/security_solution/common/constants';
+import { RAC_ALERTS_BULK_UPDATE_URL } from '../../../../plugins/timelines/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -39,29 +37,19 @@ export default ({ getService }: FtrProviderContext) => {
           .post(RAC_ALERTS_BULK_UPDATE_URL)
           .set('kbn-xsrf', 'true')
           .send({ ids: ['123'], status: 'open', index: '.siem-signals-default' });
-        //   .expect(200);
-        // console.error('BODY', JSON.stringify(body, null, 2));
 
         // remove any server generated items that are indeterministic
         delete body.took;
-
         expect(body).to.eql(getSignalStatusEmptyResponse());
       });
 
       it('should not give errors when querying and the signals index does exist and is empty', async () => {
         await createSignalsIndex(supertest);
-        const { body } = await supertest
+        await supertest
           .post(RAC_ALERTS_BULK_UPDATE_URL)
           .set('kbn-xsrf', 'true')
           .send({ ids: ['123'], status: 'open', index: '.siem-signals-default' })
           .expect(200);
-
-        // remove any server generated items that are indeterministic
-        // delete body.took;
-
-        // expect(body).to.eql(getSignalStatusEmptyResponse());
-
-        // await deleteSignalsIndex(supertest);
       });
     });
 
