@@ -13,7 +13,7 @@ import { asyncSearchServiceLogProvider } from '../correlations/async_search_serv
 import { asyncErrorCorrelationsSearchServiceStateProvider } from './async_search_service_state';
 import { fetchTransactionDurationFieldCandidates } from '../correlations/queries';
 import type { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
-import { fetchFailedTransactionsCorrelationPValues } from './queries/query_error_correlation';
+import { fetchFailureCorrelationPValues } from './queries/query_failure_correlation';
 import { ERROR_CORRELATION_THRESHOLD } from './constants';
 
 export const asyncErrorCorrelationSearchServiceProvider = (
@@ -53,11 +53,7 @@ export const asyncErrorCorrelationSearchServiceProvider = (
           try {
             const results = await Promise.allSettled(
               batches[i].map((fieldName) =>
-                fetchFailedTransactionsCorrelationPValues(
-                  esClient,
-                  params!,
-                  fieldName
-                )
+                fetchFailureCorrelationPValues(esClient, params!, fieldName)
               )
             );
 

@@ -15,7 +15,7 @@ import { getRequestBase } from '../../correlations/queries/get_request_base';
 import { EVENT_OUTCOME } from '../../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../../common/event_outcome';
 
-export const getErrorCorrelationRequest = (
+export const getFailureCorrelationRequest = (
   params: SearchServiceFetchParams,
   fieldName: string
 ): estypes.SearchRequest => {
@@ -60,13 +60,13 @@ export const getErrorCorrelationRequest = (
   };
 };
 
-export const fetchFailedTransactionsCorrelationPValues = async (
+export const fetchFailureCorrelationPValues = async (
   esClient: ElasticsearchClient,
   params: SearchServiceFetchParams,
   fieldName: string
 ) => {
   const resp = await esClient.search(
-    getErrorCorrelationRequest(params, fieldName)
+    getFailureCorrelationRequest(params, fieldName)
   );
 
   if (resp.body.aggregations === undefined) {

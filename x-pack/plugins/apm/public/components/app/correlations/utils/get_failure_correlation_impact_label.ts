@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FailureCorrelationImpactThreshold } from '../../../../../common/search_strategies/error_correlations/types';
-import { FAILURE_CORRELATION_IMPACT_THRESHOLD } from '../../../../../common/search_strategies/error_correlations/constants';
+import { FailureCorrelationImpactThreshold } from '../../../../../common/search_strategies/failure_correlations/types';
+import { FAILURE_CORRELATION_IMPACT_THRESHOLD } from '../../../../../common/search_strategies/failure_correlations/constants';
 
 export function getFailureCorrelationImpactLabel(
   pValue: number

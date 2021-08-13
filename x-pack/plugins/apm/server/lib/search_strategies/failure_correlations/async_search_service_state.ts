@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ErrorCorrelationValue } from '../../../../common/search_strategies/error_correlations/types';
+import { ErrorCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
 
 interface Progress {
   started: number;

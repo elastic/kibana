@@ -36,9 +36,9 @@ import { useCorrelationsSearchStrategy } from './use_correlations_search_strateg
 import {
   BaseSearchStrategyResponse,
   ErrorCorrelationValue,
-} from '../../../../common/search_strategies/error_correlations/types';
+} from '../../../../common/search_strategies/failure_correlations/types';
 import { ImpactBar } from '../../shared/ImpactBar';
-import { APM_ERROR_CORRELATION_SEARCH_STRATEGY } from '../../../../common/search_strategies/error_correlations/constants';
+import { APM_ERROR_CORRELATION_SEARCH_STRATEGY } from '../../../../common/search_strategies/failure_correlations/constants';
 import { isErrorMessage } from './utils/is_error_message';
 import { Summary } from '../../shared/Summary';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';

@@ -51,7 +51,10 @@ import {
   TRANSACTION_TYPE,
 } from '../common/elasticsearch_fieldnames';
 import { tutorialProvider } from './tutorial';
-import { apmErrorCorrelationsSearchStrategyProvider } from './lib/search_strategies/error_correlation/search_strategy';
+import {
+  apmErrorCorrelationsSearchStrategyProvider,
+  APM_ERROR_CORRELATION_SEARCH_STRATEGY,
+} from './lib/search_strategies/failure_correlations';
 
 export class APMPlugin
   implements
@@ -271,7 +274,7 @@ export class APMPlugin
 
         // Register APM error correlations strategy
         plugins.data.search.registerSearchStrategy(
-          'apmErrorCorrelationsSearchStrategy',
+          APM_ERROR_CORRELATION_SEARCH_STRATEGY,
           apmErrorCorrelationsSearchStrategyProvider(
             boundGetApmIndices,
             includeFrozen

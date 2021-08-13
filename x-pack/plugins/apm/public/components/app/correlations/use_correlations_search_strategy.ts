@@ -15,7 +15,7 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../src/plugins/data/common';
-import { BaseSearchStrategyResponse } from '../../../../common/search_strategies/error_correlations/types';
+import { BaseSearchStrategyResponse } from '../../../../common/search_strategies/failure_correlations/types';
 
 interface SearchStrategyOptions {
   environment?: string;
