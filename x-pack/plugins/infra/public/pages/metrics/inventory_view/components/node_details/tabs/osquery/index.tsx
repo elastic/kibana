@@ -7,7 +7,7 @@
 
 import { EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { useKibanaContextForPlugin } from '../../../../../../../hooks/use_kibana';
 import { TabContent, TabProps } from '../shared';
 import { Source } from '../../../../../../../containers/metrics_source';
@@ -35,20 +35,25 @@ const TabComponent = (props: TabProps) => {
   // @ts-expect-error
   const OsqueryAction = osquery?.OsqueryAction;
 
-  // TODO: Add info when Osquery plugin is not available
-  if (loading || !OsqueryAction) {
+  // avoids component rerender when resizing the popover
+  const content = useMemo(() => {
+    // TODO: Add info when Osquery plugin is not available
+    if (loading || !OsqueryAction) {
+      return (
+        <TabContent>
+          <EuiLoadingContent lines={10} />
+        </TabContent>
+      );
+    }
+
     return (
       <TabContent>
-        <EuiLoadingContent lines={10} />
+        <OsqueryAction metadata={metadata} />
       </TabContent>
     );
-  }
+  }, [OsqueryAction, loading, metadata]);
 
-  return (
-    <TabContent>
-      <OsqueryAction metadata={metadata} />
-    </TabContent>
-  );
+  return content;
 };
 
 export const OsqueryTab = {
