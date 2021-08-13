@@ -12,6 +12,7 @@ import {
   EXCEPTION_LIST_NAMESPACE,
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
 } from '@kbn/securitysolution-list-constants';
+import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './utils/constants';
 
 describe('extract_exceptions_list', () => {
   type FuncReturn = ReturnType<typeof extractExceptionsList>;
@@ -49,7 +50,7 @@ describe('extract_exceptions_list', () => {
     ).toEqual<FuncReturn>([
       {
         id: '123',
-        name: 'exception-list-agnostic_0',
+        name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_0`,
         type: EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
       },
     ]);
@@ -63,12 +64,12 @@ describe('extract_exceptions_list', () => {
     expect(extractExceptionsList({ logger, exceptionsList: twoInputs })).toEqual<FuncReturn>([
       {
         id: '123',
-        name: 'exception-list-agnostic_0',
+        name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_0`,
         type: EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
       },
       {
         id: '976',
-        name: 'exception-list_1',
+        name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_1`,
         type: EXCEPTION_LIST_NAMESPACE,
       },
     ]);

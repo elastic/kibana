@@ -12,6 +12,7 @@ import {
   EXCEPTION_LIST_NAMESPACE,
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
 } from '@kbn/securitysolution-list-constants';
+import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './utils/constants';
 
 describe('extract_references', () => {
   type FuncReturn = ReturnType<typeof extractReferences>;
@@ -44,7 +45,7 @@ describe('extract_references', () => {
       references: [
         {
           id: '123',
-          name: `exception-list-agnostic_0`,
+          name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_0`,
           type: EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
         },
       ],
@@ -69,12 +70,12 @@ describe('extract_references', () => {
       references: [
         {
           id: '123',
-          name: `exception-list-agnostic_0`,
+          name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_0`,
           type: EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
         },
         {
           id: '456',
-          name: `exception-list_1`,
+          name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_1`,
           type: EXCEPTION_LIST_NAMESPACE,
         },
       ],

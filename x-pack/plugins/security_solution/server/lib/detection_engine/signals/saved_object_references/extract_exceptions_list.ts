@@ -32,16 +32,10 @@ export const extractExceptionsList = ({
     );
     return [];
   } else {
-    return exceptionsList.map((exceptionItem, index) => {
-      const savedObjectType = getSavedObjectType({ namespaceType: exceptionItem.namespace_type });
-      return {
-        name: getSavedObjectNamePatternForExceptionsList({
-          savedObjectType,
-          index,
-        }),
-        id: exceptionItem.id,
-        type: savedObjectType,
-      };
-    });
+    return exceptionsList.map((exceptionItem, index) => ({
+      name: getSavedObjectNamePatternForExceptionsList(index),
+      id: exceptionItem.id,
+      type: getSavedObjectType({ namespaceType: exceptionItem.namespace_type }),
+    }));
   }
 };
