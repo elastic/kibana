@@ -21,6 +21,8 @@
     "jsx": "react",
     // Enables all strict type checking options.
     "strict": true,
+    // All TS projects should be composite and only include the files they select, and ref the files outside of the project
+    "composite": true,
     // save information about the project graph on disk
     "incremental": true,
     // Do not check d.ts files by default
