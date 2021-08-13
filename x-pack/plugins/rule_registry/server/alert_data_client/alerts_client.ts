@@ -375,8 +375,13 @@ export class AlertsClient {
         config
       );
       if (query != null && typeof query === 'object') {
-        // @ts-expect-error
-        builtQuery.bool.must.push(query);
+        return {
+          ...builtQuery,
+          bool: {
+            ...builtQuery.bool,
+            must: [...builtQuery.bool.must, query],
+          },
+        };
       }
       return builtQuery;
     } catch (exc) {
