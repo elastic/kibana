@@ -10,7 +10,6 @@ import type { estypes } from '@elastic/elasticsearch';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { AlertStatus } from '../../../timelines/common';
 
-// export const DETECTION_ENGINE_SIGNALS_STATUS_URL = '/api/detection_engine/signals/status';
 export const RAC_ALERTS_BULK_UPDATE_URL = '/internal/rac/alerts/bulk_update';
 
 /**

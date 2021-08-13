@@ -153,7 +153,6 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
       eventIds: Object.keys(selectedEventIds),
       currentStatus: filterStatus,
       ...(showClearSelection ? { query } : {}),
-      // query,
       setEventsLoading,
       setEventsDeleted,
       onUpdateSuccess: onAlertStatusUpdateSuccess,
