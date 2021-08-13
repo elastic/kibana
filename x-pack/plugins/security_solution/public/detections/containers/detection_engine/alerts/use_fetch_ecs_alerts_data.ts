@@ -42,7 +42,7 @@ export const useFetchEcsAlertsData = ({
           method: 'POST',
           body: JSON.stringify(buildAlertsQuery(alertIds ?? [])),
         });
-        console.log(alertResponse?.hits.hits);
+
         setAlertEcsData(
           alertResponse?.hits.hits.reduce<Ecs[]>(
             (acc, { _id, _index, _source = {} }) => [

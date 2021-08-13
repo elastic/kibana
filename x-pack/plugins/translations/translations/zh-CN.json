@@ -18730,7 +18730,6 @@
     "xpack.observability.alertsFlyout.statusLabel": "状态",
     "xpack.observability.alertsFlyout.triggeredLabel": "已触发",
     "xpack.observability.alertsLinkTitle": "告警",
-    "xpack.observability.alertsTable.viewInAppButtonLabel": "在应用中查看",
     "xpack.observability.alertsTitle": "告警",
     "xpack.observability.breadcrumbs.alertsLinkText": "告警",
     "xpack.observability.breadcrumbs.casesConfigureLinkText": "配置",
