@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export function setCollectionDisabled(req) {
+import { LegacyRequest } from '../../../types';
+
+export function setCollectionDisabled(req: LegacyRequest) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
   const params = {
     body: {

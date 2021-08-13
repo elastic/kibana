@@ -23,6 +23,7 @@ import { CrawlerStatusIndicator } from './components/crawler_status_indicator/cr
 import { DeleteDomainPanel } from './components/delete_domain_panel';
 import { EntryPointsTable } from './components/entry_points_table';
 import { ManageCrawlsPopover } from './components/manage_crawls_popover/manage_crawls_popover';
+import { SitemapsTable } from './components/sitemaps_table';
 import { CRAWLER_TITLE } from './constants';
 import { CrawlerSingleDomainLogic } from './crawler_single_domain_logic';
 
@@ -57,6 +58,10 @@ export const CrawlerSingleDomain: React.FC = () => {
         <>
           <EuiPanel paddingSize="l" hasBorder>
             <EntryPointsTable domain={domain} engineName={engineName} items={domain.entryPoints} />
+          </EuiPanel>
+          <EuiSpacer size="xl" />
+          <EuiPanel paddingSize="l" hasBorder>
+            <SitemapsTable domain={domain} engineName={engineName} items={domain.sitemaps} />
           </EuiPanel>
           <EuiSpacer size="xl" />
         </>

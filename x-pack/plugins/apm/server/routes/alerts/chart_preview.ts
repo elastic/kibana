@@ -12,7 +12,7 @@ import { getTransactionErrorRateChartPreview } from '../../lib/alerts/chart_prev
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../create_apm_server_route';
 import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
-import { rangeRt } from '../default_api_types';
+import { environmentRt, rangeRt } from '../default_api_types';
 
 const alertParamsRt = t.intersection([
   t.partial({
@@ -22,9 +22,9 @@ const alertParamsRt = t.intersection([
       t.literal('99th'),
     ]),
     serviceName: t.string,
-    environment: t.string,
     transactionType: t.string,
   }),
+  environmentRt,
   rangeRt,
 ]);
 

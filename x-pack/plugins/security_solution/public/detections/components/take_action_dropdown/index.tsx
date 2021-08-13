@@ -269,6 +269,7 @@ export const TakeActionDropdown = React.memo(
           closePopover={closePopoverHandler}
           panelPaddingSize="none"
           anchorPosition="downLeft"
+          repositionOnScroll
         >
           <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
         </EuiPopover>
