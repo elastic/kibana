@@ -1048,6 +1048,7 @@ export interface ErrorHttpResponseOptions {
 
 // @public (undocumented)
 export interface ExecutionContextSetup {
+    setRequestId(requestId: string): void;
     withContext<R>(context: KibanaExecutionContext | undefined, fn: (...args: any[]) => R): R;
 }
 
