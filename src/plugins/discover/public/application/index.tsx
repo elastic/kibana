@@ -5,29 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch, Route, Redirect } from 'react-router-dom';
 
 import { AppMountParameters } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { getServices } from '../kibana_services';
-import { DiscoverMainRoute } from './apps/main';
-import { ContextAppRoute } from './apps/context';
-import { SingleDocRoute } from './apps/doc';
-import { NotFoundRoute } from './apps/not_found';
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { discoverRouter } from './discover_router';
 
 export const renderApp = ({ element }: AppMountParameters) => {
   const services = getServices();
   const { history: getHistory, capabilities, chrome, data } = services;
 
   const history = getHistory();
-  const mainRouteProps = {
-    services,
-    history,
-  };
   if (!capabilities.discover.save) {
     chrome.setBadge({
       text: i18n.translate('discover.badge.readOnly.text', {
@@ -39,33 +28,7 @@ export const renderApp = ({ element }: AppMountParameters) => {
       iconType: 'glasses',
     });
   }
-  const app = (
-    <Router history={history}>
-      <KibanaContextProvider services={services}>
-        <Switch>
-          <Route
-            path="/context/:indexPatternId/:id"
-            children={<ContextAppRoute indexPatternList={[]} services={services} />}
-          />
-          <Route
-            path="/doc/:indexPattern/:index/:type"
-            render={(props) => (
-              <Redirect
-                to={`/doc/${props.match.params.indexPattern}/${props.match.params.index}`}
-              />
-            )}
-          />
-          <Route
-            path="/doc/:indexPatternId/:index"
-            children={<SingleDocRoute services={services} />}
-          />
-          <Route path="/view/:id" children={<DiscoverMainRoute {...mainRouteProps} />} />
-          <Route path="/" exact children={<DiscoverMainRoute {...mainRouteProps} />} />
-          <NotFoundRoute services={services} />
-        </Switch>
-      </KibanaContextProvider>
-    </Router>
-  );
+  const app = discoverRouter(services, history);
   ReactDOM.render(app, element);
 
   return () => {

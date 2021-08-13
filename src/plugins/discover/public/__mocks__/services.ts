@@ -29,6 +29,7 @@ export const discoverServiceMock = ({
     location: {
       search: '',
     },
+    listen: jest.fn(),
   }),
   data: dataPlugin,
   docLinks: docLinksServiceMock.createStartContract(),
