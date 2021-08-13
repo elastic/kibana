@@ -108,9 +108,9 @@ describe('SourceSettings', () => {
   it('handles disabling synchronization', () => {
     const wrapper = shallow(<SourceSettings />);
 
-    const synchronizeSwitch = wrapper.find('[data-test-subj="SynchronizeToggle"]');
+    const synchronizeSwitch = wrapper.find('[data-test-subj="SynchronizeToggle"]').first();
     const event = { target: { checked: false } };
-    synchronizeSwitch.prop('onChange')(event as any);
+    synchronizeSwitch.prop('onChange')?.(event as any);
 
     wrapper.find('[data-test-subj="SaveSyncControlsButton"]').simulate('click');
 
@@ -128,9 +128,9 @@ describe('SourceSettings', () => {
   it('handles disabling thumbnails', () => {
     const wrapper = shallow(<SourceSettings />);
 
-    const thumbnailsSwitch = wrapper.find('[data-test-subj="ThumbnailsToggle"]');
+    const thumbnailsSwitch = wrapper.find('[data-test-subj="ThumbnailsToggle"]').first();
     const event = { target: { checked: false } };
-    thumbnailsSwitch.prop('onChange')(event as any);
+    thumbnailsSwitch.prop('onChange')?.(event as any);
 
     wrapper.find('[data-test-subj="SaveSyncControlsButton"]').simulate('click');
 
@@ -148,9 +148,9 @@ describe('SourceSettings', () => {
   it('handles disabling content extraction', () => {
     const wrapper = shallow(<SourceSettings />);
 
-    const contentExtractionSwitch = wrapper.find('[data-test-subj="ContentExtractionToggle"]');
+    const contentExtractionSwitch = wrapper.find('[data-test-subj="ContentExtractionToggle"]').first();
     const event = { target: { checked: false } };
-    contentExtractionSwitch.prop('onChange')(event as any);
+    contentExtractionSwitch.prop('onChange')?.(event as any);
 
     wrapper.find('[data-test-subj="SaveSyncControlsButton"]').simulate('click');
 
