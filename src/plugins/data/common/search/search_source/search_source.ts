@@ -757,10 +757,6 @@ export class SearchSource {
           body.script_fields,
           Object.keys(body.script_fields).filter((f) => uniqFieldNames.includes(f))
         );
-        body.runtime_mappings = pick(
-          body.runtime_mappings,
-          Object.keys(body.runtime_mappings).filter((f) => uniqFieldNames.includes(f))
-        );
       }
 
       // request the remaining fields from stored_fields just in case, since the
