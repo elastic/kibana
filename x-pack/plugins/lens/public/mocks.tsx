@@ -57,9 +57,9 @@ export function mockDatasourceStates() {
   };
 }
 
-export function createMockVisualization(): jest.Mocked<Visualization> {
+export function createMockVisualization(id = 'vis1'): jest.Mocked<Visualization> {
   return {
-    id: 'TEST_VIS',
+    id,
     clearLayer: jest.fn((state, _layerId) => state),
     removeLayer: jest.fn(),
     getLayerIds: jest.fn((_state) => ['layer1']),
@@ -68,9 +68,9 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     visualizationTypes: [
       {
         icon: 'empty',
-        id: 'TEST_VIS',
+        id,
         label: 'TEST',
-        groupLabel: 'TEST_VISGroup',
+        groupLabel: `${id}Group`,
       },
     ],
     getVisualizationTypeId: jest.fn((_state) => 'empty'),

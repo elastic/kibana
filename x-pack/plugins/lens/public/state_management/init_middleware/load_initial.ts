@@ -70,7 +70,7 @@ export function loadInitial(
             datasourceMap,
             datasourceStates,
             visualizationMap,
-            activeVisualizationId: Object.keys(visualizationMap)[0] || null,
+            activeVisualization: visualizationMap?.[Object.keys(visualizationMap)[0]] || null,
             visualizationState: null,
             visualizeTriggerFieldContext: initialContext,
           });

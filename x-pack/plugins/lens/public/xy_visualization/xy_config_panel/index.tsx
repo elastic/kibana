@@ -15,8 +15,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   htmlIdGenerator,
-  EuiIcon,
-  EuiComboBox,
 } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type {
