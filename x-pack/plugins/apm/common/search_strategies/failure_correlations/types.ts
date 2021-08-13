@@ -7,7 +7,7 @@
 
 import { FAILURE_CORRELATION_IMPACT_THRESHOLD } from './constants';
 
-export interface ErrorCorrelationValue {
+export interface FailureCorrelationValue {
   key: string;
   doc_count: number;
   bg_count: number;

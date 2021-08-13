@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const APM_ERROR_CORRELATION_SEARCH_STRATEGY =
-  'apmErrorCorrelationsSearchStrategy';
+export const FAILURE_CORRELATION_SEARCH_STRATEGY =
+  'apmFailureCorrelationsSearchStrategy';
 export const FAILURE_CORRELATION_IMPACT_THRESHOLD = {
   HIGH: i18n.translate(
     'xpack.apm.correlations.failedTransactions.highImpactText',

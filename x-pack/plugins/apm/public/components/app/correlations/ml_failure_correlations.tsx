@@ -35,10 +35,10 @@ import { FailureCorrelationsHelpPopover } from './ml_failure_correlations_help_p
 import { useCorrelationsSearchStrategy } from './use_correlations_search_strategy';
 import {
   BaseSearchStrategyResponse,
-  ErrorCorrelationValue,
+  FailureCorrelationValue,
 } from '../../../../common/search_strategies/failure_correlations/types';
 import { ImpactBar } from '../../shared/ImpactBar';
-import { APM_ERROR_CORRELATION_SEARCH_STRATEGY } from '../../../../common/search_strategies/failure_correlations/constants';
+import { FAILURE_CORRELATION_SEARCH_STRATEGY } from '../../../../common/search_strategies/failure_correlations/constants';
 import { isErrorMessage } from './utils/is_error_message';
 import { Summary } from '../../shared/Summary';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -52,7 +52,7 @@ interface Props {
 
 interface ErrorCorrelationSearchStrategyResult
   extends BaseSearchStrategyResponse {
-  values: ErrorCorrelationValue[];
+  values: FailureCorrelationValue[];
 }
 
 export function MlFailureCorrelations({ onClose }: Props) {
@@ -82,7 +82,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
         },
       },
     },
-    APM_ERROR_CORRELATION_SEARCH_STRATEGY
+    FAILURE_CORRELATION_SEARCH_STRATEGY
   );
 
   const {
@@ -110,7 +110,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
   const [
     selectedSignificantTerm,
     setSelectedSignificantTerm,
-  ] = useState<ErrorCorrelationValue | null>(null);
+  ] = useState<FailureCorrelationValue | null>(null);
 
   const selectedTerm = useMemo(() => {
     if (selectedSignificantTerm) return selectedSignificantTerm;
@@ -125,7 +125,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
   const handleOnFilter = onClose;
 
   const errorCorrelationsColumns: Array<
-    EuiBasicTableColumn<ErrorCorrelationValue>
+    EuiBasicTableColumn<FailureCorrelationValue>
   > = useMemo(
     () => [
       {
@@ -193,7 +193,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
             ),
             icon: 'plusInCircle',
             type: 'icon',
-            onClick: (term: ErrorCorrelationValue) => {
+            onClick: (term: FailureCorrelationValue) => {
               push(history, {
                 query: {
                   kuery: `${term.fieldName}:"${encodeURIComponent(
@@ -216,7 +216,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
             ),
             icon: 'minusInCircle',
             type: 'icon',
-            onClick: (term: ErrorCorrelationValue) => {
+            onClick: (term: FailureCorrelationValue) => {
               push(history, {
                 query: {
                   kuery: `not ${term.fieldName}:"${encodeURIComponent(
@@ -233,7 +233,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
           'xpack.apm.correlations.correlationsTable.actionsLabel',
           { defaultMessage: 'Filter' }
         ),
-        render: (_: any, term: ErrorCorrelationValue) => {
+        render: (_: any, term: FailureCorrelationValue) => {
           return (
             <>
               <EuiLink
@@ -346,7 +346,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
           <EuiSpacer size="m" />
         </>
       ) : null}
-      <CorrelationsTable<ErrorCorrelationValue>
+      <CorrelationsTable<FailureCorrelationValue>
         columns={errorCorrelationsColumns}
         significantTerms={result?.response?.values}
         status={FETCH_STATUS.SUCCESS}
