@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const docTable = getService('docTable');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['context']);
   let expectedRowLength = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
 
@@ -67,6 +68,26 @@ export default function ({ getService, getPageObjects }) {
         async function () {
           const rows = await docTable.getRowsText();
           return rows.length === expectedRowLength;
+        }
+      );
+    });
+
+    it('should show 101 records when 50 newer and 50 older records are requests', async function () {
+      const predecessorCountPicker = await PageObjects.context.getPredecessorCountPicker();
+      await predecessorCountPicker.clearValueWithKeyboard();
+      await predecessorCountPicker.pressKeys('50');
+      await predecessorCountPicker.pressKeys(browser.keys.ENTER);
+
+      const successorCountPicker = await PageObjects.context.getSuccessorCountPicker();
+      await successorCountPicker.clearValueWithKeyboard();
+      await successorCountPicker.pressKeys('50');
+      await successorCountPicker.pressKeys(browser.keys.ENTER);
+
+      await retry.waitFor(
+        `number of rows displayed after clicking load more successors is ${expectedRowLength}`,
+        async function () {
+          const rows = await docTable.getRowsText();
+          return rows.length === 101;
         }
       );
     });
