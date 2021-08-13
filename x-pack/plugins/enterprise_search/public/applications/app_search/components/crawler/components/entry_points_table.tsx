@@ -9,10 +9,9 @@ import React from 'react';
 
 import { useActions } from 'kea';
 
-import { EuiFieldText, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiFieldText, EuiLink, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { GenericEndpointInlineEditableTable } from '../../../../shared/tables/generic_endpoint_inline_editable_table';
 import { InlineEditableTableColumn } from '../../../../shared/tables/inline_editable_table/types';
@@ -22,6 +21,10 @@ import { CrawlerDomain, EntryPoint } from '../types';
 
 import { EntryPointsTableLogic } from './entry_points_table_logic';
 
+const ADD_ENTRY_POINT_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.crawler.entryPointsTable.addButtonLabel',
+  { defaultMessage: 'Add entry point' }
+);
 interface EntryPointsTableProps {
   domain: CrawlerDomain;
   engineName: string;
@@ -69,10 +72,7 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({
 
   return (
     <GenericEndpointInlineEditableTable
-      addButtonText={i18n.translate(
-        'xpack.enterpriseSearch.appSearch.crawler.entryPointsTable.addButtonLabel',
-        { defaultMessage: 'Add entry point' }
-      )}
+      addButtonText={ADD_ENTRY_POINT_LABEL}
       columns={columns}
       description={
         <p>
@@ -100,9 +100,8 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({
       )}
       // Since canRemoveLastItem is false, the only time noItemsMessage would be displayed is if the last entry point was deleted via the API.
       noItemsMessage={(editNewItem) => (
-        <>
-          <EuiSpacer />
-          <EuiTitle size="m">
+        <EuiEmptyPrompt
+          title={
             <h4>
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.crawler.entryPointsTable.emptyMessageTitle',
@@ -111,27 +110,18 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({
                 }
               )}
             </h4>
-          </EuiTitle>
-          <EuiSpacer />
-          <EuiText>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.appSearch.crawler.entryPointsTable.emptyMessageDescription"
-              defaultMessage="{link} to specify an entry point
-              for the crawler"
-              values={{
-                link: (
-                  <EuiLink onClick={editNewItem}>
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.crawler.entryPointsTable.emptyMessageLinkText',
-                      { defaultMessage: 'Add an entry point' }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiText>
-          <EuiSpacer />
-        </>
+          }
+          titleSize="s"
+          body={
+            <EuiText>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.crawler.entryPointsTable.emptyMessageDescription',
+                { defaultMessage: 'Add an entry point for the crawler.' }
+              )}
+            </EuiText>
+          }
+          actions={<EuiButton onClick={editNewItem}>{ADD_ENTRY_POINT_LABEL}</EuiButton>}
+        />
       )}
       addRoute={entryPointsRoute}
       canRemoveLastItem={false}

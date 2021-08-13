@@ -86,7 +86,14 @@ export const SitemapsTable: React.FC<SitemapsTableProps> = ({ domain, engineName
               </h4>
             }
             titleSize="s"
-            body={<EuiText>Add a sitemap to specify an entry point for the crawler.</EuiText>}
+            body={
+              <EuiText>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.crawler.sitemapsTable.emptyMessageDescription',
+                  { defaultMessage: 'Add a sitemap to specify an entry point for the crawler.' }
+                )}
+              </EuiText>
+            }
             actions={<EuiButton onClick={editNewItem}>{ADD_BUTTON_LABEL}</EuiButton>}
           />
         </>
