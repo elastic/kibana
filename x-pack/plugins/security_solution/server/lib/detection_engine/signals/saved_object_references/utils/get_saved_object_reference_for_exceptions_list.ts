@@ -6,9 +6,9 @@
  */
 
 import { Logger, SavedObjectReference } from 'src/core/server';
-import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import { getSavedObjectReference } from './get_saved_object_reference';
 import { RuleParams } from '../../../schemas/rule_schemas';
+import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './constants';
 
 /**
  * Given an index and a saved object reference, this will return the specific "exceptionsList" saved object reference
@@ -33,10 +33,9 @@ export const getSavedObjectReferenceForExceptionsList = ({
   if (!(index >= 0)) {
     throw new TypeError(`"index" should alway be >= 0 instead of: ${index}`);
   } else {
-    const name = getSavedObjectType({ namespaceType });
     return getSavedObjectReference({
       logger,
-      name,
+      name: EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME,
       index,
       savedObjectReferences,
     });

@@ -10,6 +10,7 @@ import { SavedObjectReference } from 'src/core/server';
 import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
 import { injectExceptionsReferences } from './inject_exceptions_list';
 import { RuleParams } from '../../schemas/rule_schemas';
+import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './utils/constants';
 
 describe('inject_exceptions_list', () => {
   type FuncReturn = ReturnType<typeof injectExceptionsReferences>;
@@ -25,7 +26,7 @@ describe('inject_exceptions_list', () => {
   const mockSavedObjectReferences = (): SavedObjectReference[] => [
     {
       id: '123',
-      name: `exception-list_0`,
+      name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_0`,
       type: EXCEPTION_LIST_NAMESPACE,
     },
   ];
