@@ -8,7 +8,7 @@
 import $ from 'jquery';
 
 // Kibana wrapper
-import d3 from 'd3';
+// import d3 from 'd3';
 
 // Pluggable function to handle the comms with a server. Default impl here is
 // for use outside of Kibana server with direct access to elasticsearch
@@ -167,7 +167,7 @@ function GraphWorkspace(options) {
   //Determines if 2 nodes are connected via an edge
   this.areLinked = function (a, b) {
     if (a === b) return true;
-    this.edges.forEach((e) => {
+    this.edges.some((e) => {
       if (e.source === a && e.target === b) {
         return true;
       }
@@ -468,7 +468,7 @@ function GraphWorkspace(options) {
 
   this.stopLayout = function () {
     if (this.force) {
-      this.force.stop();
+      // this.force.stop();
     }
     this.force = null;
   };
@@ -498,9 +498,9 @@ function GraphWorkspace(options) {
         });
       }
     });
-    const visibleNodes = self.nodes.filter(function (n) {
-      return n.parent === undefined;
-    });
+    // const visibleNodes = self.nodes.filter(function (n) {
+    //   return n.parent === undefined;
+    // });
     //reset then roll-up all the counts
     const allNodes = self.nodes;
     allNodes.forEach((node) => {
@@ -517,53 +517,54 @@ function GraphWorkspace(options) {
         node.numChildren = node.numChildren + 1;
       }
     }
-    this.force = d3.layout
-      .force()
-      .nodes(visibleNodes)
-      .links(effectiveEdges)
-      .friction(0.8)
-      .linkDistance(100)
-      .charge(-1500)
-      .gravity(0.15)
-      .theta(0.99)
-      .alpha(0.5)
-      .size([800, 600])
-      .on('tick', function () {
-        const nodeArray = self.nodes;
-        let hasRollups = false;
-        //Update the position of all "top level nodes"
-        nodeArray.forEach((n) => {
-          //Code to support roll-ups
-          if (n.parent === undefined) {
-            n.kx = n.x;
-            n.ky = n.y;
-          } else {
-            hasRollups = true;
-          }
-        });
-        if (hasRollups) {
-          nodeArray.forEach((n) => {
-            //Code to support roll-ups
-            if (n.parent !== undefined) {
-              // Is a grouped node - inherit parent's position so edges point into parent
-              // d3 thinks it has moved it to x and y but we have final say using kx and ky.
-              let topLevelNode = n.parent;
-              while (topLevelNode.parent !== undefined) {
-                topLevelNode = topLevelNode.parent;
-              }
+    this.force = null;
+    // d3.layout
+    //   .force()
+    //   .nodes(visibleNodes)
+    //   .links(effectiveEdges)
+    //   .friction(0.8)
+    //   .linkDistance(100)
+    //   .charge(-1500)
+    //   .gravity(0.15)
+    //   .theta(0.99)
+    //   .alpha(0.5)
+    //   .size([800, 600])
+    //   .on('tick', function () {
+    //     const nodeArray = self.nodes;
+    //     let hasRollups = false;
+    //     //Update the position of all "top level nodes"
+    //     nodeArray.forEach((n) => {
+    //       //Code to support roll-ups
+    //       if (n.parent === undefined) {
+    //         n.kx = n.x;
+    //         n.ky = n.y;
+    //       } else {
+    //         hasRollups = true;
+    //       }
+    //     });
+    //     if (hasRollups) {
+    //       nodeArray.forEach((n) => {
+    //         //Code to support roll-ups
+    //         if (n.parent !== undefined) {
+    //           // Is a grouped node - inherit parent's position so edges point into parent
+    //           // d3 thinks it has moved it to x and y but we have final say using kx and ky.
+    //           let topLevelNode = n.parent;
+    //           while (topLevelNode.parent !== undefined) {
+    //             topLevelNode = topLevelNode.parent;
+    //           }
 
-              n.kx = topLevelNode.x;
-              n.ky = topLevelNode.y;
-            }
-          });
-        }
-        if (self.changeHandler) {
-          // Hook to allow any client to respond to position changes
-          // e.g. angular adjusts and repaints node positions on screen.
-          self.changeHandler();
-        }
-      });
-    this.force.start();
+    //           n.kx = topLevelNode.x;
+    //           n.ky = topLevelNode.y;
+    //         }
+    //       });
+    //     }
+    //     if (self.changeHandler) {
+    //       // Hook to allow any client to respond to position changes
+    //       // e.g. angular adjusts and repaints node positions on screen.
+    //       self.changeHandler();
+    //     }
+    //   });
+    // this.force.start();
   };
 
   //========Grouping functions==========
@@ -910,13 +911,12 @@ function GraphWorkspace(options) {
   // A manual expand function where the client provides the list
   // of existing nodes that are the start points and some options
   // about what targets are of interest.
-  this.expand = function (startNodes, targetOptions) {
+  this.expand = function (startNodes, targetOptions, avoidNodes = self.blocklistedNodes) {
     //=============================
     const nodesByField = {};
     const excludeNodesByField = {};
 
     //Add any blocklisted nodes to exclusion list
-    const avoidNodes = this.blocklistedNodes;
     for (let i = 0; i < avoidNodes.length; i++) {
       const n = avoidNodes[i];
       let arr = excludeNodesByField[n.data.field];
@@ -929,7 +929,7 @@ function GraphWorkspace(options) {
       }
     }
 
-    const allExistingNodes = this.nodes;
+    const allExistingNodes = self.nodes;
     for (let i = 0; i < allExistingNodes.length; i++) {
       const n = allExistingNodes[i];
       let arr = excludeNodesByField[n.data.field];
@@ -943,26 +943,26 @@ function GraphWorkspace(options) {
     //Organize nodes by field
     for (let i = 0; i < startNodes.length; i++) {
       const n = startNodes[i];
-      let arr = nodesByField[n.data.field];
+      let arr = nodesByField[n.field];
       if (!arr) {
         arr = [];
-        nodesByField[n.data.field] = arr;
+        nodesByField[n.field] = arr;
       }
       // pushing boosts server-side to influence sampling/direction
       arr.push({
-        term: n.data.term,
-        boost: n.data.weight,
+        term: n.term,
+        boost: n.weight,
       });
 
-      arr = excludeNodesByField[n.data.field];
+      arr = excludeNodesByField[n.field];
       if (!arr) {
         arr = [];
-        excludeNodesByField[n.data.field] = arr;
+        excludeNodesByField[n.field] = arr;
       }
       //NOTE for the entity-building use case need to remove excludes that otherwise
       // prevent bridge-building.
-      if (arr.indexOf(n.data.term) < 0) {
-        arr.push(n.data.term);
+      if (arr.indexOf(n.term) < 0) {
+        arr.push(n.term);
       }
     }
 
@@ -978,7 +978,7 @@ function GraphWorkspace(options) {
       }
     }
 
-    let targetFields = this.options.vertex_fields;
+    let targetFields = self.options.vertex_fields;
     if (targetOptions.toFields) {
       targetFields = targetOptions.toFields;
     }
@@ -1006,6 +1006,7 @@ function GraphWorkspace(options) {
       },
     };
     self.lastRequest = JSON.stringify(request, null, '\t');
+
     graphExplorer(self.options.indexName, request, function (data) {
       self.lastResponse = JSON.stringify(data, null, '\t');
       const edges = [];

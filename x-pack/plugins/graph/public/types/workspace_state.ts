@@ -22,6 +22,8 @@ export interface WorkspaceNode {
   parent: WorkspaceNode | null;
   color: string;
   isSelected?: boolean;
+  id: string;
+  weight: number;
 }
 
 export interface WorkspaceEdge {
@@ -31,6 +33,7 @@ export interface WorkspaceEdge {
   source: WorkspaceNode;
   target: WorkspaceNode;
   isSelected?: boolean;
+  id: string;
 }
 
 export interface ServerResultNode {

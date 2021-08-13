@@ -10316,6 +10316,13 @@ cors@^2.8.4:
     object-assign "^4"
     vary "^1"
 
+cose-base@^2.0.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/cose-base/-/cose-base-2.1.0.tgz#89b2d4a59d7bd0cde3138a4689825f3e8a5abd6a"
+  integrity sha512-HTMm07dhxq1dIPGWwpiVrIk9n+DH7KYmqWA786mLe8jDS+1ZjGtJGIIsJVKoseZXS6/FxiUWCJ2B7XzqUCuhPw==
+  dependencies:
+    layout-base "^2.0.0"
+
 cosmiconfig@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/cosmiconfig/-/cosmiconfig-4.0.0.tgz#760391549580bbd2df1e562bc177b13c290972dc"
@@ -11014,6 +11021,23 @@ cytoscape-dagre@^2.2.2:
   integrity sha512-zsg36qNwua/L2stJSWkcbSDcvW3E6VZf6KRe6aLnQJxuXuz89tMqI5EVYVKEcNBgzTEzFMFv0PE3T0nD4m6VDw==
   dependencies:
     dagre "^0.8.2"
+
+cytoscape-dblclick@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/cytoscape-dblclick/-/cytoscape-dblclick-0.3.1.tgz#007c1d6b7889afebea74113bc97a2130529f43d0"
+  integrity sha512-xeL6lP2Td0RIvVSTxsBDY94KM0JfDsi9X6BPr6Y7PQGi5CP2RXx+1fNEtageXpk+gDkKFylW0pjoGbk2uc1J7Q==
+
+cytoscape-expand-collapse@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/cytoscape-expand-collapse/-/cytoscape-expand-collapse-4.1.0.tgz#bfcd57692fae4585a112d94843790da38c3301a8"
+  integrity sha512-RJsoSDAC0ui6U6CeM7z2tiFzsk4Z2aPG8PgNIwKeFVykFmMr5S+5aT1YceQZ5XnwGFGH0uteZ96XyAfUAVb/fw==
+
+cytoscape-fcose@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/cytoscape-fcose/-/cytoscape-fcose-2.1.0.tgz#04c3093776ea6b71787009de641607db7d4edf55"
+  integrity sha512-Q3apPl66jf8/2sMsrCjNP247nbDkyIPjA9g5iPMMWNLZgP3/mn9aryF7EFY/oRPEpv7bKJ4jYmCoU5r5/qAc1Q==
+  dependencies:
+    cose-base "^2.0.0"
 
 cytoscape@^3.10.0:
   version "3.10.0"
@@ -18234,6 +18258,11 @@ latest-version@^5.0.0:
   integrity sha512-weT+r0kTkRQdCdYCNtkMwWXQTMEswKrFBkm4ckQOMVhhqhIMI1UT2hMj+1iigIhgSZm5gTmrRXBNoGUgaTY1xA==
   dependencies:
     package-json "^6.3.0"
+
+layout-base@^2.0.0:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/layout-base/-/layout-base-2.0.1.tgz#d0337913586c90f9c2c075292069f5c2da5dd285"
+  integrity sha512-dp3s92+uNI1hWIpPGH3jK2kxE2lMjdXdr+DH8ynZHpd6PUlH6x6cbuXnoMmiNumznqaNO31xu9e79F0uuZ0JFg==
 
 lazy-ass@1.6.0, lazy-ass@^1.6.0:
   version "1.6.0"
