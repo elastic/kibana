@@ -50,7 +50,12 @@ export function ApmServiceContextProvider({
     agentName,
   });
 
-  const { alerts } = useServiceAlertsFetcher({ serviceName, transactionType });
+  const { alerts } = useServiceAlertsFetcher({
+    serviceName,
+    transactionType,
+    environment: query.environment,
+    kuery: query.kuery,
+  });
 
   return (
     <APMServiceContext.Provider

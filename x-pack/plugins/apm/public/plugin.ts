@@ -81,6 +81,24 @@ export interface ApmPluginStartDeps {
   fleet?: FleetStart;
 }
 
+const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
+  defaultMessage: 'Services',
+});
+const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
+  defaultMessage: 'Traces',
+});
+const serviceMapTitle = i18n.translate('xpack.apm.navigation.serviceMapTitle', {
+  defaultMessage: 'Service Map',
+});
+
+const backendsTitle = i18n.translate('xpack.apm.navigation.backendsTitle', {
+  defaultMessage: 'Backends',
+});
+
+const newBadgeLabel = i18n.translate('xpack.apm.navigation.newBadge', {
+  defaultMessage: 'NEW',
+});
+
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
@@ -96,21 +114,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
-    const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
-      defaultMessage: 'Services',
-    });
-    const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
-      defaultMessage: 'Traces',
-    });
-    const serviceMapTitle = i18n.translate(
-      'xpack.apm.navigation.serviceMapTitle',
-      { defaultMessage: 'Service Map' }
-    );
-
-    const backendsTitle = i18n.translate('xpack.apm.navigation.backendsTitle', {
-      defaultMessage: 'Backends',
-    });
-
     // register observability nav if user has access to plugin
     plugins.observability.navigation.registerSections(
       from(core.getStartServices()).pipe(
@@ -124,11 +127,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                 entries: [
                   { label: servicesTitle, app: 'apm', path: '/services' },
                   { label: tracesTitle, app: 'apm', path: '/traces' },
-                  { label: serviceMapTitle, app: 'apm', path: '/service-map' },
                   {
                     label: backendsTitle,
                     app: 'apm',
                     path: '/backends',
+                    sideBadgeLabel: newBadgeLabel,
                     onClick: () => {
                       const { usageCollection } = pluginsStart as {
                         usageCollection?: UsageCollectionStart;
@@ -143,6 +146,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                       }
                     },
                   },
+                  { label: serviceMapTitle, app: 'apm', path: '/service-map' },
                 ],
               },
 

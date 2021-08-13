@@ -47,6 +47,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 serviceNodeIds: JSON.stringify(
                   await getServiceNodeIds({ apmApiSupertest, start, end })
                 ),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -81,6 +83,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 numBuckets: 20,
                 transactionType: 'request',
                 serviceNodeIds: JSON.stringify(serviceNodeIds),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -135,6 +139,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 comparisonStart: start,
                 comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
