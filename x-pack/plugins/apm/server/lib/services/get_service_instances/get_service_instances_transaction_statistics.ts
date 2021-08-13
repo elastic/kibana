@@ -72,8 +72,8 @@ export async function getServiceInstancesTransactionStatistics<
   end: number;
   isComparisonSearch: T;
   serviceNodeIds?: string[];
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   size?: number;
   numBuckets?: number;
 }): Promise<Array<ServiceInstanceTransactionStatistics<T>>> {
