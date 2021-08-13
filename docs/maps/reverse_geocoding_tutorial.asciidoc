@@ -1,0 +1,61 @@
+[role="xpack"]
+[[reverse-geocoding-tutorial]]
+== Map custom regions with reverse geocoding
+
+*Maps* comes with a lot of https://maps.elastic.co/#file[predefined regions] allowing you to quicky build maps to visualize metrics by region. *Maps* also offers the ability to easily map your own regions. You can use any region data you'd like, as long as your source data contains an identifier for the corresponding region. How can you map regions when your source data does not contain a region identifier? This is where reverse geocoding comes in. Reverse geocoding is the process of assigning a region identifer to a feature based on its location.
+
+In this tutorial, you’ll use reverse geocoding to visualize United States Census Bureau Combined Statistical Area (CSA) regions by web traffic.
+
+You’ll learn to:
+
+- Upload custom regions.
+- Reverse geocoding with {es} enrigh processor.
+- Create a map and visualize metrics by CSA regions.
+
+When you complete this tutorial, you’ll have a map that looks like this:
+
+[role="screenshot"]
+image::maps/images/reverse-geocoding-tutorial/csa_regions_by_web_traffic.jpeg[]
+
+
+[float]
+=== Step 1: Index web traffic data
+GeoIP is a common way of transforming an IP address to a longitude and latitude. GeoIP is roughly accurate on the city level globally and neighborhood level in selected countries. It’s not as great as an actual GPS location from your phone, but it’s much more precise than just a country, state, or province. Use {ref}/geoip-processor.html[GeoIP processor] to transform an IP adderess into a {ref}/geo-point.html[geo_point] field.
+
+We’ll use the <<get-started, web logs sample data set>> that comes with Kibana for this tutorial.
+
+. On the home page, click *Try our sample data*.
+. On the *Sample web logs* card, click *Add data*.
+
+
+[float]
+=== Step 2: Index Combined Statistical Area (CSA) regions
+GeoIP level of detail can be very useful for driving decision-making. For example, say you want to spin up a marketing campaign based on the locations of your users or show executive stakeholders which metro areas are experiencing an uptick of traffic.
+
+That kind of scale in the United States is often captured with what the Census Bureau calls the Combined Statistical Area (CSA). Combined Statistical Area is roughly equivalent with how people intuitively think of which urban area they live in. It does not necessarily coincide with state or city boundaries. CSAs generally share the same telecom providers and ad networks. New fast food franchises expand to a CSA rather than a particular city or municipality. Basically, people in the same CSA shop in the same IKEA.
+
+To get the CSA boundary data, download the https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html[Cartographic Boundary shapefile (.shp)] from the Census Bureau’s website.
+
+To use it in Kibana, we need it as a GeoJSON format. You can use QGIS to convert the Cartographic Boundary shapefile to GeoJSON. Follow this https://gist.github.com/YKCzoli/b7f5ff0e0f641faba0f47fa5d16c4d8d[helpful tutorial] if you'd like to do the same. https://gist.githubusercontent.com/thomasneirynck/3813ddde31052b6b58b458ec2a86f81f/raw/2925c87f13324c75b6ed82ead9bf593f3224e847/csba.geojson[Download a GeoJSON version].
+
+Once you have your GeoJSON file:
+
+. Open the main menu, and click *Maps*.
+. Click *Create map*.
+. In the *Layers* list, click *Upload GeoJSON*.
+. Use the File Picker to select the CSA GeoJSON file.
+. Set index name to *csa_regions* and click *Import file*.
+. When importing is complete, click *Add as document layer*.
+. Add a Tooltip field:
+.. Click *+ Add* to open field select.
+.. Select *NAME*, *GEOID*, and *AFFGEOID*.
+.. Click *Add*.
+. Click *Save & close*.
+
+Looking at the map, we get a sense of what exactly constitutes a metro area in the eyes of the Census Bureau.
+
+[role="screenshot"]
+image::maps/images/reverse-geocoding-tutorial/csa_regions.jpeg[]
+
+[float]
+=== Step 3: Reverse geocoding
