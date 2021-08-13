@@ -7,22 +7,12 @@
  */
 
 import expect from '@kbn/expect';
-import path from 'path';
 import { FtrProviderContext } from '../../ftr_provider_context';
-const FLEET_ONBOARDING_ARCHIVE = path.join(
-  __dirname,
-  '..',
-  '..',
-  'fixtures',
-  'kbn_archiver',
-  'fleet-onboarding.json'
-);
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'home']);
-  const kibanaServer = getService('kibanaServer');
 
   describe('Welcome interstitial', () => {
     before(async () => {
@@ -35,14 +25,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('is displayed on a fresh on-prem install', async () => {
       await PageObjects.common.navigateToUrl('home', undefined, { disableWelcomePrompt: false });
       expect(await PageObjects.home.isWelcomeInterstitialDisplayed()).to.be(true);
-    });
-
-    it('is displayed on a fresh install with Fleet system package index-patterns installed', async () => {
-      // Load index-patterns installed by default in Cloud
-      await kibanaServer.importExport.load(FLEET_ONBOARDING_ARCHIVE);
-      await PageObjects.common.navigateToUrl('home', undefined, { disableWelcomePrompt: false });
-      expect(await PageObjects.home.isWelcomeInterstitialDisplayed()).to.be(true);
-      await kibanaServer.importExport.unload(FLEET_ONBOARDING_ARCHIVE);
     });
   });
 }
