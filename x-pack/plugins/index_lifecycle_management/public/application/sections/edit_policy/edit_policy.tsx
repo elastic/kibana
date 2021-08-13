@@ -333,7 +333,7 @@ export const EditPolicy: React.FunctionComponent = () => {
 
         {isShowingPolicyJsonFlyout ? (
           <PolicyJsonFlyout
-            policyName={saveAsNew ? currentPolicyName : policyName}
+            policyName={saveAsNew || isNewPolicy ? currentPolicyName : policyName}
             close={() => setIsShowingPolicyJsonFlyout(false)}
           />
         ) : null}

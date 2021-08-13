@@ -90,4 +90,50 @@ describe('<EditPolicy /> request flyout', () => {
     )}`;
     expect(json).toBe(expected);
   });
+
+  test('renders the correct json and name for a new policy', async () => {
+    await act(async () => {
+      testBed = await setupRequestFlyoutTestBed(true);
+    });
+
+    const { component, actions } = testBed;
+    component.update();
+
+    await actions.openRequestFlyout();
+    const newPolicyJson = {
+      policy: {
+        phases: {
+          hot: {
+            actions: {
+              rollover: {
+                max_age: '30d',
+                max_primary_shard_size: '50gb',
+              },
+              set_priority: {
+                priority: 100,
+              },
+            },
+            min_age: '0ms',
+          },
+        },
+      },
+    };
+
+    // the json renders the default <policyName> when no policy name is provided
+    let json = actions.getRequestJson();
+    let expected = `PUT _ilm/policy/<policyName>\n${JSON.stringify(newPolicyJson, null, 2)}`;
+
+    expect(json).toBe(expected);
+
+    await actions.closeRequestFlyout();
+    await actions.setPolicyName('test_policy');
+
+    await actions.openRequestFlyout();
+
+    // the json now renders the provided policy name
+    json = actions.getRequestJson();
+    expected = `PUT _ilm/policy/test_policy\n${JSON.stringify(newPolicyJson, null, 2)}`;
+
+    expect(json).toBe(expected);
+  });
 });

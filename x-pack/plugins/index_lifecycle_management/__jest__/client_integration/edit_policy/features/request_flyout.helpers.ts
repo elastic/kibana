@@ -18,8 +18,10 @@ type SetupReturn = ReturnType<typeof setupRequestFlyoutTestBed>;
 
 export type RequestFlyoutTestBed = SetupReturn extends Promise<infer U> ? U : SetupReturn;
 
-export const setupRequestFlyoutTestBed = async () => {
-  const testBed = await initTestBed();
+export const setupRequestFlyoutTestBed = async (isNewPolicy?: boolean) => {
+  const testBed = isNewPolicy
+    ? await initTestBed({ testBedConfig: { memoryRouter: { initialEntries: ['/policies/edit'] } } })
+    : await initTestBed();
 
   return {
     ...testBed,
