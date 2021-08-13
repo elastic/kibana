@@ -57,13 +57,13 @@ export const SOURCE_ENGINES_TITLE = i18n.translate(
 export const CREATE_AN_ENGINE_BUTTON_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engines.createEngineButtonLabel',
   {
-    defaultMessage: 'Create an engine',
+    defaultMessage: 'Create engine',
   }
 );
 export const CREATE_A_META_ENGINE_BUTTON_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engines.createMetaEngineButtonLabel',
   {
-    defaultMessage: 'Create a meta engine',
+    defaultMessage: 'Create meta engine',
   }
 );
 
