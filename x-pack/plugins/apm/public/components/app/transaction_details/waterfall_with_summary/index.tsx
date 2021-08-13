@@ -25,6 +25,7 @@ import type { TraceSample } from '../../../../hooks/use_transaction_trace_sample
 import { MaybeViewTraceLink } from './MaybeViewTraceLink';
 import { TransactionTabs } from './TransactionTabs';
 import { IWaterfall } from './waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 
 interface Props {
   urlParams: IUrlParams;
@@ -43,6 +44,10 @@ export function WaterfallWithSummary({
 }: Props) {
   const history = useHistory();
   const [sampleActivePage, setSampleActivePage] = useState(0);
+
+  const {
+    query: { environment },
+  } = useApmParams('/services/:serviceName/transactions/view');
 
   useEffect(() => {
     setSampleActivePage(0);
@@ -111,6 +116,7 @@ export function WaterfallWithSummary({
             <MaybeViewTraceLink
               transaction={entryTransaction}
               waterfall={waterfall}
+              environment={environment}
             />
           </EuiFlexGroup>
         </EuiFlexItem>

@@ -30,9 +30,9 @@ interface RawResponse {
   ccsWarning: boolean;
 }
 
-export const useTransactionDistributionFetcher = (
+export function useTransactionDistributionFetcher(
   params: Omit<SearchServiceParams, 'analyzeCorrelations'>
-) => {
+) {
   const {
     services: { data },
   } = useKibana<ApmPluginStartDeps>();
@@ -131,4 +131,4 @@ export const useTransactionDistributionFetcher = (
     startFetch,
     cancelFetch,
   };
-};
+}

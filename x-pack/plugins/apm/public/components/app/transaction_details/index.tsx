@@ -42,7 +42,10 @@ export function TransactionDetails() {
       <EuiSpacer size="m" />
 
       <ChartPointerEventContextProvider>
-        <TransactionCharts />
+        <TransactionCharts
+          kuery={query.kuery}
+          environment={query.environment}
+        />
       </ChartPointerEventContextProvider>
 
       <EuiSpacer size="m" />

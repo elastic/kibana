@@ -22,6 +22,7 @@ import { useTransactionDistributionFetcher } from '../../../../hooks/use_transac
 import { TransactionDistributionChart } from '../../../shared/charts/transaction_distribution_chart';
 import { useUiTracker } from '../../../../../../observability/public';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
 const isErrorMessage = (arg: unknown): arg is Error => {
@@ -46,9 +47,14 @@ export function TransactionDistribution({
   } = useApmPluginContext();
 
   const { serviceName, transactionType } = useApmServiceContext();
+
+  const {
+    query: { kuery, environment },
+  } = useApmParams('/services/:serviceName');
+
   const { urlParams } = useUrlParams();
 
-  const { environment, kuery, transactionName, start, end } = urlParams;
+  const { transactionName, start, end } = urlParams;
 
   const clearSelectionButtonLabel = i18n.translate(
     'xpack.apm.transactionDetails.clearSelectionButtonLabel',

@@ -42,6 +42,7 @@ import {
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { LatencyCorrelationsHelpPopover } from './latency_correlations_help_popover';
+import { useApmParams } from '../../../hooks/use_apm_params';
 
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
 const isErrorMessage = (arg: unknown): arg is Error => {
@@ -62,9 +63,14 @@ export function LatencyCorrelations() {
   } = useApmPluginContext();
 
   const { serviceName, transactionType } = useApmServiceContext();
+
+  const {
+    query: { kuery, environment },
+  } = useApmParams('/services/:serviceName');
+
   const { urlParams } = useUrlParams();
 
-  const { environment, kuery, transactionName, start, end } = urlParams;
+  const { transactionName, start, end } = urlParams;
 
   const displayLog = uiSettings.get<boolean>(enableInspectEsQueries);
 

@@ -39,9 +39,11 @@ export function TransactionDetailsTabs() {
   const { component: TabContent } =
     tabs.find((tab) => tab.key === currentTab) ?? traceSamplesTab;
 
-  const { transactionName } = query;
+  const { environment, kuery, transactionName } = query;
   const { traceSamplesData } = useTransactionTraceSamplesFetcher({
     transactionName,
+    kuery,
+    environment,
   });
 
   const selectSampleFromChartSelection = (selection: XYBrushArea) => {

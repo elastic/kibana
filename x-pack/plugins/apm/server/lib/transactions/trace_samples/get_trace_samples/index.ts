@@ -33,8 +33,8 @@ export async function getTraceSamples({
   sampleRangeTo,
   setup,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   transactionName: string;
   transactionType: string;
