@@ -264,17 +264,19 @@ export class AlertsClient {
         throw Boom.badData(errorMessage);
       }
 
-      await this.ensureAllAuthorized(result.body.hits.hits, operation);
+      if (result?.body?.hits?.hits != null && result?.body.hits.hits.length > 0) {
+        await this.ensureAllAuthorized(result.body.hits.hits, operation);
 
-      result?.body.hits.hits.map((item) =>
-        this.auditLogger?.log(
-          alertAuditEvent({
-            action: operationAlertAuditActionMap[operation],
-            id: item._id,
-            ...this.getOutcome(operation),
-          })
-        )
-      );
+        result?.body.hits.hits.map((item) =>
+          this.auditLogger?.log(
+            alertAuditEvent({
+              action: operationAlertAuditActionMap[operation],
+              id: item._id,
+              ...this.getOutcome(operation),
+            })
+          )
+        );
+      }
 
       return result.body;
     } catch (error) {
@@ -629,7 +631,7 @@ export class AlertsClient {
 
       this.logger.info(`Found: ${JSON.stringify(alertsSearchResponse, null, 2)}`);
 
-      if (alertsSearchResponse == null || alertsSearchResponse.hits.hits.length === 0) {
+      if (alertsSearchResponse == null) {
         const errorMessage = `Unable to retrieve alert details for alert with query and operation ${ReadOperations.Find}`;
         this.logger.error(errorMessage);
         throw Boom.notFound(errorMessage);

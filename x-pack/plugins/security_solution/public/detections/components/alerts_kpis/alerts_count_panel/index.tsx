@@ -49,9 +49,11 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     );
 
     // TODO: Once we are past experimental phase this code should be removed
-    const fetchMethod = useIsExperimentalFeatureEnabled('ruleRegistryEnabled')
-      ? fetchQueryRuleRegistryAlerts
-      : fetchQueryAlerts;
+    // const fetchMethod = useIsExperimentalFeatureEnabled('ruleRegistryEnabled')
+    //   ? fetchQueryRuleRegistryAlerts
+    //   : fetchQueryAlerts;
+
+    const fetchMethod = fetchQueryRuleRegistryAlerts;
 
     const additionalFilters = useMemo(() => {
       try {
