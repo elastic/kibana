@@ -49,12 +49,12 @@ export function GrokDebuggerPageProvider({ getPageObjects, getService }: FtrProv
       await testSubjects.click('grokDebuggerContainer > btnToggleCustomPatternsInput');
     },
 
-    async executeGrokSimulation(input, pattern, isCustomPattern: boolean) {
+    async executeGrokSimulation(input, pattern, customPattern) {
       await this.setEventInput(input);
-      if (isCustomPattern) {
-        await this.setCustomPatternInput(pattern);
-      } else {
-        await this.setPatternInput(pattern);
+      await this.setPatternInput(pattern);
+      if (customPattern) {
+        await this.toggleSetCustomPattern();
+        await this.setCustomPatternInput(customPattern);
       }
       await (await this.simulateButton()).click();
       await retry.waitFor('Output to not be empty', async () => {

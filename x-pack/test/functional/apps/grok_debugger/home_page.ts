@@ -41,23 +41,33 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const response = await PageObjects.grokDebugger.executeGrokSimulation(
         eventInput,
         patternInput,
-        false
+        null
       );
       expect(response).to.eql('{\n  "u": "SegerCommaBob"\n}');
     });
 
-    it.skip('Accept and parse input with custom in grok pattern', async () => {
-      const eventInput = 'Seger Comma Bob';
-      const customPatternInput = '%{FIRSTNAME:f} %{MIDDLENAME:m} %{LASTNAME:l}';
+    it('Accept and parse input with custom in grok pattern', async () => {
+      await PageObjects.common.navigateToApp('grokDebugger');
+      const eventInput =
+        'Jan  1 06:25:43 mailserver14 postfix/cleanup[21403]: BEF25A72965: message-id=<20130101142543.5828399CCAF@mailserver14.example.com>';
+      const patternInput = '%{SYSLOGBASE} %{POSTFIX_QUEUEID:queue_id}: %{MSG:syslog_message}';
+      const customPatternInput = 'POSTFIX_QUEUEID [0-9A-F]{10,11}\nMSG message-id=<%{GREEDYDATA}>';
+      const testData =
+        '{\n  "pid": "21403",\n  "program": "postfix/cleanup",' +
+        '\n  "logsource": "mailserver14",' +
+        '\n  "syslog_message": "message-id=<20130101142543.5828399CCAF@mailserver14.example.com>",' +
+        '\n  "queue_id": "BEF25A72965",' +
+        '\n  "timestamp": "Jan  1 06:25:43"\n}';
 
       const response = await PageObjects.grokDebugger.executeGrokSimulation(
         eventInput,
-        customPatternInput,
-        true
+        patternInput,
+        customPatternInput
       );
-      expect(response).to.eql({ f: 'Seger', m: 'Comma', l: 'Bob' });
+      expect(response).to.eql(testData);
     });
 
+    // This test will need to be fixed.
     it.skip('applies the correct CSS classes', async () => {
       const grokPattern = '\\[(?:-|%{NUMBER:bytes:int})\\]';
 
