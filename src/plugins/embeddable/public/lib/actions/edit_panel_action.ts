@@ -13,6 +13,7 @@ import { take } from 'rxjs/operators';
 import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
+import { goToApp } from '../go_to_app';
 import {
   IEmbeddable,
   EmbeddableEditorState,
@@ -27,13 +28,6 @@ export const ACTION_EDIT_PANEL = 'editPanel';
 interface ActionContext {
   embeddable: IEmbeddable;
 }
-
-interface NavigationContext {
-  app: string;
-  path: string;
-  state?: EmbeddableEditorState;
-}
-
 export class EditPanelAction implements Action<ActionContext> {
   public readonly type = ACTION_EDIT_PANEL;
   public readonly id = ACTION_EDIT_PANEL;
@@ -81,53 +75,9 @@ export class EditPanelAction implements Action<ActionContext> {
   }
 
   public async execute(context: ActionContext) {
-    const appTarget = this.getAppTarget(context);
-    if (appTarget) {
-      if (this.stateTransfer && appTarget.state) {
-        await this.stateTransfer.navigateToEditor(appTarget.app, {
-          path: appTarget.path,
-          state: appTarget.state,
-        });
-      } else {
-        await this.application.navigateToApp(appTarget.app, { path: appTarget.path });
-      }
-      return;
-    }
-
-    const href = await this.getHref(context);
-    if (href) {
-      window.location.href = href;
-      return;
-    }
-  }
-
-  public getAppTarget({ embeddable }: ActionContext): NavigationContext | undefined {
-    const app = embeddable ? embeddable.getOutput().editApp : undefined;
-    const path = embeddable ? embeddable.getOutput().editPath : undefined;
-    if (app && path) {
-      if (this.currentAppId) {
-        const byValueMode = !(embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId;
-        const state: EmbeddableEditorState = {
-          originatingApp: this.currentAppId,
-          valueInput: byValueMode ? this.getExplicitInput({ embeddable }) : undefined,
-          embeddableId: embeddable.id,
-          searchSessionId: embeddable.getInput().searchSessionId,
-        };
-        return { app, path, state };
-      }
-      return { app, path };
-    }
-  }
-
-  public async getHref({ embeddable }: ActionContext): Promise<string> {
-    const editUrl = embeddable ? embeddable.getOutput().editUrl : undefined;
-    return editUrl ? editUrl : '';
-  }
-
-  private getExplicitInput({ embeddable }: ActionContext): EmbeddableInput {
-    return (
-      (embeddable.getRoot() as Container)?.getInput()?.panels?.[embeddable.id]?.explicitInput ??
-      embeddable.getInput()
-    );
+    goToApp(context.embeddable, this.currentAppId || '', {
+      stateTransferService: this.stateTransfer,
+      application: this.application,
+    });
   }
 }
