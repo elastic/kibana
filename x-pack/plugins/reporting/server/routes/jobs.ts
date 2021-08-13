@@ -10,12 +10,9 @@ import Boom from '@hapi/boom';
 import { ROUTE_TAG_CAN_REDIRECT } from '../../../security/server';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
+import { authorizedUserPreRouting } from './lib/authorized_user_pre_routing';
 import { jobsQueryFactory } from './lib/jobs_query';
-import {
-  deleteJobResponseHandlerFactory,
-  downloadJobResponseHandlerFactory,
-} from './lib/job_response_handler';
+import { deleteJobResponseHandler, downloadJobResponseHandler } from './lib/job_response_handler';
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
@@ -25,8 +22,8 @@ const handleUnavailable = (res: any) => {
 
 export function registerJobInfoRoutes(reporting: ReportingCore) {
   const setupDeps = reporting.getPluginSetupDeps();
-  const userHandler = authorizedUserPreRoutingFactory(reporting);
   const { router } = setupDeps;
+  const jobsQuery = jobsQueryFactory(reporting);
 
   // list jobs in the queue, paginated
   router.get(
@@ -40,7 +37,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         }),
       },
     },
-    userHandler(async (user, context, req, res) => {
+    authorizedUserPreRouting(reporting, async (user, context, req, res) => {
       // ensure the async dependencies are loaded
       if (!context.reporting) {
         return handleUnavailable(res);
@@ -53,7 +50,6 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       const page = parseInt(queryPage, 10) || 0;
       const size = Math.min(100, parseInt(querySize, 10) || 10);
       const jobIds = queryIds ? queryIds.split(',') : null;
-      const jobsQuery = jobsQueryFactory(reporting);
       const results = await jobsQuery.list(jobTypes, user, page, size, jobIds);
 
       return res.ok({
@@ -71,7 +67,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       path: `${MAIN_ENTRY}/count`,
       validate: false,
     },
-    userHandler(async (user, context, _req, res) => {
+    authorizedUserPreRouting(reporting, async (user, context, _req, res) => {
       // ensure the async dependencies are loaded
       if (!context.reporting) {
         return handleUnavailable(res);
@@ -81,7 +77,6 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      const jobsQuery = jobsQueryFactory(reporting);
       const count = await jobsQuery.count(jobTypes, user);
 
       return res.ok({
@@ -103,7 +98,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         }),
       },
     },
-    userHandler(async (user, context, req, res) => {
+    authorizedUserPreRouting(reporting, async (user, context, req, res) => {
       // ensure the async dependencies are loaded
       if (!context.reporting) {
         return res.custom({ statusCode: 503 });
@@ -114,11 +109,10 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      const jobsQuery = jobsQueryFactory(reporting);
       const result = await jobsQuery.get(user, docId);
 
       if (!result) {
-        throw Boom.notFound();
+        return res.notFound();
       }
 
       const { jobtype: jobType } = result;
@@ -137,8 +131,6 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
   );
 
   // trigger a download of the output from a job
-  const downloadResponseHandler = downloadJobResponseHandlerFactory(reporting);
-
   router.get(
     {
       path: `${MAIN_ENTRY}/download/{docId}`,
@@ -149,7 +141,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       },
       options: { tags: [ROUTE_TAG_CAN_REDIRECT] },
     },
-    userHandler(async (user, context, req, res) => {
+    authorizedUserPreRouting(reporting, async (user, context, req, res) => {
       // ensure the async dependencies are loaded
       if (!context.reporting) {
         return handleUnavailable(res);
@@ -160,12 +152,11 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      return downloadResponseHandler(res, jobTypes, user, { docId });
+      return downloadJobResponseHandler(reporting, res, jobTypes, user, { docId });
     })
   );
 
   // allow a report to be deleted
-  const deleteResponseHandler = deleteJobResponseHandlerFactory(reporting);
   router.delete(
     {
       path: `${MAIN_ENTRY}/delete/{docId}`,
@@ -175,7 +166,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         }),
       },
     },
-    userHandler(async (user, context, req, res) => {
+    authorizedUserPreRouting(reporting, async (user, context, req, res) => {
       // ensure the async dependencies are loaded
       if (!context.reporting) {
         return handleUnavailable(res);
@@ -186,7 +177,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      return deleteResponseHandler(res, jobTypes, user, { docId });
+      return deleteJobResponseHandler(reporting, res, jobTypes, user, { docId });
     })
   );
 }

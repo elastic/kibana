@@ -23,8 +23,8 @@ export async function getBuckets({
   bucketSize,
   setup,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   groupId?: string;
   bucketSize: number;

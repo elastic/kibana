@@ -97,7 +97,7 @@ describe('TraceLink', () => {
       const component = shallow(<TraceLink />);
 
       expect(component.prop('to')).toEqual(
-        '/traces?kuery=trace.id%2520%253A%2520%2522123%2522&rangeFrom=now-24h&rangeTo=now'
+        '/traces?kuery=trace.id%20%3A%20%22123%22&rangeFrom=now-24h&rangeTo=now'
       );
     });
   });

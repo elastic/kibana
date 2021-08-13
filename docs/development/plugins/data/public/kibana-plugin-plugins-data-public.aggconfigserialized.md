@@ -13,7 +13,7 @@ export declare type AggConfigSerialized = Ensure<{
     type: string;
     enabled?: boolean;
     id?: string;
-    params?: {} | SerializableState;
+    params?: {} | SerializableRecord;
     schema?: string;
-}, SerializableState>;
+}, SerializableRecord>;
 ```

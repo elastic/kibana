@@ -8,6 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
+  METRIC_TYPE,
+  useUiTracker,
+} from '../../../../../../../../../observability/public';
+import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_NAME,
@@ -32,6 +36,8 @@ export function StickySpanProperties({ span, transaction }: Props) {
   const { query } = useApmParams('/services/:serviceName/transactions/view');
   const { environment, latencyAggregationType } = query;
 
+  const trackEvent = useUiTracker();
+
   const nextEnvironment = getNextEnvironmentUrlParam({
     requestedEnvironment: transaction?.service.environment,
     currentEnvironmentUrlParam: environment,
@@ -50,7 +56,10 @@ export function StickySpanProperties({ span, transaction }: Props) {
           val: (
             <ServiceLink
               agentName={transaction.agent.name}
-              query={{ ...query, environment: nextEnvironment }}
+              query={{
+                ...query,
+                environment: nextEnvironment,
+              }}
               serviceName={transaction.service.name}
             />
           ),
@@ -98,6 +107,13 @@ export function StickySpanProperties({ span, transaction }: Props) {
               query={query}
               subtype={span.span.subtype}
               type={span.span.type}
+              onClick={() => {
+                trackEvent({
+                  app: 'apm',
+                  metricType: METRIC_TYPE.CLICK,
+                  metric: 'span_flyout_to_backend_detail',
+                });
+              }}
             />
           ),
           width: '25%',
