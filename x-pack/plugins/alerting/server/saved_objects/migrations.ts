@@ -504,7 +504,12 @@ function addExceptionListsToReferences(
     const newReferences = exceptionsToTransform.flatMap<SavedObjectReference>(
       (exceptionItem, index) => {
         const existingReferenceFound = references?.find((reference) => {
-          return reference.id === exceptionItem.id;
+          return (
+            reference.id === exceptionItem.id &&
+            ((reference.type === 'exception-list' && exceptionItem.namespace_type === 'single') ||
+              (reference.type === 'exception-list-agnostic' &&
+                exceptionItem.namespace_type === 'agnostic'))
+          );
         });
         if (existingReferenceFound) {
           // skip if the reference already exists for some uncommon reason so we do not add an additional one.
