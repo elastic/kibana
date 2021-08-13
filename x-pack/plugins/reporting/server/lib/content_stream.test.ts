@@ -30,6 +30,7 @@ describe('ContentStream', () => {
         jobtype: 'pdf',
         output: {
           content: 'some content',
+          size: 12,
         },
       })
     );
@@ -88,6 +89,130 @@ describe('ContentStream', () => {
       const data = await new Promise((resolve) => stream.once('data', resolve));
 
       expect(data).toEqual(Buffer.from('encoded content'));
+    });
+
+    it('should compound content from multiple chunks', async () => {
+      client.search.mockResolvedValueOnce(
+        set<any>({}, 'body.hits.hits.0._source', {
+          jobtype: 'pdf',
+          output: {
+            content: '12',
+            size: 6,
+          },
+        })
+      );
+      client.search.mockResolvedValueOnce(
+        set<any>({}, 'body.hits.hits.0._source.output.content', '34')
+      );
+      client.search.mockResolvedValueOnce(
+        set<any>({}, 'body.hits.hits.0._source.output.content', '56')
+      );
+      let data = '';
+      for await (const chunk of stream) {
+        data += chunk;
+      }
+
+      expect(data).toEqual('123456');
+      expect(client.search).toHaveBeenCalledTimes(3);
+
+      const [[request1], [request2], [request3]] = client.search.mock.calls;
+
+      expect(request1).toHaveProperty(
+        'body.query.constant_score.filter.bool.must.0.term._id',
+        'something'
+      );
+      expect(request2).toHaveProperty('index', 'somewhere');
+      expect(request2).toHaveProperty(
+        'body.query.constant_score.filter.bool.must.0.term.parent_id',
+        'something'
+      );
+      expect(request3).toHaveProperty('index', 'somewhere');
+      expect(request3).toHaveProperty(
+        'body.query.constant_score.filter.bool.must.0.term.parent_id',
+        'something'
+      );
+    });
+
+    it('should stop reading on empty chunk', async () => {
+      client.search.mockResolvedValueOnce(
+        set<any>({}, 'body.hits.hits.0._source', {
+          jobtype: 'pdf',
+          output: {
+            content: '12',
+            size: 6,
+          },
+        })
+      );
+      client.search.mockResolvedValueOnce(
+        set<any>({}, 'body.hits.hits.0._source.output.content', '34')
+      );
+      client.search.mockResolvedValueOnce(
+        set<any>({}, 'body.hits.hits.0._source.output.content', '')
+      );
+      let data = '';
+      for await (const chunk of stream) {
+        data += chunk;
+      }
+
+      expect(data).toEqual('1234');
+      expect(client.search).toHaveBeenCalledTimes(3);
+    });
+
+    it('should read until chunks are present when there is no size', async () => {
+      client.search.mockResolvedValueOnce(
+        set<any>({}, 'body.hits.hits.0._source', {
+          jobtype: 'pdf',
+          output: {
+            content: '12',
+          },
+        })
+      );
+      client.search.mockResolvedValueOnce(
+        set<any>({}, 'body.hits.hits.0._source.output.content', '34')
+      );
+      client.search.mockResolvedValueOnce({ body: {} } as any);
+      let data = '';
+      for await (const chunk of stream) {
+        data += chunk;
+      }
+
+      expect(data).toEqual('1234');
+      expect(client.search).toHaveBeenCalledTimes(3);
+    });
+
+    it('should decode every chunk separately', async () => {
+      exportTypesRegistry.get.mockReturnValueOnce({ jobContentEncoding: 'base64' } as ReturnType<
+        typeof exportTypesRegistry.get
+      >);
+      client.search.mockResolvedValueOnce(
+        set<any>({}, 'body.hits.hits.0._source', {
+          jobtype: 'pdf',
+          output: {
+            content: Buffer.from('12').toString('base64'),
+            size: 6,
+          },
+        })
+      );
+      client.search.mockResolvedValueOnce(
+        set<any>(
+          {},
+          'body.hits.hits.0._source.output.content',
+          Buffer.from('34').toString('base64')
+        )
+      );
+      client.search.mockResolvedValueOnce(
+        set<any>(
+          {},
+          'body.hits.hits.0._source.output.content',
+          Buffer.from('56').toString('base64')
+        )
+      );
+      let data = '';
+      for await (const chunk of stream) {
+        data += chunk;
+      }
+
+      expect(data).toEqual('123456');
     });
   });
 

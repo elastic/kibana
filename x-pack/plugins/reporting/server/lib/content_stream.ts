@@ -11,7 +11,7 @@ import Puid from 'puid';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { ElasticsearchClient } from 'src/core/server';
 import { ReportingCore } from '..';
-import { ReportDocument, ReportSource } from '../../common/types';
+import { ReportSource } from '../../common/types';
 import { ExportTypesRegistry } from './export_types_registry';
 
 /**
@@ -58,8 +58,11 @@ export class ContentStream extends Duplex {
   }
 
   private buffer = Buffer.from('');
+  private bytesRead = 0;
+  private chunksRead = 0;
   private chunksWritten = 0;
   private jobContentEncoding?: string;
+  private jobSize?: number;
   private jobType?: string;
   private maxChunkSize?: number;
   private puid = new Puid();
@@ -152,10 +155,10 @@ export class ContentStream extends Duplex {
     return this.maxChunkSize;
   }
 
-  async _read() {
+  private async readHead() {
     const { id, index } = this.document;
     const body: SearchRequest['body'] = {
-      _source: { includes: ['output.content', 'jobtype'] },
+      _source: { includes: ['output.content', 'output.size', 'jobtype'] },
       query: {
         constant_score: {
           filter: {
@@ -168,17 +171,58 @@ export class ContentStream extends Duplex {
       size: 1,
     };
 
-    try {
-      const response = await this.client.search({ body, index });
-      const hits = response?.body.hits?.hits?.[0] as ReportDocument | undefined;
-      const output = hits?._source.output?.content;
-      this.jobType = hits?._source.jobtype;
+    const response = await this.client.search<ReportSource>({ body, index });
+    const hits = response?.body.hits?.hits?.[0];
 
-      if (output != null) {
-        this.push(await this.decode(output));
+    this.jobType = hits?._source?.jobtype;
+    this.jobSize = hits?._source?.output?.size;
+
+    return hits?._source?.output?.content;
+  }
+
+  private async readChunk() {
+    const { id, index } = this.document;
+    const body: SearchRequest['body'] = {
+      _source: { includes: ['output.content'] },
+      query: {
+        constant_score: {
+          filter: {
+            bool: {
+              must: [{ term: { parent_id: id } }, { term: { 'output.chunk': this.chunksRead } }],
+            },
+          },
+        },
+      },
+      size: 1,
+    };
+
+    const response = await this.client.search<ChunkSource>({ body, index });
+    const hits = response?.body.hits?.hits?.[0];
+
+    return hits?._source?.output.content;
+  }
+
+  private isRead() {
+    return this.jobSize != null && this.bytesRead >= this.jobSize;
+  }
+
+  async _read() {
+    try {
+      const content = this.chunksRead ? await this.readChunk() : await this.readHead();
+      if (!content) {
+        this.push(null);
+        return;
       }
 
-      this.push(null);
+      const buffer = await this.decode(content);
+
+      this.push(buffer);
+      this.chunksRead++;
+      this.bytesRead += buffer.byteLength;
+
+      if (this.isRead()) {
+        this.push(null);
+      }
     } catch (error) {
       this.destroy(error);
     }
