@@ -15,11 +15,8 @@ const technicalFieldRuntimeType = runtimeTypeFromFieldMap(technicalRuleFieldMap)
 export const parseTechnicalFields = (input: unknown) => {
   const validate = technicalFieldRuntimeType.decode(input);
 
-  // if (isLeft(validate)) {
-  //   throw new Error(PathReporter.report(validate).join('\n'));
-  // }
   if (isLeft(validate)) {
-    return '';
+    throw new Error(PathReporter.report(validate).join('\n'));
   }
   return technicalFieldRuntimeType.encode(validate.right);
 };

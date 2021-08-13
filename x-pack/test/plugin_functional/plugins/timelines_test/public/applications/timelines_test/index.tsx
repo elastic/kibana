@@ -68,7 +68,12 @@ const AppRoot = React.memo(
               timelinesPluginSetup.getTGrid &&
               timelinesPluginSetup.getTGrid<'standalone'>({
                 alertConsumers: ALERT_RULE_CONSUMER,
+                appId: 'securitySolution',
                 type: 'standalone',
+                casePermissions: {
+                  read: true,
+                  crud: true,
+                },
                 columns: [],
                 indexNames: [],
                 deletedEventIds: [],

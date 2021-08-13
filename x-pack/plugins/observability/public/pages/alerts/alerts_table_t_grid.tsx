@@ -188,6 +188,13 @@ function ObservabilityActions({
     setActionsPopover(id);
   }, []);
   const casePermissions = useGetUserCasesPermissions();
+  const event = useMemo(() => {
+    return {
+      data,
+      _id: eventId,
+      ecs: ecsData,
+    };
+  }, [data, eventId, ecsData]);
 
   const actionsPanels = useMemo(() => {
     return [
@@ -196,7 +203,7 @@ function ObservabilityActions({
         content: [
           <>
             {timelines.getAddToExistingCaseButton({
-              ecsRowData: ecsData,
+              event,
               casePermissions,
               appId: observabilityFeatureId,
               onClose: afterCaseSelection,
@@ -204,7 +211,7 @@ function ObservabilityActions({
           </>,
           <>
             {timelines.getAddToNewCaseButton({
-              ecsRowData: ecsData,
+              event,
               casePermissions,
               appId: observabilityFeatureId,
               onClose: afterCaseSelection,
@@ -213,7 +220,7 @@ function ObservabilityActions({
         ],
       },
     ];
-  }, [afterCaseSelection, casePermissions, timelines, ecsData]);
+  }, [afterCaseSelection, casePermissions, timelines, event]);
   return (
     <>
       {flyoutAlert && (

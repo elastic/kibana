@@ -14,14 +14,14 @@ import * as i18n from './translations';
 
 const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   ariaLabel = i18n.ACTION_ADD_TO_CASE_ARIA_LABEL,
-  ecsRowData,
+  event,
   useInsertTimeline,
   casePermissions,
   appId,
   onClose,
 }) => {
   const { addExistingCaseClick, isDisabled, userCanCrud } = useAddToCase({
-    ecsRowData,
+    event,
     useInsertTimeline,
     casePermissions,
     appId,
