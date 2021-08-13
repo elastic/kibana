@@ -275,6 +275,7 @@ export default ({ getService }: FtrProviderContext) => {
                 depth: 0,
               },
             ],
+            reason: `Alert Query with a rule id created at ${fullSignal['@timestamp']} with a high severity and risk score of 55 by root on zeek-sensor-amsterdam.`,
             rule: fullSignal.signal.rule,
             status: 'open',
           },

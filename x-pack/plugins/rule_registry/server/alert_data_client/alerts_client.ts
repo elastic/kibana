@@ -8,13 +8,20 @@ import Boom from '@hapi/boom';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
-import {
-  mapConsumerToIndexName,
-  isValidFeatureId,
-  getSafeSortIds,
+import type {
+  getEsQueryConfig as getEsQueryConfigTyped,
+  getSafeSortIds as getSafeSortIdsTyped,
+  isValidFeatureId as isValidFeatureIdTyped,
+  mapConsumerToIndexName as mapConsumerToIndexNameTyped,
   STATUS_VALUES,
-  getEsQueryConfig,
-} from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+} from '@kbn/rule-data-utils';
+import {
+  getEsQueryConfig as getEsQueryConfigNonTyped,
+  getSafeSortIds as getSafeSortIdsNonTyped,
+  isValidFeatureId as isValidFeatureIdNonTyped,
+  mapConsumerToIndexName as mapConsumerToIndexNameNonTyped,
+  // @ts-expect-error
+} from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 
 import { InlineScript, QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { AlertTypeParams, AlertingAuthorizationFilterType } from '../../../alerting/server';
@@ -29,22 +36,31 @@ import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import { AuditLogger } from '../../../security/server';
 import {
   ALERT_STATUS,
-  ALERT_OWNER,
-  RULE_ID,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_TYPE_ID,
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
+
+const getEsQueryConfig: typeof getEsQueryConfigTyped = getEsQueryConfigNonTyped;
+const getSafeSortIds: typeof getSafeSortIdsTyped = getSafeSortIdsNonTyped;
+const isValidFeatureId: typeof isValidFeatureIdTyped = isValidFeatureIdNonTyped;
+const mapConsumerToIndexName: typeof mapConsumerToIndexNameTyped = mapConsumerToIndexNameNonTyped;
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> &
   { [K in Props]-?: NonNullable<Obj[K]> };
 type AlertType = NonNullableProps<
   ParsedTechnicalFields,
-  typeof RULE_ID | typeof ALERT_OWNER | typeof SPACE_IDS
+  typeof ALERT_RULE_TYPE_ID | typeof ALERT_RULE_CONSUMER | typeof SPACE_IDS
 >;
 
 const isValidAlert = (source?: ParsedTechnicalFields): source is AlertType => {
-  return source?.[RULE_ID] != null && source?.[ALERT_OWNER] != null && source?.[SPACE_IDS] != null;
+  return (
+    source?.[ALERT_RULE_TYPE_ID] != null &&
+    source?.[ALERT_RULE_CONSUMER] != null &&
+    source?.[SPACE_IDS] != null
+  );
 };
 export interface ConstructorOptions {
   logger: Logger;
@@ -121,7 +137,10 @@ export class AlertsClient {
       _id: string;
       // this is typed kind of crazy to fit the output of es api response to this
       _source?:
-        | { [RULE_ID]?: string | null | undefined; [ALERT_OWNER]?: string | null | undefined }
+        | {
+            [ALERT_RULE_TYPE_ID]?: string | null | undefined;
+            [ALERT_RULE_CONSUMER]?: string | null | undefined;
+          }
         | null
         | undefined;
     }>,
@@ -132,16 +151,16 @@ export class AlertsClient {
         hitIds: [hit._id, ...acc.hitIds],
         ownersAndRuleTypeIds: [
           {
-            [RULE_ID]: hit?._source?.[RULE_ID],
-            [ALERT_OWNER]: hit?._source?.[ALERT_OWNER],
+            [ALERT_RULE_TYPE_ID]: hit?._source?.[ALERT_RULE_TYPE_ID],
+            [ALERT_RULE_CONSUMER]: hit?._source?.[ALERT_RULE_CONSUMER],
           },
         ],
       }),
       { hitIds: [], ownersAndRuleTypeIds: [] } as {
         hitIds: string[];
         ownersAndRuleTypeIds: Array<{
-          [RULE_ID]: string | null | undefined;
-          [ALERT_OWNER]: string | null | undefined;
+          [ALERT_RULE_TYPE_ID]: string | null | undefined;
+          [ALERT_RULE_CONSUMER]: string | null | undefined;
         }>;
       }
     );
@@ -150,8 +169,8 @@ export class AlertsClient {
 
     return Promise.all(
       ownersAndRuleTypeIds.map((hit) => {
-        const alertOwner = hit?.[ALERT_OWNER];
-        const ruleId = hit?.[RULE_ID];
+        const alertOwner = hit?.[ALERT_RULE_CONSUMER];
+        const ruleId = hit?.[ALERT_RULE_TYPE_ID];
         if (hit != null && assertString(alertOwner) && assertString(ruleId)) {
           return this.authorization.ensureAuthorized({
             ruleTypeId: ruleId,
@@ -322,7 +341,7 @@ export class AlertsClient {
         AlertingAuthorizationEntity.Alert,
         {
           type: AlertingAuthorizationFilterType.ESDSL,
-          fieldNames: { consumer: ALERT_OWNER, ruleTypeId: RULE_ID },
+          fieldNames: { consumer: ALERT_RULE_CONSUMER, ruleTypeId: ALERT_RULE_TYPE_ID },
         },
         operation
       );
