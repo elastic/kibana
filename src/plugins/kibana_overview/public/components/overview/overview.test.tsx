@@ -23,6 +23,7 @@ jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
   overviewPageActions: jest.fn().mockReturnValue([]),
   OverviewPageFooter: jest.fn().mockReturnValue(<></>),
+  KibanaPageTemplate: jest.fn().mockReturnValue(<></>),
 }));
 
 jest.mock('../../lib/ui_metric', () => ({
@@ -78,7 +79,8 @@ const mockNewsFetchResult = {
 const mockSolutions = [
   {
     id: 'kibana',
-    title: 'Kibana',
+    title: 'Analytics',
+    description: 'Description of Kibana',
     icon: 'logoKibana',
     path: 'kibana_landing_page',
     order: 1,

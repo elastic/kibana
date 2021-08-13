@@ -55,7 +55,7 @@ export interface FeatureCatalogueSolution {
   /** URL path to link to this future. Should not include the basePath. */
   readonly path: string;
   /** An ordinal used to sort solutions relative to one another for display on the home page */
-  readonly order?: number;
+  readonly order: number;
 }
 
 export class FeatureCatalogueRegistry {

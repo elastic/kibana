@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`home change home route should render a link to change the default route in advanced settings if advanced settings is enabled 1`] = `
-<Component
+<mockConstructor
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -36,11 +36,11 @@ exports[`home change home route should render a link to change the default route
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`home directories should not render directory entry when showOnHomePage is false 1`] = `
-<Component
+<mockConstructor
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -75,11 +75,11 @@ exports[`home directories should not render directory entry when showOnHomePage 
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`home directories should render ADMIN directory entry in "Manage your data" panel 1`] = `
-<Component
+<mockConstructor
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -126,11 +126,11 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`home directories should render solutions in the "solution section" 1`] = `
-<Component
+<mockConstructor
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -196,11 +196,11 @@ exports[`home directories should render solutions in the "solution section" 1`] 
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
-<Component
+<mockConstructor
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -235,11 +235,11 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when there are index patterns 1`] = `
-<Component
+<mockConstructor
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -274,11 +274,11 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when there are no index patterns 1`] = `
-<Component
+<mockConstructor
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -313,11 +313,11 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`home should render home component 1`] = `
-<Component
+<mockConstructor
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -352,11 +352,11 @@ exports[`home should render home component 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`home welcome should show the normal home page if loading fails 1`] = `
-<Component
+<mockConstructor
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -391,11 +391,11 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`home welcome should show the normal home page if welcome screen is disabled locally 1`] = `
-<Component
+<mockConstructor
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -430,7 +430,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`home welcome should show the welcome screen if enabled, and there are no index patterns defined 1`] = `
@@ -441,7 +441,7 @@ exports[`home welcome should show the welcome screen if enabled, and there are n
 `;
 
 exports[`home welcome stores skip welcome setting if skipped 1`] = `
-<Component
+<mockConstructor
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -476,5 +476,5 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</Component>
+</mockConstructor>
 `;

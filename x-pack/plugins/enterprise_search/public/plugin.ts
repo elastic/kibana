@@ -139,6 +139,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         icon: 'logoEnterpriseSearch',
         description: ENTERPRISE_SEARCH_PLUGIN.DESCRIPTION,
         path: ENTERPRISE_SEARCH_PLUGIN.URL,
+        order: 100,
       });
 
       plugins.home.featureCatalogue.register({

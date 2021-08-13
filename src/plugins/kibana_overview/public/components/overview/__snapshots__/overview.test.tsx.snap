@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Overview render 1`] = `
-<Component
+<mockConstructor
   pageHeader={
     Object {
       "iconType": "logoKibana",
@@ -124,7 +124,7 @@ exports[`Overview render 1`] = `
             <mockConstructor>
               <EuiCard
                 className="kbnOverviewSolution kibana"
-                description=""
+                description="Description of Kibana"
                 href="kibana_landing_page"
                 icon={
                   <EuiToken
@@ -137,7 +137,7 @@ exports[`Overview render 1`] = `
                 }
                 image="/plugins/kibanaReact/assets/solutions_kibana_2x.png"
                 onClick={[Function]}
-                title="Kibana"
+                title="Analytics"
                 titleElement="h3"
                 titleSize="xs"
               />
@@ -298,11 +298,11 @@ exports[`Overview render 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/kibana_overview"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`Overview without features 1`] = `
-<Component
+<mockConstructor
   pageHeader={
     Object {
       "iconType": "logoKibana",
@@ -425,7 +425,7 @@ exports[`Overview without features 1`] = `
             <mockConstructor>
               <EuiCard
                 className="kbnOverviewSolution kibana"
-                description=""
+                description="Description of Kibana"
                 href="kibana_landing_page"
                 icon={
                   <EuiToken
@@ -438,7 +438,7 @@ exports[`Overview without features 1`] = `
                 }
                 image="/plugins/kibanaReact/assets/solutions_kibana_2x.png"
                 onClick={[Function]}
-                title="Kibana"
+                title="Analytics"
                 titleElement="h3"
                 titleSize="xs"
               />
@@ -655,11 +655,11 @@ exports[`Overview without features 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/kibana_overview"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`Overview without solutions 1`] = `
-<Component
+<mockConstructor
   pageHeader={
     Object {
       "iconType": "logoKibana",
@@ -969,5 +969,5 @@ exports[`Overview without solutions 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/kibana_overview"
   />
-</Component>
+</mockConstructor>
 `;
