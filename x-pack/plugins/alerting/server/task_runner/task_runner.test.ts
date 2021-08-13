@@ -343,6 +343,13 @@ describe('Task Runner', () => {
       },
       { refresh: false, namespace: undefined }
     );
+
+    expect(taskRunnerFactoryInitializerParams.executionContext.setRequestId).toHaveBeenCalledTimes(
+      2
+    );
+    expect(taskRunnerFactoryInitializerParams.executionContext.setRequestId).toHaveBeenCalledWith(
+      expect.any(String)
+    );
   });
 
   testAgainstEphemeralSupport(
