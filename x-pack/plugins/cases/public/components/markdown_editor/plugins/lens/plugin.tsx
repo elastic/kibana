@@ -22,23 +22,36 @@ import {
   EuiFlexGroup,
   EuiFormRow,
   EuiMarkdownAstNodePosition,
+  EuiBetaBadge,
 } from '@elastic/eui';
-import React, { useCallback, useContext, useMemo, useEffect, useState } from 'react';
+import React, { ReactNode, useCallback, useContext, useMemo, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useLocation } from 'react-router-dom';
+import styled from 'styled-components';
 
 import type { TypedLensByValueInput } from '../../../../../../lens/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LensMarkDownRenderer } from './processor';
 import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
 import { CommentEditorContext } from '../../context';
-import { LensSavedObjectsModal } from './lens_saved_objects_modal';
 import { ModalContainer } from './modal_container';
 import type {
   EmbeddablePackageState,
   EmbeddableInput,
 } from '../../../../../../../../src/plugins/embeddable/public';
+import {
+  SavedObjectFinderUi,
+  SavedObjectFinderUiProps,
+} from '../../../../../../../../src/plugins/saved_objects/public';
+
+const BetaBadgeWrapper = styled.span`
+  display: inline-flex;
+
+  .euiToolTipAnchor {
+    display: inline-flex;
+  }
+`;
 
 type LensIncomingEmbeddablePackage = Omit<EmbeddablePackageState, 'input'> & {
   input: Omit<EmbeddableInput, 'id'> & {
@@ -55,6 +68,56 @@ type LensEuiMarkdownEditorUiPlugin = EuiMarkdownEditorUiPlugin<{
   position: EuiMarkdownAstNodePosition;
   attributes: TypedLensByValueInput['attributes'];
 }>;
+
+interface LensSavedObjectsPickerProps {
+  children: ReactNode;
+  onChoose: SavedObjectFinderUiProps['onChoose'];
+}
+
+const LensSavedObjectsPickerComponent: React.FC<LensSavedObjectsPickerProps> = ({
+  children,
+  onChoose,
+}) => {
+  const { savedObjects, uiSettings } = useKibana().services;
+
+  const savedObjectMetaData = useMemo(
+    () => [
+      {
+        type: 'lens',
+        getIconForSavedObject: () => 'lensApp',
+        name: i18n.translate(
+          'xpack.cases.markdownEditor.plugins.lens.insertLensSavedObjectModal.searchSelection.savedObjectType.lens',
+          {
+            defaultMessage: 'Lens',
+          }
+        ),
+        includeFields: ['*'],
+      },
+    ],
+    []
+  );
+
+  return (
+    <SavedObjectFinderUi
+      key="searchSavedObjectFinder"
+      onChoose={onChoose}
+      showFilter={false}
+      noItemsMessage={
+        <FormattedMessage
+          id="xpack.cases.markdownEditor.plugins.lens.insertLensSavedObjectModal.searchSelection.notFoundLabel"
+          defaultMessage="No matching lens found."
+        />
+      }
+      savedObjectMetaData={savedObjectMetaData}
+      fixedPageSize={10}
+      uiSettings={uiSettings}
+      savedObjects={savedObjects}
+      children={children}
+    />
+  );
+};
+
+export const LensSavedObjectsPicker = React.memo(LensSavedObjectsPickerComponent);
 
 const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   node,
@@ -73,7 +136,6 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       },
     },
   } = useKibana().services;
-
   const [currentAppId, setCurrentAppId] = useState<string | undefined>(undefined);
 
   const [editMode, setEditMode] = useState(!!node);
@@ -87,7 +149,6 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       mode: 'relative',
     }
   );
-  const [showLensSavedObjectsModal, setShowLensSavedObjectsModal] = useState(false);
   const commentEditorContext = useContext(CommentEditorContext);
   const markdownContext = useContext(EuiMarkdownContext);
 
@@ -221,8 +282,6 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     [handleEditInLensClick]
   );
 
-  const handleCloseLensSOModal = useCallback(() => setShowLensSavedObjectsModal(false), []);
-
   useEffect(() => {
     if (node?.attributes) {
       setLensEmbeddableAttributes(node.attributes);
@@ -272,25 +331,84 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   }, [embeddable, storage, timefilter, currentAppId]);
 
   return (
-    <>
-      <ModalContainer>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            {editMode ? (
-              <FormattedMessage
-                id="xpack.cases.markdownEditor.plugins.lens.editVisualizationModalTitle"
-                defaultMessage="Edit visualization"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.cases.markdownEditor.plugins.lens.addVisualizationModalTitle"
-                defaultMessage="Add visualization"
-              />
-            )}
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <EuiFlexGroup>
+    <ModalContainer>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              {editMode ? (
+                <FormattedMessage
+                  id="xpack.cases.markdownEditor.plugins.lens.editVisualizationModalTitle"
+                  defaultMessage="Edit visualization"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.cases.markdownEditor.plugins.lens.addVisualizationModalTitle"
+                  defaultMessage="Add visualization"
+                />
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <BetaBadgeWrapper>
+                <EuiBetaBadge
+                  label={i18n.translate('xpack.cases.markdownEditor.plugins.lens.betaLabel', {
+                    defaultMessage: 'Beta',
+                  })}
+                  tooltipContent={i18n.translate(
+                    'xpack.cases.markdownEditor.plugins.lens.betaDescription',
+                    {
+                      defaultMessage:
+                        'Cases Lens plugin is not GA. Please help us by reporting any bugs.',
+                    }
+                  )}
+                />
+              </BetaBadgeWrapper>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        {lensEmbeddableAttributes ? (
+          <>
+            <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
+              <EuiFlexItem>
+                <EuiFormRow fullWidth label="Title">
+                  <EuiFieldText
+                    fullWidth
+                    placeholder={i18n.translate(
+                      'xpack.cases.markdownEditor.plugins.lens.visualizationTitleFieldPlaceholder',
+                      {
+                        defaultMessage: 'Visualization title',
+                      }
+                    )}
+                    value={lensEmbeddableAttributes?.title ?? ''}
+                    onChange={handleTitleChange}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  iconType="lensApp"
+                  fullWidth={false}
+                  isDisabled={!lens?.canUseEditor()}
+                  onClick={() => handleEditInLensClick()}
+                >
+                  <FormattedMessage
+                    id="xpack.cases.markdownEditor.plugins.lens.editVisualizationInLensButtonLabel"
+                    defaultMessage="Edit visualization"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer />
+            <LensMarkDownRenderer
+              attributes={lensEmbeddableAttributes}
+              timeRange={timeRange}
+              viewMode={false}
+            />
+          </>
+        ) : (
+          <LensSavedObjectsPicker onChoose={handleChooseLensSO}>
             <EuiFlexItem>
               <EuiButton
                 onClick={() => handleEditInLensClick()}
@@ -305,93 +423,38 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
                 />
               </EuiButton>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButton
-                color="text"
-                size="m"
-                iconType="folderOpen"
-                onClick={() => setShowLensSavedObjectsModal(true)}
-              >
-                <FormattedMessage
-                  id="xpack.cases.markdownEditor.plugins.lens.addVisualizationFromLibraryButtonLabel"
-                  defaultMessage="Add from library"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {lensEmbeddableAttributes ? (
-            <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
-              <EuiFlexItem>
-                <EuiFormRow label="Title">
-                  <EuiFieldText
-                    placeholder={i18n.translate(
-                      'xpack.cases.markdownEditor.plugins.lens.visualizationTitleFieldPlaceholder',
-                      {
-                        defaultMessage: 'Visualization title',
-                      }
-                    )}
-                    value={lensEmbeddableAttributes?.title ?? ''}
-                    onChange={handleTitleChange}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <span>
-                  <EuiButton
-                    iconType="lensApp"
-                    fullWidth={false}
-                    isDisabled={!lens?.canUseEditor() || lensEmbeddableAttributes === null}
-                    onClick={() => handleEditInLensClick()}
-                  >
-                    <FormattedMessage
-                      id="xpack.cases.markdownEditor.plugins.lens.editVisualizationInLensButtonLabel"
-                      defaultMessage="Edit visualization"
-                    />
-                  </EuiButton>
-                </span>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : null}
-          <EuiSpacer />
-          <LensMarkDownRenderer
-            attributes={lensEmbeddableAttributes}
-            timeRange={timeRange}
-            viewMode={false}
-          />
-        </EuiModalBody>
-        <EuiModalFooter>
-          <EuiButtonEmpty onClick={onCancel}>{'Cancel'}</EuiButtonEmpty>
-          {editMode ? (
-            <EuiButton onClick={handleDelete} color="danger" disabled={!lensEmbeddableAttributes}>
-              <FormattedMessage
-                id="xpack.cases.markdownEditor.plugins.lens.deleteVisualizationButtonLabel"
-                defaultMessage="Delete"
-              />
-            </EuiButton>
-          ) : null}
-          <EuiButton
-            onClick={handleAdd}
-            fill
-            disabled={!lensEmbeddableAttributes || !lensEmbeddableAttributes?.title?.length}
-          >
-            {editMode ? (
-              <FormattedMessage
-                id="xpack.cases.markdownEditor.plugins.lens.updateVisualizationButtonLabel"
-                defaultMessage="Update"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.cases.markdownEditor.plugins.lens.addVisualizationToCaseButtonLabel"
-                defaultMessage="Add to a Case"
-              />
-            )}
+          </LensSavedObjectsPicker>
+        )}
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty onClick={onCancel}>{'Cancel'}</EuiButtonEmpty>
+        {editMode ? (
+          <EuiButton onClick={handleDelete} color="danger" disabled={!lensEmbeddableAttributes}>
+            <FormattedMessage
+              id="xpack.cases.markdownEditor.plugins.lens.deleteVisualizationButtonLabel"
+              defaultMessage="Delete"
+            />
           </EuiButton>
-        </EuiModalFooter>
-      </ModalContainer>
-      {showLensSavedObjectsModal ? (
-        <LensSavedObjectsModal onClose={handleCloseLensSOModal} onChoose={handleChooseLensSO} />
-      ) : null}
-    </>
+        ) : null}
+        <EuiButton
+          onClick={handleAdd}
+          fill
+          disabled={!lensEmbeddableAttributes || !lensEmbeddableAttributes?.title?.length}
+        >
+          {editMode ? (
+            <FormattedMessage
+              id="xpack.cases.markdownEditor.plugins.lens.updateVisualizationButtonLabel"
+              defaultMessage="Update"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.cases.markdownEditor.plugins.lens.addVisualizationToCaseButtonLabel"
+              defaultMessage="Add to a Case"
+            />
+          )}
+        </EuiButton>
+      </EuiModalFooter>
+    </ModalContainer>
   );
 };
 
