@@ -25,14 +25,7 @@ import { getIdentifyStep } from './identify_step';
 import { getUpgradeStep } from './upgrade_step';
 
 export const DeprecationsOverview: FunctionComponent = () => {
-  const {
-    kibanaVersionInfo,
-    breadcrumbs,
-    docLinks,
-    api,
-    isCloudEnabled,
-    cloudDeploymentUrl,
-  } = useAppContext();
+  const { kibanaVersionInfo, breadcrumbs, docLinks, api } = useAppContext();
   const { currentMajor } = kibanaVersionInfo;
 
   useEffect(() => {
@@ -94,7 +87,7 @@ export const DeprecationsOverview: FunctionComponent = () => {
             steps={[
               getReviewStep({ currentMajor }),
               getIdentifyStep(),
-              getUpgradeStep({ docLinks, isCloudEnabled, cloudDeploymentUrl, currentMajor }),
+              getUpgradeStep({ docLinks, currentMajor }),
             ]}
           />
         </>

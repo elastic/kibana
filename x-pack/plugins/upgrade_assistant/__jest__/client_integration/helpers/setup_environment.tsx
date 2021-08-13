@@ -17,7 +17,7 @@ import {
 } from 'src/core/public/mocks';
 import { HttpSetup } from 'src/core/public';
 
-import { KibanaContextProvider, EuiThemeProvider } from '../../../public/shared_imports';
+import { KibanaContextProvider } from '../../../public/shared_imports';
 import { mockKibanaSemverVersion } from '../../../common/constants';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { apiService } from '../../../public/application/lib/api';
@@ -48,18 +48,16 @@ export const WithAppDependencies = (Comp: any, overrides: Record<string, unknown
     breadcrumbs: breadcrumbService,
     getUrlForApp: () => '',
     deprecations: deprecationsServiceMock.createStartContract(),
-    isCloudEnabled: false,
-    cloudDeploymentUrl: '',
   };
 
+  const { servicesOverrides, ...contextOverrides } = overrides;
+
   return (
-    <EuiThemeProvider>
-      <KibanaContextProvider services={{ ...servicesMock }}>
-        <AppContextProvider value={{ ...contextValue, ...overrides }}>
-          <Comp {...props} />
-        </AppContextProvider>
-      </KibanaContextProvider>
-    </EuiThemeProvider>
+    <KibanaContextProvider services={{ ...servicesMock, ...(servicesOverrides as {}) }}>
+      <AppContextProvider value={{ ...contextValue, ...contextOverrides }}>
+        <Comp {...props} />
+      </AppContextProvider>
+    </KibanaContextProvider>
   );
 };
 

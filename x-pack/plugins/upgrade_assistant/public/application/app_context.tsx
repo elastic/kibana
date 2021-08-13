@@ -32,10 +32,6 @@ export interface ContextValue {
   breadcrumbs: BreadcrumbService;
   getUrlForApp: CoreStart['application']['getUrlForApp'];
   deprecations: DeprecationsServiceStart;
-  isCloudEnabled: boolean;
-  cloudDeploymentUrl: string;
-  startServices: CoreStart;
-  startPluginDeps: CoreStart;
 }
 
 export const AppContext = createContext<ContextValue>({} as any);

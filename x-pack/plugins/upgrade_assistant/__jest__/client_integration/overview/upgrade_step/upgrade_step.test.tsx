@@ -33,8 +33,13 @@ describe('Overview - Upgrade Step', () => {
     test('Shows upgrade cta and link to docs for cloud installations', async () => {
       await act(async () => {
         testBed = await setupOverviewPage({
-          isCloudEnabled: true,
-          cloudDeploymentUrl: '/upgrade_on_cloud',
+          servicesOverrides: {
+            cloud: {
+              isCloudEnabled: true,
+              baseUrl: 'https://test.com',
+              cloudId: '1234',
+            },
+          },
         });
       });
 

@@ -9,7 +9,9 @@ import React from 'react';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { I18nStart, ScopedHistory } from 'src/core/public';
 
+import { ApplicationStart } from 'kibana/public';
 import { KibanaContextProvider } from '../shared_imports';
+import { AppServicesContext } from '../types';
 import { AppContextProvider, ContextValue, useAppContext } from './app_context';
 import { ComingSoonPrompt } from './components/coming_soon_prompt';
 import { EsDeprecationsContent } from './components/es_deprecations';
@@ -20,6 +22,8 @@ import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public
 export interface AppDependencies extends ContextValue {
   i18n: I18nStart;
   history: ScopedHistory;
+  application: ApplicationStart;
+  services: AppServicesContext;
 }
 
 const App: React.FunctionComponent = () => {
@@ -52,14 +56,14 @@ export const AppWithRouter = ({ history }: { history: ScopedHistory }) => {
 export const RootComponent = ({
   i18n,
   history,
-  startServices,
-  startPluginDeps,
+  services,
+  application,
   ...contextValue
 }: AppDependencies) => {
   return (
-    <RedirectAppLinks application={startServices.application}>
+    <RedirectAppLinks application={application}>
       <i18n.Context>
-        <KibanaContextProvider services={{ ...startServices, ...startPluginDeps }}>
+        <KibanaContextProvider services={services}>
           <AppContextProvider value={contextValue}>
             <AppWithRouter history={history} />
           </AppContextProvider>

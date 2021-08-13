@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import type { DocLinksStart } from 'src/core/public';
+import { useKibana } from '../../../../shared_imports';
 
 const i18nTexts = {
   upgradeStepTitle: (currentMajor: number) =>
@@ -43,17 +44,12 @@ const i18nTexts = {
   }),
 };
 
-export const getUpgradeStep = ({
-  docLinks,
-  isCloudEnabled,
-  cloudDeploymentUrl,
-  currentMajor,
-}: {
-  docLinks: DocLinksStart;
-  isCloudEnabled: boolean;
-  cloudDeploymentUrl: string;
-  currentMajor: number;
-}): EuiStepProps => {
+const UpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }) => {
+  const { cloud } = useKibana().services;
+
+  const isCloudEnabled: boolean = Boolean(cloud?.isCloudEnabled);
+  const cloudDeploymentUrl: string = `${cloud?.baseUrl ?? ''}/deployments/${cloud?.cloudId ?? ''}`;
+
   let callToAction;
 
   if (isCloudEnabled) {
@@ -99,23 +95,32 @@ export const getUpgradeStep = ({
     );
   }
 
+  return (
+    <>
+      <EuiText>
+        <p>
+          {isCloudEnabled
+            ? i18nTexts.upgradeStepDescriptionForCloud
+            : i18nTexts.upgradeStepDescription}
+        </p>
+      </EuiText>
+
+      <EuiSpacer size="m" />
+
+      {callToAction}
+    </>
+  );
+};
+
+interface Props {
+  docLinks: DocLinksStart;
+  currentMajor: number;
+}
+
+export const getUpgradeStep = ({ docLinks, currentMajor }: Props): EuiStepProps => {
   return {
     title: i18nTexts.upgradeStepTitle(currentMajor),
     status: 'incomplete',
-    children: (
-      <>
-        <EuiText>
-          <p>
-            {isCloudEnabled
-              ? i18nTexts.upgradeStepDescriptionForCloud
-              : i18nTexts.upgradeStepDescription}
-          </p>
-        </EuiText>
-
-        <EuiSpacer size="m" />
-
-        {callToAction}
-      </>
-    ),
+    children: <UpgradeStep docLinks={docLinks} />,
   };
 };
