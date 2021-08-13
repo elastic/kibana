@@ -63,6 +63,8 @@ export interface TGridModel extends TGridModelSettings {
   /** Uniquely identifies the timeline */
   id: string;
   indexNames: string[];
+  isAddToExistingCaseOpen: boolean;
+  isCreateNewCaseOpen: boolean;
   isLoading: boolean;
   /** If selectAll checkbox in header is checked **/
   isSelectAllChecked: boolean;
