@@ -113,7 +113,7 @@ describe('isNewInstance', () => {
     it('returns false if any other logs or metrics indices contain data', async () => {
       esClient.asCurrentUser.cat.indices.mockReturnValue(
         elasticsearchServiceMock.createSuccessTransportRequestPromise([
-          { index: '.ds-metrics-foo', docsCount: '100' },
+          { index: '.ds-metrics-foo', 'docs.count': '100' },
         ])
       );
       expect(await isNewInstance({ esClient, soClient })).toEqual(false);
