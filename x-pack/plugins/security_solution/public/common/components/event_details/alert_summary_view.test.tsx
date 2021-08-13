@@ -16,7 +16,6 @@ import { useRuleWithFallback } from '../../../detections/containers/detection_en
 import { TestProviders } from '../../mock';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
-import { SummaryRow } from './helpers';
 
 jest.mock('../../lib/kibana');
 
