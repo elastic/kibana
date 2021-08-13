@@ -85,7 +85,7 @@ export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
         filterQuery: '',
       });
     }
-  }, [from, start, data, to, eventFields, range, prevRange, defaultThreatIndices]);
+  }, [start, data, eventFields, prevEventFields, range, prevRange, defaultThreatIndices]);
 
   return {
     result: isEmpty(eventFields) ? noEnrichments : result,
