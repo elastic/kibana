@@ -25,10 +25,12 @@ export function TileMapVisualization(props: Props) {
     lon: props.visConfig.mapCenter[1],
     zoom: props.visConfig.mapZoom,
   };
-  function getLayerDescriptors(mapModules: LazyLoadedMapModules) {
-    const layerDescriptor = mapModules.createTileMapLayerDescriptor(
-      props.visConfig.layerDescriptorParams
-    );
+  function getLayerDescriptors({
+    createTileMapLayerDescriptor,
+  }: {
+    createTileMapLayerDescriptor: LazyLoadedMapModules['createTileMapLayerDescriptor'];
+  }) {
+    const layerDescriptor = createTileMapLayerDescriptor(props.visConfig.layerDescriptorParams);
     return layerDescriptor ? [layerDescriptor] : [];
   }
   return (

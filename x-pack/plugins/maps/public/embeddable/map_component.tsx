@@ -18,7 +18,12 @@ interface Props {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
-  getLayerDescriptors: (mapModules: LazyLoadedMapModules) => LayerDescriptor[];
+  getLayerDescriptors: (
+    mapModules: Pick<
+      LazyLoadedMapModules,
+      'createTileMapLayerDescriptor' | 'createRegionMapLayerDescriptor'
+    >
+  ) => LayerDescriptor[];
   mapCenter?: MapCenterAndZoom;
   onInitialRenderComplete?: () => void;
   /*
@@ -78,7 +83,10 @@ export class MapComponent extends Component<Props, State> {
           title: '',
           layerListJSON: JSON.stringify([
             mapModules.createBasemapLayerDescriptor(),
-            ...this.props.getLayerDescriptors(mapModules),
+            ...this.props.getLayerDescriptors({
+              createRegionMapLayerDescriptor: mapModules.createRegionMapLayerDescriptor,
+              createTileMapLayerDescriptor: mapModules.createTileMapLayerDescriptor,
+            }),
           ]),
         },
         mapCenter: this.props.mapCenter,

@@ -25,10 +25,12 @@ export function RegionMapVisualization(props: Props) {
     lon: props.visConfig.mapCenter[1],
     zoom: props.visConfig.mapZoom,
   };
-  function getLayerDescriptors(mapModules: LazyLoadedMapModules) {
-    const layerDescriptor = mapModules.createRegionMapLayerDescriptor(
-      props.visConfig.layerDescriptorParams
-    );
+  function getLayerDescriptors({
+    createRegionMapLayerDescriptor,
+  }: {
+    createRegionMapLayerDescriptor: LazyLoadedMapModules['createRegionMapLayerDescriptor'];
+  }) {
+    const layerDescriptor = createRegionMapLayerDescriptor(props.visConfig.layerDescriptorParams);
     return layerDescriptor ? [layerDescriptor] : [];
   }
   return (
