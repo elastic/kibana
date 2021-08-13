@@ -26,7 +26,7 @@ describe('Discover router', () => {
       history,
       services: mockDiscoverServices,
     };
-    const component = shallow(discoverRouter(mockDiscoverServices, history, mainRouteProps));
+    const component = shallow(discoverRouter(mockDiscoverServices, history));
     component.find(Route).forEach((route) => {
       const routeProps = route.props() as RouteProps;
       const path = routeProps.path;
