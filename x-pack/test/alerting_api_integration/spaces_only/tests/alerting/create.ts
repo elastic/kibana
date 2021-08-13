@@ -172,6 +172,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       expect(response.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
       expect(response.body.id).to.eql(customId);
+      expect((response as any)?.headers?.warning).to.eql(
+        `199 kibana POST /api/alerting/rule/${customId}: Usage of "id" has been deprecated and will be removed in 8.0.0`
+      );
       // Ensure AAD isn't broken
       await checkAAD({
         supertest,
@@ -191,6 +194,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       expect(response.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
       expect(response.body.id).to.eql(customId);
+      expect((response as any)?.headers?.warning).to.eql(
+        `199 kibana POST /api/alerting/rule/${customId}: Usage of "id" has been deprecated and will be removed in 8.0.0`
+      );
       // Ensure AAD isn't broken
       await checkAAD({
         supertest,
