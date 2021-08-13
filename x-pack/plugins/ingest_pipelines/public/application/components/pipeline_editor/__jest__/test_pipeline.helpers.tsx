@@ -10,11 +10,14 @@ import React from 'react';
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
+/* eslint-disable-next-line @kbn/eslint/no-restricted-paths */
 import { usageCollectionPluginMock } from 'src/plugins/usage_collection/public/mocks';
 
 import { registerTestBed, TestBed } from '@kbn/test/jest';
 import { stubWebWorker } from '@kbn/test/jest';
+
+/* eslint-disable-next-line @kbn/eslint/no-restricted-paths */
+import '../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor/jest_mock';
 import { uiMetricService, apiService } from '../../../services';
 import { Props } from '../';
 import { initHttpRequests } from './http_requests.helpers';
@@ -34,25 +37,6 @@ jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => {
         data-currentvalue={props.value}
         onChange={(e: any) => {
           props.onChange(e.jsonContent);
-        }}
-      />
-    ),
-  };
-});
-
-jest.mock('../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor', () => {
-  const original = jest.requireActual(
-    '../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor'
-  );
-
-  return {
-    ...original,
-    // Mocking EuiCodeEditor, which uses React Ace under the hood
-    EuiCodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj']}
-        onChange={(syntheticEvent: any) => {
-          props.onChange(syntheticEvent.jsonString);
         }}
       />
     ),

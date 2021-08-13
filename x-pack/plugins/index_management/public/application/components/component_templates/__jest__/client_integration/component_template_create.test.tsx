@@ -8,6 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import '../../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor/jest_mock';
 import { setupEnvironment } from './helpers';
 import { setup, ComponentTemplateCreateTestBed } from './helpers/component_template_create.helpers';
 
@@ -37,29 +38,6 @@ jest.mock('@elastic/eui', () => {
     ),
   };
 });
-
-// This mocks JsonEditor's consumption of EuiCodeEditor.
-jest.mock(
-  '../../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor',
-  () => {
-    const original = jest.requireActual(
-      '../../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor'
-    );
-
-    return {
-      ...original,
-      // Mocking EuiCodeEditor, which uses React Ace under the hood
-      EuiCodeEditor: (props: any) => (
-        <input
-          data-test-subj="mockCodeEditor"
-          onChange={(syntheticEvent: any) => {
-            props.onChange(syntheticEvent.jsonString);
-          }}
-        />
-      ),
-    };
-  }
-);
 
 describe('<ComponentTemplateCreate />', () => {
   let testBed: ComponentTemplateCreateTestBed;
@@ -97,7 +75,7 @@ describe('<ComponentTemplateCreate />', () => {
 
         // Meta editor should be hidden by default
         // Since the editor itself is mocked, we checked for the mocked element
-        expect(exists('mockCodeEditor')).toBe(false);
+        expect(exists('metaEditor')).toBe(false);
 
         await act(async () => {
           actions.toggleMetaSwitch();
@@ -105,7 +83,7 @@ describe('<ComponentTemplateCreate />', () => {
 
         component.update();
 
-        expect(exists('mockCodeEditor')).toBe(true);
+        expect(exists('metaEditor')).toBe(true);
       });
 
       describe('Validation', () => {

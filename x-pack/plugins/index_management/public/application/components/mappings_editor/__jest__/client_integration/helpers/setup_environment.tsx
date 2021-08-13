@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+/* eslint-disable-next-line @kbn/eslint/no-restricted-paths */
+import '../../../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor/jest_mock';
 import { GlobalFlyout } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
 import {
   docLinksServiceMock,
@@ -43,29 +45,6 @@ jest.mock('@elastic/eui', () => {
     ),
   };
 });
-
-jest.mock(
-  '../../../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor',
-  () => {
-    const original = jest.requireActual(
-      '../../../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor'
-    );
-
-    return {
-      ...original,
-      // Mocking EuiCodeEditor, which uses React Ace under the hood
-      EuiCodeEditor: (props: any) => (
-        <input
-          data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-          data-currentvalue={props.value}
-          onChange={(e: any) => {
-            props.onChange(e.jsonContent);
-          }}
-        />
-      ),
-    };
-  }
-);
 
 jest.mock('../../../../../../../../../../src/plugins/kibana_react/public', () => {
   const original = jest.requireActual(
