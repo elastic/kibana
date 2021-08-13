@@ -88,13 +88,13 @@ export class RuleRegistryPlugin
 
     const isWriteEnabled = (config: RuleRegistryPluginConfig, legacyConfig: SharedGlobalConfig) => {
       const hasEnabledWrite = config.write.enabled;
-      const hasSetKibanaIndex = legacyConfig.kibana.index;
+      const hasSetCustomKibanaIndex = legacyConfig.kibana.index !== '.kibana';
       const hasSetUnsafeAccess = config.unsafe.legacyMultiTenancy.enabled;
 
       if (!hasEnabledWrite) return false;
 
       // Not using legacy multi-tenancy
-      if (!hasSetKibanaIndex) {
+      if (!hasSetCustomKibanaIndex) {
         return hasEnabledWrite;
       } else {
         return hasSetUnsafeAccess;
