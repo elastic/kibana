@@ -26,7 +26,7 @@ export function rangeQuery(
   ];
 }
 
-export function kqlQuery(kql?: string): estypes.QueryDslQueryContainer[] {
+export function kqlQuery(kql: string): estypes.QueryDslQueryContainer[] {
   if (!kql) {
     return [];
   }
