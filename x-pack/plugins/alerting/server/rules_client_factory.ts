@@ -11,6 +11,7 @@ import {
   SavedObjectsServiceStart,
   PluginInitializerContext,
 } from 'src/core/server';
+import { coerce } from 'semver';
 import { PluginStartContract as ActionsPluginStartContract } from '../../actions/server';
 import { RulesClient } from './rules_client';
 import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
@@ -47,6 +48,7 @@ export class RulesClientFactory {
   private actions!: ActionsPluginStartContract;
   private eventLog!: IEventLogClientService;
   private kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
+
   private authorization!: AlertingAuthorizationClientFactory;
 
   public initialize(options: RulesClientFactoryOpts) {

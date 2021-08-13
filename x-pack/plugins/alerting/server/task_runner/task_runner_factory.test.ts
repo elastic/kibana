@@ -81,7 +81,7 @@ describe('Task Runner Factory', () => {
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: true,
     maxEphemeralActionsPerAlert: new Promise((resolve) => resolve(10)),
-    kibanaVersion: '1.0.1',
+    kibanaSemanticVersion: '1.0.1',
   };
 
   beforeEach(() => {

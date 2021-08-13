@@ -196,7 +196,7 @@ export class TaskRunner<
       alertParams,
       supportsEphemeralTasks: this.context.supportsEphemeralTasks,
       maxEphemeralActionsPerAlert: this.context.maxEphemeralActionsPerAlert,
-      kibanaVersion: this.context.kibanaVersion,
+      kibanaVersion: this.context.kibanaSemanticVersion,
     });
   }
 
@@ -353,7 +353,7 @@ export class TaskRunner<
       namespace,
       ruleType: alertType,
       rule: alert,
-      kibanaVersion: this.context.kibanaVersion,
+      kibanaVersion: this.context.kibanaSemanticVersion,
     });
 
     if (!muteAll) {
@@ -530,7 +530,7 @@ export class TaskRunner<
           scheduled: this.taskInstance.runAt.toISOString(),
           schedule_delay: Millis2Nanos * scheduleDelay,
         },
-        version: this.context.kibanaVersion,
+        version: this.context.kibanaSemanticVersion,
       },
       rule: {
         id: alertId,

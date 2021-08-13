@@ -40,7 +40,7 @@ export interface ActionExecutorContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
   preconfiguredActions: PreConfiguredAction[];
-  kibanaVersion: string | undefined;
+  kibanaSemanticVersion: string | undefined;
 }
 
 export interface TaskInfo {
@@ -177,7 +177,7 @@ export class ActionExecutor {
                 ...namespace,
               },
             ],
-            version: this.actionExecutorContext?.kibanaVersion,
+            version: this.actionExecutorContext?.kibanaSemanticVersion,
           },
         };
 

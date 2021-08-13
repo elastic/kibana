@@ -10,6 +10,7 @@ import { first, map, share } from 'rxjs/operators';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { combineLatest } from 'rxjs';
+import { coerce } from 'semver';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -385,7 +386,7 @@ export class AlertingPlugin {
       kibanaBaseUrl: this.kibanaBaseUrl,
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
       maxEphemeralActionsPerAlert: this.config.then((config) => config.maxEphemeralActionsPerAlert),
-      kibanaVersion: this.kibanaVersion,
+      kibanaSemanticVersion: coerce(this.kibanaVersion)?.version,
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {

@@ -105,7 +105,7 @@ describe('Task Runner', () => {
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: false,
     maxEphemeralActionsPerAlert: new Promise((resolve) => resolve(10)),
-    kibanaVersion: '1.0.1',
+    kibanaSemanticVersion: '1.0.1',
   };
 
   function testAgainstEphemeralSupport(

@@ -7,6 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import semver, { coerce } from 'semver';
 import {
   PluginInitializerContext,
   Plugin,
@@ -389,7 +390,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
       preconfiguredActions,
-      kibanaVersion: this.kibanaVersion,
+      kibanaSemanticVersion: coerce(this.kibanaVersion)?.version,
     });
 
     taskRunnerFactory!.initialize({
