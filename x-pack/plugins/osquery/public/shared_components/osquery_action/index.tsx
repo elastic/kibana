@@ -9,6 +9,7 @@ import { find } from 'lodash';
 import { EuiErrorBoundary, EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { QueryClientProvider } from 'react-query';
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { useAgentDetails } from '../../agents/use_agent_details';
 import { useAgentPolicy } from '../../agent_policies';
 import { KibanaContextProvider, useKibana } from '../../common/lib/kibana';
@@ -54,7 +55,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
 
     const osqueryPackageInstalled = find(agentPolicyData?.package_policies, [
       'package.name',
-      'osquery_manager',
+      OSQUERY_INTEGRATION_NAME,
     ]);
     return osqueryPackageInstalled?.enabled;
   }, [agentPolicyData?.package_policies, policyError]);
@@ -75,7 +76,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
     );
   }
 
-  if (!agentFetched && agentLoading) {
+  if (!agentFetched) {
     return <EuiLoadingContent lines={10} />;
   }
 

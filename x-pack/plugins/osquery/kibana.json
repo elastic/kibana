@@ -9,6 +9,7 @@
   "id": "osquery",
   "kibanaVersion": "kibana",
   "optionalPlugins": [
+    "fleet",
     "home",
     "usageCollection",
     "lens"
@@ -24,7 +25,6 @@
     "dataEnhanced",
     "discover",
     "features",
-    "fleet",
     "navigation",
     "triggersActionsUi",
     "security"
