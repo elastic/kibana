@@ -23,7 +23,6 @@ import { MetricsExplorerMetrics } from './metrics';
 import { MetricsExplorerGroupBy } from './group_by';
 import { MetricsExplorerAggregationPicker } from './aggregation';
 import { MetricsExplorerChartOptions as MetricsExplorerChartOptionsComponent } from './chart_options';
-import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import { mapKibanaQuickRangesToDatePickerRanges } from '../../../../utils/map_timepicker_quickranges_to_datepicker_ranges';
 
@@ -112,16 +111,6 @@ export const MetricsExplorerToolbar = ({
           <MetricsExplorerChartOptionsComponent
             onChange={onChartOptionsChange}
             chartOptions={chartOptions}
-          />
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <SavedViewsToolbarControls
-            viewState={{
-              options,
-              chartOptions,
-              currentTimerange: timeRange,
-            }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ marginRight: 5 }}>

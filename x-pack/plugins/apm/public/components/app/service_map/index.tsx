@@ -32,6 +32,8 @@ import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './useRefDimensions';
 import { SearchBar } from '../../shared/search_bar';
 import { useServiceName } from '../../../hooks/use_service_name';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { Environment } from '../../../../common/environment_rt';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -63,9 +65,30 @@ function LoadingSpinner() {
   );
 }
 
-export function ServiceMap() {
+export function ServiceMapHome() {
+  const {
+    query: { environment, kuery },
+  } = useApmParams('/service-map');
+  return <ServiceMap environment={environment} kuery={kuery} />;
+}
+
+export function ServiceMapServiceDetail() {
+  const {
+    query: { environment, kuery },
+  } = useApmParams('/services/:serviceName/service-map');
+  return <ServiceMap environment={environment} kuery={kuery} />;
+}
+
+export function ServiceMap({
+  environment,
+  kuery,
+}: {
+  environment: Environment;
+  kuery: string;
+}) {
   const theme = useTheme();
   const license = useLicenseContext();
+
   const { urlParams } = useUrlParams();
 
   const serviceName = useServiceName();
@@ -77,7 +100,7 @@ export function ServiceMap() {
         return;
       }
 
-      const { start, end, environment } = urlParams;
+      const { start, end } = urlParams;
       if (start && end) {
         return callApmApi({
           isCachable: false,
@@ -93,7 +116,7 @@ export function ServiceMap() {
         });
       }
     },
-    [license, serviceName, urlParams]
+    [license, serviceName, environment, urlParams]
   );
 
   const { ref, height } = useRefDimensions();
@@ -154,7 +177,11 @@ export function ServiceMap() {
             <Controls />
             {serviceName && <EmptyBanner />}
             {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-            <Popover focusedServiceName={serviceName} />
+            <Popover
+              focusedServiceName={serviceName}
+              environment={environment}
+              kuery={kuery}
+            />
           </Cytoscape>
         </div>
       </EuiPanel>

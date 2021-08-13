@@ -22,6 +22,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     query: {
       start: range.start,
       end: range.end,
+      environment: 'ENVIRONMENT_ALL',
+      kuery: '',
     },
   });
 
