@@ -38,6 +38,7 @@ export declare abstract class Container<TChildInput extends Partial<EmbeddableIn
 |  [getPanelState(embeddableId)](./kibana-plugin-plugins-embeddable-public.container.getpanelstate.md) |  |  |
 |  [reload()](./kibana-plugin-plugins-embeddable-public.container.reload.md) |  |  |
 |  [removeEmbeddable(embeddableId)](./kibana-plugin-plugins-embeddable-public.container.removeembeddable.md) |  |  |
+|  [setChildLoaded(embeddable)](./kibana-plugin-plugins-embeddable-public.container.setchildloaded.md) |  |  |
 |  [untilEmbeddableLoaded(id)](./kibana-plugin-plugins-embeddable-public.container.untilembeddableloaded.md) |  |  |
 |  [updateInputForChild(id, changes)](./kibana-plugin-plugins-embeddable-public.container.updateinputforchild.md) |  |  |
 
