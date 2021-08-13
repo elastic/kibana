@@ -8,13 +8,12 @@ import * as t from 'io-ts';
 
 export type Maybe<T> = T | null | undefined;
 
-export const alertStatusRt = t.union([
-  t.literal('all'),
+export const alertWorkflowStatusRt = t.union([
   t.literal('open'),
   t.literal('acknowledged'),
   t.literal('closed'),
 ]);
-export type AlertStatus = t.TypeOf<typeof alertStatusRt>;
+export type AlertWorkflowStatus = t.TypeOf<typeof alertWorkflowStatusRt>;
 
 export interface ApmIndicesConfig {
   /* eslint-disable @typescript-eslint/naming-convention */

@@ -10,32 +10,28 @@
  * We have types and code at different imports because we don't want to import the whole package in the resulting webpack bundle for the plugin.
  * This way plugins can do targeted imports to reduce the final code bundle
  */
+import { EuiButtonIcon, EuiDataGridColumn } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type {
   AlertConsumers as AlertConsumersTyped,
   ALERT_DURATION as ALERT_DURATION_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
-  ALERT_STATUS as ALERT_STATUS_TYPED,
   ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
+  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
+  ALERT_WORKFLOW_STATUS as ALERT_WORKFLOW_STATUS_TYPED,
 } from '@kbn/rule-data-utils';
+// @ts-expect-error importing from a place other than root because we want to limit what we import from this package
+import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 import {
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
-  ALERT_STATUS as ALERT_STATUS_NON_TYPED,
   ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
+  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
+  ALERT_WORKFLOW_STATUS as ALERT_WORKFLOW_STATUS_NON_TYPED,
   TIMESTAMP,
   // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
-
-// @ts-expect-error importing from a place other than root because we want to limit what we import from this package
-import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
-
-import { EuiButtonIcon, EuiDataGridColumn } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import React, { Suspense, useMemo, useState } from 'react';
-
-import type { TimelinesUIStart } from '../../../../timelines/public';
-import type { TopAlert } from './';
+import styled from 'styled-components';
+import { LazyAlertsFlyout } from '../..';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import type {
   ActionProps,
@@ -43,17 +39,17 @@ import type {
   ColumnHeaderOptions,
   RowRenderer,
 } from '../../../../timelines/common';
-
-import { getRenderCellValue } from './render_cell_value';
+import type { TimelinesUIStart } from '../../../../timelines/public';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import type { TopAlert } from './';
 import { getDefaultCellActions } from './default_cell_actions';
-import { LazyAlertsFlyout } from '../..';
 import { parseAlert } from './parse_alert';
+import { getRenderCellValue } from './render_cell_value';
 
 const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
-const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
+const ALERT_WORKFLOW_STATUS: typeof ALERT_WORKFLOW_STATUS_TYPED = ALERT_WORKFLOW_STATUS_NON_TYPED;
 const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
 
 interface AlertsTableTGridProps {
@@ -61,7 +57,7 @@ interface AlertsTableTGridProps {
   rangeFrom: string;
   rangeTo: string;
   kuery: string;
-  status: string;
+  workflowStatus: AlertWorkflowStatus;
   setRefetch: (ref: () => void) => void;
 }
 
@@ -96,7 +92,7 @@ export const columns: Array<
     displayAsText: i18n.translate('xpack.observability.alertsTGrid.statusColumnDescription', {
       defaultMessage: 'Status',
     }),
-    id: ALERT_STATUS,
+    id: ALERT_WORKFLOW_STATUS,
     initialWidth: 79,
   },
   {
@@ -147,7 +143,7 @@ const OBSERVABILITY_ALERT_CONSUMERS = [
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const { core, observabilityRuleTypeRegistry } = usePluginContext();
   const { prepend } = core.http.basePath;
-  const { indexName, rangeFrom, rangeTo, kuery, status, setRefetch } = props;
+  const { indexName, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch } = props;
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
@@ -231,7 +227,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           defaultMessage: 'alerts',
         }),
         query: {
-          query: `${ALERT_STATUS}: ${status}${kuery !== '' ? ` and ${kuery}` : ''}`,
+          query: `${ALERT_WORKFLOW_STATUS}: ${status}${kuery !== '' ? ` and ${kuery}` : ''}`,
           language: 'kuery',
         },
         renderCellValue: getRenderCellValue({ rangeFrom, rangeTo, setFlyoutAlert }),
@@ -245,7 +241,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
             sortDirection: 'desc',
           },
         ],
-        filterStatus: workflowStatus as AlertWorkflowStatus,
+        filterStatus: workflowStatus,
         leadingControlColumns,
         trailingControlColumns,
         unit: (totalAlerts: number) =>
