@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { KibanaExecutionContext } from 'kibana/public';
 import { KibanaContext, TimeRange, Filter, esQuery, Query } from '../../../data/public';
 import { TimelionVisDependencies } from '../plugin';
 import { getTimezone } from './get_timezone';
@@ -60,12 +61,14 @@ export function getTimelionRequestHandler({
     query,
     visParams,
     searchSessionId,
+    executionContext,
   }: {
     timeRange: TimeRange;
     filters: Filter[];
     query: Query;
     visParams: TimelionVisParams;
     searchSessionId?: string;
+    executionContext?: KibanaExecutionContext;
   }): Promise<TimelionSuccessResponse> {
     const dataSearch = getDataSearch();
     const expression = visParams.expression;
@@ -110,6 +113,7 @@ export function getTimelionRequestHandler({
             searchSession: searchSessionOptions,
           }),
         }),
+        context: executionContext,
       });
     } catch (e) {
       if (e && e.body) {
