@@ -44,6 +44,8 @@ export interface NavigationEntry {
   matchFullPath?: boolean;
   // whether to ignore trailing slashes, defaults to `true`
   ignoreTrailingSlash?: boolean;
+  // the label of the badge that is shown besides the navigation label
+  sideBadgeLabel?: string;
 }
 ```
 
@@ -140,3 +142,26 @@ The `<ObservabilityPageTemplate />` component is a wrapper around the `<KibanaPa
 After these two steps we should see something like the following (note the navigation on the left):
 
 ![Page template rendered example](./page_template.png)
+
+## Adding badge
+
+You can add a badge beside the label by using the property `sideBadgeLabel?: string`.
+
+```js
+setup(core: CoreSetup, plugins: PluginsSetup) {
+    plugins.observability.navigation.registerSections(
+      of([
+        {
+          label: 'A solution section',
+          sortKey: 200,
+          entries: [
+            { label: 'Home Page', app: 'exampleA', path: '/', matchFullPath: true },
+            { label: 'Example Page', app: 'exampleA', path: '/example', sideBadgeLabel: 'NEW'  },
+          ],
+        }
+      ])
+    );
+  }
+
+```
+
