@@ -19,11 +19,11 @@ import { DependenciesTableServiceMapLink } from '../../../shared/dependencies_ta
 
 export function BackendInventoryDependenciesTable() {
   const {
-    urlParams: { start, end, environment, comparisonEnabled, comparisonType },
+    urlParams: { start, end, comparisonEnabled, comparisonType },
   } = useUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo, kuery },
+    query: { rangeFrom, rangeTo, environment, kuery },
   } = useApmParams('/backends');
 
   const router = useApmRouter();
@@ -32,6 +32,7 @@ export function BackendInventoryDependenciesTable() {
       rangeFrom,
       rangeTo,
       environment,
+      kuery,
     },
   });
 

@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 
 import { SearchStrategyDependencies } from 'src/plugins/data/server';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 
@@ -136,6 +137,8 @@ describe('APM Correlations search strategy', () => {
       params = {
         start: '2020',
         end: '2021',
+        environment: ENVIRONMENT_ALL.value,
+        kuery: '',
       };
     });
 

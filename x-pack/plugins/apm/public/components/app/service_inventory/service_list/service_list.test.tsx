@@ -13,6 +13,7 @@ import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock
 import { mockMoment, renderWithTheme } from '../../../../utils/testHelpers';
 import { getServiceColumns, ServiceList } from './';
 import { items } from './__fixtures__/service_api_mock_data';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -47,6 +48,8 @@ describe('ServiceList', () => {
     const query = {
       rangeFrom: 'now-15m',
       rangeTo: 'now',
+      environment: ENVIRONMENT_ALL.value,
+      kuery: '',
     };
 
     const service: any = {

@@ -36,13 +36,13 @@ import { getErrorRate } from '../transaction_groups/get_error_rate';
 
 interface Options {
   setup: Setup & SetupTimeRange;
-  environment?: string;
+  environment: string;
   serviceName: string;
   searchAggregatedTransactions: boolean;
 }
 
 interface TaskParameters {
-  environment?: string;
+  environment: string;
   filter: ESFilter[];
   searchAggregatedTransactions: boolean;
   minutes: number;
@@ -103,7 +103,7 @@ async function getErrorStats({
 }: {
   setup: Options['setup'];
   serviceName: string;
-  environment?: string;
+  environment: string;
   searchAggregatedTransactions: boolean;
 }) {
   return withApmSpan('get_error_rate_for_service_map_node', async () => {
@@ -115,6 +115,7 @@ async function getErrorStats({
       searchAggregatedTransactions,
       start,
       end,
+      kuery: '',
     });
 
     return { avgErrorRate: noHits ? null : average };
