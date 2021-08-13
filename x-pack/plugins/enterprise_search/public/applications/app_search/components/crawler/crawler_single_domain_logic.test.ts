@@ -51,6 +51,36 @@ describe('CrawlerSingleDomainLogic', () => {
         expect(CrawlerSingleDomainLogic.values.domain).toEqual(domain);
       });
     });
+
+    describe('updateEntryPoints', () => {
+      beforeEach(() => {
+        mount({
+          domain: {
+            id: '507f1f77bcf86cd799439011',
+            entryPoints: [],
+          },
+        });
+
+        CrawlerSingleDomainLogic.actions.updateEntryPoints([
+          {
+            id: '1234',
+            value: '/',
+          },
+        ]);
+      });
+
+      it('should update the entry points on the domain', () => {
+        expect(CrawlerSingleDomainLogic.values.domain).toEqual({
+          id: '507f1f77bcf86cd799439011',
+          entryPoints: [
+            {
+              id: '1234',
+              value: '/',
+            },
+          ],
+        });
+      });
+    });
   });
 
   describe('listeners', () => {

@@ -16,8 +16,8 @@ import {
   getConditionalHeaders,
   getFullUrls,
   omitBlockedHeaders,
+  generatePngObservableFactory,
 } from '../../common';
-import { generatePngObservableFactory } from '../lib/generate_png';
 import { TaskPayloadPNG } from '../types';
 
 export const runTaskFnFactory: RunTaskFnFactory<
