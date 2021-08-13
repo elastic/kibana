@@ -29,13 +29,8 @@ interface OsqueryActionProps {
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const agentId = metadata?.info?.agent?.id ?? undefined;
-  const {
-    data: agentData,
-    isFetched: agentFetched,
-    isError: agentError,
-    isLoading: agentLoading,
-  } = useAgentDetails({
-    agentId,
+  const { data: agentData, isFetched: agentFetched } = useAgentDetails({
+    agentId: agentId + 'aaaas',
     silent: true,
     skip: !agentId,
   });
@@ -45,7 +40,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
     isError: policyError,
     isLoading: policyLoading,
   } = useAgentPolicy({
-    policyId: agentData?.item?.policy_id,
+    policyId: agentData?.policy_id,
     skip: !agentData,
     silent: true,
   });
@@ -80,7 +75,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
     return <EuiLoadingContent lines={10} />;
   }
 
-  if (!agentId || (agentFetched && agentError)) {
+  if (!agentId || (agentFetched && !agentData)) {
     return (
       <EuiEmptyPrompt
         icon={<OsqueryIcon />}
@@ -88,9 +83,8 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
         titleSize="xs"
         body={
           <p>
-            An Elastic Agent is not installed on this host. To run queries on the host, install
-            Elastic Agent on the host, and then add the Osquery Manager integration to the agent
-            policy in Fleet.
+            An Elastic Agent is not installed on this host. To run queries, install Elastic Agent
+            on the host, and then add the Osquery Manager integration to the agent policy in Fleet.
           </p>
         }
       />

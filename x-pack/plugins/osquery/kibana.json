@@ -16,6 +16,7 @@
   ],
   "requiredBundles": [
     "esUiShared",
+    "fleet",
     "kibanaUtils",
     "kibanaReact"
   ],
