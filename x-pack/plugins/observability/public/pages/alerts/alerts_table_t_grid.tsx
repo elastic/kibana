@@ -32,8 +32,8 @@ import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/t
 import { EuiButtonIcon, EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import React, { Suspense, useMemo, useState } from 'react';
 
-import React, { Suspense, useState } from 'react';
 import type { TimelinesUIStart } from '../../../../timelines/public';
 import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -46,9 +46,9 @@ import type {
 
 import { getRenderCellValue } from './render_cell_value';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { decorateResponse } from './decorate_response';
 import { getDefaultCellActions } from './default_cell_actions';
 import { LazyAlertsFlyout } from '../..';
+import { parseAlert } from './parse_alert';
 
 const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
@@ -152,6 +152,10 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
 
+  const parseObservabilityAlert = useMemo(() => parseAlert(observabilityRuleTypeRegistry), [
+    observabilityRuleTypeRegistry,
+  ]);
+
   const leadingControlColumns = [
     {
       id: 'expand',
@@ -167,11 +171,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       },
       rowCellRender: ({ data }: ActionProps) => {
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
-        const decoratedAlerts = decorateResponse(
-          [dataFieldEs] ?? [],
-          observabilityRuleTypeRegistry
-        );
-        const alert = decoratedAlerts[0];
+        const alert = parseObservabilityAlert(dataFieldEs);
         return (
           <EuiButtonIcon
             size="s"
@@ -188,19 +188,14 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       headerCellRender: () => null,
       rowCellRender: ({ data }: ActionProps) => {
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
-        const decoratedAlerts = decorateResponse(
-          [dataFieldEs] ?? [],
-          observabilityRuleTypeRegistry
-        );
-        const alert = decoratedAlerts[0];
+        const alert = parseObservabilityAlert(dataFieldEs);
         return (
           <EuiButtonIcon
             size="s"
-            target="_blank"
-            rel="nofollow noreferrer"
             href={prepend(alert.link ?? '')}
-            iconType="inspect"
+            iconType="eye"
             color="text"
+            aria-label="View alert in app"
           />
         );
       },

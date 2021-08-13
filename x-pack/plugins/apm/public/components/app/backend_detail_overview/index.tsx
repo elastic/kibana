@@ -27,7 +27,7 @@ import { BackendDetailTemplate } from '../../routing/templates/backend_detail_te
 export function BackendDetailOverview() {
   const {
     path: { backendName },
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, environment, kuery },
   } = useApmParams('/backends/:backendName/overview');
 
   const apmRouter = useApmRouter();
@@ -35,7 +35,9 @@ export function BackendDetailOverview() {
   useBreadcrumb([
     {
       title: BackendInventoryTitle,
-      href: apmRouter.link('/backends', { query: { rangeFrom, rangeTo } }),
+      href: apmRouter.link('/backends', {
+        query: { rangeFrom, rangeTo, environment, kuery },
+      }),
     },
     {
       title: backendName,
@@ -44,6 +46,8 @@ export function BackendDetailOverview() {
         query: {
           rangeFrom,
           rangeTo,
+          environment,
+          kuery,
         },
       }),
     },

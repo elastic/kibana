@@ -39,16 +39,14 @@ import {
   IStickyProperty,
   StickyProperties,
 } from '../../shared/sticky_properties';
-import {
-  getEnvironmentLabel,
-  getNextEnvironmentUrlParam,
-} from '../../../../common/environment_filter_values';
+import { getEnvironmentLabel } from '../../../../common/environment_filter_values';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { MlFailureCorrelations } from './ml_failure_correlations';
 
 const failureCorrelationsTab = {
@@ -76,6 +74,10 @@ export function Correlations() {
   const { urlParams } = useUrlParams();
   const { serviceName } = useApmServiceContext();
 
+  const {
+    query: { environment },
+  } = useApmParams('/services/:serviceName');
+
   const history = useHistory();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [currentTab, setCurrentTab] = useState(latencyCorrelationsTab.key);
@@ -92,13 +94,8 @@ export function Correlations() {
   useTrackMetric({ ...metric, delay: 15000 });
 
   const stickyProperties: IStickyProperty[] = useMemo(() => {
-    const nextEnvironment = getNextEnvironmentUrlParam({
-      requestedEnvironment: serviceName,
-      currentEnvironmentUrlParam: urlParams.environment,
-    });
-
     const properties: IStickyProperty[] = [];
-    if (serviceName !== undefined && nextEnvironment !== undefined) {
+    if (serviceName !== undefined) {
       properties.push({
         label: i18n.translate('xpack.apm.correlations.serviceLabel', {
           defaultMessage: 'Service',
@@ -109,16 +106,14 @@ export function Correlations() {
       });
     }
 
-    if (urlParams.environment) {
-      properties.push({
-        label: i18n.translate('xpack.apm.correlations.environmentLabel', {
-          defaultMessage: 'Environment',
-        }),
-        fieldName: SERVICE_ENVIRONMENT,
-        val: getEnvironmentLabel(urlParams.environment),
-        width: '20%',
-      });
-    }
+    properties.push({
+      label: i18n.translate('xpack.apm.correlations.environmentLabel', {
+        defaultMessage: 'Environment',
+      }),
+      fieldName: SERVICE_ENVIRONMENT,
+      val: getEnvironmentLabel(environment),
+      width: '20%',
+    });
 
     if (urlParams.transactionName) {
       properties.push({
@@ -132,7 +127,7 @@ export function Correlations() {
     }
 
     return properties;
-  }, [serviceName, urlParams.environment, urlParams.transactionName]);
+  }, [serviceName, environment, urlParams.transactionName]);
 
   return (
     <>

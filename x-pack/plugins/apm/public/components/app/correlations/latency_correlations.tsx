@@ -31,6 +31,7 @@ import { useFieldNames } from './use_field_names';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useUiTracker } from '../../../../../observability/public';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useApmParams } from '../../../hooks/use_apm_params';
 
 type OverallLatencyApiResponse = NonNullable<
   APIReturnType<'GET /api/apm/correlations/latency/overall_distribution'>
@@ -51,15 +52,13 @@ export function LatencyCorrelations({ onClose }: Props) {
   ] = useState<SelectedSignificantTerm | null>(null);
 
   const { serviceName } = useApmServiceContext();
-  const { urlParams } = useUrlParams();
+
   const {
-    environment,
-    kuery,
-    transactionName,
-    transactionType,
-    start,
-    end,
-  } = urlParams;
+    query: { kuery, environment },
+  } = useApmParams('/services/:serviceName');
+
+  const { urlParams } = useUrlParams();
+  const { transactionName, transactionType, start, end } = urlParams;
   const { defaultFieldNames } = useFieldNames();
   const [fieldNames, setFieldNames] = useLocalStorage(
     `apm.correlations.latency.fields:${serviceName}`,
