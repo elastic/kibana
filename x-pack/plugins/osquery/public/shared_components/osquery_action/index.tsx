@@ -111,7 +111,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
     );
   }
 
-  if (agentData?.item?.status !== 'online') {
+  if (agentData?.status !== 'online') {
     return (
       <EuiEmptyPrompt
         icon={<OsqueryIcon />}
