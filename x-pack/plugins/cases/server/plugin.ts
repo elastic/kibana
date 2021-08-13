@@ -32,6 +32,7 @@ import type { CasesRequestHandlerContext } from './types';
 import { CasesClientFactory } from './client/factory';
 import { SpacesPluginStart } from '../../spaces/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
+import { RuleRegistryPluginStartContract } from '../../rule_registry/server';
 
 function createConfig(context: PluginInitializerContext) {
   return context.config.get<ConfigType>();
@@ -47,6 +48,7 @@ export interface PluginsStart {
   features: FeaturesPluginStart;
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
+  ruleRegistry: RuleRegistryPluginStartContract;
 }
 
 /**

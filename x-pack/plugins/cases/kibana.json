@@ -23,6 +23,7 @@
      "features",
      "kibanaReact",
      "kibanaUtils",
+     "ruleRegistry",
      "triggersActionsUi"
   ],
   "server":true,
