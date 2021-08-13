@@ -6,7 +6,11 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
-import { getIndexPatterns, getNewThreatIndicatorRule } from '../../objects/rule';
+import {
+  getIndexPatterns,
+  getNewThreatIndicatorRule,
+  getThreatIndexPatterns,
+} from '../../objects/rule';
 
 import {
   ALERT_RULE_METHOD,
@@ -138,26 +142,21 @@ describe('indicator match', () => {
         });
 
         it('Does NOT show invalidation text on initial page load if indicator index pattern is filled out', () => {
-          getIndicatorIndicatorIndex().type(
-            `${getNewThreatIndicatorRule().indicatorIndexPattern}{enter}`
-          );
           getDefineContinueButton().click();
           getIndexPatternInvalidationText().should('not.exist');
         });
 
         it('Shows invalidation text when you try to continue without filling it out', () => {
           getIndexPatternClearButton().click();
-          getIndicatorIndicatorIndex().type(
-            `${getNewThreatIndicatorRule().indicatorIndexPattern}{enter}`
-          );
+          getIndicatorIndicatorIndex().type(`{backspace}{enter}`);
           getDefineContinueButton().click();
           getIndexPatternInvalidationText().should('exist');
         });
       });
 
       describe('Indicator index patterns', () => {
-        it('Contains empty index pattern', () => {
-          getIndicatorIndicatorIndex().should('have.text', '');
+        it('Contains a predefined index pattern', () => {
+          getIndicatorIndicatorIndex().should('have.text', getThreatIndexPatterns().join(''));
         });
 
         it('Does NOT show invalidation text on initial page load', () => {
@@ -165,6 +164,7 @@ describe('indicator match', () => {
         });
 
         it('Shows invalidation text if you try to continue without filling it out', () => {
+          getIndicatorIndicatorIndex().type(`{backspace}{enter}`);
           getDefineContinueButton().click();
           getIndexPatternInvalidationText().should('exist');
         });
