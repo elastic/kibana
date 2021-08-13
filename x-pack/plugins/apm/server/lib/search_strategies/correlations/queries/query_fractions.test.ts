@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 
 import {
   fetchTransactionDurationFractions,
@@ -19,6 +20,8 @@ const params = {
   start: '2020',
   end: '2021',
   includeFrozen: false,
+  environment: ENVIRONMENT_ALL.value,
+  kuery: '',
 };
 const ranges = [{ to: 1 }, { from: 1, to: 3 }, { from: 3, to: 5 }, { from: 5 }];
 
