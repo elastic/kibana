@@ -6,23 +6,19 @@
  */
 
 import {
+  KibanaPluginServiceFactory,
   projectIDs,
-  PresentationLabsService,
 } from '../../../../../../src/plugins/presentation_util/public';
-
-import { CanvasServiceFactory } from '.';
 import { UI_SETTINGS } from '../../../common';
-export interface CanvasLabsService extends PresentationLabsService {
-  projectIDs: typeof projectIDs;
-  isLabsEnabled: () => boolean;
-}
+import { CanvasStartDeps } from '../../plugin';
+import { CanvasLabsService } from '../labs';
 
-export const labsServiceFactory: CanvasServiceFactory<CanvasLabsService> = async (
-  _coreSetup,
-  coreStart,
-  _setupPlugins,
-  startPlugins
-) => ({
+export type CanvasLabsServiceFactory = KibanaPluginServiceFactory<
+  CanvasLabsService,
+  CanvasStartDeps
+>;
+
+export const labsServiceFactory: CanvasLabsServiceFactory = ({ startPlugins, coreStart }) => ({
   projectIDs,
   isLabsEnabled: () => coreStart.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI),
   ...startPlugins.presentationUtil.labsService,
