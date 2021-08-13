@@ -23,7 +23,7 @@ export interface MetricRender {
 export const metricChart: ExpressionFunctionDefinition<
   'lens_metric_chart',
   LensMultiTable,
-  Omit<MetricConfig, 'layerId'>,
+  Omit<MetricConfig, 'layerId' | 'layerType'>,
   MetricRender
 > = {
   name: 'lens_metric_chart',

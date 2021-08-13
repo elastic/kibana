@@ -12,7 +12,7 @@ import { ServerStatus } from './server_status';
 import { FormattedStatus } from '../lib';
 
 const getStatus = (parts: Partial<FormattedStatus['state']> = {}): FormattedStatus['state'] => ({
-  id: 'green',
+  id: 'available',
   title: 'Green',
   uiColor: 'secondary',
   message: '',
@@ -29,7 +29,7 @@ describe('ServerStatus', () => {
 
   it('renders correctly for red state', () => {
     const status = getStatus({
-      id: 'red',
+      id: 'unavailable',
       title: 'Red',
     });
     const component = mount(<ServerStatus serverState={status} name="My Computer" />);

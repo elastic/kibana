@@ -8,6 +8,7 @@
 
 import { reduceRight } from 'lodash';
 
+import { Filter } from '@kbn/es-query';
 import { mapSpatialFilter } from './mappers/map_spatial_filter';
 import { mapMatchAll } from './mappers/map_match_all';
 import { mapPhrase } from './mappers/map_phrase';
@@ -20,7 +21,6 @@ import { mapGeoBoundingBox } from './mappers/map_geo_bounding_box';
 import { mapGeoPolygon } from './mappers/map_geo_polygon';
 import { mapDefault } from './mappers/map_default';
 import { generateMappingChain } from './generate_mapping_chain';
-import { Filter } from '../../../../common';
 
 export function mapFilter(filter: Filter) {
   /** Mappers **/
