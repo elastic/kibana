@@ -333,6 +333,7 @@ export class AlertsClient {
       });
 
       const bulkUpdateResponse = await this.esClient.bulk({
+        refresh: 'wait_for',
         body: bulkUpdateRequest,
       });
       return bulkUpdateResponse;
