@@ -207,7 +207,7 @@ export const getPendingActionCounts = async (
     .catch(catchAndWrapError);
 
   // retrieve any responses to those action IDs from these agents
-  const responses = await fetchActionResponseIdsByAgentId(
+  const responses = await fetchActionResponseIds(
     esClient,
     metadataService,
     recentActions.map((a) => a.action_id),
@@ -245,7 +245,7 @@ export const getPendingActionCounts = async (
  * @param actionIds
  * @param agentIds
  */
-const fetchActionResponseIdsByAgentId = async (
+const fetchActionResponseIds = async (
   esClient: ElasticsearchClient,
   metadataService: EndpointMetadataService,
   actionIds: string[],
@@ -303,9 +303,12 @@ const fetchActionResponseIdsByAgentId = async (
   for (const actionResponse of actionResponses) {
     const lastEndpointMetadataEventTimestamp = endpointLastEventCreated[actionResponse.agent_id];
     const actionCompletedAtTimestamp = new Date(actionResponse.completed_at);
-    // If enough time has lapsed in checking for updated Endpoint metadata doc (we don't want keep checking it forever)
+    // If enough time has lapsed in checking for updated Endpoint metadata doc so that we don't keep
+    // checking it forever.
+    // It uses the `@timestamp` in order to ensure we are looking at times that were set by the server
     const enoughTimeHasLapsed =
-      Date.now() - actionCompletedAtTimestamp.getTime() > PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME;
+      Date.now() - new Date(actionResponse['@timestamp']).getTime() >
+      PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME;
 
     if (
       !lastEndpointMetadataEventTimestamp ||
