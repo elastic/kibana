@@ -45,11 +45,13 @@ function ensureString(body: RequestBody): string {
   return JSON.stringify(body);
 }
 
-function getErrorMessage(error: ApiError, event: RequestEvent): string {
+/**
+ * Returns a debug message from an Elasticsearch error in the following format:
+ * [error type] error reason
+ */
+export function getErrorMessage(error: ApiError): string {
   if (error instanceof errors.ResponseError) {
-    return `${getResponseMessage(event)} [${event.body?.error?.type}]: ${
-      event.body?.error?.reason ?? error.message
-    }`;
+    return `[${error.meta.body?.error?.type}]: ${error.meta.body?.error?.reason ?? error.message}`;
   }
   return `[${error.name}]: ${error.message}`;
 }
@@ -58,26 +60,44 @@ function getErrorMessage(error: ApiError, event: RequestEvent): string {
  * returns a string in format:
  *
  * status code
- * URL
+ * method URL
  * request body
  *
  * so it could be copy-pasted into the Dev console
  */
 function getResponseMessage(event: RequestEvent): string {
-  const params = event.meta.request.params;
+  const errorMeta = getRequestDebugMeta(event);
+  const body = errorMeta.body ? `\n${errorMeta.body}` : '';
+  return `${errorMeta.statusCode}\n${errorMeta.method} ${errorMeta.url}${body}`;
+}
 
+/**
+ * Returns stringified debug information from an Elasticsearch request event
+ * useful for logging in case of an unexpected failure.
+ */
+export function getRequestDebugMeta(
+  event: RequestEvent
+): { url: string; body: string; statusCode: number | null; method: string } {
+  const params = event.meta.request.params;
   // definition is wrong, `params.querystring` can be either a string or an object
   const querystring = convertQueryString(params.querystring);
-  const url = `${params.path}${querystring ? `?${querystring}` : ''}`;
-  const body = params.body ? `\n${ensureString(params.body)}` : '';
-  return `${event.statusCode}\n${params.method} ${url}${body}`;
+  return {
+    url: `${params.path}${querystring ? `?${querystring}` : ''}`,
+    body: params.body ? `${ensureString(params.body)}` : '',
+    method: params.method,
+    statusCode: event.statusCode,
+  };
 }
 
 const addLogging = (client: Client, logger: Logger) => {
   client.on('response', (error, event) => {
     if (event) {
       if (error) {
-        logger.debug(getErrorMessage(error, event));
+        if (error instanceof errors.ResponseError) {
+          logger.debug(`${getResponseMessage(event)} ${getErrorMessage(error)}`);
+        } else {
+          logger.debug(getErrorMessage(error));
+        }
       } else {
         logger.debug(getResponseMessage(event));
       }
