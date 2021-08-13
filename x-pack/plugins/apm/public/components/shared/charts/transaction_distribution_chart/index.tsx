@@ -30,7 +30,11 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { getDurationFormatter } from '../../../../../common/utils/formatters';
+import {
+  getDurationUnitKey,
+  getUnitLabelAndConvertedValue,
+} from '../../../../../common/utils/formatters';
+
 import { HistogramItem } from '../../../../../common/search_strategies/correlations/types';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -73,11 +77,6 @@ const chartTheme: PartialTheme = {
       visible: false,
     },
   },
-};
-
-// Log based axis cannot start a 0. Use a small positive number instead.
-const yAxisDomain = {
-  min: 0.9,
 };
 
 interface CorrelationsChartProps {
@@ -164,10 +163,14 @@ export function TransactionDistributionChart({
     },
   ];
 
-  const xMax =
-    Math.max(...(patchedOverallHistogram ?? []).map((d) => d.key)) ?? 0;
-
-  const durationFormatter = getDurationFormatter(xMax);
+  // This will create y axis ticks for 1, 10, 100, 1000 ...
+  const yMax =
+    Math.max(...(overallHistogram ?? []).map((d) => d.doc_count)) ?? 0;
+  const yTicks = Math.ceil(Math.log10(yMax));
+  const yAxisDomain = {
+    min: 0.9,
+    max: Math.pow(10, yTicks),
+  };
 
   const histogram = replaceHistogramDotsWithBars(originalHistogram);
 
@@ -261,7 +264,17 @@ export function TransactionDistributionChart({
             id="x-axis"
             title=""
             position={Position.Bottom}
-            tickFormat={(d) => durationFormatter(d).formatted}
+            tickFormat={(d) => {
+              const unit = getDurationUnitKey(d, 1);
+              const converted = getUnitLabelAndConvertedValue(unit, d);
+              const convertedValueParts = converted.convertedValue.split('.');
+              const convertedValue =
+                convertedValueParts.length === 2 &&
+                convertedValueParts[1] === '0'
+                  ? convertedValueParts[0]
+                  : converted.convertedValue;
+              return `${convertedValue}${converted.unitLabel}`;
+            }}
           />
           <Axis
             id="y-axis"
@@ -271,9 +284,7 @@ export function TransactionDistributionChart({
               { defaultMessage: '# transactions' }
             )}
             position={Position.Left}
-            tickFormat={(d) =>
-              d === 0 || Number.isInteger(Math.log10(d)) ? d : ''
-            }
+            ticks={yTicks}
           />
           <AreaSeries
             id={i18n.translate(
