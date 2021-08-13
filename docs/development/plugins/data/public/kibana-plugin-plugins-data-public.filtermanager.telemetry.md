@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-telemetry: (filters: import("@kbn/common-utils").SerializableRecord, collector: unknown) => {};
+telemetry: (filters: import("@kbn/utility-types").SerializableRecord, collector: unknown) => {};
 ```
