@@ -241,7 +241,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
               expect(response?.headers?.warning).to.eql(
-                `199 kibana "Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the docs for more details."`
+                `199 kibana "Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the Alerting API docs at https://www.elastic.co/guide/en/kibana/current/create-rule-api.html for more details."`
               );
 
               const taskRecord = await getScheduledTask(response.body.scheduled_task_id);

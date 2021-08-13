@@ -76,7 +76,7 @@ export const createAlertRoute = (
         const shouldWarnId = params?.id && rulesClient.getSpaceId();
         if (shouldWarnId) {
           logger.warn(
-            `POST ${LEGACY_BASE_ALERT_API_PATH}/alert/${params?.id}: Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the docs for more details.`
+            `POST ${LEGACY_BASE_ALERT_API_PATH}/alert/${params?.id}: Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the Alerting API docs at https://www.elastic.co/guide/en/kibana/current/create-rule-api.html for more details.`
           );
         }
 
@@ -92,7 +92,7 @@ export const createAlertRoute = (
             ...(shouldWarnId
               ? {
                   headers: {
-                    warning: `199 kibana "Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the docs for more details."`,
+                    warning: `199 kibana "Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the Alerting API docs at https://www.elastic.co/guide/en/kibana/current/create-rule-api.html for more details."`,
                   },
                 }
               : {}),
