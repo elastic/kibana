@@ -12,12 +12,64 @@ export enum CrawlerPolicies {
   deny = 'deny',
 }
 
+export const getReadableCrawlerPolicy = (policy: CrawlerPolicies) => {
+  switch (policy) {
+    case CrawlerPolicies.allow:
+      return i18n.translate(
+        'xpack.enterpriseSearch.appSearch.crawler.crawlRulesPolicies.allowLabel',
+        {
+          defaultMessage: 'Allow',
+        }
+      );
+    case CrawlerPolicies.deny:
+      return i18n.translate(
+        'xpack.enterpriseSearch.appSearch.crawler.crawlRulesPolicies.disallowLabel',
+        {
+          defaultMessage: 'Disallow',
+        }
+      );
+  }
+};
+
 export enum CrawlerRules {
   beginsWith = 'begins',
   endsWith = 'ends',
   contains = 'contains',
   regex = 'regex',
 }
+
+export const getReadableCrawlerRule = (rule: CrawlerRules) => {
+  switch (rule) {
+    case CrawlerRules.beginsWith:
+      return i18n.translate(
+        'xpack.enterpriseSearch.appSearch.crawler.crawlRulesCrawlerRules.beginsWithLabel',
+        {
+          defaultMessage: 'Begins with',
+        }
+      );
+    case CrawlerRules.endsWith:
+      return i18n.translate(
+        'xpack.enterpriseSearch.appSearch.crawler.crawlRulesCrawlerRules.endsWithLabel',
+        {
+          defaultMessage: 'Ends with',
+        }
+      );
+    case CrawlerRules.contains:
+      return i18n.translate(
+        'xpack.enterpriseSearch.appSearch.crawler.crawlRulesCrawlerRules.containsLabel',
+        {
+          defaultMessage: 'Contains',
+        }
+      );
+    case CrawlerRules.regex:
+      return i18n.translate(
+        'xpack.enterpriseSearch.appSearch.crawler.crawlRulesCrawlerRules.regexLabel',
+        {
+          defaultMessage: 'Regex',
+        }
+      );
+  }
+};
 
 export interface CrawlRule {
   id: string;
