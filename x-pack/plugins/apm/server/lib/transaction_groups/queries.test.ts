@@ -10,6 +10,7 @@ import {
   SearchParamsMock,
   inspectSearchParams,
 } from '../../utils/test_helpers';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 describe('transaction group queries', () => {
   let mock: SearchParamsMock;
@@ -23,6 +24,8 @@ describe('transaction group queries', () => {
       topTransactionGroupsFetcher(
         {
           searchAggregatedTransactions: false,
+          environment: ENVIRONMENT_ALL.value,
+          kuery: '',
         },
         setup
       )
@@ -37,6 +40,8 @@ describe('transaction group queries', () => {
       topTransactionGroupsFetcher(
         {
           searchAggregatedTransactions: true,
+          environment: ENVIRONMENT_ALL.value,
+          kuery: '',
         },
         setup
       )

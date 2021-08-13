@@ -30,7 +30,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const response = await supertest.get(
         format({
           pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
-          query: { start, end, transactionType },
+          query: { start, end, transactionType, environment: 'ENVIRONMENT_ALL', kuery: '' },
         })
       );
       expect(response.status).to.be(200);
@@ -52,6 +52,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             end,
             comparisonStart: start,
             comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+            environment: 'ENVIRONMENT_ALL',
+            kuery: '',
           },
         })
       );
@@ -76,7 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const response = await supertest.get(
             format({
               pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
-              query: { start, end, transactionType },
+              query: { start, end, transactionType, environment: 'ENVIRONMENT_ALL', kuery: '' },
             })
           );
           errorRateResponse = response.body;
@@ -142,6 +144,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 comparisonStart: start,
                 comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
