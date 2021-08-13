@@ -18,8 +18,12 @@ import { AlertAttributes } from '../../signals/types';
 import { createRuleMock } from './rule';
 import { listMock } from '../../../../../../lists/server/mocks';
 import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
+import { RuleParams } from '../../schemas/rule_schemas';
 
-export const createRuleTypeMocks = () => {
+export const createRuleTypeMocks = (
+  ruleType: string = 'query',
+  ruleParams: Partial<RuleParams> = {}
+) => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   let alertExecutor: (...args: any[]) => Promise<any>;
 
@@ -43,7 +47,7 @@ export const createRuleTypeMocks = () => {
   const mockSavedObjectsClient = savedObjectsClientMock.create();
   mockSavedObjectsClient.get.mockResolvedValue({
     id: 'de2f6a49-28a3-4794-bad7-0e9482e075f8',
-    type: 'query',
+    type: ruleType,
     references: [],
     attributes: {
       actions: [],
@@ -57,7 +61,7 @@ export const createRuleTypeMocks = () => {
         interval: '30m',
       },
       throttle: '',
-      params: createRuleMock(),
+      params: createRuleMock(ruleParams),
     },
   } as SavedObject<AlertAttributes>);
 

@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { DslQuery } from '@kbn/es-query';
+import { estypes } from '@elastic/elasticsearch';
 import { logSourceColumnConfigurationRT } from '../../log_sources/log_source_configuration';
 import {
   logEntryAfterCursorRT,
@@ -14,7 +14,7 @@ import {
   logEntryCursorRT,
   logEntryRT,
 } from '../../log_entry';
-import { JsonObject, jsonObjectRT } from '../../typed_json';
+import { jsonObjectRT } from '../../typed_json';
 import { searchStrategyErrorRT } from '../common/errors';
 
 export const LOG_ENTRIES_SEARCH_STRATEGY = 'infra-log-entries';
@@ -51,7 +51,7 @@ export const logEntriesSearchRequestParamsRT = rt.union([
 
 export type LogEntriesSearchRequestParams = rt.TypeOf<typeof logEntriesSearchRequestParamsRT>;
 
-export type LogEntriesSearchRequestQuery = JsonObject | DslQuery;
+export type LogEntriesSearchRequestQuery = estypes.QueryDslQueryContainer;
 
 export const logEntriesSearchResponsePayloadRT = rt.intersection([
   rt.type({

@@ -41,16 +41,16 @@ import {
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import moment from 'moment-timezone';
 import React, { useMemo } from 'react';
-import type { TopAlert, TopAlertResponse } from '../';
+import type { TopAlert } from '../';
 import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 import { asDuration } from '../../../../common/utils/formatters';
 import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
-import { decorateResponse } from '../decorate_response';
+import { parseAlert } from '../parse_alert';
 import { SeverityBadge } from '../severity_badge';
 
 type AlertsFlyoutProps = {
   alert?: TopAlert;
-  alerts?: TopAlertResponse[];
+  alerts?: Array<Record<string, unknown>>;
   isInApp?: boolean;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   selectedAlertId?: string;
@@ -77,7 +77,8 @@ export function AlertsFlyout({
   const { http } = services;
   const prepend = http?.basePath.prepend;
   const decoratedAlerts = useMemo(() => {
-    return decorateResponse(alerts ?? [], observabilityRuleTypeRegistry);
+    const parseObservabilityAlert = parseAlert(observabilityRuleTypeRegistry);
+    return (alerts ?? []).map(parseObservabilityAlert);
   }, [alerts, observabilityRuleTypeRegistry]);
 
   let alertData = alert;
