@@ -12,7 +12,7 @@ import type { FormatFactory } from '../../common';
 
 export interface MetricVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
-  formatFactory: Promise<FormatFactory>;
+  formatFactory: FormatFactory;
   editorFrame: EditorFrameSetup;
 }
 
