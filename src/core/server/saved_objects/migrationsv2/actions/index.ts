@@ -120,6 +120,10 @@ export interface TargetIndexHadWriteBlock {
   type: 'target_index_had_write_block';
 }
 
+export interface RequestEntityTooLargeException {
+  type: 'request_entity_too_large_exception';
+}
+
 /** @internal */
 export interface AcknowledgeResponse {
   acknowledged: boolean;
@@ -136,6 +140,7 @@ export interface ActionErrorTypeMap {
   alias_not_found_exception: AliasNotFound;
   remove_index_not_a_concrete_index: RemoveIndexNotAConcreteIndex;
   documents_transform_failed: DocumentsTransformFailed;
+  request_entity_too_large_exception: RequestEntityTooLargeException;
 }
 
 /**

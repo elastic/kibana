@@ -10,6 +10,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import * as Option from 'fp-ts/lib/Option';
 import { Logger, LogMeta } from '../../logging';
 import type { ElasticsearchClient } from '../../elasticsearch';
+import { getErrorMessage, getRequestDebugMeta } from '../../elasticsearch';
 import { Model, Next, stateActionMachine } from './state_action_machine';
 import { cleanup } from './migrations_state_machine_cleanup';
 import { State } from './types';
@@ -196,16 +197,19 @@ export async function migrationStateActionMachine({
   } catch (e) {
     await cleanup(client, executionLog, lastState);
     if (e instanceof EsErrors.ResponseError) {
-      logger.error(
-        logMessagePrefix + `[${e.body?.error?.type}]: ${e.body?.error?.reason ?? e.message}`
-      );
+      // Log the failed request. This is very similar to the
+      // elasticsearch-service's debug logs, but we log everything in single
+      // line until we have sub-ms resolution in our cloud logs. Because this
+      // is error level logs, we're also more careful and don't log the request
+      // body since this can very likely have sensitive saved objects.
+      const req = getRequestDebugMeta(e.meta);
+      const failedRequestMessage = `Unexpected Elasticsearch ResponseError: statusCode: ${
+        req.statusCode
+      }, method: ${req.method}, url: ${req.url} error: ${getErrorMessage(e)},`;
+      logger.error(logMessagePrefix + failedRequestMessage);
       dumpExecutionLog(logger, logMessagePrefix, executionLog);
       throw new Error(
-        `Unable to complete saved object migrations for the [${
-          initialState.indexPrefix
-        }] index. Please check the health of your Elasticsearch cluster and try again. Error: [${
-          e.body?.error?.type
-        }]: ${e.body?.error?.reason ?? e.message}`
+        `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index. Please check the health of your Elasticsearch cluster and try again. ${failedRequestMessage}`
       );
     } else {
       logger.error(e);
