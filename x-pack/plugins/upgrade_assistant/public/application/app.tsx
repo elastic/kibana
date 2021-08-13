@@ -9,7 +9,7 @@ import React from 'react';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { I18nStart, ScopedHistory } from 'src/core/public';
 
-import { KibanaContextProvider, EuiThemeProvider } from '../shared_imports';
+import { KibanaContextProvider } from '../shared_imports';
 import { AppContextProvider, ContextValue, useAppContext } from './app_context';
 import { ComingSoonPrompt } from './components/coming_soon_prompt';
 import { EsDeprecationsContent } from './components/es_deprecations';
@@ -59,13 +59,11 @@ export const RootComponent = ({
   return (
     <RedirectAppLinks application={startServices.application}>
       <i18n.Context>
-        <EuiThemeProvider>
-          <KibanaContextProvider services={{ ...startServices, ...startPluginDeps }}>
-            <AppContextProvider value={contextValue}>
-              <AppWithRouter history={history} />
-            </AppContextProvider>
-          </KibanaContextProvider>
-        </EuiThemeProvider>
+        <KibanaContextProvider services={{ ...startServices, ...startPluginDeps }}>
+          <AppContextProvider value={contextValue}>
+            <AppWithRouter history={history} />
+          </AppContextProvider>
+        </KibanaContextProvider>
       </i18n.Context>
     </RedirectAppLinks>
   );
