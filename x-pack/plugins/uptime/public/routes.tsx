@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect } from 'react';
+import React, { FC, useEffect, useContext } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { Route, Switch } from 'react-router-dom';
@@ -42,6 +42,7 @@ import {
   StepDetailPageHeader,
   StepDetailPageRightSideItem,
 } from './pages/synthetics/step_detail_page';
+import { UptimeSettingsContext } from './contexts';
 
 interface RouteProps {
   path: string;
@@ -171,14 +172,12 @@ export const PageRouter: FC = () => {
       flex-wrap: wrap;
     }
   `;
-  const { http } = useKibana().services;
-  const basePath = http!.basePath.get();
 
+  const { basePath } = useContext(UptimeSettingsContext);
   const { data } = useSelector(indexStatusSelector);
   const noDataInfo = !data || data?.docCount === 0 || data?.indexExists === false;
-  const noDataPage = (
-    <StyledPageTemplateComponent
-      noDataConfig={{
+  const noDataConfig = noDataInfo
+    ? {
         solution: 'Observability',
         pageTitle: 'Set up Uptime for Observability!',
         actions: {
@@ -186,10 +185,9 @@ export const PageRouter: FC = () => {
             href: basePath + `/app/home#/tutorial/uptimeMonitors`,
           },
         },
-        docsLink: '#',
-      }}
-    />
-  );
+        docsLink: 'https://www.elastic.co/guide/en/kibana/master/observability.html',
+      }
+    : undefined;
 
   return (
     <Switch>
@@ -199,19 +197,9 @@ export const PageRouter: FC = () => {
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <SyntheticsCallout />
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
-
-              {/* Render the No Data config if there is no data */}
-              {noDataInfo && noDataPage}
-
-              {/* Apply the template component, only if `pageHeader` is defined in the route */}
-              {!noDataInfo && pageHeader && (
-                <StyledPageTemplateComponent pageHeader={pageHeader}>
-                  <RouteComponent />
-                </StyledPageTemplateComponent>
-              )}
-
-              {/* Otherwise the template should be in the route page itself  */}
-              {!noDataInfo && !pageHeader && <RouteComponent />}
+              <StyledPageTemplateComponent pageHeader={pageHeader} noDataConfig={noDataConfig}>
+                <RouteComponent />
+              </StyledPageTemplateComponent>
             </div>
           </Route>
         )

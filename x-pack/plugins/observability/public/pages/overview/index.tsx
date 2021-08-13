@@ -80,10 +80,10 @@ export function OverviewPage({ routeParams }: Props) {
         solution: 'Observability',
         actions: {
           beats: {
-            href: `app/home#/tutorial_directory/logging`,
+            href: core.http.basePath.prepend(`/app/home#/tutorial_directory/logging`),
           },
         },
-        docsLink: '#',
+        docsLink: 'https://www.elastic.co/guide/en/kibana/master/observability.html',
       };
 
   return (

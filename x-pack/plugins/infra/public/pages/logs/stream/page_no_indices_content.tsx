@@ -24,7 +24,7 @@ export const LogsPageNoIndicesContent = () => {
             ...tutorialLinkProps,
           },
         },
-        docsLink: '#',
+        docsLink: 'https://www.elastic.co/guide/en/kibana/master/observability.html',
       }}
     />
   );

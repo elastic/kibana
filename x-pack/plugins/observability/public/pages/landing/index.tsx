@@ -50,7 +50,7 @@ export function LandingPage() {
         href: core.http.basePath.prepend(`/app/home#/tutorial_directory/logging`),
       },
     },
-    docsLink: '#',
+    docsLink: 'https://www.elastic.co/guide/en/kibana/master/observability.html',
   };
 
   return (

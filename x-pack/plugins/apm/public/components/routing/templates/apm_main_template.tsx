@@ -34,7 +34,7 @@ export function ApmMainTemplate({
   children: React.ReactNode;
 } & KibanaPageTemplateProps) {
   const { http } = useKibana().services;
-  const basePath = http!.basePath.get();
+  const basePath = http?.basePath.get();
   const { services } = useKibana<ApmPluginStartDeps>();
 
   const ObservabilityPageTemplate =
@@ -51,7 +51,8 @@ export function ApmMainTemplate({
             href: basePath + `/app/home#/tutorial/apm`,
           },
         },
-        docsLink: '#',
+        docsLink:
+          'https://www.elastic.co/guide/en/kibana/master/observability.html',
       }
     : undefined;
 

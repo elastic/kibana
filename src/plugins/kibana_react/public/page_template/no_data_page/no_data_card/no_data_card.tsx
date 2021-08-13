@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @elastic/eui/href-or-on-click */
-
 import React, { FunctionComponent } from 'react';
 import { EuiButton, EuiCard, EuiCardProps } from '@elastic/eui';
 import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
@@ -24,9 +22,9 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
     typeof button !== 'string' ? (
       button
     ) : (
-      <EuiButton href={cardRest?.href} onClick={cardRest?.onClick} target={cardRest?.target} fill>
-        {button}
-      </EuiButton>
+      // The href and/or onClick are attached to the whole Card, so the button is just for show.
+      // Do not add the behavior here too or else it will propogate through
+      <EuiButton fill>{button}</EuiButton>
     );
 
   return (

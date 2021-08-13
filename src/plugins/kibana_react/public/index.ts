@@ -15,7 +15,6 @@ export * from './overlays';
 export * from './ui_settings';
 export * from './field_icon';
 export * from './field_button';
-export * from './no_data_page';
 export * from './table_list_view';
 export * from './toolbar_button';
 export * from './split_panel';

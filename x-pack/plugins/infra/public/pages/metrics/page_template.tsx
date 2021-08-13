@@ -39,7 +39,7 @@ export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> =
             ...tutorialLinkProps,
           },
         },
-        docsLink: '#',
+        docsLink: 'https://www.elastic.co/guide/en/kibana/master/observability.html',
       };
 
   return <PageTemplate noDataConfig={noDataConfig} {...pageTemplateProps} />;

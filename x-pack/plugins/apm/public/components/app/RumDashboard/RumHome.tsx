@@ -34,7 +34,7 @@ export function RumHome() {
   const {
     sharedData: { totalPageViews },
   } = useContext(CsmSharedContext);
-  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = totalPageViews
+  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = !totalPageViews
     ? {
         solution: 'Observability',
         pageTitle: 'Set up User Experience Tracking for Observability!',
@@ -43,7 +43,8 @@ export function RumHome() {
             href: core.http.basePath.prepend(`/app/home#/tutorial/apm`),
           },
         },
-        docsLink: '#',
+        docsLink:
+          'https://www.elastic.co/guide/en/kibana/master/observability.html',
       }
     : undefined;
 

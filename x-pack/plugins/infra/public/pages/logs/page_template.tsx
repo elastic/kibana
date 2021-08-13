@@ -39,7 +39,7 @@ export const LogsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = (
               href: basePath + `/app/home#/tutorial_directory/logging`,
             },
           },
-          docsLink: '#',
+          docsLink: 'https://www.elastic.co/guide/en/kibana/master/observability.html',
         };
 
   return <PageTemplate noDataConfig={noDataConfig} {...pageTemplateProps} />;
