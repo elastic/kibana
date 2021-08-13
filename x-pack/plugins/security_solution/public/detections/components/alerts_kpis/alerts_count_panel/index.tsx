@@ -14,11 +14,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import {
-  fetchQueryAlerts,
-  fetchQueryRuleRegistryAlerts,
-} from '../../../containers/detection_engine/alerts/api';
+import { fetchQueryRuleRegistryAlerts } from '../../../containers/detection_engine/alerts/api';
 
 import { getAlertsCountQuery } from './helpers';
 import * as i18n from './translations';

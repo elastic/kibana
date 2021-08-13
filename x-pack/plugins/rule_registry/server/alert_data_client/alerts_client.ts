@@ -52,12 +52,12 @@ const mapConsumerToIndexName: typeof mapConsumerToIndexNameTyped = mapConsumerTo
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> &
   { [K in Props]-?: NonNullable<Obj[K]> };
-type AlertType = NonNullableProps<
+type AlertType = { _index: string; _id: string } & NonNullableProps<
   ParsedTechnicalFields,
   typeof ALERT_RULE_TYPE_ID | typeof ALERT_RULE_CONSUMER | typeof SPACE_IDS
 >;
 
-const isValidAlert = (source?: estypes.SearchHit<any>): source is AlertType => {
+const isValidAlert = (source?: estypes.SearchHit<ParsedTechnicalFields>): source is AlertType => {
   return (
     (source?._source?.[ALERT_RULE_TYPE_ID] != null &&
       source?._source?.[ALERT_RULE_CONSUMER] != null &&

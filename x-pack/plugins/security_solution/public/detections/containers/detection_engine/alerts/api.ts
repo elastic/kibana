@@ -42,7 +42,7 @@ export const fetchQueryAlerts = async <Hit, Aggregations>({
   signal,
 }: QueryAlerts): Promise<AlertSearchResponse<Hit, Aggregations>> => {
   return KibanaServices.get().http.fetch<AlertSearchResponse<Hit, Aggregations>>(
-    ALERTS_AS_DATA_FIND_URL, // DETECTION_ENGINE_QUERY_SIGNALS_URL,
+    DETECTION_ENGINE_QUERY_SIGNALS_URL,
     {
       method: 'POST',
       body: JSON.stringify(query),
