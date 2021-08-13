@@ -33,16 +33,13 @@ import { useCorrelationsSearchStrategy } from './use_correlations_search_strateg
 import {
   BaseSearchStrategyResponse,
   ErrorCorrelationValue,
-  FailedTransactionCorrelationImpact,
 } from '../../../../common/search_strategies/error_correlations/types';
 import { ImpactBar } from '../../shared/ImpactBar';
-import {
-  APM_ERROR_CORRELATION_SEARCH_STRATEGY,
-  FAILED_TRANSACTION_CORRELATION_IMPACT,
-} from '../../../../common/search_strategies/error_correlations/constants';
+import { APM_ERROR_CORRELATION_SEARCH_STRATEGY } from '../../../../common/search_strategies/error_correlations/constants';
 import { isErrorMessage } from './utils/is_error_message';
 import { Summary } from '../../shared/Summary';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { getFailureCorrelationImpactLabel } from './utils/get_failure_correlation_impact_label';
 
 interface Props {
   onClose: () => void;
@@ -51,19 +48,6 @@ interface Props {
 interface ErrorCorrelationSearchStrategyResult
   extends BaseSearchStrategyResponse {
   values: ErrorCorrelationValue[];
-}
-
-export function getFailedTransactionsImpactLabel(
-  pValue: number
-): FailedTransactionCorrelationImpact | null {
-  if (pValue > 0 && pValue < 1e-6)
-    return FAILED_TRANSACTION_CORRELATION_IMPACT.HIGH;
-  if (pValue >= 1e-6 && pValue < 0.001)
-    return FAILED_TRANSACTION_CORRELATION_IMPACT.MEDIUM;
-  if (pValue >= 0.001 && pValue <= 0.02)
-    return FAILED_TRANSACTION_CORRELATION_IMPACT.LOW;
-
-  return null;
 }
 
 export function MlFailureCorrelations({ onClose }: Props) {
@@ -136,8 +120,8 @@ export function MlFailureCorrelations({ onClose }: Props) {
   > = useMemo(
     () => [
       {
-        width: '125px',
-        field: 'normalized_score',
+        width: '116px',
+        field: 'normalizedScore',
         name: (
           <>
             {i18n.translate(
@@ -158,7 +142,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
       },
       {
         width: '116px',
-        field: 'p_value',
+        field: 'pValue',
         name: (
           <>
             {i18n.translate(
@@ -169,7 +153,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
             )}
           </>
         ),
-        render: getFailedTransactionsImpactLabel,
+        render: getFailureCorrelationImpactLabel,
       },
       {
         field: 'fieldName',
@@ -259,9 +243,9 @@ export function MlFailureCorrelations({ onClose }: Props) {
                 {`${selectedTerm.fieldName}: ${selectedTerm.key}`}
               </EuiBadge>,
               `p-value: ${
-                selectedTerm.p_value !== null && selectedTerm.p_value < 0.00001
+                selectedTerm.pValue !== null && selectedTerm.pValue < 0.00001
                   ? '<.00001'
-                  : asPreciseDecimal(selectedTerm.p_value, 4)
+                  : asPreciseDecimal(selectedTerm.pValue, 4)
               }`,
             ]}
           />

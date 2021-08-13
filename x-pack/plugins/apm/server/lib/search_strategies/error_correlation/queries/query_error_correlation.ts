@@ -92,8 +92,8 @@ export const fetchFailedTransactionsCorrelationPValues = async (
       ...b,
       fieldName,
       fieldValue: b.key,
-      p_value: Math.exp(-score),
-      normalized_score: normalizedScore,
+      pValue: Math.exp(-score),
+      normalizedScore,
     };
   });
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { FAILED_TRANSACTION_CORRELATION_IMPACT } from './constants';
+import { FAILURE_CORRELATION_IMPACT_THRESHOLD } from './constants';
 
 export interface ErrorCorrelationValue {
   key: string;
   doc_count: number;
   bg_count: number;
   score: number;
-  p_value: number | null;
+  pValue: number | null;
   fieldName: string;
   fieldValue: string;
 }
@@ -30,4 +30,4 @@ export interface BaseSearchStrategyResponse {
   cancelFetch: () => void;
 }
 
-export type FailedTransactionCorrelationImpact = typeof FAILED_TRANSACTION_CORRELATION_IMPACT[keyof typeof FAILED_TRANSACTION_CORRELATION_IMPACT]; // typeof JOB_FIELD_TYPES[keyof typeof JOB_FIELD_TYPES];
+export type FailureCorrelationImpactThreshold = typeof FAILURE_CORRELATION_IMPACT_THRESHOLD[keyof typeof FAILURE_CORRELATION_IMPACT_THRESHOLD];

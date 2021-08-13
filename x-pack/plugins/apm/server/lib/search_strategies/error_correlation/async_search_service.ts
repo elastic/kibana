@@ -67,8 +67,8 @@ export const asyncErrorCorrelationSearchServiceProvider = (
                   result.value.filter(
                     (record) =>
                       record &&
-                      typeof record.p_value === 'number' &&
-                      record.p_value < ERROR_CORRELATION_THRESHOLD
+                      typeof record.pValue === 'number' &&
+                      record.pValue < ERROR_CORRELATION_THRESHOLD
                   )
                 );
               } else {
