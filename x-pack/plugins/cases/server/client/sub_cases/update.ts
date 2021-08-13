@@ -36,7 +36,7 @@ import {
   User,
   CaseAttributes,
 } from '../../../common';
-import { getCaseToUpdate } from '../utils';
+import { getCaseToUpdate, updateAlertsStatusCatchErrors } from '../utils';
 import { buildSubCaseUserActions } from '../../services/user_actions/helpers';
 import {
   createAlertUpdateRequest,
@@ -246,7 +246,12 @@ async function updateAlerts({
       []
     );
 
-    await casesClientInternal.alerts.updateStatus({ alerts: alertsToUpdate });
+    await updateAlertsStatusCatchErrors({
+      casesClientInternal,
+      alertsToUpdate,
+      logger,
+      errorMessage: 'for updated sub cases',
+    });
   } catch (error) {
     throw createCaseError({
       message: `Failed to update alert status while updating sub cases: ${JSON.stringify(

@@ -9,33 +9,25 @@ import { isEmpty } from 'lodash';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { ElasticsearchClient, Logger } from 'kibana/server';
+import { Logger } from 'kibana/server';
 import { MAX_ALERTS_PER_SUB_CASE } from '../../../common';
 import { AlertInfo, createCaseError } from '../../common';
 import { UpdateAlertRequest } from '../../client/alerts/types';
+import { AlertsClient } from '../../../../rule_registry/server';
+import { Alert } from './types';
 
 export type AlertServiceContract = PublicMethodsOf<AlertService>;
 
 interface UpdateAlertsStatusArgs {
   alerts: UpdateAlertRequest[];
-  scopedClusterClient: ElasticsearchClient;
+  alertsClient: PublicMethodsOf<AlertsClient>;
   logger: Logger;
 }
 
 interface GetAlertsArgs {
   alertsInfo: AlertInfo[];
-  scopedClusterClient: ElasticsearchClient;
+  alertsClient: PublicMethodsOf<AlertsClient>;
   logger: Logger;
-}
-
-interface Alert {
-  _id: string;
-  _index: string;
-  _source: Record<string, unknown>;
-}
-
-interface AlertsResponse {
-  docs: Alert[];
 }
 
 function isEmptyAlert(alert: AlertInfo): boolean {
@@ -45,20 +37,24 @@ function isEmptyAlert(alert: AlertInfo): boolean {
 export class AlertService {
   constructor() {}
 
-  public async updateAlertsStatus({ alerts, scopedClusterClient, logger }: UpdateAlertsStatusArgs) {
+  public async updateAlertsStatus({ alerts, alertsClient, logger }: UpdateAlertsStatusArgs) {
     try {
-      const body = alerts
-        .filter((alert) => !isEmptyAlert(alert))
-        .flatMap((alert) => [
-          { update: { _id: alert.id, _index: alert.index } },
-          { doc: { signal: { status: alert.status } } },
-        ]);
+      const alertsToUpdate = alerts.filter((alert) => !isEmptyAlert(alert));
 
-      if (body.length <= 0) {
+      if (alertsToUpdate.length <= 0) {
         return;
       }
 
-      return scopedClusterClient.bulk({ body });
+      return await Promise.all(
+        alertsToUpdate.map((alert) =>
+          alertsClient.update({
+            id: alert.id,
+            index: alert.index,
+            _version: undefined,
+            status: alert.status,
+          })
+        )
+      );
     } catch (error) {
       throw createCaseError({
         message: `Failed to update alert status ids: ${JSON.stringify(alerts)}: ${error}`,
@@ -69,24 +65,28 @@ export class AlertService {
   }
 
   public async getAlerts({
-    scopedClusterClient,
+    alertsClient,
     alertsInfo,
     logger,
-  }: GetAlertsArgs): Promise<AlertsResponse | undefined> {
+  }: GetAlertsArgs): Promise<Alert[] | undefined> {
     try {
-      const docs = alertsInfo
-        .filter((alert) => !isEmptyAlert(alert))
-        .slice(0, MAX_ALERTS_PER_SUB_CASE)
-        .map((alert) => ({ _id: alert.id, _index: alert.index }));
+      const alertsToGet = alertsInfo
+        .filter((alert) => !isEmpty(alert))
+        .slice(0, MAX_ALERTS_PER_SUB_CASE);
 
-      if (docs.length <= 0) {
+      if (alertsToGet.length <= 0) {
         return;
       }
 
-      const results = await scopedClusterClient.mget<Alert>({ body: { docs } });
+      const retrievedAlertsSource = await Promise.all(
+        alertsToGet.map((alert) => alertsClient.get({ id: alert.id, index: alert.index }))
+      );
 
-      // @ts-expect-error @elastic/elasticsearch _source is optional
-      return results.body;
+      return retrievedAlertsSource.map((alert, index) => ({
+        id: alertsToGet[index].id,
+        index: alertsToGet[index].index,
+        source: alert,
+      }));
     } catch (error) {
       throw createCaseError({
         message: `Failed to retrieve alerts ids: ${JSON.stringify(alertsInfo)}: ${error}`,

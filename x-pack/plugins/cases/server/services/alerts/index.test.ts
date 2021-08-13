@@ -9,17 +9,18 @@ import { KibanaRequest } from 'kibana/server';
 import { CaseStatuses } from '../../../common';
 import { AlertService, AlertServiceContract } from '.';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import { ruleRegistryMocks } from '../../../../rule_registry/server/mocks';
 
 describe('updateAlertsStatus', () => {
-  const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggingSystemMock.create().get('case');
+  const alertsClient = ruleRegistryMocks.createAlertsClientMock.create();
 
   describe('happy path', () => {
     let alertService: AlertServiceContract;
     const args = {
       alerts: [{ id: 'alert-id-1', index: '.siem-signals', status: CaseStatuses.closed }],
       request: {} as KibanaRequest,
-      scopedClusterClient: esClient,
+      alertsClient,
       logger,
     };
 
@@ -31,17 +32,10 @@ describe('updateAlertsStatus', () => {
     test('it update the status of the alert correctly', async () => {
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.bulk).toHaveBeenCalledWith({
-        body: [
-          { update: { _id: 'alert-id-1', _index: '.siem-signals' } },
-          {
-            doc: {
-              signal: {
-                status: CaseStatuses.closed,
-              },
-            },
-          },
-        ],
+      expect(alertsClient.update).toHaveBeenCalledWith({
+        id: 'alert-id-1',
+        index: '.siem-signals',
+        status: CaseStatuses.closed,
       });
     });
 
@@ -50,7 +44,7 @@ describe('updateAlertsStatus', () => {
         expect(
           await alertService.updateAlertsStatus({
             alerts: [{ id: 'alert-id-1', index: '', status: CaseStatuses.closed }],
-            scopedClusterClient: esClient,
+            alertsClient,
             logger,
           })
         ).toBeUndefined();

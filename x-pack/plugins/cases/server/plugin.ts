@@ -129,6 +129,7 @@ export class CasePlugin {
       },
       featuresPluginStart: plugins.features,
       actionsPluginStart: plugins.actions,
+      ruleRegistryPluginStart: plugins.ruleRegistry,
     });
 
     const client = core.elasticsearch.client;

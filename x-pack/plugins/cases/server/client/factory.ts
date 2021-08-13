@@ -25,6 +25,7 @@ import {
 } from '../services';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
+import { RuleRegistryPluginStartContract } from '../../../rule_registry/server';
 import { AuthorizationAuditLogger } from '../authorization';
 import { CasesClient, createCasesClient } from '.';
 
@@ -34,6 +35,7 @@ interface CasesClientFactoryArgs {
   getSpace: GetSpaceFn;
   featuresPluginStart: FeaturesPluginStart;
   actionsPluginStart: ActionsPluginStart;
+  ruleRegistryPluginStart: RuleRegistryPluginStartContract;
 }
 
 /**
@@ -110,6 +112,7 @@ export class CasesClientFactory {
       logger: this.logger,
       authorization: auth,
       actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
+      alertsClient: await this.options.ruleRegistryPluginStart.getRacClientWithRequest(request),
     });
   }
 }
