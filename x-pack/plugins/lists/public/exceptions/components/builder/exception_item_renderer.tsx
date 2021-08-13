@@ -15,6 +15,7 @@ import {
   BuilderEntry,
   ExceptionsBuilderExceptionItem,
   FormattedBuilderEntry,
+  OperatorOption,
   getFormattedBuilderEntries,
   getUpdatedEntriesOnDelete,
 } from '@kbn/securitysolution-list-utils';
@@ -60,6 +61,7 @@ interface BuilderExceptionListItemProps {
   setErrorsExist: (arg: boolean) => void;
   onlyShowListOperators?: boolean;
   isDisabled?: boolean;
+  operatorsList?: OperatorOption[];
 }
 
 export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionListItemProps>(
@@ -80,6 +82,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     setErrorsExist,
     onlyShowListOperators = false,
     isDisabled = false,
+    operatorsList,
   }) => {
     const handleEntryChange = useCallback(
       (entry: BuilderEntry, entryIndex: number): void => {
@@ -152,6 +155,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                           showLabel={
                             exceptionItemIndex === 0 && index === 0 && item.nested !== 'child'
                           }
+                          operatorsList={operatorsList}
                         />
                       </MyOverflowContainer>
                       <BuilderEntryDeleteButtonComponent

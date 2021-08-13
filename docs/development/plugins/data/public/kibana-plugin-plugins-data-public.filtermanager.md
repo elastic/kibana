@@ -24,7 +24,7 @@ export declare class FilterManager implements PersistableStateService
 |  [getAllMigrations](./kibana-plugin-plugins-data-public.filtermanager.getallmigrations.md) |  | <code>() =&gt; {}</code> |  |
 |  [inject](./kibana-plugin-plugins-data-public.filtermanager.inject.md) |  | <code>any</code> |  |
 |  [migrateToLatest](./kibana-plugin-plugins-data-public.filtermanager.migratetolatest.md) |  | <code>any</code> |  |
-|  [telemetry](./kibana-plugin-plugins-data-public.filtermanager.telemetry.md) |  | <code>(filters: import(&quot;@kbn/common-utils&quot;).SerializableRecord, collector: unknown) =&gt; {}</code> |  |
+|  [telemetry](./kibana-plugin-plugins-data-public.filtermanager.telemetry.md) |  | <code>(filters: import(&quot;@kbn/utility-types&quot;).SerializableRecord, collector: unknown) =&gt; {}</code> |  |
 
 ## Methods
 

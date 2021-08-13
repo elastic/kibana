@@ -16,9 +16,9 @@ import {
   getConditionalHeaders,
   getFullUrls,
   omitBlockedHeaders,
+  getCustomLogo,
 } from '../../common';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
-import { getCustomLogo } from '../lib/get_custom_logo';
 import { TaskPayloadPDF } from '../types';
 
 export const runTaskFnFactory: RunTaskFnFactory<

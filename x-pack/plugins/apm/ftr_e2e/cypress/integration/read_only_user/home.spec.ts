@@ -7,6 +7,7 @@
 
 import url from 'url';
 import archives_metadata from '../../fixtures/es_archiver/archives_metadata';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 const { start, end } = archives_metadata['apm_8.0.0'];
 
@@ -27,6 +28,12 @@ const apisToIntercept = [
 ];
 
 describe('Home page', () => {
+  before(() => {
+    esArchiverLoad('apm_8.0.0');
+  });
+  after(() => {
+    esArchiverUnload('apm_8.0.0');
+  });
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
@@ -39,10 +46,9 @@ describe('Home page', () => {
     );
   });
 
-  // Flaky
-  it.skip('includes services with only metric documents', () => {
+  it('includes services with only metric documents', () => {
     cy.visit(
-      `${serviceInventoryHref}&kuery=not%2520(processor.event%2520%253A%2522transaction%2522%2520)`
+      `${serviceInventoryHref}&kuery=not%20(processor.event%3A%22transaction%22)`
     );
     cy.contains('opbeans-python');
     cy.contains('opbeans-java');
@@ -50,11 +56,7 @@ describe('Home page', () => {
   });
 
   describe('navigations', () => {
-    /*
-     This test is flaky, there's a problem with EuiBasicTable, that it blocks any action while loading is enabled.
-     So it might fail to click on the service link.
-    */
-    it.skip('navigates to service overview page with transaction type', () => {
+    it('navigates to service overview page with transaction type', () => {
       apisToIntercept.map(({ endpoint, name }) => {
         cy.intercept('GET', endpoint).as(name);
       });
@@ -62,9 +64,6 @@ describe('Home page', () => {
       cy.visit(serviceInventoryHref);
 
       cy.contains('Services');
-
-      cy.wait('@servicesMainStatistics', { responseTimeout: 10000 });
-      cy.wait('@servicesDetailedStatistics', { responseTimeout: 10000 });
 
       cy.get('[data-test-subj="serviceLink_rum-js"]').then((element) => {
         element[0].click();
