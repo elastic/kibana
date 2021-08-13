@@ -99,10 +99,8 @@ const testRecords = [
   },
 ];
 
-// FLAKY: https://github.com/elastic/kibana/issues/108043
-it.skip('indexes documents using the bulk client helper', async () => {
+it('indexes documents using the bulk client helper', async () => {
   const client = new MockClient();
-  client.helpers.bulk.mockImplementation(async () => {});
 
   const progress = new Progress();
   const stats = createStats('test', log);
@@ -186,11 +184,11 @@ it.skip('indexes documents using the bulk client helper', async () => {
       "results": Array [
         Object {
           "type": "return",
-          "value": Promise {},
+          "value": undefined,
         },
         Object {
           "type": "return",
-          "value": Promise {},
+          "value": undefined,
         },
       ],
     }

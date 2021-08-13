@@ -102,7 +102,13 @@ export function PercentileAgg(props) {
               />
             }
           >
-            <Percentiles onChange={handleChange} name="percentiles" model={model} panel={panel} />
+            <Percentiles
+              onChange={handleChange}
+              name="percentiles"
+              model={model}
+              panel={panel}
+              seriesId={series.id}
+            />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>

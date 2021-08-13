@@ -37,19 +37,34 @@ export async function runTypeCheckCli() {
           : undefined;
 
       const projects = PROJECTS.filter((p) => {
-        return (
-          !p.disableTypeCheck &&
-          (!projectFilter || p.tsConfigPath === projectFilter) &&
-          !p.isCompositeProject()
-        );
+        return !p.disableTypeCheck && (!projectFilter || p.tsConfigPath === projectFilter);
       });
 
       if (!projects.length) {
-        throw createFailError(`Unable to find project at ${flags.project}`);
+        if (projectFilter) {
+          throw createFailError(`Unable to find project at ${flags.project}`);
+        } else {
+          throw createFailError(`Unable to find projects to type-check`);
+        }
+      }
+
+      const nonCompositeProjects = projects.filter((p) => !p.isCompositeProject());
+      if (!nonCompositeProjects.length) {
+        if (projectFilter) {
+          log.success(
+            `${flags.project} is a composite project so its types are validated by scripts/build_ts_refs`
+          );
+        } else {
+          log.success(
+            `All projects are composite so their types are validated by scripts/build_ts_refs`
+          );
+        }
+
+        return;
       }
 
       const concurrency = Math.min(4, Math.round((Os.cpus() || []).length / 2) || 1) || 1;
-      log.info('running type check in', projects.length, 'non-composite projects');
+      log.info('running type check in', nonCompositeProjects.length, 'non-composite projects');
 
       const tscArgs = [
         ...['--emitDeclarationOnly', 'false'],
@@ -61,7 +76,7 @@ export async function runTypeCheckCli() {
       ];
 
       const failureCount = await lastValueFrom(
-        Rx.from(projects).pipe(
+        Rx.from(nonCompositeProjects).pipe(
           mergeMap(async (p) => {
             const relativePath = Path.relative(process.cwd(), p.tsConfigPath);
 
