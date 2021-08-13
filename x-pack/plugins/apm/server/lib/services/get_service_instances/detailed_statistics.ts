@@ -16,8 +16,8 @@ import { getServiceInstancesSystemMetricStatistics } from './get_service_instanc
 import { getServiceInstancesTransactionStatistics } from './get_service_instances_transaction_statistics';
 
 interface ServiceInstanceDetailedStatisticsParams {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   latencyAggregationType: LatencyAggregationType;
   setup: Setup;
   serviceName: string;
@@ -75,8 +75,8 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
   comparisonStart,
   comparisonEnd,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   latencyAggregationType: LatencyAggregationType;
   setup: Setup & SetupTimeRange;
   serviceName: string;

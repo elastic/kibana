@@ -30,7 +30,7 @@ export const CrawlerLanding: React.FC = () => (
         <EuiTitle size="s">
           <h2>
             {i18n.translate('xpack.enterpriseSearch.appSearch.engine.crawler.landingPage.title', {
-              defaultMessage: 'Setup the Web Crawler',
+              defaultMessage: 'Set up the Web Crawler',
             })}
           </h2>
         </EuiTitle>
