@@ -27,7 +27,7 @@ export const EnrichmentRangePicker: React.FC<RangePickerProps> = ({ setRange, lo
   const [endDate, setEndDate] = useState<moment.Moment | null>(moment());
 
   const onButtonClick = useCallback(() => {
-    if (startDate && endDate) {
+    if (startDate && endDate && startDate.isBefore(endDate)) {
       setRange({
         from: startDate.toISOString(),
         to: endDate.toISOString(),
@@ -75,6 +75,7 @@ export const EnrichmentRangePicker: React.FC<RangePickerProps> = ({ setRange, lo
           onClick={onButtonClick}
           isLoading={loading}
           data-test-subj={'enrichment-button'}
+          isDisabled={!isValid}
         >
           {i18n.REFRESH}
         </EuiButton>
