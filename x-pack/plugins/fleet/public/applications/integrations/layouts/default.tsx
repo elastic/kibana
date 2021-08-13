@@ -61,8 +61,8 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
           <EuiText>
             <h1>
               <FormattedMessage
-                id="xpack.fleet.integrationsAppTitle"
-                defaultMessage="Integrations"
+                id="xpack.fleet.integrationsHeaderTitle"
+                defaultMessage="Elastic Agent Integrations"
               />
             </h1>
           </EuiText>
@@ -74,7 +74,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
               <p>
                 <FormattedMessage
                   id="xpack.fleet.epm.pageSubtitle"
-                  defaultMessage="Collect data from popular apps and services."
+                  defaultMessage="Collect data from popular apps and services using Elastic Agent"
                 />
               </p>
             </EuiText>

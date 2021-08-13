@@ -30,8 +30,8 @@ export async function getLatencyChartsForBackend({
   setup: Setup;
   start: number;
   end: number;
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   offset?: string;
 }) {
   const { apmEventClient } = setup;
