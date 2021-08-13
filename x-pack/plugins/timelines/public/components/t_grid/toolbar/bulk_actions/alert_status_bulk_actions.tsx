@@ -87,7 +87,7 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
             text: i18n.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
           });
         } else {
-          let title: string;
+          let title;
           switch (newStatus) {
             case 'closed':
               title = i18n.CLOSED_ALERT_SUCCESS_TOAST(updated);
@@ -98,7 +98,9 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
             case 'in-progress':
               title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(updated);
           }
-          addSuccess({ title });
+          if (title) {
+            addSuccess({ title });
+          }
         }
         refetch();
         if (onActionSuccess) {
@@ -110,7 +112,7 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
 
     const onAlertStatusUpdateFailure = useCallback(
       (newStatus: AlertStatus, error: Error) => {
-        let title: string;
+        let title;
         switch (newStatus) {
           case 'closed':
             title = i18n.CLOSED_ALERT_FAILED_TOAST;
@@ -121,7 +123,9 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
           case 'in-progress':
             title = i18n.IN_PROGRESS_ALERT_FAILED_TOAST;
         }
-        addError(error.message, { title });
+        if (title) {
+          addError(error.message, { title });
+        }
         refetch();
         if (onActionFailure) {
           onActionFailure(newStatus, error.message);
