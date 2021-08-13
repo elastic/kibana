@@ -152,6 +152,6 @@ export const getPackagePolicyDeleteCallback = (
         }
       }
     }
-    Promise.all(promises);
+    await Promise.all(promises);
   };
 };

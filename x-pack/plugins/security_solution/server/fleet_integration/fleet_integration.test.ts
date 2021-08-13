@@ -285,7 +285,7 @@ describe('ingest_integration tests ', () => {
     });
   });
 
-  describe.skip('package policy delete callback with trusted apps by policy enabled', () => {
+  describe('package policy delete callback with trusted apps by policy enabled', () => {
     const invokeDeleteCallback = async (
       experimentalFeatures?: ExperimentalFeatures
     ): Promise<void> => {
@@ -293,27 +293,33 @@ describe('ingest_integration tests ', () => {
       await callback(deletePackagePolicyMock(), ctx, req);
     };
 
-    beforeEach(() => {});
+    const removedPolicies = deletePackagePolicyMock();
 
-    it('removes policy from trusted app', async () => {
-      const removedPolicies = deletePackagePolicyMock();
-      const trustedAppsList = await exceptionListClient.createTrustedAppsList();
+    const policyId = removedPolicies[0].id;
+    const fakeTA = {
+      listId: 'fake',
+      comments: [],
+      entries: [],
+      itemId: '1',
+      namespaceType: 'agnostic',
+      name: 'TA with policy assigned',
+      osTypes: [],
+      description: 'TA with policy assigned ',
+      meta: undefined,
+      tags: [`policy:${policyId}`],
+      type: 'simple',
+    };
 
-      const policyId = removedPolicies[0].id;
-      const trustedAppItem = await exceptionListClient.createExceptionListItem({
-        listId: trustedAppsList!.list_id,
-        comments: [],
-        entries: [],
-        itemId: '1',
-        namespaceType: 'agnostic',
-        name: 'TA with policy assigned',
-        osTypes: [],
-        description: 'TA with policy assigned ',
-        meta: undefined,
-        tags: [`policy:${policyId}`],
-        type: 'simple',
-      });
+    beforeEach(() => {
+      exceptionListClient.findExceptionListItem = jest
+        .fn()
+        .mockResolvedValueOnce({ data: [fakeTA], total: 1 });
+      exceptionListClient.updateExceptionListItem = jest
+        .fn()
+        .mockResolvedValueOnce({ ...fakeTA, tags: [] });
+    });
 
+    it('removes policy from trusted app FF enabled', async () => {
       await invokeDeleteCallback({
         metricsEntitiesEnabled: false,
         ruleRegistryEnabled: false,
@@ -322,13 +328,35 @@ describe('ingest_integration tests ', () => {
         excludePoliciesInFilterEnabled: false,
         uebaEnabled: false,
       });
-      // TODO: check that TA has been updated
-      const updatedTrustedAppItem = await exceptionListClient.getExceptionListItem({
-        itemId: trustedAppItem.item_id,
-        id: trustedAppItem.id,
-        namespaceType: trustedAppItem.namespace_type,
+
+      expect(exceptionListClient.findExceptionListItem).toHaveBeenCalledWith({
+        filter: `exception-list-agnostic.attributes.tags:"policy:${policyId}"`,
+        listId: 'endpoint_trusted_apps',
+        namespaceType: 'agnostic',
+        page: 1,
+        perPage: 50,
+        sortField: undefined,
+        sortOrder: undefined,
       });
-      expect(updatedTrustedAppItem!.tags).toBe([]);
+
+      expect(exceptionListClient.updateExceptionListItem).toHaveBeenCalledWith({
+        ...fakeTA,
+        tags: [],
+      });
+    });
+
+    it("doesn't remove policy from trusted app FF disabled", async () => {
+      await invokeDeleteCallback({
+        metricsEntitiesEnabled: false,
+        ruleRegistryEnabled: false,
+        tGridEnabled: false,
+        trustedAppsByPolicyEnabled: false,
+        excludePoliciesInFilterEnabled: false,
+        uebaEnabled: false,
+      });
+
+      expect(exceptionListClient.findExceptionListItem).toHaveBeenCalledTimes(0);
+      expect(exceptionListClient.updateExceptionListItem).toHaveBeenCalledTimes(0);
     });
   });
 });
