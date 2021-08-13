@@ -49,6 +49,7 @@ import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { createQueryAlertType } from './lib/detection_engine/rule_types';
+import { createMlAlertType } from './lib/detection_engine/rule_types/ml/create_ml_alert_type';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
@@ -67,6 +68,7 @@ import {
   QUERY_ALERT_TYPE_ID,
   DEFAULT_SPACE_ID,
   INDICATOR_ALERT_TYPE_ID,
+  ML_ALERT_TYPE_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
@@ -131,6 +133,7 @@ export interface PluginSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
+
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
   private readonly config: ConfigType;
@@ -277,6 +280,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         lists: plugins.lists,
         logger: this.logger,
         mergeStrategy: this.config.alertMergeStrategy,
+        ml: plugins.ml,
         ruleDataClient,
         ruleDataService,
         version: this.context.env.packageInfo.version,
@@ -284,6 +288,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       this.setupPlugins.alerting.registerType(createQueryAlertType(createRuleOptions));
       this.setupPlugins.alerting.registerType(createIndicatorMatchAlertType(createRuleOptions));
+      this.setupPlugins.alerting.registerType(createMlAlertType(createRuleOptions));
     }
 
     // TODO We need to get the endpoint routes inside of initRoutes
@@ -303,7 +308,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerTrustedAppsRoutes(router, endpointContext);
     registerActionRoutes(router, endpointContext);
 
-    const racRuleTypes = [QUERY_ALERT_TYPE_ID, INDICATOR_ALERT_TYPE_ID];
+    const racRuleTypes = [QUERY_ALERT_TYPE_ID, INDICATOR_ALERT_TYPE_ID, ML_ALERT_TYPE_ID];
     const ruleTypes = [
       SIGNALS_ID,
       NOTIFICATIONS_ID,
