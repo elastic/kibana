@@ -38,6 +38,29 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+// This mocks JsonEditor's consumption of EuiCodeEditor.
+jest.mock(
+  '../../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor',
+  () => {
+    const original = jest.requireActual(
+      '../../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor'
+    );
+
+    return {
+      ...original,
+      // Mocking EuiCodeEditor, which uses React Ace under the hood
+      EuiCodeEditor: (props: any) => (
+        <input
+          data-test-subj="mockCodeEditor"
+          onChange={(syntheticEvent: any) => {
+            props.onChange(syntheticEvent.jsonString);
+          }}
+        />
+      ),
+    };
+  }
+);
+
 describe('<ComponentTemplateCreate />', () => {
   let testBed: ComponentTemplateCreateTestBed;
 

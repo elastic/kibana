@@ -8,22 +8,27 @@
 import React from 'react';
 import { ModalProvider, OnDoneLoadJsonHandler } from './modal_provider';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+jest.mock(
+  '../../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor',
+  () => {
+    const original = jest.requireActual(
+      '../../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor'
+    );
 
-  return {
-    ...original,
-    // Mocking EuiCodeEditor, which uses React Ace under the hood
-    EuiCodeEditor: (props: any) => (
-      <input
-        data-test-subj="mockCodeEditor"
-        onChange={(syntheticEvent: any) => {
-          props.onChange(syntheticEvent.jsonString);
-        }}
-      />
-    ),
-  };
-});
+    return {
+      ...original,
+      // Mocking EuiCodeEditor, which uses React Ace under the hood
+      EuiCodeEditor: (props: any) => (
+        <input
+          data-test-subj="mockCodeEditor"
+          onChange={(syntheticEvent: any) => {
+            props.onChange(syntheticEvent.jsonString);
+          }}
+        />
+      ),
+    };
+  }
+);
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');

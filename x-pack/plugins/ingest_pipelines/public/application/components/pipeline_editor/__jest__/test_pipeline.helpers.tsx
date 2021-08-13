@@ -24,6 +24,7 @@ stubWebWorker();
 
 jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => {
   const original = jest.requireActual('../../../../../../../../src/plugins/kibana_react/public');
+
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -39,8 +40,11 @@ jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => {
   };
 });
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+jest.mock('../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor', () => {
+  const original = jest.requireActual(
+    '../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor'
+  );
+
   return {
     ...original,
     // Mocking EuiCodeEditor, which uses React Ace under the hood
