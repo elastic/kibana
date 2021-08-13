@@ -8,19 +8,15 @@
 
 import { OpsMetrics } from '..';
 import { getEcsOpsMetricsLog } from './get_ops_metrics_log';
+import { collectorMock } from '../collectors/mocks';
 
 function createBaseOpsMetrics(): OpsMetrics {
+  const mockProcess = collectorMock.createOpsProcessMetrics();
+
   return {
     collected_at: new Date('2020-01-01 01:00:00'),
-    process: {
-      memory: {
-        heap: { total_in_bytes: 1, used_in_bytes: 1, size_limit: 1 },
-        resident_set_size_in_bytes: 1,
-      },
-      event_loop_delay: 1,
-      pid: 1,
-      uptime_in_millis: 1,
-    },
+    process: mockProcess,
+    processes: [mockProcess],
     os: {
       platform: 'darwin' as const,
       platformRelease: 'test',

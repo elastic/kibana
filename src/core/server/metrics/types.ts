@@ -7,7 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics } from './collectors';
+import type { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics } from './collectors';
 
 /**
  * APIs to retrieves metrics gathered and exposed by the core platform.

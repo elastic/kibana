@@ -13,7 +13,7 @@ import {
 } from './saved_objects';
 import { savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
 import type { SavedObjectsFindResponse } from '../../../../../core/server/';
-import { mocked } from './event_loop_delays.mocks';
+import { mocked } from '../../../../../core/server/metrics/event_loop_delays/event_loop_delays_monitor.mocks';
 
 describe('serializeSavedObjectId', () => {
   it('returns serialized id', () => {

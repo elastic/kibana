@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
-import type { IntervalHistogram } from './event_loop_delays';
+import type { IntervalHistogram } from 'kibana/server';
 
 export const mockMonitorEnable = jest.fn();
 export const mockMonitorPercentile = jest.fn();

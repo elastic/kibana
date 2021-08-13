@@ -23,7 +23,7 @@ export interface OpsProcessMetrics {
   /** pid of the kibana process */
   pid: number;
   /** name of process (example: 'coordinator' | 'server_worker' | 'task_worker' | 'reporting_worker') */
-  name: string;
+  name: 'coordinator' | 'server_worker';
   /** process memory usage */
   memory: {
     /** heap memory usage */

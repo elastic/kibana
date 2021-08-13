@@ -12,10 +12,10 @@ import {
   monitorEventLoopDelay,
   mockMonitorReset,
   mockMonitorDisable,
-} from './event_loop_delays.mocks';
-import { EventLoopDelaysCollector } from './event_loop_delays';
+} from './event_loop_delays_monitor.mocks';
+import { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
 
-describe('EventLoopDelaysCollector', () => {
+describe('EventLoopDelaysMonitor', () => {
   jest.useFakeTimers('modern');
   const mockNow = jest.getRealSystemTime();
   jest.setSystemTime(mockNow);
@@ -24,14 +24,14 @@ describe('EventLoopDelaysCollector', () => {
   afterAll(() => jest.useRealTimers());
 
   test('#constructor enables monitoring', () => {
-    new EventLoopDelaysCollector();
+    new EventLoopDelaysMonitor();
     expect(monitorEventLoopDelay).toBeCalledWith({ resolution: 10 });
     expect(mockMonitorEnable).toBeCalledTimes(1);
   });
 
   test('#collect returns event loop delays histogram', () => {
-    const eventLoopDelaysCollector = new EventLoopDelaysCollector();
-    const histogramData = eventLoopDelaysCollector.collect();
+    const eventLoopDelaysMoEventLoopDelaysMonitor = new EventLoopDelaysMonitor();
+    const histogramData = eventLoopDelaysMoEventLoopDelaysMonitor.collect();
     expect(mockMonitorPercentile).toHaveBeenNthCalledWith(1, 50);
     expect(mockMonitorPercentile).toHaveBeenNthCalledWith(2, 75);
     expect(mockMonitorPercentile).toHaveBeenNthCalledWith(3, 95);
@@ -51,13 +51,13 @@ describe('EventLoopDelaysCollector', () => {
     `);
   });
   test('#reset resets histogram data', () => {
-    const eventLoopDelaysCollector = new EventLoopDelaysCollector();
-    eventLoopDelaysCollector.reset();
+    const eventLoopDelaysMoEventLoopDelaysMonitor = new EventLoopDelaysMonitor();
+    eventLoopDelaysMoEventLoopDelaysMonitor.reset();
     expect(mockMonitorReset).toBeCalledTimes(1);
   });
   test('#stop disables monitoring event loop delays', () => {
-    const eventLoopDelaysCollector = new EventLoopDelaysCollector();
-    eventLoopDelaysCollector.stop();
+    const eventLoopDelaysMoEventLoopDelaysMonitor = new EventLoopDelaysMonitor();
+    eventLoopDelaysMoEventLoopDelaysMonitor.stop();
     expect(mockMonitorDisable).toBeCalledTimes(1);
   });
 });

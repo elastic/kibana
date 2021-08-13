@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
+import { estypes } from '@elastic/elasticsearch';
 import { nodeTypes } from '../node_types/index';
 import { KQLSyntaxError } from '../kuery_syntax_error';
-import { KueryNode, DslQuery, KueryParseOptions } from '../types';
+import { KueryNode, KueryParseOptions } from '../types';
 
 import { parse as parseKuery } from '../grammar';
 import { IndexPatternBase } from '../..';
 
 const fromExpression = (
-  expression: string | DslQuery,
+  expression: string | estypes.QueryDslQueryContainer,
   parseOptions: Partial<KueryParseOptions> = {},
   parse: Function = parseKuery
 ): KueryNode => {
@@ -27,7 +28,7 @@ const fromExpression = (
 };
 
 export const fromLiteralExpression = (
-  expression: string | DslQuery,
+  expression: string | estypes.QueryDslQueryContainer,
   parseOptions: Partial<KueryParseOptions> = {}
 ): KueryNode => {
   return fromExpression(
@@ -41,7 +42,7 @@ export const fromLiteralExpression = (
 };
 
 export const fromKueryExpression = (
-  expression: string | DslQuery,
+  expression: string | estypes.QueryDslQueryContainer,
   parseOptions: Partial<KueryParseOptions> = {}
 ): KueryNode => {
   try {

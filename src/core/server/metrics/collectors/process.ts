@@ -10,11 +10,9 @@ import v8 from 'v8';
 import { OpsProcessMetrics, MetricsCollector } from './types';
 import { EventLoopDelaysMonitor } from '../event_loop_delays';
 
-export const MAIN_THREAD_PROCESS_NAME = 'main_thread';
-
 export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetrics[]> {
   static getMainThreadMetrics(processes: OpsProcessMetrics[]): undefined | OpsProcessMetrics {
-    return processes.find(({ name }) => name === MAIN_THREAD_PROCESS_NAME);
+    return processes.find(({ name }) => name === 'server_worker');
   }
 
   private readonly eventLoopDelayMonitor = new EventLoopDelaysMonitor();
@@ -25,7 +23,7 @@ export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetri
     const memoryUsage = process.memoryUsage();
 
     return {
-      name: MAIN_THREAD_PROCESS_NAME,
+      name: 'server_worker' as const,
       memory: {
         heap: {
           total_in_bytes: memoryUsage.heapTotal,

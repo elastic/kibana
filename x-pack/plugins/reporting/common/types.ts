@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
+
 export interface PageSizeParams {
   pageMarginTop: number;
   pageMarginBottom: number;
@@ -64,6 +66,11 @@ export interface ReportSource {
   created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
   payload: {
     headers: string; // encrypted headers
+    /**
+     * PDF V2 reports will contain locators parameters (see {@link LocatorPublic}) that will be converted to {@link KibanaLocation}s when
+     * generating a report
+     */
+    locatorParams?: LocatorParams[];
     isDeprecated?: boolean; // set to true when the export type is being phased out
   } & BaseParams;
   meta: { objectType: string; layout?: string }; // for telemetry
@@ -167,8 +174,21 @@ export type DownloadReportFn = (jobId: JobId) => DownloadLink;
 type ManagementLink = string;
 export type ManagementLinkFn = () => ManagementLink;
 
+export interface LocatorParams<
+  P extends SerializableRecord = SerializableRecord & { forceNow?: string }
+> {
+  id: string;
+  version: string;
+  params: P;
+}
+
 export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
 
 export interface IlmPolicyStatusResponse {
   status: IlmPolicyMigrationStatus;
 }
+
+type Url = string;
+type UrlLocatorTuple = [url: Url, locatorParams: LocatorParams];
+
+export type UrlOrUrlLocatorTuple = Url | UrlLocatorTuple;

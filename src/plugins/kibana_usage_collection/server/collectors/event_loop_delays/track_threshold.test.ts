@@ -11,7 +11,7 @@ import {
   mockMonitorPercentile,
   monitorEventLoopDelay,
   mockMonitorReset,
-} from './event_loop_delays.mocks';
+} from '../../../../../core/server/metrics/event_loop_delays/event_loop_delays_monitor.mocks';
 import { startTrackingEventLoopDelaysThreshold } from './track_threshold';
 import { loggingSystemMock } from '../../../../../core/server/mocks';
 import { usageCountersServiceMock } from '../../../../usage_collection/server/usage_counters/usage_counters_service.mock';

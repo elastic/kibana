@@ -20,28 +20,31 @@ describe('ProcessMetricsCollector', () => {
     jest.restoreAllMocks();
   });
 
-  it('collects pid from the process', async () => {
-    const metrics = await collector.collect();
+  it('collects pid from the process', () => {
+    const metrics = collector.collect();
 
-    expect(metrics.pid).toEqual(process.pid);
+    expect(metrics).toHaveLength(1);
+    expect(metrics[0].pid).toEqual(process.pid);
   });
 
-  it('collects event loop delay', async () => {
-    const metrics = await collector.collect();
+  it('collects event loop delay', () => {
+    const metrics = collector.collect();
 
-    expect(metrics.event_loop_delay).toBeGreaterThan(0);
+    expect(metrics).toHaveLength(1);
+    expect(metrics[0].event_loop_delay).toBeGreaterThan(0);
   });
 
-  it('collects uptime info from the process', async () => {
+  it('collects uptime info from the process', () => {
     const uptime = 58986;
     jest.spyOn(process, 'uptime').mockImplementation(() => uptime);
 
-    const metrics = await collector.collect();
+    const metrics = collector.collect();
 
-    expect(metrics.uptime_in_millis).toEqual(uptime * 1000);
+    expect(metrics).toHaveLength(1);
+    expect(metrics[0].uptime_in_millis).toEqual(uptime * 1000);
   });
 
-  it('collects memory info from the process', async () => {
+  it('collects memory info from the process', () => {
     const heapTotal = 58986;
     const heapUsed = 4688;
     const heapSizeLimit = 5788;
@@ -61,11 +64,12 @@ describe('ProcessMetricsCollector', () => {
         } as HeapInfo)
     );
 
-    const metrics = await collector.collect();
+    const metrics = collector.collect();
 
-    expect(metrics.memory.heap.total_in_bytes).toEqual(heapTotal);
-    expect(metrics.memory.heap.used_in_bytes).toEqual(heapUsed);
-    expect(metrics.memory.heap.size_limit).toEqual(heapSizeLimit);
-    expect(metrics.memory.resident_set_size_in_bytes).toEqual(rss);
+    expect(metrics).toHaveLength(1);
+    expect(metrics[0].memory.heap.total_in_bytes).toEqual(heapTotal);
+    expect(metrics[0].memory.heap.used_in_bytes).toEqual(heapUsed);
+    expect(metrics[0].memory.heap.size_limit).toEqual(heapSizeLimit);
+    expect(metrics[0].memory.resident_set_size_in_bytes).toEqual(rss);
   });
 });

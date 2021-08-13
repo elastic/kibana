@@ -13,7 +13,7 @@ import {
   monitorEventLoopDelay,
   mockMonitorReset,
   mockMonitorDisable,
-} from './event_loop_delays.mocks';
+} from '../../../../../core/server/metrics/event_loop_delays/event_loop_delays_monitor.mocks';
 import { savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
 import { startTrackingEventLoopDelaysUsage } from './track_delays';
 

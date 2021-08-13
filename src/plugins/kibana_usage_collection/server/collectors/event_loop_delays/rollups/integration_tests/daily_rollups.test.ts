@@ -14,7 +14,7 @@ import {
   createRootWithCorePlugins,
 } from '../../../../../../../core/test_helpers/kbn_server';
 import { rollDailyData } from '../daily';
-import { mocked } from '../../event_loop_delays.mocks';
+import { mocked } from '../../../../../../../core/server/metrics/event_loop_delays/event_loop_delays_monitor.mocks';
 
 import {
   SAVED_OBJECTS_DAILY_TYPE,
