@@ -41,7 +41,6 @@ export const injectExceptionsReferences = ({
     const savedObjectReference = getSavedObjectReferenceForExceptionsList({
       logger,
       index,
-      namespaceType: exceptionItem.namespace_type,
       savedObjectReferences,
     });
     if (savedObjectReference != null) {

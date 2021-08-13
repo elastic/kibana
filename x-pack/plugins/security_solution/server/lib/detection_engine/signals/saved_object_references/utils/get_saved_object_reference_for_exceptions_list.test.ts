@@ -33,7 +33,6 @@ describe('get_saved_object_reference_for_exceptions_list', () => {
     expect(
       getSavedObjectReferenceForExceptionsList({
         logger,
-        namespaceType: 'single',
         index: 0,
         savedObjectReferences: mockSavedObjectReferences(),
       })
@@ -52,7 +51,6 @@ describe('get_saved_object_reference_for_exceptions_list', () => {
     expect(
       getSavedObjectReferenceForExceptionsList({
         logger,
-        namespaceType: 'single',
         index: 1,
         savedObjectReferences,
       })
@@ -63,7 +61,6 @@ describe('get_saved_object_reference_for_exceptions_list', () => {
     expect(
       getSavedObjectReferenceForExceptionsList({
         logger,
-        namespaceType: 'single',
         index: 100,
         savedObjectReferences: mockSavedObjectReferences(),
       })
@@ -74,7 +71,6 @@ describe('get_saved_object_reference_for_exceptions_list', () => {
     expect(
       getSavedObjectReferenceForExceptionsList({
         logger,
-        namespaceType: 'single',
         index: 0,
         savedObjectReferences: [{ ...mockSavedObjectReferences()[0], name: 'other-name_0' }],
       })
@@ -85,7 +81,6 @@ describe('get_saved_object_reference_for_exceptions_list', () => {
     expect(
       getSavedObjectReferenceForExceptionsList({
         logger,
-        namespaceType: 'single',
         index: 0,
         savedObjectReferences: [
           { ...mockSavedObjectReferences()[0], name: 'other-name_0' },
@@ -103,7 +98,6 @@ describe('get_saved_object_reference_for_exceptions_list', () => {
     expect(
       getSavedObjectReferenceForExceptionsList({
         logger,
-        namespaceType: 'single',
         index: 1,
         savedObjectReferences: [
           { ...mockSavedObjectReferences()[0], name: 'other-name_0' },
@@ -118,7 +112,6 @@ describe('get_saved_object_reference_for_exceptions_list', () => {
     expect(() =>
       getSavedObjectReferenceForExceptionsList({
         logger,
-        namespaceType: 'single',
         index: -1,
         savedObjectReferences: mockSavedObjectReferences(),
       })
@@ -129,7 +122,6 @@ describe('get_saved_object_reference_for_exceptions_list', () => {
     expect(() =>
       getSavedObjectReferenceForExceptionsList({
         logger,
-        namespaceType: 'single',
         index: NaN,
         savedObjectReferences: mockSavedObjectReferences(),
       })
