@@ -5,10 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { useKibana } from '../../../lib/kibana';
 import * as i18n from './translations';
 import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
 
@@ -17,32 +15,13 @@ const InlineBlock = styled.div`
   line-height: 1.7em;
 `;
 
-const NoIntelligenceCTA: React.FC<{}> = () => {
-  const threatIntelDocsUrl = `${
-    useKibana().services.docLinks.links.filebeat.base
-  }/filebeat-module-threatintel.html`;
-  return (
-    <>
-      <span>{i18n.IF_CTI_NOT_ENABLED}</span>
-      <span>
-        <EuiLink href={threatIntelDocsUrl} target="_blank">
-          {i18n.CHECK_DOCS}
-        </EuiLink>
-      </span>
-      {'.'}
-    </>
-  );
-};
-
 export const EnrichmentNoData: React.FC<{ type?: ENRICHMENT_TYPES }> = ({ type }) => {
   if (!type) return null;
   return (
     <InlineBlock data-test-subj="no-enrichments-found">
-      {type === ENRICHMENT_TYPES.IndicatorMatchRule ? (
-        <NoIntelligenceCTA />
-      ) : (
-        i18n.NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION
-      )}
+      {type === ENRICHMENT_TYPES.IndicatorMatchRule
+        ? i18n.NO_ENRICHMENTS_FOUND_DESCRIPTION
+        : i18n.NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION}
     </InlineBlock>
   );
 };

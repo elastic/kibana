@@ -74,11 +74,11 @@ export const NO_ENRICHMENTS_FOUND_TITLE = i18n.translate(
   }
 );
 
-export const IF_CTI_NOT_ENABLED = i18n.translate(
-  'xpack.securitySolution.alertDetails.ifCtiNotEnabled',
+export const NO_ENRICHMENTS_FOUND_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.alertDetails.noEnrichmentsFoundDescription',
   {
     defaultMessage:
-      "We haven’t found field value matched a threat intelligence indicator with a rule you created. If you haven't enabled any threat intelligence sources and want to learn more about this capability, ",
+      'We did not find threat intelligence that matches any of the indicator match rules, or any enrichment for this alert.',
   }
 );
 
