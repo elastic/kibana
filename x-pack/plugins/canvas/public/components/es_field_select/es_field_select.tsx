@@ -5,20 +5,32 @@
  * 2.0.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { FocusEventHandler } from 'react';
 import { EuiComboBox } from '@elastic/eui';
-import { get } from 'lodash';
 
-export const ESFieldSelect = ({ value, fields = [], onChange, onFocus, onBlur }) => {
+export interface ESFieldSelectProps {
+  index: string;
+  value: string;
+  onChange: (field: string | null) => void;
+  onBlur: FocusEventHandler<HTMLDivElement> | undefined;
+  onFocus: FocusEventHandler<HTMLDivElement> | undefined;
+  fields: string[];
+}
+
+export const ESFieldSelect: React.FunctionComponent<ESFieldSelectProps> = ({
+  value,
+  fields = [],
+  onChange,
+  onFocus,
+  onBlur,
+}) => {
   const selectedOption = value ? [{ label: value }] : [];
   const options = fields.map((field) => ({ label: field }));
-
   return (
     <EuiComboBox
       selectedOptions={selectedOption}
       options={options}
-      onChange={([field]) => onChange(get(field, 'label', null))}
+      onChange={([field]) => onChange(field?.label ?? null)}
       onSearchChange={(searchValue) => {
         // resets input when user starts typing
         if (searchValue) {
@@ -32,16 +44,4 @@ export const ESFieldSelect = ({ value, fields = [], onChange, onFocus, onBlur })
       compressed
     />
   );
-};
-
-ESFieldSelect.propTypes = {
-  onChange: PropTypes.func,
-  onFocus: PropTypes.func,
-  onBlur: PropTypes.func,
-  value: PropTypes.string,
-  fields: PropTypes.array,
-};
-
-ESFieldSelect.defaultProps = {
-  fields: [],
 };
