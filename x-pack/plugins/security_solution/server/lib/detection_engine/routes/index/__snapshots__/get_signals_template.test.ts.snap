@@ -1583,10 +1583,6 @@ Object {
           "path": "signal.ancestors.type",
           "type": "alias",
         },
-        "kibana.alert.consumers": Object {
-          "type": "constant_keyword",
-          "value": "siem",
-        },
         "kibana.alert.depth": Object {
           "path": "signal.depth",
           "type": "alias",
@@ -1643,6 +1639,10 @@ Object {
           "path": "signal.original_event.provider",
           "type": "alias",
         },
+        "kibana.alert.original_event.reason": Object {
+          "path": "signal.original_event.reason",
+          "type": "alias",
+        },
         "kibana.alert.original_event.risk_score": Object {
           "path": "signal.original_event.risk_score",
           "type": "alias",
@@ -1675,9 +1675,9 @@ Object {
           "path": "signal.original_time",
           "type": "alias",
         },
-        "kibana.alert.producer": Object {
-          "type": "constant_keyword",
-          "value": "siem",
+        "kibana.alert.reason": Object {
+          "path": "signal.reason",
+          "type": "alias",
         },
         "kibana.alert.risk_score": Object {
           "path": "signal.rule.risk_score",
@@ -1690,6 +1690,10 @@ Object {
         "kibana.alert.rule.building_block_type": Object {
           "path": "signal.rule.building_block_type",
           "type": "alias",
+        },
+        "kibana.alert.rule.consumer": Object {
+          "type": "constant_keyword",
+          "value": "siem",
         },
         "kibana.alert.rule.created_at": Object {
           "path": "signal.rule.created_at",
@@ -1750,6 +1754,10 @@ Object {
         "kibana.alert.rule.note": Object {
           "path": "signal.rule.note",
           "type": "alias",
+        },
+        "kibana.alert.rule.producer": Object {
+          "type": "constant_keyword",
+          "value": "siem",
         },
         "kibana.alert.rule.query": Object {
           "path": "signal.rule.query",
@@ -3249,6 +3257,9 @@ Object {
                 "provider": Object {
                   "type": "keyword",
                 },
+                "reason": Object {
+                  "type": "keyword",
+                },
                 "risk_score": Object {
                   "type": "float",
                 },
@@ -3317,6 +3328,9 @@ Object {
                   "type": "keyword",
                 },
               },
+            },
+            "reason": Object {
+              "type": "keyword",
             },
             "rule": Object {
               "properties": Object {

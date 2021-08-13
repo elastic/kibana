@@ -6,17 +6,17 @@
  */
 
 import {
-  ALERT_CPU_USAGE,
-  ALERT_LOGSTASH_VERSION_MISMATCH,
-  ALERT_THREAD_POOL_WRITE_REJECTIONS,
+  RULE_CPU_USAGE,
+  RULE_LOGSTASH_VERSION_MISMATCH,
+  RULE_THREAD_POOL_WRITE_REJECTIONS,
 } from '../../../common/constants';
 import { AlertSeverity } from '../../../common/enums';
 import { getAlertPanelsByCategory } from './get_alert_panels_by_category';
 import {
-  ALERT_LICENSE_EXPIRATION,
-  ALERT_NODES_CHANGED,
-  ALERT_DISK_USAGE,
-  ALERT_MEMORY_USAGE,
+  RULE_LICENSE_EXPIRATION,
+  RULE_NODES_CHANGED,
+  RULE_DISK_USAGE,
+  RULE_MEMORY_USAGE,
 } from '../../../common/constants';
 import { AlertExecutionStatusValues } from '../../../../alerting/common';
 import { AlertState } from '../../../common/types/alerts';
@@ -93,7 +93,7 @@ describe('getAlertPanelsByCategory', () => {
 
     return {
       states,
-      rawAlert: {
+      sanitizedRule: {
         alertTypeId: type,
         name: `${type}_label`,
         ...mockAlert,
@@ -107,32 +107,32 @@ describe('getAlertPanelsByCategory', () => {
   describe('non setup mode', () => {
     it('should properly group for alerts in each category', () => {
       const alerts = [
-        getAlert(ALERT_NODES_CHANGED, 2),
-        getAlert(ALERT_DISK_USAGE, 1),
-        getAlert(ALERT_LICENSE_EXPIRATION, 2),
+        getAlert(RULE_NODES_CHANGED, 2),
+        getAlert(RULE_DISK_USAGE, 1),
+        getAlert(RULE_LICENSE_EXPIRATION, 2),
       ];
       const result = getAlertPanelsByCategory(panelTitle, false, alerts, stateFilter);
       expect(result).toMatchSnapshot();
     });
 
     it('should properly group for alerts in a single category', () => {
-      const alerts = [getAlert(ALERT_MEMORY_USAGE, 2)];
+      const alerts = [getAlert(RULE_MEMORY_USAGE, 2)];
       const result = getAlertPanelsByCategory(panelTitle, false, alerts, stateFilter);
       expect(result).toMatchSnapshot();
     });
 
     it('should not show any alert if none are firing', () => {
       const alerts = [
-        getAlert(ALERT_LOGSTASH_VERSION_MISMATCH, 0),
-        getAlert(ALERT_CPU_USAGE, 0),
-        getAlert(ALERT_THREAD_POOL_WRITE_REJECTIONS, 0),
+        getAlert(RULE_LOGSTASH_VERSION_MISMATCH, 0),
+        getAlert(RULE_CPU_USAGE, 0),
+        getAlert(RULE_THREAD_POOL_WRITE_REJECTIONS, 0),
       ];
       const result = getAlertPanelsByCategory(panelTitle, false, alerts, stateFilter);
       expect(result).toMatchSnapshot();
     });
 
     it('should allow for state filtering', () => {
-      const alerts = [getAlert(ALERT_CPU_USAGE, 2)];
+      const alerts = [getAlert(RULE_CPU_USAGE, 2)];
       const customStateFilter = (state: AlertState) => state.nodeName === 'es_name_0';
       const result = getAlertPanelsByCategory(panelTitle, false, alerts, customStateFilter);
       expect(result).toMatchSnapshot();
@@ -142,25 +142,25 @@ describe('getAlertPanelsByCategory', () => {
   describe('setup mode', () => {
     it('should properly group for alerts in each category', () => {
       const alerts = [
-        getAlert(ALERT_NODES_CHANGED, 2),
-        getAlert(ALERT_DISK_USAGE, 1),
-        getAlert(ALERT_LICENSE_EXPIRATION, 2),
+        getAlert(RULE_NODES_CHANGED, 2),
+        getAlert(RULE_DISK_USAGE, 1),
+        getAlert(RULE_LICENSE_EXPIRATION, 2),
       ];
       const result = getAlertPanelsByCategory(panelTitle, true, alerts, stateFilter);
       expect(result).toMatchSnapshot();
     });
 
     it('should properly group for alerts in a single category', () => {
-      const alerts = [getAlert(ALERT_MEMORY_USAGE, 2)];
+      const alerts = [getAlert(RULE_MEMORY_USAGE, 2)];
       const result = getAlertPanelsByCategory(panelTitle, true, alerts, stateFilter);
       expect(result).toMatchSnapshot();
     });
 
     it('should still show alerts if none are firing', () => {
       const alerts = [
-        getAlert(ALERT_LOGSTASH_VERSION_MISMATCH, 0),
-        getAlert(ALERT_CPU_USAGE, 0),
-        getAlert(ALERT_THREAD_POOL_WRITE_REJECTIONS, 0),
+        getAlert(RULE_LOGSTASH_VERSION_MISMATCH, 0),
+        getAlert(RULE_CPU_USAGE, 0),
+        getAlert(RULE_THREAD_POOL_WRITE_REJECTIONS, 0),
       ];
       const result = getAlertPanelsByCategory(panelTitle, true, alerts, stateFilter);
       expect(result).toMatchSnapshot();

@@ -301,6 +301,21 @@ export type AlertEvent = Partial<{
     feature: ECSField<string>;
     self_injection: ECSField<boolean>;
   }>;
+  destination: Partial<{
+    port: ECSField<number>;
+    ip: ECSField<string>;
+  }>;
+  source: Partial<{
+    port: ECSField<number>;
+    ip: ECSField<string>;
+  }>;
+  registry: Partial<{
+    path: ECSField<string>;
+    value: ECSField<string>;
+    data: Partial<{
+      strings: ECSField<string>;
+    }>;
+  }>;
   Target: Partial<{
     process: Partial<{
       thread: Partial<{
@@ -358,6 +373,9 @@ export type AlertEvent = Partial<{
         identifier: ECSField<string>;
       }>;
     }>;
+  }>;
+  rule: Partial<{
+    id: ECSField<string>;
   }>;
   file: Partial<{
     owner: ECSField<string>;
@@ -507,6 +525,7 @@ export type HostMetadata = Immutable<{
        */
       isolation?: boolean;
     };
+    capabilities?: string[];
   };
   agent: {
     id: string;
@@ -677,6 +696,8 @@ export type SafeEndpointEvent = Partial<{
     }>;
   }>;
   network: Partial<{
+    transport: ECSField<string>;
+    type: ECSField<string>;
     direction: ECSField<string>;
     forwarded_ip: ECSField<string>;
   }>;

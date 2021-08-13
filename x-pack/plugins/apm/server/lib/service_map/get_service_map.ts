@@ -25,11 +25,12 @@ import {
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
 import { transformServiceMapResponses } from './transform_service_map_responses';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 export interface IEnvOptions {
   setup: Setup & SetupTimeRange;
   serviceName?: string;
-  environment?: string;
+  environment: string;
   searchAggregatedTransactions: boolean;
   logger: Logger;
 }
@@ -67,8 +68,6 @@ async function getConnectionData({
           chunks.map((traceIdsChunk) =>
             getServiceMapFromTraceIds({
               setup,
-              serviceName,
-              environment,
               traceIds: traceIdsChunk,
             })
           )
@@ -92,6 +91,7 @@ async function getServicesData(options: IEnvOptions) {
   const projection = getServicesProjection({
     setup,
     searchAggregatedTransactions,
+    kuery: '',
   });
 
   let filter = [
@@ -147,7 +147,10 @@ async function getServicesData(options: IEnvOptions) {
         [SERVICE_NAME]: bucket.key as string,
         [AGENT_NAME]:
           (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
-        [SERVICE_ENVIRONMENT]: options.environment || null,
+        [SERVICE_ENVIRONMENT]:
+          options.environment === ENVIRONMENT_ALL.value
+            ? null
+            : options.environment,
       };
     }) || []
   );

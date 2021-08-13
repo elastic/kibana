@@ -27,7 +27,6 @@ import type {
   UpgradePackagePolicyResponse,
   PackagePolicyInput,
   NewPackagePolicyInput,
-  NewPackagePolicyInputStream,
   PackagePolicyConfigRecordEntry,
   PackagePolicyInputStream,
   PackageInfo,
@@ -425,6 +424,11 @@ class PackagePolicyService {
           id,
           name: packagePolicy.name,
           success: true,
+          package: {
+            name: packagePolicy.name,
+            title: '',
+            version: packagePolicy.version || '',
+          },
         });
       } catch (error) {
         result.push({
@@ -516,7 +520,13 @@ class PackagePolicyService {
           updatePackagePolicy.inputs as PackagePolicyInput[]
         );
 
-        await this.update(soClient, esClient, id, updatePackagePolicy, options);
+        await this.update(
+          soClient,
+          esClient,
+          id,
+          omit(updatePackagePolicy, 'missingVars'),
+          options
+        );
         result.push({
           id,
           name: packagePolicy.name,
@@ -620,29 +630,47 @@ class PackagePolicyService {
     return Promise.all(inputsPromises);
   }
 
-  public async runExternalCallbacks(
-    externalCallbackType: ExternalCallback[0],
-    newPackagePolicy: NewPackagePolicy,
+  public async runExternalCallbacks<A extends ExternalCallback[0]>(
+    externalCallbackType: A,
+    packagePolicy: NewPackagePolicy | DeletePackagePoliciesResponse,
     context: RequestHandlerContext,
     request: KibanaRequest
-  ): Promise<NewPackagePolicy> {
-    let newData = newPackagePolicy;
-
-    const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
-    if (externalCallbacks && externalCallbacks.size > 0) {
-      let updatedNewData: NewPackagePolicy = newData;
-      for (const callback of externalCallbacks) {
-        const result = await callback(updatedNewData, context, request);
-        if (externalCallbackType === 'packagePolicyCreate') {
-          updatedNewData = NewPackagePolicySchema.validate(result);
-        } else if (externalCallbackType === 'packagePolicyUpdate') {
-          updatedNewData = UpdatePackagePolicySchema.validate(result);
+  ): Promise<A extends 'postPackagePolicyDelete' ? void : NewPackagePolicy>;
+  public async runExternalCallbacks(
+    externalCallbackType: ExternalCallback[0],
+    packagePolicy: NewPackagePolicy | DeletePackagePoliciesResponse,
+    context: RequestHandlerContext,
+    request: KibanaRequest
+  ): Promise<NewPackagePolicy | void> {
+    if (externalCallbackType === 'postPackagePolicyDelete') {
+      const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
+      if (externalCallbacks && externalCallbacks.size > 0) {
+        for (const callback of externalCallbacks) {
+          if (Array.isArray(packagePolicy)) {
+            await callback(packagePolicy, context, request);
+          }
         }
       }
+    } else {
+      if (!Array.isArray(packagePolicy)) {
+        let newData = packagePolicy;
+        const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
+        if (externalCallbacks && externalCallbacks.size > 0) {
+          let updatedNewData = newData;
+          for (const callback of externalCallbacks) {
+            const result = await callback(updatedNewData, context, request);
+            if (externalCallbackType === 'packagePolicyCreate') {
+              updatedNewData = NewPackagePolicySchema.validate(result);
+            } else if (externalCallbackType === 'packagePolicyUpdate') {
+              updatedNewData = UpdatePackagePolicySchema.validate(result);
+            }
+          }
 
-      newData = updatedNewData;
+          newData = updatedNewData;
+        }
+        return newData;
+      }
     }
-    return newData;
   }
 }
 
@@ -829,9 +857,10 @@ export function overridePackageInputs(
   const inputs = [...basePackagePolicy.inputs];
   const packageName = basePackagePolicy.package!.name;
   const errors = [];
+  let responseMissingVars: string[] = [];
 
   for (const override of inputsOverride) {
-    const originalInput = inputs.find((i) => i.type === override.type);
+    let originalInput = inputs.find((i) => i.type === override.type);
     if (!originalInput) {
       const e = {
         error: new Error(
@@ -860,7 +889,9 @@ export function overridePackageInputs(
 
     if (override.vars) {
       try {
-        deepMergeVars(override, originalInput);
+        const { result, missingVars } = deepMergeVars(override, originalInput);
+        originalInput = result;
+        responseMissingVars = [...responseMissingVars, ...missingVars];
       } catch (e) {
         const varName = e.message;
         const err = {
@@ -888,7 +919,7 @@ export function overridePackageInputs(
 
     if (override.streams) {
       for (const stream of override.streams) {
-        const originalStream = originalInput.streams.find(
+        let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
         );
         if (!originalStream) {
@@ -920,7 +951,9 @@ export function overridePackageInputs(
 
         if (stream.vars) {
           try {
-            deepMergeVars(stream as InputsOverride, originalStream);
+            const { result, missingVars } = deepMergeVars(stream as InputsOverride, originalStream);
+            originalStream = result;
+            responseMissingVars = [...responseMissingVars, ...missingVars];
           } catch (e) {
             const varName = e.message;
             const streamSet = stream.data_stream.dataset;
@@ -951,25 +984,33 @@ export function overridePackageInputs(
     }
   }
 
-  if (dryRun && errors.length) return { ...basePackagePolicy, inputs, errors };
-  return { ...basePackagePolicy, inputs };
+  if (dryRun && errors.length) {
+    return { ...basePackagePolicy, inputs, errors, missingVars: responseMissingVars };
+  }
+
+  return { ...basePackagePolicy, inputs, missingVars: responseMissingVars };
 }
 
-function deepMergeVars(
-  override: NewPackagePolicyInput | InputsOverride,
-  original: NewPackagePolicyInput | NewPackagePolicyInputStream
-) {
+function deepMergeVars(override: any, original: any): { result: any; missingVars: string[] } {
+  const result = { ...original };
+  const missingVars: string[] = [];
+
   const overrideVars = Array.isArray(override.vars)
     ? override.vars
     : Object.entries(override.vars!).map(([key, rest]) => ({
         name: key,
-        ...rest,
+        ...(rest as any),
       }));
+
   for (const { name, ...val } of overrideVars) {
-    if (!original.vars || !Reflect.has(original.vars, name)) {
-      throw new Error(name);
+    if (!original.vars || !(name in original.vars)) {
+      missingVars.push(name);
+      continue;
     }
+
     const originalVar = original.vars[name];
-    Reflect.set(original.vars, name, { ...originalVar, ...val });
+    result[name] = { ...originalVar, ...val };
   }
+
+  return { result, missingVars };
 }
