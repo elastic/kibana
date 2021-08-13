@@ -119,7 +119,7 @@ export function UXAppRoot({
         >
           <i18nCore.Context>
             <RouterProvider history={history} router={uxRouter}>
-              <UrlParamsProvider className={APP_WRAPPER_CLASS}>
+              <UrlParamsProvider>
                 <UxApp />
                 <UXActionMenu appMountParameters={appMountParameters} />
               </UrlParamsProvider>

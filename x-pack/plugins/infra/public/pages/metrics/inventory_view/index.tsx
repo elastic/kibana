@@ -86,7 +86,7 @@ export const SnapshotPage = () => {
       ) : hasFailedLoadingSource ? (
         <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />
       ) : (
-        <MetricsPageTemplate />
+        <MetricsPageTemplate data-test-subj="noMetricsIndicesPrompt" />
       )}
     </EuiErrorBoundary>
   );
