@@ -19,6 +19,8 @@ import { rangeQuery, kqlQuery } from '../../../../../../observability/server';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
+const TRACE_SAMPLES_SIZE = 500;
+
 export async function getTraceSamples({
   environment,
   kuery,
@@ -83,7 +85,7 @@ export async function getTraceSamples({
               ] as QueryDslQueryContainer[],
             },
           },
-          size: 10,
+          size: TRACE_SAMPLES_SIZE,
         },
       });
 
