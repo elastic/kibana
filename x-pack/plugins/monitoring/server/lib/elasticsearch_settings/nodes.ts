@@ -6,17 +6,19 @@
  */
 
 import { get } from 'lodash';
+import { LegacyRequest } from '../../types';
 import { findReason } from './find_reason';
 
-export function handleResponse(response, isCloudEnabled) {
-  const sources = ['persistent', 'transient', 'defaults'];
-  for (const source of sources) {
-    const monitoringSettings = get(response[source], 'xpack.monitoring');
-    if (monitoringSettings !== undefined) {
+export function handleResponse({ nodes = {} } = {}, isCloudEnabled: boolean) {
+  const nodeIds = Object.keys(nodes);
+  for (const nodeId of nodeIds) {
+    const nodeSettings = get(nodes, [nodeId, 'settings']);
+    if (nodeSettings !== undefined) {
+      const monitoringSettings = get(nodeSettings, 'xpack.monitoring');
       const check = findReason(
         monitoringSettings,
         {
-          context: `cluster ${source}`,
+          context: `nodeId: ${nodeId}`,
         },
         isCloudEnabled
       );
@@ -30,10 +32,15 @@ export function handleResponse(response, isCloudEnabled) {
   return { found: false };
 }
 
-export async function checkClusterSettings(req) {
+export async function checkNodesSettings(req: LegacyRequest) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
   const { cloud } = req.server.newPlatform.setup.plugins;
   const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
-  const response = await callWithRequest(req, 'cluster.getSettings', { include_defaults: true });
+  const response = await callWithRequest(req, 'transport.request', {
+    method: 'GET',
+    path: '/_nodes/settings',
+    filter_path: ['nodes'], // NOTE: this doesn't seem to do anything when used with elasticsearch-js. In Console, it does work though
+  });
+
   return handleResponse(response, isCloudEnabled);
 }
