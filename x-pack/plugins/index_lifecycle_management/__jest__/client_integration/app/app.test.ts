@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { getDefaultHotPhasePolicy, POLICY_NAME } from '../edit_policy/constants';
+import { getDefaultHotPhasePolicy } from '../edit_policy/constants';
 import { setupEnvironment } from '../helpers';
 
 import {
@@ -63,7 +63,7 @@ describe('<App />', () => {
     });
 
     test('when there are policies', async () => {
-      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy(POLICY_NAME)]);
+      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy()]);
       await act(async () => {
         testBed = await setup(['/']);
       });

@@ -6,12 +6,12 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { TestBed } from '@kbn/test/jest';
 import { setupEnvironment } from '../../helpers';
-import { initTestBed } from '../init_test_bed';
+import { setupRequestFlyoutTestBed, RequestFlyoutTestBed } from './request_flyout.helpers';
+import { getDefaultHotPhasePolicy } from '../constants';
 
 describe('<EditPolicy /> request flyout', () => {
-  let testBed: TestBed;
+  let testBed: RequestFlyoutTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
@@ -27,7 +27,7 @@ describe('<EditPolicy /> request flyout', () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await initTestBed();
+      testBed = await setupRequestFlyoutTestBed();
     });
 
     const { component } = testBed;
@@ -35,27 +35,54 @@ describe('<EditPolicy /> request flyout', () => {
   });
 
   test('renders a json in flyout for a default policy', async () => {
-    const { find, component } = testBed;
-    await act(async () => {
-      find('requestButton').simulate('click');
-    });
-    component.update();
+    const { actions } = testBed;
+    await actions.openRequestFlyout();
 
-    const json = component.find(`code`).text();
+    const json = actions.getRequestJson();
     const expected = `PUT _ilm/policy/my_policy\n${JSON.stringify(
       {
         policy: {
-          phases: {
-            hot: {
-              min_age: '0ms',
-              actions: {
-                rollover: {
-                  max_age: '30d',
-                  max_primary_shard_size: '50gb',
-                },
-              },
-            },
-          },
+          phases: { ...getDefaultHotPhasePolicy().policy.phases },
+        },
+      },
+      null,
+      2
+    )}`;
+    expect(json).toBe(expected);
+  });
+
+  test('renders an error callout if policy form is invalid', async () => {
+    const { actions } = testBed;
+    // toggle warm phase but don't set phase timing to create an invalid policy
+    await actions.togglePhase('warm');
+    await actions.openRequestFlyout();
+    expect(actions.hasInvalidPolicyAlert()).toBe(true);
+    expect(actions.hasRequestJson()).toBe(false);
+    await actions.closeRequestFlyout();
+
+    // set phase timing to "fix" the invalid policy
+    await actions.warm.setMinAgeValue('10');
+    await actions.openRequestFlyout();
+    expect(actions.hasInvalidPolicyAlert()).toBe(false);
+    expect(actions.hasRequestJson()).toBe(true);
+  });
+
+  test('renders a json with default policy name when only policy name is missing', async () => {
+    const { actions } = testBed;
+    // delete the name of the the policy which is currently valid
+    await actions.toggleSaveAsNewPolicy();
+    await actions.setPolicyName('');
+    await actions.openRequestFlyout();
+
+    // the json still works, no "invalid policy" alert
+    expect(actions.hasInvalidPolicyAlert()).toBe(false);
+    expect(actions.hasRequestJson()).toBe(true);
+
+    const json = actions.getRequestJson();
+    const expected = `PUT _ilm/policy/<policyName>\n${JSON.stringify(
+      {
+        policy: {
+          phases: { ...getDefaultHotPhasePolicy().policy.phases },
         },
       },
       null,
