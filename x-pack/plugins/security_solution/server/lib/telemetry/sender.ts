@@ -464,6 +464,7 @@ const allowlistProcessFields: AllowlistFields = {
   args: true,
   name: true,
   executable: true,
+  code_signature: true,
   command_line: true,
   hash: true,
   pid: true,
