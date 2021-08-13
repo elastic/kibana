@@ -10,11 +10,6 @@ import { useDispatch } from 'react-redux';
 
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { timelineActions } from '../../../../timelines/store/timeline';
-<<<<<<< HEAD
-=======
-import { FILTER_OPEN, FILTER_CLOSED, FILTER_ACKNOWLEDGED } from '../alerts_filter_group';
-import { updateAlertStatusAction } from '../actions';
->>>>>>> updates front end names
 import { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
 import { useStatusBulkActionItems } from '../../../../../../timelines/public';
 
