@@ -10,6 +10,7 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import {
   registerOrgSettingsRoute,
   registerOrgSettingsCustomizeRoute,
+  registerOrgSettingsUploadImagesRoute,
   registerOrgSettingsOauthApplicationRoute,
 } from './settings';
 
@@ -62,6 +63,36 @@ describe('settings routes', () => {
     describe('validates', () => {
       it('correctly', () => {
         const request = { body: { name: 'foo' } };
+        mockRouter.shouldValidate(request);
+      });
+    });
+  });
+
+  describe('PUT /api/workplace_search/org/settings/upload_images', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'put',
+        path: '/api/workplace_search/org/settings/upload_images',
+      });
+
+      registerOrgSettingsUploadImagesRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/settings/upload_images',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = { body: { logo: 'foo', icon: null } };
         mockRouter.shouldValidate(request);
       });
     });
