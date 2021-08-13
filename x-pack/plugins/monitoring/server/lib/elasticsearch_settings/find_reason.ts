@@ -6,17 +6,22 @@
  */
 
 import { get } from 'lodash';
+import { ClusterSettingsReasonResponse } from '../../types';
 
 /*
  * Return true if the settings property is enabled or is using its default state of enabled
  * Note: this assumes that a 0 corresponds to disabled
  */
-const isEnabledOrDefault = (property) => {
+const isEnabledOrDefault = (property: string) => {
   return property === undefined || (Boolean(property) && property !== 'false');
 };
 
-export function findReason(settingsSource, context, isCloudEnabled) {
-  const iterateReasons = () => {
+export function findReason(
+  settingsSource: any,
+  context: { context: string },
+  isCloudEnabled: boolean
+) {
+  const iterateReasons = (): ClusterSettingsReasonResponse => {
     // PluginEnabled: check for `monitoring.enabled: false`
     const monitoringEnabled = get(settingsSource, 'enabled');
     if (!isEnabledOrDefault(monitoringEnabled)) {
@@ -92,9 +97,8 @@ export function findReason(settingsSource, context, isCloudEnabled) {
           return exporter.type !== 'local' && isEnabledOrDefault(exporter.enabled);
         });
         if (allEnabledRemote.length > 0 && allEnabledLocal.length === 0) {
-          let ret = {};
           if (isCloudEnabled) {
-            ret = {
+            return {
               found: true,
               reason: {
                 property: 'xpack.monitoring.exporters.cloud_enabled',
@@ -102,7 +106,7 @@ export function findReason(settingsSource, context, isCloudEnabled) {
               },
             };
           } else {
-            ret = {
+            return {
               found: true,
               reason: {
                 property: 'xpack.monitoring.exporters',
@@ -112,11 +116,9 @@ export function findReason(settingsSource, context, isCloudEnabled) {
               },
             };
           }
-          return ret;
         }
       }
     }
-
     return { found: false };
   };
 
