@@ -51,9 +51,6 @@ describe('POST /diagnose/screenshot', () => {
     );
 
     const mockSetupDeps = createMockPluginSetup({
-      elasticsearch: {
-        legacy: { client: { callAsInternalUser: jest.fn() } },
-      },
       router: httpSetup.createRouter(''),
     });
 
