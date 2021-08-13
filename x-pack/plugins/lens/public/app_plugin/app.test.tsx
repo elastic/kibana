@@ -269,6 +269,52 @@ describe('Lens App', () => {
     });
   });
 
+  describe('TopNavMenu#showDatePicker', () => {
+    it('shows date picker if any used index pattern isTimeBased', async () => {
+      const customServices = makeDefaultServices(sessionIdSubject);
+      customServices.data.indexPatterns.get = jest
+        .fn()
+        .mockImplementation((id) =>
+          Promise.resolve({ id, isTimeBased: () => true } as IndexPattern)
+        );
+      const { services } = await mountWith({ services: customServices });
+      expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
+        expect.objectContaining({ showDatePicker: true }),
+        {}
+      );
+    });
+    it('shows date picker if active datasource isTimeBased', async () => {
+      const customServices = makeDefaultServices(sessionIdSubject);
+      customServices.data.indexPatterns.get = jest
+        .fn()
+        .mockImplementation((id) =>
+          Promise.resolve({ id, isTimeBased: () => true } as IndexPattern)
+        );
+      const customProps = makeDefaultProps();
+      customProps.datasourceMap.testDatasource.isTimeBased = () => true;
+      const { services } = await mountWith({ props: customProps, services: customServices });
+      expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
+        expect.objectContaining({ showDatePicker: true }),
+        {}
+      );
+    });
+    it('does not show date picker if index pattern nor active datasource is not time based', async () => {
+      const customServices = makeDefaultServices(sessionIdSubject);
+      customServices.data.indexPatterns.get = jest
+        .fn()
+        .mockImplementation((id) =>
+          Promise.resolve({ id, isTimeBased: () => true } as IndexPattern)
+        );
+      const customProps = makeDefaultProps();
+      customProps.datasourceMap.testDatasource.isTimeBased = () => false;
+      const { services } = await mountWith({ props: customProps, services: customServices });
+      expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
+        expect.objectContaining({ showDatePicker: false }),
+        {}
+      );
+    });
+  });
+
   describe('persistence', () => {
     it('passes query and indexPatterns to TopNavMenu', async () => {
       const { instance, lensStore, services } = await mountWith({ preloadedState: {} });
@@ -294,7 +340,7 @@ describe('Lens App', () => {
       expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: 'fake query',
-          indexPatterns: [{ id: 'mockip' }],
+          indexPatterns: [{ id: 'mockip', isTimeBased: expect.any(Function) }],
         }),
         {}
       );
