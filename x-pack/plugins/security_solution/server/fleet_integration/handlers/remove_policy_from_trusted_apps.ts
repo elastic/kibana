@@ -21,7 +21,6 @@ export const removePolicyFromTrustedApps = async (
   exceptionsClient: ExceptionListClient,
   policy: DeletePolicy
 ) => {
-  if (!exceptionsClient) return;
   let page = 1;
 
   const findTrustedAppsByPolicy = async (currentPage: number) => {
@@ -44,7 +43,7 @@ export const removePolicyFromTrustedApps = async (
     page += 1;
     findResponse = await findTrustedAppsByPolicy(page);
     if (findResponse) {
-      trustedApps.concat(findResponse.data);
+      trustedApps.push(...findResponse.data);
     }
   }
 
