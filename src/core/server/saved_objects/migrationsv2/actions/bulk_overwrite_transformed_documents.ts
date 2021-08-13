@@ -8,7 +8,7 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import type { estypes } from '@elastic/elasticsearch';
+import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import type { SavedObjectsRawDoc } from '../../serialization';
 import {
@@ -17,7 +17,7 @@ import {
 } from './catch_retryable_es_client_errors';
 import { isWriteBlockException } from './es_errors';
 import { WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE } from './constants';
-import type { TargetIndexHadWriteBlock } from './index';
+import type { TargetIndexHadWriteBlock, RequestEntityTooLargeException } from './index';
 
 /** @internal */
 export interface BulkOverwriteTransformedDocumentsParams {
@@ -37,7 +37,7 @@ export const bulkOverwriteTransformedDocuments = ({
   transformedDocs,
   refresh = false,
 }: BulkOverwriteTransformedDocumentsParams): TaskEither.TaskEither<
-  RetryableEsClientError | TargetIndexHadWriteBlock,
+  RetryableEsClientError | TargetIndexHadWriteBlock | RequestEntityTooLargeException,
   'bulk_index_succeeded'
 > => () => {
   return client
@@ -88,6 +88,13 @@ export const bulkOverwriteTransformedDocuments = ({
           });
         }
         throw new Error(JSON.stringify(errors));
+      }
+    })
+    .catch((error) => {
+      if (error instanceof esErrors.ResponseError && error.statusCode === 413) {
+        return Either.left({ type: 'request_entity_too_large_exception' as const });
+      } else {
+        throw error;
       }
     })
     .catch(catchRetryableEsClientErrors);

@@ -31,7 +31,7 @@ export function getStoredAnnotations({
 }: {
   setup: Setup & SetupTimeRange;
   serviceName: string;
-  environment?: string;
+  environment: string;
   client: ElasticsearchClient;
   annotationsClient: ScopedAnnotationsClient;
   logger: Logger;

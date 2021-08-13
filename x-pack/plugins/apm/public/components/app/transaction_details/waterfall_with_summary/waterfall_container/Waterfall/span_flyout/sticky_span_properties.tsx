@@ -56,7 +56,10 @@ export function StickySpanProperties({ span, transaction }: Props) {
           val: (
             <ServiceLink
               agentName={transaction.agent.name}
-              query={{ ...query, environment: nextEnvironment }}
+              query={{
+                ...query,
+                environment: nextEnvironment,
+              }}
               serviceName={transaction.service.name}
             />
           ),
