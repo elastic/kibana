@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { EuiCodeEditor } from './code_editor';
+import EuiCodeEditor from './code_editor';
 // @ts-ignore
 import { keys } from '@elastic/eui/lib/services';
 import { findTestSubject, requiredProps, takeMountedSnapshot } from '@elastic/eui/lib/test';

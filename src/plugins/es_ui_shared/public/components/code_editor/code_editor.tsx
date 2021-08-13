@@ -68,7 +68,7 @@ export interface EuiCodeEditorState {
   name: string;
 }
 
-export class EuiCodeEditor extends Component<EuiCodeEditorProps, EuiCodeEditorState> {
+class EuiCodeEditor extends Component<EuiCodeEditorProps, EuiCodeEditorState> {
   static defaultProps = {
     setOptions: {},
   };
@@ -302,3 +302,7 @@ export class EuiCodeEditor extends Component<EuiCodeEditorProps, EuiCodeEditorSt
     );
   }
 }
+
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default EuiCodeEditor;
