@@ -16,7 +16,7 @@ export function getServicesProjection({
   setup,
   searchAggregatedTransactions,
 }: {
-  kuery?: string;
+  kuery: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
