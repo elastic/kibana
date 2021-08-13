@@ -9,7 +9,7 @@ In this tutorial, you’ll use reverse geocoding to visualize United States Cens
 You’ll learn to:
 
 - Upload custom regions.
-- Reverse geocoding with {es} enrigh processor.
+- Reverse geocoding with {es} {ref}/enrich-processor.html[enrich processor].
 - Create a map and visualize metrics by CSA regions.
 
 When you complete this tutorial, you’ll have a map that looks like this:
@@ -44,13 +44,17 @@ Once you have your GeoJSON file:
 . Click *Create map*.
 . In the *Layers* list, click *Upload GeoJSON*.
 . Use the File Picker to select the CSA GeoJSON file.
-. Set index name to *csa_regions* and click *Import file*.
+. Set index name to *csa* and click *Import file*.
 . When importing is complete, click *Add as document layer*.
-. Add a Tooltip field:
+. Add Tooltip fields:
 .. Click *+ Add* to open field select.
 .. Select *NAME*, *GEOID*, and *AFFGEOID*.
 .. Click *Add*.
 . Click *Save & close*.
+. *Save* the map.
+.. Give the map a title.
+.. Under *Add to dashboard*, select *None*.
+.. Click *Save and add to library*.
 
 Looking at the map, we get a sense of what exactly constitutes a metro area in the eyes of the Census Bureau.
 
@@ -59,3 +63,81 @@ image::maps/images/reverse-geocoding-tutorial/csa_regions.jpeg[]
 
 [float]
 === Step 3: Reverse geocoding
+To visualize CSA regions by web log traffic, the web log traffic must contain a CSA region identifier. We will use {es} {ref}/enrich-processor.html[enrich processor] to add CSA region identifiers to Kibana's web logs sample data set. You can skip this step if your source data already contains region identifies.
+
+. Open the main menu, then click *Dev Tools*.
+. In *Console*, create a {ref}/geo-match-enrich-policy-type.html[geo_match enrichment policy]:
++
+[source,js]
+----------------------------------
+PUT /_enrich/policy/csa_lookup 
+{ 
+  "geo_match": { 
+    "indices": "csa", 
+    "match_field": "coordinates", 
+    "enrich_fields": [ "GEOID", "NAME"] 
+  } 
+}
+----------------------------------
+
+. To initialize the policy, run:
++
+[source,js]
+----------------------------------
+POST /_enrich/policy/csa_lookup/_execute
+----------------------------------
+
+. To create a ingest pipeline, run:
++
+[source,js]
+----------------------------------
+PUT _ingest/pipeline/lonlat-to-csa 
+{ 
+  "description": "Reverse geocode longitude-latitude to combined statistical area", 
+  "processors": [ 
+    { 
+      "enrich": { 
+        "field": "geo.coordinates", 
+        "policy_name": "csa_lookup", 
+        "target_field": "csa", 
+        "ignore_missing": true, 
+        "ignore_failure": true, 
+        "description": "Lookup the csa identifier" 
+      } 
+    }, 
+    { 
+      "remove": { 
+        "field": "csa.coordinates", 
+        "ignore_missing": true, 
+        "ignore_failure": true, 
+        "description": "Remove the shape field" 
+      } 
+    } 
+  ] 
+}
+----------------------------------
+
+. To update your existing data, run:
++
+[source,js]
+----------------------------------
+POST kibana_sample_data_logs/_update_by_query?pipeline=lonlat-to-csa
+----------------------------------
+
+. To run the pipeline on new documents at ingest, run:
++
+[source,js]
+----------------------------------
+PUT kibana_sample_data_logs/_settings 
+{ 
+  "index": { 
+    "default_pipeline": "lonlat-to-csa" 
+  } 
+}
+----------------------------------
+
+Your web log data is has been enriched and contains GEOID and NAME fields from the matching *csa* region.
+
+[role="screenshot"]
+image::maps/images/reverse-geocoding-tutorial/enriched_web_log.png[]
+
