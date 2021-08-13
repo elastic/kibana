@@ -4,7 +4,7 @@ slug: /kibana-dev-docs/platform-intro
 title: Plugins and the Kibana platform
 summary: An introduction to the Kibana platform and how to use it to build a plugin.
 date: 2021-01-06
-tags: ['kibana','onboarding', 'dev', 'architecture']
+tags: ['kibana', 'onboarding', 'dev', 'architecture']
 ---
 
 From an end user perspective, Kibana is a tool for interacting with Elasticsearch, providing an easy way
@@ -23,11 +23,11 @@ developer tools. The Kibana platform is a blank canvas, just waiting for a devel
 
 Plugins have access to three kinds of public services:
 
- - Platform services provided by `core` (<DocLink id="kibPlatformIntro" section="core-services" text="Core services"/>)
- - Platform services provided by plugins (<DocLink id="kibPlatformIntro" section="platform-plugins" text="Platform plugins"/>)
- - Shared services provided by plugins, that are only relevant for only a few, specific plugins (e.g. "presentation utils").
+- Platform services provided by `core` (<DocLink id="kibPlatformIntro" section="core-services" text="Core services"/>)
+- Platform services provided by plugins (<DocLink id="kibPlatformIntro" section="platform-plugins" text="Platform plugins"/>)
+- Shared services provided by plugins, that are only relevant for only a few, specific plugins (e.g. "presentation utils").
 
- The first two items are what make up "Platform services".
+The first two items are what make up "Platform services".
 
 <DocCallOut title="What is the difference between services provided by platform plugins, and those by core?">
 
@@ -46,23 +46,23 @@ In reality, we ended up with many platform-like services living outside of core,
 them, so we consider them part of platform services.
 
 When we built our platform system, we also thought we'd end up with only a handful of large plugins outside core. Users could turn certain plugins off, to minimize the code
- footprint and speed up Kibana.
+footprint and speed up Kibana.
 
 In reality, our plugin model ended up being used like micro-services. Plugins are the only form of encapsulation we provide developers, and they liked it! However, we ended
- up with a ton of small plugins, that developers never intended to be uninstallable, nor tested in this manner. We are considering ways to provide developers the ability to build services
- with the encapsulation
- they desire, without the need to build a plugin.
+up with a ton of small plugins, that developers never intended to be uninstallable, nor tested in this manner. We are considering ways to provide developers the ability to build services
+with the encapsulation
+they desire, without the need to build a plugin.
 
 Another side effect of having many small plugins is that common code often ends up extracted into another plugin. Use case specific utilities are exported,
- that are not meant to be used in a general manner. This makes our definition of "platform code" a bit trickier to define. We'd like to say "The platform is made up of
- every publically exposed service", but in today's world, that wouldn't be a very accurate picture.
+that are not meant to be used in a general manner. This makes our definition of "platform code" a bit trickier to define. We'd like to say "The platform is made up of
+every publically exposed service", but in today's world, that wouldn't be a very accurate picture.
 
 We recognize the need to better clarify the relationship between core functionality, platform-like plugin functionality, and functionality exposed by other plugins.
- It's something we will be working on!
+It's something we will be working on!
+
 </DocAccordion>
 
 We will continue to focus on adding clarity around these types of services and what developers can expect from each.
-
 
 </DocCallOut>
 
@@ -75,8 +75,10 @@ there are some plugins that provide platform functionality. We call these <DocLi
 ### Platform plugins
 
 Plugins that provide fundamental services and functionality to extend and customize Kibana, for example, the
-<DocLink id="kibDataPlugin" text="data"/> plugin. There is no official way to tell if a plugin is a platform plugin or not.
-Platform plugins are _usually_ plugins that are managed by the Platform Group, but we are starting to see some exceptions.
+
+<DocLink id="kibDataPlugin" text="data" /> plugin. There is no official way to tell if a plugin is a
+platform plugin or not. Platform plugins are _usually_ plugins that are managed by the Platform Group,
+but we are starting to see some exceptions.
 
 ## Plugins
 
@@ -110,19 +112,19 @@ Any plugin that exports something from those files, or from the lifecycle method
 ## Lifecycle methods
 
 Core, and plugins, expose different features at different parts of their lifecycle. We describe the lifecycle of core services and plugins with
- specifically-named functions on the service definition.
+specifically-named functions on the service definition.
 
 Kibana has three lifecycles: setup, start, and stop. Each plugin’s setup function is called sequentially while Kibana is setting up
- on the server or when it is being loaded in the browser. The start functions are called sequentially after setup has been completed for all plugins.
- The stop functions are called sequentially while Kibana is gracefully shutting down the server or when the browser tab or window is being closed.
+on the server or when it is being loaded in the browser. The start functions are called sequentially after setup has been completed for all plugins.
+The stop functions are called sequentially while Kibana is gracefully shutting down the server or when the browser tab or window is being closed.
 
 The table below explains how each lifecycle relates to the state of Kibana.
 
-| lifecycle	| purpose |	server |	browser |
-| ---------- | ------ | ------- | ----- |
-| setup | perform "registration" work to setup environment for runtime |configure REST API endpoint, register saved object types, etc. | configure application routes in SPA, register custom UI elements in extension points, etc. |
-| start | bootstrap runtime logic | respond to an incoming request, request Elasticsearch server, etc. | start polling Kibana server, update DOM tree in response to user interactions, etc.|
-| stop | cleanup runtime | dispose of active handles before the server shutdown. | store session data in the LocalStorage when the user navigates away from Kibana, etc. |
+| lifecycle | purpose                                                      | server                                                             | browser                                                                                    |
+| --------- | ------------------------------------------------------------ | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| setup     | perform "registration" work to setup environment for runtime | configure REST API endpoint, register saved object types, etc.     | configure application routes in SPA, register custom UI elements in extension points, etc. |
+| start     | bootstrap runtime logic                                      | respond to an incoming request, request Elasticsearch server, etc. | start polling Kibana server, update DOM tree in response to user interactions, etc.        |
+| stop      | cleanup runtime                                              | dispose of active handles before the server shutdown.              | store session data in the LocalStorage when the user navigates away from Kibana, etc.      |
 
 Different service interfaces can and will be passed to setup, start, and stop because certain functionality makes sense in the context of a running plugin while other types
 of functionality may have restrictions or may only make sense in the context of a plugin that is stopping.
@@ -141,4 +143,4 @@ plugins to customize the Kibana experience. Examples of extension points are:
 
 ## Follow up material
 
-Learn how to build your own plugin by following <DocLink id="kibDevTutorialBuildAPlugin" />.
+Learn how to build your own plugin by following <DocLink id="kibHelloWorldApp" />.
