@@ -35,7 +35,7 @@ export type TimeFormatter = (
 
 type TimeFormatterBuilder = (max: number) => TimeFormatter;
 
-function getUnitLabelAndConvertedValue(
+export function getUnitLabelAndConvertedValue(
   unitKey: DurationTimeUnit,
   value: number
 ) {
@@ -122,14 +122,17 @@ function convertTo({
 export const toMicroseconds = (value: number, timeUnit: TimeUnit) =>
   moment.duration(value, timeUnit).asMilliseconds() * 1000;
 
-function getDurationUnitKey(max: number): DurationTimeUnit {
-  if (max > toMicroseconds(10, 'hours')) {
+export function getDurationUnitKey(
+  max: number,
+  threshold = 10
+): DurationTimeUnit {
+  if (max > toMicroseconds(threshold, 'hours')) {
     return 'hours';
   }
-  if (max > toMicroseconds(10, 'minutes')) {
+  if (max > toMicroseconds(threshold, 'minutes')) {
     return 'minutes';
   }
-  if (max > toMicroseconds(10, 'seconds')) {
+  if (max > toMicroseconds(threshold, 'seconds')) {
     return 'seconds';
   }
   if (max > toMicroseconds(1, 'milliseconds')) {
