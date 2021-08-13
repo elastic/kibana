@@ -10,7 +10,6 @@ import { renderHook } from '@testing-library/react-hooks';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { useSavedSearch } from './use_saved_search';
 import { getState } from './discover_state';
 import { uiSettingsMock } from '../../../../__mocks__/ui_settings';
@@ -59,7 +58,6 @@ describe('test useSavedSearch', () => {
       return useDiscoverState({
         services: discoverServiceMock,
         history,
-        initialIndexPattern: indexPatternMock,
         initialSavedSearch: savedSearchMock,
       });
     });
@@ -101,7 +99,6 @@ describe('test useSavedSearch', () => {
       return useDiscoverState({
         services: discoverServiceMock,
         history,
-        initialIndexPattern: indexPatternMock,
         initialSavedSearch: savedSearchMock,
       });
     });
