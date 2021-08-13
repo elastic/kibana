@@ -125,6 +125,12 @@
 
 # Presentation
 /src/plugins/dashboard/ @elastic/kibana-presentation
+/src/plugins/expression_error/ @elastic/kibana-presentation
+/src/plugins/expression_image/ @elastic/kibana-presentation
+/src/plugins/expression_metric/ @elastic/kibana-presentation
+/src/plugins/expression_repeat_image/ @elastic/kibana-presentation
+/src/plugins/expression_reveal_image/ @elastic/kibana-presentation
+/src/plugins/expression_shape/ @elastic/kibana-presentation
 /src/plugins/input_control_vis/ @elastic/kibana-presentation
 /src/plugins/vis_type_markdown/ @elastic/kibana-presentation
 /src/plugins/presentation_util/ @elastic/kibana-presentation
