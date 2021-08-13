@@ -63,6 +63,7 @@ function DiscoverDocumentsComponent({
 
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
+  const maxHeight = useMemo(() => uiSettings.get('truncate:maxHeight'), [uiSettings]);
 
   const documentState: DataDocumentsMsg = useDataState(documents$);
   const isLoading = documentState.fetchStatus === FetchStatus.LOADING;
@@ -153,6 +154,7 @@ function DiscoverDocumentsComponent({
             indexPattern={indexPattern}
             isLoading={isLoading}
             rows={rows}
+            maxHeight={maxHeight}
             sort={(state.sort as SortPairArr[]) || []}
             sampleSize={sampleSize}
             searchDescription={savedSearch.description}

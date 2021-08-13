@@ -103,7 +103,7 @@ export const getRenderCellValueFn = (
     });
 
     return (
-      <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
+      <EuiDescriptionList type="inline" className="dscDiscoverGrid__descriptionList">
         {[...highlightPairs, ...sourcePairs].slice(0, maxDocFieldsDisplayed).map(([key, value]) => (
           <Fragment key={key}>
             <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
@@ -147,7 +147,7 @@ export const getRenderCellValueFn = (
     });
 
     return (
-      <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
+      <EuiDescriptionList type="inline" className="dscDiscoverGrid__descriptionList">
         {[...highlightPairs, ...sourcePairs].slice(0, maxDocFieldsDisplayed).map(([key, value]) => (
           <Fragment key={key}>
             <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>

@@ -72,6 +72,10 @@ export interface DiscoverGridProps {
    */
   isLoading: boolean;
   /**
+   * max height of a row
+   */
+  maxHeight: number;
+  /**
    * Function used to add a column in the document flyout
    */
   onAddColumn: (column: string) => void;
@@ -160,6 +164,7 @@ export const DiscoverGrid = ({
   indexPattern,
   isLoading,
   expandedDoc,
+  maxHeight,
   onAddColumn,
   onFilter,
   onRemoveColumn,
@@ -226,9 +231,9 @@ export const DiscoverGrid = ({
 
   const rowHeightsOptions = useMemo(
     () => ({
-      defaultHeight: 'auto', // each row auto fit to content except rows which was defined in 'rowHeights'
+      defaultHeight: defaultColumns ? maxHeight : 'auto', // each row auto fit to content except rows which was defined in 'rowHeights'
     }),
-    []
+    [maxHeight, defaultColumns]
   );
 
   const paginationObj = useMemo(() => {
@@ -356,8 +361,6 @@ export const DiscoverGrid = ({
     );
   }
 
-  // @ts-ignore
-  // @ts-ignore
   return (
     <DiscoverGridContext.Provider
       value={{
