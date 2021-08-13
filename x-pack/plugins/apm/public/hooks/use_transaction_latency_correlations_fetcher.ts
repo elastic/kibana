@@ -12,14 +12,14 @@ import {
   IKibanaSearchResponse,
   isCompleteResponse,
   isErrorResponse,
-} from '../../../../../../../src/plugins/data/public';
+} from '../../../../../src/plugins/data/public';
 import type {
   HistogramItem,
   SearchServiceParams,
   SearchServiceValue,
-} from '../../../../common/search_strategies/correlations/types';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { ApmPluginStartDeps } from '../../../plugin';
+} from '../../common/search_strategies/correlations/types';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { ApmPluginStartDeps } from '../plugin';
 
 interface RawResponse {
   percentileThresholdValue?: number;
@@ -30,7 +30,9 @@ interface RawResponse {
   ccsWarning: boolean;
 }
 
-export const useCorrelations = (params: SearchServiceParams) => {
+export const useTransactionLatencyCorrelationsFetcher = (
+  params: Omit<SearchServiceParams, 'analyzeCorrelations'>
+) => {
   const {
     services: { data },
   } = useKibana<ApmPluginStartDeps>();
@@ -87,7 +89,11 @@ export const useCorrelations = (params: SearchServiceParams) => {
     abortCtrl.current.abort();
     abortCtrl.current = new AbortController();
 
-    const req = { params };
+    const searchServiceParams: SearchServiceParams = {
+      ...params,
+      analyzeCorrelations: true,
+    };
+    const req = { params: searchServiceParams };
 
     // Submit the search request using the `data.search` service.
     searchSubscription$.current = data.search

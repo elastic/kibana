@@ -20,7 +20,7 @@ import { useLicenseContext } from '../../../context/license/use_license_context'
 
 import { LicensePrompt } from '../../shared/license_prompt';
 
-import { MlLatencyCorrelations } from '../correlations/ml_latency_correlations';
+import { LatencyCorrelations } from '../correlations/latency_correlations';
 
 import type { TabContentProps } from './types';
 
@@ -40,7 +40,7 @@ function LatencyCorrelationsTab({}: TabContentProps) {
   useTrackMetric({ ...metric, delay: 15000 });
 
   return hasActivePlatinumLicense ? (
-    <MlLatencyCorrelations correlationAnalysisEnabled={true} />
+    <LatencyCorrelations />
   ) : (
     <LicensePrompt
       text={i18n.translate('xpack.apm.latencyCorrelations.licenseCheckText', {

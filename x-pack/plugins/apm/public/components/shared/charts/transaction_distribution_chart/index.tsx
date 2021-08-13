@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   AnnotationDomainType,
   AreaSeries,
@@ -30,14 +30,13 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { getDurationFormatter } from '../../../../common/utils/formatters';
+import { getDurationFormatter } from '../../../../../common/utils/formatters';
+import { HistogramItem } from '../../../../../common/search_strategies/correlations/types';
 
-import { HistogramItem } from '../../../../common/search_strategies/correlations/types';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useTheme } from '../../../../hooks/use_theme';
 
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useTheme } from '../../../hooks/use_theme';
-
-import { ChartContainer } from '../../shared/charts/chart_container';
+import { ChartContainer } from '../chart_container';
 
 const { euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
@@ -132,7 +131,7 @@ export const replaceHistogramDotsWithBars = (
   }
 };
 
-export function CorrelationsChart({
+export function TransactionDistributionChart({
   field,
   value,
   histogram: originalHistogram,
@@ -145,11 +144,16 @@ export function CorrelationsChart({
 }: CorrelationsChartProps) {
   const euiTheme = useTheme();
 
+  const patchedOverallHistogram = useMemo(
+    () => replaceHistogramDotsWithBars(overallHistogram),
+    [overallHistogram]
+  );
+
   const annotationsDataValues: LineAnnotationDatum[] = [
     {
       dataValue: markerValue,
       details: i18n.translate(
-        'xpack.apm.correlations.latency.chart.percentileMarkerLabel',
+        'xpack.apm.transactionDistribution.chart.percentileMarkerLabel',
         {
           defaultMessage: '{markerPercentile}th percentile',
           values: {
@@ -160,7 +164,8 @@ export function CorrelationsChart({
     },
   ];
 
-  const xMax = Math.max(...(overallHistogram ?? []).map((d) => d.key)) ?? 0;
+  const xMax =
+    Math.max(...(patchedOverallHistogram ?? []).map((d) => d.key)) ?? 0;
 
   const durationFormatter = getDurationFormatter(xMax);
 
@@ -188,9 +193,12 @@ export function CorrelationsChart({
     >
       <ChartContainer
         height={250}
-        hasData={Array.isArray(overallHistogram) && overallHistogram.length > 0}
+        hasData={
+          Array.isArray(patchedOverallHistogram) &&
+          patchedOverallHistogram.length > 0
+        }
         status={
-          Array.isArray(overallHistogram)
+          Array.isArray(patchedOverallHistogram)
             ? FETCH_STATUS.SUCCESS
             : FETCH_STATUS.LOADING
         }
@@ -224,7 +232,7 @@ export function CorrelationsChart({
                 {
                   dataValue: markerCurrentTransaction,
                   details: i18n.translate(
-                    'xpack.apm.correlations.latency.chart.currentTransactionMarkerLabel',
+                    'xpack.apm.transactionDistribution.chart.currentTransactionMarkerLabel',
                     {
                       defaultMessage: 'Current sample',
                     }
@@ -233,7 +241,7 @@ export function CorrelationsChart({
               ]}
               style={getAnnotationsStyle(euiPaletteColorBlind()[0])}
               marker={i18n.translate(
-                'xpack.apm.correlations.latency.chart.currentTransactionMarkerLabel',
+                'xpack.apm.transactionDistribution.chart.currentTransactionMarkerLabel',
                 {
                   defaultMessage: 'Current sample',
                 }
@@ -259,7 +267,7 @@ export function CorrelationsChart({
             id="y-axis"
             domain={yAxisDomain}
             title={i18n.translate(
-              'xpack.apm.correlations.latency.chart.numberOfTransactionsLabel',
+              'xpack.apm.transactionDistribution.chart.numberOfTransactionsLabel',
               { defaultMessage: '# transactions' }
             )}
             position={Position.Left}
@@ -269,12 +277,12 @@ export function CorrelationsChart({
           />
           <AreaSeries
             id={i18n.translate(
-              'xpack.apm.correlations.latency.chart.overallLatencyDistributionLabel',
+              'xpack.apm.transactionDistribution.chart.overallLatencyDistributionLabel',
               { defaultMessage: 'Overall latency distribution' }
             )}
             xScaleType={ScaleType.Log}
             yScaleType={ScaleType.Log}
-            data={overallHistogram ?? []}
+            data={patchedOverallHistogram ?? []}
             curve={CurveType.CURVE_STEP_AFTER}
             xAccessor="key"
             yAccessors={['doc_count']}
@@ -286,7 +294,7 @@ export function CorrelationsChart({
             value !== undefined && (
               <AreaSeries
                 id={i18n.translate(
-                  'xpack.apm.correlations.latency.chart.selectedTermLatencyDistributionLabel',
+                  'xpack.apm.transactionDistribution.chart.selectedTermLatencyDistributionLabel',
                   {
                     defaultMessage: '{fieldName}:{fieldValue}',
                     values: {
