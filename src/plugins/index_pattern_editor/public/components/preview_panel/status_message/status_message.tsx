@@ -127,7 +127,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
       <span>
         <FormattedMessage
           id="indexPatternEditor.status.partialMatchLabel.partialMatchDetail"
-          defaultMessage="Your index pattern doesn't match any data streams, indices, or index aliases, but you have {strongIndices} which
+          defaultMessage="Your index pattern doesn't match any data streams, indices, or index aliases, but you have {strongIndices} that
           {matchedIndicesLength, plural,
             one {is}
             other {are}
