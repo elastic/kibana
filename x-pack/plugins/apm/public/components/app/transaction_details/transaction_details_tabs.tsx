@@ -17,7 +17,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTransactionTraceSamplesFetcher } from '../../../hooks/use_transaction_trace_samples_fetcher';
 
 import { HeightRetainer } from '../../shared/HeightRetainer';
-import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
+import { fromQuery, push, toQuery } from '../../shared/Links/url_helpers';
 
 import { failedTransactionsCorrelationsTab } from './failed_transactions_correlations_tab';
 import { latencyCorrelationsTab } from './latency_correlations_tab';
@@ -64,17 +64,15 @@ export function TransactionDetailsTabs() {
   const { traceSamples } = traceSamplesData;
 
   const clearChartSelection = () => {
-    const currentQuery = toQuery(history.location.search);
-    delete currentQuery.sampleRangeFrom;
-    delete currentQuery.sampleRangeTo;
-
     const firstSample = traceSamples[0];
-    currentQuery.transactionId = firstSample?.transactionId;
-    currentQuery.traceId = firstSample?.traceId;
 
-    history.push({
-      ...history.location,
-      search: fromQuery(currentQuery),
+    push(history, {
+      query: {
+        sampleRangeFrom: '',
+        sampleRangeTo: '',
+        transactionId: firstSample?.transactionId,
+        traceId: firstSample?.traceId,
+      },
     });
   };
 

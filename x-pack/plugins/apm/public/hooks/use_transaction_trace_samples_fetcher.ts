@@ -63,8 +63,8 @@ export function useTransactionTraceSamplesFetcher({
               transactionName,
               transactionId,
               traceId,
-              sampleRangeFrom: sampleRangeFrom + '',
-              sampleRangeTo: sampleRangeTo + '',
+              sampleRangeFrom,
+              sampleRangeTo,
             },
           },
         });

@@ -218,8 +218,8 @@ const transactionTraceSamplesRoute = createApmServerRoute({
       t.partial({
         transactionId: t.string,
         traceId: t.string,
-        sampleRangeFrom: t.string,
-        sampleRangeTo: t.string,
+        sampleRangeFrom: toNumberRt,
+        sampleRangeTo: toNumberRt,
       }),
       environmentRt,
       kueryRt,
@@ -250,12 +250,8 @@ const transactionTraceSamplesRoute = createApmServerRoute({
       transactionName,
       transactionId,
       traceId,
-      sampleRangeFrom:
-        sampleRangeFrom !== undefined
-          ? parseInt(sampleRangeFrom, 10)
-          : undefined,
-      sampleRangeTo:
-        sampleRangeTo !== undefined ? parseInt(sampleRangeTo, 10) : undefined,
+      sampleRangeFrom,
+      sampleRangeTo,
       setup,
     });
   },
