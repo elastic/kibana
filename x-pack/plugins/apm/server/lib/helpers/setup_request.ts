@@ -62,7 +62,10 @@ interface SetupRequestParams {
 
 type InferSetup<TParams extends SetupRequestParams> = Setup &
   (TParams extends { query: { start: number } } ? { start: number } : {}) &
-  (TParams extends { query: { end: number } } ? { end: number } : {});
+  (TParams extends { query: { end: number } } ? { end: number } : {}) &
+  (TParams extends { query: Partial<SetupTimeRange> }
+    ? Partial<SetupTimeRange>
+    : {});
 
 export async function setupRequest<TParams extends SetupRequestParams>({
   context,

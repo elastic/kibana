@@ -33,6 +33,7 @@ export interface InlineEditableTableProps<Item extends ItemWithAnID> {
   canRemoveLastItem?: boolean;
   className?: string;
   description?: React.ReactNode;
+  disableReordering?: boolean;
   isLoading?: boolean;
   lastItemWarning?: string;
   noItemsMessage?: (editNewItem: () => void) => React.ReactNode;
@@ -170,6 +171,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
         noItemsMessage={noItemsMessage(editNewItem)}
         onReorder={reorderItems}
         disableDragging={isEditing}
+        {...rest}
       />
     </>
   );
