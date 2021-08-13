@@ -242,7 +242,7 @@ export function CorrelationsChart({
             />
           )}
           <LineAnnotation
-            id="annotation_1"
+            id="apmCorrelationsChartPercentileAnnotation"
             domainType={AnnotationDomainType.XDomain}
             dataValues={annotationsDataValues}
             style={getAnnotationsStyle()}
