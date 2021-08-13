@@ -34,6 +34,7 @@ import {
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import { useIndexPattern } from './use_index_pattern';
 import { environmentQuery } from './queries';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 
 const filterNames: UxLocalUIFilterName[] = [
   'location',
@@ -71,7 +72,7 @@ function LocalUIFilters() {
   const getFilters = useMemo(() => {
     const dataFilters: ESFilter[] = [
       ...RUM_DATA_FILTERS,
-      ...environmentQuery(environment),
+      ...environmentQuery(environment || ENVIRONMENT_ALL.value),
     ];
     if (serviceName) {
       dataFilters.push({

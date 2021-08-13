@@ -44,8 +44,8 @@ export async function getServiceTransactionGroups({
   transactionType,
   latencyAggregationType,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;

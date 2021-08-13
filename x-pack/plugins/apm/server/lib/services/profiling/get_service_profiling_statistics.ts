@@ -189,10 +189,10 @@ export async function getServiceProfilingStatistics({
   valueType,
   logger,
 }: {
-  kuery?: string;
+  kuery: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
-  environment?: string;
+  environment: string;
   valueType: ProfilingValueType;
   logger: Logger;
 }) {

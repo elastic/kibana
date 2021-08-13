@@ -21,7 +21,7 @@ export async function getServiceAnnotations({
   logger,
 }: {
   serviceName: string;
-  environment?: string;
+  environment: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
   annotationsClient?: ScopedAnnotationsClient;

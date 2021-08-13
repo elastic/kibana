@@ -11,7 +11,7 @@ import { getServiceAnomalies } from '../../service_map/get_service_anomalies';
 import { ServicesItemsSetup } from './get_services_items';
 
 interface AggregationParams {
-  environment?: string;
+  environment: string;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
 }
