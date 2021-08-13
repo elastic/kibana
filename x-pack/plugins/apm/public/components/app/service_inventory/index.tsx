@@ -149,7 +149,6 @@ function useServicesFetcher() {
     mainStatisticsData,
     mainStatisticsStatus,
     comparisonData,
-    isLoading: mainStatisticsStatus === FETCH_STATUS.LOADING,
   };
 }
 
@@ -160,7 +159,6 @@ export function ServiceInventory() {
     mainStatisticsData,
     mainStatisticsStatus,
     comparisonData,
-    isLoading,
   } = useServicesFetcher();
 
   const {
@@ -180,6 +178,8 @@ export function ServiceInventory() {
     !anomalyDetectionJobsData?.jobs.length &&
     canCreateJob &&
     !userHasDismissedCallout;
+
+  const isLoading = mainStatisticsStatus === FETCH_STATUS.LOADING;
 
   return (
     <>
