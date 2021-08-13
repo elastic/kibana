@@ -40,20 +40,17 @@ import { help as gt } from './dict/gt';
 import { help as gte } from './dict/gte';
 import { help as head } from './dict/head';
 import { help as ifFn } from './dict/if';
-import { help as image } from './dict/image';
 import { help as joinRows } from './dict/join_rows';
 import { help as location } from './dict/location';
 import { help as lt } from './dict/lt';
 import { help as lte } from './dict/lte';
 import { help as mapCenter } from './dict/map_center';
 import { help as markdown } from './dict/markdown';
-import { help as metric } from './dict/metric';
 import { help as neq } from './dict/neq';
 import { help as pie } from './dict/pie';
 import { help as plot } from './dict/plot';
 import { help as ply } from './dict/ply';
 import { help as pointseries } from './dict/pointseries';
-import { help as progress } from './dict/progress';
 import { help as render } from './dict/render';
 import { help as replace } from './dict/replace';
 import { help as rounddate } from './dict/rounddate';
@@ -199,19 +196,16 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   head,
   if: ifFn,
   joinRows,
-  image,
   location,
   lt,
   lte,
   mapCenter,
   markdown,
-  metric,
   neq,
   pie,
   plot,
   ply,
   pointseries,
-  progress,
   render,
   replace,
   rounddate,

@@ -235,22 +235,18 @@ export function Detail() {
         redirectToPath = [
           PLUGIN_ID,
           {
-            path: `#${
-              pagePathGetters.policy_details({
-                policyId: agentPolicyIdFromContext,
-              })[1]
-            }`,
+            path: pagePathGetters.policy_details({
+              policyId: agentPolicyIdFromContext,
+            })[1],
           },
         ];
       } else {
         redirectToPath = [
           INTEGRATIONS_PLUGIN_ID,
           {
-            path: `#${
-              pagePathGetters.integration_details_policies({
-                pkgkey,
-              })[1]
-            }`,
+            path: pagePathGetters.integration_details_policies({
+              pkgkey,
+            })[1],
           },
         ];
       }
@@ -260,16 +256,16 @@ export function Detail() {
         onCancelNavigateTo: [
           INTEGRATIONS_PLUGIN_ID,
           {
-            path: currentPath,
+            path: pagePathGetters.integration_details_overview({
+              pkgkey,
+            })[1],
           },
         ],
         onCancelUrl: currentPath,
       };
 
       services.application.navigateToApp(PLUGIN_ID, {
-        // Necessary because of Fleet's HashRouter. Can be changed when
-        // https://github.com/elastic/kibana/issues/96134 is resolved
-        path: `#${path}`,
+        path,
         state: redirectBackRouteState,
       });
     },

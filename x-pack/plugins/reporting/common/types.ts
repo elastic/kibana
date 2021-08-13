@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
+
 export interface PageSizeParams {
   pageMarginTop: number;
   pageMarginBottom: number;
@@ -44,15 +46,16 @@ export interface ReportDocumentHead {
   _primary_term: number;
 }
 
-export interface TaskRunResult {
+export interface ReportOutput {
   content_type: string | null;
   content: string | null;
   size: number;
   csv_contains_formulas?: boolean;
   max_size_reached?: boolean;
-  needs_sorting?: boolean;
   warnings?: string[];
 }
+
+export type TaskRunResult = Omit<ReportOutput, 'content'>;
 
 export interface ReportSource {
   /*
@@ -63,6 +66,11 @@ export interface ReportSource {
   created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
   payload: {
     headers: string; // encrypted headers
+    /**
+     * PDF V2 reports will contain locators parameters (see {@link LocatorPublic}) that will be converted to {@link KibanaLocation}s when
+     * generating a report
+     */
+    locatorParams?: LocatorParams[];
     isDeprecated?: boolean; // set to true when the export type is being phased out
   } & BaseParams;
   meta: { objectType: string; layout?: string }; // for telemetry
@@ -74,7 +82,7 @@ export interface ReportSource {
   /*
    * `output` is only populated if the report job is completed or failed.
    */
-  output: TaskRunResult | null;
+  output: ReportOutput | null;
 
   /*
    * Optional fields: populated when the job is claimed to execute, and after
@@ -98,10 +106,11 @@ export interface ReportDocument extends ReportDocumentHead {
 }
 
 export interface BaseParams {
-  browserTimezone?: string; // browserTimezone is optional: it is not in old POST URLs that were generated prior to being added to this interface
   layout?: LayoutParams;
   objectType: string;
   title: string;
+  browserTimezone: string; // to format dates in the user's time zone
+  version: string; // to handle any state migrations
 }
 
 export type JobId = string;
@@ -120,10 +129,6 @@ export type JobStatus =
   | 'processing' // Report job has been claimed and is executing
   | 'failed'; // Report was not successful, and all retries are done. Nothing to download.
 
-export interface JobContent {
-  content: string;
-}
-
 /*
  * Info API response: to avoid unnecessary large payloads on a network, the
  * report query results do not include `payload.headers` or `output.content`,
@@ -131,7 +136,7 @@ export interface JobContent {
  */
 interface ReportSimple extends Omit<ReportSource, 'payload' | 'output'> {
   payload: Omit<ReportSource['payload'], 'headers'>;
-  output?: Omit<TaskRunResult, 'content'>; // is undefined for report jobs that are not completed
+  output?: Omit<ReportOutput, 'content'>; // is undefined for report jobs that are not completed
 }
 
 /*
@@ -169,8 +174,21 @@ export type DownloadReportFn = (jobId: JobId) => DownloadLink;
 type ManagementLink = string;
 export type ManagementLinkFn = () => ManagementLink;
 
+export interface LocatorParams<
+  P extends SerializableRecord = SerializableRecord & { forceNow?: string }
+> {
+  id: string;
+  version: string;
+  params: P;
+}
+
 export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
 
 export interface IlmPolicyStatusResponse {
   status: IlmPolicyMigrationStatus;
 }
+
+type Url = string;
+type UrlLocatorTuple = [url: Url, locatorParams: LocatorParams];
+
+export type UrlOrUrlLocatorTuple = Url | UrlLocatorTuple;

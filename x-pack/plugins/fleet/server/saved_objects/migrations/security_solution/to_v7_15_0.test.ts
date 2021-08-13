@@ -14,9 +14,16 @@ import { migratePackagePolicyToV7150 as migration } from './to_v7_15_0';
 describe('7.15.0 Endpoint Package Policy migration', () => {
   const policyDoc = ({
     windowsMemory = {},
+    windowsBehavior = {},
     windowsPopup = {},
     windowsMalware = {},
     windowsRansomware = {},
+    macBehavior = {},
+    macMalware = {},
+    macPopup = {},
+    linuxBehavior = {},
+    linuxMalware = {},
+    linuxPopup = {},
   }) => {
     return {
       id: 'mock-saved-object-id',
@@ -49,7 +56,18 @@ describe('7.15.0 Endpoint Package Policy migration', () => {
                     ...windowsMalware,
                     ...windowsRansomware,
                     ...windowsMemory,
+                    ...windowsBehavior,
                     ...windowsPopup,
+                  },
+                  mac: {
+                    ...macMalware,
+                    ...macBehavior,
+                    ...macPopup,
+                  },
+                  linux: {
+                    ...linuxMalware,
+                    ...linuxBehavior,
+                    ...linuxPopup,
                   },
                 },
               },
@@ -61,7 +79,7 @@ describe('7.15.0 Endpoint Package Policy migration', () => {
     };
   };
 
-  it('adds windows memory protection alongside malware and ramsomware', () => {
+  it('adds windows memory protection, and windows, mac and linux behavior protection alongside malware and ramsomware', () => {
     const initialDoc = policyDoc({
       windowsMalware: { malware: { mode: 'off' } },
       windowsRansomware: { ransomware: { mode: 'off', supported: true } },
@@ -77,6 +95,24 @@ describe('7.15.0 Endpoint Package Policy migration', () => {
           },
         },
       },
+      macMalware: { malware: { mode: 'off' } },
+      macPopup: {
+        popup: {
+          malware: {
+            message: '',
+            enabled: true,
+          },
+        },
+      },
+      linuxMalware: { malware: { mode: 'off' } },
+      linuxPopup: {
+        popup: {
+          malware: {
+            message: '',
+            enabled: true,
+          },
+        },
+      },
     });
 
     const migratedDoc = policyDoc({
@@ -84,6 +120,7 @@ describe('7.15.0 Endpoint Package Policy migration', () => {
       windowsRansomware: { ransomware: { mode: 'off', supported: true } },
       // new memory protection
       windowsMemory: { memory_protection: { mode: 'off', supported: true } },
+      windowsBehavior: { behavior_protection: { mode: 'off', supported: true } },
       windowsPopup: {
         popup: {
           malware: {
@@ -96,6 +133,41 @@ describe('7.15.0 Endpoint Package Policy migration', () => {
           },
           // new memory popup setup
           memory_protection: {
+            message: '',
+            enabled: false,
+          },
+          // new behavior popup setup
+          behavior_protection: {
+            message: '',
+            enabled: false,
+          },
+        },
+      },
+      macMalware: { malware: { mode: 'off' } },
+      macBehavior: { behavior_protection: { mode: 'off', supported: true } },
+      macPopup: {
+        popup: {
+          malware: {
+            message: '',
+            enabled: true,
+          },
+          // new behavior popup setup
+          behavior_protection: {
+            message: '',
+            enabled: false,
+          },
+        },
+      },
+      linuxMalware: { malware: { mode: 'off' } },
+      linuxBehavior: { behavior_protection: { mode: 'off', supported: true } },
+      linuxPopup: {
+        popup: {
+          malware: {
+            message: '',
+            enabled: true,
+          },
+          // new behavior popup setup
+          behavior_protection: {
             message: '',
             enabled: false,
           },

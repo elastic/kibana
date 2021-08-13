@@ -29,8 +29,34 @@ import { defaultRowRenderers } from '../../../timelines/components/timeline/body
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { useTimelineEvents } from '../../../timelines/containers';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
+import { mockTimelines } from '../../mock/mock_timelines_plugin';
 
-jest.mock('../../lib/kibana');
+jest.mock('../../lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        navigateToApp: jest.fn(),
+        getUrlForApp: jest.fn(),
+      },
+      uiSettings: {
+        get: jest.fn(),
+      },
+      savedObjects: {
+        client: {},
+      },
+      timelines: { ...mockTimelines },
+    },
+  }),
+  useToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+  }),
+  useGetUserCasesPermissions: jest.fn(),
+  useDateFormat: jest.fn(),
+  useTimeZone: jest.fn(),
+}));
 
 jest.mock('../../hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -124,6 +150,7 @@ describe('EventsViewer', () => {
   const mount = useMountAppended();
 
   let testProps = {
+    defaultCellActions,
     defaultModel: eventsDefaultModel,
     end: to,
     id: TimelineId.test,

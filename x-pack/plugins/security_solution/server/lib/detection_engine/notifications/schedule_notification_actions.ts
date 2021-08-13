@@ -10,8 +10,8 @@ import { AlertInstance } from '../../../../../alerting/server';
 import { RuleParams } from '../schemas/rule_schemas';
 
 export type NotificationRuleTypeParams = RuleParams & {
-  name: string;
   id: string;
+  name: string;
 };
 
 interface ScheduleNotificationActions {

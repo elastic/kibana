@@ -156,7 +156,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     elasticsearch: {
       legacy: deps.elasticsearch.legacy,
     },
-    executionContext: deps.executionContext,
+    executionContext: {
+      withContext: deps.executionContext.withContext,
+    },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
       registerRouteHandlerContext: <

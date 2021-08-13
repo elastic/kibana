@@ -37,7 +37,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, image }) => {
   const LAUNCH_BUTTON_TEXT = i18n.translate(
     'xpack.enterpriseSearch.overview.productCard.launchButton',
     {
-      defaultMessage: 'Launch {productName}',
+      defaultMessage: 'Open {productName}',
       values: { productName: product.NAME },
     }
   );
@@ -45,7 +45,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, image }) => {
   const SETUP_BUTTON_TEXT = i18n.translate(
     'xpack.enterpriseSearch.overview.productCard.setupButton',
     {
-      defaultMessage: 'Setup {productName}',
+      defaultMessage: 'Set up {productName}',
       values: { productName: product.NAME },
     }
   );
@@ -80,6 +80,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, image }) => {
           {config.host ? LAUNCH_BUTTON_TEXT : SETUP_BUTTON_TEXT}
         </EuiButtonTo>
       }
+      data-test-subj={`${product.ID}ProductCard`}
     />
   );
 };

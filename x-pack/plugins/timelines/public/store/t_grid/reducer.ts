@@ -7,6 +7,7 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
+  addProviderToTimeline,
   applyDeltaToColumnWidth,
   clearEventsDeleted,
   clearEventsLoading,
@@ -17,6 +18,8 @@ import {
   setEventsDeleted,
   setEventsLoading,
   setTGridSelectAll,
+  setOpenAddToExistingCase,
+  setOpenAddToNewCase,
   setSelected,
   toggleDetailPanel,
   updateColumns,
@@ -28,6 +31,7 @@ import {
 } from './actions';
 
 import {
+  addProviderToTimelineHelper,
   applyDeltaToTimelineColumnWidth,
   createInitTGrid,
   setInitializeTgridSettings,
@@ -206,6 +210,30 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
       [id]: {
         ...state.timelineById[id],
         selectAll,
+      },
+    },
+  }))
+  .case(addProviderToTimeline, (state, { id, dataProvider }) => ({
+    ...state,
+    timelineById: addProviderToTimelineHelper(id, dataProvider, state.timelineById),
+  }))
+  .case(setOpenAddToExistingCase, (state, { id, isOpen }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        isAddToExistingCaseOpen: isOpen,
+      },
+    },
+  }))
+  .case(setOpenAddToNewCase, (state, { id, isOpen }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        isCreateNewCaseOpen: isOpen,
       },
     },
   }))

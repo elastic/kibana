@@ -41,14 +41,14 @@ import { getEntryMatchMock } from '../../../../../lists/common/schemas/types/ent
 import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comment.mock';
 import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '../../../../../lists/common/constants.mock';
-import { IFieldType, IIndexPattern } from 'src/plugins/data/common';
 import { CodeSignature } from '../../../../common/ecs/file';
+import { IndexPatternBase } from '@kbn/es-query';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
 }));
 
-const getMockIndexPattern = (): IIndexPattern => ({
+const getMockIndexPattern = (): IndexPatternBase => ({
   fields,
   id: '1234',
   title: 'logstash-*',
@@ -90,9 +90,6 @@ const mockLinuxEndpointFields = [
     readFromDocValues: false,
   },
 ];
-
-export const getEndpointField = (name: string) =>
-  mockEndpointFields.find((field) => field.name === name) as IFieldType;
 
 describe('Exception helpers', () => {
   beforeEach(() => {
@@ -367,7 +364,7 @@ describe('Exception helpers', () => {
           name: 'nested.field',
         },
       ],
-    } as IIndexPattern;
+    } as IndexPatternBase;
 
     test('it should return false with an empty array', () => {
       const payload: ExceptionListItemSchema[] = [];
@@ -826,7 +823,8 @@ describe('Exception helpers', () => {
         },
       ]);
     });
-
+  });
+  describe('ransomware protection exception items', () => {
     test('it should return pre-populated ransomware items for event code `ransomware`', () => {
       const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
@@ -941,7 +939,9 @@ describe('Exception helpers', () => {
         },
       ]);
     });
+  });
 
+  describe('memory protection exception items', () => {
     test('it should return pre-populated memory signature items for event code `memory_signature`', () => {
       const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
@@ -981,6 +981,44 @@ describe('Exception helpers', () => {
           operator: 'included',
           type: 'match',
           value: 'some name',
+          id: '123',
+        },
+        {
+          field: 'process.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some hash',
+          id: '123',
+        },
+      ]);
+    });
+
+    test('it should return pre-populated memory signature items for event code `memory_signature` and skip Empty', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        process: {
+          name: '', // name is empty
+          // executable: '',  left intentionally commented
+          hash: {
+            sha256: 'some hash',
+          },
+        },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        Memory_protection: {
+          feature: 'signature',
+        },
+        event: {
+          code: 'memory_signature',
+        },
+      });
+
+      // should not contain name or executable
+      expect(defaultItems[0].entries).toEqual([
+        {
+          field: 'Memory_protection.feature',
+          operator: 'included',
+          type: 'match',
+          value: 'signature',
           id: '123',
         },
         {
@@ -1088,7 +1126,13 @@ describe('Exception helpers', () => {
               value: '4000',
               id: '123',
             },
-            { field: 'region_size', operator: 'included', type: 'match', value: '4000', id: '123' },
+            {
+              field: 'region_size',
+              operator: 'included',
+              type: 'match',
+              value: '4000',
+              id: '123',
+            },
             {
               field: 'region_protection',
               operator: 'included',
@@ -1105,6 +1149,450 @@ describe('Exception helpers', () => {
             },
           ],
           id: '123',
+        },
+      ]);
+    });
+
+    test('it should return pre-populated memory shellcode items for event code `malicious_thread` and skip empty', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        process: {
+          name: '', // name is empty
+          // executable: '',  left intentionally commented
+          Ext: {
+            token: {
+              integrity_level_name: 'high',
+            },
+          },
+        },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        Memory_protection: {
+          feature: 'shellcode_thread',
+          self_injection: true,
+        },
+        event: {
+          code: 'malicious_thread',
+        },
+        Target: {
+          process: {
+            thread: {
+              Ext: {
+                start_address_allocation_offset: 0,
+                start_address_bytes_disasm_hash: 'a disam hash',
+                start_address_details: {
+                  // allocation_type: '', left intentionally commented
+                  allocation_size: 4000,
+                  region_size: 4000,
+                  region_protection: 'RWX',
+                  memory_pe: {
+                    imphash: 'a hash',
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // no name, no exceutable, no allocation_type
+      expect(defaultItems[0].entries).toEqual([
+        {
+          field: 'Memory_protection.feature',
+          operator: 'included',
+          type: 'match',
+          value: 'shellcode_thread',
+          id: '123',
+        },
+        {
+          field: 'Memory_protection.self_injection',
+          operator: 'included',
+          type: 'match',
+          value: 'true',
+          id: '123',
+        },
+        {
+          field: 'process.Ext.token.integrity_level_name',
+          operator: 'included',
+          type: 'match',
+          value: 'high',
+          id: '123',
+        },
+        {
+          field: 'Target.process.thread.Ext.start_address_details',
+          type: 'nested',
+          entries: [
+            {
+              field: 'allocation_size',
+              operator: 'included',
+              type: 'match',
+              value: '4000',
+              id: '123',
+            },
+            {
+              field: 'region_size',
+              operator: 'included',
+              type: 'match',
+              value: '4000',
+              id: '123',
+            },
+            {
+              field: 'region_protection',
+              operator: 'included',
+              type: 'match',
+              value: 'RWX',
+              id: '123',
+            },
+            {
+              field: 'memory_pe.imphash',
+              operator: 'included',
+              type: 'match',
+              value: 'a hash',
+              id: '123',
+            },
+          ],
+          id: '123',
+        },
+      ]);
+    });
+  });
+  describe('behavior protection exception items', () => {
+    test('it should return pre-populated behavior protection items', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        rule: {
+          id: '123',
+        },
+        process: {
+          command_line: 'command_line',
+          executable: 'some file path',
+          parent: {
+            executable: 'parent file path',
+          },
+          code_signature: {
+            subject_name: 'subject-name',
+            trusted: 'true',
+          },
+        },
+        event: {
+          code: 'behavior',
+        },
+        file: {
+          path: 'fake-file-path',
+          name: 'fake-file-name',
+        },
+        source: {
+          ip: '0.0.0.0',
+        },
+        destination: {
+          ip: '0.0.0.0',
+        },
+        registry: {
+          path: 'registry-path',
+          value: 'registry-value',
+          data: {
+            strings: 'registry-strings',
+          },
+        },
+        dll: {
+          path: 'dll-path',
+          code_signature: {
+            subject_name: 'dll-code-signature-subject-name',
+            trusted: 'false',
+          },
+          pe: {
+            original_file_name: 'dll-pe-original-file-name',
+          },
+        },
+        dns: {
+          question: {
+            name: 'dns-question-name',
+            type: 'dns-question-type',
+          },
+        },
+        user: {
+          id: '0987',
+        },
+      });
+
+      expect(defaultItems[0].entries).toEqual([
+        {
+          id: '123',
+          field: 'rule.id',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '123',
+        },
+        {
+          id: '123',
+          field: 'process.executable.caseless',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'some file path',
+        },
+        {
+          id: '123',
+          field: 'process.command_line',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'command_line',
+        },
+        {
+          id: '123',
+          field: 'process.parent.executable',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'parent file path',
+        },
+        {
+          id: '123',
+          field: 'process.code_signature.subject_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'subject-name',
+        },
+        {
+          id: '123',
+          field: 'file.path',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'fake-file-path',
+        },
+        {
+          id: '123',
+          field: 'file.name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'fake-file-name',
+        },
+        {
+          id: '123',
+          field: 'source.ip',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0.0.0.0',
+        },
+        {
+          id: '123',
+          field: 'destination.ip',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0.0.0.0',
+        },
+        {
+          id: '123',
+          field: 'registry.path',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'registry-path',
+        },
+        {
+          id: '123',
+          field: 'registry.value',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'registry-value',
+        },
+        {
+          id: '123',
+          field: 'registry.data.strings',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'registry-strings',
+        },
+        {
+          id: '123',
+          field: 'dll.path',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-path',
+        },
+        {
+          id: '123',
+          field: 'dll.code_signature.subject_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-code-signature-subject-name',
+        },
+        {
+          id: '123',
+          field: 'dll.pe.original_file_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-pe-original-file-name',
+        },
+        {
+          id: '123',
+          field: 'dns.question.name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dns-question-name',
+        },
+        {
+          id: '123',
+          field: 'dns.question.type',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dns-question-type',
+        },
+        {
+          id: '123',
+          field: 'user.id',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0987',
+        },
+      ]);
+    });
+    test('it should return pre-populated behavior protection fields and skip empty', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        rule: {
+          id: '123',
+        },
+        process: {
+          // command_line: 'command_line', intentionally left commented
+          executable: 'some file path',
+          parent: {
+            executable: 'parent file path',
+          },
+          code_signature: {
+            subject_name: 'subject-name',
+            trusted: 'true',
+          },
+        },
+        event: {
+          code: 'behavior',
+        },
+        file: {
+          // path: 'fake-file-path', intentionally left commented
+          name: 'fake-file-name',
+        },
+        source: {
+          ip: '0.0.0.0',
+        },
+        destination: {
+          ip: '0.0.0.0',
+        },
+        // intentionally left commented
+        // registry: {
+        // path: 'registry-path',
+        // value: 'registry-value',
+        // data: {
+        // strings: 'registry-strings',
+        // },
+        // },
+        dll: {
+          path: 'dll-path',
+          code_signature: {
+            subject_name: 'dll-code-signature-subject-name',
+            trusted: 'false',
+          },
+          pe: {
+            original_file_name: 'dll-pe-original-file-name',
+          },
+        },
+        dns: {
+          question: {
+            name: 'dns-question-name',
+            type: 'dns-question-type',
+          },
+        },
+        user: {
+          id: '0987',
+        },
+      });
+
+      expect(defaultItems[0].entries).toEqual([
+        {
+          id: '123',
+          field: 'rule.id',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '123',
+        },
+        {
+          id: '123',
+          field: 'process.executable.caseless',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'some file path',
+        },
+        {
+          id: '123',
+          field: 'process.parent.executable',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'parent file path',
+        },
+        {
+          id: '123',
+          field: 'process.code_signature.subject_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'subject-name',
+        },
+        {
+          id: '123',
+          field: 'file.name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'fake-file-name',
+        },
+        {
+          id: '123',
+          field: 'source.ip',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0.0.0.0',
+        },
+        {
+          id: '123',
+          field: 'destination.ip',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0.0.0.0',
+        },
+        {
+          id: '123',
+          field: 'dll.path',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-path',
+        },
+        {
+          id: '123',
+          field: 'dll.code_signature.subject_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-code-signature-subject-name',
+        },
+        {
+          id: '123',
+          field: 'dll.pe.original_file_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-pe-original-file-name',
+        },
+        {
+          id: '123',
+          field: 'dns.question.name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dns-question-name',
+        },
+        {
+          id: '123',
+          field: 'dns.question.type',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dns-question-type',
+        },
+        {
+          id: '123',
+          field: 'user.id',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0987',
         },
       ]);
     });

@@ -15,6 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const pageObjects = getPageObjects(['common', 'infraHome', 'infraSavedViews']);
 
+  // Failing: See https://github.com/elastic/kibana/issues/106650
   describe('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {

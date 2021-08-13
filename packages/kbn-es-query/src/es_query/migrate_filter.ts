@@ -11,6 +11,7 @@ import { getConvertedValueForField } from '../filters';
 import { Filter } from '../filters';
 import { IndexPatternBase } from './types';
 
+/** @internal */
 export interface DeprecatedMatchPhraseFilter extends Filter {
   query: {
     match: {
@@ -22,12 +23,13 @@ export interface DeprecatedMatchPhraseFilter extends Filter {
   };
 }
 
-function isDeprecatedMatchPhraseFilter(filter: any): filter is DeprecatedMatchPhraseFilter {
+function isDeprecatedMatchPhraseFilter(filter: Filter): filter is DeprecatedMatchPhraseFilter {
   const fieldName = filter.query && filter.query.match && Object.keys(filter.query.match)[0];
 
   return Boolean(fieldName && get(filter, ['query', 'match', fieldName, 'type']) === 'phrase');
 }
 
+/** @internal */
 export function migrateFilter(filter: Filter, indexPattern?: IndexPatternBase) {
   if (isDeprecatedMatchPhraseFilter(filter)) {
     const fieldName = Object.keys(filter.query.match)[0];

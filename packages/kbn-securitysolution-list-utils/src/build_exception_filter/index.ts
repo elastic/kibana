@@ -21,16 +21,9 @@ import {
   entriesNested,
   OsTypeArray,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { Filter } from '@kbn/es-query';
 
 import { hasLargeValueList } from '../has_large_value_list';
-
-/**
- * Originally this was an import type of:
- * import type { Filter } from '../../../../../src/plugins/data/common';
- * TODO: Once we have the type for this within kbn packages, replace this with that one
- * @deprecated
- */
-type Filter = any;
 
 type NonListEntry = EntryMatch | EntryMatchAny | EntryNested | EntryExists;
 interface ExceptionListItemNonLargeList extends ExceptionListItemSchema {
@@ -190,7 +183,7 @@ export const buildExceptionFilter = ({
   } else {
     const chunks = chunkExceptions(exceptionsWithoutLargeValueLists, chunkSize);
 
-    const filters = chunks.map<Filter>((exceptionsChunk) => {
+    const filters = chunks.map((exceptionsChunk) => {
       const orClauses = createOrClauses(exceptionsChunk);
 
       return {

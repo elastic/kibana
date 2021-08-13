@@ -32,7 +32,7 @@ import {
 } from '../../test_helpers';
 import { ElementsPositionAndAttribute } from './';
 import * as contexts from './constants';
-import { screenshotsObservableFactory } from './observable';
+import { getScreenshots$ } from './';
 
 /*
  * Mocks
@@ -67,10 +67,9 @@ describe('Screenshot Observable Pipeline', () => {
   });
 
   it('pipelines a single url into screenshot and timeRange', async () => {
-    const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
-    const result = await getScreenshots$({
+    const result = await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
       logger,
-      urls: ['/welcome/home/start/index.htm'],
+      urlsOrUrlLocatorTuples: ['/welcome/home/start/index.htm'],
       conditionalHeaders: {} as ConditionalHeaders,
       layout: mockLayout,
       browserTimezone: 'UTC',
@@ -128,10 +127,12 @@ describe('Screenshot Observable Pipeline', () => {
     });
 
     // test
-    const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
-    const result = await getScreenshots$({
+    const result = await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
       logger,
-      urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php'],
+      urlsOrUrlLocatorTuples: [
+        '/welcome/home/start/index2.htm',
+        '/welcome/home/start/index.php3?page=./home.php',
+      ],
       conditionalHeaders: {} as ConditionalHeaders,
       layout: mockLayout,
       browserTimezone: 'UTC',
@@ -227,11 +228,10 @@ describe('Screenshot Observable Pipeline', () => {
       });
 
       // test
-      const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
       const getScreenshot = async () => {
-        return await getScreenshots$({
+        return await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
           logger,
-          urls: [
+          urlsOrUrlLocatorTuples: [
             '/welcome/home/start/index2.htm',
             '/welcome/home/start/index.php3?page=./home.php3',
           ],
@@ -322,11 +322,10 @@ describe('Screenshot Observable Pipeline', () => {
       });
 
       // test
-      const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
       const getScreenshot = async () => {
-        return await getScreenshots$({
+        return await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
           logger,
-          urls: ['/welcome/home/start/index.php3?page=./home.php3'],
+          urlsOrUrlLocatorTuples: ['/welcome/home/start/index.php3?page=./home.php3'],
           conditionalHeaders: {} as ConditionalHeaders,
           layout: mockLayout,
           browserTimezone: 'UTC',
@@ -354,50 +353,46 @@ describe('Screenshot Observable Pipeline', () => {
       });
       mockLayout.getViewport = () => null;
 
-      // test
-      const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
-      const getScreenshot = async () => {
-        return await getScreenshots$({
-          logger,
-          urls: ['/welcome/home/start/index.php3?page=./home.php3'],
-          conditionalHeaders: {} as ConditionalHeaders,
-          layout: mockLayout,
-          browserTimezone: 'UTC',
-        }).toPromise();
-      };
+      const screenshots = await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
+        logger,
+        urlsOrUrlLocatorTuples: ['/welcome/home/start/index.php3?page=./home.php3'],
+        conditionalHeaders: {} as ConditionalHeaders,
+        layout: mockLayout,
+        browserTimezone: 'UTC',
+      }).toPromise();
 
-      await expect(getScreenshot()).resolves.toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "elementsPositionAndAttributes": Array [
-                    Object {
-                      "attributes": Object {},
-                      "position": Object {
-                        "boundingClientRect": Object {
-                          "height": 1200,
-                          "left": 0,
-                          "top": 0,
-                          "width": 1800,
-                        },
-                        "scroll": Object {
-                          "x": 0,
-                          "y": 0,
-                        },
-                      },
-                    },
-                  ],
-                  "error": undefined,
-                  "screenshots": Array [
-                    Object {
-                      "base64EncodedData": "allyourBase64",
-                      "description": undefined,
-                      "title": undefined,
-                    },
-                  ],
-                  "timeRange": undefined,
+      expect(screenshots).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "elementsPositionAndAttributes": Array [
+              Object {
+                "attributes": Object {},
+                "position": Object {
+                  "boundingClientRect": Object {
+                    "height": 1200,
+                    "left": 0,
+                    "top": 0,
+                    "width": 1800,
+                  },
+                  "scroll": Object {
+                    "x": 0,
+                    "y": 0,
+                  },
                 },
-              ]
-            `);
+              },
+            ],
+            "error": undefined,
+            "screenshots": Array [
+              Object {
+                "base64EncodedData": "allyourBase64",
+                "description": undefined,
+                "title": undefined,
+              },
+            ],
+            "timeRange": undefined,
+          },
+        ]
+      `);
     });
   });
 });

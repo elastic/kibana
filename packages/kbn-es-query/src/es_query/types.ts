@@ -8,10 +8,19 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
+/**
+ * A field's sub type
+ * @public
+ */
 export interface IFieldSubType {
   multi?: { parent: string };
   nested?: { path: string };
 }
+
+/**
+ * A base interface for an index pattern field
+ * @public
+ */
 export interface IndexPatternFieldBase {
   name: string;
   /**
@@ -31,8 +40,19 @@ export interface IndexPatternFieldBase {
   scripted?: boolean;
 }
 
+/**
+ * A base interface for an index pattern
+ * @public
+ */
 export interface IndexPatternBase {
   fields: IndexPatternFieldBase[];
   id?: string;
   title?: string;
+}
+
+export interface BoolQuery {
+  must: estypes.QueryDslQueryContainer[];
+  must_not: estypes.QueryDslQueryContainer[];
+  filter: estypes.QueryDslQueryContainer[];
+  should: estypes.QueryDslQueryContainer[];
 }

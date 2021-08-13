@@ -8,26 +8,6 @@
 
 import { has } from 'lodash';
 
-export interface DslRangeQuery {
-  range: {
-    [name: string]: {
-      gte: number;
-      lte: number;
-      format: string;
-    };
-  };
-}
-
-export interface DslMatchQuery {
-  match: {
-    [name: string]: {
-      query: string;
-      operator: string;
-      zero_terms_query: string;
-    };
-  };
-}
-
 export interface DslQueryStringQuery {
   query_string: {
     query: string;
@@ -35,20 +15,6 @@ export interface DslQueryStringQuery {
   };
 }
 
-export interface DslMatchAllQuery {
-  match_all: Record<string, string>;
-}
-
-export interface DslTermQuery {
-  term: Record<string, string>;
-}
-
-export type DslQuery =
-  | DslRangeQuery
-  | DslMatchQuery
-  | DslQueryStringQuery
-  | DslMatchAllQuery
-  | DslTermQuery;
-
+/** @internal */
 export const isEsQueryString = (query: any): query is DslQueryStringQuery =>
   has(query, 'query_string.query');

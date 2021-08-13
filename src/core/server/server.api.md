@@ -372,7 +372,7 @@ export const config: {
             healthCheck: import("@kbn/config-schema").ObjectType<{
                 delay: Type<import("moment").Duration>;
             }>;
-            ignoreVersionMismatch: import("@kbn/config-schema/target/types").ConditionalType<false, boolean, boolean>;
+            ignoreVersionMismatch: import("@kbn/config-schema/target_types/types").ConditionalType<false, boolean, boolean>;
         }>;
     };
     logging: {
@@ -915,6 +915,8 @@ export interface DeprecationsDetails {
     level: 'warning' | 'critical' | 'fetch_error';
     // (undocumented)
     message: string;
+    // (undocumented)
+    requireRestart?: boolean;
 }
 
 // @public
@@ -1046,8 +1048,7 @@ export interface ErrorHttpResponseOptions {
 
 // @public (undocumented)
 export interface ExecutionContextSetup {
-    get(): IExecutionContextContainer | undefined;
-    set(context: Partial<KibanaServerExecutionContext>): void;
+    withContext<R>(context: KibanaExecutionContext | undefined, fn: (...args: any[]) => R): R;
 }
 
 // @public (undocumented)
@@ -1234,7 +1235,7 @@ export interface ICustomClusterClient extends IClusterClient {
 // @public (undocumented)
 export interface IExecutionContextContainer {
     // (undocumented)
-    toJSON(): Readonly<KibanaServerExecutionContext>;
+    toJSON(): Readonly<KibanaExecutionContext>;
     // (undocumented)
     toString(): string;
 }
@@ -1355,14 +1356,15 @@ export interface IUiSettingsClient {
     setMany: (changes: Record<string, any>) => Promise<void>;
 }
 
-// @public (undocumented)
-export interface KibanaExecutionContext {
-    readonly description: string;
-    readonly id: string;
-    readonly name: string;
+// @public
+export type KibanaExecutionContext = {
     readonly type: string;
+    readonly name: string;
+    readonly id: string;
+    readonly description: string;
     readonly url?: string;
-}
+    parent?: KibanaExecutionContext;
+};
 
 // @public
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Method extends RouteMethod = any> {
@@ -1434,12 +1436,6 @@ export const kibanaResponseFactory: {
     accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     noContent: (options?: HttpResponseOptions) => KibanaResponse<undefined>;
 };
-
-// @public (undocumented)
-export interface KibanaServerExecutionContext extends Partial<KibanaExecutionContext> {
-    // (undocumented)
-    requestId: string;
-}
 
 // Warning: (ae-forgotten-export) The symbol "KnownKeys" needs to be exported by the entry point index.d.ts
 //
@@ -2266,6 +2262,7 @@ export interface SavedObjectExportBaseOptions {
 // @public
 export interface SavedObjectMigrationContext {
     readonly convertToMultiNamespaceTypeVersion?: string;
+    readonly isSingleNamespaceType: boolean;
     readonly log: SavedObjectsMigrationLogger;
     readonly migrationVersion: string;
 }
@@ -2519,6 +2516,8 @@ export class SavedObjectsErrorHelpers {
     static createConflictError(type: string, id: string, reason?: string): DecoratedError;
     // (undocumented)
     static createGenericNotFoundError(type?: string | null, id?: string | null): DecoratedError;
+    // (undocumented)
+    static createGenericNotFoundEsUnavailableError(type: string, id: string): DecoratedError;
     // (undocumented)
     static createIndexAliasNotFoundError(alias: string): DecoratedError;
     // (undocumented)
@@ -3030,7 +3029,7 @@ export interface SavedObjectsResolveImportErrorsOptions {
 
 // @public (undocumented)
 export interface SavedObjectsResolveResponse<T = unknown> {
-    aliasTargetId?: string;
+    alias_target_id?: string;
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
     saved_object: SavedObject<T>;
 }
@@ -3078,6 +3077,7 @@ export interface SavedObjectStatusMeta {
 export interface SavedObjectsType<Attributes = any> {
     convertToAliasScript?: string;
     convertToMultiNamespaceTypeVersion?: string;
+    excludeOnUpgrade?: SavedObjectTypeExcludeFromUpgradeFilterHook;
     hidden: boolean;
     indexPattern?: string;
     management?: SavedObjectsTypeManagementDefinition<Attributes>;
@@ -3159,10 +3159,18 @@ export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObjec
 export class SavedObjectsUtils {
     static createEmptyFindResponse: <T, A>({ page, perPage, }: SavedObjectsFindOptions) => SavedObjectsFindResponse<T, A>;
     static generateId(): string;
+    static getConvertedObjectId(namespace: string | undefined, type: string, id: string): string;
     static isRandomId(id: string | undefined): boolean;
     static namespaceIdToString: (namespace?: string | undefined) => string;
     static namespaceStringToId: (namespace: string) => string | undefined;
 }
+
+// Warning: (ae-extra-release-tag) The doc comment should not contain more than one release tag
+//
+// @public
+export type SavedObjectTypeExcludeFromUpgradeFilterHook = (toolkit: {
+    readonlyEsClient: Pick<ElasticsearchClient, 'search'>;
+}) => estypes.QueryDslQueryContainer | Promise<estypes.QueryDslQueryContainer>;
 
 // @public
 export class SavedObjectTypeRegistry {
