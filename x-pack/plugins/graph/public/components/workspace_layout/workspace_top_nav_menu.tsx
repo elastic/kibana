@@ -16,15 +16,10 @@ import { GraphSavePolicy, GraphWorkspaceSavedObject, Workspace } from '../../typ
 import { AsObservable, Settings, SettingsWorkspaceProps } from '../settings';
 import { asSyncedObservable } from '../../helpers/as_observable';
 
-export interface MenuOptions {
-  showSettings: boolean;
-  showInspect: boolean;
-}
-
 interface WorkspaceTopNavMenuProps {
   locationUrl: (path?: string) => string;
   workspace: Workspace | undefined;
-  onSetMenus: React.Dispatch<React.SetStateAction<MenuOptions>>;
+  setShowInspect: React.Dispatch<React.SetStateAction<boolean>>;
   confirmWipeWorkspace: (
     onConfirm: () => void,
     text?: string,
@@ -121,10 +116,7 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
       defaultMessage: 'Inspect',
     }),
     run: () => {
-      props.onSetMenus((prevMenus) => ({
-        showSettings: false,
-        showInspect: !prevMenus.showInspect,
-      }));
+      props.setShowInspect((prevShowInspect) => !prevShowInspect);
     },
   });
 

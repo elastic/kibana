@@ -28,7 +28,7 @@ import {
   WorkspaceField,
   WorkspaceNode,
 } from '../../types';
-import { WorkspaceTopNavMenu, MenuOptions } from './workspace_top_nav_menu';
+import { WorkspaceTopNavMenu } from './workspace_top_nav_menu';
 import { InspectPanel } from '../inspect_panel';
 import { GuidancePanel } from '../guidance_panel';
 import { GraphTitle } from '../graph_title';
@@ -106,10 +106,7 @@ const WorkspaceLayoutComponent = ({
   const [initialQuery, setInitialQuery] = useState<string>();
   const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern>();
   const [noIndexPatterns, setNoIndexPatterns] = useState<boolean>(false);
-  const [menus, setMenus] = useState<MenuOptions>({
-    showSettings: false,
-    showInspect: false,
-  });
+  const [showInspect, setShowInspect] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [mergeCandidates, setMergeCandidates] = useState<TermIntersect[]>([]);
   const [control, setControl] = useState<ControlType>('none');
@@ -259,13 +256,13 @@ const WorkspaceLayoutComponent = ({
         canEditDrillDownUrls={canEditDrillDownUrls}
         locationUrl={locationUrl}
         reloadRoute={reloadRoute}
-        onSetMenus={setMenus}
+        setShowInspect={setShowInspect}
         confirmWipeWorkspace={confirmWipeWorkspace}
         setHeaderActionMenu={setHeaderActionMenu}
       />
 
       <InspectPanel
-        showInspect={menus.showInspect}
+        showInspect={showInspect}
         lastRequest={workspace?.lastRequest}
         lastResponse={workspace?.lastResponse}
         indexPattern={currentIndexPattern}
