@@ -57,6 +57,23 @@ export interface ReportOutput {
 
 export type TaskRunResult = Omit<ReportOutput, 'content'>;
 
+export interface BaseParams {
+  layout?: LayoutParams;
+  objectType: string;
+  title: string;
+  savedObjectId?: string; // legacy (7.x) only
+  queryString?: string; // legacy (7.x) only
+  browserTimezone: string; // to format dates in the user's time zone
+  version: string; // to handle any state migrations
+}
+
+// base params decorated with encrypted headers that come into runJob functions
+export interface BasePayload extends BaseParams {
+  headers: string;
+  spaceId?: string;
+  isDeprecated?: boolean;
+}
+
 export interface ReportSource {
   /*
    * Required fields: populated in enqueue_job when the request comes in to
@@ -64,15 +81,7 @@ export interface ReportSource {
    */
   jobtype: string; // refers to `ExportTypeDefinition.jobType`
   created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
-  payload: {
-    headers: string; // encrypted headers
-    /**
-     * PDF V2 reports will contain locators parameters (see {@link LocatorPublic}) that will be converted to {@link KibanaLocation}s when
-     * generating a report
-     */
-    locatorParams?: LocatorParams[];
-    isDeprecated?: boolean; // set to true when the export type is being phased out
-  } & BaseParams;
+  payload: BasePayload;
   meta: { objectType: string; layout?: string }; // for telemetry
   migration_version: string; // for reminding the user to update their POST URL
   attempts: number; // initially populated as 0
@@ -103,16 +112,6 @@ export interface ReportSource {
  */
 export interface ReportDocument extends ReportDocumentHead {
   _source: ReportSource;
-}
-
-export interface BaseParams {
-  layout?: LayoutParams;
-  objectType: string;
-  title: string;
-  savedObjectId?: string; // legacy (7.x) only
-  queryString?: string; // legacy (7.x) only
-  browserTimezone: string; // to format dates in the user's time zone
-  version: string; // to handle any state migrations
 }
 
 export type JobId = string;
