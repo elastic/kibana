@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 import { nonEmptyStringRt } from './';
+import { isLeft, isRight } from 'fp-ts/lib/Either';
 
 describe('nonEmptyStringRt', () => {
   it('fails on empty strings', () => {
-    expect(nonEmptyStringRt.decode('')._tag).toEqual('Left');
+    expect(isLeft(nonEmptyStringRt.decode(''))).toBe(true);
   });
 
   it('passes non-empty strings', () => {
-    expect(nonEmptyStringRt.decode('foo')._tag).toEqual('Right');
+    expect(isRight(nonEmptyStringRt.decode('foo'))).toBe(true);
   });
 });
