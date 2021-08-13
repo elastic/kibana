@@ -52,7 +52,6 @@ import {
   MapQuery,
   StyleMetaDescriptor,
   Timeslice,
-  VectorJoinSourceRequestMeta,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStyleRequestMeta,

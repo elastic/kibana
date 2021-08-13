@@ -155,6 +155,7 @@ describe('ESGeoGridSource', () => {
     extent,
     applyGlobalQuery: true,
     applyGlobalTime: true,
+    respondToForceRefresh: true,
     fieldNames: [],
     buffer: extent,
     sourceQuery: {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import { DataFilters, MapQuery, VectorSourceRequestMeta } from '../../../common/descriptor_types';
 import { IVectorSource } from '../sources/vector_source';
 import { ITermJoinSource } from '../sources/term_join_source';

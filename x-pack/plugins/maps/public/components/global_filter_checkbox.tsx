@@ -11,10 +11,11 @@ import { i18n } from '@kbn/i18n';
 
 interface Props {
   applyGlobalQuery: boolean;
+  label: string;
   setApplyGlobalQuery: (applyGlobalQuery: boolean) => void;
 }
 
-export function GlobalFilterCheckbox({ applyGlobalQuery, setApplyGlobalQuery }: Props) {
+export function GlobalFilterCheckbox({ applyGlobalQuery, label, setApplyGlobalQuery }: Props) {
   const onApplyGlobalQueryChange = (event: EuiSwitchEvent) => {
     setApplyGlobalQuery(event.target.checked);
   };
@@ -29,9 +30,7 @@ export function GlobalFilterCheckbox({ applyGlobalQuery, setApplyGlobalQuery }: 
         })}
       >
         <EuiSwitch
-          label={i18n.translate('xpack.maps.filterEditor.applyGlobalQueryCheckboxLabel', {
-            defaultMessage: `Apply global filter to layer data`,
-          })}
+          label={label}
           checked={applyGlobalQuery}
           onChange={onApplyGlobalQueryChange}
           data-test-subj="mapLayerPanelApplyGlobalQueryCheckbox"

@@ -10,10 +10,11 @@ import { EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiToolTip } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 interface Props {
   applyGlobalTime: boolean;
+  label: string;
   setApplyGlobalTime: (applyGlobalTime: boolean) => void;
 }
 
-export function GlobalTimeCheckbox({ applyGlobalTime, setApplyGlobalTime }: Props) {
+export function GlobalTimeCheckbox({ applyGlobalTime, label, setApplyGlobalTime }: Props) {
   const onApplyGlobalTimeChange = (event: EuiSwitchEvent) => {
     setApplyGlobalTime(event.target.checked);
   };
@@ -28,9 +29,7 @@ export function GlobalTimeCheckbox({ applyGlobalTime, setApplyGlobalTime }: Prop
         })}
       >
         <EuiSwitch
-          label={i18n.translate('xpack.maps.filterEditor.applyGlobalTimeCheckboxLabel', {
-            defaultMessage: `Apply global time to layer data`,
-          })}
+          label={label}
           checked={applyGlobalTime}
           onChange={onApplyGlobalTimeChange}
           data-test-subj="mapLayerPanelApplyGlobalTimeCheckbox"
