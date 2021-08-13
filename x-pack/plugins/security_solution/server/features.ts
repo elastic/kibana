@@ -76,7 +76,7 @@ export const getAlertsSubFeature = (ruleTypes: string[]): SubFeatureConfig => ({
             all: [],
             read: [],
           },
-          ui: [],
+          ui: ['crud_alerts', 'read_alerts'],
         },
         {
           id: 'alerts_read',
@@ -93,7 +93,7 @@ export const getAlertsSubFeature = (ruleTypes: string[]): SubFeatureConfig => ({
             all: [],
             read: [],
           },
-          ui: [],
+          ui: ['read_alerts'],
         },
       ],
     },
