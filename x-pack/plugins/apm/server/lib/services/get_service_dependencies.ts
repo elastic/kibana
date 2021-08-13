@@ -25,7 +25,7 @@ export async function getServiceDependencies({
   end: number;
   serviceName: string;
   numBuckets: number;
-  environment?: string;
+  environment: string;
   offset?: string;
 }) {
   const statsItems = await getConnectionStats({

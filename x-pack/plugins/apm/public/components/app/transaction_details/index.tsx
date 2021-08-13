@@ -49,7 +49,11 @@ export function TransactionDetails() {
   const {
     distributionData,
     distributionStatus,
-  } = useTransactionDistributionFetcher({ transactionName });
+  } = useTransactionDistributionFetcher({
+    transactionName,
+    environment: query.environment,
+    kuery: query.kuery,
+  });
 
   useBreadcrumb({
     title: transactionName,
@@ -100,7 +104,10 @@ export function TransactionDetails() {
       <EuiSpacer size="m" />
 
       <ChartPointerEventContextProvider>
-        <TransactionCharts />
+        <TransactionCharts
+          kuery={query.kuery}
+          environment={query.environment}
+        />
       </ChartPointerEventContextProvider>
 
       <EuiHorizontalRule size="full" margin="l" />

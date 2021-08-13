@@ -69,6 +69,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               latencyAggregationType: 'avg',
               transactionType: 'request',
               environment: 'testing',
+              kuery: '',
             },
           })
         );
@@ -101,6 +102,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 latencyAggregationType: 'avg',
                 transactionType: 'request',
                 environment: 'testing',
+                kuery: '',
               },
             })
           );
@@ -125,6 +127,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 latencyAggregationType: 'p95',
                 transactionType: 'request',
                 environment: 'testing',
+                kuery: '',
               },
             })
           );
@@ -149,6 +152,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 latencyAggregationType: 'p99',
                 transactionType: 'request',
                 environment: 'testing',
+                kuery: '',
               },
             })
           );
@@ -179,6 +183,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 comparisonStart: start,
                 comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -219,6 +225,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 latencyAggregationType: 'avg',
                 transactionType: 'request',
                 environment: 'does-not-exist',
+                kuery: '',
               },
             })
           );
@@ -258,6 +265,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 latencyAggregationType: 'avg',
                 transactionType,
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -279,6 +288,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 latencyAggregationType: 'avg',
                 transactionType,
                 environment: 'production',
+                kuery: '',
               },
             })
           );
@@ -318,6 +328,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 latencyAggregationType: 'avg',
                 transactionType,
                 environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );

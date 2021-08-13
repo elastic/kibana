@@ -20,6 +20,7 @@ import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
 import { ServiceOverviewInstancesChartAndTable } from './service_overview_instances_chart_and_table';
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
 import { TransactionsTable } from '../../shared/transactions_table';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
 import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
 
@@ -30,8 +31,13 @@ import { AggregatedTransactionsCallout } from '../../shared/aggregated_transacti
 export const chartHeight = 288;
 
 export function ServiceOverview() {
-  const { fallbackToTransactions } = useFallbackToTransactionsFetcher();
   const { agentName, serviceName } = useApmServiceContext();
+  const {
+    query: { environment, kuery },
+  } = useApmParams('/services/:serviceName/overview');
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
+  });
 
   // The default EuiFlexGroup breaks at 768, but we want to break at 992, so we
   // observe the window width and set the flex directions of rows accordingly
@@ -41,7 +47,10 @@ export function ServiceOverview() {
   const isIosAgent = isIosAgentName(agentName);
 
   return (
-    <AnnotationsContextProvider>
+    <AnnotationsContextProvider
+      serviceName={serviceName}
+      environment={environment}
+    >
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
           {fallbackToTransactions && (
@@ -51,7 +60,11 @@ export function ServiceOverview() {
           )}
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
-              <LatencyChart height={200} />
+              <LatencyChart
+                height={200}
+                environment={environment}
+                kuery={kuery}
+              />
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -61,11 +74,15 @@ export function ServiceOverview() {
               responsive={false}
             >
               <EuiFlexItem grow={3}>
-                <ServiceOverviewThroughputChart height={chartHeight} />
+                <ServiceOverviewThroughputChart
+                  height={chartHeight}
+                  environment={environment}
+                  kuery={kuery}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={7}>
                 <EuiPanel hasBorder={true}>
-                  <TransactionsTable />
+                  <TransactionsTable kuery={kuery} environment={environment} />
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -81,6 +98,8 @@ export function ServiceOverview() {
                   <TransactionErrorRateChart
                     height={chartHeight}
                     showAnnotations={false}
+                    kuery={kuery}
+                    environment={environment}
                   />
                 </EuiFlexItem>
               )}
@@ -98,7 +117,11 @@ export function ServiceOverview() {
               responsive={false}
             >
               <EuiFlexItem grow={3}>
-                <TransactionBreakdownChart showAnnotations={false} />
+                <TransactionBreakdownChart
+                  showAnnotations={false}
+                  environment={environment}
+                  kuery={environment}
+                />
               </EuiFlexItem>
               {!isRumAgent && (
                 <EuiFlexItem grow={7}>
