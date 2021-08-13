@@ -28,6 +28,7 @@ export class DocLinksService {
     return deepFreeze({
       DOC_LINK_VERSION,
       ELASTIC_WEBSITE_URL,
+      KIBANA_DOCS,
       links: {
         settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
         canvas: {
@@ -445,6 +446,7 @@ export class DocLinksService {
 export interface DocLinksStart {
   readonly DOC_LINK_VERSION: string;
   readonly ELASTIC_WEBSITE_URL: string;
+  readonly KIBANA_DOCS: string;
   readonly links: {
     readonly settings: string;
     readonly canvas: {

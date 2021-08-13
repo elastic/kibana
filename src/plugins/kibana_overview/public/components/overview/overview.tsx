@@ -53,7 +53,7 @@ interface Props {
 export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) => {
   const [isNewKibanaInstance, setNewKibanaInstance] = useState(false);
   const {
-    services: { http, data, uiSettings, application },
+    services: { http, docLinks, data, uiSettings, application },
   } = useKibana<CoreStart & AppPluginStartDependencies>();
   const addBasePath = http.basePath.prepend;
   const indexPatternService = data.indexPatterns;
@@ -80,7 +80,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         href: addBasePath(`home#/tutorial_directory`),
       },
     },
-    docsLink: 'https://www.elastic.co/kibana/',
+    docsLink: docLinks.KIBANA_DOCS,
   };
 
   // Show card for console if none of the manage data plugins are available, most likely in OSS
