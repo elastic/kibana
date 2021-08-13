@@ -9,6 +9,8 @@ import React, { FC } from 'react';
 
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 interface Props {
   json: object;
 }
@@ -19,7 +21,19 @@ export const ExpandedRowJsonPane: FC<Props> = ({ json }) => {
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiSpacer size="s" />
-          <EuiCodeBlock fontSize="s" language="json" paddingSize="s" style={{ width: '100%' }}>
+          <EuiCodeBlock
+            aria-label={i18n.translate(
+              'xpack.transform.transformList.transformDetails.expandedRowJsonPane',
+              {
+                defaultMessage: 'JSON of transform configuration',
+              }
+            )}
+            fontSize="s"
+            language="json"
+            paddingSize="s"
+            style={{ width: '100%' }}
+            isCopyable
+          >
             value={JSON.stringify(json, null, 2)}
           </EuiCodeBlock>
         </EuiFlexItem>

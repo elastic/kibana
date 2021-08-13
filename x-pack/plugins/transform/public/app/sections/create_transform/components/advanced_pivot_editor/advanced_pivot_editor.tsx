@@ -27,9 +27,9 @@ export const AdvancedPivotEditor: FC<StepDefineFormHook['advancedPivotEditor']> 
         label={i18n.translate('xpack.transform.stepDefineForm.advancedEditorLabel', {
           defaultMessage: 'Pivot configuration object',
         })}
+        data-test-subj="transformAdvancedPivotEditor"
       >
         <CodeEditor
-          data-test-subj="transformAdvancedPivotEditor"
           height={250}
           languageId={'json'}
           onChange={(d: string) => {
