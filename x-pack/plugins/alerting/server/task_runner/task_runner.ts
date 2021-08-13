@@ -196,6 +196,7 @@ export class TaskRunner<
       alertParams,
       supportsEphemeralTasks: this.context.supportsEphemeralTasks,
       maxEphemeralActionsPerAlert: this.context.maxEphemeralActionsPerAlert,
+      kibanaVersion: this.context.kibanaVersion,
     });
   }
 
@@ -352,6 +353,7 @@ export class TaskRunner<
       namespace,
       ruleType: alertType,
       rule: alert,
+      kibanaVersion: this.context.kibanaVersion,
     });
 
     if (!muteAll) {
@@ -528,6 +530,7 @@ export class TaskRunner<
           scheduled: this.taskInstance.runAt.toISOString(),
           schedule_delay: Millis2Nanos * scheduleDelay,
         },
+        version: this.context.kibanaVersion,
       },
       rule: {
         id: alertId,
@@ -720,6 +723,7 @@ interface GenerateNewAndRecoveredInstanceEventsParams<
     string
   >;
   rule: SanitizedAlert<AlertTypeParams>;
+  kibanaVersion: string | undefined;
 }
 
 function generateNewAndRecoveredInstanceEvents<
@@ -735,6 +739,7 @@ function generateNewAndRecoveredInstanceEvents<
     recoveredAlertInstances,
     rule,
     ruleType,
+    kibanaVersion,
   } = params;
   const originalAlertInstanceIds = Object.keys(originalAlertInstances);
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
@@ -822,6 +827,7 @@ function generateNewAndRecoveredInstanceEvents<
             namespace,
           },
         ],
+        version: kibanaVersion,
       },
       message,
       rule: {

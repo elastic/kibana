@@ -105,6 +105,7 @@ describe('Task Runner', () => {
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: false,
     maxEphemeralActionsPerAlert: new Promise((resolve) => resolve(10)),
+    kibanaVersion: '1.0.1',
   };
 
   function testAgainstEphemeralSupport(
@@ -313,6 +314,7 @@ describe('Task Runner', () => {
             "schedule_delay": 0,
             "scheduled": "1970-01-01T00:00:00.000Z",
           },
+          "version": "1.0.1",
         },
         "message": "alert execution start: \\"1\\"",
         "rule": Object {
@@ -448,6 +450,7 @@ describe('Task Runner', () => {
               type_id: 'test',
             },
           ],
+          version: '1.0.1',
         },
         message: `alert execution start: "1"`,
         rule: {
@@ -480,6 +483,7 @@ describe('Task Runner', () => {
               type_id: 'test',
             },
           ],
+          version: '1.0.1',
         },
         message: "test:1: 'alert-name' created new instance: '1'",
         rule: {
@@ -504,6 +508,7 @@ describe('Task Runner', () => {
           saved_objects: [
             { id: '1', namespace: undefined, rel: 'primary', type: 'alert', type_id: 'test' },
           ],
+          version: '1.0.1',
         },
         message:
           "test:1: 'alert-name' active instance: '1' in actionGroup(subgroup): 'default(subDefault)'",
@@ -543,6 +548,7 @@ describe('Task Runner', () => {
               type_id: 'action',
             },
           ],
+          version: '1.0.1',
         },
         message:
           "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup(subgroup): 'default(subDefault)' action: action:1",
@@ -575,6 +581,7 @@ describe('Task Runner', () => {
               type_id: 'test',
             },
           ],
+          version: '1.0.1',
         },
         message: "alert executed: test:1: 'alert-name'",
         rule: {
@@ -664,6 +671,7 @@ describe('Task Runner', () => {
             type_id: 'test',
           },
         ],
+        version: '1.0.1',
       },
       message: `alert execution start: \"1\"`,
       rule: {
@@ -695,6 +703,7 @@ describe('Task Runner', () => {
             type_id: 'test',
           },
         ],
+        version: '1.0.1',
       },
       message: "test:1: 'alert-name' created new instance: '1'",
       rule: {
@@ -728,6 +737,7 @@ describe('Task Runner', () => {
             type_id: 'test',
           },
         ],
+        version: '1.0.1',
       },
       message: "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
       rule: {
@@ -764,6 +774,7 @@ describe('Task Runner', () => {
             type_id: 'test',
           },
         ],
+        version: '1.0.1',
       },
       message: "alert executed: test:1: 'alert-name'",
       rule: {
@@ -923,6 +934,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
@@ -958,6 +970,7 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
             "rule": Object {
@@ -997,6 +1010,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert executed: test:1: 'alert-name'",
             "rule": Object {
@@ -1258,6 +1272,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
@@ -1293,6 +1308,7 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "test:1: 'alert-name' created new instance: '1'",
             "rule": Object {
@@ -1329,6 +1345,7 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
             "rule": Object {
@@ -1370,6 +1387,7 @@ describe('Task Runner', () => {
                   "type_id": "action",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: action:1",
             "rule": Object {
@@ -1409,6 +1427,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert executed: test:1: 'alert-name'",
             "rule": Object {
@@ -1554,6 +1573,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
@@ -1589,6 +1609,7 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "test:1: 'alert-name' instance '2' has recovered",
             "rule": Object {
@@ -1625,6 +1646,7 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
             "rule": Object {
@@ -1666,6 +1688,7 @@ describe('Task Runner', () => {
                   "type_id": "action",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "alert: test:1: 'alert-name' instanceId: '2' scheduled actionGroup: 'recovered' action: action:2",
             "rule": Object {
@@ -1707,6 +1730,7 @@ describe('Task Runner', () => {
                   "type_id": "action",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: action:1",
             "rule": Object {
@@ -1746,6 +1770,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert executed: test:1: 'alert-name'",
             "rule": Object {
@@ -2121,6 +2146,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
@@ -2157,6 +2183,7 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "test:1: 'alert-name' instance '2' has recovered",
             "rule": Object {
@@ -2193,6 +2220,7 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
             "rule": Object {
@@ -2232,6 +2260,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert executed: test:1: 'alert-name'",
             "rule": Object {
@@ -2457,6 +2486,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
@@ -2499,6 +2529,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert execution failure: test:1: 'alert-name'",
             "rule": Object {
@@ -2566,6 +2597,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
@@ -2608,6 +2640,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "test:1: execution failed",
             "rule": Object {
@@ -2683,6 +2716,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
@@ -2725,6 +2759,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "test:1: execution failed",
             "rule": Object {
@@ -2800,6 +2835,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
@@ -2842,6 +2878,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "test:1: execution failed",
             "rule": Object {
@@ -2916,6 +2953,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
@@ -2958,6 +2996,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "test:1: execution failed",
             "rule": Object {
@@ -3206,6 +3245,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
@@ -3241,6 +3281,7 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "test:1: 'alert-name' created new instance: '1'",
             "rule": Object {
@@ -3277,6 +3318,7 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "test:1: 'alert-name' created new instance: '2'",
             "rule": Object {
@@ -3313,6 +3355,7 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
             "rule": Object {
@@ -3349,6 +3392,7 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "test:1: 'alert-name' active instance: '2' in actionGroup: 'default'",
             "rule": Object {
@@ -3388,6 +3432,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert executed: test:1: 'alert-name'",
             "rule": Object {
@@ -3492,6 +3537,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
@@ -3527,6 +3573,7 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
             "rule": Object {
@@ -3563,6 +3610,7 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "test:1: 'alert-name' active instance: '2' in actionGroup: 'default'",
             "rule": Object {
@@ -3602,6 +3650,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert executed: test:1: 'alert-name'",
             "rule": Object {
@@ -3698,6 +3747,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
@@ -3731,6 +3781,7 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
             "rule": Object {
@@ -3765,6 +3816,7 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "test:1: 'alert-name' active instance: '2' in actionGroup: 'default'",
             "rule": Object {
@@ -3804,6 +3856,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert executed: test:1: 'alert-name'",
             "rule": Object {
@@ -3895,6 +3948,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
@@ -3930,6 +3984,7 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "test:1: 'alert-name' instance '1' has recovered",
             "rule": Object {
@@ -3966,6 +4021,7 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "test:1: 'alert-name' instance '2' has recovered",
             "rule": Object {
@@ -4005,6 +4061,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert executed: test:1: 'alert-name'",
             "rule": Object {
@@ -4098,6 +4155,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
@@ -4130,6 +4188,7 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "test:1: 'alert-name' instance '1' has recovered",
             "rule": Object {
@@ -4163,6 +4222,7 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "version": "1.0.1",
             },
             "message": "test:1: 'alert-name' instance '2' has recovered",
             "rule": Object {
@@ -4202,6 +4262,7 @@ describe('Task Runner', () => {
                 "schedule_delay": 0,
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
+              "version": "1.0.1",
             },
             "message": "alert executed: test:1: 'alert-name'",
             "rule": Object {
@@ -4346,6 +4407,7 @@ describe('Task Runner', () => {
             "schedule_delay": 0,
             "scheduled": "1970-01-01T00:00:00.000Z",
           },
+          "version": "1.0.1",
         },
         "message": "alert execution start: \\"1\\"",
         "rule": Object {

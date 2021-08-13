@@ -126,6 +126,7 @@ export const EventSchema = schema.maybe(
             })
           )
         ),
+        version: ecsVersion(),
       })
     ),
   })
@@ -147,9 +148,20 @@ function ecsDate() {
   return schema.maybe(schema.string({ validate: validateDate }));
 }
 
+function ecsVersion() {
+  return schema.maybe(schema.string({ validate: validateVersion }));
+}
+
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
 function validateDate(isoDate: string) {
   if (ISO_DATE_PATTERN.test(isoDate)) return;
   return 'string is not a valid ISO date: ' + isoDate;
+}
+
+const VERSION_PATTERN = /^(\d+\.)?(\d+\.)?(\*|\d+)$/;
+
+function validateVersion(version: string) {
+  if (VERSION_PATTERN.test(version)) return;
+  return 'string is not a valid version: ' + version;
 }

@@ -385,6 +385,7 @@ export class AlertingPlugin {
       kibanaBaseUrl: this.kibanaBaseUrl,
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
       maxEphemeralActionsPerAlert: this.config.then((config) => config.maxEphemeralActionsPerAlert),
+      kibanaVersion: this.kibanaVersion,
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
