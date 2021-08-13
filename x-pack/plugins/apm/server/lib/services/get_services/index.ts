@@ -20,8 +20,8 @@ export async function getServices({
   searchAggregatedTransactions,
   logger,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
   logger: Logger;

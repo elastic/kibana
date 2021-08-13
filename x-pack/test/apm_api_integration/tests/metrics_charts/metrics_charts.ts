@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           let chartsResponse: ChartResponse;
           before(async () => {
             chartsResponse = await supertest.get(
-              `/api/apm/services/opbeans-node/metrics/charts?start=${start}&end=${end}&agentName=${agentName}`
+              `/api/apm/services/opbeans-node/metrics/charts?start=${start}&end=${end}&agentName=${agentName}&kuery=&environment=ENVIRONMENT_ALL`
             );
           });
           it('contains CPU usage and System memory usage chart data', async () => {
@@ -121,7 +121,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           let chartsResponse: ChartResponse;
           before(async () => {
             chartsResponse = await supertest.get(
-              `/api/apm/services/opbeans-java/metrics/charts?start=${start}&end=${end}&agentName=${agentName}`
+              `/api/apm/services/opbeans-java/metrics/charts?start=${start}&end=${end}&agentName=${agentName}&environment=ENVIRONMENT_ALL&kuery=`
             );
           });
 
@@ -410,7 +410,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const end = encodeURIComponent('2020-09-08T15:05:00.000Z');
 
           const chartsResponse: ChartResponse = await supertest.get(
-            `/api/apm/services/opbeans-java/metrics/charts?start=${start}&end=${end}&agentName=${agentName}`
+            `/api/apm/services/opbeans-java/metrics/charts?start=${start}&end=${end}&agentName=${agentName}&environment=ENVIRONMENT_ALL&kuery=`
           );
 
           const systemMemoryUsageChart = chartsResponse.body.charts.find(

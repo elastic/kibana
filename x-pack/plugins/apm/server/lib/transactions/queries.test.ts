@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import {
   inspectSearchParams,
   SearchParamsMock,
@@ -26,6 +27,8 @@ describe('transaction queries', () => {
         serviceName: 'foo',
         transactionType: 'bar',
         setup,
+        environment: ENVIRONMENT_ALL.value,
+        kuery: '',
       })
     );
 
@@ -39,6 +42,8 @@ describe('transaction queries', () => {
         transactionType: 'bar',
         transactionName: 'baz',
         setup,
+        environment: ENVIRONMENT_ALL.value,
+        kuery: '',
       })
     );
 
@@ -55,6 +60,8 @@ describe('transaction queries', () => {
         transactionId: 'quz',
         setup,
         searchAggregatedTransactions: false,
+        environment: ENVIRONMENT_ALL.value,
+        kuery: '',
       })
     );
 

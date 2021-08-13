@@ -85,7 +85,7 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
         const decoded = deepExactRt(route.params).decode(
           merge({}, route.defaults ?? {}, {
             path: matchedRoute.match.params,
-            query: qs.parse(location.search),
+            query: qs.parse(location.search, { decode: true }),
           })
         );
 
@@ -157,10 +157,13 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
       throw new Error(PathReporter.report(validation).join('\n'));
     }
 
-    return qs.stringifyUrl({
-      url: path,
-      query: paramsWithRouteDefaults.query,
-    });
+    return qs.stringifyUrl(
+      {
+        url: path,
+        query: paramsWithRouteDefaults.query,
+      },
+      { encode: true }
+    );
   };
 
   return {

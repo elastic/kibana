@@ -15,11 +15,15 @@ import { BreakdownChart } from '../breakdown_chart';
 export function TransactionBreakdownChart({
   height,
   showAnnotations = true,
+  environment,
+  kuery,
 }: {
   height?: number;
   showAnnotations?: boolean;
+  environment: string;
+  kuery: string;
 }) {
-  const { data, status } = useTransactionBreakdown();
+  const { data, status } = useTransactionBreakdown({ environment, kuery });
   const { annotations } = useAnnotationsContext();
   const { timeseries } = data;
 

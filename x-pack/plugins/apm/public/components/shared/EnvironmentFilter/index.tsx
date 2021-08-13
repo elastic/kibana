@@ -22,10 +22,9 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 function updateEnvironmentUrl(
   history: History,
   location: ReturnType<typeof useLocation>,
-  environment?: string
+  environment: string
 ) {
-  const nextEnvironmentQueryParam =
-    environment !== ENVIRONMENT_ALL.value ? environment : undefined;
+  const nextEnvironmentQueryParam = environment;
   history.push({
     ...location,
     search: fromQuery({

@@ -11,6 +11,7 @@ import {
   SearchParamsMock,
   inspectSearchParams,
 } from '../../utils/test_helpers';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 describe('error queries', () => {
   let mock: SearchParamsMock;
@@ -25,6 +26,8 @@ describe('error queries', () => {
         groupId: 'groupId',
         serviceName: 'serviceName',
         setup,
+        environment: ENVIRONMENT_ALL.value,
+        kuery: '',
       })
     );
 
@@ -38,6 +41,8 @@ describe('error queries', () => {
         sortField: 'foo',
         serviceName: 'serviceName',
         setup,
+        environment: ENVIRONMENT_ALL.value,
+        kuery: '',
       })
     );
 
@@ -51,6 +56,8 @@ describe('error queries', () => {
         sortField: 'latestOccurrenceAt',
         serviceName: 'serviceName',
         setup,
+        environment: ENVIRONMENT_ALL.value,
+        kuery: '',
       })
     );
 
