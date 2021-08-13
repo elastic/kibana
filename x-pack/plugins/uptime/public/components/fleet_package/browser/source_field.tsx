@@ -57,25 +57,22 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
     onChange(config);
   }, [config, onChange]);
 
+  const zipUrlLabel = (
+    <FormattedMessage
+      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.label"
+      defaultMessage="Zip URL"
+    />
+  );
+
   const tabs = [
     {
       id: 'syntheticsBrowserZipURLConfig',
-      name: (
-        <FormattedMessage
-          id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.label"
-          defaultMessage="Zip URL"
-        />
-      ),
+      name: zipUrlLabel,
       content: (
         <>
           <EuiSpacer size="m" />
           <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.label"
-                defaultMessage="Zip URL"
-              />
-            }
+            label={zipUrlLabel}
             isInvalid={!config.zipUrl}
             error={
               <FormattedMessage
