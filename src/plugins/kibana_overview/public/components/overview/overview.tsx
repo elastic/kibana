@@ -80,7 +80,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         href: addBasePath(`home#/tutorial_directory`),
       },
     },
-    docsLink: docLinks.KIBANA_DOCS,
+    docsLink: `${docLinks.ELASTIC_WEBSITE_URL}kibana`,
   };
 
   // Show card for console if none of the manage data plugins are available, most likely in OSS
