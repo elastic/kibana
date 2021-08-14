@@ -15,7 +15,7 @@ const OSQUERY_COLUMN_SCHEMA_FIELDS = ['name', 'description', 'platforms', 'colum
 
 run(
   async ({ flags }) => {
-    const schemaPath = path.resolve('./public/common/schemas/osquery/');
+    const schemaPath = path.resolve(`../public/common/schemas/osquery/`);
     const schemaFile = path.join(schemaPath, flags.schema_version as string);
     const schemaData = await require(schemaFile);
 
@@ -33,7 +33,7 @@ run(
     flags: {
       string: ['schema_version'],
       help: `
-        --schema_version The semver string for the schema file located in public/editor/osquery_schema
+        --schema_version The semver string for the schema file located in public/common/schemas/osquery/
       `,
     },
   }

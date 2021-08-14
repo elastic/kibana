@@ -19,10 +19,7 @@ const FORM_ID = 'editQueryFlyoutForm';
 export interface UseScheduledQueryGroupQueryFormProps {
   uniqueQueryIds: string[];
   defaultValue?: OsqueryManagerPackagePolicyConfigRecord | undefined;
-  handleSubmit: FormConfig<
-    OsqueryManagerPackagePolicyConfigRecord,
-    ScheduledQueryGroupFormData
-  >['onSubmit'];
+  handleSubmit: FormConfig<ScheduledQueryGroupFormData, ScheduledQueryGroupFormData>['onSubmit'];
 }
 
 export interface ScheduledQueryGroupFormData {
@@ -59,6 +56,7 @@ export const useScheduledQueryGroupQueryForm = ({
     id: FORM_ID + uuid.v4(),
     onSubmit: async (formData, isValid) => {
       if (isValid && handleSubmit) {
+        // @ts-expect-error update types
         return handleSubmit(formData, isValid);
       }
     },
@@ -89,7 +87,6 @@ export const useScheduledQueryGroupQueryForm = ({
         }
         return draft;
       }),
-    // @ts-expect-error update types
     deserializer: (payload) => {
       if (!payload) return {} as ScheduledQueryGroupFormData;
 
