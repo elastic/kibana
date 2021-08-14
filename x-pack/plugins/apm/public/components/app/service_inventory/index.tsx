@@ -14,6 +14,7 @@ import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detecti
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
 import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
@@ -35,16 +36,15 @@ const initialData = {
 
 let hasDisplayedToast = false;
 
-function useServicesFetcher() {
+function useServicesFetcher({
+  environment,
+  kuery,
+}: {
+  environment: string;
+  kuery: string;
+}) {
   const {
-    urlParams: {
-      environment,
-      kuery,
-      start,
-      end,
-      comparisonEnabled,
-      comparisonType,
-    },
+    urlParams: { start, end, comparisonEnabled, comparisonType },
   } = useUrlParams();
   const { core } = useApmPluginContext();
   const upgradeAssistantHref = useUpgradeAssistantHref();
@@ -155,13 +155,20 @@ function useServicesFetcher() {
 
 export function ServiceInventory() {
   const { core } = useApmPluginContext();
-  const { fallbackToTransactions } = useFallbackToTransactionsFetcher();
+
+  const {
+    query: { environment, kuery },
+  } = useApmParams('/services');
+
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
+  });
   const {
     mainStatisticsData,
     mainStatisticsStatus,
     comparisonData,
     isLoading,
-  } = useServicesFetcher();
+  } = useServicesFetcher({ environment, kuery });
 
   const {
     anomalyDetectionJobsData,
