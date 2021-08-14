@@ -15,13 +15,13 @@ import type {
   ALERT_DURATION as ALERT_DURATION_TYPED,
   ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
   ALERT_STATUS as ALERT_STATUS_TYPED,
-  ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
+  ALERT_REASON as ALERT_REASON_TYPED,
 } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
   ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
   ALERT_STATUS as ALERT_STATUS_NON_TYPED,
-  ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
+  ALERT_REASON as ALERT_REASON_NON_TYPED,
   TIMESTAMP,
   // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
@@ -33,7 +33,6 @@ import { EuiButtonIcon, EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import React, { Suspense, useMemo, useState } from 'react';
-
 import type { TimelinesUIStart } from '../../../../timelines/public';
 import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -54,7 +53,7 @@ const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
 const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
-const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
+const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 
 interface AlertsTableTGridProps {
   indexName: string;
@@ -63,6 +62,7 @@ interface AlertsTableTGridProps {
   kuery: string;
   status: string;
   setRefetch: (ref: () => void) => void;
+  addToQuery: (value: string) => void;
 }
 
 const EventsThContent = styled.div.attrs(({ className = '' }) => ({
@@ -129,7 +129,7 @@ export const columns: Array<
       defaultMessage: 'Reason',
     }),
     linkField: '*',
-    id: ALERT_RULE_NAME,
+    id: ALERT_REASON,
   },
 ];
 
@@ -147,7 +147,7 @@ const OBSERVABILITY_ALERT_CONSUMERS = [
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const { core, observabilityRuleTypeRegistry } = usePluginContext();
   const { prepend } = core.http.basePath;
-  const { indexName, rangeFrom, rangeTo, kuery, status, setRefetch } = props;
+  const { indexName, rangeFrom, rangeTo, kuery, status, setRefetch, addToQuery } = props;
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
@@ -218,7 +218,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         type: 'standalone',
         columns,
         deletedEventIds: [],
-        defaultCellActions: getDefaultCellActions({ enableFilterActions: false }),
+        defaultCellActions: getDefaultCellActions({ enableFilterActions: true, addToQuery }),
         end: rangeTo,
         filters: [],
         indexNames: [indexName],

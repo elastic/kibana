@@ -6,16 +6,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
-import { IIndexPattern, SearchBar, TimeHistory } from '../../../../../../src/plugins/data/public';
+import React, { useMemo, useState, useEffect } from 'react';
+import { Subscription } from 'rxjs';
+import {
+  IIndexPattern,
+  SearchBar,
+  TimeHistory,
+  FilterManager,
+  Filter,
+} from '../../../../../../src/plugins/data/public';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export function AlertsSearchBar({
   dynamicIndexPattern,
   rangeFrom,
   rangeTo,
   onQueryChange,
+  setSearchBarFilter,
   query,
+  addToQuery,
 }: {
   dynamicIndexPattern: IIndexPattern[];
   rangeFrom?: string;
@@ -25,12 +35,37 @@ export function AlertsSearchBar({
     dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
     query?: string;
   }) => void;
+  setSearchBarFilter: ({}: { filters: Filter[] }) => void;
+  addToQuery: (value: string) => void;
+  filterManager?: FilterManager;
 }) {
   const timeHistory = useMemo(() => {
     return new TimeHistory(new Storage(localStorage));
   }, []);
   const [queryLanguage, setQueryLanguage] = useState<'lucene' | 'kuery'>('kuery');
-
+  // const [setSearchBarFilter]
+  const {
+    data: {
+      query: { filterManager },
+    },
+  } = useKibana().services;
+  useEffect(() => {
+    const isSubscribed = true;
+    const subscriptions = new Subscription();
+    subscriptions.add(
+      filterManager.getUpdates$().subscribe({
+        next: () => {
+          if (isSubscribed) {
+            console.log(filterManager.getFilters(), '!!sub');
+            // saveAppStateToStorage(filterManager.getAppFilters());
+            setSearchBarFilter({
+              filters: filterManager.getFilters(),
+            });
+          }
+        },
+      })
+    );
+  });
   return (
     <SearchBar
       indexPatterns={dynamicIndexPattern}
