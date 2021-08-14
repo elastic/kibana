@@ -8,6 +8,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import intersection from 'lodash/intersection';
+import { isSupportedEsServer } from 'src/core/server/elasticsearch';
 
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
@@ -22,6 +23,7 @@ import {
   getBulkOperationError,
   getExpectedVersionProperties,
   rawDocExistsInNamespace,
+  isNotFoundFromUnsupportedServer,
 } from './internal_utils';
 import { DEFAULT_REFRESH_SETTING } from './repository';
 import type { RepositoryEsClient } from './repository_es_client';
@@ -190,6 +192,16 @@ export async function updateObjectsSpaces({
       )
     : undefined;
 
+  // fail fast if we can't verify a 404 response is from Elasticsearch
+  if (
+    bulkGetResponse &&
+    isNotFoundFromUnsupportedServer({
+      statusCode: bulkGetResponse.statusCode,
+      headers: { ...bulkGetResponse.headers },
+    })
+  ) {
+    throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+  }
   const time = new Date().toISOString();
   let bulkOperationRequestIndexCounter = 0;
   const bulkOperationParams: estypes.BulkOperationContainer[] = [];

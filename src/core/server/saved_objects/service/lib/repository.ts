@@ -341,7 +341,7 @@ export class SavedObjectsRepository {
         ? await this.client.index(requestParams)
         : await this.client.create(requestParams);
 
-    // fail fast if we can't be sure a 404 response is from Elasticsearch
+    // throw if we can't verify a 404 response is from Elasticsearch
     if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
     }
@@ -424,12 +424,12 @@ export class SavedObjectsRepository {
           { ignore: [404] }
         )
       : undefined;
-    // fail fast if we can't be sure a 404 response is from Elasticsearch
+    // throw if we can't verify a 404 response is from Elasticsearch
     if (
       bulkGetResponse &&
       isNotFoundFromUnsupportedServer({
         statusCode: bulkGetResponse.statusCode,
-        headers: bulkGetResponse.headers,
+        headers: { ...bulkGetResponse.headers },
       })
     ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
@@ -602,12 +602,12 @@ export class SavedObjectsRepository {
           { ignore: [404] }
         )
       : undefined;
-    // fail fast if we can't be sure a 404 response is from Elasticsearch
+    // throw if we can't verify a 404 response is from Elasticsearch
     if (
       bulkGetResponse &&
       isNotFoundFromUnsupportedServer({
         statusCode: bulkGetResponse.statusCode,
-        headers: bulkGetResponse.headers,
+        headers: { ...bulkGetResponse.headers },
       })
     ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
@@ -754,7 +754,7 @@ export class SavedObjectsRepository {
       },
       { ignore: [404] }
     );
-    // fail fast if we can't be sure a 404 response is from Elasticsearch
+    // throw if we can't verify a 404 response is from Elasticsearch
     if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
     }
@@ -1013,7 +1013,7 @@ export class SavedObjectsRepository {
       bulkGetResponse &&
       isNotFoundFromUnsupportedServer({
         statusCode: bulkGetResponse.statusCode,
-        headers: bulkGetResponse.headers,
+        headers: { ...bulkGetResponse.headers },
       })
     ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
@@ -1144,7 +1144,7 @@ export class SavedObjectsRepository {
     if (
       isNotFoundFromUnsupportedServer({
         statusCode: aliasResponse.statusCode,
-        headers: aliasResponse.headers,
+        headers: { ...aliasResponse.headers },
       })
     ) {
       // throw if we cannot verify the response is from Elasticsearch
@@ -1187,7 +1187,7 @@ export class SavedObjectsRepository {
     if (
       isNotFoundFromUnsupportedServer({
         statusCode: bulkGetResponse.statusCode,
-        headers: bulkGetResponse.headers,
+        headers: { ...bulkGetResponse.headers },
       })
     ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
@@ -1502,10 +1502,10 @@ export class SavedObjectsRepository {
       : undefined;
     // fail fast if we can't verify a 404 response is from Elasticsearch
     if (
-      bulkGetResponse !== undefined &&
+      bulkGetResponse &&
       isNotFoundFromUnsupportedServer({
         statusCode: bulkGetResponse.statusCode,
-        headers: bulkGetResponse.headers,
+        headers: { ...bulkGetResponse.headers },
       })
     ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();

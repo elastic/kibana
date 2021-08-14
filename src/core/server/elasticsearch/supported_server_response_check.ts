@@ -12,6 +12,6 @@ export const PRODUCT_RESPONSE_HEADER = 'x-elastic-product';
  * @returns boolean
  */
 // This check belongs to the elasticsearch service as a dedicated helper method.
-export const isSupportedEsServer = (headers: Record<string, string> | null) => {
+export const isSupportedEsServer = (headers: Record<string, string | string[]> | null) => {
   return !!headers && headers[PRODUCT_RESPONSE_HEADER] === 'Elasticsearch';
 };

@@ -273,9 +273,4 @@ describe('#isNotFoundFromUnsupportedServer', () => {
     const result = isNotFoundFromUnsupportedServer(rawResponse);
     expect(result).toBeFalsy();
   });
-
-  it('returns false when there is no response', async () => {
-    const result = isNotFoundFromUnsupportedServer();
-    expect(result).toBeFalsy();
-  });
 });

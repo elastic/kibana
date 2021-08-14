@@ -144,7 +144,6 @@ export function rawDocExistsInNamespace(
   return existsInNamespace ?? false;
 }
 
-type NotFoundServerCheckResponse = Partial<Pick<ApiResponse, 'statusCode' | 'headers' | 'body'>>;
 /**
  * Check to ensure that a 404 response does not come from Elasticsearch
  *
@@ -154,8 +153,9 @@ type NotFoundServerCheckResponse = Partial<Pick<ApiResponse, 'statusCode' | 'hea
  * @param response response from elasticsearch client call
  * @returns boolean 'true' if the status code is 404 and the Elasticsearch product header is missing/unexpected value
  */
-export const isNotFoundFromUnsupportedServer = (
-  response?: NotFoundServerCheckResponse | undefined
-) => {
-  return response && response.statusCode === 404 && !isSupportedEsServer(response.headers!);
+export const isNotFoundFromUnsupportedServer = (args: {
+  statusCode: number | null;
+  headers: Record<string, string | string[]> | null;
+}): boolean => {
+  return args.statusCode === 404 && !isSupportedEsServer(args.headers);
 };
