@@ -19150,8 +19150,6 @@
     "xpack.osquery.scheduledQueryGroup.queriesTable.platformColumnTitle": "平台",
     "xpack.osquery.scheduledQueryGroup.queriesTable.queryColumnTitle": "查询",
     "xpack.osquery.scheduledQueryGroup.queriesTable.versionColumnTitle": "最低 Osquery 版本",
-    "xpack.osquery.scheduledQueryGroup.queriesTable.viewDiscoverResultsActionAriaLabel": "在 Discover 中查看结果",
-    "xpack.osquery.scheduledQueryGroup.queriesTable.viewLensResultsActionAriaLabel": "在 Lens 中查看结果",
     "xpack.osquery.scheduledQueryGroup.queriesTable.viewResultsColumnTitle": "查看结果",
     "xpack.osquery.scheduledQueryGroup.queryFlyoutForm.cancelButtonLabel": "取消",
     "xpack.osquery.scheduledQueryGroup.queryFlyoutForm.descriptionFieldLabel": "描述",
