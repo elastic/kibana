@@ -2816,7 +2816,6 @@
     "indexPatternFieldEditor.duration.showSuffixLabel": "接尾辞を表示",
     "indexPatternFieldEditor.duration.showSuffixLabel.short": "短縮サフィックスを使用",
     "indexPatternFieldEditor.durationErrorMessage": "小数部分の桁数は0から20までの間で指定する必要があります",
-    "indexPatternFieldEditor.editor.flyoutCloseButtonLabel": "閉じる",
     "indexPatternFieldEditor.editor.flyoutDefaultTitle": "フィールドを作成",
     "indexPatternFieldEditor.editor.flyoutEditFieldSubtitle": "インデックスパターン：{patternName}",
     "indexPatternFieldEditor.editor.flyoutEditFieldTitle": "「{fieldName}」フィールドの編集",

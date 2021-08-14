@@ -2828,7 +2828,6 @@
     "indexPatternFieldEditor.duration.showSuffixLabel": "显示后缀",
     "indexPatternFieldEditor.duration.showSuffixLabel.short": "使用短后缀",
     "indexPatternFieldEditor.durationErrorMessage": "小数位数必须介于 0 和 20 之间",
-    "indexPatternFieldEditor.editor.flyoutCloseButtonLabel": "关闭",
     "indexPatternFieldEditor.editor.flyoutDefaultTitle": "创建字段",
     "indexPatternFieldEditor.editor.flyoutEditFieldSubtitle": "索引模式：{patternName}",
     "indexPatternFieldEditor.editor.flyoutEditFieldTitle": "编辑字段“{fieldName}”",
