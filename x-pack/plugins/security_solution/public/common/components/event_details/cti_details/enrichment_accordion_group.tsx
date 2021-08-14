@@ -23,7 +23,7 @@ import { InspectButton } from '../../inspect';
 import { QUERY_ID } from '../../../containers/cti/event_enrichment';
 import * as i18n from './translations';
 import { StyledEuiInMemoryTable } from '../summary_view';
-import { EVENT_REFERENCE, EVENT_URL } from '../../../../../common/cti/constants';
+import { REFERENCE } from '../../../../../common/cti/constants';
 import { getSummaryColumns, SummaryRow, ThreatDetailsRow } from '../helpers';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { getFirstElement } from '../../../../../common/utils/data_retrieval';
@@ -42,7 +42,7 @@ const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
   fieldName,
   value,
 }) => {
-  const tooltipChild = [EVENT_URL, EVENT_REFERENCE].includes(fieldName) ? (
+  const tooltipChild = fieldName.match(REFERENCE) ? (
     <EuiLink href={value} target="_blank">
       {value}
     </EuiLink>
@@ -72,7 +72,7 @@ const buildThreatDetailsItems = (enrichment: CtiEnrichment) =>
     .sort()
     .map((field) => ({
       title: field.startsWith(DEFAULT_INDICATOR_SOURCE_PATH)
-        ? field.replace(`${DEFAULT_INDICATOR_SOURCE_PATH}.`, '')
+        ? field.replace(`${DEFAULT_INDICATOR_SOURCE_PATH}`, 'indicator')
         : field,
       description: {
         fieldName: field,
