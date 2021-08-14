@@ -20169,7 +20169,6 @@
     "xpack.securitySolution.alerts.riskScoreMapping.riskScoreMappingTitle": "リスクスコア無効化",
     "xpack.securitySolution.alerts.riskScoreMapping.riskScoreTitle": "リスクスコア",
     "xpack.securitySolution.alerts.riskScoreMapping.sourceFieldTitle": "ソースフィールド",
-    "xpack.securitySolution.alerts.rowRenderers.cti.threatMatch.datasetPreposition": "開始",
     "xpack.securitySolution.alerts.rowRenderers.cti.threatMatch.matchedVerb": "一致",
     "xpack.securitySolution.alerts.rowRenderers.cti.threatMatch.providerPreposition": "提供者",
     "xpack.securitySolution.alerts.severityMapping.defaultDescriptionLabel": "このルールで生成されたすべてのアラートの重要度sレベルを選択します。",
