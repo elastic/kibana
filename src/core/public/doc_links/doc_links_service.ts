@@ -199,7 +199,7 @@ export class DocLinksService {
           typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
           deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
           setupUpgrade: `${ELASTICSEARCH_DOCS}setup-upgrade.html`,
-          whatsNew: `${ELASTICSEARCH_DOCS}release-highlights.html`,
+          releaseHighlights: `${ELASTICSEARCH_DOCS}release-highlights.html`,
           migrating8: `${ELASTICSEARCH_DOCS}migrating-8.0.html`,
         },
         siem: {

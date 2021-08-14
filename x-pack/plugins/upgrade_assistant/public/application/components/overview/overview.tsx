@@ -67,7 +67,7 @@ export const DeprecationsOverview: FunctionComponent = () => {
         ]}
       >
         <EuiText>
-          <EuiLink href={docLinks.links.elasticsearch.whatsNew} target="_blank">
+          <EuiLink href={docLinks.links.elasticsearch.releaseHighlights} target="_blank">
             <FormattedMessage
               id="xpack.upgradeAssistant.overview.whatsNewLink"
               defaultMessage="What's new in version {currentMajor}.0?"
