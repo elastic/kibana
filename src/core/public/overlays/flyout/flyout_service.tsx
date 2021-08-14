@@ -82,9 +82,15 @@ export interface OverlayFlyoutOpenOptions {
   closeButtonAriaLabel?: string;
   ownFocus?: boolean;
   'data-test-subj'?: string;
+  'aria-label'?: string;
   size?: EuiFlyoutSize;
   maxWidth?: boolean | number | string;
   hideCloseButton?: boolean;
+  /**
+   * EuiFlyout onClose handler.
+   * If provided the consumer is responsible for calling flyout.close() to close the flyout;
+   */
+  onClose?: (flyout: OverlayRef) => void;
 }
 
 interface StartDeps {
@@ -119,9 +125,17 @@ export class FlyoutService {
 
         this.activeFlyout = flyout;
 
+        const onCloseFlyout = () => {
+          if (options.onClose) {
+            options.onClose(flyout);
+          } else {
+            flyout.close();
+          }
+        };
+
         render(
           <i18n.Context>
-            <EuiFlyout {...options} onClose={() => flyout.close()}>
+            <EuiFlyout {...options} onClose={onCloseFlyout}>
               <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
             </EuiFlyout>
           </i18n.Context>,

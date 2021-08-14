@@ -10,6 +10,7 @@ import { mount } from 'enzyme';
 import { TestProviders, mockGetAllCasesSelectorModal } from '../../../../mock';
 import { AddToCaseAction } from './add_to_case_action';
 import { SECURITY_SOLUTION_OWNER } from '../../../../../../cases/common';
+import { AddToCaseActionButton } from './add_to_case_action_button';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -30,6 +31,7 @@ describe('AddToCaseAction', () => {
       read: true,
     },
     appId: 'securitySolution',
+    onClose: () => null,
   };
 
   beforeEach(() => {
@@ -39,6 +41,7 @@ describe('AddToCaseAction', () => {
   it('it renders', () => {
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton {...props} />
         <AddToCaseAction {...props} />
       </TestProviders>
     );
@@ -49,6 +52,7 @@ describe('AddToCaseAction', () => {
   it('it opens the context menu', () => {
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton {...props} />
         <AddToCaseAction {...props} />
       </TestProviders>
     );
@@ -61,6 +65,7 @@ describe('AddToCaseAction', () => {
   it('it opens the create case modal', () => {
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton {...props} />
         <AddToCaseAction {...props} />
       </TestProviders>
     );
@@ -73,6 +78,7 @@ describe('AddToCaseAction', () => {
   it('it opens the all cases modal', () => {
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton {...props} />
         <AddToCaseAction {...props} />
       </TestProviders>
     );
@@ -86,6 +92,14 @@ describe('AddToCaseAction', () => {
   it('it set rule information as null when missing', () => {
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton
+          {...props}
+          ecsRowData={{
+            _id: 'test-id',
+            _index: 'test-index',
+            signal: { rule: { id: ['rule-id'], false_positives: [] } },
+          }}
+        />
         <AddToCaseAction
           {...props}
           ecsRowData={{
@@ -113,6 +127,13 @@ describe('AddToCaseAction', () => {
   it('disabled when event type is not supported', () => {
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton
+          {...props}
+          ecsRowData={{
+            _id: 'test-id',
+            _index: 'test-index',
+          }}
+        />
         <AddToCaseAction
           {...props}
           ecsRowData={{
@@ -138,6 +159,7 @@ describe('AddToCaseAction', () => {
     };
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton {...newProps} />
         <AddToCaseAction {...newProps} />
       </TestProviders>
     );

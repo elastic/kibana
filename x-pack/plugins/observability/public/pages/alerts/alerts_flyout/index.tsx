@@ -20,31 +20,49 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type {
+  ALERT_DURATION as ALERT_DURATION_TYPED,
+  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
+  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
+  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
+  ALERT_UUID as ALERT_UUID_TYPED,
+  ALERT_RULE_CATEGORY as ALERT_RULE_CATEGORY_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
+} from '@kbn/rule-data-utils';
 import {
-  ALERT_DURATION,
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUE,
-  ALERT_SEVERITY_LEVEL,
-  ALERT_UUID,
-  ALERT_RULE_CATEGORY,
-  ALERT_RULE_NAME,
-} from '@kbn/rule-data-utils/target/technical_field_names';
+  ALERT_DURATION as ALERT_DURATION_NON_TYPED,
+  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_NON_TYPED,
+  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
+  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
+  ALERT_UUID as ALERT_UUID_NON_TYPED,
+  ALERT_RULE_CATEGORY as ALERT_RULE_CATEGORY_NON_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
+  // @ts-expect-error
+} from '@kbn/rule-data-utils/target_node/technical_field_names';
 import moment from 'moment-timezone';
 import React, { useMemo } from 'react';
-import type { TopAlert, TopAlertResponse } from '../';
+import type { TopAlert } from '../';
 import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 import { asDuration } from '../../../../common/utils/formatters';
 import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
-import { decorateResponse } from '../decorate_response';
+import { parseAlert } from '../parse_alert';
 import { SeverityBadge } from '../severity_badge';
 
 type AlertsFlyoutProps = {
   alert?: TopAlert;
-  alerts?: TopAlertResponse[];
+  alerts?: Array<Record<string, unknown>>;
   isInApp?: boolean;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   selectedAlertId?: string;
 } & EuiFlyoutProps;
+
+const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
+const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED = ALERT_EVALUATION_THRESHOLD_NON_TYPED;
+const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED = ALERT_EVALUATION_VALUE_NON_TYPED;
+const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
+const ALERT_UUID: typeof ALERT_UUID_TYPED = ALERT_UUID_NON_TYPED;
+const ALERT_RULE_CATEGORY: typeof ALERT_RULE_CATEGORY_TYPED = ALERT_RULE_CATEGORY_NON_TYPED;
+const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
 
 export function AlertsFlyout({
   alert,
@@ -59,7 +77,8 @@ export function AlertsFlyout({
   const { http } = services;
   const prepend = http?.basePath.prepend;
   const decoratedAlerts = useMemo(() => {
-    return decorateResponse(alerts ?? [], observabilityRuleTypeRegistry);
+    const parseObservabilityAlert = parseAlert(observabilityRuleTypeRegistry);
+    return (alerts ?? []).map(parseObservabilityAlert);
   }, [alerts, observabilityRuleTypeRegistry]);
 
   let alertData = alert;

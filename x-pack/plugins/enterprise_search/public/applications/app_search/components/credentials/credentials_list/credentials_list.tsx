@@ -9,12 +9,19 @@ import React, { useMemo } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiButton,
+  EuiCopy,
+  EuiEmptyPrompt,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EDIT_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
 import { HiddenText } from '../../../../shared/hidden_text';
 import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
+import { DOCS_PREFIX } from '../../../routes';
 import { TOKEN_TYPE_DISPLAY_NAMES } from '../constants';
 import { CredentialsLogic } from '../credentials_logic';
 import { ApiToken } from '../types';
@@ -131,8 +138,20 @@ export const CredentialsList: React.FC = () => {
             </h2>
           }
           body={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.body', {
-            defaultMessage: 'Click the "Create a key" button to make your first one.',
+            defaultMessage: 'Allow applications to access Elastic App Search on your behalf.',
           })}
+          actions={
+            <EuiButton
+              size="s"
+              target="_blank"
+              iconType="popout"
+              href={`${DOCS_PREFIX}/authentication.html#authentication-api-keys`}
+            >
+              {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.buttonLabel', {
+                defaultMessage: 'Learn about API keys',
+              })}
+            </EuiButton>
+          }
         />
       }
       loading={!isCredentialsDataComplete}
