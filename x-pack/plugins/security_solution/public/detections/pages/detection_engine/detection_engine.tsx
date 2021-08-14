@@ -300,7 +300,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                   <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  {timelinesUi.getLastUpdated({ updatedAt: updatedAt || 0 })}
+                  {timelinesUi.getLastUpdated({ updatedAt: updatedAt || 0, showUpdating: loading })}
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="m" />
