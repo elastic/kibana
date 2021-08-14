@@ -16,7 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  describe.only('Grok Debugger', function () {
+  describe('Grok Debugger', function () {
     before(async () => {
       // await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       // Increase window height to ensure "Simulate" button is shown above the
