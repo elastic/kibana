@@ -95,6 +95,7 @@ import { EndpointMetadataService } from './endpoint/services/metadata';
 import { createIndicatorMatchAlertType } from './lib/detection_engine/rule_types/indicator_match/create_indicator_match_alert_type';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
 import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -143,6 +144,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   private manifestTask: ManifestTask | undefined;
   private artifactsCache: LRU<string, Buffer>;
+  private telemetryUsageCounter?: UsageCounter;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
@@ -180,6 +182,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
     });
+
+    this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID)
 
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
@@ -329,7 +333,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     });
 
-    this.telemetryEventsSender.setup(plugins.telemetry, plugins.taskManager);
+    this.telemetryEventsSender.setup(plugins.telemetry, plugins.taskManager, this.telemetryUsageCounter);
 
     return {};
   }

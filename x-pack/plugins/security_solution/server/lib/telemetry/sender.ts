@@ -24,6 +24,7 @@ import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_s
 import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import { ExceptionListClient } from '../../../../lists/server';
 import { getTrustedAppsList } from '../../endpoint/routes/trusted_apps/service';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
@@ -66,13 +67,15 @@ export class TelemetryEventsSender {
   private esClient?: ElasticsearchClient;
   private savedObjectsClient?: SavedObjectsClientContract;
   private exceptionListClient?: ExceptionListClient;
+  private telemetryUsageCounter?: UsageCounter;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
   }
 
-  public setup(telemetrySetup?: TelemetryPluginSetup, taskManager?: TaskManagerSetupContract) {
+  public setup(telemetrySetup?: TelemetryPluginSetup, taskManager?: TaskManagerSetupContract, telemetryUsageCounter?: UsageCounter) {
     this.telemetrySetup = telemetrySetup;
+    this.telemetryUsageCounter = telemetryUsageCounter;
 
     if (taskManager) {
       this.diagTask = new TelemetryDiagTask(this.logger, taskManager, this);
