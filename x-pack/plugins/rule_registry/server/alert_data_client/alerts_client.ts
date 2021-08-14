@@ -5,6 +5,7 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
+import { estypes } from '@elastic/elasticsearch';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { estypes } from '@elastic/elasticsearch';
@@ -38,7 +39,7 @@ import { Logger, ElasticsearchClient, EcsEventOutcome } from '../../../../../src
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import { AuditLogger } from '../../../security/server';
 import {
-  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
   SPACE_IDS,
@@ -86,7 +87,7 @@ export interface BulkUpdateOptions<Params extends AlertTypeParams> {
   ids: string[] | undefined | null;
   status: STATUS_VALUES;
   index: string;
-  query: string | undefined | null;
+  query: object | string | undefined | null;
 }
 
 interface GetAlertParams {
@@ -134,6 +135,15 @@ export class AlertsClient {
     return {
       outcome: operation === WriteOperations.Update ? 'unknown' : 'success',
     };
+  }
+
+  private getAlertStatusFieldUpdate(
+    source: ParsedTechnicalFields | undefined,
+    status: STATUS_VALUES
+  ) {
+    return source?.[ALERT_WORKFLOW_STATUS] == null
+      ? { signal: { status } }
+      : { [ALERT_WORKFLOW_STATUS]: status };
   }
 
   /**
@@ -353,19 +363,25 @@ export class AlertsClient {
         );
       }
 
-      const bulkUpdateRequest = mgetRes.body.docs.flatMap((item) => [
-        {
-          update: {
-            _index: item._index,
-            _id: item._id,
+      const bulkUpdateRequest = mgetRes.body.docs.flatMap((item) => {
+        const fieldToUpdate = this.getAlertStatusFieldUpdate(item?._source, status);
+        return [
+          {
+            update: {
+              _index: item._index,
+              _id: item._id,
+            },
           },
-        },
-        {
-          doc: { [ALERT_STATUS]: status },
-        },
-      ]);
+          {
+            doc: {
+              ...fieldToUpdate,
+            },
+          },
+        ];
+      });
 
       const bulkUpdateResponse = await this.esClient.bulk({
+        refresh: 'wait_for',
         body: bulkUpdateRequest,
       });
       return bulkUpdateResponse;
@@ -409,9 +425,17 @@ export class AlertsClient {
         config
       );
       if (query != null && typeof query === 'object') {
-        builtQuery.bool.must.push(query);
-      }
+        //   builtQuery.bool.must.push(query);
+        // }
 
+        return {
+          ...builtQuery,
+          bool: {
+            ...builtQuery.bool,
+            must: [...builtQuery.bool.must, query],
+          },
+        };
+      }
       return builtQuery;
     } catch (exc) {
       this.logger.error(exc);
@@ -432,7 +456,7 @@ export class AlertsClient {
     operation,
   }: {
     index: string;
-    query: string;
+    query: object | string;
     operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
   }) {
     let lastSortIds;
@@ -547,14 +571,17 @@ export class AlertsClient {
         this.logger.error(errorMessage);
         throw Boom.notFound(errorMessage);
       }
-
+      const fieldToUpdate = this.getAlertStatusFieldUpdate(
+        alert?.hits.hits[0]._source,
+        status as STATUS_VALUES
+      );
       const { body: response } = await this.esClient.update<ParsedTechnicalFields>({
         ...decodeVersion(_version),
         id,
         index,
         body: {
           doc: {
-            [ALERT_STATUS]: status,
+            ...fieldToUpdate,
           },
         },
         refresh: 'wait_for',
@@ -606,11 +633,11 @@ export class AlertsClient {
           refresh: true,
           body: {
             script: {
-              source: `if (ctx._source['${ALERT_STATUS}'] != null) {
-                ctx._source['${ALERT_STATUS}'] = '${status}'
+              source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
+                ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}'
               }
-              if (ctx._source['signal.status'] != null) {
-                ctx._source['signal.status'] = '${status}'
+              if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                ctx._source.signal.status = '${status}'
               }`,
               lang: 'painless',
             } as InlineScript,
