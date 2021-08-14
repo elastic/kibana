@@ -159,6 +159,13 @@ export const useTimelineEvents = ({
     wrappedLoadPage(0);
   }, [wrappedLoadPage]);
 
+  const setUpdated = useCallback(
+    (updatedAt: number) => {
+      dispatch(tGridActions.setTimelineUpdatedAt({ id, updated: updatedAt }));
+    },
+    [dispatch, id]
+  );
+
   const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
     id,
     inspect: {
@@ -212,6 +219,7 @@ export const useTimelineEvents = ({
                       totalCount: response.totalCount,
                       updatedAt: Date.now(),
                     };
+                    setUpdated(newTimelineResponse.updatedAt);
                     return newTimelineResponse;
                   });
                   searchSubscription$.current.unsubscribe();
@@ -237,7 +245,7 @@ export const useTimelineEvents = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data, addWarning, addError, skip]
+    [skip, data, setUpdated, addWarning, addError]
   );
 
   useEffect(() => {
