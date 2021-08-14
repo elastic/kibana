@@ -69,11 +69,11 @@ exports[`StatusMessage should render with partial matches 1`] = `
             "matchedIndicesLength": 1,
             "strongIndices": <strong>
               <FormattedMessage
-                defaultMessage="{indicesLength, plural, one {# source} other {# sources} }"
-                id="indexPatternEditor.status.notMatchLabel.allIndicesLabel"
+                defaultMessage="{matchedIndicesLength, plural, one {source} other {# sources} }"
+                id="indexPatternEditor.status.partialMatchLabel.strongIndicesLabel"
                 values={
                   Object {
-                    "indicesLength": 2,
+                    "matchedIndicesLength": 1,
                   }
                 }
               />

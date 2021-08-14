@@ -137,12 +137,12 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
             strongIndices: (
               <strong>
                 <FormattedMessage
-                  id="indexPatternEditor.status.notMatchLabel.allIndicesLabel"
-                  defaultMessage="{indicesLength, plural,
-                one {# source}
-                other {# sources}
-              }"
-                  values={{ indicesLength: allIndicesLength }}
+                  id="indexPatternEditor.status.partialMatchLabel.strongIndicesLabel"
+                  defaultMessage="{matchedIndicesLength, plural,
+                    one {source}
+                    other {# sources}
+                  }"
+                  values={{ matchedIndicesLength: partialMatchedIndices.length }}
                 />
               </strong>
             ),
