@@ -7,7 +7,10 @@
 
 import { getPieVisualization } from './visualization';
 import type { PieVisualizationState } from '../../common/expressions';
+import { layerTypes } from '../../common';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
+import { FramePublicAPI } from '../types';
 
 jest.mock('../id_generator');
 
@@ -23,6 +26,7 @@ function getExampleState(): PieVisualizationState {
     layers: [
       {
         layerId: LAYER_ID,
+        layerType: layerTypes.DATA,
         groups: [],
         metric: undefined,
         numberDisplay: 'percent',
@@ -31,6 +35,16 @@ function getExampleState(): PieVisualizationState {
         nestedLegend: false,
       },
     ],
+  };
+}
+
+function mockFrame(): FramePublicAPI {
+  return {
+    ...createMockFramePublicAPI(),
+    datasourceLayers: {
+      l1: createMockDatasource('l1').publicAPIMock,
+      l42: createMockDatasource('l42').publicAPIMock,
+    },
   };
 }
 
@@ -43,6 +57,20 @@ describe('pie_visualization', () => {
       expect(error).not.toBeDefined();
     });
   });
+
+  describe('#getSupportedLayers', () => {
+    it('should return a single layer type', () => {
+      expect(pieVisualization.getSupportedLayers()).toHaveLength(1);
+    });
+  });
+
+  describe('#getLayerType', () => {
+    it('should return the type only if the layer is in the state', () => {
+      expect(pieVisualization.getLayerType(LAYER_ID, getExampleState())).toEqual(layerTypes.DATA);
+      expect(pieVisualization.getLayerType('foo', getExampleState())).toBeUndefined();
+    });
+  });
+
   describe('#setDimension', () => {
     it('returns expected state', () => {
       const prevState: PieVisualizationState = {
@@ -50,6 +78,7 @@ describe('pie_visualization', () => {
           {
             groups: ['a'],
             layerId: LAYER_ID,
+            layerType: layerTypes.DATA,
             numberDisplay: 'percent',
             categoryDisplay: 'default',
             legendDisplay: 'default',
@@ -64,6 +93,7 @@ describe('pie_visualization', () => {
         columnId: 'x',
         layerId: LAYER_ID,
         groupId: 'a',
+        frame: mockFrame(),
       });
 
       expect(setDimensionResult).toEqual(

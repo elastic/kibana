@@ -28,13 +28,13 @@ interface OsqueryEditorProps {
 
 const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   defaultValue,
-  disabled,
+  // disabled,
   onChange,
 }) => (
   <EuiCodeEditor
     value={defaultValue}
     mode="osquery"
-    // isReadOnly={!!disabled}
+    // isReadOnly={disabled}
     theme="tomorrow"
     onChange={onChange}
     name="osquery_editor"

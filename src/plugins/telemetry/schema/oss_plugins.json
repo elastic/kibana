@@ -7168,6 +7168,12 @@
             "description": "Default value of the setting was changed."
           }
         },
+        "securitySolution:defaultThreatIndex": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Default value of the setting was changed."
+          }
+        },
         "securitySolution:newsFeedUrl": {
           "type": "keyword",
           "_meta": {

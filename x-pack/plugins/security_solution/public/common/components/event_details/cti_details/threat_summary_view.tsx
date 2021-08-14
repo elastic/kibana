@@ -157,12 +157,12 @@ const columns: Array<EuiBasicTableColumn<ThreatSummaryItem>> = [
 ];
 
 const ThreatSummaryViewComponent: React.FC<{
-  enrichments: CtiEnrichment[];
-  timelineId: string;
-  eventId: string;
-  data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
-}> = ({ enrichments, timelineId, eventId, data, browserFields }) => (
+  data: TimelineEventsDetailsItem[];
+  enrichments: CtiEnrichment[];
+  eventId: string;
+  timelineId: string;
+}> = ({ browserFields, data, enrichments, eventId, timelineId }) => (
   <Indent>
     <StyledEuiInMemoryTable
       columns={columns}
