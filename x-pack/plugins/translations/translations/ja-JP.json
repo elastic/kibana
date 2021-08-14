@@ -18724,8 +18724,6 @@
     "xpack.osquery.scheduledQueryGroup.queriesTable.platformColumnTitle": "プラットフォーム",
     "xpack.osquery.scheduledQueryGroup.queriesTable.queryColumnTitle": "クエリ",
     "xpack.osquery.scheduledQueryGroup.queriesTable.versionColumnTitle": "最低Osqueryバージョン",
-    "xpack.osquery.scheduledQueryGroup.queriesTable.viewDiscoverResultsActionAriaLabel": "Discoverで結果を表示",
-    "xpack.osquery.scheduledQueryGroup.queriesTable.viewLensResultsActionAriaLabel": "Lensで結果を表示",
     "xpack.osquery.scheduledQueryGroup.queriesTable.viewResultsColumnTitle": "結果を表示",
     "xpack.osquery.scheduledQueryGroup.queryFlyoutForm.cancelButtonLabel": "キャンセル",
     "xpack.osquery.scheduledQueryGroup.queryFlyoutForm.descriptionFieldLabel": "説明",

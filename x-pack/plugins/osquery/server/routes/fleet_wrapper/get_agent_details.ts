@@ -22,10 +22,16 @@ export const getAgentDetailsRoute = (router: IRouter, osqueryContext: OsqueryApp
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asInternalUser;
 
-      const agent = await osqueryContext.service
-        .getAgentService()
-        // @ts-expect-error update types
-        ?.getAgent(esClient, request.params.id);
+      let agent;
+
+      try {
+        agent = await osqueryContext.service
+          .getAgentService()
+          // @ts-expect-error update types
+          ?.getAgent(esClient, request.params.id);
+      } catch (err) {
+        return response.notFound();
+      }
 
       return response.ok({ body: { item: agent } });
     }
