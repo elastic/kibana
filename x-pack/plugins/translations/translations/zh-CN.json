@@ -20424,7 +20424,6 @@
     "xpack.securitySolution.alerts.riskScoreMapping.riskScoreMappingTitle": "风险分数覆盖",
     "xpack.securitySolution.alerts.riskScoreMapping.riskScoreTitle": "风险分数",
     "xpack.securitySolution.alerts.riskScoreMapping.sourceFieldTitle": "源字段",
-    "xpack.securitySolution.alerts.rowRenderers.cti.threatMatch.datasetPreposition": "来自",
     "xpack.securitySolution.alerts.rowRenderers.cti.threatMatch.matchedVerb": "已匹配",
     "xpack.securitySolution.alerts.rowRenderers.cti.threatMatch.providerPreposition": "提供者",
     "xpack.securitySolution.alerts.severityMapping.defaultDescriptionLabel": "选择此规则生成的所有告警的严重性级别。",
