@@ -21,7 +21,11 @@ describe('ThreatDetailsView', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <ThreatDetailsView enrichments={enrichments} />
+        <ThreatDetailsView
+          enrichments={enrichments}
+          showInvestigationTimeEnrichments
+          loading={false}
+        />
       </TestProviders>
     );
 
@@ -38,7 +42,11 @@ describe('ThreatDetailsView', () => {
     ];
     const wrapper = mount(
       <TestProviders>
-        <ThreatDetailsView enrichments={enrichments} />
+        <ThreatDetailsView
+          enrichments={enrichments}
+          showInvestigationTimeEnrichments
+          loading={false}
+        />
       </TestProviders>
     );
     expect(wrapper.find('a').length).toEqual(1);
@@ -61,7 +69,11 @@ describe('ThreatDetailsView', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <ThreatDetailsView enrichments={enrichments} />
+        <ThreatDetailsView
+          enrichments={enrichments}
+          showInvestigationTimeEnrichments
+          loading={false}
+        />
       </TestProviders>
     );
 
@@ -86,11 +98,90 @@ describe('ThreatDetailsView', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <ThreatDetailsView enrichments={enrichments} />
+        <ThreatDetailsView
+          enrichments={enrichments}
+          showInvestigationTimeEnrichments
+          loading={false}
+        />
       </TestProviders>
     );
 
     expect(wrapper.exists('[data-test-subj="threat-match-detected"]')).toEqual(true);
     expect(wrapper.exists('[data-test-subj="enriched-with-threat-intel"]')).toEqual(true);
+  });
+
+  it('renders no data views', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatDetailsView enrichments={[]} showInvestigationTimeEnrichments loading={false} />
+      </TestProviders>
+    );
+
+    expect(
+      wrapper.exists(
+        '[data-test-subj="threat-match-detected"] [data-test-subj="no-enrichments-found"]'
+      )
+    ).toEqual(true);
+    expect(
+      wrapper.exists(
+        '[data-test-subj="enriched-with-threat-intel"] [data-test-subj="no-enrichments-found"]'
+      )
+    ).toEqual(true);
+  });
+
+  it('renders loading state', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatDetailsView enrichments={[]} showInvestigationTimeEnrichments loading />
+      </TestProviders>
+    );
+
+    expect(wrapper.exists('[data-test-subj="loading-enrichments"]')).toEqual(true);
+  });
+
+  it('can hide investigation time enrichments', () => {
+    const investigationEnrichment = buildEventEnrichmentMock({
+      'matched.type': ['investigation_time'],
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatDetailsView
+          enrichments={[investigationEnrichment]}
+          showInvestigationTimeEnrichments={false}
+          loading={false}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.exists('[data-test-subj="enriched-with-threat-intel"]')).toEqual(false);
+  });
+
+  it('renders children as a part of investigation time enrichment section', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatDetailsView enrichments={[]} showInvestigationTimeEnrichments loading={false}>
+          <div className={'test-div'} />
+        </ThreatDetailsView>
+      </TestProviders>
+    );
+
+    expect(wrapper.exists('.test-div')).toEqual(true);
+  });
+
+  it('does not render children id investigation time enrichment section is not showing', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatDetailsView
+          enrichments={[]}
+          showInvestigationTimeEnrichments={false}
+          loading={false}
+        >
+          <div className={'test-div'} />
+        </ThreatDetailsView>
+      </TestProviders>
+    );
+
+    expect(wrapper.exists('.test-div')).toEqual(false);
   });
 });

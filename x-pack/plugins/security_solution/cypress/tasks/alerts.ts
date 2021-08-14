@@ -28,6 +28,13 @@ import {
 } from '../screens/alerts';
 import { REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
+import {
+  UPDATE_ENRICHMENT_RANGE_BUTTON,
+  ENRICHMENT_QUERY_END_INPUT,
+  ENRICHMENT_QUERY_RANGE_PICKER,
+  ENRICHMENT_QUERY_START_INPUT,
+  THREAT_INTEL_TAB,
+} from '../screens/alerts_details';
 
 export const addExceptionFromFirstAlert = () => {
   cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
@@ -57,7 +64,25 @@ export const closeAlerts = () => {
 };
 
 export const expandFirstAlert = () => {
+  cy.get(EXPAND_ALERT_BTN).should('exist').first().click({ force: true });
+};
+
+export const viewThreatIntelTab = () => cy.get(THREAT_INTEL_TAB).click();
+
+export const viewThreatDetails = () => {
   cy.get(EXPAND_ALERT_BTN).first().click({ force: true });
+};
+
+export const setEnrichmentDates = (from?: string, to?: string) => {
+  cy.get(ENRICHMENT_QUERY_RANGE_PICKER).within(() => {
+    if (from) {
+      cy.get(ENRICHMENT_QUERY_START_INPUT).type(`{selectall}${from}{enter}`);
+    }
+    if (to) {
+      cy.get(ENRICHMENT_QUERY_END_INPUT).type(`{selectall}${to}{enter}`);
+    }
+  });
+  cy.get(UPDATE_ENRICHMENT_RANGE_BUTTON).click();
 };
 
 export const goToClosedAlerts = () => {
