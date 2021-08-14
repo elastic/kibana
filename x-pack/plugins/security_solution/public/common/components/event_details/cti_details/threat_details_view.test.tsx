@@ -10,7 +10,6 @@ import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../mock';
 import { buildEventEnrichmentMock } from '../../../../../common/search_strategy/security_solution/cti/index.mock';
-import { FIRSTSEEN } from '../../../../../common/cti/constants';
 import { ThreatDetailsView } from './threat_details_view';
 
 describe('ThreatDetailsView', () => {
@@ -31,11 +30,10 @@ describe('ThreatDetailsView', () => {
     );
   });
 
-  it('renders anchor links for event.url and event.reference', () => {
+  it('renders an anchor link for indicator.reference', () => {
     const enrichments = [
       buildEventEnrichmentMock({
-        'event.url': ['http://foo.bar'],
-        'event.reference': ['http://foo.baz'],
+        'threatintel.indicator.reference': ['http://foo.baz'],
       }),
     ];
     const wrapper = mount(
@@ -43,7 +41,7 @@ describe('ThreatDetailsView', () => {
         <ThreatDetailsView enrichments={enrichments} />
       </TestProviders>
     );
-    expect(wrapper.find('a').length).toEqual(2);
+    expect(wrapper.find('a').length).toEqual(1);
   });
 
   it('sorts same type of enrichments by first_seen descending', () => {
@@ -52,7 +50,7 @@ describe('ThreatDetailsView', () => {
     // this simulates a legacy enrichment from the old indicator match rule,
     // where first_seen is available at the top level
     const existingEnrichment = buildEventEnrichmentMock({
-      first_seen: [mostRecentDate],
+      'indicator.first_seen': [mostRecentDate],
     });
     delete existingEnrichment['threatintel.indicator.first_seen'];
     const newEnrichment = buildEventEnrichmentMock({
@@ -70,10 +68,10 @@ describe('ThreatDetailsView', () => {
     const firstSeenRows = wrapper
       .find('.euiTableRow')
       .hostNodes()
-      .filterWhere((node) => node.text().includes(FIRSTSEEN));
+      .filterWhere((node) => node.text().includes('first_seen'));
     expect(firstSeenRows.map((node) => node.text())).toEqual([
-      `first_seen${mostRecentDate}`,
-      `first_seen${olderDate}`,
+      `indicator.first_seen${mostRecentDate}`,
+      `indicator.first_seen${olderDate}`,
     ]);
   });
 
