@@ -22,12 +22,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { StyledEuiInMemoryTable } from '../summary_view';
 import { getSummaryColumns, SummaryRow, ThreatDetailsRow } from '../helpers';
-import {
-  FIRSTSEEN,
-  EVENT_URL,
-  EVENT_REFERENCE,
-  ENRICHMENT_TYPES,
-} from '../../../../../common/cti/constants';
+import { FIRST_SEEN, ENRICHMENT_TYPES, REFERENCE } from '../../../../../common/cti/constants';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { getFirstElement } from '../../../../../common/utils/data_retrieval';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
@@ -42,7 +37,7 @@ import { InspectButton } from '../../inspect';
 import { EnrichmentButtonContent } from './enrichment_button_content';
 
 const getFirstSeen = (enrichment: CtiEnrichment): number => {
-  const firstSeenValue = getShimmedIndicatorValue(enrichment, FIRSTSEEN);
+  const firstSeenValue = getShimmedIndicatorValue(enrichment, FIRST_SEEN);
   const firstSeenDate = Date.parse(firstSeenValue ?? 'no date');
   return Number.isInteger(firstSeenDate) ? firstSeenDate : new Date(-1).valueOf();
 };
@@ -61,7 +56,7 @@ const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
   fieldName,
   value,
 }) => {
-  const tooltipChild = [EVENT_URL, EVENT_REFERENCE].includes(fieldName) ? (
+  const tooltipChild = fieldName.match(REFERENCE) ? (
     <EuiLink href={value} target="_blank">
       {value}
     </EuiLink>
@@ -91,7 +86,7 @@ const buildThreatDetailsItems = (enrichment: CtiEnrichment) =>
     .sort()
     .map((field) => {
       const displayField = field.startsWith(DEFAULT_INDICATOR_SOURCE_PATH)
-        ? field.replace(`${DEFAULT_INDICATOR_SOURCE_PATH}.`, '')
+        ? field.replace(`${DEFAULT_INDICATOR_SOURCE_PATH}`, 'indicator')
         : field;
 
       return {
