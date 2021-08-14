@@ -48,6 +48,7 @@ export const TakeActionDropdown = React.memo(
     onAddExceptionTypeClick,
     onAddIsolationStatusClick,
     refetch,
+    indexName,
     timelineId,
   }: {
     detailsData: TimelineEventsDetailsItem[] | null;
@@ -57,6 +58,7 @@ export const TakeActionDropdown = React.memo(
     loadingEventDetails: boolean;
     nonEcsData?: TimelineNonEcsData[];
     refetch: (() => void) | undefined;
+    indexName: string;
     onAddEventFilterClick: () => void;
     onAddExceptionTypeClick: (type: ExceptionListType) => void;
     onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
@@ -154,6 +156,7 @@ export const TakeActionDropdown = React.memo(
     const { actionItems } = useAlertsActions({
       alertStatus: actionsData.alertStatus,
       eventId: actionsData.eventId,
+      indexName,
       timelineId,
       closePopover: closePopoverAndFlyout,
     });
@@ -266,6 +269,7 @@ export const TakeActionDropdown = React.memo(
           closePopover={closePopoverHandler}
           panelPaddingSize="none"
           anchorPosition="downLeft"
+          repositionOnScroll
         >
           <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
         </EuiPopover>

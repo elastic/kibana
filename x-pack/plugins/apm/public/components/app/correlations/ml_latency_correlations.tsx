@@ -349,33 +349,29 @@ export function MlLatencyCorrelations({ onClose }: Props) {
         </>
       )}
       <EuiSpacer size="m" />
-      {overallHistogram !== undefined ? (
-        <>
-          <EuiTitle size="xxs">
-            <h4 data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">
-              {i18n.translate(
-                'xpack.apm.correlations.latencyCorrelations.chartTitle',
-                {
-                  defaultMessage:
-                    'Latency distribution for {name} (Log-Log Plot)',
-                  values: {
-                    name: transactionName ?? serviceName,
-                  },
-                }
-              )}
-            </h4>
-          </EuiTitle>
 
-          <CorrelationsChart
-            markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
-            markerValue={percentileThresholdValue ?? 0}
-            {...selectedHistogram}
-            overallHistogram={overallHistogram}
-          />
+      <EuiTitle size="xxs">
+        <h4 data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">
+          {i18n.translate(
+            'xpack.apm.correlations.latencyCorrelations.chartTitle',
+            {
+              defaultMessage: 'Latency distribution for {name} (Log-Log Plot)',
+              values: {
+                name: transactionName ?? serviceName,
+              },
+            }
+          )}
+        </h4>
+      </EuiTitle>
 
-          <EuiSpacer size="s" />
-        </>
-      ) : null}
+      <CorrelationsChart
+        markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
+        markerValue={percentileThresholdValue ?? 0}
+        {...selectedHistogram}
+        overallHistogram={overallHistogram}
+      />
+
+      <EuiSpacer size="s" />
 
       <div data-test-subj="apmCorrelationsTable">
         {histograms.length > 0 && selectedHistogram !== undefined && (
