@@ -7,12 +7,14 @@
  */
 
 import type { Payload } from '@hapi/boom';
+import { ApiResponse } from '@elastic/elasticsearch';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../../serialization';
 import type { SavedObject } from '../../types';
 import { decodeRequestVersion, encodeHitVersion } from '../../version';
 import { SavedObjectsErrorHelpers } from './errors';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from './utils';
+import { isSupportedEsServer } from '../../../elasticsearch';
 
 /**
  * Checks the raw response of a bulk operation and returns an error if necessary.
@@ -141,3 +143,19 @@ export function rawDocExistsInNamespace(
     namespaces?.includes(ALL_NAMESPACES_STRING);
   return existsInNamespace ?? false;
 }
+
+type NotFoundServerCheckResponse = Partial<Pick<ApiResponse, 'statusCode' | 'headers' | 'body'>>;
+/**
+ * Check to ensure that a 404 response does not come from Elasticsearch
+ *
+ * WARNING: This is a hack to work around for 404 responses returned from a proxy.
+ * We're aiming to minimise the risk of data loss when consumers act on Not Found errors
+ *
+ * @param response response from elasticsearch client call
+ * @returns boolean 'true' if the status code is 404 and the Elasticsearch product header is missing/unexpected value
+ */
+export const isNotFoundFromUnsupportedServer = (
+  response?: NotFoundServerCheckResponse | undefined
+) => {
+  return response && response.statusCode === 404 && !isSupportedEsServer(response.headers!);
+};

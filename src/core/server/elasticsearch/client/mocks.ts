@@ -142,7 +142,7 @@ export type MockedTransportRequestPromise<T> = TransportRequestPromise<T> & {
 const createSuccessTransportRequestPromise = <T>(
   body: T,
   { statusCode = 200 }: { statusCode?: number } = {},
-  headers?: Record<string, string | string[]>
+  headers: Record<string, string | string[]> = { 'x-elastic-product': 'Elasticsearch' }
 ): MockedTransportRequestPromise<ApiResponse<T>> => {
   const response = createApiResponse({ body, statusCode, headers });
   const promise = Promise.resolve(response);
@@ -163,7 +163,7 @@ function createApiResponse<TResponse = Record<string, any>>(
   return {
     body: {} as any,
     statusCode: 200,
-    headers: {},
+    headers: { 'x-elastic-product': 'Elasticsearch' },
     warnings: [],
     meta: {} as any,
     ...opts,
