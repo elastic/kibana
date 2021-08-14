@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'grokDebugger']);
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -73,7 +72,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it.skip('applies the correct CSS classes', async () => {
       const grokPattern = '\\[(?:-|%{NUMBER:bytes:int})\\]';
 
-      await grokDebugger.setPatternInput(grokPattern);
+      await PageObjects.grokDebugger.setPatternInput(grokPattern);
 
       const GROK_START = 'grokStart';
       const GROK_PATTERN_NAME = 'grokPatternName';
@@ -85,7 +84,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const GROK_ESCAPED = 'grokEscaped';
       const GROK_REGEX = 'grokRegex';
 
-      await grokDebugger.assertPatternInputSyntaxHighlighting([
+      await PageObjects.grokDebugger.assertPatternInputSyntaxHighlighting([
         { token: GROK_ESCAPE, content: '\\' },
         { token: GROK_ESCAPED, content: '[' },
         { token: GROK_REGEX, content: '(' },

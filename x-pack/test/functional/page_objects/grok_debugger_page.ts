@@ -8,7 +8,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function GrokDebuggerPageProvider({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
   const aceEditor = getService('aceEditor');
   const retry = getService('retry');
@@ -24,21 +23,21 @@ export function GrokDebuggerPageProvider({ getPageObjects, getService }: FtrProv
       );
     },
 
-    async setEventInput(value) {
+    async setEventInput(value: string) {
       await aceEditor.setValue(
         'grokDebuggerContainer > aceEventInput > codeEditorContainer',
         value
       );
     },
 
-    async setPatternInput(pattern) {
+    async setPatternInput(pattern: string) {
       await aceEditor.setValue(
         'grokDebuggerContainer > acePatternInput > codeEditorContainer',
         pattern
       );
     },
 
-    async setCustomPatternInput(customPattern) {
+    async setCustomPatternInput(customPattern: string) {
       await aceEditor.setValue(
         'grokDebuggerContainer > aceCustomPatternsInput > codeEditorContainer',
         customPattern
@@ -49,7 +48,7 @@ export function GrokDebuggerPageProvider({ getPageObjects, getService }: FtrProv
       await testSubjects.click('grokDebuggerContainer > btnToggleCustomPatternsInput');
     },
 
-    async executeGrokSimulation(input, pattern, customPattern) {
+    async executeGrokSimulation(input: string, pattern: string, customPattern: string | null) {
       let value;
       await this.setEventInput(input);
       await this.setPatternInput(pattern);
@@ -68,8 +67,10 @@ export function GrokDebuggerPageProvider({ getPageObjects, getService }: FtrProv
     },
 
     // This needs to be fixed to work with the new test functionality. This method is skipped currently.
-    async assertPatternInputSyntaxHighlighting(expectedHighlights) {
-      const patternInputElement = await testSubjects.find(SUBJ_UI_ACE_PATTERN_INPUT);
+    async assertPatternInputSyntaxHighlighting(expectedHighlights: any[]) {
+      const patternInputElement = await testSubjects.find(
+        'grokDebuggerContainer > acePatternInput > codeEditorContainer'
+      );
       const highlightedElements = await patternInputElement.findAllByXpath(
         './/div[@class="ace_line"]/*'
       );
