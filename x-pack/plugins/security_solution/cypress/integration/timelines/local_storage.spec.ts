@@ -14,7 +14,9 @@ import { TABLE_COLUMN_EVENTS_MESSAGE } from '../../screens/hosts/external_events
 import { waitsForEventsToBeLoaded } from '../../tasks/hosts/events';
 import { removeColumn } from '../../tasks/timeline';
 
-describe('persistent timeline', () => {
+// TODO: This behavior no longer takes place with the removal of draggables
+// Not sure if it's worth testing built in DataGrid functionality here?
+describe.skip('persistent timeline', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(HOSTS_URL);

@@ -12,7 +12,9 @@ export const ALERTS = '[data-test-subj="events-viewer-panel"] [data-test-subj="e
 export const ALERTS_COUNT =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="server-side-event-count"]';
 
-export const ALERT_CHECKBOX = '[data-test-subj="select-event-container"] .euiCheckbox__input';
+export const ALERT_CHECKBOX = '[data-test-subj="select-event"].euiCheckbox__input';
+
+export const ALERT_GRID_CELL = '[data-test-subj="dataGridRowCell"]';
 
 export const ALERT_ID = '[data-test-subj="draggable-content-_id"]';
 
@@ -48,7 +50,7 @@ export const MARK_SELECTED_ALERTS_IN_PROGRESS_BTN =
   '[data-test-subj="markSelectedAlertsInProgressButton"]';
 
 export const NUMBER_OF_ALERTS =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="local-events-count"]';
+  '[data-test-subj="events-viewer-panel"] [data-test-subj="server-side-event-count"]';
 
 export const OPEN_ALERT_BTN = '[data-test-subj="open-alert-status"]';
 
@@ -56,12 +58,12 @@ export const OPEN_SELECTED_ALERTS_BTN = '[data-test-subj="openSelectedAlertsButt
 
 export const OPENED_ALERTS_FILTER_BTN = '[data-test-subj="openAlerts"]';
 
-export const SELECTED_ALERTS = '[data-test-subj="selectedAlerts"]';
+export const SELECTED_ALERTS = '[data-test-subj="selectedShowBulkActionsButton"]';
 
 export const SEND_ALERT_TO_TIMELINE_BTN = '[data-test-subj="send-alert-to-timeline-button"]';
 
 export const SHOWING_ALERTS = '[data-test-subj="showingAlerts"]';
 
-export const TAKE_ACTION_POPOVER_BTN = '[data-test-subj="alertActionPopover"] button';
+export const TAKE_ACTION_POPOVER_BTN = '[data-test-subj="alertActionPopover"]';
 
 export const TIMELINE_CONTEXT_MENU_BTN = '[data-test-subj="timeline-context-menu-button"]';
