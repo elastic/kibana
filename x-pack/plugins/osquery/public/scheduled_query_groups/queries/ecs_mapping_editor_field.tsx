@@ -190,7 +190,7 @@ export const ECSComboboxField: React.FC<ECSComboboxFieldProps> = ({
         onChange={handleChange}
         renderOption={renderOption}
         rowHeight={32}
-        isClearable={false}
+        isClearable
         {...euiFieldProps}
       />
     </EuiFormRow>
@@ -209,7 +209,7 @@ export const OsqueryColumnField: React.FC<OsqueryColumnFieldProps> = ({
   idAria,
   ...rest
 }) => {
-  const { setValue } = field;
+  const { setErrors, setValue } = field;
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
   const [selectedOptions, setSelected] = useState<
@@ -271,9 +271,10 @@ export const OsqueryColumnField: React.FC<OsqueryColumnFieldProps> = ({
       if (!field.value.length) return [];
 
       const selectedOption = find(euiFieldProps?.options, ['label', field.value]);
-      return selectedOption ? [selectedOption] : [];
+
+      return selectedOption ? [selectedOption] : [{ label: field.value }];
     });
-  }, [euiFieldProps?.options, setSelected, field.value]);
+  }, [euiFieldProps?.options, setSelected, field.value, setErrors]);
 
   return (
     <EuiFormRow
@@ -294,7 +295,7 @@ export const OsqueryColumnField: React.FC<OsqueryColumnFieldProps> = ({
         onCreateOption={onCreateOsqueryOption}
         renderOption={renderOsqueryOption}
         rowHeight={32}
-        isClearable={false}
+        isClearable
         {...euiFieldProps}
       />
     </EuiFormRow>
@@ -313,6 +314,29 @@ interface ECSMappingEditorFormProps {
   onChange?: (payload: FormData) => void;
   onDelete?: (key: string) => void;
 }
+
+const getOsqueryColumnValidator = (osquerySchemaOptions: OsquerySchemaOption[]) => (args: {
+  path: string;
+  value: string;
+}) => {
+  const osqueryColumnExists = find(osquerySchemaOptions, ['label', args.value]);
+
+  return !osqueryColumnExists
+    ? {
+        code: 'ERR_FIELD_MISSING',
+        path: args.path,
+        message: i18n.translate(
+          'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.osqueryResultFieldValueMissingErrorMessage',
+          {
+            defaultMessage: 'The current query does not return a {columnName} field',
+            values: {
+              columnName: args.value,
+            },
+          }
+        ),
+      }
+    : undefined;
+};
 
 export const ECSMappingEditorForm = ({
   osquerySchemaOptions,
@@ -343,9 +367,9 @@ export const ECSMappingEditorForm = ({
     },
     'value.field': {
       label: i18n.translate(
-        'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.osqueryColumnFieldLabel',
+        'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.osqueryResultFieldLabel',
         {
-          defaultMessage: 'Osquery results column',
+          defaultMessage: 'Osquery result',
         }
       ),
       type: FIELD_TYPES.COMBO_BOX,
@@ -353,12 +377,15 @@ export const ECSMappingEditorForm = ({
         {
           validator: fieldValidators.emptyField(
             i18n.translate(
-              'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.osqueryColumnFieldRequiredErrorMessage',
+              'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage',
               {
-                defaultMessage: 'Osquery column is required.',
+                defaultMessage: 'Osquery result is required.',
               }
             )
           ),
+        },
+        {
+          validator: getOsqueryColumnValidator(osquerySchemaOptions),
         },
       ],
     },
@@ -374,11 +401,13 @@ export const ECSMappingEditorForm = ({
     },
   });
 
-  const { submit, reset } = form;
+  const { submit, reset, validate, __validateFields } = form;
 
   const [formData] = useFormData({ form });
 
   const handleSubmit = useCallback(async () => {
+    validate();
+    __validateFields(['value.field']);
     const { data, isValid } = await submit();
 
     if (isValid) {
@@ -387,7 +416,13 @@ export const ECSMappingEditorForm = ({
       }
       reset();
     }
-  }, [submit, onAdd, reset]);
+  }, [validate, __validateFields, submit, onAdd, reset]);
+
+  const handleDeleteClick = useCallback(() => {
+    if (defaultValue?.key && onDelete) {
+      onDelete(defaultValue.key);
+    }
+  }, [defaultValue, onDelete]);
 
   useEffect(() => {
     if (defaultValue && onChange && !deepEqual(formData, currentFormData.current)) {
@@ -396,11 +431,12 @@ export const ECSMappingEditorForm = ({
     }
   }, [defaultValue, formData, onChange]);
 
-  const handleDeleteClick = useCallback(() => {
-    if (defaultValue?.key && onDelete) {
-      onDelete(defaultValue.key);
+  useEffect(() => {
+    if (defaultValue) {
+      validate();
+      __validateFields(['value.field']);
     }
-  }, [defaultValue, onDelete]);
+  }, [defaultValue, osquerySchemaOptions, validate, __validateFields]);
 
   return (
     <Form form={form}>
@@ -411,7 +447,7 @@ export const ECSMappingEditorForm = ({
             component={OsqueryColumnField}
             // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
             euiFieldProps={{
-              label: 'Osquery results column',
+              label: 'Osquery result',
               options: osquerySchemaOptions,
             }}
           />
@@ -522,11 +558,9 @@ export const ECSMappingEditorField = ({ field, query }: Props) => {
        Advanced query
        select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
       */
-      console.error('ast?.columns', ast?.columns, typeof ast?.columns);
       const suggestions =
         isArray(ast?.columns) &&
         ast?.columns
-          // @ts-expect-error update types
           ?.map((column) => {
             if (column.expr.column === '*') {
               return astOsqueryTables[column.expr.table].map((osqueryColumn) => ({
@@ -567,6 +601,7 @@ export const ECSMappingEditorField = ({ field, query }: Props) => {
           })
           .flat();
 
+      //  @ts-expect-error update types
       return sortBy(suggestions, 'value.suggestion_label');
     });
   }, [query]);

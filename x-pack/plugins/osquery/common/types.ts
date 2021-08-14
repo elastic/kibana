@@ -45,9 +45,12 @@ export interface OsqueryManagerPackagePolicyConfigRecord {
   platform?: OsqueryManagerPackagePolicyConfigRecordEntry;
   version?: OsqueryManagerPackagePolicyConfigRecordEntry;
   ecs_mapping?: {
-    type: string;
-    value: Record<string, string>;
-    frozen?: boolean;
+    value: Record<
+      string,
+      {
+        field: string;
+      }
+    >;
   };
 }
 

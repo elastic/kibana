@@ -31,7 +31,14 @@ export interface ScheduledQueryGroupFormData {
   interval: number;
   platform?: string | undefined;
   version?: string[] | undefined;
-  ecs_mapping?: Record<string, string> | undefined;
+  ecs_mapping?:
+    | Record<
+        string,
+        {
+          field: string;
+        }
+      >
+    | undefined;
 }
 
 export const useScheduledQueryGroupQueryForm = ({
@@ -82,6 +89,7 @@ export const useScheduledQueryGroupQueryForm = ({
         }
         return draft;
       }),
+    // @ts-expect-error update types
     deserializer: (payload) => {
       if (!payload) return {} as ScheduledQueryGroupFormData;
 
