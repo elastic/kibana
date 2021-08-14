@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { ValidationFunc, FieldConfig } from '../../shared_imports';
 import { Field } from '../../types';
 import { schema } from './form_schema';
-import { Props } from './field_editor';
+import type { Props } from './field_editor';
 
 const createNameNotAllowedValidator = (
   namesNotAllowed: string[]

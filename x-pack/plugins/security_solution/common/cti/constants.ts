@@ -69,5 +69,3 @@ export const CTI_DATASET_KEY_MAP: { [key: string]: string } = {
   MISP: 'threatintel.misp',
   'Recorded Future': 'threatintel.recordedfuture',
 };
-
-export const DEFAULT_CTI_SOURCE_INDEX = ['filebeat-*'];

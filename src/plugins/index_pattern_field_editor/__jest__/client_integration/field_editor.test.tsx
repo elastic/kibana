@@ -5,65 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import React, { useState, useMemo } from 'react';
 import { act } from 'react-dom/test-utils';
+import { registerTestBed, TestBed } from '@kbn/test/jest';
 
-import '../../test_utils/setup_environment';
-import { registerTestBed, TestBed, getCommonActions } from '../../test_utils';
-import { RuntimeFieldPainlessError } from '../../lib';
-import { Field } from '../../types';
-import { FieldEditor, Props, FieldEditorFormState } from './field_editor';
-import { docLinksServiceMock } from '../../../../../core/public/mocks';
-
-const defaultProps: Props = {
-  onChange: jest.fn(),
-  links: docLinksServiceMock.createStartContract() as any,
-  ctx: {
-    existingConcreteFields: [],
-    namesNotAllowed: [],
-    fieldTypeToProcess: 'runtime',
-  },
-  indexPattern: { fields: [] } as any,
-  fieldFormatEditors: {
-    getAll: () => [],
-    getById: () => undefined,
-  },
-  fieldFormats: {} as any,
-  uiSettings: {} as any,
-  syntaxError: {
-    error: null,
-    clear: () => {},
-  },
-};
-
-const setup = (props?: Partial<Props>) => {
-  const testBed = registerTestBed(FieldEditor, {
-    memoryRouter: {
-      wrapComponent: false,
-    },
-  })({ ...defaultProps, ...props }) as TestBed;
-
-  const actions = {
-    ...getCommonActions(testBed),
-  };
-
-  return {
-    ...testBed,
-    actions,
-  };
-};
+// This import needs to come first as it contains the jest.mocks
+import { setupEnvironment, getCommonActions, WithFieldEditorDependencies } from './helpers';
+import {
+  FieldEditor,
+  FieldEditorFormState,
+  Props,
+} from '../../public/components/field_editor/field_editor';
+import type { Field } from '../../public/types';
+import type { RuntimeFieldPainlessError } from '../../public/lib';
+import { setup, FieldEditorTestBed, defaultProps } from './field_editor.helpers';
 
 describe('<FieldEditor />', () => {
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
+  const { server, httpRequestsMockHelpers } = setupEnvironment();
 
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
-  let testBed: TestBed & { actions: ReturnType<typeof getCommonActions> };
+  let testBed: FieldEditorTestBed;
   let onChange: jest.Mock<Props['onChange']> = jest.fn();
 
   const lastOnChangeCall = (): FieldEditorFormState[] =>
@@ -104,12 +64,22 @@ describe('<FieldEditor />', () => {
     return formState!;
   };
 
-  beforeEach(() => {
-    onChange = jest.fn();
+  beforeAll(() => {
+    jest.useFakeTimers();
   });
 
-  test('initial state should have "set custom label", "set value" and "set format" turned off', () => {
-    testBed = setup();
+  afterAll(() => {
+    jest.useRealTimers();
+    server.restore();
+  });
+
+  beforeEach(async () => {
+    onChange = jest.fn();
+    httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['mockedScriptValue'] });
+  });
+
+  test('initial state should have "set custom label", "set value" and "set format" turned off', async () => {
+    testBed = await setup();
 
     ['customLabel', 'value', 'format'].forEach((row) => {
       const testSubj = `${row}Row.toggle`;
@@ -132,7 +102,7 @@ describe('<FieldEditor />', () => {
       script: { source: 'emit("hello")' },
     };
 
-    testBed = setup({ onChange, field });
+    testBed = await setup({ onChange, field });
 
     expect(onChange).toHaveBeenCalled();
 
@@ -153,25 +123,22 @@ describe('<FieldEditor />', () => {
   describe('validation', () => {
     test('should accept an optional list of existing fields and prevent creating duplicates', async () => {
       const existingFields = ['myRuntimeField'];
-      testBed = setup({
-        onChange,
-        ctx: {
+      testBed = await setup(
+        {
+          onChange,
+        },
+        {
           namesNotAllowed: existingFields,
           existingConcreteFields: [],
           fieldTypeToProcess: 'runtime',
-        },
-      });
+        }
+      );
 
       const { form, component, actions } = testBed;
 
-      await act(async () => {
-        actions.toggleFormRow('value');
-      });
-
-      await act(async () => {
-        form.setInputValue('nameField.input', existingFields[0]);
-        form.setInputValue('scriptField', 'echo("hello")');
-      });
+      await actions.toggleFormRow('value');
+      await actions.fields.updateName(existingFields[0]);
+      await actions.fields.updateScript('echo("hello")');
 
       await act(async () => {
         jest.advanceTimersByTime(1000); // Make sure our debounced error message is in the DOM
@@ -192,20 +159,23 @@ describe('<FieldEditor />', () => {
         script: { source: 'emit("hello"' },
       };
 
-      testBed = setup({
-        field,
-        onChange,
-        ctx: {
+      testBed = await setup(
+        {
+          field,
+          onChange,
+        },
+        {
           namesNotAllowed: existingRuntimeFieldNames,
           existingConcreteFields: [],
           fieldTypeToProcess: 'runtime',
-        },
-      });
+        }
+      );
 
       const { form, component } = testBed;
       const lastState = getLastStateUpdate();
       await submitFormAndGetData(lastState);
       component.update();
+
       expect(getLastStateUpdate().isValid).toBe(true);
       expect(form.getErrorsMessages()).toEqual([]);
     });
@@ -217,13 +187,14 @@ describe('<FieldEditor />', () => {
         script: { source: 'emit(6)' },
       };
 
-      const TestComponent = () => {
-        const dummyError = {
-          reason: 'Awwww! Painless syntax error',
-          message: '',
-          position: { offset: 0, start: 0, end: 0 },
-          scriptStack: [''],
-        };
+      const dummyError = {
+        reason: 'Awwww! Painless syntax error',
+        message: '',
+        position: { offset: 0, start: 0, end: 0 },
+        scriptStack: [''],
+      };
+
+      const ComponentToProvidePainlessSyntaxErrors = () => {
         const [error, setError] = useState<RuntimeFieldPainlessError | null>(null);
         const clearError = useMemo(() => () => setError(null), []);
         const syntaxError = useMemo(() => ({ error, clear: clearError }), [error, clearError]);
@@ -240,22 +211,29 @@ describe('<FieldEditor />', () => {
         );
       };
 
-      const customTestbed = registerTestBed(TestComponent, {
-        memoryRouter: {
-          wrapComponent: false,
-        },
-      })() as TestBed<string>;
+      let testBedToCapturePainlessErrors: TestBed<string>;
+
+      await act(async () => {
+        testBedToCapturePainlessErrors = await registerTestBed(
+          WithFieldEditorDependencies(ComponentToProvidePainlessSyntaxErrors),
+          {
+            memoryRouter: {
+              wrapComponent: false,
+            },
+          }
+        )();
+      });
 
       testBed = {
-        ...customTestbed,
-        actions: getCommonActions(customTestbed),
+        ...testBedToCapturePainlessErrors!,
+        actions: getCommonActions(testBedToCapturePainlessErrors!),
       };
 
       const {
         form,
         component,
         find,
-        actions: { changeFieldType },
+        actions: { fields },
       } = testBed;
 
       // We set some dummy painless error
@@ -267,7 +245,7 @@ describe('<FieldEditor />', () => {
       expect(form.getErrorsMessages()).toEqual(['Awwww! Painless syntax error']);
 
       // We change the type and expect the form error to not be there anymore
-      await changeFieldType('keyword');
+      await fields.updateType('keyword');
       expect(form.getErrorsMessages()).toEqual([]);
     });
   });
