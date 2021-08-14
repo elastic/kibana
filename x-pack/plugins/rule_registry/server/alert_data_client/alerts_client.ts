@@ -8,13 +8,11 @@ import Boom from '@hapi/boom';
 import { estypes } from '@elastic/elasticsearch';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
-import { estypes } from '@elastic/elasticsearch';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
 import {
-  ALERT_WORKFLOW_STATUS,
   getEsQueryConfig as getEsQueryConfigTyped,
   getSafeSortIds as getSafeSortIdsTyped,
-  validFeatureIds,
+  // validFeatureIds,
   isValidFeatureId as isValidFeatureIdTyped,
   mapConsumerToIndexName as mapConsumerToIndexNameTyped,
   STATUS_VALUES,
@@ -245,15 +243,22 @@ export class AlertsClient {
       // with nothing the do authorization on
       // so we need to check if the user is authorized for the index first
       // then continue with the rest of the procedure
-      if (index != null) {
-        const authorizedIndices = await this.getAuthorizedAlertsIndices(validFeatureIds);
-        if (authorizedIndices?.includes(index)) {
-          this.logger.debug(`authorized access to ${index}`);
-        } else {
-          this.logger.error(`unauthorized access to ${index}`);
-          throw Boom.forbidden(`unauthorized access to ${index}`);
-        }
-      }
+      // if (index != null) {
+      //   const authorizedIndices = await this.getAuthorizedAlertsIndices(validFeatureIds);
+      //   this.logger.debug(`AUTHORIZED RESPONSE ${JSON.stringify(authorizedIndices, null, 2)}`);
+      //   if (
+      //     authorizedIndices != null &&
+      //     (authorizedIndices?.some(
+      //       (indx) => indx.indexOf(index) > -1 || index.indexOf(indx) > -1
+      //     ) ||
+      //       authorizedIndices?.includes(index))
+      //   ) {
+      //     this.logger.debug(`authorized access to ${index}`);
+      //   } else {
+      //     this.logger.error(`unauthorized access to ${index}`);
+      //     throw Boom.forbidden(`unauthorized access to ${index}`);
+      //   }
+      // }
 
       const config = getEsQueryConfig();
 
@@ -335,15 +340,21 @@ export class AlertsClient {
     operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update;
   }) {
     try {
-      if (indexName != null) {
-        const authorizedIndices = await this.getAuthorizedAlertsIndices(validFeatureIds);
-        if (authorizedIndices?.includes(indexName)) {
-          this.logger.debug(`authorized access to ${indexName}`);
-        } else {
-          this.logger.error(`unauthorized access to ${indexName}`);
-          throw Boom.forbidden(`unauthorized access to ${indexName}`);
-        }
-      }
+      // if (indexName != null) {
+      //   const authorizedIndices = await this.getAuthorizedAlertsIndices(validFeatureIds);
+      //   if (
+      //     authorizedIndices != null &&
+      //     (authorizedIndices?.some(
+      //       (indx) => indx.indexOf(indexName) > -1 || indexName.indexOf(indx) > -1
+      //     ) ||
+      //       authorizedIndices?.includes(indexName))
+      //   ) {
+      //     this.logger.debug(`authorized access to ${indexName}`);
+      //   } else {
+      //     this.logger.error(`unauthorized access to ${indexName}`);
+      //     throw Boom.forbidden(`unauthorized access to ${indexName}`);
+      //   }
+      // }
       const mgetRes = await this.esClient.mget<ParsedTechnicalFields>({
         index: indexName,
         body: {

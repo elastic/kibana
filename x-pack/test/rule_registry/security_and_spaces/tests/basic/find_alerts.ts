@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 
-import { ALERT_STATUS } from '../../../../../plugins/rule_registry/common/technical_rule_data_field_names';
+import { ALERT_WORKFLOW_STATUS } from '../../../../../plugins/rule_registry/common/technical_rule_data_field_names';
 import {
   superUser,
   globalRead,
@@ -101,6 +101,19 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
     });
 
+    // it.only(`${superUser.username} should finds alerts which match query in ${SPACE1}/${SECURITY_SOLUTION_ALERT_INDEX}`, async () => {
+    //   const found = await supertestWithoutAuth
+    //     .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/find`)
+    //     .auth(superUser.username, superUser.password)
+    //     .set('kbn-xsrf', 'true')
+    //     .send({
+    //       query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+    //       index: SECURITY_SOLUTION_ALERT_INDEX,
+    //     });
+    //   expect(found.statusCode).to.eql(200);
+    //   expect(found.body.hits.total.value).to.be.above(0);
+    // });
+
     function addTests({ space, authorizedUsers, unauthorizedUsers, alertId, index }: TestCase) {
       authorizedUsers.forEach(({ username, password }) => {
         it(`${username} should finds alerts which match query in ${space}/${index}`, async () => {
@@ -109,7 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .send({
-              query: { match: { [ALERT_STATUS]: 'open' } },
+              query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
               index,
             });
           expect(found.statusCode).to.eql(200);
@@ -127,7 +140,10 @@ export default ({ getService }: FtrProviderContext) => {
               query: { term: { _id: alertId } },
               index,
             });
-          expect([403, 404]).to.contain(res.statusCode);
+          expect([403, 404, 200]).to.contain(res.statusCode);
+          if (res.statusCode === 200) {
+            expect(res.body.hits.hits.length).to.eql(0);
+          }
         });
       });
     }
