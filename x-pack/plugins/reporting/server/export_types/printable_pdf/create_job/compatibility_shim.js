@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uriEncode } from '../lib/uri_encode';
+import { url } from '../../../../../../../src/plugins/kibana_utils/server';
 
 /*
  * TODO: Kibana 8.0:
@@ -32,7 +32,7 @@ const getSavedObjectRelativeUrl = (objectType, savedObjectId, queryString) => {
   const appPrefix = appPrefixes[objectType];
   if (!appPrefix) throw new Error('Unexpected app type: ' + objectType);
 
-  const hash = appPrefix + uriEncode.string(savedObjectId, true);
+  const hash = appPrefix + url.encodeUriQuery(savedObjectId, true);
 
   return `/app/kibana#${hash}?${queryString || ''}`;
 };
