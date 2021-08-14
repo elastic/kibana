@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function GrokDebuggerPageProvider({ getPageObjects, getService }: FtrProviderContext) {
@@ -50,6 +50,7 @@ export function GrokDebuggerPageProvider({ getPageObjects, getService }: FtrProv
     },
 
     async executeGrokSimulation(input, pattern, customPattern) {
+      let value;
       await this.setEventInput(input);
       await this.setPatternInput(pattern);
       if (customPattern) {
@@ -57,13 +58,13 @@ export function GrokDebuggerPageProvider({ getPageObjects, getService }: FtrProv
         await this.setCustomPatternInput(customPattern);
       }
       await (await this.simulateButton()).click();
-      await retry.waitFor('Output to not be empty', async () => {
-        const value = JSON.parse(await this.getEventOutput());
-        log.debug(value);
-        return value !== '{}';
+      await retry.try(async () => {
+        log.debug(await this.getEventOutput());
+        value = JSON.parse(await this.getEventOutput());
+        log.debug(Object.keys(value));
+        expect(Object.keys(value).length).to.be.greaterThan(0);
       });
-      log.debug(await this.getEventOutput());
-      return await this.getEventOutput();
+      return value;
     },
 
     // This needs to be fixed to work with the new test functionality. This method is skipped currently.

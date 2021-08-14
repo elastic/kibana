@@ -43,7 +43,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         patternInput,
         null
       );
-      expect(response).to.eql('{\n  "u": "SegerCommaBob"\n}');
+      expect(response).to.eql({ u: 'SegerCommaBob' });
     });
 
     it('Accept and parse input with custom in grok pattern', async () => {
@@ -52,12 +52,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'Jan  1 06:25:43 mailserver14 postfix/cleanup[21403]: BEF25A72965: message-id=<20130101142543.5828399CCAF@mailserver14.example.com>';
       const patternInput = '%{SYSLOGBASE} %{POSTFIX_QUEUEID:queue_id}: %{MSG:syslog_message}';
       const customPatternInput = 'POSTFIX_QUEUEID [0-9A-F]{10,11}\nMSG message-id=<%{GREEDYDATA}>';
-      const testData =
-        '{\n  "pid": "21403",\n  "program": "postfix/cleanup",' +
-        '\n  "logsource": "mailserver14",' +
-        '\n  "syslog_message": "message-id=<20130101142543.5828399CCAF@mailserver14.example.com>",' +
-        '\n  "queue_id": "BEF25A72965",' +
-        '\n  "timestamp": "Jan  1 06:25:43"\n}';
+      const testData = {
+        pid: '21403',
+        program: 'postfix/cleanup',
+        logsource: 'mailserver14',
+        syslog_message: 'message-id=<20130101142543.5828399CCAF@mailserver14.example.com>',
+        queue_id: 'BEF25A72965',
+        timestamp: 'Jan  1 06:25:43',
+      };
 
       const response = await PageObjects.grokDebugger.executeGrokSimulation(
         eventInput,
