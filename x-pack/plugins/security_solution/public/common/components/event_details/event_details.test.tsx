@@ -51,13 +51,9 @@ describe('EventDetails', () => {
   beforeAll(async () => {
     (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
       result: [],
-      rangePickerProps: {
-        startDate: moment().subtract(30, 'd'),
-        endDate: moment(),
-        loading: false,
-        setStartDate: jest.fn(),
-        setEndDate: jest.fn(),
-      },
+      range: { to: 'now', from: 'now-30d' },
+      setRange: jest.fn(),
+      loading: false,
     });
     wrapper = mount(
       <TestProviders>
