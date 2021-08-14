@@ -253,7 +253,6 @@ function ObservabilityActions({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiPopover
-            id="contextMenuExample"
             button={
               <EuiButtonIcon
                 display="empty"

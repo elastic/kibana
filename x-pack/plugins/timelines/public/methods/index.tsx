@@ -18,6 +18,22 @@ import type { AddToCaseActionProps } from '../components/actions/timeline/cases/
 import { initialTGridState } from '../store/t_grid/reducer';
 import { createStore } from '../store/t_grid';
 
+const initializeStore = ({
+  store,
+  storage,
+  setStore,
+}: {
+  store?: Store;
+  storage: Storage;
+  setStore: (store: Store) => void;
+}) => {
+  let tGridStore = store;
+  if (!tGridStore) {
+    tGridStore = createStore(initialTGridState, storage);
+    setStore(tGridStore);
+  }
+};
+
 const TimelineLazy = lazy(() => import('../components'));
 export const getTGridLazy = (
   props: TGridProps,
@@ -33,6 +49,7 @@ export const getTGridLazy = (
     setStore: (store: Store) => void;
   }
 ) => {
+  initializeStore({ store, storage, setStore });
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <TimelineLazy {...props} store={store} storage={storage} data={data} setStore={setStore} />
@@ -72,11 +89,6 @@ export const getAddToCaseLazy = (
   props: AddToCaseActionProps,
   { store, storage, setStore }: { store: Store; storage: Storage; setStore: (store: Store) => void }
 ) => {
-  let tGridStore = store;
-  if (!tGridStore) {
-    tGridStore = createStore(initialTGridState, storage);
-    setStore(tGridStore);
-  }
   return (
     <Suspense fallback={<span />}>
       <Provider store={store}>
@@ -95,11 +107,7 @@ export const getAddToCasePopoverLazy = (
   props: AddToCaseActionProps,
   { store, storage, setStore }: { store: Store; storage: Storage; setStore: (store: Store) => void }
 ) => {
-  let tGridStore = store;
-  if (!tGridStore) {
-    tGridStore = createStore(initialTGridState, storage);
-    setStore(tGridStore);
-  }
+  initializeStore({ store, storage, setStore });
   return (
     <Suspense fallback={<span />}>
       <Provider store={store}>
@@ -118,11 +126,7 @@ export const getAddToExistingCaseButtonLazy = (
   props: AddToCaseActionProps,
   { store, storage, setStore }: { store: Store; storage: Storage; setStore: (store: Store) => void }
 ) => {
-  let tGridStore = store;
-  if (!tGridStore) {
-    tGridStore = createStore(initialTGridState, storage);
-    setStore(tGridStore);
-  }
+  initializeStore({ store, storage, setStore });
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <Provider store={store}>
@@ -141,11 +145,7 @@ export const getAddToNewCaseButtonLazy = (
   props: AddToCaseActionProps,
   { store, storage, setStore }: { store: Store; storage: Storage; setStore: (store: Store) => void }
 ) => {
-  let tGridStore = store;
-  if (!tGridStore) {
-    tGridStore = createStore(initialTGridState, storage);
-    setStore(tGridStore);
-  }
+  initializeStore({ store, storage, setStore });
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <Provider store={store}>
