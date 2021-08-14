@@ -8,7 +8,6 @@
 import { waitFor } from '@testing-library/dom';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
-import moment from 'moment';
 
 import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
