@@ -8,8 +8,8 @@
 .productCard {
   &__imageContainer {
     @include euiBreakpoint('xs') {
-      overflow: hidden;
       max-height: 115px;
+      overflow: hidden;
     }
   }
 }

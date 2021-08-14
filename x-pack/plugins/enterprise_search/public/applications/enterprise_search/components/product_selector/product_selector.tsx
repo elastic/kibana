@@ -45,7 +45,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ access }) => {
   const shouldShowWorkplaceSearchCard = !config.host || hasWorkplaceSearchAccess;
 
   return (
-    <KibanaPageTemplate {...NO_DATA_PAGE_TEMPLATE_PROPS} className="enterpriseSearchOverview">
+    <KibanaPageTemplate {...NO_DATA_PAGE_TEMPLATE_PROPS}>
       <SetPageChrome />
       <SendTelemetry action="viewed" metric="overview" />
       <TrialCallout />
