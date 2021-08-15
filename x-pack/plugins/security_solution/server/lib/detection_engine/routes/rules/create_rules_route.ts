@@ -6,11 +6,10 @@
  */
 
 import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
-import { PublicContract } from '@kbn/utility-types';
 
 import { KibanaResponseFactory } from 'kibana/server';
 
-import { RuleDataClient } from '../../../../../../rule_registry/server';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
@@ -43,7 +42,7 @@ import { KibanaRequest } from '../../../../../../../../src/core/server';
 export const createRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  ruleDataClient?: PublicContract<RuleDataClient> | null
+  ruleDataClient?: IRuleDataClient | null // TODO: Use this for RAC (otherwise delete it)
 ): void => {
   const isRuleRegistryEnabled = ruleDataClient != null;
   const handleRequestFactory = <TSchema extends CreateRulesSchema>() => async (

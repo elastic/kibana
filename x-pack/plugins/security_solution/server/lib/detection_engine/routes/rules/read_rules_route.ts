@@ -6,9 +6,8 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { PublicContract } from '@kbn/utility-types';
 
-import { RuleDataClient } from '../../../../../../rule_registry/server';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import {
   queryRulesSchema,
@@ -32,7 +31,7 @@ import { AlertTypeParams } from '../../../../../../alerting/common';
 
 export const readRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient?: PublicContract<RuleDataClient> | null
+  ruleDataClient?: IRuleDataClient | null
 ) => {
   const isRuleRegistryEnabled = ruleDataClient != null;
   const handleRequestFactory = <TParams extends AlertTypeParams>() => async (

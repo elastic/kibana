@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PublicContract } from '@kbn/utility-types';
-import type { RuleDataClient } from '.';
-import { RuleDataReader, RuleDataWriter } from './types';
+
+import { IRuleDataClient, IRuleDataReader, IRuleDataWriter } from './types';
 
 type MockInstances<T extends Record<string, any>> = {
   [K in keyof T]: T[K] extends (...args: infer TArgs) => infer TReturn
@@ -14,11 +13,9 @@ type MockInstances<T extends Record<string, any>> = {
     : never;
 };
 
-type RuleDataClientMock = jest.Mocked<
-  Omit<PublicContract<RuleDataClient>, 'getWriter' | 'getReader'>
-> & {
-  getWriter: (...args: Parameters<RuleDataClient['getWriter']>) => MockInstances<RuleDataWriter>;
-  getReader: (...args: Parameters<RuleDataClient['getReader']>) => MockInstances<RuleDataReader>;
+type RuleDataClientMock = jest.Mocked<Omit<IRuleDataClient, 'getWriter' | 'getReader'>> & {
+  getReader: (...args: Parameters<IRuleDataClient['getReader']>) => MockInstances<IRuleDataReader>;
+  getWriter: (...args: Parameters<IRuleDataClient['getWriter']>) => MockInstances<IRuleDataWriter>;
 };
 
 export function createRuleDataClientMock(): RuleDataClientMock {
@@ -27,14 +24,17 @@ export function createRuleDataClientMock(): RuleDataClientMock {
   const getDynamicIndexPattern = jest.fn();
 
   return {
-    createWriteTargetIfNeeded: jest.fn(({}) => Promise.resolve()),
+    indexName: '.alerts-security.alerts',
+
+    isWriteEnabled: jest.fn(() => true),
+
     getReader: jest.fn((_options?: { namespace?: string }) => ({
       getDynamicIndexPattern,
       search,
     })),
+
     getWriter: jest.fn(() => ({
       bulk,
     })),
-    isWriteEnabled: jest.fn(() => true),
   };
 }
