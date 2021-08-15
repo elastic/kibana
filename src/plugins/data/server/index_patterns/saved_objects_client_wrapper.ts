@@ -23,7 +23,8 @@ export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommo
   }
 
   async get<T = unknown>(type: string, id: string) {
-    return await this.savedObjectClient.get<T>(type, id);
+    const response = await this.savedObjectClient.resolve<T>(type, id);
+    return response.saved_object;
   }
   async update(
     type: string,
