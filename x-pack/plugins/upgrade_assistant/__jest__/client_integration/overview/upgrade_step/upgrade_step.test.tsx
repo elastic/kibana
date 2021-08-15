@@ -49,7 +49,7 @@ describe('Overview - Upgrade Step', () => {
       expect(exists('upgradeSetupCloudLink')).toBe(true);
       expect(exists('upgradeSetupDocsLink')).toBe(true);
 
-      expect(find('upgradeSetupCloudLink').props().href).toMatchSnapshot();
+      expect(find('upgradeSetupCloudLink').props().href).toBe('https://test.com/deployments/1234');
     });
   });
 });

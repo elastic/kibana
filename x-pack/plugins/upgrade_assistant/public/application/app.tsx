@@ -16,7 +16,7 @@ import { AppContextProvider, ContextValue, useAppContext } from './app_context';
 import { ComingSoonPrompt } from './components/coming_soon_prompt';
 import { EsDeprecationsContent } from './components/es_deprecations';
 import { KibanaDeprecationsContent } from './components/kibana_deprecations';
-import { DeprecationsOverview } from './components/overview';
+import { Overview } from './components/overview';
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 
 export interface AppDependencies extends ContextValue {
@@ -36,7 +36,7 @@ const App: React.FunctionComponent = () => {
 
   return (
     <Switch>
-      <Route exact path="/overview" component={DeprecationsOverview} />
+      <Route exact path="/overview" component={Overview} />
       <Route exact path="/es_deprecations/:tabName" component={EsDeprecationsContent} />
       <Route exact path="/kibana_deprecations" component={KibanaDeprecationsContent} />
       <Redirect from="/" to="/overview" />
@@ -52,7 +52,6 @@ export const AppWithRouter = ({ history }: { history: ScopedHistory }) => {
   );
 };
 
-// TODO: for these warnings look at observability app implementation
 export const RootComponent = ({
   i18n,
   history,

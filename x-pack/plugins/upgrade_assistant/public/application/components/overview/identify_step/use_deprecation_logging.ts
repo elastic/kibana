@@ -38,10 +38,11 @@ export const useDeprecationLogging = (): DeprecationLoggingPreviewProps => {
   const [updateError, setUpdateError] = useState<ResponseError | undefined>();
 
   useEffect(() => {
-    if (isLoading === false && data) {
-      setIsEnabled(data.isEnabled);
+    if (!isLoading && data) {
+      const { isEnabled: isToggleEnabled, isLoggerDeprecationEnabled } = data;
+      setIsEnabled(isToggleEnabled);
 
-      if (!data?.isEnabled && data?.isLoggerDeprecationEnabled) {
+      if (!isToggleEnabled && isLoggerDeprecationEnabled) {
         setLoggerDeprecationWarning(true);
       }
     }

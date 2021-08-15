@@ -8,13 +8,14 @@
 import React, { FunctionComponent, useEffect } from 'react';
 
 import {
-  EuiPageContentBody,
   EuiSteps,
   EuiText,
   EuiPageHeader,
   EuiButtonEmpty,
   EuiSpacer,
   EuiLink,
+  EuiPageBody,
+  EuiPageContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -24,7 +25,7 @@ import { getReviewStep } from './review_step';
 import { getIdentifyStep } from './identify_step';
 import { getUpgradeStep } from './upgrade_step';
 
-export const DeprecationsOverview: FunctionComponent = () => {
+export const Overview: FunctionComponent = () => {
   const { kibanaVersionInfo, breadcrumbs, docLinks, api } = useAppContext();
   const { currentMajor } = kibanaVersionInfo;
 
@@ -43,55 +44,51 @@ export const DeprecationsOverview: FunctionComponent = () => {
   }, [breadcrumbs]);
 
   return (
-    <div data-test-subj="overviewPageContent">
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
-          defaultMessage: 'Upgrade Assistant',
-        })}
-        description={i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
-          defaultMessage: 'Get ready for the next version of the Elastic Stack!',
-        })}
-        rightSideItems={[
-          <EuiButtonEmpty
-            href={docLinks.links.upgradeAssistant}
-            target="_blank"
-            iconType="help"
-            data-test-subj="documentationLink"
-          >
-            <FormattedMessage
-              id="xpack.upgradeAssistant.overview.documentationLinkText"
-              defaultMessage="Documentation"
-            />
-          </EuiButtonEmpty>,
-        ]}
-      >
-        <EuiText>
-          <EuiLink href={docLinks.links.elasticsearch.releaseHighlights} target="_blank">
-            <FormattedMessage
-              id="xpack.upgradeAssistant.overview.whatsNewLink"
-              defaultMessage="What's new in version {currentMajor}.0?"
-              values={{ currentMajor }}
-            />
-          </EuiLink>
-        </EuiText>
-      </EuiPageHeader>
+    <EuiPageBody restrictWidth={true}>
+      <EuiPageContent horizontalPosition="center" color="transparent" paddingSize="none">
+        <EuiPageHeader
+          bottomBorder
+          pageTitle={i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
+            defaultMessage: 'Upgrade Assistant',
+          })}
+          description={i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
+            defaultMessage: 'Get ready for the next version of the Elastic Stack!',
+          })}
+          rightSideItems={[
+            <EuiButtonEmpty
+              href={docLinks.links.upgradeAssistant}
+              target="_blank"
+              iconType="help"
+              data-test-subj="documentationLink"
+            >
+              <FormattedMessage
+                id="xpack.upgradeAssistant.overview.documentationLinkText"
+                defaultMessage="Documentation"
+              />
+            </EuiButtonEmpty>,
+          ]}
+        >
+          <EuiText>
+            <EuiLink href={docLinks.links.elasticsearch.releaseHighlights} target="_blank">
+              <FormattedMessage
+                id="xpack.upgradeAssistant.overview.whatsNewLink"
+                defaultMessage="What's new in version {currentMajor}.0?"
+                values={{ currentMajor }}
+              />
+            </EuiLink>
+          </EuiText>
+        </EuiPageHeader>
 
-      <EuiSpacer size="l" />
+        <EuiSpacer size="l" />
 
-      <EuiPageContentBody style={{ maxWidth: 900 }}>
-        <>
-          <EuiSpacer size="m" />
-
-          <EuiSteps
-            steps={[
-              getReviewStep({ currentMajor }),
-              getIdentifyStep(),
-              getUpgradeStep({ docLinks, currentMajor }),
-            ]}
-          />
-        </>
-      </EuiPageContentBody>
-    </div>
+        <EuiSteps
+          steps={[
+            getReviewStep({ currentMajor }),
+            getIdentifyStep(),
+            getUpgradeStep({ docLinks, currentMajor }),
+          ]}
+        />
+      </EuiPageContent>
+    </EuiPageBody>
   );
 };

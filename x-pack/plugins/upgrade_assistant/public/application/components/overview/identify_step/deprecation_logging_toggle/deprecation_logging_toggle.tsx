@@ -126,7 +126,7 @@ export const DeprecationLoggingToggle: FunctionComponent<DeprecationLoggingPrevi
     <EuiFlexGroup gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiSwitch
-          data-test-subj="upgradeAssistantDeprecationToggle"
+          data-test-subj="deprecationLoggingToggle"
           label={i18nTexts.buttonLabel}
           checked={!!isEnabled}
           onChange={toggleLogging}

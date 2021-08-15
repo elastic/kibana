@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
-import { DeprecationsOverview } from '../../../public/application/components/overview';
+import { Overview } from '../../../public/application/components/overview';
 import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: TestBedConfig = {
@@ -31,7 +31,7 @@ const createActions = (testBed: TestBed) => {
     const { find, component } = testBed;
 
     await act(async () => {
-      find('upgradeAssistantDeprecationToggle').simulate('click');
+      find('deprecationLoggingToggle').simulate('click');
     });
 
     component.update();
@@ -43,10 +43,7 @@ const createActions = (testBed: TestBed) => {
 };
 
 export const setup = async (overrides?: Record<string, unknown>): Promise<OverviewTestBed> => {
-  const initTestBed = registerTestBed(
-    WithAppDependencies(DeprecationsOverview, overrides),
-    testBedConfig
-  );
+  const initTestBed = registerTestBed(WithAppDependencies(Overview, overrides), testBedConfig);
   const testBed = await initTestBed();
 
   return {
@@ -56,7 +53,6 @@ export const setup = async (overrides?: Record<string, unknown>): Promise<Overvi
 };
 
 export type OverviewTestSubjects =
-  | 'overviewPageContent'
   | 'esStatsPanel'
   | 'esStatsPanel.totalDeprecations'
   | 'esStatsPanel.criticalDeprecations'
@@ -71,7 +67,7 @@ export type OverviewTestSubjects =
   | 'unauthorizedErrorIconTip'
   | 'upgradedPrompt'
   | 'partiallyUpgradedPrompt'
-  | 'upgradeAssistantDeprecationToggle'
+  | 'deprecationLoggingToggle'
   | 'updateLoggingError'
   | 'fetchLoggingError'
   | 'noDeprecationsLabel'

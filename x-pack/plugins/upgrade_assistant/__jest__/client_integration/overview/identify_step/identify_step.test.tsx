@@ -9,13 +9,14 @@ import { act } from 'react-dom/test-utils';
 
 import { OverviewTestBed, setupOverviewPage, setupEnvironment } from '../../helpers';
 import { DeprecationLoggingStatus } from '../../../../common/types';
+import { DEPRECATION_LOGS_SOURCE_ID } from '../../../../common/constants';
 
 const getLoggingResponse = (toggle: boolean): DeprecationLoggingStatus => ({
   isEnabled: toggle,
   isLoggerDeprecationEnabled: toggle,
 });
 
-describe('Overview - Identify Step', () => {
+describe('Overview - Fix deprecation logs step', () => {
   let testBed: OverviewTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
@@ -31,7 +32,7 @@ describe('Overview - Identify Step', () => {
     server.restore();
   });
 
-  describe('Step 1 - Toggle log writting and collecting', () => {
+  describe('Step 1 - Toggle log writing and collecting', () => {
     test('toggles deprecation logging', async () => {
       const { find, actions } = testBed;
 
@@ -40,13 +41,13 @@ describe('Overview - Identify Step', () => {
         isLoggerDeprecationEnabled: false,
       });
 
-      expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(true);
+      expect(find('deprecationLoggingToggle').props()['aria-checked']).toBe(true);
 
       await actions.clickDeprecationToggle();
 
       const latestRequest = server.requests[server.requests.length - 1];
       expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({ isEnabled: false });
-      expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(false);
+      expect(find('deprecationLoggingToggle').props()['aria-checked']).toBe(false);
     });
 
     test('shows callout when only loggerDeprecation is enabled', async () => {
@@ -110,7 +111,9 @@ describe('Overview - Identify Step', () => {
       component.update();
 
       expect(exists('viewObserveLogs')).toBe(true);
-      expect(find('viewObserveLogs').props().href).toMatchSnapshot();
+      expect(find('viewObserveLogs').props().href).toBe(
+        `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}`
+      );
     });
 
     test('Has a link to see logs in discover app', async () => {
@@ -119,7 +122,7 @@ describe('Overview - Identify Step', () => {
       component.update();
 
       expect(exists('viewDiscoverLogs')).toBe(true);
-      expect(find('viewDiscoverLogs').props().href).toMatchSnapshot();
+      expect(find('viewDiscoverLogs').props().href).toBe('/app/discover/');
     });
   });
 });

@@ -58,13 +58,13 @@ const DiscoverAppLink: FunctionComponent = () => {
     <EuiLink href={discoveryUrl} target="_blank" data-test-subj="viewDiscoverLogs">
       <FormattedMessage
         id="xpack.upgradeAssistant.overview.viewDiscoverResultsAction"
-        defaultMessage="Analyse logs in Discover "
+        defaultMessage="Analyse logs in Discover"
       />
     </EuiLink>
   );
 };
 
-const ObserveAppLink: FunctionComponent = () => {
+const ObservabilityAppLink: FunctionComponent = () => {
   const { http } = useKibana().services;
   const logStreamUrl = http?.basePath?.prepend(
     `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}`
@@ -73,7 +73,7 @@ const ObserveAppLink: FunctionComponent = () => {
   return (
     <EuiLink href={logStreamUrl} target="_blank" data-test-subj="viewObserveLogs">
       <FormattedMessage
-        id="xpack.upgradeAssistant.overview.viewObserveResultsAction"
+        id="xpack.upgradeAssistant.overview.viewObservabilityResultsAction"
         defaultMessage="View deprecation logs in Observability"
       />
     </EuiLink>
@@ -94,7 +94,7 @@ export const ExternalLinks: FunctionComponent = () => {
             </p>
           </EuiText>
           <EuiSpacer size="m" />
-          <ObserveAppLink />
+          <ObservabilityAppLink />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>

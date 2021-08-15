@@ -11,7 +11,7 @@ import { deprecationsServiceMock } from 'src/core/public/mocks';
 import * as mockedResponses from './mocked_responses';
 import { OverviewTestBed, setupOverviewPage, setupEnvironment } from '../../helpers';
 
-describe('Overview - Review Step', () => {
+describe('Overview - Fix deprecated settings step', () => {
   let testBed: OverviewTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
