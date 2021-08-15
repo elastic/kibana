@@ -29,9 +29,9 @@ import {
   ALERT_UUID,
   EVENT_ACTION,
   EVENT_KIND,
-  ALERT_OWNER,
-  RULE_ID,
-  RULE_UUID,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
   TIMESTAMP,
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
@@ -155,8 +155,8 @@ export const createLifecycleExecutor = (
       currentAlerts[id] = {
         ...fields,
         [ALERT_ID]: id,
-        [RULE_ID]: rule.ruleTypeId,
-        [ALERT_OWNER]: rule.consumer,
+        [ALERT_RULE_TYPE_ID]: rule.ruleTypeId,
+        [ALERT_RULE_CONSUMER]: rule.consumer,
       };
       return alertInstanceFactory(id);
     },
@@ -197,7 +197,7 @@ export const createLifecycleExecutor = (
             filter: [
               {
                 term: {
-                  [RULE_UUID]: ruleExecutorData[RULE_UUID],
+                  [ALERT_RULE_UUID]: ruleExecutorData[ALERT_RULE_UUID],
                 },
               },
               {
@@ -229,8 +229,8 @@ export const createLifecycleExecutor = (
       alertsDataMap[alertId] = {
         ...fields,
         [ALERT_ID]: alertId,
-        [RULE_ID]: rule.ruleTypeId,
-        [ALERT_OWNER]: rule.consumer,
+        [ALERT_RULE_TYPE_ID]: rule.ruleTypeId,
+        [ALERT_RULE_CONSUMER]: rule.consumer,
       };
     });
   }
@@ -247,7 +247,7 @@ export const createLifecycleExecutor = (
       ...ruleExecutorData,
       [TIMESTAMP]: timestamp,
       [EVENT_KIND]: 'signal',
-      [ALERT_OWNER]: rule.consumer,
+      [ALERT_RULE_CONSUMER]: rule.consumer,
       [ALERT_ID]: alertId,
     } as ParsedTechnicalFields;
 

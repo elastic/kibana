@@ -79,6 +79,7 @@ export const EnterpriseSearchPageTemplate: React.FC<PageTemplateProps> = ({
       }}
       isEmptyState={isEmptyState && !isLoading}
       solutionNav={solutionNav ? { icon: 'logoEnterpriseSearch', ...solutionNav } : undefined}
+      pageSideBarProps={{ className: 'betaSidebarNotification' }}
     >
       {setPageChrome}
       {readOnlyMode && (

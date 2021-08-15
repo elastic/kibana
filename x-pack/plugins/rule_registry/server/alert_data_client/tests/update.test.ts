@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ALERT_OWNER, ALERT_STATUS, SPACE_IDS, RULE_ID } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_CONSUMER,
+  ALERT_WORKFLOW_STATUS,
+  SPACE_IDS,
+  ALERT_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -82,10 +87,10 @@ describe('update()', () => {
                 _index: '.alerts-observability-apm',
                 _id: 'NoxgpHkBqbdrfX07MqXV',
                 _source: {
-                  [RULE_ID]: 'apm.error_rate',
+                  [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
-                  [ALERT_OWNER]: 'apm',
-                  [ALERT_STATUS]: 'open',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
+                  [ALERT_RULE_CONSUMER]: 'apm',
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
@@ -134,7 +139,7 @@ describe('update()', () => {
         Object {
           "body": Object {
             "doc": Object {
-              "${ALERT_STATUS}": "closed",
+              "${ALERT_WORKFLOW_STATUS}": "closed",
             },
           },
           "id": "1",
@@ -168,10 +173,10 @@ describe('update()', () => {
                 _index: '.alerts-observability-apm',
                 _id: 'NoxgpHkBqbdrfX07MqXV',
                 _source: {
-                  'rule.id': 'apm.error_rate',
+                  [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
-                  [ALERT_OWNER]: 'apm',
-                  [ALERT_STATUS]: 'open',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
+                  [ALERT_RULE_CONSUMER]: 'apm',
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
@@ -242,9 +247,9 @@ describe('update()', () => {
                 _id: fakeAlertId,
                 _index: indexName,
                 _source: {
-                  [RULE_ID]: fakeRuleTypeId,
-                  [ALERT_OWNER]: 'apm',
-                  [ALERT_STATUS]: 'open',
+                  [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
+                  [ALERT_RULE_CONSUMER]: 'apm',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
@@ -323,10 +328,10 @@ describe('update()', () => {
                 _index: '.alerts-observability-apm',
                 _id: 'NoxgpHkBqbdrfX07MqXV',
                 _source: {
-                  'rule.id': 'apm.error_rate',
+                  [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
-                  [ALERT_OWNER]: 'apm',
-                  [ALERT_STATUS]: 'open',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
+                  [ALERT_RULE_CONSUMER]: 'apm',
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
@@ -383,10 +388,10 @@ describe('update()', () => {
                   _seq_no: 362,
                   _primary_term: 2,
                   _source: {
-                    'rule.id': 'apm.error_rate',
+                    [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                     message: 'hello world 1',
-                    [ALERT_OWNER]: 'apm',
-                    [ALERT_STATUS]: 'open',
+                    [ALERT_RULE_CONSUMER]: 'apm',
+                    [ALERT_WORKFLOW_STATUS]: 'open',
                     [SPACE_IDS]: [DEFAULT_SPACE],
                   },
                 },

@@ -12,9 +12,9 @@ import { Position } from '@elastic/charts';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from 'src/plugins/charts/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { getSuggestions } from './xy_suggestions';
-import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
+import { XyToolbar, DimensionEditor, LayerHeader } from './xy_config_panel';
 import type {
   Visualization,
   OperationMetadata,
@@ -23,7 +23,8 @@ import type {
   DatasourcePublicAPI,
 } from '../types';
 import { State, visualizationTypes, XYState } from './types';
-import type { SeriesType, XYLayerConfig } from '../../common/expressions';
+import { SeriesType, XYLayerConfig } from '../../common/expressions';
+import { LayerType, layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
@@ -87,10 +88,10 @@ function getDescription(state?: State) {
 
 export const getXyVisualization = ({
   paletteService,
-  data,
+  fieldFormats,
 }: {
   paletteService: PaletteRegistry;
-  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
 }): Visualization<State> => ({
   id: 'lnsXY',
 
@@ -101,7 +102,12 @@ export const getXyVisualization = ({
   },
 
   getLayerIds(state) {
-    return state.layers.map((l) => l.layerId);
+    return getLayersByType(state).map((l) => l.layerId);
+  },
+
+  getRemoveOperation(state, layerId) {
+    const dataLayers = getLayersByType(state, layerTypes.DATA).map((l) => l.layerId);
+    return dataLayers.includes(layerId) && dataLayers.length === 1 ? 'clear' : 'remove';
   },
 
   removeLayer(state, layerId) {
@@ -111,7 +117,7 @@ export const getXyVisualization = ({
     };
   },
 
-  appendLayer(state, layerId) {
+  appendLayer(state, layerId, layerType) {
     const usedSeriesTypes = uniq(state.layers.map((layer) => layer.seriesType));
     return {
       ...state,
@@ -119,7 +125,8 @@ export const getXyVisualization = ({
         ...state.layers,
         newLayerState(
           usedSeriesTypes.length === 1 ? usedSeriesTypes[0] : state.preferredSeriesType,
-          layerId
+          layerId,
+          layerType
         ),
       ],
     };
@@ -167,16 +174,35 @@ export const getXyVisualization = ({
             position: Position.Top,
             seriesType: defaultSeriesType,
             showGridlines: false,
+            layerType: layerTypes.DATA,
           },
         ],
       }
     );
   },
 
+  getLayerType(layerId, state) {
+    return state?.layers.find(({ layerId: id }) => id === layerId)?.layerType;
+  },
+
+  getSupportedLayers(state, frame) {
+    const layers = [
+      {
+        type: layerTypes.DATA,
+        label: i18n.translate('xpack.lens.xyChart.addDataLayerLabel', {
+          defaultMessage: 'Add visualization layer',
+        }),
+        icon: LensIconChartMixedXy,
+      },
+    ];
+
+    return layers;
+  },
+
   getConfiguration({ state, frame, layerId }) {
     const layer = state.layers.find((l) => l.layerId === layerId);
     if (!layer) {
-      return { groups: [] };
+      return { groups: [], supportStaticValue: true };
     }
 
     const datasource = frame.datasourceLayers[layer.layerId];
@@ -190,7 +216,7 @@ export const getXyVisualization = ({
       const colorAssignments = getColorAssignments(
         state.layers,
         { tables: frame.activeData },
-        data.fieldFormats.deserialize
+        fieldFormats.deserialize
       );
       mappedAccessors = getAccessorColorConfig(
         colorAssignments,
@@ -204,6 +230,14 @@ export const getXyVisualization = ({
     }
 
     const isHorizontal = isHorizontalChart(state.layers);
+    const isDataLayer = !layer.layerType || layer.layerType === layerTypes.DATA;
+
+    if (!isDataLayer) {
+      return {
+        groups: [],
+      };
+    }
+
     return {
       groups: [
         {
@@ -261,7 +295,6 @@ export const getXyVisualization = ({
       return prevState;
     }
     const newLayer = { ...foundLayer };
-
     if (groupId === 'x') {
       newLayer.xAccessor = columnId;
     }
@@ -278,7 +311,7 @@ export const getXyVisualization = ({
     };
   },
 
-  removeDimension({ prevState, layerId, columnId }) {
+  removeDimension({ prevState, layerId, columnId, frame }) {
     const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
     if (!foundLayer) {
       return prevState;
@@ -298,25 +331,18 @@ export const getXyVisualization = ({
       newLayer.yConfig = newLayer.yConfig.filter(({ forAccessor }) => forAccessor !== columnId);
     }
 
+    const newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
+
     return {
       ...prevState,
-      layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
+      layers: newLayers,
     };
   },
 
-  getLayerContextMenuIcon({ state, layerId }) {
-    const layer = state.layers.find((l) => l.layerId === layerId);
-    const visualizationType = visualizationTypes.find((t) => t.id === layer?.seriesType);
-    return {
-      icon: visualizationType?.icon || 'gear',
-      label: visualizationType?.label || '',
-    };
-  },
-
-  renderLayerContextMenu(domElement, props) {
+  renderLayerHeader(domElement, props) {
     render(
       <I18nProvider>
-        <LayerContextMenu {...props} />
+        <LayerHeader {...props} />
       </I18nProvider>,
       domElement
     );
@@ -336,7 +362,7 @@ export const getXyVisualization = ({
       <I18nProvider>
         <DimensionEditor
           {...props}
-          formatFactory={data.fieldFormats.deserialize}
+          formatFactory={fieldFormats.deserialize}
           paletteService={paletteService}
         />
       </I18nProvider>,
@@ -370,8 +396,9 @@ export const getXyVisualization = ({
 
       // filter out those layers with no accessors at all
       const filteredLayers = state.layers.filter(
-        ({ accessors, xAccessor, splitAccessor }: XYLayerConfig) =>
-          accessors.length > 0 || xAccessor != null || splitAccessor != null
+        ({ accessors, xAccessor, splitAccessor, layerType }: XYLayerConfig) =>
+          layerType === layerTypes.DATA &&
+          (accessors.length > 0 || xAccessor != null || splitAccessor != null)
       );
       for (const [dimension, criteria] of checks) {
         const result = validateLayersForDimension(dimension, filteredLayers, criteria);
@@ -526,11 +553,16 @@ function getMessageIdsForDimension(dimension: string, layers: number[], isHorizo
   return { shortMessage: '', longMessage: '' };
 }
 
-function newLayerState(seriesType: SeriesType, layerId: string): XYLayerConfig {
+function newLayerState(
+  seriesType: SeriesType,
+  layerId: string,
+  layerType: LayerType = layerTypes.DATA
+): XYLayerConfig {
   return {
     layerId,
     seriesType,
     accessors: [],
+    layerType,
   };
 }
 
@@ -602,4 +634,10 @@ function checkScaleOperation(
       operation && (!dataType || operation.dataType === dataType) && operation.scale === scaleType
     );
   };
+}
+
+function getLayersByType(state: State, byType?: string) {
+  return state.layers.filter(({ layerType = layerTypes.DATA }) =>
+    byType ? layerType === byType : true
+  );
 }

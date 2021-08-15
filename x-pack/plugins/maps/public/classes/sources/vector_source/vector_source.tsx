@@ -71,6 +71,7 @@ export interface IVectorSource extends ISource {
   supportsFeatureEditing(): Promise<boolean>;
   addFeature(geometry: Geometry | Position[]): Promise<void>;
   deleteFeature(featureId: string): Promise<void>;
+  isFilterByMapBounds(): boolean;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {

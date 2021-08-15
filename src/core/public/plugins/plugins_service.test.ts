@@ -35,7 +35,6 @@ import { CoreSetup, CoreStart, PluginInitializerContext } from '..';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
-import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -105,7 +104,6 @@ describe('PluginsService', () => {
       savedObjects: savedObjectsServiceMock.createStartContract(),
       fatalErrors: fatalErrorsServiceMock.createStartContract(),
       deprecations: deprecationsServiceMock.createStartContract(),
-      executionContext: executionContextServiceMock.createStartContract(),
     };
     mockStartContext = {
       ...mockStartDeps,

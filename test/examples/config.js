@@ -22,6 +22,7 @@ export default async function ({ readConfigFile }) {
 
   return {
     testFiles: [
+      require.resolve('./hello_world'),
       require.resolve('./embeddables'),
       require.resolve('./bfetch_explorer'),
       require.resolve('./ui_actions'),
