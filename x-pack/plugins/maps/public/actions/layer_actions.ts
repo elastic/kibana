@@ -246,6 +246,32 @@ export function toggleLayerVisible(layerId: string) {
   };
 }
 
+export function showThisLayerOnly(layerId: string) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    getLayerList(getState()).forEach((layer: ILayer, index: number) => {
+      if (layer.isBasemap(index)) {
+        return;
+      }
+
+      // show target layer
+      if (layer.getId() === layerId) {
+        if (!layer.isVisible()) {
+          dispatch(setLayerVisibility(layerId, true));
+        }
+        return;
+      }
+
+      // hide all other layers
+      if (layer.isVisible()) {
+        dispatch(setLayerVisibility(layer.getId(), false));
+      }
+    });
+  };
+}
+
 export function setSelectedLayer(layerId: string | null) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,

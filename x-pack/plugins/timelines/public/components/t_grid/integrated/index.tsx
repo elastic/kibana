@@ -37,7 +37,12 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { calculateTotalPages, combineQueries, resolverIsShowing } from '../helpers';
+import {
+  calculateTotalPages,
+  buildCombinedQuery,
+  getCombinedFilterQuery,
+  resolverIsShowing,
+} from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
 import { HeaderSection } from '../header_section';
@@ -203,7 +208,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     [globalFullScreen, justTitle, setGlobalFullScreen]
   );
 
-  const combinedQueries = combineQueries({
+  const combinedQueries = buildCombinedQuery({
     config: esQuery.getEsQueryConfig(uiSettings),
     dataProviders,
     indexPattern,
@@ -256,6 +261,21 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     skip: !canQueryTimeline,
     data,
   });
+
+  const filterQuery = useMemo(() => {
+    return getCombinedFilterQuery({
+      config: esQuery.getEsQueryConfig(uiSettings),
+      dataProviders,
+      indexPattern,
+      browserFields,
+      filters,
+      kqlQuery: query,
+      kqlMode,
+      isEventViewer: true,
+      from: start,
+      to: end,
+    });
+  }, [uiSettings, dataProviders, indexPattern, browserFields, filters, start, end, query, kqlMode]);
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
@@ -315,6 +335,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                   <StatefulBody
                     activePage={pageInfo.activePage}
                     browserFields={browserFields}
+                    filterQuery={filterQuery}
                     data={nonDeletedEvents}
                     defaultCellActions={defaultCellActions}
                     id={id}
@@ -334,6 +355,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                     leadingControlColumns={leadingControlColumns}
                     trailingControlColumns={trailingControlColumns}
                     refetch={refetch}
+                    indexNames={indexNames}
                   />
                   <Footer
                     activePage={pageInfo.activePage}
