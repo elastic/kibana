@@ -19,8 +19,8 @@ export interface ResponseHit {
 }
 
 export interface SearchServiceParams {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName?: string;
   transactionName?: string;
   transactionType?: string;
@@ -32,6 +32,7 @@ export interface SearchServiceParams {
 
 export interface SearchServiceFetchParams extends SearchServiceParams {
   index: string;
+  includeFrozen?: boolean;
 }
 
 export interface SearchServiceValue {
@@ -50,5 +51,4 @@ export interface AsyncSearchProviderProgress {
   loadedFieldCanditates: number;
   loadedFieldValuePairs: number;
   loadedHistograms: number;
-  getOverallProgress: () => number;
 }

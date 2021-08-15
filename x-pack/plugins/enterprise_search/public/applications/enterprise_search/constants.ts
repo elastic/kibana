@@ -10,6 +10,6 @@ import { i18n } from '@kbn/i18n';
 export const PRODUCT_SELECTOR_CALLOUT_HEADING = i18n.translate(
   'xpack.enterpriseSearch.productSelectorCalloutTitle',
   {
-    defaultMessage: 'Enterprise-grade functionality for teams big and small',
+    defaultMessage: 'Enterprise-grade features for teams big and small',
   }
 );

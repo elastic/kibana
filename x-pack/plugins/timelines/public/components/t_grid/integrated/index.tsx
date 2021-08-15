@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import type { AlertConsumers as AlertConsumersTyped } from '@kbn/rule-data-utils';
+// @ts-expect-error
+import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -35,7 +37,12 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { calculateTotalPages, combineQueries, resolverIsShowing } from '../helpers';
+import {
+  calculateTotalPages,
+  buildCombinedQuery,
+  getCombinedFilterQuery,
+  resolverIsShowing,
+} from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
 import { HeaderSection } from '../header_section';
@@ -46,6 +53,8 @@ import * as i18n from '../translations';
 import { ExitFullScreen } from '../../exit_full_screen';
 import { Sort } from '../body/sort';
 import { InspectButtonContainer } from '../../inspect';
+
+const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const COMPACT_HEADER_HEIGHT = 36; // px
@@ -199,7 +208,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     [globalFullScreen, justTitle, setGlobalFullScreen]
   );
 
-  const combinedQueries = combineQueries({
+  const combinedQueries = buildCombinedQuery({
     config: esQuery.getEsQueryConfig(uiSettings),
     dataProviders,
     indexPattern,
@@ -252,6 +261,21 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     skip: !canQueryTimeline,
     data,
   });
+
+  const filterQuery = useMemo(() => {
+    return getCombinedFilterQuery({
+      config: esQuery.getEsQueryConfig(uiSettings),
+      dataProviders,
+      indexPattern,
+      browserFields,
+      filters,
+      kqlQuery: query,
+      kqlMode,
+      isEventViewer: true,
+      from: start,
+      to: end,
+    });
+  }, [uiSettings, dataProviders, indexPattern, browserFields, filters, start, end, query, kqlMode]);
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
@@ -311,6 +335,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                   <StatefulBody
                     activePage={pageInfo.activePage}
                     browserFields={browserFields}
+                    filterQuery={filterQuery}
                     data={nonDeletedEvents}
                     defaultCellActions={defaultCellActions}
                     id={id}
@@ -330,6 +355,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                     leadingControlColumns={leadingControlColumns}
                     trailingControlColumns={trailingControlColumns}
                     refetch={refetch}
+                    indexNames={indexNames}
                   />
                   <Footer
                     activePage={pageInfo.activePage}
