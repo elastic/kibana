@@ -20,14 +20,21 @@ const getServiceNodes = async ({
   kuery,
   setup,
   serviceName,
+  environment,
 }: {
-  kuery?: string;
+  kuery: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
+  environment: string;
 }) => {
   const { apmEventClient } = setup;
 
-  const projection = getServiceNodesProjection({ kuery, setup, serviceName });
+  const projection = getServiceNodesProjection({
+    kuery,
+    setup,
+    serviceName,
+    environment,
+  });
 
   const params = mergeProjection(projection, {
     body: {
