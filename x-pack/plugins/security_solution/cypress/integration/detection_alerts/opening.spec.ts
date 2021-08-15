@@ -6,12 +6,7 @@
  */
 
 import { getNewRule } from '../../objects/rule';
-import {
-  ALERTS_COUNT,
-  SELECTED_ALERTS,
-  SHOWING_ALERTS,
-  TAKE_ACTION_POPOVER_BTN,
-} from '../../screens/alerts';
+import { ALERTS_COUNT, SELECTED_ALERTS, TAKE_ACTION_POPOVER_BTN } from '../../screens/alerts';
 
 import {
   closeAlerts,

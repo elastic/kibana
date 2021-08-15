@@ -13,13 +13,7 @@ import {
   ThresholdRule,
 } from '../../objects/rule';
 
-import {
-  ALERT_GRID_CELL,
-  ALERT_RULE_NAME,
-  ALERT_RULE_RISK_SCORE,
-  ALERT_RULE_SEVERITY,
-  NUMBER_OF_ALERTS,
-} from '../../screens/alerts';
+import { ALERT_GRID_CELL, NUMBER_OF_ALERTS } from '../../screens/alerts';
 
 import {
   CUSTOM_RULES_BTN,

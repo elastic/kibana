@@ -56,7 +56,6 @@ import {
 
 import {
   goToManageAlertsDetectionRules,
-  sortRiskScore,
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
