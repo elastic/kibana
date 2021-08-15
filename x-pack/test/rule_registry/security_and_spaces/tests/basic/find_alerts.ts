@@ -57,7 +57,6 @@ export default ({ getService }: FtrProviderContext) => {
   const APM_ALERT_INDEX = '.alerts-observability-apm';
   const SECURITY_SOLUTION_ALERT_ID = '020202';
   const SECURITY_SOLUTION_ALERT_INDEX = '.alerts-security.alerts';
-  // const ALERT_VERSION = Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'); // required for optimistic concurrency control
 
   const getAPMIndexName = async (user: User) => {
     const {
@@ -100,19 +99,6 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
     });
-
-    // it.only(`${superUser.username} should finds alerts which match query in ${SPACE1}/${SECURITY_SOLUTION_ALERT_INDEX}`, async () => {
-    //   const found = await supertestWithoutAuth
-    //     .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/find`)
-    //     .auth(superUser.username, superUser.password)
-    //     .set('kbn-xsrf', 'true')
-    //     .send({
-    //       query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
-    //       index: SECURITY_SOLUTION_ALERT_INDEX,
-    //     });
-    //   expect(found.statusCode).to.eql(200);
-    //   expect(found.body.hits.total.value).to.be.above(0);
-    // });
 
     function addTests({ space, authorizedUsers, unauthorizedUsers, alertId, index }: TestCase) {
       authorizedUsers.forEach(({ username, password }) => {

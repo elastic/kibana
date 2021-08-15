@@ -225,7 +225,7 @@ describe('update()', () => {
   });
 
   test('audit error update if user is unauthorized for given alert', async () => {
-    const indexName = '.alerts-observability-apm';
+    const indexName = '.alerts-observability-apm.alerts';
     const fakeAlertId = 'myfakeid1';
     // fakeRuleTypeId will cause authz to fail
     const fakeRuleTypeId = 'fake.rule';

@@ -228,7 +228,7 @@ describe('get()', () => {
   });
 
   test('audit error access if user is unauthorized for given alert', async () => {
-    const indexName = '.alerts-observability-apm';
+    const indexName = '.alerts-observability-apm.alerts';
     const fakeAlertId = 'myfakeid1';
     // fakeRuleTypeId will cause authz to fail
     const fakeRuleTypeId = 'fake.rule';
@@ -269,8 +269,8 @@ describe('get()', () => {
       })
     );
 
-    await expect(alertsClient.get({ id: fakeAlertId, index: '.alerts-observability-apm' })).rejects
-      .toThrowErrorMatchingInlineSnapshot(`
+    await expect(alertsClient.get({ id: fakeAlertId, index: '.alerts-observability-apm.alerts' }))
+      .rejects.toThrowErrorMatchingInlineSnapshot(`
             "Unable to retrieve alert details for alert with id of \\"myfakeid1\\" or with query \\"undefined\\" and operation get 
             Error: Error: Unauthorized for fake.rule and apm"
           `);

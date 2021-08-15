@@ -9,10 +9,9 @@ import { estypes } from '@elastic/elasticsearch';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
-import {
+import type {
   getEsQueryConfig as getEsQueryConfigTyped,
   getSafeSortIds as getSafeSortIdsTyped,
-  // validFeatureIds,
   isValidFeatureId as isValidFeatureIdTyped,
   mapConsumerToIndexName as mapConsumerToIndexNameTyped,
   STATUS_VALUES,
@@ -238,28 +237,6 @@ export class AlertsClient {
         throw Boom.failedDependency(`fetchAlertAndAudit threw an error: ${errorMessage}`);
       }
 
-      // ensureAllAuthorized builds an authorization filter
-      // if we only relied on that we would get back an empty hits array
-      // with nothing the do authorization on
-      // so we need to check if the user is authorized for the index first
-      // then continue with the rest of the procedure
-      // if (index != null) {
-      //   const authorizedIndices = await this.getAuthorizedAlertsIndices(validFeatureIds);
-      //   this.logger.debug(`AUTHORIZED RESPONSE ${JSON.stringify(authorizedIndices, null, 2)}`);
-      //   if (
-      //     authorizedIndices != null &&
-      //     (authorizedIndices?.some(
-      //       (indx) => indx.indexOf(index) > -1 || index.indexOf(indx) > -1
-      //     ) ||
-      //       authorizedIndices?.includes(index))
-      //   ) {
-      //     this.logger.debug(`authorized access to ${index}`);
-      //   } else {
-      //     this.logger.error(`unauthorized access to ${index}`);
-      //     throw Boom.forbidden(`unauthorized access to ${index}`);
-      //   }
-      // }
-
       const config = getEsQueryConfig();
 
       let queryBody = {
@@ -340,21 +317,6 @@ export class AlertsClient {
     operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update;
   }) {
     try {
-      // if (indexName != null) {
-      //   const authorizedIndices = await this.getAuthorizedAlertsIndices(validFeatureIds);
-      //   if (
-      //     authorizedIndices != null &&
-      //     (authorizedIndices?.some(
-      //       (indx) => indx.indexOf(indexName) > -1 || indexName.indexOf(indx) > -1
-      //     ) ||
-      //       authorizedIndices?.includes(indexName))
-      //   ) {
-      //     this.logger.debug(`authorized access to ${indexName}`);
-      //   } else {
-      //     this.logger.error(`unauthorized access to ${indexName}`);
-      //     throw Boom.forbidden(`unauthorized access to ${indexName}`);
-      //   }
-      // }
       const mgetRes = await this.esClient.mget<ParsedTechnicalFields>({
         index: indexName,
         body: {
@@ -436,9 +398,6 @@ export class AlertsClient {
         config
       );
       if (query != null && typeof query === 'object') {
-        //   builtQuery.bool.must.push(query);
-        // }
-
         return {
           ...builtQuery,
           bool: {
@@ -705,7 +664,6 @@ export class AlertsClient {
         throw Boom.notFound(errorMessage);
       }
 
-      // move away from pulling data from _source in the future
       return alertsSearchResponse;
     } catch (error) {
       this.logger.error(`find threw an error: ${error}`);
