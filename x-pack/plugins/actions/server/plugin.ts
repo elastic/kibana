@@ -7,7 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import semver, { coerce } from 'semver';
+import { coerce } from 'semver';
 import {
   PluginInitializerContext,
   Plugin,
