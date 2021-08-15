@@ -9,13 +9,20 @@ import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { useServiceMetricChartsFetcher } from '../../../hooks/use_service_metric_charts_fetcher';
 import { MetricsChart } from '../../shared/charts/metrics_chart';
 
 export function ServiceMetrics() {
   const { urlParams } = useUrlParams();
+  const {
+    query: { environment, kuery },
+  } = useApmParams('/services/:serviceName/metrics');
+
   const { data, status } = useServiceMetricChartsFetcher({
     serviceNodeName: undefined,
+    environment,
+    kuery,
   });
   const { start, end } = urlParams;
 

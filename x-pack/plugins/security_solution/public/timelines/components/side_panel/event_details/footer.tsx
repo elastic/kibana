@@ -17,12 +17,14 @@ import { useEventFilterModal } from '../../../../detections/components/alerts_ta
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { useFetchEcsAlertsData } from '../../../../detections/containers/detection_engine/alerts/use_fetch_ecs_alerts_data';
+import { Ecs } from '../../../../../common/ecs';
 
 interface EventDetailsFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
   expandedEvent: {
     eventId: string;
     indexName: string;
+    ecsData?: Ecs;
     refetch?: () => void;
   };
   handleOnEventClosed: () => void;
@@ -103,6 +105,7 @@ export const EventDetailsFooter = React.memo(
             <EuiFlexItem grow={false}>
               <TakeActionDropdown
                 detailsData={detailsData}
+                ecsData={ecsData}
                 handleOnEventClosed={handleOnEventClosed}
                 isHostIsolationPanelOpen={isHostIsolationPanelOpen}
                 loadingEventDetails={loadingEventDetails}
@@ -110,6 +113,7 @@ export const EventDetailsFooter = React.memo(
                 onAddExceptionTypeClick={onAddExceptionTypeClick}
                 onAddIsolationStatusClick={onAddIsolationStatusClick}
                 refetch={expandedEvent?.refetch}
+                indexName={expandedEvent.indexName}
                 timelineId={timelineId}
               />
             </EuiFlexItem>

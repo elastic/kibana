@@ -24,6 +24,7 @@ import { StoryContext } from '@storybook/react';
 import React, { ComponentType } from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
   ApmPluginContext,
@@ -119,7 +120,9 @@ export default {
 };
 
 export function Example(_args: Args) {
-  return <LatencyChart height={300} />;
+  return (
+    <LatencyChart height={300} environment={ENVIRONMENT_ALL.value} kuery="" />
+  );
 }
 Example.args = {
   alertsResponse: {
@@ -801,7 +804,9 @@ Example.args = {
 };
 
 export function NoData(_args: Args) {
-  return <LatencyChart height={300} />;
+  return (
+    <LatencyChart height={300} environment={ENVIRONMENT_ALL.value} kuery="" />
+  );
 }
 NoData.args = {
   alertsResponse: { alerts: [] },
