@@ -487,6 +487,7 @@ Array [
                       <Memo()
                         detailsData={null}
                         handleOnEventClosed={[Function]}
+                        indexName="my-index"
                         isHostIsolationPanelOpen={false}
                         loadingEventDetails={true}
                         onAddEventFilterClick={[Function]}
@@ -747,6 +748,7 @@ Array [
                     <Memo()
                       detailsData={null}
                       handleOnEventClosed={[Function]}
+                      indexName="my-index"
                       isHostIsolationPanelOpen={false}
                       loadingEventDetails={true}
                       onAddEventFilterClick={[Function]}

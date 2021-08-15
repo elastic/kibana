@@ -13,15 +13,20 @@ import {
   JSON_LINES,
   TABLE_CELL,
   TABLE_ROWS,
-  THREAT_CONTENT,
   THREAT_DETAILS_VIEW,
   ENRICHMENT_COUNT_NOTIFICATION,
-  THREAT_SUMMARY_VIEW,
-  TITLE,
+  INDICATOR_MATCH_ENRICHMENT_SECTION,
+  INVESTIGATION_TIME_ENRICHMENT_SECTION,
+  THREAT_DETAILS_ACCORDION,
 } from '../../screens/alerts_details';
 import { TIMELINE_FIELD } from '../../screens/rule_details';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import { expandFirstAlert, goToManageAlertsDetectionRules } from '../../tasks/alerts';
+import {
+  expandFirstAlert,
+  goToManageAlertsDetectionRules,
+  setEnrichmentDates,
+  viewThreatIntelTab,
+} from '../../tasks/alerts';
 import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
 import {
   openJsonView,
@@ -56,13 +61,13 @@ describe('CTI Enrichment', () => {
 
   it('Displays enrichment matched.* fields on the timeline', () => {
     const expectedFields = {
-      'threat.indicator.matched.atomic': getNewThreatIndicatorRule().atomic,
-      'threat.indicator.matched.type': 'indicator_match_rule',
-      'threat.indicator.matched.field': getNewThreatIndicatorRule().indicatorMappingField,
+      'threat.enrichments.matched.atomic': getNewThreatIndicatorRule().atomic,
+      'threat.enrichments.matched.type': 'indicator_match_rule',
+      'threat.enrichments.matched.field': getNewThreatIndicatorRule().indicatorMappingField,
     };
     const fields = Object.keys(expectedFields) as Array<keyof typeof expectedFields>;
 
-    addsFieldsToTimeline('threat.indicator.matched', fields);
+    addsFieldsToTimeline('threat.enrichments.matched', fields);
 
     fields.forEach((field) => {
       cy.get(TIMELINE_FIELD(field)).should('have.text', expectedFields[field]);
@@ -75,7 +80,7 @@ describe('CTI Enrichment', () => {
       {
         line: 3,
         text:
-          '    "indicator": "{\\"first_seen\\":\\"2021-03-10T08:02:14.000Z\\",\\"file\\":{\\"size\\":80280,\\"pe\\":{},\\"type\\":\\"elf\\",\\"hash\\":{\\"sha256\\":\\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\\",\\"tlsh\\":\\"6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE\\",\\"ssdeep\\":\\"1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL\\",\\"md5\\":\\"9b6c3518a91d23ed77504b5416bfb5b3\\"}},\\"type\\":\\"file\\",\\"event\\":{\\"reference\\":\\"https://urlhaus-api.abuse.ch/v1/download/a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3/\\",\\"ingested\\":\\"2021-03-10T14:51:09.809069Z\\",\\"created\\":\\"2021-03-10T14:51:07.663Z\\",\\"kind\\":\\"enrichment\\",\\"module\\":\\"threatintel\\",\\"category\\":\\"threat\\",\\"type\\":\\"indicator\\",\\"dataset\\":\\"threatintel.abusemalware\\"},\\"matched\\":{\\"atomic\\":\\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\\",\\"field\\":\\"myhash.mysha256\\",\\"id\\":\\"84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f\\",\\"index\\":\\"filebeat-7.12.0-2021.03.10-000001\\",\\"type\\":\\"indicator_match_rule\\"}}"',
+          '    "enrichments": "{\\"indicator\\":{\\"first_seen\\":\\"2021-03-10T08:02:14.000Z\\",\\"file\\":{\\"size\\":80280,\\"pe\\":{},\\"type\\":\\"elf\\",\\"hash\\":{\\"sha256\\":\\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\\",\\"tlsh\\":\\"6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE\\",\\"ssdeep\\":\\"1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL\\",\\"md5\\":\\"9b6c3518a91d23ed77504b5416bfb5b3\\"}},\\"type\\":\\"file\\"},\\"matched\\":{\\"atomic\\":\\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\\",\\"field\\":\\"myhash.mysha256\\",\\"id\\":\\"84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f\\",\\"index\\":\\"filebeat-7.12.0-2021.03.10-000001\\",\\"type\\":\\"indicator_match_rule\\"}}"',
       },
       { line: 2, text: '  }' },
     ];
@@ -97,34 +102,23 @@ describe('CTI Enrichment', () => {
 
   it('Displays threat indicator details on the threat intel tab', () => {
     const expectedThreatIndicatorData = [
-      { field: 'event.category', value: 'threat' },
-      { field: 'event.created', value: '2021-03-10T14:51:07.663Z' },
-      { field: 'event.dataset', value: 'threatintel.abusemalware' },
-      { field: 'event.ingested', value: '2021-03-10T14:51:09.809069Z' },
-      { field: 'event.kind', value: 'enrichment' },
-      { field: 'event.module', value: 'threatintel' },
+      { field: 'indicator.file.hash.md5', value: '9b6c3518a91d23ed77504b5416bfb5b3' },
       {
-        field: 'event.reference',
-        value:
-          'https://urlhaus-api.abuse.ch/v1/download/a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3/(opens in a new tab or window)',
-      },
-      { field: 'event.type', value: 'indicator' },
-      { field: 'file.hash.md5', value: '9b6c3518a91d23ed77504b5416bfb5b3' },
-      {
-        field: 'file.hash.sha256',
+        field: 'indicator.file.hash.sha256',
         value: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
       },
       {
-        field: 'file.hash.ssdeep',
+        field: 'indicator.file.hash.ssdeep',
         value: '1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL',
       },
       {
-        field: 'file.hash.tlsh',
+        field: 'indicator.file.hash.tlsh',
         value: '6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE',
       },
-      { field: 'file.size', value: '80280' },
-      { field: 'file.type', value: 'elf' },
-      { field: 'first_seen', value: '2021-03-10T08:02:14.000Z' },
+      { field: 'indicator.file.size', value: '80280' },
+      { field: 'indicator.file.type', value: 'elf' },
+      { field: 'indicator.first_seen', value: '2021-03-10T08:02:14.000Z' },
+      { field: 'indicator.type', value: 'file' },
       {
         field: 'matched.atomic',
         value: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
@@ -136,7 +130,6 @@ describe('CTI Enrichment', () => {
       },
       { field: 'matched.index', value: 'filebeat-7.12.0-2021.03.10-000001' },
       { field: 'matched.type', value: 'indicator_match_rule' },
-      { field: 'type', value: 'file' },
     ];
 
     expandFirstAlert();
@@ -156,8 +149,7 @@ describe('CTI Enrichment', () => {
     });
   });
 
-  // https://github.com/elastic/kibana/pull/106889
-  describe.skip('with additional indicators', () => {
+  describe('with additional indicators', () => {
     before(() => {
       esArchiverLoad('threat_indicator2');
     });
@@ -166,7 +158,7 @@ describe('CTI Enrichment', () => {
       esArchiverUnload('threat_indicator2');
     });
 
-    it('Displays matched fields from both indicator match rules and investigation time enrichments on Alerts Summary tab', () => {
+    it('Displays matched fields from both indicator match rules and investigation time enrichments on Threat Intel tab', () => {
       const indicatorMatchRuleEnrichment = {
         field: 'myhash.mysha256',
         value: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
@@ -174,22 +166,26 @@ describe('CTI Enrichment', () => {
       const investigationTimeEnrichment = {
         field: 'source.ip',
         value: '192.168.1.1',
+        provider: 'another_provider',
       };
-      const expectedMatches = [indicatorMatchRuleEnrichment, investigationTimeEnrichment];
 
       expandFirstAlert();
+      viewThreatIntelTab();
+      setEnrichmentDates('08/05/2018 10:00 AM');
 
-      cy.get(THREAT_SUMMARY_VIEW).within(() => {
-        cy.get(TABLE_ROWS).should('have.length', expectedMatches.length);
-        expectedMatches.forEach((row, index) => {
-          cy.get(TABLE_ROWS)
-            .eq(index)
-            .within(() => {
-              cy.get(TITLE).should('have.text', row.field);
-              cy.get(THREAT_CONTENT).should('have.text', row.value);
-            });
-        });
-      });
+      cy.get(`${INDICATOR_MATCH_ENRICHMENT_SECTION} ${THREAT_DETAILS_ACCORDION}`)
+        .should('exist')
+        .should(
+          'have.text',
+          `${indicatorMatchRuleEnrichment.field} ${indicatorMatchRuleEnrichment.value}`
+        );
+
+      cy.get(`${INVESTIGATION_TIME_ENRICHMENT_SECTION} ${THREAT_DETAILS_ACCORDION}`)
+        .should('exist')
+        .should(
+          'have.text',
+          `${investigationTimeEnrichment.field} ${investigationTimeEnrichment.value} from ${investigationTimeEnrichment.provider}`
+        );
     });
   });
 });
