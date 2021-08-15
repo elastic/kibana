@@ -17,11 +17,15 @@ const INITIAL_DATA: MetricsChartsByAgentAPIResponse = {
 
 export function useServiceMetricChartsFetcher({
   serviceNodeName,
+  kuery,
+  environment,
 }: {
   serviceNodeName: string | undefined;
+  kuery: string;
+  environment: string;
 }) {
   const {
-    urlParams: { environment, kuery, start, end },
+    urlParams: { start, end },
   } = useUrlParams();
   const { agentName, serviceName } = useApmServiceContext();
 
