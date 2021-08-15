@@ -8,25 +8,31 @@
 
 import Path from 'path';
 
-import execa from 'execa';
-import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { ToolingLog, REPO_ROOT, ProcRunner } from '@kbn/dev-utils';
 
-export const REF_CONFIG_PATHS = [Path.resolve(REPO_ROOT, 'tsconfig.refs.json')];
+import { ROOT_REFS_CONFIG_PATH } from './root_refs_config';
 
-export async function buildAllTsRefs(log: ToolingLog): Promise<{ failed: boolean }> {
-  for (const path of REF_CONFIG_PATHS) {
-    const relative = Path.relative(REPO_ROOT, path);
-    log.debug(`Building TypeScript projects refs for ${relative}...`);
-    const { failed, stdout } = await execa(
-      require.resolve('typescript/bin/tsc'),
-      ['-b', relative, '--pretty'],
-      {
-        cwd: REPO_ROOT,
-        reject: false,
-      }
-    );
-    log.info(stdout);
-    if (failed) return { failed };
+export async function buildAllTsRefs({
+  log,
+  procRunner,
+  verbose,
+}: {
+  log: ToolingLog;
+  procRunner: ProcRunner;
+  verbose?: boolean;
+}): Promise<{ failed: boolean }> {
+  const relative = Path.relative(REPO_ROOT, ROOT_REFS_CONFIG_PATH);
+  log.info(`Building TypeScript projects refs for ${relative}...`);
+
+  try {
+    await procRunner.run('tsc', {
+      cmd: Path.relative(REPO_ROOT, require.resolve('typescript/bin/tsc')),
+      args: ['-b', relative, '--pretty', ...(verbose ? ['--verbose'] : [])],
+      cwd: REPO_ROOT,
+      wait: true,
+    });
+    return { failed: false };
+  } catch (error) {
+    return { failed: true };
   }
-  return { failed: false };
 }

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
+import type {
   AppMountParameters,
   CoreStart,
   SavedObjectsClientContract,
@@ -14,8 +14,8 @@ import {
   ChromeStart,
   IUiSettingsClient,
   PluginInitializerContext,
+  KibanaExecutionContext,
 } from 'kibana/public';
-
 import { History } from 'history';
 import { AnyAction, Dispatch } from 'redux';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -86,6 +86,7 @@ export interface DashboardContainerInput extends ContainerInput {
   panels: {
     [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
   };
+  executionContext?: KibanaExecutionContext;
 }
 
 /**
@@ -131,6 +132,7 @@ export type DashboardBuildContext = Pick<
   dispatchDashboardStateChange: Dispatch<AnyAction>;
   $triggerDashboardRefresh: Subject<{ force?: boolean }>;
   $onDashboardStateChange: BehaviorSubject<DashboardState>;
+  executionContext?: KibanaExecutionContext;
 };
 
 export interface DashboardOptions {

@@ -122,6 +122,19 @@ export class ApmConfiguration {
       config.transactionSampleRate = parseFloat(process.env.ELASTIC_APM_TRANSACTION_SAMPLE_RATE);
     }
 
+    if (process.env.ELASTIC_APM_SERVER_URL) {
+      config.serverUrl = process.env.ELASTIC_APM_SERVER_URL;
+    }
+
+    if (process.env.ELASTIC_APM_GLOBAL_LABELS) {
+      config.globalLabels = Object.fromEntries(
+        process.env.ELASTIC_APM_GLOBAL_LABELS.split(',').map((p) => {
+          const [key, ...val] = p.split('=');
+          return [key, val.join('=')];
+        })
+      );
+    }
+
     return config;
   }
 

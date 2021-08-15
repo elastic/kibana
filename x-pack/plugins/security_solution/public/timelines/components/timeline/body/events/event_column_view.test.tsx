@@ -20,6 +20,7 @@ import { useShallowEqualSelector } from '../../../../../common/hooks/use_selecto
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { defaultControlColumn } from '../control_columns';
 import { testLeadingControlColumn } from '../../../../../common/mock/mock_timeline_control_columns';
+import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -27,9 +28,7 @@ jest.mock('../../../../../common/hooks/use_selector');
 jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
-      timelines: {
-        getAddToCaseAction: () => <div data-test-subj="add-to-case-action">{'Add to case'}</div>,
-      },
+      timelines: { ...mockTimelines },
     },
   }),
   useToasts: jest.fn().mockReturnValue({
@@ -44,7 +43,7 @@ jest.mock(
   '../../../../../../../timelines/public/components/actions/timeline/cases/add_to_case_action',
   () => {
     return {
-      AddToCaseAction: () => {
+      AddToCasePopover: () => {
         return <div data-test-subj="add-to-case-action">{'Add to case'}</div>;
       },
     };

@@ -87,9 +87,11 @@ const anomalyDetectionEnvironmentsRoute = createApmServerRoute({
   handler: async (resources) => {
     const setup = await setupRequest(resources);
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      apmEventClient: setup.apmEventClient,
+      config: setup.config,
+      kuery: '',
+    });
 
     const environments = await getAllEnvironments({
       setup,

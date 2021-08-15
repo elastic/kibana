@@ -24,8 +24,8 @@ export async function getErrorGroupSample({
   groupId,
   setup,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   groupId: string;
   setup: Setup & SetupTimeRange;
