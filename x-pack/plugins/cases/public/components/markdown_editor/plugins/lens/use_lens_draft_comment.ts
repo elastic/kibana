@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiMarkdownAstNodePosition } from '@elastic/eui';
 import { useCallback, useEffect, useState } from 'react';
 import { first } from 'rxjs/operators';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -14,6 +15,8 @@ import { INSERT_LENS } from './translations';
 interface DraftComment {
   commentId: string;
   comment: string;
+  position: EuiMarkdownAstNodePosition;
+  title: string;
 }
 
 export const useLensDraftComment = () => {
@@ -39,7 +42,7 @@ export const useLensDraftComment = () => {
       if (incomingEmbeddablePackage) {
         if (storage.get(DRAFT_COMMENT_STORAGE_ID)) {
           try {
-            setDraftComment(JSON.parse(storage.get(DRAFT_COMMENT_STORAGE_ID)));
+            setDraftComment(storage.get(DRAFT_COMMENT_STORAGE_ID));
             // eslint-disable-next-line no-empty
           } catch (e) {}
         }
@@ -48,18 +51,18 @@ export const useLensDraftComment = () => {
     fetchDraftComment();
   }, [currentAppId$, embeddable, storage]);
 
-  const openLensModal = useCallback(
-    ({ editorRef }) => {
-      if (editorRef && editorRef.textarea && editorRef.toolbar) {
-        const lensPluginButton = editorRef.toolbar?.querySelector(`[aria-label="${INSERT_LENS}"]`);
-        if (lensPluginButton) {
-          lensPluginButton.click();
-          storage.remove(DRAFT_COMMENT_STORAGE_ID);
-        }
+  const openLensModal = useCallback(({ editorRef }) => {
+    if (editorRef && editorRef.textarea && editorRef.toolbar) {
+      const lensPluginButton = editorRef.toolbar?.querySelector(`[aria-label="${INSERT_LENS}"]`);
+      if (lensPluginButton) {
+        lensPluginButton.click();
       }
-    },
-    [storage]
-  );
+    }
+  }, []);
 
-  return { draftComment, openLensModal };
+  const clearDraftComment = useCallback(() => {
+    storage.remove(DRAFT_COMMENT_STORAGE_ID);
+  }, [storage]);
+
+  return { draftComment, openLensModal, clearDraftComment };
 };

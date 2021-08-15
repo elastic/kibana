@@ -36,14 +36,12 @@ import { LensMarkDownRenderer } from './processor';
 import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
 import { CommentEditorContext } from '../../context';
 import { ModalContainer } from './modal_container';
-import type {
-  EmbeddablePackageState,
-  EmbeddableInput,
-} from '../../../../../../../../src/plugins/embeddable/public';
+import type { EmbeddablePackageState } from '../../../../../../../../src/plugins/embeddable/public';
 import {
   SavedObjectFinderUi,
   SavedObjectFinderUiProps,
 } from '../../../../../../../../src/plugins/saved_objects/public';
+import { useLensDraftComment } from './use_lens_draft_comment';
 
 const BetaBadgeWrapper = styled.span`
   display: inline-flex;
@@ -54,10 +52,7 @@ const BetaBadgeWrapper = styled.span`
 `;
 
 type LensIncomingEmbeddablePackage = Omit<EmbeddablePackageState, 'input'> & {
-  input: Omit<EmbeddableInput, 'id'> & {
-    id: string | undefined;
-    attributes: TypedLensByValueInput['attributes'];
-  };
+  input: TypedLensByValueInput;
 };
 
 type LensEuiMarkdownEditorUiPlugin = EuiMarkdownEditorUiPlugin<{
@@ -138,10 +133,15 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   } = useKibana().services;
   const [currentAppId, setCurrentAppId] = useState<string | undefined>(undefined);
 
-  const [editMode, setEditMode] = useState(!!node);
+  const { draftComment, clearDraftComment } = useLensDraftComment();
+
+  const [nodePosition, setNodePosition] = useState<EuiMarkdownAstNodePosition | undefined>(
+    undefined
+  );
+  // const [editMode, setEditMode] = useState(!!node);
   const [lensEmbeddableAttributes, setLensEmbeddableAttributes] = useState<
     TypedLensByValueInput['attributes'] | null
-  >(null);
+  >(node?.attributes || null);
   const [timeRange, setTimeRange] = useState<TypedLensByValueInput['timeRange']>(
     node?.timeRange ?? {
       from: 'now-7d',
@@ -164,20 +164,11 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   }, []);
 
   const handleAdd = useCallback(() => {
-    let draftComment;
-    if (storage.get(DRAFT_COMMENT_STORAGE_ID)) {
-      try {
-        draftComment = JSON.parse(storage.get(DRAFT_COMMENT_STORAGE_ID));
-        // eslint-disable-next-line no-empty
-      } catch (e) {}
-    }
-
-    if (!node && draftComment?.position) {
+    if (nodePosition) {
       markdownContext.replaceNode(
-        draftComment.position,
+        nodePosition,
         `!{${ID}${JSON.stringify({
           timeRange,
-          editMode,
           attributes: lensEmbeddableAttributes,
         })}}`
       );
@@ -190,7 +181,6 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       onSave(
         `!{${ID}${JSON.stringify({
           timeRange,
-          editMode,
           attributes: lensEmbeddableAttributes,
         })}}`,
         {
@@ -198,35 +188,14 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
         }
       );
     }
-  }, [
-    storage,
-    node,
-    lensEmbeddableAttributes,
-    markdownContext,
-    timeRange,
-    editMode,
-    onCancel,
-    onSave,
-  ]);
+  }, [nodePosition, lensEmbeddableAttributes, markdownContext, timeRange, onCancel, onSave]);
 
   const handleDelete = useCallback(() => {
-    if (node?.position) {
-      markdownContext.replaceNode(node.position, ``);
+    if (nodePosition) {
+      markdownContext.replaceNode(nodePosition, ``);
       onCancel();
-      return;
     }
-
-    let draftComment;
-    if (storage.get(DRAFT_COMMENT_STORAGE_ID)) {
-      try {
-        draftComment = JSON.parse(storage.get(DRAFT_COMMENT_STORAGE_ID));
-        markdownContext.replaceNode(draftComment?.position, ``);
-        onCancel();
-
-        // eslint-disable-next-line no-empty
-      } catch (e) {}
-    }
-  }, [markdownContext, node?.position, onCancel, storage]);
+  }, [markdownContext, nodePosition, onCancel]);
 
   const originatingPath = useMemo(() => `${location.pathname}${location.search}`, [
     location.pathname,
@@ -235,14 +204,12 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
 
   const handleEditInLensClick = useCallback(
     async (lensAttributes?) => {
-      storage.set(
-        DRAFT_COMMENT_STORAGE_ID,
-        JSON.stringify({
-          commentId: commentEditorContext?.editorId,
-          comment: commentEditorContext?.value,
-          position: node?.position,
-        })
-      );
+      storage.set(DRAFT_COMMENT_STORAGE_ID, {
+        commentId: commentEditorContext?.editorId,
+        comment: commentEditorContext?.value,
+        position: node?.position,
+        title: lensEmbeddableAttributes?.title,
+      });
 
       lens?.navigateToPrefilledEditor(
         lensAttributes || lensEmbeddableAttributes
@@ -263,8 +230,8 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       commentEditorContext?.editorId,
       commentEditorContext?.value,
       node?.position,
-      lensEmbeddableAttributes,
       lens,
+      lensEmbeddableAttributes,
       timeRange,
       currentAppId,
       originatingPath,
@@ -282,11 +249,20 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     [handleEditInLensClick]
   );
 
+  useEffect(() => () => clearDraftComment(), [clearDraftComment]);
+
   useEffect(() => {
     if (node?.attributes) {
       setLensEmbeddableAttributes(node.attributes);
     }
   }, [node?.attributes]);
+
+  useEffect(() => {
+    const position = node?.position || draftComment?.position;
+    if (position) {
+      setNodePosition(position);
+    }
+  }, [node?.position, draftComment?.position]);
 
   useEffect(() => {
     const getCurrentAppId = async () => {
@@ -309,7 +285,14 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       incomingEmbeddablePackage?.type === 'lens' &&
       incomingEmbeddablePackage?.input?.attributes
     ) {
-      setLensEmbeddableAttributes(incomingEmbeddablePackage?.input.attributes);
+      const attributesTitle = incomingEmbeddablePackage?.input.attributes.title.length
+        ? incomingEmbeddablePackage?.input.attributes.title
+        : null;
+      setLensEmbeddableAttributes({
+        ...incomingEmbeddablePackage?.input.attributes,
+        title: attributesTitle ?? draftComment?.title ?? '',
+      });
+
       const lensTime = timefilter.getTime();
       if (lensTime?.from && lensTime?.to) {
         setTimeRange({
@@ -318,17 +301,8 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
           mode: [lensTime.from, lensTime.to].join('').includes('now') ? 'relative' : 'absolute',
         });
       }
-
-      let draftComment;
-      if (storage.get(DRAFT_COMMENT_STORAGE_ID)) {
-        try {
-          draftComment = JSON.parse(storage.get(DRAFT_COMMENT_STORAGE_ID));
-          setEditMode(!!draftComment?.editMode);
-          // eslint-disable-next-line no-empty
-        } catch (e) {}
-      }
     }
-  }, [embeddable, storage, timefilter, currentAppId]);
+  }, [embeddable, storage, timefilter, currentAppId, draftComment?.title]);
 
   return (
     <ModalContainer>
@@ -336,7 +310,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
         <EuiModalHeaderTitle>
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              {editMode ? (
+              {!!nodePosition ? (
                 <FormattedMessage
                   id="xpack.cases.markdownEditor.plugins.lens.editVisualizationModalTitle"
                   defaultMessage="Edit visualization"
@@ -391,7 +365,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
                   iconType="lensApp"
                   fullWidth={false}
                   isDisabled={!lens?.canUseEditor()}
-                  onClick={() => handleEditInLensClick()}
+                  onClick={handleEditInLensClick}
                 >
                   <FormattedMessage
                     id="xpack.cases.markdownEditor.plugins.lens.editVisualizationInLensButtonLabel"
@@ -411,7 +385,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
           <LensSavedObjectsPicker onChoose={handleChooseLensSO}>
             <EuiFlexItem>
               <EuiButton
-                onClick={() => handleEditInLensClick()}
+                onClick={handleEditInLensClick}
                 color="primary"
                 size="m"
                 iconType="lensApp"
@@ -428,7 +402,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onCancel}>{'Cancel'}</EuiButtonEmpty>
-        {editMode ? (
+        {!!nodePosition ? (
           <EuiButton onClick={handleDelete} color="danger" disabled={!lensEmbeddableAttributes}>
             <FormattedMessage
               id="xpack.cases.markdownEditor.plugins.lens.deleteVisualizationButtonLabel"
@@ -441,7 +415,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
           fill
           disabled={!lensEmbeddableAttributes || !lensEmbeddableAttributes?.title?.length}
         >
-          {editMode ? (
+          {!!nodePosition ? (
             <FormattedMessage
               id="xpack.cases.markdownEditor.plugins.lens.updateVisualizationButtonLabel"
               defaultMessage="Update"

@@ -21,7 +21,6 @@ import {
 import { setupSavedObjects } from './saved_objects';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
 import { lensEmbeddableFactory } from './embeddable/lens_embeddable_factory';
-import { migrations } from './migrations/saved_object_migrations';
 import { setupExpressions } from './expressions';
 
 export interface PluginSetupContract {
@@ -37,10 +36,6 @@ export interface PluginStartContract {
   data: DataPluginStart;
 }
 
-export interface LensPluginSetup {
-  getAllMigrations: () => typeof migrations;
-}
-
 export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
   private readonly kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
   private readonly telemetryLogger: Logger;
@@ -49,7 +44,7 @@ export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
     this.kibanaIndexConfig = initializerContext.config.legacy.globalConfig$;
     this.telemetryLogger = initializerContext.logger.get('usage');
   }
-  setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract): LensPluginSetup {
+  setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract) {
     setupSavedObjects(core);
     setupRoutes(core, this.initializerContext.logger.get());
     setupExpressions(core, plugins.expressions);
@@ -69,9 +64,7 @@ export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
       );
     }
     plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
-    return {
-      getAllMigrations: () => migrations,
-    };
+    return {};
   }
 
   start(core: CoreStart, plugins: PluginStartContract) {

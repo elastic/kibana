@@ -8,7 +8,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { flow, mapValues } from 'lodash';
-import { LensPluginSetup } from '../../../../lens/server';
+import { EmbeddableSetup } from '../../../../../../src/plugins/embeddable/server';
+
 import {
   mergeMigrationFunctionMaps,
   MigrateFunction,
@@ -18,6 +19,7 @@ import {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectMigrationFn,
+  SavedObjectMigrationMap,
 } from '../../../../../../src/core/server';
 import {
   ConnectorTypes,
@@ -134,14 +136,20 @@ const migrateByValueLensVisualizations = (
 };
 
 export interface CreateCommentsMigrationsDeps {
-  getLensMigrations: LensPluginSetup['getAllMigrations'];
+  embeddable: EmbeddableSetup;
 }
 
-export const createCommentsMigrations = (migrationDeps: CreateCommentsMigrationsDeps) => {
-  const lensMigrations = (mapValues(
-    migrationDeps.getLensMigrations(),
+export const createCommentsMigrations = (
+  migrationDeps: CreateCommentsMigrationsDeps
+): SavedObjectMigrationMap => {
+  // console.error(
+  //   'migrationas',
+  //   JSON.stringify(migrationDeps.embeddable.getAllMigrations(), null, 2)
+  // );
+  const embeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigrationFn>(
+    migrationDeps.embeddable.getAllMigrations(),
     migrateByValueLensVisualizations
-  ) as unknown) as MigrateFunctionsObject;
+  ) as MigrateFunctionsObject;
 
   const commentsMigrations = {
     '7.11.0': flow(
@@ -189,7 +197,7 @@ export const createCommentsMigrations = (migrationDeps: CreateCommentsMigrations
     ),
   };
 
-  return mergeMigrationFunctionMaps(commentsMigrations, lensMigrations);
+  return mergeMigrationFunctionMaps(commentsMigrations, embeddableMigrations);
 };
 
 export const connectorMappingsMigrations = {

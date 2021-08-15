@@ -209,7 +209,9 @@ describe('Comments migrations', () => {
 
     it('should remove time zone param from date histogram', () => {
       const commentsMigrations714 = createCommentsMigrations({
-        getLensMigrations: () => lensMigrations,
+        embeddable: {
+          getAllMigrations: () => lensMigrations,
+        },
       });
       const result = commentsMigrations714['7.14.0'](caseComment) as ReturnType<
         SavedObjectMigrationFn<

@@ -7,6 +7,8 @@
 
 import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { SavedObjectReference } from 'kibana/server';
+import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
 import { DOC_TYPE } from '../../common';
 import {
   commonRemoveTimezoneDateHistogramParam,
@@ -49,6 +51,17 @@ export const lensEmbeddableFactory = (): EmbeddableRegistryDefinition => {
           attributes: migratedLensState,
         } as unknown) as SerializableRecord;
       },
+    },
+    extract(state: EmbeddableStateWithType) {
+      let references: SavedObjectReference[] = [];
+      const typedState = (state as unknown) as SerializableRecord;
+
+      if ('attributes' in typedState && typedState.attributes !== undefined) {
+        // @ts-expect-error
+        references = typedState?.attributes?.references || [];
+      }
+
+      return { state, references };
     },
   };
 };

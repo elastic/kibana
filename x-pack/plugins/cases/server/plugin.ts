@@ -8,7 +8,6 @@
 import { IContextProvider, KibanaRequest, Logger, PluginInitializerContext } from 'kibana/server';
 import { CoreSetup, CoreStart } from 'src/core/server';
 
-import { LensPluginSetup } from '../../lens/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import {
   PluginSetupContract as ActionsPluginSetup,
@@ -32,6 +31,7 @@ import { registerConnectors } from './connectors';
 import type { CasesRequestHandlerContext } from './types';
 import { CasesClientFactory } from './client/factory';
 import { SpacesPluginStart } from '../../spaces/server';
+import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 
 function createConfig(context: PluginInitializerContext) {
@@ -41,7 +41,7 @@ function createConfig(context: PluginInitializerContext) {
 export interface PluginsSetup {
   security?: SecurityPluginSetup;
   actions: ActionsPluginSetup;
-  lens: LensPluginSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface PluginsStart {
@@ -49,6 +49,7 @@ export interface PluginsStart {
   features: FeaturesPluginStart;
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
+  embeddable: EmbeddableStart;
 }
 
 /**
@@ -84,7 +85,11 @@ export class CasePlugin {
     this.securityPluginSetup = plugins.security;
 
     core.savedObjects.registerType(
-      createCaseCommentSavedObjectType({ getLensMigrations: plugins.lens.getAllMigrations })
+      createCaseCommentSavedObjectType({
+        migrationDeps: {
+          embeddable: plugins.embeddable,
+        },
+      })
     );
     core.savedObjects.registerType(caseConfigureSavedObjectType);
     core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
@@ -131,6 +136,7 @@ export class CasePlugin {
       },
       featuresPluginStart: plugins.features,
       actionsPluginStart: plugins.actions,
+      embeddablePluginStart: plugins.embeddable,
     });
 
     const client = core.elasticsearch.client;

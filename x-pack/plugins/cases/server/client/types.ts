@@ -7,6 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'kibana/server';
+import { EmbeddableStart } from 'src/plugins/embeddable/server';
 import { User } from '../../common';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -33,6 +34,7 @@ export interface CasesClientArgs {
   readonly alertsService: AlertServiceContract;
   readonly attachmentService: AttachmentService;
   readonly logger: Logger;
+  readonly embeddable: EmbeddableStart;
   readonly authorization: PublicMethodsOf<Authorization>;
   readonly actionsClient: PublicMethodsOf<ActionsClient>;
 }

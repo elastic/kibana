@@ -19,6 +19,7 @@
   },
   "requiredPlugins":[
      "actions",
+     "embeddable",
      "esUiShared",
      "lens",
      "features",

@@ -11,6 +11,7 @@ import {
   Logger,
   ElasticsearchClient,
 } from 'kibana/server';
+import { EmbeddableStart } from 'src/plugins/embeddable/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../../security/server';
 import { SAVED_OBJECT_TYPES } from '../../common';
 import { Authorization } from '../authorization/authorization';
@@ -34,6 +35,7 @@ interface CasesClientFactoryArgs {
   getSpace: GetSpaceFn;
   featuresPluginStart: FeaturesPluginStart;
   actionsPluginStart: ActionsPluginStart;
+  embeddablePluginStart: EmbeddableStart;
 }
 
 /**
@@ -108,6 +110,7 @@ export class CasesClientFactory {
       userActionService: new CaseUserActionService(this.logger),
       attachmentService: new AttachmentService(this.logger),
       logger: this.logger,
+      embeddable: this.options.embeddablePluginStart,
       authorization: auth,
       actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
     });

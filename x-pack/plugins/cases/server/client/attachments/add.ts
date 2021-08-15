@@ -10,6 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
+import { EmbeddableStart } from 'src/plugins/embeddable/server';
 import {
   SavedObject,
   SavedObjectsClientContract,
@@ -124,6 +125,7 @@ const addGeneratedAlerts = async (
     caseService,
     userActionService,
     logger,
+    embeddable,
     authorization,
   } = clientArgs;
 
@@ -182,6 +184,7 @@ const addGeneratedAlerts = async (
       unsecuredSavedObjectsClient,
       caseService,
       attachmentService,
+      embeddable,
     });
 
     const {
@@ -241,12 +244,14 @@ async function getCombinedCase({
   unsecuredSavedObjectsClient,
   id,
   logger,
+  embeddable,
 }: {
   caseService: CasesService;
   attachmentService: AttachmentService;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   id: string;
   logger: Logger;
+  embeddable: EmbeddableStart;
 }): Promise<CommentableCase> {
   const [casePromise, subCasePromise] = await Promise.allSettled([
     caseService.getCase({
@@ -276,6 +281,7 @@ async function getCombinedCase({
         caseService,
         attachmentService,
         unsecuredSavedObjectsClient,
+        embeddable,
       });
     } else {
       throw Boom.badRequest('Sub case found without reference to collection');
@@ -291,6 +297,7 @@ async function getCombinedCase({
       caseService,
       attachmentService,
       unsecuredSavedObjectsClient,
+      embeddable,
     });
   }
 }
@@ -332,6 +339,7 @@ export const addComment = async (
     attachmentService,
     user,
     logger,
+    embeddable,
     authorization,
   } = clientArgs;
 
@@ -362,6 +370,7 @@ export const addComment = async (
       unsecuredSavedObjectsClient,
       id: caseId,
       logger,
+      embeddable,
     });
 
     // eslint-disable-next-line @typescript-eslint/naming-convention

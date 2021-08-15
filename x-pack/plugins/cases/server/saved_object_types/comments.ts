@@ -9,11 +9,13 @@ import { SavedObjectsType } from 'src/core/server';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../common';
 import { createCommentsMigrations, CreateCommentsMigrationsDeps } from './migrations';
 
-export const createCaseCommentSavedObjectType = (
-  migrationDeps: CreateCommentsMigrationsDeps
-): SavedObjectsType => ({
+export const createCaseCommentSavedObjectType = ({
+  migrationDeps,
+}: {
+  migrationDeps: CreateCommentsMigrationsDeps;
+}): SavedObjectsType => ({
   name: CASE_COMMENT_SAVED_OBJECT,
-  hidden: true,
+  hidden: false,
   namespaceType: 'single',
   mappings: {
     properties: {

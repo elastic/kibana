@@ -21,6 +21,8 @@ import {
 } from 'kibana/server';
 import { filter, flatMap, uniqWith, isEmpty, xorWith } from 'lodash';
 import { TimeRange } from 'src/plugins/data/server';
+import { EmbeddableStart } from 'src/plugins/embeddable/server';
+import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
 import { AlertInfo } from '.';
 import { LensDocShape714 } from '../../../lens/server';
 
@@ -417,7 +419,6 @@ export const getNoneCaseConnector = () => ({
 
 interface LensMarkdownNode {
   timeRange: TimeRange;
-  editMode: boolean;
   attributes: LensDocShape714 & { references: SavedObjectReference[] };
 }
 
@@ -447,31 +448,39 @@ export const stringifyComment = (comment: Parent) =>
     .stringify(comment);
 
 export const getLensVisualizations = (parsedComment: Array<LensMarkdownNode | Node>) =>
-  filter(parsedComment, { type: LENS_ID }) as LensMarkdownNode[];
+  filter(parsedComment, { type: LENS_ID }) as EmbeddableStateWithType[];
 
-export const extractLensReferencesFromCommentString = (comment: string): SavedObjectReference[] => {
+export const extractLensReferencesFromCommentString = (
+  embeddable: EmbeddableStart,
+  comment: string
+): SavedObjectReference[] => {
   const parsedComment = parseCommentString(comment);
   const lensVisualizations = getLensVisualizations(parsedComment.children);
-  const flattenRefs = flatMap(lensVisualizations, (lensObject) => lensObject.attributes.references);
+  const flattenRefs = flatMap(
+    lensVisualizations,
+    (lensObject) => embeddable.extract(lensObject)?.references ?? []
+  );
 
   const uniqRefs = uniqWith(
     flattenRefs,
-    (refA, refB) => refA.type === refB.type && refA.id === refB.id
+    (refA, refB) => refA.type === refB.type && refA.id === refB.id && refA.name === refB.name
   );
 
   return uniqRefs;
 };
 
 export const getOrUpdateLensReferences = (
+  embeddable: EmbeddableStart,
   newComment: string,
   currentComment?: SavedObject<CommentRequestUserType>
 ) => {
   if (!currentComment) {
-    return extractLensReferencesFromCommentString(newComment);
+    return extractLensReferencesFromCommentString(embeddable, newComment);
   }
 
   const savedObjectReferences = currentComment.references;
   const savedObjectLensReferences = extractLensReferencesFromCommentString(
+    embeddable,
     currentComment.attributes.comment
   );
 
@@ -481,7 +490,7 @@ export const getOrUpdateLensReferences = (
     (refA, refB) => refA.type === refB.type && refA.id === refB.id
   );
 
-  const newCommentLensReferences = extractLensReferencesFromCommentString(newComment);
+  const newCommentLensReferences = extractLensReferencesFromCommentString(embeddable, newComment);
 
   return currentNonLensReferences.concat(newCommentLensReferences);
 };

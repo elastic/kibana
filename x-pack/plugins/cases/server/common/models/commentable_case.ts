@@ -14,6 +14,7 @@ import {
   SavedObjectsUpdateResponse,
   Logger,
 } from 'src/core/server';
+import { EmbeddableStart } from 'src/plugins/embeddable/server';
 import {
   AssociationType,
   CASE_SAVED_OBJECT,
@@ -56,6 +57,7 @@ interface CommentableCaseParams {
   caseService: CasesService;
   attachmentService: AttachmentService;
   logger: Logger;
+  embeddable: EmbeddableStart;
 }
 
 /**
@@ -69,6 +71,7 @@ export class CommentableCase {
   private readonly caseService: CasesService;
   private readonly attachmentService: AttachmentService;
   private readonly logger: Logger;
+  private readonly embeddable: EmbeddableStart;
 
   constructor({
     collection,
@@ -77,6 +80,7 @@ export class CommentableCase {
     caseService,
     attachmentService,
     logger,
+    embeddable,
   }: CommentableCaseParams) {
     this.collection = collection;
     this.subCase = subCase;
@@ -84,6 +88,7 @@ export class CommentableCase {
     this.caseService = caseService;
     this.attachmentService = attachmentService;
     this.logger = logger;
+    this.embeddable = embeddable;
   }
 
   public get status(): CaseStatuses {
@@ -191,6 +196,7 @@ export class CommentableCase {
         caseService: this.caseService,
         attachmentService: this.attachmentService,
         logger: this.logger,
+        embeddable: this.embeddable,
       });
     } catch (error) {
       throw createCaseError({
@@ -226,6 +232,7 @@ export class CommentableCase {
         })) as SavedObject<CommentRequestUserType>;
 
         const updatedReferences = getOrUpdateLensReferences(
+          this.embeddable,
           queryRestAttributes.comment,
           currentComment
         );
@@ -287,11 +294,14 @@ export class CommentableCase {
         throw Boom.badRequest('The owner field of the comment must match the case');
       }
 
-      const references = this.buildRefsToCase();
+      let references = this.buildRefsToCase();
 
       if (commentReq.type === CommentType.user && commentReq?.comment) {
-        const commentStringReferences = getOrUpdateLensReferences(commentReq.comment);
-        references.concat(commentStringReferences);
+        const commentStringReferences = getOrUpdateLensReferences(
+          this.embeddable,
+          commentReq.comment
+        );
+        references = [...references, ...commentStringReferences];
       }
 
       const [comment, commentableCase] = await Promise.all([
