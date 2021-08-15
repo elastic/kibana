@@ -142,10 +142,6 @@ export interface CreateCommentsMigrationsDeps {
 export const createCommentsMigrations = (
   migrationDeps: CreateCommentsMigrationsDeps
 ): SavedObjectMigrationMap => {
-  // console.error(
-  //   'migrationas',
-  //   JSON.stringify(migrationDeps.embeddable.getAllMigrations(), null, 2)
-  // );
   const embeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigrationFn>(
     migrationDeps.embeddable.getAllMigrations(),
     migrateByValueLensVisualizations
