@@ -33,6 +33,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               start,
               end,
               transactionType: 'request',
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );
@@ -59,6 +61,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               end,
               transactionType: 'request',
               environment: 'production',
+              kuery: '',
             },
           })
         );

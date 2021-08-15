@@ -30,6 +30,7 @@ import { TagCloudPageObject } from './tag_cloud_page';
 import { VegaChartPageObject } from './vega_chart_page';
 import { SavedObjectsPageObject } from './management/saved_objects_page';
 import { LegacyDataTableVisPageObject } from './legacy/data_table_vis';
+import { IndexPatternFieldEditorPageObject } from './management/indexpattern_field_editor_page';
 
 export const pageObjects = {
   common: CommonPageObject,
@@ -56,4 +57,5 @@ export const pageObjects = {
   tagCloud: TagCloudPageObject,
   vegaChart: VegaChartPageObject,
   savedObjects: SavedObjectsPageObject,
+  indexPatternFieldEditorObjects: IndexPatternFieldEditorPageObject,
 };
