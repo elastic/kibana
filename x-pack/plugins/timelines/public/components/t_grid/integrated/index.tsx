@@ -302,14 +302,14 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
             >
               {HeaderSectionContent}
             </HeaderSection>
-            <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
+
             <EventsContainerLoading
               data-timeline-id={id}
               data-test-subj={`events-container-loading-${loading}`}
             >
               <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
                 <UpdatedFlexItem grow={false} show={!loading}>
-                  <LastUpdatedAt updatedAt={updatedAt} />
+                  <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
                 </UpdatedFlexItem>
               </EuiFlexGroup>
               {tableView === 'gridView' && (

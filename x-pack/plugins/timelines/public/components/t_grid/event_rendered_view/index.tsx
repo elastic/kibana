@@ -6,9 +6,11 @@
  */
 import { CriteriaWithPagination, EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALERT_RULE_ID, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { ALERT_RULE_ID, ALERT_RULE_NAME, TIMESTAMP } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
+import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
+import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 
 import type { ControlColumnProps, RowRenderer, TimelineItem } from '../../../../common';
 import { RuleName } from '../../rule_name';
@@ -22,6 +24,13 @@ interface EventRenderedViewProps {
   pageSizeOptions: number[];
   rowRenderers: RowRenderer[];
   totalItemCount: number;
+}
+export const PreferenceFormattedDate = React.memo<{ value: Date }>(
+  /* eslint-disable-next-line react-hooks/rules-of-hooks */
+  ({ value }) => {
+    const tz = useUiSetting<string>('dateFormat:tz');
+    const dateFormat = useUiSetting<string>('dateFormat');
+    return (<>{moment.tz(value, tz).format(dateFormat)}</>);
 }
 
 const EventRenderedViewComponent = ({
@@ -51,6 +60,12 @@ const EventRenderedViewComponent = ({
         }),
         truncateText: false,
         hideForMobile: false,
+        // eslint-disable-next-line react/display-name
+        render: (name, item) => {
+          console.log(name, item);
+          const timestamp = get(item, `ecs.${TIMESTAMP}`);
+          return <PreferenceFormattedDate value={timestamp} />;
+        },
       },
       {
         field: `ecs.${ALERT_RULE_NAME}`,
