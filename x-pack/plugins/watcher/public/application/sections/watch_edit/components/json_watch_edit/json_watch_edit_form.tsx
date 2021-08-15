@@ -177,6 +177,10 @@ export const JsonWatchEditForm = () => {
                 defaultMessage: 'Code editor',
               }
             )}
+            setOptions={{
+              showLineNumbers: false,
+              tabSize: 2,
+            }}
             value={xJson}
             onChange={(xjson: string) => {
               if (validationError) {
