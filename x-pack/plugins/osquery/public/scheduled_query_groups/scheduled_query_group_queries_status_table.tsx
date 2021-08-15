@@ -100,6 +100,7 @@ function getLensAttributes(actionId: string): TypedLensByValueInput['attributes'
     shape: 'pie',
     layers: [
       {
+        layerType: 'data',
         legendDisplay: 'default',
         nestedLegend: false,
         layerId: 'layer1',
@@ -292,15 +293,24 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
 
 export const ViewResultsInDiscoverAction = React.memo(ViewResultsInDiscoverActionComponent);
 
-const ScheduledQueryExpandedContent = ({ actionId }) => (
-  <EuiFlexGroup direction="column">
-    <EuiFlexItem>
-      <ScheduledQueryErrorsTable actionId={actionId} />
-    </EuiFlexItem>
-  </EuiFlexGroup>
+interface ScheduledQueryExpandedContentProps {
+  actionId: string;
+  interval: string;
+}
+
+const ScheduledQueryExpandedContent = React.memo<ScheduledQueryExpandedContentProps>(
+  ({ actionId, interval }) => (
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <ScheduledQueryErrorsTable actionId={actionId} interval={interval} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  )
 );
 
-const ScheduledQueryLastResults = ({ queryId, interval, toggleErrors, expanded }) => {
+ScheduledQueryExpandedContent.displayName = 'ScheduledQueryExpandedContent';
+
+const ScheduledQueryLastResults = ({ actionId, queryId, interval, toggleErrors, expanded }) => {
   const data = useKibana().services.data;
 
   const { data: lastResultsData, isFetched } = useQuery(
@@ -329,11 +339,11 @@ const ScheduledQueryLastResults = ({ queryId, interval, toggleErrors, expanded }
               disabled: false,
               negate: false,
               key: 'action_id',
-              value: queryId,
+              value: actionId,
             },
             query: {
               match_phrase: {
-                action_id: queryId,
+                action_id: actionId,
               },
             },
           },
@@ -349,44 +359,40 @@ const ScheduledQueryLastResults = ({ queryId, interval, toggleErrors, expanded }
   );
 
   const { data: errorsData, isFetched: errorsFetched } = useQuery(
-    ['scheduledQueryErrors', { queryId, interval }],
+    ['scheduledQueryErrors', { actionId, interval }],
     async () => {
       const indexPattern = await data.indexPatterns.find('logs-*');
-      console.error('indexPattern', indexPattern, queryId);
+      console.error('indexPattern', indexPattern, actionId);
       const searchSource = await data.search.searchSource.create({
         index: indexPattern[0],
         query: {
+          // @ts-expect-error update types
           bool: {
-            must: [],
             filter: [
               {
-                bool: {
-                  should: [
-                    // {
-                    //   match_phrase: {
-                    //     message: queryId,
-                    //   },
-                    // },
-                    {
-                      match_phrase: {
-                        message: 'Error',
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
+                match_phrase: {
+                  message: 'Error',
+                },
+              },
+              {
+                term: {
+                  'data_stream.dataset': 'elastic_agent.osquerybeat',
+                },
+              },
+              {
+                match_phrase: {
+                  message: actionId,
                 },
               },
               {
                 range: {
                   '@timestamp': {
-                    gte: `now-${interval * 20000}s`,
+                    gte: `now-${interval * 2}s`,
                     lte: 'now',
                   },
                 },
               },
             ],
-            should: [],
-            must_not: [],
           },
         },
         size: 0,
@@ -416,7 +422,9 @@ const ScheduledQueryLastResults = ({ queryId, interval, toggleErrors, expanded }
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiNotificationBadge>{lastResultsData?.doc_count ?? 0}</EuiNotificationBadge>
+            <EuiNotificationBadge color="subdued">
+              {lastResultsData?.doc_count ?? 0}
+            </EuiNotificationBadge>
           </EuiFlexItem>
           <EuiFlexItem>{'Documents'}</EuiFlexItem>
         </EuiFlexGroup>
@@ -425,19 +433,23 @@ const ScheduledQueryLastResults = ({ queryId, interval, toggleErrors, expanded }
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiNotificationBadge>{lastResultsData?.unique_agents.value}</EuiNotificationBadge>
+            <EuiNotificationBadge color="subdued">
+              {lastResultsData?.unique_agents.value ?? 0}
+            </EuiNotificationBadge>
           </EuiFlexItem>
-          <EuiFlexItem>{'Agents replied'}</EuiFlexItem>
+          <EuiFlexItem>{'Agents'}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiNotificationBadge>{errorsData?.rawResponse.hits.total ?? 0}</EuiNotificationBadge>
+            <EuiNotificationBadge color={errorsData?.rawResponse.hits.total ? 'accent' : 'subdued'}>
+              {errorsData?.rawResponse.hits.total ?? 0}
+            </EuiNotificationBadge>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>{'Agents with errors'}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{'Errors'}</EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
@@ -453,7 +465,7 @@ const ScheduledQueryLastResults = ({ queryId, interval, toggleErrors, expanded }
   );
 };
 
-const getPackActionId = (actionId, packName) => `pack_${packName}_${actionId}`;
+const getPackActionId = (actionId: string, packName: string) => `pack_${packName}_${actionId}`;
 
 interface ScheduledQueryGroupQueriesStatusTableProps {
   data: OsqueryManagerPackagePolicyInputStream[];
@@ -499,19 +511,20 @@ const ScheduledQueryGroupQueriesStatusTableComponent: React.FC<ScheduledQueryGro
       <>
         <ScheduledQueryLastResults
           queryId={item.vars.id.value}
+          actionId={getPackActionId(item.vars.id.value, scheduledQueryGroupName)}
           interval={item.vars?.interval.value}
           toggleErrors={toggleErrors}
           expanded={!!itemIdToExpandedRowMap[item.id]}
         />
       </>
     ),
-    [itemIdToExpandedRowMap, toggleErrors]
+    [itemIdToExpandedRowMap, scheduledQueryGroupName, toggleErrors]
   );
 
   const renderDiscoverResultsAction = useCallback(
     (item) => (
       <ViewResultsInDiscoverAction
-        actionId={item.vars?.id.value}
+        actionId={getPackActionId(item.vars?.id.value, scheduledQueryGroupName)}
         buttonType={ViewResultsActionButtonType.icon}
       />
     ),

@@ -5,27 +5,78 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { i18n } from '@kbn/i18n';
-import { EuiInMemoryTable, EuiCodeBlock } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiInMemoryTable, EuiCodeBlock, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { encode } from 'rison-node';
+import { stringify } from 'querystring';
 
 import { useQuery } from 'react-query';
+import { timeStamp } from 'console';
+import { SortDirection } from '../../../../../src/plugins/data/public';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { AgentIdToName } from '../agents/agent_id_to_name';
-import { useActionResults } from './use_action_results';
-import { useAllResults } from '../results/use_all_results';
-import { Direction } from '../../common/search_strategy';
+
+const VIEW_IN_LOGS = i18n.translate(
+  'xpack.osquery.scheduledQueryGroup.queriesTable.viewLogsErrorsActionAriaLabel',
+  {
+    defaultMessage: 'View in Logs',
+  }
+);
+
+interface ViewErrorsInLogsActionProps {
+  actionId: string;
+  agentId: string;
+  timestamp?: string;
+}
+
+const ViewErrorsInLogsActionComponent: React.FC<ViewErrorsInLogsActionProps> = ({
+  actionId,
+  agentId,
+  timestamp,
+}) => {
+  const navigateToApp = useKibana().services.application.navigateToApp;
+
+  const handleClick = useCallback(
+    (event) => {
+      const openInNewTab = !(!isModifiedEvent(event) && isLeftClickEvent(event));
+
+      event.preventDefault();
+      const queryString = stringify({
+        logPosition: encode({
+          end: timestamp,
+          streamLive: false,
+        }),
+        logFilter: encode({
+          expression: `elastic_agent.id:${agentId} and (data_stream.dataset:elastic_agent or data_stream.dataset:elastic_agent.osquerybeat) and "${actionId}"`,
+          kind: 'kuery',
+        }),
+      });
+
+      navigateToApp('logs', {
+        path: `stream?${queryString}`,
+        openInNewTab,
+      });
+    },
+    [actionId, agentId, navigateToApp, timestamp]
+  );
+
+  return (
+    <EuiToolTip content={VIEW_IN_LOGS}>
+      <EuiButtonIcon iconType="search" onClick={handleClick} aria-label={VIEW_IN_LOGS} />
+    </EuiToolTip>
+  );
+};
+
+export const ViewErrorsInLogsAction = React.memo(ViewErrorsInLogsActionComponent);
 
 interface ScheduledQueryErrorsTableProps {
   actionId: string;
-  expirationDate?: string;
-  agentIds?: string[];
+  interval: string;
 }
 
 const renderErrorMessage = (error: string) => (
-  <EuiCodeBlock language="shell" fontSize="s" paddingSize="none" transparentBackground>
+  <EuiCodeBlock language="prolog" fontSize="s" paddingSize="none" transparentBackground>
     {error}
   </EuiCodeBlock>
 );
@@ -35,8 +86,6 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
   interval,
 }) => {
   const data = useKibana().services.data;
-
-  console.error('actionId', actionId);
 
   const { data: lastErrosData, isFetched } = useQuery(
     ['scheduledQueryErrors', { actionId, interval }],
@@ -48,17 +97,23 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
         aggs: {
           unique_agents: { cardinality: { field: 'agent.id' } },
         },
+        sort: [
+          {
+            '@timestamp': SortDirection.desc,
+          },
+        ],
         query: {
+          // @ts-expect-error update types
           bool: {
             filter: [
               {
-                term: {
-                  'log.logger': 'osquerybeat',
+                match_phrase: {
+                  message: 'Error',
                 },
               },
               {
                 term: {
-                  'log.level': 'error',
+                  'data_stream.dataset': 'elastic_agent.osquerybeat',
                 },
               },
               {
@@ -69,7 +124,7 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
               {
                 range: {
                   '@timestamp': {
-                    gte: `now-${(interval ?? 60) * 2}s`,
+                    gte: `now-${interval * 2}s`,
                     lte: 'now',
                   },
                 },
@@ -77,7 +132,7 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
             ],
           },
         },
-        size: 100,
+        size: 1000,
       });
 
       const responseData = await searchSource.fetch$().toPromise();
@@ -98,28 +153,26 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
     return <AgentIdToName agentId={agentId} />;
   }, []);
 
-  // const renderRowsColumn = useCallback(
-  //   (_, item) => {
-  //     if (!logsResults) return '-';
-  //     const agentId = item.fields.agent_id[0];
-
-  //     return (
-  //       // @ts-expect-error update types
-  //       logsResults?.rawResponse?.aggregations?.count_by_agent_id?.buckets?.find(
-  //         // @ts-expect-error update types
-  //         (bucket) => bucket.key === agentId
-  //       )?.doc_count ?? '-'
-  //     );
-  //   },
-  //   [logsResults]
-  // );
+  const renderLogsErrorsAction = useCallback(
+    (item) => {
+      console.error('iteeee', item);
+      return (
+        <ViewErrorsInLogsAction
+          actionId={actionId}
+          agentId={item?.fields['elastic_agent.id'][0]}
+          timestamp={item?.fields['event.ingested'][0]}
+        />
+      );
+    },
+    [actionId]
+  );
 
   const columns = useMemo(
     () => [
       {
         field: 'fields.@timestamp',
         name: '@timestamp',
-        width: '15%',
+        width: '220px',
       },
       {
         field: 'fields["elastic_agent.id"][0]',
@@ -137,11 +190,16 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
         }),
         render: renderErrorMessage,
       },
+      {
+        width: '90px',
+        actions: [
+          {
+            render: renderLogsErrorsAction,
+          },
+        ],
+      },
     ],
-    [
-      renderAgentIdColumn,
-      //  renderRowsColumn
-    ]
+    [renderAgentIdColumn, renderLogsErrorsAction]
   );
 
   const pagination = useMemo(
