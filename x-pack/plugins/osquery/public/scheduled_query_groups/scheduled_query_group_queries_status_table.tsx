@@ -14,17 +14,13 @@ import {
   EuiButtonIcon,
   EuiToolTip,
   EuiLoadingSpinner,
-  EuiIcon,
-  EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiNotificationBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { useQuery } from 'react-query';
 
-import moment from 'moment';
 import {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
@@ -32,7 +28,6 @@ import {
 } from '../../../lens/public';
 import { FilterStateStore } from '../../../../../src/plugins/data/common';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
-import { PlatformIcons } from './queries/platforms';
 import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
 import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';
 
@@ -295,7 +290,7 @@ export const ViewResultsInDiscoverAction = React.memo(ViewResultsInDiscoverActio
 
 interface ScheduledQueryExpandedContentProps {
   actionId: string;
-  interval: string;
+  interval: number;
 }
 
 const ScheduledQueryExpandedContent = React.memo<ScheduledQueryExpandedContentProps>(
@@ -310,7 +305,21 @@ const ScheduledQueryExpandedContent = React.memo<ScheduledQueryExpandedContentPr
 
 ScheduledQueryExpandedContent.displayName = 'ScheduledQueryExpandedContent';
 
-const ScheduledQueryLastResults = ({ actionId, queryId, interval, toggleErrors, expanded }) => {
+interface ScheduledQueryLastResultsProps {
+  actionId: string;
+  queryId: string;
+  interval: number;
+  toggleErrors: (payload: { queryId: string; interval: number }) => void;
+  expanded: boolean;
+}
+
+const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
+  actionId,
+  queryId,
+  interval,
+  toggleErrors,
+  expanded,
+}) => {
   const data = useKibana().services.data;
 
   const { data: lastResultsData, isFetched } = useQuery(
@@ -352,8 +361,7 @@ const ScheduledQueryLastResults = ({ actionId, queryId, interval, toggleErrors, 
 
       const responseData = await searchSource.fetch$().toPromise();
 
-      console.error('responseData', responseData);
-
+      // @ts-expect-error update types
       return responseData.rawResponse.aggregations?.runs?.buckets[0];
     }
   );
@@ -362,7 +370,6 @@ const ScheduledQueryLastResults = ({ actionId, queryId, interval, toggleErrors, 
     ['scheduledQueryErrors', { actionId, interval }],
     async () => {
       const indexPattern = await data.indexPatterns.find('logs-*');
-      console.error('indexPattern', indexPattern, actionId);
       const searchSource = await data.search.searchSource.create({
         index: indexPattern[0],
         query: {
@@ -400,13 +407,15 @@ const ScheduledQueryLastResults = ({ actionId, queryId, interval, toggleErrors, 
 
       const responseData = await searchSource.fetch$().toPromise();
 
-      console.error('responseData', responseData);
-
       return responseData;
     }
   );
 
-  const handleErrorsToggle = useCallback(() => toggleErrors(queryId), [queryId, toggleErrors]);
+  const handleErrorsToggle = useCallback(() => toggleErrors({ queryId, interval }), [
+    queryId,
+    interval,
+    toggleErrors,
+  ]);
 
   if (!isFetched || !errorsFetched) {
     return <EuiLoadingSpinner />;
@@ -476,9 +485,9 @@ const ScheduledQueryGroupQueriesStatusTableComponent: React.FC<ScheduledQueryGro
   data,
   scheduledQueryGroupName,
 }) => {
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState({});
-
-  console.error('data', scheduledQueryGroupName, data);
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
+    Record<string, ReturnType<typeof ScheduledQueryExpandedContent>>
+  >({});
 
   const renderQueryColumn = useCallback(
     (query: string) => (
@@ -490,7 +499,7 @@ const ScheduledQueryGroupQueriesStatusTableComponent: React.FC<ScheduledQueryGro
   );
 
   const toggleErrors = useCallback(
-    (queryId: string) => {
+    ({ queryId, interval }: { queryId: string; interval: number }) => {
       const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
       if (itemIdToExpandedRowMapValues[queryId]) {
         delete itemIdToExpandedRowMapValues[queryId];
@@ -498,6 +507,7 @@ const ScheduledQueryGroupQueriesStatusTableComponent: React.FC<ScheduledQueryGro
         itemIdToExpandedRowMapValues[queryId] = (
           <ScheduledQueryExpandedContent
             actionId={getPackActionId(queryId, scheduledQueryGroupName)}
+            interval={interval}
           />
         );
       }
@@ -528,7 +538,7 @@ const ScheduledQueryGroupQueriesStatusTableComponent: React.FC<ScheduledQueryGro
         buttonType={ViewResultsActionButtonType.icon}
       />
     ),
-    []
+    [scheduledQueryGroupName]
   );
 
   const renderLensResultsAction = useCallback(

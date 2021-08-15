@@ -12,7 +12,6 @@ import { encode } from 'rison-node';
 import { stringify } from 'querystring';
 
 import { useQuery } from 'react-query';
-import { timeStamp } from 'console';
 import { SortDirection } from '../../../../../src/plugins/data/public';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { AgentIdToName } from '../agents/agent_id_to_name';
@@ -72,7 +71,7 @@ export const ViewErrorsInLogsAction = React.memo(ViewErrorsInLogsActionComponent
 
 interface ScheduledQueryErrorsTableProps {
   actionId: string;
-  interval: string;
+  interval: number;
 }
 
 const renderErrorMessage = (error: string) => (
@@ -87,7 +86,7 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
 }) => {
   const data = useKibana().services.data;
 
-  const { data: lastErrosData, isFetched } = useQuery(
+  const { data: lastErrosData } = useQuery(
     ['scheduledQueryErrors', { actionId, interval }],
     async () => {
       const indexPattern = await data.indexPatterns.find('logs-*');
@@ -137,8 +136,6 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
 
       const responseData = await searchSource.fetch$().toPromise();
 
-      console.error('lastErrosData', responseData);
-
       return responseData.rawResponse.hits;
     }
   );
@@ -148,22 +145,16 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
   // @ts-expect-error update types
   const [pageSize, setPageSize] = useState(10);
 
-  const renderAgentIdColumn = useCallback((agentId, itmee) => {
-    console.error('aaaa', agentId, itmee);
-    return <AgentIdToName agentId={agentId} />;
-  }, []);
+  const renderAgentIdColumn = useCallback((agentId) => <AgentIdToName agentId={agentId} />, []);
 
   const renderLogsErrorsAction = useCallback(
-    (item) => {
-      console.error('iteeee', item);
-      return (
-        <ViewErrorsInLogsAction
-          actionId={actionId}
-          agentId={item?.fields['elastic_agent.id'][0]}
-          timestamp={item?.fields['event.ingested'][0]}
-        />
-      );
-    },
+    (item) => (
+      <ViewErrorsInLogsAction
+        actionId={actionId}
+        agentId={item?.fields['elastic_agent.id'][0]}
+        timestamp={item?.fields['event.ingested'][0]}
+      />
+    ),
     [actionId]
   );
 
@@ -209,8 +200,6 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
     }),
     []
   );
-
-  console.error('lastErrosData', lastErrosData);
 
   return lastErrosData?.hits.length ? (
     <EuiInMemoryTable items={lastErrosData.hits} columns={columns} pagination={pagination} />

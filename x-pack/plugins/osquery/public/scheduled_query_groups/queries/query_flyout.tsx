@@ -61,6 +61,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     handleSubmit: (payload, isValid) =>
       new Promise((resolve) => {
         if (isValid) {
+          // @ts-expect-error update types
           onSave(payload);
           onClose();
         }
