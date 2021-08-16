@@ -26,7 +26,7 @@ import { getCommands } from '../../../tutorial/config_agent/commands/get_command
 import { CopyCommands } from '../../../tutorial/config_agent/copy_commands';
 import { replaceTemplateStrings } from './replace_template_strings';
 
-function AccordianButtonContent({
+function AccordionButtonContent({
   agentName,
   title,
 }: {
@@ -116,7 +116,7 @@ export function AgentInstructionsAccordion({
     <EuiAccordion
       id={agentName}
       buttonContent={
-        <AccordianButtonContent agentName={agentName} title={title} />
+        <AccordionButtonContent agentName={agentName} title={title} />
       }
     >
       <EuiSpacer />
