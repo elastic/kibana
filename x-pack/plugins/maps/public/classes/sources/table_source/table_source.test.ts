@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Query } from 'src/plugins/data/common';
 import { TableSource } from './table_source';
 import { FIELD_ORIGIN } from '../../../../common/constants';
 import {

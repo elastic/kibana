@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { AppLeaveAction, AppMountParameters } from 'kibana/public';
 import { Adapters } from 'src/plugins/embeddable/public';
 import { Subscription } from 'rxjs';
-import type { Query } from 'src/plugins/data/common';
+import type { Query, Filter, TimeRange, IndexPattern } from 'src/plugins/data/common';
 import {
   getData,
   getCoreChrome,
@@ -31,10 +31,6 @@ import {
 } from '../url_state';
 import {
   esFilters,
-  Filter,
-  Query,
-  TimeRange,
-  IndexPattern,
   SavedQuery,
   QueryStateChange,
   QueryState,

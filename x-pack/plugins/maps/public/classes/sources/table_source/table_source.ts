@@ -19,7 +19,6 @@ import { Adapters } from '../../../../../../../src/plugins/inspector/common/adap
 import { ITermJoinSource } from '../term_join_source';
 import { BucketProperties, PropertiesMap } from '../../../../common/elasticsearch_util';
 import { IField } from '../../fields/field';
-import { Query } from '../../../../../../../src/plugins/data/common/query';
 import {
   AbstractVectorSource,
   LayerDataFilters,
