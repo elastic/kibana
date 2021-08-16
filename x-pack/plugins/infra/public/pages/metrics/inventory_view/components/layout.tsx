@@ -24,7 +24,6 @@ import { InfraFormatterType } from '../../../../lib/lib';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { Toolbar } from './toolbars/toolbar';
 import { ViewSwitcher } from './waffle/view_switcher';
-import { IntervalLabel } from './waffle/interval_label';
 import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';
 import { createLegend } from '../lib/create_legend';
 import { useWaffleViewState } from '../hooks/use_waffle_view_state';
@@ -151,9 +150,6 @@ export const Layout = React.memo(
                           gutterSize="m"
                         >
                           <Toolbar nodeType={nodeType} currentTime={currentTime} />
-                          <EuiFlexItem grow={false} className="eui-hideFor--s eui-hideFor--xs">
-                            <IntervalLabel intervalAsString={intervalAsString} />
-                          </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <ViewSwitcher view={view} onChange={changeView} />
                           </EuiFlexItem>
