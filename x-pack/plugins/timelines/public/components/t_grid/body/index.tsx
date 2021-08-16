@@ -88,7 +88,7 @@ interface OwnProps {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   tabType: TimelineTabs;
-  tableView: ViewSelection;
+  tableView?: ViewSelection;
   leadingControlColumns?: ControlColumnProps[];
   loadPage: (newActivePage: number) => void;
   trailingControlColumns?: ControlColumnProps[];
@@ -255,7 +255,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     rowRenderers,
     sort,
     tabType,
-    tableView,
+    tableView = 'gridView',
     totalPages,
     totalItems,
     filterStatus,

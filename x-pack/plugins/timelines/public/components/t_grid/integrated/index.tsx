@@ -47,20 +47,17 @@ import {
 } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
-import { HeaderSection } from '../header_section';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem } from '../styles';
 import * as i18n from '../translations';
-import { ExitFullScreen } from '../../exit_full_screen';
 import { Sort } from '../body/sort';
-import { InspectButtonContainer } from '../../inspect';
+import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
 
 const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
-const COMPACT_HEADER_HEIGHT = 36; // px
 
 const TitleText = styled.span`
   margin-right: 12px;
@@ -79,10 +76,6 @@ const StyledEuiPanel = styled(EuiPanel)<{ $isFullScreen: boolean }>`
       padding-top: 0;
       padding-bottom: 0;
   `}
-`;
-
-const TitleFlexGroup = styled(EuiFlexGroup)`
-  margin-top: 8px;
 `;
 
 const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
@@ -105,14 +98,6 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
   overflow: auto;
 `;
 
-/**
- * Hides stateful headerFilterGroup implementations, but prevents the component
- * from being unmounted, to preserve the state of the component
- */
-const HeaderFilterGroupWrapper = styled.header<{ show: boolean }>`
-  ${({ show }) => (show ? '' : 'visibility: hidden;')}
-`;
-
 const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
 export interface TGridIntegratedProps {
@@ -126,7 +111,6 @@ export interface TGridIntegratedProps {
   entityType: EntityType;
   filters: Filter[];
   globalFullScreen: boolean;
-  headerFilterGroup?: React.ReactNode;
   filterStatus?: AlertStatus;
   height?: number;
   id: TimelineId;
@@ -163,7 +147,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   entityType,
   filters,
   globalFullScreen,
-  headerFilterGroup,
   filterStatus,
   id,
   indexNames,
@@ -203,17 +186,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   }, [dispatch, id, isQueryLoading]);
 
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
-  const titleWithExitFullScreen = useMemo(
-    () => (
-      <TitleFlexGroup alignItems="center" data-test-subj="title-flex-group" gutterSize="none">
-        <EuiFlexItem grow={false}>{justTitle}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ExitFullScreen fullScreen={globalFullScreen} setFullScreen={setGlobalFullScreen} />
-        </EuiFlexItem>
-      </TitleFlexGroup>
-    ),
-    [globalFullScreen, justTitle, setGlobalFullScreen]
-  );
 
   const combinedQueries = buildCombinedQuery({
     config: esQuery.getEsQueryConfig(uiSettings),
@@ -295,19 +267,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     events,
   ]);
 
-  const HeaderSectionContent = useMemo(
-    () =>
-      headerFilterGroup && (
-        <HeaderFilterGroupWrapper
-          data-test-subj="header-filter-group-wrapper"
-          show={!resolverIsShowing(graphEventId)}
-        >
-          {headerFilterGroup}
-        </HeaderFilterGroupWrapper>
-      ),
-    [headerFilterGroup, graphEventId]
-  );
-
   useEffect(() => {
     setIsQueryLoading(loading);
   }, [loading]);
@@ -319,22 +278,14 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
         {canQueryTimeline ? (
           <>
-            <HeaderSection
-              id={!resolverIsShowing(graphEventId) ? id : undefined}
-              inspect={inspect}
-              loading={loading}
-              height={
-                headerFilterGroup == null ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT
-              }
-              title={globalFullScreen ? titleWithExitFullScreen : justTitle}
-            >
-              {HeaderSectionContent}
-            </HeaderSection>
             <EventsContainerLoading
               data-timeline-id={id}
               data-test-subj={`events-container-loading-${loading}`}
             >
               <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" alignItems="baseline">
+                <UpdatedFlexItem grow={false} show={!loading}>
+                  <InspectButton title={justTitle} inspect={inspect} loading={loading} />
+                </UpdatedFlexItem>
                 <UpdatedFlexItem grow={false} show={!loading}>
                   {!resolverIsShowing(graphEventId) && additionalFilters}
                 </UpdatedFlexItem>
