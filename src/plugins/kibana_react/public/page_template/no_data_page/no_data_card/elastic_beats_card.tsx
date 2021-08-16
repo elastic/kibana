@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @elastic/eui/href-or-on-click */
-
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
@@ -21,7 +19,7 @@ export type ElasticBeatsCardProps = NoDataPageActions & {
 
 export const ElasticBeatsCard: FunctionComponent<ElasticBeatsCardProps> = ({
   recommended,
-  href = 'app/home#/tutorial',
+  href,
   button,
   solution,
   ...cardRest
@@ -37,7 +35,9 @@ export const ElasticBeatsCard: FunctionComponent<ElasticBeatsCardProps> = ({
     typeof button !== 'string' && typeof button !== 'undefined' ? (
       button
     ) : (
-      <EuiButton href={href} onClick={cardRest?.onClick} target={cardRest?.target} fill>
+      // The href and/or onClick are attached to the whole Card, so the button is just for show.
+      // Do not add the behavior here too or else it will propogate through
+      <EuiButton fill>
         {button ||
           i18n.translate('kibana-react.noDataPage.elasticBeatsCard.buttonLabel', {
             defaultMessage: 'Install Beats for {solution}',
@@ -49,7 +49,7 @@ export const ElasticBeatsCard: FunctionComponent<ElasticBeatsCardProps> = ({
   return (
     <EuiCard
       paddingSize="l"
-      href={href}
+      href={href ?? addBasePath('/app/home#/tutorial_directory')}
       title={i18n.translate('kibana-react.noDataPage.elasticBeatsCard.title', {
         defaultMessage: 'Add data with Beats',
       })}

@@ -7,12 +7,11 @@ exports[`ElasticBeatsCard props button 1`] = `
   footer={
     <EuiButton
       fill={true}
-      href="app/home#/tutorial"
     >
       Button
     </EuiButton>
   }
-  href="app/home#/tutorial"
+  href="/app/home#/tutorial_directory"
   image="/plugins/kibanaReact/assets/elastic_beats_card_light.svg"
   paddingSize="l"
   title="Add data with Beats"
@@ -26,7 +25,6 @@ exports[`ElasticBeatsCard props href 1`] = `
   footer={
     <EuiButton
       fill={true}
-      href="#"
     >
       Button
     </EuiButton>
@@ -46,12 +44,11 @@ exports[`ElasticBeatsCard props recommended 1`] = `
   footer={
     <EuiButton
       fill={true}
-      href="app/home#/tutorial"
     >
       Install Beats for Solution
     </EuiButton>
   }
-  href="app/home#/tutorial"
+  href="/app/home#/tutorial_directory"
   image="/plugins/kibanaReact/assets/elastic_beats_card_light.svg"
   paddingSize="l"
   title="Add data with Beats"
@@ -65,12 +62,11 @@ exports[`ElasticBeatsCard renders 1`] = `
   footer={
     <EuiButton
       fill={true}
-      href="app/home#/tutorial"
     >
       Install Beats for Solution
     </EuiButton>
   }
-  href="app/home#/tutorial"
+  href="/app/home#/tutorial_directory"
   image="/plugins/kibanaReact/assets/elastic_beats_card_light.svg"
   paddingSize="l"
   title="Add data with Beats"

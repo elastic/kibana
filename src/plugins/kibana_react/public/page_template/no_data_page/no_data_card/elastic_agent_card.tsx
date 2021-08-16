@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @elastic/eui/href-or-on-click */
-
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
@@ -24,8 +22,8 @@ export type ElasticAgentCardProps = NoDataPageActions & {
  */
 export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
   solution,
-  recommended = true,
-  href = 'app/integrations/browse',
+  recommended,
+  href,
   button,
   ...cardRest
 }) => {
@@ -39,7 +37,9 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     typeof button !== 'string' && typeof button !== 'undefined' ? (
       button
     ) : (
-      <EuiButton href={href} onClick={cardRest?.onClick} target={cardRest?.target} fill>
+      // The href and/or onClick are attached to the whole Card, so the button is just for show.
+      // Do not add the behavior here too or else it will propogate through
+      <EuiButton fill>
         {button ||
           i18n.translate('kibana-react.noDataPage.elasticAgentCard.buttonLabel', {
             defaultMessage: 'Find an integration for {solution}',
@@ -51,7 +51,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
   return (
     <EuiCard
       paddingSize="l"
-      href={href}
+      href={href ?? addBasePath('/app/integrations/browse')}
       title={i18n.translate('kibana-react.noDataPage.elasticAgentCard.title', {
         defaultMessage: 'Add a {solution} integration',
         values: { solution },
