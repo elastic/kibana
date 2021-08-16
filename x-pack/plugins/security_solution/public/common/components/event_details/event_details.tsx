@@ -36,6 +36,7 @@ import {
   timelineDataToEnrichment,
 } from './cti_details/helpers';
 import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
+import { Reason } from './reason';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -137,6 +138,7 @@ const EventDetailsComponent: React.FC<Props> = ({
             name: i18n.OVERVIEW,
             content: (
               <>
+                <Reason eventId={id} data={data} />
                 <AlertSummaryView
                   {...{
                     data,
