@@ -47,7 +47,6 @@ describe('alerts default_config', () => {
             type: 'exists',
             value: 'exists',
           },
-          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
           exists: {
             field: 'signal.rule.threat_mapping',
           },

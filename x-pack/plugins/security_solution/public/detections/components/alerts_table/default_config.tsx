@@ -83,7 +83,6 @@ export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): 
             key: 'signal.rule.building_block_type',
             value: 'exists',
           },
-          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
           exists: { field: 'signal.rule.building_block_type' },
         },
       ];
@@ -100,7 +99,6 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
             type: 'exists',
             value: 'exists',
           },
-          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
           exists: { field: 'signal.rule.threat_mapping' },
         },
       ]
@@ -175,7 +173,6 @@ export const buildShowBuildingBlockFilterRuleRegistry = (
             key: 'kibana.rule.building_block_type',
             value: 'exists',
           },
-          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
           exists: { field: 'kibana.rule.building_block_type' },
         },
       ];
