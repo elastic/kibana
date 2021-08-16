@@ -53,7 +53,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   timelineId,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
-
   const ruleId = get(0, ecsRowData?.signal?.rule?.id);
   const ruleName = get(0, ecsRowData?.signal?.rule?.name);
 
@@ -116,6 +115,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const { actionItems } = useAlertsActions({
     alertStatus,
     eventId: ecsRowData?._id,
+    indexName: ecsRowData?._index ?? '',
     timelineId,
     closePopover,
   });
