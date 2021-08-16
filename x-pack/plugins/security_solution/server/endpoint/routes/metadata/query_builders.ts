@@ -166,6 +166,28 @@ export function getESQueryHostMetadataByID(agentID: string): estypes.SearchReque
   };
 }
 
+export function getESQueryHostMetadataByFleetAgentIds(
+  fleetAgentIds: string[]
+): estypes.SearchRequest {
+  return {
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [{ terms: { 'elastic.agent.id': fleetAgentIds } }],
+              },
+            },
+          ],
+        },
+      },
+      sort: MetadataSortMethod,
+    },
+    index: metadataCurrentIndexPattern,
+  };
+}
+
 export function getESQueryHostMetadataByIDs(agentIDs: string[]) {
   return {
     body: {
