@@ -7,7 +7,6 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { getIndexExists } from '@kbn/securitysolution-es-utils';
-import { PublicContract } from '@kbn/utility-types';
 
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import {
@@ -31,7 +30,7 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '../utils';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
-import { RuleDataClient } from '../../../../../../rule_registry/server';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { KibanaRequest, KibanaResponseFactory } from '../../../../../../../../src/core/server';
 import { CreateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 import { isInternalRACRuleCreate, isInternalRuleCreate } from '../../schemas/rule_schemas';
@@ -39,7 +38,7 @@ import { isInternalRACRuleCreate, isInternalRuleCreate } from '../../schemas/rul
 export const createRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  ruleDataClient?: PublicContract<RuleDataClient> | null
+  ruleDataClient?: IRuleDataClient | null
 ) => {
   const isRuleRegistryEnabled = ruleDataClient != null;
   const handleRequestFactory = <TSchema extends CreateRulesSchema>() => async (
