@@ -243,7 +243,7 @@ describe('<CustomFields />', () => {
     const urlError = getByText('URL is required');
     const monitorIntervalError = getByText('Monitor interval is required');
     const maxRedirectsError = getByText('Max redirects must be 0 or greater');
-    const timeoutError = getByText('Timeout must be less than 0');
+    const timeoutError = getByText('Timeout must be greater than or equal to 0');
 
     expect(urlError).toBeInTheDocument();
     expect(monitorIntervalError).toBeInTheDocument();
