@@ -11,10 +11,13 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
-  EuiButtonGroup,
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiPopover,
   EuiSelectable,
   EuiSpacer,
   EuiSwitch,
@@ -38,6 +41,7 @@ export const DeduplicationPanel: React.FC = () => {
   const { submitDeduplicationUpdate } = useActions(CrawlerSingleDomainLogic);
 
   const [showAllFields, setShowAllFields] = useState(true);
+  const [showAllFieldsPopover, setShowAllFieldsPopover] = useState(false);
 
   if (!domain) {
     return null;
@@ -109,53 +113,15 @@ export const DeduplicationPanel: React.FC = () => {
         </p>
       </EuiText>
       <EuiSpacer size="l" />
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
-          <EuiSwitch
-            label="Prevent duplicate documents"
-            checked={deduplicationEnabled}
-            onChange={() =>
-              deduplicationEnabled
-                ? submitDeduplicationUpdate(domain, { enabled: false, fields: [] })
-                : submitDeduplicationUpdate(domain, { enabled: true })
-            }
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            options={[
-              {
-                id: 'all_fields',
-                label: i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.crawler.deduplicationPanel.allFieldsLabel',
-                  {
-                    defaultMessage: 'All fields',
-                  }
-                ),
-              },
-              {
-                id: 'selected_fields',
-                label: i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.crawler.deduplicationPanel.selectedFieldsLabel',
-                  {
-                    defaultMessage: 'Selected fields',
-                  }
-                ),
-              },
-            ]}
-            legend={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.deduplicationPanel.showAllFieldsToggleDescription',
-              {
-                defaultMessage: 'Select which schema fields to display in the list.',
-              }
-            )}
-            idSelected={showAllFields ? 'all_fields' : 'selected_fields'}
-            onChange={() => setShowAllFields(!showAllFields)}
-            color="primary"
-            buttonSize="s"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiSwitch
+        label="Prevent duplicate documents"
+        checked={deduplicationEnabled}
+        onChange={() =>
+          deduplicationEnabled
+            ? submitDeduplicationUpdate(domain, { enabled: false, fields: [] })
+            : submitDeduplicationUpdate(domain, { enabled: true })
+        }
+      />
       <EuiFlexGroup>
         <EuiFlexItem>
           <div className="selectableWrapper">
@@ -167,7 +133,76 @@ export const DeduplicationPanel: React.FC = () => {
                 })
               }
               searchable
-              searchProps={{ disabled: !deduplicationEnabled }}
+              searchProps={{
+                disabled: !deduplicationEnabled,
+                append: (
+                  <EuiPopover
+                    button={
+                      <EuiButtonEmpty
+                        size="xs"
+                        iconType="arrowDown"
+                        iconSide="right"
+                        onClick={() => setShowAllFieldsPopover(!showAllFieldsPopover)}
+                        className="showAllFieldsPopoverToggle"
+                        disabled={!deduplicationEnabled}
+                      >
+                        {showAllFields
+                          ? i18n.translate(
+                              'xpack.enterpriseSearch.appSearch.crawler.deduplicationPanel.allFieldsLabel',
+                              {
+                                defaultMessage: 'All fields',
+                              }
+                            )
+                          : i18n.translate(
+                              'xpack.enterpriseSearch.appSearch.crawler.deduplicationPanel.selectedFieldsLabel',
+                              {
+                                defaultMessage: 'Selected fields',
+                              }
+                            )}
+                      </EuiButtonEmpty>
+                    }
+                    isOpen={showAllFieldsPopover}
+                    closePopover={() => setShowAllFieldsPopover(false)}
+                    panelPaddingSize="none"
+                    anchorPosition="downLeft"
+                  >
+                    <EuiContextMenuPanel
+                      items={[
+                        <EuiContextMenuItem
+                          key="all fields"
+                          icon={showAllFields ? 'check' : 'empty'}
+                          onClick={() => {
+                            setShowAllFields(true);
+                            setShowAllFieldsPopover(false);
+                          }}
+                        >
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.cancelCrawlMenuItemLabel',
+                            {
+                              defaultMessage: 'Show all fields',
+                            }
+                          )}
+                        </EuiContextMenuItem>,
+                        <EuiContextMenuItem
+                          key="selected fields"
+                          icon={showAllFields ? 'empty' : 'check'}
+                          onClick={() => {
+                            setShowAllFields(false);
+                            setShowAllFieldsPopover(false);
+                          }}
+                        >
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.cancelCrawlMenuItemLabel',
+                            {
+                              defaultMessage: 'Show only selected fields',
+                            }
+                          )}
+                        </EuiContextMenuItem>,
+                      ]}
+                    />
+                  </EuiPopover>
+                ),
+              }}
             >
               {(list, search) => (
                 <>

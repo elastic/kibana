@@ -4,4 +4,11 @@
     border-radius: .675rem;
     border: 1px solid $euiColorLightestShade;
   }
+
+  .showAllFieldsPopoverToggle {
+    .euiButtonEmpty__content {
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+  }
 }

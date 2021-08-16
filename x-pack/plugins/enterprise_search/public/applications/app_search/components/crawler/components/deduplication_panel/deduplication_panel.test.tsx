@@ -9,11 +9,15 @@ import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logi
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
+
+import { act } from 'react-dom/test-utils';
 
 import {
   EuiButton,
-  EuiButtonGroup,
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiPopover,
   EuiSelectable,
   EuiSelectableList,
   EuiSelectableSearch,
@@ -37,13 +41,10 @@ const MOCK_VALUES = {
 };
 
 describe('DeduplicationPanel', () => {
-  let wrapper: ShallowWrapper;
-
   beforeEach(() => {
     jest.clearAllMocks();
     setMockActions(MOCK_ACTIONS);
     setMockValues(MOCK_VALUES);
-    wrapper = shallow(<DeduplicationPanel />);
   });
 
   it('renders an empty components if no domain', () => {
@@ -51,11 +52,14 @@ describe('DeduplicationPanel', () => {
       ...MOCK_VALUES,
       domain: null,
     });
-    rerender(wrapper);
+    const wrapper = shallow(<DeduplicationPanel />);
 
     expect(wrapper.isEmptyRender()).toBe(true);
   });
+
   it('contains a button to reset to defaults', () => {
+    const wrapper = shallow(<DeduplicationPanel />);
+
     wrapper.find(EuiButton).simulate('click');
 
     expect(MOCK_ACTIONS.submitDeduplicationUpdate).toHaveBeenCalledWith(MOCK_VALUES.domain, {
@@ -71,7 +75,7 @@ describe('DeduplicationPanel', () => {
         deduplicationEnabled: false,
       },
     });
-    rerender(wrapper);
+    const wrapper = shallow(<DeduplicationPanel />);
 
     wrapper.find(EuiSwitch).simulate('change');
 
@@ -94,6 +98,7 @@ describe('DeduplicationPanel', () => {
       },
     });
     rerender(wrapper);
+
     wrapper.find(EuiSwitch).simulate('change');
 
     expect(MOCK_ACTIONS.submitDeduplicationUpdate).toHaveBeenNthCalledWith(
@@ -109,18 +114,46 @@ describe('DeduplicationPanel', () => {
     );
   });
 
-  it('contains a button group to switch between displaying all fields or only selected ones', () => {
-    // by default it shows all fields
-    expect(wrapper.find(EuiSelectable).prop('options')).toHaveLength(2);
+  it('contains a popover to switch between displaying all fields or only selected ones', () => {
+    const fullRender = mountWithIntl(<DeduplicationPanel />);
 
-    // switch to selected fields
-    wrapper.find(EuiButtonGroup).simulate('change');
-    rerender(wrapper);
+    expect(fullRender.find(EuiButtonEmpty).text()).toEqual('All fields');
+    expect(fullRender.find(EuiPopover).prop('isOpen')).toEqual(false);
 
-    expect(wrapper.find(EuiSelectable).prop('options')).toHaveLength(1);
+    // Open the popover
+    fullRender.find(EuiButtonEmpty).simulate('click');
+    rerender(fullRender);
+
+    expect(fullRender.find(EuiPopover).prop('isOpen')).toEqual(true);
+
+    // Click "Show selected fields"
+    fullRender.find(EuiContextMenuItem).at(1).simulate('click');
+    rerender(fullRender);
+
+    expect(fullRender.find(EuiButtonEmpty).text()).toEqual('Selected fields');
+    expect(fullRender.find(EuiPopover).prop('isOpen')).toEqual(false);
+
+    // Open the popover and click "show all fields"
+    fullRender.find(EuiButtonEmpty).simulate('click');
+    fullRender.find(EuiContextMenuItem).at(0).simulate('click');
+    rerender(fullRender);
+
+    expect(fullRender.find(EuiButtonEmpty).text()).toEqual('All fields');
+    expect(fullRender.find(EuiPopover).prop('isOpen')).toEqual(false);
+
+    // Open the popover then simulate closing the popover
+    fullRender.find(EuiButtonEmpty).simulate('click');
+    act(() => {
+      fullRender.find(EuiPopover).prop('closePopover')();
+    });
+    rerender(fullRender);
+
+    expect(fullRender.find(EuiPopover).prop('isOpen')).toEqual(false);
   });
 
   it('contains a selectable to toggle fields for deduplication', () => {
+    const wrapper = shallow(<DeduplicationPanel />);
+
     wrapper
       .find(EuiSelectable)
       .simulate('change', [{ label: 'title' }, { label: 'description', checked: 'on' }]);
