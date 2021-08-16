@@ -102,6 +102,10 @@ export const setTGridSelectAll = actionCreator<{ id: string; selectAll: boolean 
   'SET_TGRID_SELECT_ALL'
 );
 
+export const setTimelineUpdatedAt = actionCreator<{ id: string; updated: number }>(
+  'SET_TIMELINE_UPDATED_AT'
+);
+
 export const addProviderToTimeline = actionCreator<{ id: string; dataProvider: DataProvider }>(
   'ADD_PROVIDER_TO_TIMELINE'
 );
