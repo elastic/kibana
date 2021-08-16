@@ -161,10 +161,13 @@ export function jobAuditMessagesProvider(
 
     let messages: JobMessage[] = [];
     if ((body.hits.total as estypes.SearchTotalHits).value > 0) {
-      messages = body.hits.hits.map((hit) => ({
-        clearable: hit._index === ML_NOTIFICATION_INDEX_02,
-        ...hit._source,
-      }));
+      messages = body.hits.hits.map(
+        (hit) =>
+          ({
+            clearable: hit._index === ML_NOTIFICATION_INDEX_02,
+            ...hit._source,
+          } as JobMessage)
+      );
     }
     messages = await jobSavedObjectService.filterJobsForSpace<JobMessage>(
       'anomaly-detector',
