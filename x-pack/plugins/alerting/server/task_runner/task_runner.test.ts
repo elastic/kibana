@@ -351,7 +351,7 @@ describe('Task Runner', () => {
         id: '1',
         name: 'execute test',
         type: 'alert',
-        description: 'execute test with name alert-name in default',
+        description: 'execute [test] with name [alert-name] in [default] namespace',
       },
       expect.any(Function)
     );

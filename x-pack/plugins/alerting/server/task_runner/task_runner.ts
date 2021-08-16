@@ -266,7 +266,9 @@ export class TaskRunner<
         type: 'alert',
         name: `execute ${alert.alertTypeId}`,
         id: alertId,
-        description: `execute ${alert.alertTypeId} with name ${name} in ${namespace ?? 'default'}`,
+        description: `execute [${alert.alertTypeId}] with name [${name}] in [${
+          namespace ?? 'default'
+        }] namespace`,
       };
 
       updatedAlertTypeState = await this.context.executionContext.withContext(ctx, () =>
