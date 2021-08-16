@@ -7,7 +7,7 @@
 
 import {
   ALERT_RULE_CONSUMER,
-  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
   ALERT_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
@@ -89,8 +89,8 @@ describe('update()', () => {
                 _source: {
                   [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
                   [ALERT_RULE_CONSUMER]: 'apm',
-                  [ALERT_STATUS]: 'open',
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
@@ -139,7 +139,7 @@ describe('update()', () => {
         Object {
           "body": Object {
             "doc": Object {
-              "${ALERT_STATUS}": "closed",
+              "${ALERT_WORKFLOW_STATUS}": "closed",
             },
           },
           "id": "1",
@@ -175,8 +175,8 @@ describe('update()', () => {
                 _source: {
                   [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
                   [ALERT_RULE_CONSUMER]: 'apm',
-                  [ALERT_STATUS]: 'open',
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
@@ -249,7 +249,7 @@ describe('update()', () => {
                 _source: {
                   [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
                   [ALERT_RULE_CONSUMER]: 'apm',
-                  [ALERT_STATUS]: 'open',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
@@ -330,8 +330,8 @@ describe('update()', () => {
                 _source: {
                   [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
                   [ALERT_RULE_CONSUMER]: 'apm',
-                  [ALERT_STATUS]: 'open',
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
@@ -391,7 +391,7 @@ describe('update()', () => {
                     [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                     message: 'hello world 1',
                     [ALERT_RULE_CONSUMER]: 'apm',
-                    [ALERT_STATUS]: 'open',
+                    [ALERT_WORKFLOW_STATUS]: 'open',
                     [SPACE_IDS]: [DEFAULT_SPACE],
                   },
                 },
