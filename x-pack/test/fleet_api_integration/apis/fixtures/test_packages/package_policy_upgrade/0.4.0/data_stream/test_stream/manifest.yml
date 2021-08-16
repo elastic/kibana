@@ -4,10 +4,8 @@ streams:
   - input: test_input
     vars:
     - name: test_var_2
-      type: text
+      type: bool
       title: Test Var 2
       required: true
       show_user: true
-      default: Test Value
-
-
+      default: false

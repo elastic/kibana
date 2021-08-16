@@ -69,7 +69,7 @@ export function InstallationButton(props: InstallationButtonProps) {
   const showUninstallButton = isInstalled || isRemoving;
   const [isInstallModalVisible, setIsInstallModalVisible] = useState<boolean>(false);
   const [isUpdateModalVisible, setIsUpdateModalVisible] = useState<boolean>(false);
-  const [upgradePackagePolicies, setUpgradePackagePolicies] = useState<boolean>(false);
+  const [upgradePackagePolicies, setUpgradePackagePolicies] = useState<boolean>(true);
   const [agentPolicyData, setAgentPolicyData] = useState<GetAgentPoliciesResponse | null>();
   const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
 
