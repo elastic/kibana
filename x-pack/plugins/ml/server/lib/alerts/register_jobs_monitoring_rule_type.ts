@@ -23,6 +23,7 @@ import {
   AlertTypeState,
 } from '../../../../alerting/common';
 import { JobsErrorsResponse } from '../../models/job_audit_messages/job_audit_messages';
+import { AlertExecutorOptions } from '../../../../alerting/server';
 
 type ModelSizeStats = MlJobStats['model_size_stats'];
 
@@ -75,6 +76,14 @@ export const REALTIME_ISSUE_DETECTED: ActionGroup<AnomalyDetectionJobRealtimeIss
   }),
 };
 
+export type JobsHealthExecutorOptions = AlertExecutorOptions<
+  AnomalyDetectionJobsHealthRuleParams,
+  Record<string, unknown>,
+  Record<string, unknown>,
+  AnomalyDetectionJobsHealthAlertContext,
+  AnomalyDetectionJobRealtimeIssue
+>;
+
 export function registerJobsMonitoringRuleType({
   alerting,
   mlServicesProviders,
@@ -122,14 +131,16 @@ export function registerJobsMonitoringRuleType({
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,
-    async executor({ services, params, alertId, state, previousStartedAt, startedAt, name, rule }) {
+    async executor(options) {
+      const { services, name } = options;
+
       const fakeRequest = {} as KibanaRequest;
       const { getTestsResults } = mlServicesProviders.jobsHealthServiceProvider(
         services.savedObjectsClient,
         fakeRequest,
         logger
       );
-      const executionResult = await getTestsResults(name, params);
+      const executionResult = await getTestsResults(options);
 
       if (executionResult.length > 0) {
         logger.info(

@@ -411,7 +411,7 @@ export function jobAuditMessagesProvider(
    * Retrieve list of errors per job.
    * @param jobIds
    */
-  async function getJobsErrors(jobIds: string[]): Promise<JobsErrorsResponse> {
+  async function getJobsErrors(jobIds: string[], earliestMs?: number): Promise<JobsErrorsResponse> {
     const { body } = await asInternalUser.search({
       index: ML_NOTIFICATION_INDEX_PATTERN,
       ignore_unavailable: true,
@@ -420,6 +420,7 @@ export function jobAuditMessagesProvider(
         query: {
           bool: {
             filter: [
+              ...(earliestMs ? [{ range: { timestamp: { gte: earliestMs } } }] : []),
               { terms: { job_id: jobIds } },
               {
                 term: { level: { value: 'error' } },
