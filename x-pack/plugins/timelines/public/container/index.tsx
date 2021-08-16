@@ -22,6 +22,7 @@ import {
   Direction,
   TimelineFactoryQueryTypes,
   TimelineEventsQueries,
+  EntityType,
 } from '../../common/search_strategy';
 import type {
   DocValueFields,
@@ -71,6 +72,7 @@ export interface UseTimelineEventsProps {
   filterQuery?: ESQuery | string;
   skip?: boolean;
   endDate: string;
+  entityType: EntityType;
   excludeEcsData?: boolean;
   id: string;
   fields: string[];
@@ -113,6 +115,7 @@ export const useTimelineEvents = ({
   alertConsumers = NO_CONSUMERS,
   docValueFields,
   endDate,
+  entityType,
   excludeEcsData = false,
   id = ID,
   indexNames,
@@ -197,7 +200,7 @@ export const useTimelineEvents = ({
         if (data && data.search) {
           searchSubscription$.current = data.search
             .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(
-              { ...request, entityType: 'alerts' },
+              { ...request, entityType },
               {
                 strategy:
                   request.language === 'eql'
@@ -245,7 +248,7 @@ export const useTimelineEvents = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [skip, data, setUpdated, addWarning, addError]
+    [skip, data, entityType, setUpdated, addWarning, addError]
   );
 
   useEffect(() => {

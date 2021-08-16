@@ -15,7 +15,7 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { Direction } from '../../../../common/search_strategy';
+import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { DocValueFields } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -119,6 +119,7 @@ export interface TGridIntegratedProps {
   deletedEventIds: Readonly<string[]>;
   docValueFields: DocValueFields[];
   end: string;
+  entityType: EntityType;
   filters: Filter[];
   globalFullScreen: boolean;
   headerFilterGroup?: React.ReactNode;
@@ -155,6 +156,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   deletedEventIds,
   docValueFields,
   end,
+  entityType,
   filters,
   globalFullScreen,
   headerFilterGroup,
@@ -250,6 +252,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   ] = useTimelineEvents({
     alertConsumers: SECURITY_ALERTS_CONSUMERS,
     docValueFields,
+    entityType,
     fields,
     filterQuery: combinedQueries!.filterQuery,
     id,
