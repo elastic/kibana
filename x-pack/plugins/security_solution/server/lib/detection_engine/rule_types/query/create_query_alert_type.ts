@@ -5,31 +5,17 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { PersistenceServices, RuleDataClient } from '../../../../../../rule_registry/server';
+import { PersistenceServices } from '../../../../../../rule_registry/server';
 import { QUERY_ALERT_TYPE_ID } from '../../../../../common/constants';
-import { ExperimentalFeatures } from '../../../../../common/experimental_features';
-import { ConfigType } from '../../../../config';
-import { SetupPlugins } from '../../../../plugin';
-import { IRuleDataPluginService } from '../../rule_execution_log/types';
 import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
 import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
+import { CreateRuleOptions } from '../types';
 
-export const createQueryAlertType = (createOptions: {
-  experimentalFeatures: ExperimentalFeatures;
-  indexAlias: string;
-  lists: SetupPlugins['lists'];
-  logger: Logger;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  ruleDataClient: RuleDataClient;
-  version: string;
-  ruleDataService: IRuleDataPluginService;
-}) => {
+export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
   const {
     experimentalFeatures,
-    indexAlias,
     lists,
     logger,
     mergeStrategy,
@@ -38,7 +24,6 @@ export const createQueryAlertType = (createOptions: {
     ruleDataService,
   } = createOptions;
   const createSecurityRuleType = createSecurityRuleTypeFactory({
-    indexAlias,
     lists,
     logger,
     mergeStrategy,
