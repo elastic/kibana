@@ -25,6 +25,7 @@ import {
   setKibanaCommonConfig,
   setKibanaVersion,
   setMapAppConfig,
+  setSetupServices,
   setStartServices,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
@@ -72,6 +73,7 @@ import {
   MapsAppTileMapLocatorDefinition,
 } from './locators';
 import { SecurityPluginStart } from '../../security/public';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -81,6 +83,7 @@ export interface MapsPluginSetupDependencies {
   mapsEms: MapsEmsPluginSetup;
   share: SharePluginSetup;
   licensing: LicensingPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface MapsPluginStartDependencies {
@@ -125,6 +128,7 @@ export class MapsPlugin
   }
 
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
+    setSetupServices(plugins);
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();

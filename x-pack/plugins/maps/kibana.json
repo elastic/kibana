@@ -18,7 +18,6 @@
     "dashboard",
     "embeddable",
     "mapsEms",
-    "usageCollection",
     "savedObjects",
     "share",
     "presentationUtil"
@@ -27,7 +26,8 @@
     "home",
     "savedObjectsTagging",
     "charts",
-    "security"
+    "security",
+    "usageCollection"
   ],
   "ui": true,
   "server": true,
