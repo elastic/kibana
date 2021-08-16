@@ -4,7 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import {
+  ALERT_SEVERITY_LEVEL,
+  ALERT_SEVERITY_VALUE,
+  ALERT_EVALUATION_VALUE,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_REASON,
+} from '@kbn/rule-data-utils';
 import { durationAnomalyAlertFactory } from './duration_anomaly';
 import { DURATION_ANOMALY } from '../../../common/constants/alerts';
 import { AnomaliesTableRecord, AnomalyRecordDoc } from '../../../../ml/common/types/anomalies';
@@ -12,12 +18,6 @@ import { DynamicSettings } from '../../../common/runtime_types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import { getSeverityType } from '../../../../ml/common/util/anomaly_utils';
 import { Ping } from '../../../common/runtime_types/ping';
-import {
-  ALERT_SEVERITY_LEVEL,
-  ALERT_SEVERITY_VALUE,
-  ALERT_EVALUATION_VALUE,
-  ALERT_EVALUATION_THRESHOLD,
-} from '@kbn/rule-data-utils';
 
 interface MockAnomaly {
   severity: AnomaliesTableRecord['severity'];
@@ -173,7 +173,7 @@ describe('duration anomaly alert', () => {
             [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
             [ALERT_SEVERITY_LEVEL]: getSeverityType(anomaly.severity),
             [ALERT_SEVERITY_VALUE]: anomaly.severity,
-            reason: `Abnormal (${getSeverityType(
+            [ALERT_REASON]: `Abnormal (${getSeverityType(
               anomaly.severity
             )} level) response time detected on uptime-monitor with url ${
               mockPing.url?.full

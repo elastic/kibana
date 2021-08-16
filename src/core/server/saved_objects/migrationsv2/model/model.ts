@@ -533,9 +533,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         transformErrors: [],
       };
     } else {
-      if (isLeftTypeof(res.left, 'target_index_had_write_block')) {
-        // the temp index has a write block, meaning that another instance already finished and moved forward.
-        // close the PIT search and carry on with the happy path.
+      if (
+        isLeftTypeof(res.left, 'target_index_had_write_block') ||
+        isLeftTypeof(res.left, 'index_not_found_exception')
+      ) {
+        // When the temp index has a write block or has been deleted another
+        // instance already completed this step. Close the PIT search and carry
+        // on with the happy path.
         return {
           ...stateP,
           controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT',
@@ -721,9 +725,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'FATAL',
           reason: `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Try to use smaller batches by changing the Kibana 'migrations.batchSize' configuration option and restarting Kibana.`,
         };
-      } else if (isLeftTypeof(res.left, 'target_index_had_write_block')) {
-        // we fail on this error since the target index will only have a write
-        // block if a newer version of Kibana started an upgrade
+      } else if (
+        isLeftTypeof(res.left, 'target_index_had_write_block') ||
+        isLeftTypeof(res.left, 'index_not_found_exception')
+      ) {
+        // we fail on these errors since the target index will never get
+        // deleted and should only have a write block if a newer version of
+        // Kibana started an upgrade
         throwBadResponse(stateP, res.left as never);
       } else {
         throwBadResponse(stateP, res.left);
