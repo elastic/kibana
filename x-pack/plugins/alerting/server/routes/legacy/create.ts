@@ -68,11 +68,12 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
         const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as AlertNotifyWhenType) : null;
 
         if (params?.id) {
+          const spaceId = rulesClient.getSpaceId();
           if (usageCounter) {
             const usageCounterName =
-              rulesClient.getSpaceId() !== 'default'
-                ? 'ruleCreatedWithPredefinedIdInCustomSpace'
-                : 'ruleCreatedWithPredefinedIdInDefaultSpace';
+              spaceId === undefined || spaceId === 'default'
+                ? 'ruleCreatedWithPredefinedIdInDefaultSpace'
+                : 'ruleCreatedWithPredefinedIdInCustomSpace';
             usageCounter?.incrementCounter({
               counterName: usageCounterName,
               incrementBy: 1,

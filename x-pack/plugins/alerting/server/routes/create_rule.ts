@@ -113,11 +113,12 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           const params = req.params;
 
           if (params?.id) {
+            const spaceId = rulesClient.getSpaceId();
             if (usageCounter) {
               const usageCounterName =
-                rulesClient.getSpaceId() !== 'default'
-                  ? 'ruleCreatedWithPredefinedIdInCustomSpace'
-                  : 'ruleCreatedWithPredefinedIdInDefaultSpace';
+                spaceId === undefined || spaceId === 'default'
+                  ? 'ruleCreatedWithPredefinedIdInDefaultSpace'
+                  : 'ruleCreatedWithPredefinedIdInCustomSpace';
               usageCounter?.incrementCounter({
                 counterName: usageCounterName,
                 incrementBy: 1,
