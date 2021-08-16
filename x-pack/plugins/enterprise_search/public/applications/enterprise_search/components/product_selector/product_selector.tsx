@@ -9,20 +9,14 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiPageContentBody,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import {
+  KibanaPageTemplate,
+  KibanaPageTemplateSolutionNavAvatar,
+  NO_DATA_PAGE_TEMPLATE_PROPS,
+} from '../../../../../../../../src/plugins/kibana_react/public';
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
@@ -51,52 +45,53 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ access }) => {
   const shouldShowWorkplaceSearchCard = !config.host || hasWorkplaceSearchAccess;
 
   return (
-    <EuiPage restrictWidth className="enterpriseSearchOverview">
+    <KibanaPageTemplate {...NO_DATA_PAGE_TEMPLATE_PROPS}>
       <SetPageChrome />
       <SendTelemetry action="viewed" metric="overview" />
+      <TrialCallout />
+      <EuiText textAlign="center">
+        <KibanaPageTemplateSolutionNavAvatar
+          name="Enterprise Search"
+          iconType="logoEnterpriseSearch"
+          size="xxl"
+        />
 
-      <EuiPageBody>
-        <TrialCallout />
-        <EuiPageHeader>
-          <EuiPageHeaderSection className="enterpriseSearchOverview__header">
-            <EuiTitle size="l">
-              <h1>
-                {i18n.translate('xpack.enterpriseSearch.overview.heading', {
-                  defaultMessage: 'Welcome to Elastic Enterprise Search',
-                })}
-              </h1>
-            </EuiTitle>
-            <EuiSpacer />
-            <EuiText>
-              <p>
-                {config.host
-                  ? i18n.translate('xpack.enterpriseSearch.overview.subheading', {
-                      defaultMessage: 'Select a product to get started.',
-                    })
-                  : i18n.translate('xpack.enterpriseSearch.overview.setupHeading', {
-                      defaultMessage: 'Choose a product to set up and get started.',
-                    })}
-              </p>
-            </EuiText>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-        <EuiPageContentBody>
-          <EuiFlexGroup justifyContent="center" gutterSize="xl">
-            {shouldShowAppSearchCard && (
-              <EuiFlexItem grow={false} className="enterpriseSearchOverview__card">
-                <ProductCard product={APP_SEARCH_PLUGIN} image={AppSearchImage} />
-              </EuiFlexItem>
-            )}
-            {shouldShowWorkplaceSearchCard && (
-              <EuiFlexItem grow={false} className="enterpriseSearchOverview__card">
-                <ProductCard product={WORKPLACE_SEARCH_PLUGIN} image={WorkplaceSearchImage} />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-          <EuiSpacer size="xxl" />
-          {config.host ? <LicenseCallout /> : <SetupGuideCta />}
-        </EuiPageContentBody>
-      </EuiPageBody>
-    </EuiPage>
+        <EuiSpacer />
+
+        <h1>
+          {i18n.translate('xpack.enterpriseSearch.overview.heading', {
+            defaultMessage: 'Welcome to Elastic Enterprise Search',
+          })}
+        </h1>
+        <p>
+          {config.host
+            ? i18n.translate('xpack.enterpriseSearch.overview.subheading', {
+                defaultMessage: 'Add search to your app or organization.',
+              })
+            : i18n.translate('xpack.enterpriseSearch.overview.setupHeading', {
+                defaultMessage: 'Choose a product to set up and get started.',
+              })}
+        </p>
+      </EuiText>
+
+      <EuiSpacer size="xxl" />
+
+      <EuiFlexGroup justifyContent="center" gutterSize="xl">
+        {shouldShowAppSearchCard && (
+          <EuiFlexItem grow={false}>
+            <ProductCard product={APP_SEARCH_PLUGIN} image={AppSearchImage} />
+          </EuiFlexItem>
+        )}
+        {shouldShowWorkplaceSearchCard && (
+          <EuiFlexItem grow={false}>
+            <ProductCard product={WORKPLACE_SEARCH_PLUGIN} image={WorkplaceSearchImage} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+
+      <EuiSpacer size="xxl" />
+
+      {config.host ? <LicenseCallout /> : <SetupGuideCta />}
+    </KibanaPageTemplate>
   );
 };

@@ -16,8 +16,8 @@ export const FILTER_OPEN: Status = 'open';
 export const FILTER_CLOSED: Status = 'closed';
 export const FILTER_IN_PROGRESS: Status = 'in-progress';
 
-const StatusFilterButton = styled(EuiFilterButton)<{ isActive: boolean }>`
-  background: ${({ isActive, theme }) => (isActive ? theme.eui.euiColorPrimary : '')};
+const StatusFilterButton = styled(EuiFilterButton)<{ $isActive: boolean }>`
+  background: ${({ $isActive, theme }) => ($isActive ? theme.eui.euiColorPrimary : '')};
 `;
 
 const StatusFilterGroup = styled(EuiFilterGroup)`
@@ -54,7 +54,7 @@ const AlertsTableFilterGroupComponent: React.FC<Props> = ({ onFilterGroupChanged
       <StatusFilterButton
         data-test-subj="openAlerts"
         hasActiveFilters={filterGroup === FILTER_OPEN}
-        isActive={filterGroup === FILTER_OPEN}
+        $isActive={filterGroup === FILTER_OPEN}
         onClick={onClickOpenFilterCallback}
         withNext
         color={filterGroup === FILTER_OPEN ? 'ghost' : 'primary'}
@@ -65,7 +65,7 @@ const AlertsTableFilterGroupComponent: React.FC<Props> = ({ onFilterGroupChanged
       <StatusFilterButton
         data-test-subj="inProgressAlerts"
         hasActiveFilters={filterGroup === FILTER_IN_PROGRESS}
-        isActive={filterGroup === FILTER_IN_PROGRESS}
+        $isActive={filterGroup === FILTER_IN_PROGRESS}
         onClick={onClickInProgressFilterCallback}
         withNext
         color={filterGroup === FILTER_IN_PROGRESS ? 'ghost' : 'primary'}
@@ -76,7 +76,7 @@ const AlertsTableFilterGroupComponent: React.FC<Props> = ({ onFilterGroupChanged
       <StatusFilterButton
         data-test-subj="closedAlerts"
         hasActiveFilters={filterGroup === FILTER_CLOSED}
-        isActive={filterGroup === FILTER_CLOSED}
+        $isActive={filterGroup === FILTER_CLOSED}
         onClick={onClickCloseFilterCallback}
         color={filterGroup === FILTER_CLOSED ? 'ghost' : 'primary'}
       >
