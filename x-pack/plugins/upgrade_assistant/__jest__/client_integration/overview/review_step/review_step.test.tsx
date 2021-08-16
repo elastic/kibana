@@ -78,6 +78,15 @@ describe('Overview - Fix deprecated settings step', () => {
       expect(exists('noDeprecationsLabel')).toBe(true);
     });
 
+    test('Has a link for viewing deprecations', () => {
+      const { component, exists, find } = testBed;
+
+      component.update();
+
+      expect(exists('esStatsPanel')).toBe(true);
+      expect(find('esStatsPanel').find('a').props().href).toBe('/es_deprecations/cluster');
+    });
+
     describe('Renders ES errors', () => {
       test('handles network failure', async () => {
         const error = {
@@ -208,6 +217,15 @@ describe('Overview - Fix deprecated settings step', () => {
       const { exists } = testBed;
 
       expect(exists('noDeprecationsLabel')).toBe(true);
+    });
+
+    test('Has a link for viewing deprecations', () => {
+      const { component, exists, find } = testBed;
+
+      component.update();
+
+      expect(exists('kibanaStatsPanel')).toBe(true);
+      expect(find('kibanaStatsPanel').find('a').props().href).toBe('/kibana_deprecations');
     });
   });
 });

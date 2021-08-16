@@ -25,13 +25,13 @@ const i18nTexts = {
   analyzeTitle: i18n.translate('xpack.upgradeAssistant.overview.analyzeTitle', {
     defaultMessage: 'Analyze deprecation logs',
   }),
-  deprecationWarningTitle: i18n.translate(
+  onlyLogWritingEnabledTitle: i18n.translate(
     'xpack.upgradeAssistant.overview.deprecationLogs.deprecationWarningTitle',
     {
       defaultMessage: 'Your logs are being written to the logs directory',
     }
   ),
-  deprecationWarningBody: i18n.translate(
+  onlyLogWritingEnabledBody: i18n.translate(
     'xpack.upgradeAssistant.overview.deprecationLogs.deprecationWarningBody',
     {
       defaultMessage:
@@ -53,26 +53,30 @@ const DeprecationLogsPreview: FunctionComponent = () => {
         <DeprecationLoggingToggle {...state} />
       </EuiPanel>
 
-      {state.hasLoggerDeprecationWarning && (
+      {state.onlyDeprecationLogWritingEnabled && (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
-            title={i18nTexts.deprecationWarningTitle}
+            title={i18nTexts.onlyLogWritingEnabledTitle}
             color="warning"
             iconType="help"
             data-test-subj="deprecationWarningCallout"
           >
-            <p>{i18nTexts.deprecationWarningBody}</p>
+            <p>{i18nTexts.onlyLogWritingEnabledBody}</p>
           </EuiCallOut>
         </>
       )}
 
-      <EuiSpacer size="xl" />
-      <EuiText>
-        <h4>{i18nTexts.analyzeTitle}</h4>
-      </EuiText>
-      <EuiSpacer size="m" />
-      <ExternalLinks />
+      {state.isDeprecationLoggingEnabled && (
+        <>
+          <EuiSpacer size="xl" />
+          <EuiText>
+            <h4>{i18nTexts.analyzeTitle}</h4>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <ExternalLinks />
+        </>
+      )}
     </>
   );
 };

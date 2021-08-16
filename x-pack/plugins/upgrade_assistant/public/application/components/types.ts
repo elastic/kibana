@@ -55,5 +55,5 @@ export interface DeprecationLoggingPreviewProps {
   updateError: ResponseError | undefined;
   resendRequest: () => void;
   toggleLogging: () => void;
-  hasLoggerDeprecationWarning: boolean;
+  onlyDeprecationLogWritingEnabled: boolean;
 }

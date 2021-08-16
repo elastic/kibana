@@ -34,7 +34,7 @@ export const useDeprecationLogging = (): DeprecationLoggingPreviewProps => {
 
   const [isEnabled, setIsEnabled] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [hasLoggerDeprecationWarning, setLoggerDeprecationWarning] = useState(false);
+  const [onlyDeprecationLogWritingEnabled, setOnlyDeprecationLogWritingEnabled] = useState(false);
   const [updateError, setUpdateError] = useState<ResponseError | undefined>();
 
   useEffect(() => {
@@ -43,30 +43,28 @@ export const useDeprecationLogging = (): DeprecationLoggingPreviewProps => {
       setIsEnabled(isToggleEnabled);
 
       if (!isToggleEnabled && isLoggerDeprecationEnabled) {
-        setLoggerDeprecationWarning(true);
+        setOnlyDeprecationLogWritingEnabled(true);
       }
     }
   }, [data, isLoading]);
 
   const toggleLogging = async () => {
-    const newIsEnabledValue = !isEnabled;
-
     setIsUpdating(true);
 
     const {
       data: updatedLoggingState,
       error: updateDeprecationError,
     } = await api.updateDeprecationLogging({
-      isEnabled: newIsEnabledValue,
+      isEnabled: !isEnabled,
     });
 
     setIsUpdating(false);
-    setLoggerDeprecationWarning(false);
+    setOnlyDeprecationLogWritingEnabled(false);
 
     if (updateDeprecationError) {
       setUpdateError(updateDeprecationError);
     } else if (updatedLoggingState) {
-      setIsEnabled(updatedLoggingState.isEnabled);
+      setOnlyDeprecationLogWritingEnabled(updatedLoggingState.isEnabled);
       notifications.toasts.addSuccess(
         updatedLoggingState.isEnabled ? i18nTexts.enabledMessage : i18nTexts.disabledMessage
       );
@@ -81,6 +79,6 @@ export const useDeprecationLogging = (): DeprecationLoggingPreviewProps => {
     fetchError,
     updateError,
     resendRequest,
-    hasLoggerDeprecationWarning,
+    onlyDeprecationLogWritingEnabled,
   };
 };
