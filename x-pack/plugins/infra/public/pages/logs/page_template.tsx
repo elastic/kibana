@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import type { LazyObservabilityPageTemplateProps } from '../../../../observability/public';
 import { useLogSourceContext } from '../../containers/logs/log_source';
@@ -22,6 +23,7 @@ export const LogsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = (
       observability: {
         navigation: { PageTemplate },
       },
+      docLinks,
     },
   } = useKibanaContextForPlugin();
 
@@ -33,13 +35,25 @@ export const LogsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = (
     sourceStatus?.logIndexStatus !== 'missing'
       ? undefined
       : {
-          solution: 'Observability',
+          solution: i18n.translate('xpack.logs.noDataConfig.solutionName', {
+            defaultMessage: 'Observability',
+          }),
           actions: {
             beats: {
+              title: i18n.translate('xpack.logs.noDataConfig.beatsCard.title', {
+                defaultMessage: 'Add logs with Beats',
+              }),
+              description: i18n.translate('xpack.logs.noDataConfig.beatsCard.description', {
+                defaultMessage:
+                  'Use Beats to send logs to Elasticsearch. We make it easy with modules for many popular systems and apps.',
+              }),
+              button: i18n.translate('xpack.logs.noDataConfig.beatsCard.buttonLabel', {
+                defaultMessage: 'Add logs with Beats',
+              }),
               href: basePath + `/app/home#/tutorial_directory/logging`,
             },
           },
-          docsLink: 'https://www.elastic.co/guide/en/kibana/master/observability.html',
+          docsLink: docLinks.links.observability.guide,
         };
 
   return <PageTemplate noDataConfig={noDataConfig} {...pageTemplateProps} />;
