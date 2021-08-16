@@ -407,6 +407,17 @@ describe('ExecutionContextService', () => {
         expect(service.getAsHeader()).toBe('1234');
       });
 
+      it('returns context if no id provided', async () => {
+        service.set({
+          type: 'type-a',
+          name: 'name-a',
+          id: 'id-a',
+          description: 'description-a',
+        });
+
+        expect(service.getAsHeader()).toBe('kibana:type-a:name-a:id-a');
+      });
+
       it('returns request id and registered context', async () => {
         service.setRequestId('1234');
         service.set({
