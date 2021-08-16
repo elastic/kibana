@@ -193,6 +193,11 @@ export const alertsFieldMap: FieldMap = {
     array: false,
     required: true,
   },
+  'kibana.alert.reason': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'kibana.alert.threat': {
     type: 'object',
     array: false,

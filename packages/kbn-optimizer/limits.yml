@@ -8,7 +8,7 @@ pageLoadAssetSize:
   charts: 95000
   cloud: 21076
   console: 46235
-  core: 434325
+  core: 435325
   crossClusterReplication: 65408
   dashboard: 374267
   dashboardEnhanced: 65646
@@ -38,11 +38,11 @@ pageLoadAssetSize:
   infra: 184320
   fleet: 465774
   ingestPipelines: 58003
-  inputControlVis: 172819
-  inspector: 148999
-  kibanaLegacy: 107855
-  kibanaOverview: 56426
-  kibanaReact: 162353
+  inputControlVis: 172675
+  inspector: 148711
+  kibanaLegacy: 107711
+  kibanaOverview: 56279
+  kibanaReact: 188705
   kibanaUtils: 198829
   lens: 96624
   licenseManagement: 41817
@@ -119,4 +119,4 @@ pageLoadAssetSize:
   expressionImage: 19288
   expressionMetric: 22238
   expressionShape: 34008
- 
+

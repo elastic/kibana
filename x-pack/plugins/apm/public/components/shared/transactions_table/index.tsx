@@ -59,12 +59,16 @@ interface Props {
   hideViewTransactionsLink?: boolean;
   numberOfTransactionsPerPage?: number;
   showAggregationAccurateCallout?: boolean;
+  environment: string;
+  kuery: string;
 }
 
 export function TransactionsTable({
   hideViewTransactionsLink = false,
   numberOfTransactionsPerPage = 5,
   showAggregationAccurateCallout = false,
+  environment,
+  kuery,
 }: Props) {
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
@@ -88,8 +92,6 @@ export function TransactionsTable({
       latencyAggregationType,
       comparisonType,
       comparisonEnabled,
-      environment,
-      kuery,
     },
   } = useUrlParams();
 
@@ -169,10 +171,7 @@ export function TransactionsTable({
     },
   } = data;
 
-  const {
-    data: transactionGroupDetailedStatistics,
-    status: transactionGroupDetailedStatisticsStatus,
-  } = useFetcher(
+  const { data: transactionGroupDetailedStatistics } = useFetcher(
     (callApmApi) => {
       if (
         transactionGroupsTotalItems &&
@@ -217,9 +216,7 @@ export function TransactionsTable({
     comparisonEnabled,
   });
 
-  const isLoading =
-    status === FETCH_STATUS.LOADING ||
-    transactionGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING;
+  const isLoading = status === FETCH_STATUS.LOADING;
 
   const pagination = {
     pageIndex,

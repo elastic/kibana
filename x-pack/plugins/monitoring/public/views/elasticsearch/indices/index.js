@@ -16,7 +16,7 @@ import template from './index.html';
 import {
   CODE_PATH_ELASTICSEARCH,
   ELASTICSEARCH_SYSTEM_ID,
-  ALERT_LARGE_SHARD_SIZE,
+  RULE_LARGE_SHARD_SIZE,
 } from '../../../../common/constants';
 import { SetupModeRenderer } from '../../../components/renderers';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
@@ -60,7 +60,7 @@ uiRoutes.when('/elasticsearch/indices', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_LARGE_SHARD_SIZE],
+            alertTypeIds: [RULE_LARGE_SHARD_SIZE],
           },
         },
       });

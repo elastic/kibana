@@ -7,6 +7,7 @@
 
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
+import semverLte from 'semver/functions/lte';
 import { assertNever } from '@kbn/std';
 import {
   AlertEvent,
@@ -261,6 +262,7 @@ interface HostInfo {
     state?: {
       isolation: boolean;
     };
+    capabilities?: string[];
   };
 }
 
@@ -392,6 +394,7 @@ enum AlertTypes {
   MALWARE = 'MALWARE',
   MEMORY_SIGNATURE = 'MEMORY_SIGNATURE',
   MEMORY_SHELLCODE = 'MEMORY_SHELLCODE',
+  BEHAVIOR = 'BEHAVIOR',
 }
 
 const alertsDefaultDataStream = {
@@ -455,10 +458,13 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   private createHostData(): HostInfo {
     const hostName = this.randomHostname();
     const isIsolated = this.randomBoolean(0.3);
+    const agentVersion = this.randomVersion();
+    const minCapabilitiesVersion = '7.15.0';
+    const capabilities = ['isolation'];
 
     return {
       agent: {
-        version: this.randomVersion(),
+        version: agentVersion,
         id: this.seededUUIDv4(),
         type: 'endpoint',
       },
@@ -487,6 +493,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         state: {
           isolation: isIsolated,
         },
+        capabilities: semverLte(minCapabilitiesVersion, agentVersion) ? capabilities : [],
       },
     };
   }
@@ -778,11 +785,117 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           alertsDataStream,
           alertType,
         });
+      case AlertTypes.BEHAVIOR:
+        return this.generateBehaviorAlert({
+          ts,
+          entityID,
+          parentEntityID,
+          ancestry,
+          alertsDataStream,
+        });
       default:
         return assertNever(alertType);
     }
   }
 
+  /**
+   * Creates a memory alert from the simulated host represented by this EndpointDocGenerator
+   * @param ts - Timestamp to put in the event
+   * @param entityID - entityID of the originating process
+   * @param parentEntityID - optional entityID of the parent process, if it exists
+   * @param ancestry - an array of ancestors for the generated alert
+   * @param alertsDataStream the values to populate the data_stream fields when generating alert documents
+   */
+  public generateBehaviorAlert({
+    ts = new Date().getTime(),
+    entityID = this.randomString(10),
+    parentEntityID,
+    ancestry = [],
+    alertsDataStream = alertsDefaultDataStream,
+  }: {
+    ts?: number;
+    entityID?: string;
+    parentEntityID?: string;
+    ancestry?: string[];
+    alertsDataStream?: DataStream;
+  } = {}): AlertEvent {
+    const processName = this.randomProcessName();
+    const newAlert: AlertEvent = {
+      ...this.commonInfo,
+      data_stream: alertsDataStream,
+      '@timestamp': ts,
+      ecs: {
+        version: '1.6.0',
+      },
+      rule: {
+        id: this.randomUUID(),
+      },
+      event: {
+        action: 'rule_detection',
+        kind: 'alert',
+        category: 'behavior',
+        code: 'behavior',
+        id: this.seededUUIDv4(),
+        dataset: 'endpoint.diagnostic.collection',
+        module: 'endpoint',
+        type: 'info',
+        sequence: this.sequence++,
+      },
+      file: {
+        name: 'fake_behavior.exe',
+        path: 'C:/fake_behavior.exe',
+      },
+      destination: {
+        port: 443,
+        ip: this.randomIP(),
+      },
+      source: {
+        port: 59406,
+        ip: this.randomIP(),
+      },
+      network: {
+        transport: 'tcp',
+        type: 'ipv4',
+        direction: 'outgoing',
+      },
+      registry: {
+        path:
+          'HKEY_USERS\\S-1-5-21-2460036010-3910878774-3458087990-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\chrome',
+        value: processName,
+        data: {
+          strings: `C:/fake_behavior/${processName}`,
+        },
+      },
+      process: {
+        pid: 2,
+        name: processName,
+        entity_id: entityID,
+        executable: `C:/fake_behavior/${processName}`,
+        parent: parentEntityID
+          ? {
+              entity_id: parentEntityID,
+              pid: 1,
+            }
+          : undefined,
+        Ext: {
+          ancestry,
+          code_signature: [
+            {
+              trusted: false,
+              subject_name: 'bad signer',
+            },
+          ],
+          user: 'SYSTEM',
+          token: {
+            integrity_level_name: 'high',
+            elevation_level: 'full',
+          },
+        },
+      },
+      dll: this.getAlertsDefaultDll(),
+    };
+    return newAlert;
+  }
   /**
    * Returns the default DLLs used in alerts
    */

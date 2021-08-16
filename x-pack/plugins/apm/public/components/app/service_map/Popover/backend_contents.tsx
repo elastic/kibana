@@ -8,7 +8,9 @@
 import { EuiButton, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
+import { METRIC_TYPE } from '@kbn/analytics';
 import React from 'react';
+import { useUiTracker } from '../../../../../../observability/public';
 import { ContentsProps } from '.';
 import { NodeStats } from '../../../../../common/service_map';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -18,11 +20,11 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { StatsList } from './stats_list';
 
-export function BackendContents({ nodeData }: ContentsProps) {
+export function BackendContents({ nodeData, environment }: ContentsProps) {
   const { query } = useApmParams('/*');
   const apmRouter = useApmRouter();
   const {
-    urlParams: { environment, start, end },
+    urlParams: { start, end },
   } = useUrlParams();
 
   const backendName = nodeData.label;
@@ -58,13 +60,26 @@ export function BackendContents({ nodeData }: ContentsProps) {
     >['query'],
   });
 
+  const trackEvent = useUiTracker();
+
   return (
     <>
       <EuiFlexItem>
         <StatsList data={data} isLoading={isLoading} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButton href={detailsUrl} fill={true}>
+        {/* eslint-disable-next-line @elastic/eui/href-or-on-click*/}
+        <EuiButton
+          href={detailsUrl}
+          fill={true}
+          onClick={() => {
+            trackEvent({
+              app: 'apm',
+              metricType: METRIC_TYPE.CLICK,
+              metric: 'service_map_to_backend_detail',
+            });
+          }}
+        >
           {i18n.translate('xpack.apm.serviceMap.backendDetailsButtonText', {
             defaultMessage: 'Backend Details',
           })}
