@@ -6,6 +6,7 @@
  */
 
 import { EuiPageHeaderProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   useKibana,
@@ -33,7 +34,7 @@ export function ApmMainTemplate({
   pageHeader?: EuiPageHeaderProps;
   children: React.ReactNode;
 } & KibanaPageTemplateProps) {
-  const { http } = useKibana().services;
+  const { http, docLinks } = useKibana().services;
   const basePath = http?.basePath.get();
   const { services } = useKibana<ApmPluginStartDeps>();
 
@@ -44,15 +45,31 @@ export function ApmMainTemplate({
   const hasData = true;
   const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = !hasData
     ? {
-        solution: 'Observability',
-        pageTitle: 'Set up APM for Observability!',
+        solution: i18n.translate('xpack.apm.noDataConfig.solutionName', {
+          defaultMessage: 'Observability',
+        }),
         actions: {
           beats: {
+            title: i18n.translate('xpack.apm.noDataConfig.beatsCard.title', {
+              defaultMessage: 'Add data with APM Agents',
+            }),
+            description: i18n.translate(
+              'xpack.apm.noDataConfig.beatsCard.description',
+              {
+                defaultMessage:
+                  'Use APM agents to collect APM data. We make it easy with agents for many popular languages.',
+              }
+            ),
+            button: i18n.translate(
+              'xpack.apm.noDataConfig.beatsCard.buttonLabel',
+              {
+                defaultMessage: 'Add data with APM Agents',
+              }
+            ),
             href: basePath + `/app/home#/tutorial/apm`,
           },
         },
-        docsLink:
-          'https://www.elastic.co/guide/en/kibana/master/observability.html',
+        docsLink: docLinks!.links.observability.guide,
       }
     : undefined;
 
