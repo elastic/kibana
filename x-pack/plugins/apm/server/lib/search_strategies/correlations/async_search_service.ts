@@ -49,14 +49,14 @@ export const asyncSearchServiceProvider = (
       // 95th percentile to be displayed as a marker in the log log chart
       const {
         totalDocs,
-        percentiles: percentileThreshold,
+        percentiles: percentilesResponseThresholds,
       } = await fetchTransactionDurationPercentiles(
         esClient,
         params,
         params.percentileThreshold ? [params.percentileThreshold] : undefined
       );
       const percentileThresholdValue =
-        percentileThreshold[`${params.percentileThreshold}.0`];
+        percentilesResponseThresholds[`${params.percentileThreshold}.0`];
       state.setPercentileThresholdValue(percentileThresholdValue);
 
       addLogMessage(
@@ -124,10 +124,14 @@ export const asyncSearchServiceProvider = (
       }
 
       // Create an array of ranges [2, 4, 6, ..., 98]
-      const percents = range(2, 100, 2);
+      const percentileAggregationPercents = range(2, 100, 2);
       const {
         percentiles: percentilesRecords,
-      } = await fetchTransactionDurationPercentiles(esClient, params, percents);
+      } = await fetchTransactionDurationPercentiles(
+        esClient,
+        params,
+        percentileAggregationPercents
+      );
       const percentiles = Object.values(percentilesRecords);
 
       addLogMessage(`Loaded percentiles.`);
