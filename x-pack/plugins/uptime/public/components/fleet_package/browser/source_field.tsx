@@ -127,7 +127,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
             helpText={
               <FormattedMessage
                 id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.params.helpText"
-                defaultMessage="A JSON object defining variables your tests always need to be defined."
+                defaultMessage="A JSON object that defines any variables your tests require."
               />
             }
           >
