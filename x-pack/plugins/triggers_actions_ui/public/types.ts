@@ -17,6 +17,7 @@ import {
   AlertHistoryDocumentTemplate,
   ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
+  AsApiContract,
 } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
 import {
@@ -58,6 +59,7 @@ export {
   AlertHistoryDocumentTemplate,
   AlertHistoryDefaultIndexName,
   ALERT_HISTORY_PREFIX,
+  AsApiContract,
 };
 
 export type ActionTypeIndex = Record<string, ActionType>;
