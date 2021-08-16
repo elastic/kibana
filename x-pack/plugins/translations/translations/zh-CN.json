@@ -9267,7 +9267,6 @@
     "xpack.enterpriseSearch.workplaceSearch.groups.sourceProioritization.zeroStateTitle": "未与此组共享任何源",
     "xpack.enterpriseSearch.workplaceSearch.groups.sourcesModalLabel": "共享内容源",
     "xpack.enterpriseSearch.workplaceSearch.groups.sourcesModalTitle": "选择要与 {groupName} 共享的内容源",
-    "xpack.enterpriseSearch.workplaceSearch.groups.userListCount": "正在显示 {numUsers} 个用户中的 {maxVisibleUsers} 个。",
     "xpack.enterpriseSearch.workplaceSearch.keepEditing.button": "继续编辑",
     "xpack.enterpriseSearch.workplaceSearch.name.label": "名称",
     "xpack.enterpriseSearch.workplaceSearch.nav.addSource": "添加源",

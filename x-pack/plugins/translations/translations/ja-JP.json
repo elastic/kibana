@@ -9019,7 +9019,6 @@
     "xpack.enterpriseSearch.workplaceSearch.groups.sourceProioritization.zeroStateTitle": "ソースはこのグループと共有されていません",
     "xpack.enterpriseSearch.workplaceSearch.groups.sourcesModalLabel": "共有コンテンツソース",
     "xpack.enterpriseSearch.workplaceSearch.groups.sourcesModalTitle": "{groupName}と共有するコンテンツソースを選択",
-    "xpack.enterpriseSearch.workplaceSearch.groups.userListCount": "{maxVisibleUsers}/{numUsers}ユーザーを表示しています。",
     "xpack.enterpriseSearch.workplaceSearch.keepEditing.button": "編集を続行",
     "xpack.enterpriseSearch.workplaceSearch.name.label": "名前",
     "xpack.enterpriseSearch.workplaceSearch.nav.addSource": "ソースの追加",
