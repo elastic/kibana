@@ -15,9 +15,10 @@ import {
   TIMESTAMP,
   ALERT_RULE_ID,
 } from '@kbn/rule-data-utils';
-import { once } from 'lodash/fp';
 import moment from 'moment';
-import { RuleDataClient } from '../../../../../../rule_registry/server';
+
+import { mappingFromFieldMap } from '../../../../../../rule_registry/common/mapping_from_field_map';
+import { Dataset, IRuleDataClient } from '../../../../../../rule_registry/server';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { invariant } from '../../../../../common/utils/invariant';
@@ -29,15 +30,9 @@ import {
   IRuleDataPluginService,
   LogStatusChangeArgs,
 } from '../types';
-import {
-  EVENTS_INDEX_PREFIX,
-  EVENT_SEQUENCE,
-  MESSAGE,
-  RULE_STATUS,
-  RULE_STATUS_SEVERITY,
-} from './constants';
+import { EVENT_SEQUENCE, MESSAGE, RULE_STATUS, RULE_STATUS_SEVERITY } from './constants';
 import { parseRuleExecutionLog, RuleExecutionEvent } from './parse_rule_execution_log';
-import { bootstrapRuleExecutionLog } from './rule_execution_log_bootstrapper';
+import { ruleExecutionFieldMap } from './rule_execution_field_map';
 import {
   getLastEntryAggregation,
   getMetricAggregation,
@@ -76,19 +71,26 @@ interface IRuleRegistryLogClient {
  */
 export class RuleRegistryLogClient implements IRuleRegistryLogClient {
   private sequence = 0;
-  private ruleDataClient: RuleDataClient;
+  private ruleDataClient: IRuleDataClient;
 
   constructor(ruleDataService: IRuleDataPluginService) {
-    this.ruleDataClient = ruleDataService.getRuleDataClient(
-      SERVER_APP_ID,
-      EVENTS_INDEX_PREFIX,
-      () => this.initialize(ruleDataService, EVENTS_INDEX_PREFIX)
-    );
+    this.ruleDataClient = ruleDataService.initializeIndex({
+      feature: SERVER_APP_ID,
+      registrationContext: 'security',
+      dataset: Dataset.events,
+      componentTemplateRefs: [],
+      componentTemplates: [
+        {
+          name: 'mappings',
+          version: 0,
+          mappings: mappingFromFieldMap(ruleExecutionFieldMap, 'strict'),
+        },
+      ],
+      indexTemplate: {
+        version: 0,
+      },
+    });
   }
-
-  private initialize = once(async (ruleDataService: IRuleDataPluginService, indexAlias: string) => {
-    await bootstrapRuleExecutionLog(ruleDataService, indexAlias);
-  });
 
   public async find({ ruleIds, spaceId, statuses, logsCount = 1 }: FindExecutionLogArgs) {
     if (ruleIds.length === 0) {

@@ -10,6 +10,7 @@ import {
   SearchParamsMock,
   inspectSearchParams,
 } from '../../../utils/test_helpers';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 describe('error distribution queries', () => {
   let mock: SearchParamsMock;
@@ -23,6 +24,8 @@ describe('error distribution queries', () => {
       getErrorDistribution({
         serviceName: 'serviceName',
         setup,
+        environment: ENVIRONMENT_ALL.value,
+        kuery: '',
       })
     );
 
@@ -35,6 +38,8 @@ describe('error distribution queries', () => {
         serviceName: 'serviceName',
         groupId: 'foo',
         setup,
+        environment: ENVIRONMENT_ALL.value,
+        kuery: '',
       })
     );
 
