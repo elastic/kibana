@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import type { Query } from 'src/plugins/data/common';
 import { Filter, IFieldType, IndexPattern, ISearchSource } from 'src/plugins/data/public';
-import { AbstractVectorSource, LayerDataFilters } from '../vector_source';
+import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
 import {
   getAutocompleteService,
   getIndexPatternService,
@@ -205,7 +205,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   async makeSearchSource(
-    searchFilters: VectorSourceRequestMeta | VectorJoinSourceRequestMeta | LayerDataFilters,
+    searchFilters: VectorSourceRequestMeta | VectorJoinSourceRequestMeta | BoundsRequestMeta,
     limit: number,
     initialSearchContext?: object
   ): Promise<ISearchSource> {
@@ -261,7 +261,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   async getBoundsForFilters(
-    boundsFilters: LayerDataFilters,
+    boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     const searchSource = await this.makeSearchSource(boundsFilters, 0);

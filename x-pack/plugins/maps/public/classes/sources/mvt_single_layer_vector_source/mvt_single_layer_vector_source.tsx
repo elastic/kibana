@@ -10,7 +10,7 @@ import uuid from 'uuid/v4';
 import React from 'react';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { LayerDataFilters, GeoJsonWithMeta } from '../vector_source';
+import { BoundsRequestMeta, GeoJsonWithMeta } from '../vector_source';
 import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
 import {
   FIELD_ORIGIN,
@@ -190,7 +190,7 @@ export class MVTSingleLayerVectorSource
   }
 
   async getBoundsForFilters(
-    boundsFilters: LayerDataFilters,
+    boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     return null;

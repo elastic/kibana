@@ -34,7 +34,7 @@ export interface GeoJsonWithMeta {
   meta?: GeoJsonFetchMeta;
 }
 
-export interface LayerDataFilters {
+export interface BoundsRequestMeta {
   applyGlobalQuery: boolean;
   applyGlobalTime: boolean;
   filters: Filter[];
@@ -47,7 +47,7 @@ export interface LayerDataFilters {
 export interface IVectorSource extends ISource {
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
-    layerDataFilters: LayerDataFilters,
+    layerDataFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null>;
   getGeoJsonWithMeta(
@@ -100,7 +100,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   }
 
   async getBoundsForFilters(
-    boundsFilters: LayerDataFilters,
+    boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     return null;

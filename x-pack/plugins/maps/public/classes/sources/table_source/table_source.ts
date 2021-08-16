@@ -21,7 +21,7 @@ import { BucketProperties, PropertiesMap } from '../../../../common/elasticsearc
 import { IField } from '../../fields/field';
 import {
   AbstractVectorSource,
-  LayerDataFilters,
+  BoundsRequestMeta,
   GeoJsonWithMeta,
   IVectorSource,
   SourceTooltipConfig,
@@ -155,7 +155,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   }
 
   async getBoundsForFilters(
-    boundsFilters: LayerDataFilters,
+    boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     return null;
