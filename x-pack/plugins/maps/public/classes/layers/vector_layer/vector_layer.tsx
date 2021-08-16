@@ -627,7 +627,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       return;
     }
 
-    const meta = await this._getVectorSourceRequestMeta(syncContext.dataFilters, source, style);
     try {
       await this._syncSourceStyleMeta(syncContext, source, style);
       await this._syncSourceFormatters(syncContext, source, style);
@@ -635,7 +634,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         layerId: this.getId(),
         layerName: await this.getDisplayName(source),
         prevDataRequest: this.getSourceDataRequest(),
-        requestMeta: meta,
+        requestMeta: await this._getVectorSourceRequestMeta(syncContext.dataFilters, source, style),
         syncContext,
         source,
         getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
