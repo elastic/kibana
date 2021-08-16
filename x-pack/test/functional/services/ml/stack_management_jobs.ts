@@ -59,14 +59,8 @@ export function MachineLearningStackManagementJobsProvider({ getService }: FtrPr
       return count;
     },
 
-    async assertAllSyncFlyoutObjectCounts(expectedCount: number) {
-      const objectTypes: SyncFlyoutObjectType[] = [
-        'MissingObjects',
-        'UnmatchedObjects',
-        'ObjectsMissingDatafeed',
-        'ObjectsUnmatchedDatafeed',
-      ];
-      for (const objectType of objectTypes) {
+    async assertSyncFlyoutObjectCounts(expectedCounts: Map<SyncFlyoutObjectType, number>) {
+      for (const [objectType, expectedCount] of expectedCounts) {
         const actualObjectCount = await this.getSyncFlyoutObjectCountFromTitle(objectType);
         expect(actualObjectCount).to.eql(
           expectedCount,

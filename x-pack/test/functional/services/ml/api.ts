@@ -686,6 +686,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return response;
     },
 
+    async dfaJobExist(analyticsId: string) {
+      try {
+        await this.getDataFrameAnalyticsJob(analyticsId);
+        return true;
+      } catch (err) {
+        return false;
+      }
+    },
+
     async waitForDataFrameAnalyticsJobToExist(analyticsId: string) {
       await retry.waitForWithTimeout(`'${analyticsId}' to exist`, 5 * 1000, async () => {
         if (await this.getDataFrameAnalyticsJob(analyticsId)) {
@@ -738,6 +747,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async deleteDataFrameAnalyticsJobES(analyticsId: string) {
       log.debug(`Deleting data frame analytics job with id '${analyticsId}' ...`);
+
+      if ((await this.dfaJobExist(analyticsId)) === false) {
+        log.debug('> no such DFA job found, nothing to delete.');
+        return;
+      }
 
       await esSupertest
         .delete(`/_ml/data_frame/analytics/${analyticsId}`)

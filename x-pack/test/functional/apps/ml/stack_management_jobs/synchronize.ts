@@ -16,10 +16,14 @@ export default function ({ getService }: FtrProviderContext) {
   const adJobId3 = 'fq_single_3';
   const adJobIdES = 'fq_single_es';
 
+  const dfaJobId1 = 'ihp_od_1';
+  const dfaJobIdES = 'ihp_od_es';
+
   describe('synchronize', function () {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -28,8 +32,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      for (const jobId of [adJobId1, adJobId2, adJobId3, adJobIdES]) {
-        await ml.api.deleteAnomalyDetectionJobES(jobId);
+      for (const adJobId of [adJobId1, adJobId2, adJobId3, adJobIdES]) {
+        await ml.api.deleteAnomalyDetectionJobES(adJobId);
+      }
+      for (const dfaJobId of [dfaJobId1, dfaJobIdES]) {
+        await ml.api.deleteDataFrameAnalyticsJobES(dfaJobId);
       }
       await ml.testResources.cleanMLSavedObjects();
     });
@@ -43,7 +50,14 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToStackManagement();
       await ml.navigation.navigateToStackManagementJobsListPage();
       await ml.stackManagementJobs.openSyncFlyout();
-      await ml.stackManagementJobs.assertAllSyncFlyoutObjectCounts(0);
+      await ml.stackManagementJobs.assertSyncFlyoutObjectCounts(
+        new Map([
+          ['MissingObjects', 0],
+          ['UnmatchedObjects', 0],
+          ['ObjectsMissingDatafeed', 0],
+          ['ObjectsUnmatchedDatafeed', 0],
+        ])
+      );
       await ml.stackManagementJobs.assertSyncFlyoutSyncButtonEnabled(false);
     });
 
@@ -54,10 +68,16 @@ export default function ({ getService }: FtrProviderContext) {
       for (const jobId of [adJobId1, adJobId2, adJobId3]) {
         await ml.api.createAnomalyDetectionJob(ml.commonConfig.getADFqSingleMetricJobConfig(jobId));
       }
+      await ml.api.createDataFrameAnalyticsJob(
+        ml.commonConfig.getDFAIhpOutlierDetectionJobConfig(dfaJobId1)
+      );
 
       // create via ES API so saved objects are missing
       await ml.api.createAnomalyDetectionJobES(
         ml.commonConfig.getADFqSingleMetricJobConfig(adJobIdES)
+      );
+      await ml.api.createDataFrameAnalyticsJobES(
+        ml.commonConfig.getDFAIhpOutlierDetectionJobConfig(dfaJobIdES)
       );
 
       // modify jobs
@@ -76,6 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // left-over SO should be removed with the sync later
       await ml.api.deleteAnomalyDetectionJobES(adJobId1);
+      await ml.api.deleteDataFrameAnalyticsJobES(dfaJobId1);
     });
 
     it('should have objects to sync', async () => {
@@ -87,7 +108,14 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToStackManagement();
       await ml.navigation.navigateToStackManagementJobsListPage();
       await ml.stackManagementJobs.openSyncFlyout();
-      await ml.stackManagementJobs.assertAllSyncFlyoutObjectCounts(1);
+      await ml.stackManagementJobs.assertSyncFlyoutObjectCounts(
+        new Map([
+          ['MissingObjects', 2],
+          ['UnmatchedObjects', 2],
+          ['ObjectsMissingDatafeed', 1],
+          ['ObjectsUnmatchedDatafeed', 1],
+        ])
+      );
       await ml.stackManagementJobs.assertSyncFlyoutSyncButtonEnabled(true);
     });
 
@@ -99,7 +127,14 @@ export default function ({ getService }: FtrProviderContext) {
     it('should have nothing to sync anymore', async () => {
       // object counts in sync flyout are all 0, sync button is disabled
       await ml.stackManagementJobs.openSyncFlyout();
-      await ml.stackManagementJobs.assertAllSyncFlyoutObjectCounts(0);
+      await ml.stackManagementJobs.assertSyncFlyoutObjectCounts(
+        new Map([
+          ['MissingObjects', 0],
+          ['UnmatchedObjects', 0],
+          ['ObjectsMissingDatafeed', 0],
+          ['ObjectsUnmatchedDatafeed', 0],
+        ])
+      );
       await ml.stackManagementJobs.assertSyncFlyoutSyncButtonEnabled(false);
       await ml.stackManagementJobs.closeSyncFlyout();
 
