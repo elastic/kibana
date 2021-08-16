@@ -16,7 +16,7 @@ import { TimelineNonEcsData } from '../../../../timelines/common/search_strategy
 import { TGridCellAction } from '../../../../timelines/common/types/timeline';
 import { TimelinesUIStart } from '../../../../timelines/public';
 
-export const FILTER_FOR_VALUE = i18n.translate('xpack.timelines.hoverActions.filterForValue', {
+export const FILTER_FOR_VALUE = i18n.translate('xpack.observability.hoverActions.filterForValue', {
   defaultMessage: 'Filter for value',
 });
 
