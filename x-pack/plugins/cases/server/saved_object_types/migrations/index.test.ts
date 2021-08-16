@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import {
-  LensDocShape,
-  migrations as lensMigrations,
-} from '../../../../lens/server/migrations/saved_object_migrations';
 import { createCommentsMigrations } from './index';
-import { SavedObjectMigrationFn } from 'src/core/server';
 import { getLensVisualizations, parseCommentString } from '../../common';
 
-describe('Comments migrations', () => {
+import { savedObjectsServiceMock } from '../../../../../../src/core/server/mocks';
+import { lensEmbeddableFactory } from '../../../../lens/server/embeddable/lens_embeddable_factory';
+
+const migrations = createCommentsMigrations({
+  lensEmbeddableFactory,
+});
+
+const contextMock = savedObjectsServiceMock.createMigrationContext();
+
+describe('lens embeddable migrations for by value panels', () => {
   describe('7.14.0 remove time zone from Lens visualization date histogram', () => {
     const lensVisualizationToMigrate = {
       title: 'MyRenamedOps',
@@ -208,19 +212,9 @@ describe('Comments migrations', () => {
     };
 
     it('should remove time zone param from date histogram', () => {
-      const commentsMigrations714 = createCommentsMigrations({
-        embeddable: {
-          getAllMigrations: () => lensMigrations,
-        },
-      });
-      const result = commentsMigrations714['7.14.0'](caseComment) as ReturnType<
-        SavedObjectMigrationFn<
-          LensDocShape,
-          {
-            comment: string;
-          }
-        >
-      >;
+      expect(migrations['7.14.0']).toBeDefined();
+      const result = migrations['7.14.0'](caseComment, contextMock);
+
       const parsedComment = parseCommentString(result.attributes.comment);
       const lensVisualizations = getLensVisualizations(parsedComment.children);
 

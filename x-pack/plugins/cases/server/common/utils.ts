@@ -21,10 +21,9 @@ import {
 } from 'kibana/server';
 import { filter, flatMap, uniqWith, isEmpty, xorWith } from 'lodash';
 import { TimeRange } from 'src/plugins/data/server';
-import { EmbeddableStart } from 'src/plugins/embeddable/server';
 import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
 import { AlertInfo } from '.';
-import { LensDocShape714 } from '../../../lens/server';
+import { LensServerPluginSetup, LensDocShape715 } from '../../../lens/server';
 
 import {
   AssociationType,
@@ -417,9 +416,9 @@ export const getNoneCaseConnector = () => ({
   fields: null,
 });
 
-interface LensMarkdownNode {
+interface LensMarkdownNode extends EmbeddableStateWithType {
   timeRange: TimeRange;
-  attributes: LensDocShape714 & { references: SavedObjectReference[] };
+  attributes: LensDocShape715 & { references: SavedObjectReference[] };
 }
 
 export const parseCommentString = (comment: string) => {
@@ -448,39 +447,44 @@ export const stringifyComment = (comment: Parent) =>
     .stringify(comment);
 
 export const getLensVisualizations = (parsedComment: Array<LensMarkdownNode | Node>) =>
-  filter(parsedComment, { type: LENS_ID }) as EmbeddableStateWithType[];
+  filter(parsedComment, { type: LENS_ID }) as LensMarkdownNode[];
 
 export const extractLensReferencesFromCommentString = (
-  embeddable: EmbeddableStart,
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'],
   comment: string
 ): SavedObjectReference[] => {
-  const parsedComment = parseCommentString(comment);
-  const lensVisualizations = getLensVisualizations(parsedComment.children);
-  const flattenRefs = flatMap(
-    lensVisualizations,
-    (lensObject) => embeddable.extract(lensObject)?.references ?? []
-  );
+  const extract = lensEmbeddableFactory()?.extract;
 
-  const uniqRefs = uniqWith(
-    flattenRefs,
-    (refA, refB) => refA.type === refB.type && refA.id === refB.id && refA.name === refB.name
-  );
+  if (extract) {
+    const parsedComment = parseCommentString(comment);
+    const lensVisualizations = getLensVisualizations(parsedComment.children);
+    const flattenRefs = flatMap(
+      lensVisualizations,
+      (lensObject) => extract(lensObject)?.references ?? []
+    );
 
-  return uniqRefs;
+    const uniqRefs = uniqWith(
+      flattenRefs,
+      (refA, refB) => refA.type === refB.type && refA.id === refB.id && refA.name === refB.name
+    );
+
+    return uniqRefs;
+  }
+  return [];
 };
 
 export const getOrUpdateLensReferences = (
-  embeddable: EmbeddableStart,
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'],
   newComment: string,
   currentComment?: SavedObject<CommentRequestUserType>
 ) => {
   if (!currentComment) {
-    return extractLensReferencesFromCommentString(embeddable, newComment);
+    return extractLensReferencesFromCommentString(lensEmbeddableFactory, newComment);
   }
 
   const savedObjectReferences = currentComment.references;
   const savedObjectLensReferences = extractLensReferencesFromCommentString(
-    embeddable,
+    lensEmbeddableFactory,
     currentComment.attributes.comment
   );
 
@@ -490,7 +494,10 @@ export const getOrUpdateLensReferences = (
     (refA, refB) => refA.type === refB.type && refA.id === refB.id
   );
 
-  const newCommentLensReferences = extractLensReferencesFromCommentString(embeddable, newComment);
+  const newCommentLensReferences = extractLensReferencesFromCommentString(
+    lensEmbeddableFactory,
+    newComment
+  );
 
   return currentNonLensReferences.concat(newCommentLensReferences);
 };

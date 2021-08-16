@@ -11,7 +11,6 @@ import {
   Logger,
   ElasticsearchClient,
 } from 'kibana/server';
-import { EmbeddableStart } from 'src/plugins/embeddable/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../../security/server';
 import { SAVED_OBJECT_TYPES } from '../../common';
 import { Authorization } from '../authorization/authorization';
@@ -26,6 +25,8 @@ import {
 } from '../services';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
+import { LensServerPluginSetup } from '../../../lens/server';
+
 import { AuthorizationAuditLogger } from '../authorization';
 import { CasesClient, createCasesClient } from '.';
 
@@ -35,7 +36,7 @@ interface CasesClientFactoryArgs {
   getSpace: GetSpaceFn;
   featuresPluginStart: FeaturesPluginStart;
   actionsPluginStart: ActionsPluginStart;
-  embeddablePluginStart: EmbeddableStart;
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }
 
 /**
@@ -110,7 +111,7 @@ export class CasesClientFactory {
       userActionService: new CaseUserActionService(this.logger),
       attachmentService: new AttachmentService(this.logger),
       logger: this.logger,
-      embeddable: this.options.embeddablePluginStart,
+      lensEmbeddableFactory: this.options.lensEmbeddableFactory,
       authorization: auth,
       actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
     });

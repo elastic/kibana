@@ -8,6 +8,7 @@
 import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
 import { LensServerPlugin } from './plugin';
 
+export type { LensServerPluginSetup } from './plugin';
 export * from './plugin';
 export * from './migrations/types';
 

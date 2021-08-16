@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { flow, mapValues } from 'lodash';
-import { EmbeddableSetup } from '../../../../../../src/plugins/embeddable/server';
+import { LensServerPluginSetup } from '../../../../lens/server';
 
 import {
   mergeMigrationFunctionMaps,
@@ -136,14 +136,14 @@ const migrateByValueLensVisualizations = (
 };
 
 export interface CreateCommentsMigrationsDeps {
-  embeddable: EmbeddableSetup;
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }
 
 export const createCommentsMigrations = (
   migrationDeps: CreateCommentsMigrationsDeps
 ): SavedObjectMigrationMap => {
   const embeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigrationFn>(
-    migrationDeps.embeddable.getAllMigrations(),
+    migrationDeps.lensEmbeddableFactory().migrations,
     migrateByValueLensVisualizations
   ) as MigrateFunctionsObject;
 

@@ -9,7 +9,7 @@ import { pick } from 'lodash/fp';
 import Boom from '@hapi/boom';
 
 import { SavedObjectsClientContract, Logger } from 'kibana/server';
-import { EmbeddableStart } from 'src/plugins/embeddable/server';
+import { LensServerPluginSetup } from '../../../../lens/server';
 import { checkEnabledCaseConnectorOrThrow, CommentableCase, createCaseError } from '../../common';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 import {
@@ -47,7 +47,7 @@ interface CombinedCaseParams {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   caseID: string;
   logger: Logger;
-  embeddable: EmbeddableStart;
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   subCaseId?: string;
 }
 
@@ -58,7 +58,7 @@ async function getCommentableCase({
   caseID,
   subCaseId,
   logger,
-  embeddable,
+  lensEmbeddableFactory,
 }: CombinedCaseParams) {
   if (subCaseId) {
     const [caseInfo, subCase] = await Promise.all([
@@ -78,7 +78,7 @@ async function getCommentableCase({
       subCase,
       unsecuredSavedObjectsClient,
       logger,
-      embeddable,
+      lensEmbeddableFactory,
     });
   } else {
     const caseInfo = await caseService.getCase({
@@ -91,7 +91,7 @@ async function getCommentableCase({
       collection: caseInfo,
       unsecuredSavedObjectsClient,
       logger,
-      embeddable,
+      lensEmbeddableFactory,
     });
   }
 }
@@ -110,7 +110,7 @@ export async function update(
     caseService,
     unsecuredSavedObjectsClient,
     logger,
-    embeddable,
+    lensEmbeddableFactory,
     user,
     userActionService,
     authorization,
@@ -134,7 +134,7 @@ export async function update(
       caseID,
       subCaseId: subCaseID,
       logger,
-      embeddable,
+      lensEmbeddableFactory,
     });
 
     const myComment = await attachmentService.get({

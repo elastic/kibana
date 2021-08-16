@@ -872,7 +872,6 @@ describe('common utils', () => {
 
   describe('extractLensReferencesFromCommentString', () => {
     it('extracts successfully', () => {
-      const lensEmbeddable = lensEmbeddableFactory();
       const commentString = [
         '**Test**   ',
         'Amazingg!!!',
@@ -882,7 +881,7 @@ describe('common utils', () => {
       ].join('\n\n');
 
       const extractedReferences = extractLensReferencesFromCommentString(
-        lensEmbeddable,
+        lensEmbeddableFactory,
         commentString
       );
 
@@ -911,7 +910,6 @@ describe('common utils', () => {
 
   describe('getOrUpdateLensReferences', () => {
     it('update references', () => {
-      const lensEmbeddable = lensEmbeddableFactory();
       const currentCommentStringReferences = [
         [
           {
@@ -981,16 +979,12 @@ describe('common utils', () => {
         )}},"editMode":false}}`,
       ].join('\n\n');
 
-      const updatedReferences = getOrUpdateLensReferences(
-        lensEmbeddable as EmbeddableStart,
-        newCommentString,
-        {
-          references: currentCommentReferences,
-          attributes: {
-            comment: currentCommentString,
-          },
-        } as SavedObject<CommentRequestUserType>
-      );
+      const updatedReferences = getOrUpdateLensReferences(lensEmbeddableFactory, newCommentString, {
+        references: currentCommentReferences,
+        attributes: {
+          comment: currentCommentString,
+        },
+      } as SavedObject<CommentRequestUserType>);
 
       const expectedReferences = [
         ...nonLensCurrentCommentReferences,

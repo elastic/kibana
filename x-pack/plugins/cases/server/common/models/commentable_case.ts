@@ -14,7 +14,7 @@ import {
   SavedObjectsUpdateResponse,
   Logger,
 } from 'src/core/server';
-import { EmbeddableStart } from 'src/plugins/embeddable/server';
+import { LensServerPluginSetup } from '../../../../lens/server';
 import {
   AssociationType,
   CASE_SAVED_OBJECT,
@@ -57,7 +57,7 @@ interface CommentableCaseParams {
   caseService: CasesService;
   attachmentService: AttachmentService;
   logger: Logger;
-  embeddable: EmbeddableStart;
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }
 
 /**
@@ -71,7 +71,7 @@ export class CommentableCase {
   private readonly caseService: CasesService;
   private readonly attachmentService: AttachmentService;
   private readonly logger: Logger;
-  private readonly embeddable: EmbeddableStart;
+  private readonly lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 
   constructor({
     collection,
@@ -80,7 +80,7 @@ export class CommentableCase {
     caseService,
     attachmentService,
     logger,
-    embeddable,
+    lensEmbeddableFactory,
   }: CommentableCaseParams) {
     this.collection = collection;
     this.subCase = subCase;
@@ -88,7 +88,7 @@ export class CommentableCase {
     this.caseService = caseService;
     this.attachmentService = attachmentService;
     this.logger = logger;
-    this.embeddable = embeddable;
+    this.lensEmbeddableFactory = lensEmbeddableFactory;
   }
 
   public get status(): CaseStatuses {
@@ -196,7 +196,7 @@ export class CommentableCase {
         caseService: this.caseService,
         attachmentService: this.attachmentService,
         logger: this.logger,
-        embeddable: this.embeddable,
+        lensEmbeddableFactory: this.lensEmbeddableFactory,
       });
     } catch (error) {
       throw createCaseError({
@@ -232,7 +232,7 @@ export class CommentableCase {
         })) as SavedObject<CommentRequestUserType>;
 
         const updatedReferences = getOrUpdateLensReferences(
-          this.embeddable,
+          this.lensEmbeddableFactory,
           queryRestAttributes.comment,
           currentComment
         );
@@ -298,7 +298,7 @@ export class CommentableCase {
 
       if (commentReq.type === CommentType.user && commentReq?.comment) {
         const commentStringReferences = getOrUpdateLensReferences(
-          this.embeddable,
+          this.lensEmbeddableFactory,
           commentReq.comment
         );
         references = [...references, ...commentStringReferences];

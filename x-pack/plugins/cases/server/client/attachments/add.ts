@@ -10,13 +10,13 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { EmbeddableStart } from 'src/plugins/embeddable/server';
 import {
   SavedObject,
   SavedObjectsClientContract,
   Logger,
   SavedObjectsUtils,
 } from '../../../../../../src/core/server';
+import { LensServerPluginSetup } from '../../../../lens/server';
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 
 import {
@@ -125,7 +125,7 @@ const addGeneratedAlerts = async (
     caseService,
     userActionService,
     logger,
-    embeddable,
+    lensEmbeddableFactory,
     authorization,
   } = clientArgs;
 
@@ -184,7 +184,7 @@ const addGeneratedAlerts = async (
       unsecuredSavedObjectsClient,
       caseService,
       attachmentService,
-      embeddable,
+      lensEmbeddableFactory,
     });
 
     const {
@@ -244,14 +244,14 @@ async function getCombinedCase({
   unsecuredSavedObjectsClient,
   id,
   logger,
-  embeddable,
+  lensEmbeddableFactory,
 }: {
   caseService: CasesService;
   attachmentService: AttachmentService;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   id: string;
   logger: Logger;
-  embeddable: EmbeddableStart;
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }): Promise<CommentableCase> {
   const [casePromise, subCasePromise] = await Promise.allSettled([
     caseService.getCase({
@@ -281,7 +281,7 @@ async function getCombinedCase({
         caseService,
         attachmentService,
         unsecuredSavedObjectsClient,
-        embeddable,
+        lensEmbeddableFactory,
       });
     } else {
       throw Boom.badRequest('Sub case found without reference to collection');
@@ -297,7 +297,7 @@ async function getCombinedCase({
       caseService,
       attachmentService,
       unsecuredSavedObjectsClient,
-      embeddable,
+      lensEmbeddableFactory,
     });
   }
 }
@@ -339,7 +339,7 @@ export const addComment = async (
     attachmentService,
     user,
     logger,
-    embeddable,
+    lensEmbeddableFactory,
     authorization,
   } = clientArgs;
 
@@ -370,7 +370,7 @@ export const addComment = async (
       unsecuredSavedObjectsClient,
       id: caseId,
       logger,
-      embeddable,
+      lensEmbeddableFactory,
     });
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
