@@ -13,12 +13,7 @@ import {
   OverrideRule,
 } from '../../objects/rule';
 
-import {
-  NUMBER_OF_ALERTS,
-  ALERT_RULE_NAME,
-  ALERT_RULE_RISK_SCORE,
-  ALERT_RULE_SEVERITY,
-} from '../../screens/alerts';
+import { NUMBER_OF_ALERTS, ALERT_GRID_CELL } from '../../screens/alerts';
 
 import {
   CUSTOM_RULES_BTN,
@@ -61,7 +56,6 @@ import {
 
 import {
   goToManageAlertsDetectionRules,
-  sortRiskScore,
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
@@ -192,12 +186,13 @@ describe('Detection rules, override', () => {
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text()).to.be.gte(1));
-    cy.get(ALERT_RULE_NAME).first().should('have.text', 'auditbeat');
-    cy.get(ALERT_RULE_SEVERITY).first().should('have.text', 'critical');
+    cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text().split(' ')[0]).to.be.gte(1));
+    cy.get(ALERT_GRID_CELL).eq(3).contains('auditbeat');
+    cy.get(ALERT_GRID_CELL).eq(4).contains('critical');
 
-    sortRiskScore();
+    // TODO: Is this necessary?
+    // sortRiskScore();
 
-    cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', '80');
+    cy.get(ALERT_GRID_CELL).eq(5).contains('80');
   });
 });
