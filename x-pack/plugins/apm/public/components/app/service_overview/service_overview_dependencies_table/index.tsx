@@ -26,7 +26,6 @@ export function ServiceOverviewDependenciesTable() {
     urlParams: {
       start,
       end,
-      environment,
       comparisonEnabled,
       comparisonType,
       latencyAggregationType,
@@ -35,7 +34,7 @@ export function ServiceOverviewDependenciesTable() {
 
   const {
     query,
-    query: { kuery, rangeFrom, rangeTo },
+    query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName/*');
 
   const { offset } = getTimeRangeComparison({

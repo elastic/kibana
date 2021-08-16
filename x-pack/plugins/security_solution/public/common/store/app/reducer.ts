@@ -11,20 +11,14 @@ import { Note } from '../../lib/note';
 
 import { addError, addErrorHash, addNotes, removeError, updateNote } from './actions';
 import { AppModel, NotesById } from './model';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 export type AppState = AppModel;
 
 export const initialAppState: AppState = {
   notesById: {},
   errors: [],
-  enableExperimental: {
-    trustedAppsByPolicyEnabled: false,
-    excludePoliciesInFilterEnabled: false,
-    metricsEntitiesEnabled: false,
-    ruleRegistryEnabled: false,
-    tGridEnabled: false,
-    uebaEnabled: false,
-  },
+  enableExperimental: { ...allowedExperimentalValues },
 };
 
 interface UpdateNotesByIdParams {

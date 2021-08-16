@@ -18,6 +18,7 @@ import type {
   UseDraggableKeyboardWrapper,
   UseDraggableKeyboardWrapperProps,
 } from './components';
+export type { SortDirection } from '../common';
 import type { TGridIntegratedProps } from './components/t_grid/integrated';
 import type { TGridStandaloneProps } from './components/t_grid/standalone';
 import type { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';
@@ -41,6 +42,9 @@ export interface TimelinesUIStart {
   ) => UseDraggableKeyboardWrapper;
   setTGridEmbeddedStore: (store: Store) => void;
   getAddToCaseAction: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
+  getAddToCasePopover: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
+  getAddToExistingCaseButton: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
+  getAddToNewCaseButton: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
 }
 
 export interface TimelinesStartPlugins {
