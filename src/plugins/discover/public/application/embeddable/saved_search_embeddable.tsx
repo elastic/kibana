@@ -170,6 +170,14 @@ export class SavedSearchEmbeddable
     this.searchProps!.isLoading = true;
 
     this.updateOutput({ loading: true, error: undefined });
+    const executionContext = {
+      type: this.type,
+      name: 'discover',
+      id: this.savedSearch.id,
+      description: this.output.title || this.output.defaultTitle || '',
+      url: this.output.editUrl,
+      parent: this.input.executionContext,
+    };
 
     try {
       // Make the request
@@ -187,6 +195,7 @@ export class SavedSearchEmbeddable
                 'This request queries Elasticsearch to fetch the data for the search.',
             }),
           },
+          executionContext,
         })
         .toPromise();
       this.updateOutput({ loading: false, error: undefined });

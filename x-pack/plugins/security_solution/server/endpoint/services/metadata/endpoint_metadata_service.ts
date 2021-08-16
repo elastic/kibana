@@ -24,8 +24,14 @@ import {
   FleetAgentNotFoundError,
   FleetAgentPolicyNotFoundError,
 } from './errors';
-import { getESQueryHostMetadataByID } from '../../routes/metadata/query_builders';
-import { queryResponseToHostResult } from '../../routes/metadata/support/query_strategies';
+import {
+  getESQueryHostMetadataByFleetAgentIds,
+  getESQueryHostMetadataByID,
+} from '../../routes/metadata/query_builders';
+import {
+  queryResponseToHostListResult,
+  queryResponseToHostResult,
+} from '../../routes/metadata/support/query_strategies';
 import {
   catchAndWrapError,
   DEFAULT_ENDPOINT_HOST_STATUS,
@@ -62,7 +68,7 @@ export class EndpointMetadataService {
    *
    * @private
    */
-  public get DANGEROUS_INTERNAL_SO_CLIENT() {
+  private get DANGEROUS_INTERNAL_SO_CLIENT() {
     // The INTERNAL SO client must be created during the first time its used. This is because creating it during
     // instance initialization (in `constructor(){}`) causes the SO Client to be invalid (perhaps because this
     // instantiation is happening during the plugin's the start phase)
@@ -93,6 +99,26 @@ export class EndpointMetadataService {
     }
 
     throw new EndpointHostNotFoundError(`Endpoint with id ${endpointId} not found`);
+  }
+
+  /**
+   * Find a  list of Endpoint Host Metadata document associated with a given list of Fleet Agent Ids
+   * @param esClient
+   * @param fleetAgentIds
+   */
+  async findHostMetadataForFleetAgents(
+    esClient: ElasticsearchClient,
+    fleetAgentIds: string[]
+  ): Promise<HostMetadata[]> {
+    const query = getESQueryHostMetadataByFleetAgentIds(fleetAgentIds);
+
+    query.size = fleetAgentIds.length;
+
+    const searchResult = await esClient
+      .search<HostMetadata>(query, { ignore: [404] })
+      .catch(catchAndWrapError);
+
+    return queryResponseToHostListResult(searchResult.body).resultList;
   }
 
   /**

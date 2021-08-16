@@ -39,8 +39,8 @@ export async function getErrorRate({
   start,
   end,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
@@ -144,8 +144,8 @@ export async function getErrorRatePeriods({
   comparisonStart,
   comparisonEnd,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
