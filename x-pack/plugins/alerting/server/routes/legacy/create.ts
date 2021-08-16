@@ -73,7 +73,8 @@ export const createAlertRoute = (
         const params = req.params;
         const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as AlertNotifyWhenType) : null;
 
-        const shouldWarnId = params?.id && rulesClient.getSpaceId() !== 'default';
+        const spaceId = rulesClient.getSpaceId();
+        const shouldWarnId = params?.id && spaceId !== undefined && spaceId !== 'default';
         if (shouldWarnId) {
           logger.warn(
             `POST ${LEGACY_BASE_ALERT_API_PATH}/alert/${params?.id}: Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the Alerting API docs at https://www.elastic.co/guide/en/kibana/current/create-rule-api.html for more details.`

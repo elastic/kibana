@@ -117,7 +117,8 @@ export const createRuleRoute = (
           const rule = req.body;
           const params = req.params;
 
-          const shouldWarnId = params?.id && rulesClient.getSpaceId() !== 'default';
+          const spaceId = rulesClient.getSpaceId();
+          const shouldWarnId = params?.id && spaceId !== undefined && spaceId !== 'default';
           if (shouldWarnId) {
             logger.warn(
               `POST ${BASE_ALERTING_API_PATH}/rule/${params?.id}: Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the Alerting API docs at https://www.elastic.co/guide/en/kibana/current/create-rule-api.html for more details.`
