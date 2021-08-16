@@ -59,7 +59,7 @@ export const HEALTH_CHECK_NAMES: Record<JobsHealthTests, { name: string; descrip
     description: i18n.translate(
       'xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesCheckDescription',
       {
-        defaultMessage: 'There are errors in the job messages',
+        defaultMessage: 'Get alerted if a job contains errors in the job messages.',
       }
     ),
   },
