@@ -6,6 +6,7 @@
  */
 
 import { ALERT_ID } from '@kbn/rule-data-utils';
+import { getCommonRuleFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeFactory } from './persistence_types';
 
 export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory = ({
@@ -24,11 +25,14 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
             logger.debug(`Found ${numAlerts} alerts.`);
 
             if (ruleDataClient.isWriteEnabled() && numAlerts) {
+              const commonRuleFields = getCommonRuleFields(options);
+
               const response = await ruleDataClient.getWriter().bulk({
                 body: alerts.flatMap((event) => [
                   { index: {} },
                   {
                     [ALERT_ID]: event.id,
+                    ...commonRuleFields,
                     ...event.fields,
                   },
                 ]),
