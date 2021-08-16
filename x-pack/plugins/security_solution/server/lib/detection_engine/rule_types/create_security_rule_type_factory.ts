@@ -36,7 +36,6 @@ import { RuleExecutionLogClient } from '../rule_execution_log/rule_execution_log
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
-  indexAlias,
   lists,
   logger,
   mergeStrategy,
@@ -83,7 +82,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         id: alertId,
         ruleId,
         name,
-        index: indexAlias,
+        index: ruleDataClient.indexName,
       });
 
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
@@ -273,7 +272,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
           logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));
           logger.debug(
             buildRuleMessage(
-              `[+] Finished indexing ${createdSignalsCount} signals into alias ${indexAlias}`
+              `[+] Finished indexing ${createdSignalsCount} signals into ${ruleDataClient.indexName}`
             )
           );
 
