@@ -128,13 +128,13 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
         error={
           parseInt(fields[ConfigKeys.TIMEOUT], 10) < 0 ? (
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.lessThanZeroError"
+              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.moreThanZeroError"
               defaultMessage="Timeout must be greater than or equal to 0"
             />
           ) : (
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.moreThanIntervalError"
-              defaultMessage="Timeout cannot be more than the monitor interval"
+              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.lessThanIntervalError"
+              defaultMessage="Timeout must be less than the monitor interval"
             />
           )
         }

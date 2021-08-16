@@ -7,7 +7,7 @@
 import 'jest-canvas-mock';
 
 import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, waitFor, screen } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
 import {
   TCPContextProvider,
@@ -259,13 +259,13 @@ describe('<CustomFields />', () => {
     expect(queryByText('URL is required')).not.toBeInTheDocument();
     expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
     expect(queryByText('Max redirects must be 0 or greater')).not.toBeInTheDocument();
-    expect(queryByText('Timeout must be less than 0')).not.toBeInTheDocument();
+    expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
 
     // create more errors
     fireEvent.change(monitorIntervalNumber, { target: { value: '1' } }); // 1 minute
-    fireEvent.change(timeout, { target: { value: '61' } }); // timeout cannot be more than monitor interval
+    fireEvent.change(timeout, { target: { value: '611' } }); // timeout cannot be more than monitor interval
 
-    const timeoutError2 = getByText('Timeout cannot be more than the monitor interval');
+    const timeoutError2 = getByText('Timeout must be less than the monitor interval');
 
     expect(timeoutError2).toBeInTheDocument();
   });
