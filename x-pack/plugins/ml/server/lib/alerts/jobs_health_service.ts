@@ -33,6 +33,10 @@ import { AnnotationService } from '../../models/annotation_service/annotation';
 import { annotationServiceProvider } from '../../models/annotation_service';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { isDefined } from '../../../common/types/guards';
+import {
+  jobAuditMessagesProvider,
+  JobAuditMessagesService,
+} from '../../models/job_audit_messages/job_audit_messages';
 
 interface TestResult {
   name: string;
@@ -45,6 +49,7 @@ export function jobsHealthServiceProvider(
   mlClient: MlClient,
   datafeedsService: DatafeedsService,
   annotationService: AnnotationService,
+  jobAuditMessagesService: JobAuditMessagesService,
   logger: Logger
 ) {
   /**
@@ -237,6 +242,13 @@ export function jobsHealthServiceProvider(
       return annotations;
     },
     /**
+     * Retrieves a list of the latest errors per jobs.
+     * @param jobIds
+     */
+    async getErrorsReport(jobIds: string[]) {
+      return await jobAuditMessagesService.getJobsErrors(jobIds);
+    },
+    /**
      * Retrieves report grouped by test.
      */
     async getTestsResults(
@@ -334,6 +346,26 @@ export function jobsHealthServiceProvider(
         }
       }
 
+      if (config.errorMessages.enabled) {
+        const response = await this.getErrorsReport(jobIds);
+        if (response.length > 0) {
+          results.push({
+            name: HEALTH_CHECK_NAMES.errorMessages.name,
+            context: {
+              results: response,
+              message: i18n.translate(
+                'xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesMessage',
+                {
+                  defaultMessage:
+                    '{jobsCount, plural, one {# job contains} other {# jobs contain}} errors in the messages.',
+                  values: { jobsCount: response.length },
+                }
+              ),
+            },
+          });
+        }
+      }
+
       return results;
     },
   };
@@ -360,6 +392,7 @@ export function getJobsHealthServiceProvider(getGuards: GetGuards) {
                 mlClient,
                 datafeedsProvider(scopedClient, mlClient),
                 annotationServiceProvider(scopedClient),
+                jobAuditMessagesProvider(scopedClient, mlClient),
                 logger
               ).getTestsResults(...args)
             );

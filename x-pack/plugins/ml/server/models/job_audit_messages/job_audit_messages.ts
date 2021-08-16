@@ -54,6 +54,10 @@ export function isClearable(index?: string): boolean {
   return false;
 }
 
+export type JobsErrorsResponse = Array<{ job_id: string; errors: JobMessage[] }>;
+
+export type JobAuditMessagesService = ReturnType<typeof jobAuditMessagesProvider>;
+
 export function jobAuditMessagesProvider(
   { asInternalUser }: IScopedClusterClient,
   mlClient: MlClient
@@ -178,7 +182,10 @@ export function jobAuditMessagesProvider(
     return { messages, notificationIndices };
   }
 
-  // search highest, most recent audit messages for all jobs for the last 24hrs.
+  /**
+   * Search highest, most recent audit messages for all jobs for the last 24hrs.
+   * @param jobIds
+   */
   async function getAuditMessagesSummary(jobIds: string[]): Promise<AuditMessage[]> {
     // TODO This is the current default value of the cluster setting `search.max_buckets`.
     // This should possibly consider the real settings in a future update.
@@ -400,9 +407,71 @@ export function jobAuditMessagesProvider(
     return (Object.keys(LEVEL) as LevelName[])[Object.values(LEVEL).indexOf(level)];
   }
 
+  /**
+   * Retrieve list of errors per job.
+   * @param jobIds
+   */
+  async function getJobsErrors(jobIds: string[]): Promise<JobsErrorsResponse> {
+    const { body } = await asInternalUser.search({
+      index: ML_NOTIFICATION_INDEX_PATTERN,
+      ignore_unavailable: true,
+      size: 0,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              { terms: { job_id: jobIds } },
+              {
+                term: { level: { value: 'error' } },
+              },
+            ],
+          },
+        },
+        aggs: {
+          by_job: {
+            terms: {
+              field: 'job_id',
+              size: jobIds.length,
+            },
+            aggs: {
+              latest_errors: {
+                top_hits: {
+                  size: 10,
+                  sort: [
+                    {
+                      timestamp: {
+                        order: 'desc',
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const errors = body.aggregations!.by_job as estypes.AggregationsTermsAggregate<{
+      key: string;
+      doc_count: number;
+      latest_errors: Pick<estypes.SearchResponse<JobMessage>, 'hits'>;
+    }>;
+
+    const result = errors.buckets.map((bucket) => {
+      return {
+        job_id: bucket.key,
+        errors: bucket.latest_errors.hits.hits.map((v) => v._source!),
+      };
+    });
+
+    return result;
+  }
+
   return {
     getJobAuditMessages,
     getAuditMessagesSummary,
     clearJobAuditMessages,
+    getJobsErrors,
   };
 }

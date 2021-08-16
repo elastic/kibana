@@ -22,6 +22,7 @@ import {
   AlertInstanceState,
   AlertTypeState,
 } from '../../../../alerting/common';
+import { JobsErrorsResponse } from '../../models/job_audit_messages/job_audit_messages';
 
 type ModelSizeStats = MlJobStats['model_size_stats'];
 
@@ -55,7 +56,8 @@ export interface DelayedDataResponse {
 export type AnomalyDetectionJobHealthResult =
   | MmlTestResponse
   | NotStartedDatafeedResponse
-  | DelayedDataResponse;
+  | DelayedDataResponse
+  | JobsErrorsResponse[number];
 
 export type AnomalyDetectionJobsHealthAlertContext = {
   results: AnomalyDetectionJobHealthResult[];
