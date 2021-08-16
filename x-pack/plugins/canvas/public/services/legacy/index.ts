@@ -9,7 +9,6 @@ import { BehaviorSubject } from 'rxjs';
 import { CoreSetup, CoreStart, AppUpdater } from '../../../../../../src/core/public';
 import { CanvasSetupDeps, CanvasStartDeps } from '../../plugin';
 import { searchServiceFactory } from './search';
-import { labsServiceFactory } from './labs';
 
 export { SearchService } from './search';
 export { ExpressionsService } from '../../../../../../src/plugins/expressions/common';
@@ -68,14 +67,12 @@ export type ServiceFromProvider<P> = P extends CanvasServiceProvider<infer T> ? 
 
 export const services = {
   search: new CanvasServiceProvider(searchServiceFactory),
-  labs: new CanvasServiceProvider(labsServiceFactory),
 };
 
 export type CanvasServiceProviders = typeof services;
 
 export interface CanvasServices {
   search: ServiceFromProvider<typeof services.search>;
-  labs: ServiceFromProvider<typeof services.labs>;
 }
 
 export const startLegacyServices = async (

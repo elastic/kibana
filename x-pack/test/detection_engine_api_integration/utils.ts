@@ -44,6 +44,8 @@ import {
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
+  DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
   INTERNAL_IMMUTABLE_KEY,
   INTERNAL_RULE_ID_KEY,
 } from '../../plugins/security_solution/common/constants';
@@ -1352,6 +1354,54 @@ export const deleteMigrations = async ({
       })
     )
   );
+};
+
+interface CreateMigrationResponse {
+  index: string;
+  migration_index: string;
+  migration_id: string;
+}
+
+export const startSignalsMigration = async ({
+  indices,
+  supertest,
+}: {
+  supertest: SuperTest<supertestAsPromised.Test>;
+  indices: string[];
+}): Promise<CreateMigrationResponse[]> => {
+  const {
+    body: { indices: created },
+  }: { body: { indices: CreateMigrationResponse[] } } = await supertest
+    .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
+    .set('kbn-xsrf', 'true')
+    .send({ index: indices })
+    .expect(200);
+
+  return created;
+};
+
+interface FinalizeMigrationResponse {
+  id: string;
+  completed?: boolean;
+  error?: unknown;
+}
+
+export const finalizeSignalsMigration = async ({
+  migrationIds,
+  supertest,
+}: {
+  supertest: SuperTest<supertestAsPromised.Test>;
+  migrationIds: string[];
+}): Promise<FinalizeMigrationResponse[]> => {
+  const {
+    body: { migrations },
+  }: { body: { migrations: FinalizeMigrationResponse[] } } = await supertest
+    .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+    .set('kbn-xsrf', 'true')
+    .send({ migration_ids: migrationIds })
+    .expect(200);
+
+  return migrations;
 };
 
 export const getOpenSignals = async (
