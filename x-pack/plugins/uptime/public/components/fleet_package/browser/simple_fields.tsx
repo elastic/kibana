@@ -129,7 +129,7 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
           parseInt(fields[ConfigKeys.TIMEOUT], 10) < 0 ? (
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.lessThanZeroError"
-              defaultMessage="Timeout must be less than 0"
+              defaultMessage="Timeout must be greater than or equal to 0"
             />
           ) : (
             <FormattedMessage
