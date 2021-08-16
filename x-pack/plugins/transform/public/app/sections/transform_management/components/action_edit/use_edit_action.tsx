@@ -49,11 +49,10 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
               values: { indexPattern: indexPatternTitle, transformId: item.id },
             })
           );
-        } else {
-          setConfig(item.config);
-          setIndexPatternId(currentIndexPatternId);
-          setIsFlyoutVisible(true);
         }
+        setIndexPatternId(currentIndexPatternId);
+        setConfig(item.config);
+        setIsFlyoutVisible(true);
       } catch (e) {
         toastNotifications.addDanger(
           i18n.translate('xpack.transform.clone.errorPromptText', {
