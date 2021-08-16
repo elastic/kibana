@@ -185,6 +185,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
         aria-label={i18n.translate('xpack.ml.jobsList.datafeedChart.datafeedChartFlyoutAriaLabel', {
           defaultMessage: 'Datafeed chart flyout',
         })}
+        data-test-subj="mlAnnotationsViewDatafeedFlyout"
       >
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="xl">
@@ -308,7 +309,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                     </EuiToolTip>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <Chart size={CHART_SIZE}>
+                    <Chart size={CHART_SIZE} data-test-subj="mlAnnotationsViewDatafeedFlyoutChart">
                       <Settings
                         showLegend
                         legendPosition={Position.Bottom}

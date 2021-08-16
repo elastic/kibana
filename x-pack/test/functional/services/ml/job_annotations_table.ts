@@ -341,5 +341,43 @@ export function MachineLearningJobAnnotationsProvider({ getService }: FtrProvide
         await this.setAnnotationText(text);
       });
     }
+
+    public async assertAnnotationsDelayedDataChartActionExists(annotationId: string) {
+      await retry.tryForTime(1000, async () => {
+        await testSubjects.existOrFail(
+          this.rowSelector(annotationId, 'mlAnnotationsActionViewDatafeed')
+        );
+      });
+    }
+
+    public async clickAnnotationsDelayedDataChartAction(annotationId: string) {
+      // await this.assertAnnotationsDelayedDataChartActionExists(annotationId);
+      await retry.tryForTime(1000, async () => {
+        await testSubjects.clickWhenNotDisabled('euiCollapsedItemActionsButton');
+        await testSubjects.clickWhenNotDisabled(
+          this.rowSelector(annotationId, 'mlAnnotationsActionViewDatafeed')
+        );
+        await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyout');
+        // await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyoutChart');
+
+        // const title = await testSubjects.getVisibleText('mlAnnotationFlyoutTitle');
+        // expect(title).to.eql(
+        //   'Edit annotation',
+        //   `Expected annotations flyout title to be 'Edit annotation' but got ${title}`
+        // );
+      });
+    }
+
+    public async assertDelayedDataChartExists(annotationId: string) {
+      await this.clickAnnotationsDelayedDataChartAction(annotationId);
+      // await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyout');
+      await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyoutChart');
+
+      // await retry.tryForTime(1000, async () => {
+      //   await testSubjects.existOrFail(
+      //     this.rowSelector(annotationId, 'mlAnnotationsActionViewDatafeed')
+      //   );
+      // });
+    }
   })();
 }
