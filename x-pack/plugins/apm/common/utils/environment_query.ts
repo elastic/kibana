@@ -13,7 +13,7 @@ import {
 } from '../environment_filter_values';
 
 export function environmentQuery(
-  environment?: string
+  environment: string
 ): QueryDslQueryContainer[] {
   if (!environment || environment === ENVIRONMENT_ALL.value) {
     return [];

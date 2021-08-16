@@ -112,6 +112,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
         defaultCellActions={defaultCellActions}
         defaultModel={eventsDefaultModel}
         end={endDate}
+        entityType="events"
         id={TimelineId.hostsPageEvents}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}

@@ -13,7 +13,7 @@ import { LevelLogger } from '../../../lib';
 import { createLayout, LayoutParams } from '../../../lib/layouts';
 import { getScreenshots$, ScreenshotResults } from '../../../lib/screenshots';
 import { ConditionalHeaders } from '../../common';
-import { PdfMaker } from './pdf';
+import { PdfMaker } from '../../common/pdf';
 import { getTracker } from './tracker';
 
 const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
@@ -50,7 +50,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     tracker.startScreenshots();
     const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, {
       logger,
-      urls,
+      urlsOrUrlLocatorTuples: urls,
       conditionalHeaders,
       layout,
       browserTimezone,
