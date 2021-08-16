@@ -14,7 +14,7 @@ import {
   REPOSITORY_RESOLVE_OUTCOME_STATS,
 } from '../../../core_usage_data';
 import type { ElasticsearchClient } from '../../../elasticsearch/';
-import { isSupportedEsServer } from '../../../elasticsearch';
+import { isSupportedEsServer, isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 import type { Logger } from '../../../logging';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import {
@@ -74,7 +74,6 @@ import {
   getExpectedVersionProperties,
   getSavedObjectFromSource,
   rawDocExistsInNamespace,
-  isNotFoundFromUnsupportedServer,
 } from './internal_utils';
 import {
   ALL_NAMESPACES_STRING,

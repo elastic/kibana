@@ -13,7 +13,6 @@ import {
   getBulkOperationError,
   getSavedObjectFromSource,
   rawDocExistsInNamespace,
-  isNotFoundFromUnsupportedServer,
 } from './internal_utils';
 import { ALL_NAMESPACES_STRING } from './utils';
 
@@ -240,37 +239,5 @@ describe('#rawDocExistsInNamespace', () => {
       expect(rawDocExistsInNamespace(registry, doc2, 'some-space')).toBe(true);
       expect(rawDocExistsInNamespace(registry, doc2, 'other-space')).toBe(true);
     });
-  });
-});
-
-describe('#isNotFoundFromUnsupportedServer', () => {
-  it('returns true with not found response from unsupported server', () => {
-    const rawResponse = {
-      statusCode: 404,
-      headers: {},
-    };
-
-    const result = isNotFoundFromUnsupportedServer(rawResponse);
-    expect(result).toBeTruthy();
-  });
-
-  it('returns false with not found response from supported server', async () => {
-    const rawResponse = {
-      statusCode: 404,
-      headers: { 'x-elastic-product': 'Elasticsearch' },
-    };
-
-    const result = isNotFoundFromUnsupportedServer(rawResponse);
-    expect(result).toBeFalsy();
-  });
-
-  it('returns false when not a 404', async () => {
-    const rawResponse = {
-      statusCode: 200,
-      headers: { 'x-elastic-product': 'Elasticsearch' },
-    };
-
-    const result = isNotFoundFromUnsupportedServer(rawResponse);
-    expect(result).toBeFalsy();
   });
 });

@@ -22,10 +22,10 @@ import {
   getBulkOperationError,
   getExpectedVersionProperties,
   rawDocExistsInNamespace,
-  isNotFoundFromUnsupportedServer,
 } from './internal_utils';
 import { DEFAULT_REFRESH_SETTING } from './repository';
 import type { RepositoryEsClient } from './repository_es_client';
+import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 
 /**
  * An object that should have its spaces updated.
