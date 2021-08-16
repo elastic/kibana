@@ -6,7 +6,7 @@ exports[`Overview render 1`] = `
     Object {
       "iconType": "logoKibana",
       "pageTitle": <FormattedMessage
-        defaultMessage="Kibana"
+        defaultMessage="Analytics"
         id="kibanaOverview.header.title"
         values={Object {}}
       />,
@@ -299,7 +299,7 @@ exports[`Overview without features 1`] = `
     Object {
       "iconType": "logoKibana",
       "pageTitle": <FormattedMessage
-        defaultMessage="Kibana"
+        defaultMessage="Analytics"
         id="kibanaOverview.header.title"
         values={Object {}}
       />,
@@ -648,7 +648,7 @@ exports[`Overview without solutions 1`] = `
     Object {
       "iconType": "logoKibana",
       "pageTitle": <FormattedMessage
-        defaultMessage="Kibana"
+        defaultMessage="Analytics"
         id="kibanaOverview.header.title"
         values={Object {}}
       />,
