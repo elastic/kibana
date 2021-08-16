@@ -32,17 +32,17 @@ export const useDeprecationLogging = (): DeprecationLoggingPreviewProps => {
   const { api, notifications } = useAppContext();
   const { data, error: fetchError, isLoading, resendRequest } = api.useLoadDeprecationLogging();
 
-  const [isEnabled, setIsEnabled] = useState(false);
+  const [isDeprecationLogIndexingEnabled, setIsDeprecationLogIndexingEnabled] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [onlyDeprecationLogWritingEnabled, setOnlyDeprecationLogWritingEnabled] = useState(false);
   const [updateError, setUpdateError] = useState<ResponseError | undefined>();
 
   useEffect(() => {
     if (!isLoading && data) {
-      const { isEnabled: isToggleEnabled, isLoggerDeprecationEnabled } = data;
-      setIsEnabled(isToggleEnabled);
+      const { isDeprecationLogIndexingEnabled: isEnabled, isDeprecationLoggingEnabled } = data;
+      setIsDeprecationLogIndexingEnabled(isEnabled);
 
-      if (!isToggleEnabled && isLoggerDeprecationEnabled) {
+      if (!isEnabled && isDeprecationLoggingEnabled) {
         setOnlyDeprecationLogWritingEnabled(true);
       }
     }
@@ -55,7 +55,7 @@ export const useDeprecationLogging = (): DeprecationLoggingPreviewProps => {
       data: updatedLoggingState,
       error: updateDeprecationError,
     } = await api.updateDeprecationLogging({
-      isEnabled: !isEnabled,
+      isEnabled: !isDeprecationLogIndexingEnabled,
     });
 
     setIsUpdating(false);
@@ -64,15 +64,17 @@ export const useDeprecationLogging = (): DeprecationLoggingPreviewProps => {
     if (updateDeprecationError) {
       setUpdateError(updateDeprecationError);
     } else if (updatedLoggingState) {
-      setOnlyDeprecationLogWritingEnabled(updatedLoggingState.isEnabled);
+      setIsDeprecationLogIndexingEnabled(updatedLoggingState.isDeprecationLogIndexingEnabled);
       notifications.toasts.addSuccess(
-        updatedLoggingState.isEnabled ? i18nTexts.enabledMessage : i18nTexts.disabledMessage
+        updatedLoggingState.isDeprecationLogIndexingEnabled
+          ? i18nTexts.enabledMessage
+          : i18nTexts.disabledMessage
       );
     }
   };
 
   return {
-    isEnabled,
+    isDeprecationLogIndexingEnabled,
     isLoading,
     isUpdating,
     toggleLogging,

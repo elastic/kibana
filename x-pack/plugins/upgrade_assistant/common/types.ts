@@ -250,6 +250,6 @@ export interface MlOperation extends SavedObjectAttributes {
 }
 
 export interface DeprecationLoggingStatus {
-  isEnabled: boolean;
-  isLoggerDeprecationEnabled: boolean;
+  isDeprecationLogIndexingEnabled: boolean;
+  isDeprecationLoggingEnabled: boolean;
 }

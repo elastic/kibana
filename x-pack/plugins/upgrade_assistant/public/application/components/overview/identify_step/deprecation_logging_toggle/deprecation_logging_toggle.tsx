@@ -76,7 +76,7 @@ const ErrorDetailsLink = ({ error }: { error: ResponseError }) => {
 };
 
 export const DeprecationLoggingToggle: FunctionComponent<DeprecationLoggingPreviewProps> = ({
-  isEnabled,
+  isDeprecationLogIndexingEnabled,
   isLoading,
   isUpdating,
   fetchError,
@@ -128,7 +128,7 @@ export const DeprecationLoggingToggle: FunctionComponent<DeprecationLoggingPrevi
         <EuiSwitch
           data-test-subj="deprecationLoggingToggle"
           label={i18nTexts.buttonLabel}
-          checked={!!isEnabled}
+          checked={!!isDeprecationLogIndexingEnabled}
           onChange={toggleLogging}
           disabled={Boolean(fetchError) || isUpdating}
         />

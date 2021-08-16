@@ -17,8 +17,8 @@ export async function getDeprecationLoggingStatus(
   });
 
   return {
-    isEnabled: isDeprecationLogIndexingEnabled(response),
-    isLoggerDeprecationEnabled: isDeprecationLoggingEnabled(response),
+    isDeprecationLogIndexingEnabled: isDeprecationLogIndexingEnabled(response),
+    isDeprecationLoggingEnabled: isDeprecationLoggingEnabled(response),
   };
 }
 
@@ -45,8 +45,8 @@ export async function setDeprecationLogging(
   });
 
   return {
-    isEnabled,
-    isLoggerDeprecationEnabled: isDeprecationLoggingEnabled(response),
+    isDeprecationLogIndexingEnabled: isEnabled,
+    isDeprecationLoggingEnabled: isDeprecationLoggingEnabled(response),
   };
 }
 

@@ -63,7 +63,10 @@ export class ApiService {
   }
 
   public useLoadDeprecationLogging() {
-    return this.useRequest<{ isEnabled: boolean; isLoggerDeprecationEnabled: boolean }>({
+    return this.useRequest<{
+      isDeprecationLogIndexingEnabled: boolean;
+      isDeprecationLoggingEnabled: boolean;
+    }>({
       path: `${API_BASE_PATH}/deprecation_logging`,
       method: 'get',
     });

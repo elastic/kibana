@@ -12,8 +12,8 @@ import { DeprecationLoggingStatus } from '../../../../common/types';
 import { DEPRECATION_LOGS_SOURCE_ID } from '../../../../common/constants';
 
 const getLoggingResponse = (toggle: boolean): DeprecationLoggingStatus => ({
-  isEnabled: toggle,
-  isLoggerDeprecationEnabled: toggle,
+  isDeprecationLogIndexingEnabled: toggle,
+  isDeprecationLoggingEnabled: toggle,
 });
 
 describe('Overview - Fix deprecation logs step', () => {
@@ -37,8 +37,8 @@ describe('Overview - Fix deprecation logs step', () => {
       const { find, actions } = testBed;
 
       httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse({
-        isEnabled: false,
-        isLoggerDeprecationEnabled: false,
+        isDeprecationLogIndexingEnabled: false,
+        isDeprecationLoggingEnabled: false,
       });
 
       expect(find('deprecationLoggingToggle').props()['aria-checked']).toBe(true);
@@ -52,8 +52,8 @@ describe('Overview - Fix deprecation logs step', () => {
 
     test('shows callout when only loggerDeprecation is enabled', async () => {
       httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({
-        isEnabled: false,
-        isLoggerDeprecationEnabled: true,
+        isDeprecationLogIndexingEnabled: false,
+        isDeprecationLoggingEnabled: true,
       });
 
       await act(async () => {

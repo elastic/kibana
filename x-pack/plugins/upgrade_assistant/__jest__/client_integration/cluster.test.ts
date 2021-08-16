@@ -44,8 +44,8 @@ describe('Cluster tab', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
       httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({
-        isEnabled: true,
-        isLoggerDeprecationEnabled: true,
+        isDeprecationLogIndexingEnabled: true,
+        isDeprecationLoggingEnabled: true,
       });
 
       await act(async () => {

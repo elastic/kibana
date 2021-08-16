@@ -28,8 +28,10 @@ describe('Upgrade Assistant Usage Collector', () => {
       body: {
         persistent: {},
         transient: {
-          logger: {
-            deprecation: 'WARN',
+          cluster: {
+            deprecation_indexing: {
+              enabled: 'true',
+            },
           },
         },
       },

@@ -54,8 +54,8 @@ describe('deprecation logging API', () => {
 
       expect(resp.status).toEqual(200);
       expect(resp.payload).toEqual({
-        isEnabled: true,
-        isLoggerDeprecationEnabled: true,
+        isDeprecationLogIndexingEnabled: true,
+        isDeprecationLoggingEnabled: true,
       });
     });
 
@@ -88,8 +88,8 @@ describe('deprecation logging API', () => {
       })(routeHandlerContextMock, { body: { isEnabled: true } }, kibanaResponseFactory);
 
       expect(resp.payload).toEqual({
-        isEnabled: true,
-        isLoggerDeprecationEnabled: true,
+        isDeprecationLogIndexingEnabled: true,
+        isDeprecationLoggingEnabled: true,
       });
     });
 
