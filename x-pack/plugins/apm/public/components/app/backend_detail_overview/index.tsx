@@ -23,6 +23,10 @@ import { BackendDetailDependenciesTable } from './backend_detail_dependencies_ta
 import { BackendThroughputChart } from './backend_throughput_chart';
 import { BackendFailedTransactionRateChart } from './backend_error_rate_chart';
 import { BackendDetailTemplate } from '../../routing/templates/backend_detail_template';
+import {
+  getKueryBarBoolFilter,
+  kueryBarPlaceholder,
+} from '../../../../common/backends';
 
 export function BackendDetailOverview() {
   const {
@@ -53,10 +57,19 @@ export function BackendDetailOverview() {
     },
   ]);
 
+  const kueryBarBoolFilter = getKueryBarBoolFilter({
+    environment,
+    backendName,
+  });
+
   return (
     <ApmBackendContextProvider>
       <BackendDetailTemplate title={backendName}>
-        <SearchBar showTimeComparison />
+        <SearchBar
+          showTimeComparison
+          kueryBarPlaceholder={kueryBarPlaceholder}
+          kueryBarBoolFilter={kueryBarBoolFilter}
+        />
         <ChartPointerEventContextProvider>
           <EuiFlexGroup direction="row" gutterSize="s">
             <EuiFlexItem>
