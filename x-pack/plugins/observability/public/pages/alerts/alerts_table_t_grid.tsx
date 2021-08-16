@@ -155,7 +155,7 @@ const OBSERVABILITY_ALERT_CONSUMERS = [
   AlertConsumers.APM,
   AlertConsumers.LOGS,
   AlertConsumers.INFRASTRUCTURE,
-  AlertConsumers.SYNTHETICS,
+  AlertConsumers.UPTIME,
 ];
 
 function ObservabilityActions({
