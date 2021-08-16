@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { DocLinksStart, NotificationsStart, CoreStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -18,53 +18,40 @@ import {
   RuntimeType,
   UsageCollectionStart,
 } from '../shared_imports';
-import { Field, PluginStart, InternalFieldType } from '../types';
+import type { Field, PluginStart, InternalFieldType } from '../types';
 import { pluginName } from '../constants';
-import { deserializeField, getRuntimeFieldValidator } from '../lib';
-import { Props as FieldEditorProps } from './field_editor/field_editor';
-import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
-
-export interface FieldEditorContext {
-  indexPattern: IndexPattern;
-  /**
-   * The Kibana field type of the field to create or edit
-   * Default: "runtime"
-   */
-  fieldTypeToProcess: InternalFieldType;
-  /** The search service from the data plugin */
-  search: DataPublicPluginStart['search'];
-}
+import { deserializeField, getRuntimeFieldValidator, getLinks, ApiService } from '../lib';
+import {
+  FieldEditorFlyoutContent,
+  Props as FieldEditorFlyoutContentProps,
+} from './field_editor_flyout_content';
+import { FieldEditorProvider } from './field_editor_context';
+import { FieldPreviewProvider } from './preview';
 
 export interface Props {
-  /**
-   * Handler for the "save" footer button
-   */
+  /** Handler for the "save" footer button */
   onSave: (field: IndexPatternField) => void;
-  /**
-   * Handler for the "cancel" footer button
-   */
+  /** Handler for the "cancel" footer button */
   onCancel: () => void;
-  /**
-   * The docLinks start service from core
-   */
+  onMounted?: FieldEditorFlyoutContentProps['onMounted'];
+  /** The docLinks start service from core */
   docLinks: DocLinksStart;
-  /**
-   * The context object specific to where the editor is currently being consumed
-   */
-  ctx: FieldEditorContext;
-  /**
-   * Optional field to edit
-   */
+  /** The index pattern where the field will be added  */
+  indexPattern: IndexPattern;
+  /** The Kibana field type of the field to create or edit (default: "runtime") */
+  fieldTypeToProcess: InternalFieldType;
+  /** Optional field to edit */
   field?: IndexPatternField;
-  /**
-   * Services
-   */
+  /** Services */
   indexPatternService: DataPublicPluginStart['indexPatterns'];
   notifications: NotificationsStart;
+  search: DataPublicPluginStart['search'];
+  usageCollection: UsageCollectionStart;
+  apiService: ApiService;
+  /** Field format */
   fieldFormatEditors: PluginStart['fieldFormatEditors'];
   fieldFormats: DataPublicPluginStart['fieldFormats'];
   uiSettings: CoreStart['uiSettings'];
-  usageCollection: UsageCollectionStart;
 }
 
 /**
@@ -78,18 +65,57 @@ export const FieldEditorFlyoutContentContainer = ({
   field,
   onSave,
   onCancel,
+  onMounted,
   docLinks,
+  fieldTypeToProcess,
+  indexPattern,
   indexPatternService,
-  ctx: { indexPattern, fieldTypeToProcess, search },
+  search,
   notifications,
+  usageCollection,
+  apiService,
   fieldFormatEditors,
   fieldFormats,
   uiSettings,
-  usageCollection,
 }: Props) => {
   const fieldToEdit = deserializeField(indexPattern, field);
-  const [Editor, setEditor] = useState<React.ComponentType<FieldEditorProps> | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  const { fields } = indexPattern;
+
+  const namesNotAllowed = useMemo(() => fields.map((fld) => fld.name), [fields]);
+
+  const existingConcreteFields = useMemo(() => {
+    const existing: Array<{ name: string; type: string }> = [];
+
+    fields
+      .filter((fld) => {
+        const isFieldBeingEdited = field?.name === fld.name;
+        return !isFieldBeingEdited && fld.isMapped;
+      })
+      .forEach((fld) => {
+        existing.push({
+          name: fld.name,
+          type: (fld.esTypes && fld.esTypes[0]) || '',
+        });
+      });
+
+    return existing;
+  }, [fields, field]);
+
+  const validateRuntimeField = useMemo(() => getRuntimeFieldValidator(indexPattern.title, search), [
+    search,
+    indexPattern,
+  ]);
+
+  const services = useMemo(
+    () => ({
+      api: apiService,
+      search,
+      notifications,
+    }),
+    [apiService, search, notifications]
+  );
 
   const saveField = useCallback(
     async (updatedField: Field) => {
@@ -163,36 +189,28 @@ export const FieldEditorFlyoutContentContainer = ({
     ]
   );
 
-  const validateRuntimeField = useMemo(() => getRuntimeFieldValidator(indexPattern.title, search), [
-    search,
-    indexPattern,
-  ]);
-
-  const loadEditor = useCallback(async () => {
-    const { FieldEditor } = await import('./field_editor');
-
-    setEditor(() => FieldEditor);
-  }, []);
-
-  useEffect(() => {
-    // On mount: load the editor asynchronously
-    loadEditor();
-  }, [loadEditor]);
-
   return (
-    <FieldEditorFlyoutContent
-      onSave={saveField}
-      onCancel={onCancel}
-      docLinks={docLinks}
-      field={fieldToEdit}
-      FieldEditor={Editor}
+    <FieldEditorProvider
+      indexPattern={indexPattern}
+      uiSettings={uiSettings}
+      links={getLinks(docLinks)}
+      fieldTypeToProcess={fieldTypeToProcess}
+      services={services}
       fieldFormatEditors={fieldFormatEditors}
       fieldFormats={fieldFormats}
-      uiSettings={uiSettings}
-      indexPattern={indexPattern}
-      fieldTypeToProcess={fieldTypeToProcess}
-      runtimeFieldValidator={validateRuntimeField}
-      isSavingField={isSaving}
-    />
+      namesNotAllowed={namesNotAllowed}
+      existingConcreteFields={existingConcreteFields}
+    >
+      <FieldPreviewProvider>
+        <FieldEditorFlyoutContent
+          onSave={saveField}
+          onCancel={onCancel}
+          onMounted={onMounted}
+          field={fieldToEdit}
+          runtimeFieldValidator={validateRuntimeField}
+          isSavingField={isSaving}
+        />
+      </FieldPreviewProvider>
+    </FieldEditorProvider>
   );
 };
