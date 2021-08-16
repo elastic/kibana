@@ -287,7 +287,10 @@ export function setQuery({
 
     if (
       !forceRefresh &&
-      _.isEqual(nextQueryContext, { forceRefresh: false, ...prevQueryContext })
+      _.isEqual(nextQueryContext, {
+        forceRefreshTriggeredFromGlobalQueryTime: false,
+        ...prevQueryContext,
+      })
     ) {
       // do nothing if query context has not changed
       return;
