@@ -44,7 +44,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
 
   const {
     cases: casesUi,
-    application: { getUrlForApp, navigateToUrl },
+    application: { getUrlForApp, navigateToUrl, navigateToApp },
   } = useKibana().services;
   const allCasesLink = getCaseUrl();
   const { formatUrl } = useFormatUrl();
@@ -109,6 +109,21 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
           ev.preventDefault();
         }
         return navigateToUrl(`${casesUrl}${configureCasesLink}`);
+      },
+    },
+    ruleDetailsNavigation: {
+      href: (ruleId) => {
+        return getUrlForApp('management', {
+          path: `/insightsAndAlerting/triggersActions/rule/${ruleId}`,
+        });
+      },
+      onClick: async (ruleId, ev) => {
+        if (ev != null) {
+          ev.preventDefault();
+        }
+        return navigateToApp('management', {
+          path: `/insightsAndAlerting/triggersActions/rule/${ruleId}`,
+        });
       },
     },
     getCaseDetailHrefWithCommentId,
