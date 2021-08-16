@@ -105,6 +105,31 @@ describe('TaskManagerRunner', () => {
       );
       expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
     });
+    test('provides execution context on run', async () => {
+      const { runner } = await readyToRunStageSetup({
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+      expect(executionContext.withContext).toHaveBeenCalledTimes(1);
+      expect(executionContext.withContext).toHaveBeenCalledWith(
+        {
+          description: 'run task',
+          id: 'foo',
+          name: 'run bar',
+          type: 'task manager',
+        },
+        expect.any(Function)
+      );
+    });
     test('provides details about the task that is running', async () => {
       const { runner } = await pendingStageSetup({
         instance: {
@@ -691,6 +716,31 @@ describe('TaskManagerRunner', () => {
         childOf: 'apmTraceparent',
       });
       expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
+    });
+    test('provides execution context on run', async () => {
+      const { runner } = await readyToRunStageSetup({
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+      expect(executionContext.withContext).toHaveBeenCalledTimes(1);
+      expect(executionContext.withContext).toHaveBeenCalledWith(
+        {
+          description: 'run task',
+          id: 'foo',
+          name: 'run bar',
+          type: 'task manager',
+        },
+        expect.any(Function)
+      );
     });
     test('queues a reattempt if the task fails', async () => {
       const initialAttempts = _.random(0, 2);
