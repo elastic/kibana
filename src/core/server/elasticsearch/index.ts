@@ -34,3 +34,4 @@ export type {
   GetResponse,
   DeleteDocumentResponse,
 } from './client';
+export { getRequestDebugMeta, getErrorMessage } from './client';
