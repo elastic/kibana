@@ -51,7 +51,7 @@ export function ApmMainTemplate({
         actions: {
           beats: {
             title: i18n.translate('xpack.apm.noDataConfig.beatsCard.title', {
-              defaultMessage: 'Add data with APM Agents',
+              defaultMessage: 'Add data with APM agents',
             }),
             description: i18n.translate(
               'xpack.apm.noDataConfig.beatsCard.description',
