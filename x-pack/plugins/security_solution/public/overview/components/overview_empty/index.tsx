@@ -26,6 +26,13 @@ const OverviewEmptyComponent: React.FC = () => {
     () => ({
       elasticAgent: {
         href: `${basePath}${ADD_INTEGRATION_PATH}`,
+        description: i18n.translate(
+          'xpack.securitySolution.pages.emptyPage.beatsCard.description',
+          {
+            defaultMessage:
+              'Use Elastic Agent to collect security events and protect your endpoints from threats. Manage your agents in Fleet and add integrations with a single click.',
+          }
+        ),
       },
     }),
     [basePath]
@@ -35,13 +42,6 @@ const OverviewEmptyComponent: React.FC = () => {
     () => ({
       beats: {
         href: `${basePath}${ADD_DATA_PATH}`,
-        description: i18n.translate(
-          'xpack.securitySolution.pages.emptyPage.beatsCard.description',
-          {
-            defaultMessage:
-              'Use Elastic Agent to collect security events and protect your endpoints from threats. Manage your agents in Fleet and add integrations with a single click.',
-          }
-        ),
       },
     }),
     [basePath]

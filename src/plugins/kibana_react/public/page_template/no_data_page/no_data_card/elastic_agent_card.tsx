@@ -23,6 +23,7 @@ export type ElasticAgentCardProps = NoDataPageActions & {
 export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
   solution,
   recommended,
+  title,
   href,
   button,
   ...cardRest
@@ -33,27 +34,24 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
   const addBasePath = http.basePath.prepend;
   const basePathUrl = '/plugins/kibanaReact/assets/';
 
+  const defaultCTAtitle = i18n.translate('kibana-react.noDataPage.elasticAgentCard.title', {
+    defaultMessage: 'Add Elastic Agent',
+  });
+
   const footer =
     typeof button !== 'string' && typeof button !== 'undefined' ? (
       button
     ) : (
       // The href and/or onClick are attached to the whole Card, so the button is just for show.
       // Do not add the behavior here too or else it will propogate through
-      <EuiButton fill>
-        {button ||
-          i18n.translate('kibana-react.noDataPage.elasticAgentCard.title', {
-            defaultMessage: 'Add Elastic Agent',
-          })}
-      </EuiButton>
+      <EuiButton fill>{button || title || defaultCTAtitle}</EuiButton>
     );
 
   return (
     <EuiCard
       paddingSize="l"
       href={href ?? addBasePath('/app/integrations/browse')}
-      title={i18n.translate('kibana-react.noDataPage.elasticAgentCard.title', {
-        defaultMessage: 'Add Elastic Agent',
-      })}
+      title={title || defaultCTAtitle}
       description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
         defaultMessage: `The Elastic Agent provides a simple, unified way to
         collect data from your machines.`,
