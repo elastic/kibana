@@ -24,7 +24,7 @@ export const AlertConsumers = {
   INFRASTRUCTURE: 'infrastructure',
   OBSERVABILITY: 'observability',
   SIEM: 'siem',
-  SYNTHETICS: 'synthetics',
+  UPTIME: 'uptime',
 } as const;
 export type AlertConsumers = typeof AlertConsumers[keyof typeof AlertConsumers];
 export type STATUS_VALUES = 'open' | 'acknowledged' | 'closed' | 'in-progress'; // TODO: remove 'in-progress' after migration to 'acknowledged'
@@ -35,7 +35,7 @@ export const mapConsumerToIndexName: Record<AlertConsumers, string | string[]> =
   infrastructure: '.alerts-observability.metrics',
   observability: '.alerts-observability',
   siem: ['.alerts-security.alerts', '.siem-signals'],
-  synthetics: '.alerts-observability-synthetics',
+  uptime: '.alerts-observability.uptime',
 };
 export type ValidFeatureId = keyof typeof mapConsumerToIndexName;
 
