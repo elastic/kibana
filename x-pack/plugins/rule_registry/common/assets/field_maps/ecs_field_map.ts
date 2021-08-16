@@ -2148,7 +2148,7 @@ export const ecsFieldMap = {
   'rule.id': {
     type: 'keyword',
     array: false,
-    required: false,
+    required: true,
   },
   'rule.license': {
     type: 'keyword',

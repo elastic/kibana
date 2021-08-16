@@ -8,8 +8,11 @@
 
 import { identity } from 'lodash';
 
-import { SerializedFieldFormat } from 'src/plugins/expressions/common/types';
-import { FieldFormat, IFieldFormat } from '../../../../common';
+import {
+  FieldFormat,
+  IFieldFormat,
+  SerializedFieldFormat,
+} from '../../../../../field_formats/common';
 import { getAggsFormats } from './get_aggs_formats';
 
 const getAggFormat = (

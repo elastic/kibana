@@ -23,11 +23,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('Top traces when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles empty state', async () => {
-      const response = await supertest.get(`/api/apm/traces?start=${start}&end=${end}`);
+      const response = await supertest.get(
+        `/api/apm/traces?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+      );
 
       expect(response.status).to.be(200);
       expect(response.body.items.length).to.be(0);
-      expect(response.body.isAggregationAccurate).to.be(true);
     });
   });
 
@@ -37,7 +38,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       let response: any;
       before(async () => {
-        response = await supertest.get(`/api/apm/traces?start=${start}&end=${end}`);
+        response = await supertest.get(
+          `/api/apm/traces?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+        );
       });
 
       it('returns the correct status code', async () => {

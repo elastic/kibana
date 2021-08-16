@@ -7,7 +7,7 @@
  */
 import React from 'react';
 import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils/target/to_number_rt';
+import { toNumberRt } from '@kbn/io-ts-utils';
 import { createRouter } from './create_router';
 import { createMemoryHistory } from 'history';
 import { route } from './route';
@@ -27,6 +27,11 @@ describe('createRouter', () => {
               rangeTo: t.string,
             }),
           }),
+          defaults: {
+            query: {
+              rangeFrom: 'now-30m',
+            },
+          },
           children: [
             {
               path: '/services',
@@ -56,6 +61,7 @@ describe('createRouter', () => {
               params: t.type({
                 query: t.type({
                   aggregationType: t.string,
+                  kuery: t.string,
                 }),
               }),
             },
@@ -107,7 +113,7 @@ describe('createRouter', () => {
         },
       });
 
-      history.push('/traces?rangeFrom=now-15m&rangeTo=now&aggregationType=avg');
+      history.push('/traces?rangeFrom=now-15m&rangeTo=now&aggregationType=avg&kuery=');
 
       const topTracesParams = router.getParams('/traces', history.location);
 
@@ -117,6 +123,7 @@ describe('createRouter', () => {
           rangeFrom: 'now-15m',
           rangeTo: 'now',
           aggregationType: 'avg',
+          kuery: '',
         },
       });
 
@@ -151,6 +158,22 @@ describe('createRouter', () => {
           maxNumNodes: 3,
         },
       });
+
+      history.push(
+        '/traces?rangeFrom=now-15m&rangeTo=now&aggregationType=avg&kuery=service.name%3A%22metricbeat%22'
+      );
+
+      const topTracesParams = router.getParams('/traces', history.location);
+
+      expect(topTracesParams).toEqual({
+        path: {},
+        query: {
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          aggregationType: 'avg',
+          kuery: 'service.name:"metricbeat"',
+        },
+      });
     });
 
     it('throws an error if the given path does not match any routes', () => {
@@ -163,6 +186,20 @@ describe('createRouter', () => {
       expect(() => {
         router.getParams('/service-map', history.location, true);
       }).not.toThrowError();
+    });
+
+    it('applies defaults', () => {
+      history.push('/services?rangeTo=now&transactionType=request');
+
+      const topLevelParams = router.getParams('/', history.location);
+
+      expect(topLevelParams).toEqual({
+        path: {},
+        query: {
+          rangeFrom: 'now-30m',
+          rangeTo: 'now',
+        },
+      });
     });
   });
 
@@ -180,6 +217,19 @@ describe('createRouter', () => {
       expect(() => {
         router.matchRoutes('/traces', history.location);
       }).toThrowError('No matching route found for /traces');
+    });
+
+    it('applies defaults', () => {
+      history.push('/services?rangeTo=now&transactionType=request');
+
+      const matches = router.matchRoutes('/', history.location);
+
+      expect(matches[1]?.match.params).toEqual({
+        query: {
+          rangeFrom: 'now-30m',
+          rangeTo: 'now',
+        },
+      });
     });
   });
 
@@ -240,6 +290,34 @@ describe('createRouter', () => {
           },
         } as any);
       }).toThrowError();
+    });
+
+    it('applies defaults', () => {
+      const href = router.link('/traces', {
+        // @ts-ignore
+        query: {
+          rangeTo: 'now',
+          aggregationType: 'avg',
+          kuery: '',
+        },
+      });
+
+      expect(href).toEqual('/traces?aggregationType=avg&kuery=&rangeFrom=now-30m&rangeTo=now');
+    });
+
+    it('encodes query parameters', () => {
+      const href = router.link('/traces', {
+        // @ts-ignore
+        query: {
+          rangeTo: 'now',
+          aggregationType: 'avg',
+          kuery: 'service.name:"metricbeat"',
+        },
+      });
+
+      expect(href).toEqual(
+        '/traces?aggregationType=avg&kuery=service.name%3A%22metricbeat%22&rangeFrom=now-30m&rangeTo=now'
+      );
     });
   });
 });

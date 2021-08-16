@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { DraggableId } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 
@@ -44,12 +44,15 @@ const useGetHandleStartDragToTimeline = ({
 };
 
 export interface AddToTimelineButtonProps extends HoverActionComponentProps {
+  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   draggableId?: DraggableId;
   dataProvider?: DataProvider[] | DataProvider;
 }
 
 const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
   ({
+    Component,
     closePopOver,
     dataProvider,
     defaultFocusedButtonRef,
@@ -96,6 +99,33 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
       }
     }, [handleStartDragToTimeline, keyboardEvent, ownFocus]);
 
+    const button = useMemo(
+      () =>
+        Component ? (
+          <Component
+            aria-label={i18n.ADD_TO_TIMELINE}
+            buttonRef={defaultFocusedButtonRef}
+            data-test-subj="add-to-timeline"
+            iconType="timeline"
+            onClick={handleStartDragToTimeline}
+            title={i18n.ADD_TO_TIMELINE}
+          >
+            {i18n.ADD_TO_TIMELINE}
+          </Component>
+        ) : (
+          <EuiButtonIcon
+            aria-label={i18n.ADD_TO_TIMELINE}
+            buttonRef={defaultFocusedButtonRef}
+            className="timelines__hoverActionButton"
+            data-test-subj="add-to-timeline"
+            iconSize="s"
+            iconType="timeline"
+            onClick={handleStartDragToTimeline}
+          />
+        ),
+      [Component, defaultFocusedButtonRef, handleStartDragToTimeline]
+    );
+
     return showTooltip ? (
       <EuiToolTip
         content={
@@ -110,26 +140,10 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
           />
         }
       >
-        <EuiButtonIcon
-          aria-label={i18n.ADD_TO_TIMELINE}
-          buttonRef={defaultFocusedButtonRef}
-          className="timelines__hoverActionButton"
-          data-test-subj="add-to-timeline"
-          iconSize="s"
-          iconType="timeline"
-          onClick={handleStartDragToTimeline}
-        />
+        {button}
       </EuiToolTip>
     ) : (
-      <EuiButtonIcon
-        aria-label={i18n.ADD_TO_TIMELINE}
-        buttonRef={defaultFocusedButtonRef}
-        className="timelines__hoverActionButton"
-        data-test-subj="add-to-timeline"
-        iconSize="s"
-        iconType="timeline"
-        onClick={handleStartDragToTimeline}
-      />
+      button
     );
   }
 );

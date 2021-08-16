@@ -10,7 +10,7 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import { CoreSetup, DocLinksStart } from '../../../core/public';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { ChartsPluginSetup } from '../../charts/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '../../charts/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<CoreSetup['uiSettings']>(
   'xy core.uiSettings'
@@ -27,6 +27,10 @@ export const [getFormatService, setFormatService] = createGetterSetter<
 export const [getThemeService, setThemeService] = createGetterSetter<ChartsPluginSetup['theme']>(
   'xy charts.theme'
 );
+
+export const [getActiveCursor, setActiveCursor] = createGetterSetter<
+  ChartsPluginStart['activeCursor']
+>('xy charts.activeCursor');
 
 export const [getPalettesService, setPalettesService] = createGetterSetter<
   ChartsPluginSetup['palettes']

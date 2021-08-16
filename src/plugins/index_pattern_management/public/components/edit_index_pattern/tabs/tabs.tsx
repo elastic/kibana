@@ -35,6 +35,7 @@ import { SourceFiltersTable } from '../source_filters_table';
 import { IndexedFieldsTable } from '../indexed_fields_table';
 import { ScriptedFieldsTable } from '../scripted_fields_table';
 import { getTabs, getPath, convertToEuiSelectOption } from './utils';
+import { getFieldInfo } from '../../utils';
 
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   indexPattern: IndexPattern;
@@ -81,7 +82,6 @@ export function Tabs({
 }: TabsProps) {
   const {
     uiSettings,
-    indexPatternManagementStart,
     docLinks,
     indexPatternFieldEditor,
   } = useKibana<IndexPatternManagmentContext>().services;
@@ -227,7 +227,7 @@ export function Tabs({
                     helpers={{
                       editField: openFieldEditor,
                       deleteField,
-                      getFieldInfo: indexPatternManagementStart.list.getFieldInfo,
+                      getFieldInfo,
                     }}
                   />
                 )}
@@ -280,7 +280,6 @@ export function Tabs({
       getFilterSection,
       history,
       indexPattern,
-      indexPatternManagementStart.list.getFieldInfo,
       indexedFieldTypeFilter,
       refreshFilters,
       scriptedFieldLanguageFilter,
@@ -293,15 +292,13 @@ export function Tabs({
 
   const euiTabs: EuiTabbedContentTab[] = useMemo(
     () =>
-      getTabs(indexPattern, fieldFilter, indexPatternManagementStart.list).map(
-        (tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
-          return {
-            ...tab,
-            content: getContent(tab.id),
-          };
-        }
-      ),
-    [fieldFilter, getContent, indexPattern, indexPatternManagementStart.list]
+      getTabs(indexPattern, fieldFilter).map((tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
+        return {
+          ...tab,
+          content: getContent(tab.id),
+        };
+      }),
+    [fieldFilter, getContent, indexPattern]
   );
 
   const [selectedTabId, setSelectedTabId] = useState(euiTabs[0].id);

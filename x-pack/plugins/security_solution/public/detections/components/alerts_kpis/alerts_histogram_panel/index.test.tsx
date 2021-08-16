@@ -9,7 +9,7 @@ import React from 'react';
 import { waitFor, act } from '@testing-library/react';
 import { mount } from 'enzyme';
 
-import { esQuery } from '../../../../../../../../src/plugins/data/public';
+import { esQuery, Filter } from '../../../../../../../../src/plugins/data/public';
 import { TestProviders } from '../../../../common/mock';
 import { SecurityPageName } from '../../../../app/types';
 
@@ -77,6 +77,11 @@ describe('AlertsHistogramPanel', () => {
     setQuery: jest.fn(),
     updateDateRange: jest.fn(),
   };
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
 
   it('renders correctly', () => {
     const wrapper = mount(
@@ -157,7 +162,7 @@ describe('AlertsHistogramPanel', () => {
         combinedQueries:
           '{"bool":{"must":[],"filter":[{"match_all":{}},{"exists":{"field":"process.name"}}],"should":[],"must_not":[]}}',
       };
-      mount(
+      const wrapper = mount(
         <TestProviders>
           <AlertsHistogramPanel {...props} />
         </TestProviders>
@@ -180,6 +185,60 @@ describe('AlertsHistogramPanel', () => {
           ],
         ]);
       });
+      wrapper.unmount();
+    });
+  });
+
+  describe('Filters', () => {
+    it('filters props is valid, alerts query include filter', async () => {
+      const mockGetAlertsHistogramQuery = jest.spyOn(helpers, 'getAlertsHistogramQuery');
+      const statusFilter: Filter = {
+        meta: {
+          alias: null,
+          disabled: false,
+          key: 'signal.status',
+          negate: false,
+          params: {
+            query: 'open',
+          },
+          type: 'phrase',
+        },
+        query: {
+          term: {
+            'signal.status': 'open',
+          },
+        },
+      };
+
+      const props = {
+        ...defaultProps,
+        query: { query: '', language: 'kql' },
+        filters: [statusFilter],
+      };
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...props} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(mockGetAlertsHistogramQuery.mock.calls[1]).toEqual([
+          'signal.rule.name',
+          '2020-07-07T08:20:18.966Z',
+          '2020-07-08T08:20:18.966Z',
+          [
+            {
+              bool: {
+                filter: [{ term: { 'signal.status': 'open' } }],
+                must: [],
+                must_not: [],
+                should: [],
+              },
+            },
+          ],
+        ]);
+      });
+      wrapper.unmount();
     });
   });
 

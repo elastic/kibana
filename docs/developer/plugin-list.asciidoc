@@ -115,8 +115,16 @@ for use in their own application.
 |Expression Shape plugin adds a shape function to the expression plugin and an associated renderer. The renderer will display the given shape with selected decorations.
 
 
+|{kib-repo}blob/{branch}/src/plugins/field_formats/README.md[fieldFormats]
+|Index pattern fields formatters
+
+
 |{kib-repo}blob/{branch}/src/plugins/home/README.md[home]
 |Moves the legacy ui/registry/feature_catalogue module for registering "features" that should be shown in the home page's feature catalogue to a service within a "home" plugin. The feature catalogue refered to here should not be confused with the "feature" plugin for registering features used to derive UI capabilities for feature controls.
+
+
+|{kib-repo}blob/{branch}/src/plugins/index_pattern_editor/README.md[indexPatternEditor]
+|Create index patterns from within Kibana apps.
 
 
 |{kib-repo}blob/{branch}/src/plugins/index_pattern_field_editor/README.md[indexPatternFieldEditor]

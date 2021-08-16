@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Writable } from 'stream';
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
 import { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
@@ -14,9 +15,6 @@ import { ReportingConfig } from '../../..';
 import {
   cellHasFormulas,
   ES_SEARCH_STRATEGY,
-  FieldFormat,
-  FieldFormatConfig,
-  IFieldFormatsRegistry,
   IndexPattern,
   ISearchSource,
   ISearchStartSearchSource,
@@ -24,6 +22,11 @@ import {
   SearchSourceFields,
   tabifyDocs,
 } from '../../../../../../../src/plugins/data/common';
+import {
+  FieldFormat,
+  FieldFormatConfig,
+  IFieldFormatsRegistry,
+} from '../../../../../../../src/plugins/field_formats/common';
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
 import { CancellationToken } from '../../../../common';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
@@ -73,7 +76,8 @@ export class CsvGenerator {
     private clients: Clients,
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,
-    private logger: LevelLogger
+    private logger: LevelLogger,
+    private stream: Writable
   ) {}
 
   private async scan(
@@ -290,7 +294,7 @@ export class CsvGenerator {
 
     const { maxSizeBytes, bom, escapeFormulaValues, scroll: scrollSettings } = settings;
 
-    const builder = new MaxSizeStringBuilder(byteSizeValueToNumber(maxSizeBytes), bom);
+    const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
     const warnings: string[] = [];
     let first = true;
     let currentRecord = -1;
@@ -403,7 +407,6 @@ export class CsvGenerator {
     );
 
     return {
-      content: builder.getString(),
       content_type: CONTENT_TYPE_CSV,
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
       max_size_reached: this.maxSizeReached,

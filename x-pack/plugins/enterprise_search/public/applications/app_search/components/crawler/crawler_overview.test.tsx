@@ -13,11 +13,16 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { getPageHeaderActions } from '../../../test_helpers';
+
 import { AddDomainFlyout } from './components/add_domain/add_domain_flyout';
 import { AddDomainForm } from './components/add_domain/add_domain_form';
 import { AddDomainFormSubmitButton } from './components/add_domain/add_domain_form_submit_button';
 import { CrawlRequestsTable } from './components/crawl_requests_table';
+import { CrawlerStatusBanner } from './components/crawler_status_banner';
+import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
 import { DomainsTable } from './components/domains_table';
+import { ManageCrawlsPopover } from './components/manage_crawls_popover/manage_crawls_popover';
 import { CrawlerOverview } from './crawler_overview';
 import {
   CrawlerDomainFromServer,
@@ -75,6 +80,7 @@ const crawlRequests: CrawlRequestFromServer[] = [
 describe('CrawlerOverview', () => {
   const mockActions = {
     fetchCrawlerData: jest.fn(),
+    getLatestCrawlRequests: jest.fn(),
   };
 
   const mockValues = {
@@ -88,12 +94,32 @@ describe('CrawlerOverview', () => {
     setMockActions(mockActions);
   });
 
-  it('calls fetchCrawlerData on page load', () => {
+  it('calls fetchCrawlerData and starts polling on page load', () => {
     setMockValues(mockValues);
 
     shallow(<CrawlerOverview />);
 
     expect(mockActions.fetchCrawlerData).toHaveBeenCalledTimes(1);
+    expect(mockActions.getLatestCrawlRequests).toHaveBeenCalledWith(false);
+  });
+
+  it('contains a crawler status banner', () => {
+    setMockValues(mockValues);
+    const wrapper = shallow(<CrawlerOverview />);
+
+    expect(wrapper.find(CrawlerStatusBanner)).toHaveLength(1);
+  });
+
+  it('contains a crawler status indicator', () => {
+    const wrapper = shallow(<CrawlerOverview />);
+
+    expect(getPageHeaderActions(wrapper).find(CrawlerStatusIndicator)).toHaveLength(1);
+  });
+
+  it('contains a popover to manage crawls', () => {
+    const wrapper = shallow(<CrawlerOverview />);
+
+    expect(getPageHeaderActions(wrapper).find(ManageCrawlsPopover)).toHaveLength(1);
   });
 
   it('hides the domain and crawl request tables when there are no domains, and no crawl requests', () => {

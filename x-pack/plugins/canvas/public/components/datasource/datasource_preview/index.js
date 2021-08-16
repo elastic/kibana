@@ -5,28 +5,25 @@
  * 2.0.
  */
 
-import { pure, compose, lifecycle, withState, branch, renderComponent } from 'recompose';
+import React, { useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
 import { interpretAst } from '../../../lib/run_interpreter';
 import { Loading } from '../../loading';
 import { DatasourcePreview as Component } from './datasource_preview';
 
-export const DatasourcePreview = compose(
-  pure,
-  withState('datatable', 'setDatatable'),
-  lifecycle({
-    componentDidMount() {
-      interpretAst(
-        {
-          type: 'expression',
-          chain: [this.props.function],
-        },
-        {}
-      ).then(this.props.setDatatable);
-    },
-  }),
-  branch(({ datatable }) => !datatable, renderComponent(Loading))
-)(Component);
+export const DatasourcePreview = (props) => {
+  const [datatable, setDatatable] = useState();
+
+  useEffect(() => {
+    interpretAst({ type: 'expression', chain: [props.function] }, {}).then(setDatatable);
+  }, [props.function, setDatatable]);
+
+  if (!datatable) {
+    return <Loading {...props} />;
+  }
+
+  return <Component {...props} datatable={datatable} setDatatable={setDatatable} />;
+};
 
 DatasourcePreview.propTypes = {
   function: PropTypes.object,

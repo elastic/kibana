@@ -36,7 +36,7 @@ import {
   TooltipType,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { EuiHighlight } from '@elastic/eui';
 import {
   Query,
@@ -61,7 +61,7 @@ import { debouncedComponent } from '../debounced_component';
 
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];
-  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   field: IndexPatternField;
   indexPattern: IndexPattern;
   highlight?: string;
@@ -395,7 +395,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     core,
     sampledValues,
     chartsThemeService,
-    data: { fieldFormats },
+    fieldFormats,
     dropOntoWorkspace,
     editField,
     removeField,

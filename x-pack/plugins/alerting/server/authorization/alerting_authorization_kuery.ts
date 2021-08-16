@@ -6,7 +6,7 @@
  */
 
 import { remove } from 'lodash';
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
 import { EsQueryConfig, nodeBuilder, toElasticsearchQuery, KueryNode } from '@kbn/es-query';
 
 import { RegistryAlertTypeWithAuth } from './alerting_authorization';

@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ShareContext } from 'src/plugins/share/public';
 import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
+import { isJobV2Params } from '../../common/job_utils';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
@@ -16,11 +17,11 @@ import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 const getJobParams = (
   apiClient: ReportingAPIClient,
   opts: JobParamsProviderOptions,
-  type: 'pdf' | 'png'
+  type: 'png' | 'pngV2' | 'printablePdf' | 'printablePdfV2'
 ) => () => {
   const {
     objectType,
-    sharingData: { title, layout },
+    sharingData: { title, layout, locatorParams },
   } = opts;
 
   const baseParams = {
@@ -29,6 +30,14 @@ const getJobParams = (
     title,
   };
 
+  if (type === 'printablePdfV2') {
+    // multi locator for PDF V2
+    return { ...baseParams, locatorParams: [locatorParams] };
+  } else if (type === 'pngV2') {
+    // single locator for PNG V2
+    return { ...baseParams, locatorParams };
+  }
+
   // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
   // Replace hashes with original RISON values.
   const relativeUrl = opts.shareableUrl.replace(
@@ -36,7 +45,7 @@ const getJobParams = (
     ''
   );
 
-  if (type === 'pdf') {
+  if (type === 'printablePdf') {
     // multi URL for PDF
     return { ...baseParams, relativeUrls: [relativeUrl] };
   }
@@ -111,6 +120,16 @@ export const reportingScreenshotShareProvider = ({
       defaultMessage: 'PNG Reports',
     });
 
+    const jobProviderOptions: JobParamsProviderOptions = {
+      shareableUrl,
+      objectType,
+      sharingData,
+    };
+
+    const isV2Job = isJobV2Params(jobProviderOptions);
+
+    const pngReportType = isV2Job ? 'pngV2' : 'png';
+
     const panelPng = {
       shareMenuItem: {
         name: pngPanelTitle,
@@ -128,10 +147,10 @@ export const reportingScreenshotShareProvider = ({
             apiClient={apiClient}
             toasts={toasts}
             uiSettings={uiSettings}
-            reportType="png"
+            reportType={pngReportType}
             objectId={objectId}
             requiresSavedState={true}
-            getJobParams={getJobParams(apiClient, { shareableUrl, objectType, sharingData }, 'png')}
+            getJobParams={getJobParams(apiClient, jobProviderOptions, pngReportType)}
             isDirty={isDirty}
             onClose={onClose}
           />
@@ -142,6 +161,8 @@ export const reportingScreenshotShareProvider = ({
     const pdfPanelTitle = i18n.translate('xpack.reporting.shareContextMenu.pdfReportsButtonLabel', {
       defaultMessage: 'PDF Reports',
     });
+
+    const pdfReportType = isV2Job ? 'printablePdfV2' : 'printablePdf';
 
     const panelPdf = {
       shareMenuItem: {
@@ -160,11 +181,11 @@ export const reportingScreenshotShareProvider = ({
             apiClient={apiClient}
             toasts={toasts}
             uiSettings={uiSettings}
-            reportType="printablePdf"
+            reportType={pdfReportType}
             objectId={objectId}
             requiresSavedState={true}
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
-            getJobParams={getJobParams(apiClient, { shareableUrl, objectType, sharingData }, 'pdf')}
+            getJobParams={getJobParams(apiClient, jobProviderOptions, pdfReportType)}
             isDirty={isDirty}
             onClose={onClose}
           />

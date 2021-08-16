@@ -100,7 +100,7 @@ export interface SpacesApiUiComponent {
    * that there is a conflict, and it includes a button that will redirect the user to object B when clicked.
    *
    * Consumers need to determine the local path for the new URL on their own, based on the object ID that was used to call
-   * `SavedObjectsClient.resolve()` (A) and the `aliasTargetId` value in the response (B). For example...
+   * `SavedObjectsClient.resolve()` (A) and the `alias_target_id` value in the response (B). For example...
    *
    * A is `workpad-123` and B is `workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e`.
    *

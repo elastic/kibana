@@ -52,6 +52,15 @@ expect.addSnapshotSerializer(createAbsolutePathSerializer());
   });
 });
 
+const OSS_PLUGIN_PATH = '/kibana/src/plugins/ossPlugin';
+const XPACK_PLUGIN_PATH = '/kibana/x-pack/plugins/xPackPlugin';
+const EXTERNAL_PLUGIN_PATH = '/kibana/plugins/externalPlugin';
+[OSS_PLUGIN_PATH, XPACK_PLUGIN_PATH, EXTERNAL_PLUGIN_PATH].forEach((path) => {
+  jest.doMock(join(path, 'server'), () => ({}), {
+    virtual: true,
+  });
+});
+
 const createPlugin = (
   id: string,
   {
@@ -245,6 +254,75 @@ describe('PluginsService', () => {
       expect(prebootMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
       expect(standardMockPluginSystem.addPlugin).not.toHaveBeenCalled();
       expect(standardMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
+    });
+
+    describe('X-Pack dependencies', () => {
+      function mockDiscoveryResults(params: { sourcePluginPath: string; dependencyType: string }) {
+        const { sourcePluginPath, dependencyType } = params;
+        // Each plugin's source is derived from its path; the PluginWrapper test suite contains more detailed test cases around the paths (for both POSIX and Windows)
+        mockDiscover.mockReturnValue({
+          error$: from([]),
+          plugin$: from([
+            createPlugin('sourcePlugin', {
+              path: sourcePluginPath,
+              version: 'some-version',
+              configPath: 'path',
+              requiredPlugins: dependencyType === 'requiredPlugin' ? ['xPackPlugin'] : [],
+              requiredBundles: dependencyType === 'requiredBundle' ? ['xPackPlugin'] : undefined,
+              optionalPlugins: dependencyType === 'optionalPlugin' ? ['xPackPlugin'] : [],
+            }),
+            createPlugin('xPackPlugin', {
+              path: XPACK_PLUGIN_PATH,
+              version: 'some-version',
+              configPath: 'path',
+              requiredPlugins: [],
+              optionalPlugins: [],
+            }),
+          ]),
+        });
+      }
+
+      async function expectError() {
+        await expect(pluginsService.discover({ environment: environmentPreboot })).rejects.toThrow(
+          `X-Pack plugin or bundle with id "xPackPlugin" is required by OSS plugin "sourcePlugin", which is prohibited. Consider making this an optional dependency instead.`
+        );
+        expect(standardMockPluginSystem.addPlugin).not.toHaveBeenCalled();
+      }
+      async function expectSuccess() {
+        await expect(pluginsService.discover({ environment: environmentPreboot })).resolves.toEqual(
+          expect.anything()
+        );
+        expect(standardMockPluginSystem.addPlugin).toHaveBeenCalled();
+      }
+
+      it('throws if an OSS plugin requires an X-Pack plugin or bundle', async () => {
+        for (const dependencyType of ['requiredPlugin', 'requiredBundle']) {
+          mockDiscoveryResults({ sourcePluginPath: OSS_PLUGIN_PATH, dependencyType });
+          await expectError();
+        }
+      });
+
+      it('does not throw if an OSS plugin has an optional dependency on an X-Pack plugin', async () => {
+        mockDiscoveryResults({
+          sourcePluginPath: OSS_PLUGIN_PATH,
+          dependencyType: 'optionalPlugin',
+        });
+        await expectSuccess();
+      });
+
+      it('does not throw if an X-Pack plugin depends on an X-Pack plugin or bundle', async () => {
+        for (const dependencyType of ['requiredPlugin', 'requiredBundle', 'optionalPlugin']) {
+          mockDiscoveryResults({ sourcePluginPath: XPACK_PLUGIN_PATH, dependencyType });
+          await expectSuccess();
+        }
+      });
+
+      it('does not throw if an external plugin depends on an X-Pack plugin or bundle', async () => {
+        for (const dependencyType of ['requiredPlugin', 'requiredBundle', 'optionalPlugin']) {
+          mockDiscoveryResults({ sourcePluginPath: EXTERNAL_PLUGIN_PATH, dependencyType });
+          await expectSuccess();
+        }
+      });
     });
 
     it('properly detects plugins that should be disabled.', async () => {

@@ -8,47 +8,54 @@
 import { SavedObject } from 'src/core/server';
 
 import { IRuleStatusSOAttributes } from '../rules/types';
-import { RuleStatusSavedObjectsClient } from './rule_status_saved_objects_client';
-import { getRuleStatusSavedObjects } from './get_rule_status_saved_objects';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
+import { IRuleExecutionLogClient } from '../rule_execution_log/types';
+import { MAX_RULE_STATUSES } from './rule_status_service';
 
 interface RuleStatusParams {
   alertId: string;
-  ruleStatusClient: RuleStatusSavedObjectsClient;
+  spaceId: string;
+  ruleStatusClient: IRuleExecutionLogClient;
 }
 
 export const createNewRuleStatus = async ({
   alertId,
+  spaceId,
   ruleStatusClient,
 }: RuleStatusParams): Promise<SavedObject<IRuleStatusSOAttributes>> => {
   const now = new Date().toISOString();
   return ruleStatusClient.create({
-    alertId,
-    statusDate: now,
-    status: RuleExecutionStatus['going to run'],
-    lastFailureAt: null,
-    lastSuccessAt: null,
-    lastFailureMessage: null,
-    lastSuccessMessage: null,
-    gap: null,
-    bulkCreateTimeDurations: [],
-    searchAfterTimeDurations: [],
-    lastLookBackDate: null,
+    spaceId,
+    attributes: {
+      alertId,
+      statusDate: now,
+      status: RuleExecutionStatus['going to run'],
+      lastFailureAt: null,
+      lastSuccessAt: null,
+      lastFailureMessage: null,
+      lastSuccessMessage: null,
+      gap: null,
+      bulkCreateTimeDurations: [],
+      searchAfterTimeDurations: [],
+      lastLookBackDate: null,
+    },
   });
 };
 
 export const getOrCreateRuleStatuses = async ({
+  spaceId,
   alertId,
   ruleStatusClient,
 }: RuleStatusParams): Promise<Array<SavedObject<IRuleStatusSOAttributes>>> => {
-  const ruleStatuses = await getRuleStatusSavedObjects({
-    alertId,
-    ruleStatusClient,
+  const ruleStatuses = await ruleStatusClient.find({
+    spaceId,
+    ruleId: alertId,
+    logsCount: MAX_RULE_STATUSES,
   });
   if (ruleStatuses.length > 0) {
     return ruleStatuses;
   }
-  const newStatus = await createNewRuleStatus({ alertId, ruleStatusClient });
+  const newStatus = await createNewRuleStatus({ alertId, spaceId, ruleStatusClient });
 
   return [newStatus];
 };

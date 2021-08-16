@@ -6,18 +6,19 @@
  */
 
 import { SavedObjectsClientContract } from '../../../../../../../../src/core/server';
-import { IRuleStatusSOAttributes } from '../../rules/types';
 import {
   RuleStatusSavedObjectsClient,
   ruleStatusSavedObjectsClientFactory,
 } from '../../signals/rule_status_saved_objects_client';
 import {
+  CreateExecutionLogArgs,
   ExecutionMetric,
   ExecutionMetricArgs,
   FindBulkExecutionLogArgs,
   FindExecutionLogArgs,
   IRuleExecutionLogClient,
   LogStatusChangeArgs,
+  UpdateExecutionLogArgs,
 } from '../types';
 
 export class SavedObjectsAdapter implements IRuleExecutionLogClient {
@@ -41,12 +42,12 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
     return this.ruleStatusClient.findBulk(ruleIds, logsCount);
   }
 
-  public async create(event: IRuleStatusSOAttributes) {
-    await this.ruleStatusClient.create(event);
+  public async create({ attributes }: CreateExecutionLogArgs) {
+    return this.ruleStatusClient.create(attributes);
   }
 
-  public async update(id: string, event: IRuleStatusSOAttributes) {
-    await this.ruleStatusClient.update(id, event);
+  public async update({ id, attributes }: UpdateExecutionLogArgs) {
+    await this.ruleStatusClient.update(id, attributes);
   }
 
   public async delete(id: string) {

@@ -9,7 +9,7 @@ import { assertUnreachable } from '../../../../common/utility_types';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { IRuleStatusSOAttributes } from '../rules/types';
 import { getOrCreateRuleStatuses } from './get_or_create_rule_statuses';
-import { RuleStatusSavedObjectsClient } from './rule_status_saved_objects_client';
+import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 
 // 1st is mutable status, followed by 5 most recent failures
 export const MAX_RULE_STATUSES = 6;
@@ -78,51 +78,69 @@ export const buildRuleStatusAttributes: (
 };
 
 export const ruleStatusServiceFactory = async ({
+  spaceId,
   alertId,
   ruleStatusClient,
 }: {
+  spaceId: string;
   alertId: string;
-  ruleStatusClient: RuleStatusSavedObjectsClient;
+  ruleStatusClient: IRuleExecutionLogClient;
 }): Promise<RuleStatusService> => {
   return {
     goingToRun: async () => {
       const [currentStatus] = await getOrCreateRuleStatuses({
+        spaceId,
         alertId,
         ruleStatusClient,
       });
 
-      await ruleStatusClient.update(currentStatus.id, {
-        ...currentStatus.attributes,
-        ...buildRuleStatusAttributes(RuleExecutionStatus['going to run']),
+      await ruleStatusClient.update({
+        id: currentStatus.id,
+        attributes: {
+          ...currentStatus.attributes,
+          ...buildRuleStatusAttributes(RuleExecutionStatus['going to run']),
+        },
+        spaceId,
       });
     },
 
     success: async (message, attributes) => {
       const [currentStatus] = await getOrCreateRuleStatuses({
+        spaceId,
         alertId,
         ruleStatusClient,
       });
 
-      await ruleStatusClient.update(currentStatus.id, {
-        ...currentStatus.attributes,
-        ...buildRuleStatusAttributes(RuleExecutionStatus.succeeded, message, attributes),
+      await ruleStatusClient.update({
+        id: currentStatus.id,
+        attributes: {
+          ...currentStatus.attributes,
+          ...buildRuleStatusAttributes(RuleExecutionStatus.succeeded, message, attributes),
+        },
+        spaceId,
       });
     },
 
     partialFailure: async (message, attributes) => {
       const [currentStatus] = await getOrCreateRuleStatuses({
+        spaceId,
         alertId,
         ruleStatusClient,
       });
 
-      await ruleStatusClient.update(currentStatus.id, {
-        ...currentStatus.attributes,
-        ...buildRuleStatusAttributes(RuleExecutionStatus['partial failure'], message, attributes),
+      await ruleStatusClient.update({
+        id: currentStatus.id,
+        attributes: {
+          ...currentStatus.attributes,
+          ...buildRuleStatusAttributes(RuleExecutionStatus['partial failure'], message, attributes),
+        },
+        spaceId,
       });
     },
 
     error: async (message, attributes) => {
       const ruleStatuses = await getOrCreateRuleStatuses({
+        spaceId,
         alertId,
         ruleStatusClient,
       });
@@ -134,8 +152,12 @@ export const ruleStatusServiceFactory = async ({
       };
 
       // We always update the newest status, so to 'persist' a failure we push a copy to the head of the list
-      await ruleStatusClient.update(currentStatus.id, failureAttributes);
-      const newStatus = await ruleStatusClient.create(failureAttributes);
+      await ruleStatusClient.update({
+        id: currentStatus.id,
+        attributes: failureAttributes,
+        spaceId,
+      });
+      const newStatus = await ruleStatusClient.create({ attributes: failureAttributes, spaceId });
 
       // drop oldest failures
       const oldStatuses = [newStatus, ...ruleStatuses].slice(MAX_RULE_STATUSES);

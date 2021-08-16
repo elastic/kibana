@@ -62,6 +62,8 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   __updateFormDataAt: (field: string, value: unknown) => void;
   __updateDefaultValueAt: (field: string, value: unknown) => void;
   __readFieldConfigFromSchema: (field: string) => FieldConfig;
+  __getFormDefaultValue: () => FormData;
+  __getFieldsRemoved: () => FieldsMap;
 }
 
 export type FormSchema<T extends FormData = FormData> = {
@@ -109,6 +111,8 @@ export interface FieldHook<T = unknown, I = T> {
   readonly errors: ValidationError[];
   readonly isValid: boolean;
   readonly isPristine: boolean;
+  readonly isDirty: boolean;
+  readonly isModified: boolean;
   readonly isValidating: boolean;
   readonly isValidated: boolean;
   readonly isChangingValue: boolean;

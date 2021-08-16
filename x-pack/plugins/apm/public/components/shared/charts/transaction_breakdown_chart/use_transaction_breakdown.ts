@@ -9,9 +9,15 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 
-export function useTransactionBreakdown() {
+export function useTransactionBreakdown({
+  kuery,
+  environment,
+}: {
+  kuery: string;
+  environment: string;
+}) {
   const {
-    urlParams: { environment, kuery, start, end, transactionName },
+    urlParams: { start, end, transactionName },
   } = useUrlParams();
   const { transactionType, serviceName } = useApmServiceContext();
 

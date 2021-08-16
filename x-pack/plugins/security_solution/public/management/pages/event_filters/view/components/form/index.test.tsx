@@ -6,56 +6,48 @@
  */
 import React from 'react';
 import { EventFiltersForm } from '.';
-import { RenderResult, act, render } from '@testing-library/react';
-import { fireEvent } from '@testing-library/dom';
+import { RenderResult, act } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/dom';
 import { stubIndexPatternWithFields } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
 import { getInitialExceptionFromEvent } from '../../../store/utils';
-import { Provider } from 'react-redux';
 import { useFetchIndex } from '../../../../../../common/containers/source';
-import { ThemeProvider } from 'styled-components';
-import { createGlobalNoMiddlewareStore, ecsEventMock } from '../../../test_utils';
-import { getMockTheme } from '../../../../../../common/lib/kibana/kibana_react.mock';
+import { ecsEventMock } from '../../../test_utils';
 import { NAME_ERROR, NAME_PLACEHOLDER } from './translations';
 import { useCurrentUser, useKibana } from '../../../../../../common/lib/kibana';
-import { ExceptionBuilder } from '../../../../../../shared_imports';
+import {
+  AppContextTestRender,
+  createAppRootMockRenderer,
+} from '../../../../../../common/mock/endpoint';
+import { EventFiltersListPageState } from '../../../types';
 
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../../../../../../common/containers/source');
 
-const mockTheme = getMockTheme({
-  eui: {
-    paddingSizes: { m: '2' },
-  },
-});
-
 describe('Event filter form', () => {
   let component: RenderResult;
-  let store: ReturnType<typeof createGlobalNoMiddlewareStore>;
-
-  const renderForm = () => {
-    const Wrapper: React.FC = ({ children }) => (
-      <Provider store={store}>
-        <ThemeProvider theme={mockTheme}>{children}</ThemeProvider>
-      </Provider>
-    );
-
-    return render(<EventFiltersForm />, { wrapper: Wrapper });
-  };
-
-  const renderComponentWithdata = () => {
-    const entry = getInitialExceptionFromEvent(ecsEventMock());
-    act(() => {
-      store.dispatch({
-        type: 'eventFiltersInitForm',
-        payload: { entry },
-      });
-    });
-    return renderForm();
-  };
+  let mockedContext: AppContextTestRender;
+  let render: () => ReturnType<AppContextTestRender['render']>;
+  let renderWithData: () => Promise<ReturnType<AppContextTestRender['render']>>;
+  let getState: () => EventFiltersListPageState;
 
   beforeEach(() => {
-    const emptyComp = <span data-test-subj="alert-exception-builder" />;
-    jest.spyOn(ExceptionBuilder, 'getExceptionBuilderComponentLazy').mockReturnValue(emptyComp);
+    mockedContext = createAppRootMockRenderer();
+    getState = () => mockedContext.store.getState().management.eventFilters;
+    render = () => mockedContext.render(<EventFiltersForm />);
+    renderWithData = async () => {
+      const renderResult = render();
+      const entry = getInitialExceptionFromEvent(ecsEventMock());
+      act(() => {
+        mockedContext.store.dispatch({
+          type: 'eventFiltersInitForm',
+          payload: { entry },
+        });
+      });
+      await waitFor(() => {
+        expect(renderResult.getByTestId('exceptionsBuilderWrapper')).toBeInTheDocument();
+      });
+      return renderResult;
+    };
 
     (useFetchIndex as jest.Mock).mockImplementation(() => [
       false,
@@ -71,21 +63,21 @@ describe('Event filter form', () => {
         notifications: {},
       },
     });
-    store = createGlobalNoMiddlewareStore();
   });
+
   it('should renders correctly without data', () => {
-    component = renderForm();
+    component = render();
     expect(component.getByTestId('loading-spinner')).not.toBeNull();
   });
 
-  it('should renders correctly with data', () => {
-    component = renderComponentWithdata();
+  it('should renders correctly with data', async () => {
+    component = await renderWithData();
 
-    expect(component.getByTestId('alert-exception-builder')).not.toBeNull();
+    expect(component.getByTestId('exceptionsBuilderWrapper')).not.toBeNull();
   });
 
-  it('should display name error only when on blur and empty name', () => {
-    component = renderComponentWithdata();
+  it('should display name error only when on blur and empty name', async () => {
+    component = await renderWithData();
     expect(component.queryByText(NAME_ERROR)).toBeNull();
     const nameInput = component.getByPlaceholderText(NAME_PLACEHOLDER);
     act(() => {
@@ -95,7 +87,7 @@ describe('Event filter form', () => {
   });
 
   it('should change name', async () => {
-    component = renderComponentWithdata();
+    component = await renderWithData();
 
     const nameInput = component.getByPlaceholderText(NAME_PLACEHOLDER);
 
@@ -107,12 +99,12 @@ describe('Event filter form', () => {
       });
     });
 
-    expect(store.getState()!.management!.eventFilters!.form!.entry!.name).toBe('Exception name');
-    expect(store.getState()!.management!.eventFilters!.form!.hasNameError).toBeFalsy();
+    expect(getState().form.entry!.name).toBe('Exception name');
+    expect(getState().form.hasNameError).toBeFalsy();
   });
 
   it('should change name with a white space still shows an error', async () => {
-    component = renderComponentWithdata();
+    component = await renderWithData();
 
     const nameInput = component.getByPlaceholderText(NAME_PLACEHOLDER);
 
@@ -124,12 +116,12 @@ describe('Event filter form', () => {
       });
     });
 
-    expect(store.getState()!.management!.eventFilters!.form!.entry!.name).toBe('');
-    expect(store.getState()!.management!.eventFilters!.form!.hasNameError).toBeTruthy();
+    expect(getState().form.entry!.name).toBe('');
+    expect(getState().form.hasNameError).toBeTruthy();
   });
 
   it('should change comments', async () => {
-    component = renderComponentWithdata();
+    component = await renderWithData();
 
     const commentInput = component.getByPlaceholderText('Add a new comment...');
 
@@ -141,6 +133,6 @@ describe('Event filter form', () => {
       });
     });
 
-    expect(store.getState()!.management!.eventFilters!.form!.newComment).toBe('Exception comment');
+    expect(getState().form.newComment).toBe('Exception comment');
   });
 });

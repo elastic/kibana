@@ -119,6 +119,16 @@ export const getStats = async ({
                 },
               },
             },
+            total_latency_sum: {
+              sum: {
+                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+              },
+            },
+            total_latency_count: {
+              sum: {
+                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+              },
+            },
             timeseries: {
               date_histogram: {
                 field: '@timestamp',
@@ -126,6 +136,7 @@ export const getStats = async ({
                   start: startWithOffset,
                   end: endWithOffset,
                   numBuckets,
+                  minBucketSize: 60,
                 }).intervalString,
                 extended_bounds: {
                   min: startWithOffset,

@@ -7,11 +7,11 @@
 
 import { KbnClient } from '@kbn/test';
 import type { ApiResponse } from '@elastic/elasticsearch';
+import { Context } from '@elastic/elasticsearch/lib/Transport';
+import type { estypes } from '@elastic/elasticsearch';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
-import { Context } from '@elastic/elasticsearch/lib/Transport';
-import { SearchResponse } from 'elasticsearch';
 import type {
   ListArray,
   NonEmptyEntriesArray,
@@ -45,6 +45,8 @@ import {
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
+  DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
   INTERNAL_IMMUTABLE_KEY,
   INTERNAL_RULE_ID_KEY,
 } from '../../plugins/security_solution/common/constants';
@@ -1079,12 +1081,14 @@ export const getSignalsByRuleIds = async (
   supertest: SuperTest<supertestAsPromised.Test>,
   ruleIds: string[]
 ): Promise<
-  SearchResponse<{
+  estypes.SearchResponse<{
     signal: Signal;
     [x: string]: unknown;
   }>
 > => {
-  const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+  const {
+    body: signalsOpen,
+  }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
     .send(getQuerySignalsRuleId(ruleIds))
@@ -1103,12 +1107,14 @@ export const getSignalsByIds = async (
   ids: string[],
   size?: number
 ): Promise<
-  SearchResponse<{
+  estypes.SearchResponse<{
     signal: Signal;
     [x: string]: unknown;
   }>
 > => {
-  const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+  const {
+    body: signalsOpen,
+  }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
     .send(getQuerySignalsId(ids, size))
@@ -1125,12 +1131,14 @@ export const getSignalsById = async (
   supertest: SuperTest<supertestAsPromised.Test>,
   id: string
 ): Promise<
-  SearchResponse<{
+  estypes.SearchResponse<{
     signal: Signal;
     [x: string]: unknown;
   }>
 > => {
-  const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+  const {
+    body: signalsOpen,
+  }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
     .send(getQuerySignalsId([id]))
@@ -1347,6 +1355,54 @@ export const deleteMigrations = async ({
       })
     )
   );
+};
+
+interface CreateMigrationResponse {
+  index: string;
+  migration_index: string;
+  migration_id: string;
+}
+
+export const startSignalsMigration = async ({
+  indices,
+  supertest,
+}: {
+  supertest: SuperTest<supertestAsPromised.Test>;
+  indices: string[];
+}): Promise<CreateMigrationResponse[]> => {
+  const {
+    body: { indices: created },
+  }: { body: { indices: CreateMigrationResponse[] } } = await supertest
+    .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
+    .set('kbn-xsrf', 'true')
+    .send({ index: indices })
+    .expect(200);
+
+  return created;
+};
+
+interface FinalizeMigrationResponse {
+  id: string;
+  completed?: boolean;
+  error?: unknown;
+}
+
+export const finalizeSignalsMigration = async ({
+  migrationIds,
+  supertest,
+}: {
+  supertest: SuperTest<supertestAsPromised.Test>;
+  migrationIds: string[];
+}): Promise<FinalizeMigrationResponse[]> => {
+  const {
+    body: { migrations },
+  }: { body: { migrations: FinalizeMigrationResponse[] } } = await supertest
+    .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+    .set('kbn-xsrf', 'true')
+    .send({ migration_ids: migrationIds })
+    .expect(200);
+
+  return migrations;
 };
 
 export const getOpenSignals = async (

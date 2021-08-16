@@ -8,17 +8,22 @@
 import React from 'react';
 import { Switch } from 'react-router-dom';
 
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
+
+import { rerender } from '../../../test_helpers';
 
 import { CrawlerLanding } from './crawler_landing';
 import { CrawlerOverview } from './crawler_overview';
 import { CrawlerRouter } from './crawler_router';
+import { CrawlerSingleDomain } from './crawler_single_domain';
 
 describe('CrawlerRouter', () => {
+  let wrapper: ShallowWrapper;
   const OLD_ENV = process.env;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    wrapper = shallow(<CrawlerRouter />);
   });
 
   afterEach(() => {
@@ -26,16 +31,18 @@ describe('CrawlerRouter', () => {
   });
 
   it('renders a landing page by default', () => {
-    const wrapper = shallow(<CrawlerRouter />);
-
     expect(wrapper.find(Switch)).toHaveLength(1);
     expect(wrapper.find(CrawlerLanding)).toHaveLength(1);
   });
 
   it('renders a crawler overview in dev', () => {
     process.env.NODE_ENV = 'development';
-    const wrapper = shallow(<CrawlerRouter />);
+    rerender(wrapper);
 
     expect(wrapper.find(CrawlerOverview)).toHaveLength(1);
+  });
+
+  it('renders a crawler single domain view', () => {
+    expect(wrapper.find(CrawlerSingleDomain)).toHaveLength(1);
   });
 });

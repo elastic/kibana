@@ -805,7 +805,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const signals = await getSignalsByIds(supertest, [id]);
 
           const alert = signals.hits.hits[0];
-          expect(alert._source.signal.status).eql('open');
+          expect(alert._source?.signal.status).eql('open');
 
           const caseUpdated = await createComment({
             supertest,
@@ -846,7 +846,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .send(getQuerySignalIds([alert._id]))
             .expect(200);
 
-          expect(updatedAlert.hits.hits[0]._source.signal.status).eql('in-progress');
+          expect(updatedAlert.hits.hits[0]._source?.signal.status).eql('in-progress');
         });
 
         it('does NOT updates alert status when the status is updated and syncAlerts=false', async () => {
@@ -863,7 +863,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const signals = await getSignalsByIds(supertest, [id]);
 
           const alert = signals.hits.hits[0];
-          expect(alert._source.signal.status).eql('open');
+          expect(alert._source?.signal.status).eql('open');
 
           const caseUpdated = await createComment({
             supertest,
@@ -899,7 +899,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .send(getQuerySignalIds([alert._id]))
             .expect(200);
 
-          expect(updatedAlert.hits.hits[0]._source.signal.status).eql('open');
+          expect(updatedAlert.hits.hits[0]._source?.signal.status).eql('open');
         });
 
         it('it updates alert status when syncAlerts is turned on', async () => {
@@ -916,7 +916,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const signals = await getSignalsByIds(supertest, [id]);
 
           const alert = signals.hits.hits[0];
-          expect(alert._source.signal.status).eql('open');
+          expect(alert._source?.signal.status).eql('open');
 
           const caseUpdated = await createComment({
             supertest,
@@ -970,7 +970,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .send(getQuerySignalIds([alert._id]))
             .expect(200);
 
-          expect(updatedAlert.hits.hits[0]._source.signal.status).eql('in-progress');
+          expect(updatedAlert.hits.hits[0]._source?.signal.status).eql('in-progress');
         });
 
         it('it does NOT updates alert status when syncAlerts is turned off', async () => {
@@ -983,7 +983,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const signals = await getSignalsByIds(supertest, [id]);
 
           const alert = signals.hits.hits[0];
-          expect(alert._source.signal.status).eql('open');
+          expect(alert._source?.signal.status).eql('open');
 
           const caseUpdated = await createComment({
             supertest,

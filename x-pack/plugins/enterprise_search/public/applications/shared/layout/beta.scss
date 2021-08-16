@@ -6,15 +6,18 @@
  */
 
 @include euiBreakpoint('m', 'l', 'xl') {
-  .kbnPageTemplateSolutionNav {
-    display: flex;
-    flex-direction: column;
-  }
-  .euiSideNav__content {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+  .betaSidebarNotification {
+    .euiSideNav {
+      display: flex;
+      flex-direction: column;
+
+      .euiSideNav__content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+    }
   }
 }
 

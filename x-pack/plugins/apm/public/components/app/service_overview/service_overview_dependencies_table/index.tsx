@@ -8,6 +8,8 @@
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { useUiTracker } from '../../../../../../observability/public';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -24,7 +26,6 @@ export function ServiceOverviewDependenciesTable() {
     urlParams: {
       start,
       end,
-      environment,
       comparisonEnabled,
       comparisonType,
       latencyAggregationType,
@@ -33,8 +34,8 @@ export function ServiceOverviewDependenciesTable() {
 
   const {
     query,
-    query: { kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/overview');
+    query: { environment, kuery, rangeFrom, rangeTo },
+  } = useApmParams('/services/:serviceName/*');
 
   const { offset } = getTimeRangeComparison({
     start,
@@ -53,6 +54,8 @@ export function ServiceOverviewDependenciesTable() {
     },
     query,
   });
+
+  const trackEvent = useUiTracker();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -88,6 +91,13 @@ export function ServiceOverviewDependenciesTable() {
               kuery,
               rangeFrom,
               rangeTo,
+            }}
+            onClick={() => {
+              trackEvent({
+                app: 'apm',
+                metricType: METRIC_TYPE.CLICK,
+                metric: 'service_dependencies_to_backend_detail',
+              });
             }}
           />
         ) : (

@@ -1,7 +1,6 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
@@ -24,5 +23,6 @@
     { "path": "../kibana_legacy/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
     { "path": "../vis_default_editor/tsconfig.json" },
+    { "path": "../field_formats/tsconfig.json" }
   ]
 }

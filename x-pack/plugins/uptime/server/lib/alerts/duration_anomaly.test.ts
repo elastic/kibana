@@ -17,7 +17,7 @@ import {
   ALERT_SEVERITY_VALUE,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_THRESHOLD,
-} from '@kbn/rule-data-utils/target/technical_field_names';
+} from '@kbn/rule-data-utils';
 
 interface MockAnomaly {
   severity: AnomaliesTableRecord['severity'];

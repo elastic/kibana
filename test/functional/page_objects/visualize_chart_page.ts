@@ -115,10 +115,10 @@ export class VisualizeChartPageObject extends FtrService {
       .map((tick) => $(tick).text().trim());
   }
 
-  public async getYAxisLabels() {
+  public async getYAxisLabels(nth = 0) {
     if (await this.isNewLibraryChart(xyChartSelector)) {
-      const [yAxis] = (await this.getEsChartDebugState(xyChartSelector))?.axes?.y ?? [];
-      return yAxis?.labels;
+      const yAxis = (await this.getEsChartDebugState(xyChartSelector))?.axes?.y ?? [];
+      return yAxis[nth]?.labels;
     }
 
     const yAxis = await this.find.byCssSelector('.visAxis__column--y.visAxis__column--left');
@@ -141,14 +141,19 @@ export class VisualizeChartPageObject extends FtrService {
    * Gets the chart data and scales it based on chart height and label.
    * @param dataLabel data-label value
    * @param axis  axis value, 'ValueAxis-1' by default
+   * @param shouldContainXAxisData boolean value for mapping points, false by default
    *
    * Returns an array of height values
    */
-  public async getAreaChartData(dataLabel: string, axis = 'ValueAxis-1') {
+  public async getAreaChartData(
+    dataLabel: string,
+    axis = 'ValueAxis-1',
+    shouldContainXAxisData = false
+  ) {
     if (await this.isNewLibraryChart(xyChartSelector)) {
       const areas = (await this.getEsChartDebugState(xyChartSelector))?.areas ?? [];
       const points = areas.find(({ name }) => name === dataLabel)?.lines.y1.points ?? [];
-      return points.map(({ y }) => y);
+      return shouldContainXAxisData ? points.map(({ x, y }) => [x, y]) : points.map(({ y }) => y);
     }
 
     const yAxisRatio = await this.getChartYAxisRatio(axis);
@@ -556,12 +561,12 @@ export class VisualizeChartPageObject extends FtrService {
     return values.filter((item) => item.length > 0);
   }
 
-  public async getRightValueAxesCount() {
+  public async getAxesCountByPosition(axesPosition: typeof Position[keyof typeof Position]) {
     if (await this.isNewLibraryChart(xyChartSelector)) {
       const yAxes = (await this.getEsChartDebugState(xyChartSelector))?.axes?.y ?? [];
-      return yAxes.filter(({ position }) => position === Position.Right).length;
+      return yAxes.filter(({ position }) => position === axesPosition).length;
     }
-    const axes = await this.find.allByCssSelector('.visAxis__column--right g.axis');
+    const axes = await this.find.allByCssSelector(`.visAxis__column--${axesPosition} g.axis`);
     return axes.length;
   }
 
@@ -574,6 +579,16 @@ export class VisualizeChartPageObject extends FtrService {
     const yOffset = 1 - Math.floor(gaugeHeight / 2);
 
     await gauge.clickMouseButton({ xOffset: 0, yOffset });
+  }
+
+  public async getAreaSeriesCount() {
+    if (await this.isNewLibraryChart(xyChartSelector)) {
+      const areas = (await this.getEsChartDebugState(xyChartSelector))?.areas ?? [];
+      return areas.filter((area) => area.lines.y1.visible).length;
+    }
+
+    const series = await this.find.allByCssSelector('.points.area');
+    return series.length;
   }
 
   public async getHistogramSeriesCount() {

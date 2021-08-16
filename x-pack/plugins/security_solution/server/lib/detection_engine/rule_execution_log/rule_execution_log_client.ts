@@ -6,21 +6,22 @@
  */
 
 import { SavedObjectsClientContract } from '../../../../../../../src/core/server';
-import { RuleDataPluginService } from '../../../../../rule_registry/server';
-import { IRuleStatusSOAttributes } from '../rules/types';
-import { RuleRegistryAdapter } from './adapters/rule_registry_dapter';
+import { RuleRegistryAdapter } from './adapters/rule_registry_adapter';
 import { SavedObjectsAdapter } from './adapters/saved_objects_adapter';
 import {
+  CreateExecutionLogArgs,
   ExecutionMetric,
   ExecutionMetricArgs,
   FindBulkExecutionLogArgs,
   FindExecutionLogArgs,
+  IRuleDataPluginService,
   IRuleExecutionLogClient,
   LogStatusChangeArgs,
+  UpdateExecutionLogArgs,
 } from './types';
 
 export interface RuleExecutionLogClientArgs {
-  ruleDataService: RuleDataPluginService;
+  ruleDataService: IRuleDataPluginService;
   savedObjectsClient: SavedObjectsClientContract;
 }
 
@@ -45,14 +46,12 @@ export class RuleExecutionLogClient implements IRuleExecutionLogClient {
     return this.client.findBulk(args);
   }
 
-  // TODO args as an object
-  public async create(event: IRuleStatusSOAttributes, spaceId: string) {
-    return this.client.create(event, spaceId);
+  public async create(args: CreateExecutionLogArgs) {
+    return this.client.create(args);
   }
 
-  // TODO args as an object
-  public async update(id: string, event: IRuleStatusSOAttributes, spaceId: string) {
-    return this.client.update(id, event, spaceId);
+  public async update(args: UpdateExecutionLogArgs) {
+    return this.client.update(args);
   }
 
   public async delete(id: string) {

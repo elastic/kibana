@@ -16,19 +16,22 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiIcon,
+  EuiToolTip,
+  EuiLink,
 } from '@elastic/eui';
 
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common';
 import { pagePathGetters } from '../../../../../../../constants';
-import type { AgentPolicy, PackagePolicy } from '../../../../../types';
+import type { AgentPolicy, InMemoryPackagePolicy, PackagePolicy } from '../../../../../types';
 import { PackageIcon, PackagePolicyActionsMenu } from '../../../../../components';
-import { useCapabilities, useStartServices } from '../../../../../hooks';
-
-interface InMemoryPackagePolicy extends PackagePolicy {
-  packageName?: string;
-  packageTitle?: string;
-  packageVersion?: string;
-}
+import {
+  useCapabilities,
+  useLink,
+  usePackageInstallations,
+  useStartServices,
+} from '../../../../../hooks';
+import { pkgKeyFromPackageInfo } from '../../../../../services';
 
 interface Props {
   packagePolicies: PackagePolicy[];
@@ -53,6 +56,8 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
 }) => {
   const { application } = useStartServices();
   const hasWriteCapabilities = useCapabilities().write;
+  const { updatableIntegrations } = usePackageInstallations();
+  const { getHref } = useLink();
 
   // With the package policies provided on input, generate the list of package policies
   // used in the InMemoryTable (flattens some values for search) as well as
@@ -66,11 +71,22 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           namespacesValues.push(packagePolicy.namespace);
         }
 
+        const updatableIntegrationRecord = updatableIntegrations.get(
+          packagePolicy.package?.name ?? ''
+        );
+
+        const hasUpgrade =
+          !!updatableIntegrationRecord &&
+          updatableIntegrationRecord.policiesToUpgrade.some(
+            ({ id }) => id === packagePolicy.policy_id
+          );
+
         return {
           ...packagePolicy,
           packageName: packagePolicy.package?.name ?? '',
           packageTitle: packagePolicy.package?.title ?? '',
           packageVersion: packagePolicy.package?.version ?? '',
+          hasUpgrade,
         };
       }
     );
@@ -79,7 +95,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
     inputTypesValues.sort(stringSortAscending);
 
     return [mappedPackagePolicies, namespacesValues.map(toFilterOption)];
-  }, [originalPackagePolicies]);
+  }, [originalPackagePolicies, updatableIntegrations]);
 
   const columns = useMemo(
     (): EuiInMemoryTableProps<InMemoryPackagePolicy>['columns'] => [
@@ -89,24 +105,30 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         name: i18n.translate('xpack.fleet.policyDetails.packagePoliciesTable.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
-        render: (value: string) => (
-          <span className="eui-textTruncate" title={value}>
-            {value}
-          </span>
-        ),
-      },
-      {
-        field: 'description',
-        name: i18n.translate(
-          'xpack.fleet.policyDetails.packagePoliciesTable.descriptionColumnTitle',
-          {
-            defaultMessage: 'Description',
-          }
-        ),
-        render: (value: string) => (
-          <span className="eui-textTruncate" title={value}>
-            {value}
-          </span>
+        render: (value: string, packagePolicy: InMemoryPackagePolicy) => (
+          <EuiLink
+            title={value}
+            {...(hasWriteCapabilities
+              ? {
+                  href: getHref('edit_integration', {
+                    policyId: agentPolicy.id,
+                    packagePolicyId: packagePolicy.id,
+                  }),
+                }
+              : { disabled: true })}
+          >
+            <span className="eui-textTruncate" title={value}>
+              {value}
+            </span>
+            {packagePolicy.description ? (
+              <span>
+                &nbsp;
+                <EuiToolTip content={packagePolicy.description}>
+                  <EuiIcon type="help" />
+                </EuiToolTip>
+              </span>
+            ) : null}
+          </EuiLink>
         ),
       },
       {
@@ -121,27 +143,69 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         render(packageTitle: string, packagePolicy: InMemoryPackagePolicy) {
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center">
-              {packagePolicy.package && (
-                <EuiFlexItem grow={false}>
-                  <PackageIcon
-                    packageName={packagePolicy.package.name}
-                    version={packagePolicy.package.version}
-                    size="m"
-                    tryApi={true}
-                  />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>{packageTitle}</EuiFlexItem>
-              {packagePolicy.package && (
-                <EuiFlexItem grow={false}>
-                  <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                    <FormattedMessage
-                      id="xpack.fleet.policyDetails.packagePoliciesTable.packageVersion"
-                      defaultMessage="v{version}"
-                      values={{ version: packagePolicy.package.version }}
-                    />
-                  </EuiText>
-                </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  href={
+                    packagePolicy.package &&
+                    getHref('integration_details_overview', {
+                      pkgkey: pkgKeyFromPackageInfo(packagePolicy.package),
+                    })
+                  }
+                >
+                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                    {packagePolicy.package && (
+                      <EuiFlexItem grow={false}>
+                        <PackageIcon
+                          packageName={packagePolicy.package.name}
+                          version={packagePolicy.package.version}
+                          size="m"
+                          tryApi={true}
+                        />
+                      </EuiFlexItem>
+                    )}
+                    <EuiFlexItem grow={false}>{packageTitle}</EuiFlexItem>
+                    {packagePolicy.package && (
+                      <EuiFlexItem grow={false}>
+                        <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+                          <FormattedMessage
+                            id="xpack.fleet.policyDetails.packagePoliciesTable.packageVersion"
+                            defaultMessage="v{version}"
+                            values={{ version: packagePolicy.package.version }}
+                          />
+                        </EuiText>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                </EuiLink>
+              </EuiFlexItem>
+              {packagePolicy.hasUpgrade && (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip
+                      content={i18n.translate(
+                        'xpack.fleet.policyDetails.packagePoliciesTable.upgradeAvailable',
+                        { defaultMessage: 'Upgrade Available' }
+                      )}
+                    >
+                      <EuiIcon type="alert" color="warning" />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      minWidth="0"
+                      href={`${getHref('upgrade_package_policy', {
+                        policyId: agentPolicy.id,
+                        packagePolicyId: packagePolicy.id,
+                      })}?from=fleet-policy-list`}
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeButton"
+                        defaultMessage="Upgrade"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </>
               )}
             </EuiFlexGroup>
           );
@@ -167,14 +231,21 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           {
             render: (packagePolicy: InMemoryPackagePolicy) => {
               return (
-                <PackagePolicyActionsMenu agentPolicy={agentPolicy} packagePolicy={packagePolicy} />
+                <PackagePolicyActionsMenu
+                  agentPolicy={agentPolicy}
+                  packagePolicy={packagePolicy}
+                  upgradePackagePolicyHref={`${getHref('upgrade_package_policy', {
+                    policyId: agentPolicy.id,
+                    packagePolicyId: packagePolicy.id,
+                  })}`}
+                />
               );
             },
           },
         ],
       },
     ],
-    [agentPolicy]
+    [agentPolicy, getHref, hasWriteCapabilities]
   );
 
   return (

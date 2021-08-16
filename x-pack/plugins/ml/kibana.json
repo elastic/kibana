@@ -39,7 +39,8 @@
     "savedObjects",
     "home",
     "maps",
-    "usageCollection"
+    "usageCollection",
+    "fieldFormats"
   ],
   "extraPublicDirs": [
     "common"

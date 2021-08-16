@@ -142,33 +142,6 @@ Array [
                     },
                   },
                 },
-                "timeseries": Object {
-                  "aggs": Object {
-                    "avg_duration": Object {
-                      "avg": Object {
-                        "field": "transaction.duration.us",
-                      },
-                    },
-                    "outcomes": Object {
-                      "terms": Object {
-                        "field": "event.outcome",
-                        "include": Array [
-                          "failure",
-                          "success",
-                        ],
-                      },
-                    },
-                  },
-                  "date_histogram": Object {
-                    "extended_bounds": Object {
-                      "max": 1528977600000,
-                      "min": 1528113600000,
-                    },
-                    "field": "@timestamp",
-                    "fixed_interval": "43200s",
-                    "min_doc_count": 0,
-                  },
-                },
               },
               "terms": Object {
                 "field": "transaction.type",

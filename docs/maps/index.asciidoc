@@ -74,6 +74,7 @@ Search across the layers in your map to focus in on just the data you want. Comb
 --
 
 include::maps-getting-started.asciidoc[]
+include::asset-tracking-tutorial.asciidoc[]
 include::heatmap-layer.asciidoc[]
 include::tile-layer.asciidoc[]
 include::vector-layer.asciidoc[]

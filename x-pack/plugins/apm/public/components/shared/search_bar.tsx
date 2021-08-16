@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiSpacer,
+  EuiFlexGroupProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -83,11 +84,14 @@ export function SearchBar({
   showTimeComparison = false,
   showTransactionTypeSelector = false,
 }: Props) {
-  const { isSmall, isMedium, isLarge, isXl, isXXL } = useBreakPoints();
+  const { isSmall, isMedium, isLarge, isXl, isXXL, isXXXL } = useBreakPoints();
 
   if (hidden) {
     return null;
   }
+
+  const searchBarDirection: EuiFlexGroupProps['direction'] =
+    isXXXL || (!isXl && !showTimeComparison) ? 'row' : 'column';
 
   return (
     <>
@@ -95,11 +99,11 @@ export function SearchBar({
       <EuiFlexGroup
         gutterSize="s"
         responsive={false}
-        direction={isXXL ? 'row' : 'column'}
+        direction={searchBarDirection}
       >
         <EuiFlexItem>
           <EuiFlexGroup
-            direction={isSmall ? 'columnReverse' : 'row'}
+            direction={isLarge ? 'columnReverse' : 'row'}
             gutterSize="s"
             responsive={false}
           >
@@ -116,15 +120,15 @@ export function SearchBar({
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={showTimeComparison && !isXXL}>
+        <EuiFlexItem grow={showTimeComparison && !isXXXL}>
           <EuiFlexGroup
             direction={isSmall || isMedium || isLarge ? 'columnReverse' : 'row'}
-            justifyContent={isXl ? 'flexEnd' : undefined}
+            justifyContent={isXXL ? 'flexEnd' : undefined}
             gutterSize="s"
             responsive={false}
           >
             {showTimeComparison && (
-              <EuiFlexItem grow={isXXL} style={{ minWidth: 300 }}>
+              <EuiFlexItem grow={isXXXL} style={{ minWidth: 300 }}>
                 <TimeComparison />
               </EuiFlexItem>
             )}

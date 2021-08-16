@@ -11,10 +11,10 @@ import {
   AlertTypeParams,
   AlertTypeState,
 } from '../../../../../alerting/common';
-import { AlertTypeWithExecutor, RuleDataPluginService } from '../../../../../rule_registry/server';
+import { AlertTypeWithExecutor } from '../../../../../rule_registry/server';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RuleExecutionLogClient } from './rule_execution_log_client';
-import { IRuleExecutionLogClient } from './types';
+import { IRuleDataPluginService, IRuleExecutionLogClient } from './types';
 
 export interface ExecutionLogServices {
   ruleExecutionLogClient: IRuleExecutionLogClient;
@@ -23,7 +23,7 @@ export interface ExecutionLogServices {
 
 type WithRuleExecutionLog = (args: {
   logger: Logger;
-  ruleDataService: RuleDataPluginService;
+  ruleDataService: IRuleDataPluginService;
 }) => <
   TState extends AlertTypeState,
   TParams extends AlertTypeParams,

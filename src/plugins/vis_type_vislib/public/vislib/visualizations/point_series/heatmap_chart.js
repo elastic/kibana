@@ -13,7 +13,7 @@ import { isColorDark } from '@elastic/eui';
 
 import { PointSeries } from './_point_series';
 import { getHeatmapColors } from '../../../../../../plugins/charts/public';
-import { UI_SETTINGS } from '../../../../../../plugins/data/public';
+import { FORMATS_UI_SETTINGS } from '../../../../../../plugins/field_formats/common';
 import { getValueForPercentageMode } from '../../percentage_mode_transform';
 
 const defaults = {
@@ -54,7 +54,7 @@ export class HeatmapChart extends PointSeries {
     const percentageMode = cfg.get('percentageMode');
     const percentageFormatPattern = cfg.get(
       'percentageFormatPattern',
-      this.uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN)
+      this.uiSettings.get(FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN)
     );
     const colorsNumber = cfg.get('colorsNumber');
     const colorsRange = cfg.get('colorsRange');

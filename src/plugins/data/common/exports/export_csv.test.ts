@@ -7,7 +7,7 @@
  */
 
 import { Datatable } from 'src/plugins/expressions';
-import { FieldFormat } from '../../common/field_formats';
+import { FieldFormat } from '../../../field_formats/common';
 import { datatableToCSV } from './export_csv';
 
 function getDefaultOptions() {

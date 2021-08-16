@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-executionContext?: IExecutionContextContainer;
+executionContext?: KibanaExecutionContext;
 ```
