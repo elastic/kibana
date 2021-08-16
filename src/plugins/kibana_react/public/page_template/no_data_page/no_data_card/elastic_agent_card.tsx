@@ -41,9 +41,8 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
       // Do not add the behavior here too or else it will propogate through
       <EuiButton fill>
         {button ||
-          i18n.translate('kibana-react.noDataPage.elasticAgentCard.buttonLabel', {
-            defaultMessage: 'Find an integration for {solution}',
-            values: { solution },
+          i18n.translate('kibana-react.noDataPage.elasticAgentCard.title', {
+            defaultMessage: 'Add Elastic Agent',
           })}
       </EuiButton>
     );
@@ -53,8 +52,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
       paddingSize="l"
       href={href ?? addBasePath('/app/integrations/browse')}
       title={i18n.translate('kibana-react.noDataPage.elasticAgentCard.title', {
-        defaultMessage: 'Add a {solution} integration',
-        values: { solution },
+        defaultMessage: 'Add Elastic Agent',
       })}
       description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
         defaultMessage: `The Elastic Agent provides a simple, unified way to

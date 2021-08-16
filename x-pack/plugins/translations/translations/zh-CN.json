@@ -21753,7 +21753,6 @@
     "xpack.securitySolution.editDataProvider.valueLabel": "值",
     "xpack.securitySolution.editDataProvider.valuePlaceholder": "值",
     "xpack.securitySolution.effectedPolicySelect.viewPolicyLinkLabel": "查看策略",
-    "xpack.securitySolution.emptyMessage": "Elastic Security 将免费开放的 Elastic SIEM 和 Endpoint Security 相集成，以预防、检测并响应威胁。首先，您需要将安全解决方案相关数据添加到 Elastic Stack。有关更多信息，您可以查看我们的 ",
     "xpack.securitySolution.emptyString.emptyStringDescription": "空字符串",
     "xpack.securitySolution.endpoint.actions.agentDetails": "查看代理详情",
     "xpack.securitySolution.endpoint.actions.agentPolicy": "查看代理策略",

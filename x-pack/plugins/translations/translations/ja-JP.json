@@ -21276,7 +21276,6 @@
     "xpack.securitySolution.editDataProvider.valueLabel": "値",
     "xpack.securitySolution.editDataProvider.valuePlaceholder": "値",
     "xpack.securitySolution.effectedPolicySelect.viewPolicyLinkLabel": "ポリシーを表示",
-    "xpack.securitySolution.emptyMessage": "Elastic Securityは無料かつオープンのElastic SIEMに、Endpoint Securityを搭載。脅威の防御と検知、脅威への対応を支援します。開始するには、セキュリティソリューション関連データをElastic Stackに追加する必要があります。詳細については、以下をご覧ください ",
     "xpack.securitySolution.emptyString.emptyStringDescription": "空の文字列",
     "xpack.securitySolution.endpoint.actions.agentDetails": "エージェント詳細を表示",
     "xpack.securitySolution.endpoint.actions.agentPolicy": "エージェントポリシーを表示",
