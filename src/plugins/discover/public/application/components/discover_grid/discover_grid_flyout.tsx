@@ -108,6 +108,7 @@ export function DiscoverGridFlyout({
         data-test-subj="docTableDetailsFlyout"
         onKeyDown={onKeyDown}
         ownFocus={false}
+        type="push"
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle
