@@ -67,9 +67,9 @@ const validateCommon: ValidationLibrary = {
 
     return (
       !timeout ||
-      parseFloat(timeout as ICustomFields[ConfigKeys.TIMEOUT]) < 0 ||
+      parseFloat(timeout) < 0 ||
       validateTimeout({
-        timeout: timeout as ICustomFields[ConfigKeys.TIMEOUT],
+        timeout,
         scheduleNumber: number,
         scheduleUnit: unit,
       })
