@@ -154,7 +154,7 @@ const OBSERVABILITY_ALERT_CONSUMERS = [
   AlertConsumers.APM,
   AlertConsumers.LOGS,
   AlertConsumers.INFRASTRUCTURE,
-  AlertConsumers.SYNTHETICS,
+  AlertConsumers.UPTIME,
 ];
 
 function ObservabilityActions({
@@ -220,7 +220,7 @@ function ObservabilityActions({
   }, [afterCaseSelection, casePermissions, timelines, event]);
   return (
     <>
-      <EuiFlexGroup gutterSize="none">
+      <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem>
           <EuiButtonIcon
             size="s"

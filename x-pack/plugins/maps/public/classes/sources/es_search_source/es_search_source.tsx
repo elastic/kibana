@@ -13,7 +13,12 @@ import type { Filter, IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { AbstractESSource } from '../es_source';
-import { getHttp, getSearchService, getTimeFilter } from '../../../kibana_services';
+import {
+  getHttp,
+  getSearchService,
+  getSecurityService,
+  getTimeFilter,
+} from '../../../kibana_services';
 import {
   addFieldToDSL,
   getField,
@@ -62,7 +67,12 @@ import { isValidStringConfig } from '../../util/valid_string_config';
 import { TopHitsUpdateSourceEditor } from './top_hits';
 import { getDocValueAndSourceFields, ScriptField } from './util/get_docvalue_source_fields';
 import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
-import { addFeatureToIndex, deleteFeatureFromIndex, getMatchingIndexes } from './util/feature_edit';
+import {
+  addFeatureToIndex,
+  deleteFeatureFromIndex,
+  getIsDrawLayer,
+  getMatchingIndexes,
+} from './util/feature_edit';
 
 export function timerangeToTimeextent(timerange: TimeRange): Timeslice | undefined {
   const timeRangeBounds = getTimeFilter().calculateBounds(timerange);
@@ -444,6 +454,29 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return matchingIndexes.length === 1;
   }
 
+  async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
+    if (!(await this._isDrawingIndex())) {
+      return {};
+    }
+    const user = await getSecurityService()?.authc.getCurrentUser();
+    const timestamp = new Date().toISOString();
+    return {
+      created: {
+        ...(user ? { user: user.username } : {}),
+        '@timestamp': timestamp,
+      },
+    };
+  }
+
+  async _isDrawingIndex(): Promise<boolean> {
+    await this.getIndexPattern();
+    if (!(this.indexPattern && this.indexPattern.title)) {
+      return false;
+    }
+    const { success, isDrawingIndex } = await getIsDrawLayer(this.indexPattern.title);
+    return success && isDrawingIndex;
+  }
+
   _hasSort(): boolean {
     const { sortField, sortOrder } = this._descriptor;
     return !!sortField && !!sortOrder;
@@ -716,9 +749,12 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return MVT_SOURCE_LAYER_NAME;
   }
 
-  async addFeature(geometry: Geometry | Position[]) {
+  async addFeature(
+    geometry: Geometry | Position[],
+    defaultFields: Record<string, Record<string, string>>
+  ) {
     const indexPattern = await this.getIndexPattern();
-    await addFeatureToIndex(indexPattern.title, geometry, this.getGeoFieldName());
+    await addFeatureToIndex(indexPattern.title, geometry, this.getGeoFieldName(), defaultFields);
   }
 
   async deleteFeature(featureId: string) {
