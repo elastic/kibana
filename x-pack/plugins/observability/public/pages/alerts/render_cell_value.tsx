@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiIconTip, EuiLink } from '@elastic/eui';
+import { EuiIconTip, EuiLink, EuiHealth } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 /**
@@ -88,22 +88,15 @@ export const getRenderCellValue = ({
 
     switch (columnId) {
       case ALERT_STATUS:
-        return value !== 'closed' ? (
-          <EuiIconTip
-            content={i18n.translate('xpack.observability.alertsTGrid.statusOpenDescription', {
-              defaultMessage: 'Open',
-            })}
-            color="danger"
-            type="alert"
-          />
-        ) : (
-          <EuiIconTip
-            content={i18n.translate('xpack.observability.alertsTGrid.statusClosedDescription', {
-              defaultMessage: 'Closed',
-            })}
-            type="check"
-          />
-        );
+        switch (value) {
+          case 'active':
+            return <EuiHealth color="active" />;
+          case 'recovered':
+            return <EuiHealth color="inactive" />;
+          default:
+            // NOTE: This fallback shouldn't be needed. Status should be either "active" or "recovered".
+            return null;
+        }
       case TIMESTAMP:
         return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
       case ALERT_DURATION:
