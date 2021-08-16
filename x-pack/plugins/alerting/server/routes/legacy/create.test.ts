@@ -157,6 +157,7 @@ describe('createAlertRoute', () => {
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id?}"`);
 
     rulesClient.create.mockResolvedValueOnce(expectedResult);
+    rulesClient.getSpaceId.mockReturnValueOnce('default');
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
