@@ -6,10 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { InternalHttpServiceSetup } from '../../http';
-import { registerGetRoute } from './get';
-
-export function registerRoutes({ http }: { http: InternalHttpServiceSetup }) {
-  const router = http.createRouter('/api/deprecations');
-  registerGetRoute(router);
-}
+require('../src/setup_node_env');
+require('../test/common/services/saved_object_info').runSavedObjInfoSvc();
