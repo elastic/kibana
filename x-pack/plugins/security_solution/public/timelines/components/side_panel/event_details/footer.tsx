@@ -113,6 +113,7 @@ export const EventDetailsFooter = React.memo(
                 onAddExceptionTypeClick={onAddExceptionTypeClick}
                 onAddIsolationStatusClick={onAddIsolationStatusClick}
                 refetch={expandedEvent?.refetch}
+                indexName={expandedEvent.indexName}
                 timelineId={timelineId}
               />
             </EuiFlexItem>
