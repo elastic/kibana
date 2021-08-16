@@ -8244,7 +8244,6 @@
     "xpack.dataVisualizer.file.welcomeContent.newlineDelimitedJsonDescription": "改行区切りの JSON",
     "xpack.dataVisualizer.file.welcomeContent.supportedFileFormatDescription": "ファイルデータビジュアライザーはこれらのファイル形式をサポートしています：",
     "xpack.dataVisualizer.file.welcomeContent.uploadedFilesAllowedSizeDescription": "最大{maxFileSize}のファイルをアップロードできます。",
-    "xpack.dataVisualizer.file.welcomeContent.visualizeDataFromLogFileDescription": "ファイルデータビジュアライザーは、ログファイルのフィールドとメトリックの理解に役立ちます。ファイルをアップロードして、データを分析し、 Elasticsearch インデックスにインポートするか選択できます。",
     "xpack.dataVisualizer.file.xmlNotCurrentlySupportedErrorMessage": "XML は現在サポートされていません",
     "xpack.dataVisualizer.fileBeatConfig.paths": "ファイルのパスをここに追加してください",
     "xpack.dataVisualizer.fileBeatConfigFlyout.closeButton": "閉じる",
