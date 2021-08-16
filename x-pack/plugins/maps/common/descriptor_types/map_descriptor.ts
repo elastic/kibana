@@ -20,8 +20,6 @@ export type MapExtent = {
   maxLat: number;
 };
 
-export type MapQuery = Query;
-
 export type MapCenter = {
   lat: number;
   lon: number;
