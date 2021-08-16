@@ -1278,21 +1278,7 @@ describe('successful migrations', () => {
         ],
       };
 
-      expect(migration7150(alert, migrationContext)).toEqual({
-        ...alert,
-        references: [
-          {
-            name: 'param:exceptionsList_0',
-            id: '123',
-            type: 'exception-list',
-          },
-          {
-            name: 'param:exceptionsList_1',
-            id: '789',
-            type: 'exception-list',
-          },
-        ],
-      });
+      expect(migration7150(alert, migrationContext)).toEqual(alert);
     });
 
     test('security solution will migrate with only missing data if we have partially migrated data', () => {
