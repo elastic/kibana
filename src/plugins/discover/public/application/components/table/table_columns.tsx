@@ -31,11 +31,10 @@ export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecord> = {
   ),
   render: (
     { flattenedField, isActive, onFilter, onToggleColumn }: FieldRecord['action'],
-    { field: { fieldKey, field, fieldMapping } }: FieldRecord
+    { field: { field, fieldMapping } }: FieldRecord
   ) => {
     return (
       <TableActions
-        fieldKey={fieldKey}
         isActive={isActive}
         field={field}
         fieldMapping={fieldMapping}
@@ -59,10 +58,10 @@ export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
         </strong>
       </EuiText>
     ),
-    render: ({ field, fieldType, fieldMapping, scripted }: FieldRecord['field']) => {
+    render: ({ field, fieldType, displayName, fieldMapping, scripted }: FieldRecord['field']) => {
       return field ? (
         <FieldName
-          fieldName={field}
+          fieldName={displayName}
           fieldType={fieldType}
           fieldMapping={fieldMapping}
           scripted={scripted}
@@ -83,8 +82,8 @@ export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
         </strong>
       </EuiText>
     ),
-    render: ({ formattedField }: FieldRecord['value'], { field: { fieldKey } }: FieldRecord) => {
-      return <TableFieldValue fieldKey={fieldKey} formattedField={formattedField} />;
+    render: ({ formattedValue }: FieldRecord['value'], { field: { field } }: FieldRecord) => {
+      return <TableFieldValue field={field} formattedValue={formattedValue} />;
     },
   },
 ];

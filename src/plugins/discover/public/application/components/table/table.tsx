@@ -36,14 +36,14 @@ export interface FieldRecord {
     flattenedField: unknown;
   };
   field: {
-    fieldKey: string;
-    field?: string;
-    fieldType: string;
-    fieldMapping?: IndexPatternField | undefined;
+    displayName: string;
+    field: string;
     scripted: boolean;
+    fieldType?: string;
+    fieldMapping?: IndexPatternField | undefined;
   };
   value: {
-    formattedField?: unknown;
+    formattedValue: string;
   };
 }
 
@@ -57,7 +57,7 @@ export const DocViewerTable = ({
 }: DocViewRenderProps) => {
   const showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
 
-  const mapping = useCallback((name) => indexPattern?.fields.getByName(name), [
+  const mapping = useCallback((name: string) => indexPattern?.fields.getByName(name), [
     indexPattern?.fields,
   ]);
 
@@ -83,11 +83,11 @@ export const DocViewerTable = ({
     [onRemoveColumn, onAddColumn, columns]
   );
 
-  const onSetRowProps = useCallback(({ field: { fieldKey } }: FieldRecord) => {
+  const onSetRowProps = useCallback(({ field: { field } }: FieldRecord) => {
     return {
-      key: fieldKey,
+      key: field,
       className: 'kbnDocViewer__tableRow',
-      'data-test-subj': `tableDocViewRow-${fieldKey}`,
+      'data-test-subj': `tableDocViewRow-${field}`,
     };
   }, []);
 
@@ -121,7 +121,7 @@ export const DocViewerTable = ({
     })
     .map((field) => {
       const fieldMapping = mapping(field);
-      const fieldKey = (field ? field : fieldMapping?.displayName) as string;
+      const displayName = fieldMapping?.displayName ?? field;
       const fieldType = isNestedFieldParent(field, indexPattern) ? 'nested' : fieldMapping?.type;
 
       return {
@@ -133,13 +133,13 @@ export const DocViewerTable = ({
         },
         field: {
           field,
-          fieldKey,
+          displayName,
           fieldMapping,
-          fieldType: fieldType!,
+          fieldType,
           scripted: Boolean(fieldMapping?.scripted),
         },
         value: {
-          formattedField: formattedHit[field],
+          formattedValue: formattedHit[field],
         },
       };
     });

@@ -15,8 +15,7 @@ import { IndexPatternField } from '../../../../../data/public';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 
 interface TableActionsProps {
-  fieldKey: string;
-  field?: string;
+  field: string;
   isActive: boolean;
   flattenedField: unknown;
   fieldMapping?: IndexPatternField;
@@ -25,7 +24,6 @@ interface TableActionsProps {
 }
 
 export const TableActions = ({
-  fieldKey,
   isActive,
   field,
   fieldMapping,
@@ -45,7 +43,7 @@ export const TableActions = ({
       />
       <DocViewTableRowBtnToggleColumn
         active={isActive}
-        fieldname={String(fieldKey)}
+        fieldname={field}
         onClick={onToggleColumn}
       />
       <DocViewTableRowBtnFilterExists

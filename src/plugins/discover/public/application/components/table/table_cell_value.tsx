@@ -14,12 +14,12 @@ import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
 
 const COLLAPSE_LINE_LENGTH = 350;
 
-type TableFieldValueProps = FieldRecord['value'] & Pick<FieldRecord['field'], 'fieldKey'>;
+type TableFieldValueProps = FieldRecord['value'] & Pick<FieldRecord['field'], 'field'>;
 
-export const TableFieldValue = ({ formattedField, fieldKey }: TableFieldValueProps) => {
+export const TableFieldValue = ({ formattedValue, field }: TableFieldValueProps) => {
   const [fieldOpen, setFieldOpen] = useState(false);
 
-  const value = trimAngularSpan(String(formattedField || ''));
+  const value = trimAngularSpan(String(formattedValue));
   const isCollapsible = value.length > COLLAPSE_LINE_LENGTH;
   const isCollapsed = isCollapsible && !fieldOpen;
 
@@ -38,7 +38,7 @@ export const TableFieldValue = ({ formattedField, fieldKey }: TableFieldValuePro
       )}
       <div
         className={valueClassName}
-        data-test-subj={`tableDocViewRow-${fieldKey}-value`}
+        data-test-subj={`tableDocViewRow-${field}-value`}
         /*
          * Justification for dangerouslySetInnerHTML:
          * We just use values encoded by our field formatters
