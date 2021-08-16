@@ -19,7 +19,7 @@ import { useBreakPoints } from '../../../hooks/use_break_points';
 import { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana_react/public';
 
 export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
-  defaultMessage: 'User Experience',
+  defaultMessage: 'Dashboard',
 });
 
 export function RumHome() {
@@ -56,7 +56,7 @@ export function RumHome() {
           isXXL
             ? {
                 pageTitle: i18n.translate('xpack.apm.ux.overview', {
-                  defaultMessage: 'Overview',
+                  defaultMessage: 'Dashboard',
                 }),
                 rightSideItems: [
                   <DatePicker />,

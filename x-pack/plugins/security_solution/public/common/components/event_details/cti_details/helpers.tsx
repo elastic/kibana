@@ -9,6 +9,7 @@ import { groupBy } from 'lodash';
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../common/constants';
 import {
   ENRICHMENT_TYPES,
+  FIRST_SEEN,
   MATCHED_ATOMIC,
   MATCHED_FIELD,
   MATCHED_ID,
@@ -119,3 +120,9 @@ export const getEnrichmentFields = (items: TimelineEventsDetailsItem[]): EventFi
     }
     return fields;
   }, {});
+
+export const getFirstSeen = (enrichment: CtiEnrichment): number => {
+  const firstSeenValue = getShimmedIndicatorValue(enrichment, FIRST_SEEN);
+  const firstSeenDate = Date.parse(firstSeenValue ?? 'no date');
+  return Number.isInteger(firstSeenDate) ? firstSeenDate : new Date(-1).valueOf();
+};

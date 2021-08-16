@@ -61,7 +61,6 @@ describe('Indicator Match Alerts', () => {
     const { services, dependencies, executor } = createRuleTypeMocks('threat_match', params);
     const indicatorMatchAlertType = createIndicatorMatchAlertType({
       experimentalFeatures: allowedExperimentalValues,
-      indexAlias: 'alerts.security-alerts',
       lists: dependencies.lists,
       logger: dependencies.logger,
       mergeStrategy: 'allFields',
@@ -102,7 +101,6 @@ describe('Indicator Match Alerts', () => {
     const { services, dependencies, executor } = createRuleTypeMocks('threat_match', params);
     const indicatorMatchAlertType = createIndicatorMatchAlertType({
       experimentalFeatures: allowedExperimentalValues,
-      indexAlias: 'alerts.security-alerts',
       lists: dependencies.lists,
       logger: dependencies.logger,
       mergeStrategy: 'allFields',
@@ -141,7 +139,6 @@ describe('Indicator Match Alerts', () => {
     const { services, dependencies, executor } = createRuleTypeMocks('threat_match', params);
     const indicatorMatchAlertType = createIndicatorMatchAlertType({
       experimentalFeatures: allowedExperimentalValues,
-      indexAlias: 'alerts.security-alerts',
       lists: dependencies.lists,
       logger: dependencies.logger,
       mergeStrategy: 'allFields',
