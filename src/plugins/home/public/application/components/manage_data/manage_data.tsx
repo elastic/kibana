@@ -71,7 +71,7 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
                         >
                           <FormattedMessage
                             id="home.manageData.devToolsButtonLabel"
-                            defaultMessage="Dev tools"
+                            defaultMessage="Dev Tools"
                           />
                         </EuiButtonEmpty>
                       </RedirectAppLinks>
@@ -90,7 +90,7 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
                         >
                           <FormattedMessage
                             id="home.manageData.stackManagementButtonLabel"
-                            defaultMessage="Stack management"
+                            defaultMessage="Stack Management"
                           />
                         </EuiButtonEmpty>
                       </RedirectAppLinks>
