@@ -30,6 +30,7 @@ import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common'
 import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
 import { inventoryTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
+import { SnapshotContainer } from './components/snapshot_container';
 
 export const SnapshotPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -87,8 +88,19 @@ export const SnapshotPage = () => {
                   paddingSize: 'none',
                 }}
               >
-                <FilterBar />
-                <LayoutView />
+                <SnapshotContainer
+                  render={({ loading, nodes, reload, interval }) => (
+                    <>
+                      <FilterBar interval={interval} />
+                      <LayoutView
+                        loading={loading}
+                        nodes={nodes}
+                        reload={reload}
+                        interval={interval}
+                      />
+                    </>
+                  )}
+                />
               </MetricsPageTemplate>
             </SavedViewProvider>
           </InventoryPageWrapper>

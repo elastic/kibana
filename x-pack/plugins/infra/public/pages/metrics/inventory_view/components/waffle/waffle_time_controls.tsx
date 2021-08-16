@@ -9,14 +9,16 @@ import { EuiButton, EuiDatePicker, EuiFlexGroup, EuiFlexItem, EuiToolTip } from 
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React, { useCallback } from 'react';
+import { convertIntervalToString } from '../../../../../utils/convert_interval_to_string';
 import { withTheme, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 
 interface Props {
   theme: EuiTheme | undefined;
+  interval: string;
 }
 
-export const WaffleTimeControls = withTheme(({ theme }: Props) => {
+export const WaffleTimeControls = withTheme(({ interval }: Props) => {
   const {
     currentTime,
     isAutoReloading,
@@ -26,6 +28,7 @@ export const WaffleTimeControls = withTheme(({ theme }: Props) => {
   } = useWaffleTimeContext();
 
   const currentMoment = moment(currentTime);
+  const intervalAsString = convertIntervalToString(interval);
 
   const liveStreamingButton = isAutoReloading ? (
     <EuiButton color="primary" iconSide="left" iconType="pause" onClick={stopAutoReload}>
@@ -56,7 +59,7 @@ export const WaffleTimeControls = withTheme(({ theme }: Props) => {
     <EuiFlexGroup gutterSize="m">
       <EuiFlexItem grow={false} data-test-subj="waffleDatePicker">
         <EuiToolTip
-          content="Last {duration} of data for the selected time"
+          content={`Last ${intervalAsString} of data for the selected time`}
           delay="long"
           display="inlineBlock"
           position="top"
