@@ -6,4 +6,4 @@
  */
 
 require('../../../../../src/setup_node_env');
-require('./script');
+require('./ecs_formatter');
