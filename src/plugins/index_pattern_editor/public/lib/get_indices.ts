@@ -166,7 +166,7 @@ export const dedupeMatchedItems = (matchedA: MatchedItem[], matchedB: MatchedIte
 
 export async function getIndices({
   http,
-  pattern: rawPattern,
+  pattern: rawPattern = '',
   showAllIndices = false,
   searchClient,
   isRollupIndex,
