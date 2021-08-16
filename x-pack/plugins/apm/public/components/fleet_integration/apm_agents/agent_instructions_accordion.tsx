@@ -131,15 +131,24 @@ export function AgentInstructionsAccordion({
     >
       <EuiSpacer />
       {steps.map(
-        ({ title, textPre, textPost, customComponentName, commands }) => {
+        (
+          {
+            title: stepTitle,
+            textPre,
+            textPost,
+            customComponentName,
+            commands,
+          },
+          index
+        ) => {
           const commandBlock = replaceTemplateStrings(
             Array.isArray(commands) ? commands.join('\n') : commands || '',
             docLinks
           );
           return (
-            <section>
+            <section key={index}>
               <EuiText>
-                <h4>{title}</h4>
+                <h4>{stepTitle}</h4>
               </EuiText>
               <EuiSpacer size="s" />
               <EuiText color="subdued" size="s">
