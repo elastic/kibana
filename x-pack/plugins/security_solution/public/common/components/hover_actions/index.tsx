@@ -240,9 +240,7 @@ export const HoverActions: React.FC<Props> = React.memo(
 
           {additionalContent != null && <AdditionalContent>{additionalContent}</AdditionalContent>}
 
-          {enableOverflowButton && overflowActionItems}
-
-          {!enableOverflowButton && allActionItems}
+          {enableOverflowButton ? overflowActionItems : allActionItems}
         </StyledHoverActionsContainer>
       </EuiFocusTrap>
     );
