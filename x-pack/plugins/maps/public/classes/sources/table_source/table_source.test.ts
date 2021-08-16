@@ -9,7 +9,6 @@ import { TableSource } from './table_source';
 import { FIELD_ORIGIN } from '../../../../common/constants';
 import {
   DataFilters,
-  MapQuery,
   VectorJoinSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
@@ -183,7 +182,7 @@ describe('TableSource', () => {
             applyGlobalTime: boolean;
             fieldNames: string[];
             geogridPrecision?: number;
-            sourceQuery?: MapQuery;
+            sourceQuery?: Query;
             sourceMeta: VectorSourceSyncMeta;
           },
           () => {},

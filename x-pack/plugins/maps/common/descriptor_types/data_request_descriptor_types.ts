@@ -7,10 +7,10 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { Query } from 'src/plugins/data/public';
+import type { Query } from 'src/plugins/data/common';
 import { SortDirection } from 'src/plugins/data/common/search';
 import { RENDER_AS, SCALING_TYPES } from '../constants';
-import { MapExtent, MapQuery } from './map_descriptor';
+import { MapExtent } from './map_descriptor';
 import { Filter, TimeRange } from '../../../../../src/plugins/data/common';
 
 export type Timeslice = {
@@ -23,7 +23,7 @@ export type DataFilters = {
   buffer?: MapExtent; // extent with additional buffer
   extent?: MapExtent; // map viewport
   filters: Filter[];
-  query?: MapQuery;
+  query?: Query;
   refreshTimerLastTriggeredAt?: string;
   searchSessionId?: string;
   timeFilters: TimeRange;
@@ -70,7 +70,7 @@ export type VectorSourceRequestMeta = DataFilters & {
   fieldNames: string[];
   geogridPrecision?: number;
   timesiceMaskField?: string;
-  sourceQuery?: MapQuery;
+  sourceQuery?: Query;
   sourceMeta: VectorSourceSyncMeta;
 };
 
@@ -81,7 +81,7 @@ export type VectorJoinSourceRequestMeta = Omit<VectorSourceRequestMeta, 'geogrid
 export type VectorStyleRequestMeta = DataFilters & {
   dynamicStyleFields: string[];
   isTimeAware: boolean;
-  sourceQuery: MapQuery;
+  sourceQuery: Query;
   timeFilters: TimeRange;
 };
 

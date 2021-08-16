@@ -6,11 +6,11 @@
  */
 
 import uuid from 'uuid';
+import type { Query } from 'src/plugins/data/common';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import {
   MapExtent,
   DataFilters,
-  MapQuery,
   TableSourceDescriptor,
   VectorJoinSourceRequestMeta,
   VectorSourceSyncMeta,
@@ -192,7 +192,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
       applyGlobalTime: boolean;
       fieldNames: string[];
       geogridPrecision?: number;
-      sourceQuery?: MapQuery;
+      sourceQuery?: Query;
       sourceMeta: VectorSourceSyncMeta;
     },
     registerCancelCallback: (callback: () => void) => void,

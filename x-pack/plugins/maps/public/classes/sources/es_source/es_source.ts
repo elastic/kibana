@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
+import type { Query } from 'src/plugins/data/common';
 import { Filter, IFieldType, IndexPattern, ISearchSource } from 'src/plugins/data/public';
 import { AbstractVectorSource, LayerDataFilters } from '../vector_source';
 import {
@@ -26,7 +27,6 @@ import {
   AbstractSourceDescriptor,
   DynamicStylePropertyOptions,
   MapExtent,
-  MapQuery,
   VectorJoinSourceRequestMeta,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
@@ -60,7 +60,7 @@ export interface IESSource extends IVectorSource {
     style: IVectorStyle;
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
     registerCancelCallback: (callback: () => void) => void;
-    sourceQuery?: MapQuery;
+    sourceQuery?: Query;
     timeFilters: TimeRange;
     searchSessionId?: string;
   }): Promise<object>;
@@ -429,7 +429,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     style: IVectorStyle;
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
     registerCancelCallback: (callback: () => void) => void;
-    sourceQuery?: MapQuery;
+    sourceQuery?: Query;
     timeFilters: TimeRange;
     searchSessionId?: string;
   }): Promise<object> {

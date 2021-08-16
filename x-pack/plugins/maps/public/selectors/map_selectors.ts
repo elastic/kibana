@@ -9,6 +9,7 @@ import { createSelector } from 'reselect';
 import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import { Adapters } from 'src/plugins/inspector/public';
+import type { Query } from 'src/plugins/data/common';
 import { TileLayer } from '../classes/layers/tile_layer/tile_layer';
 // @ts-ignore
 import { VectorTileLayer } from '../classes/layers/vector_tile_layer/vector_tile_layer';
@@ -45,7 +46,6 @@ import {
   LayerDescriptor,
   MapCenter,
   MapExtent,
-  MapQuery,
   TooltipState,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
@@ -179,7 +179,7 @@ export const getTimeFilters = ({ map }: MapStoreState): TimeRange =>
 
 export const getTimeslice = ({ map }: MapStoreState) => map.mapState.timeslice;
 
-export const getQuery = ({ map }: MapStoreState): MapQuery | undefined => map.mapState.query;
+export const getQuery = ({ map }: MapStoreState): Query | undefined => map.mapState.query;
 
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
 

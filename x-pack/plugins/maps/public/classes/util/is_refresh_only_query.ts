@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { MapQuery } from '../../../common/descriptor_types';
+import type { Query } from 'src/plugins/data/common';
 
 // Refresh only query is query where timestamps are different but query is the same.
 // Triggered by clicking "Refresh" button in QueryBar
 export function isRefreshOnlyQuery(
-  prevQuery: MapQuery | undefined,
-  newQuery: MapQuery | undefined
+  prevQuery: Query | undefined,
+  newQuery: Query | undefined
 ): boolean {
   if (!prevQuery || !newQuery) {
     return false;

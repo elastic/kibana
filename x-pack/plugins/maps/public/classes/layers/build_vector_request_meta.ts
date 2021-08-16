@@ -6,7 +6,8 @@
  */
 
 import _ from 'lodash';
-import { DataFilters, MapQuery, VectorSourceRequestMeta } from '../../../common/descriptor_types';
+import type { Query } from 'src/plugins/data/common';
+import { DataFilters, VectorSourceRequestMeta } from '../../../common/descriptor_types';
 import { IVectorSource } from '../sources/vector_source';
 import { ITermJoinSource } from '../sources/term_join_source';
 
@@ -14,7 +15,7 @@ export function buildVectorRequestMeta(
   source: IVectorSource | ITermJoinSource,
   fieldNames: string[],
   dataFilters: DataFilters,
-  sourceQuery: MapQuery
+  sourceQuery: Query
 ): VectorSourceRequestMeta {
   return {
     ...dataFilters,

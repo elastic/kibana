@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Query } from 'src/plugins/data/common';
 import { FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
 import { Filter, TimeRange } from 'src/plugins/data/public';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
@@ -14,7 +15,6 @@ import { IField } from '../../fields/field';
 import {
   ESSearchSourceResponseMeta,
   MapExtent,
-  MapQuery,
   Timeslice,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
@@ -38,8 +38,8 @@ export interface LayerDataFilters {
   applyGlobalQuery: boolean;
   applyGlobalTime: boolean;
   filters: Filter[];
-  query?: MapQuery;
-  sourceQuery?: MapQuery;
+  query?: Query;
+  sourceQuery?: Query;
   timeFilters: TimeRange;
   timeslice?: Timeslice;
 }

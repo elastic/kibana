@@ -138,8 +138,6 @@ export function createSpatialFilterWithGeometry({
     };
   }
 
-  // Currently no way to create an object with exclude property from index signature
-  // typescript error for "ignore_unmapped is not assignable to type 'GeoShapeQueryBody'" expected"
   return createMultiGeoFieldFilter(geoFieldNames, meta, createGeoFilter);
 }
 

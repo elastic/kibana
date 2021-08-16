@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { AppLeaveAction, AppMountParameters } from 'kibana/public';
 import { Adapters } from 'src/plugins/embeddable/public';
 import { Subscription } from 'rxjs';
+import type { Query } from 'src/plugins/data/common';
 import {
   getData,
   getCoreChrome,
@@ -41,7 +42,6 @@ import {
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { getTopNavConfig } from '../top_nav_config';
-import { MapQuery } from '../../../../common/descriptor_types';
 import { goToSpecifiedPath } from '../../../render_app';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
 import { getFullPath, APP_ID } from '../../../../common/constants';
@@ -87,7 +87,7 @@ export interface Props {
   }) => void;
   timeFilters: TimeRange;
   isSaveDisabled: boolean;
-  query: MapQuery | undefined;
+  query: Query | undefined;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 

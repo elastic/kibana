@@ -11,6 +11,7 @@ import type {
   AnyLayer as MbLayer,
   GeoJSONSource as MbGeoJSONSource,
 } from '@kbn/mapbox-gl';
+import type { Query } from 'src/plugins/data/common';
 import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
@@ -49,7 +50,6 @@ import {
 import {
   DynamicStylePropertyOptions,
   DataFilters,
-  MapQuery,
   StyleMetaDescriptor,
   Timeslice,
   VectorLayerDescriptor,
@@ -267,7 +267,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
           layerId: this.getId(),
           syncContext,
           source: this.getSource(),
-          sourceQuery: this.getQuery() as MapQuery,
+          sourceQuery: this.getQuery(),
         });
   }
 
@@ -414,7 +414,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     if (timesliceMaskFieldName) {
       fieldNames.push(timesliceMaskFieldName);
     }
-    return buildVectorRequestMeta(source, fieldNames, dataFilters, this.getQuery() as MapQuery);
+    return buildVectorRequestMeta(source, fieldNames, dataFilters, this.getQuery());
   }
 
   async _syncSourceStyleMeta(
@@ -422,7 +422,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     source: IVectorSource,
     style: IVectorStyle
   ) {
-    const sourceQuery = this.getQuery() as MapQuery;
+    const sourceQuery = this.getQuery();
     return this._syncStyleMeta({
       source,
       style,
@@ -474,7 +474,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     dataRequestId: string;
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
     source: IVectorSource | ITermJoinSource;
-    sourceQuery?: MapQuery;
+    sourceQuery?: Query;
     style: IVectorStyle;
   } & DataRequestContext) {
     if (!source.isESSource() || dynamicStyleProps.length === 0) {
