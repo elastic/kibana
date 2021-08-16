@@ -7,19 +7,14 @@
 
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { ExceptionListClient } from '../../../../lists/server';
-
-interface DeletePolicy {
-  id: string;
-  name?: string;
-  success: boolean;
-}
+import { PostPackagePolicyDeleteCallback } from '../../../../fleet/server';
 
 /**
  * Removes policy from trusted apps
  */
 export const removePolicyFromTrustedApps = async (
   exceptionsClient: ExceptionListClient,
-  policy: DeletePolicy
+  policy: Parameters<PostPackagePolicyDeleteCallback>[0][0]
 ) => {
   let page = 1;
 

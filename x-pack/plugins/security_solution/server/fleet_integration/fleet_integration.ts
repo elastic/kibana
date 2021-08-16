@@ -15,11 +15,7 @@ import {
   PutPackagePolicyUpdateCallback,
 } from '../../../fleet/server';
 
-import {
-  NewPackagePolicy,
-  UpdatePackagePolicy,
-  DeletePackagePoliciesResponse,
-} from '../../../fleet/common';
+import { NewPackagePolicy, UpdatePackagePolicy } from '../../../fleet/common';
 
 import { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
 import { ManifestManager } from '../endpoint/services';
@@ -140,7 +136,7 @@ export const getPackagePolicyDeleteCallback = (
   exceptionsClient: ExceptionListClient | undefined,
   experimentalFeatures: ExperimentalFeatures | undefined
 ): PostPackagePolicyDeleteCallback => {
-  return async (deletePackagePolicy: DeletePackagePoliciesResponse): Promise<void> => {
+  return async (deletePackagePolicy): Promise<void> => {
     if (!exceptionsClient) {
       return;
     }
