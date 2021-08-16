@@ -82,12 +82,6 @@ export async function syncVectorSource({
 
   if (syncContext.forceRefreshDueToDrawing) {
     canSkipFetch = false;
-  } else if (
-    requestMeta.forceRefreshTriggeredFromGlobalQueryTime &&
-    requestMeta.respondToForceRefresh &&
-    (requestMeta.applyGlobalQuery || requestMeta.applyGlobalTime)
-  ) {
-    canSkipFetch = false;
   } else {
     canSkipFetch = await canSkipSourceUpdate({
       source,

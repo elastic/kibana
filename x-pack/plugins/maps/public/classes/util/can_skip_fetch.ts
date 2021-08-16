@@ -63,6 +63,14 @@ export async function canSkipSourceUpdate({
   extentAware: boolean;
   getUpdateDueToTimeslice: (timeslice?: Timeslice) => boolean;
 }): Promise<boolean> {
+  if (
+    nextRequestMeta.forceRefreshTriggeredFromGlobalQueryTime &&
+    nextRequestMeta.respondToForceRefresh &&
+    (nextRequestMeta.applyGlobalQuery || nextRequestMeta.applyGlobalTime)
+  ) {
+    return false;
+  }
+
   const timeAware = await source.isTimeAware();
   const refreshTimerAware = await source.isRefreshTimerAware();
   const isFieldAware = source.isFieldAware();
