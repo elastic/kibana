@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { EuiBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 
 interface Props {
   label: string;
-  badgeLabel: string;
   localstorageId: string;
 }
 
@@ -49,14 +49,20 @@ export function hideBadge(localstorageId: string) {
   window.localStorage.setItem(localstorageId, JSON.stringify(false));
 }
 
-export function NavNameWithBadge({ label, badgeLabel, localstorageId }: Props) {
+export function NavNameWithBadge({ label, localstorageId }: Props) {
   const isBadgeVisible = getBadgeVisibility(localstorageId);
   return (
     <>
       <LabelContainer className="eui-textTruncate">
         <span>{label}</span>
       </LabelContainer>
-      {isBadgeVisible && <StyledBadge color="accent">{badgeLabel}</StyledBadge>}
+      {isBadgeVisible && (
+        <StyledBadge color="accent">
+          {i18n.translate('xpack.apm.navigation.newBadge', {
+            defaultMessage: 'NEW',
+          })}
+        </StyledBadge>
+      )}
     </>
   );
 }

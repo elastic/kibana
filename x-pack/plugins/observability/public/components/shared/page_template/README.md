@@ -44,8 +44,8 @@ export interface NavigationEntry {
   matchFullPath?: boolean;
   // whether to ignore trailing slashes, defaults to `true`
   ignoreTrailingSlash?: boolean;
-  // the label of the badge that is shown besides the navigation label
-  sideBadgeLabel?: string;
+  // Showns NEW badge besides the navigation label
+  isNewFeature?: boolean;
 }
 ```
 
@@ -143,9 +143,9 @@ After these two steps we should see something like the following (note the navig
 
 ![Page template rendered example](./page_template.png)
 
-## Adding badge
+## Adding NEW badge
 
-You can add a badge beside the label by using the property `sideBadgeLabel?: string`.
+You can add a NEW badge beside the label by using the property `isNewFeature?: boolean;`.
 
 ```js
 setup(core: CoreSetup, plugins: PluginsSetup) {
@@ -155,7 +155,7 @@ setup(core: CoreSetup, plugins: PluginsSetup) {
           label: 'A solution section',
           sortKey: 200,
           entries: [
-            { label: 'Backends', app: 'exampleA', path: '/example', sideBadgeLabel: 'NEW'  },
+            { label: 'Backends', app: 'exampleA', path: '/example', isNewFeature: true  },
           ],
         }
       ])
@@ -163,7 +163,7 @@ setup(core: CoreSetup, plugins: PluginsSetup) {
   }
 
 ```
-![Badge example](./badge.png)
+![NEW Badge example](./badge.png)
 
 The badge is going to be shown until user clicks on the menu item for the first time. Then we'll save an information at local storage, following this pattern `observability.nav_item_badge_visible_${app}${path}`, the above example would save `observability.nav_item_badge_visible_exampleA/example`. And the badge is removed. It'll only show again if the item saved at local storage is removed or set to `false`.
 
