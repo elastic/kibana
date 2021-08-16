@@ -1096,18 +1096,17 @@ export const mockTimelineData: TimelineItem[] = [
       _id: 'BuBP4W0BOpWiDweSoYSg',
       timestamp: '2019-10-18T23:59:15.091Z',
       threat: {
-        indicator: [
+        enrichments: [
           {
+            indicator: {
+              provider: ['indicator_provider'],
+              reference: ['https://example.com'],
+            },
             matched: {
               atomic: ['192.168.1.1'],
               field: ['source.ip'],
               type: ['ip'],
             },
-            event: {
-              dataset: ['threatintel.example_dataset'],
-              reference: ['https://example.com'],
-            },
-            provider: ['indicator_provider'],
           },
         ],
       },
@@ -1563,6 +1562,8 @@ export const mockTgridModel: TGridModel = {
   selectAll: false,
   id: 'ef579e40-jibber-jabber',
   indexNames: [],
+  isAddToExistingCaseOpen: false,
+  isCreateNewCaseOpen: false,
   isLoading: false,
   isSelectAllChecked: false,
   kqlQuery: {

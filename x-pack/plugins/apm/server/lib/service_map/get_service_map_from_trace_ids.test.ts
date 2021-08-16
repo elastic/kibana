@@ -7,7 +7,6 @@
 
 import { getConnections } from './get_service_map_from_trace_ids';
 import { Connection, ConnectionNode } from '../../../common/service_map';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 
 function getConnectionsPairs(connections: Connection[]) {
   return connections
@@ -69,119 +68,26 @@ describe('getConnections', () => {
         },
       ],
     ] as ConnectionNode[][];
-    describe('if neither service name or environment is given', () => {
-      it('includes all connections', () => {
-        const connections = getConnections({
-          paths,
-          serviceName: undefined,
-          environment: undefined,
-        });
 
-        const connectionsPairs = getConnectionsPairs(connections);
-        expect(connectionsPairs).toEqual([
-          'opbeans-ruby:testing -> opbeans-node:null',
-          'opbeans-node:null -> opbeans-go:production',
-          'opbeans-go:production -> opbeans-java:production',
-          'opbeans-java:production -> external',
-          'opbeans-ruby:testing -> opbeans-python:testing',
-          'opbeans-python:testing -> external',
-        ]);
-      });
-    });
-
-    describe('if service name and environment are given', () => {
-      it('shows all connections for opbeans-java and production', () => {
-        const connections = getConnections({
-          paths,
-          serviceName: 'opbeans-java',
-          environment: 'production',
-        });
-
-        const connectionsPairs = getConnectionsPairs(connections);
-
-        expect(connectionsPairs).toEqual([
-          'opbeans-ruby:testing -> opbeans-node:null',
-          'opbeans-node:null -> opbeans-go:production',
-          'opbeans-go:production -> opbeans-java:production',
-          'opbeans-java:production -> external',
-        ]);
+    it('includes all connections', () => {
+      const connections = getConnections({
+        paths,
       });
 
-      it('shows all connections for opbeans-python and testing', () => {
-        const connections = getConnections({
-          paths,
-          serviceName: 'opbeans-python',
-          environment: 'testing',
-        });
-
-        const connectionsPairs = getConnectionsPairs(connections);
-
-        expect(connectionsPairs).toEqual([
-          'opbeans-ruby:testing -> opbeans-python:testing',
-          'opbeans-python:testing -> external',
-        ]);
-      });
-    });
-
-    describe('if service name is given', () => {
-      it('shows all connections for opbeans-node', () => {
-        const connections = getConnections({
-          paths,
-          serviceName: 'opbeans-node',
-          environment: undefined,
-        });
-
-        const connectionsPairs = getConnectionsPairs(connections);
-
-        expect(connectionsPairs).toEqual([
-          'opbeans-ruby:testing -> opbeans-node:null',
-          'opbeans-node:null -> opbeans-go:production',
-          'opbeans-go:production -> opbeans-java:production',
-          'opbeans-java:production -> external',
-        ]);
-      });
-    });
-
-    describe('if environment is given', () => {
-      it('shows all connections for testing environment', () => {
-        const connections = getConnections({
-          paths,
-          serviceName: undefined,
-          environment: 'testing',
-        });
-
-        const connectionsPairs = getConnectionsPairs(connections);
-
-        expect(connectionsPairs).toEqual([
-          'opbeans-ruby:testing -> opbeans-node:null',
-          'opbeans-node:null -> opbeans-go:production',
-          'opbeans-go:production -> opbeans-java:production',
-          'opbeans-java:production -> external',
-          'opbeans-ruby:testing -> opbeans-python:testing',
-          'opbeans-python:testing -> external',
-        ]);
-      });
-      it('shows all connections for production environment', () => {
-        const connections = getConnections({
-          paths,
-          serviceName: undefined,
-          environment: 'production',
-        });
-
-        const connectionsPairs = getConnectionsPairs(connections);
-
-        expect(connectionsPairs).toEqual([
-          'opbeans-ruby:testing -> opbeans-node:null',
-          'opbeans-node:null -> opbeans-go:production',
-          'opbeans-go:production -> opbeans-java:production',
-          'opbeans-java:production -> external',
-        ]);
-      });
+      const connectionsPairs = getConnectionsPairs(connections);
+      expect(connectionsPairs).toEqual([
+        'opbeans-ruby:testing -> opbeans-node:null',
+        'opbeans-node:null -> opbeans-go:production',
+        'opbeans-go:production -> opbeans-java:production',
+        'opbeans-java:production -> external',
+        'opbeans-ruby:testing -> opbeans-python:testing',
+        'opbeans-python:testing -> external',
+      ]);
     });
   });
 
   describe('environment is "not defined"', () => {
-    it('shows all connections where environment is not set', () => {
+    it('includes all connections', () => {
       const environmentNotDefinedPaths = [
         [
           {
@@ -237,12 +143,12 @@ describe('getConnections', () => {
       ] as ConnectionNode[][];
       const connections = getConnections({
         paths: environmentNotDefinedPaths,
-        serviceName: undefined,
-        environment: ENVIRONMENT_NOT_DEFINED.value,
       });
 
       const connectionsPairs = getConnectionsPairs(connections);
       expect(connectionsPairs).toEqual([
+        'opbeans-go:production -> opbeans-java:production',
+        'opbeans-java:production -> external',
         'opbeans-go:null -> opbeans-java:null',
         'opbeans-java:null -> external',
         'opbeans-python:null -> opbeans-node:null',

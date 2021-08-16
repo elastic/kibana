@@ -29,6 +29,7 @@ import { MetricsPageTemplate } from '../page_template';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
 import { inventoryTitle } from '../../../translations';
+import { SavedViews } from './components/saved_views';
 
 export const SnapshotPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -72,23 +73,24 @@ export const SnapshotPage = () => {
       ) : metricIndicesExist ? (
         <>
           <InventoryPageWrapper className={APP_WRAPPER_CLASS}>
-            <MetricsPageTemplate
-              pageHeader={{
-                pageTitle: inventoryTitle,
-              }}
-              pageBodyProps={{
-                paddingSize: 'none',
-              }}
+            <SavedViewProvider
+              shouldLoadDefault={optionsSource === 'default'}
+              viewType={'inventory-view'}
+              defaultViewState={DEFAULT_WAFFLE_VIEW_STATE}
             >
-              <FilterBar />
-              <SavedViewProvider
-                shouldLoadDefault={optionsSource === 'default'}
-                viewType={'inventory-view'}
-                defaultViewState={DEFAULT_WAFFLE_VIEW_STATE}
+              <MetricsPageTemplate
+                pageHeader={{
+                  pageTitle: inventoryTitle,
+                  rightSideItems: [<SavedViews />],
+                }}
+                pageBodyProps={{
+                  paddingSize: 'none',
+                }}
               >
+                <FilterBar />
                 <LayoutView />
-              </SavedViewProvider>
-            </MetricsPageTemplate>
+              </MetricsPageTemplate>
+            </SavedViewProvider>
           </InventoryPageWrapper>
         </>
       ) : hasFailedLoadingSource ? (
