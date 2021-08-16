@@ -74,6 +74,7 @@ const MONITORING_DATASETS = [
   'elastic_agent.packetbeat',
   'elastic_agent.endpoint_security',
   'elastic_agent.auditbeat',
+  'elastic_agent.heartbeat',
 ];
 
 class AgentPolicyService {
