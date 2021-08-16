@@ -42,7 +42,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const BULK_INDEX_DELAY = 1000;
   const INDEXING_DELAY = 5000;
 
-  const ALERTS_INDEX_TARGET = '.kibana-alerts-*-apm*';
+  const ALERTS_INDEX_TARGET = '.kibana-alerts-observability.apm.alerts*';
   const APM_TRANSACTION_INDEX_NAME = 'apm-8.0.0-transaction';
 
   const createTransactionEvent = (override: Record<string, any>) => {
@@ -369,6 +369,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "kibana.alert.id": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
+            "kibana.alert.reason": Array [
+              "Failed transactions rate is greater than 30% (current value is 50%) for opbeans-go",
+            ],
             "kibana.alert.rule.category": Array [
               "Failed transaction rate threshold",
             ],
@@ -472,6 +475,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ],
             "kibana.alert.id": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
+            ],
+            "kibana.alert.reason": Array [
+              "Failed transactions rate is greater than 30% (current value is 50%) for opbeans-go",
             ],
             "kibana.alert.rule.category": Array [
               "Failed transaction rate threshold",
