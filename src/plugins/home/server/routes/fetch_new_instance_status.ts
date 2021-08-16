@@ -26,8 +26,8 @@ export const registerNewInstanceStatusRoute = (router: IRouter) => {
           },
         });
       } catch (e) {
-        return res.badRequest({
-          body: e,
+        return res.customError({
+          statusCode: 500,
         });
       }
     })
