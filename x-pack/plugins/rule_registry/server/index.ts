@@ -12,7 +12,6 @@ export type { RuleRegistryPluginSetupContract, RuleRegistryPluginStartContract }
 export { RuleDataPluginService } from './rule_data_plugin_service';
 export { RuleDataClient } from './rule_data_client';
 export { IRuleDataClient } from './rule_data_client/types';
-export { createRuleDataClientMock } from './rule_data_client/rule_data_client.mock';
 export type {
   RacRequestHandlerContext,
   RacApiRequestHandlerContext,

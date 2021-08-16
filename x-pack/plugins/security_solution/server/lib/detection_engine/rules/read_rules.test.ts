@@ -9,7 +9,7 @@ import { readRules } from './read_rules';
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { getAlertMock, getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
-import { createRuleDataClientMock } from '../../../../../rule_registry/server';
+import { createRuleDataClientMock } from '../../../../../../rule_registry/server/rule_data_client/rule_data_client.mock';
 
 export class TestError extends Error {
   constructor() {

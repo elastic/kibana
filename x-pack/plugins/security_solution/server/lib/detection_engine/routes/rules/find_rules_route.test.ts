@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createRuleDataClientMock } from '../../../../../../rule_registry/server';
+import { createRuleDataClientMock } from '../../../../../../rule_registry/server/rule_data_client/rule_data_client.mock';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { requestContextMock, requestMock, serverMock } from '../__mocks__';

@@ -15,7 +15,7 @@ import {
   getEmptySavedObjectsResponse,
 } from '../__mocks__/request_responses';
 import { requestMock, requestContextMock, serverMock } from '../__mocks__';
-import { createRuleDataClientMock } from '../../../../../../rule_registry/server';
+import { createRuleDataClientMock } from '../../../../../../rule_registry/server/rule_data_client/rule_data_client.mock';
 
 describe('read_signals', () => {
   let ruleDataClientMock = createRuleDataClientMock();
