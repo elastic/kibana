@@ -166,6 +166,7 @@ export const LensTopNavMenu = ({
     activeDatasourceId,
     datasourceStates,
   } = useLensSelector((state) => state.lens);
+  const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
 
   useEffect(() => {
     const activeDatasource =
@@ -390,7 +391,16 @@ export const LensTopNavMenu = ({
       dateRangeTo={to}
       indicateNoData={indicateNoData}
       showSearchBar={true}
-      showDatePicker={true}
+      showDatePicker={
+        indexPatterns.some((ip) => ip.isTimeBased()) ||
+        Boolean(
+          allLoaded &&
+            activeDatasourceId &&
+            datasourceMap[activeDatasourceId].isTimeBased(
+              datasourceStates[activeDatasourceId].state
+            )
+        )
+      }
       showQueryBar={true}
       showFilterBar={true}
       data-test-subj="lnsApp_topNav"

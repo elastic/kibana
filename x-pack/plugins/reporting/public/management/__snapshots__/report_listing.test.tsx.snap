@@ -614,8 +614,8 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             "index": ".reporting-2020.04.12",
                             "isDeprecated": false,
                             "jobtype": "printable_pdf",
-                            "kibana_id": undefined,
-                            "kibana_name": undefined,
+                            "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
+                            "kibana_name": "spicy.local",
                             "layout": Object {
                               "dimensions": Object {
                                 "height": 720,
@@ -660,8 +660,8 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               "index": ".reporting-2020.04.12",
                               "isDeprecated": false,
                               "jobtype": "printable_pdf",
-                              "kibana_id": undefined,
-                              "kibana_name": undefined,
+                              "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
+                              "kibana_name": "spicy.local",
                               "layout": Object {
                                 "dimensions": Object {
                                   "height": 720,
@@ -832,8 +832,8 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "index": ".reporting-2020.04.12",
                                     "isDeprecated": false,
                                     "jobtype": "printable_pdf",
-                                    "kibana_id": undefined,
-                                    "kibana_name": undefined,
+                                    "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
+                                    "kibana_name": "spicy.local",
                                     "layout": Object {
                                       "dimensions": Object {
                                         "height": 720,
@@ -1033,8 +1033,8 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "index": ".reporting-2020.04.12",
                                     "isDeprecated": false,
                                     "jobtype": "printable_pdf",
-                                    "kibana_id": undefined,
-                                    "kibana_name": undefined,
+                                    "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
+                                    "kibana_name": "spicy.local",
                                     "layout": Object {
                                       "dimensions": Object {
                                         "height": 720,
@@ -1234,8 +1234,8 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "index": ".reporting-2020.04.12",
                                       "isDeprecated": false,
                                       "jobtype": "printable_pdf",
-                                      "kibana_id": undefined,
-                                      "kibana_name": undefined,
+                                      "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
+                                      "kibana_name": "spicy.local",
                                       "layout": Object {
                                         "dimensions": Object {
                                           "height": 720,
@@ -7821,6 +7821,43 @@ exports[`ReportListing Report job listing with some items 1`] = `
                           </span>
                         </FormattedMessage>
                          
+                        <EuiText
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small"
+                          >
+                            <EuiTextColor
+                              color="subdued"
+                            >
+                              <span
+                                className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
+                              >
+                                See report info for warnings.
+                              </span>
+                            </EuiTextColor>
+                          </div>
+                        </EuiText>
+                        <EuiText
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small"
+                          >
+                             
+                            <EuiTextColor
+                              color="warning"
+                            >
+                              <span
+                                className="euiTextColor euiTextColor--warning"
+                                style={Object {}}
+                              >
+                                This is a deprecated export type. Automation of this report will need to be re-created for compatibility with future versions of Kibana.
+                              </span>
+                            </EuiTextColor>
+                          </div>
+                        </EuiText>
                       </div>
                     </div>
                   </td>
@@ -7865,7 +7902,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             "csv_contains_formulas": undefined,
                             "id": "k905zdw11d34cbae0c3y6tzh",
                             "index": ".reporting-2020.04.12",
-                            "isDeprecated": false,
+                            "isDeprecated": true,
                             "jobtype": "printable_pdf",
                             "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
                             "kibana_name": "spicy.local",
@@ -7911,7 +7948,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               "csv_contains_formulas": undefined,
                               "id": "k905zdw11d34cbae0c3y6tzh",
                               "index": ".reporting-2020.04.12",
-                              "isDeprecated": false,
+                              "isDeprecated": true,
                               "jobtype": "printable_pdf",
                               "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
                               "kibana_name": "spicy.local",
@@ -8083,7 +8120,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "csv_contains_formulas": undefined,
                                     "id": "k905zdw11d34cbae0c3y6tzh",
                                     "index": ".reporting-2020.04.12",
-                                    "isDeprecated": false,
+                                    "isDeprecated": true,
                                     "jobtype": "printable_pdf",
                                     "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
                                     "kibana_name": "spicy.local",
@@ -8145,7 +8182,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 }
                               >
                                 <EuiToolTip
-                                  content="Download report"
+                                  content="Download report with warnings"
                                   delay="regular"
                                   position="top"
                                 >
@@ -8331,7 +8368,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "csv_contains_formulas": undefined,
                                     "id": "k905zdw11d34cbae0c3y6tzh",
                                     "index": ".reporting-2020.04.12",
-                                    "isDeprecated": false,
+                                    "isDeprecated": true,
                                     "jobtype": "printable_pdf",
                                     "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
                                     "kibana_name": "spicy.local",
@@ -8532,7 +8569,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "csv_contains_formulas": undefined,
                                       "id": "k905zdw11d34cbae0c3y6tzh",
                                       "index": ".reporting-2020.04.12",
-                                      "isDeprecated": false,
+                                      "isDeprecated": true,
                                       "jobtype": "printable_pdf",
                                       "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
                                       "kibana_name": "spicy.local",
@@ -8594,7 +8631,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   }
                                 >
                                   <EuiToolTip
-                                    content="See report info."
+                                    content="See report info and warnings."
                                     delay="regular"
                                     position="top"
                                   >
@@ -8606,16 +8643,16 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     >
                                       <EuiButtonIcon
                                         aria-label="Show report info"
-                                        color="primary"
+                                        color="warning"
                                         data-test-subj="reportInfoButton"
-                                        iconType="iInCircle"
+                                        iconType="alert"
                                         onBlur={[Function]}
                                         onClick={[Function]}
                                         onFocus={[Function]}
                                       >
                                         <button
                                           aria-label="Show report info"
-                                          className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                                          className="euiButtonIcon euiButtonIcon--warning euiButtonIcon--empty euiButtonIcon--xSmall"
                                           data-test-subj="reportInfoButton"
                                           disabled={false}
                                           onBlur={[Function]}
@@ -8628,13 +8665,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                             className="euiButtonIcon__icon"
                                             color="inherit"
                                             size="m"
-                                            type="iInCircle"
+                                            type="alert"
                                           >
                                             <span
                                               aria-hidden="true"
                                               className="euiButtonIcon__icon"
                                               color="inherit"
-                                              data-euiicon-type="iInCircle"
+                                              data-euiicon-type="alert"
                                               size="m"
                                             />
                                           </EuiIcon>
@@ -8864,6 +8901,43 @@ exports[`ReportListing Report job listing with some items 1`] = `
                           </span>
                         </FormattedMessage>
                          
+                        <EuiText
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small"
+                          >
+                            <EuiTextColor
+                              color="subdued"
+                            >
+                              <span
+                                className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
+                              >
+                                See report info for warnings.
+                              </span>
+                            </EuiTextColor>
+                          </div>
+                        </EuiText>
+                        <EuiText
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small"
+                          >
+                             
+                            <EuiTextColor
+                              color="warning"
+                            >
+                              <span
+                                className="euiTextColor euiTextColor--warning"
+                                style={Object {}}
+                              >
+                                This is a deprecated export type. Automation of this report will need to be re-created for compatibility with future versions of Kibana.
+                              </span>
+                            </EuiTextColor>
+                          </div>
+                        </EuiText>
                       </div>
                     </div>
                   </td>
@@ -8907,17 +8981,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             "created_by": "elastic",
                             "csv_contains_formulas": undefined,
                             "id": "k8t4ylcb07mi9d006214ifyg",
-                            "index": ".reporting-2020.04.05",
-                            "isDeprecated": false,
+                            "index": ".reporting-2020.04.12",
+                            "isDeprecated": true,
                             "jobtype": "PNG",
-                            "kibana_id": "f2e59b4e-f79b-4a48-8a7d-6d50a3c1d914",
+                            "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
                             "kibana_name": "spicy.local",
                             "layout": Object {
                               "dimensions": Object {
-                                "height": 1575,
-                                "width": 1423,
+                                "height": 720,
+                                "width": 1080,
                               },
-                              "id": "png",
+                              "id": "preserve_layout",
                             },
                             "max_attempts": 1,
                             "max_size_reached": undefined,
@@ -8953,17 +9027,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               "created_by": "elastic",
                               "csv_contains_formulas": undefined,
                               "id": "k8t4ylcb07mi9d006214ifyg",
-                              "index": ".reporting-2020.04.05",
-                              "isDeprecated": false,
+                              "index": ".reporting-2020.04.12",
+                              "isDeprecated": true,
                               "jobtype": "PNG",
-                              "kibana_id": "f2e59b4e-f79b-4a48-8a7d-6d50a3c1d914",
+                              "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
                               "kibana_name": "spicy.local",
                               "layout": Object {
                                 "dimensions": Object {
-                                  "height": 1575,
-                                  "width": 1423,
+                                  "height": 720,
+                                  "width": 1080,
                                 },
-                                "id": "png",
+                                "id": "preserve_layout",
                               },
                               "max_attempts": 1,
                               "max_size_reached": undefined,
@@ -9125,17 +9199,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "created_by": "elastic",
                                     "csv_contains_formulas": undefined,
                                     "id": "k8t4ylcb07mi9d006214ifyg",
-                                    "index": ".reporting-2020.04.05",
-                                    "isDeprecated": false,
+                                    "index": ".reporting-2020.04.12",
+                                    "isDeprecated": true,
                                     "jobtype": "PNG",
-                                    "kibana_id": "f2e59b4e-f79b-4a48-8a7d-6d50a3c1d914",
+                                    "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
                                     "kibana_name": "spicy.local",
                                     "layout": Object {
                                       "dimensions": Object {
-                                        "height": 1575,
-                                        "width": 1423,
+                                        "height": 720,
+                                        "width": 1080,
                                       },
-                                      "id": "png",
+                                      "id": "preserve_layout",
                                     },
                                     "max_attempts": 1,
                                     "max_size_reached": undefined,
@@ -9188,7 +9262,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 }
                               >
                                 <EuiToolTip
-                                  content="Download report"
+                                  content="Download report with warnings"
                                   delay="regular"
                                   position="top"
                                 >
@@ -9373,17 +9447,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "created_by": "elastic",
                                     "csv_contains_formulas": undefined,
                                     "id": "k8t4ylcb07mi9d006214ifyg",
-                                    "index": ".reporting-2020.04.05",
-                                    "isDeprecated": false,
+                                    "index": ".reporting-2020.04.12",
+                                    "isDeprecated": true,
                                     "jobtype": "PNG",
-                                    "kibana_id": "f2e59b4e-f79b-4a48-8a7d-6d50a3c1d914",
+                                    "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
                                     "kibana_name": "spicy.local",
                                     "layout": Object {
                                       "dimensions": Object {
-                                        "height": 1575,
-                                        "width": 1423,
+                                        "height": 720,
+                                        "width": 1080,
                                       },
-                                      "id": "png",
+                                      "id": "preserve_layout",
                                     },
                                     "max_attempts": 1,
                                     "max_size_reached": undefined,
@@ -9574,17 +9648,17 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "created_by": "elastic",
                                       "csv_contains_formulas": undefined,
                                       "id": "k8t4ylcb07mi9d006214ifyg",
-                                      "index": ".reporting-2020.04.05",
-                                      "isDeprecated": false,
+                                      "index": ".reporting-2020.04.12",
+                                      "isDeprecated": true,
                                       "jobtype": "PNG",
-                                      "kibana_id": "f2e59b4e-f79b-4a48-8a7d-6d50a3c1d914",
+                                      "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
                                       "kibana_name": "spicy.local",
                                       "layout": Object {
                                         "dimensions": Object {
-                                          "height": 1575,
-                                          "width": 1423,
+                                          "height": 720,
+                                          "width": 1080,
                                         },
-                                        "id": "png",
+                                        "id": "preserve_layout",
                                       },
                                       "max_attempts": 1,
                                       "max_size_reached": undefined,
@@ -9637,7 +9711,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   }
                                 >
                                   <EuiToolTip
-                                    content="See report info."
+                                    content="See report info and warnings."
                                     delay="regular"
                                     position="top"
                                   >
@@ -9649,16 +9723,16 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     >
                                       <EuiButtonIcon
                                         aria-label="Show report info"
-                                        color="primary"
+                                        color="warning"
                                         data-test-subj="reportInfoButton"
-                                        iconType="iInCircle"
+                                        iconType="alert"
                                         onBlur={[Function]}
                                         onClick={[Function]}
                                         onFocus={[Function]}
                                       >
                                         <button
                                           aria-label="Show report info"
-                                          className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                                          className="euiButtonIcon euiButtonIcon--warning euiButtonIcon--empty euiButtonIcon--xSmall"
                                           data-test-subj="reportInfoButton"
                                           disabled={false}
                                           onBlur={[Function]}
@@ -9671,13 +9745,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                             className="euiButtonIcon__icon"
                                             color="inherit"
                                             size="m"
-                                            type="iInCircle"
+                                            type="alert"
                                           >
                                             <span
                                               aria-hidden="true"
                                               className="euiButtonIcon__icon"
                                               color="inherit"
-                                              data-euiicon-type="iInCircle"
+                                              data-euiicon-type="alert"
                                               size="m"
                                             />
                                           </EuiIcon>

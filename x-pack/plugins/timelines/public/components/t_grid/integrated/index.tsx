@@ -15,7 +15,7 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { Direction } from '../../../../common/search_strategy';
+import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { DocValueFields } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -37,7 +37,12 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { calculateTotalPages, combineQueries, resolverIsShowing } from '../helpers';
+import {
+  calculateTotalPages,
+  buildCombinedQuery,
+  getCombinedFilterQuery,
+  resolverIsShowing,
+} from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
 import { HeaderSection } from '../header_section';
@@ -114,6 +119,7 @@ export interface TGridIntegratedProps {
   deletedEventIds: Readonly<string[]>;
   docValueFields: DocValueFields[];
   end: string;
+  entityType: EntityType;
   filters: Filter[];
   globalFullScreen: boolean;
   headerFilterGroup?: React.ReactNode;
@@ -150,6 +156,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   deletedEventIds,
   docValueFields,
   end,
+  entityType,
   filters,
   globalFullScreen,
   headerFilterGroup,
@@ -203,7 +210,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     [globalFullScreen, justTitle, setGlobalFullScreen]
   );
 
-  const combinedQueries = combineQueries({
+  const combinedQueries = buildCombinedQuery({
     config: esQuery.getEsQueryConfig(uiSettings),
     dataProviders,
     indexPattern,
@@ -245,6 +252,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   ] = useTimelineEvents({
     alertConsumers: SECURITY_ALERTS_CONSUMERS,
     docValueFields,
+    entityType,
     fields,
     filterQuery: combinedQueries!.filterQuery,
     id,
@@ -256,6 +264,21 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     skip: !canQueryTimeline,
     data,
   });
+
+  const filterQuery = useMemo(() => {
+    return getCombinedFilterQuery({
+      config: esQuery.getEsQueryConfig(uiSettings),
+      dataProviders,
+      indexPattern,
+      browserFields,
+      filters,
+      kqlQuery: query,
+      kqlMode,
+      isEventViewer: true,
+      from: start,
+      to: end,
+    });
+  }, [uiSettings, dataProviders, indexPattern, browserFields, filters, start, end, query, kqlMode]);
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
@@ -315,6 +338,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                   <StatefulBody
                     activePage={pageInfo.activePage}
                     browserFields={browserFields}
+                    filterQuery={filterQuery}
                     data={nonDeletedEvents}
                     defaultCellActions={defaultCellActions}
                     id={id}
@@ -334,6 +358,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                     leadingControlColumns={leadingControlColumns}
                     trailingControlColumns={trailingControlColumns}
                     refetch={refetch}
+                    indexNames={indexNames}
                   />
                   <Footer
                     activePage={pageInfo.activePage}
