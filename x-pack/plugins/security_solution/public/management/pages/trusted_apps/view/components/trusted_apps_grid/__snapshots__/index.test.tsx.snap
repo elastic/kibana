@@ -375,18 +375,22 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
 .c2 {
   background-color: #f5f7fa;
   padding: 16px;
+  padding-top: 8px;
 }
 
 .c5 {
-  padding: 16px;
+  padding: 12px;
+  padding-left: 0;
 }
 
 .c3.c3.c3 {
   width: 40%;
+  margin-top: 8px;
 }
 
 .c4.c4.c4 {
   width: 60%;
+  margin-top: 8px;
 }
 
 .c1 {
@@ -432,7 +436,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -448,7 +452,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -464,9 +468,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -474,9 +478,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -490,9 +494,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -500,9 +504,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -516,7 +520,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -671,7 +675,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -727,7 +731,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -743,7 +747,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -759,9 +763,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -769,9 +773,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -785,9 +789,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -795,9 +799,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -811,7 +815,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -966,7 +970,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -1022,7 +1026,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -1038,7 +1042,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -1054,9 +1058,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -1064,9 +1068,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -1080,9 +1084,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -1090,9 +1094,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -1106,7 +1110,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -1261,7 +1265,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -1317,7 +1321,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -1333,7 +1337,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -1349,9 +1353,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -1359,9 +1363,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -1375,9 +1379,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -1385,9 +1389,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -1401,7 +1405,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -1556,7 +1560,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -1612,7 +1616,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -1628,7 +1632,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -1644,9 +1648,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -1654,9 +1658,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -1670,9 +1674,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -1680,9 +1684,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -1696,7 +1700,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -1851,7 +1855,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -1907,7 +1911,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -1923,7 +1927,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -1939,9 +1943,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -1949,9 +1953,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -1965,9 +1969,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -1975,9 +1979,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -1991,7 +1995,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -2146,7 +2150,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -2202,7 +2206,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -2218,7 +2222,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -2234,9 +2238,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -2244,9 +2248,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -2260,9 +2264,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -2270,9 +2274,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -2286,7 +2290,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -2441,7 +2445,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -2497,7 +2501,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -2513,7 +2517,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -2529,9 +2533,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -2539,9 +2543,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -2555,9 +2559,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -2565,9 +2569,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -2581,7 +2585,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -2736,7 +2740,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -2792,7 +2796,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -2808,7 +2812,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -2824,9 +2828,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -2834,9 +2838,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -2850,9 +2854,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -2860,9 +2864,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -2876,7 +2880,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -3031,7 +3035,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -3087,7 +3091,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -3103,7 +3107,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -3119,9 +3123,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -3129,9 +3133,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -3145,9 +3149,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -3155,9 +3159,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -3171,7 +3175,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -3326,7 +3330,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -3630,18 +3634,22 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
 .c2 {
   background-color: #f5f7fa;
   padding: 16px;
+  padding-top: 8px;
 }
 
 .c5 {
-  padding: 16px;
+  padding: 12px;
+  padding-left: 0;
 }
 
 .c3.c3.c3 {
   width: 40%;
+  margin-top: 8px;
 }
 
 .c4.c4.c4 {
   width: 60%;
+  margin-top: 8px;
 }
 
 .c1 {
@@ -3690,7 +3698,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -3706,7 +3714,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -3722,9 +3730,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -3732,9 +3740,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -3748,9 +3756,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -3758,9 +3766,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -3774,7 +3782,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -3929,7 +3937,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -3985,7 +3993,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -4001,7 +4009,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -4017,9 +4025,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -4027,9 +4035,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -4043,9 +4051,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -4053,9 +4061,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -4069,7 +4077,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -4224,7 +4232,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -4280,7 +4288,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -4296,7 +4304,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -4312,9 +4320,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -4322,9 +4330,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -4338,9 +4346,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -4348,9 +4356,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -4364,7 +4372,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -4519,7 +4527,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -4575,7 +4583,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -4591,7 +4599,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -4607,9 +4615,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -4617,9 +4625,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -4633,9 +4641,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -4643,9 +4651,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -4659,7 +4667,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -4814,7 +4822,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -4870,7 +4878,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -4886,7 +4894,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -4902,9 +4910,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -4912,9 +4920,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -4928,9 +4936,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -4938,9 +4946,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -4954,7 +4962,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -5109,7 +5117,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -5165,7 +5173,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -5181,7 +5189,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -5197,9 +5205,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -5207,9 +5215,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -5223,9 +5231,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -5233,9 +5241,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -5249,7 +5257,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -5404,7 +5412,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -5460,7 +5468,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -5476,7 +5484,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -5492,9 +5500,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -5502,9 +5510,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -5518,9 +5526,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -5528,9 +5536,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -5544,7 +5552,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -5699,7 +5707,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -5755,7 +5763,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -5771,7 +5779,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -5787,9 +5795,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -5797,9 +5805,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -5813,9 +5821,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -5823,9 +5831,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -5839,7 +5847,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -5994,7 +6002,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -6050,7 +6058,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -6066,7 +6074,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -6082,9 +6090,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -6092,9 +6100,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -6108,9 +6116,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -6118,9 +6126,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -6134,7 +6142,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -6289,7 +6297,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -6345,7 +6353,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -6361,7 +6369,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -6377,9 +6385,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -6387,9 +6395,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -6403,9 +6411,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -6413,9 +6421,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -6429,7 +6437,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -6584,7 +6592,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -6848,18 +6856,22 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
 .c2 {
   background-color: #f5f7fa;
   padding: 16px;
+  padding-top: 8px;
 }
 
 .c5 {
-  padding: 16px;
+  padding: 12px;
+  padding-left: 0;
 }
 
 .c3.c3.c3 {
   width: 40%;
+  margin-top: 8px;
 }
 
 .c4.c4.c4 {
   width: 60%;
+  margin-top: 8px;
 }
 
 .c1 {
@@ -6905,7 +6917,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -6921,7 +6933,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -6937,9 +6949,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -6947,9 +6959,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -6963,9 +6975,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -6973,9 +6985,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -6989,7 +7001,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -7144,7 +7156,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -7200,7 +7212,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -7216,7 +7228,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -7232,9 +7244,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -7242,9 +7254,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -7258,9 +7270,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -7268,9 +7280,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -7284,7 +7296,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -7439,7 +7451,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -7495,7 +7507,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -7511,7 +7523,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -7527,9 +7539,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -7537,9 +7549,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -7553,9 +7565,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -7563,9 +7575,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -7579,7 +7591,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -7734,7 +7746,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -7790,7 +7802,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -7806,7 +7818,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -7822,9 +7834,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -7832,9 +7844,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -7848,9 +7860,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -7858,9 +7870,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -7874,7 +7886,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -8029,7 +8041,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -8085,7 +8097,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -8101,7 +8113,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -8117,9 +8129,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -8127,9 +8139,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -8143,9 +8155,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -8153,9 +8165,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -8169,7 +8181,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -8324,7 +8336,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -8380,7 +8392,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -8396,7 +8408,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -8412,9 +8424,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -8422,9 +8434,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -8438,9 +8450,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -8448,9 +8460,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -8464,7 +8476,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -8619,7 +8631,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -8675,7 +8687,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -8691,7 +8703,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -8707,9 +8719,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -8717,9 +8729,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -8733,9 +8745,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -8743,9 +8755,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -8759,7 +8771,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -8914,7 +8926,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -8970,7 +8982,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -8986,7 +8998,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -9002,9 +9014,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -9012,9 +9024,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -9028,9 +9040,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -9038,9 +9050,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -9054,7 +9066,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -9209,7 +9221,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -9265,7 +9277,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -9281,7 +9293,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -9297,9 +9309,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -9307,9 +9319,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -9323,9 +9335,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -9333,9 +9345,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -9349,7 +9361,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -9504,7 +9516,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >
@@ -9560,7 +9572,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Name
                   </dt>
@@ -9576,7 +9588,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     OS
                   </dt>
@@ -9592,9 +9604,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Created
+                    Date created
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -9602,9 +9614,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Created By
+                    Created by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -9618,9 +9630,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Date Modified
+                    Date modified
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -9628,9 +9640,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
-                    Modified By
+                    Modified by
                   </dt>
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
@@ -9644,7 +9656,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c3"
+                    class="euiDescriptionList__title c3 eui-textTruncate"
                   >
                     Description
                   </dt>
@@ -9799,7 +9811,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       >
                         <div>
                           <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                            class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                             data-test-subj="trustedAppEditButton"
                             type="button"
                           >

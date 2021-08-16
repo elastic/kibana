@@ -21,7 +21,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ViewType } from '../state';
 import {
   checkingIfEntriesExist,
   entriesExist,

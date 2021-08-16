@@ -76,9 +76,9 @@ exports[`TrustedAppsList renders correctly initially 1`] = `
               >
                 <span
                   class="euiTableCellContent__text"
-                  title="Date Created"
+                  title="Date created"
                 >
-                  Date Created
+                  Date created
                 </span>
               </span>
             </th>
@@ -93,9 +93,9 @@ exports[`TrustedAppsList renders correctly initially 1`] = `
               >
                 <span
                   class="euiTableCellContent__text"
-                  title="Created By"
+                  title="Created by"
                 >
-                  Created By
+                  Created by
                 </span>
               </span>
             </th>
@@ -234,9 +234,9 @@ exports[`TrustedAppsList renders correctly when failed loading data for the firs
               >
                 <span
                   class="euiTableCellContent__text"
-                  title="Date Created"
+                  title="Date created"
                 >
-                  Date Created
+                  Date created
                 </span>
               </span>
             </th>
@@ -251,9 +251,9 @@ exports[`TrustedAppsList renders correctly when failed loading data for the firs
               >
                 <span
                   class="euiTableCellContent__text"
-                  title="Created By"
+                  title="Created by"
                 >
-                  Created By
+                  Created by
                 </span>
               </span>
             </th>
@@ -397,9 +397,9 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
               >
                 <span
                   class="euiTableCellContent__text"
-                  title="Date Created"
+                  title="Date created"
                 >
-                  Date Created
+                  Date created
                 </span>
               </span>
             </th>
@@ -414,9 +414,9 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
               >
                 <span
                   class="euiTableCellContent__text"
-                  title="Created By"
+                  title="Created by"
                 >
-                  Created By
+                  Created by
                 </span>
               </span>
             </th>
@@ -487,6 +487,10 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
 exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
 .c0 {
   background-color: #ece;
+}
+
+.c3 {
+  padding-left: 0;
 }
 
 .c1.c1.c1 {
@@ -572,9 +576,9 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <span
                   class="euiTableCellContent__text"
-                  title="Date Created"
+                  title="Date created"
                 >
-                  Date Created
+                  Date created
                 </span>
               </span>
             </th>
@@ -589,9 +593,9 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <span
                   class="euiTableCellContent__text"
-                  title="Created By"
+                  title="Created by"
                 >
-                  Created By
+                  Created by
                 </span>
               </span>
             </th>
@@ -680,7 +684,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -694,7 +698,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -787,7 +791,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                         class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                       >
                         <dt
-                          class="euiDescriptionList__title c1"
+                          class="euiDescriptionList__title c1 eui-textTruncate"
                         >
                           Name
                         </dt>
@@ -803,7 +807,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                           </span>
                         </dd>
                         <dt
-                          class="euiDescriptionList__title c1"
+                          class="euiDescriptionList__title c1 eui-textTruncate"
                         >
                           OS
                         </dt>
@@ -819,9 +823,9 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                           </span>
                         </dd>
                         <dt
-                          class="euiDescriptionList__title c1"
+                          class="euiDescriptionList__title c1 eui-textTruncate"
                         >
-                          Date Created
+                          Date created
                         </dt>
                         <dd
                           class="euiDescriptionList__description c2 eui-textBreakWord"
@@ -829,9 +833,9 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                           1 minute ago
                         </dd>
                         <dt
-                          class="euiDescriptionList__title c1"
+                          class="euiDescriptionList__title c1 eui-textTruncate"
                         >
-                          Created By
+                          Created by
                         </dt>
                         <dd
                           class="euiDescriptionList__description c2 eui-textBreakWord"
@@ -845,9 +849,9 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                           </span>
                         </dd>
                         <dt
-                          class="euiDescriptionList__title c1"
+                          class="euiDescriptionList__title c1 eui-textTruncate"
                         >
-                          Date Modified
+                          Date modified
                         </dt>
                         <dd
                           class="euiDescriptionList__description c2 eui-textBreakWord"
@@ -855,9 +859,9 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                           1 minute ago
                         </dd>
                         <dt
-                          class="euiDescriptionList__title c1"
+                          class="euiDescriptionList__title c1 eui-textTruncate"
                         >
-                          Modified By
+                          Modified by
                         </dt>
                         <dd
                           class="euiDescriptionList__description c2 eui-textBreakWord"
@@ -871,7 +875,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                           </span>
                         </dd>
                         <dt
-                          class="euiDescriptionList__title c1"
+                          class="euiDescriptionList__title c1 eui-textTruncate"
                         >
                           Description
                         </dt>
@@ -889,7 +893,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                       </dl>
                     </div>
                     <div
-                      class="euiFlexItem euiFlexItem--flexGrow5 "
+                      class="euiFlexItem euiFlexItem--flexGrow5 c3"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -1023,7 +1027,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                             >
                               <div>
                                 <button
-                                  class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                                  class="euiButton euiButton--primary euiButton--small eui-fullWidth "
                                   data-test-subj="trustedAppEditButton"
                                   type="button"
                                 >
@@ -1119,7 +1123,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -1133,7 +1137,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -1251,7 +1255,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -1265,7 +1269,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -1383,7 +1387,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -1397,7 +1401,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -1515,7 +1519,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -1529,7 +1533,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -1647,7 +1651,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -1661,7 +1665,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -1779,7 +1783,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -1793,7 +1797,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -1911,7 +1915,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -1925,7 +1929,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -2043,7 +2047,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -2057,7 +2061,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -2175,7 +2179,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -2189,7 +2193,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -2307,7 +2311,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -2321,7 +2325,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -2439,7 +2443,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -2453,7 +2457,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -2571,7 +2575,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -2585,7 +2589,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -2703,7 +2707,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -2717,7 +2721,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -2835,7 +2839,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -2849,7 +2853,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -2967,7 +2971,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -2981,7 +2985,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -3099,7 +3103,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -3113,7 +3117,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -3231,7 +3235,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -3245,7 +3249,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -3363,7 +3367,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -3377,7 +3381,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -3495,7 +3499,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -3509,7 +3513,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -3883,9 +3887,9 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <span
                   class="euiTableCellContent__text"
-                  title="Date Created"
+                  title="Date created"
                 >
-                  Date Created
+                  Date created
                 </span>
               </span>
             </th>
@@ -3900,9 +3904,9 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               >
                 <span
                   class="euiTableCellContent__text"
-                  title="Created By"
+                  title="Created by"
                 >
-                  Created By
+                  Created by
                 </span>
               </span>
             </th>
@@ -3990,7 +3994,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -4004,7 +4008,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -4122,7 +4126,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -4136,7 +4140,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -4254,7 +4258,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -4268,7 +4272,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -4386,7 +4390,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -4400,7 +4404,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -4518,7 +4522,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -4532,7 +4536,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -4650,7 +4654,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -4664,7 +4668,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -4782,7 +4786,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -4796,7 +4800,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -4914,7 +4918,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -4928,7 +4932,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -5046,7 +5050,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -5060,7 +5064,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -5178,7 +5182,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -5192,7 +5196,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -5310,7 +5314,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -5324,7 +5328,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -5442,7 +5446,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -5456,7 +5460,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -5574,7 +5578,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -5588,7 +5592,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -5706,7 +5710,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -5720,7 +5724,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -5838,7 +5842,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -5852,7 +5856,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -5970,7 +5974,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -5984,7 +5988,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -6102,7 +6106,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -6116,7 +6120,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -6234,7 +6238,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -6248,7 +6252,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -6366,7 +6370,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -6380,7 +6384,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -6498,7 +6502,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -6512,7 +6516,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -6886,9 +6890,9 @@ exports[`TrustedAppsList renders correctly when loading data for the first time 
               >
                 <span
                   class="euiTableCellContent__text"
-                  title="Date Created"
+                  title="Date created"
                 >
-                  Date Created
+                  Date created
                 </span>
               </span>
             </th>
@@ -6903,9 +6907,9 @@ exports[`TrustedAppsList renders correctly when loading data for the first time 
               >
                 <span
                   class="euiTableCellContent__text"
-                  title="Created By"
+                  title="Created by"
                 >
-                  Created By
+                  Created by
                 </span>
               </span>
             </th>
@@ -7044,9 +7048,9 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <span
                   class="euiTableCellContent__text"
-                  title="Date Created"
+                  title="Date created"
                 >
-                  Date Created
+                  Date created
                 </span>
               </span>
             </th>
@@ -7061,9 +7065,9 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               >
                 <span
                   class="euiTableCellContent__text"
-                  title="Created By"
+                  title="Created by"
                 >
-                  Created By
+                  Created by
                 </span>
               </span>
             </th>
@@ -7151,7 +7155,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -7165,7 +7169,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -7283,7 +7287,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -7297,7 +7301,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -7415,7 +7419,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -7429,7 +7433,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -7547,7 +7551,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -7561,7 +7565,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -7679,7 +7683,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -7693,7 +7697,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -7811,7 +7815,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -7825,7 +7829,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -7943,7 +7947,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -7957,7 +7961,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -8075,7 +8079,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -8089,7 +8093,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -8207,7 +8211,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -8221,7 +8225,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -8339,7 +8343,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -8353,7 +8357,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -8471,7 +8475,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -8485,7 +8489,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -8603,7 +8607,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -8617,7 +8621,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -8735,7 +8739,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -8749,7 +8753,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -8867,7 +8871,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -8881,7 +8885,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -8999,7 +9003,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -9013,7 +9017,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -9131,7 +9135,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -9145,7 +9149,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -9263,7 +9267,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -9277,7 +9281,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -9395,7 +9399,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -9409,7 +9413,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -9527,7 +9531,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -9541,7 +9545,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -9659,7 +9663,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -9673,7 +9677,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -10047,9 +10051,9 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <span
                   class="euiTableCellContent__text"
-                  title="Date Created"
+                  title="Date created"
                 >
-                  Date Created
+                  Date created
                 </span>
               </span>
             </th>
@@ -10064,9 +10068,9 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               >
                 <span
                   class="euiTableCellContent__text"
-                  title="Created By"
+                  title="Created by"
                 >
-                  Created By
+                  Created by
                 </span>
               </span>
             </th>
@@ -10154,7 +10158,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -10168,7 +10172,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -10286,7 +10290,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -10300,7 +10304,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -10418,7 +10422,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -10432,7 +10436,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -10550,7 +10554,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -10564,7 +10568,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -10682,7 +10686,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -10696,7 +10700,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -10814,7 +10818,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -10828,7 +10832,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -10946,7 +10950,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -10960,7 +10964,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -11078,7 +11082,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -11092,7 +11096,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -11210,7 +11214,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -11224,7 +11228,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -11342,7 +11346,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -11356,7 +11360,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -11474,7 +11478,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -11488,7 +11492,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -11606,7 +11610,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -11620,7 +11624,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -11738,7 +11742,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -11752,7 +11756,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -11870,7 +11874,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -11884,7 +11888,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -12002,7 +12006,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -12016,7 +12020,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -12134,7 +12138,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -12148,7 +12152,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -12266,7 +12270,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -12280,7 +12284,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -12398,7 +12402,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -12412,7 +12416,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -12530,7 +12534,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -12544,7 +12548,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -12662,7 +12666,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Date Created
+                Date created
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -12676,7 +12680,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
               >
-                Created By
+                Created by
               </div>
               <div
                 class="euiTableCellContent euiTableCellContent--overflowingContent"

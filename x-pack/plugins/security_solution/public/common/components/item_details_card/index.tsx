@@ -53,25 +53,26 @@ const groupChildrenByType = (
 
 const SummarySection = styled(EuiFlexItem)`
   background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
-  padding: ${({ theme }) => theme.eui.paddingSizes.m};
-  padding-top: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding: ${({ theme }) => theme.eui.euiSize};
+  padding-top: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const DetailsSection = styled(EuiFlexItem)`
-  padding: ${({ theme }) => theme.eui.euiSize};
+  padding: ${({ theme }) => theme.eui.euiSizeM};
+  padding-left: 0;
 `;
 
 const DescriptionListTitle = styled(EuiDescriptionListTitle)`
   &&& {
     width: 40%;
-    margin-top: ${({ theme }) => theme.eui.paddingSizes.s};
+    margin-top: ${({ theme }) => theme.eui.euiSizeS};
   }
 `;
 
 const DescriptionListDescription = styled(EuiDescriptionListDescription)`
   &&& {
     width: 60%;
-    margin-top: ${({ theme }) => theme.eui.paddingSizes.s};
+    margin-top: ${({ theme }) => theme.eui.euiSizeS};
   }
 `;
 
@@ -83,7 +84,7 @@ interface ItemDetailsPropertySummaryProps {
 export const ItemDetailsPropertySummary = memo<ItemDetailsPropertySummaryProps>(
   ({ name, value }) => (
     <>
-      <DescriptionListTitle>{name}</DescriptionListTitle>
+      <DescriptionListTitle className="eui-textTruncate">{name}</DescriptionListTitle>
       <DescriptionListDescription className="eui-textBreakWord">{value}</DescriptionListDescription>
     </>
   )

@@ -22,40 +22,40 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
     }
   />
   <ItemPropertySummary
-    name="Date Created"
+    name="Date created"
     value={
       <Memo(FormattedDate)
         className="eui-textTruncate"
-        fieldName="Date Created"
+        fieldName="Date created"
         value="1 minute ago"
       />
     }
   />
   <ItemPropertySummary
-    name="Created By"
+    name="Created by"
     value={
       <TextFieldValue
-        fieldName="Created By"
+        fieldName="Created by"
         value="someone"
       />
     }
   />
   <ItemPropertySummary
-    name="Date Modified"
+    name="Date modified"
     value={
       <Memo(FormattedDate)
         className="eui-textTruncate"
-        fieldName="Date Modified"
+        fieldName="Date modified"
         value="1 minute ago"
       />
     }
   />
   <ItemPropertySummary
-    name="Modified By"
+    name="Modified by"
     value={
       <TextFieldValue
         className="eui-textTruncate"
-        fieldName="Modified By"
+        fieldName="Modified by"
         value="someone"
       />
     }
@@ -107,7 +107,6 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
   <ItemDetailsAction
     color="primary"
     data-test-subj="trustedAppEditButton"
-    fill={true}
     onClick={[Function]}
     size="s"
   >
@@ -146,40 +145,40 @@ exports[`trusted_app_card TrustedAppCard should trim long texts 1`] = `
     }
   />
   <ItemPropertySummary
-    name="Date Created"
+    name="Date created"
     value={
       <Memo(FormattedDate)
         className="eui-textTruncate"
-        fieldName="Date Created"
+        fieldName="Date created"
         value="1 minute ago"
       />
     }
   />
   <ItemPropertySummary
-    name="Created By"
+    name="Created by"
     value={
       <TextFieldValue
-        fieldName="Created By"
+        fieldName="Created by"
         value="someone"
       />
     }
   />
   <ItemPropertySummary
-    name="Date Modified"
+    name="Date modified"
     value={
       <Memo(FormattedDate)
         className="eui-textTruncate"
-        fieldName="Date Modified"
+        fieldName="Date modified"
         value="1 minute ago"
       />
     }
   />
   <ItemPropertySummary
-    name="Modified By"
+    name="Modified by"
     value={
       <TextFieldValue
         className="eui-textTruncate"
-        fieldName="Modified By"
+        fieldName="Modified by"
         value="someone"
       />
     }
@@ -231,7 +230,6 @@ exports[`trusted_app_card TrustedAppCard should trim long texts 1`] = `
   <ItemDetailsAction
     color="primary"
     data-test-subj="trustedAppEditButton"
-    fill={true}
     onClick={[Function]}
     size="s"
   >
