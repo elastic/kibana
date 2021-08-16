@@ -6,6 +6,7 @@
  */
 
 import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
+import { lensEmbeddableFactory } from '../../../lens/server/embeddable/lens_embeddable_factory';
 import { SECURITY_SOLUTION_OWNER } from '../../common';
 import {
   AssociationType,
@@ -871,6 +872,7 @@ describe('common utils', () => {
 
   describe('extractLensReferencesFromCommentString', () => {
     it('extracts successfully', () => {
+      const lensEmbeddable = lensEmbeddableFactory();
       const commentString = [
         '**Test**   ',
         'Amazingg!!!',
@@ -879,7 +881,10 @@ describe('common utils', () => {
         '!{lens{"timeRange":{"from":"now-7d","to":"now","mode":"relative"},"attributes":{"title":"aaaa","type":"lens","visualizationType":"lnsXY","state":{"datasourceStates":{"indexpattern":{"layers":{"layer1":{"columnOrder":["col1","col2"],"columns":{"col2":{"dataType":"number","isBucketed":false,"label":"Count of records","operationType":"count","scale":"ratio","sourceField":"Records"},"col1":{"dataType":"date","isBucketed":true,"label":"@timestamp","operationType":"date_histogram","params":{"interval":"auto"},"scale":"interval","sourceField":"timestamp"}}}}}},"visualization":{"axisTitlesVisibilitySettings":{"x":true,"yLeft":true,"yRight":true},"fittingFunction":"None","gridlinesVisibilitySettings":{"x":true,"yLeft":true,"yRight":true},"layers":[{"accessors":["col2"],"layerId":"layer1","seriesType":"bar_stacked","xAccessor":"col1","yConfig":[{"forAccessor":"col2"}]}],"legend":{"isVisible":true,"position":"right"},"preferredSeriesType":"bar_stacked","tickLabelsVisibilitySettings":{"x":true,"yLeft":true,"yRight":true},"valueLabels":"hide","yRightExtent":{"mode":"full"}},"query":{"language":"kuery","query":""},"filters":[]},"references":[{"type":"index-pattern","id":"90943e30-9a47-11e8-b64d-95841ca0b246","name":"indexpattern-datasource-current-indexpattern"},{"type":"index-pattern","id":"90943e30-9a47-11e8-b64d-95841ca0b247","name":"indexpattern-datasource-layer-layer1"}]},"editMode":false}}',
       ].join('\n\n');
 
-      const extractedReferences = extractLensReferencesFromCommentString(commentString);
+      const extractedReferences = extractLensReferencesFromCommentString(
+        lensEmbeddable,
+        commentString
+      );
 
       const expectedReferences = [
         {
@@ -906,6 +911,7 @@ describe('common utils', () => {
 
   describe('getOrUpdateLensReferences', () => {
     it('update references', () => {
+      const lensEmbeddable = lensEmbeddableFactory();
       const currentCommentStringReferences = [
         [
           {
@@ -975,12 +981,16 @@ describe('common utils', () => {
         )}},"editMode":false}}`,
       ].join('\n\n');
 
-      const updatedReferences = getOrUpdateLensReferences(newCommentString, {
-        references: currentCommentReferences,
-        attributes: {
-          comment: currentCommentString,
-        },
-      } as SavedObject<CommentRequestUserType>);
+      const updatedReferences = getOrUpdateLensReferences(
+        lensEmbeddable as EmbeddableStart,
+        newCommentString,
+        {
+          references: currentCommentReferences,
+          attributes: {
+            comment: currentCommentString,
+          },
+        } as SavedObject<CommentRequestUserType>
+      );
 
       const expectedReferences = [
         ...nonLensCurrentCommentReferences,
