@@ -546,9 +546,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
       expect(queryByText('URL is required')).not.toBeInTheDocument();
       expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
       expect(queryByText('Max redirects must be 0 or greater')).not.toBeInTheDocument();
-      expect(
-        queryByText('Timeout must be 0 or greater and less than schedule interval')
-      ).not.toBeInTheDocument();
+      expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
           isValid: true,
@@ -616,9 +614,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
       expect(timeout.value).toEqual('1');
       expect(queryByText('Zip URL is required')).not.toBeInTheDocument();
       expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
-      expect(
-        queryByText('Timeout must be 0 or greater and less than schedule interval')
-      ).not.toBeInTheDocument();
+      expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
           isValid: true,
@@ -687,9 +683,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     await waitFor(() => {
       expect(queryByText('Host is required')).not.toBeInTheDocument();
       expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
-      expect(
-        queryByText('Timeout must be 0 or greater and less than schedule interval')
-      ).not.toBeInTheDocument();
+      expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
           isValid: true,

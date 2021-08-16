@@ -7,7 +7,7 @@
 import 'jest-canvas-mock';
 
 import React from 'react';
-import { fireEvent, waitFor, screen } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
 import {
   TCPContextProvider,
