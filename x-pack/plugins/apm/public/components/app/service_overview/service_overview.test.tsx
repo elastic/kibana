@@ -82,10 +82,17 @@ describe('ServiceOverview', () => {
       .spyOn(useApmServiceContextHooks, 'useApmServiceContext')
       .mockReturnValue({
         serviceName: 'test service name',
-        agentName: 'java',
         transactionType: 'request',
         transactionTypes: ['request'],
         alerts: [],
+        agentMetadataDetails: {
+          service: {
+            agent: {
+              name: 'java',
+              version: '1.2',
+            },
+          },
+        },
       });
     jest
       .spyOn(useAnnotationsHooks, 'useAnnotationsContext')
