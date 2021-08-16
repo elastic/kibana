@@ -1366,7 +1366,7 @@ export const startSignalsMigration = async ({
   indices,
   supertest,
 }: {
-  supertest: SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   indices: string[];
 }): Promise<CreateMigrationResponse[]> => {
   const {
@@ -1390,7 +1390,7 @@ export const finalizeSignalsMigration = async ({
   migrationIds,
   supertest,
 }: {
-  supertest: SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   migrationIds: string[];
 }): Promise<FinalizeMigrationResponse[]> => {
   const {
