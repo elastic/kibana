@@ -17,7 +17,7 @@ import {
   KibanaPageTemplateProps,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import type { NavigationSection } from '../../../services/navigation_registry';
-import { NavNameWithBadge } from './nav_name_with_badge';
+import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 
 export type WrappedPageTemplateProps = Pick<
   KibanaPageTemplateProps,
@@ -72,7 +72,7 @@ export function ObservabilityPageTemplate({
               exact: !!entry.matchFullPath,
               strict: !entry.ignoreTrailingSlash,
             }) != null;
-
+          const badgeLocalStorageId = `observability.nav_item_badge_visible_${entry.app}${entry.path}`;
           return {
             id: `${sectionIndex}.${entryIndex}`,
             name: entry.isNewFeature ? (
