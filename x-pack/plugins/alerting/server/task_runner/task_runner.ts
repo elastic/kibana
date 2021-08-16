@@ -266,9 +266,7 @@ export class TaskRunner<
         type: 'alert',
         name: `execute ${alert.alertTypeId}`,
         id: alertId,
-        description: `execute ${alert.alertTypeId} with ${name} in ${namespace ?? 'default'}`,
-        // is there a way to create a URL to navigate to an alert
-        // url: '',
+        description: `execute ${alert.alertTypeId} with name ${name} in ${namespace ?? 'default'}`,
       };
 
       updatedAlertTypeState = await this.context.executionContext.withContext(ctx, () =>

@@ -100,7 +100,6 @@ describe('Task Runner', () => {
     executionContext: {
       // we don't use executionContextServiceMock because the test reset the mock implementation in beforeEach
       withContext: (ctx, fn) => fn(),
-      setRequestId: jest.fn(),
     },
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
     basePathService: httpServiceMock.createBasePath(),

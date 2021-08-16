@@ -273,9 +273,7 @@ export class TaskManagerRunner implements TaskRunner {
         type: 'task manager',
         name: `run ${this.instance.task.taskType}`,
         id: this.instance.task.id,
-        description: 'run a task',
-        // is there a way to create a URL to navigate to a task
-        // url: '',
+        description: 'run task',
       };
       const result = await this.executionContext.withContext(ctx, () =>
         withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
