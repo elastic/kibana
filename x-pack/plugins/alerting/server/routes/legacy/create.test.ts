@@ -184,10 +184,7 @@ describe('createAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({ body: expectedResult });
 
-    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-      counterName: 'ruleCreatedWithPredefinedIdInDefaultSpace',
-      incrementBy: 1,
-    });
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
     expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -265,10 +262,7 @@ describe('createAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({ body: expectedResult });
 
-    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-      counterName: 'ruleCreatedWithPredefinedIdInDefaultSpace',
-      incrementBy: 1,
-    });
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
     expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -346,10 +340,7 @@ describe('createAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({ body: expectedResult });
 
-    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-      counterName: 'ruleCreatedWithPredefinedIdInCustomSpace',
-      incrementBy: 1,
-    });
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(2);
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
     expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [

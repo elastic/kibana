@@ -18,14 +18,18 @@ export function countUsageOfPredefinedIds({
   spaceId,
   usageCounter,
 }: CountUsageOfPredefinedIdsOptions) {
-  if (predefinedId) {
-    if (usageCounter) {
-      const usageCounterName =
-        spaceId === undefined || spaceId === 'default'
-          ? 'ruleCreatedWithPredefinedIdInDefaultSpace'
-          : 'ruleCreatedWithPredefinedIdInCustomSpace';
+  if (predefinedId && usageCounter) {
+    // Track any usage of pre-defined ID
+    usageCounter?.incrementCounter({
+      counterName: 'ruleCreatedWithPredefinedId',
+      incrementBy: 1,
+    });
+
+    const isInCustomSpace = spaceId !== undefined && spaceId !== 'default';
+    if (isInCustomSpace) {
+      // Track usage of pre-defined ID in custom space
       usageCounter?.incrementCounter({
-        counterName: usageCounterName,
+        counterName: 'ruleCreatedWithPredefinedIdInCustomSpace',
         incrementBy: 1,
       });
     }

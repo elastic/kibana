@@ -28,8 +28,9 @@ describe('countUsageOfPredefinedIds', () => {
 
     countUsageOfPredefinedIds({ predefinedId: 'my-id', usageCounter: mockUsageCounter });
 
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-      counterName: 'ruleCreatedWithPredefinedIdInDefaultSpace',
+      counterName: 'ruleCreatedWithPredefinedId',
       incrementBy: 1,
     });
   });
@@ -44,8 +45,9 @@ describe('countUsageOfPredefinedIds', () => {
       usageCounter: mockUsageCounter,
     });
 
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-      counterName: 'ruleCreatedWithPredefinedIdInDefaultSpace',
+      counterName: 'ruleCreatedWithPredefinedId',
       incrementBy: 1,
     });
   });
@@ -60,6 +62,11 @@ describe('countUsageOfPredefinedIds', () => {
       usageCounter: mockUsageCounter,
     });
 
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(2);
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+      counterName: 'ruleCreatedWithPredefinedId',
+      incrementBy: 1,
+    });
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
       counterName: 'ruleCreatedWithPredefinedIdInCustomSpace',
       incrementBy: 1,
