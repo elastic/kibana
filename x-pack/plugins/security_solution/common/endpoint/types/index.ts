@@ -6,7 +6,7 @@
  */
 
 import { ApplicationStart } from 'kibana/public';
-import { NewPackagePolicy, PackagePolicy } from '../../../../fleet/common';
+import { PackagePolicy, UpdatePackagePolicy } from '../../../../fleet/common';
 import { ManifestSchema } from '../schema/manifest';
 
 export * from './actions';
@@ -1020,7 +1020,7 @@ export type PolicyData = PackagePolicy & NewPolicyData;
 /**
  * New policy data. Used when updating the policy record via ingest APIs
  */
-export type NewPolicyData = NewPackagePolicy & {
+export type NewPolicyData = UpdatePackagePolicy & {
   inputs: [
     {
       type: 'endpoint';

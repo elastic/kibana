@@ -101,6 +101,7 @@ export const analysisConfigSchema = schema.object({
       stop_on_warn: schema.maybe(schema.boolean()),
     })
   ),
+  model_prune_window: schema.maybe(schema.string()),
 });
 
 export const anomalyDetectionJobSchema = {
