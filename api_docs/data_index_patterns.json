@@ -8602,7 +8602,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",

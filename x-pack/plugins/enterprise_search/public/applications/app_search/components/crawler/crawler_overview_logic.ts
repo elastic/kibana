@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors, setSuccessMessage } from '../../../shared/flash_messages';
+import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
@@ -136,7 +136,7 @@ export const CrawlerOverviewLogic = kea<
         );
         const crawlerData = crawlerDataServerToClient(response);
         actions.onReceiveCrawlerData(crawlerData);
-        setSuccessMessage(getDeleteDomainSuccessMessage(domain.url));
+        flashSuccessToast(getDeleteDomainSuccessMessage(domain.url));
       } catch (e) {
         flashAPIErrors(e);
       }

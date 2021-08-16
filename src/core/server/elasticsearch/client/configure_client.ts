@@ -14,7 +14,6 @@ import type {
   TransportRequestParams,
   TransportRequestOptions,
 } from '@elastic/elasticsearch/lib/Transport';
-import type { IExecutionContextContainer } from '../../execution_context';
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 
@@ -31,14 +30,14 @@ export const configureClient = (
     logger: Logger;
     type: string;
     scoped?: boolean;
-    getExecutionContext?: () => IExecutionContextContainer | undefined;
+    getExecutionContext?: () => string | undefined;
   }
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped);
   class KibanaTransport extends Transport {
     request(params: TransportRequestParams, options?: TransportRequestOptions) {
       const opts = options || {};
-      const opaqueId = getExecutionContext()?.toString();
+      const opaqueId = getExecutionContext();
       if (opaqueId && !opts.opaqueId) {
         // rewrites headers['x-opaque-id'] if it presents
         opts.opaqueId = opaqueId;

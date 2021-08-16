@@ -21,10 +21,10 @@ import { LensPublicStart } from '.';
 import { visualizationTypes } from './xy_visualization/types';
 import { navigationPluginMock } from '../../../../src/plugins/navigation/public/mocks';
 import { LensAppServices } from './app_plugin/types';
-import { DOC_TYPE } from '../common';
+import { DOC_TYPE, layerTypes } from '../common';
 import { DataPublicPluginStart, esFilters, UI_SETTINGS } from '../../../../src/plugins/data/public';
 import { dashboardPluginMock } from '../../../../src/plugins/dashboard/public/mocks';
-import {
+import type {
   LensByValueInput,
   LensSavedObjectAttributes,
   LensByReferenceInput,
@@ -33,13 +33,29 @@ import {
   mockAttributeService,
   createEmbeddableStateTransferMock,
 } from '../../../../src/plugins/embeddable/public/mocks';
-import { LensAttributeService } from './lens_attribute_service';
-import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
+import { fieldFormatsServiceMock } from '../../../../src/plugins/field_formats/public/mocks';
+import type { LensAttributeService } from './lens_attribute_service';
+import type { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
 
 import { makeConfigureStore, LensAppState, LensState } from './state_management/index';
 import { getResolvedDateRange } from './utils';
 import { presentationUtilPluginMock } from '../../../../src/plugins/presentation_util/public/mocks';
-import { DatasourcePublicAPI, Datasource, Visualization, FramePublicAPI } from './types';
+import {
+  DatasourcePublicAPI,
+  Datasource,
+  Visualization,
+  FramePublicAPI,
+  FrameDatasourceAPI,
+} from './types';
+
+export function mockDatasourceStates() {
+  return {
+    testDatasource: {
+      state: {},
+      isLoading: false,
+    },
+  };
+}
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
@@ -47,6 +63,8 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     clearLayer: jest.fn((state, _layerId) => state),
     removeLayer: jest.fn(),
     getLayerIds: jest.fn((_state) => ['layer1']),
+    getSupportedLayers: jest.fn(() => [{ type: layerTypes.DATA, label: 'Data Layer' }]),
+    getLayerType: jest.fn((_state, _layerId) => layerTypes.DATA),
     visualizationTypes: [
       {
         icon: 'empty',
@@ -83,9 +101,9 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
   };
 }
 
-const visualizationMap = {
-  vis: createMockVisualization(),
-  vis2: createMockVisualization(),
+export const visualizationMap = {
+  testVis: createMockVisualization(),
+  testVis2: createMockVisualization(),
 };
 
 export type DatasourceMock = jest.Mocked<Datasource> & {
@@ -129,12 +147,13 @@ export function createMockDatasource(id: string): DatasourceMock {
     publicAPIMock,
     getErrorMessages: jest.fn((_state) => undefined),
     checkIntegrity: jest.fn((_state) => []),
+    isTimeBased: jest.fn(),
   };
 }
 
 const mockDatasource: DatasourceMock = createMockDatasource('testDatasource');
 const mockDatasource2: DatasourceMock = createMockDatasource('testDatasource2');
-const datasourceMap = {
+export const datasourceMap = {
   testDatasource2: mockDatasource2,
   testDatasource: mockDatasource,
 };
@@ -150,10 +169,16 @@ export type FrameMock = jest.Mocked<FramePublicAPI>;
 export function createMockFramePublicAPI(): FrameMock {
   return {
     datasourceLayers: {},
+  };
+}
+
+export type FrameDatasourceMock = jest.Mocked<FrameDatasourceAPI>;
+export function createMockFrameDatasourceAPI(): FrameDatasourceMock {
+  return {
+    datasourceLayers: {},
     dateRange: { fromDate: 'now-7d', toDate: 'now' },
     query: { query: '', language: 'lucene' },
     filters: [],
-    searchSessionId: 'sessionId',
   };
 }
 
@@ -285,9 +310,7 @@ export function mockDataPlugin(sessionIdSubject = new Subject<string>()) {
       state$: new Observable(),
     },
     indexPatterns: {
-      get: jest.fn((id) => {
-        return new Promise((resolve) => resolve({ id }));
-      }),
+      get: jest.fn().mockImplementation((id) => Promise.resolve({ id, isTimeBased: () => true })),
     },
     search: createMockSearchService(),
     nowProvider: {
@@ -370,6 +393,7 @@ export function makeDefaultServices(
       getUrlForApp: jest.fn((appId: string) => `/testbasepath/app/${appId}#/`),
     },
     data: mockDataPlugin(sessionIdSubject),
+    fieldFormats: fieldFormatsServiceMock.createStartContract(),
     storage: {
       get: jest.fn(),
       set: jest.fn(),
@@ -393,12 +417,7 @@ export const defaultState = {
     state: {},
     activeId: 'testVis',
   },
-  datasourceStates: {
-    testDatasource: {
-      isLoading: false,
-      state: '',
-    },
-  },
+  datasourceStates: mockDatasourceStates(),
 };
 
 export function makeLensStore({

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
+import { registerTestBed } from '@kbn/test/jest';
 
 jest.mock('../../kibana_react/public', () => {
   const original = jest.requireActual('../../kibana_react/public');
@@ -21,11 +22,9 @@ import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
 
-import { registerTestBed } from './test_utils';
-
-import { FieldEditorFlyoutContentContainer } from './components/field_editor_flyout_content_container';
+import { FieldEditorLoader } from './components/field_editor_loader';
 import { IndexPatternFieldEditorPlugin } from './plugin';
-import { DeleteFieldModal } from './components/delete_field_modal';
+import { DeleteFieldModal } from './components/confirm_modals/delete_field_modal';
 import { IndexPattern } from './shared_imports';
 
 const noop = () => {};
@@ -66,7 +65,7 @@ describe('IndexPatternFieldEditorPlugin', () => {
     expect(openFlyout).toHaveBeenCalled();
 
     const [[arg]] = openFlyout.mock.calls;
-    expect(arg.props.children.type).toBe(FieldEditorFlyoutContentContainer);
+    expect(arg.props.children.type).toBe(FieldEditorLoader);
 
     // We force call the "onSave" prop from the <RuntimeFieldEditorFlyoutContent /> component
     // and make sure that the the spy is being called.

@@ -29,6 +29,7 @@ function extendNodeOptions(installDir) {
 export async function runKibanaServer({ procs, config, options }) {
   const { installDir } = options;
   const runOptions = config.get('kbnTestServer.runOptions');
+  const env = config.get('kbnTestServer.env');
 
   await procs.run('kibana', {
     cmd: getKibanaCmd(installDir),
@@ -36,6 +37,7 @@ export async function runKibanaServer({ procs, config, options }) {
     env: {
       FORCE_COLOR: 1,
       ...process.env,
+      ...env,
       ...extendNodeOptions(installDir),
     },
     cwd: installDir || KIBANA_ROOT,

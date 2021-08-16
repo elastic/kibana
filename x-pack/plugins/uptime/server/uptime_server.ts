@@ -6,7 +6,7 @@
  */
 
 import { Logger } from 'kibana/server';
-import { createLifecycleRuleTypeFactory, RuleDataClient } from '../../rule_registry/server';
+import { createLifecycleRuleTypeFactory, IRuleDataClient } from '../../rule_registry/server';
 import { UMServerLibs } from './lib/lib';
 import { createRouteWithAuth, restApiRoutes, uptimeRouteWrapper } from './rest_api';
 import { UptimeCoreSetup, UptimeCorePlugins } from './lib/adapters';
@@ -20,7 +20,7 @@ export const initUptimeServer = (
   server: UptimeCoreSetup,
   libs: UMServerLibs,
   plugins: UptimeCorePlugins,
-  ruleDataClient: RuleDataClient,
+  ruleDataClient: IRuleDataClient,
   logger: Logger
 ) => {
   restApiRoutes.forEach((route) =>

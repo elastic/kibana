@@ -7,6 +7,7 @@
  */
 
 import _ from 'lodash';
+import type { KibanaExecutionContext } from 'src/core/public';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
 import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
@@ -40,6 +41,7 @@ interface StateToDashboardContainerInputProps {
   query: DashboardBuildContext['query'];
   incomingEmbeddable?: EmbeddablePackageState;
   dashboardCapabilities: DashboardBuildContext['dashboardCapabilities'];
+  executionContext?: KibanaExecutionContext;
 }
 
 interface StateToRawDashboardStateProps {
@@ -92,6 +94,7 @@ export const stateToDashboardContainerInput = ({
   searchSessionId,
   savedDashboard,
   dashboardState,
+  executionContext,
 }: StateToDashboardContainerInputProps): DashboardContainerInput => {
   const { filterManager, timefilter: timefilterService } = queryService;
   const { timefilter } = timefilterService;
@@ -125,6 +128,7 @@ export const stateToDashboardContainerInput = ({
     timeRange: {
       ..._.cloneDeep(timefilter.getTime()),
     },
+    executionContext,
   };
 };
 

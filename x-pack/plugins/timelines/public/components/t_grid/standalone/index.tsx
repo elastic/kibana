@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import type { AlertConsumers } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { Direction } from '../../../../common/search_strategy';
+import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
 import { TGridCellAction, TimelineTabs } from '../../../../common/types/timeline';
 import type {
@@ -33,7 +33,12 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { calculateTotalPages, combineQueries, resolverIsShowing } from '../helpers';
+import {
+  calculateTotalPages,
+  combineQueries,
+  getCombinedFilterQuery,
+  resolverIsShowing,
+} from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
 import { HeaderSection } from '../header_section';
@@ -103,6 +108,7 @@ export interface TGridStandaloneProps {
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
   end: string;
+  entityType?: EntityType;
   loadingText: React.ReactNode;
   filters: Filter[];
   footerText: React.ReactNode;
@@ -134,6 +140,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   defaultCellActions,
   deletedEventIds,
   end,
+  entityType = 'alerts',
   loadingText,
   filters,
   footerText,
@@ -148,7 +155,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   rowRenderers,
   setRefetch,
   start,
-  sort: initialSort,
+  sort,
   graphEventId,
   leadingControlColumns,
   trailingControlColumns,
@@ -166,7 +173,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     itemsPerPage: itemsPerPageStore,
     itemsPerPageOptions: itemsPerPageOptionsStore,
     queryFields,
-    sort: sortFromRedux,
     title,
   } = useDeepEqualSelector((state) => getTGrid(state, STANDALONE_ID ?? ''));
 
@@ -207,9 +213,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     [columnsHeader, queryFields]
   );
 
-  const [sort, setSort] = useState(initialSort);
-  useEffect(() => setSort(sortFromRedux), [sortFromRedux]);
-
   const sortField = useMemo(
     () =>
       sort.map(({ columnId, columnType, sortDirection }) => ({
@@ -226,6 +229,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   ] = useTimelineEvents({
     alertConsumers,
     docValueFields: [],
+    entityType,
     excludeEcsData: true,
     fields,
     filterQuery: combinedQueries!.filterQuery,
@@ -263,6 +267,23 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     [headerFilterGroup, graphEventId]
   );
 
+  const filterQuery = useMemo(
+    () =>
+      getCombinedFilterQuery({
+        config: esQuery.getEsQueryConfig(uiSettings),
+        dataProviders: EMPTY_DATA_PROVIDERS,
+        indexPattern: indexPatterns,
+        browserFields,
+        filters,
+        kqlQuery: query,
+        kqlMode: 'search',
+        isEventViewer: true,
+        from: start,
+        to: end,
+      }),
+    [uiSettings, indexPatterns, browserFields, filters, query, start, end]
+  );
+
   useEffect(() => {
     setIsQueryLoading(loading);
   }, [loading]);
@@ -288,7 +309,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         defaultColumns: columns,
         footerText,
         loadingText,
-        sort,
         unit,
       })
     );
@@ -341,6 +361,8 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       itemsPerPage: itemsPerPageStore,
                     })}
                     totalItems={totalCountMinusDeleted}
+                    indexNames={indexNames}
+                    filterQuery={filterQuery}
                     unit={unit}
                     filterStatus={filterStatus}
                     leadingControlColumns={leadingControlColumns}

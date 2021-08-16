@@ -10,13 +10,16 @@ import { DiscoverServices } from '../build_services';
 import { dataPluginMock } from '../../../data/public/mocks';
 import { chromeServiceMock, coreMock, docLinksServiceMock } from '../../../../core/public/mocks';
 import {
+  CONTEXT_STEP_SETTING,
   DEFAULT_COLUMNS_SETTING,
+  DOC_HIDE_TIME_COLUMN_SETTING,
   SAMPLE_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../common';
 import { savedSearchMock } from './saved_search';
 import { UI_SETTINGS } from '../../../data/common';
 import { TopNavMenu } from '../../../navigation/public';
+import { FORMATS_UI_SETTINGS } from 'src/plugins/field_formats/common';
 const dataPlugin = dataPluginMock.createStartContract();
 
 export const discoverServiceMock = ({
@@ -49,10 +52,16 @@ export const discoverServiceMock = ({
         return [];
       } else if (key === UI_SETTINGS.META_FIELDS) {
         return [];
-      } else if (key === SAMPLE_SIZE_SETTING) {
-        return 250;
+      } else if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
+        return false;
+      } else if (key === CONTEXT_STEP_SETTING) {
+        return 5;
       } else if (key === SORT_DEFAULT_ORDER_SETTING) {
         return 'desc';
+      } else if (key === FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE) {
+        return false;
+      } else if (key === SAMPLE_SIZE_SETTING) {
+        return 250;
       }
     },
     isDefault: (key: string) => {
