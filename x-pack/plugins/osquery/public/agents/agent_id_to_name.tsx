@@ -19,7 +19,7 @@ interface AgentIdToNameProps {
 
 const AgentIdToNameComponent: React.FC<AgentIdToNameProps> = ({ agentId }) => {
   const getUrlForApp = useKibana().services.application.getUrlForApp;
-  const { data } = useAgentDetails({ agentId });
+  const { data } = useAgentDetails({ agentId, skip: !agentId });
 
   return (
     <EuiLink
@@ -29,7 +29,7 @@ const AgentIdToNameComponent: React.FC<AgentIdToNameProps> = ({ agentId }) => {
       })}
       target="_blank"
     >
-      {data?.item.local_metadata.host.name ?? agentId}
+      {data?.local_metadata.host.name ?? agentId}
     </EuiLink>
   );
 };

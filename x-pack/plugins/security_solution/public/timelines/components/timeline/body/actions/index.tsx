@@ -108,7 +108,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const addToCaseActionProps = useMemo(() => {
     return {
       ariaLabel: i18n.ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
-      ecsRowData: ecsData,
+      event: { data: [], ecs: ecsData, _id: ecsData._id },
       useInsertTimeline: insertTimelineHook,
       casePermissions,
       appId: APP_ID,
@@ -185,7 +185,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           TimelineId.detectionsRulesDetailsPage,
           TimelineId.active,
         ].includes(timelineId as TimelineId) &&
-          timelinesUi.getAddToCaseAction(addToCaseActionProps)}
+          timelinesUi.getAddToCasePopover(addToCaseActionProps)}
         <AlertContextMenu
           ariaLabel={i18n.MORE_ACTIONS_FOR_ROW({ ariaRowindex, columnValues })}
           key="alert-context-menu"
@@ -196,6 +196,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           onRuleChange={onRuleChange}
         />
       </>
+      {timelinesUi.getAddToCaseAction(addToCaseActionProps)}
     </ActionsContainer>
   );
 };

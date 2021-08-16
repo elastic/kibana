@@ -48,7 +48,12 @@ describe('EventDetails', () => {
   let wrapper: ReactWrapper;
   let alertsWrapper: ReactWrapper;
   beforeAll(async () => {
-    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({});
+    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
+      result: [],
+      range: { to: 'now', from: 'now-30d' },
+      setRange: jest.fn(),
+      loading: false,
+    });
     wrapper = mount(
       <TestProviders>
         <EventDetails {...defaultProps} />
@@ -113,7 +118,7 @@ describe('EventDetails', () => {
   describe('threat intel tab', () => {
     it('renders a "no enrichments" panel view if there are no enrichments', () => {
       alertsWrapper.find('[data-test-subj="threatIntelTab"]').first().simulate('click');
-      expect(alertsWrapper.find('[data-test-subj="no-enrichments-panel"]').exists()).toEqual(true);
+      expect(alertsWrapper.find('[data-test-subj="no-enrichments-found"]').exists()).toEqual(true);
     });
   });
 });

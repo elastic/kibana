@@ -27,6 +27,7 @@ const createSetupContract = (): Setup => {
       registerUrlGenerator: jest.fn(),
     },
     url,
+    navigate: jest.fn(),
   };
   return setupContract;
 };
@@ -38,6 +39,7 @@ const createStartContract = (): Start => {
       getUrlGenerator: jest.fn(),
     },
     toggleShareContextMenu: jest.fn(),
+    navigate: jest.fn(),
   };
   return startContract;
 };
