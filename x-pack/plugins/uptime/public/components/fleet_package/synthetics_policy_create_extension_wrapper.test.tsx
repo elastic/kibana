@@ -723,6 +723,13 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
         })
       );
     });
+
+    // test inline script validation
+    fireEvent.click(getByText('Inline script'));
+
+    await waitFor(() => {
+      expect(getByText('Script is required')).toBeInTheDocument();
+    });
   });
 
   it('handles changing TLS fields', async () => {

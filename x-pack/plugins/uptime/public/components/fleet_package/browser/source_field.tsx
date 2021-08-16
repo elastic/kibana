@@ -201,7 +201,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
       ),
       content: (
         <EuiFormRow
-          isInvalid={!!config.inlineScript}
+          isInvalid={!config.inlineScript}
           error={
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.error"
