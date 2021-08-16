@@ -89,10 +89,9 @@ export const DateRangePicker = memo(() => {
   return (
     <StickyFlexItem grow={false}>
       <EuiFlexGroup justifyContent="flexEnd" responsive>
-        <DatePickerWrapper>
+        <DatePickerWrapper data-test-subj="activityLogSuperDatePicker">
           <EuiFlexItem>
             <EuiSuperDatePicker
-              data-test-subj="activityLogSuperDatePicker"
               end={dateMath.parse(endDate)?.toISOString()}
               isLoading={isLoading}
               isPaused={isPaused}
