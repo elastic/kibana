@@ -1,7 +1,7 @@
 .deduplicationPanel {
   .selectableWrapper {
-    padding: 1rem;
-    border-radius: .675rem;
+    padding: $euiSize;
+    border-radius: $euiSize *.675;
     border: $euiBorderThin solid $euiColorLightestShade;
   }
 
