@@ -30,7 +30,6 @@ import {
 } from '../../common/constants';
 import { BaseParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
-import { isJobV2Params } from '../../common/job_utils';
 
 export interface ReportingPanelProps {
   apiClient: ReportingAPIClient;
