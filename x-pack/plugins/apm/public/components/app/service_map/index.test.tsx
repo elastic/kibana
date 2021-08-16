@@ -18,6 +18,7 @@ import * as useFetcherModule from '../../../hooks/use_fetcher';
 import { ServiceMap } from '.';
 import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
 import { Router } from 'react-router-dom';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 const history = createMemoryHistory();
 
@@ -69,9 +70,12 @@ describe('ServiceMap', () => {
   describe('with no license', () => {
     it('renders null', async () => {
       expect(
-        await render(<ServiceMap />, {
-          wrapper: createWrapper(null),
-        }).queryByTestId('ServiceMap')
+        await render(
+          <ServiceMap environment={ENVIRONMENT_ALL.value} kuery="" />,
+          {
+            wrapper: createWrapper(null),
+          }
+        ).queryByTestId('ServiceMap')
       ).not.toBeInTheDocument();
     });
   });
@@ -79,9 +83,12 @@ describe('ServiceMap', () => {
   describe('with an expired license', () => {
     it('renders the license banner', async () => {
       expect(
-        await render(<ServiceMap />, {
-          wrapper: createWrapper(expiredLicense),
-        }).findAllByText(/Platinum/)
+        await render(
+          <ServiceMap environment={ENVIRONMENT_ALL.value} kuery="" />,
+          {
+            wrapper: createWrapper(expiredLicense),
+          }
+        ).findAllByText(/Platinum/)
       ).toHaveLength(1);
     });
   });
@@ -96,9 +103,12 @@ describe('ServiceMap', () => {
         });
 
         expect(
-          await render(<ServiceMap />, {
-            wrapper: createWrapper(activeLicense),
-          }).findAllByText(/No services available/)
+          await render(
+            <ServiceMap environment={ENVIRONMENT_ALL.value} kuery="" />,
+            {
+              wrapper: createWrapper(activeLicense),
+            }
+          ).findAllByText(/No services available/)
         ).toHaveLength(1);
       });
     });

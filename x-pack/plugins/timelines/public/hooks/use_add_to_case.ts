@@ -75,15 +75,15 @@ interface PostCommentArg {
 }
 
 export const useAddToCase = ({
-  ecsRowData,
+  event,
   useInsertTimeline,
   casePermissions,
   appId,
   onClose,
 }: AddToCaseActionProps): UseAddToCase => {
-  const eventId = ecsRowData._id;
-  const eventIndex = ecsRowData._index;
-  const rule = ecsRowData.signal?.rule;
+  const eventId = event?.ecs._id ?? '';
+  const eventIndex = event?.ecs._index ?? '';
+  const rule = event?.ecs.signal?.rule;
   const dispatch = useDispatch();
   // TODO: use correct value in standalone or integrated.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -109,25 +109,36 @@ export const useAddToCase = ({
     }
   }, [timelineById]);
   const {
-    application: { navigateToApp, getUrlForApp },
+    application: { navigateToApp, getUrlForApp, navigateToUrl },
     notifications: { toasts },
   } = useKibana<TimelinesStartServices>().services;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const isEventSupported = !isEmpty(ecsRowData.signal?.rule?.id);
+  const isAlert = useMemo(() => {
+    if (event !== undefined) {
+      const data = [...event.data];
+      return data.some(({ field }) => field === 'kibana.alert.uuid');
+    } else {
+      return false;
+    }
+  }, [event]);
+  const isSecurityAlert = useMemo(() => {
+    return !isEmpty(event?.ecs.signal?.rule?.id);
+  }, [event]);
+  const isEventSupported = isSecurityAlert || isAlert;
   const userCanCrud = casePermissions?.crud ?? false;
   const isDisabled = !userCanCrud || !isEventSupported;
 
   const onViewCaseClick = useCallback(
     (id) => {
-      navigateToApp(appId, {
-        deepLinkId: appId === 'securitySolution' ? 'case' : 'cases',
-        path: getCaseDetailsUrl({ id }),
-      });
+      const caseDetailsUrl = getCaseDetailsUrl({ id });
+      const appUrl = getUrlForApp(appId);
+      const fullCaseUrl = `${appUrl}/cases/${caseDetailsUrl}`;
+      navigateToUrl(fullCaseUrl);
     },
-    [navigateToApp, appId]
+    [navigateToUrl, appId, getUrlForApp]
   );
   const currentSearch = useLocation().search;
   const urlSearch = useMemo(() => currentSearch, [currentSearch]);
