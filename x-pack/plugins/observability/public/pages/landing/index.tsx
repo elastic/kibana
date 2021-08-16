@@ -44,13 +44,19 @@ export function LandingPage() {
   // NO SIDE NAV since nothing is setup
   const hasData = false;
   const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
-    solution: 'Observability',
+    solution: i18n.translate('xpack.observability.noDataConfig.solutionName', {
+      defaultMessage: 'Observability',
+    }),
     actions: {
       beats: {
+        description: i18n.translate('xpack.observability.noDataConfig.beatsCard.description', {
+          defaultMessage:
+            'Use Beats and APM agents to send observability data to Elasticsearch. We make it easy with support for many popular systems, apps, and languages.',
+        }),
         href: core.http.basePath.prepend(`/app/home#/tutorial_directory/logging`),
       },
     },
-    docsLink: 'https://www.elastic.co/guide/en/kibana/master/observability.html',
+    docsLink: core.docLinks.links.observability.guide,
   };
 
   return (
