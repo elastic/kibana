@@ -32,7 +32,7 @@ export function FailureCorrelationsHelpPopover() {
       <p>
         <FormattedMessage
           id="xpack.apm.correlations.failurePopoverBasicExplanation"
-          defaultMessage="Failure correlations highlight the most influential terms in the failed transactions compared to terms in non-failed transactions."
+          defaultMessage="Correlations help you discover which attributes are contributing to failed transactions."
         />
       </p>
       <p>
