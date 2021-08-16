@@ -11,6 +11,8 @@ import { API_ROUTE_FUNCTIONS } from '../common/lib/constants';
 
 import { CanvasSetupDeps } from './plugin';
 
+let cached: Promise<void> | null = null;
+
 // TODO: clintandrewhall - This is getting refactored shortly.  https://github.com/elastic/kibana/issues/105675
 export const setupExpressions = async ({
   coreSetup,
@@ -20,8 +22,6 @@ export const setupExpressions = async ({
   setupPlugins: CanvasSetupDeps;
 }) => {
   const { expressions, bfetch } = setupPlugins;
-
-  let cached: Promise<void> | null = null;
 
   const loadServerFunctionWrappers = async () => {
     if (!cached) {
