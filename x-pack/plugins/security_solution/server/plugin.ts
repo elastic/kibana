@@ -183,7 +183,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       usageCollection: plugins.usageCollection,
     });
 
-    this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID)
+    this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
 
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
@@ -333,7 +333,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     });
 
-    this.telemetryEventsSender.setup(plugins.telemetry, plugins.taskManager, this.telemetryUsageCounter);
+    this.telemetryEventsSender.setup(
+      plugins.telemetry,
+      plugins.taskManager,
+      this.telemetryUsageCounter
+    );
 
     return {};
   }
