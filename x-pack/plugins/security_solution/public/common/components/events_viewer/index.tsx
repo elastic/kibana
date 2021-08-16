@@ -148,7 +148,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
         <InspectButtonContainer>
-          {}
           {tGridEnabled ? (
             timelinesUi.getTGrid<'embedded'>({
               type: 'embedded',
