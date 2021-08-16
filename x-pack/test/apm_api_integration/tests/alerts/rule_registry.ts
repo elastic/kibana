@@ -388,7 +388,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "apm.transaction_error_rate",
             ],
             "kibana.alert.status": Array [
-              "open",
+              "active",
             ],
             "kibana.space_ids": Array [
               "default",
@@ -454,7 +454,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           any
         >;
 
-        expect(recoveredAlertEvent[ALERT_STATUS]?.[0]).to.eql('closed');
+        expect(recoveredAlertEvent[ALERT_STATUS]?.[0]).to.eql('recovered');
         expect(recoveredAlertEvent[ALERT_DURATION]?.[0]).to.be.greaterThan(0);
         expect(new Date(recoveredAlertEvent[ALERT_END]?.[0]).getTime()).to.be.greaterThan(0);
 
@@ -495,7 +495,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "apm.transaction_error_rate",
             ],
             "kibana.alert.status": Array [
-              "closed",
+              "recovered",
             ],
             "kibana.space_ids": Array [
               "default",
