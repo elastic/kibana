@@ -11,6 +11,8 @@ import {
   DeprecationsService,
   InternalDeprecationsServiceSetup,
   DeprecationsServiceSetup,
+  InternalDeprecationsServiceStart,
+  DeprecationsClient,
 } from './deprecations_service';
 type DeprecationsServiceContract = PublicMethodsOf<DeprecationsService>;
 
@@ -20,6 +22,16 @@ const createSetupContractMock = () => {
   };
 
   return setupContract;
+};
+
+const createStartContractMock = () => {
+  const mocked: jest.Mocked<InternalDeprecationsServiceStart> = {
+    asScopedToClient: jest.fn(),
+  };
+
+  mocked.asScopedToClient.mockReturnValue(createClientMock());
+
+  return mocked;
 };
 
 const createInternalSetupContractMock = () => {
@@ -42,8 +54,18 @@ const createDeprecationsServiceMock = () => {
   return mocked;
 };
 
+const createClientMock = () => {
+  const mocked: jest.Mocked<DeprecationsClient> = {
+    getAllDeprecations: jest.fn(),
+  };
+  mocked.getAllDeprecations.mockResolvedValue([]);
+  return mocked;
+};
+
 export const deprecationsServiceMock = {
   create: createDeprecationsServiceMock,
   createInternalSetupContract: createInternalSetupContractMock,
   createSetupContract: createSetupContractMock,
+  createInternalStartContract: createStartContractMock,
+  createClient: createClientMock,
 };
