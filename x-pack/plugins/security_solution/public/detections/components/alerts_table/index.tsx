@@ -383,6 +383,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       pageFilters={defaultFiltersMemo}
       defaultCellActions={defaultCellActions}
       defaultModel={defaultTimelineModel}
+      entityType="alerts"
       end={to}
       currentFilter={filterGroup}
       id={timelineId}

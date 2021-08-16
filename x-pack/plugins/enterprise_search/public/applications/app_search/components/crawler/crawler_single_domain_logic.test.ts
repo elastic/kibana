@@ -16,7 +16,7 @@ import '../../__mocks__/engine_logic.mock';
 import { nextTick } from '@kbn/test/jest';
 
 import { CrawlerSingleDomainLogic, CrawlerSingleDomainValues } from './crawler_single_domain_logic';
-import { CrawlerDomain } from './types';
+import { CrawlerDomain, CrawlerPolicies, CrawlerRules } from './types';
 
 const DEFAULT_VALUES: CrawlerSingleDomainValues = {
   dataLoading: true,
@@ -106,6 +106,40 @@ describe('CrawlerSingleDomainLogic', () => {
             {
               id: '1234',
               url: 'http://www.example.com/sitemap.xml',
+            },
+          ],
+        });
+      });
+    });
+
+    describe('updateCrawlRules', () => {
+      beforeEach(() => {
+        mount({
+          domain: {
+            id: '507f1f77bcf86cd799439011',
+            crawlRules: [],
+          },
+        });
+
+        CrawlerSingleDomainLogic.actions.updateCrawlRules([
+          {
+            id: '1234',
+            policy: CrawlerPolicies.allow,
+            rule: CrawlerRules.beginsWith,
+            pattern: 'foo',
+          },
+        ]);
+      });
+
+      it('should update the crawl rules on the domain', () => {
+        expect(CrawlerSingleDomainLogic.values.domain).toEqual({
+          id: '507f1f77bcf86cd799439011',
+          crawlRules: [
+            {
+              id: '1234',
+              policy: CrawlerPolicies.allow,
+              rule: CrawlerRules.beginsWith,
+              pattern: 'foo',
             },
           ],
         });

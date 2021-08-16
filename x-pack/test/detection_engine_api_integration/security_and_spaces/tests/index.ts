@@ -60,5 +60,9 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     describe('', function () {
       loadTestFile(require.resolve('./keyword_family/index'));
     });
+
+    describe('', function () {
+      loadTestFile(require.resolve('./alerts/index'));
+    });
   });
 };

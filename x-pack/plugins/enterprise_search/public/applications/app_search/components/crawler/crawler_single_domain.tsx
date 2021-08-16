@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { EngineLogic, getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
 
+import { CrawlRulesTable } from './components/crawl_rules_table';
 import { CrawlerStatusBanner } from './components/crawler_status_banner';
 import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
 import { DeleteDomainPanel } from './components/delete_domain_panel';
@@ -64,6 +65,15 @@ export const CrawlerSingleDomain: React.FC = () => {
             <SitemapsTable domain={domain} engineName={engineName} items={domain.sitemaps} />
           </EuiPanel>
           <EuiSpacer size="xl" />
+          <EuiPanel paddingSize="l" hasBorder>
+            <CrawlRulesTable
+              domainId={domainId}
+              engineName={engineName}
+              crawlRules={domain.crawlRules}
+              defaultCrawlRule={domain.defaultCrawlRule}
+            />
+          </EuiPanel>
+          <EuiSpacer size="xxl" />
         </>
       )}
       <EuiTitle size="s">
