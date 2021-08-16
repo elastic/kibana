@@ -48,8 +48,8 @@ describe('kuery functions', () => {
         expect(result).toHaveProperty('nested');
         expect(Object.keys(result).length).toBe(1);
 
-        expect(result.nested!.path).toBe('nestedField');
-        expect(result.nested!.score_mode).toBe('none');
+        expect(result.nested?.path).toBe('nestedField');
+        expect(result.nested?.score_mode).toBe('none');
       });
 
       test('should pass the nested path to subqueries so the full field name can be used', () => {
