@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { FtrProviderContext } from '../../ftr_provider_context';
+
 const TEST_FILTER_COLUMN_NAMES = [
   [
     'agent',
@@ -14,7 +16,7 @@ const TEST_FILTER_COLUMN_NAMES = [
   ['extension', 'jpg'],
 ];
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
   const docTable = getService('docTable');
