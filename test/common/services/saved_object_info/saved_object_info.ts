@@ -55,14 +55,15 @@ export const types = (node: string) => async (index: string = '.kibana') =>
 
 export class SavedObjectInfoService extends FtrService {
   private readonly config = this.ctx.getService('config');
+  private readonly esUrl = url.format(this.config.get('servers.elasticsearch'));
 
   public async getTypes(formatted: boolean = true) {
-    if (!formatted) return await types(url.format(this.config.get('servers.elasticsearch')))();
-    return pipe(await types(url.format(this.config.get('servers.elasticsearch')))(), format);
+    if (!formatted) return await types(this.esUrl)();
+    return pipe(await types(this.esUrl)(), format);
   }
 
   public async logSoTypes(log: ToolingLog, msg: string | null = null) {
     // @ts-ignore
-    pipe(await types(url.format(this.config.get('servers.elasticsearch'))), print(log)(msg));
+    pipe(await types(this.esUrl), print(log)(msg));
   }
 }
