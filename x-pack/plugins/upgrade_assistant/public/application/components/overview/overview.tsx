@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useAppContext } from '../../app_context';
 import { getReviewStep } from './review_step';
-import { getIdentifyStep } from './identify_step';
+import { getFixDeprecationLogsStep } from './fix_deprecation_logs_step';
 import { getUpgradeStep } from './upgrade_step';
 
 export const Overview: FunctionComponent = () => {
@@ -84,7 +84,7 @@ export const Overview: FunctionComponent = () => {
         <EuiSteps
           steps={[
             getReviewStep({ currentMajor }),
-            getIdentifyStep(),
+            getFixDeprecationLogsStep(),
             getUpgradeStep({ docLinks, currentMajor }),
           ]}
         />

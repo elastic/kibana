@@ -81,7 +81,7 @@ const DeprecationLogsPreview: FunctionComponent = () => {
   );
 };
 
-export const getIdentifyStep = (): EuiStepProps => {
+export const getFixDeprecationLogsStep = (): EuiStepProps => {
   return {
     title: i18nTexts.identifyStepTitle,
     status: 'incomplete',

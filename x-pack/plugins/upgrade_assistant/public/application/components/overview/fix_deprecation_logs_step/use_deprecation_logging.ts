@@ -17,13 +17,13 @@ const i18nTexts = {
   enabledMessage: i18n.translate(
     'xpack.upgradeAssistant.overview.deprecationLogs.enabledToastMessage',
     {
-      defaultMessage: 'Log deprecated actions.',
+      defaultMessage: 'Deprecated API requests will be logged and indexed.',
     }
   ),
   disabledMessage: i18n.translate(
     'xpack.upgradeAssistant.overview.deprecationLogs.disabledToastMessage',
     {
-      defaultMessage: 'Do not log deprecated actions.',
+      defaultMessage: 'Deprecated API requests will not be logged.',
     }
   ),
 };

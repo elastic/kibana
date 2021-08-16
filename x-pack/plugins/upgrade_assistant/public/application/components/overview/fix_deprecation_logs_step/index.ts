@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getIdentifyStep } from './identify_step';
+export { getFixDeprecationLogsStep } from './fix_deprecation_logs_step';
