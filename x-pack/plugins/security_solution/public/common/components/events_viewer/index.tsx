@@ -24,6 +24,7 @@ import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
+import { EntityType } from '../../../../../timelines/common';
 import { TGridCellAction } from '../../../../../timelines/common/types';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
@@ -53,6 +54,7 @@ export interface OwnProps {
   defaultCellActions?: TGridCellAction[];
   defaultModel: SubsetTimelineModel;
   end: string;
+  entityType: EntityType;
   id: TimelineId;
   scopeId: SourcererScopeName;
   start: string;
@@ -84,6 +86,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   deletedEventIds,
   deleteEventQuery,
   end,
+  entityType,
   excludedRowRendererIds,
   filters,
   headerFilterGroup,
@@ -153,6 +156,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               deletedEventIds,
               docValueFields,
               end,
+              entityType,
               filters: globalFilters,
               globalFullScreen,
               headerFilterGroup,
