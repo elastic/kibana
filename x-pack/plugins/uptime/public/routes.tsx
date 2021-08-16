@@ -163,7 +163,7 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = 
 
 export const PageRouter: FC = () => {
   const {
-    services: { observability },
+    services: { observability, docLinks },
   } = useKibana<ClientPluginsStart>();
   const PageTemplateComponent = observability.navigation.PageTemplate;
 
@@ -178,14 +178,24 @@ export const PageRouter: FC = () => {
   const noDataInfo = !data || data?.docCount === 0 || data?.indexExists === false;
   const noDataConfig = noDataInfo
     ? {
-        solution: 'Observability',
-        pageTitle: 'Set up Uptime for Observability!',
+        solution: i18n.translate('xpack.uptime.noDataConfig.solutionName', {
+          defaultMessage: 'Observability',
+        }),
         actions: {
           beats: {
+            title: i18n.translate('xpack.uptime.noDataConfig.beatsCard.title', {
+              defaultMessage: 'Add monitors with Heartbeat',
+            }),
+            description: i18n.translate('xpack.uptime.noDataConfig.beatsCard.description', {
+              defaultMessage: 'Use Heartbeat to create uptime monitors.',
+            }),
+            button: i18n.translate('xpack.uptime.noDataConfig.beatsCard.buttonLabel', {
+              defaultMessage: 'Add monitors with Heartbeat',
+            }),
             href: basePath + `/app/home#/tutorial/uptimeMonitors`,
           },
         },
-        docsLink: 'https://www.elastic.co/guide/en/kibana/master/observability.html',
+        docsLink: docLinks!.links.observability.guide,
       }
     : undefined;
 
