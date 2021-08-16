@@ -30,13 +30,13 @@ export function MachineLearningStackManagementJobsProvider({ getService }: FtrPr
 
     async closeSyncFlyout() {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.click('mlStackMgmtSyncFlyoutCloseButton', 1000);
+        await testSubjects.click('mlJobMgmtSyncFlyoutCloseButton', 1000);
         await testSubjects.missingOrFail('mlJobMgmtSyncFlyout');
       });
     },
 
     async assertSyncFlyoutSyncButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlStackMgmtSyncFlyoutSyncButton');
+      const isEnabled = await testSubjects.isEnabled('mlJobMgmtSyncFlyoutSyncButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected Stack Management job sync flyout "Synchronize" button to be '${
@@ -46,9 +46,7 @@ export function MachineLearningStackManagementJobsProvider({ getService }: FtrPr
     },
 
     async getSyncFlyoutObjectCountFromTitle(objectType: SyncFlyoutObjectType): Promise<number> {
-      const titleText = await testSubjects.getVisibleText(
-        `mlStackMgmtSyncFlyout${objectType}Title`
-      );
+      const titleText = await testSubjects.getVisibleText(`mlJobMgmtSyncFlyout${objectType}Title`);
 
       const pattern = /^.* \((\d+)\)$/;
       const matches = titleText.match(pattern);
@@ -78,7 +76,7 @@ export function MachineLearningStackManagementJobsProvider({ getService }: FtrPr
     },
 
     async executeSync() {
-      await testSubjects.click('mlStackMgmtSyncFlyoutSyncButton', 2000);
+      await testSubjects.click('mlJobMgmtSyncFlyoutSyncButton', 2000);
 
       // check and close success toast
       const resultToast = await toasts.getToastElement(1);

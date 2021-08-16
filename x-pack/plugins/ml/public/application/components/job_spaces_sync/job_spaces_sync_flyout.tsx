@@ -122,7 +122,7 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
                 iconType="cross"
                 onClick={onClose}
                 flush="left"
-                data-test-subj="mlStackMgmtSyncFlyoutCloseButton"
+                data-test-subj="mlJobMgmtSyncFlyoutCloseButton"
               >
                 <FormattedMessage
                   id="xpack.ml.management.syncSavedObjectsFlyout.closeButton"
@@ -135,7 +135,7 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
                 onClick={sync}
                 fill
                 isDisabled={canSync === false || loading === true}
-                data-test-subj="mlStackMgmtSyncFlyoutSyncButton"
+                data-test-subj="mlJobMgmtSyncFlyoutSyncButton"
               >
                 <FormattedMessage
                   id="xpack.ml.management.syncSavedObjectsFlyout.syncButton"
