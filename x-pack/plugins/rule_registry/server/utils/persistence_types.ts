@@ -15,7 +15,7 @@ import {
   AlertTypeParams,
   AlertTypeState,
 } from '../../../alerting/server';
-import { RuleDataClient } from '../rule_data_client';
+import { IRuleDataClient } from '../rule_data_client';
 import { AlertTypeWithExecutor } from '../types';
 
 export type PersistenceAlertService<
@@ -38,7 +38,7 @@ export interface PersistenceServices<TAlertInstanceContext extends AlertInstance
 }
 
 export type CreatePersistenceRuleTypeFactory = (options: {
-  ruleDataClient: RuleDataClient;
+  ruleDataClient: IRuleDataClient;
   logger: Logger;
 }) => <
   TState extends AlertTypeState,
