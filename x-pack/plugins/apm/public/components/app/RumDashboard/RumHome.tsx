@@ -36,15 +36,31 @@ export function RumHome() {
   } = useContext(CsmSharedContext);
   const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = !totalPageViews
     ? {
-        solution: 'Observability',
-        pageTitle: 'Set up User Experience Tracking for Observability!',
+        solution: i18n.translate('xpack.apm.ux.overview.solutionName', {
+          defaultMessage: 'Observability',
+        }),
         actions: {
           beats: {
+            title: i18n.translate('xpack.apm.ux.overview.beatsCard.title', {
+              defaultMessage: 'Add RUM data',
+            }),
+            description: i18n.translate(
+              'xpack.apm.ux.overview.beatsCard.description',
+              {
+                defaultMessage:
+                  'Use the RUM (JS) agent to collect user experience data.',
+              }
+            ),
+            button: i18n.translate(
+              'xpack.apm.ux.overview.beatsCard.buttonLabel',
+              {
+                defaultMessage: 'Add RUM data',
+              }
+            ),
             href: core.http.basePath.prepend(`/app/home#/tutorial/apm`),
           },
         },
-        docsLink:
-          'https://www.elastic.co/guide/en/kibana/master/observability.html',
+        docsLink: core.docLinks.links.observability.guide,
       }
     : undefined;
 
