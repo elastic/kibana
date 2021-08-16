@@ -22,6 +22,7 @@ import {
   Direction,
   TimelineFactoryQueryTypes,
   TimelineEventsQueries,
+  EntityType,
 } from '../../common/search_strategy';
 import type {
   DocValueFields,
@@ -71,6 +72,7 @@ export interface UseTimelineEventsProps {
   filterQuery?: ESQuery | string;
   skip?: boolean;
   endDate: string;
+  entityType: EntityType;
   excludeEcsData?: boolean;
   id: string;
   fields: string[];
@@ -113,6 +115,7 @@ export const useTimelineEvents = ({
   alertConsumers = NO_CONSUMERS,
   docValueFields,
   endDate,
+  entityType,
   excludeEcsData = false,
   id = ID,
   indexNames,
@@ -159,6 +162,13 @@ export const useTimelineEvents = ({
     wrappedLoadPage(0);
   }, [wrappedLoadPage]);
 
+  const setUpdated = useCallback(
+    (updatedAt: number) => {
+      dispatch(tGridActions.setTimelineUpdatedAt({ id, updated: updatedAt }));
+    },
+    [dispatch, id]
+  );
+
   const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
     id,
     inspect: {
@@ -190,7 +200,7 @@ export const useTimelineEvents = ({
         if (data && data.search) {
           searchSubscription$.current = data.search
             .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(
-              { ...request, entityType: 'alerts' },
+              { ...request, entityType },
               {
                 strategy:
                   request.language === 'eql'
@@ -202,7 +212,6 @@ export const useTimelineEvents = ({
             .subscribe({
               next: (response) => {
                 if (isCompleteResponse(response)) {
-                  setLoading(false);
                   setTimelineResponse((prevResponse) => {
                     const newTimelineResponse = {
                       ...prevResponse,
@@ -212,8 +221,11 @@ export const useTimelineEvents = ({
                       totalCount: response.totalCount,
                       updatedAt: Date.now(),
                     };
+                    setUpdated(newTimelineResponse.updatedAt);
                     return newTimelineResponse;
                   });
+                  setLoading(false);
+
                   searchSubscription$.current.unsubscribe();
                 } else if (isErrorResponse(response)) {
                   setLoading(false);
@@ -237,7 +249,7 @@ export const useTimelineEvents = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data, addWarning, addError, skip]
+    [skip, data, entityType, setUpdated, addWarning, addError]
   );
 
   useEffect(() => {

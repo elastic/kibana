@@ -58,7 +58,7 @@ import { StatusServiceSetup } from './status';
 import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
-import { DeprecationsServiceSetup } from './deprecations';
+import { DeprecationsServiceSetup, DeprecationsClient } from './deprecations';
 // Because of #79265 we need to explicitly import, then export these types for
 // scripts/telemetry_check.js to work as expected
 import {
@@ -408,6 +408,7 @@ export type {
   RegisterDeprecationsConfig,
   GetDeprecationsContext,
   DeprecationsServiceSetup,
+  DeprecationsClient,
 } from './deprecations';
 
 export type { AppCategory } from '../types';
@@ -470,6 +471,9 @@ export interface RequestHandlerContext {
     };
     uiSettings: {
       client: IUiSettingsClient;
+    };
+    deprecations: {
+      client: DeprecationsClient;
     };
   };
 }

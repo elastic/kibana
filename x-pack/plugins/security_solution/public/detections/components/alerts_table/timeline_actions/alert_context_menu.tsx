@@ -80,23 +80,24 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const { timelines: timelinesUi } = useKibana().services;
   const casePermissions = useGetUserCasesPermissions();
   const insertTimelineHook = useInsertTimeline;
-  const addToCaseActionProps = useMemo(() => {
-    return {
+  const addToCaseActionProps = useMemo(
+    () => ({
       ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
-      ecsRowData,
+      event: { data: [], ecs: ecsRowData, _id: ecsRowData._id },
       useInsertTimeline: insertTimelineHook,
       casePermissions,
       appId: APP_ID,
       onClose: afterCaseSelection,
-    };
-  }, [
-    ariaRowindex,
-    columnValues,
-    ecsRowData,
-    insertTimelineHook,
-    casePermissions,
-    afterCaseSelection,
-  ]);
+    }),
+    [
+      ariaRowindex,
+      columnValues,
+      ecsRowData,
+      insertTimelineHook,
+      casePermissions,
+      afterCaseSelection,
+    ]
+  );
   const uiCapabilities = useKibana().services.application.capabilities;
   const capabilitiesCanUserCRUD: boolean = uiCapabilities.siem.crud === true;
   const addToCaseAction = useMemo(
@@ -182,6 +183,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const { actionItems } = useAlertsActions({
     alertStatus,
     eventId: ecsRowData?._id,
+    indexName: ecsRowData?._index ?? '',
     timelineId,
     closePopover,
   });
