@@ -62,9 +62,9 @@ export const NodeDetailsPage = (props: Props) => {
     props.cloudId
   );
 
-  const refetch = () => {
+  const refetch = useCallback(() => {
     setParsedTimeRange(parseRange(props.timeRange));
-  };
+  }, [props.timeRange]);
 
   useEffect(() => {
     setParsedTimeRange(parseRange(props.timeRange));
@@ -72,7 +72,7 @@ export const NodeDetailsPage = (props: Props) => {
 
   useEffect(() => {
     makeRequest();
-  }, [makeRequest, setParsedTimeRange]);
+  }, [makeRequest, parsedTimeRange]);
 
   if (error) {
     return <PageError error={error} name={props.name} />;
