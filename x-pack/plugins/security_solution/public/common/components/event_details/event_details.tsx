@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { isEmpty } from 'lodash';
 
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
@@ -34,7 +35,8 @@ import {
   parseExistingEnrichments,
   timelineDataToEnrichment,
 } from './cti_details/helpers';
-import { NoEnrichmentsPanel } from './cti_details/no_enrichments_panel';
+import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
+import { Reason } from './reason';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -113,16 +115,18 @@ const EventDetailsComponent: React.FC<Props> = ({
     [data, isAlert]
   );
   const {
-    loading: enrichmentsLoading,
     result: enrichmentsResponse,
+    loading: isEnrichmentsLoading,
+    setRange,
+    range,
   } = useInvestigationTimeEnrichment(eventFields);
 
   const allEnrichments = useMemo(() => {
-    if (enrichmentsLoading || !enrichmentsResponse?.enrichments) {
+    if (isEnrichmentsLoading || !enrichmentsResponse?.enrichments) {
       return existingEnrichments;
     }
     return filterDuplicateEnrichments([...existingEnrichments, ...enrichmentsResponse.enrichments]);
-  }, [enrichmentsLoading, enrichmentsResponse, existingEnrichments]);
+  }, [isEnrichmentsLoading, enrichmentsResponse, existingEnrichments]);
 
   const enrichmentCount = allEnrichments.length;
 
@@ -134,6 +138,7 @@ const EventDetailsComponent: React.FC<Props> = ({
             name: i18n.OVERVIEW,
             content: (
               <>
+                <Reason eventId={id} data={data} />
                 <AlertSummaryView
                   {...{
                     data,
@@ -152,7 +157,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                     enrichments={allEnrichments}
                   />
                 )}
-                {enrichmentsLoading && (
+                {isEnrichmentsLoading && (
                   <>
                     <EuiLoadingContent lines={2} />
                   </>
@@ -167,7 +172,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       id,
       browserFields,
       timelineId,
-      enrichmentsLoading,
+      isEnrichmentsLoading,
       enrichmentCount,
       allEnrichments,
     ]
@@ -190,7 +195,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                   <span>{i18n.THREAT_INTEL}</span>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  {enrichmentsLoading ? (
+                  {isEnrichmentsLoading ? (
                     <EuiLoadingSpinner />
                   ) : (
                     <EuiNotificationBadge data-test-subj="enrichment-count-notification">
@@ -201,19 +206,24 @@ const EventDetailsComponent: React.FC<Props> = ({
               </EuiFlexGroup>
             ),
             content: (
-              <>
-                <ThreatDetailsView enrichments={allEnrichments} />
-                <NoEnrichmentsPanel
-                  isInvestigationTimeEnrichmentsPresent={
-                    enrichmentCount > existingEnrichments.length
-                  }
-                  isIndicatorMatchesPresent={existingEnrichments.length > 0}
-                />
-              </>
+              <ThreatDetailsView
+                loading={isEnrichmentsLoading}
+                enrichments={allEnrichments}
+                showInvestigationTimeEnrichments={!isEmpty(eventFields)}
+              >
+                <>
+                  <EnrichmentRangePicker
+                    setRange={setRange}
+                    loading={isEnrichmentsLoading}
+                    range={range}
+                  />
+                  <EuiSpacer size="m" />
+                </>
+              </ThreatDetailsView>
             ),
           }
         : undefined,
-    [allEnrichments, enrichmentCount, enrichmentsLoading, existingEnrichments.length, isAlert]
+    [allEnrichments, setRange, range, enrichmentCount, isAlert, eventFields, isEnrichmentsLoading]
   );
 
   const tableTab = useMemo(
