@@ -218,8 +218,8 @@ export interface EnrichedDeprecationInfo
   resolveDuringUpgrade: boolean;
 }
 
-export interface UpgradeAssistantStatus {
-  readyForUpgrade: boolean;
+export interface ESUpgradeStatus {
+  totalCriticalDeprecations: number;
   deprecations: EnrichedDeprecationInfo[];
 }
 

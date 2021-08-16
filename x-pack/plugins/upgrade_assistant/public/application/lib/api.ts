@@ -6,7 +6,7 @@
  */
 
 import { HttpSetup } from 'src/core/public';
-import { UpgradeAssistantStatus } from '../../../common/types';
+import { ESUpgradeStatus } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
 import {
   UseRequestConfig,
@@ -46,8 +46,8 @@ export class ApiService {
   }
 
   public useLoadUpgradeStatus() {
-    return this.useRequest<UpgradeAssistantStatus>({
-      path: `${API_BASE_PATH}/status`,
+    return this.useRequest<ESUpgradeStatus>({
+      path: `${API_BASE_PATH}/es_deprecations`,
       method: 'get',
     });
   }

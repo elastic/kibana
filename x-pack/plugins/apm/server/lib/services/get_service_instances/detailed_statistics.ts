@@ -16,8 +16,8 @@ import { getServiceInstancesSystemMetricStatistics } from './get_service_instanc
 import { getServiceInstancesTransactionStatistics } from './get_service_instances_transaction_statistics';
 
 interface ServiceInstanceDetailedStatisticsParams {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   latencyAggregationType: LatencyAggregationType;
   setup: Setup;
   serviceName: string;
@@ -75,8 +75,8 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
   comparisonStart,
   comparisonEnd,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   latencyAggregationType: LatencyAggregationType;
   setup: Setup & SetupTimeRange;
   serviceName: string;
@@ -123,9 +123,7 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
         previousPeriodPromise,
       ]);
 
-      const firtCurrentPeriod = currentPeriod.length
-        ? currentPeriod[0]
-        : undefined;
+      const firstCurrentPeriod = currentPeriod?.[0];
 
       return {
         currentPeriod: keyBy(currentPeriod, 'serviceNodeName'),
@@ -134,23 +132,23 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
             return {
               ...data,
               cpuUsage: offsetPreviousPeriodCoordinates({
-                currentPeriodTimeseries: firtCurrentPeriod?.cpuUsage,
+                currentPeriodTimeseries: firstCurrentPeriod?.cpuUsage,
                 previousPeriodTimeseries: data.cpuUsage,
               }),
               errorRate: offsetPreviousPeriodCoordinates({
-                currentPeriodTimeseries: firtCurrentPeriod?.errorRate,
+                currentPeriodTimeseries: firstCurrentPeriod?.errorRate,
                 previousPeriodTimeseries: data.errorRate,
               }),
               latency: offsetPreviousPeriodCoordinates({
-                currentPeriodTimeseries: firtCurrentPeriod?.latency,
+                currentPeriodTimeseries: firstCurrentPeriod?.latency,
                 previousPeriodTimeseries: data.latency,
               }),
               memoryUsage: offsetPreviousPeriodCoordinates({
-                currentPeriodTimeseries: firtCurrentPeriod?.memoryUsage,
+                currentPeriodTimeseries: firstCurrentPeriod?.memoryUsage,
                 previousPeriodTimeseries: data.memoryUsage,
               }),
               throughput: offsetPreviousPeriodCoordinates({
-                currentPeriodTimeseries: firtCurrentPeriod?.throughput,
+                currentPeriodTimeseries: firstCurrentPeriod?.throughput,
                 previousPeriodTimeseries: data.throughput,
               }),
             };

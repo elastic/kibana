@@ -38,8 +38,7 @@ describe('Service Overview', () => {
       'have.value',
       'Worker'
     );
-
-    cy.get('[data-test-subj="tab_transactions"]').click();
+    cy.contains('Transactions').click();
     cy.get('[data-test-subj="headerFilterTransactionType"]').should(
       'have.value',
       'Worker'

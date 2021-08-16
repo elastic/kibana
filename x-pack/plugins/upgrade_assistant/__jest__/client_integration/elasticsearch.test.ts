@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import type { MlAction, UpgradeAssistantStatus } from '../../common/types';
+import type { MlAction, ESUpgradeStatus } from '../../common/types';
 import { indexSettingDeprecations } from '../../common/constants';
 
 import { ElasticsearchTestBed, setupElasticsearchPage, setupEnvironment } from './helpers';
@@ -22,8 +22,8 @@ describe('Elasticsearch deprecations', () => {
   describe('with deprecations', () => {
     const snapshotId = '1';
     const jobId = 'deprecation_check_job';
-    const upgradeStatusMockResponse: UpgradeAssistantStatus = {
-      readyForUpgrade: false,
+    const upgradeStatusMockResponse: ESUpgradeStatus = {
+      totalCriticalDeprecations: 2,
       deprecations: [
         {
           isCritical: true,
@@ -565,7 +565,7 @@ describe('Elasticsearch deprecations', () => {
   describe('no deprecations', () => {
     beforeEach(async () => {
       const noDeprecationsResponse = {
-        readyForUpgrade: false,
+        totalCriticalDeprecations: 0,
         deprecations: [],
       };
 

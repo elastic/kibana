@@ -82,6 +82,7 @@ export function DependenciesTable(props: Props) {
       render: (_, { currentStats, previousStats }) => {
         return (
           <SparkPlot
+            compact
             color="euiColorVis1"
             series={currentStats.latency.timeseries}
             comparisonSeries={previousStats?.latency.timeseries}
@@ -113,7 +114,7 @@ export function DependenciesTable(props: Props) {
     {
       field: 'errorRateValue',
       name: i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
-        defaultMessage: 'Error rate',
+        defaultMessage: 'Failed transaction rate',
       }),
       width: `${unit * 10}px`,
       render: (_, { currentStats, previousStats }) => {

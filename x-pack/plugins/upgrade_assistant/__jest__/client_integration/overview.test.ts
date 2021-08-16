@@ -8,7 +8,7 @@
 import type { DomainDeprecationDetails } from 'kibana/public';
 import { act } from 'react-dom/test-utils';
 import { deprecationsServiceMock } from 'src/core/public/mocks';
-import { UpgradeAssistantStatus } from '../../common/types';
+import { ESUpgradeStatus } from '../../common/types';
 
 import { OverviewTestBed, setupOverviewPage, setupEnvironment } from './helpers';
 
@@ -17,8 +17,8 @@ describe('Overview page', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeEach(async () => {
-    const esDeprecationsMockResponse: UpgradeAssistantStatus = {
-      readyForUpgrade: false,
+    const esDeprecationsMockResponse: ESUpgradeStatus = {
+      totalCriticalDeprecations: 1,
       deprecations: [
         {
           isCritical: true,

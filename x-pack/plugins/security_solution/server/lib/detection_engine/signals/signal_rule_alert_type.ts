@@ -69,6 +69,7 @@ import { wrapHitsFactory } from './wrap_hits_factory';
 import { wrapSequencesFactory } from './wrap_sequences_factory';
 import { ConfigType } from '../../../config';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { injectReferences, extractReferences } from './saved_object_references';
 import { RuleExecutionLogClient } from '../rule_execution_log/rule_execution_log_client';
 import { IRuleDataPluginService } from '../rule_execution_log/types';
 
@@ -96,6 +97,11 @@ export const signalRulesAlertType = ({
     name: 'SIEM signal',
     actionGroups: siemRuleActionGroups,
     defaultActionGroupId: 'default',
+    useSavedObjectReferences: {
+      extractReferences: (params) => extractReferences({ logger, params }),
+      injectReferences: (params, savedObjectReferences) =>
+        injectReferences({ logger, params, savedObjectReferences }),
+    },
     validate: {
       params: {
         validate: (object: unknown): RuleParams => {
