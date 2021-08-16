@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import uuidv5 from 'uuid/v5';
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
@@ -135,8 +135,6 @@ export class TaskRunner<
 
     const path = addSpaceIdToPath('/', spaceId);
 
-    // calc a hash to have stable id across the different calls
-    const requestId = apiKey ? uuidv5(apiKey, uuidv5.DNS) : undefined;
     const fakeRequest = KibanaRequest.from(({
       headers: requestHeaders,
       path: '/',
@@ -149,14 +147,8 @@ export class TaskRunner<
           url: '/',
         },
       },
-      app: {
-        requestId,
-      },
     } as unknown) as Request);
 
-    if (requestId) {
-      this.context.executionContext.setRequestId(requestId);
-    }
     this.context.basePathService.set(fakeRequest, path);
 
     return fakeRequest;
