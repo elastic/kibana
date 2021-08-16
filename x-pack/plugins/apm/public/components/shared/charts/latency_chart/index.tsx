@@ -33,6 +33,8 @@ const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED = ALERT_RULE_TYPE_ID_N
 
 interface Props {
   height?: number;
+  kuery: string;
+  environment: string;
 }
 
 const options: Array<{ value: LatencyAggregationType; text: string }> = [
@@ -45,7 +47,7 @@ function filterNil<T>(value: T | null | undefined): value is T {
   return value != null;
 }
 
-export function LatencyChart({ height }: Props) {
+export function LatencyChart({ height, kuery, environment }: Props) {
   const history = useHistory();
   const theme = useTheme();
   const comparisonChartTheme = getComparisonChartTheme(theme);
@@ -56,7 +58,10 @@ export function LatencyChart({ height }: Props) {
   const {
     latencyChartsData,
     latencyChartsStatus,
-  } = useTransactionLatencyChartsFetcher();
+  } = useTransactionLatencyChartsFetcher({
+    kuery,
+    environment,
+  });
 
   const {
     currentPeriod,
