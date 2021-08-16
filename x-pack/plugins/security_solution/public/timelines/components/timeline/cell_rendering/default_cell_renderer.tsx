@@ -22,6 +22,9 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   linkValues,
   setCellProps,
   timelineId,
+  rowRenderers,
+  browserFields,
+  ecsData,
 }) => (
   <>
     {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
@@ -36,6 +39,9 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
         data,
         fieldName: header.id,
       }),
+      rowRenderers,
+      browserFields,
+      ecsData,
     })}
   </>
 );

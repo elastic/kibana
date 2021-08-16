@@ -34,8 +34,11 @@ export interface SourceActions {
   searchContentSourceDocuments(sourceId: string): { sourceId: string };
   updateContentSource(
     sourceId: string,
-    source: { name: string }
-  ): { sourceId: string; source: { name: string } };
+    source: SourceUpdatePayload
+  ): {
+    sourceId: string;
+    source: ContentSourceFullData;
+  };
   resetSourceState(): void;
   removeContentSource(sourceId: string): { sourceId: string };
   initializeSource(sourceId: string): { sourceId: string };
@@ -57,6 +60,17 @@ interface SearchResultsResponse {
   meta: Meta;
 }
 
+interface SourceUpdatePayload {
+  name?: string;
+  indexing?: {
+    enabled?: boolean;
+    features?: {
+      thumbnails?: { enabled: boolean };
+      content_extraction?: { enabled: boolean };
+    };
+  };
+}
+
 export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
   path: ['enterprise_search', 'workplace_search', 'source_logic'],
   actions: {
@@ -69,7 +83,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     initializeSource: (sourceId: string) => ({ sourceId }),
     initializeFederatedSummary: (sourceId: string) => ({ sourceId }),
     searchContentSourceDocuments: (sourceId: string) => ({ sourceId }),
-    updateContentSource: (sourceId: string, source: { name: string }) => ({ sourceId, source }),
+    updateContentSource: (sourceId: string, source: SourceUpdatePayload) => ({ sourceId, source }),
     removeContentSource: (sourceId: string) => ({
       sourceId,
     }),
@@ -209,7 +223,9 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         const response = await HttpLogic.values.http.patch(route, {
           body: JSON.stringify({ content_source: source }),
         });
-        actions.onUpdateSourceName(response.name);
+        if (source.name) {
+          actions.onUpdateSourceName(response.name);
+        }
       } catch (e) {
         flashAPIErrors(e);
       }

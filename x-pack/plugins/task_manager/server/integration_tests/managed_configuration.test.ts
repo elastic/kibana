@@ -31,6 +31,7 @@ describe('managed configuration', () => {
     const context = coreMock.createPluginInitializerContext<TaskManagerConfig>({
       enabled: true,
       max_workers: 10,
+      index: 'foo',
       max_attempts: 9,
       poll_interval: 3000,
       version_conflict_threshold: 80,

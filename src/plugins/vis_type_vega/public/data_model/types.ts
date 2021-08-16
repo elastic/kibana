@@ -7,7 +7,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { DslQuery, Filter } from '@kbn/es-query';
 import { Assign } from '@kbn/utility-types';
 import { Spec } from 'vega';
 import { EsQueryParser } from './es_query_parser';
@@ -143,10 +142,10 @@ export interface TimeBucket {
 export interface Bool {
   [index: string]: any;
   bool?: Bool;
-  must?: DslQuery[];
-  filter?: Filter[];
-  should?: Filter[];
-  must_not?: Filter[];
+  must?: estypes.QueryDslQueryContainer[];
+  filter?: estypes.QueryDslQueryContainer[];
+  should?: estypes.QueryDslQueryContainer[];
+  must_not?: estypes.QueryDslQueryContainer[];
 }
 
 export interface Query {

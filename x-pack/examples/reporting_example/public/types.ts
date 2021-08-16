@@ -7,6 +7,7 @@
 
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
+import { SharePluginSetup } from 'src/plugins/share/public';
 import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
 import { ReportingStart } from '../../../plugins/reporting/public';
 
@@ -17,9 +18,12 @@ export interface PluginStart {}
 
 export interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
+  share: SharePluginSetup;
   screenshotMode: ScreenshotModePluginSetup;
 }
 export interface StartDeps {
   navigation: NavigationPublicPluginStart;
   reporting: ReportingStart;
 }
+
+export type MyForwardableState = Record<string, unknown>;
