@@ -7,14 +7,17 @@
  */
 
 import * as esKuery from '@kbn/es-query';
-import { isSupportedEsServer } from '../../../elasticsearch';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsSerializer } from '../../serialization';
 import type { SavedObject, SavedObjectsBaseOptions } from '../../types';
 import { SavedObjectsErrorHelpers } from './errors';
 import { getRootFields } from './included_fields';
-import { getSavedObjectFromSource, rawDocExistsInNamespace } from './internal_utils';
+import {
+  getSavedObjectFromSource,
+  rawDocExistsInNamespace,
+  isNotFoundFromUnsupportedServer,
+} from './internal_utils';
 import type {
   ISavedObjectsPointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderOptions,
@@ -200,7 +203,12 @@ async function getObjectsAndReferences({
       { ignore: [404] }
     );
     // exit early if we can't verify a 404 response is from Elasticsearch
-    if (bulkGetResponse.statusCode === 404 && !isSupportedEsServer(bulkGetResponse.headers)) {
+    if (
+      isNotFoundFromUnsupportedServer({
+        statusCode: bulkGetResponse.statusCode,
+        headers: bulkGetResponse.headers,
+      })
+    ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
     }
     const newObjectsToGet = new Set<string>();
