@@ -51,21 +51,17 @@ export type RangeFilterMeta = FilterMeta & {
   formattedValue?: string;
 };
 
-export interface EsRangeFilter {
-  range: { [key: string]: RangeFilterParams };
-}
-
 /**
  * @public
  */
-export type RangeFilter = Filter &
-  EsRangeFilter & {
-    meta: RangeFilterMeta;
-    script?: {
-      script: estypes.InlineScript;
-    };
-    match_all?: estypes.QueryDslQueryContainer['match_all'];
+export type RangeFilter = Filter & {
+  meta: RangeFilterMeta;
+  script?: {
+    script: estypes.InlineScript;
   };
+  range?: { [key: string]: RangeFilterParams };
+  match_all?: estypes.QueryDslQueryContainer['match_all'];
+};
 
 /**
  * @param filter
@@ -116,7 +112,7 @@ export const buildRangeFilter = (
   indexPattern: IndexPatternBase,
   formattedValue?: string
 ): RangeFilter => {
-  const filter: RangeFilter = { meta: { index: indexPattern.id, params: {} }, range: {} };
+  const filter: RangeFilter = { meta: { index: indexPattern.id, params: {} } };
 
   if (formattedValue) {
     filter.meta.formattedValue = formattedValue;

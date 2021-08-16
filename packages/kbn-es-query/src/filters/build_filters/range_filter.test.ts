@@ -124,8 +124,8 @@ describe('Range filter builder', () => {
       const script = filter.script!.script;
 
       expect(script.source).toBe('(' + field!.script + ')' + operator + key);
-      expect(script.params![key]).toBe(5);
-      expect(script.params!.value).toBe(operator + 5);
+      expect(script.params?.[key]).toBe(5);
+      expect(script.params?.value).toBe(operator + 5);
     });
   });
 

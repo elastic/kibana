@@ -8,7 +8,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { has } from 'lodash';
-import type { FieldFilter, Filter, FilterMeta } from './types';
+import type { Filter, FilterMeta } from './types';
 
 export interface MatchAllFilterMeta extends FilterMeta {
   field: string;
@@ -26,5 +26,5 @@ export type MatchAllFilter = Filter & {
  *
  * @public
  */
-export const isMatchAllFilter = (filter: FieldFilter): filter is MatchAllFilter =>
+export const isMatchAllFilter = (filter: Filter): filter is MatchAllFilter =>
   has(filter, 'match_all');

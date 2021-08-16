@@ -80,7 +80,7 @@ export type Filter = estypes.QueryDslQueryContainer & {
   };
   meta: FilterMeta;
 
-  // TODO: research me!
+  // TODO: research me! This is being extracted into the top level by translateToQuery. Maybe we can simplify.
   query?: Record<string, any>;
 };
 
