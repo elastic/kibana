@@ -2,6 +2,7 @@
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
@@ -10,25 +11,34 @@ import { i18n } from '@kbn/i18n';
 import React, { PureComponent } from 'react';
 import { EuiScreenReaderOnly, keys } from '@elastic/eui';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { ChromeStart } from '../../../../core/public';
 
 export interface ExitFullScreenButtonProps {
   onExitFullScreenMode: () => void;
+  chrome: ChromeStart;
 }
 
 import './index.scss';
 
 class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
+  private onExitFullScreenMode = () => {
+    this.props.chrome.setIsVisible(true);
+    this.props.onExitFullScreenMode();
+  }
+
   public onKeyDown = (e: KeyboardEvent) => {
     if (e.key === keys.ESCAPE) {
-      this.props.onExitFullScreenMode();
+      this.onExitFullScreenMode();
     }
   };
 
-  public UNSAFE_componentWillMount() {
+  public componentDidMount() {
+    this.props.chrome.setIsVisible(false);
     document.addEventListener('keydown', this.onKeyDown, false);
   }
 
   public componentWillUnmount() {
+    this.props.chrome.setIsVisible(true);
     document.removeEventListener('keydown', this.onKeyDown, false);
   }
 
@@ -51,7 +61,7 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
               }
             )}
             className="dshExitFullScreenButton"
-            onClick={this.props.onExitFullScreenMode}
+            onClick={this.onExitFullScreenMode}
             data-test-subj="exitFullScreenModeLogo"
           >
             <EuiFlexGroup component="span" responsive={false} alignItems="center" gutterSize="s">
