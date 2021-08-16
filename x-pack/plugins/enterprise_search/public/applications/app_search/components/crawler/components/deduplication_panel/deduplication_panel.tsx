@@ -177,7 +177,7 @@ export const DeduplicationPanel: React.FC = () => {
                           }}
                         >
                           {i18n.translate(
-                            'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.cancelCrawlMenuItemLabel',
+                            'xpack.enterpriseSearch.appSearch.crawler.deduplicationPanel.showAllFieldsButtonLabel',
                             {
                               defaultMessage: 'Show all fields',
                             }
@@ -192,7 +192,7 @@ export const DeduplicationPanel: React.FC = () => {
                           }}
                         >
                           {i18n.translate(
-                            'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.cancelCrawlMenuItemLabel',
+                            'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.showSelectedFieldsButtonLabel',
                             {
                               defaultMessage: 'Show only selected fields',
                             }
