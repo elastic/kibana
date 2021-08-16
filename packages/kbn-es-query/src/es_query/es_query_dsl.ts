@@ -5,28 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { estypes } from '@elastic/elasticsearch';
 import { has } from 'lodash';
-
-export interface DslRangeQuery {
-  range: {
-    [name: string]: {
-      gte: number;
-      lte: number;
-      format: string;
-    };
-  };
-}
-
-export interface DslMatchQuery {
-  match: {
-    [name: string]: {
-      query: string;
-      operator: estypes.QueryDslCombinedFieldsOperator;
-      zero_terms_query: estypes.QueryDslCombinedFieldsZeroTerms;
-    };
-  };
-}
 
 export interface DslQueryStringQuery {
   query_string: {
@@ -34,24 +13,6 @@ export interface DslQueryStringQuery {
     analyze_wildcard?: boolean;
   };
 }
-
-export interface DslMatchAllQuery {
-  match_all: Record<string, string>;
-}
-
-export interface DslTermQuery {
-  term: Record<string, string>;
-}
-
-/**
- * @public
- */
-export type DslQuery =
-  | DslRangeQuery
-  | DslMatchQuery
-  | DslQueryStringQuery
-  | DslMatchAllQuery
-  | DslTermQuery;
 
 /** @internal */
 export const isEsQueryString = (query: any): query is DslQueryStringQuery =>

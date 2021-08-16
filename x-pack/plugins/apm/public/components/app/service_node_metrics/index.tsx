@@ -47,7 +47,7 @@ const Truncate = euiStyled.span`
 
 export function ServiceNodeMetrics() {
   const {
-    urlParams: { kuery, start, end },
+    urlParams: { start, end },
   } = useUrlParams();
   const { agentName, serviceName } = useApmServiceContext();
 
@@ -57,6 +57,8 @@ export function ServiceNodeMetrics() {
     path: { serviceNodeName },
     query,
   } = useApmParams('/services/:serviceName/nodes/:serviceNodeName/metrics');
+
+  const { environment, kuery } = query;
 
   useBreadcrumb({
     title: getServiceNodeName(serviceNodeName),
@@ -72,7 +74,11 @@ export function ServiceNodeMetrics() {
     ),
   });
 
-  const { data } = useServiceMetricChartsFetcher({ serviceNodeName });
+  const { data } = useServiceMetricChartsFetcher({
+    serviceNodeName,
+    kuery,
+    environment,
+  });
 
   const { data: { host, containerId } = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {

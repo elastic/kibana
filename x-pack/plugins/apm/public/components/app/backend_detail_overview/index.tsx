@@ -21,13 +21,13 @@ import { BackendLatencyChart } from './backend_latency_chart';
 import { BackendInventoryTitle } from '../../routing/home';
 import { BackendDetailDependenciesTable } from './backend_detail_dependencies_table';
 import { BackendThroughputChart } from './backend_throughput_chart';
-import { BackendErrorRateChart } from './backend_error_rate_chart';
+import { BackendFailedTransactionRateChart } from './backend_error_rate_chart';
 import { BackendDetailTemplate } from '../../routing/templates/backend_detail_template';
 
 export function BackendDetailOverview() {
   const {
     path: { backendName },
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, environment, kuery },
   } = useApmParams('/backends/:backendName/overview');
 
   const apmRouter = useApmRouter();
@@ -35,7 +35,9 @@ export function BackendDetailOverview() {
   useBreadcrumb([
     {
       title: BackendInventoryTitle,
-      href: apmRouter.link('/backends', { query: { rangeFrom, rangeTo } }),
+      href: apmRouter.link('/backends', {
+        query: { rangeFrom, rangeTo, environment, kuery },
+      }),
     },
     {
       title: backendName,
@@ -44,6 +46,8 @@ export function BackendDetailOverview() {
         query: {
           rangeFrom,
           rangeTo,
+          environment,
+          kuery,
         },
       }),
     },
@@ -86,12 +90,12 @@ export function BackendDetailOverview() {
                 <EuiTitle size="xs">
                   <h2>
                     {i18n.translate(
-                      'xpack.apm.backendDetailErrorRateChartTitle',
-                      { defaultMessage: 'Error rate' }
+                      'xpack.apm.backendDetailFailedTransactionRateChartTitle',
+                      { defaultMessage: 'Failed transaction rate' }
                     )}
                   </h2>
                 </EuiTitle>
-                <BackendErrorRateChart height={200} />
+                <BackendFailedTransactionRateChart height={200} />
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>

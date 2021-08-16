@@ -5,21 +5,43 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
-import { EuiButtonIcon, EuiDataGridColumn } from '@elastic/eui';
+/**
+ * We need to produce types and code transpilation at different folders during the build of the package.
+ * We have types and code at different imports because we don't want to import the whole package in the resulting webpack bundle for the plugin.
+ * This way plugins can do targeted imports to reduce the final code bundle
+ */
+import type {
+  AlertConsumers as AlertConsumersTyped,
+  ALERT_DURATION as ALERT_DURATION_TYPED,
+  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
+  ALERT_STATUS as ALERT_STATUS_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
+} from '@kbn/rule-data-utils';
+import {
+  ALERT_DURATION as ALERT_DURATION_NON_TYPED,
+  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
+  ALERT_STATUS as ALERT_STATUS_NON_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
+  TIMESTAMP,
+  // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
+} from '@kbn/rule-data-utils/target_node/technical_field_names';
+
+// @ts-expect-error importing from a place other than root because we want to limit what we import from this package
+import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
+
+import {
+  EuiButtonIcon,
+  EuiDataGridColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiContextMenu,
+  EuiPopover,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import React, { Suspense, useMemo, useState, useCallback } from 'react';
 
-import React, { Suspense, useState } from 'react';
-import {
-  ALERT_DURATION,
-  ALERT_SEVERITY_LEVEL,
-  ALERT_STATUS,
-  ALERT_START,
-  ALERT_RULE_NAME,
-} from '@kbn/rule-data-utils/target/technical_field_names';
-
-import type { TimelinesUIStart } from '../../../../timelines/public';
+import type { TimelinesUIStart, TGridType, SortDirection } from '../../../../timelines/public';
 import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import type {
@@ -30,10 +52,18 @@ import type {
 } from '../../../../timelines/common';
 
 import { getRenderCellValue } from './render_cell_value';
+import { observabilityFeatureId } from '../../../common';
+import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { decorateResponse } from './decorate_response';
 import { getDefaultCellActions } from './default_cell_actions';
 import { LazyAlertsFlyout } from '../..';
+import { parseAlert } from './parse_alert';
+
+const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
+const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
+const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
+const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
+const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
 
 interface AlertsTableTGridProps {
   indexName: string;
@@ -42,6 +72,11 @@ interface AlertsTableTGridProps {
   kuery: string;
   status: string;
   setRefetch: (ref: () => void) => void;
+}
+
+interface ObservabilityActionsProps extends ActionProps {
+  flyoutAlert: TopAlert | undefined;
+  setFlyoutAlert: React.Dispatch<React.SetStateAction<TopAlert | undefined>>;
 }
 
 const EventsThContent = styled.div.attrs(({ className = '' }) => ({
@@ -80,11 +115,11 @@ export const columns: Array<
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.observability.alertsTGrid.triggeredColumnDescription', {
-      defaultMessage: 'Triggered',
+    displayAsText: i18n.translate('xpack.observability.alertsTGrid.lastUpdatedColumnDescription', {
+      defaultMessage: 'Last updated',
     }),
-    id: ALERT_START,
-    initialWidth: 176,
+    id: TIMESTAMP,
+    initialWidth: 230,
   },
   {
     columnHeaderType: 'not-filtered',
@@ -123,69 +158,69 @@ const OBSERVABILITY_ALERT_CONSUMERS = [
   AlertConsumers.SYNTHETICS,
 ];
 
-export function AlertsTableTGrid(props: AlertsTableTGridProps) {
+function ObservabilityActions({
+  data,
+  eventId,
+  ecsData,
+  flyoutAlert,
+  setFlyoutAlert,
+}: ObservabilityActionsProps) {
   const { core, observabilityRuleTypeRegistry } = usePluginContext();
-  const { prepend } = core.http.basePath;
-  const { indexName, rangeFrom, rangeTo, kuery, status, setRefetch } = props;
-  const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
+  const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
+  const [openActionsPopoverId, setActionsPopover] = useState(null);
   const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
+  const parseObservabilityAlert = useMemo(() => parseAlert(observabilityRuleTypeRegistry), [
+    observabilityRuleTypeRegistry,
+  ]);
+  const alert = parseObservabilityAlert(dataFieldEs);
+  const { prepend } = core.http.basePath;
 
-  const leadingControlColumns = [
-    {
-      id: 'expand',
-      width: 40,
-      headerCellRender: () => {
-        return (
-          <EventsThContent>
-            {i18n.translate('xpack.observability.alertsTable.actionsTextLabel', {
-              defaultMessage: 'Actions',
+  const afterCaseSelection = useCallback(() => {
+    setActionsPopover(null);
+  }, []);
+
+  const closeActionsPopover = useCallback(() => {
+    setActionsPopover(null);
+  }, []);
+
+  const openActionsPopover = useCallback((id) => {
+    setActionsPopover(id);
+  }, []);
+  const casePermissions = useGetUserCasesPermissions();
+  const event = useMemo(() => {
+    return {
+      data,
+      _id: eventId,
+      ecs: ecsData,
+    };
+  }, [data, eventId, ecsData]);
+
+  const actionsPanels = useMemo(() => {
+    return [
+      {
+        id: 0,
+        content: [
+          <>
+            {timelines.getAddToExistingCaseButton({
+              event,
+              casePermissions,
+              appId: observabilityFeatureId,
+              onClose: afterCaseSelection,
             })}
-          </EventsThContent>
-        );
+          </>,
+          <>
+            {timelines.getAddToNewCaseButton({
+              event,
+              casePermissions,
+              appId: observabilityFeatureId,
+              onClose: afterCaseSelection,
+            })}
+          </>,
+        ],
       },
-      rowCellRender: ({ data }: ActionProps) => {
-        const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
-        const decoratedAlerts = decorateResponse(
-          [dataFieldEs] ?? [],
-          observabilityRuleTypeRegistry
-        );
-        const alert = decoratedAlerts[0];
-        return (
-          <EuiButtonIcon
-            size="s"
-            iconType="expand"
-            color="text"
-            onClick={() => setFlyoutAlert(alert)}
-          />
-        );
-      },
-    },
-    {
-      id: 'view_in_app',
-      width: 40,
-      headerCellRender: () => null,
-      rowCellRender: ({ data }: ActionProps) => {
-        const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
-        const decoratedAlerts = decorateResponse(
-          [dataFieldEs] ?? [],
-          observabilityRuleTypeRegistry
-        );
-        const alert = decoratedAlerts[0];
-        return (
-          <EuiButtonIcon
-            size="s"
-            target="_blank"
-            rel="nofollow noreferrer"
-            href={prepend(alert.link ?? '')}
-            iconType="inspect"
-            color="text"
-          />
-        );
-      },
-    },
-  ];
-
+    ];
+  }, [afterCaseSelection, casePermissions, timelines, event]);
   return (
     <>
       {flyoutAlert && (
@@ -197,47 +232,140 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           />
         </Suspense>
       )}
-      {timelines.getTGrid<'standalone'>({
-        alertConsumers: OBSERVABILITY_ALERT_CONSUMERS,
-        type: 'standalone',
-        columns,
-        deletedEventIds: [],
-        defaultCellActions: getDefaultCellActions({ enableFilterActions: false }),
-        end: rangeTo,
-        filters: [],
-        indexNames: [indexName],
-        itemsPerPage: 10,
-        itemsPerPageOptions: [10, 25, 50],
-        loadingText: i18n.translate('xpack.observability.alertsTable.loadingTextLabel', {
-          defaultMessage: 'loading alerts',
-        }),
-        footerText: i18n.translate('xpack.observability.alertsTable.footerTextLabel', {
-          defaultMessage: 'alerts',
-        }),
-        query: {
-          query: `${ALERT_STATUS}: ${status}${kuery !== '' ? ` and ${kuery}` : ''}`,
-          language: 'kuery',
-        },
-        renderCellValue: getRenderCellValue({ rangeFrom, rangeTo, setFlyoutAlert }),
-        rowRenderers: NO_ROW_RENDER,
-        start: rangeFrom,
-        setRefetch,
-        sort: [
-          {
-            columnId: '@timestamp',
-            columnType: 'date',
-            sortDirection: 'desc',
-          },
-        ],
-        filterStatus: status as AlertStatus,
-        leadingControlColumns,
-        trailingControlColumns,
-        unit: (totalAlerts: number) =>
-          i18n.translate('xpack.observability.alertsTable.showingAlertsTitle', {
-            values: { totalAlerts },
-            defaultMessage: '{totalAlerts, plural, =1 {alert} other {alerts}}',
-          }),
-      })}
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem>
+          <EuiButtonIcon
+            size="s"
+            iconType="expand"
+            color="text"
+            onClick={() => setFlyoutAlert(alert)}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButtonIcon
+            size="s"
+            href={prepend(alert.link ?? '')}
+            iconType="eye"
+            color="text"
+            aria-label="View alert in app"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiPopover
+            button={
+              <EuiButtonIcon
+                display="empty"
+                size="s"
+                color="text"
+                iconType="boxesHorizontal"
+                aria-label="More"
+                onClick={() => openActionsPopover(eventId)}
+              />
+            }
+            isOpen={openActionsPopoverId === eventId}
+            closePopover={closeActionsPopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenu panels={actionsPanels} initialPanelId={0} />
+          </EuiPopover>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
+}
+
+export function AlertsTableTGrid(props: AlertsTableTGridProps) {
+  const { indexName, rangeFrom, rangeTo, kuery, status, setRefetch } = props;
+  const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
+
+  const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
+
+  const casePermissions = useGetUserCasesPermissions();
+
+  const leadingControlColumns = useMemo(() => {
+    return [
+      {
+        id: 'expand',
+        width: 96,
+        headerCellRender: () => {
+          return (
+            <EventsThContent>
+              {i18n.translate('xpack.observability.alertsTable.actionsTextLabel', {
+                defaultMessage: 'Actions',
+              })}
+            </EventsThContent>
+          );
+        },
+        rowCellRender: (actionProps: ActionProps) => {
+          return (
+            <ObservabilityActions
+              {...actionProps}
+              flyoutAlert={flyoutAlert}
+              setFlyoutAlert={setFlyoutAlert}
+            />
+          );
+        },
+      },
+    ];
+  }, [flyoutAlert]);
+
+  const tGridProps = useMemo(() => {
+    const type: TGridType = 'standalone';
+    const sortDirection: SortDirection = 'desc';
+    return {
+      alertConsumers: OBSERVABILITY_ALERT_CONSUMERS,
+      appId: observabilityFeatureId,
+      casePermissions,
+      type,
+      columns,
+      deletedEventIds: [],
+      defaultCellActions: getDefaultCellActions({ enableFilterActions: false }),
+      end: rangeTo,
+      filters: [],
+      indexNames: [indexName],
+      itemsPerPage: 10,
+      itemsPerPageOptions: [10, 25, 50],
+      loadingText: i18n.translate('xpack.observability.alertsTable.loadingTextLabel', {
+        defaultMessage: 'loading alerts',
+      }),
+      footerText: i18n.translate('xpack.observability.alertsTable.footerTextLabel', {
+        defaultMessage: 'alerts',
+      }),
+      query: {
+        query: `${ALERT_STATUS}: ${status}${kuery !== '' ? ` and ${kuery}` : ''}`,
+        language: 'kuery',
+      },
+      renderCellValue: getRenderCellValue({ rangeFrom, rangeTo, setFlyoutAlert }),
+      rowRenderers: NO_ROW_RENDER,
+      start: rangeFrom,
+      setRefetch,
+      sort: [
+        {
+          columnId: '@timestamp',
+          columnType: 'date',
+          sortDirection,
+        },
+      ],
+      filterStatus: status as AlertStatus,
+      leadingControlColumns,
+      trailingControlColumns,
+      unit: (totalAlerts: number) =>
+        i18n.translate('xpack.observability.alertsTable.showingAlertsTitle', {
+          values: { totalAlerts },
+          defaultMessage: '{totalAlerts, plural, =1 {alert} other {alerts}}',
+        }),
+    };
+  }, [
+    casePermissions,
+    indexName,
+    kuery,
+    leadingControlColumns,
+    rangeFrom,
+    rangeTo,
+    setRefetch,
+    status,
+  ]);
+
+  return <>{timelines.getTGrid<'standalone'>(tGridProps)}</>;
 }

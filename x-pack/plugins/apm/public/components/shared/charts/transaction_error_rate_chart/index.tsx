@@ -29,6 +29,8 @@ function yLabelFormat(y?: number | null) {
 interface Props {
   height?: number;
   showAnnotations?: boolean;
+  kuery: string;
+  environment: string;
 }
 
 type ErrorRate = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/error_rate'>;
@@ -49,12 +51,12 @@ const INITIAL_STATE: ErrorRate = {
 export function TransactionErrorRateChart({
   height,
   showAnnotations = true,
+  environment,
+  kuery,
 }: Props) {
   const theme = useTheme();
   const {
     urlParams: {
-      environment,
-      kuery,
       start,
       end,
       transactionName,
@@ -114,7 +116,7 @@ export function TransactionErrorRateChart({
       type: 'linemark',
       color: theme.eui.euiColorVis7,
       title: i18n.translate('xpack.apm.errorRate.chart.errorRate', {
-        defaultMessage: 'Error rate (avg.)',
+        defaultMessage: 'Failed transaction rate (avg.)',
       }),
     },
     ...(comparisonEnabled
@@ -137,7 +139,7 @@ export function TransactionErrorRateChart({
       <EuiTitle size="xs">
         <h2>
           {i18n.translate('xpack.apm.errorRate', {
-            defaultMessage: 'Error rate',
+            defaultMessage: 'Failed transaction rate',
           })}
         </h2>
       </EuiTitle>

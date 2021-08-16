@@ -27,7 +27,7 @@ $ mkdir hello_world
 $ cd hello_world
 ```
 
-2. Create the <DocLink id="kibDevTutorialBuildAPlugin" section="1-kibanajson" text="kibana.json manifest file"/>.
+2. Create the <DocLink id="kibDevAnatomyOfAPlugin" section="kibanajson" text="kibana.json manifest file"/>.
 
 ```
 $ touch kibana.json
@@ -44,7 +44,7 @@ and add the following:
 }
 ```
 
-3. Create a `tsconfig.json` file.
+3. Create a <DocLink id="kibDevAnatomyOfAPlugin" section="tsconfigjson" text="tsconfig.json file" />.
 
 ```
 $ touch tsconfig.json
@@ -56,8 +56,7 @@ And add the following to it:
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "./target",
-    "skipLibCheck": true
+    "outDir": "./target/types",
   },
   "include": [
     "index.ts",
@@ -67,11 +66,14 @@ And add the following to it:
     "server/**/*.ts",
     "../../typings/**/*"
   ],
-  "exclude": []
+  "exclude": [],
+  "references": [
+    { "path": "../../src/core/tsconfig.json" }
+  ]
 }
 ```
 
-4. Create a <DocLink id="kibDevTutorialBuildAPlugin" section="2-publicindexts" text="`public/plugin.tsx` file "/>.
+4. Create a <DocLink id="kibDevAnatomyOfAPlugin" section="publicindexts" text="`public/plugin.tsx` file "/>.
 
 ```
 $ mkdir public
@@ -104,7 +106,7 @@ export class HelloWorldPlugin implements Plugin {
 }
 ```
 
-5. Create a <DocLink id="kibDevTutorialBuildAPlugin" section="3-publicplugints" text="`public/index.ts` file "/>.
+5. Create a <DocLink id="kibDevAnatomyOfAPlugin" section="publicplugints" text="`public/index.ts` file "/>.
 
 ```
 $ touch index.ts
