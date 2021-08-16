@@ -6,8 +6,10 @@
  */
 
 import type { Filter, EsQueryConfig, Query } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import {
   elementOrChildrenHasFocus,
   getFocusedAriaColindexCell,
@@ -15,7 +17,7 @@ import {
   handleSkipFocus,
   stopPropagationAndPreventDefault,
 } from '../../../common';
-import type { IIndexPattern } from '../../../../../../src/plugins/data/public';
+import { IIndexPattern } from '../../../../../../src/plugins/data/public';
 import type { BrowserFields } from '../../../common/search_strategy/index_fields';
 import { DataProviderType, EXISTS_OPERATOR } from '../../../common/types/timeline';
 import type { DataProvider, DataProvidersAnd } from '../../../common/types/timeline';
@@ -133,6 +135,17 @@ export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: B
       return !index ? `(${queryMatch})` : `${globalQuery} or (${queryMatch})`;
     }, '');
 
+interface CombineQueries {
+  config: EsQueryConfig;
+  dataProviders: DataProvider[];
+  indexPattern: IIndexPattern;
+  browserFields: BrowserFields;
+  filters: Filter[];
+  kqlQuery: Query;
+  kqlMode: string;
+  isEventViewer?: boolean;
+}
+
 export const combineQueries = ({
   config,
   dataProviders,
@@ -142,16 +155,7 @@ export const combineQueries = ({
   kqlQuery,
   kqlMode,
   isEventViewer,
-}: {
-  config: EsQueryConfig;
-  dataProviders: DataProvider[];
-  indexPattern: IIndexPattern;
-  browserFields: BrowserFields;
-  filters: Filter[];
-  kqlQuery: Query;
-  kqlMode: string;
-  isEventViewer?: boolean;
-}): { filterQuery: string } | null => {
+}: CombineQueries): { filterQuery: string } | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
   if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters) && !isEventViewer) {
     return null;
@@ -183,6 +187,64 @@ export const combineQueries = ({
     filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
   };
 };
+
+export const buildCombinedQuery = (combineQueriesParams: CombineQueries) => {
+  const combinedQuery = combineQueries(combineQueriesParams);
+  return combinedQuery
+    ? {
+        filterQuery: replaceStatusField(combinedQuery!.filterQuery),
+      }
+    : null;
+};
+
+export const buildTimeRangeFilter = (from: string, to: string): Filter =>
+  ({
+    range: {
+      '@timestamp': {
+        gte: from,
+        lt: to,
+        format: 'strict_date_optional_time',
+      },
+    },
+    meta: {
+      type: 'range',
+      disabled: false,
+      negate: false,
+      alias: null,
+      key: '@timestamp',
+      params: {
+        gte: from,
+        lt: to,
+        format: 'strict_date_optional_time',
+      },
+    },
+    $state: {
+      store: FilterStateStore.APP_STATE,
+    },
+  } as Filter);
+
+export const getCombinedFilterQuery = ({
+  from,
+  to,
+  filters,
+  ...combineQueriesParams
+}: CombineQueries & { from: string; to: string }): string => {
+  return replaceStatusField(
+    combineQueries({
+      ...combineQueriesParams,
+      filters: [...filters, buildTimeRangeFilter(from, to)],
+    })!.filterQuery
+  );
+};
+
+/**
+ * This function is a temporary patch to prevent queries using old `signal.status` field.
+ * @todo The `signal.status` field should not be queried anymore and
+ * must be replaced by `ALERT_WORKFLOW_STATUS` field name constant
+ * @deprecated
+ */
+const replaceStatusField = (query: string): string =>
+  query.replaceAll('signal.status', ALERT_WORKFLOW_STATUS);
 
 /**
  * The CSS class name of a "stateful event", which appears in both

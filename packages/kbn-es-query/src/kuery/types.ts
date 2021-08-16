@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { NodeTypes } from './node_types';
 
 /** @public */
@@ -15,10 +16,9 @@ export interface KueryNode {
 }
 
 /**
- * TODO: Replace with real type
  * @public
  */
-export type DslQuery = any;
+export type DslQuery = estypes.QueryDslQueryContainer;
 
 /** @internal */
 export interface KueryParseOptions {
