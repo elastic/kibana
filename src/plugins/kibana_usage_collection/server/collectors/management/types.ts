@@ -12,6 +12,7 @@ export interface UsageStats {
    */
   'timelion:quandl.key': string;
   'securitySolution:defaultIndex': string;
+  'securitySolution:defaultThreatIndex': string;
   'securitySolution:newsFeedUrl': string;
   'xpackReporting:customPdfLogo': string;
   'notifications:banner': string;
