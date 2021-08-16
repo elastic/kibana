@@ -110,7 +110,7 @@ export const createDetectionIndex = async (
   if (!policyExists) {
     await setPolicy(esClient, index, signalsPolicy);
   }
-  const aadIndexAliasName = `${ruleDataService.getFullAssetName('security.alerts')}-${spaceId}`;
+  const aadIndexAliasName = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
   if (await templateNeedsUpdate({ alias: index, esClient })) {
     await esClient.indices.putIndexTemplate({
       name: index,
