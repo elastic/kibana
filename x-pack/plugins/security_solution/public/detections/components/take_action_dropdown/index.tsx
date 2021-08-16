@@ -181,6 +181,20 @@ export const TakeActionDropdown = React.memo(
       [eventFilterActions, exceptionActions, isEvent, actionsData.ruleId]
     );
 
+    const addToCaseProps = useMemo(() => {
+      if (ecsData) {
+        return {
+          event: { data: [], ecs: ecsData, _id: ecsData._id },
+          useInsertTimeline: insertTimelineHook,
+          casePermissions,
+          appId: 'securitySolution',
+          onClose: afterCaseSelection,
+        };
+      } else {
+        return null;
+      }
+    }, [afterCaseSelection, casePermissions, ecsData, insertTimelineHook]);
+
     const panels = useMemo(() => {
       if (tGridEnabled) {
         return [
@@ -202,26 +216,8 @@ export const TakeActionDropdown = React.memo(
             id: 2,
             title: ACTION_ADD_TO_CASE,
             content: [
-              <>
-                {ecsData &&
-                  timelinesUi.getAddToExistingCaseButton({
-                    ecsRowData: ecsData,
-                    useInsertTimeline: insertTimelineHook,
-                    casePermissions,
-                    appId: 'securitySolution',
-                    onClose: afterCaseSelection,
-                  })}
-              </>,
-              <>
-                {ecsData &&
-                  timelinesUi.getAddToNewCaseButton({
-                    ecsRowData: ecsData,
-                    useInsertTimeline: insertTimelineHook,
-                    casePermissions,
-                    appId: 'securitySolution',
-                    onClose: afterCaseSelection,
-                  })}
-              </>,
+              <>{addToCaseProps && timelinesUi.getAddToExistingCaseButton(addToCaseProps)}</>,
+              <>{addToCaseProps && timelinesUi.getAddToNewCaseButton(addToCaseProps)}</>,
             ],
           },
         ];
@@ -239,16 +235,13 @@ export const TakeActionDropdown = React.memo(
         ];
       }
     }, [
+      addToCaseProps,
       alertsActionItems,
       hostIsolationAction,
       investigateInTimelineAction,
-      ecsData,
-      casePermissions,
-      insertTimelineHook,
       timelineId,
       timelinesUi,
       actionItems,
-      afterCaseSelection,
       tGridEnabled,
     ]);
 
