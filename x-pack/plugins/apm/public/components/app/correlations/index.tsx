@@ -47,17 +47,17 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { MlFailureCorrelations } from './ml_failure_correlations';
+import { FailedTransactionsCorrelations } from './failed_transactions_correlations';
 
-const failureCorrelationsTab = {
-  key: 'errorRate',
+const failedTransactionsCorrelationsTab = {
+  key: 'failedTransactionsCorrelations',
   label: i18n.translate(
-    'xpack.apm.correlations.tabs.failureCorrelationsLabel',
+    'xpack.apm.correlations.tabs.failedTransactionsCorrelationsLabel',
     {
       defaultMessage: 'Failure correlations',
     }
   ),
-  component: MlFailureCorrelations,
+  component: FailedTransactionsCorrelations,
 };
 const latencyCorrelationsTab = {
   key: 'latencyCorrelations',
@@ -66,7 +66,7 @@ const latencyCorrelationsTab = {
   }),
   component: MlLatencyCorrelations,
 };
-const tabs = [latencyCorrelationsTab, failureCorrelationsTab];
+const tabs = [latencyCorrelationsTab, failedTransactionsCorrelationsTab];
 
 export function Correlations() {
   const license = useLicenseContext();

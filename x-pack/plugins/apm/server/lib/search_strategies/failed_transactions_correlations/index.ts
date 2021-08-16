@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { apmFailureCorrelationsSearchStrategyProvider } from './search_strategy';
-export { FAILURE_CORRELATION_SEARCH_STRATEGY } from '../../../../common/search_strategies/failure_correlations/constants';
+export { apmFailedTransactionsCorrelationsSearchStrategyProvider } from './search_strategy';
+export { FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY } from '../../../../common/search_strategies/failure_correlations/constants';

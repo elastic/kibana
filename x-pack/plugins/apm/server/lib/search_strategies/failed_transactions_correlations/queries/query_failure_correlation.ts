@@ -60,7 +60,7 @@ export const getFailureCorrelationRequest = (
   };
 };
 
-export const fetchFailureCorrelationPValues = async (
+export const fetchFailedTransactionsCorrelationPValues = async (
   esClient: ElasticsearchClient,
   params: SearchServiceFetchParams,
   fieldName: string
@@ -83,6 +83,9 @@ export const fetchFailureCorrelationPValues = async (
     score: number;
   }>).buckets.map((b) => {
     const score = b.score;
+
+    // Scale the score into a value from 0 - 1
+    // using a concave piecewise linear function in -log(p-value)
     const normalizedScore =
       0.5 * Math.min(Math.max((score - 3.912) / 2.995, 0), 1) +
       0.25 * Math.min(Math.max((score - 6.908) / 6.908, 0), 1) +

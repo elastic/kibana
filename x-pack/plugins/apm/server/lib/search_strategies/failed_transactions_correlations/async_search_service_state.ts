@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FailureCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
+import { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
 
 interface Progress {
   started: number;
@@ -51,11 +51,11 @@ export const asyncErrorCorrelationsSearchServiceStateProvider = () => {
     };
   }
 
-  const values: FailureCorrelationValue[] = [];
-  function addValue(d: FailureCorrelationValue) {
+  const values: FailedTransactionsCorrelationValue[] = [];
+  function addValue(d: FailedTransactionsCorrelationValue) {
     values.push(d);
   }
-  function addValues(d: FailureCorrelationValue[]) {
+  function addValues(d: FailedTransactionsCorrelationValue[]) {
     values.push(...d);
   }
 

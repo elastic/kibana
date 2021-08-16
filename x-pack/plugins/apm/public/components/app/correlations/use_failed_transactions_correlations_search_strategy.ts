@@ -27,7 +27,7 @@ interface SearchStrategyOptions {
   end?: string;
 }
 
-export function useCorrelationsSearchStrategy<
+export function useFailedTransactionsCorrelationsSearchStrategy<
   T extends BaseSearchStrategyResponse
 >(params: SearchStrategyOptions, strategy: string) {
   const {

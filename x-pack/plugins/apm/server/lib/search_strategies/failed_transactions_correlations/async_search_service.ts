@@ -13,7 +13,7 @@ import { asyncSearchServiceLogProvider } from '../correlations/async_search_serv
 import { asyncErrorCorrelationsSearchServiceStateProvider } from './async_search_service_state';
 import { fetchTransactionDurationFieldCandidates } from '../correlations/queries';
 import type { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
-import { fetchFailureCorrelationPValues } from './queries/query_failure_correlation';
+import { fetchFailedTransactionsCorrelationPValues } from './queries/query_failure_correlation';
 import { ERROR_CORRELATION_THRESHOLD } from './constants';
 
 export const asyncErrorCorrelationSearchServiceProvider = (
@@ -27,7 +27,11 @@ export const asyncErrorCorrelationSearchServiceProvider = (
   const state = asyncErrorCorrelationsSearchServiceStateProvider();
 
   async function fetchErrorCorrelations() {
-    let params: SearchServiceFetchParams | undefined;
+    let params: SearchServiceFetchParams = {
+      ...searchServiceParams,
+      index: 'apm-*',
+      includeFrozen,
+    };
 
     try {
       const indices = await getApmIndices();
@@ -47,13 +51,17 @@ export const asyncErrorCorrelationSearchServiceProvider = (
       state.setProgress({ loadedFieldCandidates: 1 });
 
       let fieldCandidatesFetchedCount = 0;
-      if (params && fieldCandidates.length > 0) {
+      if (params !== undefined && fieldCandidates.length > 0) {
         const batches = chunk(fieldCandidates, 10);
         for (let i = 0; i < batches.length; i++) {
           try {
             const results = await Promise.allSettled(
               batches[i].map((fieldName) =>
-                fetchFailureCorrelationPValues(esClient, params!, fieldName)
+                fetchFailedTransactionsCorrelationPValues(
+                  esClient,
+                  params,
+                  fieldName
+                )
               )
             );
 

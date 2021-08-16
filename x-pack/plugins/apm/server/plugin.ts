@@ -52,9 +52,9 @@ import {
 } from '../common/elasticsearch_fieldnames';
 import { tutorialProvider } from './tutorial';
 import {
-  apmFailureCorrelationsSearchStrategyProvider,
-  FAILURE_CORRELATION_SEARCH_STRATEGY,
-} from './lib/search_strategies/failure_correlations';
+  apmFailedTransactionsCorrelationsSearchStrategyProvider,
+  FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY,
+} from './lib/search_strategies/failed_transactions_correlations';
 
 export class APMPlugin
   implements
@@ -263,7 +263,7 @@ export class APMPlugin
           .asScopedToClient(savedObjectsClient)
           .get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
 
-        // Register APM latency correlations strategy
+        // Register APM latency correlations search strategy
         plugins.data.search.registerSearchStrategy(
           'apmCorrelationsSearchStrategy',
           apmCorrelationsSearchStrategyProvider(
@@ -272,10 +272,10 @@ export class APMPlugin
           )
         );
 
-        // Register APM error correlations strategy
+        // Register APM failed transactions correlations search strategy
         plugins.data.search.registerSearchStrategy(
-          FAILURE_CORRELATION_SEARCH_STRATEGY,
-          apmFailureCorrelationsSearchStrategyProvider(
+          FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY,
+          apmFailedTransactionsCorrelationsSearchStrategyProvider(
             boundGetApmIndices,
             includeFrozen
           )

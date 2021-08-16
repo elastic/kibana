@@ -31,18 +31,18 @@ import { CorrelationsTable } from './correlations_table';
 import { enableInspectEsQueries } from '../../../../../observability/public';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { FailureCorrelationsHelpPopover } from './ml_failure_correlations_help_popover';
-import { useCorrelationsSearchStrategy } from './use_correlations_search_strategy';
+import { FailedTransactionsCorrelationsHelpPopover } from './failed_transactions_correlations_help_popover';
+import { useFailedTransactionsCorrelationsSearchStrategy } from './use_failed_transactions_correlations_search_strategy';
 import {
   BaseSearchStrategyResponse,
-  FailureCorrelationValue,
+  FailedTransactionsCorrelationValue,
 } from '../../../../common/search_strategies/failure_correlations/types';
 import { ImpactBar } from '../../shared/ImpactBar';
-import { FAILURE_CORRELATION_SEARCH_STRATEGY } from '../../../../common/search_strategies/failure_correlations/constants';
+import { FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY } from '../../../../common/search_strategies/failure_correlations/constants';
 import { isErrorMessage } from './utils/is_error_message';
 import { Summary } from '../../shared/Summary';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { getFailureCorrelationImpactLabel } from './utils/get_failure_correlation_impact_label';
+import { getFailedTransactionsCorrelationImpactLabel } from './utils/get_failure_correlation_impact_label';
 import { createHref, push } from '../../shared/Links/url_helpers';
 import { useUiTracker } from '../../../../../observability/public';
 
@@ -50,12 +50,12 @@ interface Props {
   onClose: () => void;
 }
 
-interface ErrorCorrelationSearchStrategyResult
+interface FailedTransactionsCorrelationsSearchStrategyResult
   extends BaseSearchStrategyResponse {
-  values: FailureCorrelationValue[];
+  values: FailedTransactionsCorrelationValue[];
 }
 
-export function MlFailureCorrelations({ onClose }: Props) {
+export function FailedTransactionsCorrelations({ onClose }: Props) {
   const {
     core: { notifications, uiSettings },
   } = useApmPluginContext();
@@ -68,21 +68,17 @@ export function MlFailureCorrelations({ onClose }: Props) {
 
   const displayLog = uiSettings.get<boolean>(enableInspectEsQueries);
 
-  const result = useCorrelationsSearchStrategy<ErrorCorrelationSearchStrategyResult>(
+  const result = useFailedTransactionsCorrelationsSearchStrategy<FailedTransactionsCorrelationsSearchStrategyResult>(
     {
-      ...{
-        ...{
-          environment,
-          kuery,
-          serviceName,
-          transactionName,
-          transactionType,
-          start,
-          end,
-        },
-      },
+      environment,
+      kuery,
+      serviceName,
+      transactionName,
+      transactionType,
+      start,
+      end,
     },
-    FAILURE_CORRELATION_SEARCH_STRATEGY
+    FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY
   );
 
   const {
@@ -110,7 +106,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
   const [
     selectedSignificantTerm,
     setSelectedSignificantTerm,
-  ] = useState<FailureCorrelationValue | null>(null);
+  ] = useState<FailedTransactionsCorrelationValue | null>(null);
 
   const selectedTerm = useMemo(() => {
     if (selectedSignificantTerm) return selectedSignificantTerm;
@@ -124,8 +120,8 @@ export function MlFailureCorrelations({ onClose }: Props) {
   const history = useHistory();
   const handleOnFilter = onClose;
 
-  const errorCorrelationsColumns: Array<
-    EuiBasicTableColumn<FailureCorrelationValue>
+  const failedTransactionsCorrelationsColumns: Array<
+    EuiBasicTableColumn<FailedTransactionsCorrelationValue>
   > = useMemo(
     () => [
       {
@@ -134,7 +130,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
         name: (
           <>
             {i18n.translate(
-              'xpack.apm.correlations.failure.correlationsTable.pValueLabel',
+              'xpack.apm.correlations.failedTransactions.correlationsTable.pValueLabel',
               {
                 defaultMessage: 'Score',
               }
@@ -155,26 +151,26 @@ export function MlFailureCorrelations({ onClose }: Props) {
         name: (
           <>
             {i18n.translate(
-              'xpack.apm.correlations.failure.correlationsTable.impactLabel',
+              'xpack.apm.correlations.failedTransactions.correlationsTable.impactLabel',
               {
                 defaultMessage: 'Impact',
               }
             )}
           </>
         ),
-        render: getFailureCorrelationImpactLabel,
+        render: getFailedTransactionsCorrelationImpactLabel,
       },
       {
         field: 'fieldName',
         name: i18n.translate(
-          'xpack.apm.correlations.failure.correlationsTable.fieldNameLabel',
+          'xpack.apm.correlations.failedTransactions.correlationsTable.fieldNameLabel',
           { defaultMessage: 'Field name' }
         ),
       },
       {
         field: 'key',
         name: i18n.translate(
-          'xpack.apm.correlations.failure.correlationsTable.fieldValueLabel',
+          'xpack.apm.correlations.failedTransactions.correlationsTable.fieldValueLabel',
           { defaultMessage: 'Field value' }
         ),
         render: (fieldValue: string) => String(fieldValue).slice(0, 50),
@@ -193,7 +189,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
             ),
             icon: 'plusInCircle',
             type: 'icon',
-            onClick: (term: FailureCorrelationValue) => {
+            onClick: (term: FailedTransactionsCorrelationValue) => {
               push(history, {
                 query: {
                   kuery: `${term.fieldName}:"${encodeURIComponent(
@@ -216,7 +212,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
             ),
             icon: 'minusInCircle',
             type: 'icon',
-            onClick: (term: FailureCorrelationValue) => {
+            onClick: (term: FailedTransactionsCorrelationValue) => {
               push(history, {
                 query: {
                   kuery: `not ${term.fieldName}:"${encodeURIComponent(
@@ -233,7 +229,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
           'xpack.apm.correlations.correlationsTable.actionsLabel',
           { defaultMessage: 'Filter' }
         ),
-        render: (_: any, term: FailureCorrelationValue) => {
+        render: (_: unknown, term: FailedTransactionsCorrelationValue) => {
           return (
             <>
               <EuiLink
@@ -270,10 +266,13 @@ export function MlFailureCorrelations({ onClose }: Props) {
   useEffect(() => {
     if (isErrorMessage(error)) {
       notifications.toasts.addDanger({
-        title: i18n.translate('xpack.apm.correlations.failure.errorTitle', {
-          defaultMessage:
-            'An error occurred performing correlations on failed transactions',
-        }),
+        title: i18n.translate(
+          'xpack.apm.correlations.failedTransactions.errorTitle',
+          {
+            defaultMessage:
+              'An error occurred performing correlations on failed transactions',
+          }
+        ),
         text: error.toString(),
       });
     }
@@ -285,7 +284,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
           {!isRunning && (
             <EuiButton size="s" onClick={startFetch}>
               <FormattedMessage
-                id="xpack.apm.correlations.failure.refreshButtonTitle"
+                id="xpack.apm.correlations.failedTransactions.refreshButtonTitle"
                 defaultMessage="Refresh"
               />
             </EuiButton>
@@ -293,7 +292,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
           {isRunning && (
             <EuiButton size="s" onClick={cancelFetch}>
               <FormattedMessage
-                id="xpack.apm.correlations.failure.cancelButtonTitle"
+                id="xpack.apm.correlations.failedTransactions.cancelButtonTitle"
                 defaultMessage="Cancel"
               />
             </EuiButton>
@@ -301,11 +300,11 @@ export function MlFailureCorrelations({ onClose }: Props) {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem data-test-subj="apmCorrelationsfailedTransactionsCorrelationsProgressTitle">
+            <EuiFlexItem data-test-subj="apmCorrelationsFailedTransactionsCorrelationsProgressTitle">
               <EuiText size="xs" color="subdued">
                 <FormattedMessage
-                  data-test-subj="apmCorrelationsfailedTransactionsCorrelationsProgressTitle"
-                  id="xpack.apm.correlations.failure.progressTitle"
+                  data-test-subj="apmCorrelationsFailedTransactionsCorrelationsProgressMessage"
+                  id="xpack.apm.correlations.failedTransactions.progressTitle"
                   defaultMessage="Progress: {progress}%"
                   values={{ progress: Math.round(progress * 100) }}
                 />
@@ -314,7 +313,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
             <EuiFlexItem>
               <EuiProgress
                 aria-label={i18n.translate(
-                  'xpack.apm.correlations.failure.progressAriaLabel',
+                  'xpack.apm.correlations.failedTransactions.progressAriaLabel',
                   { defaultMessage: 'Progress' }
                 )}
                 value={Math.round(progress * 100)}
@@ -325,7 +324,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <FailureCorrelationsHelpPopover />
+          <FailedTransactionsCorrelationsHelpPopover />
         </EuiFlexItem>
       </EuiFlexGroup>
       {selectedTerm ? (
@@ -336,18 +335,19 @@ export function MlFailureCorrelations({ onClose }: Props) {
               <EuiBadge color="hollow">
                 {`${selectedTerm.fieldName}: ${selectedTerm.key}`}
               </EuiBadge>,
-              `p-value: ${
+              <>{`p-value: ${
+                // Arbitrary threshold 0.00001
                 selectedTerm.pValue !== null && selectedTerm.pValue < 0.00001
                   ? '<.00001'
                   : asPreciseDecimal(selectedTerm.pValue, 4)
-              }`,
+              }`}</>,
             ]}
           />
           <EuiSpacer size="m" />
         </>
       ) : null}
-      <CorrelationsTable<FailureCorrelationValue>
-        columns={errorCorrelationsColumns}
+      <CorrelationsTable<FailedTransactionsCorrelationValue>
+        columns={failedTransactionsCorrelationsColumns}
         significantTerms={result?.response?.values}
         status={FETCH_STATUS.SUCCESS}
         setSelectedSignificantTerm={setSelectedSignificantTerm}
@@ -360,7 +360,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
           <EuiSpacer size="m" />
           <EuiCallOut
             title={i18n.translate(
-              'xpack.apm.correlations.failure.ccsWarningCalloutTitle',
+              'xpack.apm.correlations.failedTransactions.ccsWarningCalloutTitle',
               {
                 defaultMessage: 'Cross-cluster search compatibility',
               }
@@ -369,10 +369,10 @@ export function MlFailureCorrelations({ onClose }: Props) {
           >
             <p>
               {i18n.translate(
-                'xpack.apm.correlations.failure.ccsWarningCalloutBody',
+                'xpack.apm.correlations.failedTransactions.ccsWarningCalloutBody',
                 {
                   defaultMessage:
-                    'Data for the correlation analysis could not be fully retrieved. This feature is supported only for 7.14 and later versions.',
+                    'Data for the correlation analysis could not be fully retrieved. This feature is supported only for 7.15 and later versions.',
                 }
               )}
             </p>
@@ -383,9 +383,9 @@ export function MlFailureCorrelations({ onClose }: Props) {
 
       {log.length > 0 && displayLog && (
         <EuiAccordion
-          id="accordion1"
+          id="apmFailedTransactionsCorrelationsLogAccordion"
           buttonContent={i18n.translate(
-            'xpack.apm.correlations.failure.logButtonContent',
+            'xpack.apm.correlations.failedTransactions.logButtonContent',
             {
               defaultMessage: 'Log',
             }

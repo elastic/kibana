@@ -11,7 +11,7 @@ import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common'
 import { Maybe } from '../../../../typings/common';
 
 interface Props {
-  items: Array<Maybe<React.ReactElement | string>>;
+  items: Array<Maybe<React.ReactElement>>;
 }
 
 const Item = euiStyled(EuiFlexItem)`

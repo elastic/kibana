@@ -8,7 +8,7 @@
 import { FailureCorrelationImpactThreshold } from '../../../../../common/search_strategies/failure_correlations/types';
 import { FAILURE_CORRELATION_IMPACT_THRESHOLD } from '../../../../../common/search_strategies/failure_correlations/constants';
 
-export function getFailureCorrelationImpactLabel(
+export function getFailedTransactionsCorrelationImpactLabel(
   pValue: number
 ): FailureCorrelationImpactThreshold | null {
   if (pValue > 0 && pValue < 1e-6)

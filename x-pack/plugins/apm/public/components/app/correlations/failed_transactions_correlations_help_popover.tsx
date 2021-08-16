@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { HelpPopover, HelpPopoverButton } from '../help_popover/help_popover';
 
-export function FailureCorrelationsHelpPopover() {
+export function FailedTransactionsCorrelationsHelpPopover() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   return (

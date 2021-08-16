@@ -18,14 +18,14 @@ import type { SearchServiceParams } from '../../../../common/search_strategies/c
 import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 
 import { asyncErrorCorrelationSearchServiceProvider } from './async_search_service';
-import { FailureCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
+import { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
 
 export type PartialSearchRequest = IKibanaSearchRequest<SearchServiceParams>;
 export type PartialSearchResponse = IKibanaSearchResponse<{
-  values: FailureCorrelationValue[];
+  values: FailedTransactionsCorrelationValue[];
 }>;
 
-export const apmFailureCorrelationsSearchStrategyProvider = (
+export const apmFailedTransactionsCorrelationsSearchStrategyProvider = (
   getApmIndices: () => Promise<ApmIndicesConfig>,
   includeFrozen: boolean
 ): ISearchStrategy<PartialSearchRequest, PartialSearchResponse> => {
