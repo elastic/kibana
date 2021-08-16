@@ -7,6 +7,7 @@
 import {
   CriteriaWithPagination,
   EuiBasicTable,
+  EuiBasicTableProps,
   EuiDataGridCellValueElementProps,
   EuiDataGridControlColumn,
   EuiFlexGroup,
@@ -20,7 +21,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import moment from 'moment';
-import React, { useCallback, useMemo } from 'react';
+import React, { ComponentType, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
@@ -29,6 +30,7 @@ import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/publ
 import type { BrowserFields, RowRenderer, TimelineItem } from '../../../../common';
 import { tGridActions } from '../../../store/t_grid';
 import { RuleName } from '../../rule_name';
+import { isEventBuildingBlockType } from '../body/helpers';
 
 const EventRenderedFlexItem = styled(EuiFlexItem)`
   div:first-child {
@@ -36,6 +38,15 @@ const EventRenderedFlexItem = styled(EuiFlexItem)`
     div {
       margin: 0px;
     }
+  }
+`;
+
+// Fix typing issue with EuiBasicTable and styled
+type BasicTableType = ComponentType<EuiBasicTableProps<TimelineItem>>;
+
+const StyledEuiBasicTable = styled(EuiBasicTable as BasicTableType)`
+  .EventRenderedView__buildingBlock {
+    background: ${({ theme }) => theme.eui.euiColorHighlight};
   }
 `;
 
@@ -212,12 +223,19 @@ const EventRenderedViewComponent = ({
   return (
     <>
       {alertToolbar}
-      <EuiBasicTable
+      <StyledEuiBasicTable
         compressed
         items={events}
         columns={columns}
         pagination={pagination}
         onChange={handleTableChange}
+        rowProps={({ ecs }: TimelineItem) =>
+          isEventBuildingBlockType(ecs)
+            ? {
+                className: `EventRenderedView__buildingBlock`,
+              }
+            : {}
+        }
       />
     </>
   );
