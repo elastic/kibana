@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
+import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
 
 import { XYBrushArea } from '@elastic/charts';
@@ -16,6 +17,7 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTransactionTraceSamplesFetcher } from '../../../hooks/use_transaction_trace_samples_fetcher';
 
+import { maybe } from '../../../../common/utils/maybe';
 import { HeightRetainer } from '../../shared/HeightRetainer';
 import { fromQuery, push, toQuery } from '../../shared/Links/url_helpers';
 
@@ -62,21 +64,45 @@ export function TransactionDetailsTabs() {
     }
   };
 
-  const { sampleRangeFrom, sampleRangeTo } = urlParams;
+  const { sampleRangeFrom, sampleRangeTo, transactionId, traceId } = urlParams;
   const { traceSamples } = traceSamplesData;
 
   const clearChartSelection = () => {
-    const firstSample = traceSamples[0];
-
+    // enforces a reset of the current sample to be highlighted in the chart
+    // and selected in waterfall section below, otherwise we end up with
+    // stale data for the selected sample
     push(history, {
       query: {
         sampleRangeFrom: '',
         sampleRangeTo: '',
-        transactionId: firstSample?.transactionId,
-        traceId: firstSample?.traceId,
+        traceId: '',
+        transactionId: '',
       },
     });
   };
+
+  useEffect(() => {
+    const selectedSample = traceSamples.find(
+      (sample) =>
+        sample.transactionId === transactionId && sample.traceId === traceId
+    );
+
+    if (!selectedSample) {
+      // selected sample was not found. select a new one:
+      const preferredSample = maybe(traceSamples[0]);
+
+      history.replace({
+        ...history.location,
+        search: fromQuery({
+          ...omit(toQuery(history.location.search), [
+            'traceId',
+            'transactionId',
+          ]),
+          ...preferredSample,
+        }),
+      });
+    }
+  }, [history, traceSamples, transactionId, traceId]);
 
   return (
     <>

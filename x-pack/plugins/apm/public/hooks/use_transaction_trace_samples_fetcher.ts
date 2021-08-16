@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
-import { useHistory } from 'react-router-dom';
 import { useFetcher } from './use_fetcher';
-import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
-import { maybe } from '../../common/utils/maybe';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 
@@ -45,7 +41,6 @@ export function useTransactionTraceSamplesFetcher({
     },
   } = useUrlParams();
 
-  const history = useHistory();
   const { data = INITIAL_DATA, status, error } = useFetcher(
     async (callApmApi) => {
       if (serviceName && start && end && transactionType && transactionName) {
@@ -76,27 +71,6 @@ export function useTransactionTraceSamplesFetcher({
         }
 
         const { traceSamples } = response;
-
-        const selectedSample = traceSamples.find(
-          (sample) =>
-            sample.transactionId === transactionId && sample.traceId === traceId
-        );
-
-        if (!selectedSample) {
-          // selected sample was not found. select a new one:
-          const preferredSample = maybe(traceSamples[0]);
-
-          history.replace({
-            ...history.location,
-            search: fromQuery({
-              ...omit(toQuery(history.location.search), [
-                'traceId',
-                'transactionId',
-              ]),
-              ...preferredSample,
-            }),
-          });
-        }
 
         return {
           noHits: false,
