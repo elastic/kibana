@@ -7,6 +7,7 @@
 import { min } from 'lodash';
 import datemath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
+import { ALERT_SEVERITY_WARNING, ALERT_SEVERITY_LEVEL } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { JsonObject } from '@kbn/utility-types';
 import { UptimeAlertTypeFactory } from './types';
@@ -160,6 +161,7 @@ export const getMonitorAlertDocument = (monitorSummary: Record<string, string | 
   'observer.geo.name': monitorSummary.observerLocation,
   'error.message': monitorSummary.latestErrorMessage,
   'agent.name': monitorSummary.observerHostname,
+  [ALERT_SEVERITY_LEVEL]: ALERT_SEVERITY_WARNING,
   reason: monitorSummary.reason,
 });
 
