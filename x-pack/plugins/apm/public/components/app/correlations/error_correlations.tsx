@@ -166,6 +166,7 @@ export function ErrorCorrelations() {
               'xpack.apm.correlations.error.percentageColumnName',
               { defaultMessage: '% of failed transactions' }
             )}
+            // @ts-expect-error: this file to be removed
             significantTerms={
               hasFieldNames && correlationsData?.significantTerms
                 ? correlationsData.significantTerms

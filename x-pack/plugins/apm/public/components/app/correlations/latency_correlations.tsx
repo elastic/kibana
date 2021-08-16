@@ -379,7 +379,6 @@ export function LatencyCorrelations() {
           <CorrelationsTable
             // @ts-ignore correlations don't have the same column format other tables have
             columns={mlCorrelationColumns}
-            // @ts-expect-error correlations don't have the same significant term other tables have
             significantTerms={histogramTerms}
             status={FETCH_STATUS.SUCCESS}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
