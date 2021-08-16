@@ -6,25 +6,28 @@
  * Side Public License, v 1.
  */
 
-const fs = require('fs');
-const util = require('util');
-const execa = require('execa');
-const chalk = require('chalk');
-const path = require('path');
-const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
-const { ES_BIN } = require('./paths');
-const { log: defaultLog, parseEsLog, extractConfigFiles, NativeRealm } = require('./utils');
-const { createCliError } = require('./errors');
-const { promisify } = require('util');
-const treeKillAsync = promisify(require('tree-kill'));
-const { parseSettings, SettingsFilter } = require('./settings');
-const { CA_CERT_PATH, ES_P12_PATH, ES_P12_PASSWORD, extract } = require('@kbn/dev-utils');
+import fs from 'fs';
+import util from 'util';
+import execa, { ExecaChildProcess } from 'execa';
+import chalk from 'chalk';
+import path from 'path';
+import { promisify } from 'util';
+import { CA_CERT_PATH, ES_P12_PATH, ES_P12_PASSWORD, extract, ToolingLog } from '@kbn/dev-utils';
+import treeKill from 'tree-kill';
+import type { Stream } from 'stream';
+import { downloadSnapshot, installSnapshot, installSource, installArchive } from './install';
+import { ES_BIN } from './paths';
+import { log as defaultLog, parseEsLog, extractConfigFiles, NativeRealm } from './utils';
+import { createCliError } from './errors';
+import { parseSettings, SettingsFilter } from './settings';
+
+const treeKillAsync = promisify(treeKill);
 const readFile = util.promisify(fs.readFile);
 
 // listen to data on stream until map returns anything but undefined
-const first = (stream, map) =>
+const first = <T>(stream: Stream, map: (data: any) => T | undefined): Promise<T> =>
   new Promise((resolve) => {
-    const onData = (data) => {
+    const onData = (data: any) => {
       const result = map(data);
       if (result !== undefined) {
         resolve(result);
@@ -34,7 +37,11 @@ const first = (stream, map) =>
     stream.on('data', onData);
   });
 
-exports.Cluster = class Cluster {
+export class Cluster {
+  private readonly _log: ToolingLog;
+  private readonly _ssl: boolean;
+  private readonly _caCertPromise?: Promise<Buffer>;
+
   constructor({ log = defaultLog, ssl = false } = {}) {
     this._log = log;
     this._ssl = ssl;
@@ -53,6 +60,7 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Installing from source'));
     this._log.indent(4);
 
+    // @ts-expect-error
     const { installPath } = await installSource({ log: this._log, ...options });
 
     this._log.indent(-4);
@@ -72,6 +80,7 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Downloading snapshot'));
     this._log.indent(4);
 
+    // @ts-expect-error
     const { installPath } = await downloadSnapshot({
       log: this._log,
       ...options,
@@ -94,6 +103,7 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Installing from snapshot'));
     this._log.indent(4);
 
+    // @ts-expect-error
     const { installPath } = await installSnapshot({
       log: this._log,
       ...options,
@@ -112,11 +122,11 @@ exports.Cluster = class Cluster {
    * @property {Array} options.installPath
    * @returns {Promise<{installPath}>}
    */
-  async installArchive(path, options = {}) {
+  async installArchive(archivePath: string, options = {}) {
     this._log.info(chalk.bold('Installing from an archive'));
     this._log.indent(4);
 
-    const { installPath } = await installArchive(path, {
+    const { installPath } = await installArchive(archivePath, {
       log: this._log,
       ...options,
     });
@@ -134,7 +144,7 @@ exports.Cluster = class Cluster {
    * @param {String} archivePath
    * @param {String} [extractDirName]
    */
-  async extractDataDirectory(installPath, archivePath, extractDirName = 'data') {
+  async extractDataDirectory(installPath: string, archivePath: string, extractDirName = 'data') {
     this._log.info(chalk.bold(`Extracting data directory`));
     this._log.indent(4);
 
@@ -162,13 +172,13 @@ exports.Cluster = class Cluster {
    * @property {String} options.password - super user password used to bootstrap
    * @returns {Promise}
    */
-  async start(installPath, options = {}) {
+  async start(installPath: string, options = {}) {
     this._exec(installPath, options);
 
     await Promise.race([
       // wait for native realm to be setup and es to be started
       Promise.all([
-        first(this._process.stdout, (data) => {
+        first(this._process!.stdout!, (data) => {
           if (/started/.test(data)) {
             return true;
           }
@@ -177,7 +187,7 @@ exports.Cluster = class Cluster {
       ]),
 
       // await the outcome of the process in case it exits before starting
-      this._outcome.then(() => {
+      this._outcome!.then(() => {
         throw createCliError('ES exited without starting');
       }),
     ]);
@@ -191,11 +201,11 @@ exports.Cluster = class Cluster {
    * @property {Array} options.esArgs
    * @returns {Promise<undefined>}
    */
-  async run(installPath, options = {}) {
+  async run(installPath: string, options = {}) {
     this._exec(installPath, options);
 
     // log native realm setup errors so they aren't uncaught
-    this._nativeRealmSetup.catch((error) => {
+    this._nativeRealmSetup!.catch((error) => {
       this._log.error(error);
       this.stop();
     });
@@ -223,6 +233,10 @@ exports.Cluster = class Cluster {
 
     await this._outcome;
   }
+  private _stopCalled: boolean = false;
+  private _process?: ExecaChildProcess;
+  private _nativeRealmSetup?: Promise<void>;
+  private _outcome?: Promise<void>;
 
   /**
    * Common logic from this.start() and this.run()
@@ -239,7 +253,15 @@ exports.Cluster = class Cluster {
    * @property {Boolean} options.skipNativeRealmSetup
    * @return {undefined}
    */
-  _exec(installPath, opts = {}) {
+  _exec(
+    installPath: string,
+    opts: {
+      skipNativeRealmSetup?: boolean;
+      esArgs?: string[];
+      esJavaOpts?: string;
+      password?: string;
+    } = {}
+  ) {
     const { skipNativeRealmSetup = false, ...options } = opts;
 
     if (this._process || this._outcome) {
@@ -266,7 +288,7 @@ exports.Cluster = class Cluster {
       filter: SettingsFilter.NonSecureOnly,
     }).reduce(
       (acc, [settingName, settingValue]) => acc.concat(['-E', `${settingName}=${settingValue}`]),
-      []
+      [] as string[]
     );
 
     this._log.debug('%s %s', ES_BIN, args.join(' '));
@@ -295,7 +317,7 @@ exports.Cluster = class Cluster {
     });
 
     // parse log output to find http port
-    const httpPort = first(this._process.stdout, (data) => {
+    const httpPort = first(this._process.stdout!, (data) => {
       const match = data.toString('utf8').match(/HttpServer.+publish_address {[0-9.]+:([0-9]+)/);
 
       if (match) {
@@ -317,11 +339,14 @@ exports.Cluster = class Cluster {
         elasticPassword: options.password,
         ssl: this._ssl,
       });
-      await nativeRealm.setPasswords(options);
+      const passwordOptions: Record<string, string> = Object.fromEntries(
+        Object.entries(options).filter(([key]) => key.startsWith('password.'))
+      );
+      await nativeRealm.setPasswords(passwordOptions);
     });
 
     // parse and forward es stdout to the log
-    this._process.stdout.on('data', (data) => {
+    this._process.stdout?.on('data', (data) => {
       const lines = parseEsLog(data.toString());
       lines.forEach((line) => {
         this._log.info(line.formattedMessage);
@@ -329,19 +354,19 @@ exports.Cluster = class Cluster {
     });
 
     // forward es stderr to the log
-    this._process.stderr.on('data', (data) => this._log.error(chalk.red(data.toString())));
+    this._process.stderr?.on('data', (data) => this._log.error(chalk.red(data.toString())));
 
     // observe the exit code of the process and reflect in _outcome promies
-    const exitCode = new Promise((resolve) => this._process.once('exit', resolve));
+    const exitCode = new Promise<number | null>((resolve) => this._process?.once('exit', resolve));
     this._outcome = exitCode.then((code) => {
       if (this._stopCalled) {
         return;
       }
 
       // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
-      if (code > 0 && !(code === 143 || code === 130)) {
+      if (code !== null && code > 0 && !(code === 143 || code === 130)) {
         throw createCliError(`ES exited with code ${code}`);
       }
     });
   }
-};
+}

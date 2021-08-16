@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-const dedent = require('dedent');
-const getopts = require('getopts');
-const { Cluster } = require('../cluster');
-const { createCliError } = require('../errors');
+import dedent from 'dedent';
+import getopts from 'getopts';
+import { Cluster } from '../cluster';
+import { createCliError } from '../errors';
 
-exports.description = 'Install and run from an Elasticsearch tar';
+export const description = 'Install and run from an Elasticsearch tar';
 
-exports.usage = 'es archive <path> [<args>]';
+export const usage = 'es archive <path> [<args>]';
 
-exports.help = (defaults = {}) => {
+export const help = (defaults: { password?: string; 'base-path'?: string } = {}) => {
   const { password = 'changeme', 'base-path': basePath } = defaults;
 
   return dedent`
@@ -34,7 +34,7 @@ exports.help = (defaults = {}) => {
   `;
 };
 
-exports.run = async (defaults = {}) => {
+export const run = async (defaults = {}) => {
   const argv = process.argv.slice(2);
   const options = getopts(argv, {
     alias: {

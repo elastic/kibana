@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-exports.readMeta = function readMeta(file) {
+export const readMeta = (file: string) => {
   try {
     const meta = fs.readFileSync(`${file}.meta`, {
       encoding: 'utf8',
@@ -30,7 +30,7 @@ exports.readMeta = function readMeta(file) {
   }
 };
 
-exports.writeMeta = function readMeta(file, details = {}) {
+export const writeMeta = (file: string, details = {}) => {
   const meta = {
     ts: new Date(),
     ...details,

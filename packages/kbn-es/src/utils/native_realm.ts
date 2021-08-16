@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-const { Client } = require('@elastic/elasticsearch');
-const chalk = require('chalk');
+import { Client } from '@elastic/elasticsearch';
+import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import { ToolingLog } from '@kbn/dev-utils';
+import chalk from 'chalk';
 
-const { log: defaultLog } = require('./log');
+import { log as defaultLog } from './log';
 
 /**
  * Hack to skip the Product Check performed by the Elasticsearch-js client.
@@ -21,15 +23,31 @@ const { log: defaultLog } = require('./log');
  * The hack is copied from the test/utils in the elasticsearch-js repo
  * (https://github.com/elastic/elasticsearch-js/blob/master/test/utils/index.js#L45-L56)
  */
-function skipProductCheck(client) {
+function skipProductCheck(client: KibanaClient) {
   const tSymbol = Object.getOwnPropertySymbols(client.transport || client).filter(
     (symbol) => symbol.description === 'product check'
   )[0];
-  (client.transport || client)[tSymbol] = 2;
+  ((client.transport as any) || client)[tSymbol] = 2;
 }
 
-exports.NativeRealm = class NativeRealm {
-  constructor({ elasticPassword, port, log = defaultLog, ssl = false, caCert }) {
+export class NativeRealm {
+  private readonly _client: KibanaClient;
+  private readonly _elasticPassword?: string;
+  private readonly _log: ToolingLog;
+
+  constructor({
+    elasticPassword,
+    port,
+    log = defaultLog,
+    ssl = false,
+    caCert,
+  }: {
+    elasticPassword?: string;
+    port: string;
+    log?: ToolingLog;
+    ssl?: boolean;
+    caCert?: Buffer;
+  }) {
     this._client = new Client({
       node: `${ssl ? 'https' : 'http'}://elastic:${elasticPassword}@localhost:${port}`,
       ssl: ssl
@@ -45,7 +63,7 @@ exports.NativeRealm = class NativeRealm {
     this._log = log;
   }
 
-  async setPassword(username, password = this._elasticPassword, retryOpts = {}) {
+  async setPassword(username: string, password = this._elasticPassword, retryOpts = {}) {
     await this._autoRetry(retryOpts, async () => {
       try {
         await this._client.security.changePassword({
@@ -72,7 +90,7 @@ exports.NativeRealm = class NativeRealm {
     });
   }
 
-  async setPasswords(options) {
+  async setPasswords(options: Record<string, string>) {
     if (!(await this.isSecurityEnabled())) {
       this._log.info('security is not enabled, unable to set native realm passwords');
       return;
@@ -106,7 +124,7 @@ exports.NativeRealm = class NativeRealm {
       return await this._autoRetry(retryOpts, async () => {
         const {
           body: { features },
-        } = await this._client.xpack.info({ categories: 'features' });
+        } = await this._client.xpack.info({ categories: ['features'] });
         return features.security && features.security.enabled && features.security.available;
       });
     } catch (error) {
@@ -118,7 +136,10 @@ exports.NativeRealm = class NativeRealm {
     }
   }
 
-  async _autoRetry(opts, fn) {
+  async _autoRetry<T>(
+    opts: { attempt?: number; maxAttempts?: number },
+    fn: (attempt: number) => Promise<T>
+  ): Promise<T> {
     const { attempt = 1, maxAttempts = 3 } = opts;
 
     try {
@@ -139,4 +160,4 @@ exports.NativeRealm = class NativeRealm {
       return await this._autoRetry(nextOpts, fn);
     }
   }
-};
+}

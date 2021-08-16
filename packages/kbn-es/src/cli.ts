@@ -6,18 +6,28 @@
  * Side Public License, v 1.
  */
 
-const chalk = require('chalk');
-const getopts = require('getopts');
-const dedent = require('dedent');
-const commands = require('./cli_commands');
-const { isCliError } = require('./errors');
-const { log } = require('./utils');
+import chalk from 'chalk';
+import getopts from 'getopts';
+import dedent from 'dedent';
+import * as commands from './cli_commands';
+import { isCliError } from './errors';
+import { log } from './utils';
+
+interface CliCommand {
+  description: string;
+  usage?: string;
+  help: (defaults: any) => string;
+  run: (defaults: any) => Promise<void>;
+}
+
+const cliCommands = commands as Record<string, CliCommand>;
 
 function help() {
   const availableCommands = Object.keys(commands).map(
-    (name) => `${name} - ${commands[name].description}`
+    (name) => `${name} - ${cliCommands[name].description}`
   );
 
+  // eslint-disable-next-line no-console
   console.log(dedent`
     usage: es <command> [<args>]
 
@@ -33,7 +43,7 @@ function help() {
   `);
 }
 
-exports.run = async (defaults = {}) => {
+export const run = async (defaults = {}) => {
   try {
     const argv = process.argv.slice(2);
     const options = getopts(argv, {
@@ -51,7 +61,7 @@ exports.run = async (defaults = {}) => {
       return;
     }
 
-    const command = commands[commandName];
+    const command = cliCommands[commandName];
 
     if (command === undefined) {
       log.error(chalk.red(`[${commandName}] is not a valid command, see 'es --help'`));

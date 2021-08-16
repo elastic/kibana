@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-exports.run = require('./cli').run;
-exports.Cluster = require('./cluster').Cluster;
+export type LicenseLevel = 'default' | 'oss' | 'basic' | 'trial';

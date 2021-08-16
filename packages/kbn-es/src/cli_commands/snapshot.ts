@@ -6,13 +6,21 @@
  * Side Public License, v 1.
  */
 
-const dedent = require('dedent');
-const getopts = require('getopts');
-const { Cluster } = require('../cluster');
+import dedent from 'dedent';
+import getopts from 'getopts';
+import { Cluster } from '../cluster';
+import { LicenseLevel } from '../types';
 
-exports.description = 'Downloads and run from a nightly snapshot';
+export const description = 'Downloads and run from a nightly snapshot';
 
-exports.help = (defaults = {}) => {
+export const help = (
+  defaults: {
+    license?: LicenseLevel;
+    password?: string;
+    'base-path'?: string;
+    version?: string;
+  } = {}
+) => {
   const { license = 'basic', password = 'changeme', 'base-path': basePath } = defaults;
 
   return dedent`
@@ -35,7 +43,7 @@ exports.help = (defaults = {}) => {
   `;
 };
 
-exports.run = async (defaults = {}) => {
+export const run = async (defaults = {}) => {
   const argv = process.argv.slice(2);
   const options = getopts(argv, {
     alias: {

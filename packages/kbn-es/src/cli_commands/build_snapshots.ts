@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-const { resolve, basename } = require('path');
-const { createHash } = require('crypto');
-const { promisify } = require('util');
-const { pipeline, Transform } = require('stream');
-const Fs = require('fs');
+import { resolve, basename } from 'path';
+import { createHash } from 'crypto';
+import { promisify } from 'util';
+import { pipeline, Transform } from 'stream';
+import Fs from 'fs';
 
-const getopts = require('getopts');
-const del = require('del');
+import getopts from 'getopts';
+import del from 'del';
 
-const { buildSnapshot, log } = require('../utils');
+import { buildSnapshot, log } from '../utils';
 
 const pipelineAsync = promisify(pipeline);
 
-exports.description = 'Build and collect ES snapshots';
+export const description = 'Build and collect ES snapshots';
 
-exports.help = () => ``;
+export const help = () => ``;
 
-exports.run = async (defaults = {}) => {
+export const run = async (defaults = {}) => {
   const argv = process.argv.slice(2);
   const options = getopts(argv, {
     alias: {
@@ -39,8 +39,8 @@ exports.run = async (defaults = {}) => {
   del.sync(outputDir);
   Fs.mkdirSync(outputDir, { recursive: true });
 
-  for (const license of ['oss', 'trial']) {
-    for (const platform of ['darwin', 'win32', 'linux']) {
+  for (const license of ['oss', 'trial'] as const) {
+    for (const platform of ['darwin', 'win32', 'linux'] as const) {
       log.info('Building', platform, license === 'trial' ? 'default' : 'oss', 'snapshot');
       log.indent(4);
 

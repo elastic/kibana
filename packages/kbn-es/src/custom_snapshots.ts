@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-const { basename } = require('path');
+import { basename } from 'path';
+import { LicenseLevel } from './types';
 
-function isVersionFlag(a) {
+function isVersionFlag(a: string) {
   return a.startsWith('--version');
 }
 
@@ -28,7 +29,7 @@ function getCustomSnapshotUrl() {
   }
 }
 
-function resolveCustomSnapshotUrl(urlVersion, license) {
+function resolveCustomSnapshotUrl(urlVersion: string, license: LicenseLevel) {
   const customSnapshotUrl = getCustomSnapshotUrl();
 
   if (!customSnapshotUrl) {
@@ -52,4 +53,4 @@ function resolveCustomSnapshotUrl(urlVersion, license) {
   };
 }
 
-module.exports = { getCustomSnapshotUrl, resolveCustomSnapshotUrl };
+export { getCustomSnapshotUrl, resolveCustomSnapshotUrl };

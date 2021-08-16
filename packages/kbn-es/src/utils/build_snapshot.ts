@@ -6,15 +6,19 @@
  * Side Public License, v 1.
  */
 
-const execa = require('execa');
-const path = require('path');
-const os = require('os');
-const readline = require('readline');
-const { createCliError } = require('../errors');
-const { findMostRecentlyChanged } = require('../utils');
-const { GRADLE_BIN } = require('../paths');
+import execa from 'execa';
+import path from 'path';
+import os from 'os';
+import readline from 'readline';
+import EventEmitter from 'events';
+import { ToolingLog } from '@kbn/dev-utils';
+import { createCliError } from '../errors';
+import { findMostRecentlyChanged } from '../utils';
+import { GRADLE_BIN } from '../paths';
+import { LicenseLevel } from '../types';
 
-const onceEvent = (emitter, event) => new Promise((resolve) => emitter.once(event, resolve));
+const onceEvent = (emitter: EventEmitter, event: string) =>
+  new Promise((resolve) => emitter.once(event, resolve));
 
 /**
  * Creates archive from source
@@ -33,7 +37,17 @@ const onceEvent = (emitter, event) => new Promise((resolve) => emitter.once(even
  *   :distribution:archives:oss-linux-tar:assemble
  *   :distribution:archives:oss-windows-zip:assemble
  */
-exports.buildSnapshot = async ({ license, sourcePath, log, platform = os.platform() }) => {
+export const buildSnapshot = async ({
+  license,
+  sourcePath,
+  log,
+  platform = os.platform(),
+}: {
+  license: LicenseLevel;
+  sourcePath: string;
+  log: ToolingLog;
+  platform?: NodeJS.Platform;
+}) => {
   const { task, ext } = exports.archiveForPlatform(platform, license);
   const buildArgs = [`:distribution:archives:${task}:assemble`];
 
@@ -45,8 +59,8 @@ exports.buildSnapshot = async ({ license, sourcePath, log, platform = os.platfor
     stdio: ['ignore', 'pipe', 'pipe'],
   });
 
-  const stdout = readline.createInterface({ input: build.stdout });
-  const stderr = readline.createInterface({ input: build.stderr });
+  const stdout = readline.createInterface({ input: build.stdout! });
+  const stderr = readline.createInterface({ input: build.stderr! });
 
   stdout.on('line', (line) => log.debug(line));
   stderr.on('line', (line) => log.error(line));
@@ -54,7 +68,7 @@ exports.buildSnapshot = async ({ license, sourcePath, log, platform = os.platfor
   const [exitCode] = await Promise.all([
     Promise.race([
       onceEvent(build, 'exit'),
-      onceEvent(build, 'error').then((error) => {
+      onceEvent(build, 'error').then((error: any) => {
         throw createCliError(`Error spawning gradle: ${error.message}`);
       }),
     ]),
@@ -62,7 +76,7 @@ exports.buildSnapshot = async ({ license, sourcePath, log, platform = os.platfor
     onceEvent(stderr, 'close'),
   ]);
 
-  if (exitCode > 0) {
+  if (typeof exitCode === 'number' && exitCode > 0) {
     throw createCliError('unable to build ES');
   }
 
@@ -76,7 +90,7 @@ exports.buildSnapshot = async ({ license, sourcePath, log, platform = os.platfor
   return esArchivePath;
 };
 
-exports.archiveForPlatform = (platform, license) => {
+export const archiveForPlatform = (platform: NodeJS.Platform, license: LicenseLevel) => {
   const taskPrefix = license === 'oss' ? 'oss-' : '';
 
   switch (platform) {

@@ -6,25 +6,27 @@
  * Side Public License, v 1.
  */
 
-const fetch = require('node-fetch');
-const AbortController = require('abort-controller');
-const fs = require('fs');
-const { promisify } = require('util');
-const { pipeline, Transform } = require('stream');
-const chalk = require('chalk');
-const { createHash } = require('crypto');
-const path = require('path');
+import fetch from 'node-fetch';
+import AbortController from 'abort-controller';
+import fs from 'fs';
+import { promisify } from 'util';
+import { pipeline, Transform } from 'stream';
+import chalk from 'chalk';
+import { createHash } from 'crypto';
+import path from 'path';
+import { ToolingLog } from '@kbn/dev-utils';
+import { Headers } from 'node-fetch';
+import { cache } from './utils';
+import { resolveCustomSnapshotUrl } from './custom_snapshots';
+import { createCliError, isCliError } from './errors';
+import { LicenseLevel } from './types';
 
 const asyncPipeline = promisify(pipeline);
 const DAILY_SNAPSHOTS_BASE_URL = 'https://storage.googleapis.com/kibana-ci-es-snapshots-daily';
 const PERMANENT_SNAPSHOTS_BASE_URL =
   'https://storage.googleapis.com/kibana-ci-es-snapshots-permanent';
 
-const { cache } = require('./utils');
-const { resolveCustomSnapshotUrl } = require('./custom_snapshots');
-const { createCliError, isCliError } = require('./errors');
-
-function getChecksumType(checksumUrl) {
+function getChecksumType(checksumUrl: string) {
   if (checksumUrl.endsWith('.sha512')) {
     return 'sha512';
   }
@@ -32,15 +34,15 @@ function getChecksumType(checksumUrl) {
   throw new Error(`unable to determine checksum type: ${checksumUrl}`);
 }
 
-function headersToString(headers, indent = '') {
+function headersToString(headers: Headers, indent = '') {
   return [...headers.entries()].reduce(
     (acc, [key, value]) => `${acc}\n${indent}${key}: ${value}`,
     ''
   );
 }
 
-async function retry(log, fn) {
-  async function doAttempt(attempt) {
+async function retry<T>(log: ToolingLog, fn: () => Promise<T>): Promise<T> {
+  async function doAttempt(attempt: number): Promise<T> {
     try {
       return await fn();
     } catch (error) {
@@ -63,7 +65,7 @@ function shouldUseUnverifiedSnapshot() {
   return !!process.env.KBN_ES_SNAPSHOT_USE_UNVERIFIED;
 }
 
-async function fetchSnapshotManifest(url, log) {
+async function fetchSnapshotManifest(url: string, log: ToolingLog) {
   log.info('Downloading snapshot manifest from %s', chalk.bold(url));
 
   const abc = new AbortController();
@@ -73,7 +75,11 @@ async function fetchSnapshotManifest(url, log) {
   return { abc, resp, json };
 }
 
-async function getArtifactSpecForSnapshot(urlVersion, license, log) {
+async function getArtifactSpecForSnapshot(
+  urlVersion: string,
+  license: LicenseLevel,
+  log: ToolingLog
+) {
   const desiredVersion = urlVersion.replace('-SNAPSHOT', '');
   const desiredLicense = license === 'oss' ? 'oss' : 'default';
 
@@ -103,17 +109,26 @@ async function getArtifactSpecForSnapshot(urlVersion, license, log) {
     throw new Error(`Unable to read snapshot manifest: ${resp.statusText}\n  ${json}`);
   }
 
-  const manifest = JSON.parse(json);
+  const manifest = JSON.parse(json) as {
+    archives: Array<{
+      version: string;
+      platform: string;
+      license: string;
+      architecture: string;
+      url: string;
+      filename: string;
+    }>;
+  };
 
   const platform = process.platform === 'win32' ? 'windows' : process.platform;
   const arch = process.arch === 'arm64' ? 'aarch64' : 'x86_64';
 
   const archive = manifest.archives.find(
-    (archive) =>
-      archive.version === desiredVersion &&
-      archive.platform === platform &&
-      archive.license === desiredLicense &&
-      archive.architecture === arch
+    (a) =>
+      a.version === desiredVersion &&
+      a.platform === platform &&
+      a.license === desiredLicense &&
+      a.architecture === arch
   );
 
   if (!archive) {
@@ -130,14 +145,33 @@ async function getArtifactSpecForSnapshot(urlVersion, license, log) {
   };
 }
 
-exports.Artifact = class Artifact {
+interface ArchiveSpec {
+  url: string;
+  checksumUrl: string;
+  checksumType: string;
+  filename: string;
+}
+
+interface ArtifactResponse {
+  checksum: string;
+  etag: string | null;
+  contentLength: number;
+  first500Bytes: Buffer;
+  headers: Headers;
+}
+
+function isArtifactResponse(r: ArtifactResponse | { cached: true }): r is ArtifactResponse {
+  return !(r as any).cached;
+}
+
+export class Artifact {
   /**
    * Fetch an Artifact from the Artifact API for a license level and version
    * @param {('oss'|'basic'|'trial')} license
    * @param {string} version
    * @param {ToolingLog} log
    */
-  static async getSnapshot(license, version, log) {
+  static async getSnapshot(license: LicenseLevel, version: string, log: ToolingLog) {
     const urlVersion = `${encodeURIComponent(version)}-SNAPSHOT`;
 
     const customSnapshotArtifactSpec = resolveCustomSnapshotUrl(urlVersion, license);
@@ -154,11 +188,11 @@ exports.Artifact = class Artifact {
    * @param {string} url
    * @param {ToolingLog} log
    */
-  static async getArchive(url, log) {
+  static async getArchive(url: string, log: ToolingLog) {
     const shaUrl = `${url}.sha512`;
 
     const artifactSpec = {
-      url: url,
+      url,
       filename: path.basename(url),
       checksumUrl: shaUrl,
       checksumType: getChecksumType(shaUrl),
@@ -167,25 +201,22 @@ exports.Artifact = class Artifact {
     return new Artifact(artifactSpec, log);
   }
 
-  constructor(spec, log) {
-    this._spec = spec;
-    this._log = log;
-  }
+  constructor(private readonly spec: ArchiveSpec, private readonly _log: ToolingLog) {}
 
   getUrl() {
-    return this._spec.url;
+    return this.spec.url;
   }
 
   getChecksumUrl() {
-    return this._spec.checksumUrl;
+    return this.spec.checksumUrl;
   }
 
   getChecksumType() {
-    return this._spec.checksumType;
+    return this.spec.checksumType;
   }
 
   getFilename() {
-    return this._spec.filename;
+    return this.spec.filename;
   }
 
   /**
@@ -194,13 +225,16 @@ exports.Artifact = class Artifact {
    * @param {string} dest
    * @return {Promise<void>}
    */
-  async download(dest) {
+  async download(dest: string) {
     await retry(this._log, async () => {
       const cacheMeta = cache.readMeta(dest);
       const tmpPath = `${dest}.tmp`;
 
       const artifactResp = await this._download(tmpPath, cacheMeta.etag, cacheMeta.ts);
-      if (artifactResp.cached) {
+      if (!isArtifactResponse(artifactResp)) {
+        if (!artifactResp.cached) {
+          throw new Error(`Unexpected response from artificat download: ${artifactResp}`);
+        }
         return;
       }
 
@@ -221,7 +255,11 @@ exports.Artifact = class Artifact {
    * @param {string} ts
    * @return {{ cached: true }|{ checksum: string, etag: string, first500Bytes: Buffer }}
    */
-  async _download(tmpPath, etag, ts) {
+  async _download(
+    tmpPath: string,
+    etag: string,
+    ts: string
+  ): Promise<{ cached: true } | ArtifactResponse> {
     const url = this.getUrl();
 
     if (etag) {
@@ -301,7 +339,7 @@ exports.Artifact = class Artifact {
    * @param {{ checksum: string, contentLength: number, first500Bytes: Buffer }} artifactResp
    * @return {Promise<void>}
    */
-  async _verifyChecksum(artifactResp) {
+  async _verifyChecksum(artifactResp: ArtifactResponse) {
     this._log.info('downloading artifact checksum from %s', chalk.bold(this.getChecksumUrl()));
 
     const abc = new AbortController();
@@ -336,4 +374,4 @@ exports.Artifact = class Artifact {
 
     this._log.info('checksum verified');
   }
-};
+}

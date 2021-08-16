@@ -6,12 +6,18 @@
  * Side Public License, v 1.
  */
 
-exports.createCliError = function (message) {
-  const error = new Error(message);
-  error.isCliError = true;
-  return error;
+class CliError extends Error {
+  public readonly isCliError = true;
+
+  constructor(message?: string) {
+    super(message);
+  }
+}
+
+export const createCliError = function (message: string) {
+  return new CliError(message);
 };
 
-exports.isCliError = function (error) {
-  return error && error.isCliError;
+export const isCliError = function (error: Error): error is CliError {
+  return error && (error as CliError).isCliError;
 };

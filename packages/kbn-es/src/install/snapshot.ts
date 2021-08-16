@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-const chalk = require('chalk');
-const path = require('path');
-const { BASE_PATH } = require('../paths');
-const { installArchive } = require('./archive');
-const { log: defaultLog } = require('../utils');
-const { Artifact } = require('../artifact');
+import chalk from 'chalk';
+import path from 'path';
+import { ToolingLog } from '@kbn/dev-utils';
+import { BASE_PATH } from '../paths';
+import { installArchive } from './archive';
+import { log as defaultLog } from '../utils';
+import { Artifact } from '../artifact';
+import { LicenseLevel } from '../types';
 
 /**
  * Download an ES snapshot
@@ -23,12 +25,18 @@ const { Artifact } = require('../artifact');
  * @property {String} options.installPath
  * @property {ToolingLog} options.log
  */
-exports.downloadSnapshot = async function installSnapshot({
+export async function downloadSnapshot({
   license = 'basic',
   version,
   basePath = BASE_PATH,
   installPath = path.resolve(basePath, version),
   log = defaultLog,
+}: {
+  license?: LicenseLevel;
+  version: string;
+  basePath?: string;
+  installPath?: string;
+  log?: ToolingLog;
 }) {
   log.info('version: %s', chalk.bold(version));
   log.info('install path: %s', chalk.bold(installPath));
@@ -41,7 +49,7 @@ exports.downloadSnapshot = async function installSnapshot({
   return {
     downloadPath: dest,
   };
-};
+}
 
 /**
  * Installs ES from snapshot
@@ -54,7 +62,7 @@ exports.downloadSnapshot = async function installSnapshot({
  * @property {String} options.installPath
  * @property {ToolingLog} options.log
  */
-exports.installSnapshot = async function installSnapshot({
+export async function installSnapshot({
   license = 'basic',
   password = 'password',
   version,
@@ -62,6 +70,14 @@ exports.installSnapshot = async function installSnapshot({
   installPath = path.resolve(basePath, version),
   log = defaultLog,
   esArgs,
+}: {
+  license?: LicenseLevel;
+  password?: string;
+  version: string;
+  basePath?: string;
+  installPath?: string;
+  log?: ToolingLog;
+  esArgs?: string[];
 }) {
   const { downloadPath } = await exports.downloadSnapshot({
     license,
@@ -79,4 +95,4 @@ exports.installSnapshot = async function installSnapshot({
     log,
     esArgs,
   });
-};
+}

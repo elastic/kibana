@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-const path = require('path');
-const fs = require('fs');
+import path from 'path';
+import fs from 'fs';
+import { ToolingLog } from '@kbn/dev-utils';
 
 /**
  * Copies config references to an absolute path to
@@ -17,9 +18,13 @@ const fs = require('fs');
  * @param {Array} config
  * @param {String} dest
  */
-exports.extractConfigFiles = function extractConfigFiles(config, dest, options = {}) {
+export const extractConfigFiles = (
+  config: string | string[],
+  dest: string,
+  options: { log?: ToolingLog } = {}
+) => {
   const originalConfig = typeof config === 'string' ? [config] : config;
-  const localConfig = [];
+  const localConfig: string[] = [];
 
   originalConfig.forEach((prop) => {
     const [key, value] = prop.split('=');
@@ -46,7 +51,7 @@ function isFile(dest = '') {
   return path.isAbsolute(dest) && path.extname(dest).length > 0 && fs.existsSync(dest);
 }
 
-function copyFileSync(src, dest) {
+function copyFileSync(src: string, dest: string) {
   const destPath = path.dirname(dest);
 
   if (!fs.existsSync(destPath)) {

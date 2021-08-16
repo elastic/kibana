@@ -12,8 +12,10 @@ jest.mock('fs', () => ({
   writeFileSync: jest.fn(),
 }));
 
-const { extractConfigFiles } = require('./extract_config_files');
-const fs = require('fs');
+import { extractConfigFiles } from './extract_config_files';
+import fs from 'fs';
+
+const mockedFs = fs as jest.Mocked<typeof fs>;
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -32,16 +34,16 @@ test('returns config with local paths', () => {
 test('copies file', () => {
   extractConfigFiles(['path=/data/foo.yml'], '/es');
 
-  expect(fs.readFileSync.mock.calls[0][0]).toEqual('/data/foo.yml');
-  expect(fs.writeFileSync.mock.calls[0][0]).toEqual('/es/config/foo.yml');
+  expect(mockedFs.readFileSync.mock.calls[0][0]).toEqual('/data/foo.yml');
+  expect(mockedFs.writeFileSync.mock.calls[0][0]).toEqual('/es/config/foo.yml');
 });
 
 test('ignores file which does not exist', () => {
   fs.existsSync = () => false;
   extractConfigFiles(['path=/data/foo.yml'], '/es');
 
-  expect(fs.readFileSync).not.toHaveBeenCalled();
-  expect(fs.writeFileSync).not.toHaveBeenCalled();
+  expect(mockedFs.readFileSync).not.toHaveBeenCalled();
+  expect(mockedFs.writeFileSync).not.toHaveBeenCalled();
 });
 
 test('ignores non-paths', () => {

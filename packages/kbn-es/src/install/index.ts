@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-exports.snapshot = require('./snapshot');
-exports.source = require('./source');
-exports.archive = require('./archive');
-exports.build_snapshots = require('./build_snapshots');
+export { installArchive } from './archive';
+export { installSnapshot } from './snapshot';
+export { downloadSnapshot } from './snapshot';
+export { installSource } from './source';

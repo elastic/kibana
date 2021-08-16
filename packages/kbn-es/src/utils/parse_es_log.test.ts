@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-const dedent = require('dedent');
-const { parseEsLog } = require('./parse_es_log');
+import dedent from 'dedent';
+import { parseEsLog } from './parse_es_log';
 
 test('parses single line', () => {
   const data = dedent(`

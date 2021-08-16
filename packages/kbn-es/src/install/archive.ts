@@ -6,41 +6,54 @@
  * Side Public License, v 1.
  */
 
-const fs = require('fs');
-const path = require('path');
-const chalk = require('chalk');
-const execa = require('execa');
-const del = require('del');
-const url = require('url');
-const { extract } = require('@kbn/dev-utils');
-const { log: defaultLog } = require('../utils');
-const { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } = require('../paths');
-const { Artifact } = require('../artifact');
-const { parseSettings, SettingsFilter } = require('../settings');
+import fs from 'fs';
+import path from 'path';
+import chalk from 'chalk';
+import execa from 'execa';
+import del from 'del';
+import url from 'url';
+import { extract, ToolingLog } from '@kbn/dev-utils';
+import { log as defaultLog } from '../utils';
+import { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } from '../paths';
+import { Artifact } from '../artifact';
+import { parseSettings, SettingsFilter } from '../settings';
+import { LicenseLevel } from '../types';
 
 /**
  * Extracts an ES archive and optionally installs plugins
  *
- * @param {String} archive - path to tar
+ * @param {String} archivePath - path to tar
  * @param {Object} options
  * @property {('oss'|'basic'|'trial')} options.license
  * @property {String} options.basePath
  * @property {String} options.installPath
  * @property {ToolingLog} options.log
+ * @property {String} options.password
+ * @property {String[]} options.esArgs
  */
-exports.installArchive = async function installArchive(archive, options = {}) {
+export async function installArchive(
+  archivePath: string,
+  options: {
+    license?: LicenseLevel;
+    password?: string;
+    basePath?: string;
+    installPath?: string;
+    log?: ToolingLog;
+    esArgs?: string[];
+  } = {}
+) {
   const {
     license = 'basic',
     password = 'changeme',
     basePath = BASE_PATH,
-    installPath = path.resolve(basePath, path.basename(archive, '.tar.gz')),
+    installPath = path.resolve(basePath, path.basename(archivePath, '.tar.gz')),
     log = defaultLog,
     esArgs = [],
   } = options;
 
-  let dest = archive;
-  if (['http:', 'https:'].includes(url.parse(archive).protocol)) {
-    const artifact = await Artifact.getArchive(archive, log);
+  let dest = archivePath;
+  if (['http:', 'https:'].includes(url.parse(archivePath).protocol ?? '')) {
+    const artifact = await Artifact.getArchive(archivePath, log);
     dest = path.resolve(basePath, 'cache', artifact.getFilename());
     await artifact.download(dest);
   }
@@ -75,7 +88,7 @@ exports.installArchive = async function installArchive(archive, options = {}) {
   }
 
   return { installPath };
-};
+}
 
 /**
  * Appends single line to elasticsearch.yml config file
@@ -84,7 +97,7 @@ exports.installArchive = async function installArchive(archive, options = {}) {
  * @param {String} key
  * @param {String} value
  */
-async function appendToConfig(installPath, key, value) {
+async function appendToConfig(installPath: string, key: string, value: string) {
   fs.appendFileSync(path.resolve(installPath, ES_CONFIG), `${key}: ${value}\n`, 'utf8');
 }
 
@@ -96,7 +109,11 @@ async function appendToConfig(installPath, key, value) {
  * @param {Array<[string, string]>} secureSettings List of custom Elasticsearch secure settings to
  * add into the keystore.
  */
-async function configureKeystore(installPath, log = defaultLog, secureSettings) {
+async function configureKeystore(
+  installPath: string,
+  log = defaultLog,
+  secureSettings: Array<[string, string]>
+) {
   const env = { JAVA_HOME: '' };
   await execa(ES_KEYSTORE_BIN, ['create'], { cwd: installPath, env });
 

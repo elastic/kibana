@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
-const { NativeRealm } = require('./native_realm');
+import { NativeRealm } from './native_realm';
 
 jest.genMockFromModule('@elastic/elasticsearch');
 jest.mock('@elastic/elasticsearch');
 
-const { ToolingLog } = require('@kbn/dev-utils');
-const { Client } = require('@elastic/elasticsearch');
+import { ToolingLog } from '@kbn/dev-utils';
+import { Client } from '@elastic/elasticsearch';
+
+const MockedClientConstructor = Client as jest.Mock<Client>;
 
 const mockClient = {
   xpack: {
@@ -23,10 +25,10 @@ const mockClient = {
     getUser: jest.fn(),
   },
 };
-Client.mockImplementation(() => mockClient);
+MockedClientConstructor.mockImplementation(() => mockClient as any);
 
 const log = new ToolingLog();
-let nativeRealm;
+let nativeRealm: NativeRealm;
 
 beforeEach(() => {
   nativeRealm = new NativeRealm({ elasticPassword: 'changeme', port: '9200', log });
@@ -36,7 +38,7 @@ afterAll(() => {
   jest.clearAllMocks();
 });
 
-function mockXPackInfo(available, enabled) {
+function mockXPackInfo(available: boolean, enabled: boolean) {
   mockClient.xpack.info.mockImplementation(() => ({
     body: {
       features: {
@@ -67,7 +69,7 @@ describe('isSecurityEnabled', () => {
 
   test('returns false if 400 error returned', async () => {
     mockClient.xpack.info.mockImplementation(() => {
-      const error = new Error('ResponseError');
+      const error: any = new Error('ResponseError');
       error.meta = {
         statusCode: 400,
       };
@@ -79,7 +81,7 @@ describe('isSecurityEnabled', () => {
 
   test('rejects if unexpected error is thrown', async () => {
     mockClient.xpack.info.mockImplementation(() => {
-      const error = new Error('ResponseError');
+      const error: any = new Error('ResponseError');
       error.meta = {
         statusCode: 500,
       };

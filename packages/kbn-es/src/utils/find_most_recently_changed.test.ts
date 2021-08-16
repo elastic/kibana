@@ -31,7 +31,7 @@ jest.mock('fs', () => ({
   }),
 }));
 
-const { findMostRecentlyChanged } = require('./find_most_recently_changed');
+import { findMostRecentlyChanged } from './find_most_recently_changed';
 
 test('returns newest file', () => {
   const file = findMostRecentlyChanged('/data/*.yml');

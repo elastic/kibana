@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
-const path = require('path');
-const fs = require('fs');
-const os = require('os');
-const chalk = require('chalk');
-const crypto = require('crypto');
-const simpleGit = require('simple-git/promise');
-const { installArchive } = require('./archive');
-const { log: defaultLog, cache, buildSnapshot, archiveForPlatform } = require('../utils');
-const { BASE_PATH } = require('../paths');
+import path from 'path';
+import fs from 'fs';
+import os from 'os';
+import chalk from 'chalk';
+import crypto from 'crypto';
+import simpleGit from 'simple-git/promise';
+import { ToolingLog } from '@kbn/dev-utils';
+import { installArchive } from './archive';
+import { log as defaultLog, cache, buildSnapshot, archiveForPlatform } from '../utils';
+import { BASE_PATH } from '../paths';
+import { LicenseLevel } from '../types';
 
 /**
  * Installs ES from source
@@ -27,7 +29,7 @@ const { BASE_PATH } = require('../paths');
  * @property {String} options.installPath
  * @property {ToolingLog} options.log
  */
-exports.installSource = async function installSource({
+export async function installSource({
   license = 'basic',
   password = 'changeme',
   sourcePath,
@@ -35,6 +37,14 @@ exports.installSource = async function installSource({
   installPath = path.resolve(basePath, 'source'),
   log = defaultLog,
   esArgs,
+}: {
+  license?: LicenseLevel;
+  password?: string;
+  sourcePath: string;
+  basePath?: string;
+  installPath?: string;
+  log?: ToolingLog;
+  esArgs?: string[];
 }) {
   log.info('source path: %s', chalk.bold(sourcePath));
   log.info('install path: %s', chalk.bold(installPath));
@@ -62,14 +72,14 @@ exports.installSource = async function installSource({
     log,
     esArgs,
   });
-};
+}
 
 /**
  *
  * @param {String} cwd
  * @param {ToolingLog} log
  */
-async function sourceInfo(cwd, license, log = defaultLog) {
+async function sourceInfo(cwd: string, license: LicenseLevel, log = defaultLog) {
   if (!fs.existsSync(cwd)) {
     throw new Error(`${cwd} does not exist`);
   }

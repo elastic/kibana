@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
-const { ToolingLog } = require('@kbn/dev-utils');
+import { ToolingLog } from '@kbn/dev-utils';
 
-const log = new ToolingLog({
+export const log = new ToolingLog({
   level: 'verbose',
   writeTo: process.stdout,
 });
-
-exports.log = log;
