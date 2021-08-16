@@ -273,20 +273,19 @@ export class ContentStream extends Duplex {
 
   private async flush(size = this.buffer.byteLength) {
     const chunk = this.buffer.slice(0, size);
-    if (!chunk.byteLength) {
-      return;
-    }
-
     const content = await this.encode(chunk);
 
     if (!this.chunksWritten) {
       await this.removeChunks();
       await this.writeHead(content);
-    } else {
+    } else if (chunk.byteLength) {
       await this.writeChunk(content);
     }
 
-    this.chunksWritten++;
+    if (chunk.byteLength) {
+      this.chunksWritten++;
+    }
+
     this.bytesWritten += chunk.byteLength;
     this.buffer = this.buffer.slice(size);
   }

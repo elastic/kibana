@@ -389,5 +389,19 @@ describe('ContentStream', () => {
         })
       );
     });
+
+    it('should clear the job contents on writing empty data', async () => {
+      stream.end();
+      await new Promise((resolve) => stream.once('finish', resolve));
+
+      expect(client.deleteByQuery).toHaveBeenCalledTimes(1);
+      expect(client.update).toHaveBeenCalledTimes(1);
+
+      const [[deleteRequest]] = client.deleteByQuery.mock.calls;
+      const [[updateRequest]] = client.update.mock.calls;
+
+      expect(deleteRequest).toHaveProperty('body.query.match.parent_id', 'something');
+      expect(updateRequest).toHaveProperty('body.doc.output.content', '');
+    });
   });
 });
