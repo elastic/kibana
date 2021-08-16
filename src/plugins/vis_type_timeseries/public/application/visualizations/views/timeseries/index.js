@@ -47,6 +47,10 @@ const generateAnnotationData = (values, formatter) =>
 
 const decorateFormatter = (formatter) => ({ value }) => formatter(value);
 
+/** When displaying the annotation, we must slightly shift the labels for
+ * the x-axis so that they do not overlap the annotations. **/
+const TICK_LABEL_WITH_ANNOTATIONS_PADDING = 19;
+
 export const TimeSeries = ({
   backgroundColor,
   showGrid,
@@ -148,7 +152,9 @@ export const TimeSeries = ({
             axes: {
               tickLabel: {
                 padding: {
-                  inner: hasVisibleAnnotations ? 19 : chartTheme.axes.tickLabel.padding.inner,
+                  inner: hasVisibleAnnotations
+                    ? TICK_LABEL_WITH_ANNOTATIONS_PADDING
+                    : chartTheme.axes.tickLabel.padding.inner,
                 },
               },
             },
