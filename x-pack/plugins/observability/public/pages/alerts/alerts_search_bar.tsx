@@ -7,13 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
-import {
-  IIndexPattern,
-  SearchBar,
-  TimeHistory,
-  FilterManager,
-  Filter,
-} from '../../../../../../src/plugins/data/public';
+import { IIndexPattern, SearchBar, TimeHistory } from '../../../../../../src/plugins/data/public';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
 export function AlertsSearchBar({
@@ -21,7 +15,6 @@ export function AlertsSearchBar({
   rangeFrom,
   rangeTo,
   onQueryChange,
-  setSearchBarFilter,
   query,
   addToQuery,
 }: {
