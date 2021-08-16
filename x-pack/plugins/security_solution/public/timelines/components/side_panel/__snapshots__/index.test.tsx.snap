@@ -261,7 +261,7 @@ Array [
   -ms-flex: 1;
   flex: 1;
   overflow: hidden;
-  padding: 16px;
+  padding: 0 16px 16px;
 }
 
 <EuiFlyout
@@ -295,10 +295,10 @@ Array [
         timelineId="test"
       >
         <EuiFlyoutHeader
-          hasBorder={true}
+          hasBorder={false}
         >
           <div
-            className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+            className="euiFlyoutHeader"
           >
             <ExpandableEventTitle
               isAlert={false}
@@ -487,6 +487,7 @@ Array [
                       <Memo()
                         detailsData={null}
                         handleOnEventClosed={[Function]}
+                        indexName="my-index"
                         isHostIsolationPanelOpen={false}
                         loadingEventDetails={true}
                         onAddEventFilterClick={[Function]}
@@ -527,7 +528,7 @@ Array [
   -ms-flex: 1;
   flex: 1;
   overflow: hidden;
-  padding: 16px;
+  padding: 0 16px 16px;
 }
 
 <div
@@ -555,10 +556,10 @@ Array [
       timelineId="test"
     >
       <EuiFlyoutHeader
-        hasBorder={true}
+        hasBorder={false}
       >
         <div
-          className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+          className="euiFlyoutHeader"
         >
           <ExpandableEventTitle
             isAlert={false}
@@ -747,6 +748,7 @@ Array [
                     <Memo()
                       detailsData={null}
                       handleOnEventClosed={[Function]}
+                      indexName="my-index"
                       isHostIsolationPanelOpen={false}
                       loadingEventDetails={true}
                       onAddEventFilterClick={[Function]}

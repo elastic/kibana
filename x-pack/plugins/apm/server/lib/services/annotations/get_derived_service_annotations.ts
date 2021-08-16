@@ -27,7 +27,7 @@ export async function getDerivedServiceAnnotations({
   searchAggregatedTransactions,
 }: {
   serviceName: string;
-  environment?: string;
+  environment: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
