@@ -11,15 +11,19 @@ import { v4 } from 'uuid';
 import { Logger, SavedObject } from 'kibana/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
-import type { RuleDataClient } from '../../../../../../rule_registry/server';
+import type { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 import { AlertAttributes } from '../../signals/types';
 import { createRuleMock } from './rule';
 import { listMock } from '../../../../../../lists/server/mocks';
 import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
+import { RuleParams } from '../../schemas/rule_schemas';
 
-export const createRuleTypeMocks = () => {
+export const createRuleTypeMocks = (
+  ruleType: string = 'query',
+  ruleParams: Partial<RuleParams> = {}
+) => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   let alertExecutor: (...args: any[]) => Promise<any>;
 
@@ -43,7 +47,7 @@ export const createRuleTypeMocks = () => {
   const mockSavedObjectsClient = savedObjectsClientMock.create();
   mockSavedObjectsClient.get.mockResolvedValue({
     id: 'de2f6a49-28a3-4794-bad7-0e9482e075f8',
-    type: 'query',
+    type: ruleType,
     references: [],
     attributes: {
       actions: [],
@@ -57,7 +61,7 @@ export const createRuleTypeMocks = () => {
         interval: '30m',
       },
       throttle: '',
-      params: createRuleMock(),
+      params: createRuleMock(ruleParams),
     },
   } as SavedObject<AlertAttributes>);
 
@@ -85,7 +89,8 @@ export const createRuleTypeMocks = () => {
           bulk: jest.fn(),
         })),
         isWriteEnabled: jest.fn(() => true),
-      } as unknown) as RuleDataClient,
+        indexName: '.alerts-security.alerts',
+      } as unknown) as IRuleDataClient,
       ruleDataService: ruleRegistryMocks.createRuleDataPluginService(),
     },
     services,
