@@ -8,9 +8,9 @@
 import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { useFetcher } from './use_fetcher';
 
-export function useFallbackToTransactionsFetcher() {
+export function useFallbackToTransactionsFetcher({ kuery }: { kuery: string }) {
   const {
-    urlParams: { kuery, start, end },
+    urlParams: { start, end },
   } = useUrlParams();
   const { data = { fallbackToTransactions: false } } = useFetcher(
     (callApmApi) => {

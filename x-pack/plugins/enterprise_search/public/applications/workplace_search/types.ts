@@ -129,12 +129,27 @@ interface SourceActivity {
   status: string;
 }
 
+interface IndexingConfig {
+  enabled: boolean;
+  features: {
+    contentExtraction: {
+      enabled: boolean;
+    };
+    thumbnails: {
+      enabled: boolean;
+    };
+  };
+}
+
 export interface ContentSourceFullData extends ContentSourceDetails {
   activities: SourceActivity[];
   details: DescriptionList[];
   summary: DocumentSummaryItem[];
   groups: Group[];
+  indexing: IndexingConfig;
   custom: boolean;
+  isIndexedSource: boolean;
+  areThumbnailsConfigEnabled: boolean;
   accessToken: string;
   urlField: string;
   titleField: string;

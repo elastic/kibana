@@ -20,7 +20,7 @@ import {
   CLOSE_TIMELINE_BTN,
   COMBO_BOX,
   CREATE_NEW_TIMELINE,
-  DRAGGABLE_HEADER,
+  DATAGRID_HEADERS,
   ID_FIELD,
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
@@ -28,7 +28,6 @@ import {
   NOTES_TEXT_AREA,
   OPEN_TIMELINE_ICON,
   PIN_EVENT,
-  REMOVE_COLUMN,
   RESET_FIELDS,
   SAVE_FILTER_BTN,
   SEARCH_OR_FILTER_CONTAINER,
@@ -311,10 +310,11 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
 };
 
 export const removeColumn = (column: number) => {
-  cy.get(DRAGGABLE_HEADER)
+  cy.get(DATAGRID_HEADERS)
     .eq(column)
+    .click()
     .within(() => {
-      cy.get(REMOVE_COLUMN).click({ force: true });
+      cy.get('button').eq(0).click({ force: true });
     });
 };
 
