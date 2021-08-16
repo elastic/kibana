@@ -76,7 +76,7 @@ export function ObservabilityPageTemplate({
           return {
             id: `${sectionIndex}.${entryIndex}`,
             name: entry.isNewFeature ? (
-              <NavNameWithBadge label={entry.label} localstorageId={badgeLocalStorageId} />
+              <NavNameWithBadge label={entry.label} localStorageId={badgeLocalStorageId} />
             ) : (
               entry.label
             ),
