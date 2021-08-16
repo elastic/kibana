@@ -13,6 +13,7 @@ import type { ElasticsearchClient } from 'src/core/server';
 import { ReportingCore } from '..';
 import { ReportSource } from '../../common/types';
 import { ExportTypesRegistry } from './export_types_registry';
+import { LevelLogger } from './level_logger';
 
 /**
  * @note The Elasticsearch `http.max_content_length` is including the whole POST body.
@@ -78,6 +79,7 @@ export class ContentStream extends Duplex {
   constructor(
     private client: ElasticsearchClient,
     private exportTypesRegistry: ExportTypesRegistry,
+    private logger: LevelLogger,
     private document: ContentStreamDocument
   ) {
     super();
@@ -150,6 +152,8 @@ export class ContentStream extends Duplex {
         jobContentEncoding === 'base64'
           ? ContentStream.getMaxBase64EncodedSize(maxContentSize)
           : ContentStream.getMaxJsonEscapedSize(maxContentSize);
+
+      this.logger.debug(`Chunk size is ${this.maxChunkSize} bytes.`);
     }
 
     return this.maxChunkSize;
@@ -170,6 +174,8 @@ export class ContentStream extends Duplex {
       },
       size: 1,
     };
+
+    this.logger.debug(`Reading report contents.`);
 
     const response = await this.client.search<ReportSource>({ body, index });
     const hits = response?.body.hits?.hits?.[0];
@@ -196,6 +202,8 @@ export class ContentStream extends Duplex {
       size: 1,
     };
 
+    this.logger.debug(`Reading chunk #${this.chunksRead}.`);
+
     const response = await this.client.search<ChunkSource>({ body, index });
     const hits = response?.body.hits?.hits?.[0];
 
@@ -210,6 +218,7 @@ export class ContentStream extends Duplex {
     try {
       const content = this.chunksRead ? await this.readChunk() : await this.readHead();
       if (!content) {
+        this.logger.debug(`Chunk is empty.`);
         this.push(null);
         return;
       }
@@ -221,6 +230,7 @@ export class ContentStream extends Duplex {
       this.bytesRead += buffer.byteLength;
 
       if (this.isRead()) {
+        this.logger.debug(`Read ${this.bytesRead} of ${this.jobSize} bytes.`);
         this.push(null);
       }
     } catch (error) {
@@ -242,6 +252,8 @@ export class ContentStream extends Duplex {
   }
 
   private async writeHead(content: string) {
+    this.logger.debug(`Updating report contents.`);
+
     const { body } = await this.client.update<ReportSource>({
       ...this.document,
       body: {
@@ -257,6 +269,8 @@ export class ContentStream extends Duplex {
   private async writeChunk(content: string) {
     const { id: parentId, index } = this.document;
     const id = this.puid.generate();
+
+    this.logger.debug(`Writing chunk #${this.chunksWritten} (${id}).`);
 
     await this.client.index<ChunkSource>({
       id,
@@ -330,6 +344,12 @@ export class ContentStream extends Duplex {
 export async function getContentStream(reporting: ReportingCore, document: ContentStreamDocument) {
   const { asInternalUser: client } = await reporting.getEsClient();
   const exportTypesRegistry = reporting.getExportTypesRegistry();
+  const { logger } = reporting.getPluginSetupDeps();
 
-  return new ContentStream(client, exportTypesRegistry, document);
+  return new ContentStream(
+    client,
+    exportTypesRegistry,
+    logger.clone(['content_stream', document.id]),
+    document
+  );
 }

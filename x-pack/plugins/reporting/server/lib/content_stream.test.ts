@@ -7,12 +7,14 @@
 
 import { set } from 'lodash';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { createMockLevelLogger } from '../test_helpers';
 import { ContentStream } from './content_stream';
 import { ExportTypesRegistry } from './export_types_registry';
 
 describe('ContentStream', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
   let exportTypesRegistry: jest.Mocked<ExportTypesRegistry>;
+  let logger: ReturnType<typeof createMockLevelLogger>;
   let stream: ContentStream;
 
   beforeEach(() => {
@@ -20,7 +22,8 @@ describe('ContentStream', () => {
     exportTypesRegistry = ({
       get: jest.fn(() => ({})),
     } as unknown) as typeof exportTypesRegistry;
-    stream = new ContentStream(client, exportTypesRegistry, {
+    logger = createMockLevelLogger();
+    stream = new ContentStream(client, exportTypesRegistry, logger, {
       id: 'something',
       index: 'somewhere',
     });
