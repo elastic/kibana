@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { once } from 'lodash';
 import { CoreSetup, Logger } from 'src/core/server';
-import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../../../rule_registry/common/assets';
-import { RuleRegistryPluginSetupContract } from '../../../../rule_registry/server';
+import { Dataset, RuleRegistryPluginSetupContract } from '../../../../rule_registry/server';
 import type { InfraFeatureId } from '../../../common/constants';
 import { RuleRegistrationContext, RulesServiceStartDeps } from './types';
 
@@ -25,51 +23,20 @@ export const createRuleDataClient = ({
   logger: Logger;
   ruleDataService: RuleRegistryPluginSetupContract['ruleDataService'];
 }) => {
-  const initializeRuleDataTemplates = once(async () => {
-    const componentTemplateName = ruleDataService.getFullAssetName(
-      `${registrationContext}-mappings`
-    );
-
-    const indexNamePattern = ruleDataService.getFullAssetName(`${registrationContext}*`);
-
-    if (!ruleDataService.isWriteEnabled()) {
-      return;
-    }
-
-    await ruleDataService.createOrUpdateComponentTemplate({
-      name: componentTemplateName,
-      body: {
-        template: {
-          settings: {
-            number_of_shards: 1,
-          },
-          mappings: {},
-        },
+  return ruleDataService.initializeIndex({
+    feature: ownerFeatureId,
+    registrationContext,
+    dataset: Dataset.alerts,
+    componentTemplateRefs: [],
+    componentTemplates: [
+      {
+        name: 'mappings',
+        version: 0,
+        mappings: {},
       },
-    });
-
-    await ruleDataService.createOrUpdateIndexTemplate({
-      name: ruleDataService.getFullAssetName(registrationContext),
-      body: {
-        index_patterns: [indexNamePattern],
-        composed_of: [
-          ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
-          componentTemplateName,
-        ],
-      },
-    });
-
-    await ruleDataService.updateIndexMappingsMatchingPattern(indexNamePattern);
+    ],
+    indexTemplate: {
+      version: 0,
+    },
   });
-
-  // initialize eagerly
-  const initializeRuleDataTemplatesPromise = initializeRuleDataTemplates().catch((err) => {
-    logger.error(err);
-  });
-
-  return ruleDataService.getRuleDataClient(
-    ownerFeatureId,
-    ruleDataService.getFullAssetName(registrationContext),
-    () => initializeRuleDataTemplatesPromise
-  );
 };

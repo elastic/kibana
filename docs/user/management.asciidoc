@@ -83,7 +83,7 @@ connectors>> for triggering actions.
 A report can contain a dashboard, visualization, saved search, or Canvas workpad.
 
 | Machine Learning Jobs
-| View your <<xpack-ml-anomalies,{anomaly-detect}>> and
+| View, export, and import your <<xpack-ml-anomalies,{anomaly-detect}>> and
 <<xpack-ml-dfanalytics,{dfanalytics}>> jobs. Open the Single Metric
 Viewer or Anomaly Explorer to see your {anomaly-detect} results.
 

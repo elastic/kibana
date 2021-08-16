@@ -1006,6 +1006,8 @@ export interface OverlayBannersStart {
 // @public (undocumented)
 export interface OverlayFlyoutOpenOptions {
     // (undocumented)
+    'aria-label'?: string;
+    // (undocumented)
     'data-test-subj'?: string;
     // (undocumented)
     className?: string;
@@ -1015,6 +1017,7 @@ export interface OverlayFlyoutOpenOptions {
     hideCloseButton?: boolean;
     // (undocumented)
     maxWidth?: boolean | number | string;
+    onClose?: (flyout: OverlayRef) => void;
     // (undocumented)
     ownFocus?: boolean;
     // (undocumented)
