@@ -31,8 +31,8 @@ import {
 import { ServicesItemsSetup } from './get_services_items';
 
 interface AggregationParams {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
   maxNumServices: number;

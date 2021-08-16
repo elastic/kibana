@@ -24,8 +24,8 @@ export async function getServiceDependenciesBreakdown({
   start: number;
   end: number;
   serviceName: string;
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
 }) {
   const items = await getConnectionStats({
     setup,
