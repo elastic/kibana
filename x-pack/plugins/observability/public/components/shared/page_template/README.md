@@ -44,7 +44,7 @@ export interface NavigationEntry {
   matchFullPath?: boolean;
   // whether to ignore trailing slashes, defaults to `true`
   ignoreTrailingSlash?: boolean;
-  // Showns NEW badge besides the navigation label
+  // shows NEW badge besides the navigation label, which will automatically disappear when menu item is clicked.
   isNewFeature?: boolean;
 }
 ```
