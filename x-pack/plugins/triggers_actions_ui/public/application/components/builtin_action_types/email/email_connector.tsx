@@ -519,20 +519,6 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                   </EuiFormRow>
                 </EuiFlexItem>
               </EuiFlexGroup>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiText textAlign="left">
-                    <p>Access Token: {accessToken}</p>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiText textAlign="left">
-                    <p>Refresh Token: {refreshToken}</p>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem>
                   <EuiFormRow
@@ -615,6 +601,7 @@ async function getOAuth(
       client_id: clientId,
       redirect_uri: redirectUrl,
       client_secret: clientSecret,
+      tokenUrl,
     })
   );
   const r = `${authUrl}?client_id=${clientId}&response_type=code&redirect_uri=${redirectUrl}&include_granted_scopes=true&access_type=offline&response_mode=query&scope=${scope}&state=${state}&prompt=consent`;
@@ -638,7 +625,7 @@ async function getOAuth(
           editActionSecrets('accessToken', `${res.token_type} ${res.access_token}`);
           editActionSecrets('refreshToken', res.refresh_token);
           editActionConfig('tokenExpirationDate', res.expires_in);
-          // console.log(windowObjectReference.json);
+          console.log(windowObjectReference.json);
           window.clearInterval(intervalId);
           windowObjectReference.close();
         }
