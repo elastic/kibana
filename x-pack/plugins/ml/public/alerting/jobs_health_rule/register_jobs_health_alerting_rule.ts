@@ -98,6 +98,7 @@ export function registerJobsHealthAlertingRule(
   \\{\\{#annotation\\}\\}Annotation: \\{\\{annotation\\}\\}  \\{\\{/annotation\\}\\}
   \\{\\{#missed_docs_count\\}\\}Number of missed documents: \\{\\{missed_docs_count\\}\\}  \\{\\{/missed_docs_count\\}\\}
   \\{\\{#end_timestamp\\}\\}Latest finalized bucket with missing docs: \\{\\{end_timestamp\\}\\}  \\{\\{/end_timestamp\\}\\}
+  \\{\\{#errors\\}\\}Error message: \\{\\{message\\}\\} \\{\\{/errors\\}\\}
 \\{\\{/context.results\\}\\}
 `,
       }
