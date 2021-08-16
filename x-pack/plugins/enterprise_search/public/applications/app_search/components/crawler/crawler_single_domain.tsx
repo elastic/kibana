@@ -77,17 +77,6 @@ export const CrawlerSingleDomain: React.FC = () => {
       )}
       <DeduplicationPanel />
       <EuiSpacer size="xl" />
-      <EuiTitle size="s">
-        <h2>
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.singleDomain.deleteDomainTitle',
-            {
-              defaultMessage: 'Delete domain',
-            }
-          )}
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
       <DeleteDomainPanel />
     </AppSearchPageTemplate>
   );
