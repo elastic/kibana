@@ -706,7 +706,7 @@ async function endpointDetailsMiddleware({
       type: 'serverCancelledEndpointListLoading',
     });
   }
-  if (!selectedEndpoint) {
+  if (typeof selectedEndpoint === 'undefined') {
     return;
   }
   await loadEndpointDetails({ store, coreStart, selectedEndpoint });
