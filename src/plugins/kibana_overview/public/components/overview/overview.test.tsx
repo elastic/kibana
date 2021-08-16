@@ -18,7 +18,11 @@ jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
       http: { basePath: { prepend: jest.fn((path: string) => (path ? path : 'path')) } },
       data: { indexPatterns: {} },
       uiSettings: { get: jest.fn() },
-      docLinks: { kibana: 'kibana_docs' },
+      docLinks: {
+        links: {
+          kibana: 'kibana_docs_url',
+        },
+      },
     },
   }),
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
