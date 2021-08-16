@@ -232,7 +232,7 @@ function ObservabilityActions({
           />
         </Suspense>
       )}
-      <EuiFlexGroup gutterSize="none">
+      <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem>
           <EuiButtonIcon
             size="s"
