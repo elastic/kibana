@@ -6,4 +6,12 @@
  * Side Public License, v 1.
  */
 
-export const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
+export const RUNTIME_FIELD_TYPES = [
+  'keyword',
+  'long',
+  'double',
+  'date',
+  'ip',
+  'boolean',
+  'geo_point',
+] as const;
