@@ -155,7 +155,7 @@ exports[`ManageData render 1`] = `
                 iconType="wrench"
               >
                 <FormattedMessage
-                  defaultMessage="Dev tools"
+                  defaultMessage="Dev Tools"
                   id="home.manageData.devToolsButtonLabel"
                   values={Object {}}
                 />
@@ -185,7 +185,7 @@ exports[`ManageData render 1`] = `
                 iconType="gear"
               >
                 <FormattedMessage
-                  defaultMessage="Stack management"
+                  defaultMessage="Stack Management"
                   id="home.manageData.stackManagementButtonLabel"
                   values={Object {}}
                 />

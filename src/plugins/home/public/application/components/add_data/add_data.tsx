@@ -56,7 +56,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode }) => 
               <p>
                 <FormattedMessage
                   id="home.addData.text"
-                  defaultMessage="To start working with your data in Kibana, use one of Elastic’s many ingest options. You can collect data from an app or service or upload a file that contains your data. If you’re not ready to use your own data, add a sample data set and give Kibana a test drive."
+                  defaultMessage="To start working with your data, use one of our many ingest options. Collect data from an app or service, or upload a file. If you're not ready to use your own data, add a sample data set."
                 />
               </p>
             </EuiText>
