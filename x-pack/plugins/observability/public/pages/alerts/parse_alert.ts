@@ -18,6 +18,7 @@ import {
   ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import type { TopAlert } from '.';
 import { parseTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import { asDuration, asPercent } from '../../../common/utils/formatters';
@@ -42,7 +43,7 @@ export const parseAlert = (observabilityRuleTypeRegistry: ObservabilityRuleTypeR
   return {
     ...formatted,
     fields: parsedFields,
-    active: parsedFields[ALERT_STATUS] !== 'closed',
+    active: parsedFields[ALERT_STATUS] === ALERT_STATUS_ACTIVE,
     start: new Date(parsedFields[ALERT_START] ?? 0).getTime(),
   };
 };
