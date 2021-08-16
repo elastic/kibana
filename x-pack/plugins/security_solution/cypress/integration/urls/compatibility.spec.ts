@@ -28,8 +28,8 @@ import {
 import { cleanKibana } from '../../tasks/common';
 
 const ABSOLUTE_DATE = {
-  endTime: '2019-08-01T20:33:29.186Z',
-  startTime: '2019-08-01T20:03:29.186Z',
+  endTime: 'Aug 1, 2019 @ 20:33:29.186',
+  startTime: 'Aug 1, 2019 @ 20:03:29.186',
 };
 
 const RULE_ID = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
