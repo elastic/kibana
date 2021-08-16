@@ -20,14 +20,9 @@ export interface ExitFullScreenButtonProps {
 import './index.scss';
 
 class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
-  private onExitFullScreenMode = () => {
-    this.props.chrome.setIsVisible(true);
-    this.props.onExitFullScreenMode();
-  }
-
   public onKeyDown = (e: KeyboardEvent) => {
     if (e.key === keys.ESCAPE) {
-      this.onExitFullScreenMode();
+      this.props.onExitFullScreenMode();
     }
   };
 
@@ -60,7 +55,7 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
               }
             )}
             className="dshExitFullScreenButton"
-            onClick={this.onExitFullScreenMode}
+            onClick={this.props.onExitFullScreenMode}
             data-test-subj="exitFullScreenModeLogo"
           >
             <EuiFlexGroup component="span" responsive={false} alignItems="center" gutterSize="s">
