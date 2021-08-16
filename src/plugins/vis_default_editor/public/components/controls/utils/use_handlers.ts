@@ -7,6 +7,7 @@
  */
 
 import { useCallback } from 'react';
+import { SerializableRecord } from '@kbn/utility-types';
 
 import { IAggConfig, AggParamType } from 'src/plugins/data/public';
 
@@ -36,10 +37,18 @@ function useSubAggParamsHandlers(
 
   const onAggTypeChange = useCallback(
     (aggId, aggType) => {
-      const parsedAgg = subAgg.toJSON();
+      const parsedAgg = subAgg.serialize();
+      const parsedAggParams = parsedAgg.params as SerializableRecord;
 
+      // we should share between aggs only field and base params: json, label, time shift.
       const params = {
         ...parsedAgg,
+        params: {
+          field: parsedAggParams.field,
+          json: parsedAggParams.json,
+          customLabel: parsedAggParams.customLabel,
+          timeShift: parsedAggParams.timeShift,
+        },
         type: aggType,
       };
 
