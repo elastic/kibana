@@ -74,6 +74,7 @@ interface OwnProps {
   activePage: number;
   additionalControls?: React.ReactNode;
   browserFields: BrowserFields;
+  filterQuery: string;
   data: TimelineItem[];
   defaultCellActions?: TGridCellAction[];
   id: string;
@@ -90,6 +91,7 @@ interface OwnProps {
   filterStatus?: AlertStatus;
   unit?: (total: number) => React.ReactNode;
   onRuleChange?: () => void;
+  indexNames: string[];
   refetch: Refetch;
 }
 
@@ -225,6 +227,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     activePage,
     additionalControls,
     browserFields,
+    filterQuery,
     columnHeaders,
     data,
     defaultCellActions,
@@ -250,6 +253,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     unit = basicUnit,
     leadingControlColumns = EMPTY_CONTROL_COLUMNS,
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
+    indexNames,
     refetch,
   }) => {
     const dispatch = useDispatch();
@@ -328,7 +332,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       () => ({
         additionalControls: (
           <>
-            <AlertCount>{alertCountText}</AlertCount>
+            <AlertCount data-test-subj="server-side-event-count">{alertCountText}</AlertCount>
             {showBulkActions ? (
               <>
                 <Suspense fallback={<EuiLoadingSpinner />}>
@@ -337,6 +341,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                     id={id}
                     totalItems={totalItems}
                     filterStatus={filterStatus}
+                    query={filterQuery}
+                    indexName={indexNames.join()}
                     onActionSuccess={onAlertStatusActionSuccess}
                     onActionFailure={onAlertStatusActionFailure}
                     refetch={refetch}
@@ -375,7 +381,9 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         alertCountText,
         totalItems,
         filterStatus,
+        filterQuery,
         browserFields,
+        indexNames,
         columnHeaders,
         additionalControls,
         showBulkActions,
@@ -499,15 +507,19 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       [browserFields, columnHeaders, data, defaultCellActions]
     );
 
-    const renderTGridCellValue: (
-      x: EuiDataGridCellValueElementProps
-    ) => React.ReactNode = useCallback(
-      ({ columnId, rowIndex, setCellProps }) => {
+    const renderTGridCellValue = useMemo(() => {
+      const Cell: React.FC<EuiDataGridCellValueElementProps> = ({
+        columnId,
+        rowIndex,
+        setCellProps,
+      }): React.ReactElement | null => {
         const rowData = rowIndex < data.length ? data[rowIndex].data : null;
         const header = columnHeaders.find((h) => h.id === columnId);
         const eventId = rowIndex < data.length ? data[rowIndex]._id : null;
 
-        addBuildingBlockStyle(data[rowIndex].ecs, theme, setCellProps);
+        useEffect(() => {
+          addBuildingBlockStyle(data[rowIndex].ecs, theme, setCellProps);
+        }, [rowIndex, setCellProps]);
 
         if (rowData == null || header == null || eventId == null) {
           return null;
@@ -529,10 +541,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           ecsData: data[rowIndex].ecs,
           browserFields,
           rowRenderers,
-        });
-      },
-      [columnHeaders, data, id, renderCellValue, tabType, theme, browserFields, rowRenderers]
-    );
+        }) as React.ReactElement;
+      };
+      return Cell;
+    }, [columnHeaders, data, id, renderCellValue, tabType, theme, browserFields, rowRenderers]);
 
     return (
       <EuiDataGrid
