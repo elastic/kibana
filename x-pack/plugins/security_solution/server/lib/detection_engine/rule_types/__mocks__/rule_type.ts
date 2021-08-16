@@ -11,7 +11,7 @@ import { v4 } from 'uuid';
 import { Logger, SavedObject } from 'kibana/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
-import type { RuleDataClient } from '../../../../../../rule_registry/server';
+import type { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 import { AlertAttributes } from '../../signals/types';
@@ -89,7 +89,8 @@ export const createRuleTypeMocks = (
           bulk: jest.fn(),
         })),
         isWriteEnabled: jest.fn(() => true),
-      } as unknown) as RuleDataClient,
+        indexName: '.alerts-security.alerts',
+      } as unknown) as IRuleDataClient,
       ruleDataService: ruleRegistryMocks.createRuleDataPluginService(),
     },
     services,
