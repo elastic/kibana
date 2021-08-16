@@ -49,6 +49,7 @@ describe('map_actions', () => {
 
         expect(dispatchMock).toHaveBeenCalledWith({
           mapState: {
+            forceRefreshTriggeredFromGlobalQueryTime: false,
             zoom: 5,
           },
           type: 'MAP_EXTENT_CHANGED',
@@ -69,6 +70,7 @@ describe('map_actions', () => {
 
         expect(dispatchMock).toHaveBeenCalledWith({
           mapState: {
+            forceRefreshTriggeredFromGlobalQueryTime: false,
             zoom: 5,
             extent: {
               maxLat: 10,
@@ -118,6 +120,7 @@ describe('map_actions', () => {
 
         expect(dispatchMock).toHaveBeenCalledWith({
           mapState: {
+            forceRefreshTriggeredFromGlobalQueryTime: false,
             zoom: 10,
             extent: {
               maxLat: 11,
@@ -151,6 +154,7 @@ describe('map_actions', () => {
         expect(dispatchMock).toHaveBeenCalledWith({
           mapState: {
             zoom: 10,
+            forceRefreshTriggeredFromGlobalQueryTime: false,
             extent: {
               maxLat: 5,
               maxLon: 90,
@@ -182,6 +186,7 @@ describe('map_actions', () => {
 
         expect(dispatchMock).toHaveBeenCalledWith({
           mapState: {
+            forceRefreshTriggeredFromGlobalQueryTime: false,
             zoom: 11,
             extent: {
               maxLat: 11,
@@ -310,6 +315,7 @@ describe('map_actions', () => {
       expect(dispatchMock.mock.calls).toEqual([
         [
           {
+            forceRefreshTriggeredFromGlobalQueryTime: false,
             searchSessionId,
             timeFilters,
             query: newQuery,
