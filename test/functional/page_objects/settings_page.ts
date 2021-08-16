@@ -217,7 +217,9 @@ export class SettingsPageObject extends FtrService {
 
   async getFieldsTabCount() {
     return this.retry.try(async () => {
+      // We extract the text from the tab (something like "Fields (86)")
       const text = await this.testSubjects.getVisibleText('tab-indexedFields');
+      // And we return the number inside the parenthesis "86"
       return text.split(' ')[1].replace(/\((.*)\)/, '$1');
     });
   }
@@ -357,7 +359,12 @@ export class SettingsPageObject extends FtrService {
       }
 
       await this.header.waitUntilLoadingHasFinished();
-      await this.clickAddNewIndexPatternButton();
+      const flyOut = await this.testSubjects.exists('createAnyway');
+      if (flyOut) {
+        await this.testSubjects.click('createAnyway');
+      } else {
+        await this.clickAddNewIndexPatternButton();
+      }
       await this.header.waitUntilLoadingHasFinished();
       if (!isStandardIndexPattern) {
         await this.selectRollupIndexPatternType();
@@ -538,15 +545,16 @@ export class SettingsPageObject extends FtrService {
     await this.clickSaveScriptedField();
   }
 
-  async addRuntimeField(name: string, type: string, script: string) {
+  async addRuntimeField(name: string, type: string, script: string, doSaveField = true) {
     await this.clickAddField();
     await this.setFieldName(name);
     await this.setFieldType(type);
     if (script) {
       await this.setFieldScript(script);
     }
-    await this.clickSaveField();
-    await this.closeIndexPatternFieldEditor();
+    if (doSaveField) {
+      await this.clickSaveField();
+    }
   }
 
   public async confirmSave() {
@@ -560,8 +568,16 @@ export class SettingsPageObject extends FtrService {
   }
 
   async closeIndexPatternFieldEditor() {
+    await this.testSubjects.click('closeFlyoutButton');
+
+    // We might have unsaved changes and we need to confirm inside the modal
+    if (await this.testSubjects.exists('runtimeFieldModifiedFieldConfirmModal')) {
+      this.log.debug('Unsaved changes for the field: need to confirm');
+      await this.testSubjects.click('confirmModalConfirmButton');
+    }
+
     await this.retry.waitFor('field editor flyout to close', async () => {
-      return !(await this.testSubjects.exists('euiFlyoutCloseButton'));
+      return !(await this.testSubjects.exists('fieldEditor'));
     });
   }
 
@@ -761,10 +777,6 @@ export class SettingsPageObject extends FtrService {
 
   async clickEditFieldFormat() {
     await this.testSubjects.click('editFieldFormat');
-  }
-
-  async clickCloseEditFieldFormatFlyout() {
-    await this.testSubjects.click('euiFlyoutCloseButton');
   }
 
   async associateIndexPattern(oldIndexPatternId: string, newIndexPatternTitle: string) {

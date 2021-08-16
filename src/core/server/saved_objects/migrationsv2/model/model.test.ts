@@ -1154,6 +1154,16 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+      test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> FATAL if action returns left request_entity_too_large_exception', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.left({
+          type: 'request_entity_too_large_exception',
+        });
+        const newState = model(reindexSourceToTempIndexBulkState, res) as FatalState;
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Try to use smaller batches by changing the Kibana 'migrations.batchSize' configuration option and restarting Kibana."`
+        );
+      });
       test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK should throw a throwBadResponse error if action failed', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.left({
           type: 'retryable_es_client_error',
@@ -1531,6 +1541,17 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('TRANSFORMED_DOCUMENTS_BULK_INDEX');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
+      });
+
+      test('TRANSFORMED_DOCUMENTS_BULK_INDEX -> FATAL if action returns left request_entity_too_large_exception', () => {
+        const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> = Either.left({
+          type: 'request_entity_too_large_exception',
+        });
+        const newState = model(transformedDocumentsBulkIndexState, res) as FatalState;
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Try to use smaller batches by changing the Kibana 'migrations.batchSize' configuration option and restarting Kibana."`
+        );
       });
     });
 

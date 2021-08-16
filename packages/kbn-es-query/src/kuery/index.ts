@@ -9,4 +9,4 @@
 export { KQLSyntaxError } from './kuery_syntax_error';
 export { nodeTypes, nodeBuilder } from './node_types';
 export { fromKueryExpression, toElasticsearchQuery } from './ast';
-export { DslQuery, KueryNode } from './types';
+export { DslQuery, KueryNode, KueryQueryOptions } from './types';
