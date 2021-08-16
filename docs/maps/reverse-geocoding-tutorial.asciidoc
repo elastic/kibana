@@ -2,7 +2,7 @@
 [[reverse-geocoding-tutorial]]
 == Map custom regions with reverse geocoding
 
-*Maps* comes with a lot of https://maps.elastic.co/#file[predefined regions] allowing you to quicky build maps to visualize metrics by region. *Maps* also offers the ability to easily map your own regions. You can use any region data you'd like, as long as your source data contains an identifier for the corresponding region. How can you map regions when your source data does not contain a region identifier? This is where reverse geocoding comes in. Reverse geocoding is the process of assigning a region identifer to a feature based on its location.
+*Maps* comes with a lot of https://maps.elastic.co/#file[predefined regions] allowing you to quicky build visualize regions by metrics. *Maps* also offers the ability to easily map your own regions. You can use any region data you'd like, as long as your source data contains an identifier for the corresponding region. How can you map regions when your source data does not contain a region identifier? This is where reverse geocoding comes in. Reverse geocoding is the process of assigning a region identifer to a feature based on its location.
 
 In this tutorial, you’ll use reverse geocoding to visualize United States Census Bureau Combined Statistical Area (CSA) regions by web traffic.
 
@@ -145,6 +145,7 @@ Your web log data now contains `csa.GEOID` and `csa.NAME` fields from the matchi
 [role="screenshot"]
 image::maps/images/reverse-geocoding-tutorial/discover_enriched_web_log.png[]
 
+[float]
 === Step 3: Visualize Combined Statistical Area (CSA) regions by web traffic
 
 . Open the main menu, and click *Maps*.
