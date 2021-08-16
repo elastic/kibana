@@ -15,17 +15,17 @@ jest.mock('../lib/es_version_precheck', () => ({
 
 // Need to require to get mock on named export to work.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const MigrationApis = require('../lib/es_migration_apis');
-MigrationApis.getUpgradeAssistantStatus = jest.fn();
+const ESUpgradeStatusApis = require('../lib/es_deprecations_status');
+ESUpgradeStatusApis.getESUpgradeStatus = jest.fn();
 
-import { registerClusterCheckupRoutes } from './cluster_checkup';
+import { registerESDeprecationRoutes } from './es_deprecations';
 
 /**
  * Since these route callbacks are so thin, these serve simply as integration tests
  * to ensure they're wired up to the lib functions correctly. Business logic is tested
- * more thoroughly in the es_migration_apis test.
+ * more thoroughly in the es_deprecations_status test.
  */
-describe('cluster checkup API', () => {
+describe('ES deprecations API', () => {
   let mockRouter: MockRouter;
   let routeDependencies: any;
 
@@ -34,23 +34,23 @@ describe('cluster checkup API', () => {
     routeDependencies = {
       router: mockRouter,
     };
-    registerClusterCheckupRoutes(routeDependencies);
+    registerESDeprecationRoutes(routeDependencies);
   });
 
   afterEach(() => {
     jest.resetAllMocks();
   });
 
-  describe('GET /api/upgrade_assistant/reindex/{indexName}.json', () => {
+  describe('GET /api/upgrade_assistant/es_deprecations', () => {
     it('returns state', async () => {
-      MigrationApis.getUpgradeAssistantStatus.mockResolvedValue({
+      ESUpgradeStatusApis.getESUpgradeStatus.mockResolvedValue({
         cluster: [],
         indices: [],
         nodes: [],
       });
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
-        pathPattern: '/api/upgrade_assistant/status',
+        pathPattern: '/api/upgrade_assistant/es_deprecations',
       })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       expect(resp.status).toEqual(200);
@@ -63,22 +63,22 @@ describe('cluster checkup API', () => {
       const e: any = new Error(`you can't go here!`);
       e.statusCode = 403;
 
-      MigrationApis.getUpgradeAssistantStatus.mockRejectedValue(e);
+      ESUpgradeStatusApis.getESUpgradeStatus.mockRejectedValue(e);
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
-        pathPattern: '/api/upgrade_assistant/status',
+        pathPattern: '/api/upgrade_assistant/es_deprecations',
       })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       expect(resp.status).toEqual(403);
     });
 
     it('returns an 500 error if it throws', async () => {
-      MigrationApis.getUpgradeAssistantStatus.mockRejectedValue(new Error(`scary error!`));
+      ESUpgradeStatusApis.getESUpgradeStatus.mockRejectedValue(new Error('scary error!'));
 
       await expect(
         routeDependencies.router.getHandler({
           method: 'get',
-          pathPattern: '/api/upgrade_assistant/status',
+          pathPattern: '/api/upgrade_assistant/es_deprecations',
         })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory)
       ).rejects.toThrow('scary error!');
     });
