@@ -5,25 +5,71 @@
  * 2.0.
  */
 
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 
-import { TransformConfigUnion } from '../../../../../../common/types/transform';
+import { i18n } from '@kbn/i18n';
 
 import { TransformListAction, TransformListRow } from '../../../../common';
 import { AuthorizationContext } from '../../../../lib/authorization';
 
 import { editActionNameText, EditActionName } from './edit_action_name';
+import { useSearchItems } from '../../../../hooks/use_search_items';
+import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
+import { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 export const useEditAction = (forceDisable: boolean, transformNodes: number) => {
   const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
 
   const [config, setConfig] = useState<TransformConfigUnion>();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [indexPatternId, setIndexPatternId] = useState<string | undefined>();
+
   const closeFlyout = () => setIsFlyoutVisible(false);
-  const showFlyout = (newConfig: TransformConfigUnion) => {
-    setConfig(newConfig);
-    setIsFlyoutVisible(true);
-  };
+
+  const { getIndexPatternIdByTitle, loadIndexPatterns } = useSearchItems(undefined);
+  const toastNotifications = useToastNotifications();
+  const appDeps = useAppDependencies();
+  const savedObjectsClient = appDeps.savedObjects.client;
+  const indexPatterns = appDeps.data.indexPatterns;
+
+  const clickHandler = useCallback(
+    async (item: TransformListRow) => {
+      try {
+        await loadIndexPatterns(savedObjectsClient, indexPatterns);
+        const indexPatternTitle = Array.isArray(item.config.source.index)
+          ? item.config.source.index.join(',')
+          : item.config.source.index;
+        const currentIndexPatternId = getIndexPatternIdByTitle(indexPatternTitle);
+
+        if (currentIndexPatternId === undefined) {
+          toastNotifications.addWarning(
+            i18n.translate('xpack.transform.edit.noIndexPatternErrorPromptText', {
+              defaultMessage:
+                'Unable to get index pattern the transform {transformId}. No index pattern exists for {indexPattern}.',
+              values: { indexPattern: indexPatternTitle, transformId: item.id },
+            })
+          );
+        } else {
+          setConfig(item.config);
+          setIndexPatternId(currentIndexPatternId);
+          setIsFlyoutVisible(true);
+        }
+      } catch (e) {
+        toastNotifications.addDanger(
+          i18n.translate('xpack.transform.clone.errorPromptText', {
+            defaultMessage: 'An error occurred checking if source index pattern exists',
+          })
+        );
+      }
+    },
+    [
+      savedObjectsClient,
+      indexPatterns,
+      toastNotifications,
+      loadIndexPatterns,
+      getIndexPatternIdByTitle,
+    ]
+  );
 
   const action: TransformListAction = useMemo(
     () => ({
@@ -32,10 +78,10 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
       description: editActionNameText,
       icon: 'pencil',
       type: 'icon',
-      onClick: (item: TransformListRow) => showFlyout(item.config),
+      onClick: (item: TransformListRow) => clickHandler(item),
       'data-test-subj': 'transformActionEdit',
     }),
-    [canCreateTransform, forceDisable, transformNodes]
+    [canCreateTransform, clickHandler, forceDisable, transformNodes]
   );
 
   return {
@@ -43,6 +89,6 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
     config,
     closeFlyout,
     isFlyoutVisible,
-    showFlyout,
+    indexPatternId,
   };
 };

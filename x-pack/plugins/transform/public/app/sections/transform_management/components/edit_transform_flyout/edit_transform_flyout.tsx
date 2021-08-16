@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, FC } from 'react';
+import React, { useState, FC, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -29,8 +29,7 @@ import { TransformConfigUnion } from '../../../../../../common/types/transform';
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../../common';
-import { useToastNotifications } from '../../../../app_dependencies';
-
+import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { useApi } from '../../../../hooks/use_api';
 
 import { EditTransformFlyoutCallout } from './edit_transform_flyout_callout';
@@ -39,18 +38,44 @@ import {
   applyFormFieldsToTransformConfig,
   useEditTransformFlyout,
 } from './use_edit_transform_flyout';
+import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
 
 interface EditTransformFlyoutProps {
   closeFlyout: () => void;
   config: TransformConfigUnion;
+  indexPatternId?: string;
 }
 
-export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({ closeFlyout, config }) => {
+export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({
+  closeFlyout,
+  config,
+  indexPatternId,
+}) => {
   const api = useApi();
   const toastNotifications = useToastNotifications();
 
   const [state, dispatch] = useEditTransformFlyout(config);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
+  const [dateFieldNames, setDateFieldNames] = useState<string[]>([]);
+  const appDeps = useAppDependencies();
+  const indexPatternsClient = appDeps.data.indexPatterns;
+
+  useEffect(() => {
+    const getDateFields = async () => {
+      if (indexPatternId !== undefined) {
+        const indexPattern = await indexPatternsClient.get(indexPatternId);
+        if (indexPattern) {
+          const dateTimeFields = indexPattern.fields
+            .filter((f) => f.type === KBN_FIELD_TYPES.DATE)
+            .map((f) => f.name)
+            .sort();
+          setDateFieldNames(dateTimeFields);
+        }
+      }
+    };
+
+    getDateFields();
+  }, [indexPatternId, indexPatternsClient]);
 
   async function submitFormHandler() {
     setErrorMessage(undefined);
@@ -96,7 +121,10 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({ closeFlyout,
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody banner={<EditTransformFlyoutCallout />}>
-        <EditTransformFlyoutForm editTransformFlyout={[state, dispatch]} />
+        <EditTransformFlyoutForm
+          editTransformFlyout={[state, dispatch]}
+          dateFieldNames={dateFieldNames}
+        />
         {errorMessage !== undefined && (
           <>
             <EuiSpacer size="m" />

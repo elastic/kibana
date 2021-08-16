@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 
-import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
+import { EuiForm, EuiAccordion, EuiSpacer, EuiSelect, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -16,12 +16,19 @@ import { UseEditTransformFlyoutReturnType } from './use_edit_transform_flyout';
 
 interface EditTransformFlyoutFormProps {
   editTransformFlyout: UseEditTransformFlyoutReturnType;
+  dateFieldNames?: string[];
 }
 
 export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
   editTransformFlyout: [state, dispatch],
+  dateFieldNames,
 }) => {
   const formFields = state.formFields;
+
+  const retentionDateFieldOptions = useMemo(
+    () => (Array.isArray(dateFieldNames) ? dateFieldNames.map((text: string) => ({ text })) : []),
+    [dateFieldNames]
+  );
 
   return (
     <EuiForm>
@@ -112,19 +119,37 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         paddingSize="s"
       >
         <div data-test-subj="transformEditAccordionRetentionPolicyContent">
-          {' '}
-          <EditTransformFlyoutFormTextInput
-            dataTestSubj="transformEditFlyoutRetentionPolicyFieldInput"
-            errorMessages={formFields.retentionPolicyField.errorMessages}
+          <EuiFormRow
+            data-test-subj="transformEditFlyoutRetentionPolicyFieldInput"
             label={i18n.translate(
               'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel',
               {
                 defaultMessage: 'Field',
               }
             )}
-            onChange={(value) => dispatch({ field: 'retentionPolicyField', value })}
-            value={formFields.retentionPolicyField.value}
-          />
+            isInvalid={formFields.retentionPolicyField.errorMessages.length > 0}
+            error={formFields.retentionPolicyField.errorMessages}
+            helpText={i18n.translate(
+              'xpack.transform.transformList.editFlyoutFormRetentionPolicyDateFieldHelpText',
+              {
+                defaultMessage:
+                  'Select the date field that can be used to identify out of date documents in the destination index.',
+              }
+            )}
+          >
+            <EuiSelect
+              aria-label={i18n.translate(
+                'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldSelectAriaLabel',
+                {
+                  defaultMessage: 'Date field to set retention policy',
+                }
+              )}
+              data-test-subj="transformEditFlyoutRetentionPolicyDateFieldSelect"
+              options={retentionDateFieldOptions}
+              value={formFields.retentionPolicyField.value}
+              onChange={(e) => dispatch({ field: 'retentionPolicyField', value: e.target.value })}
+            />
+          </EuiFormRow>
           <EditTransformFlyoutFormTextInput
             dataTestSubj="transformEditFlyoutRetentionPolicyMaxAgeInput"
             errorMessages={formFields.retentionPolicyMaxAge.errorMessages}
