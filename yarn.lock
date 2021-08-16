@@ -1443,10 +1443,10 @@
     ms "^2.1.3"
     secure-json-parse "^2.4.0"
 
-"@elastic/ems-client@7.14.0":
-  version "7.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.14.0.tgz#7c8095086bd9a637f72d6d810d494a460c68e0fc"
-  integrity sha512-axXTyBrC1I2TMmcxGC04SgODwb5Cp6svcW64RoTr8X2XrSSuH0gh+X5qMsC9FgGGnmbVNCEYIs3JK4AJ7X4bxA==
+"@elastic/ems-client@7.15.0":
+  version "7.15.0"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.15.0.tgz#c101d7f83aa56463bcc385fd4eb883c6ea3ae9fc"
+  integrity sha512-BAAAVPhoaH6SGrfuO6U0MVRg4lvblhJ9VqYlMf3dZN9uDBB+12CUtb6t6Kavn5Tr3nS6X3tU/KKsuomo5RrEeQ==
   dependencies:
     "@types/geojson" "^7946.0.7"
     "@types/lru-cache" "^5.1.0"
