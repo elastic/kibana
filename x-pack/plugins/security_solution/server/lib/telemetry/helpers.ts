@@ -89,6 +89,6 @@ export function isPackagePolicyList(
  * @params label_list the list of labels to create standardized UsageCounter from
  * @returns a string label for usage in the UsageCounter
  */
-export function createUsageCounterLabel(label_list: string[]): string {
-  return label_list.join('-');
+export function createUsageCounterLabel(labelList: string[]): string {
+  return labelList.join('-');
 }

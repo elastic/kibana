@@ -12,6 +12,7 @@ import { SearchRequest } from '@elastic/elasticsearch/api/types';
 import { URL } from 'url';
 import { CoreStart, ElasticsearchClient, Logger } from 'src/core/server';
 import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { transformDataToNdjson } from '../../utils/read_stream/create_stream_from_ndjson';
 import {
   TaskManagerSetupContract,
@@ -25,7 +26,6 @@ import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_s
 import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import { ExceptionListClient } from '../../../../lists/server';
 import { getTrustedAppsList } from '../../endpoint/routes/trusted_apps/service';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
