@@ -15,6 +15,5 @@ export interface ExecutionContextSetup
 
 |  Method | Description |
 |  --- | --- |
-|  [setRequestId(requestId)](./kibana-plugin-core-server.executioncontextsetup.setrequestid.md) | Attaches provided "requestId" as identifier of the current request. Should be a valid uuid.v4 value |
 |  [withContext(context, fn)](./kibana-plugin-core-server.executioncontextsetup.withcontext.md) | Keeps track of execution context while the passed function is executed. Data are carried over all async operations spawned by the passed function. The nested calls stack the registered context on top of each other. |
 
