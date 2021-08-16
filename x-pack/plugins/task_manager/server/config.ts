@@ -65,6 +65,15 @@ export const configSchema = schema.object(
       defaultValue: 1000,
       min: 1,
     }),
+    /* The name of the index used to store task information. */
+    index: schema.string({
+      defaultValue: '.kibana_task_manager',
+      validate: (val) => {
+        if (val.toLowerCase() === '.tasks') {
+          return `"${val}" is an invalid Kibana Task Manager index, as it is already in use by the ElasticSearch Tasks Manager`;
+        }
+      },
+    }),
     /* The maximum number of tasks that this Kibana instance will run simultaneously. */
     max_workers: schema.number({
       defaultValue: DEFAULT_MAX_WORKERS,

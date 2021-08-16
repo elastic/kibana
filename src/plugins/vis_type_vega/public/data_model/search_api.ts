@@ -8,7 +8,7 @@
 
 import { combineLatest, from } from 'rxjs';
 import { map, tap, switchMap } from 'rxjs/operators';
-import type { CoreStart, IUiSettingsClient } from 'kibana/public';
+import type { CoreStart, IUiSettingsClient, KibanaExecutionContext } from 'kibana/public';
 import {
   getSearchParamsFromRequest,
   SearchRequest,
@@ -56,7 +56,8 @@ export class SearchAPI {
     private readonly dependencies: SearchAPIDependencies,
     private readonly abortSignal?: AbortSignal,
     public readonly inspectorAdapters?: VegaInspectorAdapters,
-    private readonly searchSessionId?: string
+    private readonly searchSessionId?: string,
+    private readonly executionContext?: KibanaExecutionContext
   ) {}
 
   search(searchRequests: SearchRequest[]) {
@@ -87,7 +88,11 @@ export class SearchAPI {
             search
               .search(
                 { params },
-                { abortSignal: this.abortSignal, sessionId: this.searchSessionId }
+                {
+                  abortSignal: this.abortSignal,
+                  sessionId: this.searchSessionId,
+                  executionContext: this.executionContext,
+                }
               )
               .pipe(
                 tap((data) => this.inspectSearchResult(data, requestResponders[requestId])),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 import { EuiCodeEditor } from '@elastic/eui';
 import 'brace/theme/tomorrow';
 
@@ -22,27 +22,34 @@ const EDITOR_PROPS = {
 
 interface OsqueryEditorProps {
   defaultValue: string;
-  disabled?: boolean;
   onChange: (newValue: string) => void;
 }
 
-const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
-  defaultValue,
-  disabled,
-  onChange,
-}) => (
-  <EuiCodeEditor
-    value={defaultValue}
-    mode="osquery"
-    isReadOnly={disabled}
-    theme="tomorrow"
-    onChange={onChange}
-    name="osquery_editor"
-    setOptions={EDITOR_SET_OPTIONS}
-    editorProps={EDITOR_PROPS}
-    height="150px"
-    width="100%"
-  />
-);
+const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({ defaultValue, onChange }) => {
+  const editorValue = useRef(defaultValue ?? '');
+
+  const handleChange = useCallback((newValue: string) => {
+    editorValue.current = newValue;
+  }, []);
+
+  const onBlur = useCallback(() => {
+    onChange(editorValue.current.replaceAll('\n', ' ').replaceAll('  ', ' '));
+  }, [onChange]);
+
+  return (
+    <EuiCodeEditor
+      onBlur={onBlur}
+      value={defaultValue}
+      mode="osquery"
+      onChange={handleChange}
+      theme="tomorrow"
+      name="osquery_editor"
+      setOptions={EDITOR_SET_OPTIONS}
+      editorProps={EDITOR_PROPS}
+      height="150px"
+      width="100%"
+    />
+  );
+};
 
 export const OsqueryEditor = React.memo(OsqueryEditorComponent);
