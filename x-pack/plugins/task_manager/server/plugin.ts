@@ -165,6 +165,7 @@ export class TaskManagerPlugin
       config: this.config!,
       definitions: this.definitions,
       logger: this.logger,
+      executionContext,
       middleware: this.middleware,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
       pool: this.taskPollingLifecycle.pool,
