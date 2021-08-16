@@ -50,7 +50,6 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
     refetch,
   }) => {
     const dispatch = useDispatch();
-    // const { addSuccess, addError, addWarning } = useAppToasts();
 
     const [showClearSelection, setShowClearSelection] = useState(false);
 
