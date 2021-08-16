@@ -47,7 +47,7 @@ import { createHref, push } from '../../shared/Links/url_helpers';
 import { useUiTracker } from '../../../../../observability/public';
 
 interface Props {
-  onClose: () => void;
+  onFilter?: () => void;
 }
 
 interface ErrorCorrelationSearchStrategyResult
@@ -55,7 +55,7 @@ interface ErrorCorrelationSearchStrategyResult
   values: FailureCorrelationValue[];
 }
 
-export function MlFailureCorrelations({ onClose }: Props) {
+export function MlFailureCorrelations({ onFilter }: Props) {
   const {
     core: { notifications, uiSettings },
   } = useApmPluginContext();
@@ -122,7 +122,9 @@ export function MlFailureCorrelations({ onClose }: Props) {
   }, [selectedSignificantTerm, result]);
 
   const history = useHistory();
-  const handleOnFilter = onClose;
+  const handleOnFilter = useMemo(() => {
+    return onFilter ? onFilter : () => {};
+  }, [onFilter]);
 
   const errorCorrelationsColumns: Array<
     EuiBasicTableColumn<FailureCorrelationValue>
@@ -352,7 +354,7 @@ export function MlFailureCorrelations({ onClose }: Props) {
         status={FETCH_STATUS.SUCCESS}
         setSelectedSignificantTerm={setSelectedSignificantTerm}
         selectedTerm={selectedTerm}
-        onFilter={onClose}
+        onFilter={onFilter}
       />
 
       {ccsWarning && (

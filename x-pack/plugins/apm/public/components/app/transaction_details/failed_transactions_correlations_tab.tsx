@@ -22,7 +22,7 @@ import { useLicenseContext } from '../../../context/license/use_license_context'
 
 import { LicensePrompt } from '../../shared/license_prompt';
 
-import { ErrorCorrelations } from '../correlations/error_correlations';
+import { MlFailureCorrelations } from '../correlations/ml_failure_correlations';
 
 import type { TabContentProps } from './types';
 
@@ -42,7 +42,7 @@ function FailedTransactionsCorrelationsTab({}: TabContentProps) {
   useTrackMetric({ ...metric, delay: 15000 });
 
   return hasActivePlatinumLicense ? (
-    <ErrorCorrelations />
+    <MlFailureCorrelations />
   ) : (
     <LicensePrompt
       text={i18n.translate(
