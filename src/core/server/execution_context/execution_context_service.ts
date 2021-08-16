@@ -61,12 +61,6 @@ export interface ExecutionContextSetup {
    * The nested calls stack the registered context on top of each other.
    **/
   withContext<R>(context: KibanaExecutionContext | undefined, fn: (...args: any[]) => R): R;
-
-  /**
-   * Attaches provided "requestId" as identifier of the current request.
-   * Should be a valid uuid.v4 value
-   **/
-  setRequestId(requestId: string): void;
 }
 
 /**
