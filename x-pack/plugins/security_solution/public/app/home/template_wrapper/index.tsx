@@ -23,6 +23,8 @@ import {
 } from './bottom_bar';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { gutterTimeline } from '../../../common/lib/helpers';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { OverviewEmpty } from '../../../overview/components/overview_empty';
 
 /* eslint-disable react/display-name */
 
@@ -75,10 +77,12 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
       getTimelineShowStatus(state, TimelineId.active)
     );
 
+    const { indicesExist } = useSourcererScope();
+
     /* StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop, which may account for any style discrepancies, such as the bottom border not extending the full width of the page, between EuiPageTemplate and the security solution pages.
      */
 
-    return (
+    return indicesExist ? (
       <StyledKibanaPageTemplate
         $isTimelineBottomBarVisible={isTimelineBottomBarVisible}
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
@@ -99,6 +103,8 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
           {children}
         </EuiPanel>
       </StyledKibanaPageTemplate>
+    ) : (
+      <OverviewEmpty />
     );
   }
 );
