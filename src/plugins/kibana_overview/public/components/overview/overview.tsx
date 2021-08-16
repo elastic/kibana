@@ -202,6 +202,8 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                   </h2>
                 </EuiTitle>
 
+                <EuiSpacer size="m" />
+
                 <EuiFlexGroup className="kbnOverviewMore__content">
                   {solutions.map(({ id, title, description, icon, path }) => (
                     <EuiFlexItem className="kbnOverviewMore__item" key={id}>
