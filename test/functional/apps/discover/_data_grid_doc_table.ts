@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('open popover with expanded cell content to get json from the editor');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      const documentCell = await dataGrid.getCellElement(1, 3);
+      const documentCell = await dataGrid.getCellElement(1, 4);
       await documentCell.click();
       const expandCellContentButton = await documentCell.findByClassName(
         'euiDataGridRowCell__expandButtonIcon'
