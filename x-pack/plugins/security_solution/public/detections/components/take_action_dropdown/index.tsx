@@ -158,6 +158,7 @@ export const TakeActionDropdown = React.memo(
       eventId: actionsData.eventId,
       indexName,
       timelineId,
+      refetch,
       closePopover: closePopoverAndFlyout,
     });
 

@@ -30,7 +30,6 @@ import type {
 } from '../../../../src/plugins/home/public';
 import { CasesUiStart } from '../../cases/public';
 import type { LensPublicStart } from '../../lens/public';
-import type { TimelinesUIStart } from '../../timelines/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -53,7 +52,6 @@ export interface ObservabilityPublicPluginsSetup {
 
 export interface ObservabilityPublicPluginsStart {
   cases: CasesUiStart;
-  timelines: TimelinesUIStart;
   home?: HomePublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
