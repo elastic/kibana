@@ -34,20 +34,17 @@ export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> =
   const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = metricIndicesExist
     ? undefined
     : {
-        solution: i18n.translate('xpack.metrics.noDataConfig.solutionName', {
+        solution: i18n.translate('xpack.infra.metrics.noDataConfig.solutionName', {
           defaultMessage: 'Observability',
         }),
         actions: {
           beats: {
-            title: i18n.translate('xpack.metrics.noDataConfig.beatsCard.title', {
+            title: i18n.translate('xpack.infra.metrics.noDataConfig.beatsCard.title', {
               defaultMessage: 'Add metrics with Beats',
             }),
-            description: i18n.translate('xpack.metrics.noDataConfig.beatsCard.description', {
+            description: i18n.translate('xpack.infra.metrics.noDataConfig.beatsCard.description', {
               defaultMessage:
                 'Use Beats to send metrics data to Elasticsearch. We make it easy with modules for many popular systems and apps.',
-            }),
-            button: i18n.translate('xpack.metrics.noDataConfig.beatsCard.buttonLabel', {
-              defaultMessage: 'Add metrics with Beats',
             }),
             ...tutorialLinkProps,
           },

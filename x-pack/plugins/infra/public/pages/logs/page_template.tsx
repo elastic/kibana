@@ -35,20 +35,17 @@ export const LogsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = (
     sourceStatus?.logIndexStatus !== 'missing'
       ? undefined
       : {
-          solution: i18n.translate('xpack.logs.noDataConfig.solutionName', {
+          solution: i18n.translate('xpack.infra.logs.noDataConfig.solutionName', {
             defaultMessage: 'Observability',
           }),
           actions: {
             beats: {
-              title: i18n.translate('xpack.logs.noDataConfig.beatsCard.title', {
+              title: i18n.translate('xpack.infra.logs.noDataConfig.beatsCard.title', {
                 defaultMessage: 'Add logs with Beats',
               }),
-              description: i18n.translate('xpack.logs.noDataConfig.beatsCard.description', {
+              description: i18n.translate('xpack.infra.logs.noDataConfig.beatsCard.description', {
                 defaultMessage:
                   'Use Beats to send logs to Elasticsearch. We make it easy with modules for many popular systems and apps.',
-              }),
-              button: i18n.translate('xpack.logs.noDataConfig.beatsCard.buttonLabel', {
-                defaultMessage: 'Add logs with Beats',
               }),
               href: basePath + `/app/home#/tutorial_directory/logging`,
             },

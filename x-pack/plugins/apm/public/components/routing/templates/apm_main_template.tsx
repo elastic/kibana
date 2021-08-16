@@ -60,12 +60,6 @@ export function ApmMainTemplate({
                   'Use APM agents to collect APM data. We make it easy with agents for many popular languages.',
               }
             ),
-            button: i18n.translate(
-              'xpack.apm.noDataConfig.beatsCard.buttonLabel',
-              {
-                defaultMessage: 'Add data with APM Agents',
-              }
-            ),
             href: basePath + `/app/home#/tutorial/apm`,
           },
         },

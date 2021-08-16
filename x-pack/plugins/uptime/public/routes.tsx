@@ -189,9 +189,6 @@ export const PageRouter: FC = () => {
             description: i18n.translate('xpack.uptime.noDataConfig.beatsCard.description', {
               defaultMessage: 'Use Heartbeat to create uptime monitors.',
             }),
-            button: i18n.translate('xpack.uptime.noDataConfig.beatsCard.buttonLabel', {
-              defaultMessage: 'Add monitors with Heartbeat',
-            }),
             href: basePath + `/app/home#/tutorial/uptimeMonitors`,
           },
         },

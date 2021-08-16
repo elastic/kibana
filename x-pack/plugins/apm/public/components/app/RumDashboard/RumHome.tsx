@@ -51,12 +51,6 @@ export function RumHome() {
                   'Use the RUM (JS) agent to collect user experience data.',
               }
             ),
-            button: i18n.translate(
-              'xpack.apm.ux.overview.beatsCard.buttonLabel',
-              {
-                defaultMessage: 'Add RUM data',
-              }
-            ),
             href: core.http.basePath.prepend(`/app/home#/tutorial/apm`),
           },
         },
