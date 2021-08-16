@@ -74,12 +74,21 @@ export function ObservabilityPageTemplate({
 
           return {
             id: `${sectionIndex}.${entryIndex}`,
-            name: entry.label,
+            name: entry.isNewFeature ? (
+              <NavNameWithBadge label={entry.label} localStorageId={badgeLocalStorageId} />
+            ) : (
+              entry.label
+            ),
             href,
             isSelected,
             onClick: (event) => {
               if (entry.onClick) {
                 entry.onClick(event);
+              }
+
+              // Hides NEW badge when the item is clicked
+              if (entry.isNewFeature) {
+                hideBadge(badgeLocalStorageId);
               }
 
               if (

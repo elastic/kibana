@@ -81,6 +81,20 @@ export interface ApmPluginStartDeps {
   fleet?: FleetStart;
 }
 
+const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
+  defaultMessage: 'Services',
+});
+const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
+  defaultMessage: 'Traces',
+});
+const serviceMapTitle = i18n.translate('xpack.apm.navigation.serviceMapTitle', {
+  defaultMessage: 'Service Map',
+});
+
+const backendsTitle = i18n.translate('xpack.apm.navigation.backendsTitle', {
+  defaultMessage: 'Backends',
+});
+
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
@@ -129,6 +143,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                     label: backendsTitle,
                     app: 'apm',
                     path: '/backends',
+                    isNewFeature: true,
                     onClick: () => {
                       const { usageCollection } = pluginsStart as {
                         usageCollection?: UsageCollectionStart;
