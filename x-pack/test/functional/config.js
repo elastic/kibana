@@ -478,6 +478,17 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
+        test_rollup_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['rollup-*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
         //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
         test_api_keys: {
           elasticsearch: {
