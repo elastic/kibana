@@ -24,6 +24,8 @@ import {
   KibanaPageTemplateSolutionNavProps,
 } from './solution_nav/solution_nav';
 
+import { NoDataPage, NoDataPageProps, NO_DATA_PAGE_TEMPLATE_PROPS } from './no_data_page';
+
 /**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
  */
@@ -39,10 +41,16 @@ export type KibanaPageTemplateProps = EuiPageTemplateProps & {
    * Quick creation of EuiSideNav. Hooks up mobile instance too
    */
   solutionNav?: KibanaPageTemplateSolutionNavProps;
+  /**
+   * Accepts a configuration object, that when provided, ignores pageHeader and children and instead
+   * displays Agent, Beats, and custom cards to direct users to the right ingest location
+   */
+  noDataConfig?: NoDataPageProps;
 };
 
 export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   template,
+  className,
   pageHeader,
   children,
   isEmptyState,
@@ -50,6 +58,7 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   pageSideBar,
   pageSideBarProps,
   solutionNav,
+  noDataConfig,
   ...rest
 }) => {
   /**
@@ -86,11 +95,10 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
     );
   }
 
-  const emptyStateDefaultTemplate = pageSideBar ? 'centeredContent' : 'centeredBody';
-
   /**
    * An easy way to create the right content for empty pages
    */
+  const emptyStateDefaultTemplate = pageSideBar ? 'centeredContent' : 'centeredBody';
   if (isEmptyState && pageHeader && !children) {
     template = template ?? emptyStateDefaultTemplate;
     const { iconType, pageTitle, description, rightSideItems } = pageHeader;
@@ -110,9 +118,40 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
     template = template ?? emptyStateDefaultTemplate;
   }
 
+  // Set the template before the classes
+  template = noDataConfig ? NO_DATA_PAGE_TEMPLATE_PROPS.template : template;
+
+  const classes = classNames(
+    'kbnPageTemplate',
+    { [`kbnPageTemplate--${template}`]: template },
+    className
+  );
+
+  /**
+   * If passing the custom template of `noDataConfig`
+   */
+  if (noDataConfig) {
+    return (
+      <EuiPageTemplate
+        template={template}
+        className={classes}
+        pageSideBar={pageSideBar}
+        pageSideBarProps={{
+          paddingSize: solutionNav ? 'none' : 'l',
+          ...pageSideBarProps,
+          className: classNames(sideBarClasses, pageSideBarProps?.className),
+        }}
+        {...NO_DATA_PAGE_TEMPLATE_PROPS}
+      >
+        <NoDataPage {...noDataConfig} />
+      </EuiPageTemplate>
+    );
+  }
+
   return (
     <EuiPageTemplate
       template={template}
+      className={classes}
       restrictWidth={restrictWidth}
       pageHeader={pageHeader}
       pageSideBar={pageSideBar}

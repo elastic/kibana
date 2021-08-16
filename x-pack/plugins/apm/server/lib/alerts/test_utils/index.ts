@@ -8,7 +8,7 @@
 import { Logger } from 'kibana/server';
 import { of } from 'rxjs';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import type { RuleDataClient } from '../../../../../rule_registry/server';
+import type { IRuleDataClient } from '../../../../../rule_registry/server';
 import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../alerting/server';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '../../..';
 
@@ -63,7 +63,8 @@ export const createRuleTypeMocks = () => {
           };
         },
         isWriteEnabled: jest.fn(() => true),
-      } as unknown) as RuleDataClient,
+        indexName: '.alerts-observability.apm.alerts',
+      } as unknown) as IRuleDataClient,
     },
     services,
     scheduleActions,
