@@ -107,7 +107,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       isOnEndpointPage(getState()) &&
       !hasSelectedEndpoint(getState())
     ) {
-      endpointDetailsListMiddleware({ coreStart, store, fetchIndexPatterns });
+      await endpointDetailsListMiddleware({ coreStart, store, fetchIndexPatterns });
     }
 
     // Endpoint Details
@@ -117,7 +117,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     }
 
     if (action.type === 'endpointDetailsLoad') {
-      loadEndpointDetails({ store, coreStart, selectedEndpoint: action.payload.endpointId });
+      await loadEndpointDetails({ store, coreStart, selectedEndpoint: action.payload.endpointId });
     }
 
     if (
@@ -125,7 +125,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       hasSelectedEndpoint(getState()) === true &&
       getIsOnEndpointDetailsActivityLog(getState())
     ) {
-      endpointDetailsActivityLogChangedMiddleware({ store, coreStart });
+      await endpointDetailsActivityLogChangedMiddleware({ store, coreStart });
     }
 
     // page activity log API
@@ -133,7 +133,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       action.type === 'endpointDetailsActivityLogUpdatePaging' &&
       hasSelectedEndpoint(getState())
     ) {
-      endpointDetailsActivityLogPagingMiddleware({ store, coreStart });
+      await endpointDetailsActivityLogPagingMiddleware({ store, coreStart });
     }
 
     // Isolate Host
