@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButtonEmpty, EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StatefulTopN } from '../../top_n';
 import { TimelineId } from '../../../../../common/types/timeline';
@@ -24,7 +24,7 @@ const SHOW_TOP = (fieldName: string) =>
 
 interface Props {
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
   field: string;
   onClick: () => void;
   onFilterAdded?: () => void;
@@ -64,6 +64,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
           <Component
             aria-label={SHOW_TOP(field)}
             data-test-subj="show-top-field"
+            icon="visBarVertical"
             iconType="visBarVertical"
             onClick={onClick}
             title={SHOW_TOP(field)}
@@ -84,17 +85,15 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
     );
 
     return showTopN ? (
-      <EuiPopover button={button} isOpen={showTopN} closePopover={onClick}>
-        <StatefulTopN
-          browserFields={browserFields}
-          field={field}
-          indexPattern={indexPattern}
-          onFilterAdded={onFilterAdded}
-          timelineId={timelineId ?? undefined}
-          toggleTopN={onClick}
-          value={value}
-        />
-      </EuiPopover>
+      <StatefulTopN
+        browserFields={browserFields}
+        field={field}
+        indexPattern={indexPattern}
+        onFilterAdded={onFilterAdded}
+        timelineId={timelineId ?? undefined}
+        toggleTopN={onClick}
+        value={value}
+      />
     ) : showTooltip ? (
       <EuiToolTip
         content={
