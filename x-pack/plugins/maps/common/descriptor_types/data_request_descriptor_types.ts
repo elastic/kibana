@@ -28,8 +28,8 @@ export type DataFilters = {
   searchSessionId?: string;
   timeFilters: TimeRange;
   timeslice?: Timeslice;
-  zoom?: number;
-  isReadOnly?: boolean;
+  zoom: number;
+  isReadOnly: boolean;
   searchSessionMapBuffer?: MapExtent;
   forceRefreshTriggeredFromGlobalQueryTime?: boolean;
 };

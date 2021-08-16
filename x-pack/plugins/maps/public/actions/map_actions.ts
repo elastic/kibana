@@ -266,7 +266,7 @@ export function setQuery({
       return timeslice ? timeslice : getTimeslice(getState());
     }
 
-    const nextQueryContext: DataFilters = {
+    const nextQueryContext = {
       forceRefreshTriggeredFromGlobalQueryTime: forceRefresh,
       timeFilters: timeFilters ? timeFilters : prevTimeFilters,
       timeslice: getNextTimeslice(),
@@ -276,7 +276,7 @@ export function setQuery({
       searchSessionMapBuffer,
     };
 
-    const prevQueryContext: DataFilters = {
+    const prevQueryContext = {
       timeFilters: prevTimeFilters,
       timeslice: getTimeslice(getState()),
       query: prevQuery,
