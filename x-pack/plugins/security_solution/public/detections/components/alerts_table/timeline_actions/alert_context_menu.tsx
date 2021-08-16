@@ -72,7 +72,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
-  const afterCaseSelection = useCallback(() => {
+  const afterItemSelection = useCallback(() => {
     setPopover(false);
   }, []);
   const ruleId = get(0, ecsRowData?.signal?.rule?.id);
@@ -87,7 +87,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       useInsertTimeline: insertTimelineHook,
       casePermissions,
       appId: APP_ID,
-      onClose: afterCaseSelection,
+      onClose: afterItemSelection,
     }),
     [
       ariaRowindex,
@@ -95,7 +95,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       ecsRowData,
       insertTimelineHook,
       casePermissions,
-      afterCaseSelection,
+      afterItemSelection,
     ]
   );
   const hasWritePermissions = useGetUserCasesPermissions()?.crud ?? false;
@@ -207,6 +207,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const investigateInResolverAction = useInvestigateInResolverContextItem({
     timelineId,
     ecsData: ecsRowData,
+    onClose: afterItemSelection,
   });
   const eventFilterAction = useEventFilterAction({
     onAddEventFilterClick: handleOnAddEventFilterClick,

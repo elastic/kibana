@@ -12,7 +12,6 @@ import { TestProviders } from '../../../../common/mock';
 import React from 'react';
 import { Ecs } from '../../../../../common/ecs';
 import { mockTimelines } from '../../../../common/mock/mock_timelines_plugin';
-import * as i18n from '../translations';
 
 const ecsRowData: Ecs = { _id: '1', agent: { type: ['blah'] } };
 
@@ -39,8 +38,14 @@ jest.mock('../../../../common/lib/kibana', () => ({
       timelines: { ...mockTimelines },
     },
   }),
-  useGetUserCasesPermissions: jest.fn(),
+  useGetUserCasesPermissions: jest.fn().mockReturnValue({
+    crud: true,
+    read: true,
+  }),
 }));
+
+const actionMenuButton = '[data-test-subj="timeline-context-menu-button"] button';
+const addToCaseButton = '[data-test-subj="attach-alert-to-case-button"]';
 
 describe('InvestigateInResolverAction', () => {
   test('it render AddToCase context menu item if timelineId === TimelineId.detectionsPage', () => {
@@ -48,10 +53,8 @@ describe('InvestigateInResolverAction', () => {
       wrappingComponent: TestProviders,
     });
 
-    wrapper.find('[data-test-subj="timeline-context-menu-button"] button').simulate('click');
-    expect(wrapper.find('.euiContextMenuItem__text').first().text()).toEqual(
-      i18n.ACTION_ADD_TO_CASE
-    );
+    wrapper.find(actionMenuButton).simulate('click');
+    expect(wrapper.find(addToCaseButton).first().exists()).toEqual(true);
   });
 
   test('it render AddToCase context menu item if timelineId === TimelineId.detectionsRulesDetailsPage', () => {
@@ -62,10 +65,8 @@ describe('InvestigateInResolverAction', () => {
       }
     );
 
-    wrapper.find('[data-test-subj="timeline-context-menu-button"] button').simulate('click');
-    expect(wrapper.find('.euiContextMenuItem__text').first().text()).toEqual(
-      i18n.ACTION_ADD_TO_CASE
-    );
+    wrapper.find(actionMenuButton).simulate('click');
+    expect(wrapper.find(addToCaseButton).first().exists()).toEqual(true);
   });
 
   test('it render AddToCase context menu item if timelineId === TimelineId.active', () => {
@@ -73,19 +74,15 @@ describe('InvestigateInResolverAction', () => {
       wrappingComponent: TestProviders,
     });
 
-    wrapper.find('[data-test-subj="timeline-context-menu-button"] button').simulate('click');
-    expect(wrapper.find('.euiContextMenuItem__text').first().text()).toEqual(
-      i18n.ACTION_ADD_TO_CASE
-    );
+    wrapper.find(actionMenuButton).simulate('click');
+    expect(wrapper.find(addToCaseButton).first().exists()).toEqual(true);
   });
 
   test('it does NOT render AddToCase context menu item when timelineId is not in the allowed list', () => {
     const wrapper = mount(<AlertContextMenu {...props} timelineId="timeline-test" />, {
       wrappingComponent: TestProviders,
     });
-    wrapper.find('[data-test-subj="timeline-context-menu-button"] button').simulate('click');
-    expect(wrapper.find('.euiContextMenuItem__text').first().text()).toEqual(
-      i18n.ACTION_ADD_EVENT_FILTER
-    );
+    wrapper.find(actionMenuButton).simulate('click');
+    expect(wrapper.find(addToCaseButton).first().exists()).toEqual(false);
   });
 });

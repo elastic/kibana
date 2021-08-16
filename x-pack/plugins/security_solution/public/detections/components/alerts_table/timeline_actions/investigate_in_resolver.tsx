@@ -25,10 +25,12 @@ export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) =>
 interface InvestigateInResolverProps {
   timelineId: string;
   ecsData: Ecs;
+  onClose: () => void;
 }
 export const useInvestigateInResolverContextItem = ({
   timelineId,
   ecsData,
+  onClose,
 }: InvestigateInResolverProps) => {
   const dispatch = useDispatch();
   const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
@@ -37,7 +39,8 @@ export const useInvestigateInResolverContextItem = ({
     if (timelineId === TimelineId.active) {
       dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph }));
     }
-  }, [dispatch, ecsData._id, timelineId]);
+    onClose();
+  }, [dispatch, ecsData._id, onClose, timelineId]);
   return isDisabled
     ? []
     : [
