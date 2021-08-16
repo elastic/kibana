@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { FtrProviderContext } from '../../ftr_provider_context';
+
 const TEST_INDEX_PATTERN = 'logstash-*';
 const TEST_ANCHOR_ID = 'AU_x3_BrGFA8no6QjjaI';
 const TEST_ANCHOR_FILTER_FIELD = 'geo.src';
 const TEST_ANCHOR_FILTER_VALUE = 'IN';
 const TEST_COLUMN_NAMES = ['extension', 'geo.src'];
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
   const retry = getService('retry');

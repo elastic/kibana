@@ -34,8 +34,8 @@ export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
 
 export const CREATE_NEW_TIMELINE_TEMPLATE = '[data-test-subj="template-timeline-new"]';
 
-export const DRAGGABLE_HEADER =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="headers-group"] [data-test-subj="draggable-header"]';
+export const DATAGRID_HEADERS =
+  '[data-test-subj="events-viewer-panel"] [data-test-subj^="dataGridHeaderCell-"]';
 
 export const FAVORITE_TIMELINE = '[data-test-subj="timeline-favorite-filled-star"]';
 
@@ -51,6 +51,8 @@ export const ID_HEADER_FIELD = '[data-test-subj="timeline"] [data-test-subj="hea
 export const ID_FIELD = '[data-test-subj="timeline"] [data-test-subj="field-name-_id"]';
 
 export const ID_TOGGLE_FIELD = '[data-test-subj="toggle-field-_id"]';
+
+export const ID_HOVER_ACTION_OVERFLOW_BTN = '[data-test-subj="more-actions-_id"]';
 
 export const LOCKED_ICON = '[data-test-subj="timeline-date-picker-lock-button"]';
 
@@ -266,3 +268,5 @@ export const TIMELINE_TAB_CONTENT_PINNED = '[data-test-subj="timeline-tab-conten
 
 export const TIMELINE_TAB_CONTENT_GRAPHS_NOTES =
   '[data-test-subj="timeline-tab-content-graph-notes"]';
+
+export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN = '[data-test-subj="more-actions-@timestamp"]';

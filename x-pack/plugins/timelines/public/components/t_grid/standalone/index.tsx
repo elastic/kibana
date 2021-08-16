@@ -11,7 +11,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { Direction } from '../../../../common/search_strategy';
+import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
 import { TGridCellAction, TimelineTabs } from '../../../../common/types/timeline';
 import type {
@@ -115,6 +115,7 @@ export interface TGridStandaloneProps {
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
   end: string;
+  entityType?: EntityType;
   loadingText: React.ReactNode;
   filters: Filter[];
   footerText: React.ReactNode;
@@ -149,6 +150,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   defaultCellActions,
   deletedEventIds,
   end,
+  entityType = 'alerts',
   loadingText,
   filters,
   footerText,
@@ -237,6 +239,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   ] = useTimelineEvents({
     alertConsumers,
     docValueFields: [],
+    entityType,
     excludeEcsData: true,
     fields,
     filterQuery: combinedQueries!.filterQuery,
