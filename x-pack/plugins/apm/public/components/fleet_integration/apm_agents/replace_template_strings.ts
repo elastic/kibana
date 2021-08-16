@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { CoreStart } from 'kibana/public';
 import Mustache from 'mustache';
-import { ApmPluginStartDeps } from '../../../plugin';
 
 const TEMPLATE_TAGS = ['{', '}'];
 
 export function replaceTemplateStrings(
   text: string,
-  docLinks: ApmPluginStartDeps['docLinks']
+  docLinks?: CoreStart['docLinks']
 ) {
   Mustache.parse(text, TEMPLATE_TAGS);
   return Mustache.render(text, {

@@ -22,7 +22,6 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
-import { DocLinksStart } from '../../../../src/core/public/doc_links';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type { FleetStart } from '../../fleet/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
@@ -81,7 +80,6 @@ export interface ApmPluginStartDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observability: ObservabilityPublicStart;
   fleet?: FleetStart;
-  docLinks?: DocLinksStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
