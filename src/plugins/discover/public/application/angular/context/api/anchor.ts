@@ -44,14 +44,16 @@ export function fetchAnchorProvider(
         },
         language: 'lucene',
       })
-      .setField('sort', sort);
+      .setField('sort', sort)
+      .setField('trackTotalHits', false);
     if (useNewFieldsApi) {
       searchSource.removeField('fieldsFromSource');
       searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
     }
     const response = await searchSource.fetch();
+    const doc = get(response, ['hits', 'hits', 0]);
 
-    if (get(response, ['hits', 'total'], 0) < 1) {
+    if (!doc) {
       throw new Error(
         i18n.translate('discover.context.failedToLoadAnchorDocumentErrorDescription', {
           defaultMessage: 'Failed to load anchor document.',
@@ -60,7 +62,7 @@ export function fetchAnchorProvider(
     }
 
     return {
-      ...get(response, ['hits', 'hits', 0]),
+      ...doc,
       isAnchor: true,
     } as EsHitRecord;
   };

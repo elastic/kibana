@@ -74,6 +74,7 @@ export async function fetchHitsInInterval(
     .setField('searchAfter', searchAfter)
     .setField('sort', sort)
     .setField('version', true)
+    .setField('trackTotalHits', false)
     .fetch();
 
   // TODO: There's a difference in the definition of SearchResponse and EsHitRecord
