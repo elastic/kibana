@@ -13,6 +13,7 @@ import {
   EuiText,
   EuiCodeBlock,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CreateAgentInstructions } from './agent_instructions_mappings';
 import {
@@ -47,7 +48,16 @@ function AccordionButtonContent({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="s">
-              <p>Configure instrumentation for {title} applications.</p>
+              <p>
+                {i18n.translate(
+                  'xpack.apm.fleet_integration.settings.apmAgent.description',
+                  {
+                    defaultMessage:
+                      'Configure instrumentation for {title} applications.',
+                    values: { title },
+                  }
+                )}
+              </p>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
