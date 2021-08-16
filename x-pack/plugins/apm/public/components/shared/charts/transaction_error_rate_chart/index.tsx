@@ -29,6 +29,8 @@ function yLabelFormat(y?: number | null) {
 interface Props {
   height?: number;
   showAnnotations?: boolean;
+  kuery: string;
+  environment: string;
 }
 
 type ErrorRate = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/error_rate'>;
@@ -49,12 +51,12 @@ const INITIAL_STATE: ErrorRate = {
 export function TransactionErrorRateChart({
   height,
   showAnnotations = true,
+  environment,
+  kuery,
 }: Props) {
   const theme = useTheme();
   const {
     urlParams: {
-      environment,
-      kuery,
       start,
       end,
       transactionName,
