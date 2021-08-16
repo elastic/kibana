@@ -94,13 +94,13 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       router,
       credentialStore: this.credentialStore,
       log: this.logger,
+      licensing,
       getSavedObjectsService: () => {
         if (!this.savedObjectsServiceStart) {
           throw new Error('Saved Objects Start service not available');
         }
         return this.savedObjectsServiceStart;
       },
-      licensing,
     };
 
     // Initialize version service with current kibana version
