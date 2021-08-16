@@ -124,7 +124,7 @@ export const asyncSearchServiceProvider = (
       }
 
       // Create an array of ranges [2, 4, 6, ..., 98]
-      const percents = Array.from(range(2, 100, 2));
+      const percents = range(2, 100, 2);
       const {
         percentiles: percentilesRecords,
       } = await fetchTransactionDurationPercentiles(esClient, params, percents);
