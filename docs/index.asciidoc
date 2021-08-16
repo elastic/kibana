@@ -4,8 +4,6 @@
 :include-xpack:  true
 :lang:           en
 :kib-repo-dir:   {kibana-root}/docs
-:blog-ref:       https://www.elastic.co/blog/
-:wikipedia:      https://en.wikipedia.org/wiki
 
 include::{docs-root}/shared/versions/stack/{source_branch}.asciidoc[]
 

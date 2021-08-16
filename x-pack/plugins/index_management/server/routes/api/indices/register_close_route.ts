@@ -14,31 +14,24 @@ const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerCloseRoute({ router, lib }: RouteDependencies) {
+export function registerCloseRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/close'), validate: { body: bodySchema } },
-    async (ctx, req, res) => {
-      const payload = req.body as typeof bodySchema.type;
-      const { indices = [] } = payload;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { indices = [] } = request.body as typeof bodySchema.type;
 
       const params = {
-        expandWildcards: 'none',
+        expand_wildcards: 'none',
         format: 'json',
         index: indices,
       };
 
       try {
-        await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('indices.close', params);
-        return res.ok();
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        throw e;
+        await client.asCurrentUser.indices.close(params);
+        return response.ok();
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

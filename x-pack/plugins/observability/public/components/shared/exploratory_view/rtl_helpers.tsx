@@ -10,7 +10,7 @@ import React, { ReactElement } from 'react';
 import { stringify } from 'query-string';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { render as reactTestLibRender, RenderOptions } from '@testing-library/react';
-import { Route, Router } from 'react-router-dom';
+import { Router } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -24,7 +24,7 @@ import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/
 import { lensPluginMock } from '../../../../../lens/public/mocks';
 import * as useAppIndexPatternHook from './hooks/use_app_index_pattern';
 import { IndexPatternContextProvider } from './hooks/use_app_index_pattern';
-import { AllSeries, SeriesContextValue, UrlStorageContext } from './hooks/use_series_storage';
+import { AllSeries, UrlStorageContext } from './hooks/use_series_storage';
 
 import * as fetcherHook from '../../../hooks/use_fetcher';
 import * as useSeriesFilterHook from './hooks/use_series_filters';
@@ -39,10 +39,9 @@ import {
   IndexPattern,
   IndexPatternsContract,
 } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { AppDataType, SeriesUrl, UrlFilter } from './types';
+import { AppDataType, UrlFilter } from './types';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ListItem } from '../../../hooks/use_values_list';
-import { TRANSACTION_DURATION } from './configurations/constants/elasticsearch_fieldnames';
 
 interface KibanaProps {
   services?: KibanaServices;
@@ -159,11 +158,9 @@ export function MockRouter<ExtraCore>({
 }: MockRouterProps<ExtraCore>) {
   return (
     <Router history={history}>
-      <Route path={'/app/observability/exploratory-view/:mode'}>
-        <MockKibanaProvider core={core} kibanaProps={kibanaProps} history={history}>
-          {children}
-        </MockKibanaProvider>
-      </Route>
+      <MockKibanaProvider core={core} kibanaProps={kibanaProps} history={history}>
+        {children}
+      </MockKibanaProvider>
     </Router>
   );
 }
@@ -176,7 +173,7 @@ export function render<ExtraCore>(
     core: customCore,
     kibanaProps,
     renderOptions,
-    url = '/app/observability/exploratory-view/configure#?autoApply=!t',
+    url,
     initSeries = {},
   }: RenderRouterOptions<ExtraCore> = {}
 ) {
@@ -206,7 +203,7 @@ export function render<ExtraCore>(
   };
 }
 
-export const getHistoryFromUrl = (url: Url) => {
+const getHistoryFromUrl = (url: Url) => {
   if (typeof url === 'string') {
     return createMemoryHistory({
       initialEntries: [url],
@@ -255,15 +252,6 @@ export const mockUseValuesList = (values?: ListItem[]) => {
   return { spy, onRefreshTimeRange };
 };
 
-export const mockUxSeries = {
-  name: 'performance-distribution',
-  dataType: 'ux',
-  breakdown: 'user_agent.name',
-  time: { from: 'now-15m', to: 'now' },
-  reportDefinitions: { 'service.name': ['elastic-co'] },
-  selectedMetricField: TRANSACTION_DURATION,
-} as SeriesUrl;
-
 function mockSeriesStorageContext({
   data,
   filters,
@@ -273,34 +261,34 @@ function mockSeriesStorageContext({
   filters?: UrlFilter[];
   breakdown?: string;
 }) {
-  const testSeries = {
-    ...mockUxSeries,
-    breakdown: breakdown || 'user_agent.name',
-    ...(filters ? { filters } : {}),
+  const mockDataSeries = data || {
+    'performance-distribution': {
+      reportType: 'data-distribution',
+      dataType: 'ux',
+      breakdown: breakdown || 'user_agent.name',
+      time: { from: 'now-15m', to: 'now' },
+      ...(filters ? { filters } : {}),
+    },
   };
+  const allSeriesIds = Object.keys(mockDataSeries);
+  const firstSeriesId = allSeriesIds?.[0];
 
-  const mockDataSeries = data || [testSeries];
+  const series = mockDataSeries[firstSeriesId];
 
   const removeSeries = jest.fn();
   const setSeries = jest.fn();
 
-  const getSeries = jest.fn().mockReturnValue(testSeries);
+  const getSeries = jest.fn().mockReturnValue(series);
 
   return {
+    firstSeriesId,
+    allSeriesIds,
     removeSeries,
     setSeries,
     getSeries,
-    autoApply: true,
-    reportType: 'data-distribution',
-    lastRefresh: Date.now(),
-    setLastRefresh: jest.fn(),
-    setAutoApply: jest.fn(),
-    applyChanges: jest.fn(),
-    firstSeries: mockDataSeries[0],
+    firstSeries: mockDataSeries[firstSeriesId],
     allSeries: mockDataSeries,
-    setReportType: jest.fn(),
-    storage: { get: jest.fn() } as any,
-  } as SeriesContextValue;
+  };
 }
 
 export function mockUseSeriesFilter() {

@@ -9,7 +9,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { DataContext } from './table_basic';
 import { createGridCell } from './cell_value';
-import { FieldFormat } from 'src/plugins/data/public';
+import type { FieldFormat } from 'src/plugins/field_formats/common';
 import { Datatable } from 'src/plugins/expressions/public';
 import { IUiSettingsClient } from 'kibana/public';
 import { act } from 'react-dom/test-utils';

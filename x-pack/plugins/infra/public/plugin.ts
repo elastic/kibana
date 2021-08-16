@@ -41,8 +41,9 @@ export class Plugin implements InfraClientPluginClass {
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createLogThresholdAlertType()
     );
-    pluginsSetup.triggersActionsUi.ruleTypeRegistry.register(createMetricThresholdAlertType());
-
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
+      createMetricThresholdAlertType()
+    );
     pluginsSetup.observability.dashboard.register({
       appName: 'infra_logs',
       hasData: getLogsHasDataFetcher(core.getStartServices),

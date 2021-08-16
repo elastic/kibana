@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -33,9 +33,10 @@ import { IndexPatternField, IndexPattern } from '../../../../../../../data/publi
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { DiscoverServices } from '../../../../../build_services';
-import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { AppState } from '../../services/discover_state';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
+import { DataDocuments$ } from '../../services/use_saved_search';
+import { calcFieldCounts } from '../../utils/calc_field_counts';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -47,13 +48,9 @@ export interface DiscoverSidebarResponsiveProps {
    */
   columns: string[];
   /**
-   * a statistics of the distribution of fields in the given hits
-   */
-  fieldCounts: Record<string, number>;
-  /**
    * hits fetched from ES, displayed in the doc table
    */
-  hits: ElasticSearchHit[];
+  documents$: DataDocuments$;
   /**
    * List of available index patterns
    */
@@ -119,6 +116,36 @@ export interface DiscoverSidebarResponsiveProps {
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  /**
+   * needed for merging new with old field counts, high likely legacy, but kept this behavior
+   * because not 100% sure in this case
+   */
+  const fieldCounts = useRef<Record<string, number>>(
+    calcFieldCounts({}, props.documents$.getValue().result, props.selectedIndexPattern)
+  );
+
+  const [documentState, setDocumentState] = useState(props.documents$.getValue());
+  useEffect(() => {
+    const subscription = props.documents$.subscribe((next) => {
+      if (next.fetchStatus !== documentState.fetchStatus) {
+        if (next.result) {
+          fieldCounts.current = calcFieldCounts(
+            next.result.length ? fieldCounts.current : {},
+            next.result,
+            props.selectedIndexPattern!
+          );
+        }
+        setDocumentState({ ...documentState, ...next });
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [props.documents$, props.selectedIndexPattern, documentState, setDocumentState]);
+
+  useEffect(() => {
+    // when index pattern changes fieldCounts needs to be cleaned up to prevent displaying
+    // fields of the previous index pattern
+    fieldCounts.current = {};
+  }, [props.selectedIndexPattern]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
 
@@ -134,17 +161,17 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     };
   }, []);
 
+  const setFieldEditorRef = useCallback((ref: () => void | undefined) => {
+    closeFieldEditor.current = ref;
+  }, []);
+
+  const closeFlyout = useCallback(() => {
+    setIsFlyoutVisible(false);
+  }, []);
+
   if (!props.selectedIndexPattern) {
     return null;
   }
-
-  const setFieldEditorRef = (ref: () => void | undefined) => {
-    closeFieldEditor.current = ref;
-  };
-
-  const closeFlyout = () => {
-    setIsFlyoutVisible(false);
-  };
 
   const { indexPatternFieldEditor } = props.services;
   const indexPatternFieldEditPermission = indexPatternFieldEditor?.userPermissions.editIndexPattern();
@@ -177,7 +204,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         <EuiHideFor sizes={['xs', 's']}>
           <DiscoverSidebar
             {...props}
+            documents={documentState.result ?? []}
             fieldFilter={fieldFilter}
+            fieldCounts={fieldCounts.current}
             setFieldFilter={setFieldFilter}
             editField={editField}
           />
@@ -262,6 +291,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               <div className="euiFlyoutBody">
                 <DiscoverSidebar
                   {...props}
+                  documents={documentState.result ?? []}
+                  fieldCounts={fieldCounts.current}
                   fieldFilter={fieldFilter}
                   setFieldFilter={setFieldFilter}
                   alwaysShowActionButtons={true}

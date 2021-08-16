@@ -6,8 +6,10 @@
  */
 
 import { createSlice, current, PayloadAction } from '@reduxjs/toolkit';
+import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
-import { LensAppState } from './types';
+import { getInitialDatasourceId, getResolvedDateRange } from '../utils';
+import { LensAppState, LensStoreDeps } from './types';
 
 export const initialState: LensAppState = {
   searchSessionId: '',
@@ -24,6 +26,44 @@ export const initialState: LensAppState = {
     state: null,
     activeId: null,
   },
+};
+
+export const getPreloadedState = ({
+  lensServices: { data },
+  initialContext,
+  embeddableEditorIncomingState,
+  datasourceMap,
+  visualizationMap,
+}: LensStoreDeps) => {
+  const initialDatasourceId = getInitialDatasourceId(datasourceMap);
+  const datasourceStates: LensAppState['datasourceStates'] = {};
+  if (initialDatasourceId) {
+    datasourceStates[initialDatasourceId] = {
+      state: null,
+      isLoading: true,
+    };
+  }
+
+  const state = {
+    ...initialState,
+    isLoading: true,
+    query: data.query.queryString.getQuery(),
+    // Do not use app-specific filters from previous app,
+    // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
+    filters: !initialContext
+      ? data.query.filterManager.getGlobalFilters()
+      : data.query.filterManager.getFilters(),
+    searchSessionId: data.search.session.getSessionId(),
+    resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
+    isLinkedToOriginatingApp: Boolean(embeddableEditorIncomingState?.originatingApp),
+    activeDatasourceId: initialDatasourceId,
+    datasourceStates,
+    visualization: {
+      state: null as unknown,
+      activeId: Object.keys(visualizationMap)[0] || null,
+    },
+  };
+  return state;
 };
 
 export const lensSlice = createSlice({
@@ -254,6 +294,13 @@ export const lensSlice = createSlice({
       };
     },
     navigateAway: (state) => state,
+    loadInitial: (
+      state,
+      payload: PayloadAction<{
+        initialInput?: LensEmbeddableInput;
+        redirectCallback: (savedObjectId?: string) => void;
+      }>
+    ) => state,
   },
 });
 

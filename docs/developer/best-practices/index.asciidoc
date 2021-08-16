@@ -45,7 +45,7 @@ guidelines]
 === Conventions
 
 * Become familiar with our
-{kib-repo}blob/{branch}/STYLEGUIDE.md[styleguide]
+{kib-repo}blob/{branch}/STYLEGUIDE.mdx[styleguide]
 (use Typescript!)
 * Write all new code on
 {kib-repo}blob/{branch}/src/core/README.md[the

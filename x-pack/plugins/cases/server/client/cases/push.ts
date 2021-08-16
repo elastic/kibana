@@ -14,10 +14,10 @@ import {
   CaseResponse,
   CaseStatuses,
   ExternalServiceResponse,
-  ESCaseAttributes,
-  ESCasesConfigureAttributes,
   CaseType,
   ENABLE_CASE_CONNECTOR,
+  CasesConfigureAttributes,
+  CaseAttributes,
 } from '../../../common';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
@@ -33,8 +33,8 @@ import { casesConnectors } from '../../connectors';
  * In the future we could allow push to close all the sub cases of a collection but that's not currently supported.
  */
 function shouldCloseByPush(
-  configureSettings: SavedObjectsFindResponse<ESCasesConfigureAttributes>,
-  caseInfo: SavedObject<ESCaseAttributes>
+  configureSettings: SavedObjectsFindResponse<CasesConfigureAttributes>,
+  caseInfo: SavedObject<CaseAttributes>
 ): boolean {
   return (
     configureSettings.total > 0 &&
@@ -186,6 +186,7 @@ export const push = async (
 
     const [updatedCase, updatedComments] = await Promise.all([
       caseService.patchCase({
+        originalCase: myCase,
         unsecuredSavedObjectsClient,
         caseId,
         updatedAttributes: {

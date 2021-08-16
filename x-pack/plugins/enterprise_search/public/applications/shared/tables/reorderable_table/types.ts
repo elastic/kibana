@@ -11,6 +11,6 @@ export interface DraggableUXStyles {
   flexGrow?: number;
 }
 export interface Column<Item> extends DraggableUXStyles {
-  name: string;
+  name?: string;
   render: (item: Item) => React.ReactNode;
 }

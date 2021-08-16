@@ -43,7 +43,7 @@ export const ALERT = i18n.translate('xpack.securitySolution.detectionEngine.aler
 export const BUTTON_MANAGE_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.buttonManageRules',
   {
-    defaultMessage: 'Manage detection rules',
+    defaultMessage: 'Manage rules',
   }
 );
 

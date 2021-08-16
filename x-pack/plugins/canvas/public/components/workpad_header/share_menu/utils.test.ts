@@ -22,7 +22,6 @@ test('getPdfJobParams returns the correct job params for canvas layout', () => {
   const jobParams = getPdfJobParams(workpadSharingData, basePath);
   expect(jobParams).toMatchInlineSnapshot(`
     Object {
-      "browserTimezone": "America/New_York",
       "layout": Object {
         "dimensions": Object {
           "height": 0,

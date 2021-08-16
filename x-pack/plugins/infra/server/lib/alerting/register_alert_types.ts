@@ -20,10 +20,13 @@ const registerAlertTypes = (
   ml?: MlPluginSetup
 ) => {
   if (alertingPlugin) {
-    alertingPlugin.registerType(registerMetricThresholdAlertType(libs));
     alertingPlugin.registerType(registerMetricAnomalyAlertType(libs, ml));
 
-    const registerFns = [registerLogThresholdAlertType, registerMetricInventoryThresholdAlertType];
+    const registerFns = [
+      registerLogThresholdAlertType,
+      registerMetricInventoryThresholdAlertType,
+      registerMetricThresholdAlertType,
+    ];
     registerFns.forEach((fn) => {
       fn(alertingPlugin, libs);
     });

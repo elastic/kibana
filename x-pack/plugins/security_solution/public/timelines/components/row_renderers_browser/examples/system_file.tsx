@@ -23,6 +23,7 @@ const SystemFileExampleComponent: React.FC = () => {
       {systemFileRowRenderer.renderRow({
         browserFields: {},
         data: mockEndgameFileDeleteEvent,
+        isDraggable: false,
         timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>

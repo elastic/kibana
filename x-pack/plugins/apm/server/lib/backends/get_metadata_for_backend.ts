@@ -51,7 +51,7 @@ export async function getMetadataForBackend({
   const sample = maybe(sampleResponse.hits.hits[0])?._source;
 
   return {
-    'span.type': sample?.span.type,
-    'span.subtype': sample?.span.subtype,
+    spanType: sample?.span.type,
+    spanSubtype: sample?.span.subtype,
   };
 }

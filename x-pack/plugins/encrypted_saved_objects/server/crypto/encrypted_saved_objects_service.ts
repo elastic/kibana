@@ -70,7 +70,12 @@ interface DecryptParameters extends CommonParameters {
    * the object was previously encrypted with its namespace in the descriptor portion of the AAD; on the other hand, if the object is being
    * decrypted during object migration, the object was never encrypted with its namespace in the descriptor portion of the AAD.
    */
-  convertToMultiNamespaceType?: boolean;
+  isTypeBeingConverted?: boolean;
+  /**
+   * If the originId (old object ID) is present and the object is being converted from a single-namespace type to a multi-namespace type,
+   * we will attempt to decrypt with both the old object ID and the current object ID.
+   */
+  originId?: string;
 }
 
 interface EncryptedSavedObjectsServiceOptions {
@@ -528,11 +533,23 @@ export class EncryptedSavedObjectsService {
         );
       }
       if (!encryptionAADs.length) {
-        encryptionAADs.push(this.getAAD(typeDefinition, descriptor, attributes));
-        if (params?.convertToMultiNamespaceType && descriptor.namespace) {
-          // This is happening during a migration; create an alternate AAD for decrypting the object attributes by stripping out the namespace from the descriptor.
-          const { namespace, ...alternateDescriptor } = descriptor;
-          encryptionAADs.push(this.getAAD(typeDefinition, alternateDescriptor, attributes));
+        if (params?.isTypeBeingConverted) {
+          // The object is either pending conversion to a multi-namespace type, or it was just converted. We may need to attempt to decrypt
+          // it with several different descriptors depending upon how the migrations are structured, and whether this is a full index
+          // migration or a single document migration. Note that the originId is set either when the document is converted _or_ when it is
+          // imported with "createNewCopies: false", so we have to try with and without it.
+          const decryptDescriptors = params.originId
+            ? [{ ...descriptor, id: params.originId }, descriptor]
+            : [descriptor];
+          for (const decryptDescriptor of decryptDescriptors) {
+            encryptionAADs.push(this.getAAD(typeDefinition, decryptDescriptor, attributes));
+            if (descriptor.namespace) {
+              const { namespace, ...alternateDescriptor } = decryptDescriptor;
+              encryptionAADs.push(this.getAAD(typeDefinition, alternateDescriptor, attributes));
+            }
+          }
+        } else {
+          encryptionAADs.push(this.getAAD(typeDefinition, descriptor, attributes));
         }
       }
       try {

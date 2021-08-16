@@ -9,6 +9,7 @@
 import { TelemetryEventsSender } from './sender';
 import { TelemetryDiagTask } from './diagnostic_task';
 import { TelemetryEndpointTask } from './endpoint_task';
+import { TelemetryTrustedAppsTask } from './trusted_apps_task';
 import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 
 /**
@@ -24,6 +25,7 @@ export const createMockTelemetryEventsSender = (
     fetchDiagnosticAlerts: jest.fn(),
     fetchEndpointMetrics: jest.fn(),
     fetchEndpointPolicyResponses: jest.fn(),
+    fetchTrustedApplications: jest.fn(),
     queueTelemetryEvents: jest.fn(),
     processEvents: jest.fn(),
     isTelemetryOptedIn: jest.fn().mockReturnValue(enableTelemtry ?? jest.fn()),
@@ -63,5 +65,12 @@ export class MockTelemetryDiagnosticTask extends TelemetryDiagTask {
  * Creates a mocked Telemetry Endpoint Task
  */
 export class MockTelemetryEndpointTask extends TelemetryEndpointTask {
+  public runTask = jest.fn();
+}
+
+/**
+ * Creates a mocked Telemetry trusted app Task
+ */
+export class MockTelemetryTrustedAppTask extends TelemetryTrustedAppsTask {
   public runTask = jest.fn();
 }

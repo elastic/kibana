@@ -7,6 +7,6 @@
 
 export const ALL_HOSTS_TABLE = '[data-test-subj="table-allHosts-loading-false"]';
 
-export const HOSTS_NAMES = '[data-test-subj="draggable-content-host.name"] a.euiLink';
+export const HOSTS_NAMES = '[data-test-subj="render-content-host.name"] a.euiLink';
 
-export const HOSTS_NAMES_DRAGGABLE = '[data-test-subj="draggable-content-host.name"]';
+export const HOSTS_NAMES_DRAGGABLE = '[data-test-subj="render-content-host.name"]';

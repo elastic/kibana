@@ -149,13 +149,13 @@ describe('status check alert', () => {
       const alert = statusCheckAlertFactory(server, libs, plugins);
       // @ts-ignore the executor can return `void`, but ours never does
       const options = mockOptions();
-      const state: Record<string, any> = await alert.executor(options);
+      const state: Record<string, any> | void = await alert.executor(options);
       const {
         services: { alertWithLifecycle },
       } = options;
 
       expect(state).not.toBeUndefined();
-      expect(state?.isTriggered).toBe(false);
+      expect(state instanceof Object ? state.isTriggered : true).toBe(false);
       expect(alertWithLifecycle).not.toHaveBeenCalled();
       expect(mockGetter).toHaveBeenCalledTimes(1);
       expect(mockGetter.mock.calls[0][0]).toEqual(

@@ -10,14 +10,11 @@ import moment from 'moment';
 
 import { createFiltersFromRangeSelectAction } from './create_filters_from_range_select';
 
-import {
-  fieldFormats,
-  FieldFormatsGetConfigFn,
-  IndexPatternsContract,
-  RangeFilter,
-} from '../../../public';
+import { IndexPatternsContract, RangeFilter } from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns, setSearchService } from '../../../public/services';
+import { FieldFormatsGetConfigFn } from '../../../../field_formats/common';
+import { DateFormat } from '../../../../field_formats/public/';
 
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -35,7 +32,7 @@ describe('brushEvent', () => {
       id: 'logstash-*',
     },
     filterable: true,
-    format: new fieldFormats.DateFormat({}, (() => {}) as FieldFormatsGetConfigFn),
+    format: new DateFormat({}, (() => {}) as FieldFormatsGetConfigFn),
   };
 
   const indexPattern = {

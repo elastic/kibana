@@ -27,7 +27,7 @@ interface ProviderProps {
 }
 
 type HasAppDataState = Record<AppDataType, boolean | null>;
-export type IndexPatternState = Record<AppDataType, IndexPattern>;
+type IndexPatternState = Record<AppDataType, IndexPattern>;
 type LoadingState = Record<AppDataType, boolean>;
 
 export function IndexPatternContextProvider({ children }: ProviderProps) {

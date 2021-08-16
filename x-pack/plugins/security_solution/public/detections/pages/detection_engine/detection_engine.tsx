@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiWindowEvent,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
+import { Dispatch } from 'redux';
+import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { isTab } from '../../../../../timelines/public';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -23,7 +31,6 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { inputsSelectors } from '../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { useAlertInfo } from '../../components/alerts_info';
 import { AlertsTable } from '../../components/alerts_table';
 import { NoApiIntegrationKeyCallOut } from '../../components/callouts/no_api_integration_callout';
 import { AlertsHistogramPanel } from '../../components/alerts_kpis/alerts_histogram_panel';
@@ -34,7 +41,7 @@ import { DetectionEngineHeaderPage } from '../../components/detection_engine_hea
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
-import { LinkButton } from '../../../common/components/links';
+import { LinkAnchor } from '../../../common/components/links';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { Display } from '../../../hosts/pages/display';
@@ -44,9 +51,11 @@ import {
   resetKeyboardFocus,
   showGlobalFilters,
 } from '../../../timelines/components/timeline/helpers';
-import { timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import {
+  buildAlertStatusFilter,
+  buildAlertStatusFilterRuleRegistry,
   buildShowBuildingBlockFilter,
   buildShowBuildingBlockFilterRuleRegistry,
   buildThreatMatchFilter,
@@ -58,6 +67,10 @@ import { MissingPrivilegesCallOut } from '../../components/callouts/missing_priv
 import { useKibana } from '../../../common/lib/kibana';
 import { AlertsCountPanel } from '../../components/alerts_kpis/alerts_count_panel';
 import { CHART_HEIGHT } from '../../components/alerts_kpis/common/config';
+import {
+  AlertsTableFilterGroup,
+  FILTER_OPEN,
+} from '../../components/alerts_table/alerts_filter_group';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -68,12 +81,21 @@ const StyledFullHeightContainer = styled.div`
   flex: 1 1 auto;
 `;
 
-const DetectionEnginePageComponent = () => {
+type DetectionEngineComponentProps = PropsFromRedux;
+
+const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
+  clearEventsDeleted,
+  clearEventsLoading,
+  clearSelected,
+}) => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).graphEventId
+  );
+  const updatedAt = useShallowEqualSelector(
+    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).updated
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -102,12 +124,15 @@ const DetectionEnginePageComponent = () => {
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
-  const [lastAlerts] = useAlertInfo({});
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const loading = userInfoLoading || listsConfigLoading;
-  const { navigateToUrl } = useKibana().services.application;
+  const {
+    application: { navigateToUrl },
+    timelines: timelinesUi,
+  } = useKibana().services;
+  const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -134,23 +159,51 @@ const DetectionEnginePageComponent = () => {
     [formatUrl, navigateToUrl]
   );
 
+  // Callback for when open/closed filter changes
+  const onFilterGroupChangedCallback = useCallback(
+    (newFilterGroup: Status) => {
+      const timelineId = TimelineId.detectionsPage;
+      clearEventsLoading!({ id: timelineId });
+      clearEventsDeleted!({ id: timelineId });
+      clearSelected!({ id: timelineId });
+      setFilterGroup(newFilterGroup);
+    },
+    [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
+  );
+
   const alertsHistogramDefaultFilters = useMemo(
     () => [
       ...filters,
       ...(ruleRegistryEnabled
-        ? buildShowBuildingBlockFilterRuleRegistry(showBuildingBlockAlerts) // TODO: Once we are past experimental phase this code should be removed
-        : buildShowBuildingBlockFilter(showBuildingBlockAlerts)),
+        ? [
+            // TODO: Once we are past experimental phase this code should be removed
+            ...buildShowBuildingBlockFilterRuleRegistry(showBuildingBlockAlerts),
+            ...buildAlertStatusFilterRuleRegistry(filterGroup),
+          ]
+        : [
+            ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+            ...buildAlertStatusFilter(filterGroup),
+          ]),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [filters, ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
+    [
+      filters,
+      ruleRegistryEnabled,
+      showBuildingBlockAlerts,
+      showOnlyThreatIndicatorAlerts,
+      filterGroup,
+    ]
   );
 
   // AlertsTable manages global filters itself, so not including `filters`
   const alertsTableDefaultFilters = useMemo(
     () => [
       ...(ruleRegistryEnabled
-        ? buildShowBuildingBlockFilterRuleRegistry(showBuildingBlockAlerts) // TODO: Once we are past experimental phase this code should be removed
-        : buildShowBuildingBlockFilter(showBuildingBlockAlerts)),
+        ? [
+            // TODO: Once we are past experimental phase this code should be removed
+            ...buildShowBuildingBlockFilterRuleRegistry(showBuildingBlockAlerts),
+          ]
+        : [...buildShowBuildingBlockFilter(showBuildingBlockAlerts)]),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
     [ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
@@ -227,30 +280,30 @@ const DetectionEnginePageComponent = () => {
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
-          <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
+          <SecuritySolutionPageWrapper
+            noPadding={globalFullScreen}
+            data-test-subj="detectionsAlertsPage"
+          >
             <Display show={!globalFullScreen}>
-              <DetectionEngineHeaderPage
-                subtitle={
-                  lastAlerts != null && (
-                    <>
-                      {i18n.LAST_ALERT}
-                      {': '}
-                      {lastAlerts}
-                    </>
-                  )
-                }
-                title={i18n.PAGE_TITLE}
-              >
-                <LinkButton
-                  fill
+              <DetectionEngineHeaderPage title={i18n.PAGE_TITLE}>
+                <LinkAnchor
                   onClick={goToRules}
                   href={formatUrl(getRulesUrl())}
-                  iconType="gear"
                   data-test-subj="manage-alert-detection-rules"
                 >
                   {i18n.BUTTON_MANAGE_RULES}
-                </LinkButton>
+                </LinkAnchor>
               </DetectionEngineHeaderPage>
+              <EuiHorizontalRule margin="m" />
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {timelinesUi.getLastUpdated({ updatedAt: updatedAt || 0, showUpdating: loading })}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
               <EuiFlexGroup wrap>
                 <EuiFlexItem grow={2}>
                   <AlertsHistogramPanel
@@ -288,6 +341,7 @@ const DetectionEnginePageComponent = () => {
               showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
               onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
               to={to}
+              filterGroup={filterGroup}
             />
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
@@ -301,4 +355,16 @@ const DetectionEnginePageComponent = () => {
   );
 };
 
-export const DetectionEnginePage = React.memo(DetectionEnginePageComponent);
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  clearSelected: ({ id }: { id: string }) => dispatch(timelineActions.clearSelected({ id })),
+  clearEventsLoading: ({ id }: { id: string }) =>
+    dispatch(timelineActions.clearEventsLoading({ id })),
+  clearEventsDeleted: ({ id }: { id: string }) =>
+    dispatch(timelineActions.clearEventsDeleted({ id })),
+});
+
+const connector = connect(null, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const DetectionEnginePage = connector(React.memo(DetectionEnginePageComponent));

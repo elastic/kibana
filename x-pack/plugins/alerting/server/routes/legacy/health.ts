@@ -27,11 +27,21 @@ export function healthRoute(
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
       try {
+        const isEsSecurityEnabled: boolean | null = licenseState.getIsSecurityEnabled();
         const alertingFrameworkHeath = await context.alerting.getFrameworkHealth();
         const areApiKeysEnabled = await context.alerting.areApiKeysEnabled();
 
+        let isSufficientlySecure;
+        if (isEsSecurityEnabled === null) {
+          isSufficientlySecure = false;
+        } else {
+          // if isEsSecurityEnabled = true, then areApiKeysEnabled must be true to enable alerting
+          // if isEsSecurityEnabled = false, then it does not matter what areApiKeysEnabled is
+          isSufficientlySecure = !isEsSecurityEnabled || (isEsSecurityEnabled && areApiKeysEnabled);
+        }
+
         const frameworkHealth: AlertingFrameworkHealth = {
-          isSufficientlySecure: areApiKeysEnabled,
+          isSufficientlySecure,
           hasPermanentEncryptionKey: encryptedSavedObjects.canEncrypt,
           alertingFrameworkHeath,
         };

@@ -153,15 +153,15 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       ...(start !== undefined && end !== undefined ? { start, end } : {}),
     };
 
-    return httpService.http<JobMessage[]>({
+    return httpService.http<{ messages: JobMessage[]; notificationIndices: string[] }>({
       path: `${ML_BASE_PATH}/job_audit_messages/messages${jobIdString}`,
       method: 'GET',
       query,
     });
   },
 
-  clearJobAuditMessages(jobId: string) {
-    const body = JSON.stringify({ jobId });
+  clearJobAuditMessages(jobId: string, notificationIndices: string[]) {
+    const body = JSON.stringify({ jobId, notificationIndices });
     return httpService.http<{ success: boolean; latest_cleared: number }>({
       path: `${ML_BASE_PATH}/job_audit_messages/clear_messages`,
       method: 'PUT',

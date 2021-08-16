@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { AlertConsumers } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { useDispatch } from 'react-redux';
-
+import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { Direction } from '../../../../common/search_strategy';
+import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
-import { TimelineTabs } from '../../../../common/types/timeline';
+import { TGridCellAction, TimelineTabs } from '../../../../common/types/timeline';
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -21,6 +21,8 @@ import type {
   DataProvider,
   RowRenderer,
   SortColumnTimeline,
+  BulkActionsProp,
+  AlertStatus,
 } from '../../../../common/types/timeline';
 import {
   esQuery,
@@ -29,29 +31,30 @@ import {
   DataPublicPluginStart,
 } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import { Refetch } from '../../../store/t_grid/inputs';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { calculateTotalPages, combineQueries, resolverIsShowing } from '../helpers';
+import {
+  calculateTotalPages,
+  combineQueries,
+  getCombinedFilterQuery,
+  resolverIsShowing,
+} from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
+import type { State } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
 import { HeaderSection } from '../header_section';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { LastUpdatedAt } from '../..';
-import { AlertCount, SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem } from '../styles';
-import * as i18n from './translations';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem } from '../styles';
+import * as i18n from '../translations';
 import { InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
+import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
-const UTILITY_BAR_HEIGHT = 19; // px
 const COMPACT_HEADER_HEIGHT = 36; // px
 const STANDALONE_ID = 'standalone-t-grid';
 const EMPTY_DATA_PROVIDERS: DataProvider[] = [];
-
-const UtilityBar = styled.div`
-  height: ${UTILITY_BAR_HEIGHT}px;
-`;
 
 const TitleText = styled.span`
   margin-right: 12px;
@@ -101,13 +104,23 @@ const HeaderFilterGroupWrapper = styled.header<{ show: boolean }>`
 `;
 
 export interface TGridStandaloneProps {
+  alertConsumers: AlertConsumers[];
+  appId: string;
+  casePermissions: {
+    crud: boolean;
+    read: boolean;
+  } | null;
+  afterCaseSelection?: Function;
   columns: ColumnHeaderOptions[];
+  defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
   end: string;
+  entityType?: EntityType;
   loadingText: React.ReactNode;
   filters: Filter[];
   footerText: React.ReactNode;
   headerFilterGroup?: React.ReactNode;
+  filterStatus: AlertStatus;
   height?: number;
   indexNames: string[];
   itemsPerPage: number;
@@ -119,23 +132,30 @@ export interface TGridStandaloneProps {
   setRefetch: (ref: () => void) => void;
   start: string;
   sort: SortColumnTimeline[];
-  utilityBar?: (refetch: Refetch, totalCount: number) => React.ReactNode;
   graphEventId?: string;
   leadingControlColumns: ControlColumnProps[];
   trailingControlColumns: ControlColumnProps[];
+  bulkActions?: BulkActionsProp;
   data?: DataPublicPluginStart;
   unit: (total: number) => React.ReactNode;
 }
 const basicUnit = (n: number) => i18n.UNIT(n);
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
+  afterCaseSelection,
+  alertConsumers,
+  appId,
+  casePermissions,
   columns,
+  defaultCellActions,
   deletedEventIds,
   end,
+  entityType = 'alerts',
   loadingText,
   filters,
   footerText,
   headerFilterGroup,
+  filterStatus,
   indexNames,
   itemsPerPage,
   itemsPerPageOptions,
@@ -146,7 +166,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   setRefetch,
   start,
   sort,
-  utilityBar,
   graphEventId,
   leadingControlColumns,
   trailingControlColumns,
@@ -166,6 +185,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     queryFields,
     title,
   } = useDeepEqualSelector((state) => getTGrid(state, STANDALONE_ID ?? ''));
+
   useEffect(() => {
     dispatch(tGridActions.updateIsLoading({ id: STANDALONE_ID, isLoading: isQueryLoading }));
   }, [dispatch, isQueryLoading]);
@@ -217,7 +237,9 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     loading,
     { events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
+    alertConsumers,
     docValueFields: [],
+    entityType,
     excludeEcsData: true,
     fields,
     filterQuery: combinedQueries!.filterQuery,
@@ -236,13 +258,24 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
     [deletedEventIds.length, totalCount]
   );
+  const activeCaseFlowId = useSelector((state: State) => tGridSelectors.activeCaseFlowId(state));
+  const selectedEvent = useMemo(() => {
+    const matchedEvent = events.find((event) => event.ecs._id === activeCaseFlowId);
+    if (matchedEvent) {
+      return matchedEvent;
+    } else {
+      return undefined;
+    }
+  }, [events, activeCaseFlowId]);
 
-  const subtitle = useMemo(
-    () => `${totalCountMinusDeleted.toLocaleString()} ${unit && unit(totalCountMinusDeleted)}`,
-    [totalCountMinusDeleted, unit]
-  );
-
-  const additionalControls = useMemo(() => <AlertCount>{subtitle}</AlertCount>, [subtitle]);
+  const addToCaseActionProps = useMemo(() => {
+    return {
+      event: selectedEvent,
+      casePermissions: casePermissions ?? null,
+      appId,
+      onClose: afterCaseSelection,
+    };
+  }, [appId, casePermissions, afterCaseSelection, selectedEvent]);
 
   const nonDeletedEvents = useMemo(() => events.filter((e) => !deletedEventIds.includes(e._id)), [
     deletedEventIds,
@@ -262,6 +295,23 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     [headerFilterGroup, graphEventId]
   );
 
+  const filterQuery = useMemo(
+    () =>
+      getCombinedFilterQuery({
+        config: esQuery.getEsQueryConfig(uiSettings),
+        dataProviders: EMPTY_DATA_PROVIDERS,
+        indexPattern: indexPatterns,
+        browserFields,
+        filters,
+        kqlQuery: query,
+        kqlMode: 'search',
+        isEventViewer: true,
+        from: start,
+        to: end,
+      }),
+    [uiSettings, indexPatterns, browserFields, filters, query, start, end]
+  );
+
   useEffect(() => {
     setIsQueryLoading(loading);
   }, [loading]);
@@ -276,10 +326,9 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
           end,
         },
         indexNames,
-        sort,
         itemsPerPage,
         itemsPerPageOptions,
-        showCheckboxes: false,
+        showCheckboxes: true,
       })
     );
     dispatch(
@@ -310,9 +359,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
             >
               {HeaderSectionContent}
             </HeaderSection>
-            {utilityBar && !resolverIsShowing(graphEventId) && (
-              <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
-            )}
+
             <EventsContainerLoading
               data-timeline-id={STANDALONE_ID}
               data-test-subj={`events-container-loading-${loading}`}
@@ -327,22 +374,28 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                 <ScrollableFlexItem grow={1}>
                   <StatefulBody
                     activePage={pageInfo.activePage}
-                    additionalControls={additionalControls}
                     browserFields={browserFields}
                     data={nonDeletedEvents}
+                    defaultCellActions={defaultCellActions}
                     id={STANDALONE_ID}
                     isEventViewer={true}
+                    loadPage={loadPage}
                     onRuleChange={onRuleChange}
                     renderCellValue={renderCellValue}
                     rowRenderers={rowRenderers}
-                    sort={sort}
                     tabType={TimelineTabs.query}
                     totalPages={calculateTotalPages({
                       itemsCount: totalCountMinusDeleted,
                       itemsPerPage: itemsPerPageStore,
                     })}
+                    totalItems={totalCountMinusDeleted}
+                    indexNames={indexNames}
+                    filterQuery={filterQuery}
+                    unit={unit}
+                    filterStatus={filterStatus}
                     leadingControlColumns={leadingControlColumns}
                     trailingControlColumns={trailingControlColumns}
+                    refetch={refetch}
                   />
                   <Footer
                     activePage={pageInfo.activePage}
@@ -362,6 +415,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
             </EventsContainerLoading>
           </>
         ) : null}
+        <AddToCaseAction {...addToCaseActionProps} />
       </StyledEuiPanel>
     </InspectButtonContainer>
   );

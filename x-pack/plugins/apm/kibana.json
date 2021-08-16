@@ -1,5 +1,9 @@
 {
   "id": "apm",
+  "owner": {
+    "name": "APM UI",
+    "gitHubTeam": "apm-ui"
+  },
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "requiredPlugins": [
@@ -28,10 +32,7 @@
   ],
   "server": true,
   "ui": true,
-  "configPath": [
-    "xpack",
-    "apm"
-  ],
+  "configPath": ["xpack", "apm"],
   "requiredBundles": [
     "fleet",
     "home",

@@ -29,16 +29,17 @@ import {
   ALERT_UUID,
   EVENT_ACTION,
   EVENT_KIND,
-  OWNER,
-  RULE_UUID,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
   TIMESTAMP,
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
-import { RuleDataClient } from '../rule_data_client';
+import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
 import { getRuleData } from './get_rule_executor_data';
 
-type LifecycleAlertService<
+export type LifecycleAlertService<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never
@@ -101,7 +102,7 @@ export type WrappedLifecycleRuleState<State extends AlertTypeState> = AlertTypeS
 
 export const createLifecycleExecutor = (
   logger: Logger,
-  ruleDataClient: PublicContract<RuleDataClient>
+  ruleDataClient: PublicContract<IRuleDataClient>
 ) => <
   Params extends AlertTypeParams = never,
   State extends AlertTypeState = never,
@@ -154,6 +155,8 @@ export const createLifecycleExecutor = (
       currentAlerts[id] = {
         ...fields,
         [ALERT_ID]: id,
+        [ALERT_RULE_TYPE_ID]: rule.ruleTypeId,
+        [ALERT_RULE_CONSUMER]: rule.consumer,
       };
       return alertInstanceFactory(id);
     },
@@ -194,7 +197,7 @@ export const createLifecycleExecutor = (
             filter: [
               {
                 term: {
-                  [RULE_UUID]: ruleExecutorData[RULE_UUID],
+                  [ALERT_RULE_UUID]: ruleExecutorData[ALERT_RULE_UUID],
                 },
               },
               {
@@ -226,6 +229,8 @@ export const createLifecycleExecutor = (
       alertsDataMap[alertId] = {
         ...fields,
         [ALERT_ID]: alertId,
+        [ALERT_RULE_TYPE_ID]: rule.ruleTypeId,
+        [ALERT_RULE_CONSUMER]: rule.consumer,
       };
     });
   }
@@ -242,9 +247,9 @@ export const createLifecycleExecutor = (
       ...ruleExecutorData,
       [TIMESTAMP]: timestamp,
       [EVENT_KIND]: 'signal',
-      [OWNER]: rule.consumer,
+      [ALERT_RULE_CONSUMER]: rule.consumer,
       [ALERT_ID]: alertId,
-    };
+    } as ParsedTechnicalFields;
 
     const isNew = !state.trackedAlerts[alertId];
     const isRecovered = !currentAlerts[alertId];

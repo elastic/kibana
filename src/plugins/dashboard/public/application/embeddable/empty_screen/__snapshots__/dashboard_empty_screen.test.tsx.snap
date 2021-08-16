@@ -308,6 +308,7 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
               >
                 <div
                   className="euiTextColor euiTextColor--subdued"
+                  style={Object {}}
                 >
                   <span>
                     Create content that tells a story about your data.
@@ -666,6 +667,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                           >
                             <div
                               className="euiTextColor euiTextColor--subdued"
+                              style={Object {}}
                             >
                               You need additional privileges to edit this dashboard.
                             </div>
@@ -1023,6 +1025,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
                             >
                               <div
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 <p>
                                   Click edit in the menu bar above to start adding panels.

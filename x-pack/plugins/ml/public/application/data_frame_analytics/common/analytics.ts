@@ -65,6 +65,12 @@ export interface LoadExploreDataArg {
   searchQuery: SavedSearchQuery;
 }
 
+export interface ClassificationMetricItem {
+  className: string;
+  accuracy?: number;
+  recall?: number;
+}
+
 export const SEARCH_SIZE = 1000;
 
 export const TRAINING_PERCENT_MIN = 1;

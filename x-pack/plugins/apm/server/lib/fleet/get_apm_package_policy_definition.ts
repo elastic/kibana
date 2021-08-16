@@ -5,11 +5,9 @@
  * 2.0.
  */
 
+import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
 import { APMPluginSetupDependencies } from '../../types';
-import {
-  POLICY_ELASTIC_AGENT_ON_CLOUD,
-  APM_PACKAGE_NAME,
-} from './get_cloud_apm_package_policy';
+import { APM_PACKAGE_NAME } from './get_cloud_apm_package_policy';
 
 interface GetApmPackagePolicyDefinitionOptions {
   apmServerSchema: Record<string, any>;

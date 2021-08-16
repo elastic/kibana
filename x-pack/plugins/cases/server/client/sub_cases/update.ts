@@ -23,7 +23,6 @@ import {
   CaseStatuses,
   CommentAttributes,
   CommentType,
-  ESCaseAttributes,
   excess,
   SUB_CASE_SAVED_OBJECT,
   SubCaseAttributes,
@@ -35,6 +34,7 @@ import {
   SubCasesResponseRt,
   throwErrors,
   User,
+  CaseAttributes,
 } from '../../../common';
 import { getCaseToUpdate } from '../utils';
 import { buildSubCaseUserActions } from '../../services/user_actions/helpers';
@@ -124,7 +124,7 @@ async function getParentCases({
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   subCaseIDs: string[];
   subCasesMap: Map<string, SavedObject<SubCaseAttributes>>;
-}): Promise<Map<string, SavedObject<ESCaseAttributes>>> {
+}): Promise<Map<string, SavedObject<CaseAttributes>>> {
   const parentIDInfo = getParentIDs({ subCaseIDs, subCasesMap });
 
   const parentCases = await caseService.getCases({
@@ -148,7 +148,7 @@ async function getParentCases({
       acc.set(subCaseId, so);
     });
     return acc;
-  }, new Map<string, SavedObject<ESCaseAttributes>>());
+  }, new Map<string, SavedObject<CaseAttributes>>());
 }
 
 function getValidUpdateRequests(

@@ -8,6 +8,7 @@
 
 import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
 import { createPieVisFn } from './pie_fn';
+import { Datatable } from '../../expressions/common/expression_types/specs';
 
 describe('interpreter/functions#pie', () => {
   const fn = functionWrapper(createPieVisFn());
@@ -49,5 +50,21 @@ describe('interpreter/functions#pie', () => {
   it('returns an object with the correct structure', async () => {
     const actual = await fn(context, visConfig);
     expect(actual).toMatchSnapshot();
+  });
+
+  it('logs correct datatable to inspector', async () => {
+    let loggedTable: Datatable;
+    const handlers = {
+      inspectorAdapters: {
+        tables: {
+          logDatatable: (name: string, datatable: Datatable) => {
+            loggedTable = datatable;
+          },
+        },
+      },
+    };
+    await fn(context, visConfig, handlers as any);
+
+    expect(loggedTable!).toMatchSnapshot();
   });
 });

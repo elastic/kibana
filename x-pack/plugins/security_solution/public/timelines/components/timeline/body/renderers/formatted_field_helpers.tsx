@@ -82,6 +82,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
       <DefaultDraggable
         field={fieldName}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`}
+        isDraggable={isDraggable}
         tooltipContent={value}
         value={value}
       >
@@ -95,6 +96,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
       <DefaultDraggable
         field={fieldName}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`}
+        isDraggable={isDraggable}
         tooltipContent={value}
         value={`${value}`}
       >
@@ -150,6 +152,7 @@ export const renderEventModule = ({
           <DefaultDraggable
             field={fieldName}
             id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${moduleName}`}
+            isDraggable={isDraggable}
             tooltipContent={value}
             value={value}
           >
@@ -218,6 +221,7 @@ export const renderUrl = ({
       <DefaultDraggable
         field={fieldName}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${urlName}`}
+        isDraggable={isDraggable}
         tooltipContent={value}
         value={value}
       >

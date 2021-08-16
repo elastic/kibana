@@ -31,7 +31,8 @@ export const patchRules = async ({
   rulesClient,
   author,
   buildingBlockType,
-  savedObjectsClient,
+  ruleStatusClient,
+  spaceId,
   description,
   eventCategoryOverride,
   falsePositives,
@@ -200,7 +201,7 @@ export const patchRules = async ({
   if (rule.enabled && enabled === false) {
     await rulesClient.disable({ id: rule.id });
   } else if (!rule.enabled && enabled === true) {
-    await enableRule({ rule, rulesClient, savedObjectsClient });
+    await enableRule({ rule, rulesClient, ruleStatusClient, spaceId });
   } else {
     // enabled is null or undefined and we do not touch the rule
   }
