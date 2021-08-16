@@ -41,8 +41,7 @@ describe('OverviewEmpty', () => {
       (useUserPrivileges as jest.Mock).mockReset();
     });
 
-    /** TODO: Need help fixing tests because of nested props */
-    it.skip('render with correct actions ', () => {
+    test('render with correct actions ', () => {
       expect(wrapper.find('[data-test-subj="empty-page"]').prop('actions')).toEqual({
         elasticAgent: {
           url: 'ingestUrl',
@@ -60,11 +59,14 @@ describe('OverviewEmpty', () => {
       wrapper = shallow(<OverviewEmpty />);
     });
 
-    /** TODO: Need help fixing tests because of nested props */
-    it.skip('render with correct actions ', () => {
+    test('render with correct actions ', () => {
       expect(wrapper.find('[data-test-subj="empty-page"]').prop('actions')).toEqual({
         beats: {
-          href: '/app/home#/tutorial_directory/security',
+          description:
+            'Lightweight Beats can send data from hundreds or thousands of machines and systems',
+          fill: false,
+          label: 'Add data with Beats',
+          url: '/app/home#/tutorial_directory/security',
         },
       });
     });

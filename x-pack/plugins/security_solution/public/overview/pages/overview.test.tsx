@@ -298,8 +298,7 @@ describe('Overview', () => {
         expect(wrapper.find('[data-test-subj="empty-page-endpoint-action"]').exists()).toBe(false);
       });
 
-      /** Skip endpoint for now as the option has been removed via https://github.com/elastic/kibana/issues/107682 */
-      it.skip('shows Endpoint get ready button when ingest is enabled', () => {
+      it('shows Endpoint get ready button when ingest is enabled', () => {
         mockUseUserPrivileges.mockReturnValue(loadedUserPrivilegesState({ canAccessFleet: true }));
         const wrapper = mount(
           <TestProviders>

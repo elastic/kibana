@@ -6,8 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
+import { omit } from 'lodash/fp';
 import { useKibana } from '../../../common/lib/kibana';
-import { ADD_INTEGRATION_PATH, ADD_DATA_PATH } from '../../../../common/constants';
+import { ADD_INTEGRATION_PATH } from '../../../../common/constants';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 import {
@@ -20,7 +21,7 @@ const OverviewEmptyComponent: React.FC = () => {
   const basePath = http.basePath.get();
   const canAccessFleet = useUserPrivileges().endpointPrivileges.canAccessFleet;
 
-  const agentAction: NoDataPageActionsProps = useMemo(
+  const emptyPageActions: NoDataPageActionsProps = useMemo(
     () => ({
       elasticAgent: {
         href: `${basePath}${ADD_INTEGRATION_PATH}`,
@@ -29,13 +30,9 @@ const OverviewEmptyComponent: React.FC = () => {
     [basePath]
   );
 
-  const beatsAction: NoDataPageActionsProps = useMemo(
-    () => ({
-      beats: {
-        href: `${basePath}${ADD_DATA_PATH}`,
-      },
-    }),
-    [basePath]
+  const emptyPageIngestDisabledActions = useMemo(
+    () => omit(['elasticAgent', 'endpoint'], emptyPageActions),
+    [emptyPageActions]
   );
 
   return (
@@ -43,7 +40,7 @@ const OverviewEmptyComponent: React.FC = () => {
       data-test-subj="empty-page"
       noDataConfig={{
         solution: 'Security',
-        actions: canAccessFleet ? agentAction : beatsAction,
+        actions: canAccessFleet ? emptyPageActions : emptyPageIngestDisabledActions,
         docsLink: docLinks.links.siem.gettingStarted,
       }}
     />
