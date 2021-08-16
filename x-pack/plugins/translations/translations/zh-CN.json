@@ -8305,7 +8305,6 @@
     "xpack.dataVisualizer.file.welcomeContent.newlineDelimitedJsonDescription": "换行符分隔的 JSON",
     "xpack.dataVisualizer.file.welcomeContent.supportedFileFormatDescription": "File Data Visualizer 支持以下文件格式：",
     "xpack.dataVisualizer.file.welcomeContent.uploadedFilesAllowedSizeDescription": "您可以上传不超过 {maxFileSize} 的文件。",
-    "xpack.dataVisualizer.file.welcomeContent.visualizeDataFromLogFileDescription": "File Data Visualizer 可帮助您理解日志文件中的字段和指标。上传文件、分析文件数据，然后选择是否将数据导入 Elasticsearch 索引。",
     "xpack.dataVisualizer.file.xmlNotCurrentlySupportedErrorMessage": "当前不支持 XML",
     "xpack.dataVisualizer.fileBeatConfig.paths": "在此处将路径添加您的文件中",
     "xpack.dataVisualizer.fileBeatConfigFlyout.closeButton": "关闭",
