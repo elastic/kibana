@@ -455,11 +455,19 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
+    validateJobId(jobId: string) {
+      if (jobId.match(/[\*,]/) !== null) {
+        throw new Error(`No wildcards or list of ids supported in this context (got ${jobId})`);
+      }
+    },
+
     async getAnomalyDetectionJob(jobId: string) {
+      this.validateJobId(jobId);
       return await esSupertest.get(`/_ml/anomaly_detectors/${jobId}`).expect(200);
     },
 
     async adJobExist(jobId: string) {
+      this.validateJobId(jobId);
       try {
         await this.getAnomalyDetectionJob(jobId);
         return true;
@@ -519,14 +527,14 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async deleteAnomalyDetectionJobES(jobId: string) {
       log.debug(`Deleting anomaly detection job with id '${jobId}' ...`);
 
-      const datafeedId = `datafeed-${jobId}`;
-      if ((await this.datafeedExist(datafeedId)) === true) {
-        await this.deleteDatafeedES(datafeedId);
-      }
-
       if ((await this.adJobExist(jobId)) === false) {
         log.debug('> no such AD job found, nothing to delete.');
         return;
+      }
+
+      const datafeedId = `datafeed-${jobId}`;
+      if ((await this.datafeedExist(datafeedId)) === true) {
+        await this.deleteDatafeedES(datafeedId);
       }
 
       await esSupertest
@@ -679,6 +687,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async getDataFrameAnalyticsJob(analyticsId: string, statusCode = 200) {
       log.debug(`Fetching data frame analytics job '${analyticsId}'...`);
+      this.validateJobId(analyticsId);
       const response = await esSupertest
         .get(`/_ml/data_frame/analytics/${analyticsId}`)
         .expect(statusCode);
@@ -687,6 +696,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async dfaJobExist(analyticsId: string) {
+      this.validateJobId(analyticsId);
       try {
         await this.getDataFrameAnalyticsJob(analyticsId);
         return true;
