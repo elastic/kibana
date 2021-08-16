@@ -45,6 +45,7 @@
 /examples/ui_actions_explorer/ @elastic/kibana-app-services
 /examples/url_generators_examples/ @elastic/kibana-app-services
 /examples/url_generators_explorer/ @elastic/kibana-app-services
+/examples/field_formats_example/ @elastic/kibana-app-services
 /packages/elastic-datemath/ @elastic/kibana-app-services
 /packages/kbn-interpreter/ @elastic/kibana-app-services
 /src/plugins/bfetch/ @elastic/kibana-app-services
