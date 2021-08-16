@@ -17,7 +17,7 @@ export async function getDeprecationLoggingStatus(
   });
 
   return {
-    isEnabled: isClusterDeprecationLoggingEnabled(response),
+    isEnabled: isDeprecationLogIndexingEnabled(response),
     isLoggerDeprecationEnabled: isDeprecationLoggingEnabled(response),
   };
 }
@@ -50,7 +50,7 @@ export async function setDeprecationLogging(
   };
 }
 
-export function isClusterDeprecationLoggingEnabled(settings: any) {
+export function isDeprecationLogIndexingEnabled(settings: any) {
   const clusterDeprecationLoggingEnabled = ['default', 'persistent', 'transient'].reduce(
     (currentLogLevel, settingsTier) =>
       get(settings, [settingsTier, 'cluster', 'deprecation_indexing', 'enabled'], currentLogLevel),

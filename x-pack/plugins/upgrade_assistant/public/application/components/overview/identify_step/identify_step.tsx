@@ -67,7 +67,7 @@ const DeprecationLogsPreview: FunctionComponent = () => {
         </>
       )}
 
-      {state.isDeprecationLoggingEnabled && (
+      {state.isEnabled && (
         <>
           <EuiSpacer size="xl" />
           <EuiText>

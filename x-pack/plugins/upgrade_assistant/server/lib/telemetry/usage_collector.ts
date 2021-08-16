@@ -20,7 +20,7 @@ import {
   UpgradeAssistantTelemetrySavedObject,
   UpgradeAssistantTelemetrySavedObjectAttributes,
 } from '../../../common/types';
-import { isDeprecationLoggingEnabled } from '../es_deprecation_logging_apis';
+import { isDeprecationLogIndexingEnabled } from '../es_deprecation_logging_apis';
 
 async function getSavedObjectAttributesFromRepo(
   savedObjectsRepository: ISavedObjectsRepository,
@@ -45,7 +45,7 @@ async function getDeprecationLoggingStatusValue(esClient: ElasticsearchClient): 
       include_defaults: true,
     });
 
-    return isDeprecationLoggingEnabled(loggerDeprecationCallResult);
+    return isDeprecationLogIndexingEnabled(loggerDeprecationCallResult);
   } catch (e) {
     return false;
   }

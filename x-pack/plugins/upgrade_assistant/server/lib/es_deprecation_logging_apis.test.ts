@@ -10,7 +10,7 @@ import {
   getDeprecationLoggingStatus,
   isDeprecationLoggingEnabled,
   setDeprecationLogging,
-  isClusterDeprecationLoggingEnabled,
+  isDeprecationLogIndexingEnabled,
 } from './es_deprecation_logging_apis';
 
 describe('getDeprecationLoggingStatus', () => {
@@ -104,10 +104,10 @@ describe('isDeprecationLoggingEnabled', () => {
   });
 });
 
-describe('isClusterDeprecationLoggingEnabled', () => {
+describe('isDeprecationLogIndexingEnabled', () => {
   it('allows transient to override persistent and default', () => {
     expect(
-      isClusterDeprecationLoggingEnabled({
+      isDeprecationLogIndexingEnabled({
         default: { cluster: { deprecation_indexing: { enabled: 'false' } } },
         persistent: { cluster: { deprecation_indexing: { enabled: 'false' } } },
         transient: { cluster: { deprecation_indexing: { enabled: 'true' } } },
@@ -117,7 +117,7 @@ describe('isClusterDeprecationLoggingEnabled', () => {
 
   it('allows persistent to override default', () => {
     expect(
-      isClusterDeprecationLoggingEnabled({
+      isDeprecationLogIndexingEnabled({
         default: { cluster: { deprecation_indexing: { enabled: 'false' } } },
         persistent: { cluster: { deprecation_indexing: { enabled: 'true' } } },
       })
