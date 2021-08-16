@@ -40,8 +40,7 @@ export const ElasticBeatsCard: FunctionComponent<ElasticBeatsCardProps> = ({
       <EuiButton fill>
         {button ||
           i18n.translate('kibana-react.noDataPage.elasticBeatsCard.buttonLabel', {
-            defaultMessage: 'Install Beats for {solution}',
-            values: { solution },
+            defaultMessage: 'Add data',
           })}
       </EuiButton>
     );
@@ -51,7 +50,7 @@ export const ElasticBeatsCard: FunctionComponent<ElasticBeatsCardProps> = ({
       paddingSize="l"
       href={href ?? addBasePath('/app/home#/tutorial_directory')}
       title={i18n.translate('kibana-react.noDataPage.elasticBeatsCard.title', {
-        defaultMessage: 'Add data with Beats',
+        defaultMessage: 'Add data',
       })}
       description={i18n.translate('kibana-react.noDataPage.elasticBeatsCard.description', {
         defaultMessage: `

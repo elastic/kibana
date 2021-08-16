@@ -14,7 +14,7 @@ exports[`ElasticBeatsCard props button 1`] = `
   href="/app/home#/tutorial_directory"
   image="/plugins/kibanaReact/assets/elastic_beats_card_light.svg"
   paddingSize="l"
-  title="Add data with Beats"
+  title="Add data"
 />
 `;
 
@@ -32,7 +32,7 @@ exports[`ElasticBeatsCard props href 1`] = `
   href="#"
   image="/plugins/kibanaReact/assets/elastic_beats_card_light.svg"
   paddingSize="l"
-  title="Add data with Beats"
+  title="Add data"
 />
 `;
 
@@ -45,13 +45,13 @@ exports[`ElasticBeatsCard props recommended 1`] = `
     <EuiButton
       fill={true}
     >
-      Install Beats for Solution
+      Add data
     </EuiButton>
   }
   href="/app/home#/tutorial_directory"
   image="/plugins/kibanaReact/assets/elastic_beats_card_light.svg"
   paddingSize="l"
-  title="Add data with Beats"
+  title="Add data"
 />
 `;
 
@@ -63,12 +63,12 @@ exports[`ElasticBeatsCard renders 1`] = `
     <EuiButton
       fill={true}
     >
-      Install Beats for Solution
+      Add data
     </EuiButton>
   }
   href="/app/home#/tutorial_directory"
   image="/plugins/kibanaReact/assets/elastic_beats_card_light.svg"
   paddingSize="l"
-  title="Add data with Beats"
+  title="Add data"
 />
 `;
