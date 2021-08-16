@@ -74,6 +74,7 @@ interface OwnProps {
   activePage: number;
   additionalControls?: React.ReactNode;
   browserFields: BrowserFields;
+  filterQuery: string;
   data: TimelineItem[];
   defaultCellActions?: TGridCellAction[];
   id: string;
@@ -90,6 +91,7 @@ interface OwnProps {
   filterStatus?: AlertStatus;
   unit?: (total: number) => React.ReactNode;
   onRuleChange?: () => void;
+  indexNames: string[];
   refetch: Refetch;
 }
 
@@ -225,6 +227,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     activePage,
     additionalControls,
     browserFields,
+    filterQuery,
     columnHeaders,
     data,
     defaultCellActions,
@@ -250,6 +253,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     unit = basicUnit,
     leadingControlColumns = EMPTY_CONTROL_COLUMNS,
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
+    indexNames,
     refetch,
   }) => {
     const dispatch = useDispatch();
@@ -328,7 +332,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       () => ({
         additionalControls: (
           <>
-            <AlertCount>{alertCountText}</AlertCount>
+            <AlertCount data-test-subj="server-side-event-count">{alertCountText}</AlertCount>
             {showBulkActions ? (
               <>
                 <Suspense fallback={<EuiLoadingSpinner />}>
@@ -337,6 +341,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                     id={id}
                     totalItems={totalItems}
                     filterStatus={filterStatus}
+                    query={filterQuery}
+                    indexName={indexNames.join()}
                     onActionSuccess={onAlertStatusActionSuccess}
                     onActionFailure={onAlertStatusActionFailure}
                     refetch={refetch}
@@ -375,7 +381,9 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         alertCountText,
         totalItems,
         filterStatus,
+        filterQuery,
         browserFields,
+        indexNames,
         columnHeaders,
         additionalControls,
         showBulkActions,
@@ -526,9 +534,12 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           rowIndex,
           setCellProps,
           timelineId: tabType != null ? `${id}-${tabType}` : id,
+          ecsData: data[rowIndex].ecs,
+          browserFields,
+          rowRenderers,
         });
       },
-      [columnHeaders, data, id, renderCellValue, tabType, theme]
+      [columnHeaders, data, id, renderCellValue, tabType, theme, browserFields, rowRenderers]
     );
 
     return (
