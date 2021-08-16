@@ -320,4 +320,148 @@ describe('dashboard locator', () => {
       expect(location.path).toEqual(expect.stringContaining('query:appliedfilter'));
     });
   });
+
+  describe('forwarding app state on history.location.state', () => {
+    test('creates a link with query and filters', async () => {
+      const definition = new DashboardAppLocatorDefinition({
+        useHashedUrl: false,
+        getDashboardFilterFields: async (dashboardId: string) => [],
+      });
+      const location = await definition.getLocation({
+        useHash: false,
+        forwardStateToHistory: true,
+        timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+        refreshInterval: { pause: false, value: 300 },
+        dashboardId: '123',
+        filters: [
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: { query: 'hi' },
+          },
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: { query: 'hi' },
+            $state: {
+              store: esFilters.FilterStateStore.GLOBAL_STATE,
+            },
+          },
+        ],
+        query: { query: 'bye', language: 'kuery' },
+        panels: [
+          {
+            embeddableConfig: {},
+            gridData: {
+              h: 1,
+              i: 'test',
+              w: 1,
+              x: 1,
+              y: 1,
+            },
+            panelIndex: 'test',
+            type: 'test',
+            version: '8.0.0',
+          },
+        ] as any,
+      });
+
+      expect(location).toMatchObject({
+        app: 'dashboards',
+        path: `#/view/123?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))`,
+        state: {
+          panels: {
+            test: {
+              explicitInput: {
+                id: 'test',
+              },
+              gridData: {
+                h: 1,
+                i: 'test',
+                w: 1,
+                x: 1,
+                y: 1,
+              },
+              panelRefName: undefined,
+              type: 'test',
+            },
+          },
+        },
+      });
+    });
+
+    test('preserving time range', async () => {
+      const definition = new DashboardAppLocatorDefinition({
+        useHashedUrl: true,
+        getDashboardFilterFields: async (dashboardId: string) => [],
+      });
+      const location = await definition.getLocation({
+        forwardStateToHistory: true,
+        useHash: false,
+        timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+        panels: [
+          {
+            embeddableConfig: {},
+            gridData: {
+              h: 1,
+              i: 'test',
+              w: 1,
+              x: 1,
+              y: 1,
+            },
+            panelIndex: 'test',
+            type: 'test',
+            version: '8.0.0',
+          },
+        ] as any,
+      });
+
+      expect(location.path).toBe('#/create?_g=(time:(from:now-15m,mode:relative,to:now))');
+      expect(location.state).toEqual({
+        filters: undefined,
+        forwardStateToHistory: true,
+        panels: {
+          test: {
+            explicitInput: {
+              id: 'test',
+            },
+            gridData: {
+              h: 1,
+              i: 'test',
+              w: 1,
+              x: 1,
+              y: 1,
+            },
+            panelRefName: undefined,
+            type: 'test',
+          },
+        },
+      });
+    });
+
+    test('searchSessionId', async () => {
+      const definition = new DashboardAppLocatorDefinition({
+        useHashedUrl: true,
+        getDashboardFilterFields: async (dashboardId: string) => [],
+      });
+      const location = await definition.getLocation({
+        forwardStateToHistory: true,
+        searchSessionId: 'test',
+        useHash: false,
+      });
+
+      expect(location.path).toBe('#/create?_g=()&searchSessionId=test');
+      expect(location.state).toEqual({
+        filters: undefined,
+        forwardStateToHistory: true,
+        panels: {},
+      });
+    });
+  });
 });

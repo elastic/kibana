@@ -7,6 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
+import { omit } from 'lodash';
 import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
 import type { LocatorDefinition, LocatorPublic } from '../../share/public';
 import type { SavedDashboardPanel } from '../common/types';
@@ -88,6 +89,13 @@ export interface DashboardAppLocatorParams extends SerializableRecord {
    * Saved query ID
    */
   savedQuery?: string;
+
+  /**
+   * Whether to forward app state on scoped `history.location.state`.
+   *
+   * @note This can be used to avoid loading excessively long state in the address bar like could be the case with snapshots of Vega charts.
+   */
+  forwardStateToHistory?: boolean;
 }
 
 export type DashboardAppLocator = LocatorPublic<DashboardAppLocatorParams>;
@@ -97,8 +105,11 @@ export interface DashboardAppLocatorDependencies {
   getDashboardFilterFields: (dashboardId: string) => Promise<Filter[]>;
 }
 
-export type ForwardedDashboardState = Omit<DashboardAppLocator, 'panels'> & {
-  panels: DashboardPanelMap;
+export type ForwardedDashboardState = Omit<
+  DashboardAppLocatorParams,
+  'panels' | 'searchSessionId' | 'useHash' | 'dashboardId' | 'timeRange'
+> & {
+  panels?: DashboardPanelMap;
 };
 
 export class DashboardAppLocatorDefinition implements LocatorDefinition<DashboardAppLocatorParams> {
@@ -141,11 +152,13 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
         panelsMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
       });
 
-      state = {
-        ...params,
-        panels: panelsMap,
+      const forwardedDashboardState: ForwardedDashboardState = {
+        ...omit(params, ['panels', 'searchSessionId', 'useHash', 'dashboardId', 'timeRange']),
+        panels: (panelsMap as unknown) as DashboardPanelMap & SerializableRecord,
         filters,
       };
+
+      state = forwardedDashboardState;
     } else {
       path = setStateToKbnUrl(
         '_a',
