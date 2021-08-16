@@ -9,3 +9,4 @@
 export { useField, InternalFieldConfig } from './use_field';
 export { useForm } from './use_form';
 export { useFormData } from './use_form_data';
+export { useFormIsModified } from './use_form_is_modified';

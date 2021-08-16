@@ -7,16 +7,6 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { ALERT_STATUS } from '@kbn/rule-data-utils';
-import { AlertStatus } from '../../common/typings';
-
-export function alertStatusQuery(status: AlertStatus) {
-  if (status === 'all') {
-    return [];
-  }
-
-  return [{ term: { [ALERT_STATUS]: status } }];
-}
 
 export function rangeQuery(
   start?: number,
@@ -36,7 +26,7 @@ export function rangeQuery(
   ];
 }
 
-export function kqlQuery(kql?: string): estypes.QueryDslQueryContainer[] {
+export function kqlQuery(kql: string): estypes.QueryDslQueryContainer[] {
   if (!kql) {
     return [];
   }
