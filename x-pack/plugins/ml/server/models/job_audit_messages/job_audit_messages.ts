@@ -9,7 +9,10 @@ import moment from 'moment';
 import type { IScopedClusterClient } from 'kibana/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import type { estypes } from '@elastic/elasticsearch';
-import { ML_NOTIFICATION_INDEX_02, ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import {
+  ML_NOTIFICATION_INDEX_02,
+  ML_NOTIFICATION_INDEX_PATTERN,
+} from '../../../common/constants/index_patterns';
 import { MESSAGE_LEVEL } from '../../../common/constants/message_levels';
 import type { JobSavedObjectService } from '../../saved_objects';
 import type { MlClient } from '../../lib/ml_client';
@@ -330,7 +333,9 @@ export function jobAuditMessagesProvider(
   const clearedTime = new Date().getTime();
 
   // Sets 'cleared' to true for messages in the last 24hrs and index new message for clear action
-  async function clearJobAuditMessages(jobId: string): Promise<{ success: boolean; last_cleared: number }> {
+  async function clearJobAuditMessages(
+    jobId: string
+  ): Promise<{ success: boolean; last_cleared: number }> {
     const newClearedMessage = {
       job_id: jobId,
       job_type: 'anomaly_detection',
