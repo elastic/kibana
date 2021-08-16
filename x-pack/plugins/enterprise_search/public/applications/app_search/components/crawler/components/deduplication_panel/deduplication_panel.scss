@@ -2,13 +2,13 @@
   .selectableWrapper {
     padding: 1rem;
     border-radius: .675rem;
-    border: 1px solid $euiColorLightestShade;
+    border: $euiBorderThin solid $euiColorLightestShade;
   }
 
   .showAllFieldsPopoverToggle {
     .euiButtonEmpty__content {
-      padding-left: 12px;
-      padding-right: 12px;
+      padding-left: $euiSizeM;
+      padding-right: $euiSizeM;
     }
   }
 }
