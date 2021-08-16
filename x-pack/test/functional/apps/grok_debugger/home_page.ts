@@ -17,7 +17,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Grok Debugger', function () {
     before(async () => {
-      // await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       // Increase window height to ensure "Simulate" button is shown above the
       // fold. Otherwise it can't be clicked by the browser driver.
       await browser.setWindowSize(1600, 1000);
@@ -34,7 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    it('Accept and parse input with built in grok pattern', async () => {
+    it('Accept and parse input with built-in grok pattern', async () => {
       const eventInput = 'SegerCommaBob';
       const patternInput = '%{USERNAME:u}';
       const response = await PageObjects.grokDebugger.executeGrokSimulation(
@@ -45,7 +44,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(response).to.eql({ u: 'SegerCommaBob' });
     });
 
-    it('Accept and parse input with custom in grok pattern', async () => {
+    it('Accept and parse input with custom grok pattern', async () => {
       await PageObjects.common.navigateToApp('grokDebugger');
       const eventInput =
         'Jan  1 06:25:43 mailserver14 postfix/cleanup[21403]: BEF25A72965: message-id=<20130101142543.5828399CCAF@mailserver14.example.com>';

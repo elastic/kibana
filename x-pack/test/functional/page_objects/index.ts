@@ -12,7 +12,7 @@ import { SecurityPageObject } from './security_page';
 import { MonitoringPageObject } from './monitoring_page';
 import { LogstashPageObject } from './logstash_page';
 import { GraphPageObject } from './graph_page';
-import { GrokDebuggerPageProvider } from './grok_debugger_page';
+import { GrokDebuggerPageObject } from './grok_debugger_page';
 import { WatcherPageObject } from './watcher_page';
 import { ReportingPageObject } from './reporting_page';
 import { AccountSettingsPageObject } from './account_settings_page';
@@ -55,7 +55,7 @@ export const pageObjects = {
   monitoring: MonitoringPageObject,
   logstash: LogstashPageObject,
   graph: GraphPageObject,
-  grokDebugger: GrokDebuggerPageProvider,
+  grokDebugger: GrokDebuggerPageObject,
   watcher: WatcherPageObject,
   reporting: ReportingPageObject,
   spaceSelector: SpaceSelectorPageObject,
