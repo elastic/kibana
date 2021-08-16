@@ -201,11 +201,13 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                   </p>
                 </EuiText>
                 <EuiSpacer size="xs" />
-                <EuiText size="s">
-                  <EuiLink target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-                    {LEARN_CUSTOM_FEATURES_BUTTON}
-                  </EuiLink>
-                </EuiText>
+                {!hasPlatinumLicense && (
+                  <EuiText size="s">
+                    <EuiLink target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
+                      {LEARN_CUSTOM_FEATURES_BUTTON}
+                    </EuiLink>
+                  </EuiText>
+                )}
               </div>
             </EuiFlexItem>
           </EuiFlexGroup>

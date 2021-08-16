@@ -38,13 +38,13 @@ describe('SaveCustom', () => {
     expect(wrapper.find(EuiPanel)).toHaveLength(1);
     expect(wrapper.find(EuiTitle)).toHaveLength(5);
     expect(wrapper.find(EuiLinkTo)).toHaveLength(1);
-    expect(wrapper.find(EuiLink)).toHaveLength(1);
   });
 
-  it('renders LicenseBadge', () => {
+  it('renders platinum LicenseBadge and link', () => {
     setMockValues({ hasPlatinumLicense: false });
     const wrapper = shallow(<SaveCustom {...props} />);
 
     expect(wrapper.find(LicenseBadge)).toHaveLength(1);
+    expect(wrapper.find(EuiLink)).toHaveLength(1);
   });
 });
