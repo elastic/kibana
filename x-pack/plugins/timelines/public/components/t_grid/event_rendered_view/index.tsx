@@ -21,11 +21,13 @@ import {
 import { get } from 'lodash';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 
 import type { BrowserFields, RowRenderer, TimelineItem } from '../../../../common';
+import { tGridActions } from '../../../store/t_grid';
 import { RuleName } from '../../rule_name';
 
 const EventRenderedFlexItem = styled(EuiFlexItem)`
@@ -47,6 +49,7 @@ interface EventRenderedViewProps {
   pageSize: number;
   pageSizeOptions: number[];
   rowRenderers: RowRenderer[];
+  timelineId: string;
   totalItemCount: number;
 }
 const PreferenceFormattedDateComponent = ({ value }: { value: Date }) => {
@@ -66,8 +69,11 @@ const EventRenderedViewComponent = ({
   pageSize,
   pageSizeOptions,
   rowRenderers,
+  timelineId,
   totalItemCount,
 }: EventRenderedViewProps) => {
+  const dispatch = useDispatch();
+
   const ActionTitle = useMemo(
     () => (
       <EuiFlexGroup gutterSize="m">
@@ -83,6 +89,7 @@ const EventRenderedViewComponent = ({
     ),
     [leadingControlColumns]
   );
+
   const columns = useMemo(
     () => [
       {
@@ -179,9 +186,16 @@ const EventRenderedViewComponent = ({
 
   const handleTableChange = useCallback(
     (pageChange: CriteriaWithPagination<TimelineItem>) => {
-      onChangePage(pageChange.page.index);
+      if (pageChange.page.index !== pageIndex) {
+        onChangePage(pageChange.page.index);
+      }
+      if (pageChange.page.size !== pageSize) {
+        dispatch(
+          tGridActions.updateItemsPerPage({ id: timelineId, itemsPerPage: pageChange.page.size })
+        );
+      }
     },
-    [onChangePage]
+    [dispatch, onChangePage, pageIndex, pageSize, timelineId]
   );
 
   const pagination = useMemo(

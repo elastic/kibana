@@ -618,6 +618,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             pageSize={pageInfo.querySize}
             pageSizeOptions={itemsPerPageOptions}
             rowRenderers={rowRenderers}
+            timelineId={id}
             totalItemCount={totalItems}
           />
         )}
