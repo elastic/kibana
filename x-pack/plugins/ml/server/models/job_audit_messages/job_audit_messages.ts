@@ -9,7 +9,7 @@ import moment from 'moment';
 import type { IScopedClusterClient } from 'kibana/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import type { estypes } from '@elastic/elasticsearch';
-import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import { ML_NOTIFICATION_INDEX_02, ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { MESSAGE_LEVEL } from '../../../common/constants/message_levels';
 import type { JobSavedObjectService } from '../../saved_objects';
 import type { MlClient } from '../../lib/ml_client';
@@ -207,17 +207,6 @@ export function jobAuditMessagesProvider(
         },
       },
     };
-
-    // If the jobIds arg is supplied, add a query filter
-    // to only include those jobIds in the aggregations.
-    if (Array.isArray(jobIds) && jobIds.length > 0) {
-      query.bool.filter.push({
-        terms: {
-          job_id: jobIds,
-        },
-      });
-      levelsPerJobAggSize = jobIds.length;
-    }
 
     const { body } = await asInternalUser.search({
       index: ML_NOTIFICATION_INDEX_PATTERN,
