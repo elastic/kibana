@@ -18,7 +18,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextArea,
-  EuiToolTip,
 } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
@@ -28,6 +27,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { IHttpFetchError } from 'kibana/public';
 
 import type { EnrollmentToken } from '../common';
+import { TextTruncate } from './text_truncate';
 import type { ValidationErrors } from './use_form';
 import { useForm } from './use_form';
 import { useHttp } from './use_http';
@@ -156,13 +156,8 @@ interface EnrollmentTokenDetailsProps {
 
 const EnrollmentTokenDetails: FunctionComponent<EnrollmentTokenDetailsProps> = ({ token }) => (
   <EuiText size="xs">
-    <EuiFlexGroup
-      responsive={false}
-      alignItems="center"
-      gutterSize="s"
-      style={{ whiteSpace: 'nowrap' }}
-    >
-      <EuiFlexItem grow={false}>
+    <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false} className="eui-textNoWrap">
         <FormattedMessage
           id="interactiveSetup.enrollmentTokenDetails.connectTo"
           defaultMessage="Connect to"
@@ -172,14 +167,12 @@ const EnrollmentTokenDetails: FunctionComponent<EnrollmentTokenDetailsProps> = (
         <EuiIcon type="lock" />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ overflow: 'hidden' }}>
-        <EuiToolTip position="top" content={token.adr[0]} anchorClassName="eui-displayBlock">
-          <span className="eui-displayBlock eui-textTruncate">{token.adr[0]}</span>
-        </EuiToolTip>
+        <TextTruncate>{token.adr[0]}</TextTruncate>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiIcon type="logoElasticsearch" />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} className="eui-textNoWrap">
         <FormattedMessage
           id="interactiveSetup.enrollmentTokenDetails.elasticsearchVersion"
           defaultMessage="Elasticsearch (v{version})"

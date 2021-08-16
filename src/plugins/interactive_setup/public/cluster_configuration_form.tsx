@@ -23,7 +23,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
@@ -32,6 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { Certificate } from '../common';
+import { TextTruncate } from './text_truncate';
 import type { ValidationErrors } from './use_form';
 import { useForm } from './use_form';
 import { useHttp } from './use_http';
@@ -134,16 +134,16 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
   return (
     <EuiForm component="form" noValidate {...eventHandlers}>
       <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false} style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
+        <EuiFlexItem grow={false} className="eui-textNoWrap">
           <FormattedMessage
             id="interactiveSetup.clusterConfigurationForm.connectTo"
             defaultMessage="Connect to"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ overflow: 'hidden' }}>
-          <EuiToolTip position="top" content={host} anchorClassName="eui-displayBlock">
-            <strong className="eui-displayBlock eui-textTruncate">{host}</strong>
-          </EuiToolTip>
+          <TextTruncate>
+            <strong>{host}</strong>
+          </TextTruncate>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
