@@ -6,17 +6,18 @@
  */
 
 import { FailureCorrelationImpactThreshold } from '../../../../../common/search_strategies/failure_correlations/types';
-import { FAILURE_CORRELATION_IMPACT_THRESHOLD } from '../../../../../common/search_strategies/failure_correlations/constants';
+import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from '../../../../../common/search_strategies/failure_correlations/constants';
 
 export function getFailedTransactionsCorrelationImpactLabel(
   pValue: number
 ): FailureCorrelationImpactThreshold | null {
-  if (pValue > 0 && pValue < 1e-6)
-    return FAILURE_CORRELATION_IMPACT_THRESHOLD.HIGH;
+  // The lower the p value, the higher the impact
+  if (pValue >= 0 && pValue < 1e-6)
+    return FAILED_TRANSACTIONS_IMPACT_THRESHOLD.HIGH;
   if (pValue >= 1e-6 && pValue < 0.001)
-    return FAILURE_CORRELATION_IMPACT_THRESHOLD.MEDIUM;
+    return FAILED_TRANSACTIONS_IMPACT_THRESHOLD.MEDIUM;
   if (pValue >= 0.001 && pValue <= 0.02)
-    return FAILURE_CORRELATION_IMPACT_THRESHOLD.LOW;
+    return FAILED_TRANSACTIONS_IMPACT_THRESHOLD.LOW;
 
   return null;
 }
