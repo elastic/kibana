@@ -32,7 +32,9 @@ export interface EndpointActionResponse {
   action_id: string;
   /** The agent id that sent this action response */
   agent_id: string;
+  /** timestamp when the action started to be processed by the Elastic Agent and/or Endpoint on the host */
   started_at: string;
+  /** timestamp when the action completed processing by the Elastic Agent and/or Endpoint on the host */
   completed_at: string;
   error?: string;
   action_data: EndpointActionData;
