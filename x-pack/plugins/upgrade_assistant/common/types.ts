@@ -220,8 +220,8 @@ export interface EnrichedDeprecationInfo extends DeprecationInfo {
   correctiveAction?: ReindexAction | MlAction | IndexSettingAction;
 }
 
-export interface UpgradeAssistantStatus {
-  readyForUpgrade: boolean;
+export interface ESUpgradeStatus {
+  totalCriticalDeprecations: number;
   cluster: EnrichedDeprecationInfo[];
   indices: EnrichedDeprecationInfo[];
 }

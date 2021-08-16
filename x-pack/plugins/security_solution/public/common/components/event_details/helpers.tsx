@@ -223,6 +223,7 @@ export const getSummaryColumns = (
       name: '',
     },
     {
+      className: 'flyoutOverviewDescription',
       field: 'description',
       truncateText: false,
       render: DescriptionComponent,
