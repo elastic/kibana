@@ -18,7 +18,10 @@ import {
   setEventsDeleted,
   setEventsLoading,
   setTGridSelectAll,
+  setOpenAddToExistingCase,
+  setOpenAddToNewCase,
   setSelected,
+  setTimelineUpdatedAt,
   toggleDetailPanel,
   updateColumns,
   updateIsLoading,
@@ -214,5 +217,35 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
   .case(addProviderToTimeline, (state, { id, dataProvider }) => ({
     ...state,
     timelineById: addProviderToTimelineHelper(id, dataProvider, state.timelineById),
+  }))
+  .case(setOpenAddToExistingCase, (state, { id, isOpen }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        isAddToExistingCaseOpen: isOpen,
+      },
+    },
+  }))
+  .case(setOpenAddToNewCase, (state, { id, isOpen }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        isCreateNewCaseOpen: isOpen,
+      },
+    },
+  }))
+  .case(setTimelineUpdatedAt, (state, { id, updated }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        updated,
+      },
+    },
   }))
   .build();

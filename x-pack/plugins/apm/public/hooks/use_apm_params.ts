@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { OutputOf, PathsOf, useParams } from '@kbn/typed-react-router-config';
+import { TypeOf, PathsOf, useParams } from '@kbn/typed-react-router-config';
 import { ApmRoutes } from '../components/routing/apm_route_config';
 
 export function useApmParams<TPath extends PathsOf<ApmRoutes>>(
   path: TPath,
   optional: true
-): OutputOf<ApmRoutes, TPath> | undefined;
+): TypeOf<ApmRoutes, TPath> | undefined;
 
 export function useApmParams<TPath extends PathsOf<ApmRoutes>>(
   path: TPath
-): OutputOf<ApmRoutes, TPath>;
+): TypeOf<ApmRoutes, TPath>;
 
 export function useApmParams(
   path: string,
   optional?: true
-): OutputOf<ApmRoutes, PathsOf<ApmRoutes>> | undefined {
+): TypeOf<ApmRoutes, PathsOf<ApmRoutes>> | undefined {
   return useParams(path, optional);
 }

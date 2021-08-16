@@ -107,6 +107,7 @@ const AlertsTableComponent: React.FC<Props> = ({
       defaultModel={alertsDefaultModel}
       defaultCellActions={defaultCellActions}
       end={endDate}
+      entityType="alerts"
       id={timelineId}
       renderCellValue={DefaultCellRenderer}
       rowRenderers={defaultRowRenderers}

@@ -30,7 +30,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [] },
     () => {
       it('handles the empty state', async () => {
-        const response = await supertest.get(`/api/apm/services?start=${start}&end=${end}`);
+        const response = await supertest.get(
+          `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+        );
 
         expect(response.status).to.be(200);
         expect(response.body.hasHistoricalData).to.be(false);
@@ -52,7 +54,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let sortedItems: typeof response.body.items;
 
       before(async () => {
-        response = await supertest.get(`/api/apm/services?start=${start}&end=${end}`);
+        response = await supertest.get(
+          `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+        );
         sortedItems = sortBy(response.body.items, 'serviceName');
       });
 
@@ -195,9 +199,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         }
 
         const [unfilteredResponse, filteredResponse] = await Promise.all([
-          supertest.get(`/api/apm/services?start=${start}&end=${end}`) as Promise<Response>,
           supertest.get(
-            `/api/apm/services?start=${start}&end=${end}&kuery=${encodeURIComponent(
+            `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+          ) as Promise<Response>,
+          supertest.get(
+            `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=${encodeURIComponent(
               'not (processor.event:transaction)'
             )}`
           ) as Promise<Response>,
@@ -232,7 +238,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           };
 
           before(async () => {
-            response = await supertest.get(`/api/apm/services?start=${start}&end=${end}`);
+            response = await supertest.get(
+              `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+            );
           });
 
           it('the response is successful', () => {
@@ -277,7 +285,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let response: PromiseReturnType<typeof supertest.get>;
         before(async () => {
           response = await supertestAsApmReadUserWithoutMlAccess.get(
-            `/api/apm/services?start=${start}&end=${end}`
+            `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
           );
         });
 
