@@ -81,7 +81,7 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
               content={
                 <FormattedMessage
                   id="xpack.transform.agg.popoverForm.filerQueryAdvancedSuggestionTooltip"
-                  defaultMessage="Use advanced JSON query editor for more filter query aggregations."
+                  defaultMessage="To add other filter query aggregations, edit the JSON config."
                 />
               }
             >
