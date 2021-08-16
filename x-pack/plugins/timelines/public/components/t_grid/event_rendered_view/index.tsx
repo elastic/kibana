@@ -4,20 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CriteriaWithPagination, EuiBasicTable } from '@elastic/eui';
+import {
+  CriteriaWithPagination,
+  EuiBasicTable,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridControlColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALERT_RULE_ID, ALERT_RULE_NAME, TIMESTAMP } from '@kbn/rule-data-utils';
+import {
+  /* ALERT_REASON, ALERT_RULE_ID, */ ALERT_RULE_NAME,
+  TIMESTAMP,
+} from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
+import styled from 'styled-components';
+
 import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 
-import type { ControlColumnProps, RowRenderer, TimelineItem } from '../../../../common';
+import type { BrowserFields, RowRenderer, TimelineItem } from '../../../../common';
 import { RuleName } from '../../rule_name';
 
+const EventRenderedFlexItem = styled(EuiFlexItem)`
+  div:first-child {
+    padding-left: 0px;
+    div {
+      margin: 0px;
+    }
+  }
+`;
+
 interface EventRenderedViewProps {
+  alertToolbar: React.ReactNode;
+  browserFields: BrowserFields;
   events: TimelineItem[];
-  leadingControlColumns: ControlColumnProps[];
+  leadingControlColumns: EuiDataGridControlColumn[];
   onChangePage: (newActivePage: number) => void;
   pageIndex: number;
   pageSize: number;
@@ -25,15 +49,16 @@ interface EventRenderedViewProps {
   rowRenderers: RowRenderer[];
   totalItemCount: number;
 }
-export const PreferenceFormattedDate = React.memo<{ value: Date }>(
-  /* eslint-disable-next-line react-hooks/rules-of-hooks */
-  ({ value }) => {
-    const tz = useUiSetting<string>('dateFormat:tz');
-    const dateFormat = useUiSetting<string>('dateFormat');
-    return (<>{moment.tz(value, tz).format(dateFormat)}</>);
-}
+const PreferenceFormattedDateComponent = ({ value }: { value: Date }) => {
+  const tz = useUiSetting<string>('dateFormat:tz');
+  const dateFormat = useUiSetting<string>('dateFormat');
+  return <>{moment.tz(value, tz).format(dateFormat)}</>;
+};
+export const PreferenceFormattedDate = React.memo(PreferenceFormattedDateComponent);
 
 const EventRenderedViewComponent = ({
+  alertToolbar,
+  browserFields,
   events,
   leadingControlColumns,
   onChangePage,
@@ -43,15 +68,47 @@ const EventRenderedViewComponent = ({
   rowRenderers,
   totalItemCount,
 }: EventRenderedViewProps) => {
+  const ActionTitle = useMemo(
+    () => (
+      <EuiFlexGroup gutterSize="m">
+        {leadingControlColumns.map((action) => {
+          const ActionHeader = action.headerCellRender;
+          return (
+            <EuiFlexItem grow={false}>
+              <ActionHeader />
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
+    ),
+    [leadingControlColumns]
+  );
   const columns = useMemo(
     () => [
       {
         field: 'actions',
-        name: i18n.translate('xpack.timelines.alerts.EventRenderedView.actions.column', {
-          defaultMessage: 'Actions',
-        }),
+        name: ActionTitle,
         truncateText: false,
         hideForMobile: false,
+        render: (name: unknown, item: unknown) => {
+          const alertId = get(item, '_id');
+          const rowIndex = events.findIndex((evt) => evt._id === alertId);
+          return leadingControlColumns.length > 0
+            ? leadingControlColumns.map((action) => {
+                const getActions = action.rowCellRender as (
+                  props: EuiDataGridCellValueElementProps
+                ) => React.ReactNode;
+                return getActions({
+                  columnId: 'actions',
+                  isDetails: false,
+                  isExpandable: false,
+                  isExpanded: false,
+                  rowIndex,
+                  setCellProps: () => null,
+                });
+              })
+            : null;
+        },
       },
       {
         field: 'ecs.@timestamp',
@@ -61,8 +118,7 @@ const EventRenderedViewComponent = ({
         truncateText: false,
         hideForMobile: false,
         // eslint-disable-next-line react/display-name
-        render: (name, item) => {
-          console.log(name, item);
+        render: (name: unknown, item: TimelineItem) => {
           const timestamp = get(item, `ecs.${TIMESTAMP}`);
           return <PreferenceFormattedDate value={timestamp} />;
         },
@@ -75,10 +131,9 @@ const EventRenderedViewComponent = ({
         truncateText: false,
         hideForMobile: false,
         // eslint-disable-next-line react/display-name
-        render: (name, item) => {
-          console.log(name, item);
-          const ruleName = get(item, ALERT_RULE_NAME);
-          const ruleId = get(item, ALERT_RULE_ID);
+        render: (name: unknown, item: TimelineItem) => {
+          const ruleName = get(item, `ecs.signal.rule.name`); /* `ecs.${ALERT_RULE_NAME}`*/
+          const ruleId = get(item, `ecs.signal.rule.id}`); /* `ecs.${ALERT_RULE_ID}`*/
           return <RuleName name={ruleName} id={ruleId} />;
         },
       },
@@ -87,10 +142,39 @@ const EventRenderedViewComponent = ({
         name: i18n.translate('xpack.timelines.alerts.EventRenderedView.eventSummary.column', {
           defaultMessage: 'Event Summary',
         }),
-        render: () => null,
+        truncateText: false,
+        hideForMobile: false,
+        // eslint-disable-next-line react/display-name
+        render: (name: unknown, item: TimelineItem) => {
+          const ecsData = get(item, 'ecs');
+          const reason = get(item, `ecs.signal.reason`); /* `ecs.${ALERT_REASON}`*/
+          const rowRenderersValid = rowRenderers.filter((rowRenderer) =>
+            rowRenderer.isInstance(ecsData)
+          );
+          return (
+            <EuiFlexGroup gutterSize="none" direction="column">
+              {reason && <EuiFlexItem>{reason}</EuiFlexItem>}
+              {rowRenderersValid.length > 0 &&
+                rowRenderersValid.map((rowRenderer) => (
+                  <>
+                    <EuiHorizontalRule size="half" margin="xs" />
+                    <EventRenderedFlexItem>
+                      {rowRenderer.renderRow({
+                        browserFields,
+                        data: ecsData,
+                        isDraggable: false,
+                        timelineId: 'NONE',
+                      })}
+                    </EventRenderedFlexItem>
+                  </>
+                ))}
+            </EuiFlexGroup>
+          );
+        },
+        width: '60%',
       },
     ],
-    []
+    [ActionTitle, browserFields, events, leadingControlColumns, rowRenderers]
   );
 
   const handleTableChange = useCallback(
@@ -100,21 +184,28 @@ const EventRenderedViewComponent = ({
     [onChangePage]
   );
 
-  const pagination = {
-    pageIndex,
-    pageSize,
-    totalItemCount,
-    pageSizeOptions: [3, 5, 8],
-    hidePerPageOptions: false,
-  };
-  console.log('EuiBasicTable');
+  const pagination = useMemo(
+    () => ({
+      pageIndex,
+      pageSize,
+      totalItemCount,
+      pageSizeOptions,
+      hidePerPageOptions: false,
+    }),
+    [pageIndex, pageSize, pageSizeOptions, totalItemCount]
+  );
+
   return (
-    <EuiBasicTable
-      items={events}
-      columns={columns}
-      pagination={pagination}
-      onChange={handleTableChange}
-    />
+    <>
+      {alertToolbar}
+      <EuiBasicTable
+        compressed
+        items={events}
+        columns={columns}
+        pagination={pagination}
+        onChange={handleTableChange}
+      />
+    </>
   );
 };
 

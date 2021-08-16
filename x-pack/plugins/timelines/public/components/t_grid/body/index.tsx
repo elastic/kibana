@@ -13,6 +13,8 @@ import {
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
   EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
@@ -57,7 +59,7 @@ import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import type { OnRowSelected, OnSelectAll } from '../types';
 import type { Refetch } from '../../../store/t_grid/inputs';
-import { StatefulFieldsBrowser } from '../../../';
+import { PaginationInputPaginated, StatefulFieldsBrowser } from '../../../';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
@@ -65,6 +67,8 @@ import * as i18n from './translations';
 import { AlertCount } from '../styles';
 import { checkBoxControlColumn } from './control_columns';
 import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
+import { ViewSelection } from '../event_rendered_view/selector';
+import { EventRenderedView } from '../event_rendered_view';
 
 const StatefulAlertStatusBulkActions = lazy(
   () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
@@ -79,9 +83,12 @@ interface OwnProps {
   defaultCellActions?: TGridCellAction[];
   id: string;
   isEventViewer?: boolean;
+  itemsPerPageOptions: number[];
+  pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   tabType: TimelineTabs;
+  tableView: ViewSelection;
   leadingControlColumns?: ControlColumnProps[];
   loadPage: (newActivePage: number) => void;
   trailingControlColumns?: ControlColumnProps[];
@@ -235,8 +242,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     id,
     isEventViewer = false,
     isSelectAllChecked,
+    itemsPerPageOptions,
     loadingEventIds,
     loadPage,
+    pageInfo,
     selectedEventIds,
     setSelected,
     clearSelected,
@@ -246,6 +255,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     rowRenderers,
     sort,
     tabType,
+    tableView,
     totalPages,
     totalItems,
     filterStatus,
@@ -327,6 +337,43 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       }
       return bulkActions.alertStatusActions ?? true;
     }, [selectedCount, showCheckboxes, bulkActions]);
+
+    const alertToolbar = useMemo(
+      () => (
+        <EuiFlexGroup alignItems="baseline">
+          <EuiFlexItem grow={false}>
+            <AlertCount>{alertCountText}</AlertCount>
+          </EuiFlexItem>
+          {showBulkActions && (
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <StatefulAlertStatusBulkActions
+                data-test-subj="bulk-actions"
+                id={id}
+                totalItems={totalItems}
+                filterStatus={filterStatus}
+                query={filterQuery}
+                indexName={indexNames.join()}
+                onActionSuccess={onAlertStatusActionSuccess}
+                onActionFailure={onAlertStatusActionFailure}
+                refetch={refetch}
+              />
+            </Suspense>
+          )}
+        </EuiFlexGroup>
+      ),
+      [
+        alertCountText,
+        filterQuery,
+        filterStatus,
+        id,
+        indexNames,
+        onAlertStatusActionFailure,
+        onAlertStatusActionSuccess,
+        refetch,
+        showBulkActions,
+        totalItems,
+      ]
+    );
 
     const toolbarVisibility: EuiDataGridToolBarVisibilityOptions = useMemo(
       () => ({
@@ -543,20 +590,38 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     );
 
     return (
-      <EuiDataGrid
-        data-test-subj="body-data-grid"
-        aria-label={i18n.TGRID_BODY_ARIA_LABEL}
-        columns={columnsWithCellActions}
-        columnVisibility={{ visibleColumns, setVisibleColumns }}
-        gridStyle={gridStyle}
-        leadingControlColumns={leadingTGridControlColumns}
-        trailingControlColumns={trailingTGridControlColumns}
-        toolbarVisibility={toolbarVisibility}
-        rowCount={data.length}
-        renderCellValue={renderTGridCellValue}
-        inMemory={{ level: 'sorting' }}
-        sorting={{ columns: sortingColumns, onSort }}
-      />
+      <>
+        {tableView === 'gridView' && (
+          <EuiDataGrid
+            data-test-subj="body-data-grid"
+            aria-label={i18n.TGRID_BODY_ARIA_LABEL}
+            columns={columnsWithCellActions}
+            columnVisibility={{ visibleColumns, setVisibleColumns }}
+            gridStyle={gridStyle}
+            leadingControlColumns={leadingTGridControlColumns}
+            trailingControlColumns={trailingTGridControlColumns}
+            toolbarVisibility={toolbarVisibility}
+            rowCount={data.length}
+            renderCellValue={renderTGridCellValue}
+            inMemory={{ level: 'sorting' }}
+            sorting={{ columns: sortingColumns, onSort }}
+          />
+        )}
+        {tableView === 'eventRenderedView' && (
+          <EventRenderedView
+            alertToolbar={alertToolbar}
+            browserFields={browserFields}
+            events={data}
+            leadingControlColumns={leadingTGridControlColumns ?? []}
+            onChangePage={loadPage}
+            pageIndex={pageInfo.activePage}
+            pageSize={pageInfo.querySize}
+            pageSizeOptions={itemsPerPageOptions}
+            rowRenderers={rowRenderers}
+            totalItemCount={totalItems}
+          />
+        )}
+      </>
     );
   }
 );

@@ -54,7 +54,6 @@ import { ExitFullScreen } from '../../exit_full_screen';
 import { Sort } from '../body/sort';
 import { InspectButtonContainer } from '../../inspect';
 import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
-import { EventRenderedView } from '../event_rendered_view';
 
 const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 
@@ -327,9 +326,11 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               data-timeline-id={id}
               data-test-subj={`events-container-loading-${loading}`}
             >
-              <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+              <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" alignItems="baseline">
                 <UpdatedFlexItem grow={false} show={!loading}>
                   {!resolverIsShowing(graphEventId) && additionalFilters}
+                </UpdatedFlexItem>
+                <UpdatedFlexItem grow={false} show={!loading}>
                   <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
                 </UpdatedFlexItem>
               </EuiFlexGroup>
@@ -344,11 +345,14 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                     defaultCellActions={defaultCellActions}
                     id={id}
                     isEventViewer={true}
+                    itemsPerPageOptions={itemsPerPageOptions}
                     loadPage={loadPage}
                     onRuleChange={onRuleChange}
+                    pageInfo={pageInfo}
                     renderCellValue={renderCellValue}
                     rowRenderers={rowRenderers}
                     tabType={TimelineTabs.query}
+                    tableView={tableView}
                     totalPages={calculateTotalPages({
                       itemsCount: totalCountMinusDeleted,
                       itemsPerPage,
@@ -361,19 +365,21 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                     refetch={refetch}
                     indexNames={indexNames}
                   />
-                  <Footer
-                    activePage={pageInfo.activePage}
-                    data-test-subj="events-viewer-footer"
-                    height={footerHeight}
-                    id={id}
-                    isLive={isLive}
-                    isLoading={loading}
-                    itemsCount={nonDeletedEvents.length}
-                    itemsPerPage={itemsPerPage}
-                    itemsPerPageOptions={itemsPerPageOptions}
-                    onChangePage={loadPage}
-                    totalCount={totalCountMinusDeleted}
-                  />
+                  {tableView === 'gridView' && (
+                    <Footer
+                      activePage={pageInfo.activePage}
+                      data-test-subj="events-viewer-footer"
+                      height={footerHeight}
+                      id={id}
+                      isLive={isLive}
+                      isLoading={loading}
+                      itemsCount={nonDeletedEvents.length}
+                      itemsPerPage={itemsPerPage}
+                      itemsPerPageOptions={itemsPerPageOptions}
+                      onChangePage={loadPage}
+                      totalCount={totalCountMinusDeleted}
+                    />
+                  )}
                 </ScrollableFlexItem>
               </FullWidthFlexGroup>
             </EventsContainerLoading>
