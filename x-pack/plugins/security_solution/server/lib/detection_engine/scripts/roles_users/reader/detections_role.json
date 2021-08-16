@@ -6,7 +6,10 @@
         "names" : [
           ".siem-signals*",
           ".lists*",
-          ".items*"
+          ".items*",
+          "metrics-endpoint.metadata_current_*",
+          ".fleet-agents*",
+          ".fleet-actions*"
         ],
         "privileges" : ["read"]
       },

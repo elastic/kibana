@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-searchContext?: SerializableState;
+searchContext?: SerializableRecord;
 ```

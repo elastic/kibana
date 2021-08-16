@@ -28,11 +28,8 @@ export function FieldValueSuggestions({
   singleSelection,
   compressed,
   asFilterButton,
-  usePrependLabel,
   allowAllValuesSelection,
   isSyntheticsData,
-  required,
-  allowExclusions = true,
   asCombobox = true,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
@@ -69,10 +66,7 @@ export function FieldValueSuggestions({
       width={width}
       compressed={compressed}
       asFilterButton={asFilterButton}
-      usePrependLabel={usePrependLabel}
-      allowExclusions={allowExclusions}
       allowAllValuesSelection={allowAllValuesSelection}
-      required={required}
     />
   );
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenuItem, EuiText } from '@elastic/eui';
+import { EuiContextMenuItem } from '@elastic/eui';
 import React from 'react';
 import * as i18n from '../translations';
 
@@ -24,9 +24,7 @@ const AddEventFilterComponent: React.FC<AddEventFilterProps> = ({ onClick, disab
       onClick={onClick}
       disabled={disabled}
     >
-      <EuiText data-test-subj="addEventFilterButton" size="m">
-        {i18n.ACTION_ADD_EVENT_FILTER}
-      </EuiText>
+      {i18n.ACTION_ADD_EVENT_FILTER}
     </EuiContextMenuItem>
   );
 };

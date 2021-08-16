@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import type { AlertConsumers as AlertConsumersTyped } from '@kbn/rule-data-utils';
+// @ts-expect-error
+import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 import { Router } from 'react-router-dom';
 import React, { useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom';
@@ -14,6 +16,8 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimelinesUIStart } from '../../../../../../../plugins/timelines/public';
 import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
+
+const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 
 type CoreStartTimelines = CoreStart & { data: DataPublicPluginStart };
 
@@ -38,7 +42,7 @@ export function renderApp(
     ReactDOM.unmountComponentAtNode(parameters.element);
   };
 }
-const ALERT_CONSUMER = [AlertConsumers.SIEM];
+const ALERT_RULE_CONSUMER = [AlertConsumers.SIEM];
 
 const AppRoot = React.memo(
   ({
@@ -63,8 +67,13 @@ const AppRoot = React.memo(
             {(timelinesPluginSetup &&
               timelinesPluginSetup.getTGrid &&
               timelinesPluginSetup.getTGrid<'standalone'>({
-                alertConsumers: ALERT_CONSUMER,
+                alertConsumers: ALERT_RULE_CONSUMER,
+                appId: 'securitySolution',
                 type: 'standalone',
+                casePermissions: {
+                  read: true,
+                  crud: true,
+                },
                 columns: [],
                 indexNames: [],
                 deletedEventIds: [],

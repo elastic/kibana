@@ -37,16 +37,17 @@ export const MAX_QUERY_LENGTH = 2000;
 const GhostFormField = () => <></>;
 
 interface LiveQueryFormProps {
-  agentId?: string | undefined;
   defaultValue?: Partial<FormData> | undefined;
   onSuccess?: () => void;
+  singleAgentMode?: boolean;
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
-  agentId,
   defaultValue,
   onSuccess,
+  singleAgentMode,
 }) => {
+  const permissions = useKibana().services.application.capabilities.osquery;
   const { http } = useKibana().services;
   const [showSavedQueryFlyout, setShowSavedQueryFlyout] = useState(false);
   const setErrorToast = useErrorToast();
@@ -54,14 +55,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const handleShowSaveQueryFlout = useCallback(() => setShowSavedQueryFlyout(true), []);
   const handleCloseSaveQueryFlout = useCallback(() => setShowSavedQueryFlyout(false), []);
 
-  const {
-    data,
-    isLoading,
-    mutateAsync,
-    isError,
-    isSuccess,
-    // error
-  } = useMutation(
+  const { data, isLoading, mutateAsync, isError, isSuccess } = useMutation(
     (payload: Record<string, unknown>) =>
       http.post('/internal/osquery/action', {
         body: JSON.stringify(payload),
@@ -172,10 +166,15 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         />
         <EuiSpacer />
         <EuiFlexGroup justifyContent="flexEnd">
-          {!agentId && (
+          {!singleAgentMode && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                disabled={!agentSelected || !queryValueProvided || resultsStatus === 'disabled'}
+                disabled={
+                  !permissions.writeSavedQueries ||
+                  !agentSelected ||
+                  !queryValueProvided ||
+                  resultsStatus === 'disabled'
+                }
                 onClick={handleShowSaveQueryFlout}
               >
                 <FormattedMessage
@@ -197,12 +196,13 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       </>
     ),
     [
-      agentId,
       agentSelected,
+      permissions.writeSavedQueries,
       handleShowSaveQueryFlout,
       queryComponentProps,
       queryValueProvided,
       resultsStatus,
+      singleAgentMode,
       submit,
     ]
   );
@@ -255,7 +255,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   return (
     <>
-      <Form form={form}>{agentId ? singleAgentForm : <EuiSteps steps={formSteps} />}</Form>
+      <Form form={form}>{singleAgentMode ? singleAgentForm : <EuiSteps steps={formSteps} />}</Form>
       {showSavedQueryFlyout ? (
         <SavedQueryFlyout
           onClose={handleCloseSaveQueryFlout}

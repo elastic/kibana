@@ -17,7 +17,7 @@ interface DatatableVisualizationPluginStartPlugins {
 }
 export interface DatatableVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
-  formatFactory: Promise<FormatFactory>;
+  formatFactory: FormatFactory;
   editorFrame: EditorFrameSetup;
   charts: ChartsPluginSetup;
 }
@@ -37,13 +37,12 @@ export class DatatableVisualization {
         getDatatableVisualization,
       } = await import('../async_services');
       const palettes = await charts.palettes.getPalettes();
-      const resolvedFormatFactory = await formatFactory;
 
       expressions.registerFunction(() => datatableColumn);
-      expressions.registerFunction(() => getDatatable({ formatFactory: resolvedFormatFactory }));
+      expressions.registerFunction(() => getDatatable(() => formatFactory));
       expressions.registerRenderer(() =>
         getDatatableRenderer({
-          formatFactory: resolvedFormatFactory,
+          formatFactory,
           getType: core
             .getStartServices()
             .then(([_, { data: dataStart }]) => dataStart.search.aggs.types.get),

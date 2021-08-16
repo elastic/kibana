@@ -23,7 +23,7 @@ import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
 import {
   AlertTypeWithExecutor,
   PersistenceServices,
-  RuleDataClient,
+  IRuleDataClient,
 } from '../../../../../rule_registry/server';
 import { BaseHit } from '../../../../common/detection_engine/types';
 import { ConfigType } from '../../../config';
@@ -33,6 +33,7 @@ import { RuleParams } from '../schemas/rule_schemas';
 import { BuildRuleMessage } from '../signals/rule_messages';
 import { AlertAttributes, BulkCreate, WrapHits } from '../signals/types';
 import { AlertsFieldMap, RulesFieldMap } from './field_maps';
+import { ExperimentalFeatures } from '../../../../common/experimental_features';
 
 export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
   bulkCreateTimes: string[];
@@ -92,11 +93,10 @@ type SecurityAlertTypeWithExecutor<
 };
 
 export type CreateSecurityRuleTypeFactory = (options: {
-  indexAlias: string;
   lists: SetupPlugins['lists'];
   logger: Logger;
   mergeStrategy: ConfigType['alertMergeStrategy'];
-  ruleDataClient: RuleDataClient;
+  ruleDataClient: IRuleDataClient;
   ruleDataService: IRuleDataPluginService;
 }) => <
   TParams extends RuleParams & { index: string[] | undefined },
@@ -118,3 +118,13 @@ export type RACAlert = Exclude<
 
 export type RACSourceHit = SearchHit<RACAlert>;
 export type WrappedRACAlert = BaseHit<RACAlert>;
+
+export interface CreateRuleOptions {
+  experimentalFeatures: ExperimentalFeatures;
+  lists: SetupPlugins['lists'];
+  logger: Logger;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
+  ruleDataClient: IRuleDataClient;
+  version: string;
+  ruleDataService: IRuleDataPluginService;
+}

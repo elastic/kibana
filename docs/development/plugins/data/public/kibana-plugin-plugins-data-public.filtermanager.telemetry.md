@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-telemetry: (filters: import("../../../../kibana_utils/common/persistable_state").SerializableState, collector: unknown) => {};
+telemetry: (filters: import("@kbn/utility-types").SerializableRecord, collector: unknown) => {};
 ```

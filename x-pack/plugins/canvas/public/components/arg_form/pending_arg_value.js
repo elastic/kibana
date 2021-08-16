@@ -47,7 +47,6 @@ export class PendingArgValue extends React.PureComponent {
 
   render() {
     const { label, argTypeInstance } = this.props;
-
     return (
       <div className="canvasArg">
         <ArgLabel

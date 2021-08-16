@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { RuleDataClient } from '../../../../../../rule_registry/server';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import {
   queryRulesSchema,
@@ -24,7 +24,7 @@ import { RuleExecutionStatus } from '../../../../../common/detection_engine/sche
 
 export const readRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient?: RuleDataClient | null
+  ruleDataClient?: IRuleDataClient | null
 ) => {
   router.get(
     {

@@ -27,7 +27,7 @@ import {
   waitForRuleSuccessOrStatus,
   getRuleForSignalTesting,
 } from '../../utils';
-import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 
 // eslint-disable-next-line import/no-default-export

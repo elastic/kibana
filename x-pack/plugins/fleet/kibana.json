@@ -1,5 +1,9 @@
 {
   "id": "fleet",
+  "owner": {
+    "name": "Fleet",
+    "githubTeam": "fleet"
+  },
   "version": "kibana",
   "server": true,
   "ui": true,

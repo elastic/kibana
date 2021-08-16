@@ -33,11 +33,7 @@ _Docker Compose is required_
 
 ### Cypress tests
 
-```sh
-node x-pack/plugins/apm/scripts/ftr_e2e/cypress_run.js
-```
-
-_Starts Kibana (:5701), APM Server (:8201) and Elasticsearch (:9201). Ingests sample data into Elasticsearch via APM Server and runs the Cypress tests_
+See [ftr_e2e](./ftr_e2e)
 
 ### Jest tests
 
@@ -82,9 +78,10 @@ For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 
 ### API integration tests
 
-API tests are separated in two suites: 
- - a basic license test suite
- - a trial license test suite (the equivalent of gold+)
+API tests are separated in two suites:
+
+- a basic license test suite
+- a trial license test suite (the equivalent of gold+)
 
 This requires separate test servers and test runners.
 
@@ -112,10 +109,10 @@ node scripts/functional_test_runner --config x-pack/test/apm_api_integration/tri
 
 The API tests for "trial" are located in `x-pack/test/apm_api_integration/trial/tests`.
 
-
 **API Test tips**
- - For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
- - To update snapshots append `--updateSnapshots` to the functional_test_runner command
+
+- For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
+- To update snapshots append `--updateSnapshots` to the functional_test_runner command
 
 ## Linting
 
