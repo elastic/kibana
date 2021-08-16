@@ -17,9 +17,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
-import {
-  createUsageCounterLabel
-} from './helpers';
+import { createUsageCounterLabel } from './helpers';
 import { TelemetryDiagTask } from './diagnostic_task';
 import { TelemetryEndpointTask } from './endpoint_task';
 import { TelemetryTrustedAppsTask } from './trusted_apps_task';
@@ -77,7 +75,11 @@ export class TelemetryEventsSender {
     this.logger = logger.get('telemetry_events');
   }
 
-  public setup(telemetrySetup?: TelemetryPluginSetup, taskManager?: TaskManagerSetupContract, telemetryUsageCounter?: UsageCounter) {
+  public setup(
+    telemetrySetup?: TelemetryPluginSetup,
+    taskManager?: TaskManagerSetupContract,
+    telemetryUsageCounter?: UsageCounter
+  ) {
     this.telemetrySetup = telemetrySetup;
     this.telemetryUsageCounter = telemetryUsageCounter;
 
@@ -290,13 +292,13 @@ export class TelemetryEventsSender {
       // we're full already
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(this.usageLabelPrefix.concat(['queue_stats'])),
-        counterType: "docs_lost",
-        incrementBy: events.length
+        counterType: 'docs_lost',
+        incrementBy: events.length,
       });
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(this.usageLabelPrefix.concat(['queue_stats'])),
-        counterType: "num_capacity_exceeded",
-        incrementBy: 1
+        counterType: 'num_capacity_exceeded',
+        incrementBy: 1,
       });
       return;
     }
@@ -364,7 +366,7 @@ export class TelemetryEventsSender {
         'alerts-endpoint',
         clusterInfo.cluster_uuid,
         clusterInfo.version?.number,
-        licenseInfo?.uid,
+        licenseInfo?.uid
       );
     } catch (err) {
       this.logger.warn(`Error sending telemetry events data: ${err}`);
@@ -468,12 +470,12 @@ export class TelemetryEventsSender {
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(this.usageLabelPrefix.concat(['payloads', channel])),
         counterType: resp.status.toString(),
-        incrementBy: 1
+        incrementBy: 1,
       });
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(this.usageLabelPrefix.concat(['payloads', channel])),
         counterType: 'docs_sent',
-        incrementBy: events.length
+        incrementBy: events.length,
       });
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {
@@ -483,7 +485,7 @@ export class TelemetryEventsSender {
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(this.usageLabelPrefix.concat(['payloads', channel])),
         counterType: 'docs_lost',
-        incrementBy: events.length
+        incrementBy: events.length,
       });
     }
   }
