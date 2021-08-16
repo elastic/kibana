@@ -14,30 +14,31 @@ import { ILicense } from '../../../licensing/public';
 
 import { KibanaContextProvider } from '../shared_imports';
 
-import { AppWithRouter } from './app';
+import { App } from './app';
 
 import { BreadcrumbService } from './services/breadcrumbs';
+import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 
 export const renderApp = (
   element: Element,
   I18nContext: I18nStart['Context'],
   history: ScopedHistory,
-  navigateToApp: ApplicationStart['navigateToApp'],
-  getUrlForApp: ApplicationStart['getUrlForApp'],
+  application: ApplicationStart,
   breadcrumbService: BreadcrumbService,
   license: ILicense,
   cloud?: CloudSetup
 ): UnmountCallback => {
+  const { navigateToApp, getUrlForApp } = application;
   render(
-    <I18nContext>
-      <KibanaContextProvider services={{ cloud, breadcrumbService, license }}>
-        <AppWithRouter
-          history={history}
-          navigateToApp={navigateToApp}
-          getUrlForApp={getUrlForApp}
-        />
-      </KibanaContextProvider>
-    </I18nContext>,
+    <RedirectAppLinks application={application}>
+      <I18nContext>
+        <KibanaContextProvider
+          services={{ cloud, breadcrumbService, license, navigateToApp, getUrlForApp }}
+        >
+          <App history={history} />
+        </KibanaContextProvider>
+      </I18nContext>
+    </RedirectAppLinks>,
     element
   );
 

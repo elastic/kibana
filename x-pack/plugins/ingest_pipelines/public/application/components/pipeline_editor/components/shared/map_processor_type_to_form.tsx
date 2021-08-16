@@ -644,14 +644,25 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.set', {
       defaultMessage: 'Sets the value of a field.',
     }),
-    getDefaultDescription: ({ field, value }) =>
-      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.set', {
+    getDefaultDescription: ({ field, value, copy_from: copyFrom }) => {
+      if (copyFrom) {
+        return i18n.translate('xpack.ingestPipelines.processors.defaultDescription.setCopyFrom', {
+          defaultMessage: 'Sets value of "{field}" to the value of "{copyFrom}"',
+          values: {
+            field,
+            copyFrom,
+          },
+        });
+      }
+
+      return i18n.translate('xpack.ingestPipelines.processors.defaultDescription.set', {
         defaultMessage: 'Sets value of "{field}" to "{value}"',
         values: {
           field,
           value,
         },
-      }),
+      });
+    },
   },
   set_security_user: {
     FieldsComponent: SetSecurityUser,

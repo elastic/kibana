@@ -10,7 +10,7 @@ import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
 import { Feature } from 'geojson';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   convertCompositeRespToGeoJson,
   convertRegularRespToGeoJson,
@@ -274,7 +274,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       const requestId: string = afterKey
         ? `${this.getId()} afterKey ${afterKey.geoSplit}`
         : this.getId();
-      const esResponse: SearchResponse<unknown> = await this._runEsQuery({
+      const esResponse: estypes.SearchResponse<unknown> = await this._runEsQuery({
         requestId,
         requestName: `${layerName} (${requestCount})`,
         searchSource,
@@ -291,8 +291,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
 
       features.push(...convertCompositeRespToGeoJson(esResponse, this._descriptor.requestType));
 
-      afterKey = esResponse.aggregations.compositeSplit.after_key;
-      if (esResponse.aggregations.compositeSplit.buckets.length < gridsPerRequest) {
+      const aggr = esResponse.aggregations
+        ?.compositeSplit as estypes.AggregationsCompositeBucketAggregate;
+      afterKey = aggr.after_key;
+      if (aggr.buckets.length < gridsPerRequest) {
         // Finished because request did not get full resultset back
         break;
       }

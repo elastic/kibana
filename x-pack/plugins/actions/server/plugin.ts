@@ -225,7 +225,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     this.actionExecutor = actionExecutor;
     this.security = plugins.security;
 
-    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects, this.actionTypeRegistry!);
+    setupSavedObjects(
+      core.savedObjects,
+      plugins.encryptedSavedObjects,
+      this.actionTypeRegistry!,
+      plugins.taskManager.index
+    );
 
     registerBuiltInActionTypes({
       logger: this.logger,

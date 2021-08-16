@@ -23,6 +23,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     end: metadata.end,
     transactionName: 'APIRestController#stats',
     transactionType: 'request',
+    environment: 'ENVIRONMENT_ALL',
+    kuery: '',
   })}`;
 
   registry.when(
@@ -64,11 +66,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct number of buckets', () => {
-        expectSnapshot(response.body.buckets.length).toMatchInline(`16`);
+        expectSnapshot(response.body.buckets.length).toMatchInline(`26`);
       });
 
       it('returns the correct bucket size', () => {
-        expectSnapshot(response.body.bucketSize).toMatchInline(`5000`);
+        expectSnapshot(response.body.bucketSize).toMatchInline(`1000`);
       });
 
       it('returns the correct buckets', () => {
@@ -76,22 +78,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           (bucket: any) => !isEmpty(bucket.samples)
         );
 
-        expectSnapshot(bucketWithSamples.count).toMatchInline(`3`);
+        expectSnapshot(bucketWithSamples.count).toMatchInline(`1`);
 
         expectSnapshot(bucketWithSamples.samples.sort((sample: any) => sample.traceId))
           .toMatchInline(`
           Array [
             Object {
-              "traceId": "af0f18dc0841cfc1f567e7e1d55cfda7",
-              "transactionId": "925f02e5ac122897",
-            },
-            Object {
-              "traceId": "ccd327537120e857bdfa407434dfb9a4",
-              "transactionId": "c5f923159cc1b8a6",
-            },
-            Object {
-              "traceId": "a4eb3781a21dc11d289293076fd1a1b3",
-              "transactionId": "21892bde4ff1364d",
+              "traceId": "6d85d8f1bc4bbbfdb19cdba59d2fc164",
+              "transactionId": "d0a16f0f52f25d6b",
             },
           ]
         `);

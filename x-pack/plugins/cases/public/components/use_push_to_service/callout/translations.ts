@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+export * from '../translations';
 
 export const ADD_CONNECTOR = i18n.translate('xpack.cases.addConnector.title', {
   defaultMessage: 'Add connector',

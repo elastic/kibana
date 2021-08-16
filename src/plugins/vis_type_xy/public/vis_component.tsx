@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   Chart,
@@ -32,7 +32,7 @@ import {
 } from '../../charts/public';
 import { Datatable, IInterpreterRenderHandlers } from '../../expressions/public';
 import type { PersistedState } from '../../visualizations/public';
-
+import { useActiveCursor } from '../../charts/public';
 import { VisParams } from './types';
 import {
   getAdjustedDomain,
@@ -47,7 +47,7 @@ import {
 } from './utils';
 import { XYAxis, XYEndzones, XYCurrentTime, XYSettings, XYThresholdLine } from './components';
 import { getConfig } from './config';
-import { getThemeService, getDataActions, getPalettesService } from './services';
+import { getThemeService, getDataActions, getPalettesService, getActiveCursor } from './services';
 import { ChartType } from '../common';
 
 import './_chart.scss';
@@ -77,6 +77,11 @@ const VisComponent = (props: VisComponentProps) => {
     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
   });
   const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | null>(null);
+  const chartRef = useRef<Chart>(null);
+
+  const handleCursorUpdate = useActiveCursor(getActiveCursor(), chartRef, {
+    datatables: [props.visData],
+  });
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -333,7 +338,7 @@ const VisComponent = (props: VisComponentProps) => {
         showLegend={showLegend}
         legendPosition={legendPosition}
       />
-      <Chart size="100%">
+      <Chart size="100%" ref={chartRef}>
         <ChartSplitter
           splitColumnAccessor={splitChartColumnAccessor}
           splitRowAccessor={splitChartRowAccessor}
@@ -341,6 +346,7 @@ const VisComponent = (props: VisComponentProps) => {
         <XYSettings
           {...config}
           showLegend={showLegend}
+          onPointerUpdate={handleCursorUpdate}
           legendPosition={legendPosition}
           xDomain={xDomain}
           adjustedXDomain={adjustedXDomain}

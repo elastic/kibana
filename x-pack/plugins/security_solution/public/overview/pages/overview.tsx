@@ -96,13 +96,7 @@ const OverviewComponent = () => {
               <EuiFlexItem grow={true}>
                 <EuiFlexGroup direction="column" gutterSize="none">
                   <EuiFlexItem grow={false}>
-                    <SignalsByCategory
-                      filters={filters}
-                      from={from}
-                      query={query}
-                      setQuery={setQuery}
-                      to={to}
-                    />
+                    <SignalsByCategory filters={filters} query={query} />
                     <EuiSpacer size="l" />
                   </EuiFlexItem>
 

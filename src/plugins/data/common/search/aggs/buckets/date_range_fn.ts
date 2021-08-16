@@ -6,18 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { DateRangeOutput } from '../../expressions';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
 
 export const aggDateRangeFnName = 'aggDateRange';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.DATE_RANGE>;
 
-type Arguments = Assign<AggArgs, { ranges?: string }>;
+type Arguments = Assign<AggArgs, { ranges?: DateRangeOutput[] }>;
 
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<
@@ -60,9 +61,10 @@ export const aggDateRange = (): FunctionDefinition => ({
       }),
     },
     ranges: {
-      types: ['string'],
+      types: ['date_range'],
+      multi: true,
       help: i18n.translate('data.search.aggs.buckets.dateRange.ranges.help', {
-        defaultMessage: 'Serialized ranges to use for this aggregation.',
+        defaultMessage: 'Ranges to use for this aggregation.',
       }),
     },
     time_zone: {
@@ -84,20 +86,18 @@ export const aggDateRange = (): FunctionDefinition => ({
       }),
     },
   },
-  fn: (input, args) => {
-    const { id, enabled, schema, ...rest } = args;
-
+  fn: (input, { id, enabled, schema, ranges, ...params }) => {
     return {
       type: 'agg_type',
       value: {
         id,
         enabled,
         schema,
-        type: BUCKET_TYPES.DATE_RANGE,
         params: {
-          ...rest,
-          ranges: getParsedValue(args, 'ranges'),
+          ...params,
+          ranges: ranges?.map((range) => omit(range, 'type')),
         },
+        type: BUCKET_TYPES.DATE_RANGE,
       },
     };
   },

@@ -116,29 +116,34 @@ export class VegaMapView extends VegaBaseView {
     // In some cases, Vega may be initialized twice, e.g. after awaiting...
     if (!this._$container) return;
 
-    const mapBoxInstance = new mapboxgl.Map({
-      style,
-      customAttribution,
-      container: this._$container.get(0),
-      ...this.getMapParams({ ...zoomSettings }),
-    });
-
-    const initMapComponents = () => {
-      this.initControls(mapBoxInstance);
-      this.initLayers(mapBoxInstance, vegaView);
-
-      this._addDestroyHandler(() => {
-        if (mapBoxInstance.getLayer(vegaLayerId)) {
-          mapBoxInstance.removeLayer(vegaLayerId);
-        }
-        if (mapBoxInstance.getLayer(userConfiguredLayerId)) {
-          mapBoxInstance.removeLayer(userConfiguredLayerId);
-        }
-        mapBoxInstance.remove();
+    // For the correct geration of the PDF/PNG report, we must wait until the map is fully rendered.
+    return new Promise((resolve) => {
+      const mapBoxInstance = new mapboxgl.Map({
+        style,
+        customAttribution,
+        container: this._$container.get(0),
+        ...this.getMapParams({ ...zoomSettings }),
       });
-    };
 
-    mapBoxInstance.once('load', initMapComponents);
+      const initMapComponents = () => {
+        this.initControls(mapBoxInstance);
+        this.initLayers(mapBoxInstance, vegaView);
+
+        this._addDestroyHandler(() => {
+          if (mapBoxInstance.getLayer(vegaLayerId)) {
+            mapBoxInstance.removeLayer(vegaLayerId);
+          }
+          if (mapBoxInstance.getLayer(userConfiguredLayerId)) {
+            mapBoxInstance.removeLayer(userConfiguredLayerId);
+          }
+          mapBoxInstance.remove();
+        });
+
+        resolve(mapBoxInstance);
+      };
+
+      mapBoxInstance.once('load', initMapComponents);
+    });
   }
 
   private initControls(mapBoxInstance: Map) {

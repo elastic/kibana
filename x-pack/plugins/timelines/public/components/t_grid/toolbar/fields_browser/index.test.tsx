@@ -11,7 +11,7 @@ import { waitFor } from '@testing-library/react';
 
 import { mockBrowserFields, TestProviders } from '../../../../mock';
 
-import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';
+import { FIELD_BROWSER_WIDTH } from './helpers';
 
 import { StatefulFieldsBrowserComponent } from '.';
 
@@ -28,9 +28,7 @@ describe('StatefulFieldsBrowser', () => {
         <StatefulFieldsBrowserComponent
           browserFields={mockBrowserFields}
           columnHeaders={[]}
-          height={FIELD_BROWSER_HEIGHT}
           timelineId={timelineId}
-          width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
     );
@@ -45,9 +43,7 @@ describe('StatefulFieldsBrowser', () => {
           <StatefulFieldsBrowserComponent
             browserFields={mockBrowserFields}
             columnHeaders={[]}
-            height={FIELD_BROWSER_HEIGHT}
             timelineId={timelineId}
-            width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
       );
@@ -61,9 +57,7 @@ describe('StatefulFieldsBrowser', () => {
           <StatefulFieldsBrowserComponent
             browserFields={mockBrowserFields}
             columnHeaders={[]}
-            height={FIELD_BROWSER_HEIGHT}
             timelineId={timelineId}
-            width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
       );
@@ -84,9 +78,7 @@ describe('StatefulFieldsBrowser', () => {
           <StatefulFieldsBrowserComponent
             browserFields={mockBrowserFields}
             columnHeaders={[]}
-            height={FIELD_BROWSER_HEIGHT}
             timelineId={timelineId}
-            width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
       );
@@ -111,9 +103,7 @@ describe('StatefulFieldsBrowser', () => {
           <StatefulFieldsBrowserComponent
             browserFields={mockBrowserFields}
             columnHeaders={[]}
-            height={FIELD_BROWSER_HEIGHT}
             timelineId={timelineId}
-            width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
       );
@@ -157,10 +147,8 @@ describe('StatefulFieldsBrowser', () => {
         <StatefulFieldsBrowserComponent
           browserFields={mockBrowserFields}
           columnHeaders={[]}
-          height={FIELD_BROWSER_HEIGHT}
           isEventViewer={isEventViewer}
           timelineId={timelineId}
-          width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
     );
@@ -176,7 +164,6 @@ describe('StatefulFieldsBrowser', () => {
         <StatefulFieldsBrowserComponent
           browserFields={mockBrowserFields}
           columnHeaders={[]}
-          height={FIELD_BROWSER_HEIGHT}
           isEventViewer={isEventViewer}
           timelineId={timelineId}
           width={FIELD_BROWSER_WIDTH}

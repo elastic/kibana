@@ -16,6 +16,7 @@ export function plugin() {
 
 export * from './expression_renderers';
 export { LazyShapeDrawer } from './components/shape';
+export { LazyProgressDrawer } from './components/progress';
 export { getDefaultShapeData } from './components/reusable';
 export * from './components/shape/types';
 export * from './components/reusable/types';

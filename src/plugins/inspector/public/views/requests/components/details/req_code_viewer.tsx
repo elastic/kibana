@@ -54,7 +54,6 @@ export const RequestCodeViewer = ({ json }: RequestCodeViewerProps) => (
       <CodeEditor
         languageId={XJsonLang.ID}
         value={json}
-        onChange={() => {}}
         options={{
           readOnly: true,
           lineNumbers: 'off',

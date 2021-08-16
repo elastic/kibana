@@ -6,15 +6,21 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { NodeTypes } from './node_types';
 
+/** @public */
 export interface KueryNode {
   type: keyof NodeTypes;
   [key: string]: any;
 }
 
-export type DslQuery = any;
+/**
+ * @public
+ */
+export type DslQuery = estypes.QueryDslQueryContainer;
 
+/** @internal */
 export interface KueryParseOptions {
   helpers: {
     [key: string]: any;
@@ -26,3 +32,9 @@ export interface KueryParseOptions {
 }
 
 export { nodeTypes } from './node_types';
+
+/** @public */
+export interface KueryQueryOptions {
+  filtersInMustClause?: boolean;
+  dateFormatTZ?: string;
+}

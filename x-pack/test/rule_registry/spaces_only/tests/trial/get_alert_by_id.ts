@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
     expect(securitySolution).to.eql(SECURITY_SOLUTION_ALERT_INDEX); // assert this here so we can use constants in the dynamically-defined test cases below
   };
 
-  describe('Alerts - GET - RBAC - spaces', () => {
+  describe('Alerts - GET - RBAC', () => {
     before(async () => {
       await getSecuritySolutionIndexName(superUser);
       await getAPMIndexName(superUser);

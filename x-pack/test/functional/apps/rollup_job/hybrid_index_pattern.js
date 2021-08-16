@@ -11,9 +11,9 @@ import mockRolledUpData, { mockIndices } from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
   const es = getService('es');
-  const esArchiver = getService('esArchiver');
-  const find = getService('find');
   const retry = getService('retry');
+  const security = getService('security');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'settings']);
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
@@ -31,6 +31,20 @@ export default function ({ getService, getPageObjects }) {
       datemath.parse('now-2d', { forceNow: now }),
       datemath.parse('now-3d', { forceNow: now }),
     ];
+
+    before(async () => {
+      // load visualize to have an index pattern ready, otherwise visualize will redirect
+      await security.testUser.setRoles([
+        'global_index_pattern_management_all',
+        'test_rollup_reader',
+      ]);
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/rollup/rollup_hybrid'
+      );
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'rollup',
+      });
+    });
 
     it('create hybrid index pattern', async () => {
       //Create data for rollup job to recognize.
@@ -91,10 +105,6 @@ export default function ({ getService, getPageObjects }) {
       );
       expect(filteredIndexPatternNames.length).to.be(1);
 
-      // make sure there are no toasts which might be showing unexpected errors
-      const toastShown = await find.existsByCssSelector('.euiToast');
-      expect(toastShown).to.be(false);
-
       // ensure all fields are available
       await PageObjects.settings.clickIndexPatternByName(rollupIndexPatternName);
       const fields = await PageObjects.settings.getFieldNames();
@@ -110,8 +120,9 @@ export default function ({ getService, getPageObjects }) {
         `${regularIndexPrefix}*`,
         `${rollupSourceIndexPrefix}*`,
       ]);
-
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/rollup/rollup_hybrid'
+      );
     });
   });
 }

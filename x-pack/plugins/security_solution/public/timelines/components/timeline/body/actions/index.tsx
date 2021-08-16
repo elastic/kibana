@@ -11,6 +11,7 @@ import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elas
 import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import {
   eventHasNotes,
   getEventType,
@@ -22,10 +23,12 @@ import { InvestigateInTimelineAction } from '../../../../../detections/component
 import { AddEventNoteAction } from '../actions/add_note_icon_item';
 import { PinEventAction } from '../actions/pin_event_action';
 import { EventsTdContent } from '../../styles';
+import { useKibana, useGetUserCasesPermissions } from '../../../../../common/lib/kibana';
+import { APP_ID } from '../../../../../../common/constants';
 import * as i18n from '../translations';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
-import { AddToCaseAction } from '../../../../../cases/components/timeline_actions/add_to_case_action';
+import { useInsertTimeline } from '../../../../../cases/components/use_insert_timeline';
 import { TimelineId, ActionProps, OnPinEvent } from '../../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
@@ -50,15 +53,17 @@ const ActionsComponent: React.FC<ActionProps> = ({
   onEventDetailsPanelOpened,
   onRowSelected,
   refetch,
-  onRuleChange,
   showCheckboxes,
+  onRuleChange,
   showNotes,
   timelineId,
   toggleShowNotes,
 }) => {
   const dispatch = useDispatch();
+  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const { timelines: timelinesUi } = useKibana().services;
 
   const onPinEvent: OnPinEvent = useCallback(
     (evtId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId: evtId })),
@@ -78,6 +83,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
       }),
     [eventId, onRowSelected]
   );
+
   const handlePinClicked = useCallback(
     () =>
       getPinOnClick({
@@ -93,15 +99,24 @@ const ActionsComponent: React.FC<ActionProps> = ({
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).timelineType
   );
   const eventType = getEventType(ecsData);
-
+  const casePermissions = useGetUserCasesPermissions();
+  const insertTimelineHook = useInsertTimeline;
   const isEventContextMenuEnabledForEndpoint = useMemo(
     () => ecsData.event?.kind?.includes('event') && ecsData.agent?.type?.includes('endpoint'),
     [ecsData.event?.kind, ecsData.agent?.type]
   );
-
+  const addToCaseActionProps = useMemo(() => {
+    return {
+      ariaLabel: i18n.ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
+      event: { data: [], ecs: ecsData, _id: ecsData._id },
+      useInsertTimeline: insertTimelineHook,
+      casePermissions,
+      appId: APP_ID,
+    };
+  }, [ariaRowindex, ecsData, casePermissions, insertTimelineHook, columnValues]);
   return (
     <ActionsContainer>
-      {showCheckboxes && (
+      {showCheckboxes && !tGridEnabled && (
         <div key="select-event-container" data-test-subj="select-event-container">
           <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
             {loadingEventIds.includes(eventId) ? (
@@ -169,13 +184,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
           TimelineId.detectionsPage,
           TimelineId.detectionsRulesDetailsPage,
           TimelineId.active,
-        ].includes(timelineId as TimelineId) && (
-          <AddToCaseAction
-            ariaLabel={i18n.ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues })}
-            key="attach-to-case"
-            ecsRowData={ecsData}
-          />
-        )}
+        ].includes(timelineId as TimelineId) &&
+          timelinesUi.getAddToCasePopover(addToCaseActionProps)}
         <AlertContextMenu
           ariaLabel={i18n.MORE_ACTIONS_FOR_ROW({ ariaRowindex, columnValues })}
           key="alert-context-menu"
@@ -186,6 +196,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           onRuleChange={onRuleChange}
         />
       </>
+      {timelinesUi.getAddToCaseAction(addToCaseActionProps)}
     </ActionsContainer>
   );
 };

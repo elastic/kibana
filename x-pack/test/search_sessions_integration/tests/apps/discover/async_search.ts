@@ -25,14 +25,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const searchSessions = getService('searchSessions');
   const retry = getService('retry');
+  const kibanaServer = getService('kibanaServer');
 
   describe('discover async search', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.load('x-pack/test/functional/es_archives/discover/default');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/discover/default'
+      );
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.header.waitUntilLoadingHasFinished();
+    });
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/discover/default'
+      );
     });
 
     it('search session id should change between searches', async () => {

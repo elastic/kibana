@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { esKuery, IIndexPattern } from '../../../../../src/plugins/data/public';
+import { esKuery } from '../../../../../src/plugins/data/public';
+import type { IndexPattern } from '../../../../../src/plugins/data/public';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
 
 const getKueryString = (urlFilters: string): string => {
@@ -25,7 +26,7 @@ const getKueryString = (urlFilters: string): string => {
 };
 
 export const useUpdateKueryString = (
-  indexPattern: IIndexPattern | null,
+  indexPattern: IndexPattern | null,
   filterQueryString = '',
   urlFilters: string
 ): [string?, Error?] => {

@@ -29,10 +29,7 @@
           },
           "<any>"
         ],
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_b/public/index.ts",
-          "lineNumber": 11
-        },
+        "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_b/public/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -52,10 +49,7 @@
               },
               "<any>"
             ],
-            "source": {
-              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_b/public/index.ts",
-              "lineNumber": 11
-            },
+            "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_b/public/index.ts",
             "deprecated": false,
             "isRequired": true
           }

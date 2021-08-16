@@ -10,7 +10,7 @@
 /* eslint-disable dot-notation */
 
 import { mockTelemetryService } from '../mocks';
-
+import { TELEMETRY_ENDPOINT } from '../../common/constants';
 describe('TelemetryService', () => {
   describe('fetchTelemetry', () => {
     it('calls expected URL with 20 minutes - now', async () => {
@@ -137,13 +137,42 @@ describe('TelemetryService', () => {
   });
 
   describe('getTelemetryUrl', () => {
-    it('should return the config.url parameter', async () => {
-      const url = 'http://test.com';
+    it('should return staging endpoint when sendUsageTo is set to staging', async () => {
       const telemetryService = mockTelemetryService({
-        config: { url },
+        config: { sendUsageTo: 'staging' },
       });
 
-      expect(telemetryService.getTelemetryUrl()).toBe(url);
+      expect(telemetryService.getTelemetryUrl()).toBe(TELEMETRY_ENDPOINT.MAIN_CHANNEL.STAGING);
+    });
+
+    it('should return prod endpoint when sendUsageTo is set to prod', async () => {
+      const telemetryService = mockTelemetryService({
+        config: { sendUsageTo: 'prod' },
+      });
+
+      expect(telemetryService.getTelemetryUrl()).toBe(TELEMETRY_ENDPOINT.MAIN_CHANNEL.PROD);
+    });
+  });
+
+  describe('getOptInStatusUrl', () => {
+    it('should return staging endpoint when sendUsageTo is set to staging', async () => {
+      const telemetryService = mockTelemetryService({
+        config: { sendUsageTo: 'staging' },
+      });
+
+      expect(telemetryService.getOptInStatusUrl()).toBe(
+        TELEMETRY_ENDPOINT.OPT_IN_STATUS_CHANNEL.STAGING
+      );
+    });
+
+    it('should return prod endpoint when sendUsageTo is set to prod', async () => {
+      const telemetryService = mockTelemetryService({
+        config: { sendUsageTo: 'prod' },
+      });
+
+      expect(telemetryService.getOptInStatusUrl()).toBe(
+        TELEMETRY_ENDPOINT.OPT_IN_STATUS_CHANNEL.PROD
+      );
     });
   });
 

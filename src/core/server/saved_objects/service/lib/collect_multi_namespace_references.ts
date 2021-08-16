@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-// @ts-expect-error no ts
-import { esKuery } from '../../es_query';
+import * as esKuery from '@kbn/es-query';
 
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';

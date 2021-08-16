@@ -28,11 +28,7 @@ import {
   exceptionListItemSchema,
   nestedEntryItem,
 } from '@kbn/securitysolution-io-ts-list-types';
-
-// TODO: I have to use any here for now, but once this is available below, we should use the correct types
-// import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
-type IFieldType = any;
-type IIndexPattern = any;
+import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
 
 import {
   EXCEPTION_OPERATORS,
@@ -282,17 +278,17 @@ export const getUpdatedEntriesOnDelete = (
  * add nested entry, should only show nested fields, if item is the parent
  * field of a nested entry, we only display the parent field
  *
- * @param patterns IIndexPattern containing available fields on rule index
+ * @param patterns IndexPatternBase containing available fields on rule index
  * @param item exception item entry
  * set to add a nested field
  */
 export const getFilteredIndexPatterns = (
-  patterns: IIndexPattern,
+  patterns: IndexPatternBase,
   item: FormattedBuilderEntry,
   type: ExceptionListType,
-  preFilter?: (i: IIndexPattern, t: ExceptionListType, o?: OsTypeArray) => IIndexPattern,
+  preFilter?: (i: IndexPatternBase, t: ExceptionListType, o?: OsTypeArray) => IndexPatternBase,
   osTypes?: OsTypeArray
-): IIndexPattern => {
+): IndexPatternBase => {
   const indexPatterns = preFilter != null ? preFilter(patterns, type, osTypes) : patterns;
 
   if (item.nested === 'child' && item.parent != null) {
@@ -300,7 +296,6 @@ export const getFilteredIndexPatterns = (
     return {
       ...indexPatterns,
       fields: indexPatterns.fields
-        // @ts-expect-error This will go away once we type IField from any
         .filter((indexField) => {
           const fieldHasCommonParentPath =
             indexField.subType != null &&
@@ -310,7 +305,6 @@ export const getFilteredIndexPatterns = (
 
           return fieldHasCommonParentPath;
         })
-        // @ts-expect-error This will go away once we type IField from any
         .map((f) => {
           const [fieldNameWithoutParentPath] = f.name.split('.').slice(-1);
           return { ...f, name: fieldNameWithoutParentPath };
@@ -324,7 +318,6 @@ export const getFilteredIndexPatterns = (
     return {
       ...indexPatterns,
       fields: indexPatterns.fields.filter(
-        // @ts-expect-error This will go away once we type IField from any
         (field) => field.subType != null && field.subType.nested != null
       ),
     };
@@ -342,7 +335,7 @@ export const getFilteredIndexPatterns = (
  */
 export const getEntryOnFieldChange = (
   item: FormattedBuilderEntry,
-  newField: IFieldType
+  newField: IndexPatternFieldBase
 ): { index: number; updatedEntry: BuilderEntry } => {
   const { parent, entryIndex, nested } = item;
   const newChildFieldValue = newField != null ? newField.name.split('.').slice(-1)[0] : '';
@@ -657,9 +650,9 @@ export const getCorrespondingKeywordField = ({
   fields,
   selectedField,
 }: {
-  fields: IFieldType[];
+  fields: IndexPatternFieldBase[];
   selectedField: string | undefined;
-}): IFieldType | undefined => {
+}): IndexPatternFieldBase | undefined => {
   const selectedFieldBits =
     selectedField != null && selectedField !== '' ? selectedField.split('.') : [];
   const selectedFieldIsTextType = selectedFieldBits.slice(-1)[0] === 'text';
@@ -679,7 +672,7 @@ export const getCorrespondingKeywordField = ({
  * Formats the entry into one that is easily usable for the UI, most of the
  * complexity was introduced with nested fields
  *
- * @param patterns IIndexPattern containing available fields on rule index
+ * @param patterns IndexPatternBase containing available fields on rule index
  * @param item exception item entry
  * @param itemIndex entry index
  * @param parent nested entries hold copy of their parent for use in various logic
@@ -687,7 +680,7 @@ export const getCorrespondingKeywordField = ({
  * was added to ensure that nested items could be identified with their parent entry
  */
 export const getFormattedBuilderEntry = (
-  indexPattern: IIndexPattern,
+  indexPattern: IndexPatternBase,
   item: BuilderEntry,
   itemIndex: number,
   parent: EntryNested | undefined,
@@ -695,7 +688,6 @@ export const getFormattedBuilderEntry = (
 ): FormattedBuilderEntry => {
   const { fields } = indexPattern;
   const field = parent != null ? `${parent.field}.${item.field}` : item.field;
-  // @ts-expect-error This will go away once we type IField from any
   const [foundField] = fields.filter(({ name }) => field != null && field === name);
   const correspondingKeywordField = getCorrespondingKeywordField({
     fields,
@@ -734,7 +726,7 @@ export const getFormattedBuilderEntry = (
  * Formats the entries to be easily usable for the UI, most of the
  * complexity was introduced with nested fields
  *
- * @param patterns IIndexPattern containing available fields on rule index
+ * @param patterns IndexPatternBase containing available fields on rule index
  * @param entries exception item entries
  * @param addNested boolean noting whether or not UI is currently
  * set to add a nested field
@@ -743,7 +735,7 @@ export const getFormattedBuilderEntry = (
  * was added to ensure that nested items could be identified with their parent entry
  */
 export const getFormattedBuilderEntries = (
-  indexPattern: IIndexPattern,
+  indexPattern: IndexPatternBase,
   entries: BuilderEntry[],
   parent?: EntryNested,
   parentIndex?: number
@@ -765,13 +757,14 @@ export const getFormattedBuilderEntries = (
         entryIndex: index,
         field: isNewNestedEntry
           ? undefined
-          : {
+          : // This type below is really a FieldSpec type from "src/plugins/data/common/index_patterns/fields/types.ts", we cast it here to keep using the IndexPatternFieldBase interface
+            ({
               aggregatable: false,
               esTypes: ['nested'],
               name: item.field != null ? item.field : '',
               searchable: false,
               type: 'string',
-            },
+            } as IndexPatternFieldBase),
         id: item.id != null ? item.id : `${index}`,
         nested: 'parent',
         operator: isOperator,

@@ -4,6 +4,11 @@
 
 ## DataPublicPluginSetup.fieldFormats property
 
+> Warning: This API is now obsolete.
+> 
+> Use fieldFormats plugin instead
+> 
+
 <b>Signature:</b>
 
 ```typescript

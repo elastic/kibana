@@ -164,6 +164,7 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
               >
                 <div
                   className="euiTextColor euiTextColor--subdued"
+                  style={Object {}}
                 >
                   →
                 </div>
@@ -440,6 +441,7 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
               >
                 <div
                   className="euiTextColor euiTextColor--subdued"
+                  style={Object {}}
                 >
                   →
                 </div>

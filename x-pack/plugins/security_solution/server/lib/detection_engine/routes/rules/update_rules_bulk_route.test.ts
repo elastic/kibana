@@ -13,7 +13,6 @@ import {
   getAlertMock,
   getFindResultWithSingleHit,
   getUpdateBulkRequest,
-  getFindResultStatus,
   typicalMlRulePayload,
 } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
@@ -36,7 +35,6 @@ describe('update_rules_bulk', () => {
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams()));
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
 
     updateRulesBulkRoute(server.router, ml);
   });

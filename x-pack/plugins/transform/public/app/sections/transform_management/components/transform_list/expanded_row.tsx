@@ -247,6 +247,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       onTabClick={() => {}}
       expand={false}
       style={{ width: '100%' }}
+      data-test-subj="transformExpandedRowTabbedContent"
     />
   );
 };

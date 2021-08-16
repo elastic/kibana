@@ -21,7 +21,7 @@ import {
   AlertInstanceContext,
   RawAlert,
 } from '../types';
-import { NormalizedAlertType } from '../alert_type_registry';
+import { NormalizedAlertType } from '../rule_type_registry';
 import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager/server';
 
 export interface CreateExecutionHandlerOptions<

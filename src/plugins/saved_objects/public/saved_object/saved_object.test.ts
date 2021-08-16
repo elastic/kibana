@@ -20,7 +20,7 @@ import { coreMock } from '../../../../core/public/mocks';
 import { dataPluginMock, createSearchSourceMock } from '../../../../plugins/data/public/mocks';
 import { getStubIndexPattern, StubIndexPattern } from '../../../../plugins/data/public/test_utils';
 import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
-import { IIndexPattern } from '../../../data/common/index_patterns';
+import { IndexPattern } from '../../../data/common/index_patterns';
 import { savedObjectsDecoratorRegistryMock } from './decorators/registry.mock';
 
 const getConfig = (cfg: any) => cfg;
@@ -733,7 +733,7 @@ describe('Saved Object', () => {
           type: 'dashboard',
           afterESResp: afterESRespCallback,
           searchSource: true,
-          indexPattern: { id: indexPatternId } as IIndexPattern,
+          indexPattern: { id: indexPatternId } as IndexPattern,
         };
 
         stubESResponse(
@@ -775,7 +775,7 @@ describe('Saved Object', () => {
           type: 'dashboard',
           afterESResp: afterESRespCallback,
           searchSource: false,
-          indexPattern: { id: indexPatternId } as IIndexPattern,
+          indexPattern: { id: indexPatternId } as IndexPattern,
         };
 
         stubESResponse(getMockedDocResponse(indexPatternId));

@@ -35,9 +35,9 @@ import {
   FieldComponent,
   OperatorComponent,
 } from '@kbn/securitysolution-autocomplete';
+import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
 
 import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
-import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { HttpStart } from '../../../../../../../src/core/public';
 import { getEmptyValue } from '../../../common/empty_value';
 
@@ -52,19 +52,20 @@ export interface EntryItemProps {
   autocompleteService: AutocompleteStart;
   entry: FormattedBuilderEntry;
   httpService: HttpStart;
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPatternBase;
   showLabel: boolean;
   osTypes?: OsTypeArray;
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
-    pattern: IIndexPattern,
+    pattern: IndexPatternBase,
     type: ExceptionListType,
     osTypes?: OsTypeArray
-  ) => IIndexPattern;
+  ) => IndexPatternBase;
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
   setErrorsExist: (arg: boolean) => void;
   isDisabled?: boolean;
+  operatorsList?: OperatorOption[];
 }
 
 export const BuilderEntryItem: React.FC<EntryItemProps> = ({
@@ -81,6 +82,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   setErrorsExist,
   showLabel,
   isDisabled = false,
+  operatorsList,
 }): JSX.Element => {
   const handleError = useCallback(
     (err: boolean): void => {
@@ -90,7 +92,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   );
 
   const handleFieldChange = useCallback(
-    ([newField]: IFieldType[]): void => {
+    ([newField]: IndexPatternFieldBase[]): void => {
       const { updatedEntry, index } = getEntryOnFieldChange(entry, newField);
       onChange(updatedEntry, index);
     },
@@ -194,7 +196,9 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   );
 
   const renderOperatorInput = (isFirst: boolean): JSX.Element => {
-    const operatorOptions = onlyShowListOperators
+    const operatorOptions = operatorsList
+      ? operatorsList
+      : onlyShowListOperators
       ? EXCEPTION_OPERATORS_ONLY_LISTS
       : getOperatorOptions(
           entry,

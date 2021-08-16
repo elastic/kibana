@@ -4,6 +4,11 @@
 
 ## PluginStart.fieldFormats property
 
+> Warning: This API is now obsolete.
+> 
+> - use "fieldFormats" plugin directly instead
+> 
+
 <b>Signature:</b>
 
 ```typescript

@@ -15,5 +15,9 @@
     "visTypeTimelion",
     "savedObjects",
     "kibanaLegacy"
-  ]
+  ],
+  "owner": {
+    "name": "Kibana App",
+    "githubTeam": "kibana-app"
+  }
 }

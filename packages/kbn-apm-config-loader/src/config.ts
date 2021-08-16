@@ -10,7 +10,7 @@ import { join } from 'path';
 import { merge } from 'lodash';
 import { execSync } from 'child_process';
 // deep import to avoid loading the whole package
-import { getDataPath } from '@kbn/utils/target/path';
+import { getDataPath } from '@kbn/utils';
 import { readFileSync } from 'fs';
 import { ApmAgentConfig } from './types';
 
@@ -120,6 +120,19 @@ export class ApmConfiguration {
 
     if (process.env.ELASTIC_APM_TRANSACTION_SAMPLE_RATE) {
       config.transactionSampleRate = parseFloat(process.env.ELASTIC_APM_TRANSACTION_SAMPLE_RATE);
+    }
+
+    if (process.env.ELASTIC_APM_SERVER_URL) {
+      config.serverUrl = process.env.ELASTIC_APM_SERVER_URL;
+    }
+
+    if (process.env.ELASTIC_APM_GLOBAL_LABELS) {
+      config.globalLabels = Object.fromEntries(
+        process.env.ELASTIC_APM_GLOBAL_LABELS.split(',').map((p) => {
+          const [key, ...val] = p.split('=');
+          return [key, val.join('=')];
+        })
+      );
     }
 
     return config;

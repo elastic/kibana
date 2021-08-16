@@ -1,0 +1,47 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects events which have a mismatch on the expected event agent ID. The status \"agent_id_mismatch\" occurs when the expected agent ID associated with the API key does not match the actual agent ID in an event. This could indicate attempts to spoof events in order to masquerade actual activity to evade detection.",
+  "false_positives": [
+    "This is meant to run only on datasources using agents v7.14+ since versions prior to that will be missing the necessary field, resulting in false positives."
+  ],
+  "from": "now-9m",
+  "index": [
+    "logs-*",
+    "metrics-*",
+    "traces-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Agent Spoofing - Mismatched Agent ID",
+  "query": "event.agent_id_status:agent_id_mismatch\n",
+  "risk_score": 73,
+  "rule_id": "3115bd2c-0baa-4df0-80ea-45e474b5ef93",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1036",
+          "name": "Masquerading",
+          "reference": "https://attack.mitre.org/techniques/T1036/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

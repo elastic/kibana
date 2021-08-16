@@ -31,27 +31,31 @@ describe('Cases connector incident fields', () => {
   beforeEach(() => {
     cleanKibana();
     cy.intercept('GET', '/api/cases/configure/connectors/_find', getMockConnectorsResponse());
-    cy.intercept('POST', `/api/actions/action/${getConnectorIds().sn}/_execute`, (req) => {
+    cy.intercept('POST', `/api/actions/connector/${getConnectorIds().sn}/_execute`, (req) => {
       const response =
         req.body.params.subAction === 'getChoices'
           ? getExecuteResponses().servicenow.choices
           : { status: 'ok', data: [] };
       req.reply(response);
     });
-    cy.intercept('POST', `/api/actions/action/${getConnectorIds().jira}/_execute`, (req) => {
+    cy.intercept('POST', `/api/actions/connector/${getConnectorIds().jira}/_execute`, (req) => {
       const response =
         req.body.params.subAction === 'issueTypes'
           ? getExecuteResponses().jira.issueTypes
           : getExecuteResponses().jira.fieldsByIssueType;
       req.reply(response);
     });
-    cy.intercept('POST', `/api/actions/action/${getConnectorIds().resilient}/_execute`, (req) => {
-      const response =
-        req.body.params.subAction === 'incidentTypes'
-          ? getExecuteResponses().resilient.incidentTypes
-          : getExecuteResponses().resilient.severity;
-      req.reply(response);
-    });
+    cy.intercept(
+      'POST',
+      `/api/actions/connector/${getConnectorIds().resilient}/_execute`,
+      (req) => {
+        const response =
+          req.body.params.subAction === 'incidentTypes'
+            ? getExecuteResponses().resilient.incidentTypes
+            : getExecuteResponses().resilient.severity;
+        req.reply(response);
+      }
+    );
   });
 
   it('Correct incident fields show when connector is changed', () => {

@@ -20,6 +20,7 @@ exports[`CustomExtentsOptions component should init with the default set of prop
   />
   <SwitchOption
     data-test-subj="yAxisSetYExtents"
+    disabled={false}
     label="Set axis extents"
     paramName="setYExtents"
     setValue={[Function]}

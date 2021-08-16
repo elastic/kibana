@@ -12,6 +12,7 @@ import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '../../../../../src/plugins/data/public';
+import { queryToAst } from '../../../../../src/plugins/data/common';
 import {
   buildExpression,
   buildExpressionFunction,
@@ -119,7 +120,7 @@ function getExpressionForLayer(
                   id: `${index}-filter`,
                   enabled: true,
                   schema: 'bucket',
-                  filter: JSON.stringify(col.filter),
+                  filter: col.filter && queryToAst(col.filter),
                 }),
               ]),
               customMetric: buildExpression({ type: 'expression', chain: [aggAst] }),

@@ -10,7 +10,7 @@ import {
   getField,
 } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { Entry, EmptyEntry, ThreatMapEntries, FormattedEntry } from './types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
+import { FieldSpec, IndexPattern } from '../../../../../../../src/plugins/data/common';
 import moment from 'moment-timezone';
 
 import {
@@ -88,7 +88,7 @@ describe('Helpers', () => {
           searchable: false,
           aggregatable: false,
           readFromDocValues: true,
-        },
+        } as FieldSpec,
         type: 'mapping',
         value: undefined,
       };
@@ -130,7 +130,7 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           value: undefined,
           type: 'mapping',
         },
@@ -156,7 +156,7 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           value: {
             name: 'machine.os',
             type: 'string',
@@ -166,7 +166,7 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           type: 'mapping',
         },
       ];
@@ -192,7 +192,7 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           type: 'mapping',
           value: {
             name: 'machine.os',
@@ -203,7 +203,7 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           entryIndex: 0,
         },
         {

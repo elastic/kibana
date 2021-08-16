@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { errors } from 'elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import { isKnownError, handleKnownError } from './known_errors';
 import { MonitoringLicenseError } from './custom_errors';
 
 // TODO: tests were not running and are not up to date
 describe.skip('Error handling for 503 errors', () => {
   it('ignores an unknown type', () => {
-    const err = new errors.Generic();
+    const err = new Error();
     expect(isKnownError(err)).toBe(false);
   });
 
-  it('handles ConnectionFault', () => {
-    const err = new errors.ConnectionFault();
+  it('handles ConnectionError', () => {
+    const err = new errors.ConnectionError();
     expect(isKnownError(err)).toBe(true);
 
     const wrappedErr = handleKnownError(err);
@@ -41,8 +41,8 @@ describe.skip('Error handling for 503 errors', () => {
     });
   });
 
-  it('handles NoConnections', () => {
-    const err = new errors.NoConnections();
+  it('handles NoLivingConnectionsError', () => {
+    const err = new errors.NoLivingConnectionsError();
     expect(isKnownError(err)).toBe(true);
 
     const wrappedErr = handleKnownError(err);
@@ -66,8 +66,8 @@ describe.skip('Error handling for 503 errors', () => {
     });
   });
 
-  it('handles RequestTimeout', () => {
-    const err = new errors.RequestTimeout();
+  it('handles TimeoutError', () => {
+    const err = new errors.TimeoutError();
     expect(isKnownError(err)).toBe(true);
 
     const wrappedErr = handleKnownError(err);

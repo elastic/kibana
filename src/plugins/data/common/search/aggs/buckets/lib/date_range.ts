@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-export interface DateRangeKey {
-  from: number | string;
-  to: number | string;
-}
+import { DateRange } from '../../../expressions';
 
-export function convertDateRangeToString({ from, to }: DateRangeKey, format: (val: any) => string) {
+export function convertDateRangeToString({ from, to }: DateRange, format: (val: any) => string) {
   if (!from) {
     return 'Before ' + format(to);
   } else if (!to) {

@@ -24,10 +24,10 @@ import {
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  const alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
+  const ruleTypeRegistry = new TypeRegistry<AlertTypeModel>();
   return {
     actionTypeRegistry,
-    alertTypeRegistry,
+    ruleTypeRegistry,
     getAddConnectorFlyout: (props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>) => {
       return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry });
     },
@@ -37,20 +37,20 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         actionTypeRegistry,
       });
     },
-    getAddAlertFlyout: (props: Omit<AlertAddProps, 'actionTypeRegistry' | 'alertTypeRegistry'>) => {
+    getAddAlertFlyout: (props: Omit<AlertAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
       return getAddAlertFlyoutLazy({
         ...props,
         actionTypeRegistry,
-        alertTypeRegistry,
+        ruleTypeRegistry,
       });
     },
     getEditAlertFlyout: (
-      props: Omit<AlertEditProps, 'actionTypeRegistry' | 'alertTypeRegistry'>
+      props: Omit<AlertEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
     ) => {
       return getEditAlertFlyoutLazy({
         ...props,
         actionTypeRegistry,
-        alertTypeRegistry,
+        ruleTypeRegistry,
       });
     },
   };

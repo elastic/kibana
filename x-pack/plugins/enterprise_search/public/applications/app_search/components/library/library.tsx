@@ -19,11 +19,28 @@ import {
   EuiDroppable,
   EuiDraggable,
   EuiButtonIconColor,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Schema, SchemaType } from '../../../shared/schema/types';
+import { InlineEditableTable } from '../../../shared/tables/inline_editable_table';
+import { ReorderableTable } from '../../../shared/tables/reorderable_table';
 import { Result } from '../result';
+
+const NO_ITEMS = (
+  <EuiEmptyPrompt iconType="clock" title={<h2>No Items</h2>} body={<p>No Items</p>} />
+);
+
+// For the InlineEditableTable
+// Since InlineEditableTable caches handlers, we need to store this globally somewhere rather than just in useState
+interface Foo {
+  id: number;
+  foo: string;
+  bar: string;
+}
+let globalItems: Foo[] = [];
+const getLastItems = () => globalItems;
 
 export const Library: React.FC = () => {
   const props = {
@@ -84,6 +101,67 @@ export const Library: React.FC = () => {
       iconColor: 'primary' as EuiButtonIconColor,
     },
   ];
+
+  // For the InlineEditableTable
+  const [items, setItems] = useState([
+    { id: 1, foo: 'foo1', bar: '10' },
+    { id: 2, foo: 'foo2', bar: '10' },
+  ]);
+  globalItems = items;
+  const columns = [
+    {
+      field: 'foo',
+      name: 'Foo',
+      render: (item: Foo) => <div>{item.foo}</div>,
+      editingRender: (item: Foo, onChange: (value: string) => void) => (
+        <input type="text" value={item.foo} onChange={(e) => onChange(e.target.value)} />
+      ),
+    },
+    {
+      field: 'bar',
+      name: 'Bar (Must be a number)',
+      render: (item: Foo) => <div>{item.bar}</div>,
+      editingRender: (item: Foo, onChange: (value: string) => void) => (
+        <input type="text" value={item.bar} onChange={(e) => onChange(e.target.value)} />
+      ),
+    },
+  ];
+  const onAdd = (item: Foo, onSuccess: () => void) => {
+    const highestId = Math.max(...getLastItems().map((i) => i.id));
+    setItems([
+      ...getLastItems(),
+      {
+        ...item,
+        id: highestId + 1,
+      },
+    ]);
+    onSuccess();
+  };
+  const onDelete = (item: Foo) => {
+    setItems(getLastItems().filter((i) => i.id !== item.id));
+  };
+  const onUpdate = (item: Foo, onSuccess: () => void) => {
+    setItems(
+      getLastItems().map((i) => {
+        if (item.id === i.id) return item;
+        return i;
+      })
+    );
+    onSuccess();
+  };
+  const validateItem = (item: Foo) => {
+    let isValidNumber = false;
+    const num = parseInt(item.bar, 10);
+    if (!isNaN(num)) isValidNumber = true;
+
+    if (isValidNumber) return {};
+    return {
+      bar: 'Bar must be a valid number',
+    };
+  };
+  const onReorder = (newItems: Foo[]) => {
+    setItems(newItems);
+  };
 
   return (
     <>
@@ -249,12 +327,198 @@ export const Library: React.FC = () => {
           </EuiDragDropContext>
           <EuiSpacer />
 
-          <EuiSpacer />
           <EuiTitle size="s">
             <h3>With field value type highlights</h3>
           </EuiTitle>
           <EuiSpacer />
           <Result {...props} schemaForTypeHighlights={schema} />
+          <EuiSpacer />
+
+          <EuiTitle size="m">
+            <h2>ReorderableTable</h2>
+          </EuiTitle>
+          <EuiSpacer />
+
+          <ReorderableTable
+            noItemsMessage={NO_ITEMS}
+            items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+          <EuiSpacer />
+
+          <EuiTitle size="s">
+            <h3>With reordering disabled</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <ReorderableTable
+            disableReordering
+            noItemsMessage={NO_ITEMS}
+            items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+          <EuiSpacer />
+
+          <EuiTitle size="s">
+            <h3>With reordering enabled, but dragging disabled</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <ReorderableTable
+            disableDragging
+            noItemsMessage={NO_ITEMS}
+            items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+          <EuiSpacer />
+
+          <EuiTitle size="s">
+            <h3>With unreorderable items</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <ReorderableTable
+            noItemsMessage={NO_ITEMS}
+            items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            unreorderableItems={[{ id: 4 }, { id: 5 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+          <EuiSpacer />
+
+          <EuiTitle size="s">
+            <h3>Using the rowProps prop to apply dynamic properties to each row</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <ReorderableTable
+            rowProps={(item) => ({
+              style: {
+                backgroundColor: item.id % 2 === 0 ? 'red' : 'green',
+              },
+            })}
+            noItemsMessage={NO_ITEMS}
+            items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+
+          <EuiSpacer />
+          <EuiTitle size="s">
+            <h3>With no items</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <ReorderableTable
+            noItemsMessage={NO_ITEMS}
+            items={[]}
+            columns={[
+              { name: 'ID', render: (item: { id: number }) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+          <EuiSpacer />
+
+          <EuiTitle size="m">
+            <h2>InlineEditableTable</h2>
+          </EuiTitle>
+          <EuiSpacer />
+
+          <EuiTitle size="s">
+            <h3>With uneditable items</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <InlineEditableTable
+            items={items}
+            uneditableItems={[{ id: 3, foo: 'foo', bar: 'bar' }]}
+            instanceId="MyInstance"
+            title="My table"
+            description="Some description"
+            columns={columns}
+            onAdd={onAdd}
+            onDelete={onDelete}
+            onUpdate={onUpdate}
+            validateItem={validateItem}
+            onReorder={onReorder}
+          />
+          <EuiSpacer />
+
+          <EuiTitle size="s">
+            <h3>Can delete last item</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <InlineEditableTable
+            items={items}
+            instanceId="MyInstance1"
+            title="My table"
+            description="Some description"
+            columns={columns}
+            onAdd={onAdd}
+            onDelete={onDelete}
+            onUpdate={onUpdate}
+            validateItem={validateItem}
+            onReorder={onReorder}
+            canRemoveLastItem
+            noItemsMessage={(edit) => {
+              return (
+                <EuiEmptyPrompt
+                  iconType="clock"
+                  title={<h2>No Items</h2>}
+                  body={<button onClick={edit}>Click to create one</button>}
+                />
+              );
+            }}
+          />
+          <EuiSpacer />
+
+          <EuiTitle size="s">
+            <h3>Cannot delete last item</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <InlineEditableTable
+            items={items}
+            instanceId="MyInstance2"
+            title="My table"
+            description="Some description"
+            columns={columns}
+            onAdd={onAdd}
+            onDelete={onDelete}
+            onUpdate={onUpdate}
+            validateItem={validateItem}
+            onReorder={onReorder}
+            canRemoveLastItem={false}
+            lastItemWarning="This is the last item, you cannot delete it!"
+          />
+          <EuiSpacer />
+
+          <EuiTitle size="s">
+            <h3>When isLoading is true</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <InlineEditableTable
+            isLoading
+            items={items}
+            instanceId="MyInstance3"
+            title="My table"
+            description="Some description"
+            columns={columns}
+            onAdd={onAdd}
+            onDelete={onDelete}
+            onUpdate={onUpdate}
+            validateItem={validateItem}
+            onReorder={onReorder}
+          />
+          <EuiSpacer />
+
+          <EuiSpacer />
           <EuiSpacer />
         </EuiPageContentBody>
       </EuiPageContent>

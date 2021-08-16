@@ -8,6 +8,7 @@
 
 import { getLastValue, isEmptyValue, EMPTY_VALUE } from './last_value_utils';
 import { clone } from 'lodash';
+import { PanelDataArray } from './types/vis_data';
 
 describe('getLastValue(data)', () => {
   test('should return data, if data is not an array', () => {
@@ -40,7 +41,7 @@ describe('getLastValue(data)', () => {
       getLastValue([
         [1, null],
         [2, undefined],
-      ])
+      ] as PanelDataArray[])
     ).toBe(EMPTY_VALUE);
   });
 });

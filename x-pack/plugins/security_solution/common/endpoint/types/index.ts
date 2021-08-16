@@ -6,7 +6,7 @@
  */
 
 import { ApplicationStart } from 'kibana/public';
-import { NewPackagePolicy, PackagePolicy } from '../../../../fleet/common';
+import { PackagePolicy, UpdatePackagePolicy } from '../../../../fleet/common';
 import { ManifestSchema } from '../schema/manifest';
 
 export * from './actions';
@@ -301,6 +301,21 @@ export type AlertEvent = Partial<{
     feature: ECSField<string>;
     self_injection: ECSField<boolean>;
   }>;
+  destination: Partial<{
+    port: ECSField<number>;
+    ip: ECSField<string>;
+  }>;
+  source: Partial<{
+    port: ECSField<number>;
+    ip: ECSField<string>;
+  }>;
+  registry: Partial<{
+    path: ECSField<string>;
+    value: ECSField<string>;
+    data: Partial<{
+      strings: ECSField<string>;
+    }>;
+  }>;
   Target: Partial<{
     process: Partial<{
       thread: Partial<{
@@ -358,6 +373,9 @@ export type AlertEvent = Partial<{
         identifier: ECSField<string>;
       }>;
     }>;
+  }>;
+  rule: Partial<{
+    id: ECSField<string>;
   }>;
   file: Partial<{
     owner: ECSField<string>;
@@ -507,6 +525,7 @@ export type HostMetadata = Immutable<{
        */
       isolation?: boolean;
     };
+    capabilities?: string[];
   };
   agent: {
     id: string;
@@ -677,6 +696,8 @@ export type SafeEndpointEvent = Partial<{
     }>;
   }>;
   network: Partial<{
+    transport: ECSField<string>;
+    type: ECSField<string>;
     direction: ECSField<string>;
     forwarded_ip: ECSField<string>;
   }>;
@@ -865,6 +886,7 @@ export interface PolicyConfig {
     };
     malware: ProtectionFields;
     memory_protection: ProtectionFields & SupportedFields;
+    behavior_protection: ProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
     logging: {
       file: string;
@@ -882,6 +904,10 @@ export interface PolicyConfig {
         message: string;
         enabled: boolean;
       };
+      behavior_protection: {
+        message: string;
+        enabled: boolean;
+      };
     };
     antivirus_registration: {
       enabled: boolean;
@@ -895,8 +921,13 @@ export interface PolicyConfig {
       network: boolean;
     };
     malware: ProtectionFields;
+    behavior_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
+        message: string;
+        enabled: boolean;
+      };
+      behavior_protection: {
         message: string;
         enabled: boolean;
       };
@@ -913,8 +944,13 @@ export interface PolicyConfig {
       network: boolean;
     };
     malware: ProtectionFields;
+    behavior_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
+        message: string;
+        enabled: boolean;
+      };
+      behavior_protection: {
         message: string;
         enabled: boolean;
       };
@@ -941,15 +977,22 @@ export interface UIPolicyConfig {
     | 'antivirus_registration'
     | 'advanced'
     | 'memory_protection'
+    | 'behavior_protection'
   >;
   /**
    * Mac-specific policy configuration that is supported via the UI
    */
-  mac: Pick<PolicyConfig['mac'], 'malware' | 'events' | 'popup' | 'advanced'>;
+  mac: Pick<
+    PolicyConfig['mac'],
+    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection'
+  >;
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
-  linux: Pick<PolicyConfig['linux'], 'malware' | 'events' | 'popup' | 'advanced'>;
+  linux: Pick<
+    PolicyConfig['linux'],
+    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection'
+  >;
 }
 
 /** Policy:  Protection fields */
@@ -977,7 +1020,7 @@ export type PolicyData = PackagePolicy & NewPolicyData;
 /**
  * New policy data. Used when updating the policy record via ingest APIs
  */
-export type NewPolicyData = NewPackagePolicy & {
+export type NewPolicyData = UpdatePackagePolicy & {
   inputs: [
     {
       type: 'endpoint';

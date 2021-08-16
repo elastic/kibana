@@ -22,8 +22,9 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
-import { ServiceOverviewTableContainer } from '../service_overview_table_container';
+import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_column';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 
 interface Props {
   serviceName: string;
@@ -32,7 +33,7 @@ type ErrorGroupMainStatistics = APIReturnType<'GET /api/apm/services/{serviceNam
 type ErrorGroupDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 type SortDirection = 'asc' | 'desc';
-type SortField = 'name' | 'last_seen' | 'occurrences';
+type SortField = 'name' | 'lastSeen' | 'occurrences';
 
 const PAGE_SIZE = 5;
 const DEFAULT_SORT = {
@@ -57,14 +58,7 @@ const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
 
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const {
-    urlParams: {
-      environment,
-      kuery,
-      start,
-      end,
-      comparisonType,
-      comparisonEnabled,
-    },
+    urlParams: { start, end, comparisonType, comparisonEnabled },
   } = useUrlParams();
   const { transactionType } = useApmServiceContext();
   const [tableOptions, setTableOptions] = useState<{
@@ -87,6 +81,10 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const { pageIndex, sort } = tableOptions;
   const { direction, field } = sort;
+
+  const {
+    query: { environment, kuery },
+  } = useApmParams('/services/:serviceName/overview');
 
   const { data = INITIAL_STATE_MAIN_STATISTICS, status } = useFetcher(
     (callApmApi) => {
@@ -143,7 +141,6 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const {
     data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
-    status: errorGroupDetailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
       if (requestId && items.length && start && end && transactionType) {
@@ -205,7 +202,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       </EuiFlexItem>
       <EuiFlexItem>
         <TableFetchWrapper status={status}>
-          <ServiceOverviewTableContainer
+          <OverviewTableContainer
             isEmptyAndLoading={
               totalItems === 0 && status === FETCH_STATUS.LOADING
             }
@@ -220,10 +217,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
                 pageSizeOptions: [PAGE_SIZE],
                 hidePerPageOptions: true,
               }}
-              loading={
-                status === FETCH_STATUS.LOADING ||
-                errorGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING
-              }
+              loading={status === FETCH_STATUS.LOADING}
               onChange={(newTableOptions: {
                 page?: {
                   index: number;
@@ -245,7 +239,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
                 sort,
               }}
             />
-          </ServiceOverviewTableContainer>
+          </OverviewTableContainer>
         </TableFetchWrapper>
       </EuiFlexItem>
     </EuiFlexGroup>

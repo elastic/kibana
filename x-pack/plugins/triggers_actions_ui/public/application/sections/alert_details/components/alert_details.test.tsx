@@ -26,7 +26,7 @@ import {
   ALERTS_FEATURE_ID,
 } from '../../../../../../alerting/common';
 import { useKibana } from '../../../../common/lib/kibana';
-import { alertTypeRegistryMock } from '../../../alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -45,7 +45,7 @@ jest.mock('../../../lib/capabilities', () => ({
   hasExecuteActionsCapability: jest.fn(() => true),
 }));
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const alertTypeRegistry = alertTypeRegistryMock.create();
+const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 const mockAlertApis = {
   muteAlert: jest.fn(),
@@ -536,6 +536,11 @@ describe('disable button', () => {
     });
     expect(disableAlert).toHaveBeenCalled();
 
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
     // Enable the alert
     await act(async () => {
       wrapper.find('[data-test-subj="enableSwitch"] .euiSwitch__button').first().simulate('click');
@@ -545,6 +550,77 @@ describe('disable button', () => {
 
     // Ensure error banner is back
     expect(wrapper.find('[data-test-subj="dismiss-execution-error"]').length).toBeGreaterThan(0);
+  });
+
+  it('should show the loading spinner when the rule enabled switch was clicked and the server responded with some delay', async () => {
+    const alert = mockAlert({
+      enabled: true,
+      executionStatus: {
+        status: 'error',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        error: {
+          reason: AlertExecutionStatusErrorReasons.Execute,
+          message: 'Fail',
+        },
+      },
+    });
+
+    const alertType: AlertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
+      actionVariables: { context: [], state: [], params: [] },
+      defaultActionGroupId: 'default',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
+      minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
+    };
+
+    const disableAlert = jest.fn(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 6000));
+    });
+    const enableAlert = jest.fn();
+    const wrapper = mountWithIntl(
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={[]}
+        {...mockAlertApis}
+        disableAlert={disableAlert}
+        enableAlert={enableAlert}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    // Dismiss the error banner
+    await act(async () => {
+      wrapper.find('[data-test-subj="dismiss-execution-error"]').first().simulate('click');
+      await nextTick();
+    });
+
+    // Disable the alert
+    await act(async () => {
+      wrapper.find('[data-test-subj="enableSwitch"] .euiSwitch__button').first().simulate('click');
+      await nextTick();
+    });
+    expect(disableAlert).toHaveBeenCalled();
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    // Enable the alert
+    await act(async () => {
+      expect(wrapper.find('[data-test-subj="enableSpinner"]').length).toBeGreaterThan(0);
+      await nextTick();
+    });
   });
 });
 
@@ -739,7 +815,7 @@ describe('edit button', () => {
       minimumLicenseRequired: 'basic',
     },
   ];
-  alertTypeRegistry.has.mockReturnValue(true);
+  ruleTypeRegistry.has.mockReturnValue(true);
   const alertTypeR: AlertTypeModel = {
     id: 'my-alert-type',
     iconClass: 'test',
@@ -751,8 +827,8 @@ describe('edit button', () => {
     alertParamsExpression: jest.fn(),
     requiresAppContext: false,
   };
-  alertTypeRegistry.get.mockReturnValue(alertTypeR);
-  useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
+  ruleTypeRegistry.get.mockReturnValue(alertTypeR);
+  useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
 
   it('should render an edit button when alert and actions are editable', () => {
     const alert = mockAlert({

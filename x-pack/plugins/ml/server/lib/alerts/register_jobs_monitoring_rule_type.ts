@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest } from 'kibana/server';
+import { MlDatafeedState, MlJobState, MlJobStats } from '@elastic/elasticsearch/api/types';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
@@ -22,8 +23,42 @@ import {
   AlertTypeState,
 } from '../../../../alerting/common';
 
+type ModelSizeStats = MlJobStats['model_size_stats'];
+
+export interface MmlTestResponse {
+  job_id: string;
+  memory_status: ModelSizeStats['memory_status'];
+  log_time: ModelSizeStats['log_time'];
+  model_bytes: ModelSizeStats['model_bytes'];
+  model_bytes_memory_limit: ModelSizeStats['model_bytes_memory_limit'];
+  peak_model_bytes: ModelSizeStats['peak_model_bytes'];
+  model_bytes_exceeded: ModelSizeStats['model_bytes_exceeded'];
+}
+
+export interface NotStartedDatafeedResponse {
+  datafeed_id: string;
+  datafeed_state: MlDatafeedState;
+  job_id: string;
+  job_state: MlJobState;
+}
+
+export interface DelayedDataResponse {
+  job_id: string;
+  /** Annotation string */
+  annotation: string;
+  /** Number of missed documents */
+  missed_docs_count: number;
+  /** Timestamp of the latest finalized bucket with missing docs */
+  end_timestamp: number;
+}
+
+export type AnomalyDetectionJobHealthResult =
+  | MmlTestResponse
+  | NotStartedDatafeedResponse
+  | DelayedDataResponse;
+
 export type AnomalyDetectionJobsHealthAlertContext = {
-  jobIds: string[];
+  results: AnomalyDetectionJobHealthResult[];
   message: string;
 } & AlertInstanceContext;
 
@@ -63,11 +98,11 @@ export function registerJobsMonitoringRuleType({
     actionVariables: {
       context: [
         {
-          name: 'jobIds',
+          name: 'results',
           description: i18n.translate(
-            'xpack.ml.alertTypes.jobsHealthAlertingRule.alertContext.jobIdsDescription',
+            'xpack.ml.alertTypes.jobsHealthAlertingRule.alertContext.resultsDescription',
             {
-              defaultMessage: 'List of job IDs that triggered the alert',
+              defaultMessage: 'Results of the rule execution',
             }
           ),
         },
@@ -85,7 +120,7 @@ export function registerJobsMonitoringRuleType({
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,
-    async executor({ services, params, alertId, state, previousStartedAt, startedAt, name }) {
+    async executor({ services, params, alertId, state, previousStartedAt, startedAt, name, rule }) {
       const fakeRequest = {} as KibanaRequest;
       const { getTestsResults } = mlServicesProviders.jobsHealthServiceProvider(
         services.savedObjectsClient,
@@ -96,7 +131,9 @@ export function registerJobsMonitoringRuleType({
 
       if (executionResult.length > 0) {
         logger.info(
-          `Scheduling actions for tests: ${executionResult.map((v) => v.name).join(', ')}`
+          `"${name}" rule is scheduling actions for tests: ${executionResult
+            .map((v) => v.name)
+            .join(', ')}`
         );
 
         executionResult.forEach(({ name: alertInstanceName, context }) => {

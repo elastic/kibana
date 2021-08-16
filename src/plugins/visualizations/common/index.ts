@@ -8,3 +8,5 @@
 
 /** @public types */
 export * from './types';
+export * from './prepare_log_table';
+export * from './expression_functions';

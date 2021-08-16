@@ -18,8 +18,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { isEmpty } from 'lodash/fp';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';
+
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../../common/components/exceptions/add_exception_comments';
 import { filterIndexPatterns } from '../../../../../../common/components/exceptions/helpers';
@@ -65,17 +66,22 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
 
     const handleOnBuilderChange = useCallback(
       (arg: ExceptionBuilder.OnChangeProps) => {
-        if (isEmpty(arg.exceptionItems)) return;
         dispatch({
           type: 'eventFiltersChangeForm',
           payload: {
-            entry: {
-              ...arg.exceptionItems[0],
-              name: exception?.name ?? '',
-              comments: exception?.comments ?? [],
-              os_types: exception?.os_types ?? [OperatingSystem.WINDOWS],
-            },
-            hasItemsError: arg.errorExists || !arg.exceptionItems[0].entries.length,
+            ...(arg.exceptionItems[0] !== undefined
+              ? {
+                  entry: {
+                    ...arg.exceptionItems[0],
+                    name: exception?.name ?? '',
+                    comments: exception?.comments ?? [],
+                    os_types: exception?.os_types ?? [OperatingSystem.WINDOWS],
+                  },
+                  hasItemsError: arg.errorExists || !arg.exceptionItems[0]?.entries?.length,
+                }
+              : {
+                  hasItemsError: true,
+                }),
           },
         });
       },
@@ -114,7 +120,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     const exceptionBuilderComponentMemo = useMemo(
       () =>
         ExceptionBuilder.getExceptionBuilderComponentLazy({
-          allowLargeValueLists: true,
+          allowLargeValueLists: false,
           httpService: http,
           autocompleteService: data.autocomplete,
           exceptionListItems: [exception as ExceptionListItemSchema],
@@ -130,6 +136,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           idAria: 'alert-exception-builder',
           onChange: handleOnBuilderChange,
           listTypeSpecificIndexPatternFilter: filterIndexPatterns,
+          operatorsList: EVENT_FILTERS_OPERATORS,
         }),
       [data, handleOnBuilderChange, http, indexPatterns, exception]
     );

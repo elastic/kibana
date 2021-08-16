@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ShardsResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
-export const getShardMock = (): ShardsResponse => ({
+export const getShardMock = (): estypes.ShardStatistics => ({
   failed: 0,
   skipped: 0,
   successful: 0,

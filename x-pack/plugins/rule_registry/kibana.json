@@ -9,7 +9,6 @@
   "requiredPlugins": [
     "alerting",
     "data",
-    "spaces",
     "triggersActionsUi"
   ],
   "optionalPlugins": ["security"],

@@ -30,7 +30,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [] },
     () => {
       it('handles the empty state', async () => {
-        const response = await supertest.get(`/api/apm/services?start=${start}&end=${end}`);
+        const response = await supertest.get(
+          `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+        );
 
         expect(response.status).to.be(200);
         expect(response.body.hasHistoricalData).to.be(false);
@@ -52,7 +54,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let sortedItems: typeof response.body.items;
 
       before(async () => {
-        response = await supertest.get(`/api/apm/services?start=${start}&end=${end}`);
+        response = await supertest.get(
+          `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+        );
         sortedItems = sortBy(response.body.items, 'serviceName');
       });
 
@@ -71,8 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns the correct service names', () => {
         expectSnapshot(sortedItems.map((item) => item.serviceName)).toMatchInline(`
           Array [
-            "kibana",
-            "kibana-frontend",
+            "auditbeat",
             "opbeans-dotnet",
             "opbeans-go",
             "opbeans-java",
@@ -86,114 +89,44 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the correct metrics averages', () => {
         expectSnapshot(
-          sortedItems.map((item) =>
-            pick(
-              item,
-              'transactionErrorRate.value',
-              'avgResponseTime.value',
-              'transactionsPerMinute.value'
-            )
-          )
+          sortedItems.map((item) => pick(item, 'transactionErrorRate', 'latency', 'throughput'))
         ).toMatchInline(`
           Array [
+            Object {},
             Object {
-              "avgResponseTime": Object {
-                "value": 421616.337243402,
-              },
-              "transactionErrorRate": Object {
-                "value": 0,
-              },
-              "transactionsPerMinute": Object {
-                "value": 25.2,
-              },
+              "latency": 520294.126436782,
+              "throughput": 11.6,
+              "transactionErrorRate": 0.0316091954022989,
             },
             Object {
-              "avgResponseTime": Object {
-                "value": 2387606.33333333,
-              },
-              "transactionErrorRate": Object {
-                "value": null,
-              },
-              "transactionsPerMinute": Object {
-                "value": 0.2,
-              },
+              "latency": 74805.1452830189,
+              "throughput": 17.6666666666667,
+              "transactionErrorRate": 0.00566037735849057,
             },
             Object {
-              "avgResponseTime": Object {
-                "value": 633386.908045977,
-              },
-              "transactionErrorRate": Object {
-                "value": 0.027027027027027,
-              },
-              "transactionsPerMinute": Object {
-                "value": 2.46666666666667,
-              },
+              "latency": 411589.785714286,
+              "throughput": 7.46666666666667,
+              "transactionErrorRate": 0.0848214285714286,
             },
             Object {
-              "avgResponseTime": Object {
-                "value": 27891.1507936508,
-              },
-              "transactionErrorRate": Object {
-                "value": 0.0186915887850467,
-              },
-              "transactionsPerMinute": Object {
-                "value": 3.56666666666667,
-              },
+              "latency": 53906.6603773585,
+              "throughput": 7.06666666666667,
+              "transactionErrorRate": 0,
             },
             Object {
-              "avgResponseTime": Object {
-                "value": 237995.266666667,
-              },
-              "transactionErrorRate": Object {
-                "value": 0.159420289855072,
-              },
-              "transactionsPerMinute": Object {
-                "value": 2.3,
-              },
+              "latency": 420634.9,
+              "throughput": 5.33333333333333,
+              "transactionErrorRate": 0.025,
             },
             Object {
-              "avgResponseTime": Object {
-                "value": 24989.3157894737,
-              },
-              "transactionErrorRate": Object {
-                "value": 0.0263157894736842,
-              },
-              "transactionsPerMinute": Object {
-                "value": 2.53333333333333,
-              },
+              "latency": 40989.5802047782,
+              "throughput": 9.76666666666667,
+              "transactionErrorRate": 0.00341296928327645,
             },
             Object {
-              "avgResponseTime": Object {
-                "value": 29161.3703703704,
-              },
-              "transactionErrorRate": Object {
-                "value": 0.0392156862745098,
-              },
-              "transactionsPerMinute": Object {
-                "value": 1.7,
-              },
-            },
-            Object {
-              "avgResponseTime": Object {
-                "value": 71576.4545454545,
-              },
-              "transactionErrorRate": Object {
-                "value": 0.0454545454545455,
-              },
-              "transactionsPerMinute": Object {
-                "value": 3.66666666666667,
-              },
-            },
-            Object {
-              "avgResponseTime": Object {
-                "value": 2324991,
-              },
-              "transactionErrorRate": Object {
-                "value": null,
-              },
-              "transactionsPerMinute": Object {
-                "value": 0.5,
-              },
+              "latency": 1040880.77777778,
+              "throughput": 2.4,
+              "transactionErrorRate": null,
             },
           ]
         `);
@@ -209,9 +142,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "production",
             ],
             Array [
-              "production",
-            ],
-            Array [
               "testing",
             ],
             Array [
@@ -220,8 +150,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             Array [
               "testing",
             ],
-            Array [],
-            Array [],
+            Array [
+              "production",
+            ],
+            Array [
+              "production",
+            ],
             Array [
               "testing",
             ],
@@ -237,18 +171,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(rumServices.length).to.be.greaterThan(0);
 
-        expect(rumServices.every((item) => isEmpty(item.transactionErrorRate?.value)));
+        expect(rumServices.every((item) => isEmpty(item.transactionErrorRate)));
       });
 
       it('non-RUM services all report transaction error rates', () => {
-        const nonRumServices = sortedItems.filter((item) => item.agentName !== 'rum-js');
+        const nonRumServices = sortedItems.filter(
+          (item) => item.agentName !== 'rum-js' && item.serviceName !== 'auditbeat'
+        );
 
         expect(
           nonRumServices.every((item) => {
-            return (
-              typeof item.transactionErrorRate?.value === 'number' &&
-              item.transactionErrorRate.timeseries.length > 0
-            );
+            return typeof item.transactionErrorRate === 'number';
           })
         ).to.be(true);
       });
@@ -266,9 +199,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         }
 
         const [unfilteredResponse, filteredResponse] = await Promise.all([
-          supertest.get(`/api/apm/services?start=${start}&end=${end}`) as Promise<Response>,
           supertest.get(
-            `/api/apm/services?start=${start}&end=${end}&kuery=${encodeURIComponent(
+            `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+          ) as Promise<Response>,
+          supertest.get(
+            `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=${encodeURIComponent(
               'not (processor.event:transaction)'
             )}`
           ) as Promise<Response>,
@@ -303,7 +238,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           };
 
           before(async () => {
-            response = await supertest.get(`/api/apm/services?start=${start}&end=${end}`);
+            response = await supertest.get(
+              `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+            );
           });
 
           it('the response is successful', () => {
@@ -329,18 +266,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(healthStatuses.filter(Boolean).length).to.be.greaterThan(0);
 
             expectSnapshot(healthStatuses).toMatchInline(`
-                          Array [
-                            "healthy",
-                            "healthy",
-                            "healthy",
-                            "healthy",
-                            "healthy",
-                            "healthy",
-                            "healthy",
-                            "healthy",
-                            "healthy",
-                          ]
-                      `);
+              Array [
+                undefined,
+                "healthy",
+                "healthy",
+                "healthy",
+                "healthy",
+                "healthy",
+                "healthy",
+                "healthy",
+              ]
+            `);
           });
         });
       });
@@ -349,7 +285,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let response: PromiseReturnType<typeof supertest.get>;
         before(async () => {
           response = await supertestAsApmReadUserWithoutMlAccess.get(
-            `/api/apm/services?start=${start}&end=${end}`
+            `/api/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
           );
         });
 

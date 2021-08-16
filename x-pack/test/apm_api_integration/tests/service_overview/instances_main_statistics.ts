@@ -39,6 +39,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 comparisonStart: start,
                 comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             },
           });
@@ -69,6 +71,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 start,
                 end,
                 transactionType: 'request',
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             },
           });
@@ -97,7 +101,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(serviceNodeNames).toMatchInline(`
             Array [
-              "02950c4c5fbb0fda1cc98c47bf4024b473a8a17629db6530d95dcee68bd54c6c",
+              "31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad",
             ]
           `);
 
@@ -113,11 +117,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(values).toMatchInline(`
             Object {
-              "cpuUsage": 0.0120166666666667,
-              "errorRate": 0.0415094339622641,
-              "latency": 237995.266666667,
-              "memoryUsage": 0.941324615478516,
-              "throughput": 8.83333333333333,
+              "cpuUsage": 0.002,
+              "errorRate": 0.0252659574468085,
+              "latency": 411589.785714286,
+              "memoryUsage": 0.786029688517253,
+              "throughput": 25.0666666666667,
             }
           `);
         });
@@ -138,6 +142,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 start,
                 end,
                 transactionType: 'request',
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             },
           });
@@ -162,7 +168,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(serviceNodeNames).toMatchInline(`
             Array [
-              "_service_node_name_missing_",
+              "b4c600993a0b233120cd333b8c4a7e35e73ee8f18f95b5854b8d7f6442531466",
             ]
           `);
 
@@ -172,10 +178,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(values).toMatchInline(`
             Object {
-              "cpuUsage": 0.00111666666666667,
-              "errorRate": 0.00963391136801541,
-              "latency": 71576.4545454545,
-              "throughput": 17.3,
+              "cpuUsage": 0.001,
+              "errorRate": 0.000907441016333938,
+              "latency": 40989.5802047782,
+              "throughput": 36.7333333333333,
             }
           `);
 
@@ -206,6 +212,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 comparisonStart: start,
                 comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             },
           });
@@ -243,7 +251,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(serviceNodeNames).toMatchInline(`
             Array [
-              "02950c4c5fbb0fda1cc98c47bf4024b473a8a17629db6530d95dcee68bd54c6c",
+              "31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad",
             ]
           `);
 
@@ -259,11 +267,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(values).toMatchInline(`
             Object {
-              "cpuUsage": 0.0120666666666667,
-              "errorRate": 0.0333333333333333,
-              "latency": 389086.636363636,
-              "memoryUsage": 0.939879608154297,
-              "throughput": 10,
+              "cpuUsage": 0.00223333333333333,
+              "errorRate": 0.0268292682926829,
+              "latency": 739013.634146341,
+              "memoryUsage": 0.783296203613281,
+              "throughput": 27.3333333333333,
             }
           `);
         });

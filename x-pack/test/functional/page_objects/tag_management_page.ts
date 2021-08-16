@@ -57,6 +57,8 @@ class TagModal extends FtrService {
     }
     if (fields.color !== undefined) {
       await this.testSubjects.setValue('~createModalField-color', fields.color);
+      // Wait for the popover to be closable before moving to the next input
+      await new Promise((res) => setTimeout(res, 200));
     }
     if (fields.description !== undefined) {
       await this.testSubjects.click('createModalField-description');

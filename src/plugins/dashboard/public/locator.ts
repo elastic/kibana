@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
 import type { LocatorDefinition, LocatorPublic } from '../../share/public';
 import type { SavedDashboardPanel } from '../common/types';
@@ -26,7 +26,7 @@ const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
 
 export const DASHBOARD_APP_LOCATOR = 'DASHBOARD_APP_LOCATOR';
 
-export interface DashboardAppLocatorParams extends SerializableState {
+export interface DashboardAppLocatorParams extends SerializableRecord {
   /**
    * If given, the dashboard saved object with this id will be loaded. If not given,
    * a new, unsaved dashboard will be loaded up.
@@ -40,7 +40,7 @@ export interface DashboardAppLocatorParams extends SerializableState {
   /**
    * Optionally set the refresh interval.
    */
-  refreshInterval?: RefreshInterval & SerializableState;
+  refreshInterval?: RefreshInterval & SerializableRecord;
 
   /**
    * Optionally apply filers. NOTE: if given and used in conjunction with `dashboardId`, and the
@@ -80,7 +80,7 @@ export interface DashboardAppLocatorParams extends SerializableState {
   /**
    * List of dashboard panels
    */
-  panels?: SavedDashboardPanel[] & SerializableState;
+  panels?: SavedDashboardPanel[] & SerializableRecord;
 
   /**
    * Saved query ID

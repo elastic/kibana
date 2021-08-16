@@ -6,12 +6,21 @@
  */
 
 import React, { FC, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
+import {
+  EuiDescribedFormGroup,
+  EuiFieldNumber,
+  EuiForm,
+  EuiFormRow,
+  EuiIcon,
+  EuiSpacer,
+  EuiSwitch,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormFieldset, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
-import { JobsHealthRuleTestsConfig } from '../../../common/types/alerts';
+import { JobsHealthRuleTestsConfig, JobsHealthTests } from '../../../common/types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
 import { HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';
+import { TimeIntervalControl } from '../time_interval_control';
 
 interface TestsSelectionControlProps {
   config: JobsHealthRuleTestsConfig;
@@ -19,107 +28,127 @@ interface TestsSelectionControlProps {
   errors?: string[];
 }
 
-export const TestsSelectionControl: FC<TestsSelectionControlProps> = ({
-  config,
-  onChange,
-  errors,
-}) => {
-  const uiConfig = getResultJobsHealthRuleConfig(config);
+export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
+  ({ config, onChange, errors }) => {
+    const uiConfig = getResultJobsHealthRuleConfig(config);
 
-  const updateCallback = useCallback(
-    (update: Partial<Exclude<JobsHealthRuleTestsConfig, undefined>>) => {
-      onChange({
-        ...(config ?? {}),
-        ...update,
-      });
-    },
-    [onChange, config]
-  );
+    const updateCallback = useCallback(
+      (update: Partial<Exclude<JobsHealthRuleTestsConfig, undefined>>) => {
+        onChange({
+          ...(config ?? {}),
+          ...update,
+        });
+      },
+      [onChange, config]
+    );
 
-  return (
-    <EuiFormFieldset
-      legend={{
-        children: i18n.translate(
-          'xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.legend',
-          {
-            defaultMessage: 'Select health checks to perform',
-          }
-        ),
-      }}
-    >
-      <EuiFormRow isInvalid={!!errors?.length} error={errors}>
-        <EuiSwitch
-          label={HEALTH_CHECK_NAMES.datafeed}
-          onChange={updateCallback.bind(null, {
-            datafeed: { enabled: !uiConfig.datafeed.enabled },
-          })}
-          checked={uiConfig.datafeed.enabled}
-        />
-      </EuiFormRow>
+    return (
+      <EuiForm component="div" isInvalid={!!errors?.length} error={errors}>
+        {(Object.entries(uiConfig) as Array<
+          [JobsHealthTests, typeof uiConfig[JobsHealthTests]]
+        >).map(([name, conf], i) => {
+          return (
+            <EuiDescribedFormGroup
+              key={name}
+              title={<h4>{HEALTH_CHECK_NAMES[name]?.name}</h4>}
+              description={HEALTH_CHECK_NAMES[name]?.description}
+            >
+              <EuiFormRow>
+                <EuiSwitch
+                  label={
+                    <FormattedMessage
+                      id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.enableTestLabel"
+                      defaultMessage="Enable"
+                    />
+                  }
+                  onChange={updateCallback.bind(null, {
+                    [name]: {
+                      ...uiConfig[name],
+                      enabled: !uiConfig[name].enabled,
+                    },
+                  })}
+                  checked={uiConfig[name].enabled}
+                />
+              </EuiFormRow>
+              <EuiSpacer size="s" />
 
-      <EuiSpacer size="s" />
+              {name === 'delayedData' ? (
+                <>
+                  <EuiFormRow
+                    label={
+                      <>
+                        <FormattedMessage
+                          id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.docsCountLabel"
+                          defaultMessage="Number of documents"
+                        />
+                        <EuiToolTip
+                          position="bottom"
+                          content={
+                            <FormattedMessage
+                              id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.docsCountHint"
+                              defaultMessage="The threshold for the amount of missing documents to alert upon."
+                            />
+                          }
+                        >
+                          <EuiIcon type="questionInCircle" />
+                        </EuiToolTip>
+                      </>
+                    }
+                  >
+                    <EuiFieldNumber
+                      value={uiConfig.delayedData.docsCount}
+                      onChange={(e) => {
+                        updateCallback({
+                          [name]: {
+                            ...uiConfig[name],
+                            docsCount: Number(e.target.value),
+                          },
+                        });
+                      }}
+                      min={1}
+                    />
+                  </EuiFormRow>
 
-      {false && (
-        <>
-          <EuiSwitch
-            label={
-              <FormattedMessage
-                id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.mmlCheck.label"
-                defaultMessage="Model memory limit monitoring"
-              />
-            }
-            onChange={updateCallback.bind(null, { mml: { enabled: !uiConfig.mml.enabled } })}
-            checked={uiConfig.mml.enabled}
-          />
+                  <EuiSpacer size="s" />
 
-          <EuiSpacer size="s" />
+                  <TimeIntervalControl
+                    label={
+                      <>
+                        <FormattedMessage
+                          id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.timeIntervalLabel"
+                          defaultMessage="Time interval"
+                        />
+                        <EuiToolTip
+                          position="bottom"
+                          content={
+                            <FormattedMessage
+                              id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.timeIntervalHint"
+                              defaultMessage="The lookback interval to check during rule execution for delayed data. By default derived from the longest bucket span and query delay."
+                            />
+                          }
+                        >
+                          <EuiIcon type="questionInCircle" />
+                        </EuiToolTip>
+                      </>
+                    }
+                    value={uiConfig.delayedData.timeInterval}
+                    onChange={(e) => {
+                      updateCallback({
+                        [name]: {
+                          ...uiConfig[name],
+                          timeInterval: e,
+                        },
+                      });
+                    }}
+                  />
 
-          <EuiSwitch
-            label={
-              <FormattedMessage
-                id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedDataCheck.label"
-                defaultMessage="Delayed data"
-              />
-            }
-            onChange={updateCallback.bind(null, {
-              delayedData: { enabled: !uiConfig.delayedData.enabled },
-            })}
-            checked={uiConfig.delayedData.enabled}
-          />
-
-          <EuiSpacer size="s" />
-
-          <EuiSwitch
-            label={
-              <FormattedMessage
-                id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.jobBehindRealtimeCheck.label"
-                defaultMessage="Job is running behind real-time"
-              />
-            }
-            onChange={updateCallback.bind(null, {
-              behindRealtime: { enabled: !uiConfig.behindRealtime.enabled },
-            })}
-            checked={uiConfig.behindRealtime.enabled}
-          />
-
-          <EuiSpacer size="s" />
-
-          <EuiSwitch
-            label={
-              <FormattedMessage
-                id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.errorMessagesCheck.label"
-                defaultMessage="There are errors in the job messages."
-              />
-            }
-            onChange={updateCallback.bind(null, {
-              errorMessages: { enabled: !uiConfig.errorMessages.enabled },
-            })}
-            checked={uiConfig.errorMessages.enabled}
-          />
-
-          <EuiSpacer size="s" />
-        </>
-      )}
-    </EuiFormFieldset>
-  );
-};
+                  <EuiSpacer size="s" />
+                </>
+              ) : null}
+            </EuiDescribedFormGroup>
+          );
+        })}
+      </EuiForm>
+    );
+  }
+);

@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { PercentFormatEditor } from './percent';
+import { FieldFormatEditorFactory } from '../types';
+import { formatId } from './constants';
+
+export type { PercentFormatEditor } from './percent';
+export const percentFormatEditorFactory: FieldFormatEditorFactory = () =>
+  import('./percent').then((m) => m.PercentFormatEditor);
+percentFormatEditorFactory.formatId = formatId;

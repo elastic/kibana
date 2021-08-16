@@ -31,8 +31,7 @@ import {
   alertsDefaultModelRuleRegistry,
   buildAlertStatusFilterRuleRegistry,
 } from './default_config';
-import { FILTER_OPEN, AlertsTableFilterGroup } from './alerts_filter_group';
-import { AlertsUtilityBar } from './alerts_utility_bar';
+import { AditionalFiltersAction, AlertsUtilityBar } from './alerts_utility_bar';
 import * as i18nCommon from '../../../common/translations';
 import * as i18n from './translations';
 import {
@@ -53,6 +52,7 @@ import { defaultRowRenderers } from '../../../timelines/components/timeline/body
 import { columns, RenderCellValue } from '../../configurations/security_solution_detections';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
 
 interface OwnProps {
   defaultFilters?: Filter[];
@@ -67,13 +67,12 @@ interface OwnProps {
   showOnlyThreatIndicatorAlerts: boolean;
   timelineId: TimelineIdLiteral;
   to: string;
+  filterGroup?: Status;
 }
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
 export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
-  clearEventsDeleted,
-  clearEventsLoading,
   clearSelected,
   defaultFilters,
   from,
@@ -94,10 +93,10 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   showOnlyThreatIndicatorAlerts,
   timelineId,
   to,
+  filterGroup = 'open',
 }) => {
   const dispatch = useDispatch();
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
-  const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const {
     browserFields,
     indexPattern: indexPatterns,
@@ -215,17 +214,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     }
   }, [dispatch, isSelectAllChecked, timelineId]);
 
-  // Callback for when open/closed filter changes
-  const onFilterGroupChangedCallback = useCallback(
-    (newFilterGroup: Status) => {
-      clearEventsLoading!({ id: timelineId });
-      clearEventsDeleted!({ id: timelineId });
-      clearSelected!({ id: timelineId });
-      setFilterGroup(newFilterGroup);
-    },
-    [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup, timelineId]
-  );
-
   // Callback for clearing entire selection from utility bar
   const clearSelectionCallback = useCallback(() => {
     clearSelected!({ id: timelineId });
@@ -325,6 +313,16 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     ]
   );
 
+  const additionalFiltersComponent = (
+    <AditionalFiltersAction
+      areEventsLoading={loadingEventIds.length > 0}
+      onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
+      showBuildingBlockAlerts={showBuildingBlockAlerts}
+      onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsChanged}
+      showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+    />
+  );
+
   const defaultFiltersMemo = useMemo(() => {
     // TODO: Once we are past experimental phase this code should be removed
     const alertStatusFilter = ruleRegistryEnabled
@@ -371,11 +369,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     );
   }, [dispatch, defaultTimelineModel, filterManager, tGridEnabled, timelineId]);
 
-  const headerFilterGroup = useMemo(
-    () => <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />,
-    [onFilterGroupChangedCallback]
-  );
-
   if (loading || indexPatternsLoading || isEmpty(selectedPatterns)) {
     return (
       <EuiPanel hasBorder>
@@ -388,9 +381,11 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   return (
     <StatefulEventsViewer
       pageFilters={defaultFiltersMemo}
+      defaultCellActions={defaultCellActions}
       defaultModel={defaultTimelineModel}
+      entityType="alerts"
       end={to}
-      headerFilterGroup={headerFilterGroup}
+      currentFilter={filterGroup}
       id={timelineId}
       onRuleChange={onRuleChange}
       renderCellValue={RenderCellValue}
@@ -398,6 +393,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       scopeId={SourcererScopeName.detections}
       start={from}
       utilityBar={utilityBarCallback}
+      additionalFilters={additionalFiltersComponent}
     />
   );
 };
@@ -435,8 +431,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     eventIds: string[];
     isLoading: boolean;
   }) => dispatch(timelineActions.setEventsLoading({ id, eventIds, isLoading })),
-  clearEventsLoading: ({ id }: { id: string }) =>
-    dispatch(timelineActions.clearEventsLoading({ id })),
   setEventsDeleted: ({
     id,
     eventIds,
@@ -446,8 +440,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     eventIds: string[];
     isDeleted: boolean;
   }) => dispatch(timelineActions.setEventsDeleted({ id, eventIds, isDeleted })),
-  clearEventsDeleted: ({ id }: { id: string }) =>
-    dispatch(timelineActions.clearEventsDeleted({ id })),
 });
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);

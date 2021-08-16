@@ -66,7 +66,7 @@ export type ActionTypeRegistryContract<
   ActionConnector = unknown,
   ActionParams = unknown
 > = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
-export type AlertTypeRegistryContract = PublicMethodsOf<TypeRegistry<AlertTypeModel>>;
+export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<AlertTypeModel>>;
 
 export interface ActionConnectorFieldsProps<TActionConnector> {
   action: TActionConnector;
@@ -273,7 +273,7 @@ export interface ConnectorEditFlyoutProps {
 
 export interface AlertEditProps<MetaData = Record<string, any>> {
   initialAlert: Alert;
-  alertTypeRegistry: AlertTypeRegistryContract;
+  ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: (reason: AlertFlyoutCloseReason) => void;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
@@ -284,7 +284,7 @@ export interface AlertEditProps<MetaData = Record<string, any>> {
 
 export interface AlertAddProps<MetaData = Record<string, any>> {
   consumer: string;
-  alertTypeRegistry: AlertTypeRegistryContract;
+  ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: (reason: AlertFlyoutCloseReason) => void;
   alertTypeId?: string;

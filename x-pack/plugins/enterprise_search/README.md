@@ -67,3 +67,5 @@ sh jest.sh public/applications/shared/flash_messages/flash_messages_logic.test.t
 ### E2E tests
 
 See [our functional test runner README](../../test/functional_enterprise_search).
+
+Our automated accessibility tests can be found in [x-pack/test/accessibility/apps](../../test/accessibility/apps/enterprise_search.ts).

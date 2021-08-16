@@ -7,7 +7,7 @@
 
 import ipaddr from 'ipaddr.js';
 import type { IPv4, IPv6 } from 'ipaddr.js';
-import type { FieldFormat } from '../../../../../../src/plugins/data/common';
+import type { FieldFormat } from '../../../../../../src/plugins/field_formats/common';
 
 function isIPv6Address(ip: IPv4 | IPv6): ip is IPv6 {
   return ip.kind() === 'ipv6';

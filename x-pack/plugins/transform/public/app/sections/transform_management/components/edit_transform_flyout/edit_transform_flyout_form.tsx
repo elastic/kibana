@@ -69,31 +69,33 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         )}
         paddingSize="s"
       >
-        <EditTransformFlyoutFormTextInput
-          dataTestSubj="transformEditFlyoutDestinationIndexInput"
-          errorMessages={formFields.destinationIndex.errorMessages}
-          label={i18n.translate(
-            'xpack.transform.transformList.editFlyoutFormDestinationIndexLabel',
-            {
-              defaultMessage: 'Destination index',
-            }
-          )}
-          onChange={(value) => dispatch({ field: 'destinationIndex', value })}
-          value={formFields.destinationIndex.value}
-        />
+        <div data-test-subj="transformEditAccordionDestinationContent">
+          <EditTransformFlyoutFormTextInput
+            dataTestSubj="transformEditFlyoutDestinationIndexInput"
+            errorMessages={formFields.destinationIndex.errorMessages}
+            label={i18n.translate(
+              'xpack.transform.transformList.editFlyoutFormDestinationIndexLabel',
+              {
+                defaultMessage: 'Destination index',
+              }
+            )}
+            onChange={(value) => dispatch({ field: 'destinationIndex', value })}
+            value={formFields.destinationIndex.value}
+          />
 
-        <EditTransformFlyoutFormTextInput
-          dataTestSubj="transformEditFlyoutDestinationPipelineInput"
-          errorMessages={formFields.destinationPipeline.errorMessages}
-          label={i18n.translate(
-            'xpack.transform.transformList.editFlyoutFormDestinationPipelineLabel',
-            {
-              defaultMessage: 'Pipeline',
-            }
-          )}
-          onChange={(value) => dispatch({ field: 'destinationPipeline', value })}
-          value={formFields.destinationPipeline.value}
-        />
+          <EditTransformFlyoutFormTextInput
+            dataTestSubj="transformEditFlyoutDestinationPipelineInput"
+            errorMessages={formFields.destinationPipeline.errorMessages}
+            label={i18n.translate(
+              'xpack.transform.transformList.editFlyoutFormDestinationPipelineLabel',
+              {
+                defaultMessage: 'Pipeline',
+              }
+            )}
+            onChange={(value) => dispatch({ field: 'destinationPipeline', value })}
+            value={formFields.destinationPipeline.value}
+          />
+        </div>
       </EuiAccordion>
 
       <EuiSpacer size="l" />
@@ -109,31 +111,33 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         )}
         paddingSize="s"
       >
-        <EditTransformFlyoutFormTextInput
-          dataTestSubj="transformEditFlyoutRetentionPolicyFieldInput"
-          errorMessages={formFields.retentionPolicyField.errorMessages}
-          label={i18n.translate(
-            'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel',
-            {
-              defaultMessage: 'Field',
-            }
-          )}
-          onChange={(value) => dispatch({ field: 'retentionPolicyField', value })}
-          value={formFields.retentionPolicyField.value}
-        />
-
-        <EditTransformFlyoutFormTextInput
-          dataTestSubj="transformEditFlyoutRetentionPolicyMaxAgeInput"
-          errorMessages={formFields.retentionPolicyMaxAge.errorMessages}
-          label={i18n.translate(
-            'xpack.transform.transformList.editFlyoutFormRetentionMaxAgeFieldLabel',
-            {
-              defaultMessage: 'Max age',
-            }
-          )}
-          onChange={(value) => dispatch({ field: 'retentionPolicyMaxAge', value })}
-          value={formFields.retentionPolicyMaxAge.value}
-        />
+        <div data-test-subj="transformEditAccordionRetentionPolicyContent">
+          {' '}
+          <EditTransformFlyoutFormTextInput
+            dataTestSubj="transformEditFlyoutRetentionPolicyFieldInput"
+            errorMessages={formFields.retentionPolicyField.errorMessages}
+            label={i18n.translate(
+              'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel',
+              {
+                defaultMessage: 'Field',
+              }
+            )}
+            onChange={(value) => dispatch({ field: 'retentionPolicyField', value })}
+            value={formFields.retentionPolicyField.value}
+          />
+          <EditTransformFlyoutFormTextInput
+            dataTestSubj="transformEditFlyoutRetentionPolicyMaxAgeInput"
+            errorMessages={formFields.retentionPolicyMaxAge.errorMessages}
+            label={i18n.translate(
+              'xpack.transform.transformList.editFlyoutFormRetentionMaxAgeFieldLabel',
+              {
+                defaultMessage: 'Max age',
+              }
+            )}
+            onChange={(value) => dispatch({ field: 'retentionPolicyMaxAge', value })}
+            value={formFields.retentionPolicyMaxAge.value}
+          />
+        </div>
       </EuiAccordion>
 
       <EuiSpacer size="l" />

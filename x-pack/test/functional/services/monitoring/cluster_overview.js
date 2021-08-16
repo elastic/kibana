@@ -76,6 +76,10 @@ export function MonitoringClusterOverviewProvider({ getService }) {
     }
 
     closeAlertsModal() {
+      return testSubjects.click('alerts-modal-remind-later-button');
+    }
+
+    acceptAlertsModal() {
       return testSubjects.click('alerts-modal-button');
     }
 

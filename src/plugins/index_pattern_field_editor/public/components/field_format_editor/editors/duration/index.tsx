@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { DurationFormatEditor } from './duration';
+import { FieldFormatEditorFactory } from '../types';
+import { formatId } from './constants';
+
+export type { DurationFormatEditor } from './duration';
+export const durationFormatEditorFactory: FieldFormatEditorFactory = () =>
+  import('./duration').then((m) => m.DurationFormatEditor);
+durationFormatEditorFactory.formatId = formatId;

@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   esKuery,
-  IIndexPattern,
+  IndexPattern,
   QuerySuggestion,
 } from '../../../../../../../src/plugins/data/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -29,16 +29,18 @@ interface State {
   isLoadingSuggestions: boolean;
 }
 
-function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
+function convertKueryToEsQuery(kuery: string, indexPattern: IndexPattern) {
   const ast = esKuery.fromKueryExpression(kuery);
   return esKuery.toElasticsearchQuery(ast, indexPattern);
 }
 
 export function KueryBar(props: { prepend?: React.ReactNode | string }) {
-  const { path } = useApmParams('/*');
+  const { path, query } = useApmParams('/*');
 
   const serviceName = 'serviceName' in path ? path.serviceName : undefined;
   const groupId = 'groupId' in path ? path.groupId : undefined;
+  const environment = 'environment' in query ? query.environment : undefined;
+  const kuery = 'kuery' in query ? query.kuery : undefined;
 
   const history = useHistory();
   const [state, setState] = useState<State>({
@@ -97,6 +99,7 @@ export function KueryBar(props: { prepend?: React.ReactNode | string }) {
             groupId,
             processorEvent,
             serviceName,
+            environment,
             urlParams,
           }),
           query: inputValue,
@@ -125,7 +128,10 @@ export function KueryBar(props: { prepend?: React.ReactNode | string }) {
     }
 
     try {
-      const res = convertKueryToEsQuery(inputValue, indexPattern);
+      const res = convertKueryToEsQuery(
+        inputValue,
+        indexPattern as IndexPattern
+      );
       if (!res) {
         return;
       }
@@ -134,7 +140,7 @@ export function KueryBar(props: { prepend?: React.ReactNode | string }) {
         ...location,
         search: fromQuery({
           ...toQuery(location.search),
-          kuery: encodeURIComponent(inputValue.trim()),
+          kuery: inputValue.trim(),
         }),
       });
     } catch (e) {
@@ -145,7 +151,7 @@ export function KueryBar(props: { prepend?: React.ReactNode | string }) {
   return (
     <Typeahead
       isLoading={state.isLoadingSuggestions}
-      initialValue={urlParams.kuery}
+      initialValue={kuery}
       onChange={onChange}
       onSubmit={onSubmit}
       suggestions={state.suggestions}

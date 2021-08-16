@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+export * from '../../common/translations';
+
 export const PUSH_THIRD = (thirdParty: string) => {
   if (thirdParty === 'none') {
     return i18n.translate('xpack.cases.caseView.pushThirdPartyIncident', {
@@ -53,8 +55,7 @@ export const PUSH_LOCKED_DESC = i18n.translate('xpack.cases.caseView.lockedIncid
 export const CONFIGURE_CONNECTOR = i18n.translate(
   'xpack.cases.caseView.pushToService.configureConnector',
   {
-    defaultMessage:
-      'To open and update cases in external systems, you must select an external incident management system for this case.',
+    defaultMessage: 'To create and update a case in an external system, select a connector.',
   }
 );
 
@@ -74,8 +75,4 @@ export const PUSH_DISABLE_BY_LICENSE_TITLE = i18n.translate(
 
 export const LINK_CLOUD_DEPLOYMENT = i18n.translate('xpack.cases.caseView.cloudDeploymentLink', {
   defaultMessage: 'cloud deployment',
-});
-
-export const LINK_APPROPRIATE_LICENSE = i18n.translate('xpack.cases.caseView.appropiateLicense', {
-  defaultMessage: 'appropriate license',
 });

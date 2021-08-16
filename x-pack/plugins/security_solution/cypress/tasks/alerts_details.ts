@@ -6,10 +6,10 @@
  */
 
 import {
-  JSON_CONTENT,
+  ENRICHMENT_COUNT_NOTIFICATION,
+  JSON_VIEW_WRAPPER,
   JSON_VIEW_TAB,
   TABLE_TAB,
-  THREAT_INTEL_TAB,
 } from '../screens/alerts_details';
 
 export const openJsonView = () => {
@@ -21,11 +21,11 @@ export const openTable = () => {
 };
 
 export const openThreatIndicatorDetails = () => {
-  cy.get(THREAT_INTEL_TAB).click();
+  cy.get(ENRICHMENT_COUNT_NOTIFICATION).click();
 };
 
 export const scrollJsonViewToBottom = () => {
-  cy.get(JSON_CONTENT).click({ force: true });
-  cy.get(JSON_CONTENT).type('{pagedown}{pagedown}{pagedown}');
-  cy.get(JSON_CONTENT).should('be.visible');
+  cy.get(JSON_VIEW_WRAPPER).click({ force: true });
+  cy.get(JSON_VIEW_WRAPPER).type('{pagedown}{pagedown}{pagedown}');
+  cy.get(JSON_VIEW_WRAPPER).should('be.visible');
 };

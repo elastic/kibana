@@ -8,3 +8,4 @@
 export * from './constants';
 export * from './api';
 export * from './ui/types';
+export * from './utils/connectors_api';

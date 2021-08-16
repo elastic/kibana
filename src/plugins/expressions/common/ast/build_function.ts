@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionAstFunction } from './types';
+import { ExpressionAstExpression, ExpressionAstFunction } from './types';
 import {
   AnyExpressionFunctionDefinition,
   ExpressionFunctionDefinition,
@@ -164,21 +164,26 @@ export function buildExpressionFunction<
     [K in keyof FunctionArgs<FnDef>]:
       | FunctionArgs<FnDef>[K]
       | ExpressionAstExpressionBuilder
-      | ExpressionAstExpressionBuilder[];
+      | ExpressionAstExpressionBuilder[]
+      | ExpressionAstExpression
+      | ExpressionAstExpression[];
   }
 ): ExpressionAstFunctionBuilder<FnDef> {
-  const args = Object.entries(initialArgs).reduce((acc, [key, value]) => {
-    if (Array.isArray(value)) {
-      acc[key] = value.map((v) => {
-        return isExpressionAst(v) ? buildExpression(v) : v;
-      });
-    } else if (value !== undefined) {
-      acc[key] = isExpressionAst(value) ? [buildExpression(value)] : [value];
-    } else {
-      delete acc[key];
-    }
-    return acc;
-  }, initialArgs as FunctionBuilderArguments<FnDef>);
+  const args = Object.entries(initialArgs).reduce(
+    (acc, [key, value]) => {
+      if (Array.isArray(value)) {
+        acc[key] = value.map((v) => {
+          return isExpressionAst(v) ? buildExpression(v) : v;
+        });
+      } else if (value !== undefined) {
+        acc[key] = isExpressionAst(value) ? [buildExpression(value)] : [value];
+      } else {
+        delete acc[key];
+      }
+      return acc;
+    },
+    { ...initialArgs } as FunctionBuilderArguments<FnDef>
+  );
 
   return {
     type: 'expression_function_builder',

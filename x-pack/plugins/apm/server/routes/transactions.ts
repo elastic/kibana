@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { jsonRt } from '@kbn/io-ts-utils';
+import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
 import {
   LatencyAggregationType,
   latencyAggregationTypeRt,
@@ -20,60 +19,15 @@ import { getTransactionBreakdown } from '../lib/transactions/breakdown';
 import { getTransactionDistribution } from '../lib/transactions/distribution';
 import { getAnomalySeries } from '../lib/transactions/get_anomaly_data';
 import { getLatencyPeriods } from '../lib/transactions/get_latency_charts';
-import { getThroughputCharts } from '../lib/transactions/get_throughput_charts';
-import { getTransactionGroupList } from '../lib/transaction_groups';
 import { getErrorRatePeriods } from '../lib/transaction_groups/get_error_rate';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import {
   comparisonRangeRt,
   environmentRt,
-  rangeRt,
   kueryRt,
+  rangeRt,
 } from './default_api_types';
-
-/**
- * Returns a list of transactions grouped by name
- * //TODO: delete this once we moved away from the old table in the transaction overview page. It should be replaced by /transactions/groups/main_statistics/
- */
-const transactionGroupsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/transactions/groups',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      t.type({ transactionType: t.string }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (resources) => {
-    const setup = await setupRequest(resources);
-    const { params } = resources;
-    const { serviceName } = params.path;
-    const { environment, kuery, transactionType } = params.query;
-
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      ...setup,
-      kuery,
-    });
-
-    return getTransactionGroupList(
-      {
-        environment,
-        kuery,
-        type: 'top_transactions',
-        serviceName,
-        transactionType,
-        searchAggregatedTransactions,
-      },
-      setup
-    );
-  },
-});
 
 const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   endpoint:
@@ -250,51 +204,6 @@ const transactionLatencyChartsRoute = createApmServerRoute({
   },
 });
 
-const transactionThroughputChartsRoute = createApmServerRoute({
-  endpoint:
-    'GET /api/apm/services/{serviceName}/transactions/charts/throughput',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      t.type({ transactionType: t.string }),
-      t.partial({ transactionName: t.string }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (resources) => {
-    const setup = await setupRequest(resources);
-    const { params } = resources;
-
-    const { serviceName } = params.path;
-    const {
-      environment,
-      kuery,
-      transactionType,
-      transactionName,
-    } = params.query;
-
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      ...setup,
-      kuery,
-    });
-
-    return await getThroughputCharts({
-      environment,
-      kuery,
-      serviceName,
-      transactionType,
-      transactionName,
-      setup,
-      searchAggregatedTransactions,
-    });
-  },
-});
-
 const transactionChartsDistributionRoute = createApmServerRoute({
   endpoint:
     'GET /api/apm/services/{serviceName}/transactions/charts/distribution',
@@ -435,11 +344,9 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
 });
 
 export const transactionRouteRepository = createApmServerRouteRepository()
-  .add(transactionGroupsRoute)
   .add(transactionGroupsMainStatisticsRoute)
   .add(transactionGroupsDetailedStatisticsRoute)
   .add(transactionLatencyChartsRoute)
-  .add(transactionThroughputChartsRoute)
   .add(transactionChartsDistributionRoute)
   .add(transactionChartsBreakdownRoute)
   .add(transactionChartsErrorRateRoute);

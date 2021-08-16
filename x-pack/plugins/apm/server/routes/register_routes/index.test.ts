@@ -7,7 +7,7 @@
 
 import { jsonRt } from '@kbn/io-ts-utils';
 import { createServerRouteRepository } from '@kbn/server-route-repository';
-import { ServerRoute } from '@kbn/server-route-repository/target/typings';
+import { ServerRoute } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
 import { CoreSetup, Logger } from 'src/core/server';
 import { APMConfig } from '../..';

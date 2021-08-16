@@ -13,6 +13,7 @@ import type { IFieldType } from './types';
 import { FieldSpec, IndexPattern } from '../..';
 import { shortenDottedString } from '../../utils';
 
+/** @public */
 export class IndexPatternField implements IFieldType {
   readonly spec: FieldSpec;
   // not writable or serialized

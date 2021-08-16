@@ -8,15 +8,14 @@
 import React from 'react';
 import moment from 'moment';
 
-import { ObservabilityRuleTypeModel } from '../../../../observability/public';
-import { ValidationResult } from '../../../../triggers_actions_ui/public';
-
-import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
-import { MonitorStatusTranslations } from '../../../common/translations';
-
-import { getMonitorRouteFromMonitorId } from './common';
+import { ALERT_END, ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
 
 import { AlertTypeInitializer } from '.';
+import { getMonitorRouteFromMonitorId } from './common';
+import { MonitorStatusTranslations } from '../../../common/translations';
+import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
+import { ObservabilityRuleTypeModel } from '../../../../observability/public';
+import { ValidationResult } from '../../../../triggers_actions_ui/public';
 
 const { defaultActionMessage, description } = MonitorStatusTranslations;
 
@@ -54,11 +53,8 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
     reason: fields.reason,
     link: getMonitorRouteFromMonitorId({
       monitorId: fields['monitor.id']!,
-      dateRangeEnd:
-        fields['kibana.rac.alert.status'] === 'open' ? 'now' : fields['kibana.rac.alert.end']!,
-      dateRangeStart: moment(new Date(fields['kibana.rac.alert.start']!))
-        .subtract('5', 'm')
-        .toISOString(),
+      dateRangeEnd: fields[ALERT_STATUS] === 'open' ? 'now' : fields[ALERT_END]!,
+      dateRangeStart: moment(new Date(fields[ALERT_START]!)).subtract('5', 'm').toISOString(),
       filters: {
         'observer.geo.name': [fields['observer.geo.name'][0]],
       },

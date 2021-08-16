@@ -36,17 +36,17 @@ export const MarkdownEditorForm: React.FC<MarkdownEditorFormProps> = ({
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   return (
-    <EuiFormRow
-      data-test-subj={dataTestSubj}
-      describedByIds={idAria ? [idAria] : undefined}
-      error={errorMessage}
-      fullWidth
-      helpText={field.helpText}
-      isInvalid={isInvalid}
-      label={field.label}
-      labelAppend={field.labelAppend}
-    >
-      <>
+    <>
+      <EuiFormRow
+        data-test-subj={dataTestSubj}
+        describedByIds={idAria ? [idAria] : undefined}
+        fullWidth
+        error={errorMessage}
+        helpText={field.helpText}
+        isInvalid={isInvalid}
+        label={field.label}
+        labelAppend={field.labelAppend}
+      >
         <MarkdownEditor
           ariaLabel={idAria}
           editorId={id}
@@ -54,12 +54,12 @@ export const MarkdownEditorForm: React.FC<MarkdownEditorFormProps> = ({
           value={field.value as string}
           data-test-subj={`${dataTestSubj}-markdown-editor`}
         />
-        {bottomRightContent && (
-          <BottomContentWrapper justifyContent={'flexEnd'}>
-            <EuiFlexItem grow={false}>{bottomRightContent}</EuiFlexItem>
-          </BottomContentWrapper>
-        )}
-      </>
-    </EuiFormRow>
+      </EuiFormRow>
+      {bottomRightContent && (
+        <BottomContentWrapper justifyContent={'flexEnd'}>
+          <EuiFlexItem grow={false}>{bottomRightContent}</EuiFlexItem>
+        </BottomContentWrapper>
+      )}
+    </>
   );
 };
