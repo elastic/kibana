@@ -84,8 +84,15 @@
   @include euiTextTruncate;
 }
 
+.dscDiscoverGrid__descriptionList,
+.dscDiscoverGrid__descriptionListTitle,
 .dscDiscoverGrid__descriptionListDescription {
-  word-break: normal !important;
+  font-size: $euiSizeM !important;
+  line-height: 1.8em !important;
+}
+
+.dscDiscoverGrid__descriptionListDescription {
+  // word-break: normal !important;
 }
 
 @include euiBreakpoint('xs', 's', 'm') {
