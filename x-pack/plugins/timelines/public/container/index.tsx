@@ -212,7 +212,6 @@ export const useTimelineEvents = ({
             .subscribe({
               next: (response) => {
                 if (isCompleteResponse(response)) {
-                  setLoading(false);
                   setTimelineResponse((prevResponse) => {
                     const newTimelineResponse = {
                       ...prevResponse,
@@ -225,6 +224,8 @@ export const useTimelineEvents = ({
                     setUpdated(newTimelineResponse.updatedAt);
                     return newTimelineResponse;
                   });
+                  setLoading(false);
+
                   searchSubscription$.current.unsubscribe();
                 } else if (isErrorResponse(response)) {
                   setLoading(false);
