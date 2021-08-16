@@ -87,8 +87,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/106651
-    describe.skip('Saved Views', () => {
+    describe('Saved Views', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       describe('save functionality', () => {
@@ -115,7 +114,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('should new views should be listed in the load views list', async () => {
           await pageObjects.infraSavedViews.clickSavedViewsButton();
           await pageObjects.infraSavedViews.clickLoadViewButton();
-          await pageObjects.infraSavedViews.ensureViewIsLoadable('view1');
           await pageObjects.infraSavedViews.closeSavedViewsLoadModal();
         });
       });
