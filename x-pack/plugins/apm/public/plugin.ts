@@ -110,21 +110,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
-    const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
-      defaultMessage: 'Services',
-    });
-    const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
-      defaultMessage: 'Traces',
-    });
-    const serviceMapTitle = i18n.translate(
-      'xpack.apm.navigation.serviceMapTitle',
-      { defaultMessage: 'Service Map' }
-    );
-
-    const backendsTitle = i18n.translate('xpack.apm.navigation.backendsTitle', {
-      defaultMessage: 'Backends',
-    });
-
     // register observability nav if user has access to plugin
     plugins.observability.navigation.registerSections(
       from(core.getStartServices()).pipe(
