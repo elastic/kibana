@@ -61,10 +61,14 @@ export const CSV_REPORT_TYPE = 'CSV';
 export const CSV_JOB_TYPE = 'csv_searchsource';
 
 export const PDF_REPORT_TYPE = 'printablePdf';
+export const PDF_REPORT_TYPE_V2 = 'printablePdfV2';
 export const PDF_JOB_TYPE = 'printable_pdf';
+export const PDF_JOB_TYPE_V2 = 'printable_pdf_v2';
 
 export const PNG_REPORT_TYPE = 'PNG';
+export const PNG_REPORT_TYPE_V2 = 'pngV2';
 export const PNG_JOB_TYPE = 'PNG';
+export const PNG_JOB_TYPE_V2 = 'PNGV2';
 
 export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 
@@ -97,6 +101,20 @@ export const ILM_POLICY_NAME = 'kibana-reporting';
 
 // Management UI route
 export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';
+
+export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
+
+/**
+ * A way to get the client side route for the reporting redirect app.
+ *
+ * This route currently expects a job ID and a locator that to use from that job so that it can redirect to the
+ * correct page.
+ *
+ * TODO: Accommodate 'forceNow' value that some visualizations may rely on
+ */
+export const getRedirectAppPathHome = () => {
+  return '/app/management/insightsAndAlerting/reporting/r';
+};
 
 // Statuses
 export enum JOB_STATUSES {

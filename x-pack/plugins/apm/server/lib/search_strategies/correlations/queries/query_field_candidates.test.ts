@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 
 import { hasPrefixToInclude } from '../utils/has_prefix_to_include';
 
@@ -22,6 +23,8 @@ const params = {
   start: '2020',
   end: '2021',
   includeFrozen: false,
+  environment: ENVIRONMENT_ALL.value,
+  kuery: '',
 };
 
 describe('query_field_candidates', () => {

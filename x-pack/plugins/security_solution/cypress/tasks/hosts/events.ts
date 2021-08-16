@@ -17,7 +17,7 @@ import {
   LOAD_MORE,
   SERVER_SIDE_EVENT_COUNT,
 } from '../../screens/hosts/events';
-import { DRAGGABLE_HEADER } from '../../screens/timeline';
+import { DATAGRID_HEADERS } from '../../screens/timeline';
 import { REFRESH_BUTTON } from '../../screens/security_header';
 
 export const addsHostGeoCityNameToHeader = () => {
@@ -68,12 +68,12 @@ export const dragAndDropColumn = ({
   column: number;
   newPosition: number;
 }) => {
-  cy.get(DRAGGABLE_HEADER).first().should('exist');
-  cy.get(DRAGGABLE_HEADER)
+  cy.get(DATAGRID_HEADERS).first().should('exist');
+  cy.get(DATAGRID_HEADERS)
     .eq(column)
     .then((header) => drag(header));
 
-  cy.get(DRAGGABLE_HEADER)
+  cy.get(DATAGRID_HEADERS)
     .eq(newPosition)
     .then((targetPosition) => {
       drop(targetPosition);

@@ -20,22 +20,23 @@ import {
   EuiButton,
   EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { satisfies } from 'semver';
 
-import { OsqueryManagerPackagePolicyConfigRecord } from '../../../common/types';
 import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
-import { Form, getUseField, Field } from '../../shared_imports';
+import { Form, getUseField, Field, useFormData } from '../../shared_imports';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
 import {
   UseScheduledQueryGroupQueryFormProps,
+  ScheduledQueryGroupFormData,
   useScheduledQueryGroupQueryForm,
 } from './use_scheduled_query_group_query_form';
 import { ManageIntegrationLink } from '../../components/manage_integration_link';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
+import { ECSMappingEditorField, ECSMappingEditorFieldRef } from './lazy_ecs_mapping_editor_field';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -43,7 +44,7 @@ interface QueryFlyoutProps {
   uniqueQueryIds: string[];
   defaultValue?: UseScheduledQueryGroupQueryFormProps['defaultValue'] | undefined;
   integrationPackageVersion?: string | undefined;
-  onSave: (payload: OsqueryManagerPackagePolicyConfigRecord) => Promise<void>;
+  onSave: (payload: ScheduledQueryGroupFormData) => Promise<void>;
   onClose: () => void;
 }
 
@@ -54,18 +55,25 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   onSave,
   onClose,
 }) => {
+  const ecsFieldRef = useRef<ECSMappingEditorFieldRef>();
   const [isEditMode] = useState(!!defaultValue);
   const { form } = useScheduledQueryGroupQueryForm({
     uniqueQueryIds,
     defaultValue,
-    handleSubmit: (payload, isValid) =>
-      new Promise((resolve) => {
-        if (isValid) {
-          onSave(payload);
+    handleSubmit: async (payload, isValid) => {
+      const ecsFieldValue = await ecsFieldRef?.current?.validate();
+
+      return new Promise((resolve) => {
+        if (isValid && ecsFieldValue) {
+          onSave({
+            ...payload,
+            ecs_mapping: ecsFieldValue,
+          });
           onClose();
         }
         resolve();
-      }),
+      });
+    },
   });
 
   /* Platform and version fields are supported since osquery_manager@0.3.0 */
@@ -75,6 +83,11 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   );
 
   const { submit, setFieldValue, reset } = form;
+
+  const [{ query }] = useFormData({
+    form,
+    watch: ['query'],
+  });
 
   const handleSetQueryValue = useCallback(
     (savedQuery) => {
@@ -182,6 +195,16 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <CommonUseField
+                  path="ecs_mapping"
+                  component={ECSMappingEditorField}
+                  query={query}
+                  fieldRef={ecsFieldRef}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </Form>
           {!isFieldSupported ? (
             <EuiCallOut

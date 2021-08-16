@@ -188,7 +188,6 @@ export const EventFiltersListPage = memo(() => {
 
   return (
     <AdministrationListPage
-      beta={false}
       headerBackComponent={backButton}
       title={
         <FormattedMessage
