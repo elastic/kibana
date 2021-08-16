@@ -15,13 +15,13 @@ import type {
   ALERT_DURATION as ALERT_DURATION_TYPED,
   ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
   ALERT_STATUS as ALERT_STATUS_TYPED,
-  ALERT_REASON as ALERT_REASON_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
 } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
   ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
   ALERT_STATUS as ALERT_STATUS_NON_TYPED,
-  ALERT_REASON as ALERT_REASON_NON_TYPED,
+  ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
   TIMESTAMP,
   // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
@@ -62,7 +62,7 @@ const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
 const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
-const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
+const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
 
 interface AlertsTableTGridProps {
   indexName: string;
@@ -143,7 +143,7 @@ export const columns: Array<
       defaultMessage: 'Reason',
     }),
     linkField: '*',
-    id: ALERT_REASON,
+    id: ALERT_RULE_NAME,
   },
 ];
 
