@@ -42,7 +42,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const BULK_INDEX_DELAY = 1000;
   const INDEXING_DELAY = 5000;
 
-  const ALERTS_INDEX_TARGET = '.kibana-alerts-observability.apm.alerts*';
+  const ALERTS_INDEX_TARGET = '.alerts-observability.apm.alerts*';
   const APM_METRIC_INDEX_NAME = 'apm-8.0.0-transaction';
 
   const createTransactionMetric = (override: Record<string, any>) => {
