@@ -8,7 +8,6 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import intersection from 'lodash/intersection';
-import { isSupportedEsServer } from 'src/core/server/elasticsearch';
 
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';

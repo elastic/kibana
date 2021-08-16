@@ -7,7 +7,6 @@
  */
 
 import type { Payload } from '@hapi/boom';
-import { ApiResponse } from '@elastic/elasticsearch';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../../serialization';
 import type { SavedObject } from '../../types';
