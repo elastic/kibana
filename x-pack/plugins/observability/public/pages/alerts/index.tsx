@@ -16,6 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import type { AlertStatus } from '../../../common/typings';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
@@ -46,7 +47,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   const history = useHistory();
   const refetch = useRef<() => void>();
   const {
-    query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', status = 'open' },
+    query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', status = ALERT_STATUS_ACTIVE },
   } = routeParams;
 
   useBreadcrumbs([
