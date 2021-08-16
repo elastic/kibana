@@ -11,22 +11,25 @@ import { mergeProjection } from './util/merge_projection';
 import { getMetricsProjection } from './metrics';
 
 export function getServiceNodesProjection({
-  kuery,
   setup,
   serviceName,
   serviceNodeName,
+  environment,
+  kuery,
 }: {
-  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
+  environment: string;
+  kuery: string;
 }) {
   return mergeProjection(
     getMetricsProjection({
-      kuery,
       setup,
       serviceName,
       serviceNodeName,
+      environment,
+      kuery,
     }),
     {
       body: {

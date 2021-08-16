@@ -50,6 +50,14 @@ export function fetchChart(
   sendLoadingMsg(charts$);
   sendLoadingMsg(totalHits$);
 
+  const executionContext = {
+    type: 'application',
+    name: 'discover',
+    description: 'fetch chart data and total hits',
+    url: window.location.pathname,
+    id: '',
+  };
+
   const fetch$ = searchSource
     .fetch$({
       abortSignal: abortController.signal,
@@ -64,6 +72,7 @@ export function fetchChart(
             'This request queries Elasticsearch to fetch the aggregation data for the chart.',
         }),
       },
+      executionContext,
     })
     .pipe(filter((res) => isCompleteResponse(res)));
 

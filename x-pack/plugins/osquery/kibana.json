@@ -7,15 +7,14 @@
     "githubTeam": "security-asset-management"
   },
   "kibanaVersion": "kibana",
-  "optionalPlugins": ["home", "usageCollection", "lens"],
-  "requiredBundles": ["esUiShared", "kibanaUtils", "kibanaReact"],
+  "optionalPlugins": ["fleet", "home", "usageCollection", "lens"],
+  "requiredBundles": ["esUiShared", "fleet", "kibanaUtils", "kibanaReact"],
   "requiredPlugins": [
     "actions",
     "data",
     "dataEnhanced",
     "discover",
     "features",
-    "fleet",
     "navigation",
     "triggersActionsUi",
     "security"

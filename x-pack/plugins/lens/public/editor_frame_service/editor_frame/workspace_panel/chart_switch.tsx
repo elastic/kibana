@@ -136,21 +136,22 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       );
     }
     layerIds.forEach((layerId) => {
-      const layerDatasourceId = Object.entries(props.datasourceMap).find(
-        ([datasourceId, datasource]) => {
+      const [layerDatasourceId] =
+        Object.entries(props.datasourceMap).find(([datasourceId, datasource]) => {
           return (
             datasourceStates[datasourceId] &&
             datasource.getLayers(datasourceStates[datasourceId].state).includes(layerId)
           );
-        }
-      )![0];
-      dispatchLens(
-        updateLayer({
-          layerId,
-          datasourceId: layerDatasourceId,
-          updater: props.datasourceMap[layerDatasourceId].removeLayer,
-        })
-      );
+        }) ?? [];
+      if (layerDatasourceId) {
+        dispatchLens(
+          updateLayer({
+            layerId,
+            datasourceId: layerDatasourceId,
+            updater: props.datasourceMap[layerDatasourceId].removeLayer,
+          })
+        );
+      }
     });
   }
 

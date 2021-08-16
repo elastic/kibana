@@ -10,5 +10,5 @@
   "server": true,
   "ui": true,
   "configPath": ["xpack", "grokdebugger"],
-  "requiredBundles": ["kibanaReact"]
+  "requiredBundles": ["kibanaReact", "esUiShared"]
 }

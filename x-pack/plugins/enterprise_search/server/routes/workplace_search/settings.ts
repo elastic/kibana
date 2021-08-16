@@ -43,6 +43,26 @@ export function registerOrgSettingsCustomizeRoute({
   );
 }
 
+export function registerOrgSettingsUploadImagesRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.put(
+    {
+      path: '/api/workplace_search/org/settings/upload_images',
+      validate: {
+        body: schema.object({
+          logo: schema.maybe(schema.nullable(schema.string())),
+          icon: schema.maybe(schema.nullable(schema.string())),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/settings/upload_images',
+    })
+  );
+}
+
 export function registerOrgSettingsOauthApplicationRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -69,5 +89,6 @@ export function registerOrgSettingsOauthApplicationRoute({
 export const registerSettingsRoutes = (dependencies: RouteDependencies) => {
   registerOrgSettingsRoute(dependencies);
   registerOrgSettingsCustomizeRoute(dependencies);
+  registerOrgSettingsUploadImagesRoute(dependencies);
   registerOrgSettingsOauthApplicationRoute(dependencies);
 };

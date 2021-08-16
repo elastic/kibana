@@ -6,6 +6,7 @@
  */
 
 import {
+  ALERT_REASON,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAMESPACE,
   ALERT_STATUS,
@@ -50,8 +51,9 @@ describe('buildAlert', () => {
     const doc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
     delete doc._source.event;
     const rule = getRulesSchemaMock();
+    const reason = 'alert reasonable reason';
     const alert = {
-      ...buildAlert([doc], rule, SPACE_ID),
+      ...buildAlert([doc], rule, SPACE_ID, reason),
       ...additionalAlertFields(doc),
     };
     const timestamp = alert['@timestamp'];
@@ -68,6 +70,7 @@ describe('buildAlert', () => {
         },
       ],
       [ALERT_ORIGINAL_TIME]: '2020-04-20T21:27:45.000Z',
+      [ALERT_REASON]: 'alert reasonable reason',
       [ALERT_STATUS]: 'open',
       [ALERT_WORKFLOW_STATUS]: 'open',
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
@@ -119,8 +122,9 @@ describe('buildAlert', () => {
       module: 'system',
     };
     const rule = getRulesSchemaMock();
+    const reason = 'alert reasonable reason';
     const alert = {
-      ...buildAlert([doc], rule, SPACE_ID),
+      ...buildAlert([doc], rule, SPACE_ID, reason),
       ...additionalAlertFields(doc),
     };
     const timestamp = alert['@timestamp'];
@@ -143,6 +147,7 @@ describe('buildAlert', () => {
         kind: 'event',
         module: 'system',
       },
+      [ALERT_REASON]: 'alert reasonable reason',
       [ALERT_STATUS]: 'open',
       [ALERT_WORKFLOW_STATUS]: 'open',
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {

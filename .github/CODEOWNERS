@@ -49,6 +49,7 @@
 /examples/ui_actions_explorer/ @elastic/kibana-app-services
 /examples/url_generators_examples/ @elastic/kibana-app-services
 /examples/url_generators_explorer/ @elastic/kibana-app-services
+/examples/field_formats_example/ @elastic/kibana-app-services
 /packages/elastic-datemath/ @elastic/kibana-app-services
 /packages/kbn-interpreter/ @elastic/kibana-app-services
 /src/plugins/bfetch/ @elastic/kibana-app-services
@@ -111,6 +112,8 @@
 /x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
 /x-pack/test/functional_with_es_ssl/apps/uptime  @elastic/uptime
 /x-pack/test/functional/apps/uptime @elastic/uptime
+/x-pack/test/functional/es_archives/uptime @elastic/uptime
+/x-pack/test/functional/services/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
 
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
@@ -127,6 +130,12 @@
 
 # Presentation
 /src/plugins/dashboard/ @elastic/kibana-presentation
+/src/plugins/expression_error/ @elastic/kibana-presentation
+/src/plugins/expression_image/ @elastic/kibana-presentation
+/src/plugins/expression_metric/ @elastic/kibana-presentation
+/src/plugins/expression_repeat_image/ @elastic/kibana-presentation
+/src/plugins/expression_reveal_image/ @elastic/kibana-presentation
+/src/plugins/expression_shape/ @elastic/kibana-presentation
 /src/plugins/input_control_vis/ @elastic/kibana-presentation
 /src/plugins/vis_type_markdown/ @elastic/kibana-presentation
 /src/plugins/presentation_util/ @elastic/kibana-presentation

@@ -7,10 +7,11 @@
  */
 
 import { isUndefined } from 'lodash';
+import { estypes } from '@elastic/elasticsearch';
 import { migrateFilter } from './migrate_filter';
 import { filterMatchesIndex } from './filter_matches_index';
 import { Filter, cleanFilter, isFilterDisabled } from '../filters';
-import { IndexPatternBase } from './types';
+import { BoolQuery, IndexPatternBase } from './types';
 import { handleNestedFilter } from './handle_nested_filter';
 
 /**
@@ -33,20 +34,19 @@ const filterNegate = (reverse: boolean) => (filter: Filter) => {
  * @param  {Object} filter - The filter to translate
  * @return {Object} the query version of that filter
  */
-const translateToQuery = (filter: Filter) => {
-  if (!filter) return;
-
+const translateToQuery = (filter: Partial<Filter>): estypes.QueryDslQueryContainer => {
   if (filter.query) {
     return filter.query;
   }
 
-  return filter;
+  // TODO: investigate what's going on here! What does this mean for filters that don't have a query!
+  return filter as estypes.QueryDslQueryContainer;
 };
 
 /**
  * @param filters
  * @param indexPattern
- * @param ignoreFilterIfFieldNotInIndex by default filters that use fields that can't be found in the specified index pattern are not applied. Set this to true if you want to apply them any way.
+ * @param ignoreFilterIfFieldNotInIndex by default filters that use fields that can't be found in the specified index pattern are not applied. Set this to true if you want to apply them anyway.
  * @returns An EQL query
  *
  * @public
@@ -55,11 +55,12 @@ export const buildQueryFromFilters = (
   filters: Filter[] = [],
   indexPattern: IndexPatternBase | undefined,
   ignoreFilterIfFieldNotInIndex: boolean = false
-) => {
+): BoolQuery => {
   filters = filters.filter((filter) => filter && !isFilterDisabled(filter));
 
   const filtersToESQueries = (negate: boolean) => {
     return filters
+      .filter((f) => !!f)
       .filter(filterNegate(negate))
       .filter(
         (filter) => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern)
@@ -68,8 +69,8 @@ export const buildQueryFromFilters = (
         return migrateFilter(filter, indexPattern);
       })
       .map((filter) => handleNestedFilter(filter, indexPattern))
-      .map(translateToQuery)
-      .map(cleanFilter);
+      .map(cleanFilter)
+      .map(translateToQuery);
   };
 
   return {
