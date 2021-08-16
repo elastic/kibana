@@ -19,6 +19,11 @@ export enum GroupByOption {
   node = 'node',
 }
 
-export type DeprecationTableColumns = 'type' | 'index' | 'message' | 'correctiveAction';
+export type DeprecationTableColumns =
+  | 'type'
+  | 'index'
+  | 'message'
+  | 'correctiveAction'
+  | 'isCritical';
 
 export type Status = 'in_progress' | 'complete' | 'idle' | 'error';

@@ -14,7 +14,7 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import { ReindexStatus } from '../../../../../../common/types';
 import { LoadingState } from '../../../types';
@@ -57,15 +57,21 @@ const i18nTexts = {
       defaultMessage: 'Reindex paused',
     }
   ),
-  criticalBadgeLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.criticalBadgeLabel',
+  resolutionText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.resolutionLabel',
     {
-      defaultMessage: 'Critical',
+      defaultMessage: 'Reindex',
+    }
+  ),
+  resolutionTooltipLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.resolutionTooltipLabel',
+    {
+      defaultMessage: 'This deprecation requires reindexing an index to resolve.',
     }
   ),
 };
 
-export const ReindexStatusCell: React.FunctionComponent = () => {
+export const ReindexResolutionCell: React.FunctionComponent = () => {
   const { reindexState } = useReindexContext();
 
   if (reindexState.loadingState === LoadingState.Loading) {
@@ -139,5 +145,16 @@ export const ReindexStatusCell: React.FunctionComponent = () => {
       );
   }
 
-  return <EuiBadge color="danger">{i18nTexts.criticalBadgeLabel}</EuiBadge>;
+  return (
+    <EuiToolTip position="top" content={i18nTexts.resolutionTooltipLabel}>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="indexSettings" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
+  );
 };

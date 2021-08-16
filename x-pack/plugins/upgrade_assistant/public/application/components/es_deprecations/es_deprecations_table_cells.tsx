@@ -13,7 +13,7 @@ import { DEPRECATION_TYPE_MAP } from '../constants';
 import { DeprecationTableColumns } from '../types';
 
 interface Props {
-  statusTableCell?: React.ReactNode;
+  resolutionTableCell?: React.ReactNode;
   fieldName: DeprecationTableColumns;
   deprecation: EnrichedDeprecationInfo;
   openFlyout: () => void;
@@ -29,21 +29,14 @@ const i18nTexts = {
 };
 
 export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
-  statusTableCell,
+  resolutionTableCell,
   fieldName,
   deprecation,
   openFlyout,
 }) => {
-  // "Type" column
-  if (fieldName === 'type') {
-    return <>{DEPRECATION_TYPE_MAP[deprecation.type as EnrichedDeprecationInfo['type']]}</>;
-  }
-
   // "Status column"
-  if (fieldName === 'correctiveAction') {
-    if (statusTableCell) {
-      return <>{statusTableCell}</>;
-    } else if (deprecation.isCritical === true) {
+  if (fieldName === 'isCritical') {
+    if (deprecation.isCritical === true) {
       return <EuiBadge color="danger">{i18nTexts.criticalBadgeLabel}</EuiBadge>;
     }
 
@@ -60,6 +53,20 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
         {deprecation.message}
       </EuiLink>
     );
+  }
+
+  // "Type" column
+  if (fieldName === 'type') {
+    return <>{DEPRECATION_TYPE_MAP[deprecation.type as EnrichedDeprecationInfo['type']]}</>;
+  }
+
+  // "Resolution column"
+  if (fieldName === 'correctiveAction') {
+    if (resolutionTableCell) {
+      return <>{resolutionTableCell}</>;
+    }
+
+    return <>{''}</>;
   }
 
   // Default behavior: render value or empty string if undefined

@@ -72,11 +72,11 @@ const i18nTexts = {
 };
 
 const cellToLabelMap = {
-  correctiveAction: {
+  isCritical: {
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.statusColumnTitle', {
       defaultMessage: 'Status',
     }),
-    width: '4px',
+    width: '6px',
   },
   message: {
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.issueColumnTitle', {
@@ -93,6 +93,12 @@ const cellToLabelMap = {
   index: {
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.nameColumnTitle', {
       defaultMessage: 'Name',
+    }),
+    width: '24px',
+  },
+  correctiveAction: {
+    label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.resolutionColumnTitle', {
+      defaultMessage: 'Resolution',
     }),
     width: '24px',
   },
@@ -133,7 +139,7 @@ const getSortedItems = (deprecations: EnrichedDeprecationInfo[], sortConfig: Sor
   const { isSortAscending, sortField } = sortConfig;
   const sorted = sortBy(deprecations, [
     (deprecation) => {
-      if (sortField === 'correctiveAction') {
+      if (sortField === 'isCritical') {
         return deprecation.isCritical !== true;
       }
       return deprecation[sortField];
@@ -149,7 +155,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
 }) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     isSortAscending: true,
-    sortField: 'correctiveAction',
+    sortField: 'isCritical',
   });
 
   const [itemsPerPage, setItemsPerPage] = useState(pageSizeOptions[0]);

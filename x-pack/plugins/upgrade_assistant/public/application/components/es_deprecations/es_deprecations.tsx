@@ -32,7 +32,7 @@ const i18nTexts = {
   }),
   pageDescription: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageDescription', {
     defaultMessage:
-      'Review your deprecation issues. Reindex indices or follow step-by-step instructions for any issues in need of manual configuration.',
+      'You must resolve all critical issues before upgrading. Back up recommended. Make sure you have a current snapshot before modifying your configuration or reindexing.',
   }),
   docLinkText: i18n.translate('xpack.upgradeAssistant.esDeprecations.docLinkText', {
     defaultMessage: 'Documentation',

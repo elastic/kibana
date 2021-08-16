@@ -12,7 +12,7 @@ import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
 import { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
-import { ReindexStatusCell } from './status_table_cell';
+import { ReindexResolutionCell } from './resolution_table_cell';
 import { ReindexFlyout, ReindexFlyoutProps } from './flyout';
 import { ReindexStatusProvider, useReindexContext } from './context';
 
@@ -37,9 +37,9 @@ export const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
   } = useGlobalFlyout();
 
   const closeFlyout = useCallback(async () => {
-    await api.sendReindexTelemetryData({ close: true });
-    setShowFlyout(false);
     removeContentFromGlobalFlyout('reindexFlyout');
+    setShowFlyout(false);
+    await api.sendReindexTelemetryData({ close: true });
   }, [api, removeContentFromGlobalFlyout]);
 
   useEffect(() => {
@@ -84,7 +84,7 @@ export const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
               fieldName={field}
               openFlyout={() => setShowFlyout(true)}
               deprecation={deprecation}
-              statusTableCell={<ReindexStatusCell />}
+              resolutionTableCell={<ReindexResolutionCell />}
             />
           </EuiTableRowCell>
         );

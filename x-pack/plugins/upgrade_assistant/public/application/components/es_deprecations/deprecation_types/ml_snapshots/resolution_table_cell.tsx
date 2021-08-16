@@ -8,7 +8,7 @@
 import React from 'react';
 
 import {
-  EuiBadge,
+  EuiToolTip,
   EuiFlexItem,
   EuiText,
   EuiFlexGroup,
@@ -62,9 +62,22 @@ const i18nTexts = {
       defaultMessage: 'Critical',
     }
   ),
+  resolutionText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.resolutionText',
+    {
+      defaultMessage: 'Upgrade or delete snapshots',
+    }
+  ),
+  resolutionTooltipLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.resolutionTooltipLabel',
+    {
+      defaultMessage:
+        'This deprecation requires upgrading or deleting a job model snapshot to resolve.',
+    }
+  ),
 };
 
-export const MlSnapshotsStatusCell: React.FunctionComponent = () => {
+export const MlSnapshotsResolutionCell: React.FunctionComponent = () => {
   const { snapshotState } = useMlSnapshotContext();
 
   if (snapshotState.status === 'in_progress') {
@@ -118,5 +131,16 @@ export const MlSnapshotsStatusCell: React.FunctionComponent = () => {
     );
   }
 
-  return <EuiBadge color="danger">{i18nTexts.criticalBadgeLabel}</EuiBadge>;
+  return (
+    <EuiToolTip position="top" content={i18nTexts.resolutionTooltipLabel}>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="indexSettings" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
+  );
 };

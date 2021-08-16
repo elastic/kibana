@@ -13,7 +13,7 @@ import { useAppContext } from '../../../../app_context';
 import type { ResponseError } from '../../../../lib/api';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { DeprecationTableColumns, Status } from '../../../types';
-import { IndexSettingsStatusCell } from './status_table_cell';
+import { IndexSettingsResolutionCell } from './resolution_table_cell';
 import { RemoveIndexSettingsFlyout, RemoveIndexSettingsFlyoutProps } from './flyout';
 
 const { useGlobalFlyout } = GlobalFlyout;
@@ -93,7 +93,7 @@ export const IndexSettingsTableRow: React.FunctionComponent<Props> = ({
               fieldName={field}
               openFlyout={() => setShowFlyout(true)}
               deprecation={deprecation}
-              statusTableCell={<IndexSettingsStatusCell status={status} />}
+              resolutionTableCell={<IndexSettingsResolutionCell status={status} />}
             />
           </EuiTableRowCell>
         );

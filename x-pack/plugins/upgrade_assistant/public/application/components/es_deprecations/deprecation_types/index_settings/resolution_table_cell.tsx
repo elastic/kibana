@@ -7,7 +7,14 @@
 
 import React from 'react';
 
-import { EuiFlexItem, EuiText, EuiFlexGroup, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiText,
+  EuiFlexGroup,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Status } from '../../../types';
 
@@ -30,6 +37,18 @@ const i18nTexts = {
       defaultMessage: 'Settings removal failed',
     }
   ),
+  resolutionText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.indexSettings.resolutionText',
+    {
+      defaultMessage: 'Remove settings',
+    }
+  ),
+  resolutionTooltipLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.indexSettings.resolutionTooltipLabel',
+    {
+      defaultMessage: 'This deprecation requires removing index settings from an index to resolve.',
+    }
+  ),
 };
 
 interface Props {
@@ -38,7 +57,7 @@ interface Props {
   };
 }
 
-export const IndexSettingsStatusCell: React.FunctionComponent<Props> = ({ status }) => {
+export const IndexSettingsResolutionCell: React.FunctionComponent<Props> = ({ status }) => {
   const { statusType } = status;
   if (statusType === 'in_progress') {
     return (
@@ -91,5 +110,16 @@ export const IndexSettingsStatusCell: React.FunctionComponent<Props> = ({ status
     );
   }
 
-  return <>{''}</>;
+  return (
+    <EuiToolTip position="top" content={i18nTexts.resolutionTooltipLabel}>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="indexSettings" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
+  );
 };

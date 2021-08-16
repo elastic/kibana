@@ -12,7 +12,7 @@ import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
 import { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
-import { MlSnapshotsStatusCell } from './status_table_cell';
+import { MlSnapshotsResolutionCell } from './resolution_table_cell';
 import { FixSnapshotsFlyout, FixSnapshotsFlyoutProps } from './flyout';
 import { MlSnapshotsStatusProvider, useMlSnapshotContext } from './context';
 
@@ -68,7 +68,7 @@ export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = 
               fieldName={field}
               openFlyout={() => setShowFlyout(true)}
               deprecation={deprecation}
-              statusTableCell={<MlSnapshotsStatusCell />}
+              resolutionTableCell={<MlSnapshotsResolutionCell />}
             />
           </EuiTableRowCell>
         );
