@@ -17,9 +17,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiNotificationBadge,
+  EuiSpacer,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useQuery } from 'react-query';
 
 import {
   TypedLensByValueInput,
@@ -30,6 +31,8 @@ import { FilterStateStore } from '../../../../../src/plugins/data/common';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
 import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';
+import { useScheduledQueryGroupQueryLastResults } from './use_scheduled_query_group_query_last_results';
+import { useScheduledQueryGroupQueryErrors } from './use_scheduled_query_group_query_errors';
 
 const VIEW_IN_DISCOVER = i18n.translate(
   'xpack.osquery.scheduledQueryGroup.queriesTable.viewDiscoverResultsActionAriaLabel',
@@ -295,9 +298,13 @@ interface ScheduledQueryExpandedContentProps {
 
 const ScheduledQueryExpandedContent = React.memo<ScheduledQueryExpandedContentProps>(
   ({ actionId, interval }) => (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="xl">
       <EuiFlexItem>
-        <ScheduledQueryErrorsTable actionId={actionId} interval={interval} />
+        <EuiSpacer size="m" />
+        <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
+          <ScheduledQueryErrorsTable actionId={actionId} interval={interval} />
+        </EuiPanel>
+        <EuiSpacer size="m" />
       </EuiFlexItem>
     </EuiFlexGroup>
   )
@@ -322,94 +329,16 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
 }) => {
   const data = useKibana().services.data;
 
-  const { data: lastResultsData, isFetched } = useQuery(
-    ['scheduledQueryLastResults', { queryId }],
-    async () => {
-      const indexPattern = await data.indexPatterns.find('logs-*');
-      const searchSource = await data.search.searchSource.create({
-        index: indexPattern[0],
-        aggs: {
-          runs: {
-            terms: {
-              field: 'response_id',
-              order: { first_event_ingested_time: 'desc' },
-              size: 1,
-            },
-            aggs: {
-              first_event_ingested_time: { min: { field: 'event.ingested' } },
-              unique_agents: { cardinality: { field: 'agent.id' } },
-            },
-          },
-        },
-        filter: [
-          {
-            meta: {
-              alias: null,
-              disabled: false,
-              negate: false,
-              key: 'action_id',
-              value: actionId,
-            },
-            query: {
-              match_phrase: {
-                action_id: actionId,
-              },
-            },
-          },
-        ],
-      });
+  const { data: lastResultsData, isFetched } = useScheduledQueryGroupQueryLastResults({
+    actionId,
+    queryId,
+    interval,
+  });
 
-      const responseData = await searchSource.fetch$().toPromise();
-
-      // @ts-expect-error update types
-      return responseData.rawResponse.aggregations?.runs?.buckets[0];
-    }
-  );
-
-  const { data: errorsData, isFetched: errorsFetched } = useQuery(
-    ['scheduledQueryErrors', { actionId, interval }],
-    async () => {
-      const indexPattern = await data.indexPatterns.find('logs-*');
-      const searchSource = await data.search.searchSource.create({
-        index: indexPattern[0],
-        query: {
-          // @ts-expect-error update types
-          bool: {
-            filter: [
-              {
-                match_phrase: {
-                  message: 'Error',
-                },
-              },
-              {
-                term: {
-                  'data_stream.dataset': 'elastic_agent.osquerybeat',
-                },
-              },
-              {
-                match_phrase: {
-                  message: actionId,
-                },
-              },
-              {
-                range: {
-                  'event.ingested': {
-                    gte: `now-${interval * 10}s`,
-                    lte: 'now',
-                  },
-                },
-              },
-            ],
-          },
-        },
-        size: 0,
-      });
-
-      const responseData = await searchSource.fetch$().toPromise();
-
-      return responseData;
-    }
-  );
+  const { data: errorsData, isFetched: errorsFetched } = useScheduledQueryGroupQueryErrors({
+    actionId,
+    interval,
+  });
 
   const handleErrorsToggle = useCallback(() => toggleErrors({ queryId, interval }), [
     queryId,
@@ -526,7 +455,7 @@ const ScheduledQueryGroupQueriesStatusTableComponent: React.FC<ScheduledQueryGro
           actionId={getPackActionId(item.vars.id.value, scheduledQueryGroupName)}
           interval={item.vars?.interval.value}
           toggleErrors={toggleErrors}
-          expanded={!!itemIdToExpandedRowMap[item.id]}
+          expanded={!!itemIdToExpandedRowMap[item.vars.id.value]}
         />
       </>
     ),

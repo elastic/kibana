@@ -6,15 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiInMemoryTable, EuiCodeBlock, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { EuiInMemoryTable, EuiCodeBlock, EuiToolTip, EuiButtonIcon, EuiPanel } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { encode } from 'rison-node';
 import { stringify } from 'querystring';
 
-import { useQuery } from 'react-query';
-import { SortDirection } from '../../../../../src/plugins/data/public';
-import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
+import {
+  useKibana,
+  isModifiedEvent,
+  isLeftClickEvent,
+  isMiddleClickEvent,
+} from '../common/lib/kibana';
 import { AgentIdToName } from '../agents/agent_id_to_name';
+import { useScheduledQueryGroupQueryErrors } from './use_scheduled_query_group_query_errors';
 
 const VIEW_IN_LOGS = i18n.translate(
   'xpack.osquery.scheduledQueryGroup.queriesTable.viewLogsErrorsActionAriaLabel',
@@ -38,7 +42,10 @@ const ViewErrorsInLogsActionComponent: React.FC<ViewErrorsInLogsActionProps> = (
 
   const handleClick = useCallback(
     (event) => {
-      const openInNewTab = !(!isModifiedEvent(event) && isLeftClickEvent(event));
+      const openInNewTab = !(
+        !isModifiedEvent(event) &&
+        (isLeftClickEvent(event) || isMiddleClickEvent(event))
+      );
 
       event.preventDefault();
       const queryString = stringify({
@@ -84,66 +91,7 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
   actionId,
   interval,
 }) => {
-  const data = useKibana().services.data;
-
-  const { data: lastErrosData } = useQuery(
-    ['scheduledQueryErrors2', { actionId, interval }],
-    async () => {
-      const indexPattern = await data.indexPatterns.find('logs-*');
-      const searchSource = await data.search.searchSource.create({
-        index: indexPattern[0],
-        fields: ['*'],
-        aggs: {
-          unique_agents: { cardinality: { field: 'agent.id' } },
-        },
-        sort: [
-          {
-            '@timestamp': SortDirection.desc,
-          },
-        ],
-        query: {
-          // @ts-expect-error update types
-          bool: {
-            filter: [
-              {
-                match_phrase: {
-                  message: 'Error',
-                },
-              },
-              {
-                term: {
-                  'data_stream.dataset': 'elastic_agent.osquerybeat',
-                },
-              },
-              {
-                match_phrase: {
-                  message: actionId,
-                },
-              },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: `now-${interval * 2}s`,
-                    lte: 'now',
-                  },
-                },
-              },
-            ],
-          },
-        },
-        size: 1000,
-      });
-
-      const responseData = await searchSource.fetch$().toPromise();
-
-      return responseData.rawResponse.hits;
-    },
-  );
-
-  // @ts-expect-error update types
-  const [pageIndex, setPageIndex] = useState(0);
-  // @ts-expect-error update types
-  const [pageSize, setPageSize] = useState(10);
+  const { data: lastErrorsData } = useScheduledQueryGroupQueryErrors({ actionId, interval });
 
   const renderAgentIdColumn = useCallback((agentId) => <AgentIdToName agentId={agentId} />, []);
 
@@ -201,9 +149,7 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
     []
   );
 
-  return lastErrosData?.hits?.length ? (
-    <EuiInMemoryTable items={lastErrosData.hits} columns={columns} pagination={pagination} />
-  ) : null;
+  return <EuiInMemoryTable items={lastErrorsData} columns={columns} pagination={pagination} />;
 };
 
 export const ScheduledQueryErrorsTable = React.memo(ScheduledQueryErrorsTableComponent);
