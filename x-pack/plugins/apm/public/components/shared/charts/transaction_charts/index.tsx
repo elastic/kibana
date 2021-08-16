@@ -14,20 +14,29 @@ import { LatencyChart } from '../latency_chart';
 import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
 import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
 
-export function TransactionCharts() {
+export function TransactionCharts({
+  kuery,
+  environment,
+}: {
+  kuery: string;
+  environment: string;
+}) {
   return (
     <>
-      <AnnotationsContextProvider>
+      <AnnotationsContextProvider environment={environment}>
         <ChartPointerEventContextProvider>
           <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem data-cy={`transaction-duration-charts`}>
               <EuiPanel hasBorder={true}>
-                <LatencyChart />
+                <LatencyChart kuery={kuery} environment={environment} />
               </EuiPanel>
             </EuiFlexItem>
 
             <EuiFlexItem style={{ flexShrink: 1 }}>
-              <ServiceOverviewThroughputChart />
+              <ServiceOverviewThroughputChart
+                environment={environment}
+                kuery={kuery}
+              />
             </EuiFlexItem>
           </EuiFlexGrid>
 
@@ -35,10 +44,16 @@ export function TransactionCharts() {
 
           <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem>
-              <TransactionErrorRateChart />
+              <TransactionErrorRateChart
+                kuery={kuery}
+                environment={environment}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
-              <TransactionBreakdownChart />
+              <TransactionBreakdownChart
+                kuery={kuery}
+                environment={environment}
+              />
             </EuiFlexItem>
           </EuiFlexGrid>
         </ChartPointerEventContextProvider>
