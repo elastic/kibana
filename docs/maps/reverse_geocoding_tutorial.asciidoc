@@ -10,12 +10,12 @@ You’ll learn to:
 
 - Upload custom regions.
 - Reverse geocoding with {es} {ref}/enrich-processor.html[enrich processor].
-- Create a map and visualize metrics by CSA regions.
+- Create a map and visualize CSA regions by web traffic.
 
 When you complete this tutorial, you’ll have a map that looks like this:
 
 [role="screenshot"]
-image::maps/images/reverse-geocoding-tutorial/csa_regions_by_web_traffic.jpeg[]
+image::maps/images/reverse-geocoding-tutorial/csa_regions_by_web_traffic.png[]
 
 
 [float]
@@ -36,13 +36,14 @@ That kind of scale in the United States is often captured with what the Census B
 
 To get the CSA boundary data, download the https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html[Cartographic Boundary shapefile (.shp)] from the Census Bureau’s website.
 
-To use it in Kibana, we need it as a GeoJSON format. You can use QGIS to convert the Cartographic Boundary shapefile to GeoJSON. Follow this https://gist.github.com/YKCzoli/b7f5ff0e0f641faba0f47fa5d16c4d8d[helpful tutorial] if you'd like to do the same. https://gist.githubusercontent.com/thomasneirynck/3813ddde31052b6b58b458ec2a86f81f/raw/2925c87f13324c75b6ed82ead9bf593f3224e847/csba.geojson[Download a GeoJSON version].
+To use it in Kibana, GeoJSON format is required. You can use QGIS to convert the Cartographic Boundary shapefile to GeoJSON. Follow this https://gist.github.com/YKCzoli/b7f5ff0e0f641faba0f47fa5d16c4d8d[helpful tutorial] if you'd like to do the same or you can https://gist.githubusercontent.com/thomasneirynck/3813ddde31052b6b58b458ec2a86f81f/raw/2925c87f13324c75b6ed82ead9bf593f3224e847/csba.geojson[Download a prebuilt GeoJSON version].
 
 Once you have your GeoJSON file:
 
 . Open the main menu, and click *Maps*.
 . Click *Create map*.
-. In the *Layers* list, click *Upload GeoJSON*.
+. Click *Add layer*.
+. Click *Upload GeoJSON*.
 . Use the File Picker to select the CSA GeoJSON file.
 . Set index name to *csa* and click *Import file*.
 . When importing is complete, click *Add as document layer*.
@@ -51,10 +52,6 @@ Once you have your GeoJSON file:
 .. Select *NAME*, *GEOID*, and *AFFGEOID*.
 .. Click *Add*.
 . Click *Save & close*.
-. *Save* the map.
-.. Give the map a title.
-.. Under *Add to dashboard*, select *None*.
-.. Click *Save and add to library*.
 
 Looking at the map, we get a sense of what exactly constitutes a metro area in the eyes of the Census Bureau.
 
@@ -136,8 +133,41 @@ PUT kibana_sample_data_logs/_settings
 }
 ----------------------------------
 
-Your web log data is has been enriched and contains GEOID and NAME fields from the matching *csa* region.
+. Open the main menu, and click *Discover*.
+. Set the index pattern to *kibana_sample_data_logs*.
+. Open the <<set-time-filter, time filter>>, and set the time range to the last 30 days.
+. Scan through the list of *Available fields* until you find the `csa.GEOID` field. You can also search for the field by name.
+. Click image:images/reverse-geocoding-tutorial/add-icon.png[Add icon] to toggle the field into the document table.
+. Find the 'csa.NAME' field and add it to your document table.
+
+Your web log data now contains `csa.GEOID` and `csa.NAME` fields from the matching *csa* region. Web log traffic not contained in a CSA region does not have values for `csa.GEOID` and `csa.NAME` fields.
 
 [role="screenshot"]
-image::maps/images/reverse-geocoding-tutorial/enriched_web_log.png[]
+image::maps/images/reverse-geocoding-tutorial/discover_enriched_web_log.png[]
+
+=== Step 3: Visualize Combined Statistical Area (CSA) regions by web traffic
+
+. Open the main menu, and click *Maps*.
+. Click *Create map*.
+. Click *Add layer*.
+. Click *Choropleth*.
+. For *Boundaries source*: 
+.. Select *Points, lines, and polygons from Elasticsearch*.
+.. Set *Index pattern* to *csa*.
+.. Set *Join field* to *GEOID*.
+. For *Statistics source*:
+.. Set *Index pattern* to *kibana_sample_data_logs*.
+.. Set *Join field* to *csa.GEOID.keyword*.
+. Click *Add layer*.
+. Scroll to *Layer Style* and Set *Label* to *Fixed*.
+. Click *Save & close*.
+. *Save* the map.
+.. Give the map a title.
+.. Under *Add to dashboard*, select *None*.
+.. Click *Save and add to library*.
+
+[role="screenshot"]
+image::maps/images/reverse-geocoding-tutorial/csa_regions_by_web_traffic.png[]
+
+Congratulations! You have completed the tutorial and have the recipe for visualizing custom regions. You can now try replicating this same analysis with your own data.
 
