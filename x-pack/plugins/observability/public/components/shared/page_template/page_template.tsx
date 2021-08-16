@@ -17,6 +17,7 @@ import {
   KibanaPageTemplateProps,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import type { NavigationSection } from '../../../services/navigation_registry';
+import { NavNameWithBadge } from './nav_name_with_badge';
 
 export type WrappedPageTemplateProps = Pick<
   KibanaPageTemplateProps,
