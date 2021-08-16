@@ -270,11 +270,7 @@ export function setQuery({
       forceRefreshTriggeredFromGlobalQueryTime: forceRefresh,
       timeFilters: timeFilters ? timeFilters : prevTimeFilters,
       timeslice: getNextTimeslice(),
-      query: {
-        ...(query ? query : prevQuery),
-        // ensure query changes to trigger re-fetch when "Refresh" clicked
-        // queryLastTriggeredAt: forceRefresh ? generateQueryTimestamp() : prevTriggeredAt,
-      },
+      query: query ? query : prevQuery,
       filters: filters ? filters : getFilters(getState()),
       searchSessionId: searchSessionId ? searchSessionId : getSearchSessionId(getState()),
       searchSessionMapBuffer,

@@ -115,7 +115,7 @@ export class TiledVectorLayer extends VectorLayer {
     dataFilters,
   }: DataRequestContext) {
     const requestToken: symbol = Symbol(`layer-${this.getId()}-${SOURCE_DATA_REQUEST_ID}`);
-    const searchFilters: VectorSourceRequestMeta = await this._getVectorSourceRequestMeta(
+    const requestMeta: VectorSourceRequestMeta = await this._getVectorSourceRequestMeta(
       dataFilters,
       this.getSource(),
       this._style as IVectorStyle
@@ -132,7 +132,7 @@ export class TiledVectorLayer extends VectorLayer {
           extentAware: false, // spatial extent knowledge is already fully automated by tile-loading based on pan-zooming
           source: this.getSource(),
           prevDataRequest,
-          nextRequestMeta: searchFilters,
+          nextRequestMeta: requestMeta,
           getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
             // TODO use meta features to determine if tiles already contain features for timeslice.
             return true;
@@ -145,18 +145,18 @@ export class TiledVectorLayer extends VectorLayer {
       }
     }
 
-    startLoading(SOURCE_DATA_REQUEST_ID, requestToken, searchFilters);
+    startLoading(SOURCE_DATA_REQUEST_ID, requestToken, requestMeta);
     try {
       const prevMeta = prevDataRequest ? prevDataRequest.getMeta() : undefined;
       const prevData = prevDataRequest
         ? (prevDataRequest.getData() as MVTSingleLayerVectorSourceConfig)
         : undefined;
       const urlToken =
-        !prevData || isRefreshOnlyQuery(prevMeta ? prevMeta.query : undefined, searchFilters.query)
+        !prevData || isRefreshOnlyQuery(prevMeta ? prevMeta.query : undefined, requestMeta.query)
           ? uuid()
           : prevData.urlToken;
 
-      const newUrlTemplateAndMeta = await this._source.getUrlTemplateWithMeta(searchFilters);
+      const newUrlTemplateAndMeta = await this._source.getUrlTemplateWithMeta(requestMeta);
 
       let urlTemplate;
       if (newUrlTemplateAndMeta.refreshTokenParamName) {
