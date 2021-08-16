@@ -600,7 +600,7 @@ Operations::
 Platform::
 * Compress stream chunks {kibana-pull}97994[#97994]
 Reporting::
-* Adds `handleSIGHUP: false` to puppeteer LaunchOptions {kibana-pull}104992[#104992]
+* Fixes a bug where sending Kibana `SIGHUP` would cause a running PDF or PNG report to fail {kibana-pull}104992[#104992]
 Security::
 * Fixes of the `ja-JP.json not found` error {kibana-pull}105023[#105023]
 * Role management: load field-level security suggestions on-demand {kibana-pull}98681[#98681]
