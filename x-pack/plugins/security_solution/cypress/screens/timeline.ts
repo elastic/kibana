@@ -34,8 +34,8 @@ export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
 
 export const CREATE_NEW_TIMELINE_TEMPLATE = '[data-test-subj="template-timeline-new"]';
 
-export const DRAGGABLE_HEADER =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="headers-group"] [data-test-subj="draggable-header"]';
+export const DATAGRID_HEADERS =
+  '[data-test-subj="events-viewer-panel"] [data-test-subj^="dataGridHeaderCell-"]';
 
 export const FAVORITE_TIMELINE = '[data-test-subj="timeline-favorite-filled-star"]';
 

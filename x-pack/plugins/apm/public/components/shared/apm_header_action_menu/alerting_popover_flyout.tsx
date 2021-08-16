@@ -26,7 +26,7 @@ const transactionDurationLabel = i18n.translate(
 );
 const transactionErrorRateLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.transactionErrorRate',
-  { defaultMessage: 'Transaction error rate' }
+  { defaultMessage: 'Failed transaction rate' }
 );
 const errorCountLabel = i18n.translate('xpack.apm.home.alertsMenu.errorCount', {
   defaultMessage: 'Error count',
@@ -146,7 +146,7 @@ export function AlertingPopoverAndFlyout({
       ],
     },
 
-    // transaction error rate panel
+    // Failed transactions panel
     {
       id: CREATE_TRANSACTION_ERROR_RATE_ALERT_PANEL_ID,
       title: transactionErrorRateLabel,

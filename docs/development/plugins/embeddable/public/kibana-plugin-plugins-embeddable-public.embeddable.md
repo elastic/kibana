@@ -20,6 +20,7 @@ export declare abstract class Embeddable<TEmbeddableInput extends EmbeddableInpu
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
+|  [deferEmbeddableLoad](./kibana-plugin-plugins-embeddable-public.embeddable.deferembeddableload.md) |  | <code>boolean</code> |  |
 |  [fatalError](./kibana-plugin-plugins-embeddable-public.embeddable.fatalerror.md) |  | <code>Error</code> |  |
 |  [id](./kibana-plugin-plugins-embeddable-public.embeddable.id.md) |  | <code>string</code> |  |
 |  [input](./kibana-plugin-plugins-embeddable-public.embeddable.input.md) |  | <code>TEmbeddableInput</code> |  |
@@ -48,6 +49,7 @@ export declare abstract class Embeddable<TEmbeddableInput extends EmbeddableInpu
 |  [onFatalError(e)](./kibana-plugin-plugins-embeddable-public.embeddable.onfatalerror.md) |  |  |
 |  [reload()](./kibana-plugin-plugins-embeddable-public.embeddable.reload.md) |  | Reload will be called when there is a request to refresh the data or view, even if the input data did not change.<!-- -->In case if input data did change and reload is requested input$ and output$ would still emit before <code>reload</code> is called<!-- -->The order would be as follows: input$ output$ reload() \-\-\-- updated$ |
 |  [render(el)](./kibana-plugin-plugins-embeddable-public.embeddable.render.md) |  |  |
+|  [setInitializationFinished()](./kibana-plugin-plugins-embeddable-public.embeddable.setinitializationfinished.md) |  | communicate to the parent embeddable that this embeddable's initialization is finished. This only applies to embeddables which defer their loading state with deferEmbeddableLoad. |
 |  [supportedTriggers()](./kibana-plugin-plugins-embeddable-public.embeddable.supportedtriggers.md) |  |  |
 |  [updateInput(changes)](./kibana-plugin-plugins-embeddable-public.embeddable.updateinput.md) |  |  |
 |  [updateOutput(outputChanges)](./kibana-plugin-plugins-embeddable-public.embeddable.updateoutput.md) |  |  |

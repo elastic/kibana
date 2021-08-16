@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { ALERT_OWNER, RULE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import { from } from 'rxjs';
-import {
-  // TODO: Undo comment in fix here https://github.com/elastic/kibana/pull/107857
-  // isValidFeatureId,
-  mapConsumerToIndexName,
+
+import type {
   AlertConsumers,
-} from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+  mapConsumerToIndexName as mapConsumerToIndexNameTyped,
+  isValidFeatureId as isValidFeatureIdTyped,
+} from '@kbn/rule-data-utils';
+import {
+  mapConsumerToIndexName as mapConsumerToIndexNameNonTyped,
+  isValidFeatureId as isValidFeatureIdNonTyped,
+  // @ts-expect-error
+} from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 
 import {
   AlertingAuthorizationEntity,
@@ -39,6 +44,9 @@ import {
   ISearchOptions,
 } from '../../../../../../src/plugins/data/common';
 
+const mapConsumerToIndexName: typeof mapConsumerToIndexNameTyped = mapConsumerToIndexNameNonTyped;
+const isValidFeatureId: typeof isValidFeatureIdTyped = isValidFeatureIdNonTyped;
+
 export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTypes>(
   data: PluginStart,
   alerting: AlertingPluginStartContract
@@ -50,9 +58,7 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
     search: (request, options, deps) => {
       const factoryQueryType = request.factoryQueryType;
       const entityType = request.entityType;
-      let alertConsumers = request.alertConsumers;
-      // TODO: Remove in fix here https://github.com/elastic/kibana/pull/107857
-      alertConsumers = undefined;
+      const alertConsumers = request.alertConsumers;
 
       if (factoryQueryType == null) {
         throw new Error('factoryQueryType is required');
@@ -61,9 +67,7 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
       const queryFactory: TimelineFactory<T> = timelineFactory[factoryQueryType];
 
       if (alertConsumers != null && entityType != null && entityType === EntityType.ALERTS) {
-        // TODO: Thist won't be hit since alertConsumers = undefined
-        // TODO: remove in fix here https://github.com/elastic/kibana/pull/107857
-        const allFeatureIdsValid = null; // alertConsumers.every((id) => isValidFeatureId(id));
+        const allFeatureIdsValid = alertConsumers.every((id) => isValidFeatureId(id));
 
         if (!allFeatureIdsValid) {
           throw new Error('An invalid alerts consumer feature id was provided');
@@ -134,7 +138,7 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
 }) => {
   // Based on what solution alerts you want to see, figures out what corresponding
   // index to query (ex: siem --> .alerts-security.alerts)
-  const indices = alertConsumers.flatMap((consumer) => mapConsumerToIndexName[consumer]);
+  const indices = alertConsumers.flatMap((consumer) => `${mapConsumerToIndexName[consumer]}*`);
   const requestWithAlertsIndices = { ...request, defaultIndex: indices, indexName: indices };
 
   // Note: Alerts RBAC are built off of the alerting's authorization class, which
@@ -145,8 +149,8 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
       type: AlertingAuthorizationFilterType.ESDSL,
       // Not passing in values, these are the paths for these fields
       fieldNames: {
-        consumer: ALERT_OWNER,
-        ruleTypeId: RULE_ID,
+        consumer: ALERT_RULE_CONSUMER,
+        ruleTypeId: ALERT_RULE_TYPE_ID,
         spaceIds: SPACE_IDS,
       },
     });
