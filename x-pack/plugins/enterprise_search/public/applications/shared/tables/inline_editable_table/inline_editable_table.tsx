@@ -123,7 +123,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
     <>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <EuiTitle size="xs">
+          <EuiTitle size="s">
             <h3>{title}</h3>
           </EuiTitle>
           {!!description && (

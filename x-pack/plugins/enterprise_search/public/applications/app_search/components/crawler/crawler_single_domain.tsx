@@ -57,22 +57,16 @@ export const CrawlerSingleDomain: React.FC = () => {
       <EuiSpacer size="l" />
       {domain && (
         <>
-          <EuiPanel paddingSize="l" hasBorder>
-            <EntryPointsTable domain={domain} engineName={engineName} items={domain.entryPoints} />
-          </EuiPanel>
+          <EntryPointsTable domain={domain} engineName={engineName} items={domain.entryPoints} />
           <EuiSpacer size="xl" />
-          <EuiPanel paddingSize="l" hasBorder>
-            <SitemapsTable domain={domain} engineName={engineName} items={domain.sitemaps} />
-          </EuiPanel>
+          <SitemapsTable domain={domain} engineName={engineName} items={domain.sitemaps} />
           <EuiSpacer size="xl" />
-          <EuiPanel paddingSize="l" hasBorder>
-            <CrawlRulesTable
-              domainId={domainId}
-              engineName={engineName}
-              crawlRules={domain.crawlRules}
-              defaultCrawlRule={domain.defaultCrawlRule}
-            />
-          </EuiPanel>
+          <CrawlRulesTable
+            domainId={domainId}
+            engineName={engineName}
+            crawlRules={domain.crawlRules}
+            defaultCrawlRule={domain.defaultCrawlRule}
+          />
           <EuiSpacer size="xxl" />
         </>
       )}
