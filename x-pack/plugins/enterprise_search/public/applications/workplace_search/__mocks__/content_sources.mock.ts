@@ -28,7 +28,7 @@ export const contentSources = [
   },
   {
     id: '124',
-    serviceType: 'jira',
+    serviceType: 'jira_cloud',
     searchable: true,
     supportedByLicense: true,
     status: 'synced',
@@ -42,6 +42,24 @@ export const contentSources = [
     activities: [],
   },
 ];
+
+const defaultIndexing = {
+  enabled: true,
+  defaultAction: 'include',
+  rules: [],
+  schedule: {
+    intervals: [],
+    blocked: [],
+  },
+  features: {
+    contentExtraction: {
+      enabled: true,
+    },
+    thumbnails: {
+      enabled: true,
+    },
+  },
+};
 
 export const fullContentSources = [
   {
@@ -66,8 +84,11 @@ export const fullContentSources = [
         type: 'summary',
       },
     ],
+    indexing: defaultIndexing,
     groups,
     custom: false,
+    isIndexedSource: true,
+    areThumbnailsConfigEnabled: true,
     accessToken: '123token',
     urlField: 'myLink',
     titleField: 'heading',
@@ -85,7 +106,10 @@ export const fullContentSources = [
     details: [],
     summary: [],
     groups: [],
+    indexing: defaultIndexing,
     custom: true,
+    isIndexedSource: true,
+    areThumbnailsConfigEnabled: true,
     accessToken: '123token',
     urlField: 'url',
     titleField: 'title',
