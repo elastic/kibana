@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const elasticChart = getService('elasticChart');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const soInfo = getService('savedObjectInfo');
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -31,6 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
 
+      console.log(`\n### soInfo.getTypes(): \n${await soInfo.getTypes()}`);
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
