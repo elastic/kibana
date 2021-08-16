@@ -65,3 +65,5 @@ export const SHOWING_ALERTS = '[data-test-subj="showingAlerts"]';
 export const TAKE_ACTION_POPOVER_BTN = '[data-test-subj="alertActionPopover"] button';
 
 export const TIMELINE_CONTEXT_MENU_BTN = '[data-test-subj="timeline-context-menu-button"]';
+
+export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="attach-alert-to-case-button"]';

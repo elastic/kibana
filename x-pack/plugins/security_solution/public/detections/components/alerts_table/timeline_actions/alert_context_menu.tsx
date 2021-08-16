@@ -7,13 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import {
-  EuiButtonIcon,
-  EuiContextMenu,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { indexOf } from 'lodash';
 
 import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
@@ -22,6 +16,7 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui/src/components/context_menu/context_menu';
+import styled from 'styled-components';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../../timelines/components/timeline/helpers';
@@ -47,7 +42,7 @@ import { useInvestigateInResolverContextItem } from './investigate_in_resolver';
 import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
 import { TimelineId } from '../../../../../common';
 import { APP_ID } from '../../../../../common/constants';
-import { CHANGE_ALERT_STATUS } from '../../take_action_dropdown/translations';
+import { useEventFilterAction } from './use_event_filter_action';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -59,6 +54,11 @@ interface AlertContextMenuProps {
   onRuleChange?: () => void;
   timelineId: string;
 }
+export const NestedWrapper = styled.span`
+  button.euiContextMenuItem {
+    padding: 0;
+  }
+`;
 
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   ariaLabel = i18n.MORE_ACTIONS,
@@ -97,19 +97,21 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     casePermissions,
     afterCaseSelection,
   ]);
-
+  const uiCapabilities = useKibana().services.application.capabilities;
+  const capabilitiesCanUserCRUD: boolean = uiCapabilities.siem.crud === true;
   const addToCaseAction = useMemo(
     () =>
       [
         TimelineId.detectionsPage,
         TimelineId.detectionsRulesDetailsPage,
         TimelineId.active,
-      ].includes(timelineId as TimelineId)
+      ].includes(timelineId as TimelineId) && capabilitiesCanUserCRUD
         ? {
             actionItem: [
               {
                 name: i18n.ACTION_ADD_TO_CASE,
                 panel: 2,
+                'data-test-subj': 'attach-alert-to-case-button',
               },
             ],
             content: [
@@ -118,7 +120,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             ],
           }
         : { actionItem: [], content: [] },
-    [addToCaseActionProps, timelineId, timelinesUi]
+    [addToCaseActionProps, capabilitiesCanUserCRUD, timelineId, timelinesUi]
   );
 
   const alertStatus = get(0, ecsRowData?.signal?.status) as Status;
@@ -197,12 +199,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     closePopover();
   }, [closePopover, onAddEventFilterClick]);
 
-  const {
-    disabledAddEndpointException,
-    disabledAddException,
-    handleEndpointExceptionModal,
-    handleDetectionExceptionModal,
-  } = useExceptionActions({
+  const { exceptionActions } = useExceptionActions({
     isEndpointAlert,
     onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
   });
@@ -210,58 +207,26 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     timelineId,
     ecsData: ecsRowData,
   });
-  const endpointException = useMemo(
-    () =>
-      disabledAddEndpointException
-        ? []
-        : [
-            {
-              name: i18n.ACTION_ADD_ENDPOINT_EXCEPTION,
-              onClick: handleEndpointExceptionModal,
-            },
-          ],
-    [disabledAddEndpointException, handleEndpointExceptionModal]
-  );
-  const ruleException = useMemo(
-    () =>
-      disabledAddException
-        ? []
-        : [
-            {
-              name: i18n.ACTION_ADD_EXCEPTION,
-              onClick: handleDetectionExceptionModal,
-            },
-          ],
-    [disabledAddException, handleDetectionExceptionModal]
-  );
+  const eventFilterAction = useEventFilterAction({
+    onAddEventFilterClick: handleOnAddEventFilterClick,
+  });
   const items: EuiContextMenuPanelItemDescriptor[] = useMemo(
     () =>
       !isEvent && ruleId
         ? [
             ...investigateInResolverAction,
             ...addToCaseAction.actionItem,
-            {
-              name: CHANGE_ALERT_STATUS,
-              panel: 1,
-            },
-            ...endpointException,
-            ...ruleException,
+            ...actionItems.map((aI) => ({ name: <NestedWrapper>{aI}</NestedWrapper> })),
+            ...exceptionActions,
           ]
-        : [
-            ...investigateInResolverAction,
-            ...addToCaseAction.actionItem,
-            {
-              name: i18n.ACTION_ADD_EVENT_FILTER,
-              onClick: handleOnAddEventFilterClick,
-            },
-          ],
+        : [...investigateInResolverAction, ...addToCaseAction.actionItem, eventFilterAction],
     [
+      actionItems,
       addToCaseAction.actionItem,
-      endpointException,
-      handleOnAddEventFilterClick,
+      eventFilterAction,
+      exceptionActions,
       investigateInResolverAction,
       isEvent,
-      ruleException,
       ruleId,
     ]
   );
@@ -273,17 +238,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         items,
       },
       {
-        id: 1,
-        title: CHANGE_ALERT_STATUS,
-        content: <EuiContextMenuPanel size="s" items={actionItems} />,
-      },
-      {
         id: 2,
         title: i18n.ACTION_ADD_TO_CASE,
         content: addToCaseAction.content,
       },
     ],
-    [actionItems, addToCaseAction.content, items]
+    [addToCaseAction.content, items]
   );
 
   return (
