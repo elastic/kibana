@@ -35,6 +35,12 @@ interface GetNewStreamProps {
   platform?: string | undefined;
   version?: string | undefined;
   scheduledQueryGroupId?: string;
+  ecs_mapping?: Record<
+    string,
+    {
+      field: string;
+    }
+  >;
 }
 
 interface GetNewStreamReturn extends Omit<OsqueryManagerPackagePolicyInputStream, 'id'> {
@@ -64,6 +70,11 @@ const getNewStream = (payload: GetNewStreamProps) =>
       }
       if (payload.version && draft.vars) {
         draft.vars.version = { type: 'text', value: payload.version };
+      }
+      if (payload.ecs_mapping && draft.vars) {
+        draft.vars.ecs_mapping = {
+          value: payload.ecs_mapping,
+        };
       }
       return draft;
     }
@@ -144,6 +155,14 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
                 };
               } else {
                 delete draft[0].streams[showEditQueryFlyout].vars.version;
+              }
+
+              if (updatedQuery.ecs_mapping) {
+                draft[0].streams[showEditQueryFlyout].vars.ecs_mapping = {
+                  value: updatedQuery.ecs_mapping,
+                };
+              } else {
+                delete draft[0].streams[showEditQueryFlyout].vars.ecs_mapping;
               }
 
               return draft;
