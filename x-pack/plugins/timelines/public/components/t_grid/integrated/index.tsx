@@ -8,7 +8,7 @@
 import type { AlertConsumers as AlertConsumersTyped } from '@kbn/rule-data-utils';
 // @ts-expect-error
 import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -293,6 +293,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
         data-test-subj="events-viewer-panel"
         $isFullScreen={globalFullScreen}
       >
+        {loading && <EuiProgress size="xs" position="absolute" color="accent" />}
         {canQueryTimeline ? (
           <>
             <HeaderSection
