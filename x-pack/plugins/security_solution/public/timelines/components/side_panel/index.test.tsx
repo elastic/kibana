@@ -21,6 +21,8 @@ import { DetailsPanel } from './index';
 import { TimelineExpandedDetail, TimelineTabs } from '../../../../common/types/timeline';
 import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
 
+jest.mock('../../../common/lib/kibana');
+
 describe('Details Panel Component', () => {
   const state: State = { ...mockGlobalState };
 

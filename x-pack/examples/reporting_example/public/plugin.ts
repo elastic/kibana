@@ -12,11 +12,11 @@ import {
   CoreStart,
   Plugin,
 } from '../../../../src/core/public';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { SetupDeps, StartDeps } from './types';
+import { PLUGIN_ID, PLUGIN_NAME, ReportingExampleLocatorDefinition } from '../common';
+import { SetupDeps, StartDeps, MyForwardableState } from './types';
 
 export class ReportingExamplePlugin implements Plugin<void, void, {}, {}> {
-  public setup(core: CoreSetup, { developerExamples, screenshotMode }: SetupDeps): void {
+  public setup(core: CoreSetup, { developerExamples, screenshotMode, share }: SetupDeps): void {
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
@@ -30,7 +30,12 @@ export class ReportingExamplePlugin implements Plugin<void, void, {}, {}> {
           unknown
         ];
         // Render the application
-        return renderApp(coreStart, { ...depsStart, screenshotMode }, params);
+        return renderApp(
+          coreStart,
+          { ...depsStart, screenshotMode, share },
+          params,
+          params.history.location.state as MyForwardableState
+        );
       },
     });
 
@@ -40,6 +45,8 @@ export class ReportingExamplePlugin implements Plugin<void, void, {}, {}> {
       title: 'Reporting integration',
       description: 'Demonstrate how to put an Export button on a page and generate reports.',
     });
+
+    share.url.locators.create(new ReportingExampleLocatorDefinition());
   }
 
   public start() {}
