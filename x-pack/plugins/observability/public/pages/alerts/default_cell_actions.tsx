@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiButtonIcon } from '@elastic/eui';
 import { ObservabilityPublicPluginsStart } from '../..';
@@ -15,8 +16,9 @@ import { TimelineNonEcsData } from '../../../../timelines/common/search_strategy
 import { TGridCellAction } from '../../../../timelines/common/types/timeline';
 import { TimelinesUIStart } from '../../../../timelines/public';
 
-/** a noop required by the filter in / out buttons */
-const onFilterAdded = () => {};
+export const FILTER_FOR_VALUE = i18n.translate('xpack.timelines.hoverActions.filterForValue', {
+  defaultMessage: 'Filter for value',
+});
 
 /** a hook to eliminate the verbose boilerplate required to use common services */
 const useKibanaServices = () => {
@@ -31,80 +33,6 @@ const useKibanaServices = () => {
 
   return { timelines, filterManager };
 };
-
-export const FILTER_FOR_VALUE = 'filter for value';
-
-const myFilterCellActions: TGridCellAction[] = [
-  ({ data }: { data: TimelineNonEcsData[][] }) => ({ Component }) =>
-    Component ? (
-      <Component
-        aria-label="title"
-        data-test-subj="filter-for-value"
-        iconType="plusInCircle"
-        onClick={() => alert('aa')}
-        title={FILTER_FOR_VALUE}
-      >
-        {FILTER_FOR_VALUE}
-      </Component>
-    ) : (
-      <EuiButtonIcon
-        aria-label="test"
-        className="timelines__hoverActionButton"
-        data-test-subj="filter-for-value"
-        iconSize="s"
-        iconType="plusInCircle"
-        onClick={() => alert('aa')}
-      />
-    ),
-];
-
-/** actions for adding filters to the search bar */
-const filterCellActions: TGridCellAction[] = [
-  ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
-    const { timelines, filterManager } = useKibanaServices();
-
-    const value = getMappedNonEcsValue({
-      data: data[rowIndex],
-      fieldName: columnId,
-    });
-
-    return (
-      <>
-        {timelines.getHoverActions().getFilterForValueButton({
-          Component,
-          field: columnId,
-          filterManager,
-          onFilterAdded,
-          ownFocus: false,
-          showTooltip: false,
-          value,
-        })}
-      </>
-    );
-  },
-  ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
-    const { timelines, filterManager } = useKibanaServices();
-
-    const value = getMappedNonEcsValue({
-      data: data[rowIndex],
-      fieldName: columnId,
-    });
-
-    return (
-      <>
-        {timelines.getHoverActions().getFilterOutValueButton({
-          Component,
-          field: columnId,
-          filterManager,
-          onFilterAdded,
-          ownFocus: false,
-          showTooltip: false,
-          value,
-        })}
-      </>
-    );
-  },
-];
 
 /** actions common to all cells (e.g. copy to clipboard) */
 const commonCellActions: TGridCellAction[] = [
@@ -131,22 +59,7 @@ const commonCellActions: TGridCellAction[] = [
   },
 ];
 
-/** returns the default actions shown in `EuiDataGrid` cells */
-// export const getDefaultCellActions = ({
-//   enableFilterActions,
-//   addToQuery,
-// }: {
-//   enableFilterActions: boolean;
-//   addToQuery: (value: string) => void;
-// }) => {
-//   const cellActions = enableFilterActions
-//     ? [...myFilterCellActions(addToQuery), ...commonCellActions]
-//     : [...commonCellActions];
-//   return cellActions;
-// };
-
-// return an array of functions
-//
+/** actions for adding filters to the search bar */
 const buildFilterCellActions = (addToQuery: (value: string) => void): TGridCellAction[] => [
   ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component, ...rest }) => {
     const value = getMappedNonEcsValue({
@@ -163,7 +76,7 @@ const buildFilterCellActions = (addToQuery: (value: string) => void): TGridCellA
 
     return Component ? (
       <Component
-        aria-label="title"
+        aria-label={FILTER_FOR_VALUE}
         data-test-subj="filter-for-value"
         iconType="plusInCircle"
         onClick={onClick}
@@ -173,17 +86,18 @@ const buildFilterCellActions = (addToQuery: (value: string) => void): TGridCellA
       </Component>
     ) : (
       <EuiButtonIcon
-        aria-label="test"
+        aria-label={FILTER_FOR_VALUE}
         className="timelines__hoverActionButton"
         data-test-subj="filter-for-value"
         iconSize="s"
         iconType="plusInCircle"
-        onClick={addToQuery}
+        onClick={onClick}
       />
     );
   },
 ];
 
+/** returns the default actions shown in `EuiDataGrid` cells */
 export const getDefaultCellActions = ({
   enableFilterActions,
   addToQuery,
@@ -192,7 +106,7 @@ export const getDefaultCellActions = ({
   addToQuery: (value: string) => void;
 }) => {
   const cellActions = enableFilterActions
-    ? [...buildFilterCellActions(addToQuery), ...commonCellActions, ...filterCellActions]
+    ? [...buildFilterCellActions(addToQuery), ...commonCellActions]
     : [...commonCellActions];
   return cellActions;
 };

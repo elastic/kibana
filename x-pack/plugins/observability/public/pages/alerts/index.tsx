@@ -16,7 +16,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
-import { StringParamType } from 'src/plugins/data/common';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import type { AlertStatus } from '../../../common/typings';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
@@ -50,8 +49,6 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
     query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', status = 'open' },
   } = routeParams;
 
-  console.log(routeParams, '!!routeParams');
-
   useBreadcrumbs([
     {
       text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
@@ -75,16 +72,6 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
     () => (dynamicIndexPatternResp ? [dynamicIndexPatternResp] : []),
     [dynamicIndexPatternResp]
   );
-
-  const setSearchBarFilter = useCallback(() => {
-    console.log('!!set the filters');
-    const nextSearchParams = new URLSearchParams(history.location.search);
-    nextSearchParams.set('kuery', 'kibana.alert.status: "open"');
-    history.push({
-      ...history.location,
-      search: nextSearchParams.toString(),
-    });
-  }, [history]);
 
   const setStatusFilter = useCallback(
     (value: AlertStatus) => {
@@ -119,7 +106,6 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
 
   const addToQuery = useCallback(
     (value: string) => {
-      console.log(value, '!!value');
       let output = value;
       if (kuery !== '') {
         output = `${kuery} and ${value}`;
@@ -185,7 +171,6 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             rangeTo={rangeTo}
             query={kuery}
             onQueryChange={onQueryChange}
-            setSearchBarFilter={setSearchBarFilter}
             addToQuery={addToQuery}
           />
         </EuiFlexItem>
