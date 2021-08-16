@@ -12,14 +12,14 @@ import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useUiTracker } from '../../../../../observability/public';
 import { useTheme } from '../../../hooks/use_theme';
-import type { SelectedSignificantTerm } from '../../../../common/search_strategies/correlations/types';
+import { CorrelationsTerm } from '../../../../common/search_strategies/failure_correlations/types';
 
-export type { SelectedSignificantTerm };
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 
-export type SelectedSignificantCorrelationTerm<
-  T extends SelectedSignificantTerm
-> = Pick<T, 'fieldName' | 'fieldValue'>;
+export type SelectedCorrelationTerm<T extends CorrelationsTerm> = Pick<
+  T,
+  'fieldName' | 'fieldValue'
+>;
 
 interface Props<T> {
   significantTerms?: T[];
@@ -31,7 +31,7 @@ interface Props<T> {
   columns: Array<EuiBasicTableColumn<T>>;
 }
 
-export function CorrelationsTable<T extends SelectedSignificantTerm>({
+export function CorrelationsTable<T extends CorrelationsTerm>({
   significantTerms,
   status,
   setSelectedSignificantTerm,

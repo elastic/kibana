@@ -42,7 +42,7 @@ import { FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY } from '../../../../com
 import { isErrorMessage } from './utils/is_error_message';
 import { Summary } from '../../shared/Summary';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { getFailedTransactionsCorrelationImpactLabel } from './utils/get_failure_correlation_impact_label';
+import { getFailedTransactionsCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 import { createHref, push } from '../../shared/Links/url_helpers';
 import { useUiTracker } from '../../../../../observability/public';
 

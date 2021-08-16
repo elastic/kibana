@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FAILURE_CORRELATION_IMPACT_THRESHOLD } from './constants';
+import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from './constants';
 
 export interface FailedTransactionsCorrelationValue {
   key: string;
@@ -30,4 +30,9 @@ export interface BaseSearchStrategyResponse {
   cancelFetch: () => void;
 }
 
-export type FailureCorrelationImpactThreshold = typeof FAILURE_CORRELATION_IMPACT_THRESHOLD[keyof typeof FAILURE_CORRELATION_IMPACT_THRESHOLD];
+export type FailureCorrelationImpactThreshold = typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD[keyof typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD];
+
+export interface CorrelationsTerm {
+  fieldName: string;
+  fieldValue: string;
+}

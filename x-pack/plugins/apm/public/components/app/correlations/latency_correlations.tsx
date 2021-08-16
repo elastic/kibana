@@ -20,10 +20,7 @@ import { getDurationFormatter } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import {
-  CorrelationsTable,
-  SelectedSignificantTerm,
-} from './correlations_table';
+import { CorrelationsTable } from './correlations_table';
 import { ChartContainer } from '../../shared/charts/chart_container';
 import { useTheme } from '../../../hooks/use_theme';
 import { CustomFields, PercentileOption } from './custom_fields';
@@ -32,6 +29,7 @@ import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useUiTracker } from '../../../../../observability/public';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { CorrelationsTerm } from '../../../../common/search_strategies/failure_correlations/types';
 
 type OverallLatencyApiResponse = NonNullable<
   APIReturnType<'GET /api/apm/correlations/latency/overall_distribution'>
@@ -49,7 +47,7 @@ export function LatencyCorrelations({ onClose }: Props) {
   const [
     selectedSignificantTerm,
     setSelectedSignificantTerm,
-  ] = useState<SelectedSignificantTerm | null>(null);
+  ] = useState<CorrelationsTerm | null>(null);
 
   const { serviceName } = useApmServiceContext();
 
@@ -233,7 +231,7 @@ function getAxisMaxes(data?: OverallLatencyApiResponse) {
 
 function getSelectedDistribution(
   significantTerms: CorrelationsApiResponse['significantTerms'],
-  selectedSignificantTerm: SelectedSignificantTerm
+  selectedSignificantTerm: CorrelationsTerm
 ) {
   if (!significantTerms) {
     return [];
@@ -255,7 +253,7 @@ function LatencyDistributionChart({
 }: {
   overallData?: OverallLatencyApiResponse;
   correlationsData?: CorrelationsApiResponse['significantTerms'];
-  selectedSignificantTerm: SelectedSignificantTerm | null;
+  selectedSignificantTerm: CorrelationsTerm | null;
   status: FETCH_STATUS;
 }) {
   const theme = useTheme();

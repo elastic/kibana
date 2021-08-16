@@ -52,8 +52,3 @@ export interface AsyncSearchProviderProgress {
   loadedFieldValuePairs: number;
   loadedHistograms: number;
 }
-
-export interface SelectedSignificantTerm {
-  fieldName: string;
-  fieldValue: string;
-}
