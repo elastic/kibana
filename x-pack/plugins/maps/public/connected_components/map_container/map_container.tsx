@@ -191,7 +191,9 @@ export class MapContainer extends Component<Props, State> {
 
     let exitFullScreenButton;
     if (isFullScreen) {
-      exitFullScreenButton = <ExitFullScreenButton onExitFullScreenMode={exitFullScreen} chrome={getCoreChrome()} />;
+      exitFullScreenButton = (
+        <ExitFullScreenButton onExitFullScreenMode={exitFullScreen} chrome={getCoreChrome()} />
+      );
     }
     return (
       <EuiFlexGroup

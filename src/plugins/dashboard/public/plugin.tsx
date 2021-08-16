@@ -184,7 +184,7 @@ export class DashboardPlugin
       const [coreStart, deps] = await core.getStartServices();
 
       const ExitFullScreenButton: React.FC<ExitFullScreenButtonProps> = (props) => {
-        return <ExitFullScreenButtonUi {...props} chrome={coreStart.chrome}  />;
+        return <ExitFullScreenButtonUi {...props} chrome={coreStart.chrome} />;
       };
       return {
         SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
