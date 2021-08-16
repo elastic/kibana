@@ -18,6 +18,7 @@ import {
   AlertTypeParams,
 } from '../../../../alerting/server';
 import { Query } from '../../../../../../src/plugins/data/common/query';
+import { RuleDataClient } from '../../../../rule_registry/server';
 
 export const GEO_CONTAINMENT_ID = '.geo-containment';
 export const ActionGroupId = 'Tracked entity contained';
@@ -148,7 +149,10 @@ export type GeoContainmentAlertType = AlertType<
   typeof RecoveryActionGroupId
 >;
 
-export function getAlertType(logger: Logger): GeoContainmentAlertType {
+export function getAlertType(
+  logger: Logger,
+  ruleDataClient: RuleDataClient
+): GeoContainmentAlertType {
   const alertTypeName = i18n.translate('xpack.stackAlerts.geoContainment.alertTypeTitle', {
     defaultMessage: 'Tracking containment',
   });
@@ -171,7 +175,7 @@ export function getAlertType(logger: Logger): GeoContainmentAlertType {
       }),
     },
     defaultActionGroupId: ActionGroupId,
-    executor: getGeoContainmentExecutor(logger),
+    executor: getGeoContainmentExecutor(logger, ruleDataClient),
     producer: STACK_ALERTS_FEATURE_ID,
     validate: {
       params: ParamsSchema,

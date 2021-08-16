@@ -16,14 +16,16 @@ import {
   ActionGroupId,
   RecoveryActionGroupId,
 } from './alert_type';
+import { RuleDataClient } from '../../../../rule_registry/server';
 
 interface RegisterParams {
   logger: Logger;
   alerting: AlertingSetup;
+  ruleDataClient: RuleDataClient;
 }
 
 export function register(params: RegisterParams) {
-  const { logger, alerting } = params;
+  const { logger, alerting, ruleDataClient } = params;
   alerting.registerType<
     GeoContainmentParams,
     never, // Only use if defining useSavedObjectReferences hook
@@ -32,5 +34,5 @@ export function register(params: RegisterParams) {
     GeoContainmentInstanceContext,
     typeof ActionGroupId,
     typeof RecoveryActionGroupId
-  >(getAlertType(logger));
+  >(getAlertType(logger, ruleDataClient));
 }

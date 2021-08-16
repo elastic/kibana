@@ -15,11 +15,13 @@ export {
   AlertExecutorOptions,
 } from '../../alerting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
 
 // this plugin's dependendencies
 export interface StackAlertsDeps {
   alerting: AlertingSetup;
   features: FeaturesPluginSetup;
+  ruleRegistry: RuleRegistryPluginSetupContract;
 }
 
 export interface StackAlertsStartDeps {

@@ -15,9 +15,15 @@ interface RegisterAlertTypesParams {
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>;
   alerting: AlertingSetup;
 }
+import { RuleDataClient } from '../../../rule_registry/server';
 
-export function registerBuiltInAlertTypes(params: RegisterAlertTypesParams) {
+export function registerLegacyBuiltInAlertTypes(params: RegisterAlertTypesParams) {
   registerIndexThreshold(params);
-  registerGeoContainment(params);
   registerEsQuery(params);
+}
+
+export function registerBuiltInAlertTypes(
+  params: RegisterAlertTypesParams & { ruleDataClient: RuleDataClient }
+) {
+  registerGeoContainment(params);
 }

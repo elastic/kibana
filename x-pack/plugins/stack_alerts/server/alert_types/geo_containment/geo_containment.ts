@@ -18,6 +18,7 @@ import {
   GeoContainmentInstanceContext,
   GeoContainmentState,
 } from './alert_type';
+import { RuleDataClient } from '../../../../rule_registry/server';
 
 export type LatestEntityLocation = GeoContainmentInstanceState;
 
@@ -83,7 +84,7 @@ export function transformResults(
   return orderedResults;
 }
 
-export function getActiveEntriesAndGenerateAlerts(
+export async function getActiveEntriesAndGenerateAlerts(
   prevLocationMap: Map<string, LatestEntityLocation[]>,
   currLocationMap: Map<string, LatestEntityLocation[]>,
   alertInstanceFactory: AlertServices<
@@ -92,14 +93,17 @@ export function getActiveEntriesAndGenerateAlerts(
     typeof ActionGroupId
   >['alertInstanceFactory'],
   shapesIdsNamesMap: Record<string, unknown>,
-  currIntervalEndTime: Date
+  currIntervalEndTime: Date,
+  ruleDataClient: RuleDataClient,
+  log: Logger
 ) {
   const allActiveEntriesMap: Map<string, LatestEntityLocation[]> = new Map([
     ...prevLocationMap,
     ...currLocationMap,
   ]);
+  const alertableEntities: GeoContainmentInstanceContext[] = [];
   allActiveEntriesMap.forEach((locationsArr, entityName) => {
-    // Generate alerts
+    // Determine alertable entities
     locationsArr.forEach(({ location, shapeLocationId, dateInShape, docId }) => {
       const context = {
         entityId: entityName,
@@ -110,9 +114,8 @@ export function getActiveEntriesAndGenerateAlerts(
         containingBoundaryId: shapeLocationId,
         containingBoundaryName: shapesIdsNamesMap[shapeLocationId] || shapeLocationId,
       };
-      const alertInstanceId = `${entityName}-${context.containingBoundaryName}`;
       if (shapeLocationId !== OTHER_CATEGORY) {
-        alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
+        alertableEntities.push(context);
       }
     });
 
@@ -131,10 +134,40 @@ export function getActiveEntriesAndGenerateAlerts(
       allActiveEntriesMap.set(entityName, locationsArr);
     }
   });
+  alertableEntities.forEach(async (alertableEntity) => {
+    const alertInstanceId = `${alertableEntity.entityId}-${alertableEntity.containingBoundaryName}`;
+    alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, alertableEntity);
+  });
+  if (ruleDataClient.isWriteEnabled() && alertableEntities.length) {
+    // TODO: Handle response?
+    try {
+      await ruleDataClient.getWriter().bulk({
+        body: alertableEntities.flatMap((alertableEntity) => {
+          const alertInstanceId = `${alertableEntity.entityId}-${alertableEntity.containingBoundaryName}`;
+          return [
+            { index: {} },
+            {
+              alertId: alertInstanceId,
+              ...alertableEntity,
+            },
+          ];
+        }),
+      });
+    } catch (e) {
+      console.log(`Error executing write: ${e}`);
+    }
+    // return response;
+  } else {
+    log.debug('Writing is disabled.');
+  }
+
   return allActiveEntriesMap;
 }
 
-export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType['executor'] =>
+export const getGeoContainmentExecutor = (
+  log: Logger,
+  ruleDataClient: RuleDataClient
+): GeoContainmentAlertType['executor'] =>
   async function ({
     previousStartedAt: currIntervalStartTime,
     startedAt: currIntervalEndTime,
@@ -185,12 +218,14 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
     const prevLocationMap: Map<string, LatestEntityLocation[]> = new Map([
       ...Object.entries((state.prevLocationMap as Record<string, LatestEntityLocation[]>) || {}),
     ]);
-    const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
+    const allActiveEntriesMap = await getActiveEntriesAndGenerateAlerts(
       prevLocationMap,
       currLocationMap,
       services.alertInstanceFactory,
       shapesIdsNamesMap,
-      currIntervalEndTime
+      currIntervalEndTime,
+      ruleDataClient,
+      log
     );
 
     return {
