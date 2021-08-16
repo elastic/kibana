@@ -6,7 +6,10 @@
  */
 
 import { boomify } from '@hapi/boom';
+import { ErrorTypes } from '../../types';
+import { getStatusCode } from './handle_error';
 
-export function handleSettingsError(err) {
-  return boomify(err, { statusCode: err.statusCode });
+export function handleSettingsError(err: ErrorTypes) {
+  const statusCode = getStatusCode(err);
+  return boomify(err, { statusCode });
 }

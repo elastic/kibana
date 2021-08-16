@@ -6,6 +6,7 @@
  */
 
 import { forbidden, unauthorized } from '@hapi/boom';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { isAuthError, handleAuthError } from './auth_errors';
 
 describe('Error handling for 401/403 errors', () => {
@@ -58,7 +59,19 @@ describe('Error handling for 401/403 errors', () => {
 
   describe('Elasticsearch errors', () => {
     it('handles Forbidden error defined by ElasticsearchJS', () => {
-      const err = { statusCode: 401 };
+      const err = new ResponseError({
+        statusCode: 401,
+        body: {
+          error: {
+            type: 'Forbidden',
+          },
+        },
+        warnings: [],
+        headers: {
+          'WWW-Authenticate': 'content',
+        },
+        meta: {} as any,
+      });
       expect(isAuthError(err)).toBe(true);
 
       const wrappedErr = handleAuthError(err);
@@ -78,7 +91,19 @@ describe('Error handling for 401/403 errors', () => {
     });
 
     it('handles Unauthorized error defined by ElasticsearchJS', () => {
-      const err = { statusCode: 403 };
+      const err = new ResponseError({
+        statusCode: 403,
+        body: {
+          error: {
+            type: 'Unauthorized',
+          },
+        },
+        warnings: [],
+        headers: {
+          'WWW-Authenticate': 'content',
+        },
+        meta: {} as any,
+      });
       expect(isAuthError(err)).toBe(true);
 
       const wrappedErr = handleAuthError(err);
