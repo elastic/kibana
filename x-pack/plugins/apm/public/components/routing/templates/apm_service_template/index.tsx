@@ -172,6 +172,8 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.dependenciesTabLabel', {
         defaultMessage: 'Dependencies',
       }),
+      hidden:
+        !agentName || isRumAgentName(agentName) || isIosAgentName(agentName),
     },
     {
       key: 'errors',

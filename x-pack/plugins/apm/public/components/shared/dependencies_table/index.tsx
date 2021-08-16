@@ -38,6 +38,7 @@ export type DependenciesItem = Omit<
 
 interface Props {
   dependencies: DependenciesItem[];
+  fixedHeight?: boolean;
   link: React.ReactNode;
   title: React.ReactNode;
   nameColumnTitle: React.ReactNode;
@@ -48,6 +49,7 @@ interface Props {
 export function DependenciesTable(props: Props) {
   const {
     dependencies,
+    fixedHeight,
     link,
     title,
     nameColumnTitle,
@@ -183,6 +185,7 @@ export function DependenciesTable(props: Props) {
       <EuiFlexItem>
         <TableFetchWrapper status={status}>
           <OverviewTableContainer
+            fixedHeight={fixedHeight}
             isEmptyAndLoading={
               items.length === 0 && status === FETCH_STATUS.LOADING
             }

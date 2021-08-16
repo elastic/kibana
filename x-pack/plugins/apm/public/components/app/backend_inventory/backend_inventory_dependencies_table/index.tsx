@@ -106,12 +106,7 @@ export function BackendInventoryDependenciesTable() {
   return (
     <DependenciesTable
       dependencies={dependencies}
-      title={i18n.translate(
-        'xpack.apm.backendInventory.dependenciesTableTitle',
-        {
-          defaultMessage: 'Backends',
-        }
-      )}
+      title={null}
       nameColumnTitle={i18n.translate(
         'xpack.apm.backendInventory.dependenciesTableColumnBackend',
         {
