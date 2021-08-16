@@ -9,35 +9,35 @@ import { BrowserFields, ConfigKeys } from '../types';
 import {
   Normalizer,
   commonNormalizers,
-  yamlToArrayOrObjectNormalizer,
+  getNormalizer,
+  getJsonToArrayOrObjectNormalizer,
 } from '../common/normalizers';
 
 import { defaultBrowserSimpleFields, defaultBrowserAdvancedFields } from '../contexts';
 
 export type BrowserNormalizerMap = Record<keyof BrowserFields, Normalizer>;
 
+const defaultBrowserFields = {
+  ...defaultBrowserSimpleFields,
+  ...defaultBrowserAdvancedFields,
+};
+
+export const getBrowserNormalizer = (key: ConfigKeys) => {
+  return getNormalizer(key, defaultBrowserFields);
+};
+
+export const getBrowserJsonToArrayOrObjectNormalizer = (key: ConfigKeys) => {
+  return getJsonToArrayOrObjectNormalizer(key, defaultBrowserFields);
+};
+
 export const browserNormalizers: BrowserNormalizerMap = {
-  [ConfigKeys.SOURCE_ZIP_URL]: (fields) =>
-    fields?.[ConfigKeys.SOURCE_ZIP_URL]?.value ??
-    defaultBrowserSimpleFields[ConfigKeys.SOURCE_ZIP_URL],
-  [ConfigKeys.SOURCE_ZIP_USERNAME]: (fields) =>
-    fields?.[ConfigKeys.SOURCE_ZIP_USERNAME]?.value ??
-    defaultBrowserSimpleFields[ConfigKeys.SOURCE_ZIP_USERNAME],
-  [ConfigKeys.SOURCE_ZIP_PASSWORD]: (fields) =>
-    fields?.[ConfigKeys.SOURCE_ZIP_PASSWORD]?.value ??
-    defaultBrowserSimpleFields[ConfigKeys.SOURCE_ZIP_PASSWORD],
-  [ConfigKeys.SOURCE_ZIP_FOLDER]: (fields) =>
-    fields?.[ConfigKeys.SOURCE_ZIP_FOLDER]?.value ??
-    defaultBrowserSimpleFields[ConfigKeys.SOURCE_ZIP_FOLDER],
-  [ConfigKeys.SOURCE_INLINE]: (fields) =>
-    fields?.[ConfigKeys.SOURCE_INLINE]?.value ??
-    defaultBrowserSimpleFields[ConfigKeys.SOURCE_INLINE],
-  [ConfigKeys.PARAMS]: (fields) =>
-    fields?.[ConfigKeys.PARAMS]?.value ?? defaultBrowserSimpleFields[ConfigKeys.PARAMS],
-  [ConfigKeys.SCREENSHOTS]: (fields) =>
-    fields?.[ConfigKeys.SCREENSHOTS]?.value ?? defaultBrowserAdvancedFields[ConfigKeys.SCREENSHOTS],
-  [ConfigKeys.SYNTHETICS_ARGS]: (fields) =>
-    yamlToArrayOrObjectNormalizer(fields?.[ConfigKeys.SYNTHETICS_ARGS]?.value) ??
-    defaultBrowserAdvancedFields[ConfigKeys.SYNTHETICS_ARGS],
+  [ConfigKeys.SOURCE_ZIP_URL]: getBrowserNormalizer(ConfigKeys.SOURCE_ZIP_URL),
+  [ConfigKeys.SOURCE_ZIP_USERNAME]: getBrowserNormalizer(ConfigKeys.SOURCE_ZIP_USERNAME),
+  [ConfigKeys.SOURCE_ZIP_PASSWORD]: getBrowserNormalizer(ConfigKeys.SOURCE_ZIP_PASSWORD),
+  [ConfigKeys.SOURCE_ZIP_FOLDER]: getBrowserNormalizer(ConfigKeys.SOURCE_ZIP_FOLDER),
+  [ConfigKeys.SOURCE_INLINE]: getBrowserNormalizer(ConfigKeys.SOURCE_INLINE),
+  [ConfigKeys.PARAMS]: getBrowserNormalizer(ConfigKeys.PARAMS),
+  [ConfigKeys.SCREENSHOTS]: getBrowserNormalizer(ConfigKeys.SCREENSHOTS),
+  [ConfigKeys.SYNTHETICS_ARGS]: getBrowserJsonToArrayOrObjectNormalizer(ConfigKeys.SYNTHETICS_ARGS),
   ...commonNormalizers,
 };

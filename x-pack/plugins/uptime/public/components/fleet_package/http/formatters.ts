@@ -9,8 +9,8 @@ import { HTTPFields, ConfigKeys } from '../types';
 import {
   Formatter,
   commonFormatters,
-  objectToYamlFormtatter,
-  arrayToYamlFormatter,
+  objectToJsonFormatter,
+  arrayToJsonFormatter,
 } from '../common/formatters';
 import { tlsFormatters } from '../tls/formatters';
 
@@ -23,21 +23,21 @@ export const httpFormatters: HTTPFormatMap = {
   [ConfigKeys.PASSWORD]: null,
   [ConfigKeys.PROXY_URL]: null,
   [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: (fields) =>
-    arrayToYamlFormatter(fields[ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]),
+    arrayToJsonFormatter(fields[ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]),
   [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: (fields) =>
-    arrayToYamlFormatter(fields[ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]),
+    arrayToJsonFormatter(fields[ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]),
   [ConfigKeys.RESPONSE_BODY_INDEX]: null,
   [ConfigKeys.RESPONSE_HEADERS_CHECK]: (fields) =>
-    objectToYamlFormtatter(fields[ConfigKeys.RESPONSE_HEADERS_CHECK]),
+    objectToJsonFormatter(fields[ConfigKeys.RESPONSE_HEADERS_CHECK]),
   [ConfigKeys.RESPONSE_HEADERS_INDEX]: null,
   [ConfigKeys.RESPONSE_STATUS_CHECK]: (fields) =>
-    arrayToYamlFormatter(fields[ConfigKeys.RESPONSE_STATUS_CHECK]),
+    arrayToJsonFormatter(fields[ConfigKeys.RESPONSE_STATUS_CHECK]),
   [ConfigKeys.REQUEST_BODY_CHECK]: (fields) =>
     fields[ConfigKeys.REQUEST_BODY_CHECK]?.value
       ? JSON.stringify(fields[ConfigKeys.REQUEST_BODY_CHECK]?.value)
       : null,
   [ConfigKeys.REQUEST_HEADERS_CHECK]: (fields) =>
-    objectToYamlFormtatter(fields[ConfigKeys.REQUEST_HEADERS_CHECK]),
+    objectToJsonFormatter(fields[ConfigKeys.REQUEST_HEADERS_CHECK]),
   [ConfigKeys.REQUEST_METHOD_CHECK]: null,
   ...tlsFormatters,
   ...commonFormatters,

@@ -6,26 +6,27 @@
  */
 
 import { TCPFields, ConfigKeys } from '../types';
-import { Normalizer, commonNormalizers } from '../common/normalizers';
+import { Normalizer, commonNormalizers, getNormalizer } from '../common/normalizers';
 import { tlsNormalizers } from '../tls/normalizers';
 import { defaultTCPSimpleFields, defaultTCPAdvancedFields } from '../contexts';
 
+const defaultTCPFields = {
+  ...defaultTCPSimpleFields,
+  ...defaultTCPAdvancedFields,
+};
+
 export type TCPNormalizerMap = Record<keyof TCPFields, Normalizer>;
 
+export const getTCPNormalizer = (key: ConfigKeys) => {
+  return getNormalizer(key, defaultTCPFields);
+};
+
 export const tcpNormalizers: TCPNormalizerMap = {
-  [ConfigKeys.HOSTS]: (fields) =>
-    fields?.[ConfigKeys.HOSTS]?.value ?? defaultTCPSimpleFields[ConfigKeys.HOSTS],
-  [ConfigKeys.PROXY_URL]: (fields) =>
-    fields?.[ConfigKeys.PROXY_URL]?.value ?? defaultTCPAdvancedFields[ConfigKeys.PROXY_URL],
-  [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: (fields) =>
-    fields?.[ConfigKeys.PROXY_USE_LOCAL_RESOLVER]?.value ??
-    defaultTCPAdvancedFields[ConfigKeys.PROXY_USE_LOCAL_RESOLVER],
-  [ConfigKeys.RESPONSE_RECEIVE_CHECK]: (fields) =>
-    fields?.[ConfigKeys.RESPONSE_RECEIVE_CHECK]?.value ??
-    defaultTCPAdvancedFields[ConfigKeys.RESPONSE_RECEIVE_CHECK],
-  [ConfigKeys.REQUEST_SEND_CHECK]: (fields) =>
-    fields?.[ConfigKeys.REQUEST_SEND_CHECK]?.value ??
-    defaultTCPAdvancedFields[ConfigKeys.REQUEST_SEND_CHECK],
+  [ConfigKeys.HOSTS]: getTCPNormalizer(ConfigKeys.HOSTS),
+  [ConfigKeys.PROXY_URL]: getTCPNormalizer(ConfigKeys.PROXY_URL),
+  [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: getTCPNormalizer(ConfigKeys.PROXY_USE_LOCAL_RESOLVER),
+  [ConfigKeys.RESPONSE_RECEIVE_CHECK]: getTCPNormalizer(ConfigKeys.RESPONSE_RECEIVE_CHECK),
+  [ConfigKeys.REQUEST_SEND_CHECK]: getTCPNormalizer(ConfigKeys.REQUEST_SEND_CHECK),
   ...tlsNormalizers,
   ...commonNormalizers,
 };

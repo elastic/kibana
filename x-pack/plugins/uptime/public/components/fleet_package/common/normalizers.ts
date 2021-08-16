@@ -7,7 +7,7 @@
 
 import { ICommonFields, ConfigKeys } from '../types';
 import { NewPackagePolicyInput } from '../../../../../fleet/common';
-import { defaultValues } from './default_values';
+import { defaultValues as commonDefaultValues } from './default_values';
 
 // TO DO: create a standard input format that all fields resolve to
 export type Normalizer = (fields: NewPackagePolicyInput['vars']) => unknown;
@@ -15,10 +15,49 @@ export type Normalizer = (fields: NewPackagePolicyInput['vars']) => unknown;
 // create a type of all the common policy fields, as well as the fleet managed 'name' field
 export type CommonNormalizerMap = Record<keyof ICommonFields | ConfigKeys.NAME, Normalizer>;
 
+/**
+ * Takes a cron formatted seconds and returns just the number of seconds. Assumes that cron is already in seconds format.
+ * @params {string} value (Ex '3s')
+ * @return {string} (Ex '3')
+ */
+export const cronToSecondsNormalizer = (value: string) =>
+  value ? value.slice(0, value.length - 1) : null;
+
+export const jsonToArrayOrObjectNormalizer = (value: string) => (value ? JSON.parse(value) : null);
+
+export function getNormalizer<Fields>(key: string, defaultValues: Fields): Normalizer {
+  return (fields: NewPackagePolicyInput['vars']) =>
+    fields?.[key]?.value ?? defaultValues[key as keyof Fields];
+}
+
+export function getJsonToArrayOrObjectNormalizer<Fields>(
+  key: string,
+  defaultValues: Fields
+): Normalizer {
+  return (fields: NewPackagePolicyInput['vars']) =>
+    jsonToArrayOrObjectNormalizer(fields?.[key]?.value) ?? defaultValues[key as keyof Fields];
+}
+
+export function getCronNormalizer<Fields>(key: string, defaultValues: Fields): Normalizer {
+  return (fields: NewPackagePolicyInput['vars']) =>
+    cronToSecondsNormalizer(fields?.[key]?.value) ?? defaultValues[key as keyof Fields];
+}
+
+export const getCommonNormalizer = (key: ConfigKeys) => {
+  return getNormalizer(key, commonDefaultValues);
+};
+
+export const getCommonJsonToArrayOrObjectNormalizer = (key: ConfigKeys) => {
+  return getJsonToArrayOrObjectNormalizer(key, commonDefaultValues);
+};
+
+export const getCommonCronToSecondsNormalizer = (key: ConfigKeys) => {
+  return getCronNormalizer(key, commonDefaultValues);
+};
+
 export const commonNormalizers: CommonNormalizerMap = {
   [ConfigKeys.NAME]: (fields) => fields?.[ConfigKeys.NAME]?.value ?? '',
-  [ConfigKeys.MONITOR_TYPE]: (fields) =>
-    fields?.[ConfigKeys.MONITOR_TYPE]?.value ?? defaultValues[ConfigKeys.MONITOR_TYPE],
+  [ConfigKeys.MONITOR_TYPE]: getCommonNormalizer(ConfigKeys.MONITOR_TYPE),
   [ConfigKeys.SCHEDULE]: (fields) => {
     const value = fields?.[ConfigKeys.SCHEDULE]?.value;
     if (value) {
@@ -31,20 +70,10 @@ export const commonNormalizers: CommonNormalizerMap = {
         number,
       };
     } else {
-      return defaultValues[ConfigKeys.SCHEDULE];
+      return commonDefaultValues[ConfigKeys.SCHEDULE];
     }
   },
-  [ConfigKeys.APM_SERVICE_NAME]: (fields) =>
-    fields?.[ConfigKeys.APM_SERVICE_NAME]?.value ?? defaultValues[ConfigKeys.APM_SERVICE_NAME],
-  [ConfigKeys.TAGS]: (fields) =>
-    yamlToArrayOrObjectNormalizer(fields?.[ConfigKeys.TAGS]?.value) ??
-    defaultValues[ConfigKeys.TAGS],
-  [ConfigKeys.TIMEOUT]: (fields) =>
-    cronToSecondsNormalizer(fields?.[ConfigKeys.TIMEOUT]?.value) ??
-    defaultValues[ConfigKeys.TIMEOUT],
+  [ConfigKeys.APM_SERVICE_NAME]: getCommonNormalizer(ConfigKeys.APM_SERVICE_NAME),
+  [ConfigKeys.TAGS]: getCommonJsonToArrayOrObjectNormalizer(ConfigKeys.TAGS),
+  [ConfigKeys.TIMEOUT]: getCommonCronToSecondsNormalizer(ConfigKeys.TIMEOUT),
 };
-
-export const cronToSecondsNormalizer = (value: string) =>
-  value ? value.slice(0, value.length - 1) : null;
-
-export const yamlToArrayOrObjectNormalizer = (value: string) => (value ? JSON.parse(value) : null);

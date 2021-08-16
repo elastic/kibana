@@ -19,14 +19,14 @@ export const commonFormatters: CommonFormatMap = {
       `@every ${fields[ConfigKeys.SCHEDULE]?.number}${fields[ConfigKeys.SCHEDULE]?.unit}`
     ),
   [ConfigKeys.APM_SERVICE_NAME]: null,
-  [ConfigKeys.TAGS]: (fields) => arrayToYamlFormatter(fields[ConfigKeys.TAGS]),
+  [ConfigKeys.TAGS]: (fields) => arrayToJsonFormatter(fields[ConfigKeys.TAGS]),
   [ConfigKeys.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKeys.TIMEOUT]),
 };
 
-export const arrayToYamlFormatter = (value: string[] = []) =>
+export const arrayToJsonFormatter = (value: string[] = []) =>
   value.length ? JSON.stringify(value) : null;
 
 export const secondsToCronFormatter = (value: string = '') => (value ? `${value}s` : null);
 
-export const objectToYamlFormtatter = (value: Record<string, string> = {}) =>
+export const objectToJsonFormatter = (value: Record<string, string> = {}) =>
   Object.keys(value).length ? JSON.stringify(value) : null;
