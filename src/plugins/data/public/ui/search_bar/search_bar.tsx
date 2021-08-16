@@ -75,6 +75,8 @@ export interface SearchBarOwnProps {
   iconType?: EuiIconProps['type'];
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
+  // defines padding; use 'inPage' to avoid extra padding; use 'detached' if the searchBar appears at the very top of the view, without any wrapper
+  displayStyle: 'inPage' | 'detached';
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -96,6 +98,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     showFilterBar: true,
     showDatePicker: true,
     showAutoRefreshOnly: false,
+    displayStyle: 'inPage',
   };
 
   private services = this.props.kibana.services;
@@ -410,8 +413,12 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       );
     }
 
+    const globalQueryBarClasses = classNames('globalQueryBar', {
+      'globalQueryBar--inPage': this.props.displayStyle === 'inPage',
+    });
+
     return (
-      <div className="globalQueryBar" data-test-subj="globalQueryBar">
+      <div className={globalQueryBarClasses} data-test-subj="globalQueryBar">
         {queryBar}
         {filterBar}
 

@@ -54,18 +54,9 @@ const TitleText = styled.span`
   margin-right: 12px;
 `;
 
-const StyledEuiPanel = styled(EuiPanel)<{ $isFullScreen: boolean }>`
-  display: flex;
-  flex-direction: column;
-
-  ${({ $isFullScreen }) =>
-    $isFullScreen &&
-    `
-      border: 0;
-      box-shadow: none;
-      padding-top: 0;
-      padding-bottom: 0;
-  `}
+const AlertsTableWrapper = styled.div`
+  width: 100%;
+  height: 100%;
 `;
 
 const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
@@ -297,12 +288,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
 
   return (
     <InspectButtonContainer>
-      <StyledEuiPanel
-        data-test-subj="events-viewer-panel"
-        $isFullScreen={false}
-        hasShadow={false}
-        paddingSize="none"
-      >
+      <AlertsTableWrapper data-test-subj="events-viewer-panel">
         {canQueryTimeline ? (
           <>
             <HeaderSection
@@ -370,7 +356,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
             </EventsContainerLoading>
           </>
         ) : null}
-      </StyledEuiPanel>
+      </AlertsTableWrapper>
     </InspectButtonContainer>
   );
 };
