@@ -13,6 +13,7 @@ import {
   RewriteResponseCase,
   handleDisabledApiKeysError,
   verifyAccessAndContext,
+  countUsageOfPredefinedIds,
 } from './lib';
 import {
   SanitizedAlert,
@@ -112,19 +113,11 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           const rule = req.body;
           const params = req.params;
 
-          if (params?.id) {
-            const spaceId = rulesClient.getSpaceId();
-            if (usageCounter) {
-              const usageCounterName =
-                spaceId === undefined || spaceId === 'default'
-                  ? 'ruleCreatedWithPredefinedIdInDefaultSpace'
-                  : 'ruleCreatedWithPredefinedIdInCustomSpace';
-              usageCounter?.incrementCounter({
-                counterName: usageCounterName,
-                incrementBy: 1,
-              });
-            }
-          }
+          countUsageOfPredefinedIds({
+            predefinedId: params?.id,
+            spaceId: rulesClient.getSpaceId(),
+            usageCounter,
+          });
 
           try {
             const createdRule: SanitizedAlert<AlertTypeParams> = await rulesClient.create<AlertTypeParams>(

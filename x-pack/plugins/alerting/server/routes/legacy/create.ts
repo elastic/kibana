@@ -18,6 +18,7 @@ import {
 } from '../../types';
 import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
 import { RouteOptions } from '..';
+import { countUsageOfPredefinedIds } from '../lib';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -67,19 +68,11 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
         const params = req.params;
         const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as AlertNotifyWhenType) : null;
 
-        if (params?.id) {
-          const spaceId = rulesClient.getSpaceId();
-          if (usageCounter) {
-            const usageCounterName =
-              spaceId === undefined || spaceId === 'default'
-                ? 'ruleCreatedWithPredefinedIdInDefaultSpace'
-                : 'ruleCreatedWithPredefinedIdInCustomSpace';
-            usageCounter?.incrementCounter({
-              counterName: usageCounterName,
-              incrementBy: 1,
-            });
-          }
-        }
+        countUsageOfPredefinedIds({
+          predefinedId: params?.id,
+          spaceId: rulesClient.getSpaceId(),
+          usageCounter,
+        });
 
         try {
           const alertRes: SanitizedAlert<AlertTypeParams> = await rulesClient.create<AlertTypeParams>(
