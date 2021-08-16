@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { FieldMap } from '../../../../../../rule_registry/common/field_map';
 import {
   ALERT_ANCESTORS,
@@ -254,6 +255,11 @@ export const alertsFieldMap: FieldMap = {
     type: 'date',
     array: false,
     required: true,
+  },
+  [ALERT_REASON]: {
+    type: 'keyword',
+    array: false,
+    required: false,
   },
   [ALERT_THREAT]: {
     type: 'object',

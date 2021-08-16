@@ -8,7 +8,7 @@ import { min } from 'lodash';
 import datemath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
 import { UptimeAlertTypeFactory } from './types';
 import { esKuery } from '../../../../../../src/plugins/data/server';
 import {

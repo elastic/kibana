@@ -69,19 +69,9 @@ export const columns: Array<
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'event.module',
-    linkField: 'rule.reference',
-  },
-  {
-    aggregatable: true,
-    category: 'event',
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'event.action',
-    type: 'string',
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'event.category',
+    displayAsText: i18n.ALERTS_HEADERS_REASON,
+    id: 'signal.reason',
+    initialWidth: 450,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
@@ -90,6 +80,14 @@ export const columns: Array<
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'user.name',
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'process.name',
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'file.name',
   },
   {
     columnHeaderType: defaultColumnHeaderType,

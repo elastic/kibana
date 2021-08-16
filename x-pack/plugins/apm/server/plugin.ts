@@ -15,10 +15,10 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/server';
-import { isEmpty, mapValues, once } from 'lodash';
+import { isEmpty, mapValues } from 'lodash';
 import { SavedObjectsClient } from '../../../../src/core/server';
-import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
+import { Dataset } from '../../rule_registry/server';
 import { APMConfig, APMXPackConfig, APM_SERVER_FEATURE_ID } from '.';
 import { mergeConfigs } from './index';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
@@ -106,78 +106,42 @@ export class APMPlugin
 
     registerFeaturesUsage({ licensingPlugin: plugins.licensing });
 
-    const { ruleDataService } = plugins.ruleRegistry;
     const getCoreStart = () =>
       core.getStartServices().then(([coreStart]) => coreStart);
 
-    const alertsIndexPattern = ruleDataService.getFullAssetName(
-      'observability-apm*'
-    );
-
-    const initializeRuleDataTemplates = once(async () => {
-      const componentTemplateName = ruleDataService.getFullAssetName(
-        'apm-mappings'
-      );
-
-      if (!ruleDataService.isWriteEnabled()) {
-        return;
-      }
-
-      await ruleDataService.createOrUpdateComponentTemplate({
-        name: componentTemplateName,
-        body: {
-          template: {
-            settings: {
-              number_of_shards: 1,
-            },
-            mappings: mappingFromFieldMap(
-              {
-                [SERVICE_NAME]: {
-                  type: 'keyword',
-                },
-                [SERVICE_ENVIRONMENT]: {
-                  type: 'keyword',
-                },
-                [TRANSACTION_TYPE]: {
-                  type: 'keyword',
-                },
-                [PROCESSOR_EVENT]: {
-                  type: 'keyword',
-                },
+    const { ruleDataService } = plugins.ruleRegistry;
+    const ruleDataClient = ruleDataService.initializeIndex({
+      feature: APM_SERVER_FEATURE_ID,
+      registrationContext: 'observability.apm',
+      dataset: Dataset.alerts,
+      componentTemplateRefs: [],
+      componentTemplates: [
+        {
+          name: 'mappings',
+          version: 0,
+          mappings: mappingFromFieldMap(
+            {
+              [SERVICE_NAME]: {
+                type: 'keyword',
               },
-              'strict'
-            ),
-          },
+              [SERVICE_ENVIRONMENT]: {
+                type: 'keyword',
+              },
+              [TRANSACTION_TYPE]: {
+                type: 'keyword',
+              },
+              [PROCESSOR_EVENT]: {
+                type: 'keyword',
+              },
+            },
+            'strict'
+          ),
         },
-      });
-
-      await ruleDataService.createOrUpdateIndexTemplate({
-        name: ruleDataService.getFullAssetName('apm-index-template'),
-        body: {
-          index_patterns: [alertsIndexPattern],
-          composed_of: [
-            ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
-            componentTemplateName,
-          ],
-        },
-      });
-      await ruleDataService.updateIndexMappingsMatchingPattern(
-        alertsIndexPattern
-      );
+      ],
+      indexTemplate: {
+        version: 0,
+      },
     });
-
-    // initialize eagerly
-    const initializeRuleDataTemplatesPromise = initializeRuleDataTemplates().catch(
-      (err) => {
-        this.logger!.error(err);
-      }
-    );
-
-    const ruleDataClient = ruleDataService.getRuleDataClient(
-      APM_SERVER_FEATURE_ID,
-      ruleDataService.getFullAssetName('observability-apm'),
-      () => initializeRuleDataTemplatesPromise
-    );
 
     const resourcePlugins = mapValues(plugins, (value, key) => {
       return {

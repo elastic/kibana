@@ -58,6 +58,7 @@ export enum FIELD_FORMAT_IDS {
   HISTOGRAM = 'histogram',
 }
 
+/** @public */
 export interface FieldFormatConfig {
   id: FieldFormatId;
   params: Record<string, any>;
@@ -73,6 +74,8 @@ export interface FieldFormatConfig {
  * This matches the signature of the public `core.uiSettings.get`, and
  * should only be used in scenarios where async access to uiSettings is
  * not possible.
+ * 
+ @public
  */
 export type FieldFormatsGetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
 

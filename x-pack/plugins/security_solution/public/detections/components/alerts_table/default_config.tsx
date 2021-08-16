@@ -8,14 +8,16 @@
 import {
   ALERT_DURATION,
   ALERT_ID,
-  ALERT_PRODUCER,
-  ALERT_RULE_ID,
-  ALERT_RULE_NAME,
   ALERT_RULE_TO,
   ALERT_RULE_TYPE,
+  ALERT_RULE_PRODUCER,
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
+  ALERT_RULE_UUID,
+  ALERT_RULE_ID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_CATEGORY,
 } from '@kbn/rule-data-utils';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { ColumnHeaderOptions, RowRendererId } from '../../../../common/types/timeline';
@@ -197,11 +199,11 @@ export const requiredFieldMappingsForActionsRuleRegistry = {
   'event.action': 'event.action',
   'alert.status': ALERT_STATUS,
   'alert.duration.us': ALERT_DURATION,
-  'rule.uuid': 'rule.uuid',
-  'rule.id': 'rule.id',
-  'rule.name': 'rule.name',
-  'rule.category': 'rule.category',
-  producer: ALERT_PRODUCER,
+  'rule.uuid': ALERT_RULE_UUID,
+  'rule.id': ALERT_RULE_ID,
+  'rule.name': ALERT_RULE_NAME,
+  'rule.category': ALERT_RULE_CATEGORY,
+  producer: ALERT_RULE_PRODUCER,
   tags: 'tags',
 };
 

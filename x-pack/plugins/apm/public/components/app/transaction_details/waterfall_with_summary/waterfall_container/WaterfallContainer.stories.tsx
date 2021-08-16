@@ -7,9 +7,8 @@
 
 import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { TraceAPIResponse } from '../../../../../../server/lib/traces/get_trace';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
+import { APIReturnType } from '../../../../../services/rest/createCallApmApi';
 import { WaterfallContainer } from './index';
 import { getWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
 import {
@@ -19,6 +18,8 @@ import {
   traceWithErrors,
   urlParams,
 } from './waterfallContainer.stories.data';
+
+type TraceAPIResponse = APIReturnType<'GET /api/apm/traces/{traceId}'>;
 
 export default {
   title: 'app/TransactionDetails/Waterfall',

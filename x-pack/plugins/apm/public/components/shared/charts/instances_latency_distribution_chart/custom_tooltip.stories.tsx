@@ -7,9 +7,12 @@
 
 import { TooltipInfo } from '@elastic/charts';
 import React from 'react';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { MainStatsServiceInstanceItem } from '../../../app/service_overview/service_overview_instances_chart_and_table';
 import { CustomTooltip } from './custom_tooltip';
+
+type ServiceInstanceMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];
 
 function getLatencyFormatter(props: TooltipInfo) {
   const maxLatency = Math.max(

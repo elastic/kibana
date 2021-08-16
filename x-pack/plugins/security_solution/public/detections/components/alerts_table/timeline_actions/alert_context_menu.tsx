@@ -7,8 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { indexOf } from 'lodash';
 
 import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
@@ -31,12 +30,14 @@ import { useAlertsActions } from './use_alerts_actions';
 import { useExceptionModal } from './use_add_exception_modal';
 import { useExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
-import { useEventFilterAction } from './use_event_filter_action';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   ALERT_ORIGINAL_EVENT_MODULE,
   ALERT_ORIGINAL_EVENT_KIND,
 } from '../../../../../common/alert_constants';
+import { AddEventFilter } from './add_event_filter';
+import { AddException } from './add_exception';
+import { AddEndpointException } from './add_endpoint_exception';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -116,9 +117,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     onAddEventFilterClick,
   } = useEventFilterModal();
 
-  const { statusActions } = useAlertsActions({
+  const { actionItems } = useAlertsActions({
     alertStatus,
     eventId: ecsRowData?._id,
+    indexName: ecsRowData?._index ?? '',
     timelineId,
     closePopover,
   });
@@ -136,23 +138,41 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     closePopover();
   }, [closePopover, onAddEventFilterClick]);
 
-  const exceptionActions = useExceptionActions({
+  const {
+    disabledAddEndpointException,
+    disabledAddException,
+    handleEndpointExceptionModal,
+    handleDetectionExceptionModal,
+  } = useExceptionActions({
     isEndpointAlert,
     onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
   });
 
-  const eventFilterActions = useEventFilterAction({
-    onAddEventFilterClick: handleOnAddEventFilterClick,
-  });
-
-  const panels = useMemo(
-    () => [
-      {
-        id: 0,
-        items: !isEvent && ruleId ? [...statusActions, ...exceptionActions] : [eventFilterActions],
-      },
-    ],
-    [eventFilterActions, exceptionActions, isEvent, ruleId, statusActions]
+  const items = useMemo(
+    () =>
+      !isEvent && ruleId
+        ? [
+            ...actionItems,
+            <AddEndpointException
+              onClick={handleEndpointExceptionModal}
+              disabled={disabledAddEndpointException}
+            />,
+            <AddException
+              onClick={handleDetectionExceptionModal}
+              disabled={disabledAddException}
+            />,
+          ]
+        : [<AddEventFilter onClick={handleOnAddEventFilterClick} />],
+    [
+      actionItems,
+      disabledAddEndpointException,
+      disabledAddException,
+      handleDetectionExceptionModal,
+      handleEndpointExceptionModal,
+      handleOnAddEventFilterClick,
+      isEvent,
+      ruleId,
+    ]
   );
 
   return (
@@ -168,7 +188,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             anchorPosition="downLeft"
             repositionOnScroll
           >
-            <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
+            <EuiContextMenuPanel size="s" items={items} />
           </EuiPopover>
         </EventsTdContent>
       </div>
@@ -194,12 +214,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     </>
   );
 };
-
-const ContextMenuPanel = styled(EuiContextMenu)`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
-`;
-
-ContextMenuPanel.displayName = 'ContextMenuPanel';
 
 export const AlertContextMenu = React.memo(AlertContextMenuComponent);
 

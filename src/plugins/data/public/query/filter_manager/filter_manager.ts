@@ -228,15 +228,15 @@ export class FilterManager implements PersistableStateService {
     });
   }
 
-  // Filter needs to implement SerializableState
+  // Filter needs to implement SerializableRecord
   public extract = extract as any;
 
-  // Filter needs to implement SerializableState
+  // Filter needs to implement SerializableRecord
   public inject = inject as any;
 
   public telemetry = telemetry;
 
-  // Filter needs to implement SerializableState
+  // Filter needs to implement SerializableRecord
   public migrateToLatest = migrateToLatest as any;
 
   public getAllMigrations = getAllMigrations;

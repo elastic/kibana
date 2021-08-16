@@ -7,13 +7,12 @@
  */
 
 import { Configuration } from 'webpack';
-import { defaultConfig } from '@kbn/storybook';
-import webpackConfig from '@kbn/storybook/target/webpack.config';
+import { defaultConfig, WebpackConfig } from '@kbn/storybook';
 
 module.exports = {
   ...defaultConfig,
   addons: ['@storybook/addon-essentials'],
   webpackFinal: (config: Configuration) => {
-    return webpackConfig({ config });
+    return WebpackConfig({ config });
   },
 };

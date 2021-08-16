@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface EnhancementRegistryDefinition<P extends SerializableState = SerializableState> extends PersistableStateDefinition<P> 
+export interface EnhancementRegistryDefinition<P extends SerializableRecord = SerializableRecord> extends PersistableStateDefinition<P> 
 ```
 
 ## Properties

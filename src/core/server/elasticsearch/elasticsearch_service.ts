@@ -149,7 +149,7 @@ export class ElasticsearchService
       this.coreContext.logger.get('elasticsearch'),
       type,
       this.getAuthHeaders,
-      () => this.executionContextClient?.get()
+      () => this.executionContextClient?.getAsHeader()
     );
   }
 

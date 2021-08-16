@@ -15,3 +15,4 @@ export const RULE_REFERENCE_FIELD_NAME = 'rule.reference';
 export const REFERENCE_URL_FIELD_NAME = 'reference.url';
 export const EVENT_URL_FIELD_NAME = 'event.url';
 export const AGENT_STATUS_FIELD_NAME = 'agent.status';
+export const REASON_FIELD_NAME = 'signal.reason';
