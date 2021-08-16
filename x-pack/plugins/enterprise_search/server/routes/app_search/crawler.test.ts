@@ -244,6 +244,49 @@ describe('crawler routes', () => {
     });
   });
 
+  describe('PUT /api/app_search/engines/{name}/crawler/domains/{id}', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'put',
+        path: '/api/app_search/engines/{name}/crawler/domains/{id}',
+      });
+
+      registerCrawlerRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v0/engines/:name/crawler/domains/:id',
+      });
+    });
+
+    it('validates correctly with required params', () => {
+      const request = {
+        params: { name: 'some-engine', id: '1234' },
+        body: {
+          crawl_rules: [
+            {
+              order: 1,
+              id: '5678',
+            },
+          ],
+        },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails otherwise', () => {
+      const request = { params: {}, body: {} };
+      mockRouter.shouldThrow(request);
+    });
+  });
+
   describe('GET /api/app_search/engines/{name}/crawler/domains/{id}', () => {
     let mockRouter: MockRouter;
 
@@ -361,6 +404,135 @@ describe('crawler routes', () => {
       const request = {
         params: {},
         body: { domains: ['https://elastic.co', 'https://swiftype.com'] },
+      };
+      mockRouter.shouldThrow(request);
+    });
+  });
+
+  describe('GET /api/app_search/engines/{name}/crawler/crawl_schedule', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/app_search/engines/{name}/crawler/crawl_schedule',
+      });
+
+      registerCrawlerRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+      });
+    });
+
+    it('validates correctly', () => {
+      const request = {
+        params: { name: 'some-engine' },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without a name param', () => {
+      const request = {
+        params: {},
+      };
+      mockRouter.shouldThrow(request);
+    });
+  });
+
+  describe('PUT /api/app_search/engines/{name}/crawler/crawl_schedule', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'put',
+        path: '/api/app_search/engines/{name}/crawler/crawl_schedule',
+      });
+
+      registerCrawlerRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+      });
+    });
+
+    it('validates correctly', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        body: { unit: 'day', frequency: 7 },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without a name param', () => {
+      const request = {
+        params: {},
+        body: { unit: 'day', frequency: 7 },
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fails validation without a unit property in body', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        body: { frequency: 7 },
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fails validation without a frequency property in body', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        body: { unit: 'day' },
+      };
+      mockRouter.shouldThrow(request);
+    });
+  });
+
+  describe('DELETE /api/app_search/engines/{name}/crawler/crawl_schedule', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'delete',
+        path: '/api/app_search/engines/{name}/crawler/crawl_schedule',
+      });
+
+      registerCrawlerRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+      });
+    });
+
+    it('validates correctly', () => {
+      const request = {
+        params: { name: 'some-engine' },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without a name param', () => {
+      const request = {
+        params: {},
       };
       mockRouter.shouldThrow(request);
     });

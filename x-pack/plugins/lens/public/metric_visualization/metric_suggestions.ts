@@ -6,7 +6,8 @@
  */
 
 import { SuggestionRequest, VisualizationSuggestion, TableSuggestion } from '../types';
-import type { MetricState } from '../../common/expressions';
+import { MetricState } from '../../common/expressions';
+import { layerTypes } from '../../common';
 import { LensIconChartMetric } from '../assets/chart_metric';
 
 /**
@@ -49,6 +50,7 @@ function getSuggestion(table: TableSuggestion): VisualizationSuggestion<MetricSt
     state: {
       layerId: table.layerId,
       accessor: col.columnId,
+      layerType: layerTypes.DATA,
     },
   };
 }

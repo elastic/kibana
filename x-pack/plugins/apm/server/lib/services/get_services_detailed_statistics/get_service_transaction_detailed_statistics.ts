@@ -26,7 +26,7 @@ import { calculateThroughput } from '../../helpers/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../helpers/get_bucket_size_for_aggregated_transactions';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import {
-  calculateTransactionErrorPercentage,
+  calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../helpers/transaction_error_rate';
 
@@ -39,8 +39,8 @@ export async function getServiceTransactionDetailedStatistics({
   offset,
 }: {
   serviceNames: string[];
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
   offset?: string;
@@ -148,7 +148,7 @@ export async function getServiceTransactionDetailedStatistics({
         transactionErrorRate: topTransactionTypeBucket.timeseries.buckets.map(
           (dateBucket) => ({
             x: dateBucket.key + offsetInMs,
-            y: calculateTransactionErrorPercentage(dateBucket.outcomes),
+            y: calculateFailedTransactionRate(dateBucket.outcomes),
           })
         ),
         throughput: topTransactionTypeBucket.timeseries.buckets.map(

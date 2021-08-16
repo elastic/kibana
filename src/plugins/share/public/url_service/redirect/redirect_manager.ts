@@ -52,6 +52,10 @@ export class RedirectManager {
 
   public onMount(urlLocationSearch: string) {
     const options = this.parseSearchParams(urlLocationSearch);
+    this.navigate(options);
+  }
+
+  public navigate(options: RedirectOptions) {
     const locator = this.deps.url.locators.get(options.id);
 
     if (!locator) {

@@ -96,6 +96,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     dimensionGroups,
     toggleFullscreen,
     isFullscreen,
+    layerType,
   } = props;
   const services = {
     data: props.data,
@@ -186,7 +187,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
         definition.getDisabledStatus &&
         definition.getDisabledStatus(
           state.indexPatterns[state.currentIndexPatternId],
-          state.layers[layerId]
+          state.layers[layerId],
+          layerType
         ),
     };
   });
