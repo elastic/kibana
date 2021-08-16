@@ -48,6 +48,10 @@ const StyledEuiBasicTable = styled(EuiBasicTable as BasicTableType)`
   .EventRenderedView__buildingBlock {
     background: ${({ theme }) => theme.eui.euiColorHighlight};
   }
+
+  & > div:last-child {
+    height: 72px;
+  }
 `;
 
 interface EventRenderedViewProps {
