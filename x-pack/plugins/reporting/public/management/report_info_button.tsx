@@ -92,7 +92,7 @@ class ReportInfoButtonUi extends Component<Props, State> {
       {
         title: this.props.intl.formatMessage({
           id: 'xpack.reporting.listing.infoPanel.createdAtInfo',
-          defaultMessage: 'Created At',
+          defaultMessage: 'Created at',
         }),
         description: info.getCreatedAtLabel(),
       },
@@ -106,7 +106,7 @@ class ReportInfoButtonUi extends Component<Props, State> {
       {
         title: this.props.intl.formatMessage({
           id: 'xpack.reporting.listing.infoPanel.tzInfo',
-          defaultMessage: 'Timezone',
+          defaultMessage: 'Time zone',
         }),
         description: info.browserTimezone || NA,
       },
@@ -116,21 +116,21 @@ class ReportInfoButtonUi extends Component<Props, State> {
       {
         title: this.props.intl.formatMessage({
           id: 'xpack.reporting.listing.infoPanel.startedAtInfo',
-          defaultMessage: 'Started At',
+          defaultMessage: 'Started at',
         }),
         description: info.started_at || NA,
       },
       {
         title: this.props.intl.formatMessage({
           id: 'xpack.reporting.listing.infoPanel.completedAtInfo',
-          defaultMessage: 'Completed At',
+          defaultMessage: 'Completed at',
         }),
         description: info.completed_at || NA,
       },
       {
         title: this.props.intl.formatMessage({
           id: 'xpack.reporting.listing.infoPanel.processedByInfo',
-          defaultMessage: 'Processed By',
+          defaultMessage: 'Processed by',
         }),
         description:
           info.kibana_name && info.kibana_id ? `${info.kibana_name} (${info.kibana_id})` : NA,
@@ -138,14 +138,14 @@ class ReportInfoButtonUi extends Component<Props, State> {
       {
         title: this.props.intl.formatMessage({
           id: 'xpack.reporting.listing.infoPanel.contentTypeInfo',
-          defaultMessage: 'Content Type',
+          defaultMessage: 'Content type',
         }),
         description: info.content_type || NA,
       },
       {
         title: this.props.intl.formatMessage({
           id: 'xpack.reporting.listing.infoPanel.sizeInfo',
-          defaultMessage: 'Size in Bytes',
+          defaultMessage: 'Size in bytes',
         }),
         description: info.size?.toString() || NA,
       },
@@ -159,7 +159,7 @@ class ReportInfoButtonUi extends Component<Props, State> {
       {
         title: this.props.intl.formatMessage({
           id: 'xpack.reporting.listing.infoPanel.maxAttemptsInfo',
-          defaultMessage: 'Max Attempts',
+          defaultMessage: 'Max attempts',
         }),
         description: info.max_attempts?.toString() || NA,
       },
@@ -173,7 +173,7 @@ class ReportInfoButtonUi extends Component<Props, State> {
       {
         title: this.props.intl.formatMessage({
           id: 'xpack.reporting.listing.infoPanel.exportTypeInfo',
-          defaultMessage: 'Export Type',
+          defaultMessage: 'Export type',
         }),
         description: info.isDeprecated
           ? this.props.intl.formatMessage(
@@ -207,7 +207,7 @@ class ReportInfoButtonUi extends Component<Props, State> {
       {
         title: this.props.intl.formatMessage({
           id: 'xpack.reporting.listing.infoPanel.browserTypeInfo',
-          defaultMessage: 'Browser Type',
+          defaultMessage: 'Browser type',
         }),
         description: info.browser_type || NA,
       },
@@ -293,17 +293,17 @@ class ReportInfoButtonUi extends Component<Props, State> {
 
     let message = this.props.intl.formatMessage({
       id: 'xpack.reporting.listing.table.reportInfoButtonTooltip',
-      defaultMessage: 'See report info',
+      defaultMessage: 'See report info.',
     });
     if (job.getError()) {
       message = this.props.intl.formatMessage({
         id: 'xpack.reporting.listing.table.reportInfoAndErrorButtonTooltip',
-        defaultMessage: 'See report info and error message',
+        defaultMessage: 'See report info and error message.',
       });
     } else if (job.getWarnings()) {
       message = this.props.intl.formatMessage({
         id: 'xpack.reporting.listing.table.reportInfoAndWarningsButtonTooltip',
-        defaultMessage: 'See report info and warnings',
+        defaultMessage: 'See report info and warnings.',
       });
     }
 
@@ -349,7 +349,7 @@ class ReportInfoButtonUi extends Component<Props, State> {
           isLoading: false,
           calloutTitle: this.props.intl.formatMessage({
             id: 'xpack.reporting.listing.table.reportInfoUnableToFetch',
-            defaultMessage: 'Unable to fetch report info',
+            defaultMessage: 'Unable to fetch report info.',
           }),
           info: null,
           error: err,

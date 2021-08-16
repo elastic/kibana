@@ -18,8 +18,6 @@ This section summarizes the changes in each release.
 [[release-notes-8.0.0-alpha1]]
 == {kib} 8.0.0-alpha1
 
-coming[8.0.0]
-
 The following changes are released for the first time in {kib} 8.0.0-alpha1. Review the changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
 
 [float]

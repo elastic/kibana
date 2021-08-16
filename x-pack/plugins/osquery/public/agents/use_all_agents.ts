@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useQuery } from 'react-query';
 
-import { GetAgentsResponse, agentRouteService } from '../../../fleet/common';
+import { GetAgentsResponse } from '../../../fleet/common';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 
@@ -31,7 +31,8 @@ export const useAllAgents = (
   const { perPage } = opts;
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
-  const { isLoading: agentsLoading, data: agentData } = useQuery<GetAgentsResponse>(
+
+  return useQuery<GetAgentsResponse>(
     ['agents', osqueryPolicies, searchValue, perPage],
     () => {
       let kuery = `${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')}`;
@@ -40,7 +41,7 @@ export const useAllAgents = (
         kuery += ` and (local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*)`;
       }
 
-      return http.get(agentRouteService.getListPath(), {
+      return http.get(`/internal/osquery/fleet_wrapper/agents`, {
         query: {
           kuery,
           perPage,
@@ -48,6 +49,8 @@ export const useAllAgents = (
       });
     },
     {
+      // @ts-expect-error update types
+      select: (data) => data?.agents || [],
       enabled: !osqueryPoliciesLoading && osqueryPolicies.length > 0,
       onSuccess: () => setErrorToast(),
       onError: (error) =>
@@ -58,6 +61,4 @@ export const useAllAgents = (
         }),
     }
   );
-
-  return { agentsLoading, agents: agentData?.list };
 };

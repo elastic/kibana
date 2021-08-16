@@ -2518,6 +2518,8 @@ export class SavedObjectsErrorHelpers {
     // (undocumented)
     static createGenericNotFoundError(type?: string | null, id?: string | null): DecoratedError;
     // (undocumented)
+    static createGenericNotFoundEsUnavailableError(type: string, id: string): DecoratedError;
+    // (undocumented)
     static createIndexAliasNotFoundError(alias: string): DecoratedError;
     // (undocumented)
     static createInvalidVersionError(versionInput?: string): DecoratedError;
@@ -3028,7 +3030,7 @@ export interface SavedObjectsResolveImportErrorsOptions {
 
 // @public (undocumented)
 export interface SavedObjectsResolveResponse<T = unknown> {
-    aliasTargetId?: string;
+    alias_target_id?: string;
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
     saved_object: SavedObject<T>;
 }

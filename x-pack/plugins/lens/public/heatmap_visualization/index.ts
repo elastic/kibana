@@ -14,7 +14,7 @@ import type { FormatFactory } from '../../common';
 
 export interface HeatmapVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
-  formatFactory: Promise<FormatFactory>;
+  formatFactory: FormatFactory;
   editorFrame: EditorFrameSetup;
   charts: ChartsPluginSetup;
 }
