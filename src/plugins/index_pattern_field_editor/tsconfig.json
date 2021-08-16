@@ -7,7 +7,11 @@
     "declarationMap": true
   },
   "include": [
+    "../../../typings/**/*",
+    "__jest__/**/*",
+    "common/**/*",
     "public/**/*",
+    "server/**/*",
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },

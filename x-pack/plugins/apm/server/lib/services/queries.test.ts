@@ -13,6 +13,7 @@ import {
   SearchParamsMock,
   inspectSearchParams,
 } from '../../utils/test_helpers';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 describe('services queries', () => {
   let mock: SearchParamsMock;
@@ -39,6 +40,8 @@ describe('services queries', () => {
         setup,
         searchAggregatedTransactions: false,
         logger: {} as any,
+        environment: ENVIRONMENT_ALL.value,
+        kuery: '',
       })
     );
 
