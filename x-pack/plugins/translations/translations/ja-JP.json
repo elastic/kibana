@@ -23847,7 +23847,6 @@
     "xpack.transform.clone.errorPromptText": "ソースインデックスパターンが存在するかどうかを確認するときにエラーが発生しました",
     "xpack.transform.clone.errorPromptTitle": "変換構成の取得中にエラーが発生しました。",
     "xpack.transform.clone.fetchErrorPromptText": "KibanaインデックスパターンIDを取得できませんでした。",
-    "xpack.transform.clone.noIndexPatternErrorPromptText": "変換を複製できません。{indexPattern}のインデックスパターンが存在しません。",
     "xpack.transform.cloneTransform.breadcrumbTitle": "クローン変換",
     "xpack.transform.createTransform.breadcrumbTitle": "変換の作成",
     "xpack.transform.deleteTransform.deleteAnalyticsWithIndexErrorMessage": "ディスティネーションインデックス{destinationIndex}の削除中にエラーが発生しました",

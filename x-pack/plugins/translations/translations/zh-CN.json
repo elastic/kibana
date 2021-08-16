@@ -24389,7 +24389,6 @@
     "xpack.transform.clone.errorPromptText": "检查源索引模式是否存在时发生错误",
     "xpack.transform.clone.errorPromptTitle": "获取转换配置时发生错误。",
     "xpack.transform.clone.fetchErrorPromptText": "无法提取 Kibana 索引模式 ID。",
-    "xpack.transform.clone.noIndexPatternErrorPromptText": "无法克隆转换。对于 {indexPattern}，不存在索引模式。",
     "xpack.transform.cloneTransform.breadcrumbTitle": "克隆转换",
     "xpack.transform.createTransform.breadcrumbTitle": "创建转换",
     "xpack.transform.deleteTransform.deleteAnalyticsWithIndexErrorMessage": "删除目标索引 {destinationIndex} 时发生错误",
