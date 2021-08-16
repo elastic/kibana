@@ -120,7 +120,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     <KibanaPageTemplate
       pageHeader={{
         iconType: 'logoKibana',
-        pageTitle: <FormattedMessage defaultMessage="Kibana" id="kibanaOverview.header.title" />,
+        pageTitle: <FormattedMessage defaultMessage="Analytics" id="kibanaOverview.header.title" />,
         rightSideItems: overviewPageActions({
           addBasePath,
           application,
