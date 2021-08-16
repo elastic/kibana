@@ -100,7 +100,7 @@ interface Props {
   createAgentInstructions: CreateAgentInstructions;
 }
 
-export function AgentInstructionsAccordian({
+export function AgentInstructionsAccordion({
   newPolicy,
   agentName,
   title,

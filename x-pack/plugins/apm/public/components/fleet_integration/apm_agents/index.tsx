@@ -7,7 +7,7 @@
 
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import { AgentInstructionsAccordian } from './agent_instructions_accordian';
+import { AgentInstructionsAccordion } from './agent_instructions_accordion';
 import { ApmAgentInstructionsMappings } from './agent_instructions_mappings';
 import {
   NewPackagePolicy,
@@ -28,7 +28,7 @@ export function ApmAgents({ newPolicy }: Props) {
         ({ agentName, title, createAgentInstructions, variantId }) => (
           <Fragment key={agentName}>
             <EuiPanel>
-              <AgentInstructionsAccordian
+              <AgentInstructionsAccordion
                 agentName={agentName}
                 title={title}
                 newPolicy={newPolicy}
