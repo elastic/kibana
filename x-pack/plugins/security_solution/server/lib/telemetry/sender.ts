@@ -361,9 +361,10 @@ export class TelemetryEventsSender {
       await this.sendEvents(
         toSend,
         telemetryUrl,
+        'alerts-endpoint',
         clusterInfo.cluster_uuid,
         clusterInfo.version?.number,
-        licenseInfo?.uid
+        licenseInfo?.uid,
       );
     } catch (err) {
       this.logger.warn(`Error sending telemetry events data: ${err}`);
@@ -466,7 +467,7 @@ export class TelemetryEventsSender {
       });
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(this.usageLabelPrefix.concat(['payloads', channel])),
-        counterType: resp.status,
+        counterType: resp.status.toString(),
         incrementBy: 1
       });
       this.telemetryUsageCounter?.incrementCounter({
