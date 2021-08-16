@@ -41,7 +41,8 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback } from 'react';
 
-import type { TimelinesUIStart, TGridType, SortDirection } from '../../../../timelines/public';
+import type { ObservabilityPublicPluginsStart } from '../..';
+import { TGridType, SortDirection, useStatusBulkActionItems } from '../../../../timelines/public';
 import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import type {
@@ -75,6 +76,8 @@ interface AlertsTableTGridProps {
 }
 
 interface ObservabilityActionsProps extends ActionProps {
+  currentStatus: AlertStatus;
+  indexName: string;
   flyoutAlert: TopAlert | undefined;
   setFlyoutAlert: React.Dispatch<React.SetStateAction<TopAlert | undefined>>;
 }
@@ -162,6 +165,8 @@ function ObservabilityActions({
   data,
   eventId,
   ecsData,
+  currentStatus,
+  indexName,
   flyoutAlert,
   setFlyoutAlert,
 }: ObservabilityActionsProps) {
@@ -169,7 +174,8 @@ function ObservabilityActions({
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const [openActionsPopoverId, setActionsPopover] = useState(null);
-  const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
+  const { timelines, notifications } = useKibana<ObservabilityPublicPluginsStart>().services;
+
   const parseObservabilityAlert = useMemo(() => parseAlert(observabilityRuleTypeRegistry), [
     observabilityRuleTypeRegistry,
   ]);
@@ -196,31 +202,123 @@ function ObservabilityActions({
     };
   }, [data, eventId, ecsData]);
 
+  const onAlertStatusUpdateSuccess = useCallback(
+    (updated: number, conflicts: number, newStatus: AlertStatus) => {
+      setActionsPopover(null);
+      if (conflicts > 0) {
+        // Partial failure
+        notifications!.toasts.addWarning({
+          title: i18n.translate('xpack.observability.alertsTGrid.updateAlertStatusFailed', {
+            values: { conflicts },
+            defaultMessage:
+              'Failed to update { conflicts } {conflicts, plural, =1 {alert} other {alerts}}.',
+          }),
+          text: i18n.translate('xpack.observability.alertsTGrid.updateAlertStatusFailedDetailed', {
+            values: { updated, conflicts },
+            defaultMessage: `{ updated } {updated, plural, =1 {alert was} other {alerts were}} updated successfully, but { conflicts } failed to update
+               because { conflicts, plural, =1 {it was} other {they were}} already being modified.`,
+          }),
+        });
+      } else {
+        let title: string;
+        switch (newStatus) {
+          case 'closed':
+            title = i18n.translate(
+              'xpack.observability.alertsTGrid.closedAlertSuccessToastMessage',
+              {
+                values: { updated },
+                defaultMessage:
+                  'Successfully closed {updated} {updated, plural, =1 {alert} other {alerts}}.',
+              }
+            );
+            break;
+          case 'open':
+            title = i18n.translate(
+              'xpack.observability.alertsTGrid.openedAlertSuccessToastMessage',
+              {
+                values: { updated },
+                defaultMessage:
+                  'Successfully opened {updated} {updated, plural, =1 {alert} other {alerts}}.',
+              }
+            );
+            break;
+          case 'in-progress':
+            title = i18n.translate(
+              'xpack.observability.alertsTGrid.inProgressAlertSuccessToastMessage',
+              {
+                values: { updated },
+                defaultMessage:
+                  'Successfully marked {updated} {updated, plural, =1 {alert} other {alerts}} as in progress.',
+              }
+            );
+        }
+        notifications!.toasts.addSuccess(title);
+      }
+    },
+    [setActionsPopover, notifications]
+  );
+
+  const onAlertStatusUpdateFailure = useCallback(
+    (newStatus: AlertStatus, error: Error) => {
+      setActionsPopover(null);
+
+      let title: string;
+      switch (newStatus) {
+        case 'closed':
+          title = i18n.translate('xpack.observability.alertsTGrid.closedAlertFailedToastMessage', {
+            defaultMessage: 'Failed to close alert(s).',
+          });
+          break;
+        case 'open':
+          title = i18n.translate('xpack.observability.alertsTGrid.openedAlertFailedToastMessage', {
+            defaultMessage: 'Failed to open alert(s)',
+          });
+          break;
+        case 'in-progress':
+          title = i18n.translate(
+            'xpack.observability.alertsTGrid.inProgressAlertFailedToastMessage',
+            {
+              defaultMessage: 'Failed to mark alert(s) as in progress',
+            }
+          );
+      }
+      notifications!.toasts.addError(error, { title });
+    },
+    [setActionsPopover, notifications]
+  );
+
+  const statusBulkActionItems = useStatusBulkActionItems({
+    eventIds: [eventId],
+    currentStatus,
+    indexName,
+    setEventsLoading: () => {}, // TODO: implement loader 
+    setEventsDeleted: () => {}, // TODO: implement loader
+    onUpdateSuccess: onAlertStatusUpdateSuccess,
+    onUpdateFailure: onAlertStatusUpdateFailure,
+  });
+
   const actionsPanels = useMemo(() => {
     return [
       {
         id: 0,
         content: [
-          <>
-            {timelines.getAddToExistingCaseButton({
-              event,
-              casePermissions,
-              appId: observabilityFeatureId,
-              onClose: afterCaseSelection,
-            })}
-          </>,
-          <>
-            {timelines.getAddToNewCaseButton({
-              event,
-              casePermissions,
-              appId: observabilityFeatureId,
-              onClose: afterCaseSelection,
-            })}
-          </>,
+          timelines.getAddToExistingCaseButton({
+            event,
+            casePermissions,
+            appId: observabilityFeatureId,
+            onClose: afterCaseSelection,
+          }),
+          timelines.getAddToNewCaseButton({
+            event,
+            casePermissions,
+            appId: observabilityFeatureId,
+            onClose: afterCaseSelection,
+          }),
+          ...statusBulkActionItems,
         ],
       },
     ];
-  }, [afterCaseSelection, casePermissions, timelines, event]);
+  }, [afterCaseSelection, casePermissions, timelines, event, statusBulkActionItems]);
   return (
     <>
       {flyoutAlert && (
@@ -277,7 +375,7 @@ function ObservabilityActions({
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const { indexName, rangeFrom, rangeTo, kuery, status, setRefetch } = props;
-  const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
+  const { timelines } = useKibana<ObservabilityPublicPluginsStart>().services;
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
 
@@ -301,6 +399,8 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           return (
             <ObservabilityActions
               {...actionProps}
+              currentStatus={status as AlertStatus}
+              indexName={indexName}
               flyoutAlert={flyoutAlert}
               setFlyoutAlert={setFlyoutAlert}
             />
@@ -308,7 +408,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         },
       },
     ];
-  }, [flyoutAlert]);
+  }, [flyoutAlert, status, indexName]);
 
   const tGridProps = useMemo(() => {
     const type: TGridType = 'standalone';

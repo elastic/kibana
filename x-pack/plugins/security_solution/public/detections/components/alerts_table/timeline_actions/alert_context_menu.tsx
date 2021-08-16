@@ -147,7 +147,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     () =>
       !isEvent && ruleId
         ? [
-            ...actionItems,
             <AddEndpointException
               onClick={handleEndpointExceptionModal}
               disabled={disabledAddEndpointException}
@@ -156,8 +155,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
               onClick={handleDetectionExceptionModal}
               disabled={disabledAddException}
             />,
+            ...actionItems,
           ]
-        : [<AddEventFilter onClick={handleOnAddEventFilterClick} />],
+        : [<AddEventFilter onClick={handleOnAddEventFilterClick} />, ...actionItems],
     [
       actionItems,
       disabledAddEndpointException,
