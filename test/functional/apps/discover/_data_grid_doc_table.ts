@@ -61,6 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show popover with expanded cell content by click on expand button', async () => {
       log.debug('open popover with expanded cell content to get json from the editor');
+      const expandDocId = 'AU_x3_g4GFA8no6QjkPi';
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       const documentCell = await dataGrid.getCellElement(1, 4);
@@ -70,15 +71,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await expandCellContentButton.click();
       const popoverJson = await monacoEditor.getCodeEditorValue();
-      expect(JSON.parse(popoverJson)._id).to.be('AU_x3_g4GFA8no6QjkPi');
+      expect(JSON.parse(popoverJson)._id).to.be(expandDocId);
 
       log.debug('open expanded document flyout to get json');
       await dataGrid.clickRowToggle();
       await find.clickByCssSelectorWhenNotDisabled('#kbn_doc_viewer_tab_1');
-      const flyoutJson = await monacoEditor.getCodeEditorValue();
-      expect(JSON.parse(flyoutJson)._id).to.be('AU_x3_g4GFA8no6QjkPi');
 
-      expect(popoverJson).to.be(flyoutJson);
+      await retry.waitFor('codeEditorValue to be valid', async () => {
+        const text = await monacoEditor.getCodeEditorValue();
+        const flyoutJson = text.trim().charAt(0) === '{' ? JSON.parse(text) : {};
+        return flyoutJson._id === expandDocId;
+      });
     });
 
     describe('expand a document row', function () {
