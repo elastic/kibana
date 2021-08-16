@@ -6,6 +6,7 @@
  */
 
 import React, { useContext } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import type { LazyObservabilityPageTemplateProps } from '../../../../observability/public';
 import { KibanaPageTemplateProps } from '../../../../../../src/plugins/kibana_react/public';
@@ -20,6 +21,7 @@ export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> =
       observability: {
         navigation: { PageTemplate },
       },
+      docLinks,
     },
   } = useKibanaContextForPlugin();
 
@@ -32,14 +34,25 @@ export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> =
   const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = metricIndicesExist
     ? undefined
     : {
-        solution: 'Observability',
-        pageTitle: 'Set up Metrics for Observability!',
+        solution: i18n.translate('xpack.metrics.noDataConfig.solutionName', {
+          defaultMessage: 'Observability',
+        }),
         actions: {
           beats: {
+            title: i18n.translate('xpack.metrics.noDataConfig.beatsCard.title', {
+              defaultMessage: 'Add metrics with Beats',
+            }),
+            description: i18n.translate('xpack.metrics.noDataConfig.beatsCard.description', {
+              defaultMessage:
+                'Use Beats to send metrics data to Elasticsearch. We make it easy with modules for many popular systems and apps.',
+            }),
+            button: i18n.translate('xpack.metrics.noDataConfig.beatsCard.buttonLabel', {
+              defaultMessage: 'Add metrics with Beats',
+            }),
             ...tutorialLinkProps,
           },
         },
-        docsLink: 'https://www.elastic.co/guide/en/kibana/master/observability.html',
+        docsLink: docLinks.links.observability.guide,
       };
 
   return <PageTemplate noDataConfig={noDataConfig} {...pageTemplateProps} />;
