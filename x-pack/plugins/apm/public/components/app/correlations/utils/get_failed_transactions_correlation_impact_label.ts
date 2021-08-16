@@ -16,7 +16,7 @@ export function getFailedTransactionsCorrelationImpactLabel(
     return FAILED_TRANSACTIONS_IMPACT_THRESHOLD.HIGH;
   if (pValue >= 1e-6 && pValue < 0.001)
     return FAILED_TRANSACTIONS_IMPACT_THRESHOLD.MEDIUM;
-  if (pValue >= 0.001 && pValue <= 0.02)
+  if (pValue >= 0.001 && pValue < 0.02)
     return FAILED_TRANSACTIONS_IMPACT_THRESHOLD.LOW;
 
   return null;

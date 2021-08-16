@@ -15,7 +15,8 @@ describe('getFailedTransactionsCorrelationImpactLabel', () => {
     expect(getFailedTransactionsCorrelationImpactLabel(Infinity)).toBe(null);
   });
 
-  it('returns null if value is greater than threshold ', () => {
+  it('returns null if value is greater than or equal to the threshold ', () => {
+    expect(getFailedTransactionsCorrelationImpactLabel(0.02)).toBe(null);
     expect(getFailedTransactionsCorrelationImpactLabel(0.1)).toBe(null);
   });
 
@@ -44,7 +45,7 @@ describe('getFailedTransactionsCorrelationImpactLabel', () => {
     expect(getFailedTransactionsCorrelationImpactLabel(1e-3)).toBe(
       FAILED_TRANSACTIONS_IMPACT_THRESHOLD.LOW
     );
-    expect(getFailedTransactionsCorrelationImpactLabel(0.02)).toBe(
+    expect(getFailedTransactionsCorrelationImpactLabel(0.009)).toBe(
       FAILED_TRANSACTIONS_IMPACT_THRESHOLD.LOW
     );
   });
