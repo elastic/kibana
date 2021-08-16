@@ -196,7 +196,7 @@ export async function updateObjectsSpaces({
     bulkGetResponse &&
     isNotFoundFromUnsupportedServer({
       statusCode: bulkGetResponse.statusCode,
-      headers: { ...bulkGetResponse.headers },
+      headers: bulkGetResponse.headers,
     })
   ) {
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();

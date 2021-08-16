@@ -428,7 +428,7 @@ export class SavedObjectsRepository {
       bulkGetResponse &&
       isNotFoundFromUnsupportedServer({
         statusCode: bulkGetResponse.statusCode,
-        headers: { ...bulkGetResponse.headers },
+        headers: bulkGetResponse.headers,
       })
     ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
@@ -606,7 +606,7 @@ export class SavedObjectsRepository {
       bulkGetResponse &&
       isNotFoundFromUnsupportedServer({
         statusCode: bulkGetResponse.statusCode,
-        headers: { ...bulkGetResponse.headers },
+        headers: bulkGetResponse.headers,
       })
     ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
@@ -1011,7 +1011,7 @@ export class SavedObjectsRepository {
       bulkGetResponse &&
       isNotFoundFromUnsupportedServer({
         statusCode: bulkGetResponse.statusCode,
-        headers: { ...bulkGetResponse.headers },
+        headers: bulkGetResponse.headers,
       })
     ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
@@ -1142,7 +1142,7 @@ export class SavedObjectsRepository {
     if (
       isNotFoundFromUnsupportedServer({
         statusCode: aliasResponse.statusCode,
-        headers: { ...aliasResponse.headers },
+        headers: aliasResponse.headers,
       })
     ) {
       // throw if we cannot verify the response is from Elasticsearch
@@ -1185,7 +1185,7 @@ export class SavedObjectsRepository {
     if (
       isNotFoundFromUnsupportedServer({
         statusCode: bulkGetResponse.statusCode,
-        headers: { ...bulkGetResponse.headers },
+        headers: bulkGetResponse.headers,
       })
     ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
@@ -1503,7 +1503,7 @@ export class SavedObjectsRepository {
       bulkGetResponse &&
       isNotFoundFromUnsupportedServer({
         statusCode: bulkGetResponse.statusCode,
-        headers: { ...bulkGetResponse.headers },
+        headers: bulkGetResponse.headers,
       })
     ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
