@@ -98,15 +98,14 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       afterCaseSelection,
     ]
   );
-  const uiCapabilities = useKibana().services.application.capabilities;
-  const capabilitiesCanUserCRUD: boolean = uiCapabilities.siem.crud === true;
+  const hasWritePermissions = useGetUserCasesPermissions()?.crud ?? false;
   const addToCaseAction = useMemo(
     () =>
       [
         TimelineId.detectionsPage,
         TimelineId.detectionsRulesDetailsPage,
         TimelineId.active,
-      ].includes(timelineId as TimelineId) && capabilitiesCanUserCRUD
+      ].includes(timelineId as TimelineId) && hasWritePermissions
         ? {
             actionItem: [
               {
@@ -121,7 +120,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             ],
           }
         : { actionItem: [], content: [] },
-    [addToCaseActionProps, capabilitiesCanUserCRUD, timelineId, timelinesUi]
+    [addToCaseActionProps, hasWritePermissions, timelineId, timelinesUi]
   );
 
   const alertStatus = get(0, ecsRowData?.signal?.status) as Status;
