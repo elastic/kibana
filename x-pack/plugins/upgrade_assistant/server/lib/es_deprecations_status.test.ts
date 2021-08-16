@@ -10,7 +10,7 @@ import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { DeprecationAPIResponse } from '../../common/types';
 
-import { getUpgradeAssistantStatus } from './es_migration_apis';
+import { getESUpgradeStatus } from './es_deprecations_status';
 import fakeDeprecations from './__fixtures__/fake_deprecations.json';
 
 const fakeIndexNames = Object.keys(fakeDeprecations.index_settings);
@@ -20,7 +20,7 @@ const asApiResponse = <T>(body: T): RequestEvent<T> =>
     body,
   } as RequestEvent<T>);
 
-describe('getUpgradeAssistantStatus', () => {
+describe('getESUpgradeStatus', () => {
   const resolvedIndices = {
     indices: fakeIndexNames.map((indexName) => {
       // mark one index as closed to test blockerForReindexing flag
@@ -45,16 +45,16 @@ describe('getUpgradeAssistantStatus', () => {
   esClient.asCurrentUser.indices.resolveIndex.mockResolvedValue(asApiResponse(resolvedIndices));
 
   it('calls /_migration/deprecations', async () => {
-    await getUpgradeAssistantStatus(esClient);
+    await getESUpgradeStatus(esClient);
     expect(esClient.asCurrentUser.migration.deprecations).toHaveBeenCalled();
   });
 
   it('returns the correct shape of data', async () => {
-    const resp = await getUpgradeAssistantStatus(esClient);
+    const resp = await getESUpgradeStatus(esClient);
     expect(resp).toMatchSnapshot();
   });
 
-  it('returns readyForUpgrade === false when critical issues found', async () => {
+  it('returns totalCriticalDeprecations > 0 when critical issues found', async () => {
     esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
       // @ts-expect-error not full interface
       asApiResponse({
@@ -65,13 +65,13 @@ describe('getUpgradeAssistantStatus', () => {
       })
     );
 
-    await expect(getUpgradeAssistantStatus(esClient)).resolves.toHaveProperty(
-      'readyForUpgrade',
-      false
+    await expect(getESUpgradeStatus(esClient)).resolves.toHaveProperty(
+      'totalCriticalDeprecations',
+      1
     );
   });
 
-  it('returns readyForUpgrade === true when no critical issues found', async () => {
+  it('returns totalCriticalDeprecations === 0 when no critical issues found', async () => {
     esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
       // @ts-expect-error not full interface
       asApiResponse({
@@ -82,9 +82,9 @@ describe('getUpgradeAssistantStatus', () => {
       })
     );
 
-    await expect(getUpgradeAssistantStatus(esClient)).resolves.toHaveProperty(
-      'readyForUpgrade',
-      true
+    await expect(getESUpgradeStatus(esClient)).resolves.toHaveProperty(
+      'totalCriticalDeprecations',
+      0
     );
   });
 });
