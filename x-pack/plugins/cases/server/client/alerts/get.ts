@@ -12,11 +12,11 @@ export const get = async (
   { alertsInfo }: AlertGet,
   clientArgs: CasesClientArgs
 ): Promise<CasesClientGetAlertsResponse> => {
-  const { alertsService, alertsClient, logger } = clientArgs;
+  const { alertsService, logger } = clientArgs;
   if (alertsInfo.length === 0) {
     return [];
   }
 
-  const alerts = await alertsService.getAlerts({ alertsInfo, alertsClient, logger });
+  const alerts = await alertsService.getAlerts({ alertsInfo, logger });
   return alerts ?? [];
 };

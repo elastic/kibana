@@ -55,7 +55,8 @@ export async function updateAlertsStatusCatchErrors({
       alerts: alertsToUpdate,
     });
   } catch (error) {
-    // we'll log and continue as to not block the user from adding the alert
+    // we'll log and continue as to not block the user from performing the rest of the action that caused this function
+    // to be called
     logger.error(`Failed to update the status of the alerts ${errorMessage}: ${error}`);
   }
 }

@@ -16,6 +16,6 @@ export const updateStatus = async (
   { alerts }: UpdateAlertsStatusArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
-  const { alertsService, logger, alertsClient } = clientArgs;
-  await alertsService.updateAlertsStatus({ alerts, alertsClient, logger });
+  const { alertsService, logger } = clientArgs;
+  await alertsService.updateAlertsStatus({ alerts, logger });
 };

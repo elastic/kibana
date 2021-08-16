@@ -18,7 +18,6 @@ import {
   AttachmentService,
 } from '../services';
 import { ActionsClient } from '../../../actions/server';
-import { AlertsClient } from '../../../rule_registry/server';
 
 /**
  * Parameters for initializing a cases client
@@ -35,5 +34,4 @@ export interface CasesClientArgs {
   readonly logger: Logger;
   readonly authorization: PublicMethodsOf<Authorization>;
   readonly actionsClient: PublicMethodsOf<ActionsClient>;
-  readonly alertsClient: PublicMethodsOf<AlertsClient>;
 }

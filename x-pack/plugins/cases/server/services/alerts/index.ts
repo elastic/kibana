@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import { isEmpty } from 'lodash';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { Logger } from 'kibana/server';
-import { MAX_ALERTS_PER_SUB_CASE } from '../../../common';
+import { MAX_ALERTS_PER_SUB_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common';
 import { AlertInfo, createCaseError } from '../../common';
 import { UpdateAlertRequest } from '../../client/alerts/types';
 import { AlertsClient } from '../../../../rule_registry/server';
@@ -20,13 +21,11 @@ export type AlertServiceContract = PublicMethodsOf<AlertService>;
 
 interface UpdateAlertsStatusArgs {
   alerts: UpdateAlertRequest[];
-  alertsClient: PublicMethodsOf<AlertsClient>;
   logger: Logger;
 }
 
 interface GetAlertsArgs {
   alertsInfo: AlertInfo[];
-  alertsClient: PublicMethodsOf<AlertsClient>;
   logger: Logger;
 }
 
@@ -35,9 +34,9 @@ function isEmptyAlert(alert: AlertInfo): boolean {
 }
 
 export class AlertService {
-  constructor() {}
+  constructor(private readonly alertsClient: PublicMethodsOf<AlertsClient>) {}
 
-  public async updateAlertsStatus({ alerts, alertsClient, logger }: UpdateAlertsStatusArgs) {
+  public async updateAlertsStatus({ alerts, logger }: UpdateAlertsStatusArgs) {
     try {
       const alertsToUpdate = alerts.filter((alert) => !isEmptyAlert(alert));
 
@@ -45,15 +44,18 @@ export class AlertService {
         return;
       }
 
-      return await Promise.all(
-        alertsToUpdate.map((alert) =>
-          alertsClient.update({
+      return await pMap(
+        alertsToUpdate,
+        async (alert: UpdateAlertRequest) =>
+          this.alertsClient.update({
             id: alert.id,
             index: alert.index,
             _version: undefined,
             status: alert.status,
-          })
-        )
+          }),
+        {
+          concurrency: MAX_CONCURRENT_SEARCHES,
+        }
       );
     } catch (error) {
       throw createCaseError({
@@ -64,11 +66,7 @@ export class AlertService {
     }
   }
 
-  public async getAlerts({
-    alertsClient,
-    alertsInfo,
-    logger,
-  }: GetAlertsArgs): Promise<Alert[] | undefined> {
+  public async getAlerts({ alertsInfo, logger }: GetAlertsArgs): Promise<Alert[] | undefined> {
     try {
       const alertsToGet = alertsInfo
         .filter((alert) => !isEmpty(alert))
@@ -78,8 +76,12 @@ export class AlertService {
         return;
       }
 
-      const retrievedAlertsSource = await Promise.all(
-        alertsToGet.map((alert) => alertsClient.get({ id: alert.id, index: alert.index }))
+      const retrievedAlertsSource = await pMap(
+        alertsToGet,
+        async (alert: AlertInfo) => this.alertsClient.get({ id: alert.id, index: alert.index }),
+        {
+          concurrency: MAX_CONCURRENT_SEARCHES,
+        }
       );
 
       return retrievedAlertsSource.map((alert, index) => ({

@@ -86,8 +86,12 @@ export class CasesClientFactory {
     const caseService = new CasesService(this.logger, this.options?.securityPluginStart?.authc);
     const userInfo = caseService.getUser({ request });
 
+    const alertsClient = await this.options.ruleRegistryPluginStart.getRacClientWithRequest(
+      request
+    );
+
     return createCasesClient({
-      alertsService: new AlertService(),
+      alertsService: new AlertService(alertsClient),
       unsecuredSavedObjectsClient: savedObjectsService.getScopedClient(request, {
         includedHiddenTypes: SAVED_OBJECT_TYPES,
         // this tells the security plugin to not perform SO authorization and audit logging since we are handling
@@ -104,7 +108,6 @@ export class CasesClientFactory {
       logger: this.logger,
       authorization: auth,
       actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
-      alertsClient: await this.options.ruleRegistryPluginStart.getRacClientWithRequest(request),
     });
   }
 }
