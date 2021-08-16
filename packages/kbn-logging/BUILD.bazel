@@ -22,6 +22,7 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
+  "mocks/package.json",
   "package.json",
   "README.md"
 ]
