@@ -393,8 +393,8 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
               },
               {
                 range: {
-                  '@timestamp': {
-                    gte: `now-${interval * 2}s`,
+                  'event.ingested': {
+                    gte: `now-${interval * 10}s`,
                     lte: 'now',
                   },
                 },
@@ -453,8 +453,10 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiNotificationBadge color={errorsData?.rawResponse.hits.total ? 'accent' : 'subdued'}>
-              {errorsData?.rawResponse.hits.total ?? 0}
+            <EuiNotificationBadge
+              color={errorsData?.rawResponse?.hits.total ? 'accent' : 'subdued'}
+            >
+              {errorsData?.rawResponse?.hits.total ?? 0}
             </EuiNotificationBadge>
           </EuiFlexItem>
 
@@ -462,7 +464,7 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
 
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              isDisabled={!errorsData?.rawResponse.hits.total}
+              isDisabled={!errorsData?.rawResponse?.hits.total}
               onClick={handleErrorsToggle}
               aria-label={expanded ? 'Collapse' : 'Expand'}
               iconType={expanded ? 'arrowUp' : 'arrowDown'}

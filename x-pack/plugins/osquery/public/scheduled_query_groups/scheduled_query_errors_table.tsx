@@ -87,7 +87,7 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
   const data = useKibana().services.data;
 
   const { data: lastErrosData } = useQuery(
-    ['scheduledQueryErrors', { actionId, interval }],
+    ['scheduledQueryErrors2', { actionId, interval }],
     async () => {
       const indexPattern = await data.indexPatterns.find('logs-*');
       const searchSource = await data.search.searchSource.create({
@@ -137,7 +137,7 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
       const responseData = await searchSource.fetch$().toPromise();
 
       return responseData.rawResponse.hits;
-    }
+    },
   );
 
   // @ts-expect-error update types
@@ -201,7 +201,7 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
     []
   );
 
-  return lastErrosData?.hits.length ? (
+  return lastErrosData?.hits?.length ? (
     <EuiInMemoryTable items={lastErrosData.hits} columns={columns} pagination={pagination} />
   ) : null;
 };

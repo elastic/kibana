@@ -209,38 +209,26 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
     );
 
     // Generate URL to pass page state to Logs UI
-    const viewInLogsUrl = useMemo(() => {
-      console.error('sss', state, logStreamQuery, logStreamQuery, {
-        pathname: '/app/logs/stream',
-        search: stringify({
-          logPosition: encode({
-            start: state.start,
-            end: state.end,
-            streamLive: false,
-          }),
-          logFilter: encode({
-            expression: logStreamQuery,
-            kind: 'kuery',
-          }),
-        }),
-      });
-      return http.basePath.prepend(
-        url.format({
-          pathname: '/app/logs/stream',
-          search: stringify({
-            logPosition: encode({
-              start: state.start,
-              end: state.end,
-              streamLive: false,
+    const viewInLogsUrl = useMemo(
+      () =>
+        http.basePath.prepend(
+          url.format({
+            pathname: '/app/logs/stream',
+            search: stringify({
+              logPosition: encode({
+                start: state.start,
+                end: state.end,
+                streamLive: false,
+              }),
+              logFilter: encode({
+                expression: logStreamQuery,
+                kind: 'kuery',
+              }),
             }),
-            logFilter: encode({
-              expression: logStreamQuery,
-              kind: 'kuery',
-            }),
-          }),
-        })
-      );
-    }, [http.basePath, state.start, state.end, logStreamQuery]);
+          })
+        ),
+      [http.basePath, state.start, state.end, logStreamQuery]
+    );
 
     const agentVersion = agent.local_metadata?.elastic?.agent?.version;
     const isLogFeatureAvailable = useMemo(() => {
