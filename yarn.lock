@@ -8359,7 +8359,7 @@ better-opn@^2.0.0:
   dependencies:
     open "^7.0.3"
 
-big-integer@^1.6.16:
+big-integer@^1.6.16, big-integer@^1.6.48:
   version "1.6.48"
   resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.48.tgz#8fd88bd1632cba4a1c8c3e3d7159f08bb95b4b9e"
   integrity sha512-j51egjPa7/i+RdiRuJbPdJ2FIUYYPhvYLjzoYbcMMm62ooO6F94fETG4MTs46zPAF9Brs04OajboA/qTGuz78w==
@@ -20389,6 +20389,13 @@ node-sass@^4.14.1:
     sass-graph "2.2.5"
     stdout-stream "^1.4.0"
     "true-case-path" "^1.0.2"
+
+node-sql-parser@^3.6.1:
+  version "3.6.1"
+  resolved "https://registry.yarnpkg.com/node-sql-parser/-/node-sql-parser-3.6.1.tgz#6f096e9df1f19d1e2daa658d864bd68b0e2cd2c6"
+  integrity sha512-AseDvELmUvL22L6C63DsTuzF+0i/HBIHjJq/uxC7jV3PGpAUib5Oe6oz4sgAniSUMPSZQbZmRore6Na68Sg4Tg==
+  dependencies:
+    big-integer "^1.6.48"
 
 node-status-codes@^1.0.0:
   version "1.0.0"
