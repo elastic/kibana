@@ -9,7 +9,6 @@ import React, { useContext, useMemo } from 'react';
 import { EuiFormRow, EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import { i18n } from '@kbn/i18n';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
 import { commonFilterAggs, filterAggsFieldSupport } from '../constants';
 import { IndexPattern } from '../../../../../../../../../../../../src/plugins/data/public';
