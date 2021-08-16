@@ -281,6 +281,12 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     resetSettingsState: () => {
       clearFlashMessages();
     },
+    setStagedLogo: () => {
+      clearFlashMessages();
+    },
+    setStagedIcon: () => {
+      clearFlashMessages();
+    },
     resetOrgLogo: () => {
       actions.updateOrgLogo();
     },
