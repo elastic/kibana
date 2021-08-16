@@ -9,7 +9,7 @@ import {
   createPhpAgentInstructions,
   createRailsAgentInstructions,
   createRackAgentInstructions,
-} from '../../../../server/tutorial/instructions/apm_agent_instructions';
+} from '../../../../common/tutorial/instructions/apm_agent_instructions';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 
 export type CreateAgentInstructions = (
