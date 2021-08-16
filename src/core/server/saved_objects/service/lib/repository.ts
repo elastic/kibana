@@ -909,7 +909,6 @@ export class SavedObjectsRepository {
       }
     );
     if (statusCode === 404) {
-      // first need to ensure the 404 is a valid Elasticsearch response
       if (!isSupportedEsServer(headers)) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
       }

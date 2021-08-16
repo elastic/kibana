@@ -204,7 +204,7 @@ export class SavedObjectsErrorHelpers {
   }
 
   public static createGenericNotFoundEsUnavailableError(
-    // type and id not availablefor all operations (e.g. mget)
+    // type and id not available in all operations (e.g. mget)
     type: string | null = null,
     id: string | null = null
   ) {
