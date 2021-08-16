@@ -203,6 +203,7 @@ describe('createRuleRoute', () => {
       ...mockedAlert,
       id: 'custom-id',
     });
+    rulesClient.getSpaceId.mockReturnValueOnce('default');
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
