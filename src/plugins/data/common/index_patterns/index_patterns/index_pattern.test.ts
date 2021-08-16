@@ -16,8 +16,8 @@ import mockLogStashFields from './fixtures/logstash_fields';
 import { stubbedSavedObjectIndexPattern } from './fixtures/stubbed_saved_object_index_pattern';
 import { IndexPatternField } from '../fields';
 
-import { fieldFormatsMock } from '../../field_formats/mocks';
-import { FieldFormat } from '../..';
+import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
+import { FieldFormat } from '../../../../field_formats/common';
 import { RuntimeField } from '../types';
 
 class MockFieldFormatter {}

@@ -14,7 +14,11 @@ import moment from 'moment';
 import Puid from 'puid';
 import sinon from 'sinon';
 import { ReportingConfig, ReportingCore } from '../../';
-import { fieldFormats, UI_SETTINGS } from '../../../../../../src/plugins/data/server';
+import {
+  FieldFormatsRegistry,
+  StringFormat,
+  FORMATS_UI_SETTINGS,
+} from '../../../../../../src/plugins/field_formats/common';
 import {
   CSV_QUOTE_VALUES_SETTING,
   CSV_SEPARATOR_SETTING,
@@ -104,15 +108,13 @@ describe('CSV Execute Job', function () {
     setFieldFormats({
       fieldFormatServiceFactory() {
         const uiConfigMock = {};
-        (uiConfigMock as any)[UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP] = {
+        (uiConfigMock as any)[FORMATS_UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP] = {
           _default_: { id: 'string', params: {} },
         };
 
-        const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
+        const fieldFormatsRegistry = new FieldFormatsRegistry();
 
-        fieldFormatsRegistry.init((key) => (uiConfigMock as any)[key], {}, [
-          fieldFormats.StringFormat,
-        ]);
+        fieldFormatsRegistry.init((key) => (uiConfigMock as any)[key], {}, [StringFormat]);
 
         return Promise.resolve(fieldFormatsRegistry);
       },

@@ -46,6 +46,14 @@ export function fetchTotalHits(
 
   sendLoadingMsg(totalHits$);
 
+  const executionContext = {
+    type: 'application',
+    name: 'discover',
+    description: 'fetch total hits',
+    url: window.location.pathname,
+    id: '',
+  };
+
   const fetch$ = searchSource
     .fetch$({
       inspector: {
@@ -59,6 +67,7 @@ export function fetchTotalHits(
       },
       abortSignal: abortController.signal,
       sessionId: searchSessionId,
+      executionContext,
     })
     .pipe(filter((res) => isCompleteResponse(res)));
 

@@ -19,6 +19,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
+  'securitySolution:defaultThreatIndex': {
+    type: 'keyword',
+    _meta: { description: 'Default value of the setting was changed.' },
+  },
   'securitySolution:newsFeedUrl': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -425,10 +429,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'apm:enableSignificantTerms': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'apm:enableServiceOverview': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

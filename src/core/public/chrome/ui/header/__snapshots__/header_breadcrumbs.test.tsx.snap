@@ -1,34 +1,54 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 1`] = `
-<span
-  aria-current="page"
+<li
   className="euiBreadcrumb euiBreadcrumb--last"
-  data-test-subj="breadcrumb first last"
-  title="First"
+  key="0"
 >
-  First
-</span>
+  <EuiInnerText>
+    <span
+      aria-current="page"
+      className="euiBreadcrumb__content"
+      data-test-subj="breadcrumb first last"
+      title="First"
+    >
+      First
+    </span>
+  </EuiInnerText>
+</li>
 `;
 
 exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 2`] = `
 Array [
-  <span
-    aria-current="false"
+  <li
     className="euiBreadcrumb"
-    data-test-subj="breadcrumb first"
-    title="First"
+    key="0"
   >
-    First
-  </span>,
-  <span
-    aria-current="page"
+    <EuiInnerText>
+      <span
+        className="euiBreadcrumb__content"
+        data-test-subj="breadcrumb first"
+        title="First"
+      >
+        First
+      </span>
+    </EuiInnerText>
+  </li>,
+  <li
     className="euiBreadcrumb euiBreadcrumb--last"
-    data-test-subj="breadcrumb last"
-    title="Second"
+    key="1"
   >
-    Second
-  </span>,
+    <EuiInnerText>
+      <span
+        aria-current="page"
+        className="euiBreadcrumb__content"
+        data-test-subj="breadcrumb last"
+        title="Second"
+      >
+        Second
+      </span>
+    </EuiInnerText>
+  </li>,
 ]
 `;
 

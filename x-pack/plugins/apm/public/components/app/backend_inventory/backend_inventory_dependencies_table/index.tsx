@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -16,22 +17,27 @@ import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time
 import { DependenciesTable } from '../../../shared/dependencies_table';
 import { BackendLink } from '../../../shared/backend_link';
 import { DependenciesTableServiceMapLink } from '../../../shared/dependencies_table/dependencies_table_service_map_link';
+import { useUiTracker } from '../../../../../../observability/public';
 
 export function BackendInventoryDependenciesTable() {
   const {
-    urlParams: { start, end, environment, comparisonEnabled, comparisonType },
+    urlParams: { start, end, comparisonEnabled, comparisonType },
   } = useUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo, kuery },
+    query: { rangeFrom, rangeTo, environment, kuery },
   } = useApmParams('/backends');
 
   const router = useApmRouter();
+
+  const trackEvent = useUiTracker();
+
   const serviceMapLink = router.link('/service-map', {
     query: {
       rangeFrom,
       rangeTo,
       environment,
+      kuery,
     },
   });
 
@@ -51,11 +57,11 @@ export function BackendInventoryDependenciesTable() {
       return callApmApi({
         endpoint: 'GET /api/apm/backends/top_backends',
         params: {
-          query: { start, end, environment, numBuckets: 20, offset },
+          query: { start, end, environment, numBuckets: 20, offset, kuery },
         },
       });
     },
-    [start, end, environment, offset]
+    [start, end, environment, offset, kuery]
   );
 
   const dependencies =
@@ -78,6 +84,13 @@ export function BackendInventoryDependenciesTable() {
             kuery,
             rangeFrom,
             rangeTo,
+          }}
+          onClick={() => {
+            trackEvent({
+              app: 'apm',
+              metricType: METRIC_TYPE.CLICK,
+              metric: 'backend_inventory_to_backend_detail',
+            });
           }}
         />
       );

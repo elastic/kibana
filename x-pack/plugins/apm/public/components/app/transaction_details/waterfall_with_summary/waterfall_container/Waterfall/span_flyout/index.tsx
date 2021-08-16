@@ -8,6 +8,7 @@
 import {
   EuiBadge,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -21,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
+import { CompositeSpanDurationSummaryItem } from '../../../../../../shared/Summary/CompositeSpanDurationSummaryItem';
 import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
@@ -123,7 +125,6 @@ export function SpanFlyout({
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
-
             <EuiFlexItem grow={false}>
               <DiscoverSpanLink span={span}>
                 <EuiButtonEmpty iconType="discoverApp">
@@ -137,6 +138,21 @@ export function SpanFlyout({
               </DiscoverSpanLink>
             </EuiFlexItem>
           </EuiFlexGroup>
+          {span.span.composite && (
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiCallOut color="warning" iconType="gear" size="s">
+                  {i18n.translate(
+                    'xpack.apm.transactionDetails.spanFlyout.compositeExampleWarning',
+                    {
+                      defaultMessage:
+                        'This is a sample document for a group of consecutive, similar spans',
+                    }
+                  )}
+                </EuiCallOut>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <StickySpanProperties span={span} transaction={parentTransaction} />
@@ -144,11 +160,19 @@ export function SpanFlyout({
           <Summary
             items={[
               <TimestampTooltip time={span.timestamp.us / 1000} />,
-              <DurationSummaryItem
-                duration={span.span.duration.us}
-                totalDuration={totalDuration}
-                parentType="transaction"
-              />,
+              <>
+                <DurationSummaryItem
+                  duration={span.span.duration.us}
+                  totalDuration={totalDuration}
+                  parentType="transaction"
+                />
+                {span.span.composite && (
+                  <CompositeSpanDurationSummaryItem
+                    count={span.span.composite.count}
+                    durationSum={span.span.composite.sum.us}
+                  />
+                )}
+              </>,
               <>
                 {spanHttpUrl && (
                   <HttpInfoContainer>

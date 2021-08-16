@@ -11,7 +11,7 @@ import { ConfigSchema, configSchema } from '../config';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 export * from './deprecated';
-export { getEsQueryConfig, buildQueryFromFilters } from '../common';
+export { getEsQueryConfig } from '../common';
 
 /**
  * Exporters (CSV)
@@ -27,68 +27,16 @@ export const exporters = {
  * Field Formats:
  */
 
-import {
-  FieldFormatsRegistry,
-  FieldFormat,
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  UrlFormat,
-  StringFormat,
-  TruncateFormat,
-  HistogramFormat,
-} from '../common/field_formats';
-
-export const fieldFormats = {
-  FieldFormatsRegistry,
-  FieldFormat,
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  UrlFormat,
-  StringFormat,
-  TruncateFormat,
-  HistogramFormat,
-};
-
-export {
-  IFieldFormatsRegistry,
-  FieldFormatsGetConfigFn,
-  FieldFormatConfig,
-  INDEX_PATTERN_SAVED_OBJECT_TYPE,
-} from '../common';
+export { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../common';
 
 /*
  * Index patterns:
  */
 
-import { isNestedField, isFilterable } from '../common';
-
-export const indexPatterns = {
-  isFilterable,
-  isNestedField,
-};
-
 export {
   IndexPatternsFetcher,
-  FieldDescriptor as IndexPatternFieldDescriptor,
   shouldReadFieldFromDocValues, // used only in logstash_fields fixture
   FieldDescriptor,
-  mergeCapabilitiesWithFields,
   getCapabilitiesForRollupIndices,
 } from './index_patterns';
 
@@ -100,7 +48,6 @@ export {
   IndexPatternAttributes,
   UI_SETTINGS,
   IndexPattern,
-  IndexPatternLoadExpressionFunctionDefinition,
   IndexPatternsService,
   IndexPatternsService as IndexPatternsCommonService,
 } from '../common';
@@ -112,57 +59,18 @@ export {
 import {
   // aggs
   CidrMask,
-  intervalOptions,
-  isNumberType,
-  isStringType,
-  isType,
-  parentPipelineType,
-  propFilter,
-  siblingPipelineType,
-  termsAggFilter,
   dateHistogramInterval,
-  InvalidEsCalendarIntervalError,
-  InvalidEsIntervalFormatError,
   IpAddress,
-  isValidEsInterval,
-  isValidInterval,
-  parseEsInterval,
   parseInterval,
-  toAbsoluteDates,
   // tabify
-  tabifyAggResponse,
-  tabifyGetColumns,
   calcAutoIntervalLessThan,
 } from '../common';
 import { autocompleteConfigDeprecationProvider } from './config_deprecations';
 
 export {
   // aggs
-  AggGroupLabels,
-  AggGroupName,
-  AggGroupNames,
-  AggFunctionsMapping,
-  AggParam,
-  AggParamOption,
-  AggParamType,
-  AggConfigOptions,
-  BUCKET_TYPES,
-  EsaggsExpressionFunctionDefinition,
-  IAggConfig,
-  IAggConfigs,
-  IAggType,
-  IFieldParamType,
-  IMetricAggType,
   METRIC_TYPES,
-  OptionedParamType,
-  OptionedValueProp,
   ParsedInterval,
-  // expressions
-  ExecutionContextSearch,
-  ExpressionFunctionKibana,
-  ExpressionFunctionKibanaContext,
-  ExpressionValueSearchContext,
-  KibanaContext,
   // search
   ISearchOptions,
   IEsSearchRequest,
@@ -173,23 +81,12 @@ export {
 export {
   IScopedSearchClient,
   ISearchStrategy,
-  ISearchSetup,
-  ISearchStart,
   SearchStrategyDependencies,
-  getDefaultSearchParams,
-  getShardTimeout,
-  getTotalLoaded,
-  toKibanaSearchResponse,
   shimHitsTotal,
-  usageProvider,
-  searchUsageObserver,
-  shimAbortSignal,
-  SearchUsage,
   SearchSessionService,
   ISearchSessionService,
   SearchRequestHandlerContext,
   DataRequestHandlerContext,
-  AsyncSearchResponse,
   AsyncSearchStatusResponse,
   NoSearchIdInSessionError,
 } from './search';
@@ -199,26 +96,10 @@ export const search = {
   aggs: {
     CidrMask,
     dateHistogramInterval,
-    intervalOptions,
-    InvalidEsCalendarIntervalError,
-    InvalidEsIntervalFormatError,
     IpAddress,
-    isNumberType,
-    isStringType,
-    isType,
-    isValidEsInterval,
-    isValidInterval,
-    parentPipelineType,
-    parseEsInterval,
     parseInterval,
-    propFilter,
-    siblingPipelineType,
-    termsAggFilter,
-    toAbsoluteDates,
     calcAutoIntervalLessThan,
   },
-  tabifyAggResponse,
-  tabifyGetColumns,
 };
 
 /**
@@ -227,11 +108,9 @@ export const search = {
  */
 
 export {
-  // kbn field types
   castEsToKbnFieldTypeName,
   getTime,
   // timefilter
-  RefreshInterval,
   TimeRange,
   // utils
   parseInterval,
@@ -260,5 +139,3 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   },
   schema: configSchema,
 };
-
-export type { IndexPatternsServiceProvider } from './index_patterns';

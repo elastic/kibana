@@ -1,7 +1,7 @@
 {
   "id": "bfetchExplorer",
-  "version": "0.0.1",
   "kibanaVersion": "kibana",
+  "version": "0.0.1",
   "server": true,
   "ui": true,
   "requiredPlugins": ["bfetch", "developerExamples"],

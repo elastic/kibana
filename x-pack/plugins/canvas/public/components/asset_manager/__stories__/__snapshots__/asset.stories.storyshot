@@ -43,6 +43,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
           <br />
           <span
             className="euiTextColor euiTextColor--subdued"
+            style={Object {}}
           >
             <small>
               (
@@ -229,6 +230,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
           <br />
           <span
             className="euiTextColor euiTextColor--subdued"
+            style={Object {}}
           >
             <small>
               (
