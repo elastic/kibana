@@ -37,11 +37,11 @@ import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
 import {
   CommonAlertFieldName,
-  CommonRuleFields,
-  getCommonRuleFields,
+  CommonAlertIdFieldName,
+  getCommonAlertFields,
 } from './get_common_alert_fields';
 
-type ImplicitTechnicalFieldName = keyof CommonRuleFields | CommonAlertFieldName;
+type ImplicitTechnicalFieldName = CommonAlertFieldName | CommonAlertIdFieldName;
 
 type ExplicitTechnicalAlertFields = Partial<
   Omit<ParsedTechnicalFields, ImplicitTechnicalFieldName>
@@ -149,7 +149,7 @@ export const createLifecycleExecutor = (
     })
   )(wrappedStateRt<State>().decode(previousState));
 
-  const commonRuleFields = getCommonRuleFields(options);
+  const commonRuleFields = getCommonAlertFields(options);
 
   const currentAlerts: Record<string, ExplicitAlertFields> = {};
 

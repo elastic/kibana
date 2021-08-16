@@ -22,7 +22,7 @@ import {
   TIMESTAMP,
 } from '../../common/technical_rule_data_field_names';
 
-const commonRuleFieldNames = [
+const commonAlertFieldNames = [
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
@@ -33,16 +33,16 @@ const commonRuleFieldNames = [
   TAGS,
   TIMESTAMP,
 ];
-export type CommonRuleFieldName = Values<typeof commonRuleFieldNames>;
-
-const commonAlertFieldNames = [ALERT_ID, ALERT_UUID];
 export type CommonAlertFieldName = Values<typeof commonAlertFieldNames>;
 
-export type CommonRuleFields = Pick<ParsedTechnicalFields, CommonRuleFieldName>;
+const commonAlertIdFieldNames = [ALERT_ID, ALERT_UUID];
+export type CommonAlertIdFieldName = Values<typeof commonAlertIdFieldNames>;
 
-export const getCommonRuleFields = (
+export type CommonAlertFields = Pick<ParsedTechnicalFields, CommonAlertFieldName>;
+
+export const getCommonAlertFields = (
   options: AlertExecutorOptions<any, any, any, any, any>
-): CommonRuleFields => {
+): CommonAlertFields => {
   return {
     [ALERT_RULE_CATEGORY]: options.rule.ruleTypeName,
     [ALERT_RULE_CONSUMER]: options.rule.consumer,
