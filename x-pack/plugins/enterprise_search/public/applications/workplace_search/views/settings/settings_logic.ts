@@ -199,6 +199,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       }
     },
     updateOrgName: async () => {
+      clearFlashMessages();
       const { http } = HttpLogic.values;
       const route = '/api/workplace_search/org/settings/customize';
       const { orgNameInputValue: name } = values;
@@ -214,6 +215,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       }
     },
     updateOrgLogo: async () => {
+      clearFlashMessages();
       const { http } = HttpLogic.values;
       const { stagedLogo: logo } = values;
       const body = JSON.stringify({ logo });
@@ -227,6 +229,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       }
     },
     updateOrgIcon: async () => {
+      clearFlashMessages();
       const { http } = HttpLogic.values;
       const { stagedIcon: icon } = values;
       const body = JSON.stringify({ icon });
