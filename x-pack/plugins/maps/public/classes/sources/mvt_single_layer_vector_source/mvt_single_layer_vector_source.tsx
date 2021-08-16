@@ -239,6 +239,10 @@ export class MVTSingleLayerVectorSource
   async supportsFeatureEditing(): Promise<boolean> {
     return false;
   }
+
+  async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
+    return {};
+  }
 }
 
 registerSource({
