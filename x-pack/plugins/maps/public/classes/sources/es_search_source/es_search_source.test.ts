@@ -102,7 +102,6 @@ describe('ESSearchSource', () => {
         sourceQuery: {
           query: 'tooltipField: foobar',
           language: 'KQL',
-          queryLastTriggeredAt: '2019-04-25T20:53:22.331Z',
         },
         sourceMeta: null,
         applyGlobalQuery: true,
@@ -117,7 +116,7 @@ describe('ESSearchSource', () => {
         });
         const urlTemplateWithMeta = await esSearchSource.getUrlTemplateWithMeta(searchFilters);
         expect(urlTemplateWithMeta.urlTemplate).toBe(
-          `rootdir/api/maps/mvt/getTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=foobar-title-*&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:(),title:'foobar-title-*')),'1':('0':size,'1':1000),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:(),title:'foobar-title-*')),'5':('0':query,'1':(language:KQL,query:'tooltipField: foobar',queryLastTriggeredAt:'2019-04-25T20:53:22.331Z')),'6':('0':fieldsFromSource,'1':!(tooltipField,styleField)),'7':('0':source,'1':!(tooltipField,styleField))))&geoFieldType=geo_shape`
+          `rootdir/api/maps/mvt/getTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=foobar-title-*&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:(),title:'foobar-title-*')),'1':('0':size,'1':1000),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:(),title:'foobar-title-*')),'5':('0':query,'1':(language:KQL,query:'tooltipField: foobar')),'6':('0':fieldsFromSource,'1':!(tooltipField,styleField)),'7':('0':source,'1':!(tooltipField,styleField))))&geoFieldType=geo_shape`
         );
       });
 
@@ -131,7 +130,7 @@ describe('ESSearchSource', () => {
           searchSessionId: '1',
         });
         expect(urlTemplateWithMeta.urlTemplate).toBe(
-          `rootdir/api/maps/mvt/getTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=foobar-title-*&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:(),title:'foobar-title-*')),'1':('0':size,'1':1000),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:(),title:'foobar-title-*')),'5':('0':query,'1':(language:KQL,query:'tooltipField: foobar',queryLastTriggeredAt:'2019-04-25T20:53:22.331Z')),'6':('0':fieldsFromSource,'1':!(tooltipField,styleField)),'7':('0':source,'1':!(tooltipField,styleField))))&geoFieldType=geo_shape&searchSessionId=1`
+          `rootdir/api/maps/mvt/getTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=foobar-title-*&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:(),title:'foobar-title-*')),'1':('0':size,'1':1000),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:(),title:'foobar-title-*')),'5':('0':query,'1':(language:KQL,query:'tooltipField: foobar')),'6':('0':fieldsFromSource,'1':!(tooltipField,styleField)),'7':('0':source,'1':!(tooltipField,styleField))))&geoFieldType=geo_shape&searchSessionId=1`
         );
       });
     });

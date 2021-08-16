@@ -111,7 +111,6 @@ describe('canSkipSourceUpdate', () => {
     const prevQuery = {
       language: 'kuery',
       query: 'machine.os.keyword : "win 7"',
-      queryLastTriggeredAt: '2019-04-25T20:53:22.331Z',
     };
 
     describe('applyGlobalQuery is false', () => {
@@ -170,10 +169,7 @@ describe('canSkipSourceUpdate', () => {
         const nextMeta = {
           applyGlobalQuery: prevApplyGlobalQuery,
           filters: prevFilters,
-          query: {
-            ...prevQuery,
-            queryLastTriggeredAt: 'sometime layer when Refresh button is clicked',
-          },
+          query: prevQuery,
         };
 
         const canSkipUpdate = await canSkipSourceUpdate({
@@ -262,10 +258,7 @@ describe('canSkipSourceUpdate', () => {
         const nextMeta = {
           applyGlobalQuery: prevApplyGlobalQuery,
           filters: prevFilters,
-          query: {
-            ...prevQuery,
-            queryLastTriggeredAt: 'sometime layer when Refresh button is clicked',
-          },
+          query: prevQuery,
         };
 
         const canSkipUpdate = await canSkipSourceUpdate({

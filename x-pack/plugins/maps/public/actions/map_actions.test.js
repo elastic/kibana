@@ -252,7 +252,6 @@ describe('map_actions', () => {
     const query = {
       language: 'kuery',
       query: '',
-      queryLastTriggeredAt: '2020-08-14T15:07:12.276Z',
     };
     const timeFilters = { from: 'now-1y', to: 'now' };
     const filters = [
@@ -303,7 +302,6 @@ describe('map_actions', () => {
       const newQuery = {
         language: 'kuery',
         query: 'foobar',
-        queryLastTriggeredAt: '2020-08-14T15:07:12.276Z',
       };
       const setQueryAction = await setQuery({
         query: newQuery,
@@ -361,7 +359,6 @@ describe('map_actions', () => {
       });
       await setQueryAction(dispatchMock, getStoreMock);
 
-      // Only checking calls length instead of calls because queryLastTriggeredAt changes on this run
       expect(dispatchMock.mock.calls.length).toEqual(2);
     });
   });
