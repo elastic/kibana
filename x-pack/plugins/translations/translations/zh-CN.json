@@ -19885,7 +19885,6 @@
     "xpack.security.loggedOutAppTitle": "已注销",
     "xpack.security.login.basicLoginForm.logInButtonLabel": "登录",
     "xpack.security.login.basicLoginForm.passwordFormRowLabel": "密码",
-    "xpack.security.login.basicLoginForm.unknownErrorMessage": "糟糕！错误。请重试。",
     "xpack.security.login.basicLoginForm.usernameFormRowLabel": "用户名",
     "xpack.security.login.basicLoginForm.usernameOrPasswordIsIncorrectErrorMessage": "用户或密码不正确。请重试。",
     "xpack.security.login.loggedOutDescription": "您已注销 Elastic。",
