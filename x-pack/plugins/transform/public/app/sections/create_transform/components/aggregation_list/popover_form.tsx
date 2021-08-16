@@ -328,7 +328,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
       {isUnsupportedAgg && (
         <EuiCodeBlock
           aria-label={i18n.translate('xpack.transform.agg.popoverForm.codeBlock', {
-            defaultMessage: 'Read only code editor',
+            defaultMessage: 'JSON of transform aggregation',
           })}
           fontSize="s"
           language="json"

@@ -23,44 +23,48 @@ export const AdvancedSourceEditor: FC<StepDefineFormHook> = ({
   },
 }) => {
   return (
-    <CodeEditor
-      data-test-subj="transformAdvancedRuntimeMappingsEditor"
-      height={250}
-      languageId={'json'}
-      onChange={(d: string) => {
-        setSearchString(undefined);
-        setAdvancedEditorSourceConfig(d);
+    <div data-test-subj="transformAdvancedRuntimeMappingsEditor">
+      <CodeEditor
+        height={250}
+        languageId={'json'}
+        onChange={(d: string) => {
+          setSearchString(undefined);
+          setAdvancedEditorSourceConfig(d);
 
-        // Disable the "Apply"-Button if the config hasn't changed.
-        if (advancedEditorSourceConfigLastApplied === d) {
-          setAdvancedSourceEditorApplyButtonEnabled(false);
-          return;
-        }
+          // Disable the "Apply"-Button if the config hasn't changed.
+          if (advancedEditorSourceConfigLastApplied === d) {
+            setAdvancedSourceEditorApplyButtonEnabled(false);
+            return;
+          }
 
-        // Try to parse the string passed on from the editor.
-        // If parsing fails, the "Apply"-Button will be disabled
-        try {
-          JSON.parse(d);
-          setAdvancedSourceEditorApplyButtonEnabled(true);
-        } catch (e) {
-          setAdvancedSourceEditorApplyButtonEnabled(false);
-        }
-      }}
-      options={{
-        ariaLabel: i18n.translate('xpack.transform.stepDefineForm.advancedSourceEditorAriaLabel', {
-          defaultMessage: 'Advanced query editor',
-        }),
-        automaticLayout: true,
-        fontSize: 12,
-        scrollBeyondLastLine: false,
-        quickSuggestions: true,
-        minimap: {
-          enabled: false,
-        },
-        wordWrap: 'on',
-        wrappingIndent: 'indent',
-      }}
-      value={advancedEditorSourceConfig}
-    />
+          // Try to parse the string passed on from the editor.
+          // If parsing fails, the "Apply"-Button will be disabled
+          try {
+            JSON.parse(d);
+            setAdvancedSourceEditorApplyButtonEnabled(true);
+          } catch (e) {
+            setAdvancedSourceEditorApplyButtonEnabled(false);
+          }
+        }}
+        options={{
+          ariaLabel: i18n.translate(
+            'xpack.transform.stepDefineForm.advancedSourceEditorAriaLabel',
+            {
+              defaultMessage: 'Advanced query editor',
+            }
+          ),
+          automaticLayout: true,
+          fontSize: 12,
+          scrollBeyondLastLine: false,
+          quickSuggestions: true,
+          minimap: {
+            enabled: false,
+          },
+          wordWrap: 'on',
+          wrappingIndent: 'indent',
+        }}
+        value={advancedEditorSourceConfig}
+      />
+    </div>
   );
 };
