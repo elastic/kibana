@@ -23,7 +23,8 @@ const loadDetectionsPage = (role: ROLES) => {
   waitForAlertsToPopulate();
 };
 
-describe('Alerts timeline', () => {
+// TODO: This test may need changes in our UI based on RBAC
+describe.skip('Alerts timeline', () => {
   before(() => {
     // First we login as a privileged user to create alerts.
     cleanKibana();

@@ -1,5 +1,0 @@
-{
-  "extends": "../../shared/cypress/tsconfig.json",
-  "references": [{ "path": "../../shared/cypress/tsconfig.json" }],
-  "include": ["./**/*"]
-}
