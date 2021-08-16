@@ -19,8 +19,8 @@ export interface ResponseHit {
 }
 
 export interface SearchServiceParams {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName?: string;
   transactionName?: string;
   transactionType?: string;

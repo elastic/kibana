@@ -6,12 +6,7 @@
  */
 
 import { getNewRule } from '../../objects/rule';
-import {
-  ALERTS,
-  ALERTS_COUNT,
-  SHOWING_ALERTS,
-  TAKE_ACTION_POPOVER_BTN,
-} from '../../screens/alerts';
+import { ALERTS_COUNT, TAKE_ACTION_POPOVER_BTN } from '../../screens/alerts';
 
 import {
   selectNumberOfAlerts,
@@ -21,6 +16,7 @@ import {
   markInProgressFirstAlert,
   goToInProgressAlerts,
   waitForAlertsIndexToBeCreated,
+  goToOpenedAlerts,
 } from '../../tasks/alerts';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
@@ -44,33 +40,27 @@ describe('Marking alerts as in-progress', () => {
   it('Mark one alert in progress when more than one open alerts are selected', () => {
     cy.get(ALERTS_COUNT)
       .invoke('text')
-      .then((numberOfAlerts) => {
+      .then((alertNumberString) => {
+        const numberOfAlerts = alertNumberString.split(' ')[0];
         const numberOfAlertsToBeMarkedInProgress = 1;
         const numberOfAlertsToBeSelected = 3;
 
-        cy.get(TAKE_ACTION_POPOVER_BTN).should('have.attr', 'disabled');
+        cy.get(TAKE_ACTION_POPOVER_BTN).should('not.exist');
         selectNumberOfAlerts(numberOfAlertsToBeSelected);
-        cy.get(TAKE_ACTION_POPOVER_BTN).should('not.have.attr', 'disabled');
+        cy.get(TAKE_ACTION_POPOVER_BTN).should('exist');
 
         markInProgressFirstAlert();
+        refreshPage();
         waitForAlertsToBeLoaded();
+        goToOpenedAlerts();
 
         const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedInProgress;
-        cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlerts.toString());
-        cy.get(SHOWING_ALERTS).should(
-          'have.text',
-          `Showing ${expectedNumberOfAlerts.toString()} alerts`
-        );
+        cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
 
         goToInProgressAlerts();
         waitForAlerts();
 
-        cy.get(ALERTS_COUNT).should('have.text', numberOfAlertsToBeMarkedInProgress.toString());
-        cy.get(SHOWING_ALERTS).should(
-          'have.text',
-          `Showing ${numberOfAlertsToBeMarkedInProgress.toString()} alert`
-        );
-        cy.get(ALERTS).should('have.length', numberOfAlertsToBeMarkedInProgress);
+        cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeMarkedInProgress} alert`);
       });
   });
 });
