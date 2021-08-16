@@ -4,11 +4,8 @@
   "server": false,
   "ui": true,
   "owner": {
-     "name": "App Services",
-     "githubTeam": ""
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
   },
-  "requiredBundles": [
-    "kibanaUtils",
-    "kibanaReact"
-  ]
+  "requiredBundles": ["kibanaUtils", "kibanaReact"]
 }
