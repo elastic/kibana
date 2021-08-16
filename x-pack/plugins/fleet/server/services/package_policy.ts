@@ -632,7 +632,9 @@ class PackagePolicyService {
 
   public async runExternalCallbacks<A extends ExternalCallback[0]>(
     externalCallbackType: A,
-    packagePolicy: NewPackagePolicy | DeletePackagePoliciesResponse,
+    packagePolicy: A extends 'postPackagePolicyDelete'
+      ? DeletePackagePoliciesResponse
+      : NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
   ): Promise<A extends 'postPackagePolicyDelete' ? void : NewPackagePolicy>;
@@ -643,14 +645,7 @@ class PackagePolicyService {
     request: KibanaRequest
   ): Promise<NewPackagePolicy | void> {
     if (externalCallbackType === 'postPackagePolicyDelete') {
-      const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
-      if (externalCallbacks && externalCallbacks.size > 0) {
-        for (const callback of externalCallbacks) {
-          if (Array.isArray(packagePolicy)) {
-            await callback(packagePolicy, context, request);
-          }
-        }
-      }
+      await this.runDeleteExternalCallbacks(packagePolicy as DeletePackagePoliciesResponse);
     } else {
       if (!Array.isArray(packagePolicy)) {
         let newData = packagePolicy;
@@ -669,6 +664,18 @@ class PackagePolicyService {
           newData = updatedNewData;
         }
         return newData;
+      }
+    }
+  }
+
+  public async runDeleteExternalCallbacks(
+    deletedPackagePolicies: DeletePackagePoliciesResponse
+  ): Promise<void> {
+    const externalCallbacks = appContextService.getExternalCallbacks('postPackagePolicyDelete');
+
+    if (externalCallbacks && externalCallbacks.size > 0) {
+      for (const callback of externalCallbacks) {
+        await callback(deletedPackagePolicies);
       }
     }
   }

@@ -215,9 +215,7 @@ export const deleteAgentPoliciesHandler: RequestHandler<
     const body: DeleteAgentPolicyResponse = await agentPolicyService.delete(
       soClient,
       esClient,
-      request.body.agentPolicyId,
-      context,
-      request
+      request.body.agentPolicyId
     );
     return response.ok({
       body,

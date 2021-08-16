@@ -12,8 +12,6 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   SavedObjectsBulkUpdateResponse,
-  KibanaRequest,
-  RequestHandlerContext,
 } from 'src/core/server';
 
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
@@ -41,13 +39,13 @@ import {
   packageToPackagePolicy,
   AGENT_POLICY_INDEX,
 } from '../../common';
-import type { DeletePackagePoliciesResponse } from '../../common';
 import type {
   DeleteAgentPolicyResponse,
   Settings,
   FleetServerPolicy,
   Installation,
   Output,
+  DeletePackagePoliciesResponse,
 } from '../../common';
 import { AgentPolicyNameExistsError, HostedAgentPolicyRestrictionRelatedError } from '../errors';
 import {
@@ -588,9 +586,7 @@ class AgentPolicyService {
   public async delete(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    id: string,
-    context: RequestHandlerContext,
-    request: KibanaRequest<unknown, unknown, unknown, any>
+    id: string
   ): Promise<DeleteAgentPolicyResponse> {
     const agentPolicy = await this.get(soClient, id, false);
     if (!agentPolicy) {
@@ -621,7 +617,7 @@ class AgentPolicyService {
     }
 
     if (agentPolicy.package_policies && agentPolicy.package_policies.length) {
-      const body: DeletePackagePoliciesResponse = await packagePolicyService.delete(
+      const deletedPackagePolicies: DeletePackagePoliciesResponse = await packagePolicyService.delete(
         soClient,
         esClient,
         agentPolicy.package_policies as string[],
@@ -630,12 +626,7 @@ class AgentPolicyService {
         }
       );
       try {
-        await packagePolicyService.runExternalCallbacks(
-          'postPackagePolicyDelete',
-          body,
-          context,
-          request
-        );
+        await packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies);
       } catch (error) {
         const logger = appContextService.getLogger();
         logger.error(`An error occurred executing external callback: ${error}`);
