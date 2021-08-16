@@ -265,6 +265,10 @@ export interface Datasource<T = unknown, P = unknown> {
    * The frame calls this function to display warnings about visualization
    */
   getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
+  /**
+   * Checks if the visualization created is time based, for example date histogram
+   */
+  isTimeBased: (state: T) => boolean;
 }
 
 export interface DatasourceFixAction<T> {

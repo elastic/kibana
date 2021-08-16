@@ -23,8 +23,8 @@ export async function getMetricsChartDataByAgent({
   serviceNodeName,
   agentName,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;

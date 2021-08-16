@@ -6,10 +6,10 @@
  */
 
 import { AlertInstanceContext, AlertTypeParams, AlertTypeState } from '../../../alerting/common';
-import { RuleDataClient } from '../rule_data_client';
+import { IRuleDataClient } from '../rule_data_client';
 import { AlertTypeWithExecutor } from '../types';
 
-export const withRuleDataClientFactory = (ruleDataClient: RuleDataClient) => <
+export const withRuleDataClientFactory = (ruleDataClient: IRuleDataClient) => <
   TState extends AlertTypeState,
   TParams extends AlertTypeParams,
   TAlertInstanceContext extends AlertInstanceContext,
@@ -19,13 +19,13 @@ export const withRuleDataClientFactory = (ruleDataClient: RuleDataClient) => <
     TState,
     TParams,
     TAlertInstanceContext,
-    TServices & { ruleDataClient: RuleDataClient }
+    TServices & { ruleDataClient: IRuleDataClient }
   >
 ): AlertTypeWithExecutor<
   TState,
   TParams,
   TAlertInstanceContext,
-  TServices & { ruleDataClient: RuleDataClient }
+  TServices & { ruleDataClient: IRuleDataClient }
 > => {
   return {
     ...type,
