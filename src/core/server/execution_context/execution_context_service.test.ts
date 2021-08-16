@@ -407,7 +407,11 @@ describe('ExecutionContextService', () => {
         expect(service.getAsHeader()).toBe('1234');
       });
 
-      it('returns context if no id provided', async () => {
+      it('falls back to "unknownId" if no id provided', async () => {
+        expect(service.getAsHeader()).toBe('unknownId');
+      });
+
+      it('falls back to "unknownId" and context if no id provided', async () => {
         service.set({
           type: 'type-a',
           name: 'name-a',
@@ -415,7 +419,7 @@ describe('ExecutionContextService', () => {
           description: 'description-a',
         });
 
-        expect(service.getAsHeader()).toBe('kibana:type-a:name-a:id-a');
+        expect(service.getAsHeader()).toBe('unknownId;kibana:type-a:name-a:id-a');
       });
 
       it('returns request id and registered context', async () => {
