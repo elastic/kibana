@@ -23,9 +23,9 @@ export const getServiceInfrastructure = async ({
   environment,
   setup,
 }: {
-  kuery?: string;
+  kuery: string;
   serviceName: string;
-  environment?: string;
+  environment: string;
   setup: Setup & SetupTimeRange;
 }) => {
   const { apmEventClient, start, end } = setup;
