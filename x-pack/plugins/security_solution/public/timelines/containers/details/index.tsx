@@ -9,7 +9,6 @@ import { isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
@@ -24,28 +23,18 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/pl
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
 
-export enum EntityType {
-  ALERTS = 'alerts',
-  EVENTS = 'events',
-}
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
 }
 
 export interface UseTimelineEventsDetailsProps {
-  alertConsumers?: AlertConsumers[];
-  entityType?: EntityType;
   docValueFields: DocValueFields[];
   indexName: string;
   eventId: string;
   skip: boolean;
 }
 
-const EMPTY_ARRAY: AlertConsumers[] = [];
-
 export const useTimelineEventsDetails = ({
-  alertConsumers = EMPTY_ARRAY,
-  entityType = EntityType.EVENTS,
   docValueFields,
   indexName,
   eventId,
@@ -115,9 +104,7 @@ export const useTimelineEventsDetails = ({
     setTimelineDetailsRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
-        alertConsumers,
         docValueFields,
-        entityType,
         indexName,
         eventId,
         factoryQueryType: TimelineEventsQueries.details,
@@ -127,7 +114,7 @@ export const useTimelineEventsDetails = ({
       }
       return prevRequest;
     });
-  }, [alertConsumers, docValueFields, entityType, eventId, indexName]);
+  }, [docValueFields, eventId, indexName]);
 
   useEffect(() => {
     timelineDetailsSearch(timelineDetailsRequest);
