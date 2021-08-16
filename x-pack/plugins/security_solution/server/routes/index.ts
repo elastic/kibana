@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleDataClient, RuleDataPluginService } from '../../../rule_registry/server';
+import { IRuleDataClient, RuleDataPluginService } from '../../../rule_registry/server';
 
 import { SecuritySolutionPluginRouter } from '../types';
 
@@ -64,7 +64,7 @@ export const initRoutes = (
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml'],
   ruleDataService: RuleDataPluginService,
-  ruleDataClient: RuleDataClient | null
+  ruleDataClient: IRuleDataClient | null
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......

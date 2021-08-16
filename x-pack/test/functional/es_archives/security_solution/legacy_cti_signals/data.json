@@ -1,0 +1,487 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "47fc9c7b3220142effa382d78dfa828a5ca79fd5773140af1a1d96045628f171",
+    "index": ".siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2021-08-04T04:14:58.974Z",
+      "agent": {
+        "ephemeral_id": "07c24b1e-3663-4372-b982-f2d831e033eb",
+        "hostname": "elastic.local",
+        "id": "ce7741d9-3f0a-466d-8ae6-d7d8f883fcec",
+        "name": "elastic.local",
+        "type": "auditbeat",
+        "version": "7.14.0"
+      },
+      "ecs": {
+        "version": "1.10.0"
+      },
+      "event": {
+        "action": "process_stopped",
+        "category": [
+          "process"
+        ],
+        "dataset": "process",
+        "kind": "signal",
+        "module": "system",
+        "type": [
+          "end"
+        ]
+      },
+      "host": {
+        "architecture": "x86_64",
+        "hostname": "elastic.local",
+        "id": "1633D595-A115-5BF5-870B-A471B49446C3",
+        "ip": [ "192.168.1.1" ],
+        "mac": [ "aa:bb:cc:dd:ee:ff" ],
+        "name": "elastic.local",
+        "os": {
+          "build": "20G80",
+          "family": "darwin",
+          "kernel": "20.6.0",
+          "name": "Mac OS X",
+          "platform": "darwin",
+          "type": "macos",
+          "version": "10.16"
+        }
+      },
+      "message": "Process mdworker_shared (PID: 32162) by user elastic STOPPED",
+      "process": {
+        "args": [
+          "/System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared",
+          "-s",
+          "mdworker",
+          "-c",
+          "MDSImporterWorker",
+          "-m",
+          "com.apple.mdworker.shared"
+        ],
+        "entity_id": "Bu0panfqz24AEqa+",
+        "executable": "/System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared",
+        "hash": {
+          "sha1": "5f3233fd75c14b315731684d59b632df36a731a6"
+        },
+        "name": "mdworker_shared",
+        "pid": 32162,
+        "ppid": 1,
+        "start": "2021-08-04T04:07:26.900Z",
+        "working_directory": "/"
+      },
+      "service": {
+        "type": "system"
+      },
+      "signal": {
+        "_meta": {
+          "version": 45
+        },
+        "ancestors": [
+          {
+            "depth": 0,
+            "id": "yddfD3sBcVT20cvWFEs2",
+            "index": "auditbeat-7.14.0-2021.08.04-000001",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "original_event": {
+          "action": "process_stopped",
+          "category": [
+            "process"
+          ],
+          "dataset": "process",
+          "kind": "event",
+          "module": "system",
+          "type": [
+            "end"
+          ]
+        },
+        "original_time": "2021-08-04T04:14:53.490Z",
+        "parent": {
+          "depth": 0,
+          "id": "yddfD3sBcVT20cvWFEs2",
+          "index": "auditbeat-7.14.0-2021.08.04-000001",
+          "type": "event"
+        },
+        "parents": [
+          {
+            "depth": 0,
+            "id": "yddfD3sBcVT20cvWFEs2",
+            "index": "auditbeat-7.14.0-2021.08.04-000001",
+            "type": "event"
+          }
+        ],
+        "rule": {
+          "actions": [
+          ],
+          "author": [
+          ],
+          "created_at": "2021-08-04T04:14:51.576Z",
+          "created_by": "elastic",
+          "description": "These should match a dummy indicator in filebeat.",
+          "enabled": true,
+          "exceptions_list": [
+          ],
+          "false_positives": [
+          ],
+          "filters": [
+          ],
+          "from": "now-1200s",
+          "id": "832f86f0-f4da-11eb-989d-b758d09dbc85",
+          "immutable": false,
+          "index": [
+            "auditbeat-*"
+          ],
+          "interval": "5m",
+          "language": "kuery",
+          "license": "",
+          "max_signals": 100,
+          "meta": {
+            "from": "15m",
+            "kibana_siem_app_url": "http://localhost:5601/app/security"
+          },
+          "name": "Indicator Match on host.name",
+          "output_index": ".siem-signals-default",
+          "query": "host.name: \"elastic.local\" ",
+          "references": [
+          ],
+          "risk_score": 21,
+          "risk_score_mapping": [
+          ],
+          "rule_id": "2cc5f982-0de6-4325-9225-cdf88d3731ce",
+          "severity": "low",
+          "severity_mapping": [
+          ],
+          "tags": [
+          ],
+          "threat": [
+          ],
+          "threat_filters": [
+          ],
+          "threat_index": [
+            "filebeat-*"
+          ],
+          "threat_indicator_path": "",
+          "threat_language": "kuery",
+          "threat_mapping": [
+            {
+              "entries": [
+                {
+                  "field": "host.name",
+                  "type": "mapping",
+                  "value": "threatintel.indicator.domain"
+                }
+              ]
+            }
+          ],
+          "threat_query": "threatintel.indicator.type : \"url\"",
+          "throttle": null,
+          "to": "now",
+          "type": "threat_match",
+          "updated_at": "2021-08-04T04:14:52.129Z",
+          "updated_by": "elastic",
+          "version": 1
+        },
+        "status": "open"
+      },
+      "threat": {
+        "indicator": [
+          {
+            "domain": "elastic.local",
+            "event": {
+              "category": "threat",
+              "created": "2021-08-04T03:53:30.761Z",
+              "dataset": "threatintel.abuseurl",
+              "ingested": "2021-08-04T03:53:37.514040Z",
+              "kind": "enrichment",
+              "module": "threatintel",
+              "reference": "https://urlhaus.abuse.ch/url/12345/",
+              "type": "indicator"
+            },
+            "first_seen": "2021-08-03T20:35:17.000Z",
+            "matched": {
+              "atomic": "elastic.local",
+              "field": "host.name",
+              "id": "_tdUD3sBcVT20cvWAkpd",
+              "index": "filebeat-7.14.0-2021.08.04-000001",
+              "type": "indicator_match_rule"
+            },
+            "provider": "provider1",
+            "type": "url",
+            "url": {
+              "domain": "elastic.local",
+              "extension": "php",
+              "full": "http://elastic.local/thing",
+              "original": "http://elastic.local/thing",
+              "path": "/thing",
+              "scheme": "http"
+            }
+          }
+        ]
+      },
+      "user": {
+        "effective": {
+          "group": {
+            "id": "20"
+          },
+          "id": "501"
+        },
+        "group": {
+          "id": "20",
+          "name": "staff"
+        },
+        "id": "501",
+        "name": "elastic",
+        "saved": {
+          "group": {
+            "id": "20"
+          },
+          "id": "501"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "0527411874b23bcea85daf5bf7dcacd144536ba6d92d3230a4a0acfb7de7f512",
+    "index": ".siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2021-08-04T04:14:58.973Z",
+      "agent": {
+        "ephemeral_id": "07c24b1e-3663-4372-b982-f2d831e033eb",
+        "hostname": "elastic.local",
+        "id": "ce7741d9-3f0a-466d-8ae6-d7d8f883fcec",
+        "name": "elastic.local",
+        "type": "auditbeat",
+        "version": "7.14.0"
+      },
+      "ecs": {
+        "version": "1.10.0"
+      },
+      "event": {
+        "action": "process_started",
+        "category": [
+          "process"
+        ],
+        "dataset": "process",
+        "kind": "signal",
+        "module": "system",
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "architecture": "x86_64",
+        "hostname": "elastic.local",
+        "id": "1633D595-A115-5BF5-870B-A471B49446C3",
+        "ip": [ "192.168.1.1" ],
+        "mac": [ "aa:bb:cc:dd:ee:ff" ],
+        "name": "elastic.local",
+        "os": {
+          "build": "20G80",
+          "family": "darwin",
+          "kernel": "20.6.0",
+          "name": "Mac OS X",
+          "platform": "darwin",
+          "type": "macos",
+          "version": "10.16"
+        }
+      },
+      "message": "Process mdworker_shared (PID: 32306) by user elastic STARTED",
+      "process": {
+        "args": [
+          "/System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared",
+          "-s",
+          "mdworker",
+          "-c",
+          "MDSImporterWorker",
+          "-m",
+          "com.apple.mdworker.shared"
+        ],
+        "entity_id": "wfc7zUuEinqxUbZ6",
+        "executable": "/System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared",
+        "hash": {
+          "sha1": "5f3233fd75c14b315731684d59b632df36a731a6"
+        },
+        "name": "mdworker_shared",
+        "pid": 32306,
+        "ppid": 1,
+        "start": "2021-08-04T04:14:48.830Z",
+        "working_directory": "/"
+      },
+      "service": {
+        "type": "system"
+      },
+      "signal": {
+        "_meta": {
+          "version": 45
+        },
+        "ancestors": [
+          {
+            "depth": 0,
+            "id": "yNdfD3sBcVT20cvWFEs2",
+            "index": "auditbeat-7.14.0-2021.08.04-000001",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "original_event": {
+          "action": "process_started",
+          "category": [
+            "process"
+          ],
+          "dataset": "process",
+          "kind": "event",
+          "module": "system",
+          "type": [
+            "start"
+          ]
+        },
+        "original_time": "2021-08-04T04:14:53.490Z",
+        "parent": {
+          "depth": 0,
+          "id": "yNdfD3sBcVT20cvWFEs2",
+          "index": "auditbeat-7.14.0-2021.08.04-000001",
+          "type": "event"
+        },
+        "parents": [
+          {
+            "depth": 0,
+            "id": "yNdfD3sBcVT20cvWFEs2",
+            "index": "auditbeat-7.14.0-2021.08.04-000001",
+            "type": "event"
+          }
+        ],
+        "rule": {
+          "actions": [
+          ],
+          "author": [
+          ],
+          "created_at": "2021-08-04T04:14:51.576Z",
+          "created_by": "elastic",
+          "description": "These should match a dummy indicator in filebeat.",
+          "enabled": true,
+          "exceptions_list": [
+          ],
+          "false_positives": [
+          ],
+          "filters": [
+          ],
+          "from": "now-1200s",
+          "id": "832f86f0-f4da-11eb-989d-b758d09dbc85",
+          "immutable": false,
+          "index": [
+            "auditbeat-*"
+          ],
+          "interval": "5m",
+          "language": "kuery",
+          "license": "",
+          "max_signals": 100,
+          "meta": {
+            "from": "15m",
+            "kibana_siem_app_url": "http://localhost:5601/app/security"
+          },
+          "name": "Indicator Match on host.name",
+          "output_index": ".siem-signals-default",
+          "query": "host.name: \"elastic.local\" ",
+          "references": [
+          ],
+          "risk_score": 21,
+          "risk_score_mapping": [
+          ],
+          "rule_id": "2cc5f982-0de6-4325-9225-cdf88d3731ce",
+          "severity": "low",
+          "severity_mapping": [
+          ],
+          "tags": [
+          ],
+          "threat": [
+          ],
+          "threat_filters": [
+          ],
+          "threat_index": [
+            "filebeat-*"
+          ],
+          "threat_indicator_path": "",
+          "threat_language": "kuery",
+          "threat_mapping": [
+            {
+              "entries": [
+                {
+                  "field": "host.name",
+                  "type": "mapping",
+                  "value": "threatintel.indicator.domain"
+                }
+              ]
+            }
+          ],
+          "threat_query": "threatintel.indicator.type : \"url\"",
+          "throttle": null,
+          "to": "now",
+          "type": "threat_match",
+          "updated_at": "2021-08-04T04:14:52.129Z",
+          "updated_by": "elastic",
+          "version": 1
+        },
+        "status": "open"
+      },
+      "threat": {
+        "indicator": [
+          {
+            "domain": "elastic.local",
+            "event": {
+              "category": "threat",
+              "created": "2021-08-04T03:53:30.761Z",
+              "dataset": "threatintel.abuseurl",
+              "ingested": "2021-08-04T03:53:37.514040Z",
+              "kind": "enrichment",
+              "module": "threatintel",
+              "reference": "https://urlhaus.abuse.ch/url/12345/",
+              "type": "indicator"
+            },
+            "first_seen": "2021-08-03T20:35:17.000Z",
+            "matched": {
+              "atomic": "elastic.local",
+              "field": "host.name",
+              "id": "_tdUD3sBcVT20cvWAkpd",
+              "index": "filebeat-7.14.0-2021.08.04-000001",
+              "type": "indicator_match_rule"
+            },
+            "provider": "provider1",
+            "type": "url",
+            "url": {
+              "domain": "elastic.local",
+              "extension": "php",
+              "full": "http://elastic.local/thing",
+              "original": "http://elastic.local/thing",
+              "path": "/thing",
+              "scheme": "http"
+            }
+          }
+        ]
+      },
+      "user": {
+        "effective": {
+          "group": {
+            "id": "20"
+          },
+          "id": "501"
+        },
+        "group": {
+          "id": "20",
+          "name": "staff"
+        },
+        "id": "501",
+        "name": "elastic",
+        "saved": {
+          "group": {
+            "id": "20"
+          },
+          "id": "501"
+        }
+      }
+    }
+  }
+}

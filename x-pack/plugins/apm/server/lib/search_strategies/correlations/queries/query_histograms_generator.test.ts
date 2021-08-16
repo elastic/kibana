@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 
 import { asyncSearchServiceLogProvider } from '../async_search_service_log';
 import { asyncSearchServiceStateProvider } from '../async_search_service_state';
@@ -19,6 +20,8 @@ const params = {
   start: '2020',
   end: '2021',
   includeFrozen: false,
+  environment: ENVIRONMENT_ALL.value,
+  kuery: '',
 };
 const expectations = [1, 3, 5];
 const ranges = [{ to: 1 }, { from: 1, to: 3 }, { from: 3, to: 5 }, { from: 5 }];

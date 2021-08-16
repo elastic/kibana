@@ -29,8 +29,8 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getAverages, getCounts, getSums } from './get_transaction_group_stats';
 
 export interface TopTraceOptions {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   transactionName?: string;
   searchAggregatedTransactions: boolean;
 }
