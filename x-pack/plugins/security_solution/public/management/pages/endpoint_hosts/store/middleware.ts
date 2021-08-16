@@ -105,18 +105,19 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     if (
       (action.type === 'userChangedUrl' || action.type === 'appRequestedEndpointList') &&
       isOnEndpointPage(getState()) &&
-      hasSelectedEndpoint(getState()) !== true
+      !hasSelectedEndpoint(getState())
     ) {
-      endpointDetailsListMiddleware({ coreStart, store, fetchIndexPatterns });
+      await endpointDetailsListMiddleware({ coreStart, store, fetchIndexPatterns });
     }
 
     // Endpoint Details
-    if (action.type === 'userChangedUrl' && hasSelectedEndpoint(getState()) === true) {
-      endpointDetailsMiddleware({ store, coreStart });
+    if (action.type === 'userChangedUrl' && hasSelectedEndpoint(getState())) {
+      const { selected_endpoint: selectedEndpoint } = uiQueryParams(getState());
+      await endpointDetailsMiddleware({ store, coreStart, selectedEndpoint });
     }
 
     if (action.type === 'endpointDetailsLoad') {
-      loadEndpointDetails({ store, coreStart, selectedEndpoint: action.payload.endpointId });
+      await loadEndpointDetails({ store, coreStart, selectedEndpoint: action.payload.endpointId });
     }
 
     if (
@@ -124,7 +125,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       hasSelectedEndpoint(getState()) === true &&
       getIsOnEndpointDetailsActivityLog(getState())
     ) {
-      endpointDetailsActivityLogChangedMiddleware({ store, coreStart });
+      await endpointDetailsActivityLogChangedMiddleware({ store, coreStart });
     }
 
     // page activity log API
@@ -132,7 +133,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       action.type === 'endpointDetailsActivityLogUpdatePaging' &&
       hasSelectedEndpoint(getState())
     ) {
-      endpointDetailsActivityLogPagingMiddleware({ store, coreStart });
+      await endpointDetailsActivityLogPagingMiddleware({ store, coreStart });
     }
 
     // Isolate Host
@@ -665,11 +666,13 @@ async function loadEndpointDetails({
 }
 
 async function endpointDetailsMiddleware({
-  store,
   coreStart,
+  selectedEndpoint,
+  store,
 }: {
-  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
   coreStart: CoreStart;
+  selectedEndpoint?: string;
+  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
 }) {
   const { getState, dispatch } = store;
   dispatch({
@@ -703,11 +706,12 @@ async function endpointDetailsMiddleware({
       type: 'serverCancelledEndpointListLoading',
     });
   }
-  const { selected_endpoint: selectedEndpoint } = uiQueryParams(getState());
-  if (selectedEndpoint !== undefined) {
-    loadEndpointDetails({ store, coreStart, selectedEndpoint });
+  if (typeof selectedEndpoint === 'undefined') {
+    return;
   }
+  await loadEndpointDetails({ store, coreStart, selectedEndpoint });
 }
+
 async function endpointDetailsActivityLogChangedMiddleware({
   store,
   coreStart,

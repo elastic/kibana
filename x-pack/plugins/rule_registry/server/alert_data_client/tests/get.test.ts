@@ -119,6 +119,12 @@ describe('get()', () => {
       Array [
         Object {
           "body": Object {
+            "fields": Array [
+              "kibana.alert.rule.rule_type_id",
+              "kibana.alert.rule.consumer",
+              "kibana.alert.workflow_status",
+              "kibana.space_ids",
+            ],
             "query": Object {
               "bool": Object {
                 "filter": Array [
@@ -254,7 +260,7 @@ describe('get()', () => {
 
     await expect(alertsClient.get({ id: fakeAlertId, index: '.alerts-observability-apm' })).rejects
       .toThrowErrorMatchingInlineSnapshot(`
-            "Unable to retrieve alert details for alert with id of \\"myfakeid1\\" or with query \\"null\\" and operation get 
+            "Unable to retrieve alert details for alert with id of \\"myfakeid1\\" or with query \\"undefined\\" and operation get 
             Error: Error: Unauthorized for fake.rule and apm"
           `);
 
@@ -281,7 +287,7 @@ describe('get()', () => {
     await expect(
       alertsClient.get({ id: 'NoxgpHkBqbdrfX07MqXV', index: '.alerts-observability-apm' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-            "Unable to retrieve alert details for alert with id of \\"NoxgpHkBqbdrfX07MqXV\\" or with query \\"null\\" and operation get 
+            "Unable to retrieve alert details for alert with id of \\"NoxgpHkBqbdrfX07MqXV\\" or with query \\"undefined\\" and operation get 
             Error: Error: something went wrong"
           `);
   });
