@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KibanaExecutionContext } from 'kibana/public';
+import type { KibanaExecutionContext } from '../../types';
 import type {
   IExecutionContext,
   InternalExecutionContextSetup,
@@ -14,10 +14,7 @@ import type {
 } from './execution_context_service';
 
 // attempted removal of any: unsuccessful! In theory, replaceable with <R>/R
-function withContextMock(
-  context: KibanaExecutionContext | undefined,
-  fn: (...args: any[]) => any
-): any {
+function withContextMock(context: KibanaExecutionContext | undefined, fn: () => any): any {
   return fn();
 }
 

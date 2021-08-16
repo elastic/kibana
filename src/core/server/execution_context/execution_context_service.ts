@@ -34,7 +34,7 @@ export interface IExecutionContext {
    * https://nodejs.org/api/async_context.html#async_context_asynclocalstorage_enterwith_store
    */
   get(): IExecutionContextContainer | undefined;
-  withContext<R>(context: KibanaExecutionContext | undefined, fn: (...args: any[]) => R): R;
+  withContext<R>(context: KibanaExecutionContext | undefined, fn: () => R): R;
   /**
    * returns serialized representation to send as a header
    **/

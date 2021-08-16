@@ -346,7 +346,7 @@ describe('ExecutionContextService', () => {
             id: 'id-a',
             description: 'description-a',
           },
-          (i) => i
+          () => null
         );
         expect(loggingSystemMock.collect(core.logger).debug).toMatchInlineSnapshot(`
                   Array [
