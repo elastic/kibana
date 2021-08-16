@@ -106,7 +106,9 @@ export const getRenderCellValueFn = (
       <EuiDescriptionList type="inline" className="dscDiscoverGrid__descriptionList">
         {[...highlightPairs, ...sourcePairs].slice(0, maxDocFieldsDisplayed).map(([key, value]) => (
           <Fragment key={key}>
-            <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
+            <EuiDescriptionListTitle className="dscDiscoverGrid__descriptionListTitle">
+              {key}
+            </EuiDescriptionListTitle>
             <EuiDescriptionListDescription
               dangerouslySetInnerHTML={{ __html: value }}
               className="dscDiscoverGrid__descriptionListDescription"
@@ -150,7 +152,9 @@ export const getRenderCellValueFn = (
       <EuiDescriptionList type="inline" className="dscDiscoverGrid__descriptionList">
         {[...highlightPairs, ...sourcePairs].slice(0, maxDocFieldsDisplayed).map(([key, value]) => (
           <Fragment key={key}>
-            <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
+            <EuiDescriptionListTitle className="dscDiscoverGrid__descriptionListTitle">
+              {key}
+            </EuiDescriptionListTitle>
             <EuiDescriptionListDescription
               dangerouslySetInnerHTML={{ __html: value }}
               className="dscDiscoverGrid__descriptionListDescription"
