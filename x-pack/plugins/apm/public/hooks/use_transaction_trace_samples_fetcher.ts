@@ -77,14 +77,10 @@ export function useTransactionTraceSamplesFetcher({
 
         const { traceSamples } = response;
 
-        const selectedSample =
-          transactionId && traceId
-            ? traceSamples.find(
-                (sample) =>
-                  sample.transactionId === transactionId &&
-                  sample.traceId === traceId
-              )
-            : undefined;
+        const selectedSample = traceSamples.find(
+          (sample) =>
+            sample.transactionId === transactionId && sample.traceId === traceId
+        );
 
         if (!selectedSample) {
           // selected sample was not found. select a new one:
