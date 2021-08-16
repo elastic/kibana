@@ -332,7 +332,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       () => ({
         additionalControls: (
           <>
-            <AlertCount>{alertCountText}</AlertCount>
+            <AlertCount data-test-subj="server-side-event-count">{alertCountText}</AlertCount>
             {showBulkActions ? (
               <>
                 <Suspense fallback={<EuiLoadingSpinner />}>
