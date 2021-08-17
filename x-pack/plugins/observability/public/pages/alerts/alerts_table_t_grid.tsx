@@ -77,7 +77,6 @@ interface AlertsTableTGridProps {
 
 interface ObservabilityActionsProps extends ActionProps {
   currentStatus: AlertStatus;
-  flyoutAlert: TopAlert | undefined;
   setFlyoutAlert: React.Dispatch<React.SetStateAction<TopAlert | undefined>>;
 }
 
@@ -166,14 +165,12 @@ function ObservabilityActions({
   ecsData,
   currentStatus,
   refetch,
-  flyoutAlert,
   setFlyoutAlert,
   setEventsLoading,
   setEventsDeleted,
 }: ObservabilityActionsProps) {
   const { core, observabilityRuleTypeRegistry } = usePluginContext();
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
-  const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const [openActionsPopoverId, setActionsPopover] = useState(null);
   const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
 
@@ -244,15 +241,6 @@ function ObservabilityActions({
   }, [afterCaseSelection, casePermissions, timelines, event, statusBulkActionItems]);
   return (
     <>
-      {flyoutAlert && (
-        <Suspense fallback={null}>
-          <LazyAlertsFlyout
-            alert={flyoutAlert}
-            observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-            onClose={handleFlyoutClose}
-          />
-        </Suspense>
-      )}
       <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem>
           <EuiButtonIcon
@@ -323,14 +311,13 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
             <ObservabilityActions
               {...actionProps}
               currentStatus={status as AlertStatus}
-              flyoutAlert={flyoutAlert}
               setFlyoutAlert={setFlyoutAlert}
             />
           );
         },
       },
     ];
-  }, [flyoutAlert, status]);
+  }, [status]);
 
   const tGridProps = useMemo(() => {
     const type: TGridType = 'standalone';
@@ -388,6 +375,21 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     setRefetch,
     status,
   ]);
+  const handleFlyoutClose = () => setFlyoutAlert(undefined);
+  const { observabilityRuleTypeRegistry } = usePluginContext();
 
-  return <>{timelines.getTGrid<'standalone'>(tGridProps)}</>;
+  return (
+    <>
+      {flyoutAlert && (
+        <Suspense fallback={null}>
+          <LazyAlertsFlyout
+            alert={flyoutAlert}
+            observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+            onClose={handleFlyoutClose}
+          />
+        </Suspense>
+      )}
+      {timelines.getTGrid<'standalone'>(tGridProps)}
+    </>
+  );
 }
