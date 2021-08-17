@@ -42,7 +42,7 @@ type CorrelationsApiResponse = NonNullable<
   APIReturnType<'GET /api/apm/correlations/errors/failed_transactions'>
 >;
 
-export function ErrorCorrelations() {
+export function ErrorCorrelations({ onFilter }: { onFilter: () => void }) {
   const [
     selectedSignificantTerm,
     setSelectedSignificantTerm,
@@ -127,8 +127,6 @@ export function ErrorCorrelations() {
 
   const trackApmEvent = useUiTracker({ app: 'apm' });
   trackApmEvent({ metric: 'view_failed_transactions' });
-
-  const onFilter = () => {};
 
   return (
     <>
