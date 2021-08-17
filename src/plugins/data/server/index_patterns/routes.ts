@@ -69,8 +69,6 @@ export function registerRoutes(
   registerPutRuntimeFieldRoute(router, getStartServices);
   registerUpdateRuntimeFieldRoute(router, getStartServices);
 
-  //
-
   router.get(
     {
       path: '/api/index_patterns/_fields_for_wildcard',
