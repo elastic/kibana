@@ -33,7 +33,7 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
             defaultMessage="Host:Port"
           />
         }
-        isInvalid={!!validate[ConfigKeys.HOSTS]?.(fields[ConfigKeys.HOSTS])}
+        isInvalid={!!validate[ConfigKeys.HOSTS]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tcp.hosts.error"
@@ -61,7 +61,7 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
             defaultMessage="Monitor interval"
           />
         }
-        isInvalid={!!validate[ConfigKeys.SCHEDULE]?.(fields[ConfigKeys.SCHEDULE])}
+        isInvalid={!!validate[ConfigKeys.SCHEDULE]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
@@ -113,18 +113,19 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
             defaultMessage="Timeout in seconds"
           />
         }
-        isInvalid={
-          !!validate[ConfigKeys.TIMEOUT]?.(
-            fields[ConfigKeys.TIMEOUT],
-            fields[ConfigKeys.SCHEDULE].number,
-            fields[ConfigKeys.SCHEDULE].unit
-          )
-        }
+        isInvalid={!!validate[ConfigKeys.TIMEOUT]?.(fields)}
         error={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.error"
-            defaultMessage="Timeout must be 0 or greater and less than schedule interval"
-          />
+          parseInt(fields[ConfigKeys.TIMEOUT], 10) < 0 ? (
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.moreThanZeroError"
+              defaultMessage="Timeout must be greater than or equal to 0"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.lessThanIntervalError"
+              defaultMessage="Timeout must be less than the monitor interval"
+            />
+          )
         }
         helpText={
           <FormattedMessage

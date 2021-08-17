@@ -1,5 +1,9 @@
 {
   "id": "triggersActionsUi",
+  "owner": {
+    "name": "Kibana Alerting",
+    "githubTeam": "kibana-alerting-services"
+  },
   "version": "kibana",
   "server": true,
   "ui": true,

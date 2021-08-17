@@ -9,6 +9,9 @@
 /dev_docs @elastic/kibana-tech-leads
 /packages/kbn-docs-utils/ @elastic/kibana-tech-leads @elastic/kibana-operations
 
+# Virtual teams
+/x-pack/plugins/rule_registry/ @elastic/rac
+
 # App
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-app
 /x-pack/plugins/lens/ @elastic/kibana-app
@@ -31,6 +34,7 @@
 /src/plugins/vis_type_pie/ @elastic/kibana-app
 /src/plugins/visualize/ @elastic/kibana-app
 /src/plugins/visualizations/ @elastic/kibana-app
+/src/plugins/url_forwarding/ @elastic/kibana-app
 /packages/kbn-tinymath/ @elastic/kibana-app
 
 # Application Services
@@ -369,6 +373,7 @@
 /x-pack/test/plugin_functional/plugins/resolver_test/ @elastic/security-solution
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
 /x-pack/plugins/security_solution/ @elastic/security-solution
+/x-pack/plugins/metrics_entities/ @elastic/security-solution
 /x-pack/test/detection_engine_api_integration @elastic/security-solution
 /x-pack/test/lists_api_integration @elastic/security-solution
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution
