@@ -2,15 +2,8 @@
   "id": "ruleRegistry",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "configPath": [
-    "xpack",
-    "ruleRegistry"
-  ],
-  "requiredPlugins": [
-    "alerting",
-    "data",
-    "triggersActionsUi"
-  ],
+  "configPath": ["xpack", "ruleRegistry"],
+  "requiredPlugins": ["alerting", "data", "triggersActionsUi"],
   "optionalPlugins": ["security"],
   "server": true
 }

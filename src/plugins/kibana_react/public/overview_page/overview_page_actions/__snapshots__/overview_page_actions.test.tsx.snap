@@ -19,7 +19,7 @@ Array [
       data-test-subj="homeAddData"
       flush="both"
       href="/app/home#/tutorial_directory"
-      iconType="indexOpen"
+      iconType="plusInCircle"
     >
       Add data
     </EuiButtonEmpty>
@@ -92,7 +92,7 @@ Array [
       data-test-subj="homeAddData"
       flush="both"
       href="/app/home#/tutorial_directory"
-      iconType="indexOpen"
+      iconType="plusInCircle"
     >
       Add data
     </EuiButtonEmpty>
