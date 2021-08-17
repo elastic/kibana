@@ -94,7 +94,7 @@ export const getRenderCellValue = ({
         switch (value) {
           case 'open':
             return (
-              <EuiHealth color="primary">
+              <EuiHealth color="primary" textSize="xs">
                 {i18n.translate('xpack.observability.alertsTGrid.statusActiveDescription', {
                   defaultMessage: 'Active',
                 })}
@@ -102,7 +102,7 @@ export const getRenderCellValue = ({
             );
           case 'closed':
             return (
-              <EuiHealth color={theme.eui.euiColorLightShade}>
+              <EuiHealth color={theme.eui.euiColorLightShade} textSize="xs">
                 <EuiText color={theme.eui.euiColorLightShade} size="relative">
                   {i18n.translate('xpack.observability.alertsTGrid.statusRecoveredDescription', {
                     defaultMessage: 'Recovered',
