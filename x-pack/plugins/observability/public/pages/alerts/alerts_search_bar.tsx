@@ -16,7 +16,6 @@ export function AlertsSearchBar({
   rangeTo,
   onQueryChange,
   query,
-  addToQuery,
 }: {
   dynamicIndexPattern: IIndexPattern[];
   rangeFrom?: string;
@@ -26,7 +25,6 @@ export function AlertsSearchBar({
     dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
     query?: string;
   }) => void;
-  addToQuery: (value: string) => void;
 }) {
   const timeHistory = useMemo(() => {
     return new TimeHistory(new Storage(localStorage));

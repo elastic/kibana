@@ -184,7 +184,6 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             rangeTo={rangeTo}
             query={kuery}
             onQueryChange={onQueryChange}
-            addToQuery={addToQuery}
           />
         </EuiFlexItem>
         <EuiSpacer size="s" />

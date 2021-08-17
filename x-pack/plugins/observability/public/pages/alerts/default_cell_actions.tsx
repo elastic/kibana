@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-
-import { EuiButtonIcon } from '@elastic/eui';
 import { ObservabilityPublicPluginsStart } from '../..';
 import { getMappedNonEcsValue } from './render_cell_value';
 import FilterForValueButton from './filter_for_value';
@@ -81,14 +79,8 @@ const buildFilterCellActions = (addToQuery: (value: string) => void): TGridCellA
 
 /** returns the default actions shown in `EuiDataGrid` cells */
 export const getDefaultCellActions = ({
-  enableFilterActions,
   addToQuery,
 }: {
-  enableFilterActions: boolean;
   addToQuery: (value: string) => void;
-}) => {
-  const cellActions = enableFilterActions
-    ? [...buildFilterCellActions(addToQuery), ...commonCellActions]
-    : [...commonCellActions];
-  return cellActions;
+}) =>  [...buildFilterCellActions(addToQuery), ...commonCellActions]
 };

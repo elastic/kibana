@@ -302,7 +302,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       type,
       columns,
       deletedEventIds: [],
-      defaultCellActions: getDefaultCellActions({ enableFilterActions: true, addToQuery }),
+      defaultCellActions: getDefaultCellActions({ addToQuery }),
       end: rangeTo,
       filters: [],
       indexNames: [indexName],

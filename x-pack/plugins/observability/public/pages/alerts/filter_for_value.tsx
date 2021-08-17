@@ -12,7 +12,7 @@ export const FILTER_FOR_VALUE = i18n.translate('xpack.observability.hoverActions
   defaultMessage: 'Filter for value',
 });
 
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiButtonEmpty } from '@elastic/eui';
 
 interface FilterForValueProps {
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
