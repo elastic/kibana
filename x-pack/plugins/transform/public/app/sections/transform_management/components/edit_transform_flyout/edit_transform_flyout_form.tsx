@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import { UseEditTransformFlyoutReturnType } from './use_edit_transform_flyout';
 import { useAppDependencies } from '../../../../app_dependencies';
-import { KBN_FIELD_TYPES } from '../../../../../../../../../../../../../../private/var/tmp/_bazel_quynhnguyen/bd5cc7ce3740c1abb2c63a2609d8bb9f/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-field-types';
+import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
 
 interface EditTransformFlyoutFormProps {
   editTransformFlyout: UseEditTransformFlyoutReturnType;
