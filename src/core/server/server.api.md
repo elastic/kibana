@@ -2528,7 +2528,7 @@ export class SavedObjectsErrorHelpers {
     // (undocumented)
     static createGenericNotFoundError(type?: string | null, id?: string | null): DecoratedError;
     // (undocumented)
-    static createGenericNotFoundEsUnavailableError(type: string, id: string): DecoratedError;
+    static createGenericNotFoundEsUnavailableError(type?: string | null, id?: string | null): DecoratedError;
     // (undocumented)
     static createIndexAliasNotFoundError(alias: string): DecoratedError;
     // (undocumented)

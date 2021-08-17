@@ -141,6 +141,19 @@ export class Plugin
         defaultMessage: 'Overview',
       }),
       updater$: appUpdater$,
+      keywords: [
+        'observability',
+        'monitor',
+        'logs',
+        'metrics',
+        'apm',
+        'performance',
+        'trace',
+        'agent',
+        'rum',
+        'user',
+        'experience',
+      ],
     };
 
     coreSetup.application.register(app);

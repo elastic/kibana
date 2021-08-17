@@ -26,6 +26,7 @@ import { getFieldValue } from '../host_isolation/helpers';
 import type { Ecs } from '../../../../common/ecs';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { endpointAlertCheck } from '../../../common/utils/endpoint_alert_check';
+import { APP_ID } from '../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 interface ActionsData {
@@ -187,7 +188,7 @@ export const TakeActionDropdown = React.memo(
           event: { data: [], ecs: ecsData, _id: ecsData._id },
           useInsertTimeline: insertTimelineHook,
           casePermissions,
-          appId: 'securitySolution',
+          appId: APP_ID,
           onClose: afterCaseSelection,
         };
       } else {
