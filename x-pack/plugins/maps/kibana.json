@@ -24,7 +24,7 @@
     "share",
     "presentationUtil"
   ],
-  "optionalPlugins": ["home", "savedObjectsTagging", "charts"],
+  "optionalPlugins": ["home", "savedObjectsTagging", "charts", "security"],
   "ui": true,
   "server": true,
   "extraPublicDirs": ["common/constants"],

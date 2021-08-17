@@ -5,14 +5,24 @@
  * 2.0.
  */
 
-import { Filter, Query } from '@kbn/es-query';
-import { esKuery, esQuery } from '../../../../../../src/plugins/data/public';
+import { estypes } from '@elastic/elasticsearch';
+import {
+  Filter,
+  fromKueryExpression,
+  luceneStringToDsl,
+  Query,
+  toElasticsearchQuery,
+} from '@kbn/es-query';
 
-export function processFilters(filters: Filter[], query: Query, controlledBy?: string) {
+export function processFilters(
+  filters: Filter[],
+  query: Query,
+  controlledBy?: string
+): estypes.QueryDslQueryContainer {
   const inputQuery =
     query.language === 'kuery'
-      ? esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query.query as string))
-      : esQuery.luceneStringToDsl(query.query);
+      ? toElasticsearchQuery(fromKueryExpression(query.query as string))
+      : luceneStringToDsl(query.query);
 
   const must = [inputQuery];
   const mustNot = [];

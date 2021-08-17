@@ -40,7 +40,7 @@ describe('<EditPolicy /> delete phase', () => {
   });
 
   test('is hidden when disabled', async () => {
-    httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+    httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy()]);
 
     await act(async () => {
       testBed = await setupDeleteTestBed();
