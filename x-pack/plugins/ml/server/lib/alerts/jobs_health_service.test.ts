@@ -279,7 +279,7 @@ describe('JobsHealthService', () => {
               missed_docs_count: 11,
             },
           ],
-          message: '1 job is suffering from delayed data.',
+          message: 'Job test_job_01 is suffering from delayed data.',
         },
       },
     ]);
@@ -333,7 +333,7 @@ describe('JobsHealthService', () => {
               datafeed_state: 'stopped',
             },
           ],
-          message: 'Datafeed is not started for the following jobs:',
+          message: 'Datafeed is not started for job test_job_02',
         },
       },
       {
@@ -347,7 +347,7 @@ describe('JobsHealthService', () => {
             },
           ],
           message:
-            '1 job reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.',
+            'Job test_job_01 reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.',
         },
       },
       {
@@ -369,7 +369,7 @@ describe('JobsHealthService', () => {
               missed_docs_count: 8,
             },
           ],
-          message: '2 jobs are suffering from delayed data.',
+          message: 'Jobs test_job_01, test_job_02 are suffering from delayed data.',
         },
       },
     ]);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { memoize, keyBy } from 'lodash';
+import { memoize, keyBy, groupBy } from 'lodash';
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import { Logger } from 'kibana/server';
@@ -120,6 +120,15 @@ export function jobsHealthServiceProvider(
   const getJobStats = memoize(
     async (jobIds: string[]) => (await mlClient.getJobStats({ job_id: jobIds.join(',') })).body.jobs
   );
+
+  /** Gets values for translation string */
+  const getJobsAlertingMessageValues = <T extends Array<{ job_id: string }>>(response: T) => {
+    const jobIds = response.map((v) => v.job_id);
+    return {
+      count: jobIds.length,
+      jobsString: jobIds.join(', '),
+    };
+  };
 
   return {
     /**
@@ -282,7 +291,9 @@ export function jobsHealthServiceProvider(
               message: i18n.translate(
                 'xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedStateMessage',
                 {
-                  defaultMessage: 'Datafeed is not started for the following jobs:',
+                  defaultMessage:
+                    'Datafeed is not started for {count, plural, one {job} other {jobs}} {jobsString}',
+                  values: getJobsAlertingMessageValues(response),
                 }
               ),
             },
@@ -293,30 +304,31 @@ export function jobsHealthServiceProvider(
       if (config.mml.enabled) {
         const response = await this.getMmlReport(jobIds);
         if (response && response.length > 0) {
-          const hardLimitJobsCount = response.reduce((acc, curr) => {
-            return acc + (curr.memory_status === 'hard_limit' ? 1 : 0);
-          }, 0);
+          const { hard_limit: hardLimitJobs, soft_limit: sofLimitJobs } = groupBy(
+            response,
+            'memory_status'
+          );
 
           results.push({
             name: HEALTH_CHECK_NAMES.mml.name,
             context: {
               results: response,
               message:
-                hardLimitJobsCount > 0
+                hardLimitJobs.length > 0
                   ? i18n.translate(
                       'xpack.ml.alertTypes.jobsHealthAlertingRule.mmlHardLimitMessage',
                       {
                         defaultMessage:
-                          '{jobsCount, plural, one {# job} other {# jobs}} reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.',
-                        values: { jobsCount: hardLimitJobsCount },
+                          '{count, plural, one {Job} other {Jobs}} {jobsString} reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.',
+                        values: getJobsAlertingMessageValues(hardLimitJobs),
                       }
                     )
                   : i18n.translate(
                       'xpack.ml.alertTypes.jobsHealthAlertingRule.mmlSoftLimitMessage',
                       {
                         defaultMessage:
-                          '{jobsCount, plural, one {# job} other {# jobs}} reached the soft model memory limit. Assign the job more memory or edit the datafeed filter to limit scope of analysis.',
-                        values: { jobsCount: response.length },
+                          '{count, plural, one {Job} other {Jobs}} {jobsString} reached the soft model memory limit. Assign the job more memory or edit the datafeed filter to limit scope of analysis.',
+                        values: getJobsAlertingMessageValues(sofLimitJobs),
                       }
                     ),
             },
@@ -340,8 +352,8 @@ export function jobsHealthServiceProvider(
                 'xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataMessage',
                 {
                   defaultMessage:
-                    '{jobsCount, plural, one {# job is} other {# jobs are}} suffering from delayed data.',
-                  values: { jobsCount: response.length },
+                    '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {is} other {are}} suffering from delayed data.',
+                  values: getJobsAlertingMessageValues(response),
                 }
               ),
             },
@@ -360,8 +372,8 @@ export function jobsHealthServiceProvider(
                 'xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesMessage',
                 {
                   defaultMessage:
-                    '{jobsCount, plural, one {# job contains} other {# jobs contain}} errors in the messages.',
-                  values: { jobsCount: response.length },
+                    '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {contains} other {contain}} errors in the messages.',
+                  values: getJobsAlertingMessageValues(response),
                 }
               ),
             },
