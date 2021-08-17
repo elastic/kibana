@@ -385,17 +385,22 @@ const basicActionSnake = {
   comment_id: null,
   owner: SECURITY_SOLUTION_OWNER,
 };
-export const getUserActionSnake = (af: UserActionField, a: UserAction) => ({
-  ...basicActionSnake,
-  action_id: `${af[0]}-${a}`,
-  action_field: af,
-  action: a,
-  comment_id: af[0] === 'comment' ? basicCommentId : null,
-  new_value:
-    a === 'push-to-service' && af[0] === 'pushed'
-      ? JSON.stringify(basicPushSnake)
-      : basicAction.newValue,
-});
+export const getUserActionSnake = (af: UserActionField, a: UserAction) => {
+  const isPushToService = a === 'push-to-service' && af[0] === 'pushed';
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { connector_id, ...newValueNoId } = basicPushSnake;
+
+  return {
+    ...basicActionSnake,
+    action_id: `${af[0]}-${a}`,
+    action_field: af,
+    action: a,
+    comment_id: af[0] === 'comment' ? basicCommentId : null,
+    new_value: isPushToService ? JSON.stringify(newValueNoId) : basicAction.newValue,
+    new_val_connector_id: isPushToService ? basicPushSnake.connector_id : null,
+    old_val_connector_id: null,
+  };
+};
 
 export const caseUserActionsSnake: CaseUserActionsResponse = [
   getUserActionSnake(['description'], 'create'),
