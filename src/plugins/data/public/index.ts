@@ -62,7 +62,13 @@ export const indexPatterns = {
   flattenHitWrapper,
 };
 
-export { IndexPatternsContract, IndexPattern, IndexPatternField } from './index_patterns';
+export {
+  IndexPatternsContract,
+  IndexPattern,
+  IndexPatternField,
+  IndexPatternListSavedObjectAttrs,
+  TypeMeta,
+} from './index_patterns';
 
 export {
   IIndexPattern,

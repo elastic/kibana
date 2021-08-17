@@ -39,9 +39,17 @@ import { castEsToKbnFieldTypeName } from '../../kbn_field_types';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
-export interface IndexPatternSavedObjectAttrs {
-  title: string;
-}
+export type IndexPatternSavedObjectAttrs = Pick<
+  IndexPatternAttributes,
+  'title' | 'type' | 'typeMeta'
+>;
+
+export type IndexPatternListSavedObjectAttrs = Pick<
+  IndexPatternAttributes,
+  'title' | 'type' | 'typeMeta'
+>;
+
+export type IndexPatternListItem = IndexPatternListSavedObjectAttrs & { id: string };
 
 interface IndexPatternsServiceDeps {
   uiSettings: UiSettingsCommon;
@@ -94,7 +102,7 @@ export class IndexPatternsService {
   private async refreshSavedObjectsCache() {
     const so = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
       type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
-      fields: ['title'],
+      fields: ['title', 'type', 'typeMeta'],
       perPage: 10000,
     });
     this.savedObjectsCache = so;
@@ -152,9 +160,7 @@ export class IndexPatternsService {
    * Get list of index pattern ids with titles
    * @param refresh Force refresh of index pattern list
    */
-  getIdsWithTitle = async (
-    refresh: boolean = false
-  ): Promise<Array<{ id: string; title: string }>> => {
+  getIdsWithTitle = async (refresh: boolean = false): Promise<IndexPatternListItem[]> => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
@@ -164,6 +170,8 @@ export class IndexPatternsService {
     return this.savedObjectsCache.map((obj) => ({
       id: obj?.id,
       title: obj?.attributes?.title,
+      type: obj?.attributes?.type,
+      typeMeta: obj?.attributes?.typeMeta && JSON.parse(obj?.attributes?.typeMeta),
     }));
   };
 
@@ -559,7 +567,7 @@ export class IndexPatternsService {
     const createdIndexPattern = await this.initFromSavedObject(response);
     this.indexPatternCache.set(createdIndexPattern.id!, Promise.resolve(createdIndexPattern));
     if (this.savedObjectsCache) {
-      this.savedObjectsCache.push(response as SavedObject<IndexPatternSavedObjectAttrs>);
+      this.savedObjectsCache.push(response as SavedObject<IndexPatternListSavedObjectAttrs>);
     }
     return createdIndexPattern;
   }
