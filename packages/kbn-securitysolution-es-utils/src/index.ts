@@ -17,6 +17,7 @@ export * from './encode_hit_version';
 export * from './get_index_aliases';
 export * from './get_index_count';
 export * from './get_index_exists';
+export * from './get_index_version';
 export * from './get_policy_exists';
 export * from './get_template_exists';
 export * from './read_index';

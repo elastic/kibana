@@ -194,8 +194,8 @@ export const useUserInfo = (): State => {
     hasEncryptionKey: isApiEncryptionKey,
     hasIndexManage: hasApiIndexManage,
     hasIndexMaintenance: hasApiIndexMaintenance,
-    hasIndexWrite: hasApiIndexWrite,
     hasIndexUpdateDelete: hasApiIndexUpdateDelete,
+    hasKibanaPRivilegesCrud,
   } = useAlertsPrivileges();
   const {
     loading: indexNameLoading,
@@ -223,10 +223,10 @@ export const useUserInfo = (): State => {
   }, [dispatch, loading, hasIndexManage, hasApiIndexManage]);
 
   useEffect(() => {
-    if (!loading && hasIndexWrite !== hasApiIndexWrite && hasApiIndexWrite != null) {
-      dispatch({ type: 'updateHasIndexWrite', hasIndexWrite: hasApiIndexWrite });
+    if (!loading && hasIndexWrite !== hasKibanaPRivilegesCrud && hasKibanaPRivilegesCrud != null) {
+      dispatch({ type: 'updateHasIndexWrite', hasIndexWrite: hasKibanaPRivilegesCrud });
     }
-  }, [dispatch, loading, hasIndexWrite, hasApiIndexWrite]);
+  }, [dispatch, loading, hasIndexWrite, hasKibanaPRivilegesCrud]);
 
   useEffect(() => {
     if (

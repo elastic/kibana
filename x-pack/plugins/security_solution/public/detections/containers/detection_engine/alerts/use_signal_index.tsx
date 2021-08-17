@@ -39,7 +39,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
     createDeSignalIndex: null,
   });
   const { addError } = useAppToasts();
-  const { hasIndexRead } = useAlertsPrivileges();
+  const { hasKibanaPrivilegesRead } = useAlertsPrivileges();
   // TODO: Once we are past experimental phase this code should be removed
   const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
 
@@ -113,7 +113,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
       }
     };
 
-    if (hasIndexRead) {
+    if (hasKibanaPrivilegesRead) {
       fetchData();
     } else {
       // Skip data fetching as the current user doesn't have enough priviliges.
@@ -124,7 +124,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [addError, hasIndexRead, ruleRegistryEnabled]);
+  }, [addError, hasKibanaPrivilegesRead, ruleRegistryEnabled]);
 
   return { loading, ...signalIndex };
 };

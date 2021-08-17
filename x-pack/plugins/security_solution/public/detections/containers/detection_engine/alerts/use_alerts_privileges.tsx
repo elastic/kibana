@@ -20,6 +20,8 @@ export interface AlertsPrivelegesState {
   hasIndexUpdateDelete: boolean | null;
   hasIndexMaintenance: boolean | null;
   hasIndexRead: boolean | null;
+  hasKibanaPrivilegesRead: boolean | null;
+  hasKibanaPRivilegesCrud: boolean | null;
 }
 /**
  * Hook to get user privilege from
@@ -34,8 +36,10 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
     hasIndexWrite: null,
     hasIndexUpdateDelete: null,
     hasIndexMaintenance: null,
+    hasKibanaPrivilegesRead: null,
+    hasKibanaPRivilegesCrud: null,
   });
-  const { detectionEnginePrivileges } = useUserPrivileges();
+  const { detectionEnginePrivileges, alertsPrivileges } = useUserPrivileges();
 
   useEffect(() => {
     if (detectionEnginePrivileges.error != null) {
@@ -47,6 +51,8 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
         hasIndexWrite: false,
         hasIndexUpdateDelete: false,
         hasIndexMaintenance: false,
+        hasKibanaPrivilegesRead: false,
+        hasKibanaPRivilegesCrud: false,
       });
     }
   }, [detectionEnginePrivileges.error]);
@@ -69,10 +75,12 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
             privilege.index[indexName].index ||
             privilege.index[indexName].write,
           hasIndexUpdateDelete: privilege.index[indexName].write,
+          hasKibanaPrivilegesRead: alertsPrivileges.read,
+          hasKibanaPRivilegesCrud: alertsPrivileges.crud,
         });
       }
     }
-  }, [detectionEnginePrivileges.result]);
+  }, [detectionEnginePrivileges.result, alertsPrivileges]);
 
   return { loading: detectionEnginePrivileges.loading, ...privileges };
 };

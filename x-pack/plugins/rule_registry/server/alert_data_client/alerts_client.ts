@@ -8,7 +8,12 @@ import Boom from '@hapi/boom';
 import { estypes } from '@elastic/elasticsearch';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
-import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
+import {
+  decodeVersion,
+  encodeHitVersion,
+  getIndexExists,
+  getIndexVersion,
+} from '@kbn/securitysolution-es-utils';
 import type {
   getEsQueryConfig as getEsQueryConfigTyped,
   getSafeSortIds as getSafeSortIdsTyped,

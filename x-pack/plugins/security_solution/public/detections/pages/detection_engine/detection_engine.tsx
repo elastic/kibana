@@ -112,7 +112,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const [
     {
       loading: userInfoLoading,
-      isSignalIndexExists,
       isAuthenticated: isUserAuthenticated,
       hasEncryptionKey,
       signalIndexName,
@@ -256,12 +255,12 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     );
   }
 
-  if (!loading && (isSignalIndexExists === false || needsListsConfiguration)) {
+  if (!loading && (indicesExist === false || needsListsConfiguration)) {
     return (
       <SecuritySolutionPageWrapper>
         <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
         <DetectionEngineNoIndex
-          needsSignalsIndex={isSignalIndexExists === false}
+          needsSignalsIndex={indicesExist === false}
           needsListsIndex={needsListsConfiguration}
         />
       </SecuritySolutionPageWrapper>
