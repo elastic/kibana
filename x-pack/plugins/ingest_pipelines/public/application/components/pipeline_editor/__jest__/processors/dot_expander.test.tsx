@@ -84,8 +84,6 @@ describe('Processor: Dot Expander', () => {
     const {
       actions: { saveNewProcessor },
       form,
-      find,
-      component,
     } = testBed;
 
     // Add "field" value (required)
@@ -104,8 +102,6 @@ describe('Processor: Dot Expander', () => {
     const {
       actions: { saveNewProcessor },
       form,
-      find,
-      component,
     } = testBed;
 
     // Add "field" value (required)
