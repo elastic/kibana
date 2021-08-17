@@ -57,7 +57,6 @@ import {
   MapCenter,
   MapCenterAndZoom,
   MapExtent,
-  DataFilters,
   Timeslice,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
