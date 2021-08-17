@@ -7,6 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 
+import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { Ecs } from '../../../../common/ecs';
 import type {
   BrowserField,
@@ -19,6 +20,8 @@ import type {
   SortDirection,
   TimelineEventsType,
 } from '../../../../common/types/timeline';
+
+import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
@@ -144,6 +147,7 @@ export const allowSorting = ({
     'signal.parent.index',
     'signal.parent.rule',
     'signal.parent.type',
+    'signal.reason',
     'signal.rule.created_by',
     'signal.rule.description',
     'signal.rule.enabled',
@@ -184,4 +188,24 @@ export const allowSorting = ({
   ].includes(fieldName);
 
   return isAllowlistedNonBrowserField || isAggregatable;
+};
+export const addBuildingBlockStyle = (
+  ecs: Ecs,
+  theme: EuiTheme,
+  setCellProps: EuiDataGridCellValueElementProps['setCellProps']
+) => {
+  if (isEventBuildingBlockType(ecs)) {
+    setCellProps({
+      style: {
+        backgroundColor: `${theme.eui.euiColorHighlight}`,
+      },
+    });
+  } else {
+    // reset cell style
+    setCellProps({
+      style: {
+        backgroundColor: 'inherit',
+      },
+    });
+  }
 };

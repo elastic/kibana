@@ -24,24 +24,26 @@ import {
   FleetAgentNotFoundError,
   FleetAgentPolicyNotFoundError,
 } from './errors';
-import { getESQueryHostMetadataByID } from '../../routes/metadata/query_builders';
-import { queryResponseToHostResult } from '../../routes/metadata/support/query_strategies';
-import { DEFAULT_ENDPOINT_HOST_STATUS, fleetAgentStatusToEndpointHostStatus } from '../../utils';
+import {
+  getESQueryHostMetadataByFleetAgentIds,
+  getESQueryHostMetadataByID,
+} from '../../routes/metadata/query_builders';
+import {
+  queryResponseToHostListResult,
+  queryResponseToHostResult,
+} from '../../routes/metadata/support/query_strategies';
+import {
+  catchAndWrapError,
+  DEFAULT_ENDPOINT_HOST_STATUS,
+  fleetAgentStatusToEndpointHostStatus,
+  wrapErrorIfNeeded,
+} from '../../utils';
 import { EndpointError } from '../../errors';
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];
 };
-
-// Will wrap the given Error with `EndpointError`, which will
-// help getting a good picture of where in our code the error originated from.
-const wrapErrorIfNeeded = (error: Error): EndpointError =>
-  error instanceof EndpointError ? error : new EndpointError(error.message, error);
-
-// used as the callback to `Promise#catch()` to ensure errors
-// (especially those from kibana/elasticsearch clients) are wrapped
-const catchAndWrapError = <E extends Error>(error: E) => Promise.reject(wrapErrorIfNeeded(error));
 
 export class EndpointMetadataService {
   /**
@@ -66,7 +68,7 @@ export class EndpointMetadataService {
    *
    * @private
    */
-  public get DANGEROUS_INTERNAL_SO_CLIENT() {
+  private get DANGEROUS_INTERNAL_SO_CLIENT() {
     // The INTERNAL SO client must be created during the first time its used. This is because creating it during
     // instance initialization (in `constructor(){}`) causes the SO Client to be invalid (perhaps because this
     // instantiation is happening during the plugin's the start phase)
@@ -97,6 +99,26 @@ export class EndpointMetadataService {
     }
 
     throw new EndpointHostNotFoundError(`Endpoint with id ${endpointId} not found`);
+  }
+
+  /**
+   * Find a  list of Endpoint Host Metadata document associated with a given list of Fleet Agent Ids
+   * @param esClient
+   * @param fleetAgentIds
+   */
+  async findHostMetadataForFleetAgents(
+    esClient: ElasticsearchClient,
+    fleetAgentIds: string[]
+  ): Promise<HostMetadata[]> {
+    const query = getESQueryHostMetadataByFleetAgentIds(fleetAgentIds);
+
+    query.size = fleetAgentIds.length;
+
+    const searchResult = await esClient
+      .search<HostMetadata>(query, { ignore: [404] })
+      .catch(catchAndWrapError);
+
+    return queryResponseToHostListResult(searchResult.body).resultList;
   }
 
   /**

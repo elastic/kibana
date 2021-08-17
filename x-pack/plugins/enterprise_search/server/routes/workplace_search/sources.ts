@@ -57,6 +57,31 @@ const displaySettingsSchema = schema.object({
   detailFields: schema.oneOf([schema.arrayOf(displayFieldSchema), displayFieldSchema]),
 });
 
+const sourceSettingsSchema = schema.object({
+  content_source: schema.object({
+    name: schema.maybe(schema.string()),
+    indexing: schema.maybe(
+      schema.object({
+        enabled: schema.maybe(schema.boolean()),
+        features: schema.maybe(
+          schema.object({
+            thumbnails: schema.maybe(
+              schema.object({
+                enabled: schema.boolean(),
+              })
+            ),
+            content_extraction: schema.maybe(
+              schema.object({
+                enabled: schema.boolean(),
+              })
+            ),
+          })
+        ),
+      })
+    ),
+  }),
+});
+
 // Account routes
 export function registerAccountSourcesRoute({
   router,
@@ -217,11 +242,7 @@ export function registerAccountSourceSettingsRoute({
     {
       path: '/api/workplace_search/account/sources/{id}/settings',
       validate: {
-        body: schema.object({
-          content_source: schema.object({
-            name: schema.string(),
-          }),
-        }),
+        body: sourceSettingsSchema,
         params: schema.object({
           id: schema.string(),
         }),
@@ -565,11 +586,7 @@ export function registerOrgSourceSettingsRoute({
     {
       path: '/api/workplace_search/org/sources/{id}/settings',
       validate: {
-        body: schema.object({
-          content_source: schema.object({
-            name: schema.string(),
-          }),
-        }),
+        body: sourceSettingsSchema,
         params: schema.object({
           id: schema.string(),
         }),

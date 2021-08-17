@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { once } from 'lodash';
+
 import {
   PluginInitializerContext,
   CoreStart,
@@ -18,7 +18,7 @@ import { initServerWithKibana } from './kibana.index';
 import { KibanaTelemetryAdapter, UptimeCorePlugins } from './lib/adapters';
 import { umDynamicSettings } from './lib/saved_objects';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
-import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
+import { Dataset } from '../../rule_registry/server';
 
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
@@ -35,50 +35,22 @@ export class Plugin implements PluginType {
     this.logger = this.initContext.logger.get();
     const { ruleDataService } = plugins.ruleRegistry;
 
-    const ready = once(async () => {
-      const componentTemplateName = ruleDataService.getFullAssetName('synthetics-mappings');
-      const alertsIndexPattern = ruleDataService.getFullAssetName('observability.synthetics*');
-
-      if (!ruleDataService.isWriteEnabled()) {
-        return;
-      }
-
-      await ruleDataService.createOrUpdateComponentTemplate({
-        name: componentTemplateName,
-        body: {
-          template: {
-            settings: {
-              number_of_shards: 1,
-            },
-            mappings: mappingFromFieldMap(uptimeRuleFieldMap, 'strict'),
-          },
+    const ruleDataClient = ruleDataService.initializeIndex({
+      feature: 'uptime',
+      registrationContext: 'observability.uptime',
+      dataset: Dataset.alerts,
+      componentTemplateRefs: [],
+      componentTemplates: [
+        {
+          name: 'mappings',
+          version: 0,
+          mappings: mappingFromFieldMap(uptimeRuleFieldMap, 'strict'),
         },
-      });
-
-      await ruleDataService.createOrUpdateIndexTemplate({
-        name: ruleDataService.getFullAssetName('synthetics-index-template'),
-        body: {
-          index_patterns: [alertsIndexPattern],
-          composed_of: [
-            ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
-            componentTemplateName,
-          ],
-        },
-      });
-
-      await ruleDataService.updateIndexMappingsMatchingPattern(alertsIndexPattern);
+      ],
+      indexTemplate: {
+        version: 0,
+      },
     });
-
-    // initialize eagerly
-    const initializeRuleDataTemplatesPromise = ready().catch((err) => {
-      this.logger!.error(err);
-    });
-
-    const ruleDataClient = ruleDataService.getRuleDataClient(
-      'synthetics',
-      ruleDataService.getFullAssetName('observability.synthetics'),
-      () => initializeRuleDataTemplatesPromise
-    );
 
     initServerWithKibana(
       { router: core.http.createRouter() },

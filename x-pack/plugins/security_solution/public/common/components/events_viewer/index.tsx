@@ -23,13 +23,15 @@ import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
+import { EntityType } from '../../../../../timelines/common';
+import { TGridCellAction } from '../../../../../timelines/common/types';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { useKibana } from '../../lib/kibana';
 import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { EventsViewer } from './events_viewer';
 import * as i18n from './translations';
-
+import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 const leadingControlColumns: ControlColumnProps[] = [
   {
@@ -47,8 +49,10 @@ const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
 `;
 
 export interface OwnProps {
+  defaultCellActions?: TGridCellAction[];
   defaultModel: SubsetTimelineModel;
   end: string;
+  entityType: EntityType;
   id: TimelineId;
   scopeId: SourcererScopeName;
   start: string;
@@ -60,6 +64,7 @@ export interface OwnProps {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
+  additionalFilters?: React.ReactNode;
 }
 
 type Props = OwnProps & PropsFromRedux;
@@ -73,9 +78,11 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   createTimeline,
   columns,
   dataProviders,
+  defaultCellActions,
   deletedEventIds,
   deleteEventQuery,
   end,
+  entityType,
   excludedRowRendererIds,
   filters,
   headerFilterGroup,
@@ -95,6 +102,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   showCheckboxes,
   sort,
   utilityBar,
+  additionalFilters,
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId,
 }) => {
@@ -129,7 +137,13 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
-
+  const graphOverlay = useMemo(
+    () =>
+      graphEventId != null && graphEventId.length > 0 ? (
+        <GraphOverlay isEventViewer={true} timelineId={id} />
+      ) : null,
+    [graphEventId, id]
+  );
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
@@ -140,11 +154,14 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               browserFields,
               columns,
               dataProviders: dataProviders!,
+              defaultCellActions,
               deletedEventIds,
               docValueFields,
               end,
+              entityType,
               filters: globalFilters,
               globalFullScreen,
+              graphOverlay,
               headerFilterGroup,
               id,
               indexNames: selectedPatterns,
@@ -161,7 +178,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               setGlobalFullScreen,
               start,
               sort,
-              utilityBar,
+              additionalFilters,
               graphEventId,
               filterStatus: currentFilter,
               leadingControlColumns,
@@ -269,6 +286,7 @@ export const StatefulEventsViewer = connector(
       prevProps.scopeId === nextProps.scopeId &&
       deepEqual(prevProps.columns, nextProps.columns) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+      prevProps.defaultCellActions === nextProps.defaultCellActions &&
       deepEqual(prevProps.excludedRowRendererIds, nextProps.excludedRowRendererIds) &&
       prevProps.deletedEventIds === nextProps.deletedEventIds &&
       prevProps.end === nextProps.end &&
@@ -286,6 +304,7 @@ export const StatefulEventsViewer = connector(
       prevProps.showCheckboxes === nextProps.showCheckboxes &&
       prevProps.start === nextProps.start &&
       prevProps.utilityBar === nextProps.utilityBar &&
+      prevProps.additionalFilters === nextProps.additionalFilters &&
       prevProps.graphEventId === nextProps.graphEventId
   )
 );

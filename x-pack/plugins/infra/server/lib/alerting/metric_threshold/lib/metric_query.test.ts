@@ -64,4 +64,30 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       );
     });
   });
+
+  describe('when passed a timeframe of 1 hour', () => {
+    const testTimeframe = {
+      start: moment().subtract(1, 'hour').valueOf(),
+      end: moment().valueOf(),
+    };
+    const searchBodyWithoutGroupBy = getElasticsearchMetricQuery(
+      expressionParams,
+      timefield,
+      testTimeframe
+    );
+    const searchBodyWithGroupBy = getElasticsearchMetricQuery(
+      expressionParams,
+      timefield,
+      testTimeframe,
+      groupBy
+    );
+    test("generates 1 hour's worth of buckets", () => {
+      // @ts-ignore
+      expect(searchBodyWithoutGroupBy.aggs.aggregatedIntervals.date_range.ranges.length).toBe(60);
+      expect(
+        // @ts-ignore
+        searchBodyWithGroupBy.aggs.groupings.aggs.aggregatedIntervals.date_range.ranges.length
+      ).toBe(60);
+    });
+  });
 });

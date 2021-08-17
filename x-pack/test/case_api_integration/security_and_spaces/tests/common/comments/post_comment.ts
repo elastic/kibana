@@ -369,7 +369,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const signals = await getSignalsByIds(supertest, [id]);
 
         const alert = signals.hits.hits[0];
-        expect(alert._source.signal.status).eql('open');
+        expect(alert._source?.signal.status).eql('open');
 
         await createComment({
           supertest,
@@ -424,7 +424,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const signals = await getSignalsByIds(supertest, [id]);
 
         const alert = signals.hits.hits[0];
-        expect(alert._source.signal.status).eql('open');
+        expect(alert._source?.signal.status).eql('open');
 
         await createComment({
           supertest,

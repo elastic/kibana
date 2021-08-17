@@ -21,6 +21,7 @@ export interface ITableColumn<T> {
   align?: string;
   width?: string;
   sortable?: boolean;
+  truncateText?: boolean;
   render?: (value: any, item: T) => unknown;
 }
 

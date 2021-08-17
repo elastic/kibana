@@ -6,14 +6,19 @@ Array [
     "default": true,
     "id": "test",
     "sort": "0test name",
-    "tags": undefined,
+    "tags": Array [
+      Object {
+        "key": "default",
+        "name": "Default",
+      },
+    ],
     "title": "test name",
   },
   Object {
     "default": false,
     "id": "test1",
     "sort": "1test name 1",
-    "tags": undefined,
+    "tags": Array [],
     "title": "test name 1",
   },
 ]

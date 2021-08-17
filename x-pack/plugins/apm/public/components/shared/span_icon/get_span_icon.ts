@@ -40,6 +40,7 @@ export const spanTypeIcons: {
   aws: {
     servicename: awsIcon,
   },
+  cache: { redis: redisIcon },
   db: {
     cassandra: cassandraIcon,
     cosmosdb: azureIcon,
