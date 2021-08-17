@@ -20,7 +20,7 @@ import deepEqual from 'fast-deep-equal';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
-import { EntityType, useTimelineEventsDetails } from '../../../containers/details';
+import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
@@ -34,6 +34,7 @@ import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoin
 import { TimelineNonEcsData } from '../../../../../common';
 import { Ecs } from '../../../../../common/ecs';
 import { EventDetailsFooter } from './footer';
+import { EntityType } from '../../../../../../timelines/common';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {

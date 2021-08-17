@@ -23,11 +23,8 @@ import {
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
+import { EntityType } from '../../../../../timelines/common';
 
-export enum EntityType {
-  ALERTS = 'alerts',
-  EVENTS = 'events',
-}
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
 }

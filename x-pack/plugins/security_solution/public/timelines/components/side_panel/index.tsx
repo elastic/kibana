@@ -18,7 +18,7 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { EventDetailsPanel } from './event_details';
 import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';
-import { EntityType } from '../../containers/details';
+import { EntityType } from '../../../../../timelines/common';
 
 interface DetailsPanelProps {
   alertConsumers?: AlertConsumers[];
