@@ -95,6 +95,7 @@ describe('getSource', () => {
         indexPatternId: 'myIndexPattern',
         applyGlobalQuery: false,
         applyGlobalTime: false,
+        respondToForceRefresh: true,
       } as AbstractESSourceDescriptor);
     });
   });
