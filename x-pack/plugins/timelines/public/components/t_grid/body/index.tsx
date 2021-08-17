@@ -507,15 +507,19 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       [browserFields, columnHeaders, data, defaultCellActions]
     );
 
-    const renderTGridCellValue: (
-      x: EuiDataGridCellValueElementProps
-    ) => React.ReactNode = useCallback(
-      ({ columnId, rowIndex, setCellProps }) => {
+    const renderTGridCellValue = useMemo(() => {
+      const Cell: React.FC<EuiDataGridCellValueElementProps> = ({
+        columnId,
+        rowIndex,
+        setCellProps,
+      }): React.ReactElement | null => {
         const rowData = rowIndex < data.length ? data[rowIndex].data : null;
         const header = columnHeaders.find((h) => h.id === columnId);
         const eventId = rowIndex < data.length ? data[rowIndex]._id : null;
 
-        addBuildingBlockStyle(data[rowIndex].ecs, theme, setCellProps);
+        useEffect(() => {
+          addBuildingBlockStyle(data[rowIndex].ecs, theme, setCellProps);
+        }, [rowIndex, setCellProps]);
 
         if (rowData == null || header == null || eventId == null) {
           return null;
@@ -537,10 +541,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           ecsData: data[rowIndex].ecs,
           browserFields,
           rowRenderers,
-        });
-      },
-      [columnHeaders, data, id, renderCellValue, tabType, theme, browserFields, rowRenderers]
-    );
+        }) as React.ReactElement;
+      };
+      return Cell;
+    }, [columnHeaders, data, id, renderCellValue, tabType, theme, browserFields, rowRenderers]);
 
     return (
       <EuiDataGrid

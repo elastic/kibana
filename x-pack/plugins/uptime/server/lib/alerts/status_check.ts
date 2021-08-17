@@ -9,7 +9,7 @@ import datemath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { JsonObject } from '@kbn/utility-types';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { UptimeAlertTypeFactory } from './types';
 import {
   StatusCheckFilters,
@@ -157,7 +157,7 @@ export const getMonitorAlertDocument = (monitorSummary: Record<string, string | 
   'observer.geo.name': monitorSummary.observerLocation,
   'error.message': monitorSummary.latestErrorMessage,
   'agent.name': monitorSummary.observerHostname,
-  reason: monitorSummary.reason,
+  [ALERT_REASON]: monitorSummary.reason,
 });
 
 export const getStatusMessage = (
