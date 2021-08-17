@@ -78,7 +78,7 @@ export function registerApmAlerts(
     },
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
     alertParamsExpression: lazy(() => import('./error_count_alert_trigger')),
     validate: () => ({
@@ -126,7 +126,7 @@ export function registerApmAlerts(
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
     alertParamsExpression: lazy(
       () => import('./transaction_duration_alert_trigger')
@@ -177,7 +177,7 @@ export function registerApmAlerts(
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
     alertParamsExpression: lazy(
       () => import('./transaction_error_rate_alert_trigger')
@@ -226,7 +226,7 @@ export function registerApmAlerts(
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
     alertParamsExpression: lazy(
       () => import('./transaction_duration_anomaly_alert_trigger')
