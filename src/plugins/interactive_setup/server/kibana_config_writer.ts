@@ -22,7 +22,7 @@ export interface WriteConfigParameters {
   password: string;
 }
 
-export class KibanaConfig {
+export class KibanaConfigWriter {
   constructor(private readonly configPath: string, private readonly logger: Logger) {}
 
   /**
@@ -70,14 +70,15 @@ export class KibanaConfig {
     try {
       await fs.appendFile(
         this.configPath,
-        `\n\n# This section was automatically generated during setup.\n${yaml.dump({
-          elasticsearch: {
-            hosts: [params.host],
-            username: params.username,
-            password: params.password,
-            ssl: { certificateAuthorities: [caPath] },
+        `\n\n# This section was automatically generated during setup.\n${yaml.dump(
+          {
+            'elasticsearch.hosts': [params.host],
+            'elasticsearch.username': params.username,
+            'elasticsearch.password': params.password,
+            'elasticsearch.ssl.certificateAuthorities': [caPath],
           },
-        })}\n`
+          { flowLevel: 1 }
+        )}\n`
       );
       this.logger.debug(`Successfully wrote Elasticsearch configuration to ${this.configPath}.`);
     } catch (err) {

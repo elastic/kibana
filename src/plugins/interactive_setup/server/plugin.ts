@@ -14,7 +14,7 @@ import type { CorePreboot, Logger, PluginInitializerContext, PrebootPlugin } fro
 import { ElasticsearchConnectionStatus } from '../common';
 import type { ConfigSchema, ConfigType } from './config';
 import { ElasticsearchService } from './elasticsearch_service';
-import { KibanaConfig } from './kibana_config';
+import { KibanaConfigWriter } from './kibana_config_writer';
 import { defineRoutes } from './routes';
 
 export class UserSetupPlugin implements PrebootPlugin {
@@ -59,17 +59,6 @@ export class UserSetupPlugin implements PrebootPlugin {
       return;
     }
 
-    // If there is no config file available we cannot activate interactive setup mode.
-    const configPath = this.initializerContext.env.mode.dev
-      ? this.initializerContext.env.configs.find((config) => config.endsWith('.dev.yml'))
-      : this.initializerContext.env.configs[0];
-    if (!configPath) {
-      this.#logger.debug(
-        'Interactive setup mode will not be activated since Kibana configuration file is not available.'
-      );
-      return;
-    }
-
     let completeSetup: (result: { shouldReloadConfig: boolean }) => void;
     core.preboot.holdSetupUntilResolved(
       'Validating Elasticsearch connection configuration…',
@@ -102,13 +91,19 @@ export class UserSetupPlugin implements PrebootPlugin {
       }
     );
 
+    // If possible, try to use `*.dev.yml` config when Kibana is run in development mode.
+    const configPath = this.initializerContext.env.mode.dev
+      ? this.initializerContext.env.configs.find((config) => config.endsWith('.dev.yml')) ??
+        this.initializerContext.env.configs[0]
+      : this.initializerContext.env.configs[0];
+
     core.http.registerRoutes('', (router) => {
       defineRoutes({
         router,
         basePath: core.http.basePath,
         logger: this.#logger.get('routes'),
         preboot: { ...core.preboot, completeSetup },
-        kibanaConfig: new KibanaConfig(configPath, this.#logger.get('kibana-config')),
+        kibanaConfigWriter: new KibanaConfigWriter(configPath, this.#logger.get('kibana-config')),
         elasticsearch,
         getConfig: this.#getConfig.bind(this),
       });

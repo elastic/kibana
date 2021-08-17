@@ -10,7 +10,7 @@ import type { IBasePath, IRouter, Logger, PrebootServicePreboot } from 'src/core
 
 import type { ConfigType } from '../config';
 import type { ElasticsearchServiceSetup } from '../elasticsearch_service';
-import type { KibanaConfig } from '../kibana_config';
+import type { KibanaConfigWriter } from '../kibana_config_writer';
 import { defineEnrollRoutes } from './enroll';
 
 /**
@@ -23,7 +23,7 @@ export interface RouteDefinitionParams {
   readonly preboot: PrebootServicePreboot & {
     completeSetup: (result: { shouldReloadConfig: boolean }) => void;
   };
-  readonly kibanaConfig: KibanaConfig;
+  readonly kibanaConfigWriter: KibanaConfigWriter;
   readonly elasticsearch: ElasticsearchServiceSetup;
   readonly getConfig: () => ConfigType;
 }

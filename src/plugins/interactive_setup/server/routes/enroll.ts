@@ -20,7 +20,7 @@ import type { RouteDefinitionParams } from './';
 export function defineEnrollRoutes({
   router,
   logger,
-  kibanaConfig,
+  kibanaConfigWriter,
   elasticsearch,
   preboot,
 }: RouteDefinitionParams) {
@@ -33,7 +33,7 @@ export function defineEnrollRoutes({
             minSize: 1,
           }),
           apiKey: schema.string(),
-          rootCAFingerprint: schema.maybe(schema.string()),
+          caFingerprint: schema.string(),
         }),
       },
       options: { authRequired: false },
@@ -61,7 +61,7 @@ export function defineEnrollRoutes({
       // Kibana configuration file. We'll still have to handle possible filesystem access errors
       // when we actually write to the disk, but this preliminary check helps us to avoid unnecessary
       // enrollment call and communicate that to the user early.
-      const isConfigWritable = await kibanaConfig.isConfigWritable();
+      const isConfigWritable = await kibanaConfigWriter.isConfigWritable();
       if (!isConfigWritable) {
         logger.error('Kibana process does not have enough permissions to write to config file');
         return response.customError({
@@ -78,7 +78,7 @@ export function defineEnrollRoutes({
         enrollResult = await elasticsearch.enroll({
           apiKey: request.body.apiKey,
           hosts: request.body.hosts,
-          caFingerprint: request.body.rootCAFingerprint,
+          caFingerprint: request.body.caFingerprint,
         });
       } catch {
         // For security reasons, we shouldn't leak to the user whether Elasticsearch node couldn't process enrollment
@@ -90,18 +90,13 @@ export function defineEnrollRoutes({
       }
 
       try {
-        await kibanaConfig.writeConfig({
-          host: enrollResult.host,
-          ca: enrollResult.ca,
-          username: enrollResult.username,
-          password: enrollResult.password,
-        });
+        await kibanaConfigWriter.writeConfig(enrollResult);
       } catch {
         // For security reasons, we shouldn't leak any filesystem related errors.
         return response.customError({
           statusCode: 500,
           body: {
-            message: 'Failed save configuration.',
+            message: 'Failed to save configuration.',
             attributes: { type: 'kibana_config_failure' },
           },
         });
