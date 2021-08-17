@@ -11,6 +11,7 @@ import React from 'react';
 import type { StartServicesAccessor } from 'src/core/public';
 import type { SpacesApiUiComponent } from 'src/plugins/spaces_oss/public';
 
+import { getCopyToSpaceFlyoutComponent } from '../copy_saved_objects_to_space';
 import type { PluginsStart } from '../plugin';
 import {
   getLegacyUrlConflict,
@@ -51,6 +52,7 @@ export const getComponents = ({
       getSpacesContextProviderWrapper({ spacesManager, getStartServices })
     ),
     getShareToSpaceFlyout: wrapLazy(getShareToSpaceFlyoutComponent, { showLoadingSpinner: false }),
+    getCopyToSpaceFlyout: wrapLazy(getCopyToSpaceFlyoutComponent, { showLoadingSpinner: false }),
     getSpaceList: wrapLazy(getSpaceListComponent),
     getLegacyUrlConflict: wrapLazy(() => getLegacyUrlConflict({ getStartServices })),
     getSpaceAvatar: wrapLazy(getSpaceAvatarComponent),
