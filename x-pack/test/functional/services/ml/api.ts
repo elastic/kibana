@@ -462,7 +462,6 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async getAnomalyDetectionJob(jobId: string) {
-      this.validateJobId(jobId);
       return await esSupertest.get(`/_ml/anomaly_detectors/${jobId}`).expect(200);
     },
 
@@ -687,7 +686,6 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async getDataFrameAnalyticsJob(analyticsId: string, statusCode = 200) {
       log.debug(`Fetching data frame analytics job '${analyticsId}'...`);
-      this.validateJobId(analyticsId);
       const response = await esSupertest
         .get(`/_ml/data_frame/analytics/${analyticsId}`)
         .expect(statusCode);
