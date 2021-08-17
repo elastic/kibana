@@ -15,6 +15,14 @@ export type { GetAllSpacesPurpose, GetSpaceResult } from '../common';
 
 // re-export types from oss definition
 export type { Space } from 'src/plugins/spaces_oss/common';
+export type {
+  SpacesApi,
+  SpacesApiUi,
+  SpacesContextProps,
+  ShareToSpaceFlyoutProps,
+  CopyToSpaceFlyoutProps,
+  SpaceListProps,
+} from 'src/plugins/spaces_oss/public';
 
 export const plugin = () => {
   return new SpacesPlugin();

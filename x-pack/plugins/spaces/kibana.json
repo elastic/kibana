@@ -13,8 +13,7 @@
     "advancedSettings",
     "home",
     "management",
-    "usageCollection",
-    "savedObjectsManagement"
+    "usageCollection"
   ],
   "server": true,
   "ui": true,
