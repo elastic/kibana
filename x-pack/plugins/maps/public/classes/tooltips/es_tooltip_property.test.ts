@@ -74,7 +74,7 @@ describe('getESFilters', () => {
       new TooltipProperty(
         notFoundFeaturePropertyField.getName(),
         await notFoundFeaturePropertyField.getLabel(),
-        'my value',
+        'my value'
       ),
       indexPattern,
       notFoundFeaturePropertyField,
@@ -88,7 +88,7 @@ describe('getESFilters', () => {
       new TooltipProperty(
         featurePropertyField.getName(),
         await featurePropertyField.getLabel(),
-        'my value',
+        'my value'
       ),
       indexPattern,
       featurePropertyField,
@@ -137,7 +137,7 @@ describe('getESFilters', () => {
       new TooltipProperty(
         featurePropertyField.getName(),
         await featurePropertyField.getLabel(),
-        'my value',
+        'my value'
       ),
       indexPattern,
       featurePropertyField,
@@ -153,7 +153,7 @@ describe('isFilterable', () => {
       new TooltipProperty(
         featurePropertyField.getName(),
         await featurePropertyField.getLabel(),
-        'my value',
+        'my value'
       ),
       indexPattern,
       featurePropertyField,
@@ -167,7 +167,7 @@ describe('isFilterable', () => {
       new TooltipProperty(
         nonFilterableFeaturePropertyField.getName(),
         await nonFilterableFeaturePropertyField.getLabel(),
-        'my value',
+        'my value'
       ),
       indexPattern,
       nonFilterableFeaturePropertyField,
@@ -181,7 +181,7 @@ describe('isFilterable', () => {
       new TooltipProperty(
         featurePropertyField.getName(),
         await featurePropertyField.getLabel(),
-        'my value',
+        'my value'
       ),
       indexPattern,
       featurePropertyField,

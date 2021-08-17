@@ -19,7 +19,7 @@ export class ESAggTooltipProperty extends ESTooltipProperty {
     indexPattern: IndexPattern,
     field: IField,
     aggType: AGG_TYPE,
-    applyGlobalQuery: boolean,
+    applyGlobalQuery: boolean
   ) {
     super(tooltipProperty, indexPattern, field, applyGlobalQuery);
     this._aggType = aggType;

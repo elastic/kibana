@@ -21,7 +21,12 @@ export class ESTooltipProperty implements ITooltipProperty {
   private readonly _field: IField;
   private readonly _applyGlobalQuery: boolean;
 
-  constructor(tooltipProperty: ITooltipProperty, indexPattern: IndexPattern, field: IField, applyGlobalQuery: boolean) {
+  constructor(
+    tooltipProperty: ITooltipProperty,
+    indexPattern: IndexPattern,
+    field: IField,
+    applyGlobalQuery: boolean
+  ) {
     this._tooltipProperty = tooltipProperty;
     this._indexPattern = indexPattern;
     this._field = field;
