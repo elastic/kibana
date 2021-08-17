@@ -92,6 +92,7 @@ describe('VegaVisualizations', () => {
           JSON.stringify(vegaliteGraph),
           new SearchAPI({
             search: dataPluginStart.search,
+            indexPatterns: dataPluginStart.indexPatterns,
             uiSettings: coreStart.uiSettings,
             injectedMetadata: coreStart.injectedMetadata,
           }),
@@ -123,6 +124,7 @@ describe('VegaVisualizations', () => {
           JSON.stringify(vegaGraph),
           new SearchAPI({
             search: dataPluginStart.search,
+            indexPatterns: dataPluginStart.indexPatterns,
             uiSettings: coreStart.uiSettings,
             injectedMetadata: coreStart.injectedMetadata,
           }),

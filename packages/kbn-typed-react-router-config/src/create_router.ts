@@ -14,9 +14,15 @@ import {
 } from 'react-router-config';
 import qs from 'query-string';
 import { findLastIndex, merge, compact } from 'lodash';
-import { deepExactRt } from '@kbn/io-ts-utils/target/deep_exact_rt';
-import { mergeRt } from '@kbn/io-ts-utils/target/merge_rt';
+import type { deepExactRt as deepExactRtTyped, mergeRt as mergeRtTyped } from '@kbn/io-ts-utils';
+// @ts-expect-error
+import { deepExactRt as deepExactRtNonTyped } from '@kbn/io-ts-utils/target_node/deep_exact_rt';
+// @ts-expect-error
+import { mergeRt as mergeRtNonTyped } from '@kbn/io-ts-utils/target_node/merge_rt';
 import { Route, Router } from './types';
+
+const deepExactRt: typeof deepExactRtTyped = deepExactRtNonTyped;
+const mergeRt: typeof mergeRtTyped = mergeRtNonTyped;
 
 export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<TRoutes> {
   const routesByReactRouterConfig = new Map<ReactRouterConfig, Route>();
@@ -76,10 +82,12 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
       const route = routesByReactRouterConfig.get(matchedRoute.route);
 
       if (route?.params) {
-        const decoded = deepExactRt(route.params).decode({
-          path: matchedRoute.match.params,
-          query: qs.parse(location.search),
-        });
+        const decoded = deepExactRt(route.params).decode(
+          merge({}, route.defaults ?? {}, {
+            path: matchedRoute.match.params,
+            query: qs.parse(location.search, { decode: true }),
+          })
+        );
 
         if (isLeft(decoded)) {
           throw new Error(PathReporter.report(decoded).join('\n'));
@@ -110,12 +118,12 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
   const link = (path: string, ...args: any[]) => {
     const params: { path?: Record<string, any>; query?: Record<string, any> } | undefined = args[0];
 
-    const paramsWithDefaults = merge({ path: {}, query: {} }, params);
+    const paramsWithBuiltInDefaults = merge({ path: {}, query: {} }, params);
 
     path = path
       .split('/')
       .map((part) => {
-        return part.startsWith(':') ? paramsWithDefaults.path[part.split(':')[1]] : part;
+        return part.startsWith(':') ? paramsWithBuiltInDefaults.path[part.split(':')[1]] : part;
       })
       .join('/');
 
@@ -125,24 +133,37 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
       throw new Error(`No matching route found for ${path}`);
     }
 
+    const matchedRoutes = matches.map((match) => {
+      return routesByReactRouterConfig.get(match.route)!;
+    });
+
     const validationType = mergeRt(
       ...(compact(
-        matches.map((match) => {
-          return routesByReactRouterConfig.get(match.route)?.params;
+        matchedRoutes.map((match) => {
+          return match.params;
         })
       ) as [any, any])
     );
 
-    const validation = validationType.decode(paramsWithDefaults);
+    const paramsWithRouteDefaults = merge(
+      {},
+      ...matchedRoutes.map((route) => route.defaults ?? {}),
+      paramsWithBuiltInDefaults
+    );
+
+    const validation = validationType.decode(paramsWithRouteDefaults);
 
     if (isLeft(validation)) {
       throw new Error(PathReporter.report(validation).join('\n'));
     }
 
-    return qs.stringifyUrl({
-      url: path,
-      query: paramsWithDefaults.query,
-    });
+    return qs.stringifyUrl(
+      {
+        url: path,
+        query: paramsWithRouteDefaults.query,
+      },
+      { encode: true }
+    );
   };
 
   return {
@@ -152,7 +173,10 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
     getParams: (...args: any[]) => {
       const matches = matchRoutes(...args);
       return matches.length
-        ? merge({ path: {}, query: {} }, ...matches.map((match) => match.match.params))
+        ? merge(
+            { path: {}, query: {} },
+            ...matches.map((match) => merge({}, match.route?.defaults ?? {}, match.match.params))
+          )
         : undefined;
     },
     matchRoutes: (...args: any[]) => {

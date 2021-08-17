@@ -10,8 +10,8 @@ import type { Capabilities, IUiSettingsClient } from 'kibana/public';
 import { ISearchSource } from '../../../../../../data/common';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 import type { SavedSearch, SortOrder } from '../../../../saved_searches/types';
+import { getSortForSearchSource } from '../components/doc_table';
 import { AppState } from '../services/discover_state';
-import { getSortForSearchSource } from '../../../angular/doc_table';
 
 /**
  * Preparing data to share the current state as link or CSV/Report

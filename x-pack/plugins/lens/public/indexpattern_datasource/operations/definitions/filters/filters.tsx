@@ -6,22 +6,17 @@
  */
 
 import './filters.scss';
-
 import React, { MouseEventHandler, useState } from 'react';
+import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
 import { updateColumnParam } from '../../layer_helpers';
-import { OperationDefinition } from '../index';
-import { BaseIndexPatternColumn } from '../column_types';
+import type { OperationDefinition } from '../index';
+import type { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
-import { IndexPattern } from '../../../types';
-import {
-  AggFunctionsMapping,
-  Query,
-  esKuery,
-  esQuery,
-} from '../../../../../../../../src/plugins/data/public';
+import type { IndexPattern } from '../../../types';
+import type { AggFunctionsMapping, Query } from '../../../../../../../../src/plugins/data/public';
 import { queryFilterToAst } from '../../../../../../../../src/plugins/data/common';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
 import { NewBucketButton, DragDropBuckets, DraggableBucketContainer } from '../shared_components';
@@ -58,18 +53,26 @@ const defaultFilter: Filter = {
   label: '',
 };
 
-export const isQueryValid = (input: Query, indexPattern: IndexPattern) => {
+export const validateQuery = (input: Query, indexPattern: IndexPattern) => {
+  let isValid = true;
+  let error: string | undefined;
+
   try {
     if (input.language === 'kuery') {
-      esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(input.query), indexPattern);
+      toElasticsearchQuery(fromKueryExpression(input.query), indexPattern);
     } else {
-      esQuery.luceneStringToDsl(input.query);
+      luceneStringToDsl(input.query);
     }
-    return true;
   } catch (e) {
-    return false;
+    isValid = false;
+    error = e.message;
   }
+
+  return { isValid, error };
 };
+
+export const isQueryValid = (input: Query, indexPattern: IndexPattern) =>
+  validateQuery(input, indexPattern).isValid;
 
 export interface FiltersIndexPatternColumn extends BaseIndexPatternColumn {
   operationType: typeof OPERATION_NAME;

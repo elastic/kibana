@@ -11,6 +11,7 @@ import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { ElasticsearchClient } from './types';
 import { ICustomClusterClient } from './cluster_client';
+import { PRODUCT_RESPONSE_HEADER } from '../supported_server_response_check';
 
 const createInternalClientMock = (
   res?: MockedTransportRequestPromise<unknown>
@@ -141,9 +142,10 @@ export type MockedTransportRequestPromise<T> = TransportRequestPromise<T> & {
 
 const createSuccessTransportRequestPromise = <T>(
   body: T,
-  { statusCode = 200 }: { statusCode?: number } = {}
+  { statusCode = 200 }: { statusCode?: number } = {},
+  headers: Record<string, string | string[]> = { [PRODUCT_RESPONSE_HEADER]: 'Elasticsearch' }
 ): MockedTransportRequestPromise<ApiResponse<T>> => {
-  const response = createApiResponse({ body, statusCode });
+  const response = createApiResponse({ body, statusCode, headers });
   const promise = Promise.resolve(response);
   (promise as MockedTransportRequestPromise<ApiResponse<T>>).abort = jest.fn();
 
@@ -162,7 +164,7 @@ function createApiResponse<TResponse = Record<string, any>>(
   return {
     body: {} as any,
     statusCode: 200,
-    headers: {},
+    headers: { [PRODUCT_RESPONSE_HEADER]: 'Elasticsearch' },
     warnings: [],
     meta: {} as any,
     ...opts,

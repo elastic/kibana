@@ -26,7 +26,6 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { Correlations } from '../../../app/correlations';
 import { SearchBar } from '../../../shared/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
 import { ApmMainTemplate } from '../apm_main_template';
@@ -41,6 +40,7 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'metrics'
     | 'nodes'
     | 'service-map'
+    | 'logs'
     | 'profiling';
   hidden?: boolean;
 };
@@ -107,10 +107,6 @@ function TemplateWithContext({
             <EuiFlexItem grow={false}>
               <AnalyzeDataButton />
             </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <Correlations />
-            </EuiFlexItem>
           </EuiFlexGroup>
         ),
       }}
@@ -171,6 +167,8 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.dependenciesTabLabel', {
         defaultMessage: 'Dependencies',
       }),
+      hidden:
+        !agentName || isRumAgentName(agentName) || isIosAgentName(agentName),
     },
     {
       key: 'errors',
@@ -217,6 +215,18 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceMapTabLabel', {
         defaultMessage: 'Service Map',
       }),
+    },
+    {
+      key: 'logs',
+      href: router.link('/services/:serviceName/logs', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
+        defaultMessage: 'Logs',
+      }),
+      hidden:
+        !agentName || isRumAgentName(agentName) || isIosAgentName(agentName),
     },
     {
       key: 'profiling',

@@ -30,6 +30,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         start: '2020',
         end: '2021',
         percentileThreshold: 95,
+        kuery: '',
       },
     };
 

@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.common.sleep(100);
 
-      PageObjects.lens.expectFormulaText(`count(kql='Men\\'s Clothing ')`);
+      await PageObjects.lens.expectFormulaText(`count(kql='Men\\'s Clothing ')`);
 
       await PageObjects.lens.typeFormula('count(kql=');
 
@@ -111,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.switchToFormula();
-      PageObjects.lens.expectFormulaText(`unique_count('*\\' "\\'')`);
+      await PageObjects.lens.expectFormulaText(`unique_count('*\\' "\\'')`);
 
       await PageObjects.lens.typeFormula('unique_count(');
       const input = await find.activeElement();

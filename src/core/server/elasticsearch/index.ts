@@ -37,3 +37,9 @@ export type {
   GetResponse,
   DeleteDocumentResponse,
 } from './client';
+export { getRequestDebugMeta, getErrorMessage } from './client';
+export {
+  isSupportedEsServer,
+  isNotFoundFromUnsupportedServer,
+  PRODUCT_RESPONSE_HEADER,
+} from './supported_server_response_check';

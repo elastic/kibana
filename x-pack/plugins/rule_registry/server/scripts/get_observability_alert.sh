@@ -10,7 +10,7 @@
 set -e
 
 USER=${1:-'observer'}
-ID=${2:-'DHEnOXoB8br9Z2X1fq_l'}
+ID=${2:-'Do4JnHoBqkRSppNZ6vre'}
 
 cd ./hunter && sh ./post_detections_role.sh && sh ./post_detections_user.sh
 cd ../observer && sh ./post_detections_role.sh && sh ./post_detections_user.sh

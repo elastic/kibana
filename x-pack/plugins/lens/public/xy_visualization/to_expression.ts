@@ -11,7 +11,8 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 import { State } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import { ValidLayer, XYLayerConfig } from '../../common/expressions';
+import type { ValidLayer, XYLayerConfig } from '../../common/expressions';
+import { layerTypes } from '../../common';
 
 export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: XYLayerConfig) => {
   const originalOrder = datasource
@@ -155,6 +156,8 @@ export const buildExpression = (
                     floatingColumns: state.legend.floatingColumns
                       ? [Math.min(5, state.legend.floatingColumns)]
                       : [],
+                    maxLines: state.legend.maxLines ? [state.legend.maxLines] : [],
+                    shouldTruncate: [state.legend.shouldTruncate ?? true],
                   },
                 },
               ],
@@ -325,6 +328,7 @@ export const buildExpression = (
                         }))
                       : [],
                     seriesType: [layer.seriesType],
+                    layerType: [layer.layerType || layerTypes.DATA],
                     accessors: layer.accessors,
                     columnToLabel: [JSON.stringify(columnToLabel)],
                     ...(layer.palette

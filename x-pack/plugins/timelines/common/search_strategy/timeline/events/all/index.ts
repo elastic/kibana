@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
 
 import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import type { Ecs } from '../../../../ecs';

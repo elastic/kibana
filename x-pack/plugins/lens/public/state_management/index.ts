@@ -14,6 +14,7 @@ import { optimizingMiddleware } from './optimizing_middleware';
 import { LensState, LensStoreDeps } from './types';
 import { initMiddleware } from './init_middleware';
 export * from './types';
+export * from './selectors';
 
 export const reducer = {
   lens: lensSlice.reducer,

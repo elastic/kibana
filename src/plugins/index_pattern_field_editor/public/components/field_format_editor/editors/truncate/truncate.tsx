@@ -48,6 +48,7 @@ export class TruncateFormatEditor extends DefaultFormatEditor<TruncateFormatEdit
           <EuiFieldNumber
             defaultValue={formatParams.fieldLength}
             min={1}
+            data-test-subj={'truncateEditorLength'}
             onChange={(e) => {
               if (e.target.checkValidity()) {
                 this.onChange({
