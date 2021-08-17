@@ -13,8 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
 
   describe('lens drag and drop tests', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/108352
-    describe.skip('basic drag and drop', () => {
+    describe('basic drag and drop', () => {
       it('should construct the basic split xy chart', async () => {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickVisType('lens');
