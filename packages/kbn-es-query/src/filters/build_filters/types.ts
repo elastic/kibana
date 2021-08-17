@@ -8,8 +8,6 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { ExistsFilter } from './exists_filter';
-import { GeoBoundingBoxFilter } from './geo_bounding_box_filter';
-import { GeoPolygonFilter } from './geo_polygon_filter';
 import { PhrasesFilter } from './phrases_filter';
 import { PhraseFilter } from './phrase_filter';
 import { RangeFilter } from './range_filter';
@@ -22,8 +20,6 @@ import { MissingFilter } from './missing_filter';
  **/
 export type FieldFilter =
   | ExistsFilter
-  | GeoBoundingBoxFilter
-  | GeoPolygonFilter
   | PhraseFilter
   | PhrasesFilter
   | RangeFilter
@@ -44,8 +40,6 @@ export enum FILTERS {
   QUERY_STRING = 'query_string',
   RANGE = 'range',
   RANGE_FROM_VALUE = 'range_from_value',
-  GEO_BOUNDING_BOX = 'geo_bounding_box',
-  GEO_POLYGON = 'geo_polygon',
   SPATIAL_FILTER = 'spatial_filter',
 }
 

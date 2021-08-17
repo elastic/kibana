@@ -30,8 +30,6 @@ export {
 export {
   isExistsFilter,
   isMatchAllFilter,
-  isGeoBoundingBoxFilter,
-  isGeoPolygonFilter,
   isMissingFilter,
   isPhraseFilter,
   isPhrasesFilter,
@@ -65,13 +63,12 @@ export {
   ExistsFilter,
   RangeFilter,
   PhraseFilter,
+  QueryRangeFilter,
   PhrasesFilter,
   RangeFilterMeta,
-  GeoPolygonFilter,
   MatchAllFilter,
   CustomFilter,
   MissingFilter,
-  GeoBoundingBoxFilter,
   RangeFilterParams,
 } from './build_filters';
 
