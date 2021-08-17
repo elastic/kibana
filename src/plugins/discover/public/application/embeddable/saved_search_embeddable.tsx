@@ -204,9 +204,11 @@ export class SavedSearchEmbeddable
       this.searchProps!.totalHitCount = resp.hits.total as number;
       this.searchProps!.isLoading = false;
     } catch (error) {
-      this.updateOutput({ loading: false, error });
+      if (!this.isDestroyed()) {
+        this.updateOutput({ loading: false, error });
 
-      this.searchProps!.isLoading = false;
+        this.searchProps!.isLoading = false;
+      }
     }
   };
 

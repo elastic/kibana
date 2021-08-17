@@ -197,6 +197,10 @@ export abstract class Embeddable<
     return;
   }
 
+  public isDestroyed() {
+    return this.destroyed;
+  }
+
   /**
    * communicate to the parent embeddable that this embeddable's initialization is finished.
    * This only applies to embeddables which defer their loading state with deferEmbeddableLoad.
