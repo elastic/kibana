@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="attach-alert-to-case-button"]';
-
 export const BULK_ACTIONS_BTN = '[data-test-subj="bulkActions"] span';
 
 export const CREATE_NEW_RULE_BTN = '[data-test-subj="create-new-rule"]';

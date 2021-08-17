@@ -18,9 +18,10 @@ const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
 interface BackendLinkProps {
   backendName: string;
-  query?: TypeOf<ApmRoutes, '/backends/:backendName/overview'>['query'];
+  query: TypeOf<ApmRoutes, '/backends/:backendName/overview'>['query'];
   subtype?: string;
   type?: string;
+  onClick?: React.ComponentProps<typeof EuiLink>['onClick'];
 }
 
 export function BackendLink({
@@ -28,6 +29,7 @@ export function BackendLink({
   query,
   subtype,
   type,
+  onClick,
 }: BackendLinkProps) {
   const { link } = useApmRouter();
 
@@ -37,6 +39,7 @@ export function BackendLink({
         path: { backendName },
         query,
       })}
+      onClick={onClick}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>

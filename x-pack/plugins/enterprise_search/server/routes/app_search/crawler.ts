@@ -127,6 +127,29 @@ export function registerCrawlerRoutes({
     })
   );
 
+  router.put(
+    {
+      path: '/api/app_search/engines/{name}/crawler/domains/{id}',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+          id: schema.string(),
+        }),
+        body: schema.object({
+          crawl_rules: schema.arrayOf(
+            schema.object({
+              order: schema.number(),
+              id: schema.string(),
+            })
+          ),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/domains/:id',
+    })
+  );
+
   router.post(
     {
       path: '/api/app_search/crawler/validate_url',
@@ -139,6 +162,69 @@ export function registerCrawlerRoutes({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/api/as/v0/crawler/validate_url',
+    })
+  );
+
+  router.post(
+    {
+      path: '/api/app_search/engines/{name}/crawler/process_crawls',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+        body: schema.object({
+          domains: schema.maybe(schema.arrayOf(schema.string())),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/process_crawls',
+    })
+  );
+
+  router.get(
+    {
+      path: '/api/app_search/engines/{name}/crawler/crawl_schedule',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+    })
+  );
+
+  router.put(
+    {
+      path: '/api/app_search/engines/{name}/crawler/crawl_schedule',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+        body: schema.object({
+          unit: schema.string(),
+          frequency: schema.number(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+    })
+  );
+
+  router.delete(
+    {
+      path: '/api/app_search/engines/{name}/crawler/crawl_schedule',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
     })
   );
 }

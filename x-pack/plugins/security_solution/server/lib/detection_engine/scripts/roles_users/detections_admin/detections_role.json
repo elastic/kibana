@@ -17,6 +17,14 @@
           "winlogbeat-*"
         ],
         "privileges": ["manage", "write", "read"]
+      },
+      {
+        "names": [
+          "metrics-endpoint.metadata_current_*",
+          ".fleet-agents*",
+          ".fleet-actions*"
+        ],
+        "privileges": ["read"]
       }
     ]
   },

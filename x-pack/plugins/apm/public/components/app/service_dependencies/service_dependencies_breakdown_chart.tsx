@@ -18,12 +18,13 @@ export function ServiceDependenciesBreakdownChart({
 }: {
   height: number;
 }) {
-  const { start, end } = useTimeRange();
   const { serviceName } = useApmServiceContext();
 
   const {
-    query: { kuery, environment },
+    query: { kuery, environment, rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName/dependencies');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { data, status } = useFetcher(
     (callApmApi) => {

@@ -70,7 +70,7 @@ export const EditPolicy: React.FunctionComponent = () => {
     services: { cloud },
   } = useKibana();
 
-  const [saveAsNew, setSaveAsNew] = useState(false);
+  const [isClonedPolicy, setIsClonedPolicy] = useState(false);
   const originalPolicyName: string = isNewPolicy ? '' : policyName!;
   const isAllowedByLicense = license.canUseSearchableSnapshot();
   const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
@@ -103,16 +103,18 @@ export const EditPolicy: React.FunctionComponent = () => {
   });
 
   const [formData] = useFormData({ form, watch: policyNamePath });
-  const currentPolicyName = get(formData, policyNamePath);
+  const getPolicyName = () => {
+    return isNewPolicy || isClonedPolicy ? get(formData, policyNamePath) : originalPolicyName;
+  };
 
   const policyNameValidations = useMemo(
     () =>
       createPolicyNameValidations({
         originalPolicyName,
         policies: existingPolicies,
-        saveAsNewPolicy: saveAsNew,
+        isClonedPolicy,
       }),
-    [originalPolicyName, existingPolicies, saveAsNew]
+    [originalPolicyName, existingPolicies, isClonedPolicy]
   );
 
   const history = useHistory();
@@ -131,8 +133,11 @@ export const EditPolicy: React.FunctionComponent = () => {
       );
     } else {
       const success = await savePolicy(
-        { ...policy, name: saveAsNew || isNewPolicy ? currentPolicyName : originalPolicyName },
-        isNewPolicy || saveAsNew
+        {
+          ...policy,
+          name: getPolicyName(),
+        },
+        isNewPolicy || isClonedPolicy
       );
       if (success) {
         backToPolicyList();
@@ -202,9 +207,9 @@ export const EditPolicy: React.FunctionComponent = () => {
               <EuiSwitch
                 data-test-subj="saveAsNewSwitch"
                 style={{ maxWidth: '100%' }}
-                checked={saveAsNew}
+                checked={isClonedPolicy}
                 onChange={(e) => {
-                  setSaveAsNew(e.target.checked);
+                  setIsClonedPolicy(e.target.checked);
                 }}
                 label={
                   <span>
@@ -219,7 +224,7 @@ export const EditPolicy: React.FunctionComponent = () => {
           </Fragment>
         )}
 
-        {saveAsNew || isNewPolicy ? (
+        {isClonedPolicy || isNewPolicy ? (
           <UseField<string, FormInternal>
             path={policyNamePath}
             config={{
@@ -289,7 +294,7 @@ export const EditPolicy: React.FunctionComponent = () => {
                   disabled={form.isValid === false || form.isSubmitting}
                   onClick={submit}
                 >
-                  {saveAsNew ? (
+                  {isClonedPolicy ? (
                     <FormattedMessage
                       id="xpack.indexLifecycleMgmt.editPolicy.saveAsNewButton"
                       defaultMessage="Save as new policy"
@@ -318,12 +323,12 @@ export const EditPolicy: React.FunctionComponent = () => {
             <EuiButtonEmpty onClick={togglePolicyJsonFlyout} data-test-subj="requestButton">
               {isShowingPolicyJsonFlyout ? (
                 <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.hidePolicyJsonButto"
+                  id="xpack.indexLifecycleMgmt.editPolicy.hidePolicyJsonButton"
                   defaultMessage="Hide request"
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButto"
+                  id="xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButton"
                   defaultMessage="Show request"
                 />
               )}
@@ -333,7 +338,7 @@ export const EditPolicy: React.FunctionComponent = () => {
 
         {isShowingPolicyJsonFlyout ? (
           <PolicyJsonFlyout
-            policyName={saveAsNew ? currentPolicyName : policyName}
+            policyName={getPolicyName()}
             close={() => setIsShowingPolicyJsonFlyout(false)}
           />
         ) : null}

@@ -24,8 +24,8 @@
             "pluginId": "kibanaUtils",
             "scope": "common",
             "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "section": "def-common.Serializable",
+            "text": "Serializable"
           }
         ],
         "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",

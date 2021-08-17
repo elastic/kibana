@@ -25,7 +25,7 @@ import {
   HostStatus,
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
-import { POLICY_STATUS_TO_TEXT } from './host_constants';
+import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 import { getEndpointDetailsPath } from '../../../common/routing';
 import { KibanaServices, useKibana, useToasts } from '../../../../common/lib/kibana';
@@ -337,7 +337,7 @@ describe('when on the endpoint list page', () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
         const total = await renderResult.findByTestId('endpointListTableTotal');
-        expect(total.textContent).toEqual('5 Hosts');
+        expect(total.textContent).toEqual('Showing 5 endpoints');
       });
       it('should display correct status', async () => {
         const renderResult = render();
@@ -380,18 +380,14 @@ describe('when on the endpoint list page', () => {
         const policyStatuses = await renderResult.findAllByTestId('rowPolicyStatus');
 
         policyStatuses.forEach((status, index) => {
-          const policyStatusToRGBColor: Array<[string, string]> = [
-            ['Success', 'background-color: rgb(109, 204, 177);'],
-            ['Warning', 'background-color: rgb(241, 216, 111);'],
-            ['Failure', 'background-color: rgb(255, 126, 98);'],
-            ['Unsupported', 'background-color: rgb(211, 218, 230);'],
-          ];
-          const policyStatusStyleMap: ReadonlyMap<string, string> = new Map<string, string>(
-            policyStatusToRGBColor
-          );
-          const expectedStatusColor: string = policyStatusStyleMap.get(status.textContent!) ?? '';
           expect(status.textContent).toEqual(POLICY_STATUS_TO_TEXT[generatedPolicyStatuses[index]]);
-          expect(status.getAttribute('style')).toMatch(expectedStatusColor);
+          expect(
+            status.querySelector(
+              `[data-euiicon-type][color=${
+                POLICY_STATUS_TO_HEALTH_COLOR[generatedPolicyStatuses[index]]
+              }]`
+            )
+          ).not.toBeNull();
         });
       });
 
@@ -879,6 +875,25 @@ describe('when on the endpoint list page', () => {
         const dateRangePicker = await renderResult.queryByTestId('activityLogDateRangePicker');
         expect(emptyState).toBe(null);
         expect(dateRangePicker).not.toBe(null);
+      });
+
+      it('should display activity log when tab is loaded using the URL', async () => {
+        const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
+        reactTestingLibrary.act(() => {
+          history.push(
+            `${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=activity_log`
+          );
+        });
+        const changedUrlAction = await userChangedUrlChecker;
+        expect(changedUrlAction.payload.search).toEqual(
+          '?page_index=0&page_size=10&selected_endpoint=1&show=activity_log'
+        );
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', getMockData());
+        });
+        const logEntries = await renderResult.queryAllByTestId('timelineEntry');
+        expect(logEntries.length).toEqual(2);
       });
     });
 
