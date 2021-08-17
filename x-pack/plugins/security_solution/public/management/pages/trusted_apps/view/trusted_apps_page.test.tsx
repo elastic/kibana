@@ -858,6 +858,7 @@ describe('When on the Trusted Apps Page', () => {
   describe('and the back button is present', () => {
     let renderResult: ReturnType<AppContextTestRender['render']>;
     beforeEach(async () => {
+      // Ensure implementation is defined before render to avoid undefined responses from hidden api calls
       const priorMockImplementation = coreStart.http.get.getMockImplementation();
       // @ts-ignore
       coreStart.http.get.mockImplementation((path, options) => {

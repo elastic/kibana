@@ -57,6 +57,9 @@ const SummarySection = styled(EuiFlexItem)`
 `;
 
 const DetailsSection = styled(EuiFlexItem)`
+  &&& {
+    margin-left: 0;
+  }
   padding: ${({ theme }) => theme.eui.euiSizeM} ${({ theme }) => theme.eui.euiSizeM}
     ${({ theme }) => theme.eui.euiSizeL} 0;
   .trustedAppsConditionsTable {
