@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
 import type { UiActionsStart } from 'src/plugins/ui_actions/public';
 import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
@@ -26,7 +27,6 @@ import {
   setKibanaCommonConfig,
   setKibanaVersion,
   setMapAppConfig,
-  setSetupServices,
   setStartServices,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
@@ -128,7 +128,6 @@ export class MapsPlugin
   }
 
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
-    setSetupServices(plugins);
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();
@@ -172,8 +171,10 @@ export class MapsPlugin
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.kibana,
       async mount(params: AppMountParameters) {
+        const UsageTracker =
+          plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
         const { renderApp } = await lazyLoadMapModules();
-        return renderApp(params);
+        return renderApp(params, UsageTracker);
       },
     });
   }

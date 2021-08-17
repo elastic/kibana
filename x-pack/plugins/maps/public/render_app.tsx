@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
@@ -18,7 +17,6 @@ import {
   getToasts,
   getEmbeddableService,
   getDocLinks,
-  getAppUsageTracker,
 } from './kibana_services';
 import {
   createKbnUrlStateStorage,
@@ -63,12 +61,10 @@ function setAppChrome() {
   });
 }
 
-export async function renderApp({
-  element,
-  history,
-  onAppLeave,
-  setHeaderActionMenu,
-}: AppMountParameters) {
+export async function renderApp(
+  { element, history, onAppLeave, setHeaderActionMenu }: AppMountParameters,
+  AppUsageTracker: React.FC
+) {
   goToSpecifiedPath = (path) => history.push(path);
   kbnUrlStateStorage = createKbnUrlStateStorage({
     useHash: false,
@@ -107,7 +103,6 @@ export async function renderApp({
   }
 
   const I18nContext = getCoreI18n().Context;
-  const AppUsageTracker = getAppUsageTracker();
   render(
     <AppUsageTracker>
       <I18nContext>
