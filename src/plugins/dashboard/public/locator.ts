@@ -7,7 +7,6 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { omit } from 'lodash';
 import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
 import type { LocatorDefinition, LocatorPublic } from '../../share/public';
 import type { SavedDashboardPanel } from '../common/types';
