@@ -82,6 +82,7 @@ describe('Body', () => {
     filterStatus: 'open',
     filterQuery: '',
     refetch: jest.fn(),
+    indexNames: [''],
   };
 
   describe('rendering', () => {
