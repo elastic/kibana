@@ -21,7 +21,7 @@ import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time
 
 interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;
-  link: ReactNode;
+  link?: ReactNode;
 }
 
 export function ServiceOverviewDependenciesTable({

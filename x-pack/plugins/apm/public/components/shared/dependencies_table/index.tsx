@@ -39,7 +39,7 @@ export type DependenciesItem = Omit<
 interface Props {
   dependencies: DependenciesItem[];
   fixedHeight?: boolean;
-  link: React.ReactNode;
+  link?: React.ReactNode;
   title: React.ReactNode;
   nameColumnTitle: React.ReactNode;
   status: FETCH_STATUS;
@@ -179,7 +179,7 @@ export function DependenciesTable(props: Props) {
               <h2>{title}</h2>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{link}</EuiFlexItem>
+          {link && <EuiFlexItem grow={false}>{link}</EuiFlexItem>}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>

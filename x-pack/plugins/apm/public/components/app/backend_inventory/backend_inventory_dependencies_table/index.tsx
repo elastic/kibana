@@ -102,7 +102,6 @@ export function BackendInventoryDependenciesTable() {
       )}
       status={status}
       compact={false}
-      link={null}
     />
   );
 }
