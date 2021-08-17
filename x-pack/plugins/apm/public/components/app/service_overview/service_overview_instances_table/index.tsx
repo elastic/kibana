@@ -142,6 +142,7 @@ export function ServiceOverviewInstancesTable({
       <EuiFlexItem data-test-subj="serviceInstancesTableContainer">
         <TableFetchWrapper status={status}>
           <OverviewTableContainer
+            fixedHeight={true}
             isEmptyAndLoading={mainStatsItemCount === 0 && isLoading}
           >
             <EuiBasicTable

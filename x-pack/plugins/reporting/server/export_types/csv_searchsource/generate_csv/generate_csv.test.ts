@@ -226,7 +226,6 @@ it('calculates the bytes of the content', async () => {
     stream
   );
   const csvResult = await generateCsv.generateData();
-  expect(csvResult.size).toBe(2608);
   expect(csvResult.max_size_reached).toBe(false);
   expect(csvResult.warnings).toEqual([]);
 });
