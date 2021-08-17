@@ -6,7 +6,7 @@
  */
 
 import { ALERT_RULE_ID } from '@kbn/rule-data-utils';
-import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
+import { ExistsFilter, Filter } from '@kbn/es-query';
 import { buildAlertsRuleIdFilter, buildThreatMatchFilter } from './default_config';
 
 jest.mock('./actions');
@@ -39,7 +39,7 @@ describe('alerts default_config', () => {
     describe('buildThreatMatchFilter', () => {
       test('given a showOnlyThreatIndicatorAlerts=true this will return an array with a single filter', () => {
         const filters: Filter[] = buildThreatMatchFilter(true);
-        const expectedFilter: Filter = {
+        const expectedFilter: ExistsFilter = {
           meta: {
             alias: null,
             disabled: false,
@@ -48,7 +48,6 @@ describe('alerts default_config', () => {
             type: 'exists',
             value: 'exists',
           },
-          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
           exists: {
             field: 'signal.rule.threat_mapping',
           },

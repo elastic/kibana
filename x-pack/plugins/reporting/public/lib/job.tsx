@@ -11,7 +11,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React from 'react';
 import { JOB_STATUSES } from '../../common/constants';
-import { JobId, ReportApiJSON, ReportSource, TaskRunResult } from '../../common/types';
+import {
+  JobId,
+  ReportApiJSON,
+  ReportOutput,
+  ReportSource,
+  TaskRunResult,
+} from '../../common/types';
 
 const { COMPLETED, FAILED, PENDING, PROCESSING, WARNINGS } = JOB_STATUSES;
 
@@ -45,7 +51,7 @@ export class Job {
   public kibana_id: ReportSource['kibana_id'];
   public browser_type: ReportSource['browser_type'];
 
-  public size?: TaskRunResult['size'];
+  public size?: ReportOutput['size'];
   public content_type?: TaskRunResult['content_type'];
   public csv_contains_formulas?: TaskRunResult['csv_contains_formulas'];
   public max_size_reached?: TaskRunResult['max_size_reached'];
