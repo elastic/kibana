@@ -51,13 +51,9 @@ export interface EnrollResult {
    */
   ca: string;
   /**
-   * Username of the internal Kibana system user.
+   * Service account token for the "elastic/kibana" service account.
    */
-  username: string;
-  /**
-   * Password of the internal Kibana system user.
-   */
-  password: string;
+  serviceAccountToken: { name: string; value: string };
 }
 
 export interface ElasticsearchServiceSetup {
@@ -154,7 +150,7 @@ export class ElasticsearchService {
           .asCurrentUser.transport.request({
             method: 'GET',
             path: '/_security/enroll/kibana',
-          })) as ApiResponse<{ password: string; http_ca: string }>;
+          })) as ApiResponse<{ token: { name: string; value: string }; http_ca: string }>;
       } catch (err) {
         // We expect that all hosts belong to exactly same node and any non-connection error for one host would mean
         // that enrollment will fail for any other host and we should bail out.
@@ -174,38 +170,36 @@ export class ElasticsearchService {
       }
 
       this.logger.debug(
-        `Successfully enrolled with "${host}" host, CA certificate: ${enrollmentResponse.body.http_ca}`
+        `Successfully enrolled with "${host}" host, token name: ${enrollmentResponse.body.token.name}, CA certificate: ${enrollmentResponse.body.http_ca}`
       );
 
       const enrollResult = {
         host,
         ca: ElasticsearchService.createPemCertificate(enrollmentResponse.body.http_ca),
-        username: 'kibana_system',
-        password: enrollmentResponse.body.password,
+        serviceAccountToken: enrollmentResponse.body.token,
       };
 
       // Now try to use retrieved password and CA certificate to authenticate to this host.
       const authenticateClient = elasticsearch.createClient('authenticate', {
         hosts: [host],
-        username: enrollResult.username,
-        password: enrollResult.password,
+        serviceAccountToken: enrollResult.serviceAccountToken.value,
         ssl: { certificateAuthorities: [enrollResult.ca] },
       });
 
       this.logger.debug(
-        `Verifying if "${enrollResult.username}" can authenticate to "${host}" host.`
+        `Verifying if "${enrollmentResponse.body.token.name}" token can authenticate to "${host}" host.`
       );
 
       try {
         await authenticateClient.asInternalUser.security.authenticate();
         this.logger.debug(
-          `Successfully authenticated "${enrollResult.username}" to "${host}" host.`
+          `Successfully authenticated "${enrollmentResponse.body.token.name}" token to "${host}" host.`
         );
       } catch (err) {
         this.logger.error(
           `Failed to authenticate "${
-            enrollResult.username
-          }" to "${host}" host: ${getDetailedErrorMessage(err)}.`
+            enrollmentResponse.body.token.name
+          }" token to "${host}" host: ${getDetailedErrorMessage(err)}.`
         );
         throw err;
       } finally {

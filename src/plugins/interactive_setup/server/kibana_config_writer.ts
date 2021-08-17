@@ -18,8 +18,7 @@ import { getDetailedErrorMessage } from './errors';
 export interface WriteConfigParameters {
   host: string;
   ca: string;
-  username: string;
-  password: string;
+  serviceAccountToken: { name: string; value: string };
 }
 
 export class KibanaConfigWriter {
@@ -70,11 +69,12 @@ export class KibanaConfigWriter {
     try {
       await fs.appendFile(
         this.configPath,
-        `\n\n# This section was automatically generated during setup.\n${yaml.dump(
+        `\n\n# This section was automatically generated during setup (service account token name is "${
+          params.serviceAccountToken.name
+        }").\n${yaml.safeDump(
           {
             'elasticsearch.hosts': [params.host],
-            'elasticsearch.username': params.username,
-            'elasticsearch.password': params.password,
+            'elasticsearch.serviceAccountToken': params.serviceAccountToken.value,
             'elasticsearch.ssl.certificateAuthorities': [caPath],
           },
           { flowLevel: 1 }
