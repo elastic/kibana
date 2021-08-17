@@ -16,7 +16,11 @@ import { cleanKibana } from '../../tasks/common';
 describe('Export timelines', () => {
   beforeEach(() => {
     cleanKibana();
-    cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
+    cy.intercept({
+      method: 'POST',
+      path: '*/api/timeline*',
+      query: { file_name: 'timelines_export.ndjson' },
+    }).as('export');
     createTimeline(getTimeline()).then((response) => {
       cy.wrap(response).as('timelineResponse');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId');
