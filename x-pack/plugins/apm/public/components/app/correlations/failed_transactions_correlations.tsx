@@ -21,6 +21,8 @@ import {
   EuiBadge,
   EuiIcon,
   EuiLink,
+  EuiTitle,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -29,7 +31,6 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { CorrelationsTable } from './correlations_table';
 import { enableInspectEsQueries } from '../../../../../observability/public';
-import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { FailedTransactionsCorrelationsHelpPopover } from './failed_transactions_correlations_help_popover';
 import { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
@@ -268,6 +269,49 @@ export function FailedTransactionsCorrelations() {
   }, [error, notifications.toasts]);
   return (
     <>
+      <EuiFlexGroup
+        data-test-subj="apmFailedTransactionsCorrelationsTabContent"
+        gutterSize="s"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h5 data-test-subj="apmFailedTransactionsCorrelationsChartTitle">
+              {i18n.translate(
+                'xpack.apm.correlations.failedTransactions.panelTitle',
+                {
+                  defaultMessage: 'Failed transactions',
+                }
+              )}
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiBetaBadge
+            label={i18n.translate(
+              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaLabel',
+              {
+                defaultMessage: 'Beta',
+              }
+            )}
+            title={i18n.translate(
+              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaTitle',
+              {
+                defaultMessage: 'Failed transaction rate',
+              }
+            )}
+            tooltipContent={i18n.translate(
+              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaDescription',
+              {
+                defaultMessage:
+                  'Failed transaction rate is not GA. Please help us by reporting any bugs.',
+              }
+            )}
+            size="s"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           {!isRunning && (
@@ -316,7 +360,7 @@ export function FailedTransactionsCorrelations() {
           <FailedTransactionsCorrelationsHelpPopover />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {selectedTerm ? (
+      {selectedTerm?.pValue != null ? (
         <>
           <EuiSpacer size="m" />
           <Summary
@@ -324,12 +368,7 @@ export function FailedTransactionsCorrelations() {
               <EuiBadge color="hollow">
                 {`${selectedTerm.fieldName}: ${selectedTerm.key}`}
               </EuiBadge>,
-              <>{`p-value: ${
-                // Arbitrary threshold 0.00001
-                selectedTerm.pValue !== null && selectedTerm.pValue < 0.00001
-                  ? '<.00001'
-                  : asPreciseDecimal(selectedTerm.pValue, 4)
-              }`}</>,
+              <>{`p-value: ${selectedTerm.pValue.toPrecision(3)}`}</>,
             ]}
           />
           <EuiSpacer size="m" />

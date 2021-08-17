@@ -9,8 +9,6 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiBetaBadge } from '@elastic/eui';
-
 import {
   METRIC_TYPE,
   useTrackMetric,
@@ -65,29 +63,7 @@ export const failedTransactionsCorrelationsTab = {
         {
           defaultMessage: 'Failed transaction correlations',
         }
-      )}{' '}
-      <EuiBetaBadge
-        label={i18n.translate(
-          'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaLabel',
-          {
-            defaultMessage: 'Beta',
-          }
-        )}
-        title={i18n.translate(
-          'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaTitle',
-          {
-            defaultMessage: 'Failed transaction rate',
-          }
-        )}
-        tooltipContent={i18n.translate(
-          'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaDescription',
-          {
-            defaultMessage:
-              'Failed transaction rate is not GA. Please help us by reporting any bugs.',
-          }
-        )}
-        size="s"
-      />
+      )}
     </>
   ),
   component: FailedTransactionsCorrelationsTab,
