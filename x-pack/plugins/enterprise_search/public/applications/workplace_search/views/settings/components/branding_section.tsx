@@ -81,7 +81,7 @@ export const BrandingSection: React.FC<Props> = ({
 
   const resetConfirmModal = (
     <EuiConfirmModal
-      title={isLogo ? RESET_IMAGE_TITLE : RESET_IMAGE_TITLE}
+      title={RESET_IMAGE_TITLE}
       onCancel={closeDeleteModal}
       onConfirm={() => {
         resetImage();
