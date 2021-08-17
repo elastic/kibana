@@ -108,7 +108,7 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
             alias: null,
             disabled: false,
             negate: false,
-            key: 'signal.rule.threat_mapping',
+            key: 'signal.rule.threat_mapping', // TODO: These need to be updated
             type: 'exists',
             value: 'exists',
           },
@@ -158,14 +158,14 @@ export const buildAlertStatusFilterRuleRegistry = (status: Status): Filter[] => 
       negate: false,
       disabled: false,
       type: 'phrase',
-      key: ALERT_STATUS,
+      key: ALERT_WORKFLOW_STATUS,
       params: {
         query: status,
       },
     },
     query: {
       term: {
-        [ALERT_STATUS]: status,
+        [ALERT_WORKFLOW_STATUS]: status,
       },
     },
   },
@@ -183,11 +183,11 @@ export const buildShowBuildingBlockFilterRuleRegistry = (
             negate: true,
             disabled: false,
             type: 'exists',
-            key: 'kibana.rule.building_block_type',
+            key: ALERT_RULE_BUILDING_BLOCK_TYPE,
             value: 'exists',
           },
           // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
-          exists: { field: 'kibana.rule.building_block_type' },
+          exists: { field: ALERT_RULE_BUILDING_BLOCK_TYPE },
         },
       ];
 

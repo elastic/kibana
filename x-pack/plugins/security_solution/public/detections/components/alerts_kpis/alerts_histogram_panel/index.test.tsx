@@ -9,7 +9,7 @@ import React from 'react';
 import { waitFor, act } from '@testing-library/react';
 import { mount } from 'enzyme';
 
-import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { esQuery, Filter } from '../../../../../../../../src/plugins/data/public';
 import { TestProviders } from '../../../../common/mock';
 import { SecurityPageName } from '../../../../app/types';
@@ -197,7 +197,7 @@ describe('AlertsHistogramPanel', () => {
         meta: {
           alias: null,
           disabled: false,
-          key: 'signal.status',
+          key: ALERT_WORKFLOW_STATUS,
           negate: false,
           params: {
             query: 'open',
@@ -206,7 +206,7 @@ describe('AlertsHistogramPanel', () => {
         },
         query: {
           term: {
-            'signal.status': 'open',
+            [ALERT_WORKFLOW_STATUS]: 'open',
           },
         },
       };
@@ -224,13 +224,13 @@ describe('AlertsHistogramPanel', () => {
 
       await waitFor(() => {
         expect(mockGetAlertsHistogramQuery.mock.calls[1]).toEqual([
-          'signal.rule.name',
+          ALERT_RULE_NAME,
           '2020-07-07T08:20:18.966Z',
           '2020-07-08T08:20:18.966Z',
           [
             {
               bool: {
-                filter: [{ term: { 'signal.status': 'open' } }],
+                filter: [{ term: { [ALERT_WORKFLOW_STATUS]: 'open' } }],
                 must: [],
                 must_not: [],
                 should: [],

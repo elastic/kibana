@@ -43,7 +43,7 @@ describe('Detections Alerts API', () => {
     test('check parameter url, body', async () => {
       await fetchQueryAlerts({ query: mockAlertsQuery, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/signals/search', {
-        body: `{"aggs":{"alertsByGrouping":{"terms":{"field":${ALERT_RULE_RISK_SCORE},"missing":"All others","order":{"_count":"desc"},"size":10},"aggs":{"alerts":{"date_histogram":{"field":"@timestamp","fixed_interval":"81000000ms","min_doc_count":0,"extended_bounds":{"min":1579644343954,"max":1582236343955}}}}}},"query":{"bool":{"filter":[{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}},{"range":{"@timestamp":{"gte":1579644343954,"lte":1582236343955}}}]}}}`,
+        body: `{"aggs":{"alertsByGrouping":{"terms":{"field":"${ALERT_RULE_RISK_SCORE}","missing":"All others","order":{"_count":"desc"},"size":10},"aggs":{"alerts":{"date_histogram":{"field":"@timestamp","fixed_interval":"81000000ms","min_doc_count":0,"extended_bounds":{"min":1579644343954,"max":1582236343955}}}}}},"query":{"bool":{"filter":[{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}},{"range":{"@timestamp":{"gte":1579644343954,"lte":1582236343955}}}]}}}`,
         method: 'POST',
         signal: abortCtrl.signal,
       });

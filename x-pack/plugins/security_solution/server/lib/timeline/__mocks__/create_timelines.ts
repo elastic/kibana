@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { ALERT_RULE_DESCRIPTION } from '@kbn/rule-data-utils';
-
 export const mockTemplate = {
   columns: [
     {
@@ -19,7 +17,7 @@ export const mockTemplate = {
     {
       columnHeaderType: 'not-filtered',
       indexes: null,
-      id: ALERT_RULE_DESCRIPTION,
+      id: 'signal.rule.description',
       name: null,
       searchable: null,
     },
