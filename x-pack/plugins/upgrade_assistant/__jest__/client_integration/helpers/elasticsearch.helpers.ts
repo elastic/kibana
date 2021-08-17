@@ -68,6 +68,14 @@ const createActions = (testBed: TestBed) => {
     component.update();
   };
 
+  const clickDeleteSettingsButton = async () => {
+    await act(async () => {
+      find('deleteSettingsButton').simulate('click');
+    });
+
+    component.update();
+  };
+
   const clickReindexDeprecationAt = async (index: number) => {
     await act(async () => {
       find('deprecation-reindex').at(index).simulate('click');
@@ -138,6 +146,7 @@ const createActions = (testBed: TestBed) => {
     clickUpgradeMlSnapshot,
     clickDeleteMlSnapshot,
     clickIndexSettingsDeprecationAt,
+    clickDeleteSettingsButton,
     clickReindexDeprecationAt,
     clickDefaultDeprecationAt,
     clickCriticalFilterButton,

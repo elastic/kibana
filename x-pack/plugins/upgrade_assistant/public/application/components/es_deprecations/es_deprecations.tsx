@@ -40,14 +40,6 @@ const i18nTexts = {
   isLoading: i18n.translate('xpack.upgradeAssistant.esDeprecations.loadingText', {
     defaultMessage: 'Loading deprecations…',
   }),
-  backupDataButton: {
-    label: i18n.translate('xpack.upgradeAssistant.esDeprecations.backupDataButtonLabel', {
-      defaultMessage: 'Back up your data',
-    }),
-    tooltipText: i18n.translate('xpack.upgradeAssistant.esDeprecations.backupDataTooltipText', {
-      defaultMessage: 'Take a snapshot before you make any changes.',
-    }),
-  },
 };
 
 export const EsDeprecationsContent = withRouter(({ history }: RouteComponentProps) => {
@@ -115,23 +107,7 @@ export const EsDeprecationsContent = withRouter(({ history }: RouteComponentProp
             {i18nTexts.docLinkText}
           </EuiButtonEmpty>,
         ]}
-      >
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip position="bottom" content={i18nTexts.backupDataButton.tooltipText}>
-              <EuiButton
-                data-test-subj="snapshotRestoreLink"
-                href={getUrlForApp('management', {
-                  path: 'data/snapshot_restore',
-                })}
-                target="_blank"
-              >
-                {i18nTexts.backupDataButton.label}
-              </EuiButton>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPageHeader>
+      />
 
       <EuiSpacer size="l" />
 

@@ -98,9 +98,6 @@ describe('Elasticsearch deprecations', () => {
       // Verify container exists
       expect(exists('esDeprecationsContent')).toBe(true);
 
-      // Verify links exist
-      expect(exists('esDeprecationsContent.snapshotRestoreLink')).toBe(true);
-
       // Verify all deprecations appear in the table
       expect(find('deprecationTableRow').length).toEqual(
         upgradeStatusMockResponse.deprecations.length
@@ -177,8 +174,8 @@ describe('Elasticsearch deprecations', () => {
             `/api/upgrade_assistant/ml_snapshots/${jobId}/${snapshotId}`
           );
 
-          // Verify the "Status" column of the table is updated
-          expect(find('mlActionStatusCell').text()).toContain('Upgrade complete');
+          // Verify the "Resolution" column of the table is updated
+          expect(find('mlActionResolutionCell').text()).toContain('Upgrade complete');
 
           // Reopen the flyout
           await actions.clickMlDeprecationAt(0);
@@ -212,8 +209,8 @@ describe('Elasticsearch deprecations', () => {
           expect(upgradeRequest.method).toBe('POST');
           expect(upgradeRequest.url).toBe('/api/upgrade_assistant/ml_snapshots');
 
-          // Verify the "Status" column of the table is updated
-          expect(find('mlActionStatusCell').text()).toContain('Upgrade failed');
+          // Verify the "Resolution" column of the table is updated
+          expect(find('mlActionResolutionCell').text()).toContain('Upgrade failed');
 
           // Reopen the flyout
           await actions.clickMlDeprecationAt(0);
@@ -247,8 +244,8 @@ describe('Elasticsearch deprecations', () => {
             }/${(mlDeprecation.correctiveAction! as MlAction).snapshotId}`
           );
 
-          // Verify the "Status" column of the table is updated
-          expect(find('mlActionStatusCell').at(0).text()).toEqual('Deletion complete');
+          // Verify the "Resolution" column of the table is updated
+          expect(find('mlActionResolutionCell').at(0).text()).toEqual('Deletion complete');
 
           // Reopen the flyout
           await actions.clickMlDeprecationAt(0);
@@ -277,8 +274,8 @@ describe('Elasticsearch deprecations', () => {
             }/${(mlDeprecation.correctiveAction! as MlAction).snapshotId}`
           );
 
-          // Verify the "Status" column of the table is updated
-          expect(find('mlActionStatusCell').at(0).text()).toEqual('Deletion failed');
+          // Verify the "Resolution" column of the table is updated
+          expect(find('mlActionResolutionCell').at(0).text()).toEqual('Deletion failed');
 
           // Reopen the flyout
           await actions.clickMlDeprecationAt(0);
@@ -308,17 +305,13 @@ describe('Elasticsearch deprecations', () => {
         });
 
         it('removes deprecated index settings', async () => {
-          const { component, find, actions } = testBed;
+          const { find, actions } = testBed;
 
           httpRequestsMockHelpers.setUpdateIndexSettingsResponse({
             acknowledged: true,
           });
 
-          await act(async () => {
-            find('deleteSettingsButton').simulate('click');
-          });
-
-          component.update();
+          await actions.clickDeleteSettingsButton();
 
           const request = server.requests[server.requests.length - 1];
 
@@ -328,8 +321,8 @@ describe('Elasticsearch deprecations', () => {
           );
           expect(request.status).toEqual(200);
 
-          // Verify the "Status" column of the table is updated
-          expect(find('indexSettingsActionStatusCell').at(0).text()).toEqual(
+          // Verify the "Resolution" column of the table is updated
+          expect(find('indexSettingsResolutionStatusCell').at(0).text()).toEqual(
             'Deprecated settings removed'
           );
 
@@ -343,7 +336,7 @@ describe('Elasticsearch deprecations', () => {
         });
 
         it('handles failure', async () => {
-          const { component, find, actions } = testBed;
+          const { find, actions } = testBed;
           const error = {
             statusCode: 500,
             error: 'Remove index settings error',
@@ -352,11 +345,7 @@ describe('Elasticsearch deprecations', () => {
 
           httpRequestsMockHelpers.setUpdateIndexSettingsResponse(undefined, error);
 
-          await act(async () => {
-            find('deleteSettingsButton').simulate('click');
-          });
-
-          component.update();
+          await actions.clickDeleteSettingsButton();
 
           const request = server.requests[server.requests.length - 1];
 
@@ -366,8 +355,8 @@ describe('Elasticsearch deprecations', () => {
           );
           expect(request.status).toEqual(500);
 
-          // Verify the "Status" column of the table is updated
-          expect(find('indexSettingsActionStatusCell').at(0).text()).toEqual(
+          // Verify the "Resolution" column of the table is updated
+          expect(find('indexSettingsResolutionStatusCell').at(0).text()).toEqual(
             'Settings removal failed'
           );
 

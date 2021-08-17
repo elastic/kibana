@@ -208,7 +208,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
   }, [deprecations, sortConfig, pager, searchQuery, filteredDeprecations.length]);
 
   return (
-    <div>
+    <>
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem data-test-subj="searchBarContainer">
           <EuiSearchBar
@@ -318,6 +318,6 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
         onChangeItemsPerPage={setItemsPerPage}
         onChangePage={setCurrentPageIndex}
       />
-    </div>
+    </>
   );
 };

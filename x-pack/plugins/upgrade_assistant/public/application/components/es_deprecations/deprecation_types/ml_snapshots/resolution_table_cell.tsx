@@ -56,12 +56,6 @@ const i18nTexts = {
       defaultMessage: 'Deletion failed',
     }
   ),
-  criticalBadgeLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.criticalBadgeLabel',
-    {
-      defaultMessage: 'Critical',
-    }
-  ),
   resolutionText: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.mlSnapshots.resolutionText',
     {
@@ -82,7 +76,7 @@ export const MlSnapshotsResolutionCell: React.FunctionComponent = () => {
 
   if (snapshotState.status === 'in_progress') {
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="mlActionStatusCell">
+      <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="mlActionResolutionCell">
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
@@ -99,7 +93,7 @@ export const MlSnapshotsResolutionCell: React.FunctionComponent = () => {
 
   if (snapshotState.status === 'complete') {
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="mlActionStatusCell">
+      <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="mlActionResolutionCell">
         <EuiFlexItem grow={false}>
           <EuiIcon type="check" color="success" />
         </EuiFlexItem>
@@ -116,7 +110,7 @@ export const MlSnapshotsResolutionCell: React.FunctionComponent = () => {
 
   if (snapshotState.status === 'error') {
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="mlActionStatusCell">
+      <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="mlActionResolutionCell">
         <EuiFlexItem grow={false}>
           <EuiIcon type="alert" color="danger" />
         </EuiFlexItem>
@@ -133,7 +127,7 @@ export const MlSnapshotsResolutionCell: React.FunctionComponent = () => {
 
   return (
     <EuiToolTip position="top" content={i18nTexts.resolutionTooltipLabel}>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="mlActionResolutionCell">
         <EuiFlexItem grow={false}>
           <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
         </EuiFlexItem>

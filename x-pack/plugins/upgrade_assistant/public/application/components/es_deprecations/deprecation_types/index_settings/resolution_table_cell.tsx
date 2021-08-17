@@ -64,7 +64,7 @@ export const IndexSettingsResolutionCell: React.FunctionComponent<Props> = ({ st
       <EuiFlexGroup
         gutterSize="s"
         alignItems="center"
-        data-test-subj="indexSettingsActionStatusCell"
+        data-test-subj="indexSettingsResolutionStatusCell"
       >
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="m" />
@@ -81,7 +81,7 @@ export const IndexSettingsResolutionCell: React.FunctionComponent<Props> = ({ st
       <EuiFlexGroup
         gutterSize="s"
         alignItems="center"
-        data-test-subj="indexSettingsActionStatusCell"
+        data-test-subj="indexSettingsResolutionStatusCell"
       >
         <EuiFlexItem grow={false}>
           <EuiIcon type="check" color="success" />
@@ -98,7 +98,7 @@ export const IndexSettingsResolutionCell: React.FunctionComponent<Props> = ({ st
       <EuiFlexGroup
         gutterSize="s"
         alignItems="center"
-        data-test-subj="indexSettingsActionStatusCell"
+        data-test-subj="indexSettingsResolutionStatusCell"
       >
         <EuiFlexItem grow={false}>
           <EuiIcon type="alert" color="danger" />
@@ -112,7 +112,11 @@ export const IndexSettingsResolutionCell: React.FunctionComponent<Props> = ({ st
 
   return (
     <EuiToolTip position="top" content={i18nTexts.resolutionTooltipLabel}>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        data-test-subj="indexSettingsResolutionStatusCell"
+      >
         <EuiFlexItem grow={false}>
           <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
         </EuiFlexItem>
