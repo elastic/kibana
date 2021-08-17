@@ -229,6 +229,7 @@ describe('plugins discovery system', () => {
         `Error: The "type" in manifest for plugin "pluginD" is set to "evenEarlierThanPreboot", but it should either be "standard" or "preboot". (invalid-manifest, ${manifestPath(
           'plugin_d'
         )})`,
+        `Plugin manifest for "Foo" must contain an "owner" property, which includes a nested "name" property.`,
       ])
     );
   });
