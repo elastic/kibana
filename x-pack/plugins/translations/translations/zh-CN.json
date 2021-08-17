@@ -20552,7 +20552,6 @@
     "xpack.securitySolution.cases.pageTitle": "案例",
     "xpack.securitySolution.certificate.fingerprint.clientCertLabel": "客户端证书",
     "xpack.securitySolution.certificate.fingerprint.serverCertLabel": "服务器证书",
-    "xpack.securitySolution.chart.allOthersGroupingLabel": "所有其他",
     "xpack.securitySolution.chart.dataAllValuesZerosTitle": "所有值返回了零",
     "xpack.securitySolution.chart.dataNotAvailableTitle": "图表数据不可用",
     "xpack.securitySolution.chrome.help.appName": "安全",
