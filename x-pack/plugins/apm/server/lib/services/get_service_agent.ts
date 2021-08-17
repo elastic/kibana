@@ -76,6 +76,10 @@ export async function getServiceAgent({
     'get_service_agent_name',
     params
   );
+  if (response.hits.total.value === 0) {
+    return {};
+  }
+
   const { service, agent } = response.hits.hits[0]._source as ServiceAgent;
   return { agentName: agent?.name, serviceRuntimeName: service?.runtime.name };
 }
