@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show popover with expanded cell content by click on expand button', async () => {
       log.debug('open popover with expanded cell content to get json from the editor');
-      const expandDocId = 'AU_x3_g4GFA8no6QjkPi';
+      const expandDocId = 'AU_x3_g4GFA8no6QjkYX';
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       const documentCell = await dataGrid.getCellElement(1, 4);
