@@ -30,10 +30,7 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTransactionLatencyCorrelationsFetcher } from '../../../hooks/use_transaction_latency_correlations_fetcher';
 import { TransactionDistributionChart } from '../../shared/charts/transaction_distribution_chart';
-import {
-  CorrelationsTable,
-  SelectedSignificantTerm,
-} from './correlations_table';
+import { CorrelationsTable } from './correlations_table';
 import { push } from '../../shared/Links/url_helpers';
 import {
   enableInspectEsQueries,
@@ -43,11 +40,9 @@ import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { LatencyCorrelationsHelpPopover } from './latency_correlations_help_popover';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { isErrorMessage } from './utils/is_error_message';
 
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
-const isErrorMessage = (arg: unknown): arg is Error => {
-  return arg instanceof Error;
-};
 
 interface MlCorrelationsTerms {
   correlation: number;
@@ -126,7 +121,7 @@ export function LatencyCorrelations() {
   const [
     selectedSignificantTerm,
     setSelectedSignificantTerm,
-  ] = useState<SelectedSignificantTerm | null>(null);
+  ] = useState<MlCorrelationsTerms | null>(null);
 
   let selectedHistogram = histograms.length > 0 ? histograms[0] : undefined;
 
@@ -376,10 +371,8 @@ export function LatencyCorrelations() {
       <EuiSpacer size="m" />
       <div data-test-subj="apmCorrelationsTable">
         {histograms.length > 0 && selectedHistogram !== undefined && (
-          <CorrelationsTable
-            // @ts-ignore correlations don't have the same column format other tables have
+          <CorrelationsTable<MlCorrelationsTerms>
             columns={mlCorrelationColumns}
-            // @ts-expect-error correlations don't have the same significant term other tables have
             significantTerms={histogramTerms}
             status={FETCH_STATUS.SUCCESS}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
