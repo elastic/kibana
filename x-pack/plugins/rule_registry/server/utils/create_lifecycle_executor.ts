@@ -158,7 +158,6 @@ export const createLifecycleExecutor = (
         [ALERT_ID]: id,
         [ALERT_RULE_TYPE_ID]: rule.ruleTypeId,
         [ALERT_RULE_CONSUMER]: rule.consumer,
-        [ALERT_WORKFLOW_STATUS]: 'open', // TODO: how do we prevent overwriting this field back to "open"?
       };
       return alertInstanceFactory(id);
     },
@@ -265,6 +264,7 @@ export const createLifecycleExecutor = (
 
     event[ALERT_START] = started;
     event[ALERT_UUID] = alertUuid;
+    event[ALERT_WORKFLOW_STATUS] = event[ALERT_WORKFLOW_STATUS] ?? 'open';
 
     // not sure why typescript needs the non-null assertion here
     // we already assert the value is not undefined with the ternary
