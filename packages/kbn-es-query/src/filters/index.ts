@@ -63,7 +63,6 @@ export {
   ExistsFilter,
   RangeFilter,
   PhraseFilter,
-  QueryRangeFilter,
   PhrasesFilter,
   RangeFilterMeta,
   MatchAllFilter,
