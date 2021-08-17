@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
+export { CopyToSpaceSavedObjectsManagementAction } from './copy_saved_objects_to_space_action';
+export { ShareToSpaceSavedObjectsManagementAction } from './share_saved_objects_to_space_action';

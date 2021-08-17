@@ -14,6 +14,7 @@
     "server/**/*",
   ],
   "references": [
+    { "path": "../../../x-pack/plugins/spaces/tsconfig.json" },
     { "path": "../../core/tsconfig.json" },
     { "path": "../inspector/tsconfig.json" },
     { "path": "../kibana_legacy/tsconfig.json" },
@@ -30,7 +31,6 @@
     { "path": "../saved_objects_tagging_oss/tsconfig.json" },
     { "path": "../saved_objects/tsconfig.json" },
     { "path": "../ui_actions/tsconfig.json" },
-    { "path": "../spaces_oss/tsconfig.json" },
     { "path": "../charts/tsconfig.json" },
     { "path": "../discover/tsconfig.json" },
     { "path": "../visualizations/tsconfig.json" },

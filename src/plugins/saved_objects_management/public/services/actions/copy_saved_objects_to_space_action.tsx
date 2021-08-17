@@ -1,17 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
-import type { CopyToSpaceFlyoutProps, SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
-import { SavedObjectsManagementAction } from '../../../../../src/plugins/saved_objects_management/public';
+import type {
+  CopyToSpaceFlyoutProps,
+  SpacesApiUi,
+} from '../../../../../../x-pack/plugins/spaces/public';
+import type { SavedObjectsManagementRecord } from '../types';
+import { SavedObjectsManagementAction } from '../types';
 
 interface WrapperProps {
   spacesApiUi: SpacesApiUi;
@@ -28,10 +32,10 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
   public id: string = 'copy_saved_objects_to_space';
 
   public euiAction = {
-    name: i18n.translate('xpack.spaces.management.copyToSpace.actionTitle', {
+    name: i18n.translate('savedObjectsManagement.copyToSpace.actionTitle', {
       defaultMessage: 'Copy to space',
     }),
-    description: i18n.translate('xpack.spaces.management.copyToSpace.actionDescription', {
+    description: i18n.translate('savedObjectsManagement.copyToSpace.actionDescription', {
       defaultMessage: 'Make a copy of this saved object in one or more spaces',
     }),
     icon: 'copy',

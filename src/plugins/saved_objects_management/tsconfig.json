@@ -13,6 +13,7 @@
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/spaces/tsconfig.json" },
     { "path": "../dashboard/tsconfig.json" },
     { "path": "../data/tsconfig.json" },
     { "path": "../discover/tsconfig.json" },
@@ -20,6 +21,5 @@
     { "path": "../kibana_react/tsconfig.json" },
     { "path": "../management/tsconfig.json" },
     { "path": "../visualizations/tsconfig.json" },
-    { "path": "../spaces_oss/tsconfig.json" },
   ]
 }
