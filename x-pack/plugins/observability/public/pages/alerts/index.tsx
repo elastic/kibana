@@ -27,6 +27,14 @@ import { AlertsTableTGrid } from './alerts_table_t_grid';
 import { StatusFilter } from './status_filter';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { callObservabilityApi } from '../../services/call_observability_api';
+import type {
+  ALERT_STATUS as ALERT_STATUS_TYPED,
+} from '@kbn/rule-data-utils';
+import {
+  ALERT_STATUS as ALERT_STATUS_NON_TYPED,
+} from '@kbn/rule-data-utils/target_node/technical_field_names';
+
+const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
 
 export interface TopAlert {
   fields: ParsedTechnicalFields;
@@ -124,9 +132,15 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
 
   useEffect(() => {
     if (fetcherStatus === 'success') {
-      addToQuery(`kibana.alert.status: "open"`); // works, refactor to use a const
+      const nextSearchParams = new URLSearchParams(history.location.search);
+
+      nextSearchParams.set('kuery', `${ALERT_STATUS}: "open"`); // TODO this needs to be changed, this should be part of another dependent PR that updates the Status column values to Active and recovered
+      history.push({
+        ...history.location,
+        search: nextSearchParams.toString(),
+      });
     }
-  }, [fetcherStatus]);
+  }, [fetcherStatus, history]);
 
   return (
     <ObservabilityPageTemplate
