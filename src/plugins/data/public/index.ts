@@ -62,13 +62,7 @@ export const indexPatterns = {
   flattenHitWrapper,
 };
 
-export {
-  IndexPatternsContract,
-  IndexPattern,
-  IndexPatternField,
-  IndexPatternListSavedObjectAttrs,
-  TypeMeta,
-} from './index_patterns';
+export { IndexPatternsContract, IndexPattern, IndexPatternField, TypeMeta } from './index_patterns';
 
 export {
   IIndexPattern,
@@ -85,6 +79,7 @@ export {
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
   AggregationRestrictions,
   IndexPatternType,
+  IndexPatternListItem,
 } from '../common';
 
 export { DuplicateIndexPatternError } from '../common/index_patterns/errors';

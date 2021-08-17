@@ -28,6 +28,7 @@ import {
   FieldAttrs,
   FieldSpec,
   IndexPatternFieldMap,
+  TypeMeta,
 } from '../types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '../../../../field_formats/common/';
 import { UI_SETTINGS, SavedObject } from '../../../common';
@@ -49,7 +50,12 @@ export type IndexPatternListSavedObjectAttrs = Pick<
   'title' | 'type' | 'typeMeta'
 >;
 
-export type IndexPatternListItem = IndexPatternListSavedObjectAttrs & { id: string };
+export interface IndexPatternListItem {
+  id: string;
+  title: string;
+  type: string;
+  typeMeta: TypeMeta;
+}
 
 interface IndexPatternsServiceDeps {
   uiSettings: UiSettingsCommon;

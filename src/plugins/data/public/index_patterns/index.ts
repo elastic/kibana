@@ -16,12 +16,7 @@ export {
 } from '../../common/index_patterns/lib';
 export { flattenHitWrapper, formatHitProvider, onRedirectNoIndexPattern } from './index_patterns';
 
-export {
-  IndexPatternField,
-  IIndexPatternFieldList,
-  TypeMeta,
-  IndexPatternListSavedObjectAttrs,
-} from '../../common/index_patterns';
+export { IndexPatternField, IIndexPatternFieldList, TypeMeta } from '../../common/index_patterns';
 
 export {
   IndexPatternsService,

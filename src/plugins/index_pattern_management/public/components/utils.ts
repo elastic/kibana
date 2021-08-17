@@ -7,7 +7,7 @@
  */
 
 import { IndexPatternsContract } from 'src/plugins/data/public';
-import { IFieldType, IndexPatternListSavedObjectAttrs, TypeMeta } from 'src/plugins/data/public';
+import { IFieldType, IndexPattern, IndexPatternListItem } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
 
 const defaultIndexPatternListName = i18n.translate(
@@ -24,7 +24,7 @@ const rollupIndexPatternListName = i18n.translate(
   }
 );
 
-const isRollup = (indexPatternType: string) => {
+const isRollup = (indexPatternType: string = '') => {
   return indexPatternType === 'rollup';
 };
 
@@ -63,7 +63,7 @@ export async function getIndexPatterns(
   );
 }
 
-export const getTags = (indexPattern: IndexPatternListSavedObjectAttrs, isDefault: boolean) => {
+export const getTags = (indexPattern: IndexPatternListItem | IndexPattern, isDefault: boolean) => {
   const tags = [];
   if (isDefault) {
     tags.push({
@@ -80,24 +80,19 @@ export const getTags = (indexPattern: IndexPatternListSavedObjectAttrs, isDefaul
   return tags;
 };
 
-export const areScriptedFieldsEnabled = (indexPattern: IndexPatternListSavedObjectAttrs) => {
+export const areScriptedFieldsEnabled = (indexPattern: IndexPatternListItem | IndexPattern) => {
   return !isRollup(indexPattern.type);
 };
 
-export const getFieldInfo = (indexPattern: IndexPatternListSavedObjectAttrs, field: IFieldType) => {
+export const getFieldInfo = (
+  indexPattern: IndexPatternListItem | IndexPattern,
+  field: IFieldType
+) => {
   if (!isRollup(indexPattern.type)) {
     return [];
   }
 
-  let typeMeta: TypeMeta;
-
-  try {
-    typeMeta = JSON.parse(indexPattern.typeMeta);
-  } catch {
-    return [];
-  }
-
-  const allAggs = typeMeta?.aggs;
+  const allAggs = indexPattern.typeMeta?.aggs;
   const fieldAggs: string[] | undefined =
     allAggs && Object.keys(allAggs).filter((agg) => allAggs[agg][field.name]);
 
