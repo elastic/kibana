@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon } from '@elastic/eui';
 import { ObservabilityPublicPluginsStart } from '../..';
 import { getMappedNonEcsValue } from './render_cell_value';
+import FilterForValueButton from './filter_for_value';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { TimelineNonEcsData } from '../../../../timelines/common/search_strategy';
 import { TGridCellAction } from '../../../../timelines/common/types/timeline';
@@ -66,32 +67,13 @@ const buildFilterCellActions = (addToQuery: (value: string) => void): TGridCellA
       data: data[rowIndex],
       fieldName: columnId,
     });
-    const text = useMemo(() => `${columnId}${value != null ? `: "${value}"` : ''}`, [
-      columnId,
-      value,
-    ]);
-    const onClick = useCallback(() => {
-      addToQuery(text);
-    }, [text]);
 
-    return Component ? (
-      <Component
-        aria-label={FILTER_FOR_VALUE}
-        data-test-subj="filter-for-value"
-        iconType="plusInCircle"
-        onClick={onClick}
-        title={FILTER_FOR_VALUE}
-      >
-        {FILTER_FOR_VALUE}
-      </Component>
-    ) : (
-      <EuiButtonIcon
-        aria-label={FILTER_FOR_VALUE}
-        className="timelines__hoverActionButton"
-        data-test-subj="filter-for-value"
-        iconSize="s"
-        iconType="plusInCircle"
-        onClick={onClick}
+    return (
+      <FilterForValueButton
+        Component={Component}
+        field={columnId}
+        value={value}
+        addToQuery={addToQuery}
       />
     );
   },
