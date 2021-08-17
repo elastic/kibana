@@ -26,7 +26,6 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { Correlations } from '../../../app/correlations';
 import { SearchBar } from '../../../shared/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
 import { ApmMainTemplate } from '../apm_main_template';
@@ -107,10 +106,6 @@ function TemplateWithContext({
 
             <EuiFlexItem grow={false}>
               <AnalyzeDataButton />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <Correlations />
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
