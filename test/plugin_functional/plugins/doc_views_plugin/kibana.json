@@ -1,5 +1,9 @@
 {
   "id": "docViewPlugin",
+  "owner": {
+    "name": "Kibana App",
+    "githubTeam": "kibana-app"
+  },
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "server": false,

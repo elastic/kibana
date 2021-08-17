@@ -60,6 +60,10 @@ const Plugins = {
       requiredPlugins: [],
       optionalPlugins: [],
       server: true,
+      owner: {
+        name: 'foo',
+        githubTeam: 'foo',
+      },
     }),
   }),
   validPreboot: (id: string) => ({
@@ -72,6 +76,10 @@ const Plugins = {
       requiredPlugins: [],
       optionalPlugins: [],
       server: true,
+      owner: {
+        name: 'foo',
+        githubTeam: 'foo',
+      },
     }),
   }),
 };
