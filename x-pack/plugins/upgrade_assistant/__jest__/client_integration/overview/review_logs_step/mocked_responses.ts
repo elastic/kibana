@@ -6,10 +6,10 @@
  */
 
 import type { DomainDeprecationDetails } from 'kibana/public';
-import { UpgradeAssistantStatus } from '../../../../common/types';
+import { ESUpgradeStatus } from '../../../../common/types';
 
-export const esDeprecations: UpgradeAssistantStatus = {
-  readyForUpgrade: false,
+export const esDeprecations: ESUpgradeStatus = {
+  totalCriticalDeprecations: 1,
   cluster: [
     {
       level: 'critical',
@@ -33,8 +33,8 @@ export const esDeprecations: UpgradeAssistantStatus = {
   ],
 };
 
-export const esDeprecationsEmpty: UpgradeAssistantStatus = {
-  readyForUpgrade: true,
+export const esDeprecationsEmpty: ESUpgradeStatus = {
+  totalCriticalDeprecations: 0,
   cluster: [],
   indices: [],
 };
