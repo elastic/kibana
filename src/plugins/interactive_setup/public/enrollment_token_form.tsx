@@ -38,7 +38,7 @@ export interface EnrollmentTokenFormValues {
 
 export interface EnrollmentTokenFormProps {
   defaultValues?: EnrollmentTokenFormValues;
-  onCancel(): void;
+  onCancel?(): void;
   onSuccess?(): void;
 }
 

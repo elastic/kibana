@@ -63,7 +63,7 @@ export const App: FunctionComponent = () => {
             ) : (
               <ClusterAddressForm
                 onCancel={() => setPage('token')}
-                onSuccess={(values, result) =>
+                onSuccess={(result, values) =>
                   setCluster({
                     host: values.host,
                     authRequired: result.statusCode === 401,
@@ -74,7 +74,7 @@ export const App: FunctionComponent = () => {
             )}
           </div>
           {page === 'success' && (
-            <ProgressIndicator onSuccess={() => window.location.replace('/')} />
+            <ProgressIndicator onSuccess={() => window.location.replace(window.location.href)} />
           )}
         </EuiPanel>
       </div>

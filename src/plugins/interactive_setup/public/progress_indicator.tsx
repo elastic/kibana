@@ -7,11 +7,10 @@
  */
 
 import type { EuiStepProps } from '@elastic/eui';
-import { EuiCallOut, EuiPanel, EuiSteps } from '@elastic/eui';
+import { EuiPanel, EuiSteps } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import useTimeout from 'react-use/lib/useTimeout';
 import useTimeoutFn from 'react-use/lib/useTimeoutFn';
 
 import { i18n } from '@kbn/i18n';
@@ -55,16 +54,6 @@ export const ProgressIndicator: FunctionComponent<ProgressIndicatorProps> = ({ o
     }
   }, [status.loading, status.value]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const [helpRequired, cancelHelp, resetHelp] = useTimeout(20000);
-
-  useEffect(() => {
-    if (status.value === 'complete') {
-      cancelHelp();
-    } else {
-      resetHelp();
-    }
-  }, [status.value]); // eslint-disable-line react-hooks/exhaustive-deps
-
   return (
     <EuiPanel color="transparent">
       <LoadingSteps
@@ -90,11 +79,6 @@ export const ProgressIndicator: FunctionComponent<ProgressIndicatorProps> = ({ o
           },
         ]}
       />
-      {helpRequired() && (
-        <EuiCallOut iconType="alert" title="Process is not responding" color="warning">
-          Check terminal for error cause.
-        </EuiCallOut>
-      )}
     </EuiPanel>
   );
 };

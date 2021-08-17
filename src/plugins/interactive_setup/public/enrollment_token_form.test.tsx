@@ -6,8 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { fireEvent, render, waitFor } from '@testing-library/react';
+import React from 'react';
+
+import { coreMock } from 'src/core/public/mocks';
+
 import type { EnrollmentToken } from '../common';
-import { decodeEnrollmentToken } from './enrollment_token_form';
+import { decodeEnrollmentToken, EnrollmentTokenForm } from './enrollment_token_form';
+import { Providers } from './plugin';
+
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  htmlIdGenerator: () => () => `id-${Math.random()}`,
+}));
 
 const token: EnrollmentToken = {
   ver: '8.0.0',
@@ -16,6 +26,59 @@ const token: EnrollmentToken = {
     'AA:C8:2C:2E:09:58:F4:FE:A1:D2:AB:7F:13:70:C2:7D:EB:FD:A2:23:88:13:E4:DA:3A:D0:59:D0:09:00:07:36',
   key: 'JH-36HoBo4EYIoVhHh2F:uEo4dksARMq_BSHaAHUr8Q',
 };
+
+describe('EnrollmentTokenForm', () => {
+  jest.setTimeout(20_000);
+
+  it('calls enrollment API when submitting form', async () => {
+    const coreStart = coreMock.createStart();
+    coreStart.http.post.mockResolvedValue({});
+
+    const onSuccess = jest.fn();
+
+    const { findByRole, findByLabelText } = render(
+      <Providers http={coreStart.http}>
+        <EnrollmentTokenForm onSuccess={onSuccess} />
+      </Providers>
+    );
+    fireEvent.change(await findByLabelText('Enrollment token'), {
+      target: { value: btoa(JSON.stringify(token)) },
+    });
+    fireEvent.click(await findByRole('button', { name: 'Connect to cluster', hidden: true }));
+
+    await waitFor(() => {
+      expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/interactive_setup/enroll', {
+        body: JSON.stringify({
+          hosts: [`https://${token.adr[0]}`],
+          apiKey: token.key,
+          caFingerprint: token.fgr,
+        }),
+      });
+      expect(onSuccess).toHaveBeenCalled();
+    });
+  });
+
+  it('validates form', async () => {
+    const coreStart = coreMock.createStart();
+    const onSuccess = jest.fn();
+
+    const { findAllByText, findByRole, findByLabelText } = render(
+      <Providers http={coreStart.http}>
+        <EnrollmentTokenForm onSuccess={onSuccess} />
+      </Providers>
+    );
+
+    fireEvent.click(await findByRole('button', { name: 'Connect to cluster', hidden: true }));
+
+    await findAllByText(/Enter an enrollment token/i);
+
+    fireEvent.change(await findByLabelText('Enrollment token'), {
+      target: { value: 'invalid' },
+    });
+
+    await findAllByText(/Enter a valid enrollment token/i);
+  });
+});
 
 describe('decodeEnrollmentToken', () => {
   it('should decode a valid token', () => {

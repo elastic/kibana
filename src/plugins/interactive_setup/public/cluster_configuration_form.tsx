@@ -34,6 +34,7 @@ import type { Certificate } from '../common';
 import { TextTruncate } from './text_truncate';
 import type { ValidationErrors } from './use_form';
 import { useForm } from './use_form';
+import { useHtmlId } from './use_html_id';
 import { useHttp } from './use_http';
 
 export interface ClusterConfigurationFormValues {
@@ -131,6 +132,8 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
     },
   });
 
+  const trustCaCertId = useHtmlId('clusterConfigurationForm', 'trustCaCert');
+
   return (
     <EuiForm component="form" noValidate {...eventHandlers}>
       <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
@@ -214,7 +217,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
         </>
       )}
 
-      {certificateChain && (
+      {certificateChain && certificateChain.length > 0 && (
         <>
           <EuiFormRow
             label={i18n.translate('interactiveSetup.clusterConfigurationForm.caCertLabel', {
@@ -225,16 +228,16 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
             fullWidth
           >
             <EuiCheckableCard
-              id="trustCaCert"
+              id={trustCaCertId}
               label={i18n.translate('interactiveSetup.clusterConfigurationForm.trustCaCertLabel', {
                 defaultMessage: 'I recognize and trust this certificate:',
               })}
               checkableType="checkbox"
               value="true"
               checked={!!form.values.caCert}
-              onChange={async (event) => {
+              onChange={() => {
                 const intermediateCa = certificateChain[Math.min(1, certificateChain.length - 1)];
-                await form.setValue('caCert', event.target.checked ? intermediateCa.raw ?? '' : '');
+                form.setValue('caCert', form.values.caCert ? '' : intermediateCa.raw);
                 form.setTouched('caCert');
               }}
             >

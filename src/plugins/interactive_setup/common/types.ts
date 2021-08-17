@@ -47,10 +47,10 @@ export interface EnrollmentToken {
 }
 
 export interface Certificate {
-  issuer: PeerCertificate['issuer'];
+  issuer: Partial<PeerCertificate['issuer']>;
   valid_from: PeerCertificate['valid_from'];
   valid_to: PeerCertificate['valid_to'];
-  subject: PeerCertificate['subject'];
+  subject: Partial<PeerCertificate['subject']>;
   fingerprint256: PeerCertificate['fingerprint256'];
   raw: string;
 }

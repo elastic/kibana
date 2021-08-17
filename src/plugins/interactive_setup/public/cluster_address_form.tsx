@@ -34,7 +34,7 @@ export interface ClusterAddressFormValues {
 export interface ClusterAddressFormProps {
   defaultValues?: ClusterAddressFormValues;
   onCancel?(): void;
-  onSuccess?(values: ClusterAddressFormValues, result: PingResponse): void;
+  onSuccess?(result: PingResponse, values: ClusterAddressFormValues): void;
 }
 
 export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
@@ -80,7 +80,7 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
         }),
       });
 
-      onSuccess?.({ host }, result);
+      onSuccess?.(result, { host });
     },
   });
 
