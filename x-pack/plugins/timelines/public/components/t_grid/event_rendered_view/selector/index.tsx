@@ -102,7 +102,7 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
             text: i18n.translate(
               'xpack.timelines.alerts.summaryView.options.summaryView.description',
               {
-                defaultMessage: 'View the event summary for each alert',
+                defaultMessage: 'View a rendering of the event flow for each alert',
               }
             ),
           },
