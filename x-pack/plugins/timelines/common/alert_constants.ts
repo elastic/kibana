@@ -7,6 +7,13 @@
 
 import { ALERT_NAMESPACE, ALERT_RULE_NAMESPACE } from '@kbn/rule-data-utils';
 
+// TODO: Replace the below located in: x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names.ts
+
+// export const ALERT_ANCESTORS = `${ALERT_NAMESPACE}.ancestors`;
+// export const ALERT_DEPTH = `${ALERT_NAMESPACE}.depth`;
+// export const ALERT_ORIGINAL_EVENT = `${ALERT_NAMESPACE}.original_event`;
+// export const ALERT_ORIGINAL_TIME = `${ALERT_NAMESPACE}.original_time`;
+
 /**
  * This file contains the security solution specific Alert fields not contained in the @kbn/rule-data-utils package
  */

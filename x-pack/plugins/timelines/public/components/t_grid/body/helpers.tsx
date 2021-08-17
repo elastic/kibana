@@ -6,6 +6,7 @@
  */
 
 import {
+  ALERT_REASON,
   ALERT_RULE_CREATED_BY,
   ALERT_RULE_DESCRIPTION,
   ALERT_RULE_ENABLED,
@@ -120,7 +121,7 @@ export const getEventIdToDataMapping = (
   }, {});
 
 export const isEventBuildingBlockType = (event: Ecs): boolean =>
-  !isEmpty(event.signal?.rule?.building_block_type);
+  !isEmpty(event.kibana?.alert?.rule?.building_block_type);
 
 export const isEvenEqlSequence = (event: Ecs): boolean => {
   if (!isEmpty(event.eql?.sequenceNumber)) {
@@ -133,10 +134,10 @@ export const isEvenEqlSequence = (event: Ecs): boolean => {
   }
   return false;
 };
-/** Return eventType raw or signal or eql */
+/** Return eventType raw or kibana or eql */
 export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
-  if (!isEmpty(event.signal?.rule?.id)) {
-    return 'signal';
+  if (!isEmpty(event.kibana?.alert?.rule?.id)) {
+    return 'kibana';
   } else if (!isEmpty(event.eql?.parentId)) {
     return 'eql';
   }
@@ -211,6 +212,7 @@ export const allowSorting = ({
     ALERT_ORIGINAL_EVENT_TIMEZONE,
     ALERT_ORIGINAL_EVENT_TYPE,
     ALERT_ORIGINAL_TIME,
+    ALERT_REASON,
     ALERT_RULE_CREATED_BY,
     ALERT_RULE_DESCRIPTION,
     ALERT_RULE_ENABLED,
@@ -248,75 +250,7 @@ export const allowSorting = ({
     ALERT_RULE_UPDATED_BY,
     ALERT_RULE_VERSION,
     ALERT_STATUS,
-    'signal.ancestors.depth',
-    'signal.ancestors.id',
-    'signal.ancestors.rule',
-    'signal.ancestors.type',
-    'signal.original_event.action',
-    'signal.original_event.category',
-    'signal.original_event.code',
-    'signal.original_event.created',
-    'signal.original_event.dataset',
-    'signal.original_event.duration',
-    'signal.original_event.end',
-    'signal.original_event.hash',
-    'signal.original_event.id',
-    'signal.original_event.kind',
-    'signal.original_event.module',
-    'signal.original_event.original',
-    'signal.original_event.outcome',
-    'signal.original_event.provider',
-    'signal.original_event.risk_score',
-    'signal.original_event.risk_score_norm',
-    'signal.original_event.sequence',
-    'signal.original_event.severity',
-    'signal.original_event.start',
-    'signal.original_event.timezone',
-    'signal.original_event.type',
-    'signal.original_time',
-    'signal.parent.depth',
-    'signal.parent.id',
-    'signal.parent.index',
-    'signal.parent.rule',
-    'signal.parent.type',
-    'signal.reason',
-    'signal.rule.created_by',
-    'signal.rule.description',
-    'signal.rule.enabled',
-    'signal.rule.false_positives',
-    'signal.rule.filters',
-    'signal.rule.from',
-    'signal.rule.id',
-    'signal.rule.immutable',
-    'signal.rule.index',
-    'signal.rule.interval',
-    'signal.rule.language',
-    'signal.rule.max_signals',
-    'signal.rule.name',
-    'signal.rule.note',
-    'signal.rule.output_index',
-    'signal.rule.query',
-    'signal.rule.references',
-    'signal.rule.risk_score',
-    'signal.rule.rule_id',
-    'signal.rule.saved_id',
-    'signal.rule.severity',
-    'signal.rule.size',
-    'signal.rule.tags',
-    'signal.rule.threat',
-    'signal.rule.threat.tactic.id',
-    'signal.rule.threat.tactic.name',
-    'signal.rule.threat.tactic.reference',
-    'signal.rule.threat.technique.id',
-    'signal.rule.threat.technique.name',
-    'signal.rule.threat.technique.reference',
-    'signal.rule.timeline_id',
-    'signal.rule.timeline_title',
-    'signal.rule.to',
-    'signal.rule.type',
-    'signal.rule.updated_by',
-    'signal.rule.version',
-    'signal.status',
+    // @ts-expect-error
   ].includes(fieldName);
 
   return isAllowlistedNonBrowserField || isAggregatable;

@@ -401,7 +401,7 @@ describe('helpers', () => {
       const mockedSetCellProps = jest.fn();
       const ecs = {
         ...mockDnsEvent,
-        ...{ signal: { rule: { building_block_type: ['default'] } } },
+        ...{ kibana: { alert: { rule: { building_block_type: ['default'] } } } },
       };
 
       addBuildingBlockStyle(ecs, THEME, mockedSetCellProps);

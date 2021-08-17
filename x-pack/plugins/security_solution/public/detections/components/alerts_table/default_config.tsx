@@ -18,6 +18,7 @@ import {
   ALERT_RULE_ID,
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
+  ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-data-utils';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { ColumnHeaderOptions, RowRendererId } from '../../../../common/types/timeline';
@@ -45,14 +46,14 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => [
       negate: false,
       disabled: false,
       type: 'phrase',
-      key: ALERT_STATUS,
+      key: ALERT_WORKFLOW_STATUS,
       params: {
         query: status,
       },
     },
     query: {
       term: {
-        [ALERT_STATUS]: status,
+        [ALERT_WORKFLOW_STATUS]: status,
       },
     },
   },

@@ -27,7 +27,7 @@ describe('AddToCaseAction', () => {
       ecs: {
         _id: 'test-id',
         _index: 'test-index',
-        signal: { rule: { id: ['rule-id'], name: ['rule-name'], false_positives: [] } },
+        kibana: { alert: { rule: { id: ['rule-id'], name: ['rule-name'], false_positives: [] } } },
       },
     },
     casePermissions: {
@@ -104,7 +104,7 @@ describe('AddToCaseAction', () => {
             ecs: {
               _id: 'test-id',
               _index: 'test-index',
-              signal: { rule: { id: ['rule-id'], false_positives: [] } },
+              kibana: { alert: { rule: { id: ['rule-id'], false_positives: [] } } },
             },
           }}
         />
@@ -116,7 +116,7 @@ describe('AddToCaseAction', () => {
             ecs: {
               _id: 'test-id',
               _index: 'test-index',
-              signal: { rule: { id: ['rule-id'], false_positives: [] } },
+              kibana: { alert: { rule: { id: ['rule-id'], false_positives: [] } } },
             },
           }}
         />

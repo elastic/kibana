@@ -14,6 +14,7 @@ import { EventEcs } from './event';
 import { FileEcs } from './file';
 import { GeoEcs } from './geo';
 import { HostEcs } from './host';
+import { KibanaEcs } from './kibana';
 import { NetworkEcs } from './network';
 import { RegistryEcs } from './registry';
 import { RuleEcs } from './rule';
@@ -42,6 +43,7 @@ export interface Ecs {
   event?: EventEcs;
   geo?: GeoEcs;
   host?: HostEcs;
+  kibana?: KibanaEcs;
   network?: NetworkEcs;
   registry?: RegistryEcs;
   rule?: RuleEcs;
