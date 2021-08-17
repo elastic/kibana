@@ -13,14 +13,14 @@
 import {
   AlertConsumers as AlertConsumersTyped,
   ALERT_DURATION as ALERT_DURATION_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
+  ALERT_SEVERITY as ALERT_SEVERITY_TYPED,
   ALERT_STATUS as ALERT_STATUS_TYPED,
   ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
   ALERT_RULE_CONSUMER,
 } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
+  ALERT_SEVERITY as ALERT_SEVERITY_NON_TYPED,
   ALERT_STATUS as ALERT_STATUS_NON_TYPED,
   ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
   TIMESTAMP,
@@ -66,7 +66,7 @@ import { CoreStart } from '../../../../../../src/core/public';
 
 const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
-const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
+const ALERT_SEVERITY: typeof ALERT_SEVERITY_TYPED = ALERT_SEVERITY_NON_TYPED;
 const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
 const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
 
@@ -139,7 +139,7 @@ export const columns: Array<
     displayAsText: i18n.translate('xpack.observability.alertsTGrid.severityColumnDescription', {
       defaultMessage: 'Severity',
     }),
-    id: ALERT_SEVERITY_LEVEL,
+    id: ALERT_SEVERITY,
     initialWidth: 102,
   },
   {
