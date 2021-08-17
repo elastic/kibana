@@ -30,6 +30,20 @@ interface RawResponse {
   ccsWarning: boolean;
 }
 
+interface TransactionLatencyCorrelationsFetcherState {
+  error?: Error;
+  isComplete: boolean;
+  isRunning: boolean;
+  loaded: number;
+  ccsWarning: RawResponse['ccsWarning'];
+  histograms: RawResponse['values'];
+  log: RawResponse['log'];
+  overallHistogram?: RawResponse['overallHistogram'];
+  percentileThresholdValue?: RawResponse['percentileThresholdValue'];
+  timeTook?: number;
+  total: number;
+}
+
 export const useTransactionLatencyCorrelationsFetcher = (
   params: Omit<SearchServiceParams, 'analyzeCorrelations'>
 ) => {
@@ -37,54 +51,51 @@ export const useTransactionLatencyCorrelationsFetcher = (
     services: { data },
   } = useKibana<ApmPluginStartDeps>();
 
-  const [error, setError] = useState<Error>();
-  const [isComplete, setIsComplete] = useState(false);
-  const [isRunning, setIsRunning] = useState(false);
-  const [loaded, setLoaded] = useState<number>(0);
+  const [
+    fetchState,
+    setFetchState,
+  ] = useState<TransactionLatencyCorrelationsFetcherState>({
+    isComplete: false,
+    isRunning: false,
+    loaded: 0,
+    ccsWarning: false,
+    histograms: [],
+    log: [],
+    total: 100,
+  });
 
-  const [ccsWarning, setCcsWarning] = useState<RawResponse['ccsWarning']>(
-    false
-  );
-  const [histograms, setHistograms] = useState<RawResponse['values']>([]);
-  const [log, setLog] = useState<RawResponse['log']>([]);
-  const [overallHistogram, setOverallHistogram] = useState<
-    RawResponse['overallHistogram']
-  >();
-  const [percentileThresholdValue, setPercentileThresholdValue] = useState<
-    RawResponse['percentileThresholdValue']
-  >();
-
-  const [timeTook, setTimeTook] = useState<number | undefined>();
-  const [total, setTotal] = useState<number>(100);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef<Subscription>();
 
   function setResponse(response: IKibanaSearchResponse<RawResponse>) {
-    setIsRunning(response.isRunning || false);
-    setCcsWarning(response.rawResponse?.ccsWarning ?? false);
-    setHistograms(response.rawResponse?.values ?? []);
-    setLog(response.rawResponse?.log ?? []);
-
-    // only set percentileThresholdValue and overallHistogram once it's repopulated on a refresh,
-    // otherwise the consuming chart would flicker with an empty state on reload.
-    if (
-      response.rawResponse?.percentileThresholdValue !== undefined &&
+    setFetchState((prevState) => ({
+      ...prevState,
+      isRunning: response.isRunning || false,
+      ccsWarning: response.rawResponse?.ccsWarning ?? false,
+      histograms: response.rawResponse?.values ?? [],
+      log: response.rawResponse?.log ?? [],
+      loaded: response.loaded!,
+      total: response.total!,
+      timeTook: response.rawResponse.took,
+      // only set percentileThresholdValue and overallHistogram once it's repopulated on a refresh,
+      // otherwise the consuming chart would flicker with an empty state on reload.
+      ...(response.rawResponse?.percentileThresholdValue !== undefined &&
       response.rawResponse?.overallHistogram !== undefined
-    ) {
-      setOverallHistogram(response.rawResponse?.overallHistogram);
-      setPercentileThresholdValue(
-        response.rawResponse?.percentileThresholdValue
-      );
-    }
-
-    setLoaded(response.loaded!);
-    setTotal(response.total!);
-    setTimeTook(response.rawResponse.took);
+        ? {
+            overallHistogram: response.rawResponse?.overallHistogram,
+            percentileThresholdValue:
+              response.rawResponse?.percentileThresholdValue,
+          }
+        : {}),
+    }));
   }
 
   const startFetch = () => {
-    setError(undefined);
-    setIsComplete(false);
+    setFetchState((prevState) => ({
+      ...prevState,
+      error: undefined,
+      isComplete: false,
+    }));
     searchSubscription$.current?.unsubscribe();
     abortCtrl.current.abort();
     abortCtrl.current = new AbortController();
@@ -106,17 +117,26 @@ export const useTransactionLatencyCorrelationsFetcher = (
           setResponse(res);
           if (isCompleteResponse(res)) {
             searchSubscription$.current?.unsubscribe();
-            setIsRunning(false);
-            setIsComplete(true);
+            setFetchState((prevState) => ({
+              ...prevState,
+              isRunnning: false,
+              isComplete: true,
+            }));
           } else if (isErrorResponse(res)) {
             searchSubscription$.current?.unsubscribe();
-            setError((res as unknown) as Error);
-            setIsRunning(false);
+            setFetchState((prevState) => ({
+              ...prevState,
+              error: (res as unknown) as Error,
+              setIsRunning: false,
+            }));
           }
         },
-        error: (e: Error) => {
-          setError(e);
-          setIsRunning(false);
+        error: (error: Error) => {
+          setFetchState((prevState) => ({
+            ...prevState,
+            error,
+            setIsRunning: false,
+          }));
         },
       });
   };
@@ -125,20 +145,15 @@ export const useTransactionLatencyCorrelationsFetcher = (
     searchSubscription$.current?.unsubscribe();
     searchSubscription$.current = undefined;
     abortCtrl.current.abort();
-    setIsRunning(false);
+    setFetchState((prevState) => ({
+      ...prevState,
+      setIsRunning: false,
+    }));
   };
 
   return {
-    ccsWarning,
-    log,
-    error,
-    histograms,
-    percentileThresholdValue,
-    overallHistogram,
-    isComplete,
-    isRunning,
-    progress: loaded / total,
-    timeTook,
+    ...fetchState,
+    progress: fetchState.loaded / fetchState.total,
     startFetch,
     cancelFetch,
   };

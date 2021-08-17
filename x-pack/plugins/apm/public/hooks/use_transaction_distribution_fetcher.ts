@@ -30,6 +30,19 @@ interface RawResponse {
   ccsWarning: boolean;
 }
 
+interface TransactionDistributionFetcherState {
+  error?: Error;
+  isComplete: boolean;
+  isRunning: boolean;
+  loaded: number;
+  ccsWarning: RawResponse['ccsWarning'];
+  log: RawResponse['log'];
+  transactionDistribution?: RawResponse['overallHistogram'];
+  percentileThresholdValue?: RawResponse['percentileThresholdValue'];
+  timeTook?: number;
+  total: number;
+}
+
 export function useTransactionDistributionFetcher(
   params: Omit<SearchServiceParams, 'analyzeCorrelations'>
 ) {
@@ -37,46 +50,50 @@ export function useTransactionDistributionFetcher(
     services: { data },
   } = useKibana<ApmPluginStartDeps>();
 
-  const [error, setError] = useState<Error>();
-  const [isComplete, setIsComplete] = useState(false);
-  const [isRunning, setIsRunning] = useState(false);
-  const [loaded, setLoaded] = useState<number>(0);
+  const [
+    fetchState,
+    setFetchState,
+  ] = useState<TransactionDistributionFetcherState>({
+    isComplete: false,
+    isRunning: false,
+    loaded: 0,
+    ccsWarning: false,
+    log: [],
+    total: 100,
+  });
 
-  const [transactionDistribution, setTansactionDistribution] = useState<
-    RawResponse['overallHistogram']
-  >();
-  const [percentileThresholdValue, setPercentileThresholdValue] = useState<
-    RawResponse['percentileThresholdValue']
-  >();
-
-  const [timeTook, setTimeTook] = useState<number | undefined>();
-  const [total, setTotal] = useState<number>(100);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef<Subscription>();
 
   function setResponse(response: IKibanaSearchResponse<RawResponse>) {
-    setIsRunning(response.isRunning || false);
-
-    // only set percentileThresholdValue and overallHistogram once it's repopulated on a refresh,
-    // otherwise the consuming chart would flicker with an empty state on reload.
-    if (
-      response.rawResponse?.percentileThresholdValue !== undefined &&
+    setFetchState((prevState) => ({
+      ...prevState,
+      isRunning: response.isRunning || false,
+      ccsWarning: response.rawResponse?.ccsWarning ?? false,
+      histograms: response.rawResponse?.values ?? [],
+      log: response.rawResponse?.log ?? [],
+      loaded: response.loaded!,
+      total: response.total!,
+      timeTook: response.rawResponse.took,
+      // only set percentileThresholdValue and overallHistogram once it's repopulated on a refresh,
+      // otherwise the consuming chart would flicker with an empty state on reload.
+      ...(response.rawResponse?.percentileThresholdValue !== undefined &&
       response.rawResponse?.overallHistogram !== undefined
-    ) {
-      setTansactionDistribution(response.rawResponse?.overallHistogram);
-      setPercentileThresholdValue(
-        response.rawResponse?.percentileThresholdValue
-      );
-    }
-
-    setLoaded(response.loaded!);
-    setTotal(response.total!);
-    setTimeTook(response.rawResponse.took);
+        ? {
+            transactionDistribution: response.rawResponse?.overallHistogram,
+            percentileThresholdValue:
+              response.rawResponse?.percentileThresholdValue,
+          }
+        : {}),
+    }));
   }
 
   const startFetch = () => {
-    setError(undefined);
-    setIsComplete(false);
+    setFetchState((prevState) => ({
+      ...prevState,
+      error: undefined,
+      isComplete: false,
+    }));
     searchSubscription$.current?.unsubscribe();
     abortCtrl.current.abort();
     abortCtrl.current = new AbortController();
@@ -98,17 +115,26 @@ export function useTransactionDistributionFetcher(
           setResponse(res);
           if (isCompleteResponse(res)) {
             searchSubscription$.current?.unsubscribe();
-            setIsRunning(false);
-            setIsComplete(true);
+            setFetchState((prevState) => ({
+              ...prevState,
+              isRunnning: false,
+              isComplete: true,
+            }));
           } else if (isErrorResponse(res)) {
             searchSubscription$.current?.unsubscribe();
-            setError((res as unknown) as Error);
-            setIsRunning(false);
+            setFetchState((prevState) => ({
+              ...prevState,
+              error: (res as unknown) as Error,
+              setIsRunning: false,
+            }));
           }
         },
-        error: (e: Error) => {
-          setError(e);
-          setIsRunning(false);
+        error: (error: Error) => {
+          setFetchState((prevState) => ({
+            ...prevState,
+            error,
+            setIsRunning: false,
+          }));
         },
       });
   };
@@ -117,17 +143,15 @@ export function useTransactionDistributionFetcher(
     searchSubscription$.current?.unsubscribe();
     searchSubscription$.current = undefined;
     abortCtrl.current.abort();
-    setIsRunning(false);
+    setFetchState((prevState) => ({
+      ...prevState,
+      setIsRunning: false,
+    }));
   };
 
   return {
-    error,
-    percentileThresholdValue,
-    isComplete,
-    isRunning,
-    progress: loaded / total,
-    timeTook,
-    transactionDistribution,
+    ...fetchState,
+    progress: fetchState.loaded / fetchState.total,
     startFetch,
     cancelFetch,
   };
