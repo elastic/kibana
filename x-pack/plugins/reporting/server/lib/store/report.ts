@@ -7,7 +7,6 @@
 
 import { omit } from 'lodash';
 import moment from 'moment';
-// @ts-ignore no module definition
 import Puid from 'puid';
 import { JOB_STATUSES } from '../../../common/constants';
 import {
