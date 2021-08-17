@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const STACK_BY_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.histogram.stackByOptions.stackByLabel',
-  {
-    defaultMessage: 'Stack by',
-  }
-);
+export { ResetJobModal } from './reset_job_modal';
