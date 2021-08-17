@@ -37,12 +37,12 @@ interface Props {
 
   embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
 
-  EditorComponent?: JSX.Element;
+  editorElement?: JSX.Element;
 }
 
 export function QuickEditFlyout(props: Props) {
   const {
-    EditorComponent,
+    editorElement,
     embeddable,
 
     onSave,
@@ -52,10 +52,10 @@ export function QuickEditFlyout(props: Props) {
 
   // Mount the editor component in the tree
   useEffect(() => {
-    if (EditorComponent) {
-      render(EditorComponent, document.getElementById(EDITOR_CONTAINER_ID));
+    if (editorElement) {
+      render(editorElement, document.getElementById(EDITOR_CONTAINER_ID));
     }
-  }, [EditorComponent]);
+  }, [editorElement]);
 
   const [input, setInput] = useState({ title: embeddable.getTitle() });
 

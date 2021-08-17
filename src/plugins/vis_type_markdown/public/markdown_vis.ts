@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { MarkdownOptions } from './markdown_options';
+import { getQuickEditor } from './markdown_quick_editor';
 import { SettingsOptions } from './settings_options_lazy';
 import { DefaultEditorSize } from '../../vis_default_editor/public';
 import { VisGroups, VisTypeDefinition } from '../../visualizations/public';
@@ -35,6 +36,7 @@ export const markdownVisDefinition: VisTypeDefinition<MarkdownVisParams> = {
       markdown: '',
     },
   },
+  getQuickEditor,
   editorConfig: {
     optionTabs: [
       {

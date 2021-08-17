@@ -93,6 +93,8 @@ export interface VisTypeDefinition<TVisParams> {
    */
   readonly getSupportedTriggers?: (params?: VisParams) => string[];
 
+  readonly getQuickEditor?: any;
+
   /**
    * Some visualizations are created without SearchSource and may change the used indexes during the visualization configuration.
    * Using this method we can rewrite the standard mechanism for getting used indexes

@@ -154,8 +154,10 @@ export interface IEmbeddable<
 
   getQuickEditor?():
     | Promise<{
-        component: JSX.Element;
+        element: JSX.Element;
         onSave(): Partial<I>;
+        onOpen?(): void;
+        onClose?(): void;
       }>
     | undefined;
 

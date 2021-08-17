@@ -36,6 +36,7 @@ export class BaseVisType<TVisParams = VisParams> {
   public readonly visConfig;
   public readonly editorConfig;
   public hidden;
+  public readonly getQuickEditor;
   public readonly requiresSearch;
   public readonly hierarchicalData;
   public readonly setup;
@@ -70,6 +71,7 @@ export class BaseVisType<TVisParams = VisParams> {
     this.getUsedIndexPattern = opts.getUsedIndexPattern;
     this.inspectorAdapters = opts.inspectorAdapters;
     this.toExpressionAst = opts.toExpressionAst;
+    this.getQuickEditor = opts.getQuickEditor;
     this.getInfoMessage = opts.getInfoMessage;
 
     this.schemas = new Schemas(this.editorConfig?.schemas ?? []);

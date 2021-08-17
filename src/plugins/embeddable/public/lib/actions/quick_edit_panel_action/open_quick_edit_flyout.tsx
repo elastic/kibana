@@ -22,13 +22,18 @@ export async function openQuickEditFlyout(options: {
 }) {
   const { embeddable, overlays, application, stateTransferService } = options;
 
-  let EditorComponent;
+  let element;
   let onSave = () => ({});
+  let onOpen = () => {};
+  let onClose = () => {};
 
   if (embeddable.getQuickEditor) {
     const editor = await embeddable.getQuickEditor();
-    EditorComponent = editor?.component;
+    element = editor?.element;
     onSave = editor?.onSave || (() => ({}));
+
+    onOpen = editor?.onOpen || onOpen;
+    onClose = editor?.onClose || onClose;
   }
 
   let currentAppId: string | undefined;
@@ -40,16 +45,20 @@ export async function openQuickEditFlyout(options: {
 
   const initialInput = embeddable.getInput();
 
+  // Call the open callback
+  onOpen();
+
   const flyoutSession = overlays.openFlyout(
     toMountPoint(
       <QuickEditFlyout
         embeddable={embeddable}
-        EditorComponent={EditorComponent}
+        editorElement={element}
         onCancel={() => {
           // Restore embeddable state if we cancel
           embeddable.updateInput(initialInput);
           embeddable.reload();
 
+          onClose();
           if (flyoutSession) {
             flyoutSession.close();
           }
@@ -57,6 +66,7 @@ export async function openQuickEditFlyout(options: {
         onSave={(newState: Partial<EmbeddableInput>) => {
           embeddable.updateInput({ ...onSave(), ...newState });
 
+          onClose();
           if (flyoutSession) {
             flyoutSession.close();
           }
@@ -67,6 +77,7 @@ export async function openQuickEditFlyout(options: {
 
           goToApp(embeddable, currentAppId || '', { stateTransferService, application });
 
+          onClose();
           if (flyoutSession) {
             flyoutSession.close();
           }
