@@ -122,24 +122,25 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       }
     };
 
+    const { filters, panels, ...restParams } = params;
+    const state: ForwardedDashboardState = restParams;
+
     // leave filters `undefined` if no filters was applied
     // in this case dashboard will restore saved filters on its own
-    const filters = params.filters && [
+    state.filters = params.filters && [
       ...(await getSavedFiltersFromDestinationDashboardIfNeeded()),
       ...params.filters,
     ];
 
-    const panelsMap: DashboardPanelMap = {};
-
-    params.panels?.forEach((panel) => {
-      panelsMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
-    });
-
-    const state: ForwardedDashboardState = {
-      ...params,
-      panels: (panelsMap as unknown) as DashboardPanelMap & SerializableRecord,
-      filters,
-    };
+    const hasPanels = Boolean(params.panels?.length);
+    let panelsMap: undefined | DashboardPanelMap;
+    if (hasPanels) {
+      panelsMap = {};
+      params.panels?.forEach((panel, idx) => {
+        panelsMap![panel.panelIndex ?? String(idx)] = convertSavedDashboardPanelToPanelState(panel);
+      });
+    }
+    state.panels = panelsMap;
 
     let path = `#/${hash}`;
     path = setStateToKbnUrl<QueryState>(
@@ -160,7 +161,7 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
     return {
       app: DashboardConstants.DASHBOARDS_ID,
       path,
-      state,
+      state: cleanEmptyKeys(state),
     };
   };
 }
