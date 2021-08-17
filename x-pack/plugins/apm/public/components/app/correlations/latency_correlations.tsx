@@ -5,338 +5,426 @@
  * 2.0.
  */
 
+import React, { useEffect, useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
-  ScaleType,
-  Chart,
-  Axis,
-  BarSeries,
-  Position,
-  Settings,
-} from '@elastic/charts';
-import React, { useState } from 'react';
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+  EuiCallOut,
+  EuiCode,
+  EuiAccordion,
+  EuiPanel,
+  EuiIcon,
+  EuiBasicTableColumn,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getDurationFormatter } from '../../../../common/utils/formatters';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useTransactionLatencyCorrelationsFetcher } from '../../../hooks/use_transaction_latency_correlations_fetcher';
+import { TransactionDistributionChart } from '../../shared/charts/transaction_distribution_chart';
 import {
   CorrelationsTable,
   SelectedSignificantTerm,
 } from './correlations_table';
-import { ChartContainer } from '../../shared/charts/chart_container';
-import { useTheme } from '../../../hooks/use_theme';
-import { CustomFields, PercentileOption } from './custom_fields';
-import { useFieldNames } from './use_field_names';
-import { useLocalStorage } from '../../../hooks/useLocalStorage';
-import { useUiTracker } from '../../../../../observability/public';
+import { push } from '../../shared/Links/url_helpers';
+import {
+  enableInspectEsQueries,
+  useUiTracker,
+} from '../../../../../observability/public';
+import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { LatencyCorrelationsHelpPopover } from './latency_correlations_help_popover';
 import { useApmParams } from '../../../hooks/use_apm_params';
 
-type OverallLatencyApiResponse = NonNullable<
-  APIReturnType<'GET /api/apm/correlations/latency/overall_distribution'>
->;
+const DEFAULT_PERCENTILE_THRESHOLD = 95;
+const isErrorMessage = (arg: unknown): arg is Error => {
+  return arg instanceof Error;
+};
 
-type CorrelationsApiResponse = NonNullable<
-  APIReturnType<'GET /api/apm/correlations/latency/slow_transactions'>
->;
-
-interface Props {
-  onClose: () => void;
+interface MlCorrelationsTerms {
+  correlation: number;
+  ksTest: number;
+  fieldName: string;
+  fieldValue: string;
+  duplicatedFields?: string[];
 }
 
-export function LatencyCorrelations({ onClose }: Props) {
-  const [
-    selectedSignificantTerm,
-    setSelectedSignificantTerm,
-  ] = useState<SelectedSignificantTerm | null>(null);
+export function LatencyCorrelations() {
+  const {
+    core: { notifications, uiSettings },
+  } = useApmPluginContext();
 
-  const { serviceName } = useApmServiceContext();
+  const { serviceName, transactionType } = useApmServiceContext();
 
   const {
     query: { kuery, environment },
   } = useApmParams('/services/:serviceName');
 
   const { urlParams } = useUrlParams();
-  const { transactionName, transactionType, start, end } = urlParams;
-  const { defaultFieldNames } = useFieldNames();
-  const [fieldNames, setFieldNames] = useLocalStorage(
-    `apm.correlations.latency.fields:${serviceName}`,
-    defaultFieldNames
-  );
-  const hasFieldNames = fieldNames.length > 0;
+
+  const { transactionName, start, end } = urlParams;
+
+  const displayLog = uiSettings.get<boolean>(enableInspectEsQueries);
+
+  const {
+    ccsWarning,
+    log,
+    error,
+    histograms,
+    percentileThresholdValue,
+    isRunning,
+    progress,
+    startFetch,
+    cancelFetch,
+    overallHistogram,
+  } = useTransactionLatencyCorrelationsFetcher({
+    environment,
+    kuery,
+    serviceName,
+    transactionName,
+    transactionType,
+    start,
+    end,
+    percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+  });
+
+  // start fetching on load
+  // we want this effect to execute exactly once after the component mounts
+  useEffect(() => {
+    startFetch();
+
+    return () => {
+      // cancel any running async partial request when unmounting the component
+      // we want this effect to execute exactly once after the component mounts
+      cancelFetch();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (isErrorMessage(error)) {
+      notifications.toasts.addDanger({
+        title: i18n.translate(
+          'xpack.apm.correlations.latencyCorrelations.errorTitle',
+          {
+            defaultMessage: 'An error occurred fetching correlations',
+          }
+        ),
+        text: error.toString(),
+      });
+    }
+  }, [error, notifications.toasts]);
 
   const [
-    durationPercentile,
-    setDurationPercentile,
-  ] = useLocalStorage<PercentileOption>(
-    `apm.correlations.latency.threshold:${serviceName}`,
-    75
-  );
+    selectedSignificantTerm,
+    setSelectedSignificantTerm,
+  ] = useState<SelectedSignificantTerm | null>(null);
 
-  const { data: overallData, status: overallStatus } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/correlations/latency/overall_distribution',
-          params: {
-            query: {
-              environment,
-              kuery,
-              serviceName,
-              transactionName,
-              transactionType,
-              start,
-              end,
-            },
-          },
-        });
-      }
-    },
-    [
-      environment,
-      kuery,
-      serviceName,
-      start,
-      end,
-      transactionName,
-      transactionType,
-    ]
-  );
+  let selectedHistogram = histograms.length > 0 ? histograms[0] : undefined;
 
-  const maxLatency = overallData?.maxLatency;
-  const distributionInterval = overallData?.distributionInterval;
-  const fieldNamesCommaSeparated = fieldNames.join(',');
-
-  const { data: correlationsData, status: correlationsStatus } = useFetcher(
-    (callApmApi) => {
-      if (start && end && hasFieldNames && maxLatency && distributionInterval) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/correlations/latency/slow_transactions',
-          params: {
-            query: {
-              environment,
-              kuery,
-              serviceName,
-              transactionName,
-              transactionType,
-              start,
-              end,
-              durationPercentile: durationPercentile.toString(10),
-              fieldNames: fieldNamesCommaSeparated,
-              maxLatency: maxLatency.toString(10),
-              distributionInterval: distributionInterval.toString(10),
-            },
-          },
-        });
-      }
-    },
-    [
-      environment,
-      kuery,
-      serviceName,
-      start,
-      end,
-      transactionName,
-      transactionType,
-      durationPercentile,
-      fieldNamesCommaSeparated,
-      hasFieldNames,
-      maxLatency,
-      distributionInterval,
-    ]
-  );
-
+  if (histograms.length > 0 && selectedSignificantTerm !== null) {
+    selectedHistogram = histograms.find(
+      (h) =>
+        h.field === selectedSignificantTerm.fieldName &&
+        h.value === selectedSignificantTerm.fieldValue
+    );
+  }
+  const history = useHistory();
   const trackApmEvent = useUiTracker({ app: 'apm' });
-  trackApmEvent({ metric: 'view_latency_correlations' });
+
+  const mlCorrelationColumns: Array<
+    EuiBasicTableColumn<MlCorrelationsTerms>
+  > = useMemo(
+    () => [
+      {
+        width: '116px',
+        field: 'correlation',
+        name: (
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.apm.correlations.latencyCorrelations.correlationsTable.correlationColumnDescription',
+              {
+                defaultMessage:
+                  'The correlation score [0-1] of an attribute; the greater the score, the more an attribute increases latency.',
+              }
+            )}
+          >
+            <>
+              {i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.correlationsTable.correlationLabel',
+                {
+                  defaultMessage: 'Correlation',
+                }
+              )}
+              <EuiIcon
+                size="s"
+                color="subdued"
+                type="questionInCircle"
+                className="eui-alignTop"
+              />
+            </>
+          </EuiToolTip>
+        ),
+        render: (correlation: number) => {
+          return <div>{asPreciseDecimal(correlation, 2)}</div>;
+        },
+      },
+      {
+        field: 'fieldName',
+        name: i18n.translate(
+          'xpack.apm.correlations.latencyCorrelations.correlationsTable.fieldNameLabel',
+          { defaultMessage: 'Field name' }
+        ),
+      },
+      {
+        field: 'fieldValue',
+        name: i18n.translate(
+          'xpack.apm.correlations.latencyCorrelations.correlationsTable.fieldValueLabel',
+          { defaultMessage: 'Field value' }
+        ),
+        render: (fieldValue: string) => String(fieldValue).slice(0, 50),
+      },
+      {
+        width: '100px',
+        actions: [
+          {
+            name: i18n.translate(
+              'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterLabel',
+              { defaultMessage: 'Filter' }
+            ),
+            description: i18n.translate(
+              'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterDescription',
+              { defaultMessage: 'Filter by value' }
+            ),
+            icon: 'plusInCircle',
+            type: 'icon',
+            onClick: (term: MlCorrelationsTerms) => {
+              push(history, {
+                query: {
+                  kuery: `${term.fieldName}:"${encodeURIComponent(
+                    term.fieldValue
+                  )}"`,
+                },
+              });
+              trackApmEvent({ metric: 'correlations_term_include_filter' });
+            },
+          },
+          {
+            name: i18n.translate(
+              'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeLabel',
+              { defaultMessage: 'Exclude' }
+            ),
+            description: i18n.translate(
+              'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeDescription',
+              { defaultMessage: 'Filter out value' }
+            ),
+            icon: 'minusInCircle',
+            type: 'icon',
+            onClick: (term: MlCorrelationsTerms) => {
+              push(history, {
+                query: {
+                  kuery: `not ${term.fieldName}:"${encodeURIComponent(
+                    term.fieldValue
+                  )}"`,
+                },
+              });
+              trackApmEvent({ metric: 'correlations_term_exclude_filter' });
+            },
+          },
+        ],
+        name: i18n.translate(
+          'xpack.apm.correlations.latencyCorrelations.correlationsTable.actionsLabel',
+          { defaultMessage: 'Filter' }
+        ),
+      },
+    ],
+    [history, trackApmEvent]
+  );
+
+  const histogramTerms: MlCorrelationsTerms[] = useMemo(() => {
+    return histograms.map((d) => {
+      return {
+        fieldName: d.field,
+        fieldValue: d.value,
+        ksTest: d.ksTest,
+        correlation: d.correlation,
+        duplicatedFields: d.duplicatedFields,
+      };
+    });
+  }, [histograms]);
 
   return (
     <>
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <EuiText size="s" color="subdued">
-            <p>
-              {i18n.translate('xpack.apm.correlations.latency.description', {
-                defaultMessage:
-                  'What is slowing down my service? Correlations will help discover a slower performance in a particular cohort of your data. Either by host, version, or other custom fields.',
-              })}
-            </p>
-          </EuiText>
+      <EuiFlexGroup data-test-subj="apmCorrelationsTabContent">
+        <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <EuiTitle size="xs">
+            <h5 data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">
+              {i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.panelTitle',
+                {
+                  defaultMessage: 'Latency distribution',
+                }
+              )}
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+
+      <TransactionDistributionChart
+        markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
+        markerValue={percentileThresholdValue ?? 0}
+        {...selectedHistogram}
+        overallHistogram={overallHistogram}
+      />
+
+      <EuiSpacer size="s" />
+      <EuiTitle size="xs">
+        <span data-test-subj="apmCorrelationsLatencyCorrelationsTablePanelTitle">
+          {i18n.translate(
+            'xpack.apm.correlations.latencyCorrelations.tableTitle',
+            {
+              defaultMessage: 'Correlations',
+            }
+          )}
+        </span>
+      </EuiTitle>
+
+      <EuiSpacer size="s" />
+
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          {!isRunning && (
+            <EuiButton size="s" onClick={startFetch}>
+              <FormattedMessage
+                id="xpack.apm.correlations.latencyCorrelations.refreshButtonTitle"
+                defaultMessage="Refresh"
+              />
+            </EuiButton>
+          )}
+          {isRunning && (
+            <EuiButton size="s" onClick={cancelFetch}>
+              <FormattedMessage
+                id="xpack.apm.correlations.latencyCorrelations.cancelButtonTitle"
+                defaultMessage="Cancel"
+              />
+            </EuiButton>
+          )}
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup direction="row">
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem data-test-subj="apmCorrelationsLatencyCorrelationsProgressTitle">
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  data-test-subj="apmCorrelationsLatencyCorrelationsProgressTitle"
+                  id="xpack.apm.correlations.latencyCorrelations.progressTitle"
+                  defaultMessage="Progress: {progress}%"
+                  values={{ progress: Math.round(progress * 100) }}
+                />
+              </EuiText>
+            </EuiFlexItem>
             <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h4>
-                  {i18n.translate(
-                    'xpack.apm.correlations.latency.chart.title',
-                    { defaultMessage: 'Latency distribution' }
-                  )}
-                </h4>
-              </EuiTitle>
-              <LatencyDistributionChart
-                overallData={overallData}
-                correlationsData={
-                  hasFieldNames && correlationsData
-                    ? correlationsData?.significantTerms
-                    : undefined
-                }
-                status={overallStatus}
-                selectedSignificantTerm={selectedSignificantTerm}
+              <EuiProgress
+                aria-label={i18n.translate(
+                  'xpack.apm.correlations.latencyCorrelations.progressAriaLabel',
+                  { defaultMessage: 'Progress' }
+                )}
+                value={Math.round(progress * 100)}
+                max={100}
+                size="m"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <CorrelationsTable
-            percentageColumnName={i18n.translate(
-              'xpack.apm.correlations.latency.percentageColumnName',
-              { defaultMessage: '% of slow transactions' }
-            )}
-            significantTerms={
-              hasFieldNames && correlationsData
-                ? correlationsData?.significantTerms
-                : []
-            }
-            status={correlationsStatus}
-            setSelectedSignificantTerm={setSelectedSignificantTerm}
-            onFilter={onClose}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <CustomFields
-            fieldNames={fieldNames}
-            setFieldNames={setFieldNames}
-            showThreshold
-            setDurationPercentile={setDurationPercentile}
-            durationPercentile={durationPercentile}
-          />
+        <EuiFlexItem grow={false}>
+          <LatencyCorrelationsHelpPopover />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
-  );
-}
-
-function getAxisMaxes(data?: OverallLatencyApiResponse) {
-  if (!data?.overallDistribution) {
-    return { xMax: 0, yMax: 0 };
-  }
-  const { overallDistribution } = data;
-  const xValues = overallDistribution.map((p) => p.x ?? 0);
-  const yValues = overallDistribution.map((p) => p.y ?? 0);
-  return {
-    xMax: Math.max(...xValues),
-    yMax: Math.max(...yValues),
-  };
-}
-
-function getSelectedDistribution(
-  significantTerms: CorrelationsApiResponse['significantTerms'],
-  selectedSignificantTerm: SelectedSignificantTerm
-) {
-  if (!significantTerms) {
-    return [];
-  }
-  return (
-    significantTerms.find(
-      ({ fieldName, fieldValue }) =>
-        selectedSignificantTerm.fieldName === fieldName &&
-        selectedSignificantTerm.fieldValue === fieldValue
-    )?.distribution || []
-  );
-}
-
-function LatencyDistributionChart({
-  overallData,
-  correlationsData,
-  selectedSignificantTerm,
-  status,
-}: {
-  overallData?: OverallLatencyApiResponse;
-  correlationsData?: CorrelationsApiResponse['significantTerms'];
-  selectedSignificantTerm: SelectedSignificantTerm | null;
-  status: FETCH_STATUS;
-}) {
-  const theme = useTheme();
-  const { xMax, yMax } = getAxisMaxes(overallData);
-  const durationFormatter = getDurationFormatter(xMax);
-
-  return (
-    <ChartContainer height={200} hasData={!!overallData} status={status}>
-      <Chart>
-        <Settings
-          showLegend
-          legendPosition={Position.Bottom}
-          tooltip={{
-            headerFormatter: (obj) => {
-              const start = durationFormatter(obj.value);
-              const end = durationFormatter(
-                obj.value + overallData?.distributionInterval
-              );
-
-              return `${start.value} - ${end.formatted}`;
-            },
-          }}
-        />
-        <Axis
-          id="x-axis"
-          position={Position.Bottom}
-          showOverlappingTicks
-          tickFormat={(d) => durationFormatter(d).formatted}
-        />
-        <Axis
-          id="y-axis"
-          position={Position.Left}
-          tickFormat={(d) => `${d}%`}
-          domain={{ min: 0, max: yMax }}
-        />
-
-        <BarSeries
-          id={i18n.translate(
-            'xpack.apm.correlations.latency.chart.overallLatencyDistributionLabel',
-            { defaultMessage: 'Overall latency distribution' }
-          )}
-          xScaleType={ScaleType.Linear}
-          yScaleType={ScaleType.Linear}
-          xAccessor={'x'}
-          yAccessors={['y']}
-          color={theme.eui.euiColorVis1}
-          data={overallData?.overallDistribution || []}
-          minBarHeight={5}
-          tickFormat={(d) => `${roundFloat(d)}%`}
-        />
-
-        {correlationsData && selectedSignificantTerm ? (
-          <BarSeries
-            id={i18n.translate(
-              'xpack.apm.correlations.latency.chart.selectedTermLatencyDistributionLabel',
+      {ccsWarning && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.apm.correlations.latencyCorrelations.ccsWarningCalloutTitle',
               {
-                defaultMessage: '{fieldName}:{fieldValue}',
-                values: {
-                  fieldName: selectedSignificantTerm.fieldName,
-                  fieldValue: selectedSignificantTerm.fieldValue,
-                },
+                defaultMessage: 'Cross-cluster search compatibility',
               }
             )}
-            xScaleType={ScaleType.Linear}
-            yScaleType={ScaleType.Linear}
-            xAccessor={'x'}
-            yAccessors={['y']}
-            color={theme.eui.euiColorVis2}
-            data={getSelectedDistribution(
-              correlationsData,
-              selectedSignificantTerm
-            )}
-            minBarHeight={5}
-            tickFormat={(d) => `${roundFloat(d)}%`}
+            color="warning"
+          >
+            <p>
+              {i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.ccsWarningCalloutBody',
+                {
+                  defaultMessage:
+                    'Data for the correlation analysis could not be fully retrieved. This feature is supported only for 7.14 and later versions.',
+                }
+              )}
+            </p>
+          </EuiCallOut>
+        </>
+      )}
+      <EuiSpacer size="m" />
+      <div data-test-subj="apmCorrelationsTable">
+        {histograms.length > 0 && selectedHistogram !== undefined && (
+          <CorrelationsTable
+            // @ts-ignore correlations don't have the same column format other tables have
+            columns={mlCorrelationColumns}
+            // @ts-expect-error correlations don't have the same significant term other tables have
+            significantTerms={histogramTerms}
+            status={FETCH_STATUS.SUCCESS}
+            setSelectedSignificantTerm={setSelectedSignificantTerm}
+            selectedTerm={{
+              fieldName: selectedHistogram.field,
+              fieldValue: selectedHistogram.value,
+            }}
           />
+        )}
+        {histograms.length < 1 && progress > 0.99 ? (
+          <>
+            <EuiSpacer size="m" />
+            <EuiText textAlign="center">
+              <FormattedMessage
+                id="xpack.apm.correlations.latencyCorrelations.noCorrelationsText"
+                defaultMessage="No significant correlations found"
+              />
+            </EuiText>
+          </>
         ) : null}
-      </Chart>
-    </ChartContainer>
+      </div>
+      {log.length > 0 && displayLog && (
+        <EuiAccordion
+          id="accordion1"
+          buttonContent={i18n.translate(
+            'xpack.apm.correlations.latencyCorrelations.logButtonContent',
+            {
+              defaultMessage: 'Log',
+            }
+          )}
+        >
+          <EuiPanel color="subdued">
+            {log.map((d, i) => {
+              const splitItem = d.split(': ');
+              return (
+                <p key={i}>
+                  <small>
+                    <EuiCode>{splitItem[0]}</EuiCode> {splitItem[1]}
+                  </small>
+                </p>
+              );
+            })}
+          </EuiPanel>
+        </EuiAccordion>
+      )}
+    </>
   );
-}
-
-function roundFloat(n: number, digits = 2) {
-  const factor = Math.pow(10, digits);
-  return Math.round(n * factor) / factor;
 }
