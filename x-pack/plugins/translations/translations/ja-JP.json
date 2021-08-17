@@ -19597,7 +19597,6 @@
     "xpack.security.loggedOutAppTitle": "ログアウト",
     "xpack.security.login.basicLoginForm.logInButtonLabel": "ログイン",
     "xpack.security.login.basicLoginForm.passwordFormRowLabel": "パスワード",
-    "xpack.security.login.basicLoginForm.unknownErrorMessage": "おっと！エラー。再試行してください。",
     "xpack.security.login.basicLoginForm.usernameFormRowLabel": "ユーザー名",
     "xpack.security.login.basicLoginForm.usernameOrPasswordIsIncorrectErrorMessage": "ユーザー名またはパスワードが正しくありません。再試行してください。",
     "xpack.security.login.loggedOutDescription": "Elasticからログアウトしました。",
