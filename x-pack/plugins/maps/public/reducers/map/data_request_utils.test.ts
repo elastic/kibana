@@ -186,7 +186,7 @@ describe('startDataRequest', () => {
           __dataRequests: [
             {
               dataId: 'source',
-              dataMetaAtStart: DATA_META_AT_START,
+              dataRequestMetaAtStart: DATA_META_AT_START,
               dataRequestToken: REQUEST_TOKEN,
             },
           ],
@@ -204,7 +204,7 @@ describe('startDataRequest', () => {
           __dataRequests: [
             {
               dataId: 'source',
-              dataMetaAtStart: { prop1: 'old value' },
+              dataRequestMetaAtStart: { prop1: 'old value' },
               dataRequestToken: Symbol('request'),
             },
           ],
@@ -219,7 +219,7 @@ describe('startDataRequest', () => {
           __dataRequests: [
             {
               dataId: 'source',
-              dataMetaAtStart: DATA_META_AT_START,
+              dataRequestMetaAtStart: DATA_META_AT_START,
               dataRequestToken: REQUEST_TOKEN,
             },
           ],
@@ -270,7 +270,7 @@ describe('stopDataRequest', () => {
             {
               dataId: 'source',
               dataRequestToken: REQUEST_TOKEN,
-              dataMetaAtStart: { requestProp1: 'request' },
+              dataRequestMetaAtStart: { requestProp1: 'request' },
               data: { prop1: 'old data ' },
             },
           ],
@@ -287,9 +287,9 @@ describe('stopDataRequest', () => {
           __dataRequests: [
             {
               dataId: 'source',
-              dataMeta: { requestProp1: 'request', responseProp1: 'response' },
+              dataRequestMeta: { requestProp1: 'request', responseProp1: 'response' },
               data: { prop1: 'new data' },
-              dataMetaAtStart: undefined,
+              dataRequestMetaAtStart: undefined,
               dataRequestToken: undefined,
             },
           ],
