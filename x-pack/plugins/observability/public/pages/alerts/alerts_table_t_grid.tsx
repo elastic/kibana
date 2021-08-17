@@ -28,9 +28,6 @@ import {
   // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
 
-// @ts-expect-error importing from a place other than root because we want to limit what we import from this package
-import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
-
 import {
   EuiButtonIcon,
   EuiDataGridColumn,
