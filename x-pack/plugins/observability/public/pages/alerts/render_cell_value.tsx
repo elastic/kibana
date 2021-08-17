@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiIconTip, EuiLink, EuiHealth } from '@elastic/eui';
+import { EuiLink, EuiHealth } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 /**
