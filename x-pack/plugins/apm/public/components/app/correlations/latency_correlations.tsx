@@ -10,6 +10,7 @@ import { useHistory } from 'react-router-dom';
 import {
   EuiCallOut,
   EuiCode,
+  EuiEmptyPrompt,
   EuiAccordion,
   EuiPanel,
   EuiIcon,
@@ -376,31 +377,52 @@ export function LatencyCorrelations() {
       )}
       <EuiSpacer size="m" />
       <div data-test-subj="apmCorrelationsTable">
-        {histograms.length > 0 && selectedHistogram !== undefined && (
+        {(isRunning || histogramTerms.length > 0) && (
           <CorrelationsTable
             // @ts-ignore correlations don't have the same column format other tables have
             columns={mlCorrelationColumns}
             // @ts-expect-error correlations don't have the same significant term other tables have
             significantTerms={histogramTerms}
-            status={FETCH_STATUS.SUCCESS}
+            status={isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
-            selectedTerm={{
-              fieldName: selectedHistogram.field,
-              fieldValue: selectedHistogram.value,
-            }}
+            selectedTerm={
+              selectedHistogram !== undefined
+                ? {
+                    fieldName: selectedHistogram.field,
+                    fieldValue: selectedHistogram.value,
+                  }
+                : undefined
+            }
           />
         )}
-        {histograms.length < 1 && progress > 0.99 ? (
+        {histogramTerms.length < 1 && (progress === 1 || !isRunning) && (
           <>
             <EuiSpacer size="m" />
-            <EuiText textAlign="center">
-              <FormattedMessage
-                id="xpack.apm.correlations.latencyCorrelations.noCorrelationsText"
-                defaultMessage="No significant correlations found"
-              />
-            </EuiText>
+            <EuiEmptyPrompt
+              iconType="minusInCircle"
+              title={
+                <EuiText size="s">
+                  <h2>
+                    {i18n.translate(
+                      'xpack.apm.correlations.latencyCorrelations.noCorrelationsTitle',
+                      {
+                        defaultMessage: 'No significant correlations',
+                      }
+                    )}
+                  </h2>
+                </EuiText>
+              }
+              body={
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.apm.correlations.latencyCorrelations.noCorrelationsText"
+                    defaultMessage="Correlations will only be identified if they have significant impact. Try selecting another time range or remove any added filter."
+                  />
+                </EuiText>
+              }
+            />
           </>
-        ) : null}
+        )}
       </div>
       {log.length > 0 && displayLog && (
         <EuiAccordion
