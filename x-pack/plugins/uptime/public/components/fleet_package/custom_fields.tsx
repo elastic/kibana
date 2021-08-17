@@ -15,6 +15,8 @@ import {
   EuiSpacer,
   EuiDescribedFormGroup,
   EuiCheckbox,
+  EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 import { ConfigKeys, DataStream, Validation } from './types';
 import { useMonitorTypeContext } from './contexts';
@@ -122,6 +124,32 @@ export const CustomFields = memo<Props>(
                   />
                 </EuiFormRow>
               )}
+              <EuiSpacer size="s" />
+              {isBrowser && (
+                <EuiCallOut
+                  title={
+                    <FormattedMessage
+                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.description"
+                      defaultMessage={
+                        'Browser monitoring requires using the "complete" variant of the elastic–agent docker container. Other distributions of elastic that agent will not work correctly with it because they lack the required browser and other binaries. For more information see our {link}'
+                      }
+                      values={{
+                        link: (
+                          <EuiLink target="_blank" href="" external>
+                            <FormattedMessage
+                              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.link"
+                              defaultMessage="docs"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  }
+                  iconType="help"
+                  size="s"
+                />
+              )}
+              <EuiSpacer size="s" />
               {renderSimpleFields(monitorType)}
             </EuiFlexItem>
           </EuiFlexGroup>

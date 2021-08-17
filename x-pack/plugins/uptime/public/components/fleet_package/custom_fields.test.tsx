@@ -203,6 +203,11 @@ describe('<CustomFields />', () => {
     getAllByLabelText('Zip URL').forEach((node) => {
       expect(node).toBeInTheDocument();
     });
+    expect(
+      getByText(
+        /Browser monitoring requires using the \"complete\" variant of the elastic–agent docker container./
+      )
+    ).toBeInTheDocument();
 
     // ensure at least one browser advanced option is present
     advancedOptionsButton = getByText('Advanced Browser options');
