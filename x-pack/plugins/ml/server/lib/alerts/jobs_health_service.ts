@@ -197,7 +197,6 @@ export function jobsHealthServiceProvider(
       const resultJobIds = getJobIds(resultJobs);
       const jobsMap = keyBy(resultJobs, 'job_id');
 
-      // @ts-expect-error @elastic-elasticsearch missing blocked property in job
       const defaultLookbackInterval = resolveLookbackInterval(resultJobs, datafeeds!);
       const earliestMs = getDelayedDataLookbackTimestamp(timeInterval, defaultLookbackInterval);
 
@@ -227,7 +226,6 @@ export function jobsHealthServiceProvider(
 
           const isDocCountExceededThreshold = docsCount ? v.missed_docs_count >= docsCount : true;
 
-          // @ts-expect-error @elastic-elasticsearch missing blocked property in job
           const jobLookbackInterval = resolveLookbackInterval([job], [datafeed]);
 
           const isEndTimestampWithinRange =

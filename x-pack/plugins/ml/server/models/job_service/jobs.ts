@@ -157,8 +157,12 @@ export function jobsProvider(
     for (const jobId of jobIds) {
       try {
         const {
+          // @ts-expect-error @elastic-elasticsearch resetJob response incorrect, missing task
           body: { task },
-        } = await mlClient.resetJob({ job_id: jobId, wait_for_completion: false });
+        } = await mlClient.resetJob({
+          job_id: jobId,
+          wait_for_completion: false,
+        });
         results[jobId] = { reset: true, task };
       } catch (error) {
         if (isRequestTimeout(error)) {
@@ -313,8 +317,7 @@ export function jobsProvider(
     if (jobResults && jobResults.jobs) {
       const job = jobResults.jobs.find((j) => j.job_id === jobId);
       if (job) {
-        // TODO remove type assertion once es client types are correct
-        result.job = job as Job;
+        result.job = job;
       }
     }
     return result;
@@ -515,7 +518,7 @@ export function jobsProvider(
       jobs.push(
         ...(tempJobs as Job[]) // change once es client types are correct
           .filter((j) => j.blocked !== undefined)
-          .map((j) => ({ [j.job_id]: j.blocked.reason }))
+          .map((j) => ({ [j.job_id]: j.blocked!.reason }))
       );
     }
     return { jobs };

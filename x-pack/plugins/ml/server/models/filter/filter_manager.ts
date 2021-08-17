@@ -71,7 +71,6 @@ export class FilterManager {
         let filtersInUse: FiltersInUse = {};
         if (results[JOBS] && (results[JOBS].body as estypes.MlGetJobsResponse).jobs) {
           filtersInUse = this.buildFiltersInUse(
-            // @ts-expect-error @elastic-elasticsearch missing blocked property in job
             (results[JOBS].body as estypes.MlGetJobsResponse).jobs
           );
         }
@@ -111,7 +110,6 @@ export class FilterManager {
       let filtersInUse: FiltersInUse = {};
       if (results[JOBS] && (results[JOBS].body as estypes.MlGetJobsResponse).jobs) {
         filtersInUse = this.buildFiltersInUse(
-          // @ts-expect-error @elastic-elasticsearch missing blocked property in job
           (results[JOBS].body as estypes.MlGetJobsResponse).jobs
         );
       }

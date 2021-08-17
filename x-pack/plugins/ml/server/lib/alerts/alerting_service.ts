@@ -448,10 +448,8 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
     }
 
     const lookBackTimeInterval: string =
-      // @ts-expect-error @elastic-elasticsearch missing blocked property in job
       params.lookbackInterval ?? resolveLookbackInterval(jobsResponse, datafeeds ?? []);
 
-    // @ts-expect-error @elastic-elasticsearch missing blocked property in job
     const topNBuckets: number = params.topNBuckets ?? getTopNBuckets(jobsResponse[0]);
 
     const requestBody = {

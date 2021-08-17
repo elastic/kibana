@@ -103,7 +103,7 @@ export function getMlClient(
     const ids = getADJobIdsFromRequest(p);
     if (ids.length) {
       const { body } = await mlClient.getJobs(...p);
-      await groupIdsCheck(p, body.jobs as Job[], filteredJobIds);
+      await groupIdsCheck(p, body.jobs, filteredJobIds);
     }
   }
 
@@ -343,14 +343,12 @@ export function getMlClient(
         const { body } = await mlClient.getJobs<{ jobs: Job[] }>(...p);
         const jobs = await jobSavedObjectService.filterJobsForSpace<Job>(
           'anomaly-detector',
-          // TODO remove type assertion once es client types are correct
-          body.jobs as Job[],
+          body.jobs,
           'job_id'
         );
         await groupIdsCheck(
           p,
-          // TODO remove type assertion once es client types are correct
-          body.jobs as Job[],
+          body.jobs,
           jobs.map((j) => j.job_id)
         );
         return { body: { ...body, count: jobs.length, jobs } };
@@ -476,7 +474,7 @@ export function getMlClient(
       await jobIdsCheck('anomaly-detector', p);
       return mlClient.updateJob(...p);
     },
-    async resetJob(...p: Parameters<MlClient['updateJob']>) {
+    async resetJob(...p: Parameters<MlClient['resetJob']>) {
       await jobIdsCheck('anomaly-detector', p);
       return mlClient.resetJob(...p);
     },
