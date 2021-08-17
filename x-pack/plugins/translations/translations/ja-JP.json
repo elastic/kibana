@@ -11481,7 +11481,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotTitle": "スナップショットポリシーを待機",
     "xpack.indexLifecycleMgmt.editPolicy.differentPolicyNameRequiredError": "ポリシー名は異なるものである必要があります。",
     "xpack.indexLifecycleMgmt.editPolicy.documentationLinkText": "ドキュメント",
-    "xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyExplanationMessage": "すべての変更はこのポリシーに関連付けられているインデックスに影響を及ぼします。代わりに、これらの変更を新規ポリシーに保存することもできます。",
     "xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyMessage": "既存のポリシーを編集しています",
     "xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage": "ポリシー{originalPolicyName}の編集",
     "xpack.indexLifecycleMgmt.editPolicy.errors.integerRequiredError": "整数のみを使用できます。",

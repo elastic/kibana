@@ -11619,7 +11619,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotTitle": "等候快照策略",
     "xpack.indexLifecycleMgmt.editPolicy.differentPolicyNameRequiredError": "策略名称必须不同。",
     "xpack.indexLifecycleMgmt.editPolicy.documentationLinkText": "文档",
-    "xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyExplanationMessage": "所做的任何更改将影响附加到此策略的索引。或者，您可以在新策略中保存这些更改。",
     "xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyMessage": "您正在编辑现有策略",
     "xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage": "编辑策略 {originalPolicyName}",
     "xpack.indexLifecycleMgmt.editPolicy.errors.integerRequiredError": "仅允许使用整数。",
