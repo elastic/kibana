@@ -130,11 +130,11 @@ export function TransactionDistribution({
   };
 
   return (
-    <>
-      <EuiFlexGroup data-test-subj="apmCorrelationsTabContent">
+    <div data-test-subj="apmTransactionDistributionTabContent">
+      <EuiFlexGroup>
         <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
           <EuiTitle size="xs">
-            <h5 data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">
+            <h5 data-test-subj="apmTransactionDistributionChartTitle">
               {i18n.translate(
                 'xpack.apm.transactionDetails.distribution.panelTitle',
                 {
@@ -196,6 +196,6 @@ export function TransactionDistribution({
         onChartSelection={onTrackedChartSelection}
         selection={selection}
       />
-    </>
+    </div>
   );
 }

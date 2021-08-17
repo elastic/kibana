@@ -262,8 +262,8 @@ export function LatencyCorrelations() {
   }, [histograms]);
 
   return (
-    <>
-      <EuiFlexGroup data-test-subj="apmCorrelationsTabContent">
+    <div data-test-subj="apmLatencyCorrelationsTabContent">
+      <EuiFlexGroup>
         <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
           <EuiTitle size="xs">
             <h5 data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">
@@ -275,6 +275,9 @@ export function LatencyCorrelations() {
               )}
             </h5>
           </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LatencyCorrelationsHelpPopover />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -288,6 +291,7 @@ export function LatencyCorrelations() {
       />
 
       <EuiSpacer size="s" />
+
       <EuiTitle size="xs">
         <span data-test-subj="apmCorrelationsLatencyCorrelationsTablePanelTitle">
           {i18n.translate(
@@ -344,9 +348,6 @@ export function LatencyCorrelations() {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <LatencyCorrelationsHelpPopover />
         </EuiFlexItem>
       </EuiFlexGroup>
       {ccsWarning && (
@@ -425,6 +426,6 @@ export function LatencyCorrelations() {
           </EuiPanel>
         </EuiAccordion>
       )}
-    </>
+    </div>
   );
 }
