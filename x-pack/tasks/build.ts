@@ -70,7 +70,7 @@ async function copySourceAndBabelify() {
         buffer: true,
         nodir: true,
         ignore: [
-          '**/README.md',
+          '**/*.{md,asciidoc}',
           '**/jest.config.js',
           '**/*.{test,test.mocks,mock,mocks}.*',
           '**/*.d.ts',
