@@ -105,7 +105,24 @@ describe('Overview - Fix deprecation logs step', () => {
   });
 
   describe('Step 2 - Analyze logs', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({
+        isDeprecationLogIndexingEnabled: true,
+        isDeprecationLoggingEnabled: true,
+      });
+    });
+
     test('Has a link to see logs in observability app', async () => {
+      await act(async () => {
+        testBed = await setupOverviewPage({
+          http: {
+            basePath: {
+              prepend: (url: string) => url,
+            },
+          },
+        });
+      });
+
       const { component, exists, find } = testBed;
 
       component.update();
@@ -117,12 +134,20 @@ describe('Overview - Fix deprecation logs step', () => {
     });
 
     test('Has a link to see logs in discover app', async () => {
+      await act(async () => {
+        testBed = await setupOverviewPage({
+          getUrlForApp: jest.fn((app, options) => {
+            return `${app}/${options.path}`;
+          }),
+        });
+      });
+
       const { exists, component, find } = testBed;
 
       component.update();
 
       expect(exists('viewDiscoverLogs')).toBe(true);
-      expect(find('viewDiscoverLogs').props().href).toBe('/app/discover/');
+      expect(find('viewDiscoverLogs').props().href).toBe('/discover/logs');
     });
   });
 });

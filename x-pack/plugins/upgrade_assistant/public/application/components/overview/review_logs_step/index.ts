@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getReviewStep } from './review_step';
+export { getReviewLogsStep } from './review_logs_step';

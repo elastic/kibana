@@ -20,7 +20,7 @@ const i18nTexts = {
   }),
 };
 
-export const getReviewStep = ({ currentMajor }: { currentMajor: number }): EuiStepProps => {
+export const getReviewLogsStep = ({ currentMajor }: { currentMajor: number }): EuiStepProps => {
   return {
     title: i18nTexts.reviewStepTitle,
     status: 'incomplete',
