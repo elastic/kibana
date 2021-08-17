@@ -21,6 +21,9 @@ import { asTaskPollingCycleEvent, asTaskRunEvent, TaskPersistence } from './task
 import { TaskRunResult } from './task_running';
 import { TaskPoolRunResult } from './task_pool';
 import { TaskPoolMock } from './task_pool.mock';
+import { executionContextServiceMock } from '../../../../src/core/server/mocks';
+
+const executionContext = executionContextServiceMock.createSetupContract();
 
 describe('EphemeralTaskLifecycle', () => {
   function initTaskLifecycleParams({
@@ -37,6 +40,7 @@ describe('EphemeralTaskLifecycle', () => {
     const opts: EphemeralTaskLifecycleOpts = {
       logger: taskManagerLogger,
       definitions: new TaskTypeDictionary(taskManagerLogger),
+      executionContext,
       config: {
         enabled: true,
         max_workers: 10,

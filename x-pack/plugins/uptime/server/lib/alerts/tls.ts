@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { ALERT_SEVERITY_WARNING, ALERT_SEVERITY_LEVEL } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_SEVERITY_WARNING, ALERT_SEVERITY_LEVEL } from '@kbn/rule-data-utils';
 import { UptimeAlertTypeFactory } from './types';
 import { updateState, generateAlertMessage } from './common';
 import { TLS } from '../../../common/constants/alerts';
@@ -174,7 +173,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
             'tls.server.x509.not_before': cert.not_before,
             'tls.server.hash.sha256': cert.sha256,
             [ALERT_SEVERITY_LEVEL]: ALERT_SEVERITY_WARNING,
-            reason: generateAlertMessage(TlsTranslations.defaultActionMessage, summary),
+            [ALERT_REASON]: generateAlertMessage(TlsTranslations.defaultActionMessage, summary),
           },
         });
         alertInstance.replaceState({

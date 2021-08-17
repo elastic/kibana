@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { ALERT_SEVERITY_WARNING, ALERT_SEVERITY_LEVEL } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { JsonObject } from '@kbn/utility-types';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { UptimeAlertTypeFactory } from './types';
 import { esKuery } from '../../../../../../src/plugins/data/server';
 import {
@@ -162,7 +163,7 @@ export const getMonitorAlertDocument = (monitorSummary: Record<string, string | 
   'error.message': monitorSummary.latestErrorMessage,
   'agent.name': monitorSummary.observerHostname,
   [ALERT_SEVERITY_LEVEL]: ALERT_SEVERITY_WARNING,
-  reason: monitorSummary.reason,
+  [ALERT_REASON]: monitorSummary.reason,
 });
 
 export const getStatusMessage = (

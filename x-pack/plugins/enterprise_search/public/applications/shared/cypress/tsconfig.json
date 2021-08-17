@@ -1,0 +1,8 @@
+{
+  "extends": "../../../../../../../tsconfig.base.json",
+  "include": ["./**/*"],
+  "compilerOptions": {
+    "outDir": "../../../../target/cypress/types/shared",
+    "types": ["cypress", "node"]
+  }
+}
