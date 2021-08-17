@@ -11,9 +11,7 @@ import useMount from 'react-use/lib/useMount';
 import classNames from 'classnames';
 import { EuiFormControlLayout, EuiFormLabel, EuiFormRow } from '@elastic/eui';
 
-import { InputControlEmbeddable } from '../embeddable/types';
-
-import './control_frame.scss';
+import { InputControlEmbeddable } from '../../embeddable/types';
 
 interface ControlFrameProps {
   embeddable: InputControlEmbeddable;
@@ -39,8 +37,8 @@ export const ControlFrame = ({ twoLine, embeddable }: ControlFrameProps) => {
     >
       <div
         className={classNames('controlFrame--control', {
-          'optionsList--filterBtnTwoLine': twoLine,
-          'optionsList--filterBtnSingle': !twoLine,
+          'controlFrame--filterBtnTwoLine': twoLine,
+          'controlFrame--filterBtnSingle': !twoLine,
         })}
         id={embeddable.id}
         ref={embeddableRoot}

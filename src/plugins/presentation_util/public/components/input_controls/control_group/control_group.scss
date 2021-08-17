@@ -1,0 +1,24 @@
+.controlFrame--formControlLayout {
+  width: 100%;
+  min-width: $euiSize * 12.5;
+}
+
+.controlFrame--control {
+  &.controlFrame--filterBtnSingle {
+    height: 100%;
+  }
+}
+
+.controlFrame--filterBtnTwoLine {
+  width: 100%;
+}
+
+.controlGroup--sortPopover {
+  // Hack because the fixed positions of drag and drop don't work inside of transformed elements
+  // sass-lint:disable-block no-important
+  transform: none !important;
+  transition: none !important;
+  margin-top: -$euiSizeS;
+  // IE11 needs a min-width
+  min-width: $euiSize * 12;
+}
