@@ -100,7 +100,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kuery, start, end]);
+  }, [environment, serviceName, kuery, start, end]);
 
   // start fetching on load
   // we want this effect to execute exactly once after the component mounts
