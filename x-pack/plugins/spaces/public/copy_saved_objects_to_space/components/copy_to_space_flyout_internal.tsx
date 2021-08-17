@@ -73,7 +73,7 @@ export const CopyToSpaceFlyoutInternal = (props: CopyToSpaceFlyoutProps) => {
     }
   );
   useEffect(() => {
-    const getSpaces = spacesManager.getSpaces({ includeAuthorizedPurposes: true });
+    const getSpaces = spacesManager.getSpaces({ includeAuthorizedPurposes: true }); // TODO: change to use spacesDataPromise
     const getActiveSpace = spacesManager.getActiveSpace();
     Promise.all([getSpaces, getActiveSpace])
       .then(([allSpaces, activeSpace]) => {

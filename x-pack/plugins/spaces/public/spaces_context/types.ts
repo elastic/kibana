@@ -11,13 +11,13 @@ import type { CoreStart, StartServicesAccessor } from 'src/core/public';
 
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';
-import type { ShareToSpacesData } from '../types';
+import type { SpacesData } from '../types';
 
 export type KibanaServices = Partial<CoreStart>;
 
 export interface SpacesReactContextValue<Services extends KibanaServices> {
   readonly spacesManager: SpacesManager;
-  readonly shareToSpacesDataPromise: Promise<ShareToSpacesData>;
+  readonly spacesDataPromise: Promise<SpacesData>;
   readonly services: Services;
 }
 
