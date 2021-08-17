@@ -5,53 +5,42 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiFieldText, EuiFieldNumber } from '@elastic/eui';
 import { ConfigKeys, Validation } from '../types';
-import { useICMPSimpleFieldsContext } from '../contexts';
+import { useBrowserSimpleFieldsContext } from '../contexts';
 import { ComboBox } from '../combo_box';
 import { OptionalLabel } from '../optional_label';
 import { ScheduleField } from '../schedule_field';
+import { SourceField } from './source_field';
 
 interface Props {
   validate: Validation;
 }
 
-export const ICMPSimpleFields = memo<Props>(({ validate }) => {
-  const { fields, setFields } = useICMPSimpleFieldsContext();
+export const BrowserSimpleFields = memo<Props>(({ validate }) => {
+  const { fields, setFields, defaultValues } = useBrowserSimpleFieldsContext();
   const handleInputChange = ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
     setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
   };
+  const onChangeSourceField = useCallback(
+    ({ zipUrl, folder, username, password, inlineScript, params }) => {
+      setFields((prevFields) => ({
+        ...prevFields,
+        [ConfigKeys.SOURCE_ZIP_URL]: zipUrl,
+        [ConfigKeys.SOURCE_ZIP_FOLDER]: folder,
+        [ConfigKeys.SOURCE_ZIP_USERNAME]: username,
+        [ConfigKeys.SOURCE_ZIP_PASSWORD]: password,
+        [ConfigKeys.SOURCE_INLINE]: inlineScript,
+        [ConfigKeys.PARAMS]: params,
+      }));
+    },
+    [setFields]
+  );
 
   return (
     <>
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.icmp.hosts"
-            defaultMessage="Host"
-          />
-        }
-        isInvalid={!!validate[ConfigKeys.HOSTS]?.(fields)}
-        error={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.icmp.hosts.error"
-            defaultMessage="Host is required"
-          />
-        }
-      >
-        <EuiFieldText
-          value={fields[ConfigKeys.HOSTS]}
-          onChange={(event) =>
-            handleInputChange({
-              value: event.target.value,
-              configKey: ConfigKeys.HOSTS,
-            })
-          }
-          data-test-subj="syntheticsICMPHostField"
-        />
-      </EuiFormRow>
       <EuiFormRow
         id="syntheticsFleetScheduleField--number syntheticsFleetScheduleField--unit"
         label={
@@ -82,35 +71,24 @@ export const ICMPSimpleFields = memo<Props>(({ validate }) => {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.wait.label"
-            defaultMessage="Wait in seconds"
-          />
-        }
-        isInvalid={!!validate[ConfigKeys.WAIT]?.(fields)}
-        error={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.wait.error"
-            defaultMessage="Wait must be 0 or greater"
-          />
-        }
-        labelAppend={<OptionalLabel />}
-        helpText={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.wait.helpText"
-            defaultMessage="The duration to wait before emitting another ICMP Echo Request if no response is received."
+            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.sourceType.label"
+            defaultMessage="Source Type"
           />
         }
       >
-        <EuiFieldNumber
-          min={0}
-          value={fields[ConfigKeys.WAIT]}
-          onChange={(event) =>
-            handleInputChange({
-              value: event.target.value,
-              configKey: ConfigKeys.WAIT,
-            })
-          }
-          step={'any'}
+        <SourceField
+          onChange={onChangeSourceField}
+          defaultConfig={useMemo(
+            () => ({
+              zipUrl: defaultValues[ConfigKeys.SOURCE_ZIP_URL],
+              folder: defaultValues[ConfigKeys.SOURCE_ZIP_FOLDER],
+              username: defaultValues[ConfigKeys.SOURCE_ZIP_USERNAME],
+              password: defaultValues[ConfigKeys.SOURCE_ZIP_PASSWORD],
+              inlineScript: defaultValues[ConfigKeys.SOURCE_INLINE],
+              params: defaultValues[ConfigKeys.PARAMS],
+            }),
+            [defaultValues]
+          )}
         />
       </EuiFormRow>
       <EuiFormRow
