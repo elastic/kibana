@@ -9,6 +9,7 @@
 import React from 'react';
 import { ManageData } from './manage_data';
 import { shallowWithIntl } from '@kbn/test/jest';
+import { ApplicationStart } from 'kibana/public';
 import { FeatureCatalogueEntry, FeatureCatalogueCategory } from '../../../services';
 
 jest.mock('../app_navigation_handler', () => {
@@ -26,6 +27,14 @@ jest.mock('../../kibana_services', () => ({
 beforeEach(() => {
   jest.clearAllMocks();
 });
+
+const applicationStartMock = ({
+  capabilities: { navLinks: { management: true, dev_tools: true } },
+} as unknown) as ApplicationStart;
+
+const applicationStartMockRestricted = ({
+  capabilities: { navLinks: { management: false, dev_tools: false } },
+} as unknown) as ApplicationStart;
 
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 
@@ -76,13 +85,30 @@ const mockFeatures: FeatureCatalogueEntry[] = [
 describe('ManageData', () => {
   test('render', () => {
     const component = shallowWithIntl(
-      <ManageData addBasePath={addBasePathMock} features={mockFeatures} />
+      <ManageData
+        addBasePath={addBasePathMock}
+        application={applicationStartMock}
+        features={mockFeatures}
+      />
     );
     expect(component).toMatchSnapshot();
   });
 
-  test('render empty without any features', () => {
-    const component = shallowWithIntl(<ManageData addBasePath={addBasePathMock} features={[]} />);
+  test('render null without any features', () => {
+    const component = shallowWithIntl(
+      <ManageData addBasePath={addBasePathMock} application={applicationStartMock} features={[]} />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  test('hide dev tools and stack management links if unavailable', () => {
+    const component = shallowWithIntl(
+      <ManageData
+        addBasePath={addBasePathMock}
+        application={applicationStartMockRestricted}
+        features={mockFeatures}
+      />
+    );
     expect(component).toMatchSnapshot();
   });
 });

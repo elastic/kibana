@@ -266,7 +266,7 @@ describe('crawler routes', () => {
       });
     });
 
-    it('validates correctly with required params', () => {
+    it('validates correctly with crawl rules', () => {
       const request = {
         params: { name: 'some-engine', id: '1234' },
         body: {
@@ -281,9 +281,24 @@ describe('crawler routes', () => {
       mockRouter.shouldValidate(request);
     });
 
-    it('fails otherwise', () => {
-      const request = { params: {}, body: {} };
-      mockRouter.shouldThrow(request);
+    it('validates correctly with deduplication enabled', () => {
+      const request = {
+        params: { name: 'some-engine', id: '1234' },
+        body: {
+          deduplication_enabled: true,
+        },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validates correctly with deduplication fields', () => {
+      const request = {
+        params: { name: 'some-engine', id: '1234' },
+        body: {
+          deduplication_fields: ['title', 'description'],
+        },
+      };
+      mockRouter.shouldValidate(request);
     });
   });
 
