@@ -25357,7 +25357,6 @@
     "xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tags.label": "タグ",
     "xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tcp.hosts": "ホスト:ポート",
     "xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tcp.hosts.error": "ホストとポートは必須です",
-    "xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.error": "タイムアウトは0以上で、スケジュール間隔未満でなければなりません",
     "xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.helpText": "接続のテストとデータの交換に許可された合計時間。",
     "xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.label": "タイムアウト (秒) ",
     "xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.URL": "URL",
