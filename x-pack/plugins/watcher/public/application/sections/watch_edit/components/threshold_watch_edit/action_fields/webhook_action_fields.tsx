@@ -254,10 +254,6 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               defaultMessage: 'Code editor',
             }
           )}
-          setOptions={{
-            showLineNumbers: false,
-            tabSize: 2,
-          }}
           value={body || ''}
           onChange={(json: string) => {
             editAction({ key: 'body', value: json });
