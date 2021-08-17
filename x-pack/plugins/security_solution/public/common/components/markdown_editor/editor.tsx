@@ -17,6 +17,7 @@ interface MarkdownEditorProps {
   editorId?: string;
   dataTestSubj?: string;
   height?: number;
+  autoFocusDisabled?: boolean;
 }
 
 const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = ({
@@ -26,16 +27,18 @@ const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = ({
   editorId,
   dataTestSubj,
   height,
+  autoFocusDisabled = false,
 }) => {
   const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
   const onParse = useCallback((err, { messages }) => {
     setMarkdownErrorMessages(err ? [err] : messages);
   }, []);
 
-  useEffect(
-    () => document.querySelector<HTMLElement>('textarea.euiMarkdownEditorTextArea')?.focus(),
-    []
-  );
+  useEffect(() => {
+    if (!autoFocusDisabled) {
+      document.querySelector<HTMLElement>('textarea.euiMarkdownEditorTextArea')?.focus();
+    }
+  }, [autoFocusDisabled]);
 
   return (
     <EuiMarkdownEditor

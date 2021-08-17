@@ -10,34 +10,29 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPagination,
-  EuiPanel,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import type { IUrlParams } from '../../../../context/url_params_context/types';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { TransactionSummary } from '../../../shared/Summary/TransactionSummary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/TransactionActionMenu';
+import type { TraceSample } from '../../../../hooks/use_transaction_trace_samples_fetcher';
 import { MaybeViewTraceLink } from './MaybeViewTraceLink';
 import { TransactionTabs } from './TransactionTabs';
 import { IWaterfall } from './waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-
-type DistributionApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/distribution'>;
-
-type DistributionBucket = DistributionApiResponse['buckets'][0];
 
 interface Props {
   urlParams: IUrlParams;
   waterfall: IWaterfall;
   exceedsMax: boolean;
   isLoading: boolean;
-  traceSamples: DistributionBucket['samples'];
+  traceSamples: TraceSample[];
 }
 
 export function WaterfallWithSummary({
@@ -88,13 +83,13 @@ export function WaterfallWithSummary({
       />
     );
 
-    return <EuiPanel hasBorder={true}>{content}</EuiPanel>;
+    return content;
   }
 
   const entryTransaction = entryWaterfallTransaction.doc;
 
   return (
-    <EuiPanel hasBorder={true}>
+    <>
       <EuiFlexGroup>
         <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
           <EuiTitle size="xs">
@@ -142,6 +137,6 @@ export function WaterfallWithSummary({
         waterfall={waterfall}
         exceedsMax={exceedsMax}
       />
-    </EuiPanel>
+    </>
   );
 }

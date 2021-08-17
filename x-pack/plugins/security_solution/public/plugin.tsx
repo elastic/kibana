@@ -105,24 +105,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.home.featureCatalogue.registerSolution({
         id: APP_ID,
         title: APP_NAME,
-        subtitle: i18n.translate('xpack.securitySolution.featureCatalogue.subtitle', {
-          defaultMessage: 'SIEM & Endpoint Security',
-        }),
         description: i18n.translate('xpack.securitySolution.featureCatalogueDescription', {
           defaultMessage:
             'Prevent, collect, detect, and respond to threats for unified protection across your infrastructure.',
         }),
-        appDescriptions: [
-          i18n.translate('xpack.securitySolution.featureCatalogueDescription1', {
-            defaultMessage: 'Prevent threats autonomously.',
-          }),
-          i18n.translate('xpack.securitySolution.featureCatalogueDescription2', {
-            defaultMessage: 'Detect and respond.',
-          }),
-          i18n.translate('xpack.securitySolution.featureCatalogueDescription3', {
-            defaultMessage: 'Investigate incidents.',
-          }),
-        ],
         icon: 'logoSecurity',
         path: APP_OVERVIEW_PATH,
         order: 300,
