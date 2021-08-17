@@ -29,6 +29,7 @@ import { getTrustedAppsList } from '../../endpoint/routes/trusted_apps/service';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
+const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
 
 export interface TelemetryEvent {
   [key: string]: SearchTypes;
@@ -59,7 +60,6 @@ export class TelemetryEventsSender {
   private intervalId?: NodeJS.Timeout;
   private isSending = false;
   private queue: TelemetryEvent[] = [];
-  private usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
   private isOptedIn?: boolean = true; // Assume true until the first check
   private diagTask?: TelemetryDiagTask;
   private epMetricsTask?: TelemetryEndpointTask;
@@ -290,20 +290,20 @@ export class TelemetryEventsSender {
 
     if (qlength >= this.maxQueueSize) {
       // we're full already
-      this.telemetryUsageCounter?.incrementCounter({
-        counterName: createUsageCounterLabel(this.usageLabelPrefix.concat(['queue_stats'])),
-        counterType: 'docs_lost',
-        incrementBy: events.length,
-      });
-      this.telemetryUsageCounter?.incrementCounter({
-        counterName: createUsageCounterLabel(this.usageLabelPrefix.concat(['queue_stats'])),
-        counterType: 'num_capacity_exceeded',
-        incrementBy: 1,
-      });
       return;
     }
 
     if (events.length > this.maxQueueSize - qlength) {
+      this.telemetryUsageCounter?.incrementCounter({
+        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['queue_stats'])),
+        counterType: 'docs_lost',
+        incrementBy: events.length,
+      });
+      this.telemetryUsageCounter?.incrementCounter({
+        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['queue_stats'])),
+        counterType: 'num_capacity_exceeded',
+        incrementBy: 1,
+      });
       this.queue.push(...this.processEvents(events.slice(0, this.maxQueueSize - qlength)));
     } else {
       this.queue.push(...this.processEvents(events));
@@ -468,12 +468,12 @@ export class TelemetryEventsSender {
         },
       });
       this.telemetryUsageCounter?.incrementCounter({
-        counterName: createUsageCounterLabel(this.usageLabelPrefix.concat(['payloads', channel])),
+        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
         counterType: resp.status.toString(),
         incrementBy: 1,
       });
       this.telemetryUsageCounter?.incrementCounter({
-        counterName: createUsageCounterLabel(this.usageLabelPrefix.concat(['payloads', channel])),
+        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
         counterType: 'docs_sent',
         incrementBy: events.length,
       });
@@ -483,9 +483,14 @@ export class TelemetryEventsSender {
         `Error sending events: ${err.response.status} ${JSON.stringify(err.response.data)}`
       );
       this.telemetryUsageCounter?.incrementCounter({
-        counterName: createUsageCounterLabel(this.usageLabelPrefix.concat(['payloads', channel])),
+        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
         counterType: 'docs_lost',
         incrementBy: events.length,
+      });
+      this.telemetryUsageCounter?.incrementCounter({
+        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
+        counterType: 'num_exceptions',
+        incrementBy: 1,
       });
     }
   }
