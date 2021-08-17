@@ -10,7 +10,6 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import nodeCrypto from '@elastic/node-crypto';
 import { ElasticsearchClient, IUiSettingsClient } from 'kibana/server';
 import moment from 'moment';
-// @ts-ignore
 import Puid from 'puid';
 import sinon from 'sinon';
 import { ReportingConfig, ReportingCore } from '../../';

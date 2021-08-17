@@ -10,12 +10,13 @@
  * We have types and code at different imports because we don't want to import the whole package in the resulting webpack bundle for the plugin.
  * This way plugins can do targeted imports to reduce the final code bundle
  */
-import type {
+import {
   AlertConsumers as AlertConsumersTyped,
   ALERT_DURATION as ALERT_DURATION_TYPED,
   ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
   ALERT_STATUS as ALERT_STATUS_TYPED,
   ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
+  ALERT_RULE_CONSUMER,
 } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
@@ -41,7 +42,10 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback } from 'react';
 
+import { get } from 'lodash';
+import { useGetUserAlertsPermissions } from '../../hooks/use_alert_permission';
 import type { TimelinesUIStart, TGridType, SortDirection } from '../../../../timelines/public';
+import { useStatusBulkActionItems } from '../../../../timelines/public';
 import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import type {
@@ -58,6 +62,7 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { getDefaultCellActions } from './default_cell_actions';
 import { LazyAlertsFlyout } from '../..';
 import { parseAlert } from './parse_alert';
+import { CoreStart } from '../../../../../../src/core/public';
 
 const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
@@ -75,7 +80,7 @@ interface AlertsTableTGridProps {
 }
 
 interface ObservabilityActionsProps extends ActionProps {
-  flyoutAlert: TopAlert | undefined;
+  currentStatus: AlertStatus;
   setFlyoutAlert: React.Dispatch<React.SetStateAction<TopAlert | undefined>>;
 }
 
@@ -155,24 +160,34 @@ const OBSERVABILITY_ALERT_CONSUMERS = [
   AlertConsumers.APM,
   AlertConsumers.LOGS,
   AlertConsumers.INFRASTRUCTURE,
-  AlertConsumers.SYNTHETICS,
+  AlertConsumers.UPTIME,
 ];
 
 function ObservabilityActions({
   data,
   eventId,
   ecsData,
-  flyoutAlert,
+  currentStatus,
+  refetch,
   setFlyoutAlert,
+  setEventsLoading,
+  setEventsDeleted,
 }: ObservabilityActionsProps) {
   const { core, observabilityRuleTypeRegistry } = usePluginContext();
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
-  const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const [openActionsPopoverId, setActionsPopover] = useState(null);
-  const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
+  const {
+    timelines,
+    application: { capabilities },
+  } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
+
   const parseObservabilityAlert = useMemo(() => parseAlert(observabilityRuleTypeRegistry), [
     observabilityRuleTypeRegistry,
   ]);
+  const alertDataConsumer = useMemo<string>(() => get(dataFieldEs, ALERT_RULE_CONSUMER, [''])[0], [
+    dataFieldEs,
+  ]);
+
   const alert = parseObservabilityAlert(dataFieldEs);
   const { prepend } = core.http.basePath;
 
@@ -184,8 +199,8 @@ function ObservabilityActions({
     setActionsPopover(null);
   }, []);
 
-  const openActionsPopover = useCallback((id) => {
-    setActionsPopover(id);
+  const toggleActionsPopover = useCallback((id) => {
+    setActionsPopover((current) => (current ? null : id));
   }, []);
   const casePermissions = useGetUserCasesPermissions();
   const event = useMemo(() => {
@@ -196,43 +211,51 @@ function ObservabilityActions({
     };
   }, [data, eventId, ecsData]);
 
+  const onAlertStatusUpdated = useCallback(() => {
+    setActionsPopover(null);
+    if (refetch) {
+      refetch();
+    }
+  }, [setActionsPopover, refetch]);
+
+  const alertPermissions = useGetUserAlertsPermissions(capabilities, alertDataConsumer);
+
+  const statusActionItems = useStatusBulkActionItems({
+    eventIds: [eventId],
+    currentStatus,
+    indexName: ecsData._index ?? '',
+    setEventsLoading,
+    setEventsDeleted,
+    onUpdateSuccess: onAlertStatusUpdated,
+    onUpdateFailure: onAlertStatusUpdated,
+  });
+
   const actionsPanels = useMemo(() => {
     return [
       {
         id: 0,
         content: [
-          <>
-            {timelines.getAddToExistingCaseButton({
-              event,
-              casePermissions,
-              appId: observabilityFeatureId,
-              onClose: afterCaseSelection,
-            })}
-          </>,
-          <>
-            {timelines.getAddToNewCaseButton({
-              event,
-              casePermissions,
-              appId: observabilityFeatureId,
-              onClose: afterCaseSelection,
-            })}
-          </>,
+          timelines.getAddToExistingCaseButton({
+            event,
+            casePermissions,
+            appId: observabilityFeatureId,
+            onClose: afterCaseSelection,
+          }),
+          timelines.getAddToNewCaseButton({
+            event,
+            casePermissions,
+            appId: observabilityFeatureId,
+            onClose: afterCaseSelection,
+          }),
+          ...(alertPermissions.crud ? statusActionItems : []),
         ],
       },
     ];
-  }, [afterCaseSelection, casePermissions, timelines, event]);
+  }, [afterCaseSelection, casePermissions, timelines, event, statusActionItems, alertPermissions]);
+
   return (
     <>
-      {flyoutAlert && (
-        <Suspense fallback={null}>
-          <LazyAlertsFlyout
-            alert={flyoutAlert}
-            observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-            onClose={handleFlyoutClose}
-          />
-        </Suspense>
-      )}
-      <EuiFlexGroup gutterSize="none">
+      <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem>
           <EuiButtonIcon
             size="s"
@@ -259,7 +282,7 @@ function ObservabilityActions({
                 color="text"
                 iconType="boxesHorizontal"
                 aria-label="More"
-                onClick={() => openActionsPopover(eventId)}
+                onClick={() => toggleActionsPopover(eventId)}
               />
             }
             isOpen={openActionsPopoverId === eventId}
@@ -301,14 +324,14 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           return (
             <ObservabilityActions
               {...actionProps}
-              flyoutAlert={flyoutAlert}
+              currentStatus={status as AlertStatus}
               setFlyoutAlert={setFlyoutAlert}
             />
           );
         },
       },
     ];
-  }, [flyoutAlert]);
+  }, [status]);
 
   const tGridProps = useMemo(() => {
     const type: TGridType = 'standalone';
@@ -366,6 +389,21 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     setRefetch,
     status,
   ]);
+  const handleFlyoutClose = () => setFlyoutAlert(undefined);
+  const { observabilityRuleTypeRegistry } = usePluginContext();
 
-  return <>{timelines.getTGrid<'standalone'>(tGridProps)}</>;
+  return (
+    <>
+      {flyoutAlert && (
+        <Suspense fallback={null}>
+          <LazyAlertsFlyout
+            alert={flyoutAlert}
+            observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+            onClose={handleFlyoutClose}
+          />
+        </Suspense>
+      )}
+      {timelines.getTGrid<'standalone'>(tGridProps)}
+    </>
+  );
 }

@@ -11,6 +11,7 @@ import type {
   TimelineType,
   TimelineStatus,
   TimelineTabs,
+  ScrollToTopEvent,
 } from '../../../../common/types/timeline';
 import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
 import type { TGridModelForTimeline } from '../../../../../timelines/public';
@@ -23,6 +24,9 @@ export type TimelineModel = TGridModelForTimeline & {
   /** The selected tab to displayed in the timeline */
   activeTab: TimelineTabs;
   prevActiveTab: TimelineTabs;
+
+  /** Used for scrolling to top when swiching tabs. It includes the timestamp of when the event happened */
+  scrollToTop?: ScrollToTopEvent;
   /** Timeline saved object owner */
   createdBy?: string;
   /** A summary of the events and notes in this timeline */
@@ -63,6 +67,8 @@ export type TimelineModel = TGridModelForTimeline & {
   status: TimelineStatus;
   /** updated saved object timestamp */
   updated?: number;
+  /** updated saved object user */
+  updatedBy?: string | null;
   /** timeline is saving */
   isSaving: boolean;
   version: string | null;

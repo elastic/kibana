@@ -1433,20 +1433,20 @@
   dependencies:
     "@elastic/ecs-helpers" "^1.1.0"
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.14":
-  version "8.0.0-canary.14"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.14.tgz#36f0dedc5e02c43a2fd1ceb86e273e29c603f1fb"
-  integrity sha512-ZwyjT16581grvJLgsbkT9tzy49g5E2qYQ05mS41Db98Kqe0sYZsm25eHGuV7U9DqJo5LuV0TTTs3rhsaqL5Mhw==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.17":
+  version "8.0.0-canary.17"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.17.tgz#0625a04cc585e3f311bc6471e04cd4fb0e927e9a"
+  integrity sha512-rsbEdzxYlEU+jS+qf5Gr3+2U6/1Z/S/Yt2dM7lp1A64mCjuOqqHoR2FTHN27BWvBCjtJrtyhlCJht4fsTLNuYA==
   dependencies:
     debug "^4.3.1"
     hpagent "^0.1.1"
     ms "^2.1.3"
     secure-json-parse "^2.4.0"
 
-"@elastic/ems-client@7.14.0":
-  version "7.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.14.0.tgz#7c8095086bd9a637f72d6d810d494a460c68e0fc"
-  integrity sha512-axXTyBrC1I2TMmcxGC04SgODwb5Cp6svcW64RoTr8X2XrSSuH0gh+X5qMsC9FgGGnmbVNCEYIs3JK4AJ7X4bxA==
+"@elastic/ems-client@7.15.0":
+  version "7.15.0"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.15.0.tgz#c101d7f83aa56463bcc385fd4eb883c6ea3ae9fc"
+  integrity sha512-BAAAVPhoaH6SGrfuO6U0MVRg4lvblhJ9VqYlMf3dZN9uDBB+12CUtb6t6Kavn5Tr3nS6X3tU/KKsuomo5RrEeQ==
   dependencies:
     "@types/geojson" "^7946.0.7"
     "@types/lru-cache" "^5.1.0"
@@ -1466,10 +1466,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@36.1.0":
-  version "36.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-36.1.0.tgz#99946e193bc9d1616f52cbd16e1a5bc196bd450f"
-  integrity sha512-j09Kv5K9YBkb9NkM3+cGparJeYfjLfwyypG27UYvSOLCpOYxS3bPycwmD7QrzPjoTqH+HHzDanHSwJMp6ttabA==
+"@elastic/eui@37.1.1":
+  version "37.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-37.1.1.tgz#06bd1e1908b8b56525107a3eca42af036b950ab5"
+  integrity sha512-wEehwi9Ei81ydl8ExDuALbzDH6dgaHqKSlv/3Pmm+BcuW8FW4ctr8K5YPSJ7+5hdOdG0Bps5nnIpCDEinXSsLw==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -4858,7 +4858,7 @@
   resolved "https://registry.yarnpkg.com/@types/base64-js/-/base64-js-1.2.5.tgz#582b2476169a6cba460a214d476c744441d873d5"
   integrity sha1-WCskdhaabLpGCiFNR2x0REHYc9U=
 
-"@types/bluebird@*", "@types/bluebird@^3.1.1":
+"@types/bluebird@^3.1.1":
   version "3.5.30"
   resolved "https://registry.yarnpkg.com/@types/bluebird/-/bluebird-3.5.30.tgz#ee034a0eeea8b84ed868b1aa60d690b08a6cfbc5"
   integrity sha512-8LhzvcjIoqoi1TghEkRMkbbmM+jhHnBokPGkJWjclMK+Ks0MxEBow3/p2/iFTZ+OIbJHQDSfpgdZEb+af3gfVw==
@@ -6117,16 +6117,7 @@
     "@types/cookiejar" "*"
     "@types/node" "*"
 
-"@types/supertest-as-promised@^2.0.38":
-  version "2.0.38"
-  resolved "https://registry.yarnpkg.com/@types/supertest-as-promised/-/supertest-as-promised-2.0.38.tgz#5077adf2a31429e06ba8de6799ebdb796ad50fc7"
-  integrity sha512-2vdlnsZBIgaX0DFNOACK4xFDqvoA1sAR78QD3LiDWGmzSfrRCNt1WFyUYe2Vf0QS03tZf6XC8bNlLaLYXhZbGA==
-  dependencies:
-    "@types/bluebird" "*"
-    "@types/superagent" "*"
-    "@types/supertest" "*"
-
-"@types/supertest@*", "@types/supertest@^2.0.5":
+"@types/supertest@^2.0.5":
   version "2.0.8"
   resolved "https://registry.yarnpkg.com/@types/supertest/-/supertest-2.0.8.tgz#23801236e2b85204ed771a8e7c40febba7da2bda"
   integrity sha512-wcax7/ip4XSSJRLbNzEIUVy2xjcBIZZAuSd2vtltQfRK7kxhx5WMHbLHkYdxN3wuQCrwpYrg86/9byDjPXoGMA==
@@ -8420,7 +8411,7 @@ bluebird@3.5.5:
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.5.tgz#a8d0afd73251effbbd5fe384a77d73003c17a71f"
   integrity sha512-5am6HnnfN+urzt4yfg7IgTbotDjIT/u8AJpEt0sIU9FtXfVeezXAPKswrG+xKUCOYAINpSdgZVDU6QFh+cuH3w==
 
-bluebird@3.7.2, bluebird@^3.3.1, bluebird@^3.3.5, bluebird@^3.4.1, bluebird@^3.5.0, bluebird@^3.5.1, bluebird@^3.5.5, bluebird@^3.7.1, bluebird@^3.7.2:
+bluebird@3.7.2, bluebird@^3.3.5, bluebird@^3.4.1, bluebird@^3.5.0, bluebird@^3.5.1, bluebird@^3.5.5, bluebird@^3.7.1, bluebird@^3.7.2:
   version "3.7.2"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.7.2.tgz#9f229c15be272454ffa973ace0dbee79a1b0c36f"
   integrity sha512-XpNj6GDQzdfW+r2Wnn7xiSAd7TM3jzkxGXBGTtWKuSXv1xUV+azxAm8jdWZN06QTQk+2N2XB9jRDkvbmQmcRtg==
@@ -9472,10 +9463,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^91.0.1:
-  version "91.0.1"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-91.0.1.tgz#4d70a569901e356c978a41de3019c464f2a8ebd0"
-  integrity sha512-9LktpHiUxM4UWUsr+jI1K1YKx2GENt6BKKJ2mibPj1Wc6ODzX/3fFIlr8CZ4Ftuyga+dHTTbAyPWKwKvybEbKA==
+chromedriver@^92.0.1:
+  version "92.0.1"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-92.0.1.tgz#3e28b7e0c9fb94d693cf74d51af0c29d57f18dca"
+  integrity sha512-LptlDVCs1GgyFNVbRoHzzy948JDVzTgGiVPXjNj385qXKQP3hjAVBIgyvb/Hco0xSEW8fjwJfsm1eQRmu6t4pQ==
   dependencies:
     "@testim/chrome-version" "^1.0.7"
     axios "^0.21.1"
@@ -26428,14 +26419,6 @@ supercluster@^7.1.0:
   integrity sha512-LDasImUAFMhTqhK+cUXfy9C2KTUqJ3gucLjmNLNFmKWOnDUBxLFLH9oKuXOTCLveecmxh8fbk8kgh6Q0gsfe2w==
   dependencies:
     kdbush "^3.0.0"
-
-supertest-as-promised@^4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/supertest-as-promised/-/supertest-as-promised-4.0.2.tgz#0464f2bd256568d4a59bce84269c0548f6879f1a"
-  integrity sha1-BGTyvSVlaNSlm86EJpwFSPaHnxo=
-  dependencies:
-    bluebird "^3.3.1"
-    methods "^1.1.1"
 
 supertest@^3.1.0:
   version "3.1.0"
