@@ -36,8 +36,8 @@ export class Plugin implements PluginType {
     const { ruleDataService } = plugins.ruleRegistry;
 
     const ruleDataClient = ruleDataService.initializeIndex({
-      feature: 'synthetics',
-      registrationContext: 'observability.synthetics',
+      feature: 'uptime',
+      registrationContext: 'observability.uptime',
       dataset: Dataset.alerts,
       componentTemplateRefs: [],
       componentTemplates: [
