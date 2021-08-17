@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
