@@ -7,31 +7,21 @@
  */
 
 import classNames from 'classnames';
-import React, { useCallback, useState } from 'react';
-import { IndexPatternField } from '../../../../../data/public';
+import React, { Fragment, useState } from 'react';
 import { FieldRecord } from './table';
 import { trimAngularSpan } from './table_helper';
 import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
-import { DocViewTableRowIconUnderscore } from './table_row_icon_underscore';
 
 const COLLAPSE_LINE_LENGTH = 350;
 
-type TableFieldValueProps = FieldRecord['value'] & {
-  fieldName: string;
-  fieldMapping: IndexPatternField | undefined;
-};
+type TableFieldValueProps = FieldRecord['value'] & Pick<FieldRecord['field'], 'field'>;
 
-export const TableFieldValue = ({
-  formattedField,
-  fieldName,
-  fieldMapping,
-}: TableFieldValueProps) => {
+export const TableFieldValue = ({ formattedValue, field }: TableFieldValueProps) => {
   const [fieldOpen, setFieldOpen] = useState(false);
 
-  const value = trimAngularSpan(String(formattedField));
+  const value = trimAngularSpan(String(formattedValue));
   const isCollapsible = value.length > COLLAPSE_LINE_LENGTH;
   const isCollapsed = isCollapsible && !fieldOpen;
-  const displayUnderscoreWarning = !fieldMapping && fieldName.indexOf('_') === 0;
 
   const valueClassName = classNames({
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -39,28 +29,23 @@ export const TableFieldValue = ({
     'truncate-by-height': isCollapsible && isCollapsed,
   });
 
-  const onToggleCollapse = useCallback(
-    () => setFieldOpen((fieldOpenPrev: boolean) => !fieldOpenPrev),
-    []
-  );
+  const onToggleCollapse = () => setFieldOpen((fieldOpenPrev) => !fieldOpenPrev);
 
   return (
-    <div>
+    <Fragment>
       {isCollapsible && (
         <DocViewTableRowBtnCollapse onClick={onToggleCollapse} isCollapsed={isCollapsed} />
       )}
-      {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
-      {fieldName ? null : <div className={valueClassName}>{fieldName}:&nbsp;</div>}
       <div
         className={valueClassName}
-        data-test-subj={`tableDocViewRow-${fieldName}-value`}
+        data-test-subj={`tableDocViewRow-${field}-value`}
         /*
          * Justification for dangerouslySetInnerHTML:
          * We just use values encoded by our field formatters
          */
         // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: value as string }}
+        dangerouslySetInnerHTML={{ __html: value }}
       />
-    </div>
+    </Fragment>
   );
 };

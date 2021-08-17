@@ -29,10 +29,11 @@ export const CopySource: Task = {
         '!src/cli/dev.js',
         '!src/functional_test_runner/**',
         '!src/dev/**',
+        '!**/jest.config.js',
         '!src/plugins/telemetry/schema/**', // Skip telemetry schemas
         // this is the dev-only entry
         '!src/setup_node_env/index.js',
-        '!**/public/**/*.{js,ts,tsx,json}',
+        '!**/public/**/*.{js,ts,tsx,json,scss}',
         'typings/**',
         'config/kibana.yml',
         'config/node.options',

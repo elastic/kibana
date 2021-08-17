@@ -321,6 +321,12 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         showLegend={args.legend.isVisible}
         legendPosition={args.legend.position}
         debugState={window._echDebugStateFlag ?? false}
+        theme={{
+          ...chartTheme,
+          legend: {
+            labelOptions: { maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0 },
+          },
+        }}
       />
       <Heatmap
         id={tableId}

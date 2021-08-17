@@ -19,7 +19,7 @@ import { IndexPatternField } from '../../../../../data/public';
 // this should be changed when both components are deangularized
 interface Props {
   fieldName: string;
-  fieldType: string;
+  fieldType?: string;
   fieldMapping?: IndexPatternField;
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
   scripted?: boolean;
@@ -41,7 +41,7 @@ export function FieldName({
   return (
     <Fragment>
       <EuiFlexItem grow={false} className="kbnDocViewer__fieldIcon">
-        <FieldIcon type={fieldType} label={typeName} scripted={scripted} {...fieldIconProps} />
+        <FieldIcon type={fieldType!} label={typeName} scripted={scripted} {...fieldIconProps} />
       </EuiFlexItem>
 
       <EuiFlexGroup wrap={true} gutterSize="none" responsive={false} alignItems="flexStart">
