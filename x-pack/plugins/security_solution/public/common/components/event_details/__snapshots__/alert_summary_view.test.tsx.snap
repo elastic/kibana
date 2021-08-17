@@ -14,6 +14,16 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
   padding: 0;
 }
 
+.c0 .flyoutOverviewDescription .hoverActions-active .timelines__hoverActionButton,
+.c0 .flyoutOverviewDescription .hoverActions-active .securitySolution__hoverActionButton {
+  opacity: 1;
+}
+
+.c0 .flyoutOverviewDescription:hover .timelines__hoverActionButton,
+.c0 .flyoutOverviewDescription:hover .securitySolution__hoverActionButton {
+  opacity: 1;
+}
+
 .c2 {
   min-width: 138px;
   padding: 0 8px;
@@ -129,7 +139,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             class="euiTableRowCell"
           >
             <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
+              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div>
                 <div
@@ -159,27 +169,13 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   >
                     Filter out button
                   </div>
-                  <span
-                    class="euiToolTipAnchor"
-                  >
-                    <button
-                      aria-label="Show top signal.status"
-                      class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall securitySolution__hoverActionButton"
-                      data-test-subj="show-top-field"
-                      type="button"
-                    >
-                      <span
-                        aria-hidden="true"
-                        class="euiButtonIcon__icon"
-                        color="inherit"
-                        data-euiicon-type="visBarVertical"
-                      />
-                    </button>
-                  </span>
                   <div
-                    data-test-subj="hover-actions-copy-button"
+                    data-test-subj="more-actions-signal.status"
+                    field="signal.status"
+                    items="[object Object],[object Object]"
+                    value="open"
                   >
-                    Copy button
+                    Overflow button
                   </div>
                 </div>
               </div>
@@ -207,7 +203,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             class="euiTableRowCell"
           >
             <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
+              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div>
                 <div
@@ -242,14 +238,12 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="hover-actions-add-timeline"
+                    data-test-subj="more-actions-@timestamp"
+                    field="@timestamp"
+                    items="[object Object],[object Object]"
+                    value="2020-11-25T15:42:39.417Z"
                   >
-                    Add To Timeline
-                  </div>
-                  <div
-                    data-test-subj="hover-actions-copy-button"
-                  >
-                    Copy button
+                    Overflow button
                   </div>
                 </div>
               </div>
@@ -277,7 +271,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             class="euiTableRowCell"
           >
             <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
+              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div>
                 <div
@@ -307,27 +301,13 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   >
                     Filter out button
                   </div>
-                  <span
-                    class="euiToolTipAnchor"
-                  >
-                    <button
-                      aria-label="Show top signal.rule.name"
-                      class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall securitySolution__hoverActionButton"
-                      data-test-subj="show-top-field"
-                      type="button"
-                    >
-                      <span
-                        aria-hidden="true"
-                        class="euiButtonIcon__icon"
-                        color="inherit"
-                        data-euiicon-type="visBarVertical"
-                      />
-                    </button>
-                  </span>
                   <div
-                    data-test-subj="hover-actions-copy-button"
+                    data-test-subj="more-actions-signal.rule.name"
+                    field="signal.rule.name"
+                    items="[object Object],[object Object]"
+                    value="xxx"
                   >
-                    Copy button
+                    Overflow button
                   </div>
                 </div>
               </div>
@@ -355,7 +335,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             class="euiTableRowCell"
           >
             <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
+              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div>
                 <div
@@ -385,27 +365,13 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   >
                     Filter out button
                   </div>
-                  <span
-                    class="euiToolTipAnchor"
-                  >
-                    <button
-                      aria-label="Show top signal.rule.severity"
-                      class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall securitySolution__hoverActionButton"
-                      data-test-subj="show-top-field"
-                      type="button"
-                    >
-                      <span
-                        aria-hidden="true"
-                        class="euiButtonIcon__icon"
-                        color="inherit"
-                        data-euiicon-type="visBarVertical"
-                      />
-                    </button>
-                  </span>
                   <div
-                    data-test-subj="hover-actions-copy-button"
+                    data-test-subj="more-actions-signal.rule.severity"
+                    field="signal.rule.severity"
+                    items="[object Object],[object Object]"
+                    value="low"
                   >
-                    Copy button
+                    Overflow button
                   </div>
                 </div>
               </div>
@@ -433,7 +399,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             class="euiTableRowCell"
           >
             <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
+              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div>
                 <div
@@ -463,27 +429,13 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   >
                     Filter out button
                   </div>
-                  <span
-                    class="euiToolTipAnchor"
-                  >
-                    <button
-                      aria-label="Show top signal.rule.risk_score"
-                      class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall securitySolution__hoverActionButton"
-                      data-test-subj="show-top-field"
-                      type="button"
-                    >
-                      <span
-                        aria-hidden="true"
-                        class="euiButtonIcon__icon"
-                        color="inherit"
-                        data-euiicon-type="visBarVertical"
-                      />
-                    </button>
-                  </span>
                   <div
-                    data-test-subj="hover-actions-copy-button"
+                    data-test-subj="more-actions-signal.rule.risk_score"
+                    field="signal.rule.risk_score"
+                    items="[object Object],[object Object]"
+                    value="21"
                   >
-                    Copy button
+                    Overflow button
                   </div>
                 </div>
               </div>
@@ -511,7 +463,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             class="euiTableRowCell"
           >
             <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
+              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div>
                 <div
@@ -542,9 +494,12 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="hover-actions-copy-button"
+                    data-test-subj="more-actions-host.name"
+                    field="host.name"
+                    items="[object Object]"
+                    value="windows-native"
                   >
-                    Copy button
+                    Overflow button
                   </div>
                 </div>
               </div>
@@ -572,7 +527,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             class="euiTableRowCell"
           >
             <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
+              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div>
                 <div
@@ -603,9 +558,12 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="hover-actions-copy-button"
+                    data-test-subj="more-actions-user.name"
+                    field="user.name"
+                    items="[object Object]"
+                    value="administrator"
                   >
-                    Copy button
+                    Overflow button
                   </div>
                 </div>
               </div>
@@ -633,7 +591,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             class="euiTableRowCell"
           >
             <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
+              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div>
                 <div
@@ -674,9 +632,12 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="hover-actions-copy-button"
+                    data-test-subj="more-actions-source.ip"
+                    field="source.ip"
+                    items="[object Object]"
+                    value="185.156.74.3"
                   >
-                    Copy button
+                    Overflow button
                   </div>
                 </div>
               </div>
@@ -704,7 +665,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             class="euiTableRowCell"
           >
             <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
+              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
                 class="c3"
@@ -735,7 +696,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             class="euiTableRowCell"
           >
             <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
+              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
                 class="c3"
@@ -766,7 +727,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             class="euiTableRowCell"
           >
             <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
+              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
                 class="c3"
@@ -797,7 +758,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             class="euiTableRowCell"
           >
             <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
+              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
                 class="c3"
@@ -828,7 +789,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             class="euiTableRowCell"
           >
             <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
+              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
                 class="c3"
@@ -859,7 +820,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             class="euiTableRowCell"
           >
             <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
+              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
                 class="c3"
