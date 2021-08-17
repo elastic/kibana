@@ -288,8 +288,8 @@ export function TransactionDistributionChart({
           />
           <AreaSeries
             id={i18n.translate(
-              'xpack.apm.transactionDistribution.chart.overallLatencyDistributionLabel',
-              { defaultMessage: 'Overall latency distribution' }
+              'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
+              { defaultMessage: 'All transactions' }
             )}
             xScaleType={ScaleType.Log}
             yScaleType={ScaleType.Log}
