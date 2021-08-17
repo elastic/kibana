@@ -122,6 +122,17 @@ export const BucketAggsSchemas: t.Type<BucketAggsSchemas> = t.recursion('BucketA
           term: t.record(t.string, t.union([t.string, t.boolean, t.number])),
         })
       ),
+      date_histogram: t.exact(
+        t.partial({
+          field: t.string,
+          fixed_interval: t.string,
+          min_doc_count: t.number,
+          extended_bounds: t.type({
+            min: t.string,
+            max: t.string,
+          }),
+        })
+      ),
       histogram: t.exact(
         t.partial({
           field: t.string,

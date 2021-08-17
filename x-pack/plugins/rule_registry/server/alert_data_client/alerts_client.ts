@@ -93,15 +93,15 @@ interface GetAlertParams {
 }
 
 interface SingleSearchAfterAndAudit {
-  id: string | null | undefined;
-  query: string | object | undefined;
-  aggs: object | undefined;
+  id?: string | null | undefined;
+  query?: string | object | undefined;
+  aggs?: object | undefined;
   index?: string;
-  _source: string[] | undefined;
-  track_total_hits: boolean | undefined;
-  size: number | undefined;
+  _source?: string[] | undefined;
+  track_total_hits?: boolean | undefined;
+  size?: number | undefined;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
-  lastSortIds: Array<string | number> | undefined;
+  lastSortIds?: Array<string | number> | undefined;
 }
 
 /**
@@ -222,8 +222,7 @@ export class AlertsClient {
     query,
     aggs,
     _source,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    track_total_hits,
+    track_total_hits: trackTotalHits,
     size,
     index,
     operation,
@@ -244,7 +243,7 @@ export class AlertsClient {
         query: await this.buildEsQueryWithAuthz(query, id, alertSpaceId, operation, config),
         aggs,
         _source,
-        track_total_hits,
+        track_total_hits: trackTotalHits,
         size,
         sort: [
           {
@@ -452,10 +451,6 @@ export class AlertsClient {
         const result = await this.singleSearchAfterAndAudit({
           id: null,
           query,
-          aggs: undefined,
-          track_total_hits: undefined,
-          _source: undefined,
-          size: undefined,
           index,
           operation,
           lastSortIds,
@@ -493,14 +488,8 @@ export class AlertsClient {
       // first search for the alert by id, then use the alert info to check if user has access to it
       const alert = await this.singleSearchAfterAndAudit({
         id,
-        query: undefined,
-        aggs: undefined,
-        track_total_hits: undefined,
-        _source: undefined,
-        size: undefined,
         index,
         operation: ReadOperations.Get,
-        lastSortIds: undefined,
       });
 
       if (alert == null || alert.hits.hits.length === 0) {
@@ -526,14 +515,8 @@ export class AlertsClient {
     try {
       const alert = await this.singleSearchAfterAndAudit({
         id,
-        query: undefined,
-        aggs: undefined,
-        track_total_hits: undefined,
-        _source: undefined,
-        size: undefined,
         index,
         operation: WriteOperations.Update,
-        lastSortIds: undefined,
       });
 
       if (alert == null || alert.hits.hits.length === 0) {
@@ -647,7 +630,6 @@ export class AlertsClient {
     try {
       // first search for the alert by id, then use the alert info to check if user has access to it
       const alertsSearchResponse = await this.singleSearchAfterAndAudit({
-        id: undefined,
         query,
         aggs,
         _source,
@@ -655,7 +637,6 @@ export class AlertsClient {
         size,
         index,
         operation: ReadOperations.Find,
-        lastSortIds: undefined,
       });
 
       if (alertsSearchResponse == null) {
