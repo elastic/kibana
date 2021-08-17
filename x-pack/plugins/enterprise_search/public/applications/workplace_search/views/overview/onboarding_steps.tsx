@@ -26,7 +26,7 @@ import { TelemetryLogic } from '../../../shared/telemetry';
 import { AppLogic } from '../../app_logic';
 import sharedSourcesIcon from '../../components/shared/assets/source_icons/share_circle.svg';
 import { ContentSection } from '../../components/shared/content_section';
-import { SOURCES_PATH, USERS_AND_ROLES_PATH, ORG_SETTINGS_PATH } from '../../routes';
+import { ADD_SOURCE_PATH, USERS_AND_ROLES_PATH, ORG_SETTINGS_PATH } from '../../routes';
 
 import { OnboardingCard } from './onboarding_card';
 import { OverviewLogic } from './overview_logic';
@@ -99,7 +99,7 @@ export const OnboardingSteps: React.FC = () => {
               values: { label: sourcesCount > 0 ? 'more' : '' },
             }
           )}
-          actionPath={sourcesPath}
+          actionPath={ADD_SOURCE_PATH}
           complete={hasOrgSources}
         />
         <OnboardingCard

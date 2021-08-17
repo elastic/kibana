@@ -13,7 +13,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { SOURCES_PATH, USERS_AND_ROLES_PATH } from '../../routes';
+import { ADD_SOURCE_PATH, USERS_AND_ROLES_PATH } from '../../routes';
 
 import { OnboardingCard } from './onboarding_card';
 import { OnboardingSteps, OrgNameOnboarding } from './onboarding_steps';
@@ -34,7 +34,7 @@ describe('OnboardingSteps', () => {
       const wrapper = shallow(<OnboardingSteps />);
 
       expect(wrapper.find(OnboardingCard)).toHaveLength(2);
-      expect(wrapper.find(OnboardingCard).first().prop('actionPath')).toBe(SOURCES_PATH);
+      expect(wrapper.find(OnboardingCard).first().prop('actionPath')).toBe(ADD_SOURCE_PATH);
       expect(wrapper.find(OnboardingCard).first().prop('description')).toBe(
         'Add shared sources for your organization to start searching.'
       );
