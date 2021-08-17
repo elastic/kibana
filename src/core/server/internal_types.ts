@@ -38,7 +38,7 @@ import { InternalStatusServiceSetup } from './status';
 import { InternalLoggingServicePreboot, InternalLoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
-import { InternalDeprecationsServiceSetup } from './deprecations';
+import { InternalDeprecationsServiceSetup, InternalDeprecationsServiceStart } from './deprecations';
 import type {
   InternalExecutionContextSetup,
   InternalExecutionContextStart,
@@ -87,6 +87,7 @@ export interface InternalCoreStart {
   uiSettings: InternalUiSettingsServiceStart;
   coreUsageData: CoreUsageDataStart;
   executionContext: InternalExecutionContextStart;
+  deprecations: InternalDeprecationsServiceStart;
 }
 
 /**
