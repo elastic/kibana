@@ -139,7 +139,6 @@ describe('indicator match', () => {
           getIndicatorIndex().should('have.text', getIndexPatterns().join(''));
         });
 
-        // TODO: Need to fix
         it('Does NOT show invalidation text on initial page load if indicator index pattern is filled out', () => {
           getDefineContinueButton().click();
           getIndexPatternInvalidationText().should('not.exist');
@@ -154,7 +153,6 @@ describe('indicator match', () => {
       });
 
       describe('Indicator index patterns', () => {
-        // TODO: Need to fix
         it('Contains a predefined index pattern', () => {
           getIndicatorIndicatorIndex().should('have.text', getThreatIndexPatterns().join(''));
         });
@@ -392,7 +390,6 @@ describe('indicator match', () => {
         loginAndWaitForPageWithoutDateRange(ALERTS_URL);
       });
 
-      // TODO: Need to fix
       it('Creates and activates a new Indicator Match rule', () => {
         waitForAlertsPanelToBeLoaded();
         waitForAlertsIndexToBeCreated();
@@ -491,7 +488,6 @@ describe('indicator match', () => {
           .should('have.text', getNewThreatIndicatorRule().riskScore);
       });
 
-      // TODO: Need to fix
       it('Investigate alert in timeline', () => {
         const accessibilityText = `Press enter for options, or press space to begin dragging.`;
 
