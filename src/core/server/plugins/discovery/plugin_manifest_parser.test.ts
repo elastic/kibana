@@ -114,7 +114,10 @@ test('return error when plugin version is missing', async () => {
 
 test('return error when plugin expected Kibana version is lower than actual version', async () => {
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'someId', version: '6.4.2' })));
+    cb(
+      null,
+      Buffer.from(JSON.stringify({ id: 'someId', version: '6.4.2', owner: { name: 'foo' } }))
+    );
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
@@ -128,7 +131,14 @@ test('return error when plugin expected Kibana version cannot be interpreted as 
   mockReadFile.mockImplementation((path, cb) => {
     cb(
       null,
-      Buffer.from(JSON.stringify({ id: 'someId', version: '1.0.0', kibanaVersion: 'non-sem-ver' }))
+      Buffer.from(
+        JSON.stringify({
+          id: 'someId',
+          version: '1.0.0',
+          kibanaVersion: 'non-sem-ver',
+          owner: { name: 'foo' },
+        })
+      )
     );
   });
 
