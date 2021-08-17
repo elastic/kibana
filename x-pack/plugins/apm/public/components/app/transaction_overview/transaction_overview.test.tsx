@@ -55,7 +55,7 @@ function setup({
     .spyOn(useServiceAgentNameHook, 'useServiceAgentFetcher')
     .mockReturnValue({
       agentName: 'nodejs',
-      serviceRuntimeName: 'node',
+      runtimeName: 'node',
       error: undefined,
       status: useFetcherHook.FETCH_STATUS.SUCCESS,
     });

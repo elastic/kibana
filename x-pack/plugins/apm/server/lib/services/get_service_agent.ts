@@ -81,5 +81,5 @@ export async function getServiceAgent({
   }
 
   const { service, agent } = response.hits.hits[0]._source as ServiceAgent;
-  return { agentName: agent?.name, serviceRuntimeName: service?.runtime.name };
+  return { agentName: agent?.name, runtimeName: service?.runtime.name };
 }

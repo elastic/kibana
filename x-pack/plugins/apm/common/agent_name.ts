@@ -87,6 +87,6 @@ export function isIosAgentName(agentName?: string) {
   return lowercased === 'ios/swift' || lowercased === 'opentelemetry/swift';
 }
 
-export function isJRubyAgent(agentName?: string, serviceRuntimeName?: string) {
-  return agentName === 'ruby' && serviceRuntimeName?.toLowerCase() === 'jruby';
+export function isJRubyAgent(agentName?: string, runtimeName?: string) {
+  return agentName === 'ruby' && runtimeName?.toLowerCase() === 'jruby';
 }

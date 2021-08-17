@@ -40,7 +40,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
 
-        expect(response.body).to.eql({ agentName: 'nodejs', serviceRuntimeName: 'node' });
+        expect(response.body).to.eql({ agentName: 'nodejs', runtimeName: 'node' });
       });
     }
   );

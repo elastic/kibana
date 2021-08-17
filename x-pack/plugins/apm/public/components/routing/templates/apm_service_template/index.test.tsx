@@ -18,7 +18,7 @@ describe('APM service template', () => {
         { agentName: 'opentelemetry/java' },
         { agentName: 'ios/swift' },
         { agentName: 'opentelemetry/swift' },
-        { agentName: 'ruby', serviceRuntimeName: 'jruby' },
+        { agentName: 'ruby', runtimeName: 'jruby' },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
           expect(isMetricsTabHidden(input)).toBeTruthy();
@@ -27,7 +27,7 @@ describe('APM service template', () => {
     });
     describe('shows metrics tab', () => {
       [
-        { agentName: 'ruby', serviceRuntimeName: 'ruby' },
+        { agentName: 'ruby', runtimeName: 'ruby' },
         { agentName: 'ruby' },
         { agentName: 'dotnet' },
         { agentName: 'go' },
@@ -45,7 +45,7 @@ describe('APM service template', () => {
     describe('hides JVMs tab', () => {
       [
         { agentName: undefined },
-        { agentName: 'ruby', serviceRuntimeName: 'ruby' },
+        { agentName: 'ruby', runtimeName: 'ruby' },
         { agentName: 'ruby' },
         { agentName: 'dotnet' },
         { agentName: 'go' },
@@ -62,7 +62,7 @@ describe('APM service template', () => {
       [
         { agentName: 'java' },
         { agentName: 'opentelemetry/java' },
-        { agentName: 'ruby', serviceRuntimeName: 'jruby' },
+        { agentName: 'ruby', runtimeName: 'jruby' },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
           expect(isJVMsTabHidden(input)).toBeFalsy();

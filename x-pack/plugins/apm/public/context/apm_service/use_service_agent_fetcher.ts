@@ -10,7 +10,7 @@ import { useUrlParams } from '../url_params_context/use_url_params';
 
 const INITIAL_STATE = {
   agentName: undefined,
-  serviceRuntimeName: undefined,
+  runtimeName: undefined,
 };
 
 export function useServiceAgentFetcher(serviceName?: string) {
