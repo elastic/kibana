@@ -86,7 +86,7 @@ describe('isNewInstance', () => {
     it('returns true if no logs or metrics indices contain data', async () => {
       esClient.asCurrentUser.cat.indices.mockReturnValue(
         elasticsearchServiceMock.createSuccessTransportRequestPromise([
-          { index: '.ds-metrics-foo', docsCount: '0' },
+          { index: '.ds-metrics-foo', 'docs.count': '0' },
         ])
       );
       expect(await isNewInstance({ esClient, soClient })).toEqual(true);
@@ -95,7 +95,7 @@ describe('isNewInstance', () => {
     it('returns true if only metrics-elastic_agent index contains data', async () => {
       esClient.asCurrentUser.cat.indices.mockReturnValue(
         elasticsearchServiceMock.createSuccessTransportRequestPromise([
-          { index: '.ds-metrics-elastic_agent', docsCount: '100' },
+          { index: '.ds-metrics-elastic_agent', 'docs.count': '100' },
         ])
       );
       expect(await isNewInstance({ esClient, soClient })).toEqual(true);
@@ -104,7 +104,7 @@ describe('isNewInstance', () => {
     it('returns true if only logs-elastic_agent index contains data', async () => {
       esClient.asCurrentUser.cat.indices.mockReturnValue(
         elasticsearchServiceMock.createSuccessTransportRequestPromise([
-          { index: '.ds-logs-elastic_agent', docsCount: '100' },
+          { index: '.ds-logs-elastic_agent', 'docs.count': '100' },
         ])
       );
       expect(await isNewInstance({ esClient, soClient })).toEqual(true);

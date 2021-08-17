@@ -57,7 +57,7 @@ export const isNewInstance = async ({ esClient, soClient }: Deps): Promise<boole
       // Ignore some data that is shipped by default
       .filter(({ index }) => !INDEX_PREFIXES_TO_IGNORE.some((prefix) => index?.startsWith(prefix)))
       // If any other logs and metrics indices have data, return false
-      .some((catResult) => parseInt(catResult['docs.count'] ?? '0', 10) > 0);
+      .some((catResult) => (catResult['docs.count'] ?? '0') !== '0');
 
     return !anyIndicesContainerUserData;
   } catch (e) {
