@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import uuid from 'uuid';
 import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import {
@@ -129,6 +130,119 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(typeof response.body.scheduled_task_id).to.be('string');
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
+
+              const taskRecord = await getScheduledTask(response.body.scheduled_task_id);
+              expect(taskRecord.type).to.eql('task');
+              expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
+              expect(JSON.parse(taskRecord.task.params)).to.eql({
+                alertId: response.body.id,
+                spaceId: space.id,
+              });
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'alert',
+                id: response.body.id,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle create alert request appropriately when using pre-defined ID', async () => {
+          const predefinedRuleId = uuid.v4();
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'MY action',
+              connector_type_id: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${predefinedRuleId}`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(
+              getTestAlertData({
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
+              })
+            );
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
+              expect(response.body).to.eql({
+                id: response.body.id,
+                name: 'abc',
+                tags: ['foo'],
+                actions: [
+                  {
+                    id: createdAction.id,
+                    connector_type_id: createdAction.connector_type_id,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
+                enabled: true,
+                rule_type_id: 'test.noop',
+                consumer: 'alertsFixture',
+                params: {},
+                created_by: user.username,
+                schedule: { interval: '1m' },
+                scheduled_task_id: response.body.scheduled_task_id,
+                created_at: response.body.created_at,
+                updated_at: response.body.updated_at,
+                throttle: '1m',
+                notify_when: 'onThrottleInterval',
+                updated_by: user.username,
+                api_key_owner: user.username,
+                mute_all: false,
+                muted_alert_ids: [],
+                execution_status: response.body.execution_status,
+              });
+              expect(typeof response.body.scheduled_task_id).to.be('string');
+              expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
+              expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
+              expect(response?.headers?.warning).to.eql(
+                `199 kibana "Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the Alerting API docs at https://www.elastic.co/guide/en/kibana/current/create-rule-api.html for more details."`
+              );
 
               const taskRecord = await getScheduledTask(response.body.scheduled_task_id);
               expect(taskRecord.type).to.eql('task');

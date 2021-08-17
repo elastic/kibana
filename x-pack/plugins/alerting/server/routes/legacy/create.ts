@@ -43,7 +43,7 @@ export const bodySchema = schema.object({
   notifyWhen: schema.nullable(schema.string({ validate: validateNotifyWhenType })),
 });
 
-export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {
+export const createAlertRoute = ({ router, licenseState, logger, usageCounter }: RouteOptions) => {
   router.post(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id?}`,
@@ -68,9 +68,17 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
         const params = req.params;
         const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as AlertNotifyWhenType) : null;
 
+        const spaceId = rulesClient.getSpaceId();
+        const shouldWarnId = params?.id && spaceId !== undefined && spaceId !== 'default';
+        if (shouldWarnId) {
+          logger.warn(
+            `POST ${LEGACY_BASE_ALERT_API_PATH}/alert/${params?.id}: Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the Alerting API docs at https://www.elastic.co/guide/en/kibana/current/create-rule-api.html for more details.`
+          );
+        }
+
         countUsageOfPredefinedIds({
           predefinedId: params?.id,
-          spaceId: rulesClient.getSpaceId(),
+          spaceId,
           usageCounter,
         });
 
@@ -83,6 +91,13 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
           );
           return res.ok({
             body: alertRes,
+            ...(shouldWarnId
+              ? {
+                  headers: {
+                    warning: `199 kibana "Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the Alerting API docs at https://www.elastic.co/guide/en/kibana/current/create-rule-api.html for more details."`,
+                  },
+                }
+              : {}),
           });
         } catch (e) {
           if (e instanceof AlertTypeDisabledError) {

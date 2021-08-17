@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MockedLogger, loggerMock } from '@kbn/logging/target/mocks';
 import { createAlertRoute } from './create';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
@@ -17,6 +18,7 @@ import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/s
 import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 
 const rulesClient = rulesClientMock.create();
+let logger: MockedLogger;
 
 jest.mock('../../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -24,6 +26,7 @@ jest.mock('../../lib/license_api_access.ts', () => ({
 
 beforeEach(() => {
   jest.resetAllMocks();
+  logger = loggerMock.create();
 });
 
 describe('createAlertRoute', () => {
@@ -87,6 +90,7 @@ describe('createAlertRoute', () => {
     createAlertRoute({
       router,
       licenseState,
+      logger,
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
     });
@@ -107,6 +111,7 @@ describe('createAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({ body: createResult });
 
+    expect(logger.warn).not.toHaveBeenCalled();
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
     expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -149,7 +154,7 @@ describe('createAlertRoute', () => {
     });
   });
 
-  it('allows providing a custom id when space is undefined', async () => {
+  it('allows providing a custom id when space id is undefined', async () => {
     const expectedResult = {
       ...createResult,
       id: 'custom-id',
@@ -163,6 +168,7 @@ describe('createAlertRoute', () => {
     createAlertRoute({
       router,
       licenseState,
+      logger,
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
     });
@@ -240,6 +246,7 @@ describe('createAlertRoute', () => {
     createAlertRoute({
       router,
       licenseState,
+      logger,
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
     });
@@ -262,6 +269,8 @@ describe('createAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({ body: expectedResult });
 
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(rulesClient.getSpaceId).toHaveBeenCalled();
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
     expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -304,7 +313,7 @@ describe('createAlertRoute', () => {
     });
   });
 
-  it('allows providing a custom id in non-default space', async () => {
+  it('allows providing a custom id in non-default space but logs warning and returns warning header', async () => {
     const expectedResult = {
       ...createResult,
       id: 'custom-id',
@@ -318,6 +327,7 @@ describe('createAlertRoute', () => {
     createAlertRoute({
       router,
       licenseState,
+      logger,
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
     });
@@ -338,8 +348,17 @@ describe('createAlertRoute', () => {
       ['ok']
     );
 
-    expect(await handler(context, req, res)).toEqual({ body: expectedResult });
+    expect(await handler(context, req, res)).toEqual({
+      body: expectedResult,
+      headers: {
+        warning: `199 kibana "Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the Alerting API docs at https://www.elastic.co/guide/en/kibana/current/create-rule-api.html for more details."`,
+      },
+    });
 
+    expect(logger.warn).toHaveBeenCalledWith(
+      `POST /api/alerts/alert/custom-id: Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the Alerting API docs at https://www.elastic.co/guide/en/kibana/current/create-rule-api.html for more details.`
+    );
+    expect(rulesClient.getSpaceId).toHaveBeenCalled();
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(2);
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
     expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -379,6 +398,9 @@ describe('createAlertRoute', () => {
 
     expect(res.ok).toHaveBeenCalledWith({
       body: expectedResult,
+      headers: {
+        warning: `199 kibana "Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the Alerting API docs at https://www.elastic.co/guide/en/kibana/current/create-rule-api.html for more details."`,
+      },
     });
   });
 
@@ -387,7 +409,7 @@ describe('createAlertRoute', () => {
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
-    createAlertRoute({ router, licenseState, encryptedSavedObjects });
+    createAlertRoute({ router, licenseState, logger, encryptedSavedObjects });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -409,7 +431,7 @@ describe('createAlertRoute', () => {
       throw new Error('OMG');
     });
 
-    createAlertRoute({ router, licenseState, encryptedSavedObjects });
+    createAlertRoute({ router, licenseState, logger, encryptedSavedObjects });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -427,7 +449,7 @@ describe('createAlertRoute', () => {
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
-    createAlertRoute({ router, licenseState, encryptedSavedObjects });
+    createAlertRoute({ router, licenseState, logger, encryptedSavedObjects });
 
     const [, handler] = router.post.mock.calls[0];
 
