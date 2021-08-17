@@ -27,6 +27,7 @@ import { AlertsTableTGrid } from './alerts_table_t_grid';
 import { StatusFilter } from './status_filter';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { callObservabilityApi } from '../../services/call_observability_api';
+import './styles.scss';
 
 export interface TopAlert {
   fields: ParsedTechnicalFields;
