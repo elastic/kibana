@@ -25439,7 +25439,6 @@
     "xpack.upgradeAssistant.kibanaDeprecationStats.loadingErrorMessage": "检索 Kibana 弃用时发生错误。",
     "xpack.upgradeAssistant.kibanaDeprecationStats.loadingText": "正在加载 Kibana 弃用统计……",
     "xpack.upgradeAssistant.kibanaDeprecationStats.statsTitle": "Kibana",
-    "xpack.upgradeAssistant.kibanaDeprecationStats.totalDeprecationsLabel": "Kibana 总共有 {totalDeprecations} 个弃用",
     "xpack.upgradeAssistant.noDeprecationsPrompt.description": "您的配置是最新的。",
     "xpack.upgradeAssistant.noDeprecationsPrompt.nextStepsDescription": "查看{overviewButton}以了解其他 Stack 弃用。",
     "xpack.upgradeAssistant.noDeprecationsPrompt.overviewLinkText": "“概览”页面",

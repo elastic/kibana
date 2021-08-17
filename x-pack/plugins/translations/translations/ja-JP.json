@@ -24884,7 +24884,6 @@
     "xpack.upgradeAssistant.kibanaDeprecationStats.loadingErrorMessage": "Kibana廃止予定の取得中にエラーが発生しました。",
     "xpack.upgradeAssistant.kibanaDeprecationStats.loadingText": "Kibana廃止予定統計情報を読み込んでいます…",
     "xpack.upgradeAssistant.kibanaDeprecationStats.statsTitle": "Kibana",
-    "xpack.upgradeAssistant.kibanaDeprecationStats.totalDeprecationsLabel": "Kibanaには合計{totalDeprecations}個の廃止予定があります",
     "xpack.upgradeAssistant.noDeprecationsPrompt.description": "構成は最新です。",
     "xpack.upgradeAssistant.noDeprecationsPrompt.nextStepsDescription": "他のスタック廃止予定については、{overviewButton}を確認してください。",
     "xpack.upgradeAssistant.noDeprecationsPrompt.overviewLinkText": "概要ページ",
