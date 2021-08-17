@@ -423,7 +423,7 @@ export function jobAuditMessagesProvider(
               ...(earliestMs ? [{ range: { timestamp: { gte: earliestMs } } }] : []),
               { terms: { job_id: jobIds } },
               {
-                term: { level: { value: 'error' } },
+                term: { level: { value: MESSAGE_LEVEL.ERROR } },
               },
             ],
           },
@@ -459,14 +459,12 @@ export function jobAuditMessagesProvider(
       latest_errors: Pick<estypes.SearchResponse<JobMessage>, 'hits'>;
     }>;
 
-    const result = errors.buckets.map((bucket) => {
+    return errors.buckets.map((bucket) => {
       return {
         job_id: bucket.key,
         errors: bucket.latest_errors.hits.hits.map((v) => v._source!),
       };
     });
-
-    return result;
   }
 
   return {
