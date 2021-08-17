@@ -15,7 +15,7 @@ export function buildVectorRequestMeta(
   source: IVectorSource | ITermJoinSource,
   fieldNames: string[],
   dataFilters: DataFilters,
-  sourceQuery?: Query
+  sourceQuery?: Query | null
 ): VectorSourceRequestMeta {
   return {
     ...dataFilters,
