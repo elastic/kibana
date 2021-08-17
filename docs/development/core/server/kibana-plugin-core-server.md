@@ -63,9 +63,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [CountResponse](./kibana-plugin-core-server.countresponse.md) |  |
 |  [CustomHttpResponseOptions](./kibana-plugin-core-server.customhttpresponseoptions.md) | HTTP response parameters for a response with adjustable status code. |
 |  [DeleteDocumentResponse](./kibana-plugin-core-server.deletedocumentresponse.md) |  |
-|  [DeprecationAPIClientParams](./kibana-plugin-core-server.deprecationapiclientparams.md) |  |
-|  [DeprecationAPIResponse](./kibana-plugin-core-server.deprecationapiresponse.md) |  |
-|  [DeprecationInfo](./kibana-plugin-core-server.deprecationinfo.md) |  |
 |  [DeprecationsClient](./kibana-plugin-core-server.deprecationsclient.md) | Server-side client that provides access to fetch all Kibana deprecations |
 |  [DeprecationsDetails](./kibana-plugin-core-server.deprecationsdetails.md) |  |
 |  [DeprecationSettings](./kibana-plugin-core-server.deprecationsettings.md) | UiSettings deprecation field options. |
