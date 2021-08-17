@@ -51,6 +51,16 @@ const Plugins = {
       content: JSON.stringify({ id: 'plugin', version: '1' }),
     }),
   }),
+  missingOwnerAttribute: () => ({
+    'kibana.json': JSON.stringify({
+      id: 'foo',
+      version: '1',
+      kibanaVersion: '1.2.3',
+      requiredPlugins: [],
+      optionalPlugins: [],
+      server: true,
+    }),
+  }),
   valid: (id: string) => ({
     'kibana.json': JSON.stringify({
       id,
@@ -190,6 +200,7 @@ describe('plugins discovery system', () => {
         [`${KIBANA_ROOT}/src/plugins/plugin_c`]: Plugins.incompatible(),
         [`${KIBANA_ROOT}/src/plugins/plugin_d`]: Plugins.incompatibleType('pluginD'),
         [`${KIBANA_ROOT}/src/plugins/plugin_ad`]: Plugins.missingManifest(),
+        [`${KIBANA_ROOT}/src/plugins/plugin_e`]: Plugins.missingOwnerAttribute(),
       },
       { createCwd: false }
     );
