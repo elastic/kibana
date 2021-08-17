@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, KibanaRequest } from 'kibana/server';
+import type { CoreSetup } from 'kibana/server';
 import {
   pie,
   xyChart,
-  timeScale,
   counterRate,
   metricChart,
   yAxisConfig,
@@ -21,40 +20,21 @@ import {
   datatableColumn,
   tickLabelsConfig,
   axisTitlesVisibilityConfig,
+  getTimeScale,
   getDatatable,
 } from '../../common/expressions';
-import type { PluginStartContract } from '../plugin';
-import type {
-  ExecutionContext,
-  ExpressionsServerSetup,
-} from '../../../../../src/plugins/expressions/server';
+import { getFormatFactory, getTimeZoneFactory } from './utils';
 
-const getUiSettings = (coreStart: CoreStart, kibanaRequest: KibanaRequest) =>
-  coreStart.uiSettings.asScopedToClient(coreStart.savedObjects.getScopedClient(kibanaRequest));
+import type { PluginStartContract } from '../plugin';
+import type { ExpressionsServerSetup } from '../../../../../src/plugins/expressions/server';
 
 export const setupExpressions = (
   core: CoreSetup<PluginStartContract>,
   expressions: ExpressionsServerSetup
 ) => {
-  const getFormatFactory = async (context: ExecutionContext) => {
-    const [coreStart, { fieldFormats: fieldFormatsStart }] = await core.getStartServices();
-    const kibanaRequest = context.getKibanaRequest?.();
-
-    if (!kibanaRequest) {
-      throw new Error('"lens_datatable" expression function requires a KibanaRequest to execute');
-    }
-
-    const fieldFormats = await fieldFormatsStart.fieldFormatServiceFactory(
-      getUiSettings(coreStart, kibanaRequest)
-    );
-
-    return fieldFormats.deserialize;
-  };
-
   [
     pie,
     xyChart,
-    timeScale,
     counterRate,
     metricChart,
     yAxisConfig,
@@ -66,6 +46,7 @@ export const setupExpressions = (
     datatableColumn,
     tickLabelsConfig,
     axisTitlesVisibilityConfig,
-    getDatatable(getFormatFactory),
+    getDatatable(getFormatFactory(core)),
+    getTimeScale(getTimeZoneFactory(core)),
   ].forEach((expressionFn) => expressions.registerFunction(expressionFn));
 };
