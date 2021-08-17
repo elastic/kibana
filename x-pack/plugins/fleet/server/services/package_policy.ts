@@ -511,14 +511,14 @@ class PackagePolicyService {
         const updatePackagePolicy = overridePackageInputs(
           {
             ...omit(packagePolicy, 'id'),
-            inputs: packageToPackagePolicyInputs(packageInfo),
+            inputs: packagePolicy.inputs,
             package: {
               ...packagePolicy.package,
               version: packageInfo.version,
             },
           },
           packageInfo,
-          packagePolicy.inputs as InputsOverride[]
+          packageToPackagePolicyInputs(packageInfo) as InputsOverride[]
         );
 
         updatePackagePolicy.inputs = await this.compilePackagePolicyInputs(
@@ -566,14 +566,14 @@ class PackagePolicyService {
       const updatedPackagePolicy = overridePackageInputs(
         {
           ...omit(packagePolicy, 'id'),
-          inputs: packageToPackagePolicyInputs(packageInfo),
+          inputs: packagePolicy.inputs,
           package: {
             ...packagePolicy.package,
             version: packageInfo.version,
           },
         },
         packageInfo,
-        packagePolicy.inputs as InputsOverride[],
+        packageToPackagePolicyInputs(packageInfo) as InputsOverride[],
         true
       );
 
@@ -986,13 +986,13 @@ function deepMergeVars(original: any, override: any): any {
         ...(rest as any),
       }));
 
-  for (const { name, ...val } of overrideVars) {
+  for (const { name, ...overrideVal } of overrideVars) {
     if (!original.vars || !(name in original.vars)) {
       continue;
     }
 
     const originalVar = original.vars[name];
-    result[name] = { ...originalVar, ...val };
+    result[name] = { ...originalVar, ...overrideVal };
   }
 
   return result;
