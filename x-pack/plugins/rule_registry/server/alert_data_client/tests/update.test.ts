@@ -91,7 +91,7 @@ describe('update()', () => {
               {
                 found: true,
                 _type: 'alert',
-                _index: '.alerts-observability.apm',
+                _index: '.alerts-observability.apm.alerts',
                 _id: 'NoxgpHkBqbdrfX07MqXV',
                 _source: {
                   [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
@@ -109,7 +109,7 @@ describe('update()', () => {
     esClientMock.update.mockResolvedValueOnce(
       elasticsearchClientMock.createApiResponse({
         body: {
-          _index: '.alerts-observability.apm',
+          _index: '.alerts-observability.apm.alerts',
           _id: 'NoxgpHkBqbdrfX07MqXV',
           _version: 2,
           result: 'updated',
@@ -123,12 +123,12 @@ describe('update()', () => {
       id: '1',
       status: 'closed',
       _version: undefined,
-      index: '.alerts-observability.apm',
+      index: '.alerts-observability.apm.alerts',
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "_id": "NoxgpHkBqbdrfX07MqXV",
-        "_index": ".alerts-observability.apm",
+        "_index": ".alerts-observability.apm.alerts",
         "_primary_term": 1,
         "_seq_no": 1,
         "_shards": Object {
@@ -150,7 +150,7 @@ describe('update()', () => {
             },
           },
           "id": "1",
-          "index": ".alerts-observability.apm",
+          "index": ".alerts-observability.apm.alerts",
           "refresh": "wait_for",
         },
       ]
@@ -177,7 +177,7 @@ describe('update()', () => {
               {
                 found: true,
                 _type: 'alert',
-                _index: '.alerts-observability.apm',
+                _index: '.alerts-observability.apm.alerts',
                 _id: 'NoxgpHkBqbdrfX07MqXV',
                 _source: {
                   [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
@@ -195,7 +195,7 @@ describe('update()', () => {
     esClientMock.update.mockResolvedValueOnce(
       elasticsearchClientMock.createApiResponse({
         body: {
-          _index: '.alerts-observability.apm',
+          _index: '.alerts-observability.apm.alerts',
           _id: 'NoxgpHkBqbdrfX07MqXV',
           _version: 2,
           result: 'updated',
@@ -209,7 +209,7 @@ describe('update()', () => {
       id: 'NoxgpHkBqbdrfX07MqXV',
       status: 'closed',
       _version: undefined,
-      index: '.alerts-observability.apm',
+      index: '.alerts-observability.apm.alerts',
     });
 
     expect(auditLogger.log).toHaveBeenCalledWith({
@@ -271,7 +271,7 @@ describe('update()', () => {
         id: fakeAlertId,
         status: 'closed',
         _version: '1',
-        index: '.alerts-observability.apm',
+        index: '.alerts-observability.apm.alerts',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
             "Unable to retrieve alert details for alert with id of \\"myfakeid1\\" or with query \\"undefined\\" and operation update
@@ -303,7 +303,7 @@ describe('update()', () => {
         id: 'NoxgpHkBqbdrfX07MqXV',
         status: 'closed',
         _version: undefined,
-        index: '.alerts-observability.apm',
+        index: '.alerts-observability.apm.alerts',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
             "Unable to retrieve alert details for alert with id of \\"NoxgpHkBqbdrfX07MqXV\\" or with query \\"undefined\\" and operation update
@@ -332,7 +332,7 @@ describe('update()', () => {
               {
                 found: true,
                 _type: 'alert',
-                _index: '.alerts-observability.apm',
+                _index: '.alerts-observability.apm.alerts',
                 _id: 'NoxgpHkBqbdrfX07MqXV',
                 _source: {
                   [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
@@ -354,7 +354,7 @@ describe('update()', () => {
         id: 'NoxgpHkBqbdrfX07MqXV',
         status: 'closed',
         _version: undefined,
-        index: '.alerts-observability.apm',
+        index: '.alerts-observability.apm.alerts',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong on update"`);
     expect(auditLogger.log).toHaveBeenCalledWith({
@@ -389,7 +389,7 @@ describe('update()', () => {
                 {
                   found: true,
                   _type: 'alert',
-                  _index: '.alerts-observability.apm',
+                  _index: '.alerts-observability.apm.alerts',
                   _id: 'NoxgpHkBqbdrfX07MqXV',
                   _version: 2,
                   _seq_no: 362,
@@ -411,7 +411,7 @@ describe('update()', () => {
       esClientMock.update.mockResolvedValueOnce(
         elasticsearchClientMock.createApiResponse({
           body: {
-            _index: '.alerts-observability.apm',
+            _index: '.alerts-observability.apm.alerts',
             _id: 'NoxgpHkBqbdrfX07MqXV',
             _version: 2,
             result: 'updated',
@@ -429,13 +429,13 @@ describe('update()', () => {
         id: 'NoxgpHkBqbdrfX07MqXV',
         status: 'closed',
         _version: undefined,
-        index: '.alerts-observability.apm',
+        index: '.alerts-observability.apm.alerts',
       });
 
       expect(result).toMatchInlineSnapshot(`
         Object {
           "_id": "NoxgpHkBqbdrfX07MqXV",
-          "_index": ".alerts-observability.apm",
+          "_index": ".alerts-observability.apm.alerts",
           "_primary_term": 1,
           "_seq_no": 1,
           "_shards": Object {

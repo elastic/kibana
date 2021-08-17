@@ -27,7 +27,7 @@ export type AlertConsumers = typeof AlertConsumers[keyof typeof AlertConsumers];
 export type STATUS_VALUES = 'open' | 'acknowledged' | 'closed' | 'in-progress'; // TODO: remove 'in-progress' after migration to 'acknowledged'
 
 export const mapConsumerToIndexName: Record<AlertConsumers, string | string[]> = {
-  apm: '.alerts-observability.apm',
+  apm: '.alerts-observability.apm.alerts',
   logs: '.alerts-observability.logs',
   infrastructure: '.alerts-observability.metrics',
   observability: '.alerts-observability',

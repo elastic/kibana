@@ -91,7 +91,7 @@ describe('get()', () => {
               {
                 found: true,
                 _type: 'alert',
-                _index: '.alerts-observability.apm',
+                _index: '.alerts-observability.apm.alerts',
                 _id: 'NoxgpHkBqbdrfX07MqXV',
                 _version: 1,
                 _seq_no: 362,
@@ -109,7 +109,7 @@ describe('get()', () => {
         },
       })
     );
-    const result = await alertsClient.get({ id: '1', index: '.alerts-observability.apm' });
+    const result = await alertsClient.get({ id: '1', index: '.alerts-observability.apm.alerts' });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "kibana.alert.rule.consumer": "apm",
@@ -173,7 +173,7 @@ describe('get()', () => {
             "track_total_hits": undefined,
           },
           "ignore_unavailable": true,
-          "index": ".alerts-observability.apm",
+          "index": ".alerts-observability.apm.alerts",
           "seq_no_primary_term": true,
         },
       ]
@@ -200,7 +200,7 @@ describe('get()', () => {
               {
                 found: true,
                 _type: 'alert',
-                _index: '.alerts-observability.apm',
+                _index: '.alerts-observability.apm.alerts',
                 _id: 'NoxgpHkBqbdrfX07MqXV',
                 _version: 1,
                 _seq_no: 362,
@@ -218,7 +218,10 @@ describe('get()', () => {
         },
       })
     );
-    await alertsClient.get({ id: 'NoxgpHkBqbdrfX07MqXV', index: '.alerts-observability.apm' });
+    await alertsClient.get({
+      id: 'NoxgpHkBqbdrfX07MqXV',
+      index: '.alerts-observability.apm.alerts',
+    });
 
     expect(auditLogger.log).toHaveBeenCalledWith({
       error: undefined,
@@ -296,7 +299,7 @@ describe('get()', () => {
     esClientMock.search.mockRejectedValue(error);
 
     await expect(
-      alertsClient.get({ id: 'NoxgpHkBqbdrfX07MqXV', index: '.alerts-observability.apm' })
+      alertsClient.get({ id: 'NoxgpHkBqbdrfX07MqXV', index: '.alerts-observability.apm.alerts' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
             "Unable to retrieve alert details for alert with id of \\"NoxgpHkBqbdrfX07MqXV\\" or with query \\"undefined\\" and operation get
             Error: Error: something went wrong"
@@ -323,7 +326,7 @@ describe('get()', () => {
                 {
                   found: true,
                   _type: 'alert',
-                  _index: '.alerts-observability.apm',
+                  _index: '.alerts-observability.apm.alerts',
                   _id: 'NoxgpHkBqbdrfX07MqXV',
                   _version: 1,
                   _seq_no: 362,
@@ -347,7 +350,7 @@ describe('get()', () => {
       const alertsClient = new AlertsClient(alertsClientParams);
       const result = await alertsClient.get({
         id: 'NoxgpHkBqbdrfX07MqXV',
-        index: '.alerts-observability.apm',
+        index: '.alerts-observability.apm.alerts',
       });
 
       expect(result).toMatchInlineSnapshot(`
