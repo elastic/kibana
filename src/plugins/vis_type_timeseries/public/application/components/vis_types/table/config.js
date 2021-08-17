@@ -120,6 +120,8 @@ export class TableSeriesConfig extends Component {
       this.props.fields,
       this.props.indexPatternForQuery
     );
+    const isKibanaIndexPattern =
+      this.props.panel.use_kibana_indexes || this.props.indexPatternForQuery === '';
 
     return (
       <div className="tvbAggRow">
@@ -127,6 +129,7 @@ export class TableSeriesConfig extends Component {
           <DataFormatPicker
             formatterValue={model.formatter}
             changeModelFormatter={this.changeModelFormatter}
+            shouldIncludeDefaultOption={isKibanaIndexPattern}
             shouldIncludeNumberOptions={isNumericMetric}
           />
           <EuiFlexItem grow={3}>

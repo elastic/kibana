@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { ChangeEvent, useMemo, useCallback, useState } from 'react';
+import React, { useEffect, useMemo, useCallback, useState, ChangeEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -19,6 +19,8 @@ import {
   EuiLink,
   EuiSuperSelect,
   EuiText,
+  EuiCode,
+  EuiIcon,
 } from '@elastic/eui';
 import { DATA_FORMATTERS } from '../../../common/enums';
 import {
@@ -29,16 +31,40 @@ import {
 } from './lib/durations';
 
 const DEFAULT_OUTPUT_PRECISION = '2';
+const DEFAULT_CUSTOM_FORMAT_PATTERN = '0,0.[000]';
 
 const defaultOptionLabel = i18n.translate('visTypeTimeseries.dataFormatPicker.defaultLabel', {
   defaultMessage: 'Default',
 });
 
-const getDataFormatPickerOptions = (isNumericField: boolean) => {
-  let numericFieldOptions;
+const getDataFormatPickerOptions = (
+  shouldIncludeDefaultOption: boolean,
+  shouldIncludeNumberOptions: boolean
+) => {
+  const additionalOptions = [];
 
-  if (isNumericField) {
-    numericFieldOptions = [
+  if (shouldIncludeDefaultOption) {
+    additionalOptions.push({
+      value: DATA_FORMATTERS.DEFAULT,
+      inputDisplay: defaultOptionLabel,
+      dropdownDisplay: (
+        <>
+          <span>{defaultOptionLabel}</span>
+          <EuiText size="s" color="subdued">
+            <p className="euiTextColor--subdued">
+              {i18n.translate('visTypeTimeseries.dataFormatPicker.defaultLabelDescription', {
+                defaultMessage: 'Applies common formatting',
+              })}
+            </p>
+          </EuiText>
+        </>
+      ),
+      'data-test-subj': `tsvbDataFormatPicker-${DATA_FORMATTERS.DEFAULT}`,
+    });
+  }
+
+  if (shouldIncludeNumberOptions) {
+    additionalOptions.push(
       {
         value: DATA_FORMATTERS.NUMBER,
         inputDisplay: i18n.translate('visTypeTimeseries.dataFormatPicker.numberLabel', {
@@ -66,25 +92,12 @@ const getDataFormatPickerOptions = (isNumericField: boolean) => {
           defaultMessage: 'Duration',
         }),
         'data-test-subj': `tsvbDataFormatPicker-${DATA_FORMATTERS.DURATION}`,
-      },
-    ];
+      }
+    );
   }
 
   return [
-    {
-      value: DATA_FORMATTERS.DEFAULT,
-      inputDisplay: defaultOptionLabel,
-      dropdownDisplay: (
-        <>
-          <span>{defaultOptionLabel}</span>
-          <EuiText size="s" color="subdued">
-            <p className="euiTextColor--subdued">Applies common formatting</p>
-          </EuiText>
-        </>
-      ),
-      'data-test-subj': `tsvbDataFormatPicker-${DATA_FORMATTERS.DEFAULT}`,
-    },
-    ...(numericFieldOptions || []),
+    ...additionalOptions,
     {
       value: DATA_FORMATTERS.CUSTOM,
       inputDisplay: i18n.translate('visTypeTimeseries.dataFormatPicker.customLabel', {
@@ -113,22 +126,34 @@ const getSelectedFormatter = (formatter: string) => {
 interface DataFormatPickerProps {
   formatterValue: string;
   changeModelFormatter: (formatter: string) => void;
+  shouldIncludeDefaultOption: boolean;
   shouldIncludeNumberOptions: boolean;
 }
 
 export const DataFormatPicker = ({
   formatterValue,
   changeModelFormatter,
+  shouldIncludeDefaultOption,
   shouldIncludeNumberOptions,
 }: DataFormatPickerProps) => {
-  const options = useMemo(() => getDataFormatPickerOptions(shouldIncludeNumberOptions), [
-    shouldIncludeNumberOptions,
-  ]);
+  const options = useMemo(
+    () => getDataFormatPickerOptions(shouldIncludeDefaultOption, shouldIncludeNumberOptions),
+    [shouldIncludeDefaultOption, shouldIncludeNumberOptions]
+  );
   const [selectedFormatter, setSelectedFormatter] = useState(getSelectedFormatter(formatterValue));
-  const [customFormatString, setCustomFormatString] = useState('');
+  const [customFormatPattern, setCustomFormatPattern] = useState('');
   const [durationParams, setDurationParams] = useState(
     getDurationParams(selectedFormatter === DATA_FORMATTERS.DURATION ? formatterValue : 'ms,ms,')
   );
+
+  useEffect(() => {
+    // formatter value is set to the first option in case options do not include selected formatter
+    if (!options.find(({ value }) => value === selectedFormatter)) {
+      const [{ value: firstOptionValue }] = options;
+      setSelectedFormatter(firstOptionValue);
+      changeModelFormatter(firstOptionValue);
+    }
+  }, [options, selectedFormatter, changeModelFormatter]);
 
   const handleChange = useCallback(
     (selectedOption: DATA_FORMATTERS) => {
@@ -137,19 +162,19 @@ export const DataFormatPicker = ({
         const { from, to, decimals } = durationParams;
         changeModelFormatter(`${from},${to},${decimals}`);
       } else if (selectedOption === DATA_FORMATTERS.CUSTOM) {
-        changeModelFormatter(customFormatString);
+        changeModelFormatter(customFormatPattern);
       } else {
         changeModelFormatter(selectedOption);
       }
     },
-    [changeModelFormatter, customFormatString, durationParams]
+    [changeModelFormatter, customFormatPattern, durationParams]
   );
 
   const handleCustomFormatStringChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      const formatString = event.target.value;
-      changeModelFormatter(formatString);
-      setCustomFormatString(formatString);
+      const stringPattern = event.target.value;
+      changeModelFormatter(stringPattern);
+      setCustomFormatPattern(stringPattern);
     },
     [changeModelFormatter]
   );
@@ -245,33 +270,34 @@ export const DataFormatPicker = ({
   }
 
   let custom;
-  if (selectedFormatter === DATA_FORMATTERS.CUSTOM) {
+  if (selectedFormatter === DATA_FORMATTERS.CUSTOM && shouldIncludeNumberOptions) {
     custom = (
       <EuiFlexItem grow={false}>
         <EuiFormRow
-          label={i18n.translate('visTypeTimeseries.dataFormatPicker.formatStringLabel', {
-            defaultMessage: 'Format string',
-          })}
+          label={
+            <FormattedMessage
+              id="visTypeTimeseries.dataFormatPicker.formatPatternLabel"
+              defaultMessage="Numeral.js format pattern (Default: {defaultPattern})"
+              values={{ defaultPattern: <EuiCode>{DEFAULT_CUSTOM_FORMAT_PATTERN}</EuiCode> }}
+            />
+          }
           helpText={
             <span>
-              <FormattedMessage
-                id="visTypeTimeseries.dataFormatPicker.formatStringHelpText"
-                defaultMessage="See {numeralJsLink}"
-                values={{
-                  numeralJsLink: (
-                    <EuiLink href="http://numeraljs.com/#format" target="_BLANK">
-                      Numeral.js
-                    </EuiLink>
-                  ),
-                }}
-              />
+              <EuiLink target="_blank" href="http://numeraljs.com/#format">
+                <FormattedMessage
+                  id="visTypeTimeseries.dataFormatPicker.formatStringHelpText"
+                  defaultMessage="Documentation"
+                />
+                &nbsp;
+                <EuiIcon type="link" />
+              </EuiLink>
             </span>
           }
         >
           <EuiFieldText
-            value={customFormatString}
+            placeholder={DEFAULT_CUSTOM_FORMAT_PATTERN}
+            value={customFormatPattern}
             onChange={handleCustomFormatStringChange}
-            disabled={!shouldIncludeNumberOptions}
           />
         </EuiFormRow>
       </EuiFlexItem>

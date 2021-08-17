@@ -55,6 +55,7 @@ export function Agg(props: AggProps) {
   const indexPattern = props.series.override_index_pattern
     ? props.series.series_index_pattern
     : props.panel.index_pattern;
+  const isKibanaIndexPattern = props.panel.use_kibana_indexes || indexPattern === '';
 
   const onAggChange = useMemo(
     () => seriesChangeHandler({ name, model: series, onChange }, siblings),
@@ -66,10 +67,18 @@ export function Agg(props: AggProps) {
     const isNumberFormatter = ![DATA_FORMATTERS.DEFAULT, DATA_FORMATTERS.CUSTOM].includes(
       series.formatter as DATA_FORMATTERS
     );
-    if (!isNumericMetric && isNumberFormatter) {
+
+    if (isNumberFormatter && !isNumericMetric) {
       onChange({ formatter: DATA_FORMATTERS.DEFAULT });
     }
-  }, [indexPattern, model, onChange, fields, series.formatter]);
+    // in case of string index pattern mode, change default formatter depending on metric type
+    // "number" formatter for numeric metric and "" as custom formatter for any other type
+    if (series.formatter === DATA_FORMATTERS.DEFAULT && !isKibanaIndexPattern) {
+      onChange({
+        formatter: isNumericMetric ? DATA_FORMATTERS.NUMBER : '',
+      });
+    }
+  }, [indexPattern, model, onChange, fields, series.formatter, isKibanaIndexPattern]);
 
   return (
     <div className={props.className} style={style}>

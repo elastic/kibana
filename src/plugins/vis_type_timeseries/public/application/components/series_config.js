@@ -41,6 +41,7 @@ export const SeriesConfig = (props) => {
     () => checkIfNumericMetric(last(model.metrics), props.fields, seriesIndexPattern),
     [model.metrics, props.fields, seriesIndexPattern]
   );
+  const isKibanaIndexPattern = props.panel.use_kibana_indexes || seriesIndexPattern === '';
 
   return (
     <div className="tvbAggRow">
@@ -48,6 +49,7 @@ export const SeriesConfig = (props) => {
         <DataFormatPicker
           formatterValue={model.formatter}
           changeModelFormatter={changeModelFormatter}
+          shouldIncludeDefaultOption={isKibanaIndexPattern}
           shouldIncludeNumberOptions={isNumericMetric}
         />
         <EuiFlexItem grow={3}>

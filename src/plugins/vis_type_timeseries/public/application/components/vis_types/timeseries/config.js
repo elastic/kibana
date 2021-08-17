@@ -336,6 +336,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
     () => checkIfNumericMetric(last(model.metrics), props.fields, seriesIndexPattern),
     [model.metrics, props.fields, seriesIndexPattern]
   );
+  const isKibanaIndexPattern = props.panel.use_kibana_indexes || seriesIndexPattern === '';
 
   const initialPalette = model.palette ?? {
     type: 'palette',
@@ -356,6 +357,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
         <DataFormatPicker
           formatterValue={model.formatter}
           changeModelFormatter={changeModelFormatter}
+          shouldIncludeDefaultOption={isKibanaIndexPattern}
           shouldIncludeNumberOptions={isNumericMetric}
         />
         <EuiFlexItem grow={3}>

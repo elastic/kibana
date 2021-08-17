@@ -8,6 +8,7 @@
 
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 import { METRIC_TYPES } from '../../../../common/enums';
+import { KBN_FIELD_TYPES } from '../../../../../data/public';
 
 import type { Metric, IndexPatternValue } from '../../../../common/types';
 import type { VisFields } from '../../lib/fetch_fields';
@@ -23,7 +24,7 @@ export const checkIfNumericMetric = (
     const selectedField = fields[getIndexPatternKey(indexPattern)]?.find(
       ({ name }) => name === metric?.field
     );
-    return selectedField?.type === 'number';
+    return selectedField?.type === KBN_FIELD_TYPES.NUMBER;
   }
   return true;
 };

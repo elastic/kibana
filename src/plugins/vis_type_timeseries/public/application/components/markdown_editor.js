@@ -24,6 +24,11 @@ import { getDataStart } from '../../services';
 import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 
 export class MarkdownEditor extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { fieldFormatMap: undefined };
+  }
+
   handleChange = (value) => {
     this.props.onChange({ markdown: value });
   };
@@ -40,11 +45,8 @@ export class MarkdownEditor extends Component {
 
   async componentDidMount() {
     const { indexPatterns } = getDataStart();
-    const { indexPattern } = await fetchIndexPattern(
-      this.props.model.index_pattern || '',
-      indexPatterns
-    );
-    this.fieldFormatMap = indexPattern?.fieldFormatMap;
+    const { indexPattern } = await fetchIndexPattern(this.props.model.index_pattern, indexPatterns);
+    this.setState({ fieldFormatMap: indexPattern?.fieldFormatMap });
   }
 
   render() {
@@ -54,7 +56,7 @@ export class MarkdownEditor extends Component {
       return null;
     }
     const series = _.get(visData, `${model.id}.series`, []);
-    const variables = convertSeriesToVars(series, model, getConfig, this.fieldFormatMap);
+    const variables = convertSeriesToVars(series, model, getConfig, this.state.fieldFormatMap);
     const rows = [];
     const rawFormatter = createTickFormatter('0.[0000]', null, getConfig);
 

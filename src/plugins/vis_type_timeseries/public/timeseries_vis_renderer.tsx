@@ -57,7 +57,7 @@ export const getTimeseriesVisRenderer: (deps: {
     const palettesService = await palettes.getPalettes();
 
     const { indexPatterns } = getDataStart();
-    const { indexPattern } = await fetchIndexPattern(model.index_pattern || '', indexPatterns);
+    const { indexPattern } = await fetchIndexPattern(model.index_pattern, indexPatterns);
 
     render(
       <I18nProvider>

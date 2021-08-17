@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { last } from 'lodash';
+import { last, isEqual } from 'lodash';
 import { DATA_FORMATTERS } from '../../../../common/enums';
 import type { Series } from '../../../../common/types';
 import type { FieldFormatMap } from '../../../../../data/common';
@@ -22,9 +22,8 @@ export const checkIfSeriesHaveSameFormatters = (
   return allSeriesHaveDefaultFormatting && fieldFormatMap
     ? seriesModel
         .map(({ metrics }) => fieldFormatMap[last(metrics)?.field ?? ''])
-        .every(
-          (fieldFormat, index, [firstSeriesFieldFormat]) =>
-            JSON.stringify(fieldFormat) === JSON.stringify(firstSeriesFieldFormat)
+        .every((fieldFormat, index, [firstSeriesFieldFormat]) =>
+          isEqual(fieldFormat, firstSeriesFieldFormat)
         )
     : seriesModel.every(
         (series) =>
