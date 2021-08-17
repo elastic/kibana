@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { isRumAgentName, isIosAgentName } from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
@@ -23,6 +24,7 @@ import { TransactionsTable } from '../../shared/transactions_table';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
 import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -33,6 +35,7 @@ export const chartHeight = 288;
 export function ServiceOverview() {
   const { agentName, serviceName } = useApmServiceContext();
   const {
+    query,
     query: { environment, kuery },
   } = useApmParams('/services/:serviceName/overview');
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
@@ -45,6 +48,14 @@ export function ServiceOverview() {
   const rowDirection = isMedium ? 'column' : 'row';
   const isRumAgent = isRumAgentName(agentName);
   const isIosAgent = isIosAgentName(agentName);
+
+  const router = useApmRouter();
+  const dependenciesLink = router.link('/services/:serviceName/dependencies', {
+    path: {
+      serviceName,
+    },
+    query,
+  });
 
   return (
     <AnnotationsContextProvider
@@ -82,7 +93,11 @@ export function ServiceOverview() {
               </EuiFlexItem>
               <EuiFlexItem grow={7}>
                 <EuiPanel hasBorder={true}>
-                  <TransactionsTable kuery={kuery} environment={environment} />
+                  <TransactionsTable
+                    kuery={kuery}
+                    environment={environment}
+                    fixedHeight={true}
+                  />
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -126,7 +141,17 @@ export function ServiceOverview() {
               {!isRumAgent && (
                 <EuiFlexItem grow={7}>
                   <EuiPanel hasBorder={true}>
-                    <ServiceOverviewDependenciesTable />
+                    <ServiceOverviewDependenciesTable
+                      fixedHeight={true}
+                      link={
+                        <EuiLink href={dependenciesLink}>
+                          {i18n.translate(
+                            'xpack.apm.serviceOverview.dependenciesTableTabLink',
+                            { defaultMessage: 'View dependencies' }
+                          )}
+                        </EuiLink>
+                      }
+                    />
                   </EuiPanel>
                 </EuiFlexItem>
               )}

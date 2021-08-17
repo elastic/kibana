@@ -8,3 +8,4 @@
 
 export * from './technical_field_names';
 export * from './alerts_as_data_rbac';
+export * from './alerts_as_data_severity';
