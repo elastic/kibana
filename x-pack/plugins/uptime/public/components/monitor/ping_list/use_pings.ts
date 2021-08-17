@@ -45,6 +45,7 @@ export const usePingsList = ({ pageSize, pageIndex }: Props) => {
     dispatch,
   ]);
 
+  const locations = JSON.stringify(selectedLocations);
   useEffect(() => {
     getPings({
       monitorId,
@@ -52,22 +53,12 @@ export const usePingsList = ({ pageSize, pageIndex }: Props) => {
         from,
         to,
       },
-      locations: JSON.stringify(selectedLocations),
+      locations,
       index: pageIndex,
       size: pageSize,
       status: statusFilter !== 'all' ? statusFilter : '',
     });
-  }, [
-    from,
-    to,
-    getPings,
-    monitorId,
-    lastRefresh,
-    pageIndex,
-    pageSize,
-    statusFilter,
-    selectedLocations,
-  ]);
+  }, [from, to, getPings, monitorId, lastRefresh, pageIndex, pageSize, statusFilter, locations]);
 
   const { data } = useFetcher(() => {
     if (pings?.length > 0 && pings.find((ping) => ping.monitor.type === MONITOR_TYPES.BROWSER))
