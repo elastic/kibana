@@ -32,7 +32,7 @@ export const CopySource: Task = {
         '!src/setup_node_env/babel_register/index.js',
         '!src/setup_node_env/babel_register/register.js',
         '!src/plugins/telemetry/schema/**', // Skip telemetry schemas
-        '!**/public/**/*.{js,ts,tsx,json}',
+        '!**/public/**/*.{js,ts,tsx,json,scss}',
         'typings/**',
         'config/kibana.yml',
         'config/node.options',
