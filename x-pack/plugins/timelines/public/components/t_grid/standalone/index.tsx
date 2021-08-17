@@ -335,8 +335,8 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   }, []);
 
   return (
-    <InspectButtonContainer>
-      <AlertsTableWrapper data-test-subj="events-viewer-panel">
+    <InspectButtonContainer data-test-subj="events-viewer-panel">
+      <AlertsTableWrapper>
         {canQueryTimeline ? (
           <>
             <HeaderSection
