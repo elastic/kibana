@@ -53,6 +53,7 @@ export function createMockGraphStore({
   } as unknown) as GraphWorkspaceSavedObject;
 
   const mockedDeps: jest.Mocked<GraphStoreDependencies> = {
+    basePath: '',
     addBasePath: jest.fn((url: string) => url),
     changeUrl: jest.fn(),
     chrome: ({
