@@ -238,6 +238,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
                   )}"`,
                 },
               });
+              onFilter();
               trackApmEvent({ metric: 'correlations_term_exclude_filter' });
             },
           },
