@@ -687,6 +687,7 @@ export class SavedObjectsRepository {
     }
 
     const deleteDocNotFound = body.result === 'not_found';
+    // @ts-expect-error @elastic/elasticsearch doesn't declare error on DeleteResponse
     const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
     const esServerSupported = isSupportedEsServer(headers);
     if (deleteDocNotFound || deleteIndexNotFound) {

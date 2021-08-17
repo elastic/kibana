@@ -133,15 +133,16 @@ export const goToQueryTab = () => {
 
 export const addNotesToTimeline = (notes: string) => {
   goToNotesTab().then(() => {
-    cy.get(NOTES_TEXT_AREA).type(notes);
-    cy.root()
-      .pipe(($el) => {
-        $el.find(ADD_NOTE_BUTTON).trigger('click');
-        return $el.find(NOTES_TAB_BUTTON).find('.euiBadge');
-      })
-      .should('have.text', '1');
-  });
+    cy.get(NOTES_TAB_BUTTON)
+      .find('.euiBadge__text')
+      .then(($el) => {
+        const notesCount = parseInt($el.text(), 10);
 
+        cy.get(NOTES_TEXT_AREA).type(notes);
+        cy.get(ADD_NOTE_BUTTON).trigger('click');
+        cy.get(`${NOTES_TAB_BUTTON} .euiBadge`).should('have.text', `${notesCount + 1}`);
+      });
+  });
   goToQueryTab();
   goToNotesTab();
 };
