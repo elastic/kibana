@@ -7,10 +7,11 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { GroupAwareWorkspaceEdge, GroupAwareWorkspaceNode } from '../../types';
+import { GraphVisualization } from './graph_visualization';
+import { Workspace, WorkspaceEdge, WorkspaceNode } from '../../types';
 
 describe('graph_visualization', () => {
-  const nodes: GroupAwareWorkspaceNode[] = [
+  const nodes: WorkspaceNode[] = [
     {
       color: 'black',
       data: {
@@ -75,7 +76,7 @@ describe('graph_visualization', () => {
       y: 9,
     },
   ];
-  const edges: GroupAwareWorkspaceEdge[] = [
+  const edges: WorkspaceEdge[] = [
     {
       isSelected: true,
       label: '',
@@ -97,9 +98,32 @@ describe('graph_visualization', () => {
       width: 2.2,
     },
   ];
+  const workspace = ({
+    nodes,
+    edges,
+    selectNone: () => {},
+    changeHandler: jest.fn(),
+    toggleNodeSelection: jest.fn().mockImplementation((node: WorkspaceNode) => {
+      return !node.isSelected;
+    }),
+    getAllIntersections: jest.fn(),
+  } as unknown) as jest.Mocked<Workspace>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should render empty workspace without data', () => {
-    expect(shallow(<GraphVisualization edgeClick={() => {}} nodeClick={() => {}} />))
-      .toMatchInlineSnapshot(`
+    expect(
+      shallow(
+        <GraphVisualization
+          workspace={({} as unknown) as Workspace}
+          selectSelected={() => {}}
+          onSetControl={() => {}}
+          onSetMergeCandidates={() => {}}
+        />
+      )
+    ).toMatchInlineSnapshot(`
       <svg
         className="gphGraph"
         height="100%"
@@ -118,36 +142,67 @@ describe('graph_visualization', () => {
   it('should render to svg elements', () => {
     expect(
       shallow(
-        <GraphVisualization edgeClick={() => {}} nodeClick={() => {}} nodes={nodes} edges={edges} />
+        <GraphVisualization
+          workspace={workspace}
+          selectSelected={() => {}}
+          onSetControl={() => {}}
+          onSetMergeCandidates={() => {}}
+        />
       )
     ).toMatchSnapshot();
   });
 
-  it('should react to node click', () => {
-    const nodeClickSpy = jest.fn();
+  it('should react to node selection', () => {
+    const selectSelectedMock = jest.fn();
+
     const instance = shallow(
       <GraphVisualization
-        edgeClick={() => {}}
-        nodeClick={nodeClickSpy}
-        nodes={nodes}
-        edges={edges}
+        workspace={workspace}
+        selectSelected={selectSelectedMock}
+        onSetControl={() => {}}
+        onSetMergeCandidates={() => {}}
       />
     );
+
+    instance.find('.gphNode').last().simulate('click', {});
+
+    expect(workspace.toggleNodeSelection).toHaveBeenCalledWith(nodes[2]);
+    expect(selectSelectedMock).toHaveBeenCalledWith(nodes[2]);
+    expect(workspace.changeHandler).toHaveBeenCalled();
+  });
+
+  it('should react to node deselection', () => {
+    const onSetControlMock = jest.fn();
+    const instance = shallow(
+      <GraphVisualization
+        workspace={workspace}
+        selectSelected={() => {}}
+        onSetControl={onSetControlMock}
+        onSetMergeCandidates={() => {}}
+      />
+    );
+
     instance.find('.gphNode').first().simulate('click', {});
-    expect(nodeClickSpy).toHaveBeenCalledWith(nodes[0], {});
+
+    expect(workspace.toggleNodeSelection).toHaveBeenCalledWith(nodes[0]);
+    expect(onSetControlMock).toHaveBeenCalledWith('none');
+    expect(workspace.changeHandler).toHaveBeenCalled();
   });
 
   it('should react to edge click', () => {
-    const edgeClickSpy = jest.fn();
     const instance = shallow(
       <GraphVisualization
-        edgeClick={edgeClickSpy}
-        nodeClick={() => {}}
-        nodes={nodes}
-        edges={edges}
+        workspace={workspace}
+        selectSelected={() => {}}
+        onSetControl={() => {}}
+        onSetMergeCandidates={() => {}}
       />
     );
+
     instance.find('.gphEdge').first().simulate('click');
-    expect(edgeClickSpy).toHaveBeenCalledWith(edges[0]);
+
+    expect(workspace.getAllIntersections).toHaveBeenCalled();
+    expect(edges[0].topSrc).toEqual(workspace.getAllIntersections.mock.calls[0][1][0]);
+    expect(edges[0].topTarget).toEqual(workspace.getAllIntersections.mock.calls[0][1][1]);
   });
 });

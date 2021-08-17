@@ -54,14 +54,18 @@ export interface SerializedField extends Omit<WorkspaceField, 'icon' | 'type' | 
 }
 
 export interface SerializedNode
-  extends Omit<WorkspaceNode, 'icon' | 'data' | 'parent' | 'scaledSize' | 'numChildren'> {
+  extends Omit<
+    WorkspaceNode,
+    'icon' | 'data' | 'parent' | 'scaledSize' | 'kx' | 'ky' | 'numChildren'
+  > {
   field: string;
   term: string;
   parent: number | null;
   size: number;
 }
 
-export interface SerializedEdge extends Omit<WorkspaceEdge, 'source' | 'target'> {
+export interface SerializedEdge
+  extends Omit<WorkspaceEdge, 'source' | 'target' | 'topTarget' | 'topSrc'> {
   source: number;
   target: number;
 }

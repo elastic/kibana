@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
 import d3 from 'd3';
 import { TargetOptions } from '../components/control_panel';
 import { FontawesomeIcon } from '../helpers/style_choices';
@@ -25,7 +25,11 @@ export interface WorkspaceNode {
   color: string;
   numChildren: number;
   isSelected?: boolean;
+  kx: number;
+  ky: number;
 }
+
+export type BlockListedNode = Omit<WorkspaceNode, 'kx' | 'ky' | 'numChildren' | 'isSelected'>;
 
 export interface WorkspaceEdge {
   weight: number;
@@ -34,6 +38,8 @@ export interface WorkspaceEdge {
   source: WorkspaceNode;
   target: WorkspaceNode;
   isSelected?: boolean;
+  topTarget: WorkspaceNode;
+  topSrc: WorkspaceNode;
 }
 
 export interface ServerResultNode {
@@ -74,10 +80,10 @@ export interface TermIntersect {
 export interface Workspace {
   options: WorkspaceOptions;
   nodesMap: Record<string, WorkspaceNode>;
-  nodes: GroupAwareWorkspaceNode[];
+  nodes: WorkspaceNode[];
   selectedNodes: WorkspaceNode[];
-  edges: GroupAwareWorkspaceEdge[];
-  blocklistedNodes: WorkspaceNode[];
+  edges: WorkspaceEdge[];
+  blocklistedNodes: BlockListedNode[];
   undoLog: string;
   redoLog: string;
   force: ReturnType<typeof d3.layout.force>;
@@ -163,21 +169,5 @@ export type WorkspaceOptions = Partial<{
   ) => void;
   exploreControls: AdvancedSettings;
 }>;
-
-/*
- * The layouting algorithm sets a few extra properties on
- * node objects to handle grouping. GroupAwareWorkspaceNode and GroupAwareWorkspaceEdge
- * will be moved to a separate data structure when the layouting is migrated
- */
-
-export interface GroupAwareWorkspaceNode extends WorkspaceNode {
-  kx: number;
-  ky: number;
-}
-
-export interface GroupAwareWorkspaceEdge extends WorkspaceEdge {
-  topTarget: GroupAwareWorkspaceNode;
-  topSrc: GroupAwareWorkspaceNode;
-}
 
 export type ControlType = 'style' | 'drillDowns' | 'editLabel' | 'mergeTerms' | 'none';

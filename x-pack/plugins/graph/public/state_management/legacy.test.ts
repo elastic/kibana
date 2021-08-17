@@ -77,7 +77,6 @@ describe('legacy sync sagas', () => {
 
   it('syncs templates with workspace', () => {
     env.store.dispatch(loadTemplates([]));
-    expect(env.mockedDeps.setUrlTemplates).toHaveBeenCalledWith([]);
     expect(env.mockedDeps.notifyReact).toHaveBeenCalled();
   });
 

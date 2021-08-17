@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiTab, EuiListGroupItem, EuiButton, EuiAccordion, EuiFieldText } from '@elastic/eui';
 import * as Rx from 'rxjs';
 import { mountWithIntl } from '@kbn/test/jest';
-import { Settings, AngularProps } from './settings';
+import { Settings, SettingsWorkspaceProps } from './settings';
 import { act } from '@testing-library/react';
 import { ReactWrapper } from 'enzyme';
 import { UrlTemplateForm } from './url_template_form';
@@ -46,7 +46,7 @@ describe('settings', () => {
     isDefault: false,
   };
 
-  const angularProps: jest.Mocked<AngularProps> = {
+  const angularProps: jest.Mocked<SettingsWorkspaceProps> = {
     blocklistedNodes: [
       {
         x: 0,
@@ -64,6 +64,9 @@ describe('settings', () => {
           code: '1',
           label: 'test',
         },
+        numChildren: 0,
+        kx: 0,
+        ky: 0,
       },
       {
         x: 0,
@@ -81,13 +84,16 @@ describe('settings', () => {
           code: '1',
           label: 'test',
         },
+        numChildren: 0,
+        kx: 0,
+        ky: 0,
       },
     ],
     unblocklistNode: jest.fn(),
     canEditDrillDownUrls: true,
   };
 
-  let subject: Rx.BehaviorSubject<jest.Mocked<AngularProps>>;
+  let subject: Rx.BehaviorSubject<jest.Mocked<SettingsWorkspaceProps>>;
   let instance: ReactWrapper;
 
   beforeEach(() => {
@@ -235,6 +241,9 @@ describe('settings', () => {
                 code: '1',
                 label: 'test',
               },
+              numChildren: 0,
+              kx: 0,
+              ky: 0,
             },
           ],
         });

@@ -9,14 +9,7 @@ import React, { useRef } from 'react';
 import classNames from 'classnames';
 import d3, { ZoomEvent } from 'd3';
 import { isColorDark, hexToRgb } from '@elastic/eui';
-import {
-  GroupAwareWorkspaceNode,
-  GroupAwareWorkspaceEdge,
-  Workspace,
-  WorkspaceNode,
-  TermIntersect,
-  ControlType,
-} from '../../types';
+import { Workspace, WorkspaceNode, TermIntersect, ControlType, WorkspaceEdge } from '../../types';
 import { makeNodeId } from '../../services/persistence';
 
 export interface GraphVisualizationProps {
@@ -52,7 +45,7 @@ export function GraphVisualization({
 }: GraphVisualizationProps) {
   const svgRoot = useRef<SVGSVGElement | null>(null);
 
-  const nodeClick = (n: GroupAwareWorkspaceNode, event: React.MouseEvent) => {
+  const nodeClick = (n: WorkspaceNode, event: React.MouseEvent) => {
     // Selection logic - shift key+click helps selects multiple nodes
     // Without the shift key we deselect all prior selections (perhaps not
     // a great idea for touch devices with no concept of shift key)
@@ -86,7 +79,7 @@ export function GraphVisualization({
     onSetControl('mergeTerms');
   };
 
-  const edgeClick = (edge: GroupAwareWorkspaceEdge) =>
+  const edgeClick = (edge: WorkspaceEdge) =>
     workspace.getAllIntersections(handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
 
   return (
