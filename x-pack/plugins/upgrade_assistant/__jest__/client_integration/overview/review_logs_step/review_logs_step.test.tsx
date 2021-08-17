@@ -42,7 +42,7 @@ describe('Overview - Fix deprecated settings step', () => {
       const { exists, find } = testBed;
 
       expect(exists('esStatsPanel')).toBe(true);
-      expect(find('esStatsPanel.totalDeprecations').text()).toContain('2');
+      expect(find('esStatsPanel.warningDeprecations').text()).toContain('1');
       expect(find('esStatsPanel.criticalDeprecations').text()).toContain('1');
     });
 
@@ -78,7 +78,7 @@ describe('Overview - Fix deprecated settings step', () => {
       expect(exists('noDeprecationsLabel')).toBe(true);
     });
 
-    test('Has a link for viewing deprecations', () => {
+    test('Stats panel navigates to deprecations list if clicked', () => {
       const { component, exists, find } = testBed;
 
       component.update();
@@ -181,7 +181,7 @@ describe('Overview - Fix deprecated settings step', () => {
       const { exists, find } = testBed;
 
       expect(exists('kibanaStatsPanel')).toBe(true);
-      expect(find('kibanaStatsPanel.totalDeprecations').text()).toContain('1');
+      expect(find('kibanaStatsPanel.warningDeprecations').text()).toContain('1');
       expect(find('kibanaStatsPanel.criticalDeprecations').text()).toContain('1');
     });
 
@@ -217,9 +217,11 @@ describe('Overview - Fix deprecated settings step', () => {
       const { exists } = testBed;
 
       expect(exists('noDeprecationsLabel')).toBe(true);
+      expect(exists('kibanaStatsPanel.warningDeprecations')).toBe(false);
+      expect(exists('kibanaStatsPanel.criticalDeprecations')).toBe(false);
     });
 
-    test('Has a link for viewing deprecations', () => {
+    test('Stats panel navigates to deprecations list if clicked', () => {
       const { component, exists, find } = testBed;
 
       component.update();

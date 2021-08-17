@@ -47,4 +47,10 @@ export const kibanaDeprecations: DomainDeprecationDetails[] = [
     message:
       'Disabling the Spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)',
   },
+  {
+    correctiveActions: { manualSteps: ['test-step'] },
+    domainId: 'xpack.spaces',
+    level: 'warning',
+    message: 'Sample warning deprecation',
+  },
 ];

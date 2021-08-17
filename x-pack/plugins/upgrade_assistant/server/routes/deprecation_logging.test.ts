@@ -37,7 +37,7 @@ describe('deprecation logging API', () => {
   });
 
   describe('GET /api/upgrade_assistant/deprecation_logging', () => {
-    it('returns isEnabled', async () => {
+    it('returns that indexing and writing logs is enabled', async () => {
       (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
         .getSettings as jest.Mock).mockResolvedValue({
         body: {
@@ -72,12 +72,13 @@ describe('deprecation logging API', () => {
   });
 
   describe('PUT /api/upgrade_assistant/deprecation_logging', () => {
-    it('returns isEnabled', async () => {
+    it('returns that indexing and writing logs is enabled', async () => {
       (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
         .putSettings as jest.Mock).mockResolvedValue({
         body: {
           default: {
-            cluster: { deprecation_indexing: { enabled: 'false' } },
+            logger: { deprecation: 'WARN' },
+            cluster: { deprecation_indexing: { enabled: 'true' } },
           },
         },
       });

@@ -13,11 +13,9 @@ import {
   EuiFlexGroup,
   EuiSpacer,
   EuiButton,
-  EuiIcon,
-  EuiLink,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import type { DocLinksStart } from 'src/core/public';
 import { useKibana } from '../../../../shared_imports';
@@ -42,6 +40,12 @@ const i18nTexts = {
   upgradeStepLink: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepLink', {
     defaultMessage: 'Learn more',
   }),
+  upgradeStepCloudLink: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepCloudLink', {
+    defaultMessage: 'Upgrade on Cloud',
+  }),
+  upgradeGuideLink: i18n.translate('xpack.upgradeAssistant.overview.upgradeGuideLink', {
+    defaultMessage: 'View upgrade guide',
+  }),
 };
 
 const UpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }) => {
@@ -54,31 +58,29 @@ const UpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }) => {
 
   if (isCloudEnabled) {
     callToAction = (
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButton
             href={cloudDeploymentUrl}
             target="_blank"
             data-test-subj="upgradeSetupCloudLink"
+            iconSide="right"
+            iconType="popout"
           >
-            <FormattedMessage
-              id="xpack.upgradeAssistant.overview.upgradeStepCloudLink"
-              defaultMessage="Upgrade on Cloud"
-            />
+            {i18nTexts.upgradeStepCloudLink}
           </EuiButton>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiLink
+          <EuiButtonEmpty
             href={docLinks.links.elasticsearch.setupUpgrade}
             target="_blank"
             data-test-subj="upgradeSetupDocsLink"
+            iconSide="right"
+            iconType="popout"
           >
-            <FormattedMessage
-              id="xpack.upgradeAssistant.overview.upgradeGuideLink"
-              defaultMessage="View upgrade guide"
-            />
-          </EuiLink>
+            {i18nTexts.upgradeGuideLink}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -88,9 +90,10 @@ const UpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }) => {
         href={docLinks.links.elasticsearch.setupUpgrade}
         target="_blank"
         data-test-subj="upgradeSetupDocsLink"
+        iconSide="right"
+        iconType="popout"
       >
         {i18nTexts.upgradeStepLink}
-        <EuiIcon type="popout" size="s" style={{ marginLeft: 4 }} />
       </EuiButton>
     );
   }

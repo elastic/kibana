@@ -75,5 +75,5 @@ export const EsStatsErrors: React.FunctionComponent<Props> = ({ error }) => {
       );
   }
 
-  return <span style={{ marginLeft: 8 }}>{iconContent}</span>;
+  return <span className="upgWarningIcon">{iconContent}</span>;
 };

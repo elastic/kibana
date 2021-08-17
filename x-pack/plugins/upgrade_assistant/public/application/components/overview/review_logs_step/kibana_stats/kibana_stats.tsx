@@ -29,7 +29,7 @@ const i18nTexts = {
   statsTitle: i18n.translate('xpack.upgradeAssistant.kibanaDeprecationStats.statsTitle', {
     defaultMessage: 'Kibana',
   }),
-  totalDeprecationsTitle: i18n.translate(
+  warningDeprecationsTitle: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecationStats.warningDeprecationsTitle',
     {
       defaultMessage: 'Warning',
@@ -52,16 +52,18 @@ const i18nTexts = {
   }),
   getCriticalDeprecationsMessage: (criticalDeprecations: number) =>
     i18n.translate('xpack.upgradeAssistant.kibanaDeprecationStats.criticalDeprecationsLabel', {
-      defaultMessage: 'Kibana has {criticalDeprecations} critical deprecations',
+      defaultMessage:
+        'Kibana has {criticalDeprecations} critical {criticalDeprecations, plural, one {deprecation} other {deprecations}}',
       values: {
         criticalDeprecations,
       },
     }),
-  getTotalDeprecationsMessage: (totalDeprecations: number) =>
-    i18n.translate('xpack.upgradeAssistant.kibanaDeprecationStats.totalDeprecationsLabel', {
-      defaultMessage: 'Kibana has {totalDeprecations} total deprecations',
+  getWarningDeprecationsMessage: (warningDeprecations: number) =>
+    i18n.translate('xpack.upgradeAssistant.kibanaDeprecationStats.getWarningDeprecationsMessage', {
+      defaultMessage:
+        'Kibana has {warningDeprecations} warning {warningDeprecations, plural, one {deprecation} other {deprecations}}',
       values: {
-        totalDeprecations,
+        warningDeprecations,
       },
     }),
 };
@@ -93,12 +95,13 @@ export const KibanaDeprecationStats: FunctionComponent = () => {
     getAllDeprecations();
   }, [deprecations]);
 
-  const warningDeprecationsCount = kibanaDeprecations?.length ?? 0;
+  const warningDeprecationsCount =
+    kibanaDeprecations?.filter((deprecation) => deprecation.level === 'warning')?.length ?? 0;
   const criticalDeprecationsCount =
     kibanaDeprecations?.filter((deprecation) => deprecation.level === 'critical')?.length ?? 0;
 
-  const hasWarnings = criticalDeprecationsCount > 0;
-  const hasCritical = warningDeprecationsCount > 0;
+  const hasCritical = criticalDeprecationsCount > 0;
+  const hasWarnings = warningDeprecationsCount > 0;
   const hasNoDeprecations = !isLoading && !error && !hasWarnings && !hasCritical;
   const shouldRenderStat = (forSection: boolean) => error || isLoading || forSection;
 
@@ -110,15 +113,17 @@ export const KibanaDeprecationStats: FunctionComponent = () => {
         <>
           {i18nTexts.statsTitle}
           {error && (
-            <EuiIconTip
-              type="alert"
-              color="danger"
-              size="l"
-              content={i18nTexts.loadingError}
-              iconProps={{
-                'data-test-subj': 'kibanaRequestErrorIconTip',
-              }}
-            />
+            <span className="upgWarningIcon">
+              <EuiIconTip
+                type="alert"
+                color="danger"
+                size="m"
+                content={i18nTexts.loadingError}
+                iconProps={{
+                  'data-test-subj': 'kibanaRequestErrorIconTip',
+                }}
+              />
+            </span>
           )}
         </>
       }
@@ -160,10 +165,10 @@ export const KibanaDeprecationStats: FunctionComponent = () => {
         {shouldRenderStat(hasWarnings) && (
           <EuiFlexItem>
             <EuiStat
-              data-test-subj="totalDeprecations"
+              data-test-subj="warningDeprecations"
               title={error ? '--' : getDeprecationsUpperLimit(warningDeprecationsCount)}
               titleElement="span"
-              description={i18nTexts.totalDeprecationsTitle}
+              description={i18nTexts.warningDeprecationsTitle}
               isLoading={isLoading}
             >
               {!error && (
@@ -171,7 +176,7 @@ export const KibanaDeprecationStats: FunctionComponent = () => {
                   <p>
                     {isLoading
                       ? i18nTexts.loadingText
-                      : i18nTexts.getTotalDeprecationsMessage(warningDeprecationsCount)}
+                      : i18nTexts.getWarningDeprecationsMessage(warningDeprecationsCount)}
                   </p>
                 </EuiScreenReaderOnly>
               )}

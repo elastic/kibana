@@ -28,7 +28,7 @@ const i18nTexts = {
   statsTitle: i18n.translate('xpack.upgradeAssistant.esDeprecationStats.statsTitle', {
     defaultMessage: 'Elasticsearch',
   }),
-  totalDeprecationsTitle: i18n.translate(
+  warningDeprecationsTitle: i18n.translate(
     'xpack.upgradeAssistant.esDeprecationStats.warningDeprecationsTitle',
     {
       defaultMessage: 'Warning',
@@ -50,7 +50,7 @@ const i18nTexts = {
         criticalDeprecations,
       },
     }),
-  getTotalDeprecationsMessage: (clusterCount: number, indexCount: number) =>
+  getWarningDeprecationMessage: (clusterCount: number, indexCount: number) =>
     i18n.translate('xpack.upgradeAssistant.esDeprecationStats.totalDeprecationsTooltip', {
       defaultMessage:
         'This cluster is using {clusterCount} deprecated cluster settings and {indexCount} deprecated index settings',
@@ -68,11 +68,14 @@ export const ESDeprecationStats: FunctionComponent = () => {
   const { data: esDeprecations, isLoading, error } = api.useLoadUpgradeStatus();
 
   const allDeprecations = esDeprecations?.cluster?.concat(esDeprecations?.indices) ?? [];
+  const warningDeprecations = allDeprecations.filter(
+    (deprecation) => deprecation.level === 'warning'
+  );
   const criticalDeprecations = allDeprecations.filter(
     (deprecation) => deprecation.level === 'critical'
   );
 
-  const hasWarnings = allDeprecations.length > 0;
+  const hasWarnings = warningDeprecations.length > 0;
   const hasCritical = criticalDeprecations.length > 0;
   const hasNoDeprecations = !isLoading && !error && !hasWarnings && !hasCritical;
   const shouldRenderStat = (forSection: boolean) => error || isLoading || forSection;
@@ -123,10 +126,10 @@ export const ESDeprecationStats: FunctionComponent = () => {
         {shouldRenderStat(hasWarnings) && (
           <EuiFlexItem>
             <EuiStat
-              data-test-subj="totalDeprecations"
-              title={error ? '--' : getDeprecationsUpperLimit(allDeprecations.length)}
+              data-test-subj="warningDeprecations"
+              title={error ? '--' : getDeprecationsUpperLimit(warningDeprecations.length)}
               titleElement="span"
-              description={i18nTexts.totalDeprecationsTitle}
+              description={i18nTexts.warningDeprecationsTitle}
               isLoading={isLoading}
             >
               {!error && (
@@ -134,7 +137,7 @@ export const ESDeprecationStats: FunctionComponent = () => {
                   <p>
                     {isLoading
                       ? i18nTexts.loadingText
-                      : i18nTexts.getTotalDeprecationsMessage(
+                      : i18nTexts.getWarningDeprecationMessage(
                           esDeprecations?.cluster.length ?? 0,
                           esDeprecations?.indices.length ?? 0
                         )}

@@ -19,7 +19,6 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ResponseError } from '../../../../lib/api';
 import { DeprecationLoggingPreviewProps } from '../../../types';
@@ -48,6 +47,9 @@ const i18nTexts = {
   }),
   buttonLabel: i18n.translate('xpack.upgradeAssistant.overview.deprecationLogs.buttonLabel', {
     defaultMessage: 'Enable deprecation logging and indexing',
+  }),
+  loadingLogsLabel: i18n.translate('xpack.upgradeAssistant.overview.loadingLogsLabel', {
+    defaultMessage: 'Loading log collection state…',
   }),
 };
 
@@ -90,12 +92,7 @@ export const DeprecationLoggingToggle: FunctionComponent<DeprecationLoggingPrevi
         <EuiFlexItem grow={false} className="upgLoadingItem">
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <FormattedMessage
-            id="xpack.upgradeAssistant.overview.loadingLogsLabel"
-            defaultMessage="Loading log collection state..."
-          />
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{i18nTexts.loadingLogsLabel}</EuiFlexItem>
       </EuiFlexGroup>
     );
   }

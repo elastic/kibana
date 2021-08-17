@@ -39,10 +39,13 @@ export const useDeprecationLogging = (): DeprecationLoggingPreviewProps => {
 
   useEffect(() => {
     if (!isLoading && data) {
-      const { isDeprecationLogIndexingEnabled: isEnabled, isDeprecationLoggingEnabled } = data;
-      setIsDeprecationLogIndexingEnabled(isEnabled);
+      const {
+        isDeprecationLogIndexingEnabled: isIndexingEnabled,
+        isDeprecationLoggingEnabled,
+      } = data;
+      setIsDeprecationLogIndexingEnabled(isIndexingEnabled);
 
-      if (!isEnabled && isDeprecationLoggingEnabled) {
+      if (!isIndexingEnabled && isDeprecationLoggingEnabled) {
         setOnlyDeprecationLogWritingEnabled(true);
       }
     }

@@ -62,7 +62,7 @@ const DiscoverAppLink: FunctionComponent = () => {
     <EuiLink href={discoveryUrl} target="_blank" data-test-subj="viewDiscoverLogs">
       <FormattedMessage
         id="xpack.upgradeAssistant.overview.viewDiscoverResultsAction"
-        defaultMessage="Analyse logs in Discover"
+        defaultMessage="Analyze logs in Discover"
       />
     </EuiLink>
   );

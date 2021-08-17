@@ -54,10 +54,10 @@ export const setup = async (overrides?: Record<string, unknown>): Promise<Overvi
 
 export type OverviewTestSubjects =
   | 'esStatsPanel'
-  | 'esStatsPanel.totalDeprecations'
+  | 'esStatsPanel.warningDeprecations'
   | 'esStatsPanel.criticalDeprecations'
   | 'kibanaStatsPanel'
-  | 'kibanaStatsPanel.totalDeprecations'
+  | 'kibanaStatsPanel.warningDeprecations'
   | 'kibanaStatsPanel.criticalDeprecations'
   | 'deprecationLoggingFormRow'
   | 'esRequestErrorIconTip'
