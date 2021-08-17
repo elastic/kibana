@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   EuiCallOut,
@@ -86,21 +86,30 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     startFetch,
     cancelFetch,
     overallHistogram,
-  } = useTransactionLatencyCorrelationsFetcher({
-    environment,
-    kuery,
-    serviceName,
-    transactionName,
-    transactionType,
-    start,
-    end,
-    percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-  });
+  } = useTransactionLatencyCorrelationsFetcher();
+
+  const startFetchHandler = useCallback(() => {
+    startFetch({
+      environment,
+      kuery,
+      serviceName,
+      transactionName,
+      transactionType,
+      start,
+      end,
+      percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kuery, start, end]);
 
   // start fetching on load
   // we want this effect to execute exactly once after the component mounts
   useEffect(() => {
-    startFetch();
+    if (isRunning) {
+      cancelFetch();
+    }
+
+    startFetchHandler();
 
     return () => {
       // cancel any running async partial request when unmounting the component
@@ -108,7 +117,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       cancelFetch();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [startFetchHandler]);
 
   useEffect(() => {
     if (isErrorMessage(error)) {
@@ -336,7 +345,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {!isRunning && (
-            <EuiButton size="s" onClick={startFetch}>
+            <EuiButton size="s" onClick={startFetchHandler}>
               <FormattedMessage
                 id="xpack.apm.correlations.latencyCorrelations.refreshButtonTitle"
                 defaultMessage="Refresh"

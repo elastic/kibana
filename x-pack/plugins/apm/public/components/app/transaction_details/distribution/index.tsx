@@ -74,24 +74,27 @@ export function TransactionDistribution({
   const {
     error,
     percentileThresholdValue,
+    isRunning,
     startFetch,
     cancelFetch,
     transactionDistribution,
-  } = useTransactionDistributionFetcher({
-    environment,
-    kuery,
-    serviceName,
-    transactionName,
-    transactionType,
-    start,
-    end,
-    percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-  });
+  } = useTransactionDistributionFetcher();
 
-  // start fetching on load
-  // we want this effect to execute exactly once after the component mounts
   useEffect(() => {
-    startFetch();
+    if (isRunning) {
+      cancelFetch();
+    }
+
+    startFetch({
+      environment,
+      kuery,
+      serviceName,
+      transactionName,
+      transactionType,
+      start,
+      end,
+      percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+    });
 
     return () => {
       // cancel any running async partial request when unmounting the component
@@ -99,7 +102,7 @@ export function TransactionDistribution({
       cancelFetch();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [kuery, start, end]);
 
   useEffect(() => {
     if (isErrorMessage(error)) {
