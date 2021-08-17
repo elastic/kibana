@@ -5,26 +5,24 @@
 }
 
 .homSolutionPanel {
-  img {
-    max-height: $euiSize * 10;
-    object-fit: cover;
-  }
-}
-
-.euiCard__image {
-  .homSolutionPanel & {
+  .euiCard__image {
     background-color: $euiColorPrimary;
   }
 
-  .homSolutionPanel--enterpriseSearch & {
+  &--enterpriseSearch .euiCard__image {
     background-color: $euiColorWarning;
   }
 
-  .homSolutionPanel--observability & {
+  &--observability .euiCard__image {
     background-color: $euiColorAccent;
   }
 
-  .homSolutionPanel--securitySolution & {
+  &--securitySolution .euiCard__image {
     background-color: $euiColorSecondary;
+  }
+
+  img {
+    max-height: $euiSize * 10;
+    object-fit: cover;
   }
 }
