@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
@@ -13,6 +12,7 @@ import {
   ALERT_SEVERITY_VALUE,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_THRESHOLD,
+  ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '../../../../alerting/common';
 import { updateState, generateAlertMessage } from './common';
@@ -137,7 +137,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
             [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
             [ALERT_SEVERITY_LEVEL]: summary.severity,
             [ALERT_SEVERITY_VALUE]: summary.severityScore,
-            reason: generateAlertMessage(
+            [ALERT_REASON]: generateAlertMessage(
               CommonDurationAnomalyTranslations.defaultActionMessage,
               summary
             ),

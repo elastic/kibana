@@ -11,27 +11,29 @@ import { schema } from '@kbn/config-schema';
 import { CoreSetup } from '../../../../src/core/server';
 import {
   APP_ID,
+  DEFAULT_ANOMALY_SCORE,
+  DEFAULT_APP_REFRESH_INTERVAL,
+  DEFAULT_APP_TIME_RANGE,
+  DEFAULT_FROM,
   DEFAULT_INDEX_KEY,
   DEFAULT_INDEX_PATTERN,
   DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
-  DEFAULT_ANOMALY_SCORE,
-  DEFAULT_APP_TIME_RANGE,
-  DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
-  DEFAULT_FROM,
-  DEFAULT_TO,
-  ENABLE_NEWS_FEED_SETTING,
-  NEWS_FEED_URL_SETTING,
-  NEWS_FEED_URL_SETTING_DEFAULT,
-  IP_REPUTATION_LINKS_SETTING,
-  IP_REPUTATION_LINKS_SETTING_DEFAULT,
-  DEFAULT_RULES_TABLE_REFRESH_SETTING,
+  DEFAULT_RULE_REFRESH_IDLE_VALUE,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-  DEFAULT_RULE_REFRESH_IDLE_VALUE,
+  DEFAULT_RULES_TABLE_REFRESH_SETTING,
+  DEFAULT_THREAT_INDEX_KEY,
+  DEFAULT_THREAT_INDEX_VALUE,
+  DEFAULT_TO,
   DEFAULT_TRANSFORMS,
   DEFAULT_TRANSFORMS_SETTING,
+  ENABLE_NEWS_FEED_SETTING,
+  IP_REPUTATION_LINKS_SETTING,
+  IP_REPUTATION_LINKS_SETTING_DEFAULT,
+  NEWS_FEED_URL_SETTING,
+  NEWS_FEED_URL_SETTING_DEFAULT,
 } from '../common/constants';
 import { transformConfigSchema } from '../common/transforms/types';
 import { ExperimentalFeatures } from '../common/experimental_features';
@@ -96,6 +98,23 @@ export const initUiSettings = (
         defaultMessage:
           '<p>Comma-delimited list of Elasticsearch indices from which the Security app collects events.</p>',
       }),
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.arrayOf(schema.string()),
+    },
+    [DEFAULT_THREAT_INDEX_KEY]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.defaultThreatIndexLabel', {
+        defaultMessage: 'Threat indices',
+      }),
+      sensitive: true,
+      value: DEFAULT_THREAT_INDEX_VALUE,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.defaultThreatIndexDescription',
+        {
+          defaultMessage:
+            '<p>Comma-delimited list of Threat Intelligence indices from which the Security app collects indicators.</p>',
+        }
+      ),
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.arrayOf(schema.string()),
