@@ -391,6 +391,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                         leadingControlColumns={leadingControlColumns}
                         trailingControlColumns={trailingControlColumns}
                         refetch={refetch}
+                        indexNames={indexNames}
                       />
                       <Footer
                         activePage={pageInfo.activePage}

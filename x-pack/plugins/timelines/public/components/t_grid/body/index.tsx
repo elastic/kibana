@@ -93,6 +93,7 @@ interface OwnProps {
   filterStatus?: AlertStatus;
   unit?: (total: number) => React.ReactNode;
   onRuleChange?: () => void;
+  indexNames: string[];
   refetch: Refetch;
 }
 
@@ -260,6 +261,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     unit = basicUnit,
     leadingControlColumns = EMPTY_CONTROL_COLUMNS,
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
+    indexNames,
     refetch,
   }) => {
     const dispatch = useDispatch();
@@ -274,7 +276,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     ]);
 
     const selectedCount = useMemo(() => Object.keys(selectedEventIds).length, [selectedEventIds]);
-    const indexName = useMemo(() => data[0]?._index ?? '', [data]);
 
     const theme: EuiTheme = useContext(ThemeContext);
     const onRowSelected: OnRowSelected = useCallback(
@@ -349,7 +350,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                     totalItems={totalItems}
                     filterStatus={filterStatus}
                     query={filterQuery}
-                    indexName={indexName}
+                    indexName={indexNames.join()}
                     onActionSuccess={onAlertStatusActionSuccess}
                     onActionFailure={onAlertStatusActionFailure}
                     refetch={refetch}
@@ -390,7 +391,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         filterStatus,
         filterQuery,
         browserFields,
-        indexName,
+        indexNames,
         columnHeaders,
         additionalControls,
         showBulkActions,

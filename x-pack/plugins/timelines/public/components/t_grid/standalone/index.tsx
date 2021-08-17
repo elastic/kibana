@@ -389,6 +389,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       itemsPerPage: itemsPerPageStore,
                     })}
                     totalItems={totalCountMinusDeleted}
+                    indexNames={indexNames}
                     filterQuery={filterQuery}
                     unit={unit}
                     filterStatus={filterStatus}
