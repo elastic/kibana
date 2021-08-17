@@ -27,8 +27,8 @@ import type {
   ScopeableRequest,
 } from 'src/core/server';
 
-import { ElasticsearchConnectionStatus } from '../../common';
-import { getDetailedErrorMessage } from '../errors';
+import { ElasticsearchConnectionStatus } from '../common';
+import { getDetailedErrorMessage } from './errors';
 
 interface EnrollParameters {
   apiKey: string;
@@ -193,7 +193,7 @@ export class ElasticsearchService {
       });
 
       this.logger.debug(
-        `Verifying if can authenticate "${enrollResult.username}" to "${host}" host.`
+        `Verifying if "${enrollResult.username}" can authenticate to "${host}" host.`
       );
 
       try {

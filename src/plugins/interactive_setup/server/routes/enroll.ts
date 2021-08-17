@@ -11,7 +11,7 @@ import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 
 import { ElasticsearchConnectionStatus } from '../../common';
-import type { EnrollResult } from '../elasticsearch';
+import type { EnrollResult } from '../elasticsearch_service';
 import type { RouteDefinitionParams } from './';
 
 /**

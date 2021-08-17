@@ -13,7 +13,7 @@ import type { CorePreboot, Logger, PluginInitializerContext, PrebootPlugin } fro
 
 import { ElasticsearchConnectionStatus } from '../common';
 import type { ConfigSchema, ConfigType } from './config';
-import { ElasticsearchService } from './elasticsearch';
+import { ElasticsearchService } from './elasticsearch_service';
 import { KibanaConfig } from './kibana_config';
 import { defineRoutes } from './routes';
 
@@ -91,12 +91,12 @@ export class UserSetupPlugin implements PrebootPlugin {
       (status) => {
         if (status === ElasticsearchConnectionStatus.Configured) {
           this.#logger.debug(
-            'Interactive setup mode is deactivated since Kibana is already properly configured to connect to Elasticsearch at http://localhost:9200.'
+            'Skipping interactive setup mode since Kibana is already properly configured to connect to Elasticsearch at http://localhost:9200.'
           );
           completeSetup({ shouldReloadConfig: false });
         } else {
           this.#logger.debug(
-            'Interactive setup mode is activated since Kibana cannot to connect to Elasticsearch at http://localhost:9200.'
+            'Starting interactive setup mode since Kibana cannot to connect to Elasticsearch at http://localhost:9200.'
           );
         }
       }
