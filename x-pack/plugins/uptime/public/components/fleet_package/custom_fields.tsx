@@ -130,12 +130,14 @@ export const CustomFields = memo<Props>(
                   title={
                     <FormattedMessage
                       id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.description"
-                      defaultMessage={
-                        'Browser monitoring requires using the "complete" variant of the elastic–agent docker container. Other distributions of elastic that agent will not work correctly with it because they lack the required browser and other binaries. For more information see our {link}'
-                      }
+                      defaultMessage={`Browser monitoring requires using the "complete" variant of the elastic–agent docker container. Other distributions of elastic that agent will not work correctly with it because they lack the required browser and other binaries. For more information see our {link}`}
                       values={{
                         link: (
-                          <EuiLink target="_blank" href="" external>
+                          <EuiLink
+                            target="_blank"
+                            href="https://www.elastic.co/guide/en/observability/current/synthetic-monitoring.html"
+                            external
+                          >
                             <FormattedMessage
                               id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.link"
                               defaultMessage="docs"
