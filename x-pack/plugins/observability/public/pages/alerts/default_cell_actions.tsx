@@ -82,5 +82,4 @@ export const getDefaultCellActions = ({
   addToQuery,
 }: {
   addToQuery: (value: string) => void;
-}) =>  [...buildFilterCellActions(addToQuery), ...commonCellActions]
-};
+}) =>  [...buildFilterCellActions(addToQuery), ...commonCellActions];
