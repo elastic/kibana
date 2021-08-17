@@ -74,15 +74,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Print PDF button', () => {
-      it('is not available if new', async () => {
+      it('is available if new', async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.reporting.openPdfReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
       });
 
-      it('becomes available when saved', async () => {
+      it('is available when saved', async () => {
         await PageObjects.dashboard.saveDashboard('My PDF Dashboard');
         await PageObjects.reporting.openPdfReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
@@ -109,15 +109,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Print PNG button', () => {
-      it('is not available if new', async () => {
+      it('is available if new', async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.reporting.openPngReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
       });
 
-      it('becomes available when saved', async () => {
+      it('is available when saved', async () => {
         await PageObjects.dashboard.saveDashboard('My PNG Dash');
         await PageObjects.reporting.openPngReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
