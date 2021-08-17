@@ -245,8 +245,8 @@ export function jobsHealthServiceProvider(
      * @param previousStartedAt Time of the previous rule execution. As we intend to notify
      *                          about an error only once, limit the scope of the errors search.
      */
-    async getErrorsReport(jobIds: string[], previousStartedAt: Date | null) {
-      return await jobAuditMessagesService.getJobsErrors(jobIds, previousStartedAt?.getTime());
+    async getErrorsReport(jobIds: string[], previousStartedAt: Date) {
+      return await jobAuditMessagesService.getJobsErrors(jobIds, previousStartedAt.getTime());
     },
     /**
      * Retrieves report grouped by test.
@@ -349,7 +349,7 @@ export function jobsHealthServiceProvider(
         }
       }
 
-      if (config.errorMessages.enabled) {
+      if (config.errorMessages.enabled && previousStartedAt) {
         const response = await this.getErrorsReport(jobIds, previousStartedAt);
         if (response.length > 0) {
           results.push({
