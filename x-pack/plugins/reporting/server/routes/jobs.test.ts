@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+jest.mock('../lib/content_stream', () => ({
+  getContentStream: jest.fn(),
+}));
+
 import { UnwrapPromise } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { of } from 'rxjs';
@@ -13,7 +17,7 @@ import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '..';
 import { ReportingInternalSetup } from '../core';
-import { ExportTypesRegistry } from '../lib/export_types_registry';
+import { ContentStream, ExportTypesRegistry, getContentStream } from '../lib';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
@@ -32,6 +36,7 @@ describe('GET /api/reporting/jobs/download', () => {
   let core: ReportingCore;
   let mockSetupDeps: ReportingInternalSetup;
   let mockEsClient: DeeplyMockedKeys<ElasticsearchClient>;
+  let stream: jest.Mocked<ContentStream>;
 
   const getHits = (...sources: any) => {
     return {
@@ -93,6 +98,9 @@ describe('GET /api/reporting/jobs/download', () => {
     core.getExportTypesRegistry = () => exportTypesRegistry;
 
     mockEsClient = (await core.getEsClient()).asInternalUser as typeof mockEsClient;
+    stream = ({ toString: jest.fn(() => 'test') } as unknown) as typeof stream;
+
+    (getContentStream as jest.MockedFunction<typeof getContentStream>).mockResolvedValue(stream);
   });
 
   afterEach(async () => {
@@ -188,10 +196,10 @@ describe('GET /api/reporting/jobs/download', () => {
       body: getHits({
         jobtype: 'unencodedJobType',
         status: 'failed',
-        output: { content: 'job failure message' },
         payload: { title: 'failing job!' },
       }),
     } as any);
+    stream.toString.mockResolvedValueOnce('job failure message');
     registerJobInfoRoutes(core);
 
     await server.start();
@@ -207,14 +215,13 @@ describe('GET /api/reporting/jobs/download', () => {
   describe('successful downloads', () => {
     const getCompleteHits = ({
       jobType = 'unencodedJobType',
-      outputContent = 'job output content',
       outputContentType = 'text/plain',
       title = '',
     } = {}) => {
       return getHits({
         jobtype: jobType,
         status: 'completed',
-        output: { content: outputContent, content_type: outputContentType },
+        output: { content_type: outputContentType },
         payload: { title },
       });
     };
@@ -252,7 +259,6 @@ describe('GET /api/reporting/jobs/download', () => {
       mockEsClient.search.mockResolvedValueOnce({
         body: getCompleteHits({
           jobType: 'unencodedJobType',
-          outputContent: 'test',
         }),
       } as any);
       registerJobInfoRoutes(core);
@@ -269,7 +275,6 @@ describe('GET /api/reporting/jobs/download', () => {
       mockEsClient.search.mockResolvedValueOnce({
         body: getCompleteHits({
           jobType: 'base64EncodedJobType',
-          outputContent: 'test',
           outputContentType: 'application/pdf',
         }),
       } as any);
@@ -288,7 +293,6 @@ describe('GET /api/reporting/jobs/download', () => {
       mockEsClient.search.mockResolvedValueOnce({
         body: getCompleteHits({
           jobType: 'unencodedJobType',
-          outputContent: 'alert("all your base mine now");',
           outputContentType: 'application/html',
         }),
       } as any);

@@ -13,11 +13,11 @@ import { monaco } from './monaco_imports';
 import { registerLanguage } from './helpers';
 
 // @ts-ignore
-import xJsonWorkerSrc from '!!raw-loader!../../target_web/xjson.editor.worker.js';
+import xJsonWorkerSrc from '!!raw-loader!../target_workers/xjson.editor.worker.js';
 // @ts-ignore
-import defaultWorkerSrc from '!!raw-loader!../../target_web/default.editor.worker.js';
+import defaultWorkerSrc from '!!raw-loader!../target_workers/default.editor.worker.js';
 // @ts-ignore
-import painlessWorkerSrc from '!!raw-loader!../../target_web/painless.editor.worker.js';
+import painlessWorkerSrc from '!!raw-loader!../target_workers/painless.editor.worker.js';
 
 /**
  * Register languages and lexer rules

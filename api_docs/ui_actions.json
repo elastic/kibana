@@ -19,10 +19,7 @@
           },
           " extends Error"
         ],
-        "source": {
-          "path": "src/plugins/ui_actions/public/actions/incompatible_action_error.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/ui_actions/public/actions/incompatible_action_error.ts",
         "deprecated": false,
         "children": [
           {
@@ -32,10 +29,7 @@
             "tags": [],
             "label": "code",
             "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/incompatible_action_error.ts",
-              "lineNumber": 12
-            },
+            "path": "src/plugins/ui_actions/public/actions/incompatible_action_error.ts",
             "deprecated": false
           },
           {
@@ -48,10 +42,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/incompatible_action_error.ts",
-              "lineNumber": 14
-            },
+            "path": "src/plugins/ui_actions/public/actions/incompatible_action_error.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -66,10 +57,7 @@
         "tags": [],
         "label": "UiActionsService",
         "description": [],
-        "source": {
-          "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-          "lineNumber": 26
-        },
+        "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
         "deprecated": false,
         "children": [
           {
@@ -82,10 +70,7 @@
             "signature": [
               "UiActionsExecutionService"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 27
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false
           },
           {
@@ -100,10 +85,7 @@
               "TriggerInternal",
               "<any>>"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 28
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false
           },
           {
@@ -126,10 +108,7 @@
               },
               "<object>>>"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false
           },
           {
@@ -142,10 +121,7 @@
             "signature": [
               "Map<string, string[]>"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 30
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false
           },
           {
@@ -158,10 +134,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 32
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -180,10 +153,7 @@
                     "text": "UiActionsServiceParams"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 32
-                },
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -208,10 +178,7 @@
               },
               ") => void"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 42
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -230,10 +197,7 @@
                     "text": "Trigger"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 42
-                },
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -252,10 +216,7 @@
               "TriggerContract",
               "<object>"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 53
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -268,10 +229,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 53
-                },
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -306,10 +264,7 @@
               "ActionContext",
               "<A>>"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 63
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -322,10 +277,7 @@
                 "signature": [
                   "A"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 64
-                },
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -342,10 +294,7 @@
             "signature": [
               "(actionId: string) => void"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 77
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -358,10 +307,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 77
-                },
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -378,10 +324,7 @@
             "signature": [
               "(actionId: string) => boolean"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 85
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -394,10 +337,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 85
-                },
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -414,10 +354,7 @@
             "signature": [
               "(triggerId: string, actionId: string) => void"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 89
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -430,10 +367,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 89
-                },
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -447,10 +381,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 89
-                },
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -467,10 +398,7 @@
             "signature": [
               "(triggerId: string, actionId: string) => void"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 105
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -483,10 +411,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 105
-                },
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -500,10 +425,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 105
-                },
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -530,10 +452,7 @@
               },
               "<object>) => void"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 126
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -546,10 +465,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 127
-                },
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -570,10 +486,7 @@
                   },
                   "<object>"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 128
-                },
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -608,10 +521,7 @@
               "ActionContext",
               "<T>>"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 134
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -624,10 +534,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 135
-                },
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -652,10 +559,7 @@
               },
               "<object>[]"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 144
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -668,10 +572,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 144
-                },
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -696,10 +597,7 @@
               },
               "<object>[]>"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 157
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -712,10 +610,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 158
-                },
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -729,10 +624,7 @@
                 "signature": [
                   "object"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 159
-                },
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -751,46 +643,28 @@
             "signature": [
               "(triggerId: string, context: object) => Promise<void>"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 181
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": true,
             "references": [
               {
                 "plugin": "data",
-                "link": {
-                  "path": "src/plugins/data/public/utils/table_inspector_view/components/data_table.tsx",
-                  "lineNumber": 99
-                }
+                "path": "src/plugins/data/public/utils/table_inspector_view/components/data_table.tsx"
               },
               {
                 "plugin": "data",
-                "link": {
-                  "path": "src/plugins/data/public/utils/table_inspector_view/components/data_table.tsx",
-                  "lineNumber": 132
-                }
+                "path": "src/plugins/data/public/utils/table_inspector_view/components/data_table.tsx"
               },
               {
                 "plugin": "discover",
-                "link": {
-                  "path": "src/plugins/discover/public/application/embeddable/saved_search_embeddable.tsx",
-                  "lineNumber": 101
-                }
+                "path": "src/plugins/discover/public/application/embeddable/saved_search_embeddable.tsx"
               },
               {
                 "plugin": "discover",
-                "link": {
-                  "path": "src/plugins/discover/public/application/embeddable/search_embeddable_factory.ts",
-                  "lineNumber": 26
-                }
+                "path": "src/plugins/discover/public/application/embeddable/search_embeddable_factory.ts"
               },
               {
                 "plugin": "discover",
-                "link": {
-                  "path": "src/plugins/discover/public/plugin.tsx",
-                  "lineNumber": 462
-                }
+                "path": "src/plugins/discover/public/plugin.tsx"
               }
             ],
             "children": [
@@ -804,10 +678,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 181
-                },
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -821,10 +692,7 @@
                 "signature": [
                   "object"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-                  "lineNumber": 181
-                },
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -843,10 +711,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 189
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -870,10 +735,7 @@
                 "text": "UiActionsService"
               }
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 200
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -899,10 +761,7 @@
           "EuiContextMenuPanelDescriptor",
           "[]>"
         ],
-        "source": {
-          "path": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
-          "lineNumber": 120
-        },
+        "path": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
         "deprecated": false,
         "children": [
           {
@@ -915,10 +774,7 @@
             "signature": [
               "BuildContextMenuParams"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
-              "lineNumber": 120
-            },
+            "path": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
             "deprecated": false,
             "isRequired": true
           }
@@ -952,10 +808,7 @@
           },
           "<Context>"
         ],
-        "source": {
-          "path": "src/plugins/ui_actions/public/actions/create_action.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/ui_actions/public/actions/create_action.ts",
         "deprecated": false,
         "children": [
           {
@@ -975,10 +828,7 @@
               },
               "<Context>"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/create_action.ts",
-              "lineNumber": 12
-            },
+            "path": "src/plugins/ui_actions/public/actions/create_action.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1021,10 +871,7 @@
           },
           "<Context>>>"
         ],
-        "source": {
-          "path": "src/plugins/ui_actions/public/actions/action.ts",
-          "lineNumber": 38
-        },
+        "path": "src/plugins/ui_actions/public/actions/action.ts",
         "deprecated": false,
         "children": [
           {
@@ -1039,10 +886,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 44
-            },
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false
           },
           {
@@ -1054,10 +898,7 @@
             "description": [
               "\nA unique identifier for this action instance."
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 49
-            },
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false
           },
           {
@@ -1069,10 +910,7 @@
             "description": [
               "\nThe action type is what determines the context shape."
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 54
-            },
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false
           },
           {
@@ -1095,10 +933,7 @@
               },
               "<Context>) => string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 59
-            },
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "children": [
               {
@@ -1118,10 +953,7 @@
                   },
                   "<Context>"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 59
-                },
+                "path": "src/plugins/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1148,10 +980,7 @@
               },
               "<Context>) => string"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 65
-            },
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "children": [
               {
@@ -1171,10 +1000,7 @@
                   },
                   "<Context>"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 65
-                },
+                "path": "src/plugins/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1208,10 +1034,7 @@
               },
               "<Context>; }> | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 71
-            },
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false
           },
           {
@@ -1234,10 +1057,7 @@
               },
               "<Context>) => Promise<boolean>"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 77
-            },
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "children": [
               {
@@ -1257,10 +1077,7 @@
                   },
                   "<Context>"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 77
-                },
+                "path": "src/plugins/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1287,10 +1104,7 @@
               },
               "<Context>) => Promise<void>"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 82
-            },
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "children": [
               {
@@ -1310,10 +1124,7 @@
                   },
                   "<Context>"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 82
-                },
+                "path": "src/plugins/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1340,10 +1151,7 @@
               },
               "<Context>) => Promise<string | undefined>) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 89
-            },
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "children": [
               {
@@ -1363,10 +1171,7 @@
                   },
                   "<Context>"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 89
-                },
+                "path": "src/plugins/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1393,10 +1198,7 @@
               },
               "<Context>) => Promise<boolean>) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 96
-            },
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "children": [
               {
@@ -1416,10 +1218,7 @@
                   },
                   "<Context>"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 96
-                },
+                "path": "src/plugins/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1458,10 +1257,7 @@
           "ActionDefinitionContext",
           "<Context>>>"
         ],
-        "source": {
-          "path": "src/plugins/ui_actions/public/actions/action.ts",
-          "lineNumber": 102
-        },
+        "path": "src/plugins/ui_actions/public/actions/action.ts",
         "deprecated": false,
         "children": [
           {
@@ -1473,10 +1269,7 @@
             "description": [
               "\nID of the action that uniquely identifies this action in the actions registry."
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 107
-            },
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false
           },
           {
@@ -1491,10 +1284,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 112
-            },
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false
           },
           {
@@ -1511,10 +1301,7 @@
               "ActionDefinitionContext",
               "<Context>) => Promise<boolean>) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 118
-            },
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "children": [
               {
@@ -1528,10 +1315,7 @@
                   "ActionDefinitionContext",
                   "<Context>"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 118
-                },
+                "path": "src/plugins/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1552,10 +1336,7 @@
               "ActionDefinitionContext",
               "<Context>) => Promise<void>"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 123
-            },
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "children": [
               {
@@ -1569,10 +1350,7 @@
                   "ActionDefinitionContext",
                   "<Context>"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 123
-                },
+                "path": "src/plugins/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1593,10 +1371,7 @@
               "ActionDefinitionContext",
               "<Context>) => Promise<boolean>) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 130
-            },
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "children": [
               {
@@ -1610,10 +1385,7 @@
                   "ActionDefinitionContext",
                   "<Context>"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 130
-                },
+                "path": "src/plugins/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1634,10 +1406,7 @@
               "ActionDefinitionContext",
               "<Context>) => Promise<string | undefined>) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 137
-            },
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "children": [
               {
@@ -1651,10 +1420,7 @@
                   "ActionDefinitionContext",
                   "<Context>"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/actions/action.ts",
-                  "lineNumber": 137
-                },
+                "path": "src/plugins/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1673,10 +1439,7 @@
         "description": [
           "\nDuring action execution we can provide additional information,\nfor example, trigger, that caused the action execution"
         ],
-        "source": {
-          "path": "src/plugins/ui_actions/public/actions/action.ts",
-          "lineNumber": 17
-        },
+        "path": "src/plugins/ui_actions/public/actions/action.ts",
         "deprecated": false,
         "children": [
           {
@@ -1697,10 +1460,7 @@
                 "text": "Trigger"
               }
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/actions/action.ts",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false
           }
         ],
@@ -1725,10 +1485,7 @@
           },
           "<Context>"
         ],
-        "source": {
-          "path": "src/plugins/ui_actions/public/util/presentable.ts",
-          "lineNumber": 14
-        },
+        "path": "src/plugins/ui_actions/public/util/presentable.ts",
         "deprecated": false,
         "children": [
           {
@@ -1740,10 +1497,7 @@
             "description": [
               "\nID that uniquely identifies this object."
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/util/presentable.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/ui_actions/public/util/presentable.ts",
             "deprecated": false
           },
           {
@@ -1755,10 +1509,7 @@
             "description": [
               "\nDetermines the display order in relation to other items. Higher numbers are\ndisplayed first."
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/util/presentable.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/ui_actions/public/util/presentable.ts",
             "deprecated": false
           },
           {
@@ -1780,10 +1531,7 @@
               },
               "<{ context: Context; }> | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/util/presentable.ts",
-              "lineNumber": 30
-            },
+            "path": "src/plugins/ui_actions/public/util/presentable.ts",
             "deprecated": false
           },
           {
@@ -1798,10 +1546,7 @@
             "signature": [
               "(context: Context) => string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/util/presentable.ts",
-              "lineNumber": 35
-            },
+            "path": "src/plugins/ui_actions/public/util/presentable.ts",
             "deprecated": false,
             "children": [
               {
@@ -1814,10 +1559,7 @@
                 "signature": [
                   "Context"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/util/presentable.ts",
-                  "lineNumber": 35
-                },
+                "path": "src/plugins/ui_actions/public/util/presentable.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1836,10 +1578,7 @@
             "signature": [
               "(context: Context) => string"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/util/presentable.ts",
-              "lineNumber": 40
-            },
+            "path": "src/plugins/ui_actions/public/util/presentable.ts",
             "deprecated": false,
             "children": [
               {
@@ -1852,10 +1591,7 @@
                 "signature": [
                   "Context"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/util/presentable.ts",
-                  "lineNumber": 40
-                },
+                "path": "src/plugins/ui_actions/public/util/presentable.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1874,10 +1610,7 @@
             "signature": [
               "((context: Context) => string) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/util/presentable.ts",
-              "lineNumber": 46
-            },
+            "path": "src/plugins/ui_actions/public/util/presentable.ts",
             "deprecated": false,
             "children": [
               {
@@ -1890,10 +1623,7 @@
                 "signature": [
                   "Context"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/util/presentable.ts",
-                  "lineNumber": 46
-                },
+                "path": "src/plugins/ui_actions/public/util/presentable.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1912,10 +1642,7 @@
             "signature": [
               "((context: Context) => Promise<string | undefined>) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/util/presentable.ts",
-              "lineNumber": 53
-            },
+            "path": "src/plugins/ui_actions/public/util/presentable.ts",
             "deprecated": false,
             "children": [
               {
@@ -1928,10 +1655,7 @@
                 "signature": [
                   "Context"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/util/presentable.ts",
-                  "lineNumber": 53
-                },
+                "path": "src/plugins/ui_actions/public/util/presentable.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1950,10 +1674,7 @@
             "signature": [
               "(context: Context) => Promise<boolean>"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/util/presentable.ts",
-              "lineNumber": 59
-            },
+            "path": "src/plugins/ui_actions/public/util/presentable.ts",
             "deprecated": false,
             "children": [
               {
@@ -1966,10 +1687,7 @@
                 "signature": [
                   "Context"
                 ],
-                "source": {
-                  "path": "src/plugins/ui_actions/public/util/presentable.ts",
-                  "lineNumber": 59
-                },
+                "path": "src/plugins/ui_actions/public/util/presentable.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1995,10 +1713,7 @@
               },
               "<Context> | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/util/presentable.ts",
-              "lineNumber": 66
-            },
+            "path": "src/plugins/ui_actions/public/util/presentable.ts",
             "deprecated": false
           }
         ],
@@ -2011,10 +1726,7 @@
         "tags": [],
         "label": "RowClickContext",
         "description": [],
-        "source": {
-          "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
-          "lineNumber": 25
-        },
+        "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
         "deprecated": false,
         "children": [
           {
@@ -2027,10 +1739,7 @@
             "signature": [
               "unknown"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
-              "lineNumber": 28
-            },
+            "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
             "deprecated": false
           },
           {
@@ -2051,10 +1760,7 @@
               },
               "; columns?: string[] | undefined; }"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
             "deprecated": false
           }
         ],
@@ -2069,10 +1775,7 @@
         "description": [
           "\nThis is a convenience interface used to register a *trigger*.\n\n`Trigger` specifies a named anchor to which `Action` can be attached. When\n`Trigger` is being *called* it creates a `Context` object and passes it to\nthe `execute` method of an `Action`.\n\nMore than one action can be attached to a single trigger, in which case when\ntrigger is *called* it first displays a context menu for user to pick a\nsingle action to execute."
         ],
-        "source": {
-          "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
-          "lineNumber": 20
-        },
+        "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
         "deprecated": false,
         "children": [
           {
@@ -2084,10 +1787,7 @@
             "description": [
               "\nUnique name of the trigger as identified in `ui_actions` plugin trigger registry."
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
             "deprecated": false
           },
           {
@@ -2102,10 +1802,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
             "deprecated": false
           },
           {
@@ -2120,10 +1817,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
-              "lineNumber": 34
-            },
+            "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
             "deprecated": false
           }
         ],
@@ -2136,10 +1830,7 @@
         "tags": [],
         "label": "UiActionsServiceParams",
         "description": [],
-        "source": {
-          "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-          "lineNumber": 16
-        },
+        "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
         "deprecated": false,
         "children": [
           {
@@ -2153,10 +1844,7 @@
               "TriggerRegistry",
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 17
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false
           },
           {
@@ -2170,10 +1858,7 @@
               "ActionRegistry",
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false
           },
           {
@@ -2189,10 +1874,7 @@
               "TriggerToActionsRegistry",
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-              "lineNumber": 23
-            },
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false
           }
         ],
@@ -2205,10 +1887,7 @@
         "tags": [],
         "label": "VisualizeFieldContext",
         "description": [],
-        "source": {
-          "path": "src/plugins/ui_actions/public/types.ts",
-          "lineNumber": 16
-        },
+        "path": "src/plugins/ui_actions/public/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2218,10 +1897,7 @@
             "tags": [],
             "label": "fieldName",
             "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/types.ts",
-              "lineNumber": 17
-            },
+            "path": "src/plugins/ui_actions/public/types.ts",
             "deprecated": false
           },
           {
@@ -2231,10 +1907,7 @@
             "tags": [],
             "label": "indexPatternId",
             "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/types.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/ui_actions/public/types.ts",
             "deprecated": false
           },
           {
@@ -2247,10 +1920,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "src/plugins/ui_actions/public/types.ts",
-              "lineNumber": 19
-            },
+            "path": "src/plugins/ui_actions/public/types.ts",
             "deprecated": false
           }
         ],
@@ -2269,10 +1939,7 @@
         "signature": [
           "\"ACTION_VISUALIZE_FIELD\""
         ],
-        "source": {
-          "path": "src/plugins/ui_actions/public/types.ts",
-          "lineNumber": 22
-        },
+        "path": "src/plugins/ui_actions/public/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2286,10 +1953,7 @@
         "signature": [
           "\"ACTION_VISUALIZE_GEO_FIELD\""
         ],
-        "source": {
-          "path": "src/plugins/ui_actions/public/types.ts",
-          "lineNumber": 23
-        },
+        "path": "src/plugins/ui_actions/public/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2303,10 +1967,7 @@
         "signature": [
           "\"ACTION_VISUALIZE_LENS_FIELD\""
         ],
-        "source": {
-          "path": "src/plugins/ui_actions/public/types.ts",
-          "lineNumber": 24
-        },
+        "path": "src/plugins/ui_actions/public/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2329,10 +1990,7 @@
             "text": "ActionExecutionMeta"
           }
         ],
-        "source": {
-          "path": "src/plugins/ui_actions/public/actions/action.ts",
-          "lineNumber": 27
-        },
+        "path": "src/plugins/ui_actions/public/actions/action.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2347,10 +2005,7 @@
           "PresentableGroup",
           "<Context>[]"
         ],
-        "source": {
-          "path": "src/plugins/ui_actions/public/util/presentable.ts",
-          "lineNumber": 76
-        },
+        "path": "src/plugins/ui_actions/public/util/presentable.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2364,10 +2019,7 @@
         "signature": [
           "\"ROW_CLICK_TRIGGER\""
         ],
-        "source": {
-          "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
-          "lineNumber": 13
-        },
+        "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2381,10 +2033,7 @@
         "signature": [
           "\"VISUALIZE_FIELD_TRIGGER\""
         ],
-        "source": {
-          "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2398,10 +2047,7 @@
         "signature": [
           "\"VISUALIZE_GEO_FIELD_TRIGGER\""
         ],
-        "source": {
-          "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -2414,10 +2060,7 @@
         "tags": [],
         "label": "rowClickTrigger",
         "description": [],
-        "source": {
-          "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
-          "lineNumber": 15
-        },
+        "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
         "deprecated": false,
         "children": [
           {
@@ -2427,10 +2070,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
             "deprecated": false
           },
           {
@@ -2440,10 +2080,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
-              "lineNumber": 17
-            },
+            "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
             "deprecated": false
           },
           {
@@ -2453,10 +2090,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
             "deprecated": false
           }
         ],
@@ -2469,10 +2103,7 @@
         "tags": [],
         "label": "visualizeFieldTrigger",
         "description": [],
-        "source": {
-          "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
-          "lineNumber": 12
-        },
+        "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
         "deprecated": false,
         "children": [
           {
@@ -2482,10 +2113,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
-              "lineNumber": 13
-            },
+            "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
             "deprecated": false
           },
           {
@@ -2495,10 +2123,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
-              "lineNumber": 14
-            },
+            "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
             "deprecated": false
           },
           {
@@ -2508,10 +2133,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
             "deprecated": false
           }
         ],
@@ -2524,10 +2146,7 @@
         "tags": [],
         "label": "visualizeGeoFieldTrigger",
         "description": [],
-        "source": {
-          "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
-          "lineNumber": 12
-        },
+        "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
         "deprecated": false,
         "children": [
           {
@@ -2537,10 +2156,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
-              "lineNumber": 13
-            },
+            "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
             "deprecated": false
           },
           {
@@ -2550,10 +2166,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
-              "lineNumber": 14
-            },
+            "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
             "deprecated": false
           },
           {
@@ -2563,10 +2176,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "source": {
-              "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
             "deprecated": false
           }
         ],
@@ -2617,10 +2227,7 @@
         },
         ") => void; readonly unregisterAction: (actionId: string) => void; }"
       ],
-      "source": {
-        "path": "src/plugins/ui_actions/public/plugin.ts",
-        "lineNumber": 14
-      },
+      "path": "src/plugins/ui_actions/public/plugin.ts",
       "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -2713,10 +2320,7 @@
         },
         "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; }"
       ],
-      "source": {
-        "path": "src/plugins/ui_actions/public/plugin.ts",
-        "lineNumber": 24
-      },
+      "path": "src/plugins/ui_actions/public/plugin.ts",
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true

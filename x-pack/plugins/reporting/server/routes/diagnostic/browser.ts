@@ -10,7 +10,7 @@ import { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
 import { browserStartLogs } from '../../browsers/chromium/driver_factory/start_logs';
 import { LevelLogger as Logger } from '../../lib';
-import { authorizedUserPreRoutingFactory } from '../lib/authorized_user_pre_routing';
+import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { DiagnosticResponse } from './';
 
 const logsToHelpMap = {
@@ -47,14 +47,13 @@ const logsToHelpMap = {
 
 export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger) => {
   const { router } = reporting.getPluginSetupDeps();
-  const userHandler = authorizedUserPreRoutingFactory(reporting);
 
   router.post(
     {
       path: `${API_DIAGNOSE_URL}/browser`,
       validate: {},
     },
-    userHandler(async (user, context, req, res) => {
+    authorizedUserPreRouting(reporting, async (_user, _context, _req, res) => {
       try {
         const logs = await browserStartLogs(reporting, logger).toPromise();
         const knownIssues = Object.keys(logsToHelpMap) as Array<keyof typeof logsToHelpMap>;

@@ -8,34 +8,55 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
+import uuid from 'uuid';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
+import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
 import { useUpgradeAssistantHref } from '../../shared/Links/kibana';
 import { SearchBar } from '../../shared/search_bar';
+import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import { NoServicesMessage } from './no_services_message';
 import { ServiceList } from './service_list';
 import { MLCallout } from './service_list/MLCallout';
 
 const initialData = {
-  items: [],
-  hasHistoricalData: true,
-  hasLegacyData: false,
+  requestId: '',
+  mainStatisticsData: {
+    items: [],
+    hasHistoricalData: true,
+    hasLegacyData: false,
+  },
 };
 
 let hasDisplayedToast = false;
 
-function useServicesFetcher() {
+function useServicesFetcher({
+  environment,
+  kuery,
+}: {
+  environment: string;
+  kuery: string;
+}) {
   const {
-    urlParams: { environment, kuery, start, end },
+    urlParams: { start, end, comparisonEnabled, comparisonType },
   } = useUrlParams();
   const { core } = useApmPluginContext();
   const upgradeAssistantHref = useUpgradeAssistantHref();
 
-  const { data = initialData, status } = useFetcher(
+  const { offset } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonEnabled,
+    comparisonType,
+  });
+
+  const { data = initialData, status: mainStatisticsStatus } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
@@ -48,14 +69,50 @@ function useServicesFetcher() {
               end,
             },
           },
+        }).then((mainStatisticsData) => {
+          return {
+            requestId: uuid(),
+            mainStatisticsData,
+          };
         });
       }
     },
     [environment, kuery, start, end]
   );
 
+  const { mainStatisticsData, requestId } = data;
+
+  const { data: comparisonData } = useFetcher(
+    (callApmApi) => {
+      if (start && end && mainStatisticsData.items.length) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/services/detailed_statistics',
+          params: {
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              serviceNames: JSON.stringify(
+                mainStatisticsData.items
+                  .map(({ serviceName }) => serviceName)
+                  // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
+                  .sort()
+              ),
+              offset,
+            },
+          },
+        });
+      }
+    },
+    // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [requestId, offset],
+    { preservePreviousData: false }
+  );
+
   useEffect(() => {
-    if (data.hasLegacyData && !hasDisplayedToast) {
+    if (mainStatisticsData.hasLegacyData && !hasDisplayedToast) {
       hasDisplayedToast = true;
 
       core.notifications.toasts.addWarning({
@@ -82,14 +139,34 @@ function useServicesFetcher() {
         ),
       });
     }
-  }, [data.hasLegacyData, upgradeAssistantHref, core.notifications.toasts]);
+  }, [
+    mainStatisticsData.hasLegacyData,
+    upgradeAssistantHref,
+    core.notifications.toasts,
+  ]);
 
-  return { servicesData: data, servicesStatus: status };
+  return {
+    mainStatisticsData,
+    mainStatisticsStatus,
+    comparisonData,
+  };
 }
 
 export function ServiceInventory() {
   const { core } = useApmPluginContext();
-  const { servicesData, servicesStatus } = useServicesFetcher();
+
+  const {
+    query: { environment, kuery },
+  } = useApmParams('/services');
+
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
+  });
+  const {
+    mainStatisticsData,
+    mainStatisticsStatus,
+    comparisonData,
+  } = useServicesFetcher({ environment, kuery });
 
   const {
     anomalyDetectionJobsData,
@@ -109,23 +186,34 @@ export function ServiceInventory() {
     canCreateJob &&
     !userHasDismissedCallout;
 
+  const isLoading = mainStatisticsStatus === FETCH_STATUS.LOADING;
+
   return (
     <>
-      <SearchBar />
+      <SearchBar showTimeComparison />
       <EuiFlexGroup direction="column" gutterSize="s">
         {displayMlCallout && (
           <EuiFlexItem>
             <MLCallout onDismiss={() => setUserHasDismissedCallout(true)} />
           </EuiFlexItem>
         )}
+        {fallbackToTransactions && (
+          <EuiFlexItem>
+            <AggregatedTransactionsCallout />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <ServiceList
-            items={servicesData.items}
+            isLoading={isLoading}
+            items={mainStatisticsData.items}
+            comparisonData={comparisonData}
             noItemsMessage={
-              <NoServicesMessage
-                historicalDataFound={servicesData.hasHistoricalData}
-                status={servicesStatus}
-              />
+              !isLoading && (
+                <NoServicesMessage
+                  historicalDataFound={mainStatisticsData.hasHistoricalData}
+                  status={mainStatisticsStatus}
+                />
+              )
             }
           />
         </EuiFlexItem>

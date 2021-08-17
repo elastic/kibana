@@ -7,24 +7,13 @@
 
 import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import moment from 'moment';
 import React, { Component } from 'react';
-import { ToastsSetup } from 'src/core/public';
 import { getDefaultLayoutSelectors } from '../../common';
-import { BaseParams, LayoutParams } from '../../common/types';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
-import { ReportingPanelContent } from './reporting_panel_content';
+import { LayoutParams } from '../../common/types';
+import { ReportingPanelContent, ReportingPanelProps } from './reporting_panel_content';
 
-export interface Props {
-  apiClient: ReportingAPIClient;
-  toasts: ToastsSetup;
-  reportType: string;
+export interface Props extends ReportingPanelProps {
   layoutOption?: 'canvas' | 'print';
-  objectId?: string;
-  getJobParams: () => BaseParams;
-  requiresSavedState: boolean;
-  isDirty?: boolean;
-  onClose?: () => void;
 }
 
 interface State {
@@ -45,16 +34,10 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
   public render() {
     return (
       <ReportingPanelContent
-        requiresSavedState={this.props.requiresSavedState}
-        apiClient={this.props.apiClient}
-        toasts={this.props.toasts}
-        reportType={this.props.reportType}
+        {...this.props}
         layoutId={this.getLayout().id}
-        objectId={this.props.objectId}
         getJobParams={this.getJobParams}
         options={this.renderOptions()}
-        isDirty={this.props.isDirty}
-        onClose={this.props.onClose}
       />
     );
   }
@@ -147,17 +130,10 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
     return { id: 'preserve_layout', dimensions, selectors };
   };
 
-  private getJobParams = (): Required<BaseParams> => {
-    const outerParams = this.props.getJobParams();
-    let browserTimezone = outerParams.browserTimezone;
-    if (!browserTimezone) {
-      browserTimezone = moment.tz.guess();
-    }
-
+  private getJobParams = () => {
     return {
       ...this.props.getJobParams(),
       layout: this.getLayout(),
-      browserTimezone,
     };
   };
 }

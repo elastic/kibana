@@ -10,7 +10,6 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { buildSiemResponse, mergeStatuses, getFailingRules } from '../utils';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import {
   findRulesStatusesSchema,
   FindRulesStatusesSchemaDecoded,
@@ -41,7 +40,6 @@ export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => 
       const { body } = request;
       const siemResponse = buildSiemResponse(response);
       const rulesClient = context.alerting?.getRulesClient();
-      const savedObjectsClient = context.core.savedObjects.client;
 
       if (!rulesClient) {
         return siemResponse.error({ statusCode: 404 });
@@ -49,9 +47,13 @@ export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => 
 
       const ids = body.ids;
       try {
-        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
         const [statusesById, failingRules] = await Promise.all([
-          ruleStatusClient.findBulk(ids, 6),
+          ruleStatusClient.findBulk({
+            ruleIds: ids,
+            logsCount: 6,
+            spaceId: context.securitySolution.getSpaceId(),
+          }),
           getFailingRules(ids, rulesClient),
         ]);
 

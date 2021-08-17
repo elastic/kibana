@@ -14,10 +14,11 @@ import { CasesUiStart } from '../../cases/public';
 import type {
   LastUpdatedAtProps,
   LoadingPanelProps,
-  FieldBrowserWrappedProps,
+  FieldBrowserProps,
   UseDraggableKeyboardWrapper,
   UseDraggableKeyboardWrapperProps,
 } from './components';
+export type { SortDirection } from '../common';
 import type { TGridIntegratedProps } from './components/t_grid/integrated';
 import type { TGridStandaloneProps } from './components/t_grid/standalone';
 import type { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';
@@ -33,7 +34,7 @@ export interface TimelinesUIStart {
   getTGridReducer: () => any;
   getLoadingPanel: (props: LoadingPanelProps) => ReactElement<LoadingPanelProps>;
   getLastUpdated: (props: LastUpdatedAtProps) => ReactElement<LastUpdatedAtProps>;
-  getFieldBrowser: (props: FieldBrowserWrappedProps) => ReactElement<FieldBrowserWrappedProps>;
+  getFieldBrowser: (props: FieldBrowserProps) => ReactElement<FieldBrowserProps>;
   getUseAddToTimeline: () => (props: UseAddToTimelineProps) => UseAddToTimeline;
   getUseAddToTimelineSensor: () => (api: SensorAPI) => void;
   getUseDraggableKeyboardWrapper: () => (
@@ -41,6 +42,9 @@ export interface TimelinesUIStart {
   ) => UseDraggableKeyboardWrapper;
   setTGridEmbeddedStore: (store: Store) => void;
   getAddToCaseAction: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
+  getAddToCasePopover: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
+  getAddToExistingCaseButton: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
+  getAddToNewCaseButton: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
 }
 
 export interface TimelinesStartPlugins {

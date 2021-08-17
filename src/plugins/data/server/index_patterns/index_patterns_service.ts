@@ -22,7 +22,7 @@ import { registerRoutes } from './routes';
 import { indexPatternSavedObjectType } from '../saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
 import { IndexPatternsCommonService } from '../';
-import { FieldFormatsStart } from '../field_formats';
+import { FieldFormatsStart } from '../../../field_formats/server';
 import { getIndexPatternLoad } from './expressions';
 import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';

@@ -92,10 +92,14 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiBreadcrumbs.collapsedBadge.ariaLabel': i18n.translate(
       'core.euiBreadcrumbs.collapsedBadge.ariaLabel',
       {
-        defaultMessage: 'Show collapsed breadcrumbs',
+        defaultMessage: 'See collapsed breadcrumbs',
         description: 'Displayed when one or more breadcrumbs are hidden.',
       }
     ),
+    'euiBreadcrumbs.nav.ariaLabel': i18n.translate('core.euiBreadcrumbs.nav.ariaLabel', {
+      defaultMessage: 'Breadcrumbs',
+      description: 'Label on the breadcrumbs nav element',
+    }),
     'euiCardSelect.select': i18n.translate('core.euiCardSelect.select', {
       defaultMessage: 'Select',
       description: 'Displayed button text when a card option can be selected.',
@@ -493,6 +497,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'Descending size label',
       }
     ),
+    'euiDatePopoverButton.invalidTitle': ({ title }: EuiValues) =>
+      i18n.translate('core.euiDatePopoverButton.invalidTitle', {
+        defaultMessage: 'Invalid date: {title}',
+        values: { title },
+      }),
+    'euiDatePopoverButton.outdatedTitle': ({ title }: EuiValues) =>
+      i18n.translate('core.euiDatePopoverButton.outdatedTitle', {
+        defaultMessage: 'Update needed: {title}',
+        values: { title },
+      }),
     'euiFieldPassword.showPassword': i18n.translate('core.euiFieldPassword.showPassword', {
       defaultMessage:
         'Show password as plain text. Note: this will visually expose your password on the screen.',
@@ -932,9 +946,19 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Step {number}: {title} is complete',
         values: { number, title },
       }),
+    'euiStepStrings.current': ({ number, title }: EuiValues) =>
+      i18n.translate('core.euiStepStrings.current', {
+        defaultMessage: 'Current step {number}: {title}',
+        values: { number, title },
+      }),
     'euiStepStrings.simpleComplete': ({ number }: EuiValues) =>
       i18n.translate('core.euiStepStrings.simpleComplete', {
         defaultMessage: 'Step {number} is complete',
+        values: { number },
+      }),
+    'euiStepStrings.simpleCurrent': ({ number }: EuiValues) =>
+      i18n.translate('core.euiStepStrings.simpleCurrent', {
+        defaultMessage: 'Current step is {number}',
         values: { number },
       }),
     'euiStepStrings.warning': ({ number, title }: EuiValues) =>

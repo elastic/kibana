@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Shape } from '../types';
+import { Shape, Progress } from '../types';
 
 export const getAvailableShapes = () => Object.values(Shape);
+export const getAvailableProgressShapes = () => Object.values(Progress);

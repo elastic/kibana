@@ -92,6 +92,7 @@ export const importRulesRoute = (
           savedObjectsClient,
         });
 
+        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
         const { filename } = (request.body.file as HapiReadableStream).hapi;
         const fileExtension = extname(filename).toLowerCase();
         if (fileExtension !== '.ndjson') {
@@ -259,7 +260,8 @@ export const importRulesRoute = (
                       rulesClient,
                       author,
                       buildingBlockType,
-                      savedObjectsClient,
+                      spaceId: context.securitySolution.getSpaceId(),
+                      ruleStatusClient,
                       description,
                       enabled,
                       eventCategoryOverride,

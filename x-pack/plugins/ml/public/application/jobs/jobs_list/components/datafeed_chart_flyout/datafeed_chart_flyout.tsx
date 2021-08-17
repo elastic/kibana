@@ -53,6 +53,7 @@ import { JobMessagesPane } from '../job_details/job_messages_pane';
 import { EditQueryDelay } from './edit_query_delay';
 import { CHART_DIRECTION, ChartDirectionType, CHART_SIZE } from './constants';
 import { loadFullJob } from '../utils';
+import { checkPermission } from '../../../../capabilities/check_capabilities';
 
 const dateFormatter = timeFormatter('MM-DD HH:mm:ss');
 const MAX_CHART_POINTS = 480;
@@ -87,6 +88,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
   const [showAnnotations, setShowAnnotations] = useState<boolean>(true);
   const [showModelSnapshots, setShowModelSnapshots] = useState<boolean>(true);
   const [range, setRange] = useState<{ start: string; end: string } | undefined>();
+  const canUpdateDatafeed = useMemo(() => checkPermission('canUpdateDatafeed'), []);
 
   const {
     results: { getDatafeedResultChartData },
@@ -238,7 +240,9 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                     <EditQueryDelay
                       datafeedId={datafeedConfig.datafeed_id}
                       queryDelay={datafeedConfig.query_delay}
-                      isEnabled={datafeedConfig.state === DATAFEED_STATE.STOPPED}
+                      isEnabled={
+                        datafeedConfig.state === DATAFEED_STATE.STOPPED && canUpdateDatafeed
+                      }
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>

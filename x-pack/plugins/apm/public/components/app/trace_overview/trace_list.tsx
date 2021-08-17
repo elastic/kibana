@@ -73,7 +73,8 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
     }),
     sortable: true,
     dataType: 'number',
-    render: (time: number) => asMillisecondDuration(time),
+    render: (_, { averageResponseTime }) =>
+      asMillisecondDuration(averageResponseTime),
   },
   {
     field: 'transactionsPerMinute',
@@ -82,7 +83,8 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
     }),
     sortable: true,
     dataType: 'number',
-    render: (value: number) => asTransactionRate(value),
+    render: (_, { transactionsPerMinute }) =>
+      asTransactionRate(transactionsPerMinute),
   },
   {
     field: 'impact',
@@ -112,7 +114,7 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
     width: '20%',
     align: 'left',
     sortable: true,
-    render: (value: number) => <ImpactBar value={value} />,
+    render: (_, { impact }) => <ImpactBar value={impact} />,
   },
 ];
 

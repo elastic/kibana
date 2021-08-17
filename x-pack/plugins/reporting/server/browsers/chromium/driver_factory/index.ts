@@ -17,7 +17,6 @@ import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
 import { getChromiumDisconnectedError } from '../';
 import { ReportingCore } from '../../..';
-import { BROWSER_TYPE } from '../../../../common/constants';
 import { durationToNumber } from '../../../../common/schema_utils';
 import { CaptureConfig } from '../../../../server/types';
 import { LevelLogger } from '../../../lib';
@@ -70,7 +69,7 @@ export class HeadlessChromiumDriverFactory {
       });
   }
 
-  type = BROWSER_TYPE;
+  type = 'chromium';
 
   /*
    * Return an observable to objects which will drive screenshot capture for a page

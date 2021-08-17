@@ -6,7 +6,6 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 export interface SeverityBadgeProps {
@@ -19,12 +18,11 @@ const colorMap: { [key: string]: string } = {
 };
 
 export function SeverityBadge({ severityLevel }: SeverityBadgeProps) {
+  if (!severityLevel) {
+    return null;
+  }
+
   return (
-    <EuiBadge color={severityLevel ? colorMap[severityLevel] : 'default'}>
-      {severityLevel ??
-        i18n.translate('xpack.observability.severityBadge.unknownDescription', {
-          defaultMessage: 'unknown',
-        })}
-    </EuiBadge>
+    <EuiBadge color={severityLevel ? colorMap[severityLevel] : 'default'}>{severityLevel}</EuiBadge>
   );
 }

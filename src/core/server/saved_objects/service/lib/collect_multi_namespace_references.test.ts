@@ -8,7 +8,7 @@
 
 import { mockRawDocExistsInNamespace } from './collect_multi_namespace_references.test.mock';
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/target/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import type { ElasticsearchClient } from 'src/core/server/elasticsearch';
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 

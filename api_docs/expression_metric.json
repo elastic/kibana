@@ -23,10 +23,7 @@
           "MetricRendererConfig",
           ">"
         ],
-        "source": {
-          "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx",
-          "lineNumber": 29
-        },
+        "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -56,10 +53,7 @@
           "MetricRendererConfig",
           ">)[]"
         ],
-        "source": {
-          "path": "src/plugins/expression_metric/public/expression_renderers/index.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/expression_metric/public/expression_renderers/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -75,10 +69,7 @@
       "signature": [
         "void"
       ],
-      "source": {
-        "path": "src/plugins/expression_metric/public/plugin.ts",
-        "lineNumber": 23
-      },
+      "path": "src/plugins/expression_metric/public/plugin.ts",
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true

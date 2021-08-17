@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import {
   generateFilterDSL,
   hasFilters,
@@ -71,7 +72,7 @@ const mockStatusAlertDocument = (
   return {
     fields: {
       ...mockCommonAlertDocumentFields(monitor.monitorInfo),
-      reason: `Monitor first with url ${monitorInfo?.url?.full} is down from ${
+      [ALERT_REASON]: `Monitor first with url ${monitorInfo?.url?.full} is down from ${
         monitorInfo.observer?.geo?.name
       }. The latest error message is ${monitorInfo.error?.message || ''}`,
     },
@@ -87,7 +88,7 @@ const mockAvailabilityAlertDocument = (monitor: GetMonitorAvailabilityResult) =>
   return {
     fields: {
       ...mockCommonAlertDocumentFields(monitor.monitorInfo),
-      reason: `Monitor ${monitorInfo.monitor.name || monitorInfo.monitor.id} with url ${
+      [ALERT_REASON]: `Monitor ${monitorInfo.monitor.name || monitorInfo.monitor.id} with url ${
         monitorInfo?.url?.full
       } is below threshold with ${(monitor.availabilityRatio! * 100).toFixed(
         2
@@ -149,13 +150,13 @@ describe('status check alert', () => {
       const alert = statusCheckAlertFactory(server, libs, plugins);
       // @ts-ignore the executor can return `void`, but ours never does
       const options = mockOptions();
-      const state: Record<string, any> = await alert.executor(options);
+      const state: Record<string, any> | void = await alert.executor(options);
       const {
         services: { alertWithLifecycle },
       } = options;
 
       expect(state).not.toBeUndefined();
-      expect(state?.isTriggered).toBe(false);
+      expect(state instanceof Object ? state.isTriggered : true).toBe(false);
       expect(alertWithLifecycle).not.toHaveBeenCalled();
       expect(mockGetter).toHaveBeenCalledTimes(1);
       expect(mockGetter.mock.calls[0][0]).toEqual(

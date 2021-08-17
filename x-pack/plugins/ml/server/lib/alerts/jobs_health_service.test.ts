@@ -10,6 +10,9 @@ import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import type { Logger } from 'kibana/server';
 import { MlClient } from '../ml_client';
 import { MlJob, MlJobStats } from '@elastic/elasticsearch/api/types';
+import { AnnotationService } from '../../models/annotation_service/annotation';
+
+const MOCK_DATE_NOW = 1487076708000;
 
 describe('JobsHealthService', () => {
   const mlClient = ({
@@ -20,12 +23,15 @@ describe('JobsHealthService', () => {
         jobs = [
           ({
             job_id: 'test_job_01',
+            analysis_config: { bucket_span: '1h' },
           } as unknown) as MlJob,
           ({
             job_id: 'test_job_02',
+            analysis_config: { bucket_span: '15m' },
           } as unknown) as MlJob,
           ({
             job_id: 'test_job_03',
+            analysis_config: { bucket_span: '8m' },
           } as unknown) as MlJob,
         ];
       }
@@ -34,6 +40,7 @@ describe('JobsHealthService', () => {
         jobs = [
           ({
             job_id: jobIds[0],
+            analysis_config: { bucket_span: '1h' },
           } as unknown) as MlJob,
         ];
       }
@@ -84,12 +91,31 @@ describe('JobsHealthService', () => {
       return Promise.resolve(
         jobIds.map((j) => {
           return {
+            job_id: j,
             datafeed_id: j.replace('job', 'datafeed'),
+            query_delay: '3m',
           };
         })
       );
     }),
   } as unknown) as jest.Mocked<DatafeedsService>;
+
+  const annotationService = ({
+    getDelayedDataAnnotations: jest.fn().mockImplementation(({ jobIds }: { jobIds: string[] }) => {
+      return Promise.resolve(
+        jobIds.map((jobId) => {
+          return {
+            job_id: jobId,
+            annotation: `Datafeed has missed ${
+              jobId === 'test_job_01' ? 11 : 8
+            } documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay`,
+            modified_time: 1627660295141,
+            end_timestamp: 1627653300000,
+          };
+        })
+      );
+    }),
+  } as unknown) as jest.Mocked<AnnotationService>;
 
   const logger = ({
     warn: jest.fn(),
@@ -100,13 +126,19 @@ describe('JobsHealthService', () => {
   const jobHealthService: JobsHealthService = jobsHealthServiceProvider(
     mlClient,
     datafeedsService,
+    annotationService,
     logger
   );
 
-  beforeEach(() => {});
+  let dateNowSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => MOCK_DATE_NOW);
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
+    dateNowSpy.mockRestore();
   });
 
   test('returns empty results when no jobs provided', async () => {
@@ -131,7 +163,11 @@ describe('JobsHealthService', () => {
           enabled: false,
         },
         behindRealtime: null,
-        delayedData: null,
+        delayedData: {
+          enabled: false,
+          docsCount: null,
+          timeInterval: null,
+        },
         errorMessages: null,
         mml: {
           enabled: false,
@@ -147,6 +183,54 @@ describe('JobsHealthService', () => {
     expect(logger.debug).toHaveBeenCalledWith(`Performing health checks for job IDs: test_job_01`);
     expect(datafeedsService.getDatafeedByJobId).not.toHaveBeenCalled();
     expect(executionResult).toEqual([]);
+  });
+
+  test('takes into account delayed data params', async () => {
+    const executionResult = await jobHealthService.getTestsResults('testRule_04', {
+      testsConfig: {
+        delayedData: {
+          enabled: true,
+          docsCount: 10,
+          timeInterval: '4h',
+        },
+        behindRealtime: { enabled: false, timeInterval: null },
+        mml: { enabled: false },
+        datafeed: { enabled: false },
+        errorMessages: { enabled: false },
+      },
+      includeJobs: {
+        jobIds: [],
+        groupIds: ['test_group'],
+      },
+      excludeJobs: {
+        jobIds: ['test_job_03'],
+        groupIds: [],
+      },
+    });
+
+    expect(annotationService.getDelayedDataAnnotations).toHaveBeenCalledWith({
+      jobIds: ['test_job_01', 'test_job_02'],
+      // 1487076708000 - 4h
+      earliestMs: 1487062308000,
+    });
+
+    expect(executionResult).toEqual([
+      {
+        name: 'Data delay has occurred',
+        context: {
+          results: [
+            {
+              job_id: 'test_job_01',
+              annotation:
+                'Datafeed has missed 11 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
+              end_timestamp: 1627653300000,
+              missed_docs_count: 11,
+            },
+          ],
+          message: '1 job is suffering from delayed data.',
+        },
+      },
+    ]);
   });
 
   test('returns results based on provided selection', async () => {
@@ -169,11 +253,17 @@ describe('JobsHealthService', () => {
       'test_job_01',
       'test_job_02',
     ]);
+    expect(datafeedsService.getDatafeedByJobId).toHaveBeenCalledTimes(1);
     expect(mlClient.getJobStats).toHaveBeenCalledWith({ job_id: 'test_job_01,test_job_02' });
     expect(mlClient.getDatafeedStats).toHaveBeenCalledWith({
       datafeed_id: 'test_datafeed_01,test_datafeed_02',
     });
     expect(mlClient.getJobStats).toHaveBeenCalledTimes(1);
+    expect(annotationService.getDelayedDataAnnotations).toHaveBeenCalledWith({
+      jobIds: ['test_job_01', 'test_job_02'],
+      earliestMs: 1487069268000,
+    });
+
     expect(executionResult).toEqual([
       {
         name: 'Datafeed is not started',
@@ -201,6 +291,28 @@ describe('JobsHealthService', () => {
           ],
           message:
             '1 job reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.',
+        },
+      },
+      {
+        name: 'Data delay has occurred',
+        context: {
+          results: [
+            {
+              job_id: 'test_job_01',
+              annotation:
+                'Datafeed has missed 11 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
+              end_timestamp: 1627653300000,
+              missed_docs_count: 11,
+            },
+            {
+              job_id: 'test_job_02',
+              annotation:
+                'Datafeed has missed 8 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
+              end_timestamp: 1627653300000,
+              missed_docs_count: 8,
+            },
+          ],
+          message: '2 jobs are suffering from delayed data.',
         },
       },
     ]);

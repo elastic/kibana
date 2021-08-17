@@ -11,13 +11,13 @@ import { BrowserField } from '../../../containers/source';
 import { OverflowField } from '../../tables/helpers';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { MESSAGE_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { EventFieldsData } from '../types';
+import { EventFieldsData, FieldsData } from '../types';
 
 export interface FieldValueCellProps {
   contextId: string;
-  data: EventFieldsData;
+  data: EventFieldsData | FieldsData;
   eventId: string;
-  fieldFromBrowserField?: Readonly<Record<string, Partial<BrowserField>>>;
+  fieldFromBrowserField?: BrowserField;
   getLinkValue?: (field: string) => string | null;
   linkValue?: string | null | undefined;
   values: string[] | null | undefined;

@@ -453,3 +453,12 @@ export const getEndpointHostIsolationStatusPropsCallback: (
     };
   }
 );
+
+export const getMetadataTransformStats = (state: Immutable<EndpointState>) =>
+  state.metadataTransformStats;
+
+export const metadataTransformStats = (state: Immutable<EndpointState>) =>
+  isLoadedResourceState(state.metadataTransformStats) ? state.metadataTransformStats.data : [];
+
+export const isMetadataTransformStatsLoading = (state: Immutable<EndpointState>) =>
+  isLoadingResourceState(state.metadataTransformStats);

@@ -16,7 +16,7 @@ export const runTaskFnFactory: RunTaskFnFactory<
 > = function executeJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
 
-  return async function runTask(jobId, job, cancellationToken) {
+  return async function runTask(jobId, job, cancellationToken, stream) {
     const elasticsearch = await reporting.getEsClient();
     const logger = parentLogger.clone([jobId]);
     const generateCsv = createGenerateCsv(logger);
@@ -27,18 +27,18 @@ export const runTaskFnFactory: RunTaskFnFactory<
     const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest, logger);
     const { asCurrentUser: elasticsearchClient } = elasticsearch.asScoped(fakeRequest);
 
-    const { content, maxSizeReached, size, csvContainsFormulas, warnings } = await generateCsv(
+    const { maxSizeReached, size, csvContainsFormulas, warnings } = await generateCsv(
       job,
       config,
       uiSettingsClient,
       elasticsearchClient,
-      cancellationToken
+      cancellationToken,
+      stream
     );
 
     // @TODO: Consolidate these one-off warnings into the warnings array (max-size reached and csv contains formulas)
     return {
       content_type: CONTENT_TYPE_CSV,
-      content,
       max_size_reached: maxSizeReached,
       size,
       csv_contains_formulas: csvContainsFormulas,

@@ -55,6 +55,15 @@ export class LicenseState {
     return this.licenseInformation;
   }
 
+  public getIsSecurityEnabled(): boolean | null {
+    if (!this.license || !this.license?.isAvailable) {
+      return null;
+    }
+
+    const { isEnabled } = this.license.getFeature('security');
+    return isEnabled;
+  }
+
   public setNotifyUsage(notifyUsage: LicensingPluginStart['featureUsage']['notifyUsage']) {
     this._notifyUsage = notifyUsage;
   }

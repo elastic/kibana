@@ -1,0 +1,89 @@
+---
+id: kibDevTutorialSetupDevEnv
+slug: /kibana-dev-docs/tutorial/setup-dev-env
+title: Set up a Development Environment
+summary: Learn how to setup a development environment for contributing to the Kibana repository
+date: 2021-04-26
+tags: ['kibana', 'onboarding', 'dev', 'architecture', 'setup']
+---
+
+Setting up a development environment is pretty easy.
+
+<DocCallOut title="A note about Windows">
+  In order to support Windows development we currently require you to use one of the following:
+
+- [Git Bash](https://git-scm.com/download/win)
+- [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/about)
+
+Before running the steps below, please make sure you have installed [Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145) and that you are running all commands in either Git Bash or WSL.
+
+</DocCallOut>
+
+## Get the code
+
+Start by forking [the Kibana repository](https://github.com/elastic/kibana) on Github so that you have a place to stage pull requests and create branches for development.
+
+Then clone the repository to your machine:
+
+```sh
+git clone https://github.com/[YOUR_USERNAME]/kibana.git kibana
+cd kibana
+```
+
+## Install dependencies
+
+Install the version of Node.js listed in the `.node-version` file. This can be automated with tools such as [nvm](https://github.com/creationix/nvm) or [nvm-windows](https://github.com/coreybutler/nvm-windows). As we also include a `.nvmrc` file you can switch to the correct version when using nvm by running:
+
+```sh
+nvm use
+```
+
+Then, install the latest version of yarn using:
+
+```sh
+npm install -g yarn
+```
+
+Finally, boostrap Kibana and install all of the remaining dependencies:
+
+```sh
+yarn kbn bootstrap
+```
+
+Node.js native modules could be in use and node-gyp is the tool used to build them. There are tools you need to install per platform and python versions you need to be using. Please follow the [node-gyp installation steps](https://github.com/nodejs/node-gyp#installation) for your platform.
+
+## Run Elasticsearch
+
+In order to start Kibana you need to run a local version of Elasticsearch. You can startup and initialize the latest Elasticsearch snapshot of the correct version for Kibana by running the following in a new terminal tab/window:
+
+```sh
+yarn es snapshot
+```
+
+You can pass `--license trial` to start Elasticsearch with a trial license, or use the Kibana UI to switch the local version to a trial version which includes all features.
+
+Read about more options for [Running Elasticsearch during development](https://www.elastic.co/guide/en/kibana/current/running-elasticsearch.html), like connecting to a remote host, running from source, preserving data inbetween runs, running remote cluster, etc.
+
+## Run Kibana
+
+In another terminal tab/window you can start Kibana.
+
+```sh
+yarn start
+```
+
+If you include the `--run-examples` flag then all of the [developer examples](https://github.com/elastic/kibana/tree/{branch}/examples). Read more about the advanced options for [Running Kibana](https://www.elastic.co/guide/en/kibana/current/running-kibana-advanced.html).
+
+## Code away!
+
+You are now ready to start developing. Changes to the source files should be picked up automatically and either cause the server to restart, or be served to the browser on the next page refresh.
+
+## Install pre-commit hook (optional)
+
+In case you want to run a couple of checks like linting or check the file casing of the files to commit, we provide a way to install a pre-commit hook. To configure it you just need to run the following:
+
+```sh
+node scripts/register_git_hook
+```
+
+After the script completes the pre-commit hook will be created within the file `.git/hooks/pre-commit`. If you choose to not install it, don’t worry, we still run a quick CI check to provide feedback earliest as we can about the same checks.

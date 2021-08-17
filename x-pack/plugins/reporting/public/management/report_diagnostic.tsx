@@ -120,7 +120,7 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
           <EuiButton
             disabled={isBusy || configStatus === 'complete'}
             isLoading={isBusy && configStatus === 'incomplete'}
-            onClick={apiWrapper(apiClient.verifyConfig, statuses.configStatus)}
+            onClick={apiWrapper(() => apiClient.verifyConfig(), statuses.configStatus)}
             iconType={configStatus === 'complete' ? 'check' : undefined}
           >
             <FormattedMessage
@@ -148,7 +148,7 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
           <EuiSpacer />
           <EuiButton
             disabled={isBusy || chromeStatus === 'complete'}
-            onClick={apiWrapper(apiClient.verifyBrowser, statuses.chromeStatus)}
+            onClick={apiWrapper(() => apiClient.verifyBrowser(), statuses.chromeStatus)}
             isLoading={isBusy && chromeStatus === 'incomplete'}
             iconType={chromeStatus === 'complete' ? 'check' : undefined}
           >
@@ -177,7 +177,7 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
           <EuiSpacer />
           <EuiButton
             disabled={isBusy || screenshotStatus === 'complete'}
-            onClick={apiWrapper(apiClient.verifyScreenCapture, statuses.screenshotStatus)}
+            onClick={apiWrapper(() => apiClient.verifyScreenCapture(), statuses.screenshotStatus)}
             isLoading={isBusy && screenshotStatus === 'incomplete'}
             iconType={screenshotStatus === 'complete' ? 'check' : undefined}
           >

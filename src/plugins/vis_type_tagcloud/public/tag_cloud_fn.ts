@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+import { prepareLogTable, Dimension } from '../../visualizations/public';
 import { TagCloudVisParams, TagCloudVisConfig } from './types';
 
 const name = 'tagcloud';
@@ -109,7 +110,24 @@ export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
     } as TagCloudVisParams;
 
     if (handlers?.inspectorAdapters?.tables) {
-      handlers.inspectorAdapters.tables.logDatatable('default', input);
+      const argsTable: Dimension[] = [
+        [
+          [args.metric],
+          i18n.translate('visTypeTagCloud.function.dimension.tagSize', {
+            defaultMessage: 'Tag size',
+          }),
+        ],
+      ];
+      if (args.bucket) {
+        argsTable.push([
+          [args.bucket],
+          i18n.translate('visTypeTagCloud.function.adimension.tags', {
+            defaultMessage: 'Tags',
+          }),
+        ]);
+      }
+      const logTable = prepareLogTable(input, argsTable);
+      handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
     return {
       type: 'render',

@@ -129,7 +129,9 @@ function isEndpointBehaviorPolicyValidForLicense(policy: PolicyConfig, license: 
     // only platinum or higher may enable behavior protection
     if (
       policy.windows.behavior_protection.supported !==
-      defaults.windows.behavior_protection.supported
+        defaults.windows.behavior_protection.supported ||
+      policy.mac.behavior_protection.supported !== defaults.mac.behavior_protection.supported ||
+      policy.linux.behavior_protection.supported !== defaults.linux.behavior_protection.supported
     ) {
       return false;
     }
@@ -139,29 +141,44 @@ function isEndpointBehaviorPolicyValidForLicense(policy: PolicyConfig, license: 
   const defaults = policyFactoryWithoutPaidFeatures();
 
   // only platinum or higher may enable behavior_protection
-  if (policy.windows.behavior_protection.mode !== defaults.windows.behavior_protection.mode) {
+  if (
+    policy.windows.behavior_protection.mode !== defaults.windows.behavior_protection.mode ||
+    policy.mac.behavior_protection.mode !== defaults.mac.behavior_protection.mode ||
+    policy.linux.behavior_protection.mode !== defaults.linux.behavior_protection.mode
+  ) {
     return false;
   }
 
   // only platinum or higher may enable behavior_protection notification
   if (
     policy.windows.popup.behavior_protection.enabled !==
-    defaults.windows.popup.behavior_protection.enabled
+      defaults.windows.popup.behavior_protection.enabled ||
+    policy.mac.popup.behavior_protection.enabled !==
+      defaults.mac.popup.behavior_protection.enabled ||
+    policy.linux.popup.behavior_protection.enabled !==
+      defaults.linux.popup.behavior_protection.enabled
   ) {
     return false;
   }
 
   // Only Platinum or higher may change the behavior_protection message (which can be blank or what Endpoint defaults)
   if (
-    policy.windows.popup.behavior_protection.message !== '' &&
-    policy.windows.popup.behavior_protection.message !== DefaultPolicyNotificationMessage
+    (policy.windows.popup.behavior_protection.message !== '' &&
+      policy.windows.popup.behavior_protection.message !== DefaultPolicyNotificationMessage) ||
+    (policy.mac.popup.behavior_protection.message !== '' &&
+      policy.mac.popup.behavior_protection.message !== DefaultPolicyNotificationMessage) ||
+    (policy.linux.popup.behavior_protection.message !== '' &&
+      policy.linux.popup.behavior_protection.message !== DefaultPolicyNotificationMessage)
   ) {
     return false;
   }
 
   // only platinum or higher may enable behavior_protection
   if (
-    policy.windows.behavior_protection.supported !== defaults.windows.behavior_protection.supported
+    policy.windows.behavior_protection.supported !==
+      defaults.windows.behavior_protection.supported ||
+    policy.mac.behavior_protection.supported !== defaults.mac.behavior_protection.supported ||
+    policy.linux.behavior_protection.supported !== defaults.linux.behavior_protection.supported
   ) {
     return false;
   }

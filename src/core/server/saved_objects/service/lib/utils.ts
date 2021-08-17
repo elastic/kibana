@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import uuidv1 from 'uuid/v1';
+import uuidv5 from 'uuid/v5';
 import { SavedObjectsFindOptions } from '../../types';
 import { SavedObjectsFindResponse } from '..';
 
@@ -65,7 +66,7 @@ export class SavedObjectsUtils {
    * Generates a random ID for a saved objects.
    */
   public static generateId() {
-    return uuid.v1();
+    return uuidv1();
   }
 
   /**
@@ -76,5 +77,20 @@ export class SavedObjectsUtils {
    */
   public static isRandomId(id: string | undefined) {
     return typeof id === 'string' && UUID_REGEX.test(id);
+  }
+
+  /**
+   * Uses a single-namespace object's "legacy ID" to determine what its new ID will be after it is converted to a multi-namespace type.
+   *
+   * @param {string} namespace The namespace of the saved object before it is converted.
+   * @param {string} type The type of the saved object before it is converted.
+   * @param {string} id The ID of the saved object before it is converted.
+   * @returns {string} The ID of the saved object after it is converted.
+   */
+  public static getConvertedObjectId(namespace: string | undefined, type: string, id: string) {
+    if (SavedObjectsUtils.namespaceIdToString(namespace) === DEFAULT_NAMESPACE_STRING) {
+      return id; // Objects that exist in the Default space do not get new IDs when they are converted.
+    }
+    return uuidv5(`${namespace}:${type}:${id}`, uuidv5.DNS); // The uuidv5 namespace constant (uuidv5.DNS) is arbitrary.
   }
 }

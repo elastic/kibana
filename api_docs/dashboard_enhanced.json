@@ -43,10 +43,7 @@
           },
           ">"
         ],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-          "lineNumber": 34
-        },
+        "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
         "deprecated": false,
         "children": [
           {
@@ -59,10 +56,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 36
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false,
             "children": [
               {
@@ -81,10 +75,7 @@
                     "text": "Params"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-                  "lineNumber": 36
-                },
+                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -98,10 +89,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 38
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false
           },
           {
@@ -114,10 +102,7 @@
             "signature": [
               "() => string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 40
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -142,10 +127,7 @@
               "KibanaLocation",
               "<object>>"
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 42
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false,
             "children": [
               {
@@ -164,10 +146,7 @@
                     "text": "DrilldownConfig"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-                  "lineNumber": 42
-                },
+                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -181,10 +160,7 @@
                 "signature": [
                   "Context"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-                  "lineNumber": 42
-                },
+                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -201,10 +177,7 @@
             "signature": [
               "100"
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 44
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false
           },
           {
@@ -217,10 +190,7 @@
             "signature": [
               "() => string"
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 46
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -235,10 +205,7 @@
             "signature": [
               "\"dashboardApp\""
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 48
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false
           },
           {
@@ -283,10 +250,7 @@
               },
               ">>"
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 54
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -301,10 +265,7 @@
             "signature": [
               "() => { dashboardId: string; useCurrentFilters: boolean; useCurrentDateRange: boolean; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 56
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -334,10 +295,7 @@
                 "text": "DrilldownConfig"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 62
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false,
             "children": [
               {
@@ -356,10 +314,7 @@
                     "text": "DrilldownConfig"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-                  "lineNumber": 62
-                },
+                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -384,10 +339,7 @@
               },
               ", context: Context) => Promise<string>"
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 67
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false,
             "children": [
               {
@@ -406,10 +358,7 @@
                     "text": "DrilldownConfig"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-                  "lineNumber": 67
-                },
+                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -423,10 +372,7 @@
                 "signature": [
                   "Context"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-                  "lineNumber": 67
-                },
+                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -451,10 +397,7 @@
               },
               ", context: Context) => Promise<void>"
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 76
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false,
             "children": [
               {
@@ -473,10 +416,7 @@
                     "text": "DrilldownConfig"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-                  "lineNumber": 76
-                },
+                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -490,10 +430,7 @@
                 "signature": [
                   "Context"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-                  "lineNumber": 76
-                },
+                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -525,10 +462,7 @@
               },
               ">"
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 84
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false
           }
         ],
@@ -544,10 +478,7 @@
         "tags": [],
         "label": "Params",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-          "lineNumber": 26
-        },
+        "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
         "deprecated": false,
         "children": [
           {
@@ -600,10 +531,7 @@
               },
               ">"
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -618,10 +546,7 @@
         "tags": [],
         "label": "SetupDependencies",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
         "deprecated": false,
         "children": [
           {
@@ -640,10 +565,7 @@
                 "text": "SetupContract"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-              "lineNumber": 17
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
             "deprecated": false
           },
           {
@@ -662,10 +584,7 @@
                 "text": "EmbeddableSetup"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-              "lineNumber": 18
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
             "deprecated": false
           },
           {
@@ -690,10 +609,7 @@
               "UrlService",
               "; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-              "lineNumber": 19
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
             "deprecated": false
           }
         ],
@@ -706,10 +622,7 @@
         "tags": [],
         "label": "StartDependencies",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-          "lineNumber": 22
-        },
+        "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
         "deprecated": false,
         "children": [
           {
@@ -728,10 +641,7 @@
                 "text": "StartContract"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-              "lineNumber": 23
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
             "deprecated": false
           },
           {
@@ -750,10 +660,7 @@
                 "text": "DataPublicPluginStart"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-              "lineNumber": 24
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
             "deprecated": false
           },
           {
@@ -772,10 +679,7 @@
                 "text": "EmbeddableStart"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-              "lineNumber": 25
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
             "deprecated": false
           },
           {
@@ -800,10 +704,7 @@
               "UrlService",
               "; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-              "lineNumber": 26
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
             "deprecated": false
           },
           {
@@ -822,10 +723,7 @@
                 "text": "DashboardStart"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
             "deprecated": false
           }
         ],
@@ -844,10 +742,7 @@
         "signature": [
           "{ dashboardId?: string | undefined; useCurrentFilters: boolean; useCurrentDateRange: boolean; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/types.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -860,10 +755,7 @@
       "tags": [],
       "label": "SetupContract",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-        "lineNumber": 31
-      },
+      "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
       "deprecated": false,
       "children": [],
       "lifecycle": "setup",
@@ -876,10 +768,7 @@
       "tags": [],
       "label": "StartContract",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
-        "lineNumber": 34
-      },
+      "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
       "deprecated": false,
       "children": [],
       "lifecycle": "start",
@@ -897,10 +786,7 @@
         "tags": [],
         "label": "SetupDependencies",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
-          "lineNumber": 12
-        },
+        "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
         "deprecated": false,
         "children": [
           {
@@ -919,10 +805,7 @@
                 "text": "SetupContract"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
-              "lineNumber": 13
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
             "deprecated": false
           }
         ],
@@ -935,10 +818,7 @@
         "tags": [],
         "label": "StartDependencies",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
         "deprecated": false,
         "children": [
           {
@@ -951,10 +831,7 @@
             "signature": [
               "void"
             ],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
-              "lineNumber": 17
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
             "deprecated": false
           }
         ],
@@ -971,10 +848,7 @@
       "tags": [],
       "label": "SetupContract",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
-        "lineNumber": 21
-      },
+      "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
       "deprecated": false,
       "children": [],
       "lifecycle": "setup",
@@ -987,10 +861,7 @@
       "tags": [],
       "label": "StartContract",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
-        "lineNumber": 24
-      },
+      "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
       "deprecated": false,
       "children": [],
       "lifecycle": "start",
@@ -1028,10 +899,7 @@
           "SavedObjectReference",
           "[]; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
-          "lineNumber": 46
-        },
+        "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
         "deprecated": false,
         "children": [
           {
@@ -1041,10 +909,7 @@
             "tags": [],
             "label": "{\n  drilldownId,\n}",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
-              "lineNumber": 48
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
             "deprecated": false,
             "children": [
               {
@@ -1054,10 +919,7 @@
                 "tags": [],
                 "label": "drilldownId",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
-                  "lineNumber": 49
-                },
+                "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
                 "deprecated": false
               }
             ]
@@ -1093,10 +955,7 @@
             "text": "SerializedEvent"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
-          "lineNumber": 31
-        },
+        "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
         "deprecated": false,
         "children": [
           {
@@ -1106,10 +965,7 @@
             "tags": [],
             "label": "{\n  drilldownId,\n}",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
-              "lineNumber": 33
-            },
+            "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
             "deprecated": false,
             "children": [
               {
@@ -1119,10 +975,7 @@
                 "tags": [],
                 "label": "drilldownId",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
-                  "lineNumber": 34
-                },
+                "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
                 "deprecated": false
               }
             ]
@@ -1145,10 +998,7 @@
         "signature": [
           "{ dashboardId?: string | undefined; useCurrentFilters: boolean; useCurrentDateRange: boolean; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/types.ts",
-          "lineNumber": 9
-        },
+        "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1164,10 +1014,7 @@
         "signature": [
           "\"DASHBOARD_TO_DASHBOARD_DRILLDOWN\""
         ],
-        "source": {
-          "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/constants.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

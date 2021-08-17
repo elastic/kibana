@@ -10,7 +10,7 @@ import d3 from 'd3';
 import _ from 'lodash';
 
 import { getHeatmapColors } from '../../../../../charts/public';
-import { UI_SETTINGS } from '../../../../../data/public';
+import { FORMATS_UI_SETTINGS } from '../../../../../field_formats/common';
 import { getValueForPercentageMode } from '../../percentage_mode_transform';
 
 const arcAngles = {
@@ -73,7 +73,7 @@ export class MeterGauge {
     const isPercentageMode = this.gaugeConfig.percentageMode;
     const percentageFormatPattern =
       this.gaugeConfig.percentageFormatPattern ||
-      this.uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN);
+      this.uiSettings.get(FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN);
     const colorsRange = this.gaugeConfig.colorsRange;
     const max = _.last(colorsRange).to;
     const labels = [];

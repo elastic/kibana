@@ -14,6 +14,8 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsBulkResponse,
   SavedObjectsFindResult,
+  SavedObjectsBulkUpdateResponse,
+  SavedObjectsUpdateResponse,
 } from 'kibana/server';
 
 import type { estypes } from '@elastic/elasticsearch';
@@ -32,7 +34,6 @@ import {
   CommentAttributes,
   CommentType,
   ENABLE_CASE_CONNECTOR,
-  ESCaseAttributes,
   GetCaseIdsByAlertIdAggs,
   MAX_CONCURRENT_SEARCHES,
   MAX_DOCS_PER_PAGE,
@@ -41,6 +42,7 @@ import {
   SubCaseAttributes,
   SubCaseResponse,
   User,
+  CaseAttributes,
 } from '../../../common';
 import {
   defaultSortField,
@@ -54,6 +56,15 @@ import { ClientArgs } from '..';
 import { combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { EnsureSOAuthCallback } from '../../authorization';
+import {
+  transformSavedObjectToExternalModel,
+  transformAttributesToESModel,
+  transformUpdateResponseToExternalModel,
+  transformUpdateResponsesToExternalModels,
+  transformBulkResponseToExternalModel,
+  transformFindResponseToExternalModel,
+} from './transform';
+import { ESCaseAttributes } from './types';
 
 interface GetCaseIdsByAlertIdArgs extends ClientArgs {
   alertId: string;
@@ -111,7 +122,7 @@ interface FindSubCasesStatusStats {
 }
 
 interface PostCaseArgs extends ClientArgs {
-  attributes: ESCaseAttributes;
+  attributes: CaseAttributes;
   id: string;
 }
 
@@ -123,7 +134,8 @@ interface CreateSubCaseArgs extends ClientArgs {
 
 interface PatchCase {
   caseId: string;
-  updatedAttributes: Partial<ESCaseAttributes & PushedArgs>;
+  updatedAttributes: Partial<CaseAttributes & PushedArgs>;
+  originalCase: SavedObject<CaseAttributes>;
   version?: string;
 }
 type PatchCaseArgs = PatchCase & ClientArgs;
@@ -168,7 +180,7 @@ interface FindCommentsByAssociationArgs {
 }
 
 interface Collection {
-  case: SavedObjectsFindResult<ESCaseAttributes>;
+  case: SavedObjectsFindResult<CaseAttributes>;
   subCases?: SubCaseResponse[];
 }
 
@@ -713,10 +725,14 @@ export class CasesService {
   public async getCase({
     unsecuredSavedObjectsClient,
     id: caseId,
-  }: GetCaseArgs): Promise<SavedObject<ESCaseAttributes>> {
+  }: GetCaseArgs): Promise<SavedObject<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET case ${caseId}`);
-      return await unsecuredSavedObjectsClient.get<ESCaseAttributes>(CASE_SAVED_OBJECT, caseId);
+      const caseSavedObject = await unsecuredSavedObjectsClient.get<ESCaseAttributes>(
+        CASE_SAVED_OBJECT,
+        caseId
+      );
+      return transformSavedObjectToExternalModel(caseSavedObject);
     } catch (error) {
       this.log.error(`Error on GET case ${caseId}: ${error}`);
       throw error;
@@ -753,12 +769,13 @@ export class CasesService {
   public async getCases({
     unsecuredSavedObjectsClient,
     caseIds,
-  }: GetCasesArgs): Promise<SavedObjectsBulkResponse<ESCaseAttributes>> {
+  }: GetCasesArgs): Promise<SavedObjectsBulkResponse<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET cases ${caseIds.join(', ')}`);
-      return await unsecuredSavedObjectsClient.bulkGet<ESCaseAttributes>(
+      const cases = await unsecuredSavedObjectsClient.bulkGet<ESCaseAttributes>(
         caseIds.map((caseId) => ({ type: CASE_SAVED_OBJECT, id: caseId }))
       );
+      return transformBulkResponseToExternalModel(cases);
     } catch (error) {
       this.log.error(`Error on GET cases ${caseIds.join(', ')}: ${error}`);
       throw error;
@@ -768,14 +785,15 @@ export class CasesService {
   public async findCases({
     unsecuredSavedObjectsClient,
     options,
-  }: FindCasesArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>> {
+  }: FindCasesArgs): Promise<SavedObjectsFindResponse<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to find cases`);
-      return await unsecuredSavedObjectsClient.find<ESCaseAttributes>({
+      const cases = await unsecuredSavedObjectsClient.find<ESCaseAttributes>({
         sortField: defaultSortField,
         ...options,
         type: CASE_SAVED_OBJECT,
       });
+      return transformFindResponseToExternalModel(cases);
     } catch (error) {
       this.log.error(`Error on find cases: ${error}`);
       throw error;
@@ -1041,14 +1059,20 @@ export class CasesService {
     }
   }
 
-  public async postNewCase({ unsecuredSavedObjectsClient, attributes, id }: PostCaseArgs) {
+  public async postNewCase({
+    unsecuredSavedObjectsClient,
+    attributes,
+    id,
+  }: PostCaseArgs): Promise<SavedObject<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to POST a new case`);
-      return await unsecuredSavedObjectsClient.create<ESCaseAttributes>(
+      const transformedAttributes = transformAttributesToESModel(attributes);
+      const createdCase = await unsecuredSavedObjectsClient.create<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
-        attributes,
-        { id }
+        transformedAttributes.attributes,
+        { id, references: transformedAttributes.referenceHandler.build() }
       );
+      return transformSavedObjectToExternalModel(createdCase);
     } catch (error) {
       this.log.error(`Error on POST a new case: ${error}`);
       throw error;
@@ -1059,33 +1083,52 @@ export class CasesService {
     unsecuredSavedObjectsClient,
     caseId,
     updatedAttributes,
+    originalCase,
     version,
-  }: PatchCaseArgs) {
+  }: PatchCaseArgs): Promise<SavedObjectsUpdateResponse<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
-      return await unsecuredSavedObjectsClient.update<ESCaseAttributes>(
+      const transformedAttributes = transformAttributesToESModel(updatedAttributes);
+
+      const updatedCase = await unsecuredSavedObjectsClient.update<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
         caseId,
-        { ...updatedAttributes },
-        { version }
+        transformedAttributes.attributes,
+        {
+          version,
+          references: transformedAttributes.referenceHandler.build(originalCase.references),
+        }
       );
+
+      return transformUpdateResponseToExternalModel(updatedCase);
     } catch (error) {
       this.log.error(`Error on UPDATE case ${caseId}: ${error}`);
       throw error;
     }
   }
 
-  public async patchCases({ unsecuredSavedObjectsClient, cases }: PatchCasesArgs) {
+  public async patchCases({
+    unsecuredSavedObjectsClient,
+    cases,
+  }: PatchCasesArgs): Promise<SavedObjectsBulkUpdateResponse<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to UPDATE case ${cases.map((c) => c.caseId).join(', ')}`);
-      return await unsecuredSavedObjectsClient.bulkUpdate<ESCaseAttributes>(
-        cases.map((c) => ({
+
+      const bulkUpdate = cases.map(({ caseId, updatedAttributes, version, originalCase }) => {
+        const { attributes, referenceHandler } = transformAttributesToESModel(updatedAttributes);
+        return {
           type: CASE_SAVED_OBJECT,
-          id: c.caseId,
-          attributes: c.updatedAttributes,
-          version: c.version,
-        }))
+          id: caseId,
+          attributes,
+          references: referenceHandler.build(originalCase.references),
+          version,
+        };
+      });
+
+      const updatedCases = await unsecuredSavedObjectsClient.bulkUpdate<ESCaseAttributes>(
+        bulkUpdate
       );
+      return transformUpdateResponsesToExternalModels(updatedCases);
     } catch (error) {
       this.log.error(`Error on UPDATE case ${cases.map((c) => c.caseId).join(', ')}: ${error}`);
       throw error;
