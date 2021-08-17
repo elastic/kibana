@@ -135,7 +135,7 @@ export const useStatusBulkActionItems = ({
       actionItems.push(
         <EuiContextMenuItem
           key="acknowledge"
-          data-test-subj="acknowledge-alert-status"
+          data-test-subj="acknowledged-alert-status"
           onClick={() => onClickUpdate(FILTER_ACKNOWLEDGED)}
           size="s"
         >

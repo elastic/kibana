@@ -114,6 +114,9 @@ export const openAlerts = () => {
 
 export const goToAcknowledgedAlerts = () => {
   cy.get(ACKNOWLEDGED_ALERTS_FILTER_BTN).click();
+  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
+  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
 export const markAcknowledgedFirstAlert = () => {
