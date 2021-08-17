@@ -124,7 +124,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                 entries: [
                   { label: servicesTitle, app: 'apm', path: '/services' },
                   { label: tracesTitle, app: 'apm', path: '/traces' },
-                  { label: serviceMapTitle, app: 'apm', path: '/service-map' },
                   {
                     label: backendsTitle,
                     app: 'apm',
@@ -144,6 +143,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                       }
                     },
                   },
+                  { label: serviceMapTitle, app: 'apm', path: '/service-map' },
                 ],
               },
 

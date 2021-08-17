@@ -3,13 +3,10 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": [
-    "inspector",
-    "uiActions"
-  ],
-  "requiredBundles": [
-    "savedObjects",
-    "kibanaReact",
-    "kibanaUtils"
-  ]
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "requiredPlugins": ["inspector", "uiActions"],
+  "requiredBundles": ["savedObjects", "kibanaReact", "kibanaUtils"]
 }
