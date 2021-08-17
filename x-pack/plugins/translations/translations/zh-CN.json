@@ -5561,7 +5561,6 @@
     "xpack.apm.correlations.latencyCorrelations.correlationsTable.filterDescription": "按值筛选",
     "xpack.apm.correlations.latencyCorrelations.correlationsTable.filterLabel": "筛选",
     "xpack.apm.correlations.latencyCorrelations.errorTitle": "提取关联性时发生错误",
-    "xpack.apm.correlations.latencyCorrelations.noCorrelationsText": "未找到有意义的关联性",
     "xpack.apm.correlations.latencyCorrelations.progressAriaLabel": "进度",
     "xpack.apm.correlations.latencyCorrelations.progressTitle": "进度：{progress}%",
     "xpack.apm.correlations.latencyCorrelations.refreshButtonTitle": "刷新",

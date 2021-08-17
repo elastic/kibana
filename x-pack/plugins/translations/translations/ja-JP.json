@@ -5536,7 +5536,6 @@
     "xpack.apm.correlations.latencyCorrelations.correlationsTable.filterDescription": "値でフィルタリング",
     "xpack.apm.correlations.latencyCorrelations.correlationsTable.filterLabel": "フィルター",
     "xpack.apm.correlations.latencyCorrelations.errorTitle": "相関関係の取得中にエラーが発生しました",
-    "xpack.apm.correlations.latencyCorrelations.noCorrelationsText": "有意な相関関係が見つかりません",
     "xpack.apm.correlations.latencyCorrelations.progressAriaLabel": "進捗",
     "xpack.apm.correlations.latencyCorrelations.progressTitle": "進捗状況: {progress}%",
     "xpack.apm.correlations.latencyCorrelations.refreshButtonTitle": "更新",
