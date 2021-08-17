@@ -21,34 +21,43 @@ In the future, we hope to make it easier for producers of state to understand wh
 
 ## Exposing state that can be persisted but is not owned by plugin exposing it (registry)
 
-Any plugin that owns collection of items whose state/configuration can be persisted should implement `PersistableStateService`
-interface on their `setup` contract as well as make each item in the collection implement `PersistableStateDefinition` interface.
+Any plugin that owns collection of items (registry) whose state/configuration can be persisted should implement `PersistableStateService`
+interface on their `setup` contract and each item in the collection should implement `PersistableStateDefinition` interface.
 
 Example: Embeddable plugin owns the registry of embeddable factories to which other plugins can register new embeddable factories. Dashboard plugin
 stores a bunch of embeddable panels input in its saved object and URL. Embeddable plugin setup contract implements `PersistableStateService`
 interface and each `EmbeddableFactory`  needs to implement `PersistableStateDefinition` interface.
 
-note: if your plugin doesn't expose the state and is thus the only one storing state but still owning the registry
-of items whose state it doesn't own then the items should still implement `PersistableStateDefinition` but registry
-plugin doesn't need to implement `PersistableStateService` interface.
+Embeddable plugin exposes this interfaces:
+```
+// EmbeddableInput implements Serializable
+
+export interface EmbeddableRegistryDefinition extends PersistableStateDefinition<EmbeddableInput> {
+  id: string;
+  ...
+}
+
+export interface EmbeddableSetup extends PersistableStateService<EmbeddableInput>;
+```
+
+note: if your plugin doesn't expose the state (is the only one storing state) plugin doesn't need to implement `PersistableStateService` interface.
+If the state your plugin is storing can be provided by other plugins (your plugin owns a registry) items in that registry still need to implement `PersistableStateDefinition` interface.
 
 ## Storing persistable state as part of saved object
 
 Any plugin that stores any persistable state as part of their saved object should make sure that its saved object migration 
-and reference extraction and injection methods correctly use the correct `PersistableStateService` implementation.
+and reference extraction and injection methods correctly use the matching `PersistableStateService` implementation for the state they are storing.
 
-If a saved object contains state from another plugin, the <DocLink id="kibCoreSavedObjectsPluginApi" section="iaf33fb81-e64a-11eb-8631-9d6e17a74ca4" text-"SavedObjectType.migrations"/> parameter should be a function, which returns a list of migrations. 
- These migration functions will need to merge the migration functions returned from <DocLInk id="" section="" text="PersistableStateServices.getAllMigrations"/> with any migrations provided by the plugin.
+Take a look at [example saved object](https://github.com/elastic/kibana/blob/master/examples/embeddable_examples/server/searchable_list_saved_object.ts#L32) which stores an embeddable state. Note how the `migrations`, `extractReferences` and `injectReferences` are defined.
 
-For reference injection and extraction matching methods on PersistableStateService should be called and merged with plugins own array of references.
-
-## Available state operations
-
-### Storing persistable state as part of URL
+## Storing persistable state as part of URL
 
 When storing persistable state as part of URL you must make sure your URL is versioned. When loading the state `migrateToLatest` method
-of `PersistableStateService` should be called, which will given the original version of state migrate it to latest.
+of `PersistableStateService` should be called, which will migrate the state from its original version to latest.
 
+note: Currently there is no recommended way on how to store version in url and its up to every application to decide on how to implement that.
+
+## Available state operations
  
 ### Extraction/Injection of References
 
@@ -57,11 +66,17 @@ To support persisting your state in saved objects owned by another plugin, the `
 
 <DocLink id="kibDevTutorialSavedObject" section="references" text="Learn how to define Saved Object references"/>
 
+[See example embeddable providing extract/inject functions](https://github.com/elastic/kibana/blob/master/examples/embeddable_examples/public/migrations/migrations_embeddable_factory.ts)
+
 ### Migrations and Backward compatibility
 
-As your plugin evolves, you may need to change your state in a breaking way. If that happens, you should write a migration to upgrade the any state that existed prior to the change.
+As your plugin evolves, you may need to change your state in a breaking way. If that happens, you should write a migration to upgrade the state that existed prior to the change.
 
 <DocLink id="kibDevTutorialSavedObject" section="migrations" text="How to write a migration"/>.
+
+[See an example saved object storing embeddable state implementing saved object migration function](https://github.com/elastic/kibana/blob/master/examples/embeddable_examples/server/searchable_list_saved_object.ts)
+
+[See example embeddable providing migration functions](https://github.com/elastic/kibana/blob/master/examples/embeddable_examples/public/migrations/migrations_embeddable_factory.ts)
 
 ## Telemetry
 
