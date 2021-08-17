@@ -57,15 +57,9 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
     newCustomSource,
   } = useValues(AddSourceLogic);
 
-  const {
-    serviceType,
-    configuration,
-    features,
-    objTypes,
-    sourceDescription,
-    connectStepDescription,
-    addPath,
-  } = staticSourceData[props.sourceIndex] as SourceDataItem;
+  const { serviceType, configuration, features, objTypes, addPath } = staticSourceData[
+    props.sourceIndex
+  ] as SourceDataItem;
 
   const { isOrganization } = useValues(AppLogic);
 
@@ -132,8 +126,6 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
           configuration={configuration}
           features={features}
           objTypes={objTypes}
-          sourceDescription={sourceDescription}
-          connectStepDescription={connectStepDescription}
           needsPermissions={!!needsPermissions}
           onFormCreated={goToFormSourceCreated}
           header={header}

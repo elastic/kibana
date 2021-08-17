@@ -27,6 +27,7 @@ import {
   getKueryBarBoolFilter,
   kueryBarPlaceholder,
 } from '../../../../common/backends';
+import { useBreakPoints } from '../../../hooks/use_break_points';
 
 export function BackendDetailOverview() {
   const {
@@ -62,6 +63,8 @@ export function BackendDetailOverview() {
     backendName,
   });
 
+  const largeScreenOrSmaller = useBreakPoints().isLarge;
+
   return (
     <ApmBackendContextProvider>
       <BackendDetailTemplate title={backendName}>
@@ -71,7 +74,10 @@ export function BackendDetailOverview() {
           kueryBarBoolFilter={kueryBarBoolFilter}
         />
         <ChartPointerEventContextProvider>
-          <EuiFlexGroup direction="row" gutterSize="s">
+          <EuiFlexGroup
+            direction={largeScreenOrSmaller ? 'column' : 'row'}
+            gutterSize="s"
+          >
             <EuiFlexItem>
               <EuiPanel hasBorder={true}>
                 <EuiTitle size="xs">
