@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import type { Capabilities } from 'kibana/public';
 import { IndexPattern, IndexPatternsContract } from '../../../../data/public';
-import { getServices } from '../../kibana_services';
 
 async function popularizeField(
   indexPattern: IndexPattern,
   fieldName: string,
-  indexPatternsService: IndexPatternsContract
+  indexPatternsService: IndexPatternsContract,
+  capabilities: Capabilities
 ) {
-  const { capabilities } = getServices();
   if (!indexPattern.id || !capabilities?.indexPatterns?.save) return;
   const field = indexPattern.fields.getByName(fieldName);
   if (!field) {
