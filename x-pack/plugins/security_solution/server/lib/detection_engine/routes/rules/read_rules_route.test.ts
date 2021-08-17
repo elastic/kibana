@@ -26,7 +26,6 @@ describe('read_signals', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // successful transform
     clients.ruleExecutionLogClient.find.mockResolvedValue([]);
     ruleDataClientMock = createRuleDataClientMock();
@@ -39,6 +38,9 @@ describe('read_signals', () => {
     ])(
       'returns 200 when reading a single rule with a valid actionClient and alertClient - %s',
       async (_, ruleDataClient) => {
+        clients.rulesClient.find.mockResolvedValue(
+          getFindResultWithSingleHit(ruleDataClient != null)
+        ); // rule exists
         readRulesRoute(server.router, ruleDataClient);
         const response = await server.inject(getReadRequest(), context);
         expect(response.status).toEqual(200);
@@ -51,6 +53,9 @@ describe('read_signals', () => {
     ])(
       'returns 404 if alertClient is not available on the route - %s',
       async (_, ruleDataClient) => {
+        clients.rulesClient.find.mockResolvedValue(
+          getFindResultWithSingleHit(ruleDataClient != null)
+        ); // rule exists
         readRulesRoute(server.router, ruleDataClient);
         context.alerting!.getRulesClient = jest.fn();
         const response = await server.inject(getReadRequest(), context);
@@ -63,8 +68,11 @@ describe('read_signals', () => {
       ['Legacy', undefined],
       ['RAC', ruleDataClientMock],
     ])('returns error if requesting a non-rule - %s', async (_, ruleDataClient) => {
+      clients.rulesClient.find.mockResolvedValue(
+        getFindResultWithSingleHit(ruleDataClient != null)
+      ); // rule exists
       readRulesRoute(server.router, ruleDataClient);
-      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
+      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult(ruleDataClient != null));
       const response = await server.inject(getReadRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
@@ -77,6 +85,9 @@ describe('read_signals', () => {
       ['Legacy', undefined],
       ['RAC', ruleDataClientMock],
     ])('catches error if search throws error -%s', async (_, ruleDataClient) => {
+      clients.rulesClient.find.mockResolvedValue(
+        getFindResultWithSingleHit(ruleDataClient != null)
+      ); // rule exists
       readRulesRoute(server.router, ruleDataClient);
       clients.rulesClient.find.mockImplementation(async () => {
         throw new Error('Test error');
@@ -95,6 +106,9 @@ describe('read_signals', () => {
       ['Legacy', undefined],
       ['RAC', ruleDataClientMock],
     ])('returns 404 if given a non-existent id - %s', async (_, ruleDataClient) => {
+      clients.rulesClient.find.mockResolvedValue(
+        getFindResultWithSingleHit(ruleDataClient != null)
+      ); // rule exists
       readRulesRoute(server.router, ruleDataClient);
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       const request = requestMock.create({

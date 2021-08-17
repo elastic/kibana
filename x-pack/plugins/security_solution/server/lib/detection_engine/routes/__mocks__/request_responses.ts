@@ -180,18 +180,18 @@ export const getEmptyFindResult = (): FindHit => ({
   data: [],
 });
 
-export const getFindResultWithSingleHit = (): FindHit => ({
+export const getFindResultWithSingleHit = (isRuleRegistryEnabled: boolean): FindHit => ({
   page: 1,
   perPage: 1,
   total: 1,
-  data: [getAlertMock(getQueryRuleParams())],
+  data: [getAlertMock(getQueryRuleParams(isRuleRegistryEnabled))],
 });
 
-export const nonRuleFindResult = (): FindHit => ({
+export const nonRuleFindResult = (isRuleRegistryEnabled: boolean): FindHit => ({
   page: 1,
   perPage: 1,
   total: 1,
-  data: [nonRuleAlert()],
+  data: [nonRuleAlert(isRuleRegistryEnabled)],
 });
 
 export const getFindResultWithMultiHits = ({
@@ -355,9 +355,9 @@ export const createActionResult = (): ActionResult => ({
   isPreconfigured: false,
 });
 
-export const nonRuleAlert = () => ({
+export const nonRuleAlert = (isRuleRegistryEnabled: boolean) => ({
   // Defaulting to QueryRuleParams because ts doesn't like empty objects
-  ...getAlertMock(getQueryRuleParams()),
+  ...getAlertMock(getQueryRuleParams(isRuleRegistryEnabled)),
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bc',
   name: 'Non-Rule Alert',
   alertTypeId: 'something',
@@ -367,7 +367,7 @@ export const getAlertMock = <T extends RuleParams>(params: T): Alert<T> => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
-  alertTypeId: 'siem.signals',
+  alertTypeId: 'namespace' in params ? (params as T).type : 'siem.signals',
   consumer: 'siem',
   params,
   createdAt: new Date('2019-12-13T16:40:33.400Z'),

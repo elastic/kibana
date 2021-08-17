@@ -106,11 +106,12 @@ import { RulesClient, PartialAlert } from '../../../../../alerting/server';
 import { Alert, SanitizedAlert } from '../../../../../alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { PartialFilter } from '../types';
-import { RuleParams } from '../schemas/rule_schemas';
+import { RACRuleParams, RuleParams } from '../schemas/rule_schemas';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 import { ruleTypeMappings } from '../signals/utils';
 
 export type RuleAlertType = Alert<RuleParams>;
+export type RuleAlertTypeRAC = Alert<RACRuleParams>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleStatusSOAttributes extends Record<string, any> {
@@ -198,12 +199,12 @@ export const isAlertTypes = (
   return partialAlert.every((rule) => isAlertType(isRuleRegistryEnabled, rule));
 };
 
-export const isAlertType = (
+export const isAlertType = <TRuleParams extends RuleParams>(
   isRuleRegistryEnabled: boolean,
   partialAlert: PartialAlert<RuleParams>
-): partialAlert is RuleAlertType => {
+): partialAlert is Alert<TRuleParams> => {
   return isRuleRegistryEnabled
-    ? Object.values(ruleTypeMappings).includes(partialAlert.alertTypeId as string)
+    ? Object.keys(ruleTypeMappings).includes(partialAlert.alertTypeId as string)
     : partialAlert.alertTypeId === SIGNALS_ID;
 };
 

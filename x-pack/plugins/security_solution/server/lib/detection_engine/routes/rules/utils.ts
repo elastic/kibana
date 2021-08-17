@@ -142,13 +142,12 @@ export const transformFindAlerts = <TRuleParams extends RuleParams>(
   };
 };
 
-export const transform = (
-  alert: PartialAlert<RuleParams>,
+export const transform = <TRuleParams extends RuleParams>(
+  alert: PartialAlert<TRuleParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<RulesSchema> | null => {
   if (isAlertType(false, alert)) {
-    // TODO: support RAC
     return transformAlertToRule(
       alert,
       ruleActions,

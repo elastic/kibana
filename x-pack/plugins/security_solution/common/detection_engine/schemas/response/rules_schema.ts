@@ -113,8 +113,13 @@ export const requiredRulesSchema = t.type({
   version,
   exceptions_list: DefaultListArray,
 });
+export const requiredRACRulesSchema = t.intersection([
+  requiredRulesSchema,
+  t.type({ namespace: t.string }),
+]);
 
 export type RequiredRulesSchema = t.TypeOf<typeof requiredRulesSchema>;
+export type RequiredRACRulesSchema = t.TypeOf<typeof requiredRACRulesSchema>;
 
 /**
  * If you have type dependents or exclusive or situations add them here AND update the

@@ -148,6 +148,9 @@ const querySpecificRuleParams = t.exact(
 export const queryRuleParams = t.intersection([baseRuleParams, querySpecificRuleParams]);
 export type QueryRuleParams = t.TypeOf<typeof queryRuleParams>;
 
+export const queryRuleParamsRAC = t.intersection([baseRACRuleParams, querySpecificRuleParams]);
+export type QueryRuleParamsRAC = t.TypeOf<typeof queryRuleParamsRAC>;
+
 const savedQuerySpecificRuleParams = t.type({
   type: t.literal('saved_query'),
   // Having language, query, and filters possibly defined adds more code confusion and probably user confusion

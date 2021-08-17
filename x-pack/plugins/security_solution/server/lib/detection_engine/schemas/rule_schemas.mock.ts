@@ -9,6 +9,7 @@ import { getThreatMock } from '../../../../common/detection_engine/schemas/types
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMappingMock } from '../signals/threat_mapping/build_threat_mapping_filter.mock';
 import {
+  BaseRACRuleParams,
   BaseRuleParams,
   EqlRuleParams,
   MachineLearningRuleParams,
@@ -46,6 +47,13 @@ const getBaseRuleParams = (): BaseRuleParams => {
     threat: getThreatMock(),
     version: 1,
     exceptionsList: getListArrayMock(),
+  };
+};
+
+const getBaseRACRuleParams = (): BaseRACRuleParams => {
+  return {
+    ...getBaseRuleParams(),
+    namespace: 'default',
   };
 };
 
@@ -92,9 +100,9 @@ export const getMlRuleParams = (): MachineLearningRuleParams => {
   };
 };
 
-export const getQueryRuleParams = (): QueryRuleParams => {
+export const getQueryRuleParams = <T extends QueryRuleParams>(isRuleRegistryEnabled: boolean) => {
   return {
-    ...getBaseRuleParams(),
+    ...(isRuleRegistryEnabled ? getBaseRACRuleParams() : getBaseRuleParams()),
     type: 'query',
     language: 'kuery',
     query: 'user.name: root or user.name: admin',
@@ -109,7 +117,7 @@ export const getQueryRuleParams = (): QueryRuleParams => {
       },
     ],
     savedId: undefined,
-  };
+  } as T;
 };
 
 export const getThreatRuleParams = (): ThreatRuleParams => {
