@@ -65,7 +65,10 @@ export const getLatestPushInfo = (
         const pushedInfo = JSON.parse(action.new_value);
         // We returned the index of the element in the userActions array.
         // As we traverse the userActions in reverse we need to calculate the index of a normal traversal
-        return { index: userActions.length - index - 1, pushedInfo };
+        return {
+          index: userActions.length - index - 1,
+          pushedInfo: { ...pushedInfo, connector_id: connectorId },
+        };
       } catch (e) {
         // ignore
       }
