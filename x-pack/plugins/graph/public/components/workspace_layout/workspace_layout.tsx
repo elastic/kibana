@@ -7,7 +7,7 @@
 
 import React, { Fragment, memo, useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, hexToRgb, isColorDark } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { connect } from 'react-redux';
 import { SearchBar } from '../search_bar';
 import {
@@ -124,8 +124,6 @@ const WorkspaceLayoutComponent = ({
   }, []);
 
   const isSelectedSelected = useCallback((node: WorkspaceNode) => chosenNode.current === node, []);
-
-  const isHexColorDark = useCallback((color) => isColorDark(...hexToRgb(color)), []);
 
   // Deal with situation of request to open saved workspace
   useEffect(() => {
@@ -311,7 +309,6 @@ const WorkspaceLayoutComponent = ({
             mergeCandidates={mergeCandidates}
             isSelectedSelected={isSelectedSelected}
             selectSelected={selectSelected}
-            isColorDark={isHexColorDark}
             onSetControl={onSetControl}
           />
         </div>

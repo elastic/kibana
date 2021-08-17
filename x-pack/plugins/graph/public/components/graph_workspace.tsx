@@ -49,7 +49,6 @@ export const GraphWorkspace = (props: GraphWorkspaceProps) => {
    * `workspace.changeHandler()`.
    */
   const workspaceRef = useRef<Workspace>();
-  const workspace = workspaceRef.current;
 
   /**
    * `renderCounter` needs to force react state update on workspace changes
@@ -170,7 +169,7 @@ export const GraphWorkspace = (props: GraphWorkspaceProps) => {
         <Provider store={store}>
           <WorkspaceLayout
             renderCounter={renderCounter}
-            workspace={workspace}
+            workspace={workspaceRef.current}
             loading={loading}
             setHeaderActionMenu={props.deps.setHeaderActionMenu}
             graphSavePolicy={props.deps.graphSavePolicy}

@@ -19,13 +19,13 @@ import {
 import { urlTemplateRegex } from '../../helpers/url_template';
 import { SelectionToolBar } from './selection_tool_bar';
 import { ControlPanelToolBar } from './control_panel_tool_bar';
-import { SelectionList } from './selection_list';
 import { SelectStyle } from './select_style';
 import { LatestSelectionEditor } from './latest_selection_editor';
 import { MergeCandidates } from './merge_candidates';
 import { DrillDowns } from './drill_downs';
 import { UrlTemplateButtons } from './url_template_buttons';
 import { GraphState, liveResponseFieldsSelector, templatesSelector } from '../../state_management';
+import { SelectedNodeItem } from './selected_node_item';
 
 export interface TargetOptions {
   toFields: WorkspaceField[];
@@ -41,7 +41,6 @@ interface ControlPanelProps {
   onSetControl: (control: ControlType) => void;
   selectSelected: (node: WorkspaceNode) => void;
   isSelectedSelected: (node: WorkspaceNode) => boolean;
-  isColorDark: (color: string) => boolean;
 }
 
 interface ControlPanelStateProps {
@@ -60,7 +59,6 @@ const ControlPanelComponent = ({
   onSetControl,
   isSelectedSelected,
   selectSelected,
-  isColorDark,
 }: ControlPanelProps & ControlPanelStateProps) => {
   const hasNodes = workspace.nodes.length === 0;
 
@@ -68,6 +66,11 @@ const ControlPanelComponent = ({
     const url = template.url;
     const newUrl = url.replace(urlTemplateRegex, template.encoder.encode(workspace!));
     window.open(newUrl, '_blank');
+  };
+
+  const onSelectedFieldClick = (node: WorkspaceNode) => {
+    selectSelected(node);
+    workspace.changeHandler();
   };
 
   const onDeselectNode = (node: WorkspaceNode) => {
@@ -91,13 +94,24 @@ const ControlPanelComponent = ({
           })}
         </div>
         <SelectionToolBar workspace={workspace} onSetControl={onSetControl} />
-        <SelectionList
-          workspace={workspace}
-          selectSelected={selectSelected}
-          isColorDark={isColorDark}
-          isSelectedSelected={isSelectedSelected}
-          onDeselectNode={onDeselectNode}
-        />
+        <div className="gphSelectionList">
+          {workspace.selectedNodes.length === 0 && (
+            <p className="help-block">
+              {i18n.translate('xpack.graph.sidebar.selections.noSelectionsHelpText', {
+                defaultMessage: 'No selections. Click on vertices to add.',
+              })}
+            </p>
+          )}
+
+          {workspace.selectedNodes.map((node) => (
+            <SelectedNodeItem
+              node={node}
+              onSelectedFieldClick={onSelectedFieldClick}
+              isSelectedSelected={isSelectedSelected}
+              onDeselectNode={onDeselectNode}
+            />
+          ))}
+        </div>
       </div>
       <UrlTemplateButtons
         urlTemplates={urlTemplates}
