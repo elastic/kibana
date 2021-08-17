@@ -78,8 +78,7 @@ const buildFilterCellActions = (addToQuery: (value: string) => void): TGridCellA
 ];
 
 /** returns the default actions shown in `EuiDataGrid` cells */
-export const getDefaultCellActions = ({
-  addToQuery,
-}: {
-  addToQuery: (value: string) => void;
-}) =>  [...buildFilterCellActions(addToQuery), ...commonCellActions];
+export const getDefaultCellActions = ({ addToQuery }: { addToQuery: (value: string) => void }) => [
+  ...buildFilterCellActions(addToQuery),
+  ...commonCellActions,
+];
