@@ -93,7 +93,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   })),
 });
 
-export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {
+export const createRuleRoute = ({ router, licenseState, logger, usageCounter }: RouteOptions) => {
   router.post(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id?}`,
@@ -112,10 +112,17 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           const rulesClient = context.alerting.getRulesClient();
           const rule = req.body;
           const params = req.params;
+          const spaceId = rulesClient.getSpaceId();
 
+          const shouldWarnId = params?.id && spaceId !== undefined && spaceId !== 'default';
+          if (shouldWarnId) {
+            logger.warn(
+              `POST ${BASE_ALERTING_API_PATH}/rule/${params?.id}: Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the Alerting API docs at https://www.elastic.co/guide/en/kibana/current/create-rule-api.html for more details.`
+            );
+          }
           countUsageOfPredefinedIds({
             predefinedId: params?.id,
-            spaceId: rulesClient.getSpaceId(),
+            spaceId,
             usageCounter,
           });
 
@@ -131,6 +138,13 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
             );
             return res.ok({
               body: rewriteBodyRes(createdRule),
+              ...(shouldWarnId
+                ? {
+                    headers: {
+                      warning: `199 kibana "Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the Alerting API docs at https://www.elastic.co/guide/en/kibana/current/create-rule-api.html for more details."`,
+                    },
+                  }
+                : {}),
             });
           } catch (e) {
             if (e instanceof AlertTypeDisabledError) {

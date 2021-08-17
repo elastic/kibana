@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter, Logger } from 'kibana/server';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { ILicenseState } from '../lib';
 import { defineLegacyRoutes } from './legacy';
@@ -28,10 +28,10 @@ import { muteAlertRoute } from './mute_alert';
 import { unmuteAllRuleRoute } from './unmute_all_rule';
 import { unmuteAlertRoute } from './unmute_alert';
 import { updateRuleApiKeyRoute } from './update_rule_api_key';
-
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
   licenseState: ILicenseState;
+  logger: Logger;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   usageCounter?: UsageCounter;
 }

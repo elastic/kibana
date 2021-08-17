@@ -281,6 +281,7 @@ export class AlertingPlugin {
       router,
       licenseState: this.licenseState,
       usageCounter,
+      logger: this.logger,
       encryptedSavedObjects: plugins.encryptedSavedObjects,
     });
 
