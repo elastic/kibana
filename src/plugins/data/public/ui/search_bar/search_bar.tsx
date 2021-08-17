@@ -76,7 +76,7 @@ export interface SearchBarOwnProps {
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
   // defines padding; use 'inPage' to avoid extra padding; use 'detached' if the searchBar appears at the very top of the view, without any wrapper
-  displayStyle: 'inPage' | 'detached';
+  displayStyle?: 'inPage' | 'detached';
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
