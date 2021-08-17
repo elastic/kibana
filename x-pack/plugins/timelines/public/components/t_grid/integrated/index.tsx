@@ -126,6 +126,7 @@ export interface TGridIntegratedProps {
   entityType: EntityType;
   filters: Filter[];
   globalFullScreen: boolean;
+  graphOverlay?: React.ReactNode;
   headerFilterGroup?: React.ReactNode;
   filterStatus?: AlertStatus;
   height?: number;
@@ -181,6 +182,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   start,
   sort,
   additionalFilters,
+  graphOverlay = null,
   graphEventId,
   leadingControlColumns,
   trailingControlColumns,
@@ -343,7 +345,10 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                 </UpdatedFlexItem>
               </EuiFlexGroup>
 
-              <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
+              <FullWidthFlexGroup
+                $visible={!graphEventId && graphOverlay == null}
+                gutterSize="none"
+              >
                 <ScrollableFlexItem grow={1}>
                   {nonDeletedEvents.length === 0 && loading === false ? (
                     <EuiEmptyPrompt
