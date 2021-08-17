@@ -375,22 +375,26 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
 .c2 {
   background-color: #f5f7fa;
   padding: 16px;
-  padding-top: 8px;
 }
 
 .c5 {
-  padding: 12px;
-  padding-left: 0;
+  padding: 12px 12px 24px 0;
+}
+
+.c5 .trustedAppsConditionsTable {
+  margin-left: 16px;
 }
 
 .c3.c3.c3 {
   width: 40%;
-  margin-top: 8px;
+  margin-top: 0;
+  margin-bottom: 8px;
 }
 
 .c4.c4.c4 {
   width: 60%;
-  margin-top: 8px;
+  margin-top: 0;
+  margin-bottom: 8px;
 }
 
 .c1 {
@@ -554,7 +558,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -849,7 +853,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -1144,7 +1148,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -1439,7 +1443,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -1734,7 +1738,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -2029,7 +2033,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -2324,7 +2328,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -2619,7 +2623,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -2914,7 +2918,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -3209,7 +3213,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -3634,22 +3638,26 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
 .c2 {
   background-color: #f5f7fa;
   padding: 16px;
-  padding-top: 8px;
 }
 
 .c5 {
-  padding: 12px;
-  padding-left: 0;
+  padding: 12px 12px 24px 0;
+}
+
+.c5 .trustedAppsConditionsTable {
+  margin-left: 16px;
 }
 
 .c3.c3.c3 {
   width: 40%;
-  margin-top: 8px;
+  margin-top: 0;
+  margin-bottom: 8px;
 }
 
 .c4.c4.c4 {
   width: 60%;
-  margin-top: 8px;
+  margin-top: 0;
+  margin-bottom: 8px;
 }
 
 .c1 {
@@ -3816,7 +3824,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -4111,7 +4119,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -4406,7 +4414,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -4701,7 +4709,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -4996,7 +5004,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -5291,7 +5299,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -5586,7 +5594,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -5881,7 +5889,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -6176,7 +6184,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -6471,7 +6479,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -6856,22 +6864,26 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
 .c2 {
   background-color: #f5f7fa;
   padding: 16px;
-  padding-top: 8px;
 }
 
 .c5 {
-  padding: 12px;
-  padding-left: 0;
+  padding: 12px 12px 24px 0;
+}
+
+.c5 .trustedAppsConditionsTable {
+  margin-left: 16px;
 }
 
 .c3.c3.c3 {
   width: 40%;
-  margin-top: 8px;
+  margin-top: 0;
+  margin-bottom: 8px;
 }
 
 .c4.c4.c4 {
   width: 60%;
-  margin-top: 8px;
+  margin-top: 0;
+  margin-bottom: 8px;
 }
 
 .c1 {
@@ -7035,7 +7047,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -7330,7 +7342,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -7625,7 +7637,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -7920,7 +7932,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -8215,7 +8227,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -8510,7 +8522,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -8805,7 +8817,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -9100,7 +9112,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -9395,7 +9407,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div
@@ -9690,7 +9702,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                           class="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <div
-                            class="euiBasicTable"
+                            class="euiBasicTable trustedAppsConditionsTable"
                           >
                             <div>
                               <div

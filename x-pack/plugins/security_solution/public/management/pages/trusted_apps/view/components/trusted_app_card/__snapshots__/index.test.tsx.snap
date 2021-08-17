@@ -72,6 +72,7 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
   />
   <ConditionsTable
     badge="and"
+    className="trustedAppsConditionsTable"
     columns={
       Array [
         Object {
@@ -195,6 +196,7 @@ exports[`trusted_app_card TrustedAppCard should trim long texts 1`] = `
   />
   <ConditionsTable
     badge="and"
+    className="trustedAppsConditionsTable"
     columns={
       Array [
         Object {

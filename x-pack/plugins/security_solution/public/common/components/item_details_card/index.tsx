@@ -54,25 +54,29 @@ const groupChildrenByType = (
 const SummarySection = styled(EuiFlexItem)`
   background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
   padding: ${({ theme }) => theme.eui.euiSize};
-  padding-top: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const DetailsSection = styled(EuiFlexItem)`
-  padding: ${({ theme }) => theme.eui.euiSizeM};
-  padding-left: 0;
+  padding: ${({ theme }) => theme.eui.euiSizeM} ${({ theme }) => theme.eui.euiSizeM}
+    ${({ theme }) => theme.eui.euiSizeL} 0;
+  .trustedAppsConditionsTable {
+    margin-left: ${({ theme }) => theme.eui.euiSize};
+  }
 `;
 
 const DescriptionListTitle = styled(EuiDescriptionListTitle)`
   &&& {
     width: 40%;
-    margin-top: ${({ theme }) => theme.eui.euiSizeS};
+    margin-top: 0;
+    margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
   }
 `;
 
 const DescriptionListDescription = styled(EuiDescriptionListDescription)`
   &&& {
     width: 60%;
-    margin-top: ${({ theme }) => theme.eui.euiSizeS};
+    margin-top: 0;
+    margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
   }
 `;
 
