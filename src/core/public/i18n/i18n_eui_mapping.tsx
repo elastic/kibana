@@ -497,6 +497,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'Descending size label',
       }
     ),
+    'euiDatePopoverButton.invalidTitle': ({ title }: EuiValues) =>
+      i18n.translate('core.euiDatePopoverButton.invalidTitle', {
+        defaultMessage: 'Invalid date: {title}',
+        values: { title },
+      }),
+    'euiDatePopoverButton.outdatedTitle': ({ title }: EuiValues) =>
+      i18n.translate('core.euiDatePopoverButton.outdatedTitle', {
+        defaultMessage: 'Update needed: {title}',
+        values: { title },
+      }),
     'euiFieldPassword.showPassword': i18n.translate('core.euiFieldPassword.showPassword', {
       defaultMessage:
         'Show password as plain text. Note: this will visually expose your password on the screen.',

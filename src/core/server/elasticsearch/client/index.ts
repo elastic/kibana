@@ -20,5 +20,5 @@ export type { IScopedClusterClient } from './scoped_cluster_client';
 export type { ElasticsearchClientConfig } from './client_config';
 export { ClusterClient } from './cluster_client';
 export type { IClusterClient, ICustomClusterClient } from './cluster_client';
-export { configureClient } from './configure_client';
+export { configureClient, getRequestDebugMeta, getErrorMessage } from './configure_client';
 export { retryCallCluster, migrationRetryCallCluster } from './retry_call_cluster';
