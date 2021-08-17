@@ -85,7 +85,7 @@ export interface LegendSettingsPopoverProps {
   /**
    * Defines if the legend items will be truncated or not
    */
-  truncate?: boolean;
+  shouldTruncate?: boolean;
   /**
    * Callback on nested switch status change
    */
@@ -146,13 +146,7 @@ export const MaxLinesInput = ({
         const val = Number(e.target.value);
         // we want to automatically change the values to the limits
         // if the user enters a value that is outside the limits
-        if (val > MAX_TRUNCATE_LINES) {
-          handleInputChange(MAX_TRUNCATE_LINES);
-        } else if (val < MIN_TRUNCATE_LINES) {
-          handleInputChange(MIN_TRUNCATE_LINES);
-        } else {
-          handleInputChange(val);
-        }
+        handleInputChange(Math.min(MAX_TRUNCATE_LINES, Math.max(val, MIN_TRUNCATE_LINES)));
       }}
     />
   );
@@ -180,7 +174,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
   groupPosition = 'right',
   maxLines,
   onMaxLinesChange = () => {},
-  truncate,
+  shouldTruncate,
   onTruncateLegendChange = () => {},
 }) => {
   return (
@@ -246,7 +240,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
             data-test-subj="lens-legend-truncate-switch"
             showLabel={false}
             disabled={mode === 'hide'}
-            checked={truncate ?? true}
+            checked={shouldTruncate ?? true}
             onChange={onTruncateLegendChange}
           />
         </TooltipWrapper>
@@ -265,10 +259,10 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
                   defaultMessage: 'Requires legend to be shown',
                 })
               : i18n.translate('xpack.lens.shared.legendIsTruncated', {
-                  defaultMessage: 'Requires legend to be truncated',
+                  defaultMessage: 'Requires text to be truncated',
                 })
           }
-          condition={mode === 'hide' || !truncate}
+          condition={mode === 'hide' || !shouldTruncate}
           position="top"
           delay="regular"
           display="block"
@@ -276,7 +270,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
           <MaxLinesInput
             value={maxLines ?? DEFAULT_TRUNCATE_LINES}
             setValue={onMaxLinesChange}
-            isDisabled={mode === 'hide' || !truncate}
+            isDisabled={mode === 'hide' || !shouldTruncate}
           />
         </TooltipWrapper>
       </EuiFormRow>

@@ -24,9 +24,9 @@ export interface HeatmapLegendConfig {
    */
   maxLines?: number;
   /**
-   * Defines the number of lines per legend item
+   * Defines if the legend items should be truncated
    */
-  truncate?: boolean;
+  shouldTruncate?: boolean;
 }
 
 export type HeatmapLegendConfigResult = HeatmapLegendConfig & {
@@ -68,10 +68,10 @@ export const heatmapLegendConfig: ExpressionFunctionDefinition<
         defaultMessage: 'Specifies the number of lines per legend item.',
       }),
     },
-    truncate: {
+    shouldTruncate: {
       types: ['boolean'],
       default: true,
-      help: i18n.translate('xpack.lens.heatmapChart.legend.truncate.help', {
+      help: i18n.translate('xpack.lens.heatmapChart.legend.shouldTruncate.help', {
         defaultMessage: 'Specifies whether or not the legend items should be truncated.',
       }),
     },

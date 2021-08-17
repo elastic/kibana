@@ -220,7 +220,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
             layers: [{ ...layer, nestedLegend: !layer.nestedLegend }],
           });
         }}
-        truncate={layer.truncateLegend ?? true}
+        shouldTruncate={layer.truncateLegend ?? true}
         onTruncateLegendChange={() => {
           const current = layer.truncateLegend ?? true;
           setState({

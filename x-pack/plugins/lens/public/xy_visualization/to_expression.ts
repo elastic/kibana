@@ -157,7 +157,7 @@ export const buildExpression = (
                       ? [Math.min(5, state.legend.floatingColumns)]
                       : [],
                     maxLines: state.legend.maxLines ? [state.legend.maxLines] : [],
-                    truncate: [state.legend.truncate ?? true],
+                    shouldTruncate: [state.legend.shouldTruncate ?? true],
                   },
                 },
               ],

@@ -72,12 +72,12 @@ export const HeatmapToolbar = memo(
                   legend: { ...state.legend, maxLines: val },
                 });
               }}
-              truncate={state?.legend.truncate ?? true}
+              shouldTruncate={state?.legend.shouldTruncate ?? true}
               onTruncateLegendChange={() => {
-                const current = state.legend.truncate ?? true;
+                const current = state.legend.shouldTruncate ?? true;
                 setState({
                   ...state,
-                  legend: { ...state.legend, truncate: !current },
+                  legend: { ...state.legend, shouldTruncate: !current },
                 });
               }}
             />

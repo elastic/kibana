@@ -67,21 +67,21 @@ describe('Legend Settings', () => {
   });
 
   it('should set the truncate switch state when truncate prop value is false', () => {
-    const component = shallow(<LegendSettingsPopover {...props} truncate={false} />);
+    const component = shallow(<LegendSettingsPopover {...props} shouldTruncate={false} />);
     expect(
       component.find('[data-test-subj="lens-legend-truncate-switch"]').prop('checked')
     ).toEqual(false);
   });
 
   it('should have disabled the max lines input when truncate is set to false', () => {
-    const component = shallow(<LegendSettingsPopover {...props} truncate={false} />);
+    const component = shallow(<LegendSettingsPopover {...props} shouldTruncate={false} />);
     expect(component.find(MaxLinesInput).prop('isDisabled')).toEqual(true);
   });
 
   it('should have called the onTruncateLegendChange function on truncate switch change', () => {
     const nestedProps = {
       ...props,
-      truncate: true,
+      shouldTruncate: true,
       onTruncateLegendChange: jest.fn(),
     };
     const component = shallow(<LegendSettingsPopover {...nestedProps} />);

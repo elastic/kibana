@@ -149,10 +149,10 @@ Object {
                   "position": Array [
                     "bottom",
                   ],
-                  "showSingleSeries": Array [],
-                  "truncate": Array [
+                  "shouldTruncate": Array [
                     true,
                   ],
+                  "showSingleSeries": Array [],
                   "verticalAlignment": Array [],
                 },
                 "function": "lens_xy_legendConfig",
