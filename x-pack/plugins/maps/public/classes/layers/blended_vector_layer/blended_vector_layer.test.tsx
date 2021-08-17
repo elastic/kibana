@@ -86,7 +86,7 @@ describe('getSource', () => {
         geoField: sourceDescriptor.geoField,
         applyGlobalQuery: sourceDescriptor.applyGlobalQuery,
         applyGlobalTime: sourceDescriptor.applyGlobalTime,
-        respondToForceRefresh: sourceDescriptor.respondToForceRefresh,
+        applyForceRefresh: sourceDescriptor.applyForceRefresh,
       };
       expect(abstractEsSourceDescriptor).toEqual({
         type: sourceDescriptor.type,
@@ -95,7 +95,7 @@ describe('getSource', () => {
         indexPatternId: 'myIndexPattern',
         applyGlobalQuery: false,
         applyGlobalTime: false,
-        respondToForceRefresh: true,
+        applyForceRefresh: true,
       } as AbstractESSourceDescriptor);
     });
   });

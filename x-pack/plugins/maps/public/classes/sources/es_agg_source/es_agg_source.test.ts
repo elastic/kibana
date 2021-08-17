@@ -40,7 +40,7 @@ class TestESAggSource extends AbstractESAggSource {
         metrics,
         applyGlobalQuery: true,
         applyGlobalTime: true,
-        respondToForceRefresh: true,
+        applyForceRefresh: true,
       },
       []
     );

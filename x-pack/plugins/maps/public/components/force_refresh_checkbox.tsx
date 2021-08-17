@@ -10,13 +10,13 @@ import { EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiToolTip } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 
 interface Props {
-  respondToForceRefresh: boolean;
+  applyForceRefresh: boolean;
   setRespondToForceRefresh: (applyGlobalTime: boolean) => void;
   isDisabled: boolean;
 }
 
 export function ForceRefreshCheckbox({
-  respondToForceRefresh,
+  applyForceRefresh,
   setRespondToForceRefresh,
   isDisabled,
 }: Props) {
@@ -25,10 +25,10 @@ export function ForceRefreshCheckbox({
   };
 
   const tooltipContent = isDisabled
-    ? i18n.translate('xpack.maps.filterEditor.respondToForceRefreshDefaultHelp', {
+    ? i18n.translate('xpack.maps.filterEditor.applyForceRefreshDefaultHelp', {
         defaultMessage: `Turn this flag off for when the underlying data is static, and does not need to be refreshed based on time.`,
       })
-    : i18n.translate('xpack.maps.filterEditor.respondToForceRefreshDisabledHelp', {
+    : i18n.translate('xpack.maps.filterEditor.applyForceRefreshDisabledHelp', {
         defaultMessage: `This layer will not respond to any changes in the global query state.`,
       });
 
@@ -36,10 +36,10 @@ export function ForceRefreshCheckbox({
     <EuiFormRow display="columnCompressedSwitch">
       <EuiToolTip position="top" content={tooltipContent}>
         <EuiSwitch
-          label={i18n.translate('xpack.maps.filterEditor.respondToForceRefreshLabel', {
+          label={i18n.translate('xpack.maps.filterEditor.applyForceRefreshLabel', {
             defaultMessage: `Refresh layer on global refresh`,
           })}
-          checked={respondToForceRefresh}
+          checked={applyForceRefresh}
           onChange={onRespondRoForceRefreshChange}
           data-test-subj="mapLayerPanelRespondToForceRefreshCheckbox"
           compressed

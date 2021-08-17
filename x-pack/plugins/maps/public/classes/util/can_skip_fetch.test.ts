@@ -174,7 +174,7 @@ describe('canSkipSourceUpdate', () => {
           filters: prevFilters,
           query: prevQuery,
           forceRefreshTriggeredFromGlobalQueryTime: true,
-          respondToForceRefresh: true,
+          applyForceRefresh: true,
         };
 
         const canSkipUpdate = await canSkipSourceUpdate({
@@ -265,7 +265,7 @@ describe('canSkipSourceUpdate', () => {
           filters: prevFilters,
           query: prevQuery,
           forceRefreshTriggeredFromGlobalQueryTime: true,
-          respondToForceRefresh: true,
+          applyForceRefresh: true,
         };
 
         const canSkipUpdate = await canSkipSourceUpdate({

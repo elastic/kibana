@@ -61,7 +61,7 @@ describe('createLayerDescriptor', () => {
                 type: 'avg',
               },
             ],
-            respondToForceRefresh: true,
+            applyForceRefresh: true,
             term: 'client.geo.country_iso_code',
             type: 'ES_TERM_SOURCE',
             whereQuery: {
@@ -202,7 +202,7 @@ describe('createLayerDescriptor', () => {
         ],
         requestType: 'heatmap',
         resolution: 'MOST_FINE',
-        respondToForceRefresh: true,
+        applyForceRefresh: true,
         type: 'ES_GEO_GRID',
       },
       style: {
@@ -247,7 +247,7 @@ describe('createLayerDescriptor', () => {
         ],
         requestType: 'point',
         resolution: 'MOST_FINE',
-        respondToForceRefresh: true,
+        applyForceRefresh: true,
         type: 'ES_GEO_GRID',
       },
       style: {

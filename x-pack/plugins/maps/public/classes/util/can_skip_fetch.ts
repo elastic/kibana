@@ -65,7 +65,7 @@ export async function canSkipSourceUpdate({
 }): Promise<boolean> {
   if (
     nextRequestMeta.forceRefreshTriggeredFromGlobalQueryTime &&
-    nextRequestMeta.respondToForceRefresh &&
+    nextRequestMeta.applyForceRefresh &&
     (nextRequestMeta.applyGlobalQuery || nextRequestMeta.applyGlobalTime)
   ) {
     return false;

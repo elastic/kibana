@@ -106,7 +106,7 @@ describe('ESSearchSource', () => {
         sourceMeta: null,
         applyGlobalQuery: true,
         applyGlobalTime: true,
-        respondToForceRefresh: true,
+        applyForceRefresh: true,
       };
 
       it('Should only include required props', async () => {

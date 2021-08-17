@@ -116,12 +116,8 @@ export class FilterEditor extends Component<Props, State> {
     this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalTime', applyGlobalTime);
   };
 
-  _onRespondToForceRefreshChange = (respondToForceRefresh: boolean) => {
-    this.props.updateSourceProp(
-      this.props.layer.getId(),
-      'respondToForceRefresh',
-      respondToForceRefresh
-    );
+  _onRespondToForceRefreshChange = (applyForceRefresh: boolean) => {
+    this.props.updateSourceProp(this.props.layer.getId(), 'applyForceRefresh', applyForceRefresh);
   };
 
   _renderQueryPopover() {
@@ -252,7 +248,7 @@ export class FilterEditor extends Component<Props, State> {
 
         {globalTimeCheckbox}
         <ForceRefreshCheckbox
-          respondToForceRefresh={this.props.layer.getSource().getRespondToForceRefresh()}
+          applyForceRefresh={this.props.layer.getSource().getRespondToForceRefresh()}
           setRespondToForceRefresh={this._onRespondToForceRefreshChange}
           isDisabled={
             !this.props.layer.getSource().getApplyGlobalQuery() &&

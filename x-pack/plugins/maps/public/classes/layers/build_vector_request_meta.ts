@@ -28,6 +28,6 @@ export function buildVectorRequestMeta(
     applyGlobalQuery: source.getApplyGlobalQuery(),
     applyGlobalTime: source.getApplyGlobalTime(),
     sourceMeta: source.getSyncMeta(),
-    respondToForceRefresh: source.isESSource() ? source.getRespondToForceRefresh() : false,
+    applyForceRefresh: source.isESSource() ? source.getRespondToForceRefresh() : false,
   };
 }

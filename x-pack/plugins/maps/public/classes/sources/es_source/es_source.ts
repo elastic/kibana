@@ -88,10 +88,8 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         typeof descriptor.applyGlobalQuery !== 'undefined' ? descriptor.applyGlobalQuery : true,
       applyGlobalTime:
         typeof descriptor.applyGlobalTime !== 'undefined' ? descriptor.applyGlobalTime : true,
-      respondToForceRefresh:
-        typeof descriptor.respondToForceRefresh !== 'undefined'
-          ? descriptor.respondToForceRefresh
-          : true,
+      applyForceRefresh:
+        typeof descriptor.applyForceRefresh !== 'undefined' ? descriptor.applyForceRefresh : true,
     };
   }
 
@@ -113,7 +111,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   getRespondToForceRefresh(): boolean {
-    return this._descriptor.respondToForceRefresh;
+    return this._descriptor.applyForceRefresh;
   }
 
   isFieldAware(): boolean {
