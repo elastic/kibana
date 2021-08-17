@@ -86,6 +86,7 @@ export class SavedSearchEmbeddable
   private prevQuery?: Query;
   private prevSearchSessionId?: string;
   private searchProps?: SearchProps;
+  private isDestroyed?: boolean;
 
   private node?: HTMLElement;
 
@@ -204,7 +205,7 @@ export class SavedSearchEmbeddable
       this.searchProps!.totalHitCount = resp.hits.total as number;
       this.searchProps!.isLoading = false;
     } catch (error) {
-      if (!this.isDestroyed()) {
+      if (!this.isDestroyed) {
         this.updateOutput({ loading: false, error });
 
         this.searchProps!.isLoading = false;
@@ -412,6 +413,7 @@ export class SavedSearchEmbeddable
 
   public destroy() {
     super.destroy();
+    this.isDestroyed = true;
     this.savedSearch.destroy();
     if (this.searchProps) {
       delete this.searchProps;
