@@ -1547,8 +1547,6 @@
     "discover.docTable.tableRow.viewSurroundingDocumentsLinkText": "周りのドキュメントを表示",
     "discover.documentsAriaLabel": "ドキュメント",
     "discover.docViews.json.jsonTitle": "JSON",
-    "discover.docViews.table.fieldNamesBeginningWithUnderscoreUnsupportedAriaLabel": "警告",
-    "discover.docViews.table.fieldNamesBeginningWithUnderscoreUnsupportedTooltip": "{underscoreSign} で始まるフィールド名はサポートされません",
     "discover.docViews.table.filterForFieldPresentButtonAriaLabel": "フィールド表示のフィルター",
     "discover.docViews.table.filterForFieldPresentButtonTooltip": "フィールド表示のフィルター",
     "discover.docViews.table.filterForValueButtonAriaLabel": "値でフィルター",
