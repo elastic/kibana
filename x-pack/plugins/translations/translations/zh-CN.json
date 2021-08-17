@@ -25723,7 +25723,6 @@
     "xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tags.label": "标签",
     "xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tcp.hosts": "主机:端口",
     "xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tcp.hosts.error": "主机和端口必填",
-    "xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.error": "超时必须等于或大于 0 且小于计划时间间隔",
     "xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.helpText": "允许用于测试连接并交换数据的总时间。",
     "xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.label": "超时（秒）",
     "xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.URL": "URL",
