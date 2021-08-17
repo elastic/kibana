@@ -29,7 +29,7 @@ export function FieldValueSuggestions({
   compressed,
   asFilterButton,
   allowAllValuesSelection,
-  isSyntheticsData,
+  cardinalityField,
   asCombobox = true,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
@@ -41,7 +41,7 @@ export function FieldValueSuggestions({
     sourceField,
     filters,
     time,
-    isSyntheticsData,
+    cardinalityField,
     keepHistory: true,
   });
 

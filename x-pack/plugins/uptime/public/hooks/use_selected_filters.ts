@@ -12,7 +12,15 @@ import { filterLabels } from '../components/overview/filter_group/translations';
 import { FILTER_FIELDS, MONITOR_ROUTE } from '../../common/constants';
 import { parseFiltersMap } from './use_filter_update';
 
-export const getFiltersFromMap = (map: Map<string, any>) => {
+type FilterType = string[] | undefined;
+interface Filters {
+  locations: FilterType;
+  ports: FilterType;
+  schemes: FilterType;
+  tags: FilterType;
+}
+
+export const getFiltersFromMap = (map: Map<string, string[]>): Filters => {
   const { LOCATION, TAGS, TYPE, PORT } = FILTER_FIELDS;
 
   return {

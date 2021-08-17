@@ -69,7 +69,7 @@ export const FilterGroup = () => {
                 setIsOpen('');
               }}
               filters={[]}
-              isSyntheticsData={true}
+              cardinalityField="monitor.id"
               time={{ from: dateRangeStart, to: dateRangeEnd }}
             />
           ))}

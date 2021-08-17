@@ -18,7 +18,7 @@ export interface Props {
   filters?: ESFilter[];
   time?: { from: string; to: string };
   keepHistory?: boolean;
-  isSyntheticsData?: boolean;
+  cardinalityField?: string;
 }
 
 export interface ListItem {
@@ -33,7 +33,7 @@ export const useValuesList = ({
   filters,
   time,
   keepHistory,
-  isSyntheticsData = false,
+  cardinalityField,
 }: Props): { values: ListItem[]; loading?: boolean } => {
   const [debouncedQuery, setDebounceQuery] = useState<string>(query);
   const [values, setValues] = useState<ListItem[]>([]);
@@ -98,12 +98,12 @@ export const useValuesList = ({
               size: 50,
               ...(query ? { include: includeClause } : {}),
             },
-            ...(isSyntheticsData
+            ...(cardinalityField
               ? {
                   aggs: {
                     count: {
                       cardinality: {
-                        field: 'monitor.id',
+                        field: cardinalityField,
                       },
                     },
                   },

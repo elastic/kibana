@@ -24,7 +24,7 @@ interface CommonProps {
   asFilterButton?: boolean;
   showCount?: boolean;
   allowAllValuesSelection?: boolean;
-  isSyntheticsData?: boolean;
+  cardinalityField?: string;
   required?: boolean;
 }
 

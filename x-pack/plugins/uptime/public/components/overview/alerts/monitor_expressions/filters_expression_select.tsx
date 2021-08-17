@@ -153,7 +153,7 @@ export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = 
                     setIsOpen({ ...isOpen, [id]: !isOpen[id] });
                   }}
                   asCombobox={false}
-                  allowExclusions={false}
+                  cardinalityField="monitor.id"
                 />
               )}
             </EuiFlexItem>
