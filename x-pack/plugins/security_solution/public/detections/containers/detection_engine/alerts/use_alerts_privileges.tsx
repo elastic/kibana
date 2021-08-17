@@ -21,7 +21,7 @@ export interface AlertsPrivelegesState {
   hasIndexMaintenance: boolean | null;
   hasIndexRead: boolean | null;
   hasKibanaPrivilegesRead: boolean | null;
-  hasKibanaPRivilegesCrud: boolean | null;
+  hasKibanaPrivilegesCrud: boolean | null;
 }
 /**
  * Hook to get user privilege from
@@ -37,7 +37,7 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
     hasIndexUpdateDelete: null,
     hasIndexMaintenance: null,
     hasKibanaPrivilegesRead: null,
-    hasKibanaPRivilegesCrud: null,
+    hasKibanaPrivilegesCrud: null,
   });
   const { detectionEnginePrivileges, alertsPrivileges } = useUserPrivileges();
 
@@ -52,7 +52,7 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
         hasIndexUpdateDelete: false,
         hasIndexMaintenance: false,
         hasKibanaPrivilegesRead: false,
-        hasKibanaPRivilegesCrud: false,
+        hasKibanaPrivilegesCrud: false,
       });
     }
   }, [detectionEnginePrivileges.error]);
@@ -76,7 +76,7 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
             privilege.index[indexName].write,
           hasIndexUpdateDelete: privilege.index[indexName].write,
           hasKibanaPrivilegesRead: alertsPrivileges.read,
-          hasKibanaPRivilegesCrud: alertsPrivileges.crud,
+          hasKibanaPrivilegesCrud: alertsPrivileges.crud,
         });
       }
     }

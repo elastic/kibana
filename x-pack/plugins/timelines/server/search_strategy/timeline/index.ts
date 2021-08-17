@@ -148,7 +148,7 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
       return request.defaultIndex ?? request.indexType;
     }
 
-    return `${mapConsumerToIndexName[consumer]}*`;
+    return `${mapConsumerToIndexName[consumer]}`;
   });
   const requestWithAlertsIndices = { ...request, defaultIndex: indices, indexName: indices };
 

@@ -18,6 +18,7 @@ export interface State {
   hasIndexManage: boolean | null;
   hasIndexMaintenance: boolean | null;
   hasIndexWrite: boolean | null;
+  hasIndexRead: boolean | null;
   hasIndexUpdateDelete: boolean | null;
   isSignalIndexExists: boolean | null;
   isAuthenticated: boolean | null;
@@ -32,6 +33,7 @@ export const initialState: State = {
   hasIndexManage: null,
   hasIndexMaintenance: null,
   hasIndexWrite: null,
+  hasIndexRead: null,
   hasIndexUpdateDelete: null,
   isSignalIndexExists: null,
   isAuthenticated: null,
@@ -54,6 +56,10 @@ export type Action =
   | {
       type: 'updateHasIndexWrite';
       hasIndexWrite: boolean | null;
+    }
+  | {
+      type: 'updateHasIndexRead';
+      hasIndexRead: boolean | null;
     }
   | {
       type: 'updateHasIndexUpdateDelete';
@@ -108,6 +114,12 @@ export const userInfoReducer = (state: State, action: Action): State => {
       return {
         ...state,
         hasIndexWrite: action.hasIndexWrite,
+      };
+    }
+    case 'updateHasIndexRead': {
+      return {
+        ...state,
+        hasIndexWrite: action.hasIndexRead,
       };
     }
     case 'updateHasIndexUpdateDelete': {
@@ -178,6 +190,7 @@ export const useUserInfo = (): State => {
       hasIndexManage,
       hasIndexMaintenance,
       hasIndexWrite,
+      hasIndexRead,
       hasIndexUpdateDelete,
       isSignalIndexExists,
       isAuthenticated,
@@ -195,7 +208,8 @@ export const useUserInfo = (): State => {
     hasIndexManage: hasApiIndexManage,
     hasIndexMaintenance: hasApiIndexMaintenance,
     hasIndexUpdateDelete: hasApiIndexUpdateDelete,
-    hasKibanaPRivilegesCrud,
+    hasKibanaPrivilegesCrud,
+    hasKibanaPrivilegesRead,
   } = useAlertsPrivileges();
   const {
     loading: indexNameLoading,
@@ -223,10 +237,16 @@ export const useUserInfo = (): State => {
   }, [dispatch, loading, hasIndexManage, hasApiIndexManage]);
 
   useEffect(() => {
-    if (!loading && hasIndexWrite !== hasKibanaPRivilegesCrud && hasKibanaPRivilegesCrud != null) {
-      dispatch({ type: 'updateHasIndexWrite', hasIndexWrite: hasKibanaPRivilegesCrud });
+    if (!loading && hasIndexWrite !== hasKibanaPrivilegesCrud && hasKibanaPrivilegesCrud != null) {
+      dispatch({ type: 'updateHasIndexWrite', hasIndexWrite: hasKibanaPrivilegesCrud });
     }
-  }, [dispatch, loading, hasIndexWrite, hasKibanaPRivilegesCrud]);
+  }, [dispatch, loading, hasIndexWrite, hasKibanaPrivilegesCrud]);
+
+  useEffect(() => {
+    if (!loading && hasIndexRead !== hasKibanaPrivilegesRead && hasKibanaPrivilegesRead != null) {
+      dispatch({ type: 'updateHasIndexRead', hasIndexRead: hasKibanaPrivilegesRead });
+    }
+  }, [dispatch, loading, hasIndexRead, hasKibanaPrivilegesRead]);
 
   useEffect(() => {
     if (
@@ -334,6 +354,7 @@ export const useUserInfo = (): State => {
     hasIndexManage,
     hasIndexMaintenance,
     hasIndexWrite,
+    hasIndexRead,
     hasIndexUpdateDelete,
     signalIndexName,
     signalIndexMappingOutdated,

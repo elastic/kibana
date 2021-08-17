@@ -409,6 +409,28 @@ export function updateGlobalNavigation({
             : AppNavLinkStatus.hidden,
           searchable: capabilities.siem.read_cases === true,
         };
+      case SecurityPageName.detections:
+        return {
+          ...link,
+          deepLinks:
+            link.deepLinks != null
+              ? [
+                  ...link.deepLinks.map((detLink) => {
+                    if (detLink.id !== SecurityPageName.alerts) {
+                      return detLink;
+                    } else {
+                      return {
+                        ...detLink,
+                        navLinkStatus: capabilities.siem.read_alerts
+                          ? AppNavLinkStatus.visible
+                          : AppNavLinkStatus.hidden,
+                        searchable: capabilities.siem.read_alerts === true,
+                      };
+                    }
+                  }),
+                ]
+              : [],
+        };
       default:
         return link;
     }

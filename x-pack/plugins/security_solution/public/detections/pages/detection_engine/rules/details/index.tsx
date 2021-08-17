@@ -197,6 +197,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       hasEncryptionKey,
       canUserCRUD,
       hasIndexWrite,
+      hasIndexRead,
       hasIndexMaintenance,
       signalIndexName,
     },
@@ -227,6 +228,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   // This is used to re-trigger api rule status when user de/activate rule
   const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
   const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.alerts);
+  const [pageTabs, setTabs] = useState(ruleDetailTabs);
   const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
     rule != null
       ? getStepsData({ rule, detailsView: true })
@@ -272,6 +274,16 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       setRule(maybeRule);
     }
   }, [maybeRule]);
+
+  useEffect(() => {
+    if (!hasIndexRead) {
+      setTabs(ruleDetailTabs.filter(({ id }) => id !== RuleDetailTabs.alerts));
+      setRuleDetailTab(RuleDetailTabs.exceptions);
+    } else {
+      setTabs(ruleDetailTabs);
+      setRuleDetailTab(RuleDetailTabs.alerts);
+    }
+  }, [hasIndexRead]);
 
   const title = useMemo(
     () => (
@@ -395,7 +407,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const tabs = useMemo(
     () => (
       <EuiTabs>
-        {ruleDetailTabs.map((tab) => (
+        {pageTabs.map((tab) => (
           <EuiTab
             onClick={() => setRuleDetailTab(tab.id)}
             isSelected={tab.id === ruleDetailTab}
@@ -408,7 +420,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         ))}
       </EuiTabs>
     ),
-    [ruleDetailTab, setRuleDetailTab]
+    [ruleDetailTab, setRuleDetailTab, pageTabs]
   );
   const ruleIndices = useMemo(
     () =>
@@ -457,7 +469,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       );
     } else if (
       currentStatus?.status === 'failed' &&
-      ruleDetailTab === RuleDetailTabs.alerts &&
+      (ruleDetailTab === RuleDetailTabs.alerts || ruleDetailTab === RuleDetailTabs.failures) &&
       currentStatus?.last_failure_at != null
     ) {
       return (
@@ -468,7 +480,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       );
     } else if (
       (currentStatus?.status === 'warning' || currentStatus?.status === 'partial failure') &&
-      ruleDetailTab === RuleDetailTabs.alerts &&
+      (ruleDetailTab === RuleDetailTabs.alerts || ruleDetailTab === RuleDetailTabs.failures) &&
       currentStatus?.last_success_at != null
     ) {
       return (
@@ -750,7 +762,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               {tabs}
               <EuiSpacer />
             </Display>
-            {ruleDetailTab === RuleDetailTabs.alerts && (
+            {ruleDetailTab === RuleDetailTabs.alerts && hasIndexRead && (
               <>
                 <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                   <EuiFlexItem grow={false}>

@@ -117,6 +117,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       signalIndexName,
       hasIndexWrite,
       hasIndexMaintenance,
+      hasIndexRead,
     },
   ] = useUserData();
   const {
@@ -278,71 +279,75 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
+          {hasIndexRead && (
+            <SecuritySolutionPageWrapper
+              noPadding={globalFullScreen}
+              data-test-subj="detectionsAlertsPage"
+            >
+              <Display show={!globalFullScreen}>
+                <DetectionEngineHeaderPage title={i18n.PAGE_TITLE}>
+                  <LinkAnchor
+                    onClick={goToRules}
+                    href={formatUrl(getRulesUrl())}
+                    data-test-subj="manage-alert-detection-rules"
+                  >
+                    {i18n.BUTTON_MANAGE_RULES}
+                  </LinkAnchor>
+                </DetectionEngineHeaderPage>
+                <EuiHorizontalRule margin="m" />
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                  <EuiFlexItem grow={false}>
+                    <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {timelinesUi.getLastUpdated({
+                      updatedAt: updatedAt || 0,
+                      showUpdating: loading,
+                    })}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="m" />
+                <EuiFlexGroup wrap>
+                  <EuiFlexItem grow={2}>
+                    <AlertsHistogramPanel
+                      chartHeight={CHART_HEIGHT}
+                      filters={alertsHistogramDefaultFilters}
+                      query={query}
+                      showTotalAlertsCount={false}
+                      titleSize={'s'}
+                      signalIndexName={signalIndexName}
+                      updateDateRange={updateDateRangeCallback}
+                    />
+                  </EuiFlexItem>
 
-          <SecuritySolutionPageWrapper
-            noPadding={globalFullScreen}
-            data-test-subj="detectionsAlertsPage"
-          >
-            <Display show={!globalFullScreen}>
-              <DetectionEngineHeaderPage title={i18n.PAGE_TITLE}>
-                <LinkAnchor
-                  onClick={goToRules}
-                  href={formatUrl(getRulesUrl())}
-                  data-test-subj="manage-alert-detection-rules"
-                >
-                  {i18n.BUTTON_MANAGE_RULES}
-                </LinkAnchor>
-              </DetectionEngineHeaderPage>
-              <EuiHorizontalRule margin="m" />
-              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {timelinesUi.getLastUpdated({ updatedAt: updatedAt || 0, showUpdating: loading })}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-              <EuiFlexGroup wrap>
-                <EuiFlexItem grow={2}>
-                  <AlertsHistogramPanel
-                    chartHeight={CHART_HEIGHT}
-                    filters={alertsHistogramDefaultFilters}
-                    query={query}
-                    showTotalAlertsCount={false}
-                    titleSize={'s'}
-                    signalIndexName={signalIndexName}
-                    updateDateRange={updateDateRangeCallback}
-                  />
-                </EuiFlexItem>
+                  <EuiFlexItem grow={1}>
+                    <AlertsCountPanel
+                      filters={alertsHistogramDefaultFilters}
+                      query={query}
+                      signalIndexName={signalIndexName}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
 
-                <EuiFlexItem grow={1}>
-                  <AlertsCountPanel
-                    filters={alertsHistogramDefaultFilters}
-                    query={query}
-                    signalIndexName={signalIndexName}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                <EuiSpacer size="l" />
+              </Display>
 
-              <EuiSpacer size="l" />
-            </Display>
-
-            <AlertsTable
-              timelineId={TimelineId.detectionsPage}
-              loading={loading}
-              hasIndexWrite={hasIndexWrite ?? false}
-              hasIndexMaintenance={hasIndexMaintenance ?? false}
-              from={from}
-              defaultFilters={alertsTableDefaultFilters}
-              showBuildingBlockAlerts={showBuildingBlockAlerts}
-              onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
-              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-              onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
-              to={to}
-              filterGroup={filterGroup}
-            />
-          </SecuritySolutionPageWrapper>
+              <AlertsTable
+                timelineId={TimelineId.detectionsPage}
+                loading={loading}
+                hasIndexWrite={hasIndexWrite ?? false}
+                hasIndexMaintenance={hasIndexMaintenance ?? false}
+                from={from}
+                defaultFilters={alertsTableDefaultFilters}
+                showBuildingBlockAlerts={showBuildingBlockAlerts}
+                onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
+                showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+                onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
+                to={to}
+                filterGroup={filterGroup}
+              />
+            </SecuritySolutionPageWrapper>
+          )}
         </StyledFullHeightContainer>
       ) : (
         <SecuritySolutionPageWrapper>
