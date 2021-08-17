@@ -10,6 +10,7 @@ import type { UiActionsStart } from 'src/plugins/ui_actions/public';
 import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import type { DashboardStart } from 'src/plugins/dashboard/public';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import type {
   AppMountParameters,
   CoreSetup,
@@ -73,7 +74,6 @@ import {
   MapsAppTileMapLocatorDefinition,
 } from './locators';
 import { SecurityPluginStart } from '../../security/public';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
