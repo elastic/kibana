@@ -13,7 +13,6 @@ const { workplaceSearch: mockAppValues } = DEFAULT_INITIAL_APP_DATA;
 export const mockOverviewValues = {
   accountsCount: 0,
   activityFeed: [],
-  canCreateContentSources: false,
   hasOrgSources: false,
   hasUsers: false,
   isOldAccount: false,

@@ -59,19 +59,9 @@ const ONBOARDING_USERS_CARD_DESCRIPTION = i18n.translate(
 export const OnboardingSteps: React.FC = () => {
   const {
     organization: { name, defaultOrgName },
-    account: { isCurated, canCreateInvitations },
   } = useValues(AppLogic);
 
-  const {
-    hasUsers,
-    hasOrgSources,
-    canCreateContentSources,
-    accountsCount,
-    sourcesCount,
-  } = useValues(OverviewLogic);
-
-  const accountsPath = canCreateInvitations || isCurated ? USERS_AND_ROLES_PATH : undefined;
-  const sourcesPath = canCreateContentSources || isCurated ? SOURCES_PATH : undefined;
+  const { hasUsers, hasOrgSources, accountsCount, sourcesCount } = useValues(OverviewLogic);
 
   const SOURCES_CARD_DESCRIPTION = i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sourcesOnboardingCard.description',
@@ -114,7 +104,7 @@ export const OnboardingSteps: React.FC = () => {
               values: { label: accountsCount > 0 ? 'more' : '' },
             }
           )}
-          actionPath={accountsPath}
+          actionPath={USERS_AND_ROLES_PATH}
           complete={hasUsers}
         />
       </EuiFlexGrid>
