@@ -35,12 +35,12 @@ function getForFeature(
     });
   }
 
+  // if the type itself is deprecated, all jobs are deprecated, otherwise only some of them might be
   const deprecated = jobTypeIsDeprecated(typeKey) ? jobType.total : jobType.deprecated || 0;
 
   return {
     available: isAvailable(typeKey),
     total: jobType.total,
-    // all jobs are deprecated if the type is deprecated, otherwise only some of them might be
     deprecated,
     ...filledAdditional,
   };
