@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, Suspense } from 'react';
 import {
   casesBreadcrumbs,
   getCaseDetailsUrl,
@@ -15,10 +15,12 @@ import {
   useFormatUrl,
 } from '../../../../pages/cases/links';
 import { Case } from '../../../../../../cases/common';
-import { useFetchAlertData } from './helpers';
+import { useFetchAlertData, useFetchAlertDetail } from './helpers';
 import { useKibana } from '../../../../utils/kibana_react';
+import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { observabilityAppId } from '../../../../../common';
+import { LazyAlertsFlyout } from '../../../..';
 
 interface Props {
   caseId: string;
@@ -41,6 +43,7 @@ export interface CaseProps extends Props {
 
 export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) => {
   const [caseTitle, setCaseTitle] = useState<string | null>(null);
+  const { observabilityRuleTypeRegistry } = usePluginContext();
 
   const {
     cases: casesUi,
@@ -49,6 +52,8 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
   const allCasesLink = getCaseUrl();
   const { formatUrl } = useFormatUrl();
   const href = formatUrl(allCasesLink);
+  const [selectedAlertId, setSelectedAlertId] = useState<string>('');
+
   useBreadcrumbs([
     { ...casesBreadcrumbs.cases, href },
     ...(caseTitle !== null
@@ -80,56 +85,78 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
       }),
     [caseId, formatUrl, subCaseId]
   );
-
   const casesUrl = `${getUrlForApp(observabilityAppId)}/cases`;
-  return casesUi.getCaseView({
-    allCasesNavigation: {
-      href: allCasesHref,
-      onClick: async (ev) => {
-        if (ev != null) {
-          ev.preventDefault();
-        }
-        return navigateToUrl(casesUrl);
-      },
-    },
-    caseDetailsNavigation: {
-      href: caseDetailsHref,
-      onClick: async (ev) => {
-        if (ev != null) {
-          ev.preventDefault();
-        }
-        return navigateToUrl(`${casesUrl}${getCaseDetailsUrl({ id: caseId })}`);
-      },
-    },
-    caseId,
-    configureCasesNavigation: {
-      href: configureCasesHref,
-      onClick: async (ev) => {
-        if (ev != null) {
-          ev.preventDefault();
-        }
-        return navigateToUrl(`${casesUrl}${configureCasesLink}`);
-      },
-    },
-    ruleDetailsNavigation: {
-      href: (ruleId) => {
-        return getUrlForApp('management', {
-          path: `/insightsAndAlerting/triggersActions/rule/${ruleId}`,
-        });
-      },
-      onClick: async (ruleId, ev) => {
-        if (ev != null) {
-          ev.preventDefault();
-        }
-        return navigateToApp('management', {
-          path: `/insightsAndAlerting/triggersActions/rule/${ruleId}`,
-        });
-      },
-    },
-    getCaseDetailHrefWithCommentId,
-    onCaseDataSuccess,
-    subCaseId,
-    useFetchAlertData,
-    userCanCrud,
-  });
+
+  const handleFlyoutClose = useCallback(() => {
+    setSelectedAlertId('');
+  }, []);
+
+  const [alertLoading, alert] = useFetchAlertDetail(selectedAlertId);
+
+  return (
+    <>
+      {alertLoading === false && alert && selectedAlertId !== '' && (
+        <Suspense fallback={null}>
+          <LazyAlertsFlyout
+            alert={alert}
+            observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+            onClose={handleFlyoutClose}
+          />
+        </Suspense>
+      )}
+      {casesUi.getCaseView({
+        allCasesNavigation: {
+          href: allCasesHref,
+          onClick: async (ev) => {
+            if (ev != null) {
+              ev.preventDefault();
+            }
+            return navigateToUrl(casesUrl);
+          },
+        },
+        caseDetailsNavigation: {
+          href: caseDetailsHref,
+          onClick: async (ev) => {
+            if (ev != null) {
+              ev.preventDefault();
+            }
+            return navigateToUrl(`${casesUrl}${getCaseDetailsUrl({ id: caseId })}`);
+          },
+        },
+        caseId,
+        configureCasesNavigation: {
+          href: configureCasesHref,
+          onClick: async (ev) => {
+            if (ev != null) {
+              ev.preventDefault();
+            }
+            return navigateToUrl(`${casesUrl}${configureCasesLink}`);
+          },
+        },
+        ruleDetailsNavigation: {
+          href: (ruleId) => {
+            return getUrlForApp('management', {
+              path: `/insightsAndAlerting/triggersActions/rule/${ruleId}`,
+            });
+          },
+          onClick: async (ruleId, ev) => {
+            if (ev != null) {
+              ev.preventDefault();
+            }
+            return navigateToApp('management', {
+              path: `/insightsAndAlerting/triggersActions/rule/${ruleId}`,
+            });
+          },
+        },
+        getCaseDetailHrefWithCommentId,
+        onCaseDataSuccess,
+        subCaseId,
+        useFetchAlertData,
+        showAlertDetails: (alertId) => {
+          setSelectedAlertId(alertId);
+        },
+        userCanCrud,
+      })}
+    </>
+  );
 });
