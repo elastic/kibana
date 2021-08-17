@@ -370,6 +370,9 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async isFieldSelected(field: string) {
+    if (!(await this.testSubjects.exists('fieldList-selected'))) {
+      return false;
+    }
     const selectedList = await this.testSubjects.find('fieldList-selected');
     return await this.testSubjects.descendantExists(`field-${field}`, selectedList);
   }
