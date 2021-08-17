@@ -163,6 +163,14 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     });
   }, []);
 
+  const handleClose = useCallback(() => {
+    if (currentAppId) {
+      embeddable?.getStateTransfer().getIncomingEmbeddablePackage(currentAppId, true);
+      clearDraftComment();
+    }
+    onCancel();
+  }, [clearDraftComment, currentAppId, embeddable, onCancel]);
+
   const handleAdd = useCallback(() => {
     if (nodePosition) {
       markdownContext.replaceNode(
@@ -173,7 +181,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
         })}}`
       );
 
-      onCancel();
+      handleClose();
       return;
     }
 
@@ -188,7 +196,9 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
         }
       );
     }
-  }, [nodePosition, lensEmbeddableAttributes, markdownContext, timeRange, onCancel, onSave]);
+
+    handleClose();
+  }, [nodePosition, lensEmbeddableAttributes, handleClose, markdownContext, timeRange, onSave]);
 
   const handleDelete = useCallback(() => {
     if (nodePosition) {
@@ -248,8 +258,6 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     },
     [handleEditInLensClick]
   );
-
-  useEffect(() => () => clearDraftComment(), [clearDraftComment]);
 
   useEffect(() => {
     if (node?.attributes) {
@@ -401,7 +409,12 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
         )}
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel}>{'Cancel'}</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={handleClose}>
+          <FormattedMessage
+            id="xpack.cases.markdownEditor.plugins.lens.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        </EuiButtonEmpty>
         {!!nodePosition ? (
           <EuiButton onClick={handleDelete} color="danger" disabled={!lensEmbeddableAttributes}>
             <FormattedMessage

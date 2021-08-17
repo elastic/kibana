@@ -27,6 +27,7 @@ interface MarkdownEditorProps {
   editorId?: string;
   dataTestSubj?: string;
   height?: number;
+  autoFocusDisabled?: boolean;
 }
 
 type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
@@ -38,14 +39,18 @@ export interface MarkdownEditorRef {
 }
 
 const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
-  ({ onChange, value, ariaLabel, editorId, dataTestSubj, height }, ref) => {
+  ({ onChange, value, ariaLabel, editorId, dataTestSubj, height, autoFocusDisabled }, ref) => {
     const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
     const onParse = useCallback((err, { messages }) => {
       setMarkdownErrorMessages(err ? [err] : messages);
     }, []);
     const editorRef = useRef<EuiMarkdownEditorRef>(null);
 
-    useEffect(() => editorRef.current?.textarea?.focus(), []);
+    useEffect(() => {
+      if (!autoFocusDisabled) {
+        editorRef.current?.textarea?.focus();
+      }
+    }, [autoFocusDisabled]);
 
     // @ts-expect-error update types
     useImperativeHandle(ref, () => {
