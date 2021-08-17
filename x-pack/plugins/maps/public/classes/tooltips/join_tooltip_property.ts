@@ -40,11 +40,9 @@ export class JoinTooltipProperty implements ITooltipProperty {
 
   async getESFilters(): Promise<Filter[]> {
     const esFilters = [];
-    if (this._tooltipProperty.isFilterable()) {
-      const filters = await this._tooltipProperty.getESFilters();
-      esFilters.push(...filters);
-    }
 
+    // only create filters for right sources.
+    // do not create filters for left source.
     for (let i = 0; i < this._leftInnerJoins.length; i++) {
       const rightSource = this._leftInnerJoins[i].getRightJoinSource();
       const termField = rightSource.getTermField();
