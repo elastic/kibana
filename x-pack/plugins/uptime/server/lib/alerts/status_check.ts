@@ -9,6 +9,7 @@ import datemath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { JsonObject } from '@kbn/utility-types';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { UptimeAlertTypeFactory } from './types';
 import {
