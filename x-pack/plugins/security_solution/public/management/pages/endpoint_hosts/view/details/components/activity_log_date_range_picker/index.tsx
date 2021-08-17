@@ -9,7 +9,12 @@ import { useDispatch } from 'react-redux';
 import React, { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import dateMath from '@elastic/datemath';
-import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperDatePicker,
+  EuiSuperDatePickerRecentRange,
+} from '@elastic/eui';
 
 import { useEndpointSelector } from '../../../hooks';
 import { getActivityLogDataPaging } from '../../../../store/selectors';
@@ -32,9 +37,7 @@ export const DateRangePicker = memo(() => {
     getActivityLogDataPaging
   );
 
-  const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<
-    Array<{ start: string; end: string }>
-  >([]);
+  const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<EuiSuperDatePickerRecentRange[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const stopLoading = useCallback(() => {
@@ -71,15 +74,19 @@ export const DateRangePicker = memo(() => {
   }, [dispatch, page, pageSize, startDate, endDate]);
 
   const onTimeChange = useCallback(
-    ({ start, end }) => {
-      const recentlyUsedRange = recentlyUsedRanges.filter((e) => {
-        const isDuplicate = e.start === start && e.end === end;
-        return !isDuplicate;
-      });
-      recentlyUsedRange.unshift({ start, end });
-      setRecentlyUsedRanges(
-        recentlyUsedRange.length > 10 ? recentlyUsedRange.slice(0, 9) : recentlyUsedRange
-      );
+    ({ start: newStart, end: newEnd }) => {
+      const newRecentlyUsedRanges = [
+        { start: newStart, end: newEnd },
+        ...recentlyUsedRanges
+          .filter(
+            (recentlyUsedRange) =>
+              !(recentlyUsedRange.start === newStart && recentlyUsedRange.end === newEnd)
+          )
+          .slice(0, 9),
+      ];
+      recentlyUsedRanges.unshift({ start: newStart, end: newEnd });
+      setRecentlyUsedRanges(newRecentlyUsedRanges);
+
       setIsLoading(true);
       startLoading();
       dispatch({
@@ -88,8 +95,8 @@ export const DateRangePicker = memo(() => {
           disabled: false,
           page,
           pageSize,
-          startDate: start ? dateMath.parse(start)?.toISOString() : undefined,
-          endDate: end ? dateMath.parse(end)?.toISOString() : undefined,
+          startDate: newStart ? dateMath.parse(newStart)?.toISOString() : undefined,
+          endDate: newEnd ? dateMath.parse(newEnd)?.toISOString() : undefined,
         },
       });
     },
@@ -109,6 +116,7 @@ export const DateRangePicker = memo(() => {
               onRefreshChange={onRefreshChange}
               refreshInterval={autoRefreshOptions.duration}
               onRefresh={onRefresh}
+              recentlyUsedRanges={recentlyUsedRanges}
               start={dateMath.parse(startDate)?.toISOString()}
               showUpdateButton={false}
             />
