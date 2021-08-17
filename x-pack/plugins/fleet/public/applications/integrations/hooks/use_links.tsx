@@ -17,6 +17,7 @@ export function useLinks() {
   const { http } = useStartServices();
   return {
     toAssets: (path: string) => http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/${path}`),
+    toSharedAssets: (path: string) => http.basePath.prepend(`/plugins/kibanaReact/assets/${path}`),
     toPackageImage: (
       img: PackageSpecIcon | PackageSpecScreenshot | RegistryImage,
       pkgName: string,
