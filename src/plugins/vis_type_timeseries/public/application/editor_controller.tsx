@@ -14,7 +14,7 @@ import type { IEditorController, EditorRenderProps } from 'src/plugins/visualize
 
 import { getUISettings, getI18n } from '../services';
 import { VisEditor } from './components/vis_editor_lazy';
-import type { TimeseriesVisParams, TimeseriesVisDefaultParams } from '../types';
+import type { TimeseriesVisParams } from '../types';
 
 export const TSVB_EDITOR_NAME = 'tsvbEditor';
 
