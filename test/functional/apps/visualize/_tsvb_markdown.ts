@@ -78,8 +78,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('markdown variables should be clickable', async () => {
+        await visualBuilder.clearMarkdown();
         const [firstVariable] = await visualBuilder.getMarkdownTableVariables();
-
         await firstVariable.selector.click();
         await visChart.waitForVisualizationRenderingStabilized();
         const markdownText = await visualBuilder.getMarkdownText();
