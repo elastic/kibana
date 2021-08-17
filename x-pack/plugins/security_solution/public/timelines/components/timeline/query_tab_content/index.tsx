@@ -13,6 +13,7 @@ import {
   EuiFlyoutFooter,
   EuiBadge,
 } from '@elastic/eui';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
@@ -134,6 +135,8 @@ VerticalRule.displayName = 'VerticalRule';
 const EventsCountBadge = styled(EuiBadge)`
   margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
+
+const alertConsumers: AlertConsumers[] = [AlertConsumers.SIEM];
 
 const isTimerangeSame = (prevProps: Props, nextProps: Props) =>
   prevProps.end === nextProps.end &&
@@ -414,6 +417,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             <VerticalRule />
             <ScrollableFlexItem grow={1}>
               <DetailsPanel
+                alertConsumers={alertConsumers}
                 browserFields={browserFields}
                 docValueFields={docValueFields}
                 handleOnPanelClosed={handleOnPanelClosed}
