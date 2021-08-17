@@ -39,6 +39,8 @@ describe('SettingsLogic', () => {
     stagedIcon: null,
     logo: null,
     stagedLogo: null,
+    logoButtonLoading: false,
+    iconButtonLoading: false,
   };
   const serverProps = { organizationName: ORG_NAME, oauthApplication, logo: null, icon: null };
 
