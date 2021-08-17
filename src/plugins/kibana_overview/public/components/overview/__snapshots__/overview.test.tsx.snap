@@ -229,9 +229,6 @@ exports[`Overview render 1`] = `
             "home#/tutorial_directory",
           ],
           Array [
-            "home#/tutorial_directory",
-          ],
-          Array [
             "kibana_landing_page",
           ],
           Array [
@@ -257,10 +254,6 @@ exports[`Overview render 1`] = `
           ],
         ],
         "results": Array [
-          Object {
-            "type": "return",
-            "value": "home#/tutorial_directory",
-          },
           Object {
             "type": "return",
             "value": "home#/tutorial_directory",
@@ -536,9 +529,6 @@ exports[`Overview without features 1`] = `
             "home#/tutorial_directory",
           ],
           Array [
-            "home#/tutorial_directory",
-          ],
-          Array [
             "kibana_landing_page",
           ],
           Array [
@@ -561,12 +551,6 @@ exports[`Overview without features 1`] = `
           ],
           Array [
             "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-          ],
-          Array [
-            "home#/tutorial_directory",
-          ],
-          Array [
-            "home#/tutorial_directory",
           ],
           Array [
             "home#/tutorial_directory",
@@ -606,10 +590,6 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "home#/tutorial_directory",
-          },
-          Object {
-            "type": "return",
             "value": "kibana_landing_page",
           },
           Object {
@@ -639,14 +619,6 @@ exports[`Overview without features 1`] = `
           Object {
             "type": "return",
             "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-          },
-          Object {
-            "type": "return",
-            "value": "home#/tutorial_directory",
-          },
-          Object {
-            "type": "return",
-            "value": "home#/tutorial_directory",
           },
           Object {
             "type": "return",
@@ -804,9 +776,6 @@ exports[`Overview without solutions 1`] = `
                     "home#/tutorial_directory",
                   ],
                   Array [
-                    "home#/tutorial_directory",
-                  ],
-                  Array [
                     "kibana_landing_page",
                   ],
                   Array [
@@ -833,15 +802,8 @@ exports[`Overview without solutions 1`] = `
                   Array [
                     "home#/tutorial_directory",
                   ],
-                  Array [
-                    "home#/tutorial_directory",
-                  ],
                 ],
                 "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": "home#/tutorial_directory",
-                  },
                   Object {
                     "type": "return",
                     "value": "home#/tutorial_directory",
@@ -877,10 +839,6 @@ exports[`Overview without solutions 1`] = `
                   Object {
                     "type": "return",
                     "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "home#/tutorial_directory",
                   },
                   Object {
                     "type": "return",
@@ -901,9 +859,6 @@ exports[`Overview without solutions 1`] = `
                     "home#/tutorial_directory",
                   ],
                   Array [
-                    "home#/tutorial_directory",
-                  ],
-                  Array [
                     "kibana_landing_page",
                   ],
                   Array [
@@ -930,15 +885,8 @@ exports[`Overview without solutions 1`] = `
                   Array [
                     "home#/tutorial_directory",
                   ],
-                  Array [
-                    "home#/tutorial_directory",
-                  ],
                 ],
                 "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": "home#/tutorial_directory",
-                  },
                   Object {
                     "type": "return",
                     "value": "home#/tutorial_directory",
@@ -974,10 +922,6 @@ exports[`Overview without solutions 1`] = `
                   Object {
                     "type": "return",
                     "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "home#/tutorial_directory",
                   },
                   Object {
                     "type": "return",
@@ -1000,9 +944,6 @@ exports[`Overview without solutions 1`] = `
     addBasePath={
       [MockFunction] {
         "calls": Array [
-          Array [
-            "home#/tutorial_directory",
-          ],
           Array [
             "home#/tutorial_directory",
           ],
@@ -1033,15 +974,8 @@ exports[`Overview without solutions 1`] = `
           Array [
             "home#/tutorial_directory",
           ],
-          Array [
-            "home#/tutorial_directory",
-          ],
         ],
         "results": Array [
-          Object {
-            "type": "return",
-            "value": "home#/tutorial_directory",
-          },
           Object {
             "type": "return",
             "value": "home#/tutorial_directory",
@@ -1077,10 +1011,6 @@ exports[`Overview without solutions 1`] = `
           Object {
             "type": "return",
             "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-          },
-          Object {
-            "type": "return",
-            "value": "home#/tutorial_directory",
           },
           Object {
             "type": "return",

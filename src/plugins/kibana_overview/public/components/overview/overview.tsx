@@ -82,9 +82,6 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
       beats: {
         href: addBasePath(`home#/tutorial_directory`),
       },
-      elasticAgent: {
-        href: addBasePath(`home#/tutorial_directory`),
-      },
     },
     docsLink: docLinks.links.kibana,
   };
