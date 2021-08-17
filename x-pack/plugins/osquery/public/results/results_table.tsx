@@ -8,6 +8,7 @@
 import { isEmpty, isEqual, keys, map } from 'lodash/fp';
 import {
   EuiCallOut,
+  EuiCode,
   EuiDataGrid,
   EuiDataGridSorting,
   EuiDataGridProps,
@@ -31,6 +32,8 @@ import {
   ViewResultsInLensAction,
   ViewResultsActionButtonType,
 } from '../scheduled_query_groups/scheduled_query_group_queries_table';
+import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
+import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
 const DataContext = createContext<ResultEdges>([]);
 
@@ -49,6 +52,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   endDate,
 }) => {
   const [isLive, setIsLive] = useState(true);
+  const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
   const {
     // @ts-expect-error update types
     data: { aggregations },
@@ -60,6 +64,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     direction: Direction.asc,
     sortField: '@timestamp',
     isLive,
+    skip: !hasActionResultsPrivileges,
   });
   const expired = useMemo(() => (!endDate ? false : new Date(endDate) < new Date()), [endDate]);
   const { getUrlForApp } = useKibana().services.application;
@@ -104,6 +109,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       field: sortedColumn.id,
       direction: sortedColumn.direction as Direction,
     })),
+    skip: !hasActionResultsPrivileges,
   });
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
@@ -197,6 +203,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const toolbarVisibility = useMemo(
     () => ({
+      showStyleSelector: false,
       additionalControls: (
         <>
           <ViewResultsInDiscoverAction
@@ -236,6 +243,20 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       expired,
     ]
   );
+
+  if (!hasActionResultsPrivileges) {
+    return (
+      <EuiCallOut title="Missing privileges" color="danger" iconType="alert">
+        <p>
+          {'Your user role doesn’t have index read permissions on the '}
+          <EuiCode>logs-{OSQUERY_INTEGRATION_NAME}.result*</EuiCode>
+          {
+            'index. Access to this index is required to view osquery results. Administrators can update role permissions in Stack Management > Roles.'
+          }
+        </p>
+      </EuiCallOut>
+    );
+  }
 
   if (!isFetched) {
     return <EuiLoadingContent lines={5} />;

@@ -136,13 +136,13 @@ export function MachineLearningJobAnnotationsProvider({ getService }: FtrProvide
     }
 
     public async assertAnnotationsRowExists(annotationId: string) {
-      await retry.tryForTime(1000, async () => {
+      await retry.tryForTime(5 * 1000, async () => {
         await testSubjects.existOrFail(this.rowSelector(annotationId));
       });
     }
 
     public async assertAnnotationsRowMissing(annotationId: string) {
-      await retry.tryForTime(1000, async () => {
+      await retry.tryForTime(5 * 1000, async () => {
         await testSubjects.missingOrFail(this.rowSelector(annotationId));
       });
     }

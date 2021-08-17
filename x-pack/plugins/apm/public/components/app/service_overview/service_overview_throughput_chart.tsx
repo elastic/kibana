@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiTitle,
+  EuiIconTip,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { asTransactionRate } from '../../../../common/utils/formatters';
+import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
@@ -22,24 +28,22 @@ import {
 const INITIAL_STATE = {
   currentPeriod: [],
   previousPeriod: [],
+  throughputUnit: 'minute' as const,
 };
 
 export function ServiceOverviewThroughputChart({
   height,
+  environment,
+  kuery,
 }: {
   height?: number;
+  environment: string;
+  kuery: string;
 }) {
   const theme = useTheme();
 
   const {
-    urlParams: {
-      environment,
-      kuery,
-      start,
-      end,
-      comparisonEnabled,
-      comparisonType,
-    },
+    urlParams: { start, end, comparisonEnabled, comparisonType },
   } = useUrlParams();
 
   const { transactionType, serviceName } = useApmServiceContext();
@@ -111,20 +115,49 @@ export function ServiceOverviewThroughputChart({
 
   return (
     <EuiPanel hasBorder={true}>
-      <EuiTitle size="xs">
-        <h2>
-          {i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
-            defaultMessage: 'Throughput',
-          })}
-        </h2>
-      </EuiTitle>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate(
+                'xpack.apm.serviceOverview.throughtputChartTitle',
+                { defaultMessage: 'Throughput' }
+              )}
+              {data.throughputUnit === 'second'
+                ? i18n.translate(
+                    'xpack.apm.serviceOverview.throughtputPerSecondChartTitle',
+                    { defaultMessage: ' (per second)' }
+                  )
+                : ''}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            content={
+              data.throughputUnit === 'minute'
+                ? i18n.translate('xpack.apm.serviceOverview.tpmHelp', {
+                    defaultMessage:
+                      'Throughput is measured in transactions per minute (tpm)',
+                  })
+                : i18n.translate('xpack.apm.serviceOverview.tpsHelp', {
+                    defaultMessage:
+                      'Throughput is measured in transactions per second (tps)',
+                  })
+            }
+            position="right"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <TimeseriesChart
         id="throughput"
         height={height}
         showAnnotations={false}
         fetchStatus={status}
         timeseries={timeseries}
-        yLabelFormat={asTransactionRate}
+        yLabelFormat={(y) => asExactTransactionRate(y, data.throughputUnit)}
         customTheme={comparisonChartTheme}
       />
     </EuiPanel>

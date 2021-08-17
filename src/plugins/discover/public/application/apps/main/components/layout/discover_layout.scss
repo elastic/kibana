@@ -79,29 +79,13 @@ discover-app {
 
 .dscHistogram {
   display: flex;
-  height: $euiSize * 12.5;
-  padding: $euiSizeS;
-}
-
-// new slimmer layout for data grid
-.dscHistogramGrid {
-  display: flex;
   height: $euiSize * 8;
   padding: $euiSizeS $euiSizeS 0 $euiSizeS;
 }
 
 .dscTable {
-  // SASSTODO: add a monospace modifier to the doc-table component
-  .kbnDocTable__row {
-    font-family: $euiCodeFontFamily;
-    font-size: $euiFontSizeXS;
-  }
-}
-
-.dscTable__footer {
-  background-color: $euiColorLightShade;
-  padding: $euiSizeXS $euiSizeS;
-  text-align: center;
+  // needs for scroll container of lagacy table
+  min-height: 0;
 }
 
 .dscDocuments__loading {
