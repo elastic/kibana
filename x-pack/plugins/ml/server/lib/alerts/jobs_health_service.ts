@@ -255,7 +255,10 @@ export function jobsHealthServiceProvider(
      *                          about an error only once, limit the scope of the errors search.
      */
     async getErrorsReport(jobIds: string[], previousStartedAt: Date) {
-      return await jobAuditMessagesService.getJobsErrors(jobIds, previousStartedAt.getTime());
+      return await jobAuditMessagesService.getJobsErrorMessages(
+        jobIds,
+        previousStartedAt.getTime()
+      );
     },
     /**
      * Retrieves report grouped by test.

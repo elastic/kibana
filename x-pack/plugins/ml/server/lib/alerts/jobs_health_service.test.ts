@@ -148,7 +148,7 @@ describe('JobsHealthService', () => {
   } as unknown) as jest.Mocked<AnnotationService>;
 
   const jobAuditMessagesService = ({
-    getJobsErrors: jest.fn().mockImplementation((jobIds: string) => {
+    getJobsErrorMessages: jest.fn().mockImplementation((jobIds: string) => {
       return Promise.resolve({});
     }),
   } as unknown) as jest.Mocked<JobAuditMessagesService>;
