@@ -226,7 +226,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       describe('when "dryRun: true" is provided', function () {
-        it('should return a diff with missingVars', async function () {
+        it('should return a diff with no errors', async function () {
           const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
             .post(`/api/fleet/package_policies/upgrade`)
             .set('kbn-xsrf', 'xxxx')
@@ -239,7 +239,6 @@ export default function (providerContext: FtrProviderContext) {
           expect(body.length).to.be(1);
           expect(body[0].diff?.length).to.be(2);
           expect(body[0].hasErrors).to.be(false);
-          expect(body[0].diff?.[1].missingVars).to.contain('test_var');
         });
       });
 
