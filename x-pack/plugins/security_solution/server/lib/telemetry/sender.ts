@@ -476,6 +476,7 @@ const allowlistProcessFields: AllowlistFields = {
     code_signature: true,
     dll: true,
     malware_signature: true,
+    memory_region: true,
     token: {
       integrity_level_name: true,
     },
