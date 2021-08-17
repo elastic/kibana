@@ -10,6 +10,7 @@ import React, { FunctionComponent, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
 
+import { useAppContext } from '../../../app_context';
 import { useKibana, DataPublicPluginStart } from '../../../../shared_imports';
 import {
   DEPRECATION_LOGS_INDEX_PATTERN,
@@ -31,13 +32,16 @@ const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) 
   } else {
     const newIndexPattern = await indexPatternService.createAndSave({
       title: DEPRECATION_LOGS_INDEX_PATTERN,
+      allowNoIndex: true,
     });
     return newIndexPattern.id;
   }
 };
 
 const DiscoverAppLink: FunctionComponent = () => {
-  const { data: dataService, discover: discoverService, application } = useKibana().services;
+  const { getUrlForApp } = useAppContext();
+  const { data: dataService, discover: discoverService } = useKibana().services;
+
   const [discoveryUrl, setDiscoveryUrl] = useState<string | undefined>();
 
   useEffect(() => {
@@ -45,14 +49,14 @@ const DiscoverAppLink: FunctionComponent = () => {
       const indexPatternId = await getDeprecationIndexPatternId(dataService);
       const appLocation = await discoverService?.locator?.getLocation({ indexPatternId });
 
-      const result = application?.getUrlForApp(appLocation?.app as string, {
+      const result = getUrlForApp(appLocation?.app as string, {
         path: appLocation?.path,
       });
       setDiscoveryUrl(result);
     };
 
     getDiscoveryUrl();
-  }, [dataService, discoverService, application]);
+  }, [dataService, discoverService, getUrlForApp]);
 
   return (
     <EuiLink href={discoveryUrl} target="_blank" data-test-subj="viewDiscoverLogs">
@@ -65,7 +69,7 @@ const DiscoverAppLink: FunctionComponent = () => {
 };
 
 const ObservabilityAppLink: FunctionComponent = () => {
-  const { http } = useKibana().services;
+  const { http } = useAppContext();
   const logStreamUrl = http?.basePath?.prepend(
     `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}`
   );

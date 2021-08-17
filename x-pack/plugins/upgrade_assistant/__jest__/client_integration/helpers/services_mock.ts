@@ -5,37 +5,26 @@
  * 2.0.
  */
 
-import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
-import { DiscoverAppLocator } from '../../../../../../src/plugins/discover/public';
+import { discoverPluginMock } from '../../../../../../src/plugins/discover/public/mocks';
+import { applicationServiceMock } from '../../../../../../src/core/public/application/application_service.mock';
 
-const locator: DiscoverAppLocator = {
-  getLocation: jest.fn(() =>
-    Promise.resolve({
-      app: 'discover',
-      path: '/',
-      state: {},
-    })
-  ),
-  navigate: jest.fn(async () => {}),
-  getUrl: jest.fn(),
-  useUrl: jest.fn(),
-  extract: jest.fn(),
-  inject: jest.fn(),
-  telemetry: jest.fn(),
-  migrations: {},
-};
-
-const application = {
-  getUrlForApp: (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path}`,
-  navigateToApp: jest.fn(),
-};
-
-const coreStartMock = coreMock.createStart();
+const discoverMock = discoverPluginMock.createStartContract();
 
 export const servicesMock = {
-  application,
-  discover: { locator },
   data: dataPluginMock.createStartContract(),
-  http: coreStartMock.http,
+  application: applicationServiceMock.createStartContract(),
+  discover: {
+    ...discoverMock,
+    locator: {
+      ...discoverMock.locator,
+      getLocation: jest.fn(() =>
+        Promise.resolve({
+          app: '/discover',
+          path: 'logs',
+          state: {},
+        })
+      ),
+    },
+  },
 };

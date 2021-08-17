@@ -14,6 +14,7 @@ import {
   deprecationsServiceMock,
   docLinksServiceMock,
   notificationServiceMock,
+  applicationServiceMock,
 } from 'src/core/public/mocks';
 import { HttpSetup } from 'src/core/public';
 
@@ -45,7 +46,7 @@ export const WithAppDependencies = (Comp: any, overrides: Record<string, unknown
     isReadOnlyMode: false,
     api: apiService,
     breadcrumbs: breadcrumbService,
-    getUrlForApp: () => '',
+    getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
     deprecations: deprecationsServiceMock.createStartContract(),
   };
 

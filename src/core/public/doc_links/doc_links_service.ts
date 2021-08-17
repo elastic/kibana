@@ -200,7 +200,6 @@ export class DocLinksService {
           deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
           setupUpgrade: `${ELASTICSEARCH_DOCS}setup-upgrade.html`,
           releaseHighlights: `${ELASTICSEARCH_DOCS}release-highlights.html`,
-          migrating8: `${ELASTICSEARCH_DOCS}migrating-8.0.html`,
         },
         siem: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
