@@ -184,6 +184,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     eventId: ecsRowData?._id,
     indexName: ecsRowData?._index ?? '',
     timelineId,
+    refetch,
     closePopover,
   });
 

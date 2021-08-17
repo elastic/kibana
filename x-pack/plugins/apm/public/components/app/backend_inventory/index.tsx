@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import {
   getKueryBarBoolFilter,
@@ -30,6 +31,7 @@ export function BackendInventory() {
         kueryBarPlaceholder={kueryBarPlaceholder}
         kueryBarBoolFilter={kueryBarBoolFilter}
       />
+      <EuiSpacer size="s" />
       <BackendInventoryDependenciesTable />
     </>
   );
