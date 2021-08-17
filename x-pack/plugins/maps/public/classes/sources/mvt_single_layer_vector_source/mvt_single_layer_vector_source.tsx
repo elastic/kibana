@@ -236,6 +236,10 @@ export class MVTSingleLayerVectorSource
     return null;
   }
 
+  async getSourceIndexList(): Promise<string[]> {
+    return [];
+  }
+
   async supportsFeatureEditing(): Promise<boolean> {
     return false;
   }

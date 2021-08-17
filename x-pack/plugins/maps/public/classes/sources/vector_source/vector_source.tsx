@@ -68,6 +68,7 @@ export interface IVectorSource extends ISource {
   isBoundsAware(): boolean;
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
   getTimesliceMaskFieldName(): Promise<string | null>;
+  getSourceIndexList(): Promise<string[]>;
   supportsFeatureEditing(): Promise<boolean>;
   getDefaultFields(): Promise<Record<string, Record<string, string>>>;
   addFeature(
@@ -177,6 +178,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   async deleteFeature(featureId: string): Promise<void> {
     throw new Error('Should implement VectorSource#deleteFeature');
+  }
+
+  async getSourceIndexList(): Promise<string[]> {
+    return [];
   }
 
   async supportsFeatureEditing(): Promise<boolean> {

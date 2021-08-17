@@ -441,17 +441,21 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return !!(scalingType === SCALING_TYPES.TOP_HITS && topHitsSplitField);
   }
 
-  async supportsFeatureEditing(): Promise<boolean> {
+  async getSourceIndexList(): Promise<string[]> {
     await this.getIndexPattern();
     if (!(this.indexPattern && this.indexPattern.title)) {
-      return false;
+      return [];
     }
-    const { matchingIndexes } = await getMatchingIndexes(this.indexPattern.title);
-    if (!matchingIndexes) {
-      return false;
-    }
+    const {
+      payload: { matchingIndexes },
+    } = await getMatchingIndexes(this.indexPattern.title);
+    return matchingIndexes;
+  }
+
+  async supportsFeatureEditing(): Promise<boolean> {
+    const matchingIndexes = await this.getSourceIndexList();
     // For now we only support 1:1 index-pattern:index matches
-    return matchingIndexes.length === 1 && matchingIndexes[0] === this.indexPattern.title;
+    return matchingIndexes.length === 1;
   }
 
   async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
@@ -753,8 +757,13 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     geometry: Geometry | Position[],
     defaultFields: Record<string, Record<string, string>>
   ) {
-    const indexPattern = await this.getIndexPattern();
-    await addFeatureToIndex(indexPattern.title, geometry, this.getGeoFieldName(), defaultFields);
+    const indexList = await this.getSourceIndexList();
+    if (indexList.length !== 1) {
+      throw new Error(
+        `Error: ${indexList.length} indexes associated with index pattern. Only index patterns associated with a single index can be edited`
+      );
+    }
+    await addFeatureToIndex(indexList[0], geometry, this.getGeoFieldName(), defaultFields);
   }
 
   async deleteFeature(featureId: string) {
