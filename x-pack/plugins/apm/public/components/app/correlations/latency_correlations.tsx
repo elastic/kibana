@@ -414,12 +414,21 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
                 </EuiText>
               }
               body={
-                <EuiText size="s">
-                  <FormattedMessage
-                    id="xpack.apm.correlations.latencyCorrelations.noCorrelationsText"
-                    defaultMessage="Correlations will only be identified if they have significant impact. Try selecting another time range or remove any added filter."
-                  />
-                </EuiText>
+                <>
+                  <EuiText size="s">
+                    <FormattedMessage
+                      id="xpack.apm.correlations.latencyCorrelations.noCorrelationsTextLine1"
+                      defaultMessage="Correlations will only be identified if they have significant impact."
+                    />
+                  </EuiText>
+                  {/* Another EuiText element to enforce a line break */}
+                  <EuiText size="s">
+                    <FormattedMessage
+                      id="xpack.apm.correlations.latencyCorrelations.noCorrelationsTextLine2"
+                      defaultMessage="Try selecting another time range or remove any added filter."
+                    />
+                  </EuiText>
+                </>
               }
             />
           </>
