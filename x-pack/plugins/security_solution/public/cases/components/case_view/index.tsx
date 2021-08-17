@@ -7,6 +7,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import {
   getCaseDetailsUrl,
@@ -33,6 +34,7 @@ import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import * as timelineMarkdownPlugin from '../../../common/components/markdown_editor/plugins/timeline';
 import { CaseDetailsRefreshContext } from '../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { getEndpointDetailsPath } from '../../../management/common/routing';
+import { EntityType } from '../../../../../timelines/common';
 
 interface Props {
   caseId: string;
@@ -53,13 +55,17 @@ export interface CaseProps extends Props {
   updateCase: (newCase: Case) => void;
 }
 
-const TimelineDetailsPanel = () => {
+const ALERT_CONSUMER: AlertConsumers[] = [AlertConsumers.SIEM];
+
+const TimelineDetailsPanel = ({ alertConsumers }: { alertConsumers?: AlertConsumers[] }) => {
   const { browserFields, docValueFields } = useSourcererScope(SourcererScopeName.detections);
 
   return (
     <DetailsPanel
+      alertConsumers={alertConsumers}
       browserFields={browserFields}
       docValueFields={docValueFields}
+      entityType={EntityType.ALERTS}
       isFlyoutView
       timelineId={TimelineId.casePage}
     />
@@ -228,6 +234,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         showAlertDetails,
         subCaseId,
         timelineIntegration: {
+          alertConsumers: ALERT_CONSUMER,
           editor_plugins: {
             parsingPlugin: timelineMarkdownPlugin.parser,
             processingPluginRenderer: timelineMarkdownPlugin.renderer,
