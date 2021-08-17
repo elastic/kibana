@@ -341,7 +341,12 @@ export const useDashboardAppState = ({
       if (from && to) timefilter.setTime({ from, to });
       if (refreshInterval) timefilter.setRefreshInterval(refreshInterval);
     }
-    dispatchDashboardStateChange(setDashboardState(lastSavedState));
+    dispatchDashboardStateChange(
+      setDashboardState({
+        ...lastSavedState,
+        viewMode: ViewMode.VIEW,
+      })
+    );
   }, [lastSavedState, dashboardAppState, data.query.timefilter, dispatchDashboardStateChange]);
 
   /**
