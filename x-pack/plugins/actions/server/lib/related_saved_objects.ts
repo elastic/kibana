@@ -9,17 +9,19 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { Logger } from '../../../../../src/core/server';
 
 export type RelatedSavedObjects = TypeOf<typeof RelatedSavedObjectsSchema>;
+export type RelatedSavedObjectRef = Omit<TypeOf<typeof RelatedSavedObjectSchema>, 'id'> & {
+  ref: string;
+};
 
-const RelatedSavedObjectsSchema = schema.arrayOf(
-  schema.object({
-    namespace: schema.maybe(schema.string({ minLength: 1 })),
-    id: schema.string({ minLength: 1 }),
-    type: schema.string({ minLength: 1 }),
-    // optional; for SO types like action/alert that have type id's
-    typeId: schema.maybe(schema.string({ minLength: 1 })),
-  }),
-  { defaultValue: [] }
-);
+const RelatedSavedObjectSchema = schema.object({
+  namespace: schema.maybe(schema.string({ minLength: 1 })),
+  id: schema.string({ minLength: 1 }),
+  type: schema.string({ minLength: 1 }),
+  // optional; for SO types like action/alert that have type id's
+  typeId: schema.maybe(schema.string({ minLength: 1 })),
+});
+
+const RelatedSavedObjectsSchema = schema.arrayOf(RelatedSavedObjectSchema, { defaultValue: [] });
 
 export function validatedRelatedSavedObjects(logger: Logger, data: unknown): RelatedSavedObjects {
   try {
