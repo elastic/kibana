@@ -34,6 +34,7 @@ import {
   extractExportDetails,
   SavedObjectsExportResultDetails,
   getTagFindReferences,
+  SpacesInfo,
 } from '../../lib';
 import { SavedObjectWithMetadata } from '../../types';
 import {
@@ -64,6 +65,7 @@ export interface SavedObjectsTableProps {
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   taggingApi?: SavedObjectsTaggingApi;
+  spacesInfo?: SpacesInfo;
   http: HttpStart;
   search: DataPublicPluginStart['search'];
   overlays: OverlayStart;
@@ -104,6 +106,7 @@ const unableFindSavedObjectNotificationMessage = i18n.translate(
   'savedObjectsManagement.objectsTable.unableFindSavedObjectNotificationMessage',
   { defaultMessage: 'Unable to find saved object' }
 );
+
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
 
@@ -149,7 +152,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   fetchCounts = async () => {
     const { allowedTypes, taggingApi } = this.props;
-    const { queryText, visibleTypes, selectedTags } = parseQuery(this.state.activeQuery);
+    const { queryText, visibleTypes, selectedTags, selectedSpaces } = parseQuery(
+      this.state.activeQuery
+    );
 
     const selectedTypes = allowedTypes.filter(
       (type) => !visibleTypes || visibleTypes.includes(type)
@@ -162,6 +167,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       http: this.props.http,
       typesToInclude: selectedTypes,
       searchString: queryText,
+      namespaces: selectedSpaces?.length ? selectedSpaces : undefined,
       references,
     });
 
@@ -208,7 +214,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   debouncedFindObjects = debounce(async () => {
     const { activeQuery: query, page, perPage } = this.state;
     const { notifications, http, allowedTypes, taggingApi } = this.props;
-    const { queryText, visibleTypes, selectedTags } = parseQuery(query);
+    const { queryText, visibleTypes, selectedTags, selectedSpaces } = parseQuery(query);
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
     // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
     const findOptions: SavedObjectsFindOptions = {
@@ -217,6 +223,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       page: page + 1,
       fields: ['id'],
       type: allowedTypes.filter((type) => !visibleTypes || visibleTypes.includes(type)),
+      namespaces: selectedSpaces?.length ? selectedSpaces : undefined,
     };
     if (findOptions.type.length > 1) {
       findOptions.sortField = 'type';
@@ -395,7 +402,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   onExportAll = async () => {
     const { exportAllSelectedOptions, isIncludeReferencesDeepChecked, activeQuery } = this.state;
     const { notifications, http, taggingApi } = this.props;
-    const { queryText, selectedTags } = parseQuery(activeQuery);
+    const { queryText, selectedTags, selectedSpaces } = parseQuery(activeQuery);
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
       if (selected) {
         accum.push(id);
@@ -412,6 +419,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         search: queryText ? `${queryText}*` : undefined,
         types: exportTypes,
         references,
+        namespaces: selectedSpaces,
         includeReferencesDeep: isIncludeReferencesDeepChecked,
       });
     } catch (e) {
@@ -635,7 +643,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       isSearching,
       savedObjectCounts,
     } = this.state;
-    const { http, taggingApi, allowedTypes, applications } = this.props;
+    const { http, taggingApi, allowedTypes, applications, spacesInfo } = this.props;
 
     const selectionConfig = {
       onSelectionChange: this.onSelectionChanged,
@@ -664,6 +672,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           <Table
             basePath={http.basePath}
             taggingApi={taggingApi}
+            spacesInfo={spacesInfo}
             initialQuery={this.props.initialQuery}
             itemId={'id'}
             actionRegistry={this.props.actionRegistry}

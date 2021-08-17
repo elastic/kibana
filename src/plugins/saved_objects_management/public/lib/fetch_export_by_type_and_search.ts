@@ -13,11 +13,13 @@ export async function fetchExportByTypeAndSearch({
   search,
   types,
   references,
+  namespaces,
   includeReferencesDeep = false,
 }: {
   http: HttpStart;
   types: string[];
   search?: string;
+  namespaces?: string[];
   references?: SavedObjectsFindOptionsReference[];
   includeReferencesDeep?: boolean;
 }): Promise<Blob> {
@@ -27,6 +29,7 @@ export async function fetchExportByTypeAndSearch({
       search,
       hasReference: references,
       includeReferencesDeep,
+      namespaces,
     }),
   });
 }

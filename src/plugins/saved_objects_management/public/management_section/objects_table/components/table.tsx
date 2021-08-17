@@ -28,7 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SavedObjectsTaggingApi } from '../../../../../saved_objects_tagging_oss/public';
-import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
+import { getDefaultTitle, getSavedObjectLabel, SpacesInfo } from '../../../lib';
 import { SavedObjectWithMetadata } from '../../../types';
 import {
   SavedObjectsManagementActionServiceStart,
@@ -38,6 +38,7 @@ import {
 
 export interface TableProps {
   taggingApi?: SavedObjectsTaggingApi;
+  spacesInfo?: SpacesInfo;
   basePath: IBasePath;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
@@ -54,7 +55,7 @@ export interface TableProps {
   pageIndex: number;
   pageSize: number;
   items: SavedObjectWithMetadata[];
-  itemId: string | (() => string);
+  itemId: string | ((obj: SavedObjectWithMetadata) => string);
   totalItemCount: number;
   onQueryChange: (query: any) => void;
   onTableChange: (table: any) => void;
@@ -145,6 +146,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       actionRegistry,
       columnRegistry,
       taggingApi,
+      spacesInfo,
     } = this.props;
 
     const pagination = {
@@ -165,6 +167,23 @@ export class Table extends PureComponent<TableProps, TableState> {
         options: filterOptions,
       },
       ...(taggingApi ? [taggingApi.ui.getSearchBarFilter({ useName: true })] : []),
+      ...(spacesInfo
+        ? [
+            {
+              type: 'field_value_selection',
+              field: 'space',
+              name: i18n.translate('savedObjectsManagement.objectsTable.table.spaceFilterName', {
+                defaultMessage: 'Space',
+              }),
+              multiSelect: 'or',
+              options: spacesInfo.all.map((space) => ({
+                value: space.id,
+                name: space.name,
+                view: `${space.name}`,
+              })),
+            },
+          ]
+        : []),
     ];
 
     const columns = [

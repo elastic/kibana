@@ -27,6 +27,11 @@ export interface SpacesApi {
   getActiveSpace(): Promise<Space>;
 
   /**
+   * Retrieve the list of spaces the user is allowed to access.
+   */
+  getSpaces(): Promise<Space[]>;
+
+  /**
    * UI components and services to add spaces capabilities to an application.
    */
   ui: SpacesApiUi;

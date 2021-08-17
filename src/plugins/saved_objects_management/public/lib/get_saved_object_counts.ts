@@ -12,15 +12,17 @@ export async function getSavedObjectCounts({
   http,
   searchString,
   typesToInclude,
+  namespaces,
   references,
 }: {
   http: HttpStart;
   typesToInclude: string[];
   searchString?: string;
+  namespaces?: string[];
   references?: SavedObjectsFindOptionsReference[];
 }): Promise<Record<string, number>> {
   return await http.post<Record<string, number>>(
     `/api/kibana/management/saved_objects/scroll/counts`,
-    { body: JSON.stringify({ typesToInclude, searchString, references }) }
+    { body: JSON.stringify({ typesToInclude, searchString, references, namespaces }) }
   );
 }

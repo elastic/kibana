@@ -25,6 +25,7 @@ import {
   SavedObjectsManagementColumnServiceStart,
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
+import type { SpacesInfo } from '../lib';
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
@@ -33,6 +34,7 @@ const SavedObjectsTablePage = ({
   dataStart,
   taggingApi,
   spacesApi,
+  spacesInfo,
   allowedTypes,
   serviceRegistry,
   actionRegistry,
@@ -43,6 +45,7 @@ const SavedObjectsTablePage = ({
   dataStart: DataPublicPluginStart;
   taggingApi?: SavedObjectsTaggingApi;
   spacesApi?: SpacesAvailableStartContract;
+  spacesInfo?: SpacesInfo;
   allowedTypes: string[];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
@@ -88,6 +91,7 @@ const SavedObjectsTablePage = ({
         actionRegistry={actionRegistry}
         columnRegistry={columnRegistry}
         taggingApi={taggingApi}
+        spacesInfo={spacesInfo}
         savedObjectsClient={coreStart.savedObjects.client}
         indexPatterns={dataStart.indexPatterns}
         search={dataStart.search}

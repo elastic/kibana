@@ -27,12 +27,13 @@ export const registerScrollForCountRoute = (router: IRouter) => {
               })
             )
           ),
+          namespaces: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { getClient, typeRegistry } = context.core.savedObjects;
-      const { typesToInclude, searchString, references } = req.body;
+      const { typesToInclude, searchString, references, namespaces } = req.body;
 
       const includedHiddenTypes = chain(typesToInclude)
         .uniq()
@@ -45,6 +46,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       const findOptions: SavedObjectsFindOptions = {
         type: typesToInclude,
         perPage: 1000,
+        namespaces,
       };
       if (searchString) {
         findOptions.search = `${searchString}*`;

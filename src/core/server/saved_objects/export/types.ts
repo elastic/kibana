@@ -23,7 +23,7 @@ export interface SavedObjectExportBaseOptions {
   includeNamespaces?: boolean;
   /** flag to not append {@link SavedObjectsExportResultDetails | export details} to the end of the export stream. */
   excludeExportDetails?: boolean;
-  /** optional namespace to override the namespace used by the savedObjectsClient. */
+  /** optional namespace to override the default namespace used by the savedObjectsClient. */
   namespace?: string;
 }
 
@@ -39,6 +39,8 @@ export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOp
   hasReference?: SavedObjectsFindOptionsReference[];
   /** optional query string to filter exported objects. */
   search?: string;
+  /** optional list of namespaces to export from. Defaults to the current namespace if unspecified. */
+  namespaces?: string[];
 }
 
 /**
@@ -53,6 +55,8 @@ export interface SavedObjectsExportByObjectOptions extends SavedObjectExportBase
     id: string;
     /** the saved object type. */
     type: string;
+    /** optional namespace to retrieve the object from. Defaults to the current namespace if unspecified. */
+    namespace?: string;
   }>;
 }
 

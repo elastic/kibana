@@ -153,16 +153,16 @@ export class SavedObjectsExporter {
 
   private async fetchByTypes({
     types,
-    namespace,
     hasReference,
     search,
+    namespaces,
   }: SavedObjectsExportByTypeOptions) {
     const finder = this.#savedObjectsClient.createPointInTimeFinder({
       type: types,
       hasReference,
       hasReferenceOperator: hasReference ? 'OR' : undefined,
       search,
-      namespaces: namespace ? [namespace] : undefined,
+      namespaces: namespaces ?? undefined,
     });
 
     const hits: SavedObjectsFindResult[] = [];

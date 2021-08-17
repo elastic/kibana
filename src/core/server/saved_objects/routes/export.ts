@@ -27,10 +27,16 @@ interface RouteDependencies {
 
 type EitherExportOptions = SavedObjectsExportByTypeOptions | SavedObjectsExportByObjectOptions;
 
+interface ObjectIdentifier {
+  id: string;
+  type: string;
+  namespace?: string;
+}
+
 interface ExportRawOptions {
   type?: string | string[];
   hasReference?: { id: string; type: string } | Array<{ id: string; type: string }>;
-  objects?: Array<{ id: string; type: string }>;
+  objects?: ObjectIdentifier[];
   search?: string;
   includeReferencesDeep: boolean;
   excludeExportDetails: boolean;
@@ -39,8 +45,9 @@ interface ExportRawOptions {
 interface ExportOptions {
   types?: string[];
   hasReference?: Array<{ id: string; type: string }>;
-  objects?: Array<{ id: string; type: string }>;
+  objects?: ObjectIdentifier[];
   search?: string;
+  namespaces?: string[];
   includeReferencesDeep: boolean;
   excludeExportDetails: boolean;
 }
@@ -77,6 +84,7 @@ const validateOptions = (
     hasReference,
     includeReferencesDeep,
     search,
+    namespaces,
   }: ExportOptions,
   {
     exportSizeLimit,
@@ -121,6 +129,7 @@ const validateOptions = (
       types: types!,
       hasReference,
       search,
+      namespaces,
       excludeExportDetails,
       includeReferencesDeep,
       request,
@@ -153,17 +162,20 @@ export const registerExportRoute = (
               schema.object({
                 type: schema.string(),
                 id: schema.string(),
+                namespace: schema.maybe(schema.string()),
               }),
               { maxSize: maxImportExportSize }
             )
           ),
           search: schema.maybe(schema.string()),
+          namespaces: schema.maybe(schema.arrayOf(schema.string())),
           includeReferencesDeep: schema.boolean({ defaultValue: false }),
           excludeExportDetails: schema.boolean({ defaultValue: false }),
         }),
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
+      // TODO: use namespaces
       const cleaned = cleanOptions(req.body);
       const { typeRegistry, getExporter, getClient } = context.core.savedObjects;
       const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((t) => t.name);
