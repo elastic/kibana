@@ -9,7 +9,6 @@ import React, { useEffect } from 'react';
 import { BrushEndListener, XYBrushArea } from '@elastic/charts';
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -65,8 +64,8 @@ export function TransactionDistribution({
     }
   );
 
-  const clearSelectionButtonLabel = i18n.translate(
-    'xpack.apm.transactionDetails.clearSelectionButtonLabel',
+  const clearSelectionAriaLabel = i18n.translate(
+    'xpack.apm.transactionDetails.clearSelectionAriaLabel',
     {
       defaultMessage: 'Clear selection',
     }
@@ -169,12 +168,7 @@ export function TransactionDistribution({
               iconType="cross"
               iconSide="left"
               iconOnClick={onTrackedClearSelection}
-              iconOnClickAriaLabel={i18n.translate(
-                'xpack.apm.transactionDetails.distribution.clearSelectionArialLabel',
-                {
-                  defaultMessage: 'Clear selection',
-                }
-              )}
+              iconOnClickAriaLabel={clearSelectionAriaLabel}
               data-test-sub="apmTransactionDetailsDistributionClearSelectionBadge"
             >
               {i18n.translate(

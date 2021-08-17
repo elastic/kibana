@@ -249,7 +249,7 @@ export function TransactionDistributionChart({
                   defaultMessage: 'Current sample',
                 }
               )}
-              markerPosition={'top'}
+              markerPosition={'bottom'}
             />
           )}
           <LineAnnotation
