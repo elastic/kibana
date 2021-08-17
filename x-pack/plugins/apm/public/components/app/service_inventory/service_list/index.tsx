@@ -42,6 +42,8 @@ import { ServiceLink } from '../../../shared/service_link';
 import { HealthBadge } from './HealthBadge';
 import { ServiceListMetric } from './ServiceListMetric';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
+import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 
 type ServiceListAPIResponse = APIReturnType<'GET /api/apm/services'>;
 type Items = ServiceListAPIResponse['items'];
@@ -237,6 +239,11 @@ export function ServiceList({
 
   const { query } = useApmParams('/services');
 
+  const { kuery } = query;
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
+  });
+
   const serviceColumns = useMemo(
     () =>
       getServiceColumns({
@@ -260,10 +267,13 @@ export function ServiceList({
       gutterSize="xs"
       direction="column"
       responsive={false}
-      alignItems="flexEnd"
+      // alignItems="flexEnd"
     >
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
+          <EuiFlexItem>
+            {fallbackToTransactions && <AggregatedTransactionsBadge />}
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="top"

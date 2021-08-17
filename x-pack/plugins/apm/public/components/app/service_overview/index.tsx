@@ -22,7 +22,7 @@ import { ServiceOverviewThroughputChart } from './service_overview_throughput_ch
 import { TransactionsTable } from '../../shared/transactions_table';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
-import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
+import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -55,7 +55,7 @@ export function ServiceOverview() {
         <EuiFlexGroup direction="column" gutterSize="s">
           {fallbackToTransactions && (
             <EuiFlexItem>
-              <AggregatedTransactionsCallout />
+              <AggregatedTransactionsBadge />
             </EuiFlexItem>
           )}
           <EuiFlexItem>
