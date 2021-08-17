@@ -263,17 +263,18 @@ export function ServiceList({
     : 'transactionsPerMinute';
 
   return (
-    <EuiFlexGroup
-      gutterSize="xs"
-      direction="column"
-      responsive={false}
-      // alignItems="flexEnd"
-    >
+    <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
       <EuiFlexItem>
-        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
-          <EuiFlexItem>
-            {fallbackToTransactions && <AggregatedTransactionsBadge />}
-          </EuiFlexItem>
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="xs"
+          justifyContent="flexEnd"
+        >
+          {fallbackToTransactions && (
+            <EuiFlexItem>
+              <AggregatedTransactionsBadge />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="top"

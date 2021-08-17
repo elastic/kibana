@@ -13,11 +13,10 @@ export function AggregatedTransactionsBadge() {
   return (
     <div>
       <EuiToolTip
-        position="bottom"
         content={i18n.translate(
           'xpack.apm.aggregatedTransactions.fallback.tooltip',
           {
-            defaultMessage: `This page is using transaction event data as no metrics events were found in the current time range, or a filter has been applied based on fields that are not available in metric even documents.`,
+            defaultMessage: `This page is using transaction event data as no metric events were found in the current time range, or a filter has been applied based on fields that are not available in metric event documents.`,
           }
         )}
       >
