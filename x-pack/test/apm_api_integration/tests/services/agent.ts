@@ -21,7 +21,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('Agent name when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles the empty state', async () => {
       const response = await supertest.get(
-        `/api/apm/services/opbeans-node/agent_name?start=${start}&end=${end}`
+        `/api/apm/services/opbeans-node/agent?start=${start}&end=${end}`
       );
 
       expect(response.status).to.be(200);
@@ -35,12 +35,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       it('returns the agent name', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/agent_name?start=${start}&end=${end}`
+          `/api/apm/services/opbeans-node/agent?start=${start}&end=${end}`
         );
 
         expect(response.status).to.be(200);
 
-        expect(response.body).to.eql({ agentName: 'nodejs' });
+        expect(response.body).to.eql({ agentName: 'nodejs', runtimeName: 'node' });
       });
     }
   );
