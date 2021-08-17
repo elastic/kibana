@@ -276,6 +276,8 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     setIsQueryLoading(loading);
   }, [loading]);
 
+  const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
+
   return (
     <InspectButtonContainer>
       <StyledEuiPanel data-test-subj="events-viewer-panel" $isFullScreen={globalFullScreen}>
@@ -287,11 +289,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               data-timeline-id={id}
               data-test-subj={`events-container-loading-${loading}`}
             >
-              <UpdatedFlexGroup
-                gutterSize="s"
-                justifyContent="flexEnd"
-                alignItems={`${tableView === 'gridView' ? 'baseline' : 'center'}`}
-              >
+              <UpdatedFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems={alignItems}>
                 <UpdatedFlexItem grow={false} show={!loading}>
                   <InspectButton title={justTitle} inspect={inspect} loading={loading} />
                 </UpdatedFlexItem>
