@@ -22,6 +22,7 @@ import { useUiTracker } from '../../../../../observability/public';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
@@ -41,11 +42,7 @@ type CorrelationsApiResponse = NonNullable<
   APIReturnType<'GET /api/apm/correlations/errors/failed_transactions'>
 >;
 
-interface Props {
-  onClose: () => void;
-}
-
-export function ErrorCorrelations({ onClose }: Props) {
+export function ErrorCorrelations() {
   const [
     selectedSignificantTerm,
     setSelectedSignificantTerm,
@@ -53,20 +50,17 @@ export function ErrorCorrelations({ onClose }: Props) {
 
   const { serviceName } = useApmServiceContext();
   const { urlParams } = useUrlParams();
-  const {
-    environment,
-    kuery,
-    transactionName,
-    transactionType,
-    start,
-    end,
-  } = urlParams;
+  const { transactionName, transactionType, start, end } = urlParams;
   const { defaultFieldNames } = useFieldNames();
   const [fieldNames, setFieldNames] = useLocalStorage(
     `apm.correlations.errors.fields:${serviceName}`,
     defaultFieldNames
   );
   const hasFieldNames = fieldNames.length > 0;
+
+  const {
+    query: { environment, kuery },
+  } = useApmParams('/services/:serviceName');
 
   const { data: overallData, status: overallStatus } = useFetcher(
     (callApmApi) => {
@@ -132,7 +126,9 @@ export function ErrorCorrelations({ onClose }: Props) {
   );
 
   const trackApmEvent = useUiTracker({ app: 'apm' });
-  trackApmEvent({ metric: 'view_errors_correlations' });
+  trackApmEvent({ metric: 'view_failed_transactions' });
+
+  const onFilter = () => {};
 
   return (
     <>
@@ -177,7 +173,7 @@ export function ErrorCorrelations({ onClose }: Props) {
             }
             status={correlationsStatus}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
-            onFilter={onClose}
+            onFilter={onFilter}
           />
         </EuiFlexItem>
         <EuiFlexItem>

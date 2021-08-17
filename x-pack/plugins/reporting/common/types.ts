@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
+
 export interface PageSizeParams {
   pageMarginTop: number;
   pageMarginBottom: number;
@@ -44,16 +46,32 @@ export interface ReportDocumentHead {
   _primary_term: number;
 }
 
-export interface ReportOutput {
-  content_type: string | null;
+export interface ReportOutput extends TaskRunResult {
   content: string | null;
   size: number;
+}
+
+export interface TaskRunResult {
+  content_type: string | null;
   csv_contains_formulas?: boolean;
   max_size_reached?: boolean;
   warnings?: string[];
 }
 
-export type TaskRunResult = Omit<ReportOutput, 'content'>;
+export interface BaseParams {
+  layout?: LayoutParams;
+  objectType: string;
+  title: string;
+  browserTimezone: string; // to format dates in the user's time zone
+  version: string; // to handle any state migrations
+}
+
+// base params decorated with encrypted headers that come into runJob functions
+export interface BasePayload extends BaseParams {
+  headers: string;
+  spaceId?: string;
+  isDeprecated?: boolean;
+}
 
 export interface ReportSource {
   /*
@@ -62,10 +80,7 @@ export interface ReportSource {
    */
   jobtype: string; // refers to `ExportTypeDefinition.jobType`
   created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
-  payload: {
-    headers: string; // encrypted headers
-    isDeprecated?: boolean; // set to true when the export type is being phased out
-  } & BaseParams;
+  payload: BasePayload;
   meta: { objectType: string; layout?: string }; // for telemetry
   migration_version: string; // for reminding the user to update their POST URL
   attempts: number; // initially populated as 0
@@ -96,14 +111,6 @@ export interface ReportSource {
  */
 export interface ReportDocument extends ReportDocumentHead {
   _source: ReportSource;
-}
-
-export interface BaseParams {
-  layout?: LayoutParams;
-  objectType: string;
-  title: string;
-  browserTimezone: string; // to format dates in the user's time zone
-  version: string; // to handle any state migrations
 }
 
 export type JobId = string;
@@ -167,8 +174,21 @@ export type DownloadReportFn = (jobId: JobId) => DownloadLink;
 type ManagementLink = string;
 export type ManagementLinkFn = () => ManagementLink;
 
+export interface LocatorParams<
+  P extends SerializableRecord = SerializableRecord & { forceNow?: string }
+> {
+  id: string;
+  version: string;
+  params: P;
+}
+
 export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
 
 export interface IlmPolicyStatusResponse {
   status: IlmPolicyMigrationStatus;
 }
+
+type Url = string;
+type UrlLocatorTuple = [url: Url, locatorParams: LocatorParams];
+
+export type UrlOrUrlLocatorTuple = Url | UrlLocatorTuple;

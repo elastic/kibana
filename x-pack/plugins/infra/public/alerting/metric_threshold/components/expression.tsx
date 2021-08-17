@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { debounce, pick } from 'lodash';
+import { debounce } from 'lodash';
 import { Unit } from '@elastic/datemath';
 import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {
@@ -22,12 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { AlertPreview } from '../../common';
-import {
-  Comparator,
-  Aggregators,
-  METRIC_THRESHOLD_ALERT_TYPE_ID,
-} from '../../../../common/alerting/metrics';
+import { Comparator, Aggregators } from '../../../../common/alerting/metrics';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import {
   IErrorObject,
@@ -43,7 +38,6 @@ import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { ExpressionRow } from './expression_row';
 import { MetricExpression, AlertParams, AlertContextMeta } from '../types';
 import { ExpressionChart } from './expression_chart';
-import { validateMetricThreshold } from './validation';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
@@ -63,15 +57,7 @@ const defaultExpression = {
 export { defaultExpression };
 
 export const Expressions: React.FC<Props> = (props) => {
-  const {
-    setAlertParams,
-    alertParams,
-    errors,
-    alertInterval,
-    alertThrottle,
-    metadata,
-    alertNotifyWhen,
-  } = props;
+  const { setAlertParams, alertParams, errors, metadata } = props;
   const { http, notifications } = useKibanaContextForPlugin().services;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
@@ -256,11 +242,6 @@ export const Expressions: React.FC<Props> = (props) => {
     [onFilterChange]
   );
 
-  const groupByPreviewDisplayName = useMemo(() => {
-    if (Array.isArray(alertParams.groupBy)) return alertParams.groupBy.join(', ');
-    return alertParams.groupBy;
-  }, [alertParams.groupBy]);
-
   const areAllAggsRate = useMemo(
     () => alertParams.criteria?.every((c) => c.aggType === Aggregators.RATE),
     [alertParams.criteria]
@@ -434,24 +415,6 @@ export const Expressions: React.FC<Props> = (props) => {
         />
       </EuiFormRow>
 
-      <EuiSpacer size={'m'} />
-      <AlertPreview
-        alertInterval={alertInterval}
-        alertThrottle={alertThrottle}
-        alertNotifyWhen={alertNotifyWhen}
-        alertType={METRIC_THRESHOLD_ALERT_TYPE_ID}
-        alertParams={pick(
-          alertParams,
-          'criteria',
-          'groupBy',
-          'filterQuery',
-          'sourceId',
-          'shouldDropPartialBuckets'
-        )}
-        showNoDataResults={alertParams.alertOnNoData}
-        validate={validateMetricThreshold}
-        groupByDisplayName={groupByPreviewDisplayName}
-      />
       <EuiSpacer size={'m'} />
     </>
   );

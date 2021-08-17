@@ -11,6 +11,7 @@ import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
 
 import { isEmpty } from 'lodash/fp';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
@@ -23,6 +24,7 @@ import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
+import { EntityType } from '../../../../../timelines/common';
 import { TGridCellAction } from '../../../../../timelines/common/types';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
@@ -30,7 +32,7 @@ import { useKibana } from '../../lib/kibana';
 import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { EventsViewer } from './events_viewer';
 import * as i18n from './translations';
-
+import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 const leadingControlColumns: ControlColumnProps[] = [
   {
@@ -51,6 +53,7 @@ export interface OwnProps {
   defaultCellActions?: TGridCellAction[];
   defaultModel: SubsetTimelineModel;
   end: string;
+  entityType: EntityType;
   id: TimelineId;
   scopeId: SourcererScopeName;
   start: string;
@@ -67,6 +70,8 @@ export interface OwnProps {
 
 type Props = OwnProps & PropsFromRedux;
 
+const alertConsumers: AlertConsumers[] = [AlertConsumers.SIEM];
+
 /**
  * The stateful events viewer component is the highest level component that is utilized across the security_solution pages layer where
  * timeline is used BESIDES the flyout. The flyout makes use of the `EventsViewer` component which is a subcomponent here
@@ -80,6 +85,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   deletedEventIds,
   deleteEventQuery,
   end,
+  entityType,
   excludedRowRendererIds,
   filters,
   headerFilterGroup,
@@ -134,7 +140,13 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
-
+  const graphOverlay = useMemo(
+    () =>
+      graphEventId != null && graphEventId.length > 0 ? (
+        <GraphOverlay isEventViewer={true} timelineId={id} />
+      ) : null,
+    [graphEventId, id]
+  );
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
@@ -149,8 +161,10 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               deletedEventIds,
               docValueFields,
               end,
+              entityType,
               filters: globalFilters,
               globalFullScreen,
+              graphOverlay,
               headerFilterGroup,
               id,
               indexNames: selectedPatterns,
@@ -205,7 +219,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         </InspectButtonContainer>
       </FullScreenContainer>
       <DetailsPanel
+        alertConsumers={alertConsumers}
         browserFields={browserFields}
+        entityType={EntityType.ALERTS}
         docValueFields={docValueFields}
         isFlyoutView
         timelineId={id}

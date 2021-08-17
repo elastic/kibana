@@ -47,9 +47,11 @@ export const mapping = {
   kibana_name: { type: 'keyword' },
   kibana_id: { type: 'keyword' },
   status: { type: 'keyword' },
+  parent_id: { type: 'keyword' },
   output: {
     type: 'object',
     properties: {
+      chunk: { type: 'long' },
       content_type: { type: 'keyword' },
       size: { type: 'long' },
       content: { type: 'object', enabled: false },

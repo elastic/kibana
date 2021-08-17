@@ -16,7 +16,7 @@ import type { KibanaRequest } from 'kibana/server';
 
 import type { PackageInfo, PackagePolicySOAttributes, AgentPolicySOAttributes } from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
-import type { ExternalCallback } from '..';
+import type { PutPackagePolicyUpdateCallback, PostPackagePolicyCreateCallback } from '..';
 
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
@@ -104,6 +104,8 @@ jest.mock('./agent_policy', () => {
     },
   };
 });
+
+type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
 
 describe('Package policy service', () => {
   describe('compilePackagePolicyInputs', () => {
@@ -835,7 +837,7 @@ describe('Package policy service', () => {
     const callbackCallingOrder: string[] = [];
 
     // Callback one adds an input that includes a `config` property
-    const callbackOne: ExternalCallback[1] = jest.fn(async (ds) => {
+    const callbackOne: CombinedExternalCallback = jest.fn(async (ds) => {
       callbackCallingOrder.push('one');
       return {
         ...ds,
@@ -855,7 +857,7 @@ describe('Package policy service', () => {
     });
 
     // Callback two adds an additional `input[0].config` property
-    const callbackTwo: ExternalCallback[1] = jest.fn(async (ds) => {
+    const callbackTwo: CombinedExternalCallback = jest.fn(async (ds) => {
       callbackCallingOrder.push('two');
       return {
         ...ds,
@@ -886,12 +888,12 @@ describe('Package policy service', () => {
     });
 
     it('should call external callbacks in expected order', async () => {
-      const callbackA: ExternalCallback[1] = jest.fn(async (ds) => {
+      const callbackA: CombinedExternalCallback = jest.fn(async (ds) => {
         callbackCallingOrder.push('a');
         return ds;
       });
 
-      const callbackB: ExternalCallback[1] = jest.fn(async (ds) => {
+      const callbackB: CombinedExternalCallback = jest.fn(async (ds) => {
         callbackCallingOrder.push('b');
         return ds;
       });
@@ -927,12 +929,12 @@ describe('Package policy service', () => {
     });
 
     describe('with a callback that throws an exception', () => {
-      const callbackThree: ExternalCallback[1] = jest.fn(async () => {
+      const callbackThree: CombinedExternalCallback = jest.fn(async () => {
         callbackCallingOrder.push('three');
         throw new Error('callbackThree threw error on purpose');
       });
 
-      const callbackFour: ExternalCallback[1] = jest.fn(async (ds) => {
+      const callbackFour: CombinedExternalCallback = jest.fn(async (ds) => {
         callbackCallingOrder.push('four');
         return {
           ...ds,

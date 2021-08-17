@@ -26,6 +26,7 @@ import {
   SERVICE_NAME,
   SPAN_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
+import { Environment } from '../../../../../common/environment_rt';
 import { useTheme } from '../../../../hooks/use_theme';
 import { CytoscapeContext } from '../Cytoscape';
 import { getAnimationOptions, popoverWidth } from '../cytoscape_options';
@@ -53,14 +54,22 @@ function getContentsComponent(selectedNodeData: cytoscape.NodeDataDefinition) {
 
 export interface ContentsProps {
   nodeData: cytoscape.NodeDataDefinition;
+  environment: Environment;
+  kuery: string;
   onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
 }
 
 interface PopoverProps {
   focusedServiceName?: string;
+  environment: Environment;
+  kuery: string;
 }
 
-export function Popover({ focusedServiceName }: PopoverProps) {
+export function Popover({
+  focusedServiceName,
+  environment,
+  kuery,
+}: PopoverProps) {
   const theme = useTheme();
   const cy = useContext(CytoscapeContext);
   const [selectedNode, setSelectedNode] = useState<
@@ -171,6 +180,8 @@ export function Popover({ focusedServiceName }: PopoverProps) {
         <ContentsComponent
           onFocusClick={onFocusClick}
           nodeData={selectedNodeData}
+          environment={environment}
+          kuery={kuery}
         />
       </EuiFlexGroup>
     </EuiPopover>

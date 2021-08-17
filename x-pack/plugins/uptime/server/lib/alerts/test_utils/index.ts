@@ -9,7 +9,7 @@ import { Logger } from 'kibana/server';
 import { UMServerLibs } from '../../lib';
 import { UptimeCorePlugins, UptimeCoreSetup } from '../../adapters';
 import type { UptimeRouter } from '../../../types';
-import type { RuleDataClient } from '../../../../../rule_registry/server';
+import type { IRuleDataClient } from '../../../../../rule_registry/server';
 import { getUptimeESMockClient } from '../../requests/helper';
 import { alertsMock } from '../../../../../alerting/server/mocks';
 import { DynamicSettings } from '../../../../common/runtime_types';
@@ -72,7 +72,9 @@ export const createRuleTypeMocks = (
             bulk: jest.fn(),
           };
         },
-      } as unknown) as RuleDataClient,
+        isWriteEnabled: jest.fn(() => true),
+        indexName: '.alerts-observability.synthetics.alerts',
+      } as unknown) as IRuleDataClient,
     },
     services,
     scheduleActions,

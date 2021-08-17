@@ -9,7 +9,7 @@ import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logi
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { ReactWrapper, shallow } from 'enzyme';
 
 import {
   EuiButton,
@@ -22,6 +22,7 @@ import {
 import { mountWithIntl } from '../../../../../test_helpers';
 import { CrawlerDomain } from '../../types';
 
+import { AutomaticCrawlScheduler } from './automatic_crawl_scheduler';
 import { ManageCrawlsPopover } from './manage_crawls_popover';
 
 const MOCK_ACTIONS = {
@@ -57,22 +58,33 @@ describe('ManageCrawlsPopover', () => {
     expect(wrapper.find(EuiContextMenuPanel)).toHaveLength(0);
   });
 
-  it('includes a context menu when open', () => {
-    setMockValues({
-      ...MOCK_VALUES,
-      isOpen: true,
+  describe('when open', () => {
+    let wrapper: ReactWrapper;
+    let menuItems: ReactWrapper;
+
+    beforeEach(() => {
+      setMockValues({
+        ...MOCK_VALUES,
+        isOpen: true,
+      });
+
+      wrapper = mountWithIntl(<ManageCrawlsPopover domain={MOCK_DOMAIN} />);
+
+      menuItems = wrapper
+        .find(EuiContextMenuPanel)
+        .find(EuiResizeObserver)
+        .find(EuiContextMenuItem);
     });
 
-    const wrapper = mountWithIntl(<ManageCrawlsPopover domain={MOCK_DOMAIN} />);
+    it('includes a button to reapply crawl rules', () => {
+      menuItems.at(0).simulate('click');
+      expect(MOCK_ACTIONS.reApplyCrawlRules).toHaveBeenCalledWith(MOCK_DOMAIN);
+    });
 
-    const menuItems = wrapper
-      .find(EuiContextMenuPanel)
-      .find(EuiResizeObserver)
-      .find(EuiContextMenuItem);
+    it('includes a form to set a crawl schedule ', () => {
+      menuItems.at(1).simulate('click');
 
-    expect(menuItems).toHaveLength(1);
-
-    menuItems.first().simulate('click');
-    expect(MOCK_ACTIONS.reApplyCrawlRules).toHaveBeenCalledWith(MOCK_DOMAIN);
+      expect(wrapper.find(EuiContextMenuPanel).find(AutomaticCrawlScheduler));
+    });
   });
 });
