@@ -64,7 +64,6 @@ const actionExecutorInitializerParams = {
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   eventLogger: eventLoggerMock.create(),
   preconfiguredActions: [],
-  kibanaSemanticVersion: '1.0.1',
 };
 const taskRunnerFactoryInitializerParams = {
   spaceIdToNamespace,

@@ -45,7 +45,6 @@ actionExecutor.initialize({
   encryptedSavedObjectsClient,
   eventLogger,
   preconfiguredActions: [],
-  kibanaSemanticVersion: '1.0.1',
 });
 
 beforeEach(() => {
@@ -127,7 +126,6 @@ test('successfully executes', async () => {
                 "type_id": "test",
               },
             ],
-            "version": "1.0.1",
           },
           "message": "action started: test:1: 1",
         },
@@ -148,7 +146,6 @@ test('successfully executes', async () => {
                 "type_id": "test",
               },
             ],
-            "version": "1.0.1",
           },
           "message": "action executed: test:1: 1",
         },
@@ -415,7 +412,6 @@ test('throws an error when passing isESOCanEncrypt with value of false', async (
     encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
     preconfiguredActions: [],
-    kibanaSemanticVersion: '1.0.1',
   });
   await expect(
     customActionExecutor.execute(executeParams)

@@ -76,7 +76,6 @@ const createExecutionHandlerParams: jest.Mocked<
   tags: ['tag-A', 'tag-B'],
   apiKey: 'MTIzOmFiYw==',
   kibanaBaseUrl: 'http://localhost:5601',
-  kibanaVersion: '1.0.1',
   alertType,
   logger: loggingSystemMock.create().get(),
   eventLogger: mockEventLogger,
@@ -194,7 +193,6 @@ test('enqueues execution per selected action', async () => {
                 "type_id": "test",
               },
             ],
-            "version": "1.0.1",
           },
           "message": "alert: test:1: 'name-of-alert' instanceId: '2' scheduled actionGroup: 'default' action: test:1",
           "rule": Object {

@@ -43,7 +43,6 @@ export interface TaskRunnerContext {
   kibanaBaseUrl: string | undefined;
   supportsEphemeralTasks: boolean;
   maxEphemeralActionsPerAlert: Promise<number>;
-  kibanaSemanticVersion: string | undefined;
 }
 
 export class TaskRunnerFactory {

@@ -15,7 +15,6 @@ import {
   SharedGlobalConfig,
   IContextProvider,
 } from 'src/core/server';
-import { coerce } from 'semver';
 import { SpacesPluginStart } from '../../spaces/server';
 
 import type {
@@ -85,6 +84,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       systemLogger: this.systemLogger,
       kibanaUUID: this.context.env.instanceUuid,
       savedObjectProviderRegistry: this.savedObjectProviderRegistry,
+      kibanaVersion: this.kibanaVersion,
     });
 
     this.eventLogService.registerProviderActions(PROVIDER, Object.values(ACTIONS));
@@ -134,7 +134,6 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     // will log the event after initialization
     this.eventLogger.logEvent({
       event: { action: ACTIONS.starting },
-      kibana: { version: coerce(this.kibanaVersion)?.version },
       message: 'eventLog starting',
     });
 
@@ -160,7 +159,6 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     // when Kibana is actuaelly stopping, as it's written asynchronously
     this.eventLogger.logEvent({
       event: { action: ACTIONS.stopping },
-      kibana: { version: coerce(this.kibanaVersion)?.version },
       message: 'eventLog stopping',
     });
 

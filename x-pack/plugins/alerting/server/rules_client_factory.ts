@@ -47,7 +47,6 @@ export class RulesClientFactory {
   private actions!: ActionsPluginStartContract;
   private eventLog!: IEventLogClientService;
   private kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
-
   private authorization!: AlertingAuthorizationClientFactory;
 
   public initialize(options: RulesClientFactoryOpts) {

@@ -41,7 +41,6 @@ export interface CreateExecutionHandlerOptions<
   spaceId: string;
   apiKey: RawAlert['apiKey'];
   kibanaBaseUrl: string | undefined;
-  kibanaVersion: string | undefined;
   alertType: NormalizedAlertType<
     Params,
     ExtractedParams,
@@ -95,7 +94,6 @@ export function createExecutionHandler<
   alertParams,
   supportsEphemeralTasks,
   maxEphemeralActionsPerAlert,
-  kibanaVersion,
 }: CreateExecutionHandlerOptions<
   Params,
   ExtractedParams,
@@ -225,7 +223,6 @@ export function createExecutionHandler<
             },
             { type: 'action', id: action.id, type_id: action.actionTypeId, ...namespace },
           ],
-          version: kibanaVersion,
         },
         rule: {
           id: alertId,

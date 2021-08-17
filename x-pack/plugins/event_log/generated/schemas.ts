@@ -13,6 +13,7 @@
 // the event log
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import semver from 'semver';
 
 type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
 type DeepPartial<T> = {
@@ -159,9 +160,7 @@ function validateDate(isoDate: string) {
   return 'string is not a valid ISO date: ' + isoDate;
 }
 
-const VERSION_PATTERN = /^(\d+\.)?(\d+\.)?(\*|\d+)$/;
-
 function validateVersion(version: string) {
-  if (VERSION_PATTERN.test(version)) return;
+  if (semver.valid(version)) return;
   return 'string is not a valid version: ' + version;
 }

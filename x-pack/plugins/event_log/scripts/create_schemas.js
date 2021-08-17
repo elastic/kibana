@@ -324,10 +324,8 @@ function ecsVersion() {
   return schema.maybe(schema.string({ validate: validateVersion }));
 }
 
-const VERSION_PATTERN = /^(\d+\.)?(\d+\.)?(\*|\d+)$/;
-
 function validateVersion(version: string) {
-  if (VERSION_PATTERN.test(version)) return;
+  if (semver.valid(version)) return;
   return 'string is not a valid version: ' + version;
 }
 `.trim();
