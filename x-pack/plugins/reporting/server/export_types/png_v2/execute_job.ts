@@ -54,11 +54,9 @@ export const runTaskFnFactory: RunTaskFnFactory<
           job.layout
         );
       }),
-      tap(({ base64 }) => stream.write(base64)),
-      map(({ base64, warnings }) => ({
+      tap(({ buffer }) => stream.write(buffer)),
+      map(({ warnings }) => ({
         content_type: 'image/png',
-        content: base64,
-        size: (base64 && base64.length) || 0,
         warnings,
       })),
       catchError((err) => {
