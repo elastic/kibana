@@ -22,6 +22,13 @@ export const ACTIVITY_LOG = {
         defaultMessage: 'Nothing more to show',
       }
     ),
+    dateRangeMessage: i18n.translate(
+      'xpack.securitySolution.endpointDetails.activityLog.logEntry.dateRangeMessage.title',
+      {
+        defaultMessage:
+          'Nothing to show for selected date range, please select another and try again.',
+      }
+    ),
     emptyState: {
       title: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.emptyState.title',
