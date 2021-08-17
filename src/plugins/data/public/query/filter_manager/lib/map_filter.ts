@@ -46,8 +46,6 @@ export function mapFilter(filter: Filter) {
     mapExists,
     mapMissing,
     mapQueryString,
-    mapGeoBoundingBox,
-    mapGeoPolygon,
     mapDefault,
   ];
 
