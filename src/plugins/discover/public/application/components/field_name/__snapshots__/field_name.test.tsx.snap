@@ -99,7 +99,7 @@ Array [
 ]
 `;
 
-exports[`FieldName renders default field icon 1`] = `
+exports[`FieldName renders unknown field 1`] = `
 Array [
   <div
     class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldIcon"

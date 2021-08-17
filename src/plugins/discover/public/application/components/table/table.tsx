@@ -32,7 +32,7 @@ export interface FieldRecord {
   action: {
     isActive: boolean;
     onFilter?: DocViewFilterFn;
-    onToggleColumn: (field?: string) => void;
+    onToggleColumn: (field: string) => void;
     flattenedField: unknown;
   };
   field: {
@@ -40,7 +40,7 @@ export interface FieldRecord {
     field: string;
     scripted: boolean;
     fieldType?: string;
-    fieldMapping?: IndexPatternField | undefined;
+    fieldMapping?: IndexPatternField;
   };
   value: {
     formattedValue: string;
@@ -126,7 +126,7 @@ export const DocViewerTable = ({
 
       return {
         action: {
-          onToggleColumn: () => onToggleColumn(field),
+          onToggleColumn,
           onFilter: filter,
           isActive: !!columns?.includes(field),
           flattenedField: flattened[field],
