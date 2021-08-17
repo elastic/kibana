@@ -792,7 +792,7 @@ export const esFilters: {
 export const esKuery: {
     nodeTypes: import("@kbn/es-query/target_types/kuery/node_types").NodeTypes;
     fromKueryExpression: (expression: string | import("@elastic/elasticsearch/api/types").QueryDslQueryContainer, parseOptions?: Partial<import("@kbn/es-query/target_types/kuery/types").KueryParseOptions> | undefined) => import("@kbn/es-query").KueryNode;
-    toElasticsearchQuery: (node: import("@kbn/es-query").KueryNode, indexPattern?: import("@kbn/es-query").IndexPatternBase | undefined, config?: Record<string, any> | undefined, context?: Record<string, any> | undefined) => import("@kbn/utility-types").JsonObject;
+    toElasticsearchQuery: (node: import("@kbn/es-query").KueryNode, indexPattern?: import("@kbn/es-query").IndexPatternBase | undefined, config?: import("@kbn/es-query").KueryQueryOptions | undefined, context?: Record<string, any> | undefined) => import("@elastic/elasticsearch/api/types").QueryDslQueryContainer;
 };
 
 // Warning: (ae-missing-release-tag) "esQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -2036,7 +2036,9 @@ export const search: {
             intervalLabel: string;
         })[];
         getNumberHistogramIntervalByDatatableColumn: (column: import("../../expressions").DatatableColumn) => number | undefined;
-        getDateHistogramMetaDataByDatatableColumn: (column: import("../../expressions").DatatableColumn) => {
+        getDateHistogramMetaDataByDatatableColumn: (column: import("../../expressions").DatatableColumn, defaults?: Partial<{
+            timeZone: string;
+        }>) => {
             interval: string | undefined;
             timeZone: string | undefined;
             timeRange: import("../common").TimeRange | undefined;
