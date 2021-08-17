@@ -62,6 +62,7 @@ interface SettingsActions {
   updateOrgIcon(): void;
   resetOrgLogo(): void;
   resetOrgIcon(): void;
+  resetButtonLoading(): void;
   deleteSourceConfig(
     serviceType: string,
     name: string
@@ -80,6 +81,8 @@ interface SettingsValues {
   icon: string | null;
   stagedLogo: string | null;
   stagedIcon: string | null;
+  logoButtonLoading: boolean;
+  iconButtonLoading: boolean;
 }
 
 const imageRoute = '/api/workplace_search/org/settings/upload_images';
@@ -105,6 +108,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     updateOrgIcon: () => true,
     resetOrgLogo: () => true,
     resetOrgIcon: () => true,
+    resetButtonLoading: () => true,
     updateOauthApplication: () => true,
     deleteSourceConfig: (serviceType: string, name: string) => ({
       serviceType,
@@ -174,6 +178,22 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
         setIcon: () => null,
       },
     ],
+    logoButtonLoading: [
+      false,
+      {
+        updateOrgLogo: () => true,
+        setLogo: () => false,
+        resetButtonLoading: () => false,
+      },
+    ],
+    iconButtonLoading: [
+      false,
+      {
+        updateOrgIcon: () => true,
+        setIcon: () => false,
+        resetButtonLoading: () => false,
+      },
+    ],
   },
   listeners: ({ actions, values }) => ({
     initializeSettings: async () => {
@@ -225,6 +245,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
         actions.setLogo(response.logo);
         flashSuccessToast(ORG_UPDATED_MESSAGE);
       } catch (e) {
+        actions.resetButtonLoading();
         flashAPIErrors(e);
       }
     },
@@ -239,6 +260,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
         actions.setIcon(response.icon);
         flashSuccessToast(ORG_UPDATED_MESSAGE);
       } catch (e) {
+        actions.resetButtonLoading();
         flashAPIErrors(e);
       }
     },
