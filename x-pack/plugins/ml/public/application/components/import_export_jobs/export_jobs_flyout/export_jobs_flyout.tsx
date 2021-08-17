@@ -358,7 +358,7 @@ const FlyoutButton: FC<{ isDisabled: boolean; onClick(): void }> = ({ isDisabled
       iconType="exportAction"
       onClick={onClick}
       isDisabled={isDisabled}
-      data-test-subj="mlJobWizardButtonPreviewJobJson"
+      data-test-subj="mlJobsExportButton"
     >
       <FormattedMessage id="xpack.ml.importExport.exportButton" defaultMessage="Export jobs" />
     </EuiButtonEmpty>
