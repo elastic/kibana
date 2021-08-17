@@ -14,11 +14,14 @@ import {
   MAX_DRAWING_SIZE_BYTES,
   GET_MATCHING_INDEXES_PATH,
   INDEX_FEATURE_PATH,
+  CHECK_IS_DRAWING_INDEX,
+  MAPS_NEW_VECTOR_LAYER_META_CREATED_BY,
 } from '../../common/constants';
 import { createDocSource } from './create_doc_source';
 import { writeDataToIndex } from './index_data';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 import { getMatchingIndexes } from './get_indexes_matching_pattern';
+import { SecurityPluginStart } from '../../../security/server';
 
 export function initIndexingRoutes({
   router,
@@ -28,6 +31,7 @@ export function initIndexingRoutes({
   router: IRouter<DataRequestHandlerContext>;
   logger: Logger;
   dataPlugin: DataPluginStart;
+  securityPlugin?: SecurityPluginStart;
 }) {
   router.post(
     {
@@ -172,6 +176,43 @@ export function initIndexingRoutes({
         context.core.elasticsearch.client
       );
       return response.ok({ body: result });
+    }
+  );
+
+  router.get(
+    {
+      path: CHECK_IS_DRAWING_INDEX,
+      validate: {
+        query: schema.object({
+          index: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { index } = request.query;
+      try {
+        const {
+          body: mappingsResp,
+        } = await context.core.elasticsearch.client.asCurrentUser.indices.getMapping({
+          index: request.query.index,
+        });
+        const isDrawingIndex =
+          mappingsResp[index].mappings?._meta?.created_by === MAPS_NEW_VECTOR_LAYER_META_CREATED_BY;
+        return response.ok({
+          body: {
+            success: true,
+            isDrawingIndex,
+          },
+        });
+      } catch (error) {
+        // Index likely doesn't exist
+        return response.ok({
+          body: {
+            success: false,
+            error,
+          },
+        });
+      }
     }
   );
 }

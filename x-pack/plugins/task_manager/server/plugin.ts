@@ -126,7 +126,11 @@ export class TaskManagerPlugin
     };
   }
 
-  public start({ savedObjects, elasticsearch }: CoreStart): TaskManagerStartContract {
+  public start({
+    savedObjects,
+    elasticsearch,
+    executionContext,
+  }: CoreStart): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
     const serializer = savedObjects.createSerializer();
@@ -150,6 +154,7 @@ export class TaskManagerPlugin
       config: this.config!,
       definitions: this.definitions,
       logger: this.logger,
+      executionContext,
       taskStore,
       middleware: this.middleware,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
@@ -160,6 +165,7 @@ export class TaskManagerPlugin
       config: this.config!,
       definitions: this.definitions,
       logger: this.logger,
+      executionContext,
       middleware: this.middleware,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
       pool: this.taskPollingLifecycle.pool,

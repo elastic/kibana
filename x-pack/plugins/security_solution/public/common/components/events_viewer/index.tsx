@@ -31,7 +31,7 @@ import { useKibana } from '../../lib/kibana';
 import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { EventsViewer } from './events_viewer';
 import * as i18n from './translations';
-
+import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 const leadingControlColumns: ControlColumnProps[] = [
   {
@@ -137,7 +137,13 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
-
+  const graphOverlay = useMemo(
+    () =>
+      graphEventId != null && graphEventId.length > 0 ? (
+        <GraphOverlay isEventViewer={true} timelineId={id} />
+      ) : null,
+    [graphEventId, id]
+  );
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
@@ -155,6 +161,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               entityType,
               filters: globalFilters,
               globalFullScreen,
+              graphOverlay,
               headerFilterGroup,
               id,
               indexNames: selectedPatterns,
