@@ -17,19 +17,6 @@ export interface FailedTransactionsCorrelationValue {
   fieldValue: string;
 }
 
-export interface BaseSearchStrategyResponse {
-  took: number;
-  log: string[];
-  ccsWarning: boolean;
-  error?: Error;
-  isComplete: boolean;
-  isRunning: boolean;
-  progress: number;
-  timeTook: number;
-  startFetch: () => void;
-  cancelFetch: () => void;
-}
-
 export type FailureCorrelationImpactThreshold = typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD[keyof typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD];
 
 export interface CorrelationsTerm {

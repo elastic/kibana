@@ -32,27 +32,20 @@ import { enableInspectEsQueries } from '../../../../../observability/public';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { FailedTransactionsCorrelationsHelpPopover } from './failed_transactions_correlations_help_popover';
-import { useFailedTransactionsCorrelationsSearchStrategy } from './use_failed_transactions_correlations_search_strategy';
-import {
-  BaseSearchStrategyResponse,
-  FailedTransactionsCorrelationValue,
-} from '../../../../common/search_strategies/failure_correlations/types';
+import { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
 import { ImpactBar } from '../../shared/ImpactBar';
-import { FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY } from '../../../../common/search_strategies/failure_correlations/constants';
 import { isErrorMessage } from './utils/is_error_message';
 import { Summary } from '../../shared/Summary';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { getFailedTransactionsCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 import { createHref, push } from '../../shared/Links/url_helpers';
 import { useUiTracker } from '../../../../../observability/public';
+import { useFailedTransactionsCorrelationsFetcher } from '../../../hooks/use_failed_transactions_correlations_fetcher';
+import { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
+import { useApmParams } from '../../../hooks/use_apm_params';
 
 interface Props {
   onClose: () => void;
-}
-
-interface FailedTransactionsCorrelationsSearchStrategyResult
-  extends BaseSearchStrategyResponse {
-  values: FailedTransactionsCorrelationValue[];
 }
 
 export function FailedTransactionsCorrelations({ onClose }: Props) {
@@ -62,24 +55,27 @@ export function FailedTransactionsCorrelations({ onClose }: Props) {
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
   const { serviceName, transactionType } = useApmServiceContext();
-  const { urlParams } = useUrlParams();
 
-  const { environment, kuery, transactionName, start, end } = urlParams;
+  const {
+    query: { kuery, environment },
+  } = useApmParams('/services/:serviceName');
+
+  const { urlParams } = useUrlParams();
+  const { transactionName, start, end } = urlParams;
 
   const displayLog = uiSettings.get<boolean>(enableInspectEsQueries);
 
-  const result = useFailedTransactionsCorrelationsSearchStrategy<FailedTransactionsCorrelationsSearchStrategyResult>(
-    {
-      environment,
-      kuery,
-      serviceName,
-      transactionName,
-      transactionType,
-      start,
-      end,
-    },
-    FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY
-  );
+  const searchServicePrams: SearchServiceParams = {
+    environment,
+    kuery,
+    serviceName,
+    transactionName,
+    transactionType,
+    start,
+    end,
+  };
+
+  const result = useFailedTransactionsCorrelationsFetcher(searchServicePrams);
 
   const {
     ccsWarning,
@@ -110,10 +106,10 @@ export function FailedTransactionsCorrelations({ onClose }: Props) {
 
   const selectedTerm = useMemo(() => {
     if (selectedSignificantTerm) return selectedSignificantTerm;
-    return result?.response?.values &&
-      Array.isArray(result.response.values) &&
-      result.response.values.length > 0
-      ? result.response?.values[0]
+    return result?.values &&
+      Array.isArray(result.values) &&
+      result.values.length > 0
+      ? result?.values[0]
       : undefined;
   }, [selectedSignificantTerm, result]);
 
@@ -348,7 +344,7 @@ export function FailedTransactionsCorrelations({ onClose }: Props) {
       ) : null}
       <CorrelationsTable<FailedTransactionsCorrelationValue>
         columns={failedTransactionsCorrelationsColumns}
-        significantTerms={result?.response?.values}
+        significantTerms={result?.values}
         status={FETCH_STATUS.SUCCESS}
         setSelectedSignificantTerm={setSelectedSignificantTerm}
         selectedTerm={selectedTerm}
