@@ -7,6 +7,8 @@
 
 import { EuiSelectableLIOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
+import { CrawlerDomain } from '../../types';
+
 import { getCheckedOptionLabels, getSelectableOptions } from './utils';
 
 describe('getCheckedOptionLabels', () => {
@@ -21,20 +23,45 @@ describe('getCheckedOptionLabels', () => {
 
 describe('getSelectableOptions', () => {
   it('returns all available fields when we want all fields', () => {
-    expect(getSelectableOptions(['title', 'description'], ['title'], true, true)).toEqual([
+    expect(
+      getSelectableOptions(
+        {
+          availableDeduplicationFields: ['title', 'description'],
+          deduplicationFields: ['title'],
+          deduplicationEnabled: true,
+        } as CrawlerDomain,
+        true
+      )
+    ).toEqual([
       { label: 'title', checked: 'on' },
       { label: 'description', checked: undefined },
     ]);
   });
 
-  it('returns only selected fields and whether they are selected when we want all fields', () => {
-    expect(getSelectableOptions(['title', 'description'], ['title'], false, true)).toEqual([
-      { label: 'title', checked: 'on' },
-    ]);
+  it('can returns only selected fields', () => {
+    expect(
+      getSelectableOptions(
+        {
+          availableDeduplicationFields: ['title', 'description'],
+          deduplicationFields: ['title'],
+          deduplicationEnabled: true,
+        } as CrawlerDomain,
+        false
+      )
+    ).toEqual([{ label: 'title', checked: 'on' }]);
   });
 
   it('disables all options when deduplication is disabled', () => {
-    expect(getSelectableOptions(['title', 'description'], ['title'], true, false)).toEqual([
+    expect(
+      getSelectableOptions(
+        {
+          availableDeduplicationFields: ['title', 'description'],
+          deduplicationFields: ['title'],
+          deduplicationEnabled: false,
+        } as CrawlerDomain,
+        true
+      )
+    ).toEqual([
       { label: 'title', checked: 'on', disabled: true },
       { label: 'description', checked: undefined, disabled: true },
     ]);

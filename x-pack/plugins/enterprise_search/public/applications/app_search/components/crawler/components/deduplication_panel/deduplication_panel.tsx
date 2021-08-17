@@ -47,14 +47,9 @@ export const DeduplicationPanel: React.FC = () => {
     return null;
   }
 
-  const { deduplicationEnabled, availableDeduplicationFields, deduplicationFields } = domain;
+  const { deduplicationEnabled, deduplicationFields } = domain;
 
-  const selectableOptions = getSelectableOptions(
-    availableDeduplicationFields,
-    deduplicationFields,
-    showAllFields,
-    deduplicationEnabled
-  );
+  const selectableOptions = getSelectableOptions(domain, showAllFields);
 
   return (
     <div className="deduplicationPanel">

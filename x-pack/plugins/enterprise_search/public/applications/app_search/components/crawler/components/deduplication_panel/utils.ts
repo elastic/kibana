@@ -6,28 +6,31 @@
  */
 import { EuiSelectableLIOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
+import { CrawlerDomain } from '../../types';
+
 export const getSelectableOptions = (
-  availableFields: string[],
-  selectedFields: string[],
-  showAllFields: boolean,
-  deduplicationEnabled: boolean
+  domain: CrawlerDomain,
+  showAllFields: boolean
 ): Array<EuiSelectableLIOption<object>> => {
+  const { availableDeduplicationFields, deduplicationFields, deduplicationEnabled } = domain;
+
   let selectableOptions: Array<EuiSelectableLIOption<object>>;
 
   if (showAllFields) {
-    selectableOptions = availableFields.map((field) => ({
+    selectableOptions = availableDeduplicationFields.map((field) => ({
       label: field,
-      checked: selectedFields.includes(field) ? 'on' : undefined,
+      checked: deduplicationFields.includes(field) ? 'on' : undefined,
     }));
   } else {
-    selectableOptions = availableFields
-      .filter((field) => selectedFields.includes(field))
+    selectableOptions = availableDeduplicationFields
+      .filter((field) => deduplicationFields.includes(field))
       .map((field) => ({ label: field, checked: 'on' }));
   }
 
   if (!deduplicationEnabled) {
     selectableOptions = selectableOptions.map((option) => ({ ...option, disabled: true }));
   }
+
   return selectableOptions;
 };
 

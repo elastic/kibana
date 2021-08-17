@@ -47,7 +47,7 @@ describe('DeduplicationPanel', () => {
     setMockValues(MOCK_VALUES);
   });
 
-  it('renders an empty components if no domain', () => {
+  it('renders an empty component if no domain', () => {
     setMockValues({
       ...MOCK_VALUES,
       domain: null,
