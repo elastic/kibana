@@ -149,6 +149,7 @@ const columns: Array<EuiBasicTableColumn<ThreatSummaryItem>> = [
     name: '',
   },
   {
+    className: 'flyoutOverviewDescription',
     field: 'description',
     truncateText: false,
     render: EnrichmentDescription,
