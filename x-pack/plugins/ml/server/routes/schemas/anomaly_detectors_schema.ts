@@ -219,3 +219,13 @@ export const updateModelSnapshotBodySchema = schema.object({
 });
 
 export const forecastAnomalyDetector = schema.object({ duration: schema.any() });
+
+export const jobResetQuerySchema = schema.object({
+  /** wait for completion */
+  wait_for_completion: schema.maybe(schema.boolean()),
+});
+
+export const forceQuerySchema = schema.object({
+  /** force close */
+  force: schema.maybe(schema.boolean()),
+});

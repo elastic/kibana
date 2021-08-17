@@ -694,11 +694,12 @@ Array [
         "all": Array [
           "search",
           "query",
-          "index-pattern",
           "url",
           "search-session",
         ],
-        "read": Array [],
+        "read": Array [
+          "index-pattern",
+        ],
       },
       "ui": Array [
         "show",
@@ -1223,11 +1224,12 @@ Array [
         "all": Array [
           "search",
           "query",
-          "index-pattern",
           "url",
           "search-session",
         ],
-        "read": Array [],
+        "read": Array [
+          "index-pattern",
+        ],
       },
       "ui": Array [
         "show",

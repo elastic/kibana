@@ -76,7 +76,7 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
     }
 
     if (result.max_size_reached) {
-      logger.warn(`Max size reached: CSV output truncated to ${result.size} bytes`);
+      logger.warn(`Max size reached: CSV output truncated`);
     }
 
     const { warnings } = result;
