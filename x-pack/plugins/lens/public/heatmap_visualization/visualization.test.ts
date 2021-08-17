@@ -32,6 +32,8 @@ function exampleState(): HeatmapVisualizationState {
       isVisible: true,
       position: Position.Right,
       type: LEGEND_FUNCTION,
+      maxLines: 1,
+      shouldTruncate: true,
     },
     gridConfig: {
       type: HEATMAP_GRID_FUNCTION,
@@ -63,6 +65,8 @@ describe('heatmap', () => {
           isVisible: true,
           position: Position.Right,
           type: LEGEND_FUNCTION,
+          maxLines: 1,
+          shouldTruncate: true,
         },
         gridConfig: {
           type: HEATMAP_GRID_FUNCTION,

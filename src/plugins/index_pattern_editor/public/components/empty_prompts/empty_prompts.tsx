@@ -36,7 +36,7 @@ export const EmptyPrompts: FC<Props> = ({
   loadSources,
 }) => {
   const {
-    services: { docLinks, application, http },
+    services: { docLinks, application, http, searchClient },
   } = useKibana<IndexPatternEditorContext>();
 
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
@@ -47,7 +47,13 @@ export const EmptyPrompts: FC<Props> = ({
   useCallback(() => {
     let isMounted = true;
     if (!hasDataIndices)
-      getIndices(http, () => false, '*:*', false).then((dataSources) => {
+      getIndices({
+        http,
+        isRollupIndex: () => false,
+        pattern: '*:*',
+        showAllIndices: false,
+        searchClient,
+      }).then((dataSources) => {
         if (isMounted) {
           setRemoteClustersExist(!!dataSources.filter(removeAliases).length);
         }
@@ -55,7 +61,7 @@ export const EmptyPrompts: FC<Props> = ({
     return () => {
       isMounted = false;
     };
-  }, [http, hasDataIndices]);
+  }, [http, hasDataIndices, searchClient]);
 
   if (!hasExistingIndexPatterns && !goToForm) {
     if (!hasDataIndices && !remoteClustersExist) {

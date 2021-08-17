@@ -421,17 +421,13 @@ describe('migration actions', () => {
         timeout: '0s',
       })();
 
-      await cloneIndexPromise.then((res) => {
-        expect(res).toMatchInlineSnapshot(`
-          Object {
-            "_tag": "Left",
-            "left": Object {
-              "error": [ResponseError: Response Error],
-              "message": "Response Error",
-              "type": "retryable_es_client_error",
-            },
-          }
-        `);
+      await expect(cloneIndexPromise).resolves.toMatchObject({
+        _tag: 'Left',
+        left: {
+          error: expect.any(ResponseError),
+          message: expect.stringMatching(/\"timed_out\":true/),
+          type: 'retryable_es_client_error',
+        },
       });
     });
   });
