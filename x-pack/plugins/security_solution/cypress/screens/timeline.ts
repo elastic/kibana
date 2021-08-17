@@ -52,6 +52,8 @@ export const ID_FIELD = '[data-test-subj="timeline"] [data-test-subj="field-name
 
 export const ID_TOGGLE_FIELD = '[data-test-subj="toggle-field-_id"]';
 
+export const ID_HOVER_ACTION_OVERFLOW_BTN = '[data-test-subj="more-actions-_id"]';
+
 export const LOCKED_ICON = '[data-test-subj="timeline-date-picker-lock-button"]';
 
 export const UNLOCKED_ICON = '[data-test-subj="timeline-date-picker-unlock-button"]';
@@ -266,3 +268,5 @@ export const TIMELINE_TAB_CONTENT_PINNED = '[data-test-subj="timeline-tab-conten
 
 export const TIMELINE_TAB_CONTENT_GRAPHS_NOTES =
   '[data-test-subj="timeline-tab-content-graph-notes"]';
+
+export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN = '[data-test-subj="more-actions-@timestamp"]';
