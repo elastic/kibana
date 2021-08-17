@@ -27,6 +27,8 @@ interface OwnProps {
   id: string;
   totalItems: number;
   filterStatus?: AlertStatus;
+  query: string;
+  indexName: string;
   onActionSuccess?: OnAlertStatusActionSuccess;
   onActionFailure?: OnAlertStatusActionFailure;
   refetch: Refetch;
@@ -42,9 +44,11 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
     id,
     totalItems,
     filterStatus,
+    query,
     selectedEventIds,
     isSelectAllChecked,
     clearSelected,
+    indexName,
     onActionSuccess,
     onActionFailure,
     refetch,
@@ -149,8 +153,10 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
     );
 
     const statusBulkActionItems = useStatusBulkActionItems({
-      currentStatus: filterStatus,
+      indexName,
       eventIds: Object.keys(selectedEventIds),
+      currentStatus: filterStatus,
+      ...(showClearSelection ? { query } : {}),
       setEventsLoading,
       setEventsDeleted,
       onUpdateSuccess: onAlertStatusUpdateSuccess,

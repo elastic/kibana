@@ -43,9 +43,16 @@ export const Customize: React.FC = () => {
     resetOrgLogo,
     resetOrgIcon,
   } = useActions(SettingsLogic);
-  const { dataLoading, orgNameInputValue, icon, stagedIcon, logo, stagedLogo } = useValues(
-    SettingsLogic
-  );
+  const {
+    dataLoading,
+    orgNameInputValue,
+    icon,
+    stagedIcon,
+    logo,
+    stagedLogo,
+    iconButtonLoading,
+    logoButtonLoading,
+  } = useValues(SettingsLogic);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -92,6 +99,7 @@ export const Customize: React.FC = () => {
         helpText={LOGO_HELP_TEXT}
         image={logo}
         stagedImage={stagedLogo}
+        buttonLoading={logoButtonLoading}
         stageImage={setStagedLogo}
         saveImage={updateOrgLogo}
         resetImage={resetOrgLogo}
@@ -103,6 +111,7 @@ export const Customize: React.FC = () => {
         helpText={ICON_HELP_TEXT}
         image={icon}
         stagedImage={stagedIcon}
+        buttonLoading={iconButtonLoading}
         stageImage={setStagedIcon}
         saveImage={updateOrgIcon}
         resetImage={resetOrgIcon}

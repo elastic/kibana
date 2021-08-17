@@ -20,6 +20,7 @@ import { callObservabilityApi } from '../../services/call_observability_api';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTableTGrid } from './alerts_table_t_grid';
 import { WorkflowStatusFilter } from './workflow_status_filter';
+import './styles.scss';
 
 export interface TopAlert {
   fields: ParsedTechnicalFields;

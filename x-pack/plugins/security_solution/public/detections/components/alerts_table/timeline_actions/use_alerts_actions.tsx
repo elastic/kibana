@@ -25,9 +25,16 @@ interface Props {
   closePopover: () => void;
   eventId: string;
   timelineId: string;
+  indexName: string;
 }
 
-export const useAlertsActions = ({ alertStatus, closePopover, eventId, timelineId }: Props) => {
+export const useAlertsActions = ({
+  alertStatus,
+  closePopover,
+  eventId,
+  timelineId,
+  indexName,
+}: Props) => {
   const dispatch = useDispatch();
   const [, dispatchToaster] = useStateToaster();
 
@@ -105,6 +112,7 @@ export const useAlertsActions = ({ alertStatus, closePopover, eventId, timelineI
   const actionItems = useStatusBulkActionItems({
     eventIds: [eventId],
     currentStatus: alertStatus,
+    indexName,
     setEventsLoading,
     setEventsDeleted,
     onUpdateSuccess: onAlertStatusUpdateSuccess,

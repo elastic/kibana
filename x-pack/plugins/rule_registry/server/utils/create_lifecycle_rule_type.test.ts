@@ -10,7 +10,7 @@ import { ALERT_DURATION, ALERT_STATUS, ALERT_UUID } from '@kbn/rule-data-utils';
 import { loggerMock } from '@kbn/logging/target/mocks';
 import { castArray, omit, mapValues } from 'lodash';
 import { RuleDataClient } from '../rule_data_client';
-import { createRuleDataClientMock } from '../rule_data_client/create_rule_data_client_mock';
+import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_factory';
 
 type RuleTestHelpers = ReturnType<typeof createRule>;

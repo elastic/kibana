@@ -6,7 +6,7 @@
  */
 
 import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
-import { RuleDataClient } from '../../../../../../rule_registry/server';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
@@ -25,7 +25,7 @@ import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters'
 export const createRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  ruleDataClient?: RuleDataClient | null // TODO: Use this for RAC (otherwise delete it)
+  ruleDataClient?: IRuleDataClient | null // TODO: Use this for RAC (otherwise delete it)
 ): void => {
   router.post(
     {
