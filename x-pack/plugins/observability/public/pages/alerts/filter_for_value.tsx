@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
-export const FILTER_FOR_VALUE = i18n.translate('xpack.observability.hoverActions.filterForValue', {
+export const filterForValueButtonLabel = i18n.translate('xpack.observability.hoverActions.filterForValueButtonLabel', {
   defaultMessage: 'Filter for value',
 });
 
@@ -31,17 +31,17 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
       () =>
         Component ? (
           <Component
-            aria-label={FILTER_FOR_VALUE}
+            aria-label={filterForValueButtonLabel}
             data-test-subj="filter-for-value"
             iconType="plusInCircle"
             onClick={onClick}
-            title={FILTER_FOR_VALUE}
+            title={filterForValueButtonLabel}
           >
-            {FILTER_FOR_VALUE}
+            {filterForValueButtonLabel}
           </Component>
         ) : (
           <EuiButtonIcon
-            aria-label={FILTER_FOR_VALUE}
+            aria-label={filterForValueButtonLabel}
             className="timelines__hoverActionButton"
             data-test-subj="filter-for-value"
             iconSize="s"
