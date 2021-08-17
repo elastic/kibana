@@ -33,26 +33,22 @@ export async function getIndexPatterns(
   indexPatternsService: IndexPatternsContract
 ) {
   const existingIndexPatterns = await indexPatternsService.getIdsWithTitle(true);
-  const indexPatternsListItems = // await Promise.all(
-    // existingIndexPatterns.map(async ({ id, title }) => {
-    existingIndexPatterns.map((idxPattern) => {
-      const { id, title } = idxPattern;
-      const isDefault = defaultIndex === id;
-      // const pattern = await indexPatternsService.get(id);
-      const tags = getTags(idxPattern, isDefault);
+  const indexPatternsListItems = existingIndexPatterns.map((idxPattern) => {
+    const { id, title } = idxPattern;
+    const isDefault = defaultIndex === id;
+    const tags = getTags(idxPattern, isDefault);
 
-      return {
-        id,
-        title,
-        default: isDefault,
-        tags,
-        // the prepending of 0 at the default pattern takes care of prioritization
-        // so the sorting will but the default index on top
-        // or on bottom of a the table
-        sort: `${isDefault ? '0' : '1'}${title}`,
-      };
-    });
-  // );
+    return {
+      id,
+      title,
+      default: isDefault,
+      tags,
+      // the prepending of 0 at the default pattern takes care of prioritization
+      // so the sorting will but the default index on top
+      // or on bottom of a the table
+      sort: `${isDefault ? '0' : '1'}${title}`,
+    };
+  });
 
   return (
     indexPatternsListItems.sort((a, b) => {
