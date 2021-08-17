@@ -12,7 +12,6 @@ import { useUiTracker } from '../../../../../../observability/public';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { BackendLink } from '../../../shared/backend_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
@@ -26,8 +25,6 @@ export function BackendInventoryDependenciesTable() {
   const {
     query: { rangeFrom, rangeTo, environment, kuery },
   } = useApmParams('/backends');
-
-  const router = useApmRouter();
 
   const trackEvent = useUiTracker();
 
