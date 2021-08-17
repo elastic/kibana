@@ -151,6 +151,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         <InspectButtonContainer>
           {tGridEnabled ? (
             timelinesUi.getTGrid<'embedded'>({
+              id,
               type: 'embedded',
               browserFields,
               columns,
