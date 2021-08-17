@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-describe('APM depp links', () => {
+describe('APM deep links', () => {
   before(() => {
     cy.loginAsReadOnlyUser();
   });

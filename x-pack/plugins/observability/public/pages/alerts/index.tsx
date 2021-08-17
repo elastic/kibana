@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -15,14 +22,12 @@ import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
-import type { ObservabilityAPIReturnType } from '../../services/call_observability_api/types';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTableTGrid } from './alerts_table_t_grid';
 import { StatusFilter } from './status_filter';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { callObservabilityApi } from '../../services/call_observability_api';
-
-export type TopAlertResponse = ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>[number];
+import './styles.scss';
 
 export interface TopAlert {
   fields: ParsedTechnicalFields;
@@ -55,9 +60,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
 
   // In a future milestone we'll have a page dedicated to rule management in
   // observability. For now link to the settings page.
-  const manageDetectionRulesHref = prepend(
-    '/app/management/insightsAndAlerting/triggersActions/alerts'
-  );
+  const manageRulesHref = prepend('/app/management/insightsAndAlerting/triggersActions/alerts');
 
   const { data: dynamicIndexPatternResp } = useFetcher(({ signal }) => {
     return callObservabilityApi({
@@ -116,11 +119,11 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
           </>
         ),
         rightSideItems: [
-          <EuiButton fill href={manageDetectionRulesHref} iconType="gear">
-            {i18n.translate('xpack.observability.alerts.manageDetectionRulesButtonLabel', {
-              defaultMessage: 'Manage detection rules',
+          <EuiButtonEmpty href={manageRulesHref}>
+            {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
+              defaultMessage: 'Manage Rules',
             })}
-          </EuiButton>,
+          </EuiButtonEmpty>,
         ],
       }}
     >

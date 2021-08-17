@@ -23,9 +23,9 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MonitoringStartPluginDependencies, MonitoringConfig } from './types';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
 import {
-  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
-  ALERT_THREAD_POOL_WRITE_REJECTIONS,
-  ALERT_DETAILS,
+  RULE_THREAD_POOL_SEARCH_REJECTIONS,
+  RULE_THREAD_POOL_WRITE_REJECTIONS,
+  RULE_DETAILS,
 } from '../common/constants';
 import { createCpuUsageAlertType } from './alerts/cpu_usage_alert';
 import { createMissingMonitoringDataAlertType } from './alerts/missing_monitoring_data_alert';
@@ -176,14 +176,14 @@ export class MonitoringPlugin
     ruleTypeRegistry.register(createMissingMonitoringDataAlertType());
     ruleTypeRegistry.register(
       createThreadPoolRejectionsAlertType(
-        ALERT_THREAD_POOL_SEARCH_REJECTIONS,
-        ALERT_DETAILS[ALERT_THREAD_POOL_SEARCH_REJECTIONS]
+        RULE_THREAD_POOL_SEARCH_REJECTIONS,
+        RULE_DETAILS[RULE_THREAD_POOL_SEARCH_REJECTIONS]
       )
     );
     ruleTypeRegistry.register(
       createThreadPoolRejectionsAlertType(
-        ALERT_THREAD_POOL_WRITE_REJECTIONS,
-        ALERT_DETAILS[ALERT_THREAD_POOL_WRITE_REJECTIONS]
+        RULE_THREAD_POOL_WRITE_REJECTIONS,
+        RULE_DETAILS[RULE_THREAD_POOL_WRITE_REJECTIONS]
       )
     );
     ruleTypeRegistry.register(createCCRReadExceptionsAlertType());

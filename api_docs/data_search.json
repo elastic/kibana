@@ -918,7 +918,7 @@
                 "text": "IndexPattern"
               },
               ", configStates?: Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
               {
                 "pluginId": "data",
@@ -4174,7 +4174,7 @@
                 "description": [],
                 "signature": [
                   "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-                  "SerializableState",
+                  "Serializable",
                   " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
                   {
                     "pluginId": "data",
@@ -4541,7 +4541,7 @@
             "description": [],
             "signature": [
               "() => { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; }"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_config.ts",
@@ -4562,7 +4562,7 @@
             "description": [],
             "signature": [
               "() => { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; }"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_config.ts",
@@ -5206,7 +5206,7 @@
                 "description": [],
                 "signature": [
                   "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-                  "SerializableState",
+                  "Serializable",
                   " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
                   {
                     "pluginId": "data",
@@ -5445,7 +5445,7 @@
                 "text": "AggConfig"
               },
               ">(params: Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
               {
                 "pluginId": "data",
@@ -5476,7 +5476,7 @@
                 "description": [],
                 "signature": [
                   "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-                  "SerializableState",
+                  "Serializable",
                   " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
                   {
                     "pluginId": "data",
@@ -6207,7 +6207,7 @@
             "description": [],
             "signature": [
               "(agg: TAggConfig, state?: { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; } | undefined) => TAggConfig"
             ],
             "path": "src/plugins/data/common/search/aggs/param_types/agg.ts",
@@ -6236,7 +6236,7 @@
                 "description": [],
                 "signature": [
                   "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-                  "SerializableState",
+                  "Serializable",
                   " | undefined; schema?: string | undefined; } | undefined"
                 ],
                 "path": "src/plugins/data/common/search/aggs/param_types/agg.ts",
@@ -11247,7 +11247,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">) => any"
         ],
         "path": "src/plugins/data/common/search/expressions/utils/function_wrapper.ts",
@@ -14922,7 +14922,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15004,7 +15004,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15054,7 +15054,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15168,7 +15168,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15250,7 +15250,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15332,7 +15332,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15382,7 +15382,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15496,7 +15496,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15578,7 +15578,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15692,7 +15692,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15746,7 +15746,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15796,7 +15796,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15854,7 +15854,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15912,7 +15912,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15970,7 +15970,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16028,7 +16028,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16086,7 +16086,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16136,7 +16136,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16186,7 +16186,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16240,7 +16240,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16294,7 +16294,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16344,7 +16344,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16394,7 +16394,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16444,7 +16444,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16494,7 +16494,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16544,7 +16544,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16594,7 +16594,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16648,7 +16648,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16698,7 +16698,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16748,7 +16748,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16802,7 +16802,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16852,7 +16852,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16902,7 +16902,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16952,7 +16952,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "SerializableState",
+              "Serializable",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -17102,7 +17102,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_avg.ts",
@@ -17117,7 +17117,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_avg.ts",
@@ -17156,7 +17156,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_max.ts",
@@ -17171,7 +17171,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_max.ts",
@@ -17210,7 +17210,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_min.ts",
@@ -17225,7 +17225,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_min.ts",
@@ -17264,7 +17264,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_sum.ts",
@@ -17279,7 +17279,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_sum.ts",
@@ -17365,7 +17365,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/cumulative_sum.ts",
@@ -17702,7 +17702,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/derivative.ts",
@@ -17843,7 +17843,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric.ts",
@@ -17858,7 +17858,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric.ts",
@@ -18557,7 +18557,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/moving_avg.ts",
@@ -18770,7 +18770,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/serial_diff.ts",
@@ -19027,7 +19027,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "SerializableState",
+              "Serializable",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
@@ -23574,7 +23574,7 @@
             "text": "IAggType"
           },
           "; enabled?: boolean | undefined; id?: string | undefined; schema?: string | undefined; params?: {} | ",
-          "SerializableState",
+          "Serializable",
           " | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_config.ts",
@@ -24027,7 +24027,7 @@
             "text": "IndexPattern"
           },
           ", configStates?: Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-          "SerializableState",
+          "Serializable",
           " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
           {
             "pluginId": "data",
@@ -24216,7 +24216,7 @@
             "text": "IAggType"
           },
           "; enabled?: boolean | undefined; id?: string | undefined; schema?: string | undefined; params?: {} | ",
-          "SerializableState",
+          "Serializable",
           " | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
@@ -24356,7 +24356,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/esaggs/esaggs_fn.ts",
@@ -24395,7 +24395,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/esdsl.ts",
@@ -24575,7 +24575,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/cidr.ts",
@@ -24638,7 +24638,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/date_range.ts",
@@ -24687,7 +24687,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/exists_filter.ts",
@@ -24750,7 +24750,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/extended_bounds.ts",
@@ -24805,7 +24805,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/field.ts",
@@ -24860,7 +24860,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/geo_bounding_box.ts",
@@ -24915,7 +24915,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/geo_point.ts",
@@ -24978,7 +24978,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/ip_range.ts",
@@ -25149,7 +25149,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/kibana_filter.ts",
@@ -25212,7 +25212,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/timerange.ts",
@@ -25261,7 +25261,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/kql.ts",
@@ -25310,7 +25310,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/lucene.ts",
@@ -25373,7 +25373,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/numerical_range.ts",
@@ -25422,7 +25422,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/phrase_filter.ts",
@@ -25477,7 +25477,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/query_filter.ts",
@@ -25524,7 +25524,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/range.ts",
@@ -25573,7 +25573,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/range_filter.ts",
@@ -30132,7 +30132,7 @@
             "text": "IBucketAggConfig"
           },
           ", state?: { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-          "SerializableState",
+          "Serializable",
           " | undefined; schema?: string | undefined; } | undefined) => ",
           {
             "pluginId": "data",

@@ -106,6 +106,7 @@ import { SavedObjectsFindOptions } from 'kibana/public';
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { SavedObjectsUpdateResponse } from 'kibana/server';
 import { SchemaTypeError } from '@kbn/config-schema';
+import { SerializableRecord } from '@kbn/utility-types';
 import { SerializedFieldFormat as SerializedFieldFormat_3 } from 'src/plugins/expressions/common';
 import { StartServicesAccessor } from 'kibana/public';
 import { ToastInputFields } from 'src/core/public/notifications';
@@ -200,8 +201,7 @@ export class AggConfig {
     toExpressionAst(): ExpressionAstExpression | undefined;
     // @deprecated (undocumented)
     toJSON(): AggConfigSerialized;
-    // Warning: (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
-    toSerializedFieldFormat(): {} | Ensure<SerializedFieldFormat_3<SerializableState_2>, SerializableState_2>;
+    toSerializedFieldFormat(): {} | Ensure<SerializedFieldFormat_3<SerializableRecord>, SerializableRecord>;
     // (undocumented)
     get type(): IAggType;
     set type(type: IAggType);
@@ -227,7 +227,7 @@ export class AggConfigs {
         type: string;
         enabled?: boolean | undefined;
         id?: string | undefined;
-        params?: {} | import("./agg_config").SerializableState | undefined;
+        params?: {} | import("@kbn/utility-types").SerializableRecord | undefined;
         schema?: string | undefined;
     }, "schema" | "enabled" | "id" | "params"> & Pick<{
         type: string | IAggType;
@@ -330,9 +330,9 @@ export type AggConfigSerialized = Ensure<{
     type: string;
     enabled?: boolean;
     id?: string;
-    params?: {} | SerializableState_2;
+    params?: {} | SerializableRecord;
     schema?: string;
-}, SerializableState_2>;
+}, SerializableRecord>;
 
 // Warning: (ae-missing-release-tag) "AggFunctionsMapping" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -791,8 +791,8 @@ export const esFilters: {
 // @public @deprecated (undocumented)
 export const esKuery: {
     nodeTypes: import("@kbn/es-query/target_types/kuery/node_types").NodeTypes;
-    fromKueryExpression: (expression: any, parseOptions?: Partial<import("@kbn/es-query/target_types/kuery/types").KueryParseOptions> | undefined) => import("@kbn/es-query").KueryNode;
-    toElasticsearchQuery: (node: import("@kbn/es-query").KueryNode, indexPattern?: import("@kbn/es-query").IndexPatternBase | undefined, config?: Record<string, any> | undefined, context?: Record<string, any> | undefined) => import("@kbn/common-utils").JsonObject;
+    fromKueryExpression: (expression: string | import("@elastic/elasticsearch/api/types").QueryDslQueryContainer, parseOptions?: Partial<import("@kbn/es-query/target_types/kuery/types").KueryParseOptions> | undefined) => import("@kbn/es-query").KueryNode;
+    toElasticsearchQuery: (node: import("@kbn/es-query").KueryNode, indexPattern?: import("@kbn/es-query").IndexPatternBase | undefined, config?: import("@kbn/es-query").KueryQueryOptions | undefined, context?: Record<string, any> | undefined) => import("@elastic/elasticsearch/api/types").QueryDslQueryContainer;
 };
 
 // Warning: (ae-missing-release-tag) "esQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -801,12 +801,7 @@ export const esKuery: {
 export const esQuery: {
     buildEsQuery: typeof import("@kbn/es-query").buildEsQuery;
     getEsQueryConfig: typeof getEsQueryConfig;
-    buildQueryFromFilters: (filters: import("@kbn/es-query").Filter[] | undefined, indexPattern: import("@kbn/es-query").IndexPatternBase | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => {
-        must: never[];
-        filter: import("@kbn/es-query").Filter[];
-        should: never[];
-        must_not: import("@kbn/es-query").Filter[];
-    };
+    buildQueryFromFilters: (filters: import("@kbn/es-query").Filter[] | undefined, indexPattern: import("@kbn/es-query").IndexPatternBase | undefined, ignoreFilterIfFieldNotInIndex?: boolean | undefined) => import("@kbn/es-query").BoolQuery;
     luceneStringToDsl: typeof import("@kbn/es-query").luceneStringToDsl;
     decorateQuery: typeof import("@kbn/es-query").decorateQuery;
 };
@@ -943,7 +938,7 @@ export class FilterManager implements PersistableStateService {
     static setFiltersStore(filters: Filter_2[], store: FilterStateStore, shouldOverrideStore?: boolean): void;
     setGlobalFilters(newGlobalFilters: Filter_2[]): void;
     // (undocumented)
-    telemetry: (filters: import("../../../../kibana_utils/common/persistable_state").SerializableState, collector: unknown) => {};
+    telemetry: (filters: import("@kbn/utility-types").SerializableRecord, collector: unknown) => {};
     }
 
 // Warning: (ae-missing-release-tag) "generateFilters" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1152,6 +1147,7 @@ export interface IKibanaSearchResponse<RawResponse = any> {
     loaded?: number;
     rawResponse: RawResponse;
     total?: number;
+    warning?: string;
 }
 
 // Warning: (ae-forgotten-export) The symbol "MetricAggType" needs to be exported by the entry point index.d.ts
@@ -2040,7 +2036,9 @@ export const search: {
             intervalLabel: string;
         })[];
         getNumberHistogramIntervalByDatatableColumn: (column: import("../../expressions").DatatableColumn) => number | undefined;
-        getDateHistogramMetaDataByDatatableColumn: (column: import("../../expressions").DatatableColumn) => {
+        getDateHistogramMetaDataByDatatableColumn: (column: import("../../expressions").DatatableColumn, defaults?: Partial<{
+            timeZone: string;
+        }>) => {
             interval: string | undefined;
             timeZone: string | undefined;
             timeRange: import("../common").TimeRange | undefined;

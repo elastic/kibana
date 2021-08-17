@@ -8,7 +8,7 @@
 import { IRouter } from 'kibana/server';
 import { id as _id } from '@kbn/securitysolution-io-ts-list-types';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { validFeatureIds } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import { validFeatureIds } from '@kbn/rule-data-utils';
 
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
