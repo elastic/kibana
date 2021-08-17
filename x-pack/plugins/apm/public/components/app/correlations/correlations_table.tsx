@@ -74,8 +74,6 @@ export function CorrelationsTable<T extends CorrelationsTerm>({
     setPageSize(size);
   }, []);
 
-  const tableColumns: Array<EuiBasicTableColumn<T>> = columns ?? [];
-
   return (
     <EuiBasicTable
       items={pageOfItems ?? []}
@@ -83,7 +81,7 @@ export function CorrelationsTable<T extends CorrelationsTerm>({
         status === FETCH_STATUS.LOADING ? loadingText : noDataText
       }
       loading={status === FETCH_STATUS.LOADING}
-      columns={tableColumns}
+      columns={columns}
       rowProps={(term) => {
         return {
           onMouseEnter: () => {

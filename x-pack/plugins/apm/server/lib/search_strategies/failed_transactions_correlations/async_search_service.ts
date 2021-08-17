@@ -27,15 +27,9 @@ export const asyncErrorCorrelationSearchServiceProvider = (
   const state = asyncErrorCorrelationsSearchServiceStateProvider();
 
   async function fetchErrorCorrelations() {
-    let params: SearchServiceFetchParams = {
-      ...searchServiceParams,
-      index: 'apm-*',
-      includeFrozen,
-    };
-
     try {
       const indices = await getApmIndices();
-      params = {
+      const params: SearchServiceFetchParams = {
         ...searchServiceParams,
         index: indices['apm_oss.transactionIndices'],
         includeFrozen,
@@ -84,6 +78,10 @@ export const asyncErrorCorrelationSearchServiceProvider = (
             });
           } catch (e) {
             state.setError(e);
+
+            if (params?.index.includes(':')) {
+              state.setCcsWarning(true);
+            }
           } finally {
             fieldCandidatesFetchedCount += batches[i].length;
             state.setProgress({
@@ -106,10 +104,6 @@ export const asyncErrorCorrelationSearchServiceProvider = (
         state.getState().values.length
       } significant correlations relating to failed transactions.`
     );
-
-    if (state.getState().error !== undefined && params?.index.includes(':')) {
-      state.setCcsWarning(true);
-    }
 
     state.setIsRunning(false);
   }

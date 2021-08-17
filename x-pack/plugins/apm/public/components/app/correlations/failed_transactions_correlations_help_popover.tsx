@@ -19,7 +19,7 @@ export function FailedTransactionsCorrelationsHelpPopover() {
       button={
         <HelpPopoverButton
           onClick={() => {
-            setIsPopoverOpen(!isPopoverOpen);
+            setIsPopoverOpen((prevIsPopoverOpen) => !prevIsPopoverOpen);
           }}
         />
       }
