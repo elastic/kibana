@@ -516,7 +516,7 @@ export function jobsProvider(
       } = await mlClient.getJobs();
 
       jobs.push(
-        ...(tempJobs as Job[]) // change once es client types are correct
+        ...tempJobs
           .filter((j) => j.blocked !== undefined)
           .map((j) => ({ [j.job_id]: j.blocked!.reason }))
       );
