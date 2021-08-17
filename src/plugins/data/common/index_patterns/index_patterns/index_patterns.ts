@@ -53,8 +53,8 @@ export type IndexPatternListSavedObjectAttrs = Pick<
 export interface IndexPatternListItem {
   id: string;
   title: string;
-  type: string;
-  typeMeta: TypeMeta;
+  type?: string;
+  typeMeta?: TypeMeta;
 }
 
 interface IndexPatternsServiceDeps {
