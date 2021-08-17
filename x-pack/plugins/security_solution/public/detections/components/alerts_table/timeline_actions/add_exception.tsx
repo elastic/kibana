@@ -23,6 +23,7 @@ const AddExceptionComponent: React.FC<AddExceptionProps> = ({ disabled, onClick 
       id="addException"
       onClick={onClick}
       disabled={disabled}
+      size="s"
     >
       {i18n.ACTION_ADD_EXCEPTION}
     </EuiContextMenuItem>

@@ -5,38 +5,42 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   AnnotationDomainType,
+  AreaSeries,
+  Axis,
+  AxisStyle,
+  BrushEndListener,
   Chart,
   CurveType,
-  Settings,
-  Axis,
-  ScaleType,
-  Position,
-  AreaSeries,
-  RecursivePartial,
-  AxisStyle,
-  PartialTheme,
   LineAnnotation,
   LineAnnotationDatum,
+  PartialTheme,
+  Position,
+  RectAnnotation,
+  RecursivePartial,
+  ScaleType,
+  Settings,
 } from '@elastic/charts';
 
 import euiVars from '@elastic/eui/dist/eui_theme_light.json';
+
+import { euiPaletteColorBlind } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import {
   getDurationUnitKey,
   getUnitLabelAndConvertedValue,
-} from '../../../../common/utils/formatters';
+} from '../../../../../common/utils/formatters';
 
-import { HistogramItem } from '../../../../common/search_strategies/correlations/types';
+import { HistogramItem } from '../../../../../common/search_strategies/correlations/types';
 
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useTheme } from '../../../hooks/use_theme';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useTheme } from '../../../../hooks/use_theme';
 
-import { ChartContainer } from '../../shared/charts/chart_container';
+import { ChartContainer } from '../chart_container';
 
 const { euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
@@ -79,25 +83,28 @@ interface CorrelationsChartProps {
   field?: string;
   value?: string;
   histogram?: HistogramItem[];
+  markerCurrentTransaction?: number;
   markerValue: number;
   markerPercentile: number;
   overallHistogram?: HistogramItem[];
+  onChartSelection?: BrushEndListener;
+  selection?: [number, number];
 }
 
-const annotationsStyle = {
+const getAnnotationsStyle = (color = 'gray') => ({
   line: {
     strokeWidth: 1,
-    stroke: 'gray',
+    stroke: color,
     opacity: 0.8,
   },
   details: {
     fontSize: 8,
     fontFamily: 'Arial',
     fontStyle: 'normal',
-    fill: 'gray',
+    fill: color,
     padding: 0,
   },
-};
+});
 
 const CHART_PLACEHOLDER_VALUE = 0.0001;
 
@@ -123,21 +130,29 @@ export const replaceHistogramDotsWithBars = (
   }
 };
 
-export function CorrelationsChart({
+export function TransactionDistributionChart({
   field,
   value,
   histogram: originalHistogram,
+  markerCurrentTransaction,
   markerValue,
   markerPercentile,
   overallHistogram,
+  onChartSelection,
+  selection,
 }: CorrelationsChartProps) {
   const euiTheme = useTheme();
+
+  const patchedOverallHistogram = useMemo(
+    () => replaceHistogramDotsWithBars(overallHistogram),
+    [overallHistogram]
+  );
 
   const annotationsDataValues: LineAnnotationDatum[] = [
     {
       dataValue: markerValue,
       details: i18n.translate(
-        'xpack.apm.correlations.latency.chart.percentileMarkerLabel',
+        'xpack.apm.transactionDistribution.chart.percentileMarkerLabel',
         {
           defaultMessage: '{markerPercentile}th percentile',
           values: {
@@ -159,6 +174,21 @@ export function CorrelationsChart({
 
   const histogram = replaceHistogramDotsWithBars(originalHistogram);
 
+  const selectionAnnotation =
+    selection !== undefined
+      ? [
+          {
+            coordinates: {
+              x0: selection[0],
+              x1: selection[1],
+              y0: 0,
+              y1: 100000,
+            },
+            details: 'selection',
+          },
+        ]
+      : undefined;
+
   return (
     <div
       data-test-subj="apmCorrelationsChart"
@@ -166,9 +196,12 @@ export function CorrelationsChart({
     >
       <ChartContainer
         height={250}
-        hasData={Array.isArray(overallHistogram) && overallHistogram.length > 0}
+        hasData={
+          Array.isArray(patchedOverallHistogram) &&
+          patchedOverallHistogram.length > 0
+        }
         status={
-          Array.isArray(overallHistogram)
+          Array.isArray(patchedOverallHistogram)
             ? FETCH_STATUS.SUCCESS
             : FETCH_STATUS.LOADING
         }
@@ -179,12 +212,51 @@ export function CorrelationsChart({
             theme={chartTheme}
             showLegend
             legendPosition={Position.Bottom}
+            onBrushEnd={onChartSelection}
           />
+          {selectionAnnotation !== undefined && (
+            <RectAnnotation
+              dataValues={selectionAnnotation}
+              id="rect_annotation_1"
+              style={{
+                strokeWidth: 1,
+                stroke: '#e5e5e5',
+                fill: '#e5e5e5',
+                opacity: 0.9,
+              }}
+              hideTooltips={true}
+            />
+          )}
+          {typeof markerCurrentTransaction === 'number' && (
+            <LineAnnotation
+              id="annotation_current_transaction"
+              domainType={AnnotationDomainType.XDomain}
+              dataValues={[
+                {
+                  dataValue: markerCurrentTransaction,
+                  details: i18n.translate(
+                    'xpack.apm.transactionDistribution.chart.currentTransactionMarkerLabel',
+                    {
+                      defaultMessage: 'Current sample',
+                    }
+                  ),
+                },
+              ]}
+              style={getAnnotationsStyle(euiPaletteColorBlind()[0])}
+              marker={i18n.translate(
+                'xpack.apm.transactionDistribution.chart.currentTransactionMarkerLabel',
+                {
+                  defaultMessage: 'Current sample',
+                }
+              )}
+              markerPosition={'top'}
+            />
+          )}
           <LineAnnotation
-            id="annotation_1"
+            id="apmCorrelationsChartPercentileAnnotation"
             domainType={AnnotationDomainType.XDomain}
             dataValues={annotationsDataValues}
-            style={annotationsStyle}
+            style={getAnnotationsStyle()}
             marker={`${markerPercentile}p`}
             markerPosition={'top'}
           />
@@ -208,7 +280,7 @@ export function CorrelationsChart({
             id="y-axis"
             domain={yAxisDomain}
             title={i18n.translate(
-              'xpack.apm.correlations.latency.chart.numberOfTransactionsLabel',
+              'xpack.apm.transactionDistribution.chart.numberOfTransactionsLabel',
               { defaultMessage: '# transactions' }
             )}
             position={Position.Left}
@@ -216,12 +288,12 @@ export function CorrelationsChart({
           />
           <AreaSeries
             id={i18n.translate(
-              'xpack.apm.correlations.latency.chart.overallLatencyDistributionLabel',
+              'xpack.apm.transactionDistribution.chart.overallLatencyDistributionLabel',
               { defaultMessage: 'Overall latency distribution' }
             )}
             xScaleType={ScaleType.Log}
             yScaleType={ScaleType.Log}
-            data={overallHistogram ?? []}
+            data={patchedOverallHistogram ?? []}
             curve={CurveType.CURVE_STEP_AFTER}
             xAccessor="key"
             yAccessors={['doc_count']}
@@ -232,7 +304,16 @@ export function CorrelationsChart({
             field !== undefined &&
             value !== undefined && (
               <AreaSeries
-                id={`${field}:${value}`}
+                id={i18n.translate(
+                  'xpack.apm.transactionDistribution.chart.selectedTermLatencyDistributionLabel',
+                  {
+                    defaultMessage: '{fieldName}:{fieldValue}',
+                    values: {
+                      fieldName: field,
+                      fieldValue: value,
+                    },
+                  }
+                )}
                 xScaleType={ScaleType.Log}
                 yScaleType={ScaleType.Log}
                 data={histogram}
