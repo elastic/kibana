@@ -1,5 +1,6 @@
 {
   "paths": {
+    "alerts": "packages/kbn-alerts/src",
     "autocomplete": "packages/kbn-securitysolution-autocomplete/src",
     "console": "src/plugins/console",
     "core": "src/core",
