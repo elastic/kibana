@@ -20,6 +20,7 @@ import {
   EuiText,
   EuiCallOut,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
@@ -76,6 +77,12 @@ const i18nTexts = {
       defaultMessage: 'Error upgrading snapshot',
     }
   ),
+  learnMoreLinkLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.learnMoreLinkLabel',
+    {
+      defaultMessage: 'Learn more about this deprecation',
+    }
+  ),
 };
 
 export const FixSnapshotsFlyout = ({
@@ -122,6 +129,11 @@ export const FixSnapshotsFlyout = ({
         )}
         <EuiText>
           <p>{deprecation.details}</p>
+          <p>
+            <EuiLink target="_blank" href={deprecation.url}>
+              {i18nTexts.learnMoreLinkLabel}
+            </EuiLink>
+          </p>
         </EuiText>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

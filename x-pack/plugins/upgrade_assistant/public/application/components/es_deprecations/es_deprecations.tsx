@@ -8,16 +8,7 @@
 import React, { useEffect } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiPageHeader,
-  EuiToolTip,
-  EuiSpacer,
-  EuiPageContent,
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiSpacer, EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { SectionLoading } from '../../../shared_imports';
@@ -34,16 +25,13 @@ const i18nTexts = {
     defaultMessage:
       'You must resolve all critical issues before upgrading. Back up recommended. Make sure you have a current snapshot before modifying your configuration or reindexing.',
   }),
-  docLinkText: i18n.translate('xpack.upgradeAssistant.esDeprecations.docLinkText', {
-    defaultMessage: 'Documentation',
-  }),
   isLoading: i18n.translate('xpack.upgradeAssistant.esDeprecations.loadingText', {
     defaultMessage: 'Loading deprecations…',
   }),
 };
 
 export const EsDeprecationsContent = withRouter(({ history }: RouteComponentProps) => {
-  const { api, breadcrumbs, getUrlForApp, docLinks } = useAppContext();
+  const { api, breadcrumbs } = useAppContext();
 
   const {
     data: esDeprecations,
@@ -94,20 +82,7 @@ export const EsDeprecationsContent = withRouter(({ history }: RouteComponentProp
 
   return (
     <div data-test-subj="esDeprecationsContent">
-      <EuiPageHeader
-        pageTitle={i18nTexts.pageTitle}
-        description={i18nTexts.pageDescription}
-        rightSideItems={[
-          <EuiButtonEmpty
-            href={docLinks.links.upgradeAssistant}
-            target="_blank"
-            iconType="help"
-            data-test-subj="uaDocumentationLink"
-          >
-            {i18nTexts.docLinkText}
-          </EuiButtonEmpty>,
-        ]}
-      />
+      <EuiPageHeader pageTitle={i18nTexts.pageTitle} description={i18nTexts.pageDescription} />
 
       <EuiSpacer size="l" />
 
