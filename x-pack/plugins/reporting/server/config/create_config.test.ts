@@ -7,20 +7,26 @@
 
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { coreMock } from 'src/core/server/mocks';
-import { createMockConfigSchema, createMockLevelLogger } from '../test_helpers';
+import { LevelLogger } from '../lib';
+import { createMockConfigSchema } from '../test_helpers';
 import { createConfig$ } from './create_config';
 
 describe('Reporting server createConfig$', () => {
   let mockCoreSetup: CoreSetup;
   let mockInitContext: PluginInitializerContext;
-  const mockLogger = createMockLevelLogger();
+  let mockLogger: LevelLogger;
 
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockInitContext = coreMock.createPluginInitializerContext(
       createMockConfigSchema({ kibanaServer: {} })
     );
-    jest.resetAllMocks();
+    mockLogger = ({
+      warn: jest.fn(),
+      debug: jest.fn(),
+      info: jest.fn(),
+      clone: jest.fn().mockImplementation(() => mockLogger),
+    } as unknown) as LevelLogger;
   });
 
   afterEach(() => {
