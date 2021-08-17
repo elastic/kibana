@@ -150,13 +150,17 @@ export const useSavedSearch = ({
           autoRefreshDoneCb = done;
         }),
         filter(() => {
-          /**
-           * filter to prevent auto-refresh triggered fetch when
-           * loading is still ongoing
-           */
           const currentFetchStatus = main$.getValue().fetchStatus;
           return (
-            currentFetchStatus !== FetchStatus.LOADING && currentFetchStatus !== FetchStatus.PARTIAL
+            /**
+             * filter to prevent auto-refresh triggered fetch when
+             * loading is still ongoing
+             */
+            currentFetchStatus !== FetchStatus.LOADING &&
+            currentFetchStatus !== FetchStatus.PARTIAL &&
+            // don't autofetch if it's a index pattern without time field, however this is a temorary solutiom
+            // till we've got a better UI
+            Boolean(searchSource.getField('index')?.isTimeBased())
           );
         })
       ),
