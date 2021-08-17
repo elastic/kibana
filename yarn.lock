@@ -1433,10 +1433,10 @@
   dependencies:
     "@elastic/ecs-helpers" "^1.1.0"
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.16":
-  version "8.0.0-canary.16"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.16.tgz#873bc93e5ed5775541e8b3ca42149249895c0410"
-  integrity sha512-vZO9i/VB3nxe1xhAd98kZUb12A5UfKTy0VWyPIJkcwjrDB+u9qaV65ovq0drYcKks77AAsA8MZKjuPwq1/aF2g==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.17":
+  version "8.0.0-canary.17"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.17.tgz#0625a04cc585e3f311bc6471e04cd4fb0e927e9a"
+  integrity sha512-rsbEdzxYlEU+jS+qf5Gr3+2U6/1Z/S/Yt2dM7lp1A64mCjuOqqHoR2FTHN27BWvBCjtJrtyhlCJht4fsTLNuYA==
   dependencies:
     debug "^4.3.1"
     hpagent "^0.1.1"
