@@ -13,7 +13,6 @@ import {
   ALERT_STATUS,
   ALERT_UUID,
   ALERT_RULE_UUID,
-  ALERT_RULE_ID,
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
 } from '@kbn/rule-data-utils';
@@ -190,7 +189,6 @@ export const requiredFieldMappingsForActionsRuleRegistry = {
   'alert.status': ALERT_STATUS,
   'alert.duration.us': ALERT_DURATION,
   'rule.uuid': ALERT_RULE_UUID,
-  'rule.id': ALERT_RULE_ID,
   'rule.name': ALERT_RULE_NAME,
   'rule.category': ALERT_RULE_CATEGORY,
   producer: ALERT_RULE_PRODUCER,
