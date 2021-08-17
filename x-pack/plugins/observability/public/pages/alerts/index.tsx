@@ -16,6 +16,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useRef, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import type {
+  ALERT_STATUS as ALERT_STATUS_TYPED,
+} from '@kbn/rule-data-utils';
+import {
+  ALERT_STATUS as ALERT_STATUS_NON_TYPED,
+} from '@kbn/rule-data-utils/target_node/technical_field_names';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import type { AlertStatus } from '../../../common/typings';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
@@ -27,12 +33,6 @@ import { AlertsTableTGrid } from './alerts_table_t_grid';
 import { StatusFilter } from './status_filter';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { callObservabilityApi } from '../../services/call_observability_api';
-import type {
-  ALERT_STATUS as ALERT_STATUS_TYPED,
-} from '@kbn/rule-data-utils';
-import {
-  ALERT_STATUS as ALERT_STATUS_NON_TYPED,
-} from '@kbn/rule-data-utils/target_node/technical_field_names';
 
 const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
 
