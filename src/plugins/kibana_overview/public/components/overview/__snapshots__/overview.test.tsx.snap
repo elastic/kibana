@@ -1,12 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Overview render 1`] = `
-<Component
+<mockConstructor
   pageHeader={
     Object {
       "iconType": "logoKibana",
       "pageTitle": <FormattedMessage
-        defaultMessage="Kibana"
+        defaultMessage="Analytics"
         id="kibanaOverview.header.title"
         values={Object {}}
       />,
@@ -124,20 +124,18 @@ exports[`Overview render 1`] = `
             <mockConstructor>
               <EuiCard
                 className="kbnOverviewSolution kibana"
-                description=""
+                description="Description of Kibana"
                 href="kibana_landing_page"
                 icon={
-                  <EuiToken
-                    className="kbnOverviewSolution__icon"
-                    fill="light"
+                  <mockConstructor
                     iconType="logoKibana"
-                    shape="circle"
-                    size="l"
+                    name="Analytics"
+                    size="xl"
                   />
                 }
-                image="/plugins/kibanaOverview/assets/solutions_kibana_2x.png"
+                image="/plugins/kibanaReact/assets/solutions_kibana.svg"
                 onClick={[Function]}
-                title="Kibana"
+                title="Analytics"
                 titleElement="h3"
                 titleSize="xs"
               />
@@ -153,15 +151,13 @@ exports[`Overview render 1`] = `
                 description="Description of solution two"
                 href="path-to-solution-two"
                 icon={
-                  <EuiToken
-                    className="kbnOverviewSolution__icon"
-                    fill="light"
+                  <mockConstructor
                     iconType="empty"
-                    shape="circle"
-                    size="l"
+                    name="Solution two"
+                    size="xl"
                   />
                 }
-                image="/plugins/kibanaOverview/assets/solutions_solution_2_2x.png"
+                image="/plugins/kibanaReact/assets/solutions_solution_2.svg"
                 onClick={[Function]}
                 title="Solution two"
                 titleElement="h3"
@@ -179,15 +175,13 @@ exports[`Overview render 1`] = `
                 description="Description of solution three"
                 href="path-to-solution-three"
                 icon={
-                  <EuiToken
-                    className="kbnOverviewSolution__icon"
-                    fill="light"
+                  <mockConstructor
                     iconType="empty"
-                    shape="circle"
-                    size="l"
+                    name="Solution three"
+                    size="xl"
                   />
                 }
-                image="/plugins/kibanaOverview/assets/solutions_solution_3_2x.png"
+                image="/plugins/kibanaReact/assets/solutions_solution_3.svg"
                 onClick={[Function]}
                 title="Solution three"
                 titleElement="h3"
@@ -205,15 +199,13 @@ exports[`Overview render 1`] = `
                 description="Description of solution four"
                 href="path-to-solution-four"
                 icon={
-                  <EuiToken
-                    className="kbnOverviewSolution__icon"
-                    fill="light"
+                  <mockConstructor
                     iconType="empty"
-                    shape="circle"
-                    size="l"
+                    name="Solution four"
+                    size="xl"
                   />
                 }
-                image="/plugins/kibanaOverview/assets/solutions_solution_4_2x.png"
+                image="/plugins/kibanaReact/assets/solutions_solution_4.svg"
                 onClick={[Function]}
                 title="Solution four"
                 titleElement="h3"
@@ -243,25 +235,25 @@ exports[`Overview render 1`] = `
             "kibana_landing_page",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
+            "/plugins/kibanaReact/assets/solutions_kibana.svg",
           ],
           Array [
             "path-to-solution-two",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
+            "/plugins/kibanaReact/assets/solutions_solution_2.svg",
           ],
           Array [
             "path-to-solution-three",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
+            "/plugins/kibanaReact/assets/solutions_solution_3.svg",
           ],
           Array [
             "path-to-solution-four",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
+            "/plugins/kibanaReact/assets/solutions_solution_4.svg",
           ],
         ],
         "results": Array [
@@ -279,7 +271,7 @@ exports[`Overview render 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
+            "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
           },
           Object {
             "type": "return",
@@ -287,7 +279,7 @@ exports[`Overview render 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
+            "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
           },
           Object {
             "type": "return",
@@ -295,7 +287,7 @@ exports[`Overview render 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
+            "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
           },
           Object {
             "type": "return",
@@ -303,7 +295,7 @@ exports[`Overview render 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
+            "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
           },
         ],
       }
@@ -312,16 +304,16 @@ exports[`Overview render 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/kibana_overview"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`Overview without features 1`] = `
-<Component
+<mockConstructor
   pageHeader={
     Object {
       "iconType": "logoKibana",
       "pageTitle": <FormattedMessage
-        defaultMessage="Kibana"
+        defaultMessage="Analytics"
         id="kibanaOverview.header.title"
         values={Object {}}
       />,
@@ -439,20 +431,18 @@ exports[`Overview without features 1`] = `
             <mockConstructor>
               <EuiCard
                 className="kbnOverviewSolution kibana"
-                description=""
+                description="Description of Kibana"
                 href="kibana_landing_page"
                 icon={
-                  <EuiToken
-                    className="kbnOverviewSolution__icon"
-                    fill="light"
+                  <mockConstructor
                     iconType="logoKibana"
-                    shape="circle"
-                    size="l"
+                    name="Analytics"
+                    size="xl"
                   />
                 }
-                image="/plugins/kibanaOverview/assets/solutions_kibana_2x.png"
+                image="/plugins/kibanaReact/assets/solutions_kibana.svg"
                 onClick={[Function]}
-                title="Kibana"
+                title="Analytics"
                 titleElement="h3"
                 titleSize="xs"
               />
@@ -468,15 +458,13 @@ exports[`Overview without features 1`] = `
                 description="Description of solution two"
                 href="path-to-solution-two"
                 icon={
-                  <EuiToken
-                    className="kbnOverviewSolution__icon"
-                    fill="light"
+                  <mockConstructor
                     iconType="empty"
-                    shape="circle"
-                    size="l"
+                    name="Solution two"
+                    size="xl"
                   />
                 }
-                image="/plugins/kibanaOverview/assets/solutions_solution_2_2x.png"
+                image="/plugins/kibanaReact/assets/solutions_solution_2.svg"
                 onClick={[Function]}
                 title="Solution two"
                 titleElement="h3"
@@ -494,15 +482,13 @@ exports[`Overview without features 1`] = `
                 description="Description of solution three"
                 href="path-to-solution-three"
                 icon={
-                  <EuiToken
-                    className="kbnOverviewSolution__icon"
-                    fill="light"
+                  <mockConstructor
                     iconType="empty"
-                    shape="circle"
-                    size="l"
+                    name="Solution three"
+                    size="xl"
                   />
                 }
-                image="/plugins/kibanaOverview/assets/solutions_solution_3_2x.png"
+                image="/plugins/kibanaReact/assets/solutions_solution_3.svg"
                 onClick={[Function]}
                 title="Solution three"
                 titleElement="h3"
@@ -520,15 +506,13 @@ exports[`Overview without features 1`] = `
                 description="Description of solution four"
                 href="path-to-solution-four"
                 icon={
-                  <EuiToken
-                    className="kbnOverviewSolution__icon"
-                    fill="light"
+                  <mockConstructor
                     iconType="empty"
-                    shape="circle"
-                    size="l"
+                    name="Solution four"
+                    size="xl"
                   />
                 }
-                image="/plugins/kibanaOverview/assets/solutions_solution_4_2x.png"
+                image="/plugins/kibanaReact/assets/solutions_solution_4.svg"
                 onClick={[Function]}
                 title="Solution four"
                 titleElement="h3"
@@ -558,25 +542,25 @@ exports[`Overview without features 1`] = `
             "kibana_landing_page",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
+            "/plugins/kibanaReact/assets/solutions_kibana.svg",
           ],
           Array [
             "path-to-solution-two",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
+            "/plugins/kibanaReact/assets/solutions_solution_2.svg",
           ],
           Array [
             "path-to-solution-three",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
+            "/plugins/kibanaReact/assets/solutions_solution_3.svg",
           ],
           Array [
             "path-to-solution-four",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
+            "/plugins/kibanaReact/assets/solutions_solution_4.svg",
           ],
           Array [
             "home#/tutorial_directory",
@@ -594,25 +578,25 @@ exports[`Overview without features 1`] = `
             "kibana_landing_page",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
+            "/plugins/kibanaReact/assets/solutions_kibana.svg",
           ],
           Array [
             "path-to-solution-two",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
+            "/plugins/kibanaReact/assets/solutions_solution_2.svg",
           ],
           Array [
             "path-to-solution-three",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
+            "/plugins/kibanaReact/assets/solutions_solution_3.svg",
           ],
           Array [
             "path-to-solution-four",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
+            "/plugins/kibanaReact/assets/solutions_solution_4.svg",
           ],
         ],
         "results": Array [
@@ -630,7 +614,7 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
+            "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
           },
           Object {
             "type": "return",
@@ -638,7 +622,7 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
+            "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
           },
           Object {
             "type": "return",
@@ -646,7 +630,7 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
+            "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
           },
           Object {
             "type": "return",
@@ -654,7 +638,7 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
+            "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
           },
           Object {
             "type": "return",
@@ -678,7 +662,7 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
+            "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
           },
           Object {
             "type": "return",
@@ -686,7 +670,7 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
+            "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
           },
           Object {
             "type": "return",
@@ -694,7 +678,7 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
+            "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
           },
           Object {
             "type": "return",
@@ -702,7 +686,7 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
+            "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
           },
         ],
       }
@@ -711,16 +695,16 @@ exports[`Overview without features 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/kibana_overview"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`Overview without solutions 1`] = `
-<Component
+<mockConstructor
   pageHeader={
     Object {
       "iconType": "logoKibana",
       "pageTitle": <FormattedMessage
-        defaultMessage="Kibana"
+        defaultMessage="Analytics"
         id="kibanaOverview.header.title"
         values={Object {}}
       />,
@@ -826,25 +810,25 @@ exports[`Overview without solutions 1`] = `
                     "kibana_landing_page",
                   ],
                   Array [
-                    "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
+                    "/plugins/kibanaReact/assets/solutions_kibana.svg",
                   ],
                   Array [
                     "path-to-solution-two",
                   ],
                   Array [
-                    "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
+                    "/plugins/kibanaReact/assets/solutions_solution_2.svg",
                   ],
                   Array [
                     "path-to-solution-three",
                   ],
                   Array [
-                    "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
+                    "/plugins/kibanaReact/assets/solutions_solution_3.svg",
                   ],
                   Array [
                     "path-to-solution-four",
                   ],
                   Array [
-                    "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
+                    "/plugins/kibanaReact/assets/solutions_solution_4.svg",
                   ],
                   Array [
                     "home#/tutorial_directory",
@@ -868,7 +852,7 @@ exports[`Overview without solutions 1`] = `
                   },
                   Object {
                     "type": "return",
-                    "value": "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
+                    "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
                   },
                   Object {
                     "type": "return",
@@ -876,7 +860,7 @@ exports[`Overview without solutions 1`] = `
                   },
                   Object {
                     "type": "return",
-                    "value": "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
+                    "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
                   },
                   Object {
                     "type": "return",
@@ -884,7 +868,7 @@ exports[`Overview without solutions 1`] = `
                   },
                   Object {
                     "type": "return",
-                    "value": "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
+                    "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
                   },
                   Object {
                     "type": "return",
@@ -892,7 +876,7 @@ exports[`Overview without solutions 1`] = `
                   },
                   Object {
                     "type": "return",
-                    "value": "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
+                    "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
                   },
                   Object {
                     "type": "return",
@@ -923,25 +907,25 @@ exports[`Overview without solutions 1`] = `
                     "kibana_landing_page",
                   ],
                   Array [
-                    "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
+                    "/plugins/kibanaReact/assets/solutions_kibana.svg",
                   ],
                   Array [
                     "path-to-solution-two",
                   ],
                   Array [
-                    "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
+                    "/plugins/kibanaReact/assets/solutions_solution_2.svg",
                   ],
                   Array [
                     "path-to-solution-three",
                   ],
                   Array [
-                    "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
+                    "/plugins/kibanaReact/assets/solutions_solution_3.svg",
                   ],
                   Array [
                     "path-to-solution-four",
                   ],
                   Array [
-                    "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
+                    "/plugins/kibanaReact/assets/solutions_solution_4.svg",
                   ],
                   Array [
                     "home#/tutorial_directory",
@@ -965,7 +949,7 @@ exports[`Overview without solutions 1`] = `
                   },
                   Object {
                     "type": "return",
-                    "value": "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
+                    "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
                   },
                   Object {
                     "type": "return",
@@ -973,7 +957,7 @@ exports[`Overview without solutions 1`] = `
                   },
                   Object {
                     "type": "return",
-                    "value": "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
+                    "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
                   },
                   Object {
                     "type": "return",
@@ -981,7 +965,7 @@ exports[`Overview without solutions 1`] = `
                   },
                   Object {
                     "type": "return",
-                    "value": "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
+                    "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
                   },
                   Object {
                     "type": "return",
@@ -989,7 +973,7 @@ exports[`Overview without solutions 1`] = `
                   },
                   Object {
                     "type": "return",
-                    "value": "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
+                    "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
                   },
                   Object {
                     "type": "return",
@@ -1026,25 +1010,25 @@ exports[`Overview without solutions 1`] = `
             "kibana_landing_page",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
+            "/plugins/kibanaReact/assets/solutions_kibana.svg",
           ],
           Array [
             "path-to-solution-two",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
+            "/plugins/kibanaReact/assets/solutions_solution_2.svg",
           ],
           Array [
             "path-to-solution-three",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
+            "/plugins/kibanaReact/assets/solutions_solution_3.svg",
           ],
           Array [
             "path-to-solution-four",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
+            "/plugins/kibanaReact/assets/solutions_solution_4.svg",
           ],
           Array [
             "home#/tutorial_directory",
@@ -1068,7 +1052,7 @@ exports[`Overview without solutions 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_kibana_2x.png",
+            "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
           },
           Object {
             "type": "return",
@@ -1076,7 +1060,7 @@ exports[`Overview without solutions 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_2x.png",
+            "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
           },
           Object {
             "type": "return",
@@ -1084,7 +1068,7 @@ exports[`Overview without solutions 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_2x.png",
+            "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
           },
           Object {
             "type": "return",
@@ -1092,7 +1076,7 @@ exports[`Overview without solutions 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_2x.png",
+            "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
           },
           Object {
             "type": "return",
@@ -1109,5 +1093,5 @@ exports[`Overview without solutions 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/kibana_overview"
   />
-</Component>
+</mockConstructor>
 `;

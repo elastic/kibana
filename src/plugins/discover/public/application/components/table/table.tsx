@@ -36,13 +36,14 @@ export interface FieldRecord {
     flattenedField: unknown;
   };
   field: {
-    fieldName: string;
-    fieldType: string;
-    fieldMapping: IndexPatternField | undefined;
+    displayName: string;
+    field: string;
     scripted: boolean;
+    fieldType?: string;
+    fieldMapping?: IndexPatternField;
   };
   value: {
-    formattedField: unknown;
+    formattedValue: string;
   };
 }
 
@@ -56,7 +57,7 @@ export const DocViewerTable = ({
 }: DocViewRenderProps) => {
   const showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
 
-  const mapping = useCallback((name) => indexPattern?.fields.getByName(name), [
+  const mapping = useCallback((name: string) => indexPattern?.fields.getByName(name), [
     indexPattern?.fields,
   ]);
 
@@ -82,10 +83,11 @@ export const DocViewerTable = ({
     [onRemoveColumn, onAddColumn, columns]
   );
 
-  const onSetRowProps = useCallback(({ field: { fieldName } }: FieldRecord) => {
+  const onSetRowProps = useCallback(({ field: { field } }: FieldRecord) => {
     return {
+      key: field,
       className: 'kbnDocViewer__tableRow',
-      'data-test-subj': `tableDocViewRow-${fieldName}`,
+      'data-test-subj': `tableDocViewRow-${field}`,
     };
   }, []);
 
@@ -117,31 +119,34 @@ export const DocViewerTable = ({
       const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
       return nameA.localeCompare(nameB);
     })
-    .map((fieldName) => {
-      const fieldMapping = mapping(fieldName);
-      const fieldType = isNestedFieldParent(fieldName, indexPattern)
-        ? 'nested'
-        : fieldMapping?.type;
+    .map((field) => {
+      const fieldMapping = mapping(field);
+      const displayName = fieldMapping?.displayName ?? field;
+      const fieldType = isNestedFieldParent(field, indexPattern) ? 'nested' : fieldMapping?.type;
 
       return {
         action: {
           onToggleColumn,
           onFilter: filter,
-          isActive: !!columns?.includes(fieldName),
-          flattenedField: flattened[fieldName],
+          isActive: !!columns?.includes(field),
+          flattenedField: flattened[field],
         },
         field: {
-          fieldName,
-          fieldType: fieldType!,
-          scripted: Boolean(fieldMapping?.scripted),
+          field,
+          displayName,
           fieldMapping,
+          fieldType,
+          scripted: Boolean(fieldMapping?.scripted),
         },
-        value: { formattedField: formattedHit[fieldName] },
+        value: {
+          formattedValue: formattedHit[field],
+        },
       };
     });
 
   return (
     <EuiInMemoryTable
+      tableLayout="auto"
       className="kbnDocViewer__table"
       items={items}
       columns={tableColumns}

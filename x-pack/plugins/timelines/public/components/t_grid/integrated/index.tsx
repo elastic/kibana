@@ -125,6 +125,7 @@ export interface TGridIntegratedProps {
   entityType: EntityType;
   filters: Filter[];
   globalFullScreen: boolean;
+  graphOverlay?: React.ReactNode;
   headerFilterGroup?: React.ReactNode;
   filterStatus?: AlertStatus;
   height?: number;
@@ -180,6 +181,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   start,
   sort,
   additionalFilters,
+  graphOverlay = null,
   graphEventId,
   leadingControlColumns,
   trailingControlColumns,
@@ -312,7 +314,13 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   return (
     <InspectButtonContainer>
-      <StyledEuiPanel data-test-subj="events-viewer-panel" $isFullScreen={globalFullScreen}>
+      <StyledEuiPanel
+        hasBorder={false}
+        hasShadow={false}
+        paddingSize="none"
+        data-test-subj="events-viewer-panel"
+        $isFullScreen={globalFullScreen}
+      >
         {loading && <EuiProgress size="xs" position="absolute" color="accent" />}
 
         {canQueryTimeline ? (
@@ -332,13 +340,17 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               data-timeline-id={id}
               data-test-subj={`events-container-loading-${loading}`}
             >
+              {graphOverlay}
               <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
                 <UpdatedFlexItem grow={false} show={!loading}>
                   {!resolverIsShowing(graphEventId) && additionalFilters}
                 </UpdatedFlexItem>
               </EuiFlexGroup>
 
-              <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
+              <FullWidthFlexGroup
+                $visible={!graphEventId && graphOverlay == null}
+                gutterSize="none"
+              >
                 <ScrollableFlexItem grow={1}>
                   {nonDeletedEvents.length === 0 && loading === false ? (
                     <EuiEmptyPrompt
