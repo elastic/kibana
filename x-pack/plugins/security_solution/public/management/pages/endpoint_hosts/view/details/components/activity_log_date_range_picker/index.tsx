@@ -29,11 +29,12 @@ interface Range {
 
 const DatePickerWrapper = styled.div`
   width: ${(props) => props.theme.eui.fractions.single.percentage};
-  background: white;
+  max-width: 250px;
 `;
 const StickyFlexItem = styled(EuiFlexItem)`
+  background: white;
   position: sticky;
-  top: ${(props) => props.theme.eui.euiSizeM};
+  top: 0;
   z-index: 1;
   padding: ${(props) => `${props.theme.eui.paddingSizes.m}`};
 `;
@@ -121,7 +122,7 @@ export const DateRangePicker = memo(() => {
 
   return (
     <StickyFlexItem grow={false}>
-      <EuiFlexGroup justifyContent="flexEnd" responsive>
+      <EuiFlexGroup justifyContent="flexStart" responsive>
         <DatePickerWrapper data-test-subj="activityLogSuperDatePicker">
           <EuiFlexItem>
             <EuiSuperDatePicker
