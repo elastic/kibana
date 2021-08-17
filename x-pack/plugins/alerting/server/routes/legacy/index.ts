@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
-import { ILicenseState } from '../../lib';
-import { AlertingRequestHandlerContext } from '../../types';
-import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
-
 import { aggregateAlertRoute } from './aggregate';
 import { createAlertRoute } from './create';
 import { deleteAlertRoute } from './delete';
@@ -27,14 +22,13 @@ import { unmuteAlertInstanceRoute } from './unmute_instance';
 import { muteAllAlertRoute } from './mute_all';
 import { unmuteAllAlertRoute } from './unmute_all';
 import { healthRoute } from './health';
+import { RouteOptions } from '..';
 
-export function defineLegacyRoutes(
-  router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
-) {
+export function defineLegacyRoutes(opts: RouteOptions) {
+  const { router, licenseState, encryptedSavedObjects } = opts;
+
+  createAlertRoute(opts);
   aggregateAlertRoute(router, licenseState);
-  createAlertRoute(router, licenseState);
   deleteAlertRoute(router, licenseState);
   findAlertRoute(router, licenseState);
   getAlertRoute(router, licenseState);
