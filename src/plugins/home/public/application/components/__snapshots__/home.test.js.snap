@@ -1,291 +1,182 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`home change home route should render a link to change the default route in advanced settings if advanced settings is enabled 1`] = `
-<Component
+<mockConstructor
   data-test-subj="homeApp"
   pageHeader={
     Object {
+      "bottomBorder": false,
       "pageTitle": <FormattedMessage
-        defaultMessage="Home"
+        defaultMessage="Welcome home"
         id="home.header.title"
         values={Object {}}
       />,
-      "rightSideItems": Array [],
-    }
-  }
-  template="empty"
->
-  <EuiFlexGroup
-    className="homData homData--expanded"
-  >
-    <EuiFlexItem>
-      <AddData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <ManageData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
-  />
-  <mockConstructor
-    addBasePath={[Function]}
-    onChangeDefaultRoute={[Function]}
-    onSetDefaultRoute={[Function]}
-    path="/app/home"
-  />
-</Component>
-`;
-
-exports[`home directories should not render directory entry when showOnHomePage is false 1`] = `
-<Component
-  data-test-subj="homeApp"
-  pageHeader={
-    Object {
-      "pageTitle": <FormattedMessage
-        defaultMessage="Home"
-        id="home.header.title"
-        values={Object {}}
-      />,
-      "rightSideItems": Array [],
-    }
-  }
-  template="empty"
->
-  <EuiFlexGroup
-    className="homData homData--expanded"
-  >
-    <EuiFlexItem>
-      <AddData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <ManageData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
-  />
-  <mockConstructor
-    addBasePath={[Function]}
-    onChangeDefaultRoute={[Function]}
-    onSetDefaultRoute={[Function]}
-    path="/app/home"
-  />
-</Component>
-`;
-
-exports[`home directories should render ADMIN directory entry in "Manage your data" panel 1`] = `
-<Component
-  data-test-subj="homeApp"
-  pageHeader={
-    Object {
-      "pageTitle": <FormattedMessage
-        defaultMessage="Home"
-        id="home.header.title"
-        values={Object {}}
-      />,
-      "rightSideItems": Array [],
-    }
-  }
-  template="empty"
->
-  <EuiFlexGroup
-    className="homData homData--expanded"
-  >
-    <EuiFlexItem>
-      <AddData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <ManageData
-        addBasePath={[Function]}
-        features={
-          Array [
-            Object {
-              "category": "admin",
-              "description": "Manage the index patterns that help retrieve your data from Elasticsearch.",
-              "icon": "indexPatternApp",
-              "id": "index_patterns",
-              "path": "index_management_landing_page",
-              "showOnHomePage": true,
-              "title": "Index Patterns",
-            },
-          ]
-        }
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
-  />
-  <mockConstructor
-    addBasePath={[Function]}
-    onChangeDefaultRoute={[Function]}
-    onSetDefaultRoute={[Function]}
-    path="/app/home"
-  />
-</Component>
-`;
-
-exports[`home directories should render DATA directory entry in "Ingest your data" panel 1`] = `
-<Component
-  data-test-subj="homeApp"
-  pageHeader={
-    Object {
-      "pageTitle": <FormattedMessage
-        defaultMessage="Home"
-        id="home.header.title"
-        values={Object {}}
-      />,
-      "rightSideItems": Array [],
-    }
-  }
-  template="empty"
->
-  <EuiFlexGroup
-    className="homData homData--expanded"
-  >
-    <EuiFlexItem>
-      <AddData
-        addBasePath={[Function]}
-        features={
-          Array [
-            Object {
-              "category": "data",
-              "description": "Display and share a collection of visualizations and saved searches.",
-              "icon": "dashboardApp",
-              "id": "dashboard",
-              "path": "dashboard_landing_page",
-              "showOnHomePage": true,
-              "title": "Dashboard",
-            },
-          ]
-        }
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <ManageData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
-  />
-  <mockConstructor
-    addBasePath={[Function]}
-    onChangeDefaultRoute={[Function]}
-    onSetDefaultRoute={[Function]}
-    path="/app/home"
-  />
-</Component>
-`;
-
-exports[`home directories should render solutions in the "solution section" 1`] = `
-<Component
-  data-test-subj="homeApp"
-  pageHeader={
-    Object {
-      "pageTitle": <FormattedMessage
-        defaultMessage="Home"
-        id="home.header.title"
-        values={Object {}}
-      />,
-      "rightSideItems": Array [],
     }
   }
   template="empty"
 >
   <SolutionsSection
     addBasePath={[Function]}
-    directories={Array []}
+    solutions={Array []}
+  />
+  <AddData
+    addBasePath={[Function]}
+    isDarkMode={false}
+  />
+  <ManageData
+    addBasePath={[Function]}
+    features={Array []}
+  />
+  <mockConstructor
+    addBasePath={[Function]}
+    onChangeDefaultRoute={[Function]}
+    onSetDefaultRoute={[Function]}
+    path="/app/home"
+  />
+</mockConstructor>
+`;
+
+exports[`home directories should not render directory entry when showOnHomePage is false 1`] = `
+<mockConstructor
+  data-test-subj="homeApp"
+  pageHeader={
+    Object {
+      "bottomBorder": false,
+      "pageTitle": <FormattedMessage
+        defaultMessage="Welcome home"
+        id="home.header.title"
+        values={Object {}}
+      />,
+    }
+  }
+  template="empty"
+>
+  <SolutionsSection
+    addBasePath={[Function]}
+    solutions={Array []}
+  />
+  <AddData
+    addBasePath={[Function]}
+    isDarkMode={false}
+  />
+  <ManageData
+    addBasePath={[Function]}
+    features={Array []}
+  />
+  <mockConstructor
+    addBasePath={[Function]}
+    onChangeDefaultRoute={[Function]}
+    onSetDefaultRoute={[Function]}
+    path="/app/home"
+  />
+</mockConstructor>
+`;
+
+exports[`home directories should render ADMIN directory entry in "Manage your data" panel 1`] = `
+<mockConstructor
+  data-test-subj="homeApp"
+  pageHeader={
+    Object {
+      "bottomBorder": false,
+      "pageTitle": <FormattedMessage
+        defaultMessage="Welcome home"
+        id="home.header.title"
+        values={Object {}}
+      />,
+    }
+  }
+  template="empty"
+>
+  <SolutionsSection
+    addBasePath={[Function]}
+    solutions={Array []}
+  />
+  <AddData
+    addBasePath={[Function]}
+    isDarkMode={false}
+  />
+  <ManageData
+    addBasePath={[Function]}
+    features={
+      Array [
+        Object {
+          "category": "admin",
+          "description": "Manage the index patterns that help retrieve your data from Elasticsearch.",
+          "icon": "indexPatternApp",
+          "id": "index_patterns",
+          "path": "index_management_landing_page",
+          "showOnHomePage": true,
+          "title": "Index Patterns",
+        },
+      ]
+    }
+  />
+  <mockConstructor
+    addBasePath={[Function]}
+    onChangeDefaultRoute={[Function]}
+    onSetDefaultRoute={[Function]}
+    path="/app/home"
+  />
+</mockConstructor>
+`;
+
+exports[`home directories should render solutions in the "solution section" 1`] = `
+<mockConstructor
+  data-test-subj="homeApp"
+  pageHeader={
+    Object {
+      "bottomBorder": false,
+      "pageTitle": <FormattedMessage
+        defaultMessage="Welcome home"
+        id="home.header.title"
+        values={Object {}}
+      />,
+    }
+  }
+  template="empty"
+>
+  <SolutionsSection
+    addBasePath={[Function]}
     solutions={
       Array [
         Object {
-          "appDescriptions": Array [
-            "Analyze data in dashboards",
-          ],
           "icon": "logoKibana",
           "id": "kibana",
           "order": 1,
           "path": "kibana_landing_page",
-          "subtitle": "Visualize & analyze",
           "title": "Kibana",
         },
         Object {
-          "appDescriptions": Array [
-            "Example use case",
-          ],
           "icon": "empty",
           "id": "solution-2",
           "order": 2,
           "path": "path-to-solution-two",
-          "subtitle": "Subtitle for solution two",
           "title": "Solution two",
         },
         Object {
-          "appDescriptions": Array [
-            "Example use case",
-          ],
           "icon": "empty",
           "id": "solution-3",
           "order": 3,
           "path": "path-to-solution-three",
-          "subtitle": "Subtitle for solution three",
           "title": "Solution three",
         },
         Object {
-          "appDescriptions": Array [
-            "Example use case",
-          ],
           "icon": "empty",
           "id": "solution-4",
           "order": 4,
           "path": "path-to-solution-four",
-          "subtitle": "Subtitle for solution four",
           "title": "Solution four",
         },
       ]
     }
   />
-  <EuiFlexGroup
-    className="homData homData--expanded"
-  >
-    <EuiFlexItem>
-      <AddData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <ManageData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
+  <AddData
+    addBasePath={[Function]}
+    isDarkMode={false}
+  />
+  <ManageData
+    addBasePath={[Function]}
+    features={Array []}
   />
   <mockConstructor
     addBasePath={[Function]}
@@ -293,187 +184,35 @@ exports[`home directories should render solutions in the "solution section" 1`] 
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</Component>
-`;
-
-exports[`home header render 1`] = `
-<Component
-  data-test-subj="homeApp"
-  pageHeader={
-    Object {
-      "pageTitle": <FormattedMessage
-        defaultMessage="Home"
-        id="home.header.title"
-        values={Object {}}
-      />,
-      "rightSideItems": Array [],
-    }
-  }
-  template="empty"
->
-  <EuiFlexGroup
-    className="homData homData--expanded"
-  >
-    <EuiFlexItem>
-      <AddData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <ManageData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
-  />
-  <mockConstructor
-    addBasePath={[Function]}
-    onChangeDefaultRoute={[Function]}
-    onSetDefaultRoute={[Function]}
-    path="/app/home"
-  />
-</Component>
-`;
-
-exports[`home header should show "Dev tools" link if console is available 1`] = `
-<Component
-  data-test-subj="homeApp"
-  pageHeader={
-    Object {
-      "pageTitle": <FormattedMessage
-        defaultMessage="Home"
-        id="home.header.title"
-        values={Object {}}
-      />,
-      "rightSideItems": Array [],
-    }
-  }
-  template="empty"
->
-  <EuiFlexGroup
-    className="homData homData--expanded"
-  >
-    <EuiFlexItem>
-      <AddData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <ManageData
-        addBasePath={[Function]}
-        features={
-          Array [
-            Object {
-              "category": "admin",
-              "description": "Skip cURL and use a JSON interface to work with your data in Console.",
-              "icon": "consoleApp",
-              "id": "console",
-              "path": "path-to-dev-tools",
-              "showOnHomePage": false,
-              "title": "Console",
-            },
-          ]
-        }
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
-  />
-  <mockConstructor
-    addBasePath={[Function]}
-    onChangeDefaultRoute={[Function]}
-    onSetDefaultRoute={[Function]}
-    path="/app/home"
-  />
-</Component>
-`;
-
-exports[`home header should show "Manage" link if stack management is available 1`] = `
-<Component
-  data-test-subj="homeApp"
-  pageHeader={
-    Object {
-      "pageTitle": <FormattedMessage
-        defaultMessage="Home"
-        id="home.header.title"
-        values={Object {}}
-      />,
-      "rightSideItems": Array [],
-    }
-  }
-  template="empty"
->
-  <EuiFlexGroup
-    className="homData homData--expanded"
-  >
-    <EuiFlexItem>
-      <AddData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <ManageData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
-  />
-  <mockConstructor
-    addBasePath={[Function]}
-    onChangeDefaultRoute={[Function]}
-    onSetDefaultRoute={[Function]}
-    path="/app/home"
-  />
-</Component>
+</mockConstructor>
 `;
 
 exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
-<Component
+<mockConstructor
   data-test-subj="homeApp"
   pageHeader={
     Object {
+      "bottomBorder": false,
       "pageTitle": <FormattedMessage
-        defaultMessage="Home"
+        defaultMessage="Welcome home"
         id="home.header.title"
         values={Object {}}
       />,
-      "rightSideItems": Array [],
     }
   }
   template="empty"
 >
-  <EuiFlexGroup
-    className="homData homData--expanded"
-  >
-    <EuiFlexItem>
-      <AddData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <ManageData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
+  <SolutionsSection
+    addBasePath={[Function]}
+    solutions={Array []}
+  />
+  <AddData
+    addBasePath={[Function]}
+    isDarkMode={false}
+  />
+  <ManageData
+    addBasePath={[Function]}
+    features={Array []}
   />
   <mockConstructor
     addBasePath={[Function]}
@@ -481,43 +220,35 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when there are index patterns 1`] = `
-<Component
+<mockConstructor
   data-test-subj="homeApp"
   pageHeader={
     Object {
+      "bottomBorder": false,
       "pageTitle": <FormattedMessage
-        defaultMessage="Home"
+        defaultMessage="Welcome home"
         id="home.header.title"
         values={Object {}}
       />,
-      "rightSideItems": Array [],
     }
   }
   template="empty"
 >
-  <EuiFlexGroup
-    className="homData homData--expanded"
-  >
-    <EuiFlexItem>
-      <AddData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <ManageData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
+  <SolutionsSection
+    addBasePath={[Function]}
+    solutions={Array []}
+  />
+  <AddData
+    addBasePath={[Function]}
+    isDarkMode={false}
+  />
+  <ManageData
+    addBasePath={[Function]}
+    features={Array []}
   />
   <mockConstructor
     addBasePath={[Function]}
@@ -525,43 +256,35 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when there are no index patterns 1`] = `
-<Component
+<mockConstructor
   data-test-subj="homeApp"
   pageHeader={
     Object {
+      "bottomBorder": false,
       "pageTitle": <FormattedMessage
-        defaultMessage="Home"
+        defaultMessage="Welcome home"
         id="home.header.title"
         values={Object {}}
       />,
-      "rightSideItems": Array [],
     }
   }
   template="empty"
 >
-  <EuiFlexGroup
-    className="homData homData--expanded"
-  >
-    <EuiFlexItem>
-      <AddData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <ManageData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
+  <SolutionsSection
+    addBasePath={[Function]}
+    solutions={Array []}
+  />
+  <AddData
+    addBasePath={[Function]}
+    isDarkMode={false}
+  />
+  <ManageData
+    addBasePath={[Function]}
+    features={Array []}
   />
   <mockConstructor
     addBasePath={[Function]}
@@ -569,43 +292,35 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`home should render home component 1`] = `
-<Component
+<mockConstructor
   data-test-subj="homeApp"
   pageHeader={
     Object {
+      "bottomBorder": false,
       "pageTitle": <FormattedMessage
-        defaultMessage="Home"
+        defaultMessage="Welcome home"
         id="home.header.title"
         values={Object {}}
       />,
-      "rightSideItems": Array [],
     }
   }
   template="empty"
 >
-  <EuiFlexGroup
-    className="homData homData--expanded"
-  >
-    <EuiFlexItem>
-      <AddData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <ManageData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
+  <SolutionsSection
+    addBasePath={[Function]}
+    solutions={Array []}
+  />
+  <AddData
+    addBasePath={[Function]}
+    isDarkMode={false}
+  />
+  <ManageData
+    addBasePath={[Function]}
+    features={Array []}
   />
   <mockConstructor
     addBasePath={[Function]}
@@ -613,43 +328,35 @@ exports[`home should render home component 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`home welcome should show the normal home page if loading fails 1`] = `
-<Component
+<mockConstructor
   data-test-subj="homeApp"
   pageHeader={
     Object {
+      "bottomBorder": false,
       "pageTitle": <FormattedMessage
-        defaultMessage="Home"
+        defaultMessage="Welcome home"
         id="home.header.title"
         values={Object {}}
       />,
-      "rightSideItems": Array [],
     }
   }
   template="empty"
 >
-  <EuiFlexGroup
-    className="homData homData--expanded"
-  >
-    <EuiFlexItem>
-      <AddData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <ManageData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
+  <SolutionsSection
+    addBasePath={[Function]}
+    solutions={Array []}
+  />
+  <AddData
+    addBasePath={[Function]}
+    isDarkMode={false}
+  />
+  <ManageData
+    addBasePath={[Function]}
+    features={Array []}
   />
   <mockConstructor
     addBasePath={[Function]}
@@ -657,43 +364,35 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`home welcome should show the normal home page if welcome screen is disabled locally 1`] = `
-<Component
+<mockConstructor
   data-test-subj="homeApp"
   pageHeader={
     Object {
+      "bottomBorder": false,
       "pageTitle": <FormattedMessage
-        defaultMessage="Home"
+        defaultMessage="Welcome home"
         id="home.header.title"
         values={Object {}}
       />,
-      "rightSideItems": Array [],
     }
   }
   template="empty"
 >
-  <EuiFlexGroup
-    className="homData homData--expanded"
-  >
-    <EuiFlexItem>
-      <AddData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <ManageData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
+  <SolutionsSection
+    addBasePath={[Function]}
+    solutions={Array []}
+  />
+  <AddData
+    addBasePath={[Function]}
+    isDarkMode={false}
+  />
+  <ManageData
+    addBasePath={[Function]}
+    features={Array []}
   />
   <mockConstructor
     addBasePath={[Function]}
@@ -701,7 +400,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</Component>
+</mockConstructor>
 `;
 
 exports[`home welcome should show the welcome screen if enabled, and there are no index patterns defined 1`] = `
@@ -712,39 +411,31 @@ exports[`home welcome should show the welcome screen if enabled, and there are n
 `;
 
 exports[`home welcome stores skip welcome setting if skipped 1`] = `
-<Component
+<mockConstructor
   data-test-subj="homeApp"
   pageHeader={
     Object {
+      "bottomBorder": false,
       "pageTitle": <FormattedMessage
-        defaultMessage="Home"
+        defaultMessage="Welcome home"
         id="home.header.title"
         values={Object {}}
       />,
-      "rightSideItems": Array [],
     }
   }
   template="empty"
 >
-  <EuiFlexGroup
-    className="homData homData--expanded"
-  >
-    <EuiFlexItem>
-      <AddData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <ManageData
-        addBasePath={[Function]}
-        features={Array []}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiHorizontalRule
-    aria-hidden="true"
-    margin="xl"
+  <SolutionsSection
+    addBasePath={[Function]}
+    solutions={Array []}
+  />
+  <AddData
+    addBasePath={[Function]}
+    isDarkMode={false}
+  />
+  <ManageData
+    addBasePath={[Function]}
+    features={Array []}
   />
   <mockConstructor
     addBasePath={[Function]}
@@ -752,5 +443,5 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</Component>
+</mockConstructor>
 `;

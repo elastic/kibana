@@ -11,10 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Logger } from 'kibana/server';
 import { MlJob } from '@elastic/elasticsearch/api/types';
 import { MlClient } from '../ml_client';
-import {
-  AnomalyDetectionJobsHealthRuleParams,
-  JobSelection,
-} from '../../routes/schemas/alerting_schema';
+import { JobSelection } from '../../routes/schemas/alerting_schema';
 import { datafeedsProvider, DatafeedsService } from '../../models/job_service/datafeeds';
 import { ALL_JOBS_SELECTION, HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';
 import { DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
@@ -22,6 +19,7 @@ import { GetGuards } from '../../shared_services/shared_services';
 import {
   AnomalyDetectionJobsHealthAlertContext,
   DelayedDataResponse,
+  JobsHealthExecutorOptions,
   MmlTestResponse,
   NotStartedDatafeedResponse,
 } from './register_jobs_monitoring_rule_type';
@@ -33,6 +31,10 @@ import { AnnotationService } from '../../models/annotation_service/annotation';
 import { annotationServiceProvider } from '../../models/annotation_service';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { isDefined } from '../../../common/types/guards';
+import {
+  jobAuditMessagesProvider,
+  JobAuditMessagesService,
+} from '../../models/job_audit_messages/job_audit_messages';
 
 interface TestResult {
   name: string;
@@ -45,6 +47,7 @@ export function jobsHealthServiceProvider(
   mlClient: MlClient,
   datafeedsService: DatafeedsService,
   annotationService: AnnotationService,
+  jobAuditMessagesService: JobAuditMessagesService,
   logger: Logger
 ) {
   /**
@@ -237,12 +240,24 @@ export function jobsHealthServiceProvider(
       return annotations;
     },
     /**
+     * Retrieves a list of the latest errors per jobs.
+     * @param jobIds List of job IDs.
+     * @param previousStartedAt Time of the previous rule execution. As we intend to notify
+     *                          about an error only once, limit the scope of the errors search.
+     */
+    async getErrorsReport(jobIds: string[], previousStartedAt: Date) {
+      return await jobAuditMessagesService.getJobsErrors(jobIds, previousStartedAt.getTime());
+    },
+    /**
      * Retrieves report grouped by test.
      */
-    async getTestsResults(
-      ruleInstanceName: string,
-      { testsConfig, includeJobs, excludeJobs }: AnomalyDetectionJobsHealthRuleParams
-    ): Promise<TestsResults> {
+    async getTestsResults(executorOptions: JobsHealthExecutorOptions): Promise<TestsResults> {
+      const {
+        rule,
+        previousStartedAt,
+        params: { testsConfig, includeJobs, excludeJobs },
+      } = executorOptions;
+
       const config = getResultJobsHealthRuleConfig(testsConfig);
 
       const results: TestsResults = [];
@@ -251,7 +266,7 @@ export function jobsHealthServiceProvider(
       const jobIds = getJobIds(jobs);
 
       if (jobIds.length === 0) {
-        logger.warn(`Rule "${ruleInstanceName}" does not have associated jobs.`);
+        logger.warn(`Rule "${rule.name}" does not have associated jobs.`);
         return results;
       }
 
@@ -334,6 +349,26 @@ export function jobsHealthServiceProvider(
         }
       }
 
+      if (config.errorMessages.enabled && previousStartedAt) {
+        const response = await this.getErrorsReport(jobIds, previousStartedAt);
+        if (response.length > 0) {
+          results.push({
+            name: HEALTH_CHECK_NAMES.errorMessages.name,
+            context: {
+              results: response,
+              message: i18n.translate(
+                'xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesMessage',
+                {
+                  defaultMessage:
+                    '{jobsCount, plural, one {# job contains} other {# jobs contain}} errors in the messages.',
+                  values: { jobsCount: response.length },
+                }
+              ),
+            },
+          });
+        }
+      }
+
       return results;
     },
   };
@@ -360,6 +395,7 @@ export function getJobsHealthServiceProvider(getGuards: GetGuards) {
                 mlClient,
                 datafeedsProvider(scopedClient, mlClient),
                 annotationServiceProvider(scopedClient),
+                jobAuditMessagesProvider(scopedClient, mlClient),
                 logger
               ).getTestsResults(...args)
             );
