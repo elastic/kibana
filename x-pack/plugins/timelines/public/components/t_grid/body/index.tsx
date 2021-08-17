@@ -41,6 +41,8 @@ import {
   SortColumnTimeline,
   TimelineId,
   TimelineTabs,
+  SetEventsLoading,
+  SetEventsDeleted,
 } from '../../../../common/types/timeline';
 
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
@@ -131,6 +133,8 @@ const transformControlColumns = ({
   browserFields,
   sort,
   theme,
+  setEventsLoading,
+  setEventsDeleted,
 }: {
   actionColumnsWidth: number;
   columnHeaders: ColumnHeaderOptions[];
@@ -149,6 +153,8 @@ const transformControlColumns = ({
   onSelectPage: OnSelectAll;
   sort: SortColumnTimeline[];
   theme: EuiTheme;
+  setEventsLoading: SetEventsLoading;
+  setEventsDeleted: SetEventsDeleted;
 }): EuiDataGridControlColumn[] =>
   controlColumns.map(
     ({ id: columnId, headerCellRender = EmptyHeaderCellRender, rowCellRender, width }, i) => ({
@@ -208,6 +214,8 @@ const transformControlColumns = ({
             tabType={tabType}
             timelineId={timelineId}
             width={width ?? MIN_ACTION_COLUMN_WIDTH}
+            setEventsLoading={setEventsLoading}
+            setEventsDeleted={setEventsDeleted}
           />
         );
       },
@@ -438,6 +446,20 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       setVisibleColumns(columnHeaders.map(({ id: cid }) => cid));
     }, [columnHeaders]);
 
+    const setEventsLoading = useCallback<SetEventsLoading>(
+      ({ eventIds, isLoading }) => {
+        dispatch(tGridActions.setEventsLoading({ id, eventIds, isLoading }));
+      },
+      [dispatch, id]
+    );
+
+    const setEventsDeleted = useCallback<SetEventsDeleted>(
+      ({ eventIds, isDeleted }) => {
+        dispatch(tGridActions.setEventsDeleted({ id, eventIds, isDeleted }));
+      },
+      [dispatch, id]
+    );
+
     const [leadingTGridControlColumns, trailingTGridControlColumns] = useMemo(() => {
       return [
         showCheckboxes ? [checkBoxControlColumn, ...leadingControlColumns] : leadingControlColumns,
@@ -467,6 +489,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           browserFields,
           onSelectPage,
           theme,
+          setEventsLoading,
+          setEventsDeleted,
         })
       );
     }, [
@@ -487,6 +511,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       onSelectPage,
       sort,
       theme,
+      setEventsLoading,
+      setEventsDeleted,
     ]);
 
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
