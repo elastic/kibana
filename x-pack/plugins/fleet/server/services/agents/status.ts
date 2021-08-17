@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient } from 'src/core/server';
 import pMap from 'p-map';
+
+import type { KueryNode } from '@kbn/es-query';
+import { fromKueryExpression } from '@kbn/es-query';
 
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import type { AgentStatus } from '../../types';
 import { AgentStatusKueryHelper } from '../../../common/services';
-import { esKuery } from '../../../../../../src/plugins/data/server';
-import type { KueryNode } from '../../../../../../src/plugins/data/server';
 
 import { getAgentById, getAgentsByKuery, removeSOAttributes } from './crud';
 
@@ -32,9 +33,7 @@ function joinKuerys(...kuerys: Array<string | undefined>) {
       if (kuery === undefined) {
         return acc;
       }
-      const normalizedKuery: KueryNode = esKuery.fromKueryExpression(
-        removeSOAttributes(kuery || '')
-      );
+      const normalizedKuery: KueryNode = fromKueryExpression(removeSOAttributes(kuery || ''));
 
       if (!acc) {
         return normalizedKuery;
@@ -49,7 +48,6 @@ function joinKuerys(...kuerys: Array<string | undefined>) {
 }
 
 export async function getAgentStatusForAgentPolicy(
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   agentPolicyId?: string,
   filterKuery?: string

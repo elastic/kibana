@@ -9,5 +9,6 @@
 // required for i18nIdDirective
 import 'angular-sanitize';
 
-import './discover';
-import './doc_viewer';
+import './doc';
+import './context';
+import './redirect';

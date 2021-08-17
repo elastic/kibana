@@ -15,7 +15,10 @@ import { RangeFilter } from './range_filter';
 import { MatchAllFilter } from './match_all_filter';
 import { MissingFilter } from './missing_filter';
 
-// Any filter associated with a field (used in the filter bar/editor)
+/**
+ * A common type for filters supported by this package
+ * @public
+ **/
 export type FieldFilter =
   | ExistsFilter
   | GeoBoundingBoxFilter
@@ -26,6 +29,16 @@ export type FieldFilter =
   | MatchAllFilter
   | MissingFilter;
 
+/**
+ * A common type for filters supported by this package
+ * @public
+ **/
+export type FilterParams = any;
+
+/**
+ * An enum of all types of filters supported by this package
+ * @public
+ */
 export enum FILTERS {
   CUSTOM = 'custom',
   PHRASES = 'phrases',
@@ -41,15 +54,14 @@ export enum FILTERS {
   SPATIAL_FILTER = 'spatial_filter',
 }
 
+/**
+ * An enum to denote whether a filter is specific to an application's context or whether it should be applied globally.
+ * @public
+ */
 export enum FilterStateStore {
   APP_STATE = 'appState',
   GLOBAL_STATE = 'globalState',
 }
-
-// eslint-disable-next-line
-export type FilterState = {
-  store: FilterStateStore;
-};
 
 // eslint-disable-next-line
 export type FilterMeta = {
@@ -69,7 +81,9 @@ export type FilterMeta = {
 
 // eslint-disable-next-line
 export type Filter = {
-  $state?: FilterState;
+  $state?: {
+    store: FilterStateStore;
+  };
   meta: FilterMeta;
   query?: any; // TODO: can we use the Query type her?
 };
@@ -80,6 +94,10 @@ export type Query = {
   language: string;
 };
 
+/**
+ * An interface for a latitude-longitude pair
+ * @public
+ */
 export interface LatLon {
   lat: number;
   lon: number;

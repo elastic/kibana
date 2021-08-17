@@ -18,5 +18,5 @@
     "name": "Kibana App",
     "githubTeam": "kibana-app"
   },
-  "description": "Contains the new xy-axis chart using the elastic-charts library, which will eventually replace the vislib xy-axis charts including bar, area, and line."
+  "description": "Contains the shared architecture among all the legacy visualizations, e.g. the visualization type registry or the visualization embeddable."
 }

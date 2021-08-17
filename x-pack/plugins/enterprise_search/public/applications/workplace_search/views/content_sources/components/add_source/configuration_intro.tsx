@@ -96,9 +96,9 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
                   >
                     <EuiFlexItem grow={false}>
                       <div className="adding-a-source__intro-step">
-                        <EuiText>
-                          <h4>{CONFIG_INTRO_STEP1_HEADING}</h4>
-                        </EuiText>
+                        <EuiTitle size="xs">
+                          <h3>{CONFIG_INTRO_STEP1_HEADING}</h3>
+                        </EuiTitle>
                       </div>
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -125,9 +125,9 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
                   >
                     <EuiFlexItem grow={false}>
                       <div className="adding-a-source__intro-step">
-                        <EuiText>
+                        <EuiTitle size="xs">
                           <h4>{CONFIG_INTRO_STEP2_HEADING}</h4>
-                        </EuiText>
+                        </EuiTitle>
                       </div>
                     </EuiFlexItem>
                     <EuiFlexItem>

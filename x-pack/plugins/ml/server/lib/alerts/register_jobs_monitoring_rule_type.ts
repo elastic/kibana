@@ -42,7 +42,20 @@ export interface NotStartedDatafeedResponse {
   job_state: MlJobState;
 }
 
-export type AnomalyDetectionJobHealthResult = MmlTestResponse | NotStartedDatafeedResponse;
+export interface DelayedDataResponse {
+  job_id: string;
+  /** Annotation string */
+  annotation: string;
+  /** Number of missed documents */
+  missed_docs_count: number;
+  /** Timestamp of the latest finalized bucket with missing docs */
+  end_timestamp: number;
+}
+
+export type AnomalyDetectionJobHealthResult =
+  | MmlTestResponse
+  | NotStartedDatafeedResponse
+  | DelayedDataResponse;
 
 export type AnomalyDetectionJobsHealthAlertContext = {
   results: AnomalyDetectionJobHealthResult[];
@@ -107,7 +120,7 @@ export function registerJobsMonitoringRuleType({
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,
-    async executor({ services, params, alertId, state, previousStartedAt, startedAt, name }) {
+    async executor({ services, params, alertId, state, previousStartedAt, startedAt, name, rule }) {
       const fakeRequest = {} as KibanaRequest;
       const { getTestsResults } = mlServicesProviders.jobsHealthServiceProvider(
         services.savedObjectsClient,

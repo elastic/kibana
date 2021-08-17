@@ -11,7 +11,6 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
 import { Category } from './category';
-import type { FieldBrowserProps } from './types';
 import { getFieldItems } from './field_items';
 import { FIELDS_PANE_WIDTH, TABLE_HEIGHT } from './helpers';
 
@@ -33,7 +32,8 @@ const NoFieldsFlexGroup = styled(EuiFlexGroup)`
 
 NoFieldsFlexGroup.displayName = 'NoFieldsFlexGroup';
 
-type Props = Pick<FieldBrowserProps, 'onFieldSelected' | 'timelineId'> & {
+interface Props {
+  timelineId: string;
   columnHeaders: ColumnHeaderOptions[];
   /**
    * A map of categoryId -> metadata about the fields in that category,
@@ -56,7 +56,7 @@ type Props = Pick<FieldBrowserProps, 'onFieldSelected' | 'timelineId'> & {
   selectedCategoryId: string;
   /** The width field browser */
   width: number;
-};
+}
 export const FieldsPane = React.memo<Props>(
   ({
     columnHeaders,

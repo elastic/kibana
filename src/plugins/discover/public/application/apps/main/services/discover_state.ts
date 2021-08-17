@@ -112,7 +112,7 @@ export interface GetStateReturn {
    */
   appStateContainer: ReduxLikeStateContainer<AppState>;
   /**
-   * Function starting state sync when Discover main is loaded
+   * Initialize state with filters and query,  start state syncing
    */
   initializeAndSync: (
     indexPattern: IndexPattern,
@@ -243,7 +243,6 @@ export function getState({
       filterManager: FilterManager,
       data: DataPublicPluginStart
     ) => {
-
       if (appStateContainer.getState().index !== indexPattern.id) {
         // used index pattern is different than the given by url/state which is invalid
         setState(appStateContainerModified, { index: indexPattern.id });

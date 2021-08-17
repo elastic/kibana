@@ -514,6 +514,10 @@ Shows the Timelion tutorial to users when they first open the Timelion app.
 Used for calculating automatic intervals in visualizations, this is the number
 of buckets to try to represent.
 
+[[timelion-legacyChartsLibrary]]`timelion:legacyChartsLibrary`::
+Enables the legacy charts library for timelion charts in Visualize.
+
+
 [float]
 [[kibana-visualization-settings]]
 ==== Visualization

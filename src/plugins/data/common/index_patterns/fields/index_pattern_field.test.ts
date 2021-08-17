@@ -8,8 +8,9 @@
 
 import { IndexPatternField } from './index_pattern_field';
 import { IndexPattern } from '../index_patterns';
-import { KBN_FIELD_TYPES, FieldFormat } from '../../../common';
+import { KBN_FIELD_TYPES } from '../../../common';
 import { FieldSpec, RuntimeField } from '../types';
+import { FieldFormat } from '../../../../field_formats/common';
 
 describe('Field', function () {
   function flatten(obj: Record<string, any>) {

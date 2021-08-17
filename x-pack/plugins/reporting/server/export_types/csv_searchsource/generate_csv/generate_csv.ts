@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Writable } from 'stream';
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
 import { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
@@ -12,18 +13,20 @@ import { IScopedSearchClient } from 'src/plugins/data/server';
 import { Datatable } from 'src/plugins/expressions/server';
 import { ReportingConfig } from '../../..';
 import {
+  cellHasFormulas,
   ES_SEARCH_STRATEGY,
-  FieldFormat,
-  FieldFormatConfig,
-  IFieldFormatsRegistry,
   IndexPattern,
   ISearchSource,
   ISearchStartSearchSource,
   SearchFieldValue,
   SearchSourceFields,
   tabifyDocs,
-  cellHasFormulas,
 } from '../../../../../../../src/plugins/data/common';
+import {
+  FieldFormat,
+  FieldFormatConfig,
+  IFieldFormatsRegistry,
+} from '../../../../../../../src/plugins/field_formats/common';
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
 import { CancellationToken } from '../../../../common';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
@@ -68,12 +71,13 @@ export class CsvGenerator {
   private csvRowCount = 0;
 
   constructor(
-    private job: JobParamsCSV,
+    private job: Omit<JobParamsCSV, 'version'>,
     private config: ReportingConfig,
     private clients: Clients,
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,
-    private logger: LevelLogger
+    private logger: LevelLogger,
+    private stream: Writable
   ) {}
 
   private async scan(
@@ -219,7 +223,6 @@ export class CsvGenerator {
    */
   private generateHeader(
     columns: string[],
-    table: Datatable,
     builder: MaxSizeStringBuilder,
     settings: CsvExportSettings
   ) {
@@ -228,7 +231,6 @@ export class CsvGenerator {
 
     if (!builder.tryAppend(header)) {
       return {
-        size: 0,
         content: '',
         maxSizeReached: true,
         warnings: [],
@@ -291,7 +293,7 @@ export class CsvGenerator {
 
     const { maxSizeBytes, bom, escapeFormulaValues, scroll: scrollSettings } = settings;
 
-    const builder = new MaxSizeStringBuilder(byteSizeValueToNumber(maxSizeBytes), bom);
+    const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
     const warnings: string[] = [];
     let first = true;
     let currentRecord = -1;
@@ -357,7 +359,7 @@ export class CsvGenerator {
 
         if (first) {
           first = false;
-          this.generateHeader(columns, table, builder, settings);
+          this.generateHeader(columns, builder, settings);
         }
 
         if (table.rows.length < 1) {
@@ -398,17 +400,12 @@ export class CsvGenerator {
       }
     }
 
-    const size = builder.getSizeInBytes();
-    this.logger.debug(
-      `Finished generating. Total size in bytes: ${size}. Row count: ${this.csvRowCount}.`
-    );
+    this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
 
     return {
-      content: builder.getString(),
       content_type: CONTENT_TYPE_CSV,
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
       max_size_reached: this.maxSizeReached,
-      size,
       warnings,
     };
   }

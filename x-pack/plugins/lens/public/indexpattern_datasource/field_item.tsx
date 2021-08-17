@@ -36,7 +36,7 @@ import {
   TooltipType,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { EuiHighlight } from '@elastic/eui';
 import {
   Query,
@@ -44,7 +44,6 @@ import {
   ES_FIELD_TYPES,
   Filter,
   esQuery,
-  IIndexPattern,
 } from '../../../../../src/plugins/data/public';
 import { FieldButton } from '../../../../../src/plugins/kibana_react/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
@@ -62,7 +61,7 @@ import { debouncedComponent } from '../debounced_component';
 
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];
-  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   field: IndexPatternField;
   indexPattern: IndexPattern;
   highlight?: string;
@@ -169,7 +168,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
       .post(`/api/lens/index_stats/${indexPattern.id}/field`, {
         body: JSON.stringify({
           dslQuery: esQuery.buildEsQuery(
-            indexPattern as IIndexPattern,
+            indexPattern,
             query,
             filters,
             esQuery.getEsQueryConfig(core.uiSettings)
@@ -396,7 +395,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     core,
     sampledValues,
     chartsThemeService,
-    data: { fieldFormats },
+    fieldFormats,
     dropOntoWorkspace,
     editField,
     removeField,

@@ -79,6 +79,7 @@ import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patt
 import {
   AggConfigs,
   ES_SEARCH_STRATEGY,
+  EsQuerySortValue,
   IEsSearchResponse,
   ISearchGeneric,
   ISearchOptions,
@@ -99,7 +100,7 @@ import {
   isPartialResponse,
   IKibanaSearchResponse,
 } from '../../../common';
-import { getHighlightRequest } from '../../../common/field_formats';
+import { getHighlightRequest } from '../../../../field_formats/common';
 import { extractReferences } from './extract_references';
 
 /** @internal */
@@ -314,7 +315,8 @@ export class SearchSource {
 
   /**
    * Fetch this source and reject the returned Promise on error
-   * @deprecated Use fetch$ instead
+   * @deprecated Use the `fetch$` method instead
+   * @removeBy 8.1
    */
   fetch(options: ISearchOptions = {}) {
     return this.fetch$(options)
@@ -755,10 +757,6 @@ export class SearchSource {
           body.script_fields,
           Object.keys(body.script_fields).filter((f) => uniqFieldNames.includes(f))
         );
-        body.runtime_mappings = pick(
-          body.runtime_mappings,
-          Object.keys(body.runtime_mappings).filter((f) => uniqFieldNames.includes(f))
-        );
       }
 
       // request the remaining fields from stored_fields just in case, since the
@@ -832,7 +830,14 @@ export class SearchSource {
       body.fields = filteredDocvalueFields;
     }
 
-    const esQueryConfigs = getEsQueryConfig({ get: getConfig });
+    // If sorting by _score, build queries in the "must" clause instead of "filter" clause to enable scoring
+    const filtersInMustClause = (body.sort ?? []).some((sort: EsQuerySortValue[]) =>
+      sort.hasOwnProperty('_score')
+    );
+    const esQueryConfigs = {
+      ...getEsQueryConfig({ get: getConfig }),
+      filtersInMustClause,
+    };
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
     if (highlightAll && body.query) {

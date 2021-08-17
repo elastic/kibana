@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { kqlQuery } from '../../../../observability/server';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getConnectionStats } from '../connections/get_connection_stats';
@@ -17,6 +18,7 @@ export async function getUpstreamServicesForBackend({
   end,
   backendName,
   numBuckets,
+  kuery,
   environment,
   offset,
 }: {
@@ -25,7 +27,8 @@ export async function getUpstreamServicesForBackend({
   end: number;
   backendName: string;
   numBuckets: number;
-  environment?: string;
+  kuery: string;
+  environment: string;
   offset?: string;
 }) {
   const statsItems = await getConnectionStats({
@@ -35,6 +38,7 @@ export async function getUpstreamServicesForBackend({
     filter: [
       { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } },
       ...environmentQuery(environment),
+      ...kqlQuery(kuery),
     ],
     collapseBy: 'upstream',
     numBuckets,

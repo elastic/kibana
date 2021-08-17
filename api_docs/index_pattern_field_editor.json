@@ -29,10 +29,7 @@
           "FormatEditorState",
           " & S, any>"
         ],
-        "source": {
-          "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-          "lineNumber": 64
-        },
+        "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
         "deprecated": false,
         "children": [
           {
@@ -42,10 +39,7 @@
             "tags": [],
             "label": "formatId",
             "description": [],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-              "lineNumber": 68
-            },
+            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false
           },
           {
@@ -59,10 +53,7 @@
               "FormatEditorState",
               " & S"
             ],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-              "lineNumber": 69
-            },
+            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false
           },
           {
@@ -87,10 +78,7 @@
               "Sample",
               "[]; }"
             ],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-              "lineNumber": 71
-            },
+            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false,
             "children": [
               {
@@ -110,10 +98,7 @@
                   },
                   "<{}>"
                 ],
-                "source": {
-                  "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-                  "lineNumber": 71
-                },
+                "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -127,10 +112,7 @@
                 "signature": [
                   "FormatEditorState"
                 ],
-                "source": {
-                  "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-                  "lineNumber": 71
-                },
+                "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -147,10 +129,7 @@
             "signature": [
               "(newParams?: {}) => void"
             ],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-              "lineNumber": 83
-            },
+            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false,
             "children": [
               {
@@ -163,10 +142,7 @@
                 "signature": [
                   "{}"
                 ],
-                "source": {
-                  "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-                  "lineNumber": 83
-                },
+                "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -183,10 +159,7 @@
             "signature": [
               "() => JSX.Element"
             ],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-              "lineNumber": 92
-            },
+            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -204,10 +177,7 @@
         "tags": [],
         "label": "FieldEditorContext",
         "description": [],
-        "source": {
-          "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
-          "lineNumber": 27
-        },
+        "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
         "deprecated": false,
         "children": [
           {
@@ -226,10 +196,7 @@
                 "text": "IndexPattern"
               }
             ],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
-              "lineNumber": 28
-            },
+            "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
             "deprecated": false
           },
           {
@@ -244,10 +211,7 @@
             "signature": [
               "\"concrete\" | \"runtime\""
             ],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
-              "lineNumber": 33
-            },
+            "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
             "deprecated": false
           },
           {
@@ -268,10 +232,7 @@
                 "text": "ISearchStart"
               }
             ],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
-              "lineNumber": 35
-            },
+            "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
             "deprecated": false
           }
         ],
@@ -296,10 +257,7 @@
           },
           "<P>"
         ],
-        "source": {
-          "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
-          "lineNumber": 17
-        },
+        "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -309,10 +267,7 @@
             "tags": [],
             "label": "fieldType",
             "description": [],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
             "deprecated": false
           },
           {
@@ -331,10 +286,7 @@
                 "text": "FieldFormat"
               }
             ],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
-              "lineNumber": 19
-            },
+            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
             "deprecated": false
           },
           {
@@ -347,10 +299,7 @@
             "signature": [
               "{ type?: string | undefined; } & P"
             ],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
             "deprecated": false
           },
           {
@@ -363,30 +312,36 @@
             "signature": [
               "(newParams: { [key: string]: any; }) => void"
             ],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "indexPatternFieldEditor",
-                "id": "def-public.newParams",
+                "id": "def-public.FormatEditorProps.onChange.$1.newParams",
                 "type": "Object",
                 "tags": [],
                 "label": "newParams",
                 "description": [],
-                "signature": [
-                  "{ [key: string]: any; }"
-                ],
-                "source": {
-                  "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
-                  "lineNumber": 21
-                },
-                "deprecated": false
+                "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "indexPatternFieldEditor",
+                    "id": "def-public.FormatEditorProps.onChange.$1.newParams.Unnamed",
+                    "type": "Any",
+                    "tags": [],
+                    "label": "Unnamed",
+                    "description": [],
+                    "signature": [
+                      "any"
+                    ],
+                    "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
+                    "deprecated": false
+                  }
+                ]
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "indexPatternFieldEditor",
@@ -398,10 +353,7 @@
             "signature": [
               "(error?: string | undefined) => void"
             ],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
-              "lineNumber": 22
-            },
+            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -415,10 +367,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/field_format_editor.tsx",
-                  "lineNumber": 34
-                },
+                "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/field_format_editor.tsx",
                 "deprecated": false
               }
             ]
@@ -433,10 +382,7 @@
         "tags": [],
         "label": "OpenFieldDeleteModalOptions",
         "description": [],
-        "source": {
-          "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
-          "lineNumber": 24
-        },
+        "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
         "deprecated": false,
         "children": [
           {
@@ -457,10 +403,7 @@
               },
               "; }"
             ],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
             "deprecated": false
           },
           {
@@ -473,11 +416,25 @@
             "signature": [
               "((fieldNames: string[]) => void) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
-              "lineNumber": 28
-            },
-            "deprecated": false
+            "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "indexPatternFieldEditor",
+                "id": "def-public.OpenFieldDeleteModalOptions.onDelete.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "fieldNames",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "indexPatternFieldEditor",
@@ -489,10 +446,7 @@
             "signature": [
               "string | string[]"
             ],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
             "deprecated": false
           }
         ],
@@ -505,10 +459,7 @@
         "tags": [],
         "label": "OpenFieldEditorOptions",
         "description": [],
-        "source": {
-          "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
-          "lineNumber": 27
-        },
+        "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
         "deprecated": false,
         "children": [
           {
@@ -529,10 +480,7 @@
               },
               "; }"
             ],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
-              "lineNumber": 28
-            },
+            "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
             "deprecated": false
           },
           {
@@ -553,11 +501,31 @@
               },
               ") => void) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
-              "lineNumber": 31
-            },
-            "deprecated": false
+            "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "indexPatternFieldEditor",
+                "id": "def-public.OpenFieldEditorOptions.onSave.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataIndexPatternsPluginApi",
+                    "section": "def-common.IndexPatternField",
+                    "text": "IndexPatternField"
+                  }
+                ],
+                "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "indexPatternFieldEditor",
@@ -569,10 +537,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
-              "lineNumber": 32
-            },
+            "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
             "deprecated": false
           }
         ],
@@ -609,10 +574,7 @@
           },
           "<FormatParams>> & { formatId: string; })"
         ],
-        "source": {
-          "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
-          "lineNumber": 29
-        },
+        "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -636,11 +598,10 @@
           },
           "<FormatParams>>) & { formatId: string; }"
         ],
-        "source": {
-          "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
-          "lineNumber": 37
-        },
+        "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       }
     ],
@@ -652,10 +613,7 @@
       "tags": [],
       "label": "PluginStart",
       "description": [],
-      "source": {
-        "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-        "lineNumber": 26
-      },
+      "path": "src/plugins/index_pattern_field_editor/public/types.ts",
       "deprecated": false,
       "children": [
         {
@@ -676,10 +634,7 @@
             },
             ") => () => void"
           ],
-          "source": {
-            "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-            "lineNumber": 27
-          },
+          "path": "src/plugins/index_pattern_field_editor/public/types.ts",
           "deprecated": false,
           "children": [
             {
@@ -698,10 +653,7 @@
                   "text": "OpenFieldEditorOptions"
                 }
               ],
-              "source": {
-                "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-                "lineNumber": 27
-              },
+              "path": "src/plugins/index_pattern_field_editor/public/types.ts",
               "deprecated": false,
               "isRequired": true
             }
@@ -726,10 +678,7 @@
             },
             ") => () => void"
           ],
-          "source": {
-            "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-            "lineNumber": 28
-          },
+          "path": "src/plugins/index_pattern_field_editor/public/types.ts",
           "deprecated": false,
           "children": [
             {
@@ -748,10 +697,7 @@
                   "text": "OpenFieldDeleteModalOptions"
                 }
               ],
-              "source": {
-                "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-                "lineNumber": 28
-              },
+              "path": "src/plugins/index_pattern_field_editor/public/types.ts",
               "deprecated": false,
               "isRequired": true
             }
@@ -784,10 +730,7 @@
             },
             "<any> | undefined; }"
           ],
-          "source": {
-            "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-            "lineNumber": 29
-          },
+          "path": "src/plugins/index_pattern_field_editor/public/types.ts",
           "deprecated": false
         },
         {
@@ -800,10 +743,7 @@
           "signature": [
             "{ editIndexPattern: () => boolean; }"
           ],
-          "source": {
-            "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-            "lineNumber": 30
-          },
+          "path": "src/plugins/index_pattern_field_editor/public/types.ts",
           "deprecated": false
         },
         {
@@ -818,10 +758,7 @@
             "Props",
             ">"
           ],
-          "source": {
-            "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-            "lineNumber": 33
-          },
+          "path": "src/plugins/index_pattern_field_editor/public/types.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
@@ -835,10 +772,7 @@
               "signature": [
                 "P & { children?: React.ReactNode; }"
               ],
-              "source": {
-                "path": "node_modules/@types/react/index.d.ts",
-                "lineNumber": 554
-              },
+              "path": "node_modules/@types/react/index.d.ts",
               "deprecated": false
             },
             {
@@ -851,10 +785,7 @@
               "signature": [
                 "any"
               ],
-              "source": {
-                "path": "node_modules/@types/react/index.d.ts",
-                "lineNumber": 554
-              },
+              "path": "node_modules/@types/react/index.d.ts",
               "deprecated": false
             }
           ]

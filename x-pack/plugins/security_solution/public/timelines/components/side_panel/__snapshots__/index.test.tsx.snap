@@ -261,7 +261,7 @@ Array [
   -ms-flex: 1;
   flex: 1;
   overflow: hidden;
-  padding: 4px 16px 50px;
+  padding: 0 16px 16px;
 }
 
 <EuiFlyout
@@ -295,10 +295,10 @@ Array [
         timelineId="test"
       >
         <EuiFlyoutHeader
-          hasBorder={true}
+          hasBorder={false}
         >
           <div
-            className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+            className="euiFlyoutHeader"
           >
             <ExpandableEventTitle
               isAlert={false}
@@ -454,6 +454,54 @@ Array [
             </div>
           </EuiFlyoutBody>
         </Styled(EuiFlyoutBody)>
+        <Memo()
+          detailsData={null}
+          expandedEvent={
+            Object {
+              "eventId": "my-id",
+              "indexName": "my-index",
+            }
+          }
+          handleOnEventClosed={[Function]}
+          isHostIsolationPanelOpen={false}
+          loadingEventDetails={true}
+          onAddIsolationStatusClick={[Function]}
+          timelineId="test"
+        >
+          <EuiFlyoutFooter>
+            <div
+              className="euiFlyoutFooter"
+            >
+              <EuiFlexGroup
+                justifyContent="flexEnd"
+              >
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem
+                    grow={false}
+                  >
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <Memo()
+                        detailsData={null}
+                        handleOnEventClosed={[Function]}
+                        indexName="my-index"
+                        isHostIsolationPanelOpen={false}
+                        loadingEventDetails={true}
+                        onAddEventFilterClick={[Function]}
+                        onAddExceptionTypeClick={[Function]}
+                        onAddIsolationStatusClick={[Function]}
+                        timelineId="test"
+                      />
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+            </div>
+          </EuiFlyoutFooter>
+        </Memo()>
       </EventDetailsPanelComponent>
     </div>
   </EuiFlyout>,
@@ -480,7 +528,7 @@ Array [
   -ms-flex: 1;
   flex: 1;
   overflow: hidden;
-  padding: 4px 16px 50px;
+  padding: 0 16px 16px;
 }
 
 <div
@@ -508,10 +556,10 @@ Array [
       timelineId="test"
     >
       <EuiFlyoutHeader
-        hasBorder={true}
+        hasBorder={false}
       >
         <div
-          className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+          className="euiFlyoutHeader"
         >
           <ExpandableEventTitle
             isAlert={false}
@@ -667,6 +715,54 @@ Array [
           </div>
         </EuiFlyoutBody>
       </Styled(EuiFlyoutBody)>
+      <Memo()
+        detailsData={null}
+        expandedEvent={
+          Object {
+            "eventId": "my-id",
+            "indexName": "my-index",
+          }
+        }
+        handleOnEventClosed={[Function]}
+        isHostIsolationPanelOpen={false}
+        loadingEventDetails={true}
+        onAddIsolationStatusClick={[Function]}
+        timelineId="test"
+      >
+        <EuiFlyoutFooter>
+          <div
+            className="euiFlyoutFooter"
+          >
+            <EuiFlexGroup
+              justifyContent="flexEnd"
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <Memo()
+                      detailsData={null}
+                      handleOnEventClosed={[Function]}
+                      indexName="my-index"
+                      isHostIsolationPanelOpen={false}
+                      loadingEventDetails={true}
+                      onAddEventFilterClick={[Function]}
+                      onAddExceptionTypeClick={[Function]}
+                      onAddIsolationStatusClick={[Function]}
+                      timelineId="test"
+                    />
+                  </div>
+                </EuiFlexItem>
+              </div>
+            </EuiFlexGroup>
+          </div>
+        </EuiFlyoutFooter>
+      </Memo()>
     </EventDetailsPanelComponent>
   </div>,
 ]

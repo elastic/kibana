@@ -22,7 +22,7 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController($route, $scope) {
+function discoverController(_, $scope) {
   const history = getHistory();
 
   $scope.opts = {

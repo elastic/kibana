@@ -8,6 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 import { NewsfeedApiEndpoint } from '../../../../src/plugins/newsfeed/public';
@@ -29,6 +30,10 @@ export const renderApp = (
     .filter(({ id }) => id !== 'kibana')
     .filter(({ id }) => navLinks.find(({ category, hidden }) => !hidden && category?.id === id));
   const features = home.featureCatalogue.get();
+
+  core.chrome.setBreadcrumbs([
+    { text: i18n.translate('kibanaOverview.breadcrumbs.title', { defaultMessage: 'Analytics' }) },
+  ]);
 
   ReactDOM.render(
     <I18nProvider>

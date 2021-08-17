@@ -8,17 +8,16 @@
 
 import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test/jest';
-import { FieldFormat } from 'src/plugins/data/public';
 
 import { ColorFormatEditor } from './color';
-import { fieldFormats } from '../../../../../../data/public';
+import { FieldFormat, DEFAULT_CONVERTER_COLOR } from '../../../../../../field_formats/common';
 
 const fieldType = 'string';
 const format = {
   getConverterFor: jest.fn(),
 };
 const formatParams = {
-  colors: [{ ...fieldFormats.DEFAULT_CONVERTER_COLOR }],
+  colors: [{ ...DEFAULT_CONVERTER_COLOR }],
 };
 const onChange = jest.fn();
 const onError = jest.fn();

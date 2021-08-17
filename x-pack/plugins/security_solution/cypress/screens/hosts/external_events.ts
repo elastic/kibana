@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const TABLE_COLUMN_EVENTS_MESSAGE = 1;
+export const TABLE_COLUMN_EVENTS_MESSAGE = 2;

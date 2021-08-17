@@ -14,8 +14,22 @@ import { buildRangeFilter } from './range_filter';
 import { buildExistsFilter } from './exists_filter';
 
 import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
-import { FilterMeta, FilterStateStore } from './types';
+import { FilterStateStore } from './types';
 
+/**
+ *
+ * @param indexPattern
+ * @param field
+ * @param type
+ * @param negate whether the filter is negated (NOT filter)
+ * @param disabled  whether the filter is disabled andwon't be applied to searches
+ * @param params
+ * @param alias a display name for the filter
+ * @param store whether the filter applies to the current application or should be applied to global context
+ * @returns
+ *
+ * @public
+ */
 export function buildFilter(
   indexPattern: IndexPatternBase,
   field: IndexPatternFieldBase,
@@ -33,26 +47,6 @@ export function buildFilter(
   if (store) {
     filter.$state = { store };
   }
-  return filter;
-}
-
-export function buildCustomFilter(
-  indexPatternString: string,
-  queryDsl: any,
-  disabled: boolean,
-  negate: boolean,
-  alias: string | null,
-  store: FilterStateStore
-): Filter {
-  const meta: FilterMeta = {
-    index: indexPatternString,
-    type: FILTERS.CUSTOM,
-    disabled,
-    negate,
-    alias,
-  };
-  const filter: Filter = { ...queryDsl, meta };
-  filter.$state = { store };
   return filter;
 }
 

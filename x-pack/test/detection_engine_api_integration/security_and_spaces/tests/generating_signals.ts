@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { orderBy, get } from 'lodash';
+import { orderBy, get, omit } from 'lodash';
 
 import {
   EqlCreateSchema,
@@ -98,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
-        expect(signalsOpen.hits.hits[0]._source.signal.rule.rule_id).eql(getSimpleRule().rule_id);
+        expect(signalsOpen.hits.hits[0]._source?.signal.rule.rule_id).eql(getSimpleRule().rule_id);
       });
 
       it('should query and get back expected signal structure using a basic KQL query', async () => {
@@ -110,8 +110,11 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
+        const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const { rule: removedRule, ...signalNoRule } = signalsOpen.hits.hits[0]._source.signal;
+        // remove reason to avoid failures due to @timestamp mismatches in the reason string
+        const signalNoRule = omit(signal, ['rule', 'reason']);
+
         expect(signalNoRule).eql({
           parents: [
             {
@@ -161,8 +164,10 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
+        const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const { rule: removedRule, ...signalNoRule } = signalsOpen.hits.hits[0]._source.signal;
+        // remove reason to avoid failures due to @timestamp mismatches in the reason string
+        const signalNoRule = omit(signal, ['rule', 'reason']);
         expect(signalNoRule).eql({
           parents: [
             {
@@ -223,8 +228,9 @@ export default ({ getService }: FtrProviderContext) => {
         // Get our single signal on top of a signal
         const signalsOpen = await getSignalsByRuleIds(supertest, ['signal-on-signal']);
 
+        const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const { rule: removedRule, ...signalNoRule } = signalsOpen.hits.hits[0]._source.signal;
+        const signalNoRule = omit(signal, ['rule', 'reason']);
         expect(signalNoRule).eql({
           parents: [
             {
@@ -284,6 +290,9 @@ export default ({ getService }: FtrProviderContext) => {
           const signals = await getSignalsByIds(supertest, [id]);
           expect(signals.hits.hits.length).eql(1);
           const fullSignal = signals.hits.hits[0]._source;
+          if (!fullSignal) {
+            return expect(fullSignal).to.be.ok();
+          }
 
           expect(fullSignal).eql({
             '@timestamp': fullSignal['@timestamp'],
@@ -353,6 +362,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             signal: {
+              reason: `Alert Signal Testing Query created at ${fullSignal['@timestamp']} with a high severity and risk score of 1 on suricata-zeek-sensor-toronto.`,
               rule: fullSignal.signal.rule,
               original_time: fullSignal.signal.original_time,
               status: 'open',
@@ -398,7 +408,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 100, [id]);
           const signals = await getSignalsByIds(supertest, [id], 1000);
           const filteredSignals = signals.hits.hits.filter(
-            (signal) => signal._source.signal.depth === 1
+            (signal) => signal._source?.signal.depth === 1
           );
           expect(filteredSignals.length).eql(100);
         });
@@ -415,6 +425,9 @@ export default ({ getService }: FtrProviderContext) => {
           const signals = await getSignalsByIds(supertest, [id]);
           expect(signals.hits.hits.length).eql(1);
           const fullSignal = signals.hits.hits[0]._source;
+          if (!fullSignal) {
+            return expect(fullSignal).to.be.ok();
+          }
 
           expect(fullSignal).eql({
             '@timestamp': fullSignal['@timestamp'],
@@ -484,6 +497,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             signal: {
+              reason: `Alert Signal Testing Query created at ${fullSignal['@timestamp']} with a high severity and risk score of 1 on suricata-zeek-sensor-toronto.`,
               rule: fullSignal.signal.rule,
               original_time: fullSignal.signal.original_time,
               status: 'open',
@@ -533,11 +547,14 @@ export default ({ getService }: FtrProviderContext) => {
           const signals = await getSignalsByIds(supertest, [id]);
           const buildingBlock = signals.hits.hits.find(
             (signal) =>
-              signal._source.signal.depth === 1 &&
+              signal._source?.signal.depth === 1 &&
               get(signal._source, 'signal.original_event.category') === 'anomoly'
           );
           expect(buildingBlock).not.eql(undefined);
-          const fullSignal = buildingBlock!._source;
+          const fullSignal = buildingBlock?._source;
+          if (!fullSignal) {
+            return expect(fullSignal).to.be.ok();
+          }
 
           expect(fullSignal).eql({
             '@timestamp': fullSignal['@timestamp'],
@@ -645,6 +662,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             signal: {
+              reason: `Alert Signal Testing Query created at ${fullSignal['@timestamp']} with a high severity and risk score of 1 by root on zeek-sensor-amsterdam.`,
               rule: fullSignal.signal.rule,
               group: fullSignal.signal.group,
               original_time: fullSignal.signal.original_time,
@@ -694,12 +712,15 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 3, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
           const sequenceSignal = signalsOpen.hits.hits.find(
-            (signal) => signal._source.signal.depth === 2
+            (signal) => signal._source?.signal.depth === 2
           );
-          const source = sequenceSignal!._source;
-          const eventIds = source.signal.parents.map((event) => event.id);
+          const source = sequenceSignal?._source;
+          if (!source) {
+            return expect(source).to.be.ok();
+          }
+          const eventIds = source?.signal.parents.map((event) => event.id);
           expect(source).eql({
-            '@timestamp': source['@timestamp'],
+            '@timestamp': source && source['@timestamp'],
             agent: {
               ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
               hostname: 'zeek-sensor-amsterdam',
@@ -732,6 +753,7 @@ export default ({ getService }: FtrProviderContext) => {
               status: 'open',
               depth: 2,
               group: source.signal.group,
+              reason: `Alert Signal Testing Query created at ${source['@timestamp']} with a high severity and risk score of 1.`,
               rule: source.signal.rule,
               ancestors: [
                 {
@@ -798,10 +820,10 @@ export default ({ getService }: FtrProviderContext) => {
           const signalsOpen = await getSignalsByIds(supertest, [id], 1000);
           expect(signalsOpen.hits.hits.length).eql(300);
           const shellSignals = signalsOpen.hits.hits.filter(
-            (signal) => signal._source.signal.depth === 2
+            (signal) => signal._source?.signal.depth === 2
           );
           const buildingBlocks = signalsOpen.hits.hits.filter(
-            (signal) => signal._source.signal.depth === 1
+            (signal) => signal._source?.signal.depth === 1
           );
           expect(shellSignals.length).eql(100);
           expect(buildingBlocks.length).eql(200);
@@ -823,6 +845,9 @@ export default ({ getService }: FtrProviderContext) => {
           const signalsOpen = await getSignalsByIds(supertest, [id]);
           expect(signalsOpen.hits.hits.length).eql(1);
           const fullSignal = signalsOpen.hits.hits[0]._source;
+          if (!fullSignal) {
+            return expect(fullSignal).to.be.ok();
+          }
           const eventIds = fullSignal.signal.parents.map((event) => event.id);
           expect(fullSignal).eql({
             '@timestamp': fullSignal['@timestamp'],
@@ -847,6 +872,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               status: 'open',
+              reason: `Alert Signal Testing Query created at ${fullSignal['@timestamp']} with a high severity and risk score of 1.`,
               rule: fullSignal.signal.rule,
               original_time: fullSignal.signal.original_time,
               depth: 1,
@@ -957,6 +983,9 @@ export default ({ getService }: FtrProviderContext) => {
           const signalsOpen = await getOpenSignals(supertest, es, createdRule);
           expect(signalsOpen.hits.hits.length).eql(1);
           const fullSignal = signalsOpen.hits.hits[0]._source;
+          if (!fullSignal) {
+            return expect(fullSignal).to.be.ok();
+          }
           const eventIds = fullSignal.signal.parents.map((event) => event.id);
           expect(fullSignal).eql({
             '@timestamp': fullSignal['@timestamp'],
@@ -981,6 +1010,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               status: 'open',
+              reason: `Alert Signal Testing Query created at ${fullSignal['@timestamp']} with a high severity and risk score of 1.`,
               rule: fullSignal.signal.rule,
               original_time: fullSignal.signal.original_time,
               depth: 1,
@@ -1035,6 +1065,9 @@ export default ({ getService }: FtrProviderContext) => {
           const signalsOpen = await getOpenSignals(supertest, es, createdRule);
           expect(signalsOpen.hits.hits.length).eql(1);
           const fullSignal = signalsOpen.hits.hits[0]._source;
+          if (!fullSignal) {
+            return expect(fullSignal).to.be.ok();
+          }
           const eventIds = fullSignal.signal.parents.map((event) => event.id);
           expect(fullSignal).eql({
             '@timestamp': fullSignal['@timestamp'],
@@ -1061,6 +1094,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               status: 'open',
+              reason: `Alert Signal Testing Query created at ${fullSignal['@timestamp']} with a high severity and risk score of 1.`,
               rule: fullSignal.signal.rule,
               original_time: fullSignal.signal.original_time,
               depth: 1,
@@ -1132,7 +1166,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
-        expect(signalsOpen.hits.hits[0]._source.signal.rule.rule_id).eql(getSimpleRule().rule_id);
+        expect(signalsOpen.hits.hits[0]._source?.signal.rule.rule_id).eql(getSimpleRule().rule_id);
       });
 
       it('should query and get back expected signal structure using a basic KQL query', async () => {
@@ -1144,8 +1178,10 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
+        const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const { rule: removedRule, ...signalNoRule } = signalsOpen.hits.hits[0]._source.signal;
+        // remove reason to avoid failures due to @timestamp mismatches in the reason string
+        const signalNoRule = omit(signal, ['rule', 'reason']);
         expect(signalNoRule).eql({
           parents: [
             {
@@ -1200,8 +1236,9 @@ export default ({ getService }: FtrProviderContext) => {
         // Get our single signal on top of a signal
         const signalsOpen = await getSignalsByRuleIds(supertest, ['signal-on-signal']);
 
+        const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const { rule: removedRule, ...signalNoRule } = signalsOpen.hits.hits[0]._source.signal;
+        const signalNoRule = omit(signal, ['rule', 'reason']);
 
         expect(signalNoRule).eql({
           parents: [
@@ -1284,7 +1321,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
-        expect(signalsOpen.hits.hits[0]._source.signal.rule.rule_id).eql(getSimpleRule().rule_id);
+        expect(signalsOpen.hits.hits[0]._source?.signal.rule.rule_id).eql(getSimpleRule().rule_id);
       });
 
       it('should query and get back expected signal structure using a basic KQL query', async () => {
@@ -1296,8 +1333,10 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
+        const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const { rule: removedRule, ...signalNoRule } = signalsOpen.hits.hits[0]._source.signal;
+        // remove reason to avoid failures due to @timestamp mismatches in the reason string
+        const signalNoRule = omit(signal, ['rule', 'reason']);
         expect(signalNoRule).eql({
           parents: [
             {
@@ -1357,9 +1396,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         // Get our single signal on top of a signal
         const signalsOpen = await getSignalsByRuleIds(supertest, ['signal-on-signal']);
-
+        const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const { rule: removedRule, ...signalNoRule } = signalsOpen.hits.hits[0]._source.signal;
+        const signalNoRule = omit(signal, ['rule', 'reason']);
 
         expect(signalNoRule).eql({
           parents: [
@@ -1443,11 +1482,11 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(signals.length).equal(4);
         signals.forEach((s) => {
-          expect(s.signal.rule.severity).equal('medium');
-          expect(s.signal.rule.severity_mapping).eql([]);
+          expect(s?.signal.rule.severity).equal('medium');
+          expect(s?.signal.rule.severity_mapping).eql([]);
 
-          expect(s.signal.rule.risk_score).equal(75);
-          expect(s.signal.rule.risk_score_mapping).eql([]);
+          expect(s?.signal.rule.risk_score).equal(75);
+          expect(s?.signal.rule.risk_score_mapping).eql([]);
         });
       });
 
@@ -1464,8 +1503,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         const signals = await executeRuleAndGetSignals(rule);
         const severities = signals.map((s) => ({
-          id: s.signal.parent?.id,
-          value: s.signal.rule.severity,
+          id: s?.signal.parent?.id,
+          value: s?.signal.rule.severity,
         }));
 
         expect(signals.length).equal(4);
@@ -1477,9 +1516,9 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
 
         signals.forEach((s) => {
-          expect(s.signal.rule.risk_score).equal(75);
-          expect(s.signal.rule.risk_score_mapping).eql([]);
-          expect(s.signal.rule.severity_mapping).eql([
+          expect(s?.signal.rule.risk_score).equal(75);
+          expect(s?.signal.rule.risk_score_mapping).eql([]);
+          expect(s?.signal.rule.severity_mapping).eql([
             { field: 'my_severity', operator: 'equals', value: 'sev_900', severity: 'high' },
             { field: 'my_severity', operator: 'equals', value: 'sev_max', severity: 'critical' },
           ]);
@@ -1498,8 +1537,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         const signals = await executeRuleAndGetSignals(rule);
         const riskScores = signals.map((s) => ({
-          id: s.signal.parent?.id,
-          value: s.signal.rule.risk_score,
+          id: s?.signal.parent?.id,
+          value: s?.signal.rule.risk_score,
         }));
 
         expect(signals.length).equal(4);
@@ -1511,9 +1550,9 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
 
         signals.forEach((s) => {
-          expect(s.signal.rule.severity).equal('medium');
-          expect(s.signal.rule.severity_mapping).eql([]);
-          expect(s.signal.rule.risk_score_mapping).eql([
+          expect(s?.signal.rule.severity).equal('medium');
+          expect(s?.signal.rule.severity_mapping).eql([]);
+          expect(s?.signal.rule.risk_score_mapping).eql([
             { field: 'my_risk', operator: 'equals', value: '' },
           ]);
         });
@@ -1535,9 +1574,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         const signals = await executeRuleAndGetSignals(rule);
         const values = signals.map((s) => ({
-          id: s.signal.parent?.id,
-          severity: s.signal.rule.severity,
-          risk: s.signal.rule.risk_score,
+          id: s?.signal.parent?.id,
+          severity: s?.signal.rule.severity,
+          risk: s?.signal.rule.risk_score,
         }));
 
         expect(signals.length).equal(4);
@@ -1549,11 +1588,11 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
 
         signals.forEach((s) => {
-          expect(s.signal.rule.severity_mapping).eql([
+          expect(s?.signal.rule.severity_mapping).eql([
             { field: 'my_severity', operator: 'equals', value: 'sev_900', severity: 'high' },
             { field: 'my_severity', operator: 'equals', value: 'sev_max', severity: 'critical' },
           ]);
-          expect(s.signal.rule.risk_score_mapping).eql([
+          expect(s?.signal.rule.risk_score_mapping).eql([
             { field: 'my_risk', operator: 'equals', value: '' },
           ]);
         });
@@ -1587,6 +1626,9 @@ export default ({ getService }: FtrProviderContext) => {
         const signals = signalsResponse.hits.hits.map((hit) => hit._source);
         const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
         const fullSignal = signalsOrderedByEventId[0];
+        if (!fullSignal) {
+          return expect(fullSignal).to.be.ok();
+        }
 
         expect(fullSignal).eql({
           '@timestamp': fullSignal['@timestamp'],
@@ -1644,6 +1686,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
             status: 'open',
+            reason: `Alert boot created at ${fullSignal['@timestamp']} with a high severity and risk score of 1 on zeek-sensor-amsterdam.`,
             rule: {
               ...fullSignal.signal.rule,
               name: 'boot',

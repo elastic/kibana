@@ -7,8 +7,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { SearchResponse } from 'elasticsearch';
-import { isEmpty } from 'lodash';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import {
   getCaseDetailsUrl,
@@ -18,24 +17,24 @@ import {
   getRuleDetailsUrl,
   useFormatUrl,
 } from '../../../common/components/link_to';
-import { Ecs } from '../../../../common/ecs';
 import { Case, CaseViewRefreshPropInterface } from '../../../../../cases/common';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
-import { KibanaServices, useKibana } from '../../../common/lib/kibana';
-import { APP_ID, DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../common/constants';
+import { useKibana } from '../../../common/lib/kibana';
+import { APP_ID } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
-import { buildAlertsQuery, formatAlertToEcsSignal, useFetchAlertData } from './helpers';
+import { useFetchAlertData } from './helpers';
 import { SEND_ALERT_TO_TIMELINE } from './translations';
 import { useInsertTimeline } from '../use_insert_timeline';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import * as timelineMarkdownPlugin from '../../../common/components/markdown_editor/plugins/timeline';
 import { CaseDetailsRefreshContext } from '../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { getEndpointDetailsPath } from '../../../management/common/routing';
+import { EntityType } from '../../../../../timelines/common';
 
 interface Props {
   caseId: string;
@@ -56,13 +55,17 @@ export interface CaseProps extends Props {
   updateCase: (newCase: Case) => void;
 }
 
-const TimelineDetailsPanel = () => {
+const ALERT_CONSUMER: AlertConsumers[] = [AlertConsumers.SIEM];
+
+const TimelineDetailsPanel = ({ alertConsumers }: { alertConsumers?: AlertConsumers[] }) => {
   const { browserFields, docValueFields } = useSourcererScope(SourcererScopeName.detections);
 
   return (
     <DetailsPanel
+      alertConsumers={alertConsumers}
       browserFields={browserFields}
       docValueFields={docValueFields}
+      entityType={EntityType.ALERTS}
       isFlyoutView
       timelineId={TimelineId.casePage}
     />
@@ -70,39 +73,12 @@ const TimelineDetailsPanel = () => {
 };
 
 const InvestigateInTimelineActionComponent = (alertIds: string[]) => {
-  const fetchEcsAlertsData = async (fetchAlertIds?: string[]): Promise<Ecs[]> => {
-    if (isEmpty(fetchAlertIds)) {
-      return [];
-    }
-    const alertResponse = await KibanaServices.get().http.fetch<
-      SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
-    >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
-      method: 'POST',
-      body: JSON.stringify(buildAlertsQuery(fetchAlertIds ?? [])),
-    });
-    return (
-      alertResponse?.hits.hits.reduce<Ecs[]>(
-        (acc, { _id, _index, _source }) => [
-          ...acc,
-          {
-            ...formatAlertToEcsSignal(_source as {}),
-            _id,
-            _index,
-            timestamp: _source['@timestamp'],
-          },
-        ],
-        []
-      ) ?? []
-    );
-  };
-
   return (
     <InvestigateInTimelineAction
       ariaLabel={SEND_ALERT_TO_TIMELINE}
       alertIds={alertIds}
       key="investigate-in-timeline"
       ecsRowData={null}
-      fetchEcsAlertsData={fetchEcsAlertsData}
       nonEcsRowData={[]}
     />
   );
@@ -258,6 +234,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         showAlertDetails,
         subCaseId,
         timelineIntegration: {
+          alertConsumers: ALERT_CONSUMER,
           editor_plugins: {
             parsingPlugin: timelineMarkdownPlugin.parser,
             processingPluginRenderer: timelineMarkdownPlugin.renderer,

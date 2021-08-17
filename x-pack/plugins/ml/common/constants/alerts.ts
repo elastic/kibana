@@ -21,26 +21,57 @@ export const TOP_N_BUCKETS_COUNT = 1;
 
 export const ALL_JOBS_SELECTION = '*';
 
-export const HEALTH_CHECK_NAMES: Record<JobsHealthTests, string> = {
-  datafeed: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedCheckName', {
-    defaultMessage: 'Datafeed is not started',
-  }),
-  mml: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlCheckName', {
-    defaultMessage: 'Model memory limit reached',
-  }),
-  errorMessages: i18n.translate(
-    'xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesCheckName',
-    {
+export const HEALTH_CHECK_NAMES: Record<JobsHealthTests, { name: string; description: string }> = {
+  datafeed: {
+    name: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedCheckName', {
+      defaultMessage: 'Datafeed is not started',
+    }),
+    description: i18n.translate(
+      'xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedCheckDescription',
+      {
+        defaultMessage: 'Get alerted if the corresponding datafeed of the job is not started',
+      }
+    ),
+  },
+  mml: {
+    name: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlCheckName', {
+      defaultMessage: 'Model memory limit reached',
+    }),
+    description: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlCheckDescription', {
+      defaultMessage: 'Get alerted when job reaches soft or hard model memory limit.',
+    }),
+  },
+  delayedData: {
+    name: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataCheckName', {
+      defaultMessage: 'Data delay has occurred',
+    }),
+    description: i18n.translate(
+      'xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataCheckDescription',
+      {
+        defaultMessage: 'Get alerted if a job missed data due to data delay.',
+      }
+    ),
+  },
+  errorMessages: {
+    name: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesCheckName', {
       defaultMessage: 'There are errors in the job messages',
-    }
-  ),
-  behindRealtime: i18n.translate(
-    'xpack.ml.alertTypes.jobsHealthAlertingRule.behindRealtimeCheckName',
-    {
+    }),
+    description: i18n.translate(
+      'xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesCheckDescription',
+      {
+        defaultMessage: 'There are errors in the job messages',
+      }
+    ),
+  },
+  behindRealtime: {
+    name: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.behindRealtimeCheckName', {
       defaultMessage: 'Job is running behind real-time',
-    }
-  ),
-  delayedData: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataCheckName', {
-    defaultMessage: 'Data delay has occurred',
-  }),
+    }),
+    description: i18n.translate(
+      'xpack.ml.alertTypes.jobsHealthAlertingRule.behindRealtimeCheckDescription',
+      {
+        defaultMessage: 'Job is running behind real-time',
+      }
+    ),
+  },
 };

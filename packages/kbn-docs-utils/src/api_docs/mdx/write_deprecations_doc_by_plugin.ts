@@ -50,11 +50,10 @@ export function writeDeprecationDocByPlugin(
           firstTen
             .map(
               (ref) =>
-                `[${ref.link.path.substr(ref.link.path.lastIndexOf(Path.sep) + 1)}#L${
-                  ref.link.lineNumber
-                }](https://github.com/elastic/kibana/tree/master/${ref.link.path}#L${
-                  ref.link.lineNumber
-                })`
+                `[${ref.path.substr(ref.path.lastIndexOf(Path.sep) + 1)}
+                ](https://github.com/elastic/kibana/tree/master/${
+                  ref.path
+                }#:~:text=${encodeURIComponent(api.label)})`
             )
             .join(', ') + (refs.length > 0 ? `+ ${refs.length} more` : '');
 

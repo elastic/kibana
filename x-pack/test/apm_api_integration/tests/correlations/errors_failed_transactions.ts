@@ -23,6 +23,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       start: range.start,
       end: range.end,
       fieldNames: 'user_agent.name,user_agent.os.name,url.original',
+      environment: 'ENVIRONMENT_ALL',
+      kuery: '',
     },
   });
   registry.when(
@@ -64,6 +66,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(sortedFieldNames).toMatchInline(`
           Array [
             "user_agent.name",
+            "user_agent.name",
           ]
         `);
       });
@@ -72,6 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const { significantTerms } = response.body;
         expectSnapshot(significantTerms.map((term) => term.timeseries.length)).toMatchInline(`
           Array [
+            31,
             31,
           ]
         `);

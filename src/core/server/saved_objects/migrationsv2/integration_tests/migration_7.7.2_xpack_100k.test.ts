@@ -10,7 +10,7 @@ import path from 'path';
 import { unlink } from 'fs/promises';
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { Env } from '@kbn/config';
-import { getEnvOptions } from '@kbn/config/target/mocks';
+import { getEnvOptions } from '../../../config/mocks';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { InternalCoreStart } from '../../../internal_types';
@@ -24,8 +24,7 @@ async function removeLogFile() {
   await unlink(logFilePath).catch(() => void 0);
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/96895
-describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
+describe('migration from 7.7.2-xpack with 100k objects', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
   let coreStart: InternalCoreStart;

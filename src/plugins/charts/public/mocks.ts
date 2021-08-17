@@ -8,6 +8,7 @@
 
 import { ChartsPlugin } from './plugin';
 import { themeServiceMock } from './services/theme/mock';
+import { activeCursorMock } from './services/active_cursor/mock';
 import { colorsServiceMock } from './services/legacy_colors/mock';
 import { getPaletteRegistry, paletteServiceMock } from './services/palettes/mock';
 
@@ -23,6 +24,7 @@ const createSetupContract = (): Setup => ({
 const createStartContract = (): Start => ({
   legacyColors: colorsServiceMock,
   theme: themeServiceMock,
+  activeCursor: activeCursorMock,
   palettes: paletteServiceMock.setup({} as any),
 });
 

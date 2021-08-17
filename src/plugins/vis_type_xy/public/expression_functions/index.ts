@@ -15,4 +15,3 @@ export { seriesParam, ExpressionValueSeriesParam } from './series_param';
 export { thresholdLine, ExpressionValueThresholdLine } from './threshold_line';
 export { label, ExpressionValueLabel } from './label';
 export { visScale, ExpressionValueScale } from './vis_scale';
-export { xyDimension, ExpressionValueXYDimension } from './xy_dimension';

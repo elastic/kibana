@@ -10,7 +10,6 @@ import { renderHook } from '@testing-library/react-hooks';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { useSavedSearch } from './use_saved_search';
 import { getState } from './discover_state';
 import { uiSettingsMock } from '../../../../__mocks__/ui_settings';
@@ -28,7 +27,6 @@ describe('test useSavedSearch', () => {
 
     const { result } = renderHook(() => {
       return useSavedSearch({
-        indexPattern: indexPatternMock,
         initialFetchStatus: FetchStatus.LOADING,
         searchSessionManager,
         searchSource: savedSearchMock.searchSource.createCopy(),
@@ -39,11 +37,10 @@ describe('test useSavedSearch', () => {
     });
 
     expect(result.current.refetch$).toBeInstanceOf(Subject);
-    expect(result.current.data$.value).toMatchInlineSnapshot(`
-      Object {
-        "state": "loading",
-      }
-    `);
+    expect(result.current.data$.main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+    expect(result.current.data$.documents$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+    expect(result.current.data$.totalHits$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+    expect(result.current.data$.charts$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
   });
   test('refetch$ triggers a search', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();
@@ -61,14 +58,12 @@ describe('test useSavedSearch', () => {
       return useDiscoverState({
         services: discoverServiceMock,
         history,
-        initialIndexPattern: indexPatternMock,
         initialSavedSearch: savedSearchMock,
       });
     });
 
     const { result, waitForValueToChange } = renderHook(() => {
       return useSavedSearch({
-        indexPattern: indexPatternMock,
         initialFetchStatus: FetchStatus.LOADING,
         searchSessionManager,
         searchSource: resultState.current.searchSource,
@@ -81,11 +76,11 @@ describe('test useSavedSearch', () => {
     result.current.refetch$.next();
 
     await waitForValueToChange(() => {
-      return result.current.data$.value.state === 'complete';
+      return result.current.data$.main$.value.fetchStatus === 'complete';
     });
 
-    expect(result.current.data$.value.hits).toBe(0);
-    expect(result.current.data$.value.rows).toEqual([]);
+    expect(result.current.data$.totalHits$.value.result).toBe(0);
+    expect(result.current.data$.documents$.value.result).toEqual([]);
   });
 
   test('reset sets back to initial state', async () => {
@@ -104,14 +99,12 @@ describe('test useSavedSearch', () => {
       return useDiscoverState({
         services: discoverServiceMock,
         history,
-        initialIndexPattern: indexPatternMock,
         initialSavedSearch: savedSearchMock,
       });
     });
 
     const { result, waitForValueToChange } = renderHook(() => {
       return useSavedSearch({
-        indexPattern: indexPatternMock,
         initialFetchStatus: FetchStatus.LOADING,
         searchSessionManager,
         searchSource: resultState.current.searchSource,
@@ -124,10 +117,10 @@ describe('test useSavedSearch', () => {
     result.current.refetch$.next();
 
     await waitForValueToChange(() => {
-      return result.current.data$.value.state === FetchStatus.COMPLETE;
+      return result.current.data$.main$.value.fetchStatus === FetchStatus.COMPLETE;
     });
 
     result.current.reset();
-    expect(result.current.data$.value.state).toBe(FetchStatus.LOADING);
+    expect(result.current.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
   });
 });

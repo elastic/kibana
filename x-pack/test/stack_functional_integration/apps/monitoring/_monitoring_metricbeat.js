@@ -26,7 +26,7 @@ export default ({ getService, getPageObjects }) => {
       }
       // navigateToApp without a username and password will default to the superuser
       await PageObjects.common.navigateToApp('monitoring', { insertTimestamp: false });
-      await clusterOverview.closeAlertsModal();
+      await clusterOverview.acceptAlertsModal();
     });
 
     it('should have Monitoring already enabled', async () => {
