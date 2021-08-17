@@ -69,10 +69,10 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
 
         results.forEach((r) => {
           r.screenshots.forEach((screenshot) => {
-            logger.debug(`Adding image to PDF. Image base64 size: ${screenshot.base64EncodedData?.length || 0}`); // prettier-ignore
+            logger.debug(`Adding image to PDF. Image size: ${screenshot.data.byteLength}`); // prettier-ignore
             tracker.startAddImage();
             tracker.endAddImage();
-            pdfOutput.addImage(screenshot.base64EncodedData, {
+            pdfOutput.addImage(screenshot.data, {
               title: screenshot.title,
               description: screenshot.description,
             });
