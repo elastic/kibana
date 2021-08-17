@@ -8,6 +8,7 @@
 import React, { useEffect } from 'react';
 import { BrushEndListener, XYBrushArea } from '@elastic/charts';
 import {
+  EuiBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -163,38 +164,30 @@ export function TransactionDistribution({
           </EuiFlexItem>
         )}
         {selection && (
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
-              <EuiFlexItem
-                grow={false}
-                style={{ flexDirection: 'row', alignItems: 'center' }}
-              >
-                <EuiText size="xs">
-                  {i18n.translate(
-                    'xpack.apm.transactionDetails.distribution.selectionText',
-                    {
-                      defaultMessage: `Selection: {selectionFrom} - {selectionTo}ms`,
-                      values: {
-                        selectionFrom: Math.round(selection[0] / 1000),
-                        selectionTo: Math.round(selection[1] / 1000),
-                      },
-                    }
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-                style={{ flexDirection: 'row', alignItems: 'center' }}
-              >
-                <EuiButtonEmpty
-                  onClick={onTrackedClearSelection}
-                  iconType="cross"
-                  size="xs"
-                >
-                  {clearSelectionButtonLabel}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiBadge
+              iconType="cross"
+              iconSide="left"
+              iconOnClick={onTrackedClearSelection}
+              iconOnClickAriaLabel={i18n.translate(
+                'xpack.apm.transactionDetails.distribution.clearSelectionArialLabel',
+                {
+                  defaultMessage: 'Clear selection',
+                }
+              )}
+              data-test-sub="apmTransactionDetailsDistributionClearSelectionBadge"
+            >
+              {i18n.translate(
+                'xpack.apm.transactionDetails.distribution.selectionText',
+                {
+                  defaultMessage: `Selection: {selectionFrom} - {selectionTo}ms`,
+                  values: {
+                    selectionFrom: Math.round(selection[0] / 1000),
+                    selectionTo: Math.round(selection[1] / 1000),
+                  },
+                }
+              )}
+            </EuiBadge>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
