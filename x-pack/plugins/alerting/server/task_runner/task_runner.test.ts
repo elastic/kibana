@@ -27,6 +27,7 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   httpServiceMock,
+  executionContextServiceMock,
 } from '../../../../../src/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
 import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
@@ -89,6 +90,7 @@ describe('Task Runner', () => {
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
     eventLogger: jest.Mocked<IEventLogger>;
+    executionContext: ReturnType<typeof executionContextServiceMock.createInternalStartContract>;
   };
 
   const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType = {
@@ -97,6 +99,7 @@ describe('Task Runner', () => {
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     encryptedSavedObjectsClient,
     logger: loggingSystemMock.create().get(),
+    executionContext: executionContextServiceMock.createInternalStartContract(),
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
     basePathService: httpServiceMock.createBasePath(),
     eventLogger: eventLoggerMock.create(),
@@ -185,6 +188,9 @@ describe('Task Runner', () => {
       (actionTypeId, actionId, params) => params
     );
     ruleTypeRegistry.get.mockReturnValue(alertType);
+    taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
+      fn()
+    );
   });
 
   test('successfully executes the task', async () => {
@@ -337,6 +343,17 @@ describe('Task Runner', () => {
         },
       },
       { refresh: false, namespace: undefined }
+    );
+
+    expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
+    expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toHaveBeenCalledWith(
+      {
+        id: '1',
+        name: 'execute test',
+        type: 'alert',
+        description: 'execute [test] with name [alert-name] in [default] namespace',
+      },
+      expect.any(Function)
     );
   });
 

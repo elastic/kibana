@@ -43,6 +43,9 @@ const values: { domains: CrawlerDomain[]; crawlRequests: CrawlRequest[] } = {
         rule: CrawlerRules.regex,
         pattern: '.*',
       },
+      deduplicationEnabled: false,
+      deduplicationFields: ['title'],
+      availableDeduplicationFields: ['title', 'description'],
     },
   ],
   crawlRequests: [
