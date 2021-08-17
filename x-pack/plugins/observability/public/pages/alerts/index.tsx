@@ -47,7 +47,12 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   const history = useHistory();
   const refetch = useRef<() => void>();
   const {
-    query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', status = 'open' },
+    query: {
+      rangeFrom = 'now-15m',
+      rangeTo = 'now',
+      kuery = 'kibana.alert.status: "open"', // TODO change hardcoded values as part of another PR
+      status = 'open',
+    },
   } = routeParams;
 
   useBreadcrumbs([
@@ -122,18 +127,6 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   const setRefetch = useCallback((ref) => {
     refetch.current = ref;
   }, []);
-
-  useEffect(() => {
-    if (fetcherStatus === 'success') {
-      const nextSearchParams = new URLSearchParams(history.location.search);
-
-      nextSearchParams.set('kuery', 'kibana.alert.status: "open"'); // TODO this needs to be changed, this should be part of another dependent PR that updates the Status column values to Active and recovered
-      history.push({
-        ...history.location,
-        search: nextSearchParams.toString(),
-      });
-    }
-  }, [fetcherStatus, history]);
 
   return (
     <ObservabilityPageTemplate
