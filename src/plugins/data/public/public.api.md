@@ -1568,7 +1568,7 @@ export interface ISearchStartSearchSource {
 // Warning: (ae-missing-release-tag) "isErrorResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const isErrorResponse: (response?: IKibanaSearchResponse<any> | undefined) => boolean | undefined;
+export const isErrorResponse: (response?: IKibanaSearchResponse<any> | undefined) => boolean;
 
 // Warning: (ae-missing-release-tag) "isEsError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
