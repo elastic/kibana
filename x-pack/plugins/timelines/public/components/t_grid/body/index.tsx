@@ -340,7 +340,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     const alertToolbar = useMemo(
       () => (
-        <EuiFlexGroup alignItems="baseline">
+        <EuiFlexGroup gutterSize="m" alignItems="center">
           <EuiFlexItem grow={false}>
             <AlertCount>{alertCountText}</AlertCount>
           </EuiFlexItem>

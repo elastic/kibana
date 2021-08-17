@@ -39,7 +39,7 @@ import { useTimelineEvents } from '../../../container';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { LastUpdatedAt } from '../..';
-import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem } from '../styles';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem, UpdatedFlexGroup } from '../styles';
 import * as i18n from '../translations';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
@@ -70,6 +70,7 @@ const StyledEuiPanel = styled(EuiPanel)<{ $isFullScreen: boolean }>`
 const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
   className: `${SELECTOR_TIMELINE_GLOBAL_CONTAINER} ${className}`,
 }))`
+  position: relative;
   width: 100%;
   overflow: hidden;
   flex: 1;
@@ -322,14 +323,14 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
               data-timeline-id={STANDALONE_ID}
               data-test-subj={`events-container-loading-${loading}`}
             >
-              <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+              <UpdatedFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="baseline">
                 <UpdatedFlexItem grow={false} show={!loading}>
                   <InspectButton title={justTitle} inspect={inspect} loading={loading} />
                 </UpdatedFlexItem>
                 <UpdatedFlexItem grow={false} show={!loading}>
                   <LastUpdatedAt updatedAt={updatedAt} />
                 </UpdatedFlexItem>
-              </EuiFlexGroup>
+              </UpdatedFlexGroup>
 
               <FullWidthFlexGroup direction="row" $visible={!graphEventId} gutterSize="none">
                 <ScrollableFlexItem grow={1}>

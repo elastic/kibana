@@ -49,7 +49,7 @@ import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
-import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem } from '../styles';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
 import * as i18n from '../translations';
 import { Sort } from '../body/sort';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
@@ -81,6 +81,7 @@ const StyledEuiPanel = styled(EuiPanel)<{ $isFullScreen: boolean }>`
 const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
   className: `${SELECTOR_TIMELINE_GLOBAL_CONTAINER} ${className}`,
 }))`
+  position: relative;
   width: 100%;
   overflow: hidden;
   flex: 1;
@@ -134,6 +135,7 @@ export interface TGridIntegratedProps {
   leadingControlColumns?: ControlColumnProps[];
   trailingControlColumns?: ControlColumnProps[];
   data?: DataPublicPluginStart;
+  tGridEventRenderedViewEnabled: boolean;
 }
 
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
@@ -167,6 +169,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   graphEventId,
   leadingControlColumns,
   trailingControlColumns,
+  tGridEventRenderedViewEnabled,
   data,
 }) => {
   const dispatch = useDispatch();
@@ -282,17 +285,23 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               data-timeline-id={id}
               data-test-subj={`events-container-loading-${loading}`}
             >
-              <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" alignItems="baseline">
+              <UpdatedFlexGroup
+                gutterSize="s"
+                justifyContent="flexEnd"
+                alignItems={`${tableView === 'gridView' ? 'baseline' : 'center'}`}
+              >
                 <UpdatedFlexItem grow={false} show={!loading}>
                   <InspectButton title={justTitle} inspect={inspect} loading={loading} />
                 </UpdatedFlexItem>
                 <UpdatedFlexItem grow={false} show={!loading}>
                   {!resolverIsShowing(graphEventId) && additionalFilters}
                 </UpdatedFlexItem>
-                <UpdatedFlexItem grow={false} show={!loading}>
-                  <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
-                </UpdatedFlexItem>
-              </EuiFlexGroup>
+                {tGridEventRenderedViewEnabled && (
+                  <UpdatedFlexItem grow={false} show={!loading}>
+                    <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
+                  </UpdatedFlexItem>
+                )}
+              </UpdatedFlexGroup>
 
               <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
                 <ScrollableFlexItem grow={1}>

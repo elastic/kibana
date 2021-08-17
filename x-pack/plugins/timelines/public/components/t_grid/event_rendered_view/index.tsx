@@ -45,6 +45,7 @@ const EventRenderedFlexItem = styled(EuiFlexItem)`
 type BasicTableType = ComponentType<EuiBasicTableProps<TimelineItem>>;
 
 const StyledEuiBasicTable = styled(EuiBasicTable as BasicTableType)`
+  padding-top: ${({ theme }) => theme.eui.paddingSizes.m};
   .EventRenderedView__buildingBlock {
     background: ${({ theme }) => theme.eui.euiColorHighlight};
   }
