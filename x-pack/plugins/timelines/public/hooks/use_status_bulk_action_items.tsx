@@ -48,7 +48,8 @@ export const useStatusBulkActionItems = ({
             title = i18n.OPENED_ALERT_SUCCESS_TOAST(updated);
             break;
           case 'in-progress':
-            title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(updated);
+          case 'acknowledged':
+            title = i18n.ACKNOWLEDGED_ALERT_SUCCESS_TOAST(updated);
         }
         addSuccess({ title });
       }
@@ -70,7 +71,8 @@ export const useStatusBulkActionItems = ({
           title = i18n.OPENED_ALERT_FAILED_TOAST;
           break;
         case 'in-progress':
-          title = i18n.IN_PROGRESS_ALERT_FAILED_TOAST;
+        case 'acknowledged':
+          title = i18n.ACKNOWLEDGED_ALERT_FAILED_TOAST;
       }
       addError(error.message, { title });
       if (onUpdateFailure) {
