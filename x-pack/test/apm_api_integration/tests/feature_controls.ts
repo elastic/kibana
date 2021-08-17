@@ -86,7 +86,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/api/apm/services/foo/agent_name?start=${start}&end=${end}`,
+        url: `/api/apm/services/foo/agent?start=${start}&end=${end}`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,

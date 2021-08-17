@@ -9,12 +9,24 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import {
   AGENT_NAME,
   SERVICE_NAME,
+  SERVICE_RUNTIME_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../observability/server';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
-export async function getServiceAgentName({
+interface ServiceAgent {
+  service?: {
+    runtime: {
+      name: string;
+    };
+  };
+  agent?: {
+    name: string;
+  };
+}
+
+export async function getServiceAgent({
   serviceName,
   setup,
   searchAggregatedTransactions,
@@ -37,27 +49,33 @@ export async function getServiceAgentName({
       ],
     },
     body: {
-      size: 0,
+      size: 1,
+      _source: [SERVICE_RUNTIME_NAME, AGENT_NAME],
       query: {
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             ...rangeQuery(start, end),
+            {
+              exists: {
+                field: SERVICE_RUNTIME_NAME,
+              },
+            },
+            {
+              exists: {
+                field: AGENT_NAME,
+              },
+            },
           ],
-        },
-      },
-      aggs: {
-        agents: {
-          terms: { field: AGENT_NAME, size: 1 },
         },
       },
     },
   };
 
-  const { aggregations } = await apmEventClient.search(
+  const response = await apmEventClient.search(
     'get_service_agent_name',
     params
   );
-  const agentName = aggregations?.agents.buckets[0]?.key as string | undefined;
-  return { agentName };
+  const { service, agent } = response.hits.hits[0]._source as ServiceAgent;
+  return { agentName: agent?.name, serviceRuntimeName: service?.runtime.name };
 }
