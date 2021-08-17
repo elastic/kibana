@@ -98,7 +98,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     showFilterBar: true,
     showDatePicker: true,
     showAutoRefreshOnly: false,
-    displayStyle: 'inPage',
   };
 
   private services = this.props.kibana.services;
