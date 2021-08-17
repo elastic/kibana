@@ -167,11 +167,14 @@ describe('canSkipSourceUpdate', () => {
         expect(canSkipUpdate).toBe(true);
       });
 
-      it('can not skip update when query is refreshed', async () => {
+      it('must skip when apply global query is false, even though force-refresh is on', async () => {
+        // todo - reevaluate this change
         const nextRequestMeta = {
           applyGlobalQuery: prevApplyGlobalQuery,
           filters: prevFilters,
           query: prevQuery,
+          forceRefreshTriggeredFromGlobalQueryTime: true,
+          respondToForceRefresh: true,
         };
 
         const canSkipUpdate = await canSkipSourceUpdate({
@@ -182,7 +185,7 @@ describe('canSkipSourceUpdate', () => {
           getUpdateDueToTimeslice,
         });
 
-        expect(canSkipUpdate).toBe(false);
+        expect(canSkipUpdate).toBe(true);
       });
 
       it('can not skip update when applyGlobalQuery changes', async () => {
@@ -261,6 +264,8 @@ describe('canSkipSourceUpdate', () => {
           applyGlobalQuery: prevApplyGlobalQuery,
           filters: prevFilters,
           query: prevQuery,
+          forceRefreshTriggeredFromGlobalQueryTime: true,
+          respondToForceRefresh: true,
         };
 
         const canSkipUpdate = await canSkipSourceUpdate({
