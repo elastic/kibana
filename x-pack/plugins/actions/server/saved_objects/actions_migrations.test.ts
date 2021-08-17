@@ -6,7 +6,7 @@
  */
 
 import uuid from 'uuid';
-import { getMigrations } from './migrations';
+import { getActionsMigrations } from './actions_migrations';
 import { RawAction } from '../types';
 import { SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
@@ -23,7 +23,7 @@ describe('successful migrations', () => {
 
   describe('7.10.0', () => {
     test('add hasAuth config property for .email actions', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+      const migration710 = getActionsMigrations(encryptedSavedObjectsSetup)['7.10.0'];
       const action = getMockDataForEmail({});
       const migratedAction = migration710(action, context);
       expect(migratedAction.attributes.config).toEqual({
@@ -41,7 +41,7 @@ describe('successful migrations', () => {
     });
 
     test('rename cases configuration object', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+      const migration710 = getActionsMigrations(encryptedSavedObjectsSetup)['7.10.0'];
       const action = getCasesMockData({});
       const migratedAction = migration710(action, context);
       expect(migratedAction.attributes.config).toEqual({
@@ -61,7 +61,7 @@ describe('successful migrations', () => {
 
   describe('7.11.0', () => {
     test('add hasAuth = true for .webhook actions with user and password', () => {
-      const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
+      const migration711 = getActionsMigrations(encryptedSavedObjectsSetup)['7.11.0'];
       const action = getMockDataForWebhook({}, true);
       expect(migration711(action, context)).toMatchObject({
         ...action,
@@ -75,7 +75,7 @@ describe('successful migrations', () => {
     });
 
     test('add hasAuth = false for .webhook actions without user and password', () => {
-      const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
+      const migration711 = getActionsMigrations(encryptedSavedObjectsSetup)['7.11.0'];
       const action = getMockDataForWebhook({}, false);
       expect(migration711(action, context)).toMatchObject({
         ...action,
@@ -88,7 +88,7 @@ describe('successful migrations', () => {
       });
     });
     test('remove cases mapping object', () => {
-      const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
+      const migration711 = getActionsMigrations(encryptedSavedObjectsSetup)['7.11.0'];
       const action = getMockData({
         config: { incidentConfiguration: { mapping: [] }, isCaseOwned: true, another: 'value' },
       });
@@ -106,7 +106,7 @@ describe('successful migrations', () => {
 
   describe('7.14.0', () => {
     test('add isMissingSecrets property for actions', () => {
-      const migration714 = getMigrations(encryptedSavedObjectsSetup)['7.14.0'];
+      const migration714 = getActionsMigrations(encryptedSavedObjectsSetup)['7.14.0'];
       const action = getMockData({ isMissingSecrets: undefined });
       const migratedAction = migration714(action, context);
       expect(migratedAction).toEqual({
@@ -130,7 +130,7 @@ describe('handles errors during migrations', () => {
 
   describe('7.10.0 throws if migration fails', () => {
     test('should show the proper exception', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+      const migration710 = getActionsMigrations(encryptedSavedObjectsSetup)['7.10.0'];
       const action = getMockDataForEmail({});
       expect(() => {
         migration710(action, context);
@@ -148,7 +148,7 @@ describe('handles errors during migrations', () => {
 
   describe('7.11.0 throws if migration fails', () => {
     test('should show the proper exception', () => {
-      const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
+      const migration711 = getActionsMigrations(encryptedSavedObjectsSetup)['7.11.0'];
       const action = getMockDataForEmail({});
       expect(() => {
         migration711(action, context);
@@ -166,7 +166,7 @@ describe('handles errors during migrations', () => {
 
   describe('7.14.0 throws if migration fails', () => {
     test('should show the proper exception', () => {
-      const migration714 = getMigrations(encryptedSavedObjectsSetup)['7.14.0'];
+      const migration714 = getActionsMigrations(encryptedSavedObjectsSetup)['7.14.0'];
       const action = getMockDataForEmail({});
       expect(() => {
         migration714(action, context);
