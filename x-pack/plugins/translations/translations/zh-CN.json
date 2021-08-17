@@ -25441,8 +25441,6 @@
     "xpack.upgradeAssistant.esDeprecationErrors.partiallyUpgradedWarningMessage": "将 Kibana 升级到与您的 Elasticsearch 集群相同的版本。集群中的一个或多个节点正在运行与 Kibana 不同的版本。",
     "xpack.upgradeAssistant.esDeprecationErrors.permissionsErrorMessage": "您无权查看 Elasticsearch 弃用。",
     "xpack.upgradeAssistant.esDeprecationErrors.upgradedWarningMessage": "您的配置是最新的。Kibana 和索引 Elasticsearch 节点正在运行相同的版本。",
-    "xpack.upgradeAssistant.esDeprecations.backupDataButtonLabel": "备份您的数据",
-    "xpack.upgradeAssistant.esDeprecations.backupDataTooltipText": "在进行任何更改之前拍取快照。",
     "xpack.upgradeAssistant.esDeprecations.docLinkText": "文档",
     "xpack.upgradeAssistant.esDeprecations.loadingText": "正在加载弃用……",
     "xpack.upgradeAssistant.esDeprecations.pageDescription": "查看已弃用的群集和索引设置。在升级之前必须解决任何紧急问题。",

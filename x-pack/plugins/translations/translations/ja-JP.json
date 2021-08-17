@@ -24874,8 +24874,6 @@
     "xpack.upgradeAssistant.esDeprecationErrors.partiallyUpgradedWarningMessage": "Kibanaをご使用のElasticsearchクラスターと同じバージョンにアップグレードしてください。クラスターの1つ以上のノードがKibanaとは異なるバージョンを実行しています。",
     "xpack.upgradeAssistant.esDeprecationErrors.permissionsErrorMessage": "Elasticsearchの廃止予定を表示する権限がありません。",
     "xpack.upgradeAssistant.esDeprecationErrors.upgradedWarningMessage": "構成は最新です。KibanaおよびすべてのElasticsearchノードは同じバージョンを実行しています。",
-    "xpack.upgradeAssistant.esDeprecations.backupDataButtonLabel": "データをバックアップ",
-    "xpack.upgradeAssistant.esDeprecations.backupDataTooltipText": "変更を行う前にスナップショットを作成します。",
     "xpack.upgradeAssistant.esDeprecations.docLinkText": "ドキュメント",
     "xpack.upgradeAssistant.esDeprecations.loadingText": "廃止予定を読み込んでいます...",
     "xpack.upgradeAssistant.esDeprecations.pageDescription": "廃止予定のクラスターとインデックス設定をレビューします。アップグレード前に重要な問題を解決する必要があります。",
