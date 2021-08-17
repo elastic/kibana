@@ -14,8 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/95614
-  describe.skip('lens runtime fields', () => {
+  describe('lens runtime fields', () => {
     it('should be able to add runtime field and use it', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
