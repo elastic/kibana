@@ -155,3 +155,40 @@ describe('#uiSettings', () => {
     });
   });
 });
+
+describe('#deprecations', () => {
+  describe('#client', () => {
+    test('returns the results of coreStart.deprecations.asScopedToClient', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = coreMock.createInternalStart();
+      const context = new CoreRouteHandlerContext(coreStart, request);
+
+      const client = context.deprecations.client;
+      expect(client).toBe(coreStart.deprecations.asScopedToClient.mock.results[0].value);
+    });
+
+    test('lazily created', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = coreMock.createInternalStart();
+      const context = new CoreRouteHandlerContext(coreStart, request);
+
+      expect(coreStart.deprecations.asScopedToClient).not.toHaveBeenCalled();
+      const client = context.deprecations.client;
+      expect(coreStart.deprecations.asScopedToClient).toHaveBeenCalled();
+      expect(client).toBeDefined();
+    });
+
+    test('only creates one instance', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = coreMock.createInternalStart();
+      const context = new CoreRouteHandlerContext(coreStart, request);
+
+      const client1 = context.deprecations.client;
+      const client2 = context.deprecations.client;
+      expect(coreStart.deprecations.asScopedToClient.mock.calls.length).toBe(1);
+      const mockResult = coreStart.deprecations.asScopedToClient.mock.results[0].value;
+      expect(client1).toBe(mockResult);
+      expect(client2).toBe(mockResult);
+    });
+  });
+});

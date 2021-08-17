@@ -25,7 +25,7 @@ export async function getAnomalySeries({
   setup,
   logger,
 }: {
-  environment?: string;
+  environment: string;
   serviceName: string;
   transactionType: string;
   transactionName?: string;

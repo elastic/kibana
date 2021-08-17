@@ -40,6 +40,22 @@ export const PROJECTS = [
   createProject('x-pack/plugins/security_solution/cypress/tsconfig.json', {
     name: 'security_solution/cypress',
   }),
+  createProject(
+    'x-pack/plugins/enterprise_search/public/applications/shared/cypress/tsconfig.json',
+    { name: 'enterprise_search/shared/cypress' }
+  ),
+  createProject(
+    'x-pack/plugins/enterprise_search/public/applications/enterprise_search/cypress/tsconfig.json',
+    { name: 'enterprise_search/overview/cypress' }
+  ),
+  createProject(
+    'x-pack/plugins/enterprise_search/public/applications/app_search/cypress/tsconfig.json',
+    { name: 'enterprise_search/app_search/cypress' }
+  ),
+  createProject(
+    'x-pack/plugins/enterprise_search/public/applications/workplace_search/cypress/tsconfig.json',
+    { name: 'enterprise_search/workplace_search/cypress' }
+  ),
   createProject('x-pack/plugins/osquery/cypress/tsconfig.json', {
     name: 'osquery/cypress',
   }),

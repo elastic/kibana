@@ -43,7 +43,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
     .euiFlyoutBody__overflowContent {
       flex: 1;
       overflow: hidden;
-      padding: ${({ theme }) => `${theme.eui.paddingSizes.m}`};
+      padding: ${({ theme }) => `0 ${theme.eui.paddingSizes.m} ${theme.eui.paddingSizes.m}`};
     }
   }
 `;
@@ -154,7 +154,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
   return isFlyoutView ? (
     <>
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader hasBorder={isHostIsolationPanelOpen}>
         {isHostIsolationPanelOpen ? (
           backToAlertDetailsLink
         ) : (

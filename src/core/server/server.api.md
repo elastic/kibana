@@ -726,6 +726,46 @@ export interface DeleteDocumentResponse {
     _version: number;
 }
 
+// @public @deprecated (undocumented)
+export interface DeprecationAPIClientParams extends GenericParams {
+    // (undocumented)
+    method: 'GET';
+    // (undocumented)
+    path: '/_migration/deprecations';
+}
+
+// @public @deprecated (undocumented)
+export interface DeprecationAPIResponse {
+    // (undocumented)
+    cluster_settings: DeprecationInfo[];
+    // (undocumented)
+    index_settings: IndexSettingsDeprecationInfo;
+    // (undocumented)
+    ml_settings: DeprecationInfo[];
+    // (undocumented)
+    node_settings: DeprecationInfo[];
+}
+
+// @public @deprecated (undocumented)
+export interface DeprecationInfo {
+    // (undocumented)
+    details?: string;
+    // (undocumented)
+    level: MIGRATION_DEPRECATION_LEVEL;
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    url: string;
+}
+
+// @public
+export interface DeprecationsClient {
+    // Warning: (ae-forgotten-export) The symbol "DomainDeprecationDetails" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
+}
+
 // Warning: (ae-missing-release-tag) "DeprecationsDetails" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1617,6 +1657,9 @@ export interface RequestHandlerContext {
         };
         uiSettings: {
             client: IUiSettingsClient;
+        };
+        deprecations: {
+            client: DeprecationsClient;
         };
     };
 }
