@@ -767,8 +767,13 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   async deleteFeature(featureId: string) {
-    const indexPattern = await this.getIndexPattern();
-    await deleteFeatureFromIndex(indexPattern.title, featureId);
+    const indexList = await this.getSourceIndexList();
+    if (indexList.length !== 1) {
+      throw new Error(
+        `Error: ${indexList.length} indexes associated with index pattern. Only index patterns associated with a single index can be edited`
+      );
+    }
+    await deleteFeatureFromIndex(indexList[0], featureId);
   }
 
   async getUrlTemplateWithMeta(
