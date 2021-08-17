@@ -243,7 +243,7 @@ export const useHoverActionItems = ({
     ]
   ) as JSX.Element[];
 
-  const overflowBtn = useMemo(
+  const showTopNBtn = useMemo(
     () => (
       <ShowTopNButton
         Component={enableOverflowButton ? EuiContextMenuItem : undefined}
@@ -276,7 +276,7 @@ export const useHoverActionItems = ({
                 onClick: onOverflowButtonClick,
                 showTooltip: enableOverflowButton ? false : true,
                 value: values,
-                items: showTopN ? [overflowBtn] : allItems.slice(itemsToShow),
+                items: showTopN ? [showTopNBtn] : allItems.slice(itemsToShow),
                 isOverflowPopoverOpen: !!isOverflowPopoverOpen,
               }),
             ]
@@ -293,7 +293,7 @@ export const useHoverActionItems = ({
       isOverflowPopoverOpen,
       itemsToShow,
       onOverflowButtonClick,
-      overflowBtn,
+      showTopNBtn,
       ownFocus,
       showTopN,
       stKeyboardEvent,
@@ -301,9 +301,9 @@ export const useHoverActionItems = ({
     ]
   );
 
-  const allActionItems = useMemo(() => (showTopN ? [overflowBtn] : allItems), [
+  const allActionItems = useMemo(() => (showTopN ? [showTopNBtn] : allItems), [
     allItems,
-    overflowBtn,
+    showTopNBtn,
     showTopN,
   ]);
 

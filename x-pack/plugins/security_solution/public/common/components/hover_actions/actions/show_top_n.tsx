@@ -6,7 +6,13 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiPopover,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StatefulTopN } from '../../top_n';
 import { TimelineId } from '../../../../../common/types/timeline';
@@ -25,6 +31,7 @@ const SHOW_TOP = (fieldName: string) =>
 interface Props {
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
+  enablePopOver?: boolean;
   field: string;
   onClick: () => void;
   onFilterAdded?: () => void;
@@ -38,6 +45,7 @@ interface Props {
 export const ShowTopNButton: React.FC<Props> = React.memo(
   ({
     Component,
+    enablePopOver,
     field,
     onClick,
     onFilterAdded,
@@ -84,16 +92,35 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
       [Component, field, onClick]
     );
 
+    const topNPannel = useMemo(
+      () => (
+        <StatefulTopN
+          browserFields={browserFields}
+          field={field}
+          indexPattern={indexPattern}
+          onFilterAdded={onFilterAdded}
+          timelineId={timelineId ?? undefined}
+          toggleTopN={onClick}
+          value={value}
+        />
+      ),
+      [browserFields, field, indexPattern, onClick, onFilterAdded, timelineId, value]
+    );
+
     return showTopN ? (
-      <StatefulTopN
-        browserFields={browserFields}
-        field={field}
-        indexPattern={indexPattern}
-        onFilterAdded={onFilterAdded}
-        timelineId={timelineId ?? undefined}
-        toggleTopN={onClick}
-        value={value}
-      />
+      enablePopOver ? (
+        <EuiPopover
+          button={button}
+          isOpen={showTopN}
+          closePopover={onClick}
+          panelClassName="withHoverActions__popover"
+          data-test-subj="showTopNContainer"
+        >
+          {topNPannel}
+        </EuiPopover>
+      ) : (
+        topNPannel
+      )
     ) : showTooltip ? (
       <EuiToolTip
         content={
