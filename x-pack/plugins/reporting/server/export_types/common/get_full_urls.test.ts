@@ -68,11 +68,7 @@ test(`fails if URLs are absolute for PDF`, async () => {
     getFullUrls(
       mockConfig,
       getMockJob({
-        objects: [
-          {
-            relativeUrl,
-          },
-        ],
+        objects: [{ relativeUrl }],
         forceNow,
       })
     );
@@ -107,7 +103,7 @@ test(`fails if URL does not route to a visualization`, async () => {
 
 test(`adds forceNow to hash's query, if it exists`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
-  const urls = await getFullUrls(
+  const urls = getFullUrls(
     mockConfig,
     getMockJob({ relativeUrl: '/app/kibana#/something', forceNow })
   );
@@ -120,7 +116,7 @@ test(`adds forceNow to hash's query, if it exists`, async () => {
 test(`appends forceNow to hash's query, if it exists`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
 
-  const urls = await getFullUrls(
+  const urls = getFullUrls(
     mockConfig,
     getMockJob({ relativeUrl: '/app/kibana#/something?_g=something', forceNow })
   );
@@ -131,7 +127,7 @@ test(`appends forceNow to hash's query, if it exists`, async () => {
 });
 
 test(`doesn't append forceNow query to url, if it doesn't exists`, async () => {
-  const urls = await getFullUrls(mockConfig, getMockJob({ relativeUrl: '/app/kibana#/something' }));
+  const urls = getFullUrls(mockConfig, getMockJob({ relativeUrl: '/app/kibana#/something' }));
 
   expect(urls[0]).toEqual('http://localhost:5601/sbp/app/kibana#/something');
 });

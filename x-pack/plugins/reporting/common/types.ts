@@ -62,8 +62,6 @@ export interface BaseParams {
   layout?: LayoutParams;
   objectType: string;
   title: string;
-  savedObjectId?: string; // legacy (7.x) only
-  queryString?: string; // legacy (7.x) only
   browserTimezone: string; // to format dates in the user's time zone
   version: string; // to handle any state migrations
 }
