@@ -306,24 +306,6 @@ export function LatencyCorrelations() {
       <EuiSpacer size="s" />
 
       <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          {!isRunning && (
-            <EuiButton size="s" onClick={startFetch}>
-              <FormattedMessage
-                id="xpack.apm.correlations.latencyCorrelations.refreshButtonTitle"
-                defaultMessage="Refresh"
-              />
-            </EuiButton>
-          )}
-          {isRunning && (
-            <EuiButton size="s" onClick={cancelFetch}>
-              <FormattedMessage
-                id="xpack.apm.correlations.latencyCorrelations.cancelButtonTitle"
-                defaultMessage="Cancel"
-              />
-            </EuiButton>
-          )}
-        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem data-test-subj="apmCorrelationsLatencyCorrelationsProgressTitle">
@@ -348,6 +330,24 @@ export function LatencyCorrelations() {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {!isRunning && (
+            <EuiButton size="s" onClick={startFetch}>
+              <FormattedMessage
+                id="xpack.apm.correlations.latencyCorrelations.refreshButtonTitle"
+                defaultMessage="Refresh"
+              />
+            </EuiButton>
+          )}
+          {isRunning && (
+            <EuiButton size="s" onClick={cancelFetch}>
+              <FormattedMessage
+                id="xpack.apm.correlations.latencyCorrelations.cancelButtonTitle"
+                defaultMessage="Cancel"
+              />
+            </EuiButton>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
       {ccsWarning && (
