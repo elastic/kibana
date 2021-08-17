@@ -13,8 +13,7 @@ import type {
   FailedImport,
   ProcessedImportResponse,
 } from 'src/plugins/saved_objects_management/public';
-
-import type { SavedObjectTarget } from '../types';
+import type { CopyToSpaceSavedObjectTarget } from 'src/plugins/spaces_oss/public';
 
 export interface SummarizedSavedObjectResult {
   type: string;
@@ -68,7 +67,7 @@ export type SummarizedCopyToSpaceResult =
   | ProcessingResponse;
 
 export function summarizeCopyResult(
-  savedObjectTarget: Required<SavedObjectTarget>,
+  savedObjectTarget: Required<CopyToSpaceSavedObjectTarget>,
   copyResult: ProcessedImportResponse | undefined
 ): SummarizedCopyToSpaceResult {
   const conflicts = copyResult?.failedImports.filter(isAnyConflict) ?? [];

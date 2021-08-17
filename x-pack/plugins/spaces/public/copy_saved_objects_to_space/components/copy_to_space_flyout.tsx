@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { CopyToSpaceFlyoutProps } from './copy_to_space_flyout_internal';
+import type { CopyToSpaceFlyoutProps } from 'src/plugins/spaces_oss/public';
 
 export const getCopyToSpaceFlyoutComponent = async (): Promise<
   React.FC<CopyToSpaceFlyoutProps>

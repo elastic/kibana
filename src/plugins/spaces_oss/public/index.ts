@@ -23,6 +23,8 @@ export type {
   SpacesContextProps,
   ShareToSpaceFlyoutProps,
   ShareToSpaceSavedObjectTarget,
+  CopyToSpaceFlyoutProps,
+  CopyToSpaceSavedObjectTarget,
   SpaceListProps,
   LegacyUrlConflictProps,
   SpaceAvatarProps,

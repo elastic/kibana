@@ -83,6 +83,12 @@ export interface SpacesApiUiComponent {
    */
   getShareToSpaceFlyout: LazyComponentFn<ShareToSpaceFlyoutProps>;
   /**
+   * Displays a flyout to copy an object to other spaces.
+   *
+   * Note: must be rendered inside of a SpacesContext.
+   */
+  getCopyToSpaceFlyout: LazyComponentFn<CopyToSpaceFlyoutProps>;
+  /**
    * Displays a corresponding list of spaces for a given list of saved object namespaces. It shows up to five spaces (and an indicator for
    * any number of spaces that the user is not authorized to see) by default. If more than five named spaces would be displayed, the extras
    * (along with the unauthorized spaces indicator, if present) are hidden behind a button. If '*' (aka "All spaces") is present, it
@@ -221,6 +227,50 @@ export interface ShareToSpaceSavedObjectTarget {
    * Default value is 'object'.
    */
   noun?: string;
+}
+
+/**
+ * Properties for the CopyToSpaceFlyout.
+ */
+export interface CopyToSpaceFlyoutProps {
+  /**
+   * The object to render the flyout for.
+   */
+  savedObjectTarget: CopyToSpaceSavedObjectTarget;
+  /**
+   * Optional callback when the flyout is closed.
+   */
+  onClose?: () => void;
+}
+
+/**
+ * Describes the target saved object during a copy operation.
+ */
+export interface CopyToSpaceSavedObjectTarget {
+  /**
+   * The object's type.
+   */
+  type: string;
+  /**
+   * The object's ID.
+   */
+  id: string;
+  /**
+   * The namespaces that the object currently exists in.
+   */
+  namespaces: string[];
+  /**
+   * The EUI icon that is rendered in the flyout's subtitle.
+   *
+   * Default is 'apps'.
+   */
+  icon?: string;
+  /**
+   * The string that is rendered in the flyout's subtitle.
+   *
+   * Default is `${type} [id=${id}]`.
+   */
+  title?: string;
 }
 
 /**

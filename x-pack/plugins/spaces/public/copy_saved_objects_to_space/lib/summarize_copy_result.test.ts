@@ -10,8 +10,8 @@ import type {
   ProcessedImportResponse,
   SavedObjectsManagementRecord,
 } from 'src/plugins/saved_objects_management/public';
+import type { CopyToSpaceSavedObjectTarget } from 'src/plugins/spaces_oss/public';
 
-import type { SavedObjectTarget } from '../types';
 import { summarizeCopyResult } from './summarize_copy_result';
 
 // Sample data references:
@@ -29,7 +29,7 @@ const OBJECTS = {
     namespaces: [],
     icon: 'dashboardApp',
     title: 'my-dashboard-title',
-  } as Required<SavedObjectTarget>,
+  } as Required<CopyToSpaceSavedObjectTarget>,
   MY_DASHBOARD: {
     type: 'dashboard',
     id: 'foo',

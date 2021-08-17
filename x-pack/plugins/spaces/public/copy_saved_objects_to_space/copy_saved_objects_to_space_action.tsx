@@ -5,41 +5,23 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
-import useAsync from 'react-use/lib/useAsync';
+import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { StartServicesAccessor } from 'src/core/public';
 import type { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
+import type { CopyToSpaceFlyoutProps, SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
 import { SavedObjectsManagementAction } from '../../../../../src/plugins/saved_objects_management/public';
-import type { PluginsStart } from '../plugin';
-import { SuspenseErrorBoundary } from '../suspense_error_boundary';
-import type { CopyToSpaceFlyoutProps } from './components';
-import { getCopyToSpaceFlyoutComponent } from './components';
-
-const LazyCopyToSpaceFlyout = lazy(() =>
-  getCopyToSpaceFlyoutComponent().then((component) => ({ default: component }))
-);
 
 interface WrapperProps {
-  getStartServices: StartServicesAccessor<PluginsStart>;
+  spacesApiUi: SpacesApiUi;
   props: CopyToSpaceFlyoutProps;
 }
 
-const Wrapper = ({ getStartServices, props }: WrapperProps) => {
-  const { value: startServices = [{ notifications: undefined }] } = useAsync(getStartServices);
-  const [{ notifications }] = startServices;
+const Wrapper = ({ spacesApiUi, props }: WrapperProps) => {
+  const LazyComponent = useMemo(() => spacesApiUi.components.getCopyToSpaceFlyout, [spacesApiUi]);
 
-  if (!notifications) {
-    return null;
-  }
-
-  return (
-    <SuspenseErrorBoundary notifications={notifications}>
-      <LazyCopyToSpaceFlyout {...props} />
-    </SuspenseErrorBoundary>
-  );
+  return <LazyComponent {...props} />;
 };
 
 export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction {
@@ -62,7 +44,7 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
     },
   };
 
-  constructor(private getStartServices: StartServicesAccessor<PluginsStart>) {
+  constructor(private readonly spacesApiUi: SpacesApiUi) {
     super();
   }
 
@@ -82,7 +64,7 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
       },
     };
 
-    return <Wrapper getStartServices={this.getStartServices} props={props} />;
+    return <Wrapper spacesApiUi={this.spacesApiUi} props={props} />;
   };
 
   private onClose = () => {

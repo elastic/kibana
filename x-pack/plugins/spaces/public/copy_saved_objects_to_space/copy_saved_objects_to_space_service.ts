@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor } from 'src/core/public';
 import type { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
-import type { PluginsStart } from '../plugin';
 import { CopyToSpaceSavedObjectsManagementAction } from './copy_saved_objects_to_space_action';
 
 interface SetupDeps {
   savedObjectsManagementSetup: SavedObjectsManagementPluginSetup;
-  getStartServices: StartServicesAccessor<PluginsStart>;
+  spacesApiUi: SpacesApiUi;
 }
 
 export class CopySavedObjectsToSpaceService {
-  public setup({ savedObjectsManagementSetup, getStartServices }: SetupDeps) {
-    const action = new CopyToSpaceSavedObjectsManagementAction(getStartServices);
+  public setup({ savedObjectsManagementSetup, spacesApiUi }: SetupDeps) {
+    const action = new CopyToSpaceSavedObjectsManagementAction(spacesApiUi);
     savedObjectsManagementSetup.actions.register(action);
   }
 }

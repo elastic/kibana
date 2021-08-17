@@ -11,6 +11,7 @@ function createComponentsMock(): jest.Mocked<SpacesApiUiComponent> {
   return {
     getSpacesContextProvider: jest.fn(),
     getShareToSpaceFlyout: jest.fn(),
+    getCopyToSpaceFlyout: jest.fn(),
     getSpaceList: jest.fn(),
     getLegacyUrlConflict: jest.fn(),
     getSpaceAvatar: jest.fn(),
