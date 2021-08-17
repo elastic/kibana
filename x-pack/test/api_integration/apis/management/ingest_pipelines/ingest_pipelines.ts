@@ -492,12 +492,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').expect(404);
 
-        expect(body).to.eql({
-          error: 'Not Found',
-          message: '{"_index":"test_index","_id":"2","found":false}',
-          statusCode: 404,
-          attributes: {},
-        });
+        expect(body.error).to.be('Not Found');
+        expect(body.statusCode).to.be(404);
       });
     });
   });
