@@ -100,7 +100,7 @@ describe('AddToCaseAction', () => {
           {...props}
           event={{
             _id: 'test-id',
-            data: [],
+            data: [{ field: 'kibana.alert.rule.id', value: ['rule-id'] }],
             ecs: {
               _id: 'test-id',
               _index: 'test-index',
@@ -112,7 +112,7 @@ describe('AddToCaseAction', () => {
           {...props}
           event={{
             _id: 'test-id',
-            data: [],
+            data: [{ field: 'kibana.alert.rule.id', value: ['rule-id'] }],
             ecs: {
               _id: 'test-id',
               _index: 'test-index',
