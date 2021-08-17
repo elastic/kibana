@@ -21,7 +21,8 @@ export function registerJobsHealthAlertingRule(
   triggersActionsUi.ruleTypeRegistry.register({
     id: ML_ALERT_TYPES.AD_JOBS_HEALTH,
     description: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.description', {
-      defaultMessage: 'Alert when anomaly detection jobs experience operational issues.',
+      defaultMessage:
+        'Alert when anomaly detection jobs experience operational issues. Enable suitable alerts for critically important jobs.',
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
