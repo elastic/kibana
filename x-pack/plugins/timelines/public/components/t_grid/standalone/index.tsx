@@ -237,6 +237,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     loading,
     { events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
+    alertConsumers,
     docValueFields: [],
     entityType,
     excludeEcsData: true,
