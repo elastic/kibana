@@ -44,11 +44,7 @@ import { useFailedTransactionsCorrelationsFetcher } from '../../../hooks/use_fai
 import { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 import { useApmParams } from '../../../hooks/use_apm_params';
 
-interface Props {
-  onClose: () => void;
-}
-
-export function FailedTransactionsCorrelations({ onClose }: Props) {
+export function FailedTransactionsCorrelations() {
   const {
     core: { notifications, uiSettings },
   } = useApmPluginContext();
@@ -114,7 +110,6 @@ export function FailedTransactionsCorrelations({ onClose }: Props) {
   }, [selectedSignificantTerm, result]);
 
   const history = useHistory();
-  const handleOnFilter = onClose;
 
   const failedTransactionsCorrelationsColumns: Array<
     EuiBasicTableColumn<FailedTransactionsCorrelationValue>
@@ -193,7 +188,6 @@ export function FailedTransactionsCorrelations({ onClose }: Props) {
                   )}"`,
                 },
               });
-              handleOnFilter();
               trackApmEvent({ metric: 'correlations_term_include_filter' });
             },
           },
@@ -216,7 +210,6 @@ export function FailedTransactionsCorrelations({ onClose }: Props) {
                   )}"`,
                 },
               });
-              handleOnFilter();
               trackApmEvent({ metric: 'correlations_term_exclude_filter' });
             },
           },
@@ -256,7 +249,7 @@ export function FailedTransactionsCorrelations({ onClose }: Props) {
         },
       },
     ],
-    [handleOnFilter, history, trackApmEvent]
+    [history, trackApmEvent]
   );
 
   useEffect(() => {
@@ -348,7 +341,6 @@ export function FailedTransactionsCorrelations({ onClose }: Props) {
         status={FETCH_STATUS.SUCCESS}
         setSelectedSignificantTerm={setSelectedSignificantTerm}
         selectedTerm={selectedTerm}
-        onFilter={onClose}
       />
 
       {ccsWarning && (
