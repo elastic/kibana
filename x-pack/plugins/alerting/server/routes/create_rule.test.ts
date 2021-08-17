@@ -17,6 +17,8 @@ import { rulesClientMock } from '../rules_client.mock';
 import { AlertTypeDisabledError } from '../lib';
 import { AsApiContract } from './lib';
 import { SanitizedAlert } from '../types';
+import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 
 const rulesClient = rulesClientMock.create();
 let logger: MockedLogger;
@@ -108,8 +110,17 @@ describe('createRuleRoute', () => {
   it('creates a rule with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    createRuleRoute(router, licenseState, logger);
+    createRuleRoute({
+      router,
+      licenseState,
+      logger,
+      encryptedSavedObjects,
+      usageCounter: mockUsageCounter,
+    });
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -128,6 +139,7 @@ describe('createRuleRoute', () => {
     expect(await handler(context, req, res)).toEqual({ body: createResult });
 
     expect(logger.warn).not.toHaveBeenCalled();
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
     expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -177,8 +189,17 @@ describe('createRuleRoute', () => {
     };
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    createRuleRoute(router, licenseState, logger);
+    createRuleRoute({
+      router,
+      licenseState,
+      logger,
+      encryptedSavedObjects,
+      usageCounter: mockUsageCounter,
+    });
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -202,6 +223,7 @@ describe('createRuleRoute', () => {
 
     expect(logger.warn).not.toHaveBeenCalled();
     expect(rulesClient.getSpaceId).toHaveBeenCalled();
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
     expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -251,8 +273,17 @@ describe('createRuleRoute', () => {
     };
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    createRuleRoute(router, licenseState, logger);
+    createRuleRoute({
+      router,
+      licenseState,
+      logger,
+      encryptedSavedObjects,
+      usageCounter: mockUsageCounter,
+    });
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -277,6 +308,7 @@ describe('createRuleRoute', () => {
 
     expect(logger.warn).not.toHaveBeenCalled();
     expect(rulesClient.getSpaceId).toHaveBeenCalled();
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
     expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -326,8 +358,17 @@ describe('createRuleRoute', () => {
     };
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    createRuleRoute(router, licenseState, logger);
+    createRuleRoute({
+      router,
+      licenseState,
+      logger,
+      encryptedSavedObjects,
+      usageCounter: mockUsageCounter,
+    });
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -358,6 +399,7 @@ describe('createRuleRoute', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       `POST /api/alerting/rule/custom-id: Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the Alerting API docs at https://www.elastic.co/guide/en/kibana/current/create-rule-api.html for more details.`
     );
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(2);
     expect(rulesClient.getSpaceId).toHaveBeenCalled();
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
     expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -407,8 +449,9 @@ describe('createRuleRoute', () => {
   it('ensures the license allows creating rules', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
-    createRuleRoute(router, licenseState, logger);
+    createRuleRoute({ router, licenseState, logger, encryptedSavedObjects });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -424,12 +467,13 @@ describe('createRuleRoute', () => {
   it('ensures the license check prevents creating rules', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('OMG');
     });
 
-    createRuleRoute(router, licenseState, logger);
+    createRuleRoute({ router, licenseState, logger, encryptedSavedObjects });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -445,8 +489,9 @@ describe('createRuleRoute', () => {
   it('ensures the rule type gets validated for the license', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
-    createRuleRoute(router, licenseState, logger);
+    createRuleRoute({ router, licenseState, logger, encryptedSavedObjects });
 
     const [, handler] = router.post.mock.calls[0];
 

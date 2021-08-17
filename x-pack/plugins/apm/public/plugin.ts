@@ -52,6 +52,7 @@ import {
 } from './components/fleet_integration';
 import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/lazy_apm_policy_create_extension';
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
+import { getLazyApmAgentsTabExtension } from './components/fleet_integration/lazy_apm_agents_tab_extension';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
@@ -81,6 +82,20 @@ export interface ApmPluginStartDeps {
   fleet?: FleetStart;
 }
 
+const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
+  defaultMessage: 'Services',
+});
+const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
+  defaultMessage: 'Traces',
+});
+const serviceMapTitle = i18n.translate('xpack.apm.navigation.serviceMapTitle', {
+  defaultMessage: 'Service Map',
+});
+
+const backendsTitle = i18n.translate('xpack.apm.navigation.backendsTitle', {
+  defaultMessage: 'Backends',
+});
+
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
@@ -95,21 +110,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       pluginSetupDeps.home.environment.update({ apmUi: true });
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
-
-    const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
-      defaultMessage: 'Services',
-    });
-    const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
-      defaultMessage: 'Traces',
-    });
-    const serviceMapTitle = i18n.translate(
-      'xpack.apm.navigation.serviceMapTitle',
-      { defaultMessage: 'Service Map' }
-    );
-
-    const backendsTitle = i18n.translate('xpack.apm.navigation.backendsTitle', {
-      defaultMessage: 'Backends',
-    });
 
     // register observability nav if user has access to plugin
     plugins.observability.navigation.registerSections(
@@ -129,6 +129,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                     label: backendsTitle,
                     app: 'apm',
                     path: '/backends',
+                    isNewFeature: true,
                     onClick: () => {
                       const { usageCollection } = pluginsStart as {
                         usageCollection?: UsageCollectionStart;
@@ -364,6 +365,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         package: 'apm',
         view: 'package-policy-edit',
         Component: getLazyAPMPolicyEditExtension(),
+      });
+
+      fleet.registerExtension({
+        package: 'apm',
+        view: 'package-policy-edit-tabs',
+        tabs: [
+          { title: 'APM Agents', Component: getLazyApmAgentsTabExtension() },
+        ],
       });
     }
   }

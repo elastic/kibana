@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import { validateDurationSchema, ILicenseState, AlertTypeDisabledError } from '../lib';
+import { validateDurationSchema, AlertTypeDisabledError } from '../lib';
 import { CreateOptions } from '../rules_client';
 import {
   RewriteRequestCase,
   RewriteResponseCase,
   handleDisabledApiKeysError,
   verifyAccessAndContext,
+  countUsageOfPredefinedIds,
 } from './lib';
 import {
   SanitizedAlert,
   validateNotifyWhenType,
   AlertTypeParams,
-  AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
   AlertNotifyWhenType,
 } from '../types';
+import { RouteOptions } from '.';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -93,11 +93,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   })),
 });
 
-export const createRuleRoute = (
-  router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState,
-  logger: Logger
-) => {
+export const createRuleRoute = ({ router, licenseState, logger, usageCounter }: RouteOptions) => {
   router.post(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id?}`,
@@ -116,14 +112,19 @@ export const createRuleRoute = (
           const rulesClient = context.alerting.getRulesClient();
           const rule = req.body;
           const params = req.params;
-
           const spaceId = rulesClient.getSpaceId();
+
           const shouldWarnId = params?.id && spaceId !== undefined && spaceId !== 'default';
           if (shouldWarnId) {
             logger.warn(
               `POST ${BASE_ALERTING_API_PATH}/rule/${params?.id}: Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the Alerting API docs at https://www.elastic.co/guide/en/kibana/current/create-rule-api.html for more details.`
             );
           }
+          countUsageOfPredefinedIds({
+            predefinedId: params?.id,
+            spaceId,
+            usageCounter,
+          });
 
           try {
             const createdRule: SanitizedAlert<AlertTypeParams> = await rulesClient.create<AlertTypeParams>(

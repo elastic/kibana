@@ -9,8 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { useDispatch } from 'react-redux';
-
+import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
@@ -40,6 +39,7 @@ import {
   resolverIsShowing,
 } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
+import type { State } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
 import { HeaderSection } from '../header_section';
 import { StatefulBody } from '../body';
@@ -49,6 +49,7 @@ import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem } from '../styles';
 import * as i18n from '../translations';
 import { InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
+import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const COMPACT_HEADER_HEIGHT = 36; // px
@@ -104,6 +105,12 @@ const HeaderFilterGroupWrapper = styled.header<{ show: boolean }>`
 
 export interface TGridStandaloneProps {
   alertConsumers: AlertConsumers[];
+  appId: string;
+  casePermissions: {
+    crud: boolean;
+    read: boolean;
+  } | null;
+  afterCaseSelection?: Function;
   columns: ColumnHeaderOptions[];
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
@@ -135,7 +142,10 @@ export interface TGridStandaloneProps {
 const basicUnit = (n: number) => i18n.UNIT(n);
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
+  afterCaseSelection,
   alertConsumers,
+  appId,
+  casePermissions,
   columns,
   defaultCellActions,
   deletedEventIds,
@@ -248,6 +258,24 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
     [deletedEventIds.length, totalCount]
   );
+  const activeCaseFlowId = useSelector((state: State) => tGridSelectors.activeCaseFlowId(state));
+  const selectedEvent = useMemo(() => {
+    const matchedEvent = events.find((event) => event.ecs._id === activeCaseFlowId);
+    if (matchedEvent) {
+      return matchedEvent;
+    } else {
+      return undefined;
+    }
+  }, [events, activeCaseFlowId]);
+
+  const addToCaseActionProps = useMemo(() => {
+    return {
+      event: selectedEvent,
+      casePermissions: casePermissions ?? null,
+      appId,
+      onClose: afterCaseSelection,
+    };
+  }, [appId, casePermissions, afterCaseSelection, selectedEvent]);
 
   const nonDeletedEvents = useMemo(() => events.filter((e) => !deletedEventIds.includes(e._id)), [
     deletedEventIds,
@@ -387,6 +415,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
             </EventsContainerLoading>
           </>
         ) : null}
+        <AddToCaseAction {...addToCaseActionProps} />
       </StyledEuiPanel>
     </InspectButtonContainer>
   );
