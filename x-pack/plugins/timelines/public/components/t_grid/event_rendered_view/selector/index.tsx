@@ -125,6 +125,14 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
     );
   }, []);
 
+  const listProps = useMemo(
+    () => ({
+      rowHeight: 80,
+      showIcons: true,
+    }),
+    []
+  );
+
   return (
     <EuiPopover
       panelPaddingSize="none"
@@ -140,10 +148,7 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
           renderOption={renderOption}
           searchable={false}
           height={160}
-          listProps={{
-            rowHeight: 80,
-            showIcons: true,
-          }}
+          listProps={listProps}
           singleSelection={true}
         >
           {(list) => list}

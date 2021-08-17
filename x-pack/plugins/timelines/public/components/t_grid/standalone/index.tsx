@@ -339,14 +339,18 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                     browserFields={browserFields}
                     data={nonDeletedEvents}
                     defaultCellActions={defaultCellActions}
+                    filterQuery={filterQuery}
                     id={STANDALONE_ID}
+                    indexNames={indexNames}
                     isEventViewer={true}
-                    itemsPerPageOptions={itemsPerPageOptions}
+                    itemsPerPageOptions={itemsPerPageOptionsStore}
+                    leadingControlColumns={leadingControlColumns}
                     loadPage={loadPage}
-                    onRuleChange={onRuleChange}
-                    pageInfo={pageInfo}
+                    refetch={refetch}
                     renderCellValue={renderCellValue}
                     rowRenderers={rowRenderers}
+                    onRuleChange={onRuleChange}
+                    querySize={pageInfo.querySize}
                     tabType={TimelineTabs.query}
                     tableView="gridView"
                     totalPages={calculateTotalPages({
@@ -354,13 +358,9 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       itemsPerPage: itemsPerPageStore,
                     })}
                     totalItems={totalCountMinusDeleted}
-                    indexNames={indexNames}
-                    filterQuery={filterQuery}
                     unit={unit}
                     filterStatus={filterStatus}
-                    leadingControlColumns={leadingControlColumns}
                     trailingControlColumns={trailingControlColumns}
-                    refetch={refetch}
                   />
                   <Footer
                     activePage={pageInfo.activePage}

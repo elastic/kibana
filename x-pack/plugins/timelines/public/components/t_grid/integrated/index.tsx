@@ -112,6 +112,7 @@ export interface TGridIntegratedProps {
   entityType: EntityType;
   filters: Filter[];
   globalFullScreen: boolean;
+  graphOverlay?: React.ReactNode;
   filterStatus?: AlertStatus;
   height?: number;
   id: TimelineId;
@@ -166,6 +167,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   start,
   sort,
   additionalFilters,
+  graphOverlay = null,
   graphEventId,
   leadingControlColumns,
   trailingControlColumns,
@@ -303,7 +305,10 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                 )}
               </UpdatedFlexGroup>
 
-              <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
+              <FullWidthFlexGroup
+                $visible={!graphEventId && graphOverlay == null}
+                gutterSize="none"
+              >
                 <ScrollableFlexItem grow={1}>
                   {nonDeletedEvents.length === 0 && loading === false ? (
                     <EuiEmptyPrompt
@@ -338,7 +343,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                         itemsPerPageOptions={itemsPerPageOptions}
                         loadPage={loadPage}
                         onRuleChange={onRuleChange}
-                        pageInfo={pageInfo}
+                        querySize={pageInfo.querySize}
                         renderCellValue={renderCellValue}
                         rowRenderers={rowRenderers}
                         tabType={TimelineTabs.query}
