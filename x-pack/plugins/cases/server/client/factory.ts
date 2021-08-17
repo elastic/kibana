@@ -30,7 +30,7 @@ interface CasesClientFactoryArgs {
   getSpace: GetSpaceFn;
   featuresPluginStart: FeaturesPluginStart;
   actionsPluginStart: ActionsPluginStart;
-  ruleRegistryPluginStart: RuleRegistryPluginStartContract;
+  ruleRegistryPluginStart?: RuleRegistryPluginStartContract;
 }
 
 /**
@@ -86,7 +86,7 @@ export class CasesClientFactory {
     const caseService = new CasesService(this.logger, this.options?.securityPluginStart?.authc);
     const userInfo = caseService.getUser({ request });
 
-    const alertsClient = await this.options.ruleRegistryPluginStart.getRacClientWithRequest(
+    const alertsClient = await this.options.ruleRegistryPluginStart?.getRacClientWithRequest(
       request
     );
 

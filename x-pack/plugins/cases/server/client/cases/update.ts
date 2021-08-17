@@ -43,7 +43,7 @@ import {
   CaseAttributes,
 } from '../../../common';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
-import { getCaseToUpdate, updateAlertsStatusCatchErrors } from '../utils';
+import { getCaseToUpdate } from '../utils';
 
 import { CasesService } from '../../services';
 import {
@@ -364,11 +364,8 @@ async function updateAlerts({
     []
   );
 
-  await updateAlertsStatusCatchErrors({
-    casesClientInternal,
-    alertsToUpdate,
-    logger,
-    errorMessage: 'for updated cases',
+  await casesClientInternal.alerts.updateStatus({
+    alerts: alertsToUpdate,
   });
 }
 

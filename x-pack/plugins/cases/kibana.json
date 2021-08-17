@@ -10,6 +10,7 @@
   "id":"cases",
   "kibanaVersion":"kibana",
   "optionalPlugins":[
+    "ruleRegistry",
      "security",
      "spaces"
   ],
@@ -23,7 +24,6 @@
      "features",
      "kibanaReact",
      "kibanaUtils",
-     "ruleRegistry",
      "triggersActionsUi"
   ],
   "server":true,

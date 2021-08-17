@@ -12,7 +12,6 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { Logger } from 'kibana/server';
 import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
 import { esKuery } from '../../../../../src/plugins/data/server';
 import {
@@ -36,30 +35,6 @@ import {
   isCommentRequestTypeActions,
   SavedObjectFindOptionsKueryNode,
 } from '../common';
-import { CasesClientInternal } from '.';
-import { UpdateAlertRequest } from './alerts/types';
-
-export async function updateAlertsStatusCatchErrors({
-  casesClientInternal,
-  alertsToUpdate,
-  logger,
-  errorMessage = '',
-}: {
-  casesClientInternal: CasesClientInternal;
-  alertsToUpdate: UpdateAlertRequest[];
-  logger: Logger;
-  errorMessage?: string;
-}) {
-  try {
-    await casesClientInternal.alerts.updateStatus({
-      alerts: alertsToUpdate,
-    });
-  } catch (error) {
-    // we'll log and continue as to not block the user from performing the rest of the action that caused this function
-    // to be called
-    logger.error(`Failed to update the status of the alerts ${errorMessage}: ${error}`);
-  }
-}
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {

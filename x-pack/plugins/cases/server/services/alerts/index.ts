@@ -34,10 +34,16 @@ function isEmptyAlert(alert: AlertInfo): boolean {
 }
 
 export class AlertService {
-  constructor(private readonly alertsClient: PublicMethodsOf<AlertsClient>) {}
+  constructor(private readonly alertsClient?: PublicMethodsOf<AlertsClient>) {}
 
   public async updateAlertsStatus({ alerts, logger }: UpdateAlertsStatusArgs) {
     try {
+      if (!this.alertsClient) {
+        throw new Error(
+          'Alert client is undefined, the rule registry plugin must be enabled to updated the status of alerts'
+        );
+      }
+
       const alertsToUpdate = alerts.filter((alert) => !isEmptyAlert(alert));
 
       if (alertsToUpdate.length <= 0) {
@@ -47,7 +53,7 @@ export class AlertService {
       return await pMap(
         alertsToUpdate,
         async (alert: UpdateAlertRequest) =>
-          this.alertsClient.update({
+          this.alertsClient?.update({
             id: alert.id,
             index: alert.index,
             _version: undefined,
@@ -68,6 +74,12 @@ export class AlertService {
 
   public async getAlerts({ alertsInfo, logger }: GetAlertsArgs): Promise<Alert[] | undefined> {
     try {
+      if (!this.alertsClient) {
+        throw new Error(
+          'Alert client is undefined, the rule registry plugin must be enabled to retrieve alerts'
+        );
+      }
+
       const alertsToGet = alertsInfo
         .filter((alert) => !isEmpty(alert))
         .slice(0, MAX_ALERTS_PER_SUB_CASE);
@@ -78,7 +90,7 @@ export class AlertService {
 
       const retrievedAlertsSource = await pMap(
         alertsToGet,
-        async (alert: AlertInfo) => this.alertsClient.get({ id: alert.id, index: alert.index }),
+        async (alert: AlertInfo) => this.alertsClient?.get({ id: alert.id, index: alert.index }),
         {
           concurrency: MAX_CONCURRENT_SEARCHES,
         }

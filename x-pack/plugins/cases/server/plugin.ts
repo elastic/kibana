@@ -48,7 +48,7 @@ export interface PluginsStart {
   features: FeaturesPluginStart;
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
-  ruleRegistry: RuleRegistryPluginStartContract;
+  ruleRegistry?: RuleRegistryPluginStartContract;
 }
 
 /**

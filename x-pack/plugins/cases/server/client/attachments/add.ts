@@ -47,7 +47,7 @@ import {
 } from '../../common';
 import { CasesClientArgs, CasesClientInternal } from '..';
 
-import { decodeCommentRequest, updateAlertsStatusCatchErrors } from '../utils';
+import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';
 
 async function getSubCase({
@@ -203,11 +203,9 @@ const addGeneratedAlerts = async (
         comment: query,
         status: subCase.attributes.status,
       });
-      await updateAlertsStatusCatchErrors({
-        casesClientInternal,
-        alertsToUpdate,
-        logger,
-        errorMessage: 'for generated alerts',
+
+      await casesClientInternal.alerts.updateStatus({
+        alerts: alertsToUpdate,
       });
     }
 
@@ -388,11 +386,8 @@ export const addComment = async (
         status: updatedCase.status,
       });
 
-      await updateAlertsStatusCatchErrors({
-        casesClientInternal,
-        alertsToUpdate,
-        logger,
-        errorMessage: 'for user added alert',
+      await casesClientInternal.alerts.updateStatus({
+        alerts: alertsToUpdate,
       });
     }
 
