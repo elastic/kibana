@@ -12,6 +12,7 @@ import * as t from 'io-ts';
 // note: these schemas are not exhaustive. See the `Sort` type of `@elastic/elasticsearch` if you need to enhance it.
 const fieldSchema = t.string;
 export const sortOrderSchema = t.union([t.literal('asc'), t.literal('desc'), t.literal('_doc')]);
+type SortOrderSchema = 'asc' | 'desc' | '_doc';
 const sortModeSchema = t.union([
   t.literal('min'),
   t.literal('max'),
@@ -32,6 +33,52 @@ const sortCombinationsSchema = t.union([fieldSchema, sortContainerSchema]);
 export const sortSchema = t.union([sortCombinationsSchema, t.array(sortCombinationsSchema)]);
 
 export const minDocCount = t.number;
+
+interface BucketAggsSchemas {
+  filter?: {
+    term?: { [x: string]: string | boolean | number };
+  };
+  histogram?: {
+    field?: string;
+    interval?: number;
+    min_doc_count?: number;
+    extended_bounds?: {
+      min: number;
+      max: number;
+    };
+    hard_bounds?: {
+      min: number;
+      max: number;
+    };
+    missing?: number;
+    keyed?: boolean;
+    order?: {
+      _count: string;
+      _key: string;
+    };
+  };
+  nested?: {
+    path: string;
+  };
+  terms?: {
+    field?: string;
+    collect_mode?: string;
+    exclude?: string | string[];
+    include?: string | string[];
+    execution_hint?: string;
+    missing?: number;
+    min_doc_count?: number;
+    size?: number;
+    show_term_doc_count_error?: boolean;
+    order?:
+      | SortOrderSchema
+      | { [x: string]: SortOrderSchema }
+      | Array<{ [x: string]: SortOrderSchema }>;
+  };
+  aggs?: {
+    [x: string]: BucketAggsSchemas;
+  };
+}
 
 /**
  * Schemas for the Bucket aggregations.
@@ -67,62 +114,66 @@ export const minDocCount = t.number;
  * - significant_text
  * - variable_width_histogram
  */
-
-export const bucketAggsSchemas = t.partial({
-  filter: t.exact(
+export const BucketAggsSchemas: t.Type<BucketAggsSchemas> = t.recursion('BucketAggsSchemas', () =>
+  t.exact(
     t.partial({
-      term: t.record(t.string, t.union([t.string, t.boolean, t.number])),
-    })
-  ),
-  histogram: t.exact(
-    t.partial({
-      field: t.string,
-      interval: t.number,
-      min_doc_count: t.number,
-      extended_bounds: t.exact(
+      filter: t.exact(
         t.partial({
-          min: t.number,
-          max: t.number,
+          term: t.record(t.string, t.union([t.string, t.boolean, t.number])),
         })
       ),
-      hard_bounds: t.exact(
+      histogram: t.exact(
         t.partial({
-          min: t.number,
-          max: t.number,
+          field: t.string,
+          interval: t.number,
+          min_doc_count: t.number,
+          extended_bounds: t.exact(
+            t.type({
+              min: t.number,
+              max: t.number,
+            })
+          ),
+          hard_bounds: t.exact(
+            t.type({
+              min: t.number,
+              max: t.number,
+            })
+          ),
+          missing: t.number,
+          keyed: t.boolean,
+          order: t.exact(
+            t.type({
+              _count: t.string,
+              _key: t.string,
+            })
+          ),
         })
       ),
-      missing: t.number,
-      keyed: t.boolean,
-      order: t.exact(
+      nested: t.type({
+        path: t.string,
+      }),
+      terms: t.exact(
         t.partial({
-          _count: t.string,
-          _key: t.string,
+          field: t.string,
+          collect_mode: t.string,
+          exclude: t.union([t.string, t.array(t.string)]),
+          include: t.union([t.string, t.array(t.string)]),
+          execution_hint: t.string,
+          missing: t.number,
+          min_doc_count: t.number,
+          size: t.number,
+          show_term_doc_count_error: t.boolean,
+          order: t.union([
+            sortOrderSchema,
+            t.record(t.string, sortOrderSchema),
+            t.array(t.record(t.string, sortOrderSchema)),
+          ]),
         })
       ),
+      aggs: t.record(t.string, BucketAggsSchemas),
     })
-  ),
-  nested: t.type({
-    path: t.string,
-  }),
-  terms: t.exact(
-    t.partial({
-      field: t.string,
-      collect_mode: t.string,
-      exclude: t.union([t.string, t.array(t.string)]),
-      include: t.union([t.string, t.array(t.string)]),
-      execution_hint: t.string,
-      missing: t.number,
-      min_doc_count: t.number,
-      size: t.number,
-      show_term_doc_count_error: t.boolean,
-      order: t.union([
-        sortOrderSchema,
-        t.record(t.string, sortOrderSchema),
-        t.array(t.record(t.string, sortOrderSchema)),
-      ]),
-    })
-  ),
-});
+  )
+);
 
 /**
  * Schemas for the metrics Aggregations

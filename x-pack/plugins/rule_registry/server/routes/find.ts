@@ -14,7 +14,7 @@ import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
-import { metricsAggsSchemas, bucketAggsSchemas } from '../../common/types';
+import { BucketAggsSchemas } from '../../common/types';
 
 export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>) => {
   router.post(
@@ -26,11 +26,7 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
             t.partial({
               index: t.string,
               query: t.object,
-              aggs: t.union([
-                t.record(t.string, metricsAggsSchemas),
-                t.record(t.string, bucketAggsSchemas),
-                t.undefined,
-              ]),
+              aggs: t.union([t.record(t.string, BucketAggsSchemas), t.undefined]),
               size: t.union([PositiveInteger, t.undefined]),
               track_total_hits: t.union([t.boolean, t.undefined]),
               _source: t.union([t.array(t.string), t.undefined]),

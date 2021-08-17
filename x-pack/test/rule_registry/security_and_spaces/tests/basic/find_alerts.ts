@@ -100,6 +100,72 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
     });
 
+    it(`${superUser.username} should reject at route level when nested aggs contains script alerts which match query in ${SPACE1}/${SECURITY_SOLUTION_ALERT_INDEX}`, async () => {
+      const found = await supertestWithoutAuth
+        .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/find`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .send({
+          query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+          aggs: {
+            alertsByGroupingCount: {
+              terms: {
+                field: 'signal.rule.name',
+                order: {
+                  _count: 'desc',
+                },
+                size: 10000,
+              },
+              aggs: {
+                test: {
+                  terms: {
+                    field: 'signal.rule.name',
+                    size: 10,
+                    script: {
+                      source: 'SCRIPT',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          index: SECURITY_SOLUTION_ALERT_INDEX,
+        });
+      expect(found.statusCode).to.eql(400);
+    });
+
+    it(`${superUser.username} should allow nested aggs and return alerts which match query in ${SPACE1}/${SECURITY_SOLUTION_ALERT_INDEX}`, async () => {
+      const found = await supertestWithoutAuth
+        .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/find`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .send({
+          query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+          aggs: {
+            alertsByGroupingCount: {
+              terms: {
+                field: 'signal.rule.name',
+                order: {
+                  _count: 'desc',
+                },
+                size: 10000,
+              },
+              aggs: {
+                test: {
+                  terms: {
+                    field: 'signal.rule.name',
+                    size: 10,
+                  },
+                },
+              },
+            },
+          },
+          index: SECURITY_SOLUTION_ALERT_INDEX,
+        });
+      expect(found.statusCode).to.eql(200);
+      expect(found.body.hits.total.value).to.be.above(0);
+    });
+
     function addTests({ space, authorizedUsers, unauthorizedUsers, alertId, index }: TestCase) {
       authorizedUsers.forEach(({ username, password }) => {
         it(`${username} should finds alerts which match query in ${space}/${index}`, async () => {
