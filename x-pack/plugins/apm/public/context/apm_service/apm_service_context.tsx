@@ -16,9 +16,9 @@ import { useServiceTransactionTypesFetcher } from './use_service_transaction_typ
 import { APIReturnType } from '../../services/rest/createCallApmApi';
 import { useServiceAlertsFetcher } from './use_service_alerts_fetcher';
 import {
-  useAgentMetadataDetailsFetcher,
+  useServiceMetadataDetailsFetcher,
   AgentMetadataDetails,
-} from './use_agent_metadata_details_fetcher';
+} from './use_service_metadata_details_fetcher';
 import { useApmParams } from '../../hooks/use_apm_params';
 
 export type APMServiceAlert = ValuesType<
@@ -43,7 +43,9 @@ export function ApmServiceContextProvider({
     query,
   } = useApmParams('/services/:serviceName');
 
-  const { agentMetadataDetails } = useAgentMetadataDetailsFetcher(serviceName);
+  const { agentMetadataDetails } = useServiceMetadataDetailsFetcher(
+    serviceName
+  );
   const agentName = agentMetadataDetails?.service?.agent.name;
 
   const transactionTypes = useServiceTransactionTypesFetcher(serviceName);

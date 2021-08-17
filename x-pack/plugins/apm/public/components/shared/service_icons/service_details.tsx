@@ -9,7 +9,7 @@ import { EuiDescriptionList } from '@elastic/eui';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AgentMetadataDetails } from '../../../context/apm_service/use_agent_metadata_details_fetcher';
+import { AgentMetadataDetails } from '../../../context/apm_service/use_service_metadata_details_fetcher';
 
 interface Props {
   service: AgentMetadataDetails['service'];

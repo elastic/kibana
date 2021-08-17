@@ -17,7 +17,7 @@ import { CloudDetails } from './cloud_details';
 import { ContainerDetails } from './container_details';
 import { IconPopover } from './icon_popover';
 import { ServiceDetails } from './service_details';
-import { useAgentMetadataDetailsFetcher } from '../../../context/apm_service/use_agent_metadata_details_fetcher';
+import { useServiceMetadataDetailsFetcher } from '../../../context/apm_service/use_service_metadata_details_fetcher';
 
 interface Props {
   serviceName: string;
@@ -90,7 +90,7 @@ export function ServiceIcons({ serviceName }: Props) {
   const {
     agentMetadataDetails,
     agentMetadataDetailsStatus,
-  } = useAgentMetadataDetailsFetcher(serviceName);
+  } = useServiceMetadataDetailsFetcher(serviceName);
 
   const isLoading = !icons && iconsFetchStatus === FETCH_STATUS.LOADING;
 

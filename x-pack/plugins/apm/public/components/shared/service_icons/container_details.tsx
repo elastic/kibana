@@ -10,7 +10,7 @@ import { EuiDescriptionListProps } from '@elastic/eui/src/components/description
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asInteger } from '../../../../common/utils/formatters';
-import { AgentMetadataDetails } from '../../../context/apm_service/use_agent_metadata_details_fetcher';
+import { AgentMetadataDetails } from '../../../context/apm_service/use_service_metadata_details_fetcher';
 
 interface Props {
   container: AgentMetadataDetails['container'];

@@ -12,7 +12,7 @@ import { createKibanaReactContext } from '../../../../../../../../src/plugins/ki
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { AnalyzeDataButton } from './analyze_data_button';
-import { AgentMetadataDetails } from '../../../../context/apm_service/use_agent_metadata_details_fetcher';
+import { AgentMetadataDetails } from '../../../../context/apm_service/use_service_metadata_details_fetcher';
 
 interface Args {
   agentMetadataDetails: AgentMetadataDetails;

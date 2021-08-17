@@ -11,7 +11,7 @@ import { APIReturnType } from '../../services/rest/createCallApmApi';
 
 export type AgentMetadataDetails = APIReturnType<'GET /api/apm/services/{serviceName}/metadata/details'>;
 
-export function useAgentMetadataDetailsFetcher(serviceName?: string) {
+export function useServiceMetadataDetailsFetcher(serviceName?: string) {
   const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
   const { data, status } = useFetcher(

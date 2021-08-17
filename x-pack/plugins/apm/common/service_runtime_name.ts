@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export function isJRubyServiceRuntimeName(serviceName?: string) {
-  return serviceName?.toLowerCase() === 'jruby';
+export function isJRubyAgent(agentName?: string, serviceRuntimeName?: string) {
+  return agentName === 'ruby' && serviceRuntimeName?.toLowerCase() === 'jruby';
 }

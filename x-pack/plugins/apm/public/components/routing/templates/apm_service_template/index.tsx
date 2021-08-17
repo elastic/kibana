@@ -15,7 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
-import { isJRubyServiceRuntimeName } from '../../../../../common/service_runtime_name';
+import { isJRubyAgent } from '../../../../../common/service_runtime_name';
 import {
   isIosAgentName,
   isJavaAgentName,
@@ -136,7 +136,7 @@ export function isMetricsTabHidden({
     isRumAgentName(agentName) ||
     isJavaAgentName(agentName) ||
     isIosAgentName(agentName) ||
-    isJRubyServiceRuntimeName(serviceRuntimeName)
+    isJRubyAgent(serviceRuntimeName)
   );
 }
 
@@ -147,9 +147,7 @@ export function isJVMsTabHidden({
   agentName?: string;
   serviceRuntimeName?: string;
 }) {
-  return !(
-    isJavaAgentName(agentName) || isJRubyServiceRuntimeName(serviceRuntimeName)
-  );
+  return !(isJavaAgentName(agentName) || isJRubyAgent(serviceRuntimeName));
 }
 
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
