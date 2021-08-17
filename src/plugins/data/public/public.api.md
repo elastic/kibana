@@ -1376,9 +1376,9 @@ export interface IndexPatternListItem {
     // (undocumented)
     title: string;
     // (undocumented)
-    type: string;
+    type?: string;
     // (undocumented)
-    typeMeta: TypeMeta;
+    typeMeta?: TypeMeta;
 }
 
 // Warning: (ae-forgotten-export) The symbol "name" needs to be exported by the entry point index.d.ts

@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-typeMeta: TypeMeta;
+typeMeta?: TypeMeta;
 ```
