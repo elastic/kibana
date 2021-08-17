@@ -16,9 +16,9 @@ import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { ProcessedImportResponse } from 'src/plugins/saved_objects_management/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 import type { CopyToSpaceSavedObjectTarget } from 'src/plugins/spaces_oss/public';
 
+import type { SpacesDataEntry } from '../../types';
 import { summarizeCopyResult } from '../lib';
 import type { CopyOptions, ImportRetry } from '../types';
 import { SpaceResult, SpaceResultProcessing } from './space_result';
@@ -30,7 +30,7 @@ interface Props {
   copyResult: Record<string, ProcessedImportResponse>;
   retries: Record<string, ImportRetry[]>;
   onRetriesChange: (retries: Record<string, ImportRetry[]>) => void;
-  spaces: Space[];
+  spaces: SpacesDataEntry[];
   copyOptions: CopyOptions;
 }
 
@@ -96,7 +96,7 @@ export const ProcessingCopyToSpace = (props: Props) => {
       </EuiText>
       <EuiSpacer size="m" />
       {props.copyOptions.selectedSpaceIds.map((id) => {
-        const space = props.spaces.find((s) => s.id === id) as Space;
+        const space = props.spaces.find((s) => s.id === id)!;
         const spaceCopyResult = props.copyResult[space.id];
         const summarizedSpaceCopyResult = summarizeCopyResult(
           props.savedObjectTarget,
