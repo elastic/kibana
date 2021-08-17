@@ -29,7 +29,7 @@ describe('SourceLogic', () => {
   const {
     clearFlashMessages,
     flashAPIErrors,
-    setSuccessMessage,
+    flashSuccessToast,
     setQueuedSuccessMessage,
     setErrorMessage,
   } = mockFlashMessageHelpers;
@@ -79,7 +79,7 @@ describe('SourceLogic', () => {
         ...contentSource,
         name: NAME,
       });
-      expect(setSuccessMessage).toHaveBeenCalled();
+      expect(flashSuccessToast).toHaveBeenCalled();
     });
 
     it('setSearchResults', () => {

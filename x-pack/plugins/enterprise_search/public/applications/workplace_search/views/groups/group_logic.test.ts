@@ -27,7 +27,7 @@ describe('GroupLogic', () => {
   const {
     clearFlashMessages,
     flashAPIErrors,
-    setSuccessMessage,
+    flashSuccessToast,
     setQueuedSuccessMessage,
     setQueuedErrorMessage,
   } = mockFlashMessageHelpers;
@@ -255,7 +255,7 @@ describe('GroupLogic', () => {
 
         await nextTick();
         expect(onGroupNameChangedSpy).toHaveBeenCalledWith(group);
-        expect(setSuccessMessage).toHaveBeenCalledWith(
+        expect(flashSuccessToast).toHaveBeenCalledWith(
           'Successfully renamed this group to "group".'
         );
       });
@@ -286,7 +286,7 @@ describe('GroupLogic', () => {
 
         await nextTick();
         expect(onGroupSourcesSavedSpy).toHaveBeenCalledWith(group);
-        expect(setSuccessMessage).toHaveBeenCalledWith(
+        expect(flashSuccessToast).toHaveBeenCalledWith(
           'Successfully updated shared content sources.'
         );
       });
@@ -323,7 +323,7 @@ describe('GroupLogic', () => {
         });
 
         await nextTick();
-        expect(setSuccessMessage).toHaveBeenCalledWith(
+        expect(flashSuccessToast).toHaveBeenCalledWith(
           'Successfully updated shared source prioritization.'
         );
         expect(onGroupPrioritiesChangedSpy).toHaveBeenCalledWith(group);
