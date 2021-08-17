@@ -76,7 +76,7 @@ const cellToLabelMap = {
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.statusColumnTitle', {
       defaultMessage: 'Status',
     }),
-    width: '6px',
+    width: '8px',
   },
   message: {
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.issueColumnTitle', {
@@ -242,8 +242,8 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
           <EuiButton
             iconType="refresh"
             onClick={reload}
-            data-test-subj="reloadButton"
-            key="reloadButton"
+            data-test-subj="refreshButton"
+            key="refreshButton"
           >
             {i18nTexts.refreshButtonLabel}
           </EuiButton>
@@ -310,6 +310,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
       <EuiSpacer size="m" />
 
       <EuiTablePagination
+        data-test-subj="esDeprecationsPagination"
         activePage={pager.getCurrentPageIndex()}
         itemsPerPage={pager.itemsPerPage}
         itemsPerPageOptions={pageSizeOptions}

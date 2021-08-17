@@ -57,14 +57,11 @@ const i18nTexts = {
       defaultMessage: 'Reindex paused',
     }
   ),
-  resolutionText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.resolutionLabel',
-    {
-      defaultMessage: 'Reindex',
-    }
-  ),
+  resolutionText: i18n.translate('xpack.upgradeAssistant.esDeprecations.reindex.resolutionLabel', {
+    defaultMessage: 'Reindex',
+  }),
   resolutionTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.resolutionTooltipLabel',
+    'xpack.upgradeAssistant.esDeprecations.reindex.resolutionTooltipLabel',
     {
       defaultMessage: 'This deprecation requires reindexing an index to resolve.',
     }
@@ -117,7 +114,7 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
             <EuiIcon type="alert" color="danger" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18nTexts.reindexCompleteText}</EuiText>
+            <EuiText size="s">{i18nTexts.reindexFailedText}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       );

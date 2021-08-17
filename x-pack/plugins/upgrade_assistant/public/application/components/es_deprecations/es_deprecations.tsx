@@ -53,14 +53,20 @@ const i18nTexts = {
 export const EsDeprecationsContent = withRouter(({ history }: RouteComponentProps) => {
   const { api, breadcrumbs, getUrlForApp, docLinks } = useAppContext();
 
-  const { data: esDeprecations, isLoading, error, resendRequest } = api.useLoadUpgradeStatus();
+  const {
+    data: esDeprecations,
+    isLoading,
+    error,
+    resendRequest,
+    isInitialRequest,
+  } = api.useLoadUpgradeStatus();
 
   useEffect(() => {
     breadcrumbs.setBreadcrumbs('esDeprecations');
   }, [breadcrumbs]);
 
   useEffect(() => {
-    if (isLoading === false) {
+    if (isLoading === false && isInitialRequest) {
       async function sendTelemetryData() {
         await api.sendPageTelemetryData({
           elasticsearch: true,
@@ -69,7 +75,7 @@ export const EsDeprecationsContent = withRouter(({ history }: RouteComponentProp
 
       sendTelemetryData();
     }
-  }, [api, isLoading]);
+  }, [api, isLoading, isInitialRequest]);
 
   if (error) {
     return <EsDeprecationErrors error={error} />;
