@@ -84,6 +84,7 @@
 |  [SavedQueryService](./kibana-plugin-plugins-data-public.savedqueryservice.md) |  |
 |  [SearchSessionInfoProvider](./kibana-plugin-plugins-data-public.searchsessioninfoprovider.md) | Provide info about current search session to be stored in the Search Session saved object |
 |  [SearchSourceFields](./kibana-plugin-plugins-data-public.searchsourcefields.md) | search source fields |
+|  [TypeMeta](./kibana-plugin-plugins-data-public.typemeta.md) |  |
 |  [WaitUntilNextSessionCompletesOptions](./kibana-plugin-plugins-data-public.waituntilnextsessioncompletesoptions.md) | Options for [waitUntilNextSessionCompletes$()](./kibana-plugin-plugins-data-public.waituntilnextsessioncompletes_.md) |
 
 ## Variables
@@ -155,6 +156,7 @@
 |  [IFieldParamType](./kibana-plugin-plugins-data-public.ifieldparamtype.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-public.ifieldsubtype.md) |  |
 |  [IMetricAggType](./kibana-plugin-plugins-data-public.imetricaggtype.md) |  |
+|  [IndexPatternListSavedObjectAttrs](./kibana-plugin-plugins-data-public.indexpatternlistsavedobjectattrs.md) |  |
 |  [IndexPatternLoadExpressionFunctionDefinition](./kibana-plugin-plugins-data-public.indexpatternloadexpressionfunctiondefinition.md) |  |
 |  [IndexPatternsContract](./kibana-plugin-plugins-data-public.indexpatternscontract.md) |  |
 |  [IndexPatternSelectProps](./kibana-plugin-plugins-data-public.indexpatternselectprops.md) |  |
