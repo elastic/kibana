@@ -253,6 +253,7 @@ export {
   IndexPattern,
   IIndexPatternFieldList,
   IndexPatternField,
+  TypeMeta,
 } from './index_patterns';
 
 export {
@@ -270,6 +271,7 @@ export {
   fieldList,
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
   IndexPatternType,
+  IndexPatternListItem,
 } from '../common';
 
 export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
