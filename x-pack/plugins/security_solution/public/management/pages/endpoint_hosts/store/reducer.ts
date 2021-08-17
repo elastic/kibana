@@ -24,6 +24,7 @@ import { AppAction } from '../../../../common/store/actions';
 import { ImmutableReducer } from '../../../../common/store';
 import { Immutable } from '../../../../../common/endpoint/types';
 import { createUninitialisedResourceState, isUninitialisedResourceState } from '../../../state';
+import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
 
 type StateReducer = ImmutableReducer<EndpointState, AppAction>;
 type CaseReducer<T extends AppAction> = (
@@ -174,7 +175,8 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
     };
   } else if (
     action.type === 'endpointDetailsActivityLogUpdatePaging' ||
-    action.type === 'endpointDetailsActivityLogUpdateIsInvalidDateRange'
+    action.type === 'endpointDetailsActivityLogUpdateIsInvalidDateRange' ||
+    action.type === 'userUpdatedActivityLogRefreshOptions'
   ) {
     return {
       ...state,
@@ -309,6 +311,10 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         pageSize: 50,
         startDate: 'now-1d',
         endDate: 'now',
+        autoRefreshOptions: {
+          enabled: false,
+          duration: DEFAULT_POLL_INTERVAL,
+        },
       },
     };
 

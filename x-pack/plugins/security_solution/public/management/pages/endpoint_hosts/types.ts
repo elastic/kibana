@@ -44,6 +44,10 @@ export interface EndpointState {
         startDate: string;
         endDate: string;
         isInvalidDateRange: boolean;
+        autoRefreshOptions: {
+          enabled: boolean;
+          duration: number;
+        };
       };
       logData: AsyncResourceState<ActivityLog>;
     };

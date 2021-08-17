@@ -27,6 +27,10 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
           startDate: 'now-1d',
           endDate: 'now',
           isInvalidDateRange: false,
+          autoRefreshOptions: {
+            enabled: false,
+            duration: DEFAULT_POLL_INTERVAL,
+          },
         },
         logData: createUninitialisedResourceState(),
       },

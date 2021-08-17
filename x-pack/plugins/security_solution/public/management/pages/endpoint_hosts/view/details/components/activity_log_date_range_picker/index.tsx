@@ -28,14 +28,14 @@ const StickyFlexItem = styled(EuiFlexItem)`
 
 export const DateRangePicker = memo(() => {
   const dispatch = useDispatch();
-  const { page, pageSize, startDate, endDate } = useEndpointSelector(getActivityLogDataPaging);
+  const { page, pageSize, startDate, endDate, autoRefreshOptions } = useEndpointSelector(
+    getActivityLogDataPaging
+  );
 
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<
     Array<{ start: string; end: string }>
   >([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isPaused, setIsPaused] = useState(true);
-  const [refreshInterval, setRefreshInterval] = useState();
 
   const stopLoading = useCallback(() => {
     setIsLoading(false);
@@ -45,9 +45,19 @@ export const DateRangePicker = memo(() => {
     setTimeout(stopLoading, 1000);
   }, [stopLoading]);
 
-  const onRefreshChange = useCallback(() => {
-    setIsPaused(isPaused);
-    setRefreshInterval(refreshInterval);
+  const onRefreshChange = useCallback(
+    (evt) => {
+      dispatch({
+        type: 'userUpdatedActivityLogRefreshOptions',
+        payload: {
+          autoRefreshOptions: { enabled: !evt.isPaused, duration: evt.refreshInterval },
+        },
+      });
+    },
+    [dispatch]
+  );
+
+  const onRefresh = useCallback(() => {
     dispatch({
       type: 'endpointDetailsActivityLogUpdatePaging',
       payload: {
@@ -58,7 +68,7 @@ export const DateRangePicker = memo(() => {
         endDate,
       },
     });
-  }, [dispatch, page, pageSize, startDate, endDate, isPaused, refreshInterval]);
+  }, [dispatch, page, pageSize, startDate, endDate]);
 
   const onTimeChange = useCallback(
     ({ start, end }) => {
@@ -94,10 +104,11 @@ export const DateRangePicker = memo(() => {
             <EuiSuperDatePicker
               end={dateMath.parse(endDate)?.toISOString()}
               isLoading={isLoading}
-              isPaused={isPaused}
+              isPaused={!autoRefreshOptions.enabled}
               onTimeChange={onTimeChange}
               onRefreshChange={onRefreshChange}
-              refreshInterval={refreshInterval}
+              refreshInterval={autoRefreshOptions.duration}
+              onRefresh={onRefresh}
               start={dateMath.parse(startDate)?.toISOString()}
               showUpdateButton={false}
             />

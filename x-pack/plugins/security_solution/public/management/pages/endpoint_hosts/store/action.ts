@@ -166,6 +166,13 @@ export interface EndpointDetailsActivityLogUpdatePaging {
   };
 }
 
+export interface UserUpdatedActivityLogRefreshOptions {
+  type: 'userUpdatedActivityLogRefreshOptions';
+  payload: {
+    autoRefreshOptions: { enabled: boolean; duration: number };
+  };
+}
+
 export interface EndpointDetailsLoad {
   type: 'endpointDetailsLoad';
   payload: {
@@ -194,6 +201,7 @@ export type EndpointAction =
   | EndpointDetailsActivityLogUpdatePaging
   | EndpointDetailsActivityLogUpdateIsInvalidDateRange
   | EndpointDetailsActivityLogChanged
+  | UserUpdatedActivityLogRefreshOptions
   | EndpointDetailsLoad
   | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse
