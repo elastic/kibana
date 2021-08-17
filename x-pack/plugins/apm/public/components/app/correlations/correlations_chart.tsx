@@ -20,6 +20,7 @@ import {
   PartialTheme,
   LineAnnotation,
   LineAnnotationDatum,
+  LineAnnotationStyle,
 } from '@elastic/charts';
 
 import euiVars from '@elastic/eui/dist/eui_theme_light.json';
@@ -84,7 +85,7 @@ interface CorrelationsChartProps {
   overallHistogram?: HistogramItem[];
 }
 
-const annotationsStyle = {
+const annotationsStyle: LineAnnotationStyle = {
   line: {
     strokeWidth: 1,
     stroke: 'gray',
