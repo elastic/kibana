@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './technical_field_names';
-export * from './alerts_as_data_rbac';
-export * from './alerts_as_data_severity';
+export const ALERT_SEVERITY_WARNING = 'warning';
+export const ALERT_SEVERITY_CRITICAL = 'critical';
+export type AlertSeverity = typeof ALERT_SEVERITY_WARNING | typeof ALERT_SEVERITY_CRITICAL;
