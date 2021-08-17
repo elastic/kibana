@@ -23,7 +23,7 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
     this.http = http;
   }
 
-  private _request(url: string, query: any) {
+  private _request(url: string, query?: any) {
     return this.http
       .fetch(url, {
         query,
@@ -61,5 +61,10 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
       rollup_index: rollupIndex,
       allow_no_index: allowNoIndex,
     }).then((resp: any) => resp.fields || []);
+  }
+
+  async hasIndexPatternWithUserData(): Promise<boolean> {
+    const response = await this._request(this._getUrl(['has_index_pattern_with_user_data']));
+    return response.has_index_pattern_with_user_data;
   }
 }

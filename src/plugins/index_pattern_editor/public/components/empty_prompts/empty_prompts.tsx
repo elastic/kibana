@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useCallback, FC } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 
 import { useKibana } from '../../shared_imports';
 
@@ -24,25 +25,33 @@ const removeAliases = (item: MatchedItem) =>
 interface Props {
   onCancel: () => void;
   allSources: MatchedItem[];
-  hasExistingIndexPatterns: boolean;
   loadSources: () => void;
 }
 
-export const EmptyPrompts: FC<Props> = ({
-  hasExistingIndexPatterns,
-  allSources,
-  onCancel,
-  children,
-  loadSources,
-}) => {
+const FLEET_INDEX_PREFIXES_TO_IGNORE = [
+  '.ds-metrics-elastic_agent', // ignore index created by Fleet server itself
+  '.ds-logs-elastic_agent', // ignore index created by Fleet server itself
+];
+
+function isDataIndex(source: MatchedItem) {
+  if (source.name.startsWith('.')) return false;
+  return !source.item.backing_indices?.every((index) =>
+    FLEET_INDEX_PREFIXES_TO_IGNORE.some((ignorePrefix) => index.startsWith(ignorePrefix))
+  );
+}
+
+export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSources }) => {
   const {
-    services: { docLinks, application, http },
+    services: { docLinks, application, http, indexPatternService },
   } = useKibana<IndexPatternEditorContext>();
 
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
   const [goToForm, setGoToForm] = useState<boolean>(false);
 
-  const hasDataIndices = allSources.some(({ name }: MatchedItem) => !name.startsWith('.'));
+  const hasDataIndices = allSources.some(isDataIndex);
+  const hasExistingIndexPatternsWithUserData = useAsync(() =>
+    indexPatternService.hasIndexPatternWithUserData()
+  );
 
   useCallback(() => {
     let isMounted = true;
@@ -57,7 +66,9 @@ export const EmptyPrompts: FC<Props> = ({
     };
   }, [http, hasDataIndices]);
 
-  if (!hasExistingIndexPatterns && !goToForm) {
+  if (hasExistingIndexPatternsWithUserData.loading) return null; // return null to prevent UI flickering while loading
+
+  if (!hasExistingIndexPatternsWithUserData.value && !goToForm) {
     if (!hasDataIndices && !remoteClustersExist) {
       // load data
       return (

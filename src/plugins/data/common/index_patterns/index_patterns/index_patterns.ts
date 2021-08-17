@@ -219,6 +219,16 @@ export class IndexPatternsService {
   };
 
   /**
+   * Guess if there is an existing index pattern with real user data
+   */
+  async hasIndexPatternWithUserData(): Promise<boolean> {
+    return this.apiClient.hasIndexPatternWithUserData().catch(() => {
+      // assume exists in case of error
+      return true;
+    });
+  }
+
+  /**
    * Get field list by providing { pattern }
    * @param options
    * @returns FieldSpec[]

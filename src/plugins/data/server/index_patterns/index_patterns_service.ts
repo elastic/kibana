@@ -63,10 +63,10 @@ export const indexPatternsServiceFactory = ({
   const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
   const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
 
-  return new IndexPatternsCommonService({
+  const indexPatternsService: IndexPatternsCommonService = new IndexPatternsCommonService({
     uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
     savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
-    apiClient: new IndexPatternsApiServer(elasticsearchClient),
+    apiClient: new IndexPatternsApiServer(elasticsearchClient, savedObjectsClient),
     fieldFormats: formats,
     onError: (error) => {
       logger.error(error);
@@ -75,6 +75,8 @@ export const indexPatternsServiceFactory = ({
       logger.warn(`${title}${text ? ` : ${text}` : ''}`);
     },
   });
+
+  return indexPatternsService;
 };
 
 export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsServiceStart> {
