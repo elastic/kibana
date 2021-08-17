@@ -627,7 +627,7 @@ describe('SearchSource', () => {
         expect(request.fields).toEqual(['@timestamp']);
         expect(request.script_fields).toEqual({ hello: {} });
         expect(request.stored_fields).toEqual(['@timestamp', 'bar']);
-        expect(request.runtime_mappings).toEqual({ runtime_field: runtimeFieldDef });
+        expect(request.runtime_mappings).toEqual(runtimeFields);
       });
 
       test('filters request when a specific list of fields is provided with fieldsFromSource or fields', async () => {
