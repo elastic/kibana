@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { Observable } from 'rxjs';
-import { HttpStart } from 'kibana/public';
+import type { HttpStart } from 'kibana/public';
 import { HttpService } from '../http_service';
 
 import { annotations } from './annotations';
@@ -16,16 +17,19 @@ import { resultsApiProvider } from './results';
 import { jobsApiProvider } from './jobs';
 import { fileDatavisualizer } from './datavisualizer';
 import { savedObjectsApiProvider } from './saved_objects';
-import {
+import type {
   MlServerDefaults,
   MlServerLimits,
   MlNodeCount,
 } from '../../../../common/types/ml_server_info';
 
-import { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
-import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
-import { BucketSpanEstimatorData } from '../../../../common/types/job_service';
-import {
+import type { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
+import type { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
+import type {
+  BucketSpanEstimatorData,
+  ResetJobsResponse,
+} from '../../../../common/types/job_service';
+import type {
   Job,
   JobStats,
   Datafeed,
@@ -35,8 +39,8 @@ import {
   ModelSnapshot,
   IndicesOptions,
 } from '../../../../common/types/anomaly_detection_jobs';
-import { FieldHistogramRequestConfig } from '../../datavisualizer/index_based/common/request';
-import { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
+import type { FieldHistogramRequestConfig } from '../../datavisualizer/index_based/common/request';
+import type { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
 import { getHttp } from '../../util/dependency_cache';
 import type { RuntimeMappings } from '../../../../common/types/fields';
 
@@ -151,14 +155,14 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     deleteJob({ jobId }: { jobId: string }) {
-      return httpService.http<any>({
+      return httpService.http<estypes.MlDeleteJobResponse>({
         path: `${basePath()}/anomaly_detectors/${jobId}`,
         method: 'DELETE',
       });
     },
 
     forceDeleteJob({ jobId }: { jobId: string }) {
-      return httpService.http<any>({
+      return httpService.http<estypes.MlDeleteJobResponse>({
         path: `${basePath()}/anomaly_detectors/${jobId}?force=true`,
         method: 'DELETE',
       });
@@ -170,6 +174,13 @@ export function mlApiServicesProvider(httpService: HttpService) {
         path: `${basePath()}/anomaly_detectors/${jobId}/_update`,
         method: 'POST',
         body,
+      });
+    },
+
+    resetJob({ jobId }: { jobId: string }) {
+      return httpService.http<ResetJobsResponse>({
+        path: `${basePath()}/anomaly_detectors/${jobId}/_reset`,
+        method: 'POST',
       });
     },
 
