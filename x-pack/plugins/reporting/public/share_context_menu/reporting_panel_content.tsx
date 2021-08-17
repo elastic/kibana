@@ -104,6 +104,10 @@ class ReportingPanelContentUi extends Component<Props, State> {
     window.addEventListener('resize', this.setAbsoluteReportGenerationUrl);
   }
 
+  private isNotSaved = () => {
+    return this.props.objectId === undefined || this.props.objectId === '';
+  };
+
   public render() {
     if (
       this.props.requiresSavedState &&
@@ -224,10 +228,6 @@ class ReportingPanelContentUi extends Component<Props, State> {
     }
 
     this.setState({ isStale: true });
-  };
-
-  private isNotSaved = () => {
-    return this.props.objectId === undefined || this.props.objectId === '';
   };
 
   private setAbsoluteReportGenerationUrl = () => {

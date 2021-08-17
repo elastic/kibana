@@ -89,13 +89,6 @@ export interface DashboardAppLocatorParams extends SerializableRecord {
    * Saved query ID
    */
   savedQuery?: string;
-
-  /**
-   * Whether to forward app state on scoped `history.location.state`.
-   *
-   * @note This can be used to avoid loading excessively long state in the address bar like could be the case with snapshots of Vega charts.
-   */
-  forwardStateToHistory?: boolean;
 }
 
 export type DashboardAppLocator = LocatorPublic<DashboardAppLocatorParams>;
@@ -105,10 +98,7 @@ export interface DashboardAppLocatorDependencies {
   getDashboardFilterFields: (dashboardId: string) => Promise<Filter[]>;
 }
 
-export type ForwardedDashboardState = Omit<
-  DashboardAppLocatorParams,
-  'panels' | 'searchSessionId' | 'useHash' | 'dashboardId' | 'timeRange'
-> & {
+export type ForwardedDashboardState = Omit<DashboardAppLocatorParams, 'panels'> & {
   panels?: DashboardPanelMap;
 };
 
@@ -120,7 +110,6 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
   public readonly getLocation = async (params: DashboardAppLocatorParams) => {
     const useHash = params.useHash ?? this.deps.useHashedUrl;
     const hash = params.dashboardId ? `view/${params.dashboardId}` : `create`;
-    const forwardStateToHistory = params.forwardStateToHistory ?? false;
 
     const getSavedFiltersFromDestinationDashboardIfNeeded = async (): Promise<Filter[]> => {
       if (params.preserveSavedFilters === false) return [];
@@ -141,41 +130,19 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       ...params.filters,
     ];
 
-    let path: string;
-    let state: Record<string, unknown>;
+    const panelsMap: DashboardPanelMap = {};
 
-    if (forwardStateToHistory) {
-      path = `#/${hash}`;
-      const panelsMap: DashboardPanelMap = {};
+    params.panels?.forEach((panel) => {
+      panelsMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
+    });
 
-      params.panels?.forEach((panel) => {
-        panelsMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
-      });
+    const state: ForwardedDashboardState = {
+      ...params,
+      panels: (panelsMap as unknown) as DashboardPanelMap & SerializableRecord,
+      filters,
+    };
 
-      const forwardedDashboardState: ForwardedDashboardState = {
-        ...omit(params, ['panels', 'searchSessionId', 'useHash', 'dashboardId', 'timeRange']),
-        panels: (panelsMap as unknown) as DashboardPanelMap & SerializableRecord,
-        filters,
-      };
-
-      state = forwardedDashboardState;
-    } else {
-      path = setStateToKbnUrl(
-        '_a',
-        cleanEmptyKeys({
-          query: params.query,
-          filters: filters?.filter((f) => !esFilters.isFilterPinned(f)),
-          viewMode: params.viewMode,
-          panels: params.panels,
-          savedQuery: params.savedQuery,
-        }),
-        { useHash },
-        `#/${hash}`
-      );
-
-      state = {};
-    }
-
+    let path = `#/${hash}`;
     path = setStateToKbnUrl<QueryState>(
       '_g',
       cleanEmptyKeys({

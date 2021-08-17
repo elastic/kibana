@@ -122,7 +122,7 @@ export function ShowShareModal({
     options: rawDashboardState.options as SerializableRecord & DashboardOptions,
     panels: rawDashboardState.panels as SerializableRecord & SavedDashboardPanel[],
     timeRange,
-    refreshInterval: undefined,
+    refreshInterval: undefined, // We don't share refresh interval externally
   };
 
   share.toggleShareContextMenu({
