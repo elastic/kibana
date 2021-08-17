@@ -32,11 +32,10 @@ const DatePickerWrapper = styled.div`
   background: white;
 `;
 const StickyFlexItem = styled(EuiFlexItem)`
-  max-width: 250px;
   position: sticky;
   top: ${(props) => props.theme.eui.euiSizeM};
   z-index: 1;
-  padding: ${(props) => `0 ${props.theme.eui.paddingSizes.m}`};
+  padding: ${(props) => `${props.theme.eui.paddingSizes.m}`};
 `;
 
 export const DateRangePicker = memo(() => {
