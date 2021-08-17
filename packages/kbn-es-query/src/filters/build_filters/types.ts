@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
 import { ExistsFilter } from './exists_filter';
 import { PhrasesFilter } from './phrases_filter';
 import { PhraseFilter } from './phrase_filter';
@@ -44,6 +43,7 @@ export enum FILTERS {
 }
 
 /**
+  Filter,
  * An enum to denote whether a filter is specific to an application's context or whether it should be applied globally.
  * @public
  */
@@ -68,7 +68,8 @@ export type FilterMeta = {
   value?: string;
 };
 
-export type Filter = estypes.QueryDslQueryContainer & {
+// eslint-disable-next-line
+export type Filter = {
   $state?: {
     store: FilterStateStore;
   };

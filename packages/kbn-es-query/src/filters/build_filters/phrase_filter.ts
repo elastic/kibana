@@ -23,11 +23,15 @@ export type PhraseFilterMeta = FilterMeta & {
 
 export type PhraseFilter = Filter & {
   meta: PhraseFilterMeta;
-  query?: {
+  query: {
     match_phrase?: estypes.QueryDslQueryContainer['match_phrase'];
     match?: estypes.QueryDslQueryContainer['match'];
   };
-  script?: {
+};
+
+export type ScriptedPhraseFilter = Filter & {
+  meta: PhraseFilterMeta;
+  script: {
     script: estypes.InlineScript;
   };
 };
@@ -53,7 +57,7 @@ export const isPhraseFilter = (filter: Filter): filter is PhraseFilter => {
  *
  * @public
  */
-export const isScriptedPhraseFilter = (filter: Filter): filter is PhraseFilter =>
+export const isScriptedPhraseFilter = (filter: Filter): filter is ScriptedPhraseFilter =>
   has(filter, 'script.script.params.value');
 
 /** @internal */
@@ -65,10 +69,16 @@ export const getPhraseFilterField = (filter: PhraseFilter) => {
 /**
  * @internal
  */
-export const getPhraseFilterValue = (filter: PhraseFilter): PhraseFilterValue => {
-  const queryConfig = filter.query?.match_phrase ?? filter.query?.match ?? {};
-  const queryValue = Object.values(queryConfig)[0];
-  return isPlainObject(queryValue) ? queryValue.query : queryValue;
+export const getPhraseFilterValue = (
+  filter: PhraseFilter | ScriptedPhraseFilter
+): PhraseFilterValue => {
+  if (isPhraseFilter(filter)) {
+    const queryConfig = filter.query.match_phrase ?? filter.query.match ?? {};
+    const queryValue = Object.values(queryConfig)[0];
+    return isPlainObject(queryValue) ? queryValue.query : queryValue;
+  } else {
+    return filter.script.script.params?.value;
+  }
 };
 
 /**
@@ -84,7 +94,7 @@ export const buildPhraseFilter = (
   field: IndexPatternFieldBase,
   value: PhraseFilterValue,
   indexPattern: IndexPatternBase
-): PhraseFilter => {
+): PhraseFilter | ScriptedPhraseFilter => {
   const convertedValue = getConvertedValueForField(field, value);
 
   if (field.scripted) {
@@ -100,7 +110,7 @@ export const buildPhraseFilter = (
           [field.name]: convertedValue,
         },
       },
-    } as PhraseFilter;
+    };
   }
 };
 

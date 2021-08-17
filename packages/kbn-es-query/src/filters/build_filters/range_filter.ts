@@ -51,16 +51,24 @@ export type RangeFilterMeta = FilterMeta & {
   formattedValue?: string;
 };
 
+export type ScriptedRangeFilter = Filter & {
+  meta: RangeFilterMeta;
+  script: {
+    script: estypes.InlineScript;
+  };
+};
+
+export type MatchAllRangeFilter = Filter & {
+  meta: RangeFilterMeta;
+  match_all: estypes.QueryDslQueryContainer['match_all'];
+};
+
 /**
  * @public
  */
 export type RangeFilter = Filter & {
   meta: RangeFilterMeta;
-  script?: {
-    script: estypes.InlineScript;
-  };
-  range?: { [key: string]: RangeFilterParams };
-  match_all?: estypes.QueryDslQueryContainer['match_all'];
+  range: { [key: string]: RangeFilterParams };
 };
 
 /**
@@ -78,7 +86,7 @@ export const isRangeFilter = (filter?: Filter): filter is RangeFilter => has(fil
  *
  * @public
  */
-export const isScriptedRangeFilter = (filter: Filter): filter is RangeFilter => {
+export const isScriptedRangeFilter = (filter: Filter): filter is ScriptedRangeFilter => {
   const params: RangeFilterParams = get(filter, 'script.script.params', {});
 
   return hasRangeKeys(params);
@@ -111,13 +119,7 @@ export const buildRangeFilter = (
   params: RangeFilterParams,
   indexPattern: IndexPatternBase,
   formattedValue?: string
-): RangeFilter => {
-  const filter: RangeFilter = { meta: { index: indexPattern.id, params: {} } };
-
-  if (formattedValue) {
-    filter.meta.formattedValue = formattedValue;
-  }
-
+): RangeFilter | ScriptedRangeFilter | MatchAllRangeFilter => {
   params = mapValues(params, (value: any) => (field.type === 'number' ? parseFloat(value) : value));
 
   if ('gte' in params && 'gt' in params) throw new Error('gte and gt are mutually exclusive');
@@ -137,22 +139,23 @@ export const buildRangeFilter = (
     return acc;
   }, 0);
 
+  const meta: RangeFilterMeta = {
+    index: indexPattern.id,
+    params: {},
+    field: field.name,
+    ...(formattedValue ? { formattedValue } : {}),
+  };
+
   if (totalInfinite === OPERANDS_IN_RANGE) {
-    filter.match_all = {};
-    filter.meta.field = field.name;
+    return { meta, match_all: {} } as MatchAllRangeFilter;
   } else if (field.scripted) {
     const scr = getRangeScript(field, params);
     // TODO: type mismatch enforced
     scr.script.params.value = formatValue(scr.script.params as any);
-    filter.script = scr;
-
-    filter.meta.field = field.name;
+    return { meta, script: scr } as ScriptedRangeFilter;
   } else {
-    filter.range = {};
-    filter.range[field.name] = params;
+    return { meta, range: { [field.name]: params } } as RangeFilter;
   }
-
-  return filter as RangeFilter;
 };
 
 /**

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { Filter, FilterMeta, FILTERS } from './types';
 import { getPhraseScript } from './phrase_filter';
 import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
@@ -17,6 +18,7 @@ export type PhrasesFilterMeta = FilterMeta & {
 
 export type PhrasesFilter = Filter & {
   meta: PhrasesFilterMeta;
+  query: estypes.QueryDslQueryContainer;
 };
 
 /**
