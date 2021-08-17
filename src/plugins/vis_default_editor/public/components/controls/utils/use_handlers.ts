@@ -7,7 +7,7 @@
  */
 
 import { useCallback } from 'react';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 import { IAggConfig, AggParamType } from 'src/plugins/data/public';
 
@@ -21,7 +21,7 @@ function useSubAggParamsHandlers(
 ) {
   const setAggParamValue = useCallback(
     (aggId, paramName, val) => {
-      const parsedParams = subAgg.toJSON();
+      const parsedParams = subAgg.serialize();
       const params = {
         ...parsedParams,
         params: {
