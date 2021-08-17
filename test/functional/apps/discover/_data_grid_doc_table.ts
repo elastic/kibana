@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.waitFor('codeEditorValue to be valid', async () => {
         const text = await monacoEditor.getCodeEditorValue();
-        const flyoutJson = text.trim().charAt(0) === '{' ? JSON.parse(text) : {};
+        const flyoutJson = text?.trim().charAt(0) === '{' ? JSON.parse(text) : {};
         return flyoutJson._id === expandDocId;
       });
     });
