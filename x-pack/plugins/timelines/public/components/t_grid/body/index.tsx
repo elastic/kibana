@@ -59,7 +59,7 @@ import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import type { OnRowSelected, OnSelectAll } from '../types';
 import type { Refetch } from '../../../store/t_grid/inputs';
-import { PaginationInputPaginated, StatefulFieldsBrowser } from '../../../';
+import { StatefulFieldsBrowser } from '../../../';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
@@ -78,28 +78,28 @@ interface OwnProps {
   activePage: number;
   additionalControls?: React.ReactNode;
   browserFields: BrowserFields;
-  filterQuery: string;
+  bulkActions?: BulkActionsProp;
   data: TimelineItem[];
   defaultCellActions?: TGridCellAction[];
+  filterQuery: string;
+  filterStatus?: AlertStatus;
   id: string;
+  indexNames: string[];
   isEventViewer?: boolean;
   itemsPerPageOptions: number[];
-  pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
-  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
-  rowRenderers: RowRenderer[];
-  tabType: TimelineTabs;
-  tableView: ViewSelection;
   leadingControlColumns?: ControlColumnProps[];
   loadPage: (newActivePage: number) => void;
-  trailingControlColumns?: ControlColumnProps[];
-  totalPages: number;
-  totalItems: number;
-  bulkActions?: BulkActionsProp;
-  filterStatus?: AlertStatus;
-  unit?: (total: number) => React.ReactNode;
   onRuleChange?: () => void;
-  indexNames: string[];
+  querySize: number;
   refetch: Refetch;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
+  tableView: ViewSelection;
+  tabType: TimelineTabs;
+  totalItems: number;
+  totalPages: number;
+  trailingControlColumns?: ControlColumnProps[];
+  unit?: (total: number) => React.ReactNode;
 }
 
 const basicUnit = (n: number) => i18n.UNIT(n);
@@ -234,37 +234,37 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     activePage,
     additionalControls,
     browserFields,
-    filterQuery,
+    bulkActions = true,
+    clearSelected,
     columnHeaders,
     data,
     defaultCellActions,
     excludedRowRendererIds,
+    filterQuery,
+    filterStatus,
     id,
+    indexNames,
     isEventViewer = false,
     isSelectAllChecked,
     itemsPerPageOptions,
+    leadingControlColumns = EMPTY_CONTROL_COLUMNS,
     loadingEventIds,
     loadPage,
-    pageInfo,
-    selectedEventIds,
-    setSelected,
-    clearSelected,
     onRuleChange,
-    showCheckboxes,
+    querySize,
+    refetch,
     renderCellValue,
     rowRenderers,
+    selectedEventIds,
+    setSelected,
+    showCheckboxes,
     sort,
-    tabType,
     tableView,
-    totalPages,
+    tabType,
     totalItems,
-    filterStatus,
-    bulkActions = true,
-    unit = basicUnit,
-    leadingControlColumns = EMPTY_CONTROL_COLUMNS,
+    totalPages,
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
-    indexNames,
-    refetch,
+    unit = basicUnit,
   }) => {
     const dispatch = useDispatch();
     const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
@@ -618,8 +618,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             events={data}
             leadingControlColumns={leadingTGridControlColumns ?? []}
             onChangePage={loadPage}
-            pageIndex={pageInfo.activePage}
-            pageSize={pageInfo.querySize}
+            pageIndex={activePage}
+            pageSize={querySize}
             pageSizeOptions={itemsPerPageOptions}
             rowRenderers={rowRenderers}
             timelineId={id}
@@ -675,4 +675,4 @@ const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
-export const StatefulBody = connector(BodyComponent);
+export const StatefulBody: React.FunctionComponent<OwnProps> = connector(BodyComponent);
