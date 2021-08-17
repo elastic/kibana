@@ -14,7 +14,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useRef, useEffect } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import type { AlertStatus } from '../../../common/typings';
@@ -67,7 +67,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   // observability. For now link to the settings page.
   const manageRulesHref = prepend('/app/management/insightsAndAlerting/triggersActions/alerts');
 
-  const { data: dynamicIndexPatternResp, status: fetcherStatus } = useFetcher(({ signal }) => {
+  const { data: dynamicIndexPatternResp } = useFetcher(({ signal }) => {
     return callObservabilityApi({
       signal,
       endpoint: 'GET /api/observability/rules/alerts/dynamic_index_pattern',
