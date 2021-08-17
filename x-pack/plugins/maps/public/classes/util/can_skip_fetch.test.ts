@@ -131,7 +131,7 @@ describe('canSkipSourceUpdate', () => {
       it('can skip update when filter changes', async () => {
         const nextRequestMeta = {
           applyGlobalQuery: prevApplyGlobalQuery,
-          filters: [],
+          filters: [({} as unknown) as Filter],
           query: prevQuery,
         };
 
@@ -223,7 +223,7 @@ describe('canSkipSourceUpdate', () => {
       it('can not skip update when filter changes', async () => {
         const nextRequestMeta = {
           applyGlobalQuery: prevApplyGlobalQuery,
-          filters: [prevQuery],
+          filters: [({} as unknown) as Filter],
           query: prevQuery,
         };
 
