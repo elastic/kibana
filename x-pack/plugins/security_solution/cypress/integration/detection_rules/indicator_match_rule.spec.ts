@@ -140,7 +140,7 @@ describe('indicator match', () => {
         });
 
         // TODO: Need to fix
-        it.skip('Does NOT show invalidation text on initial page load if indicator index pattern is filled out', () => {
+        it('Does NOT show invalidation text on initial page load if indicator index pattern is filled out', () => {
           getDefineContinueButton().click();
           getIndexPatternInvalidationText().should('not.exist');
         });
@@ -155,7 +155,7 @@ describe('indicator match', () => {
 
       describe('Indicator index patterns', () => {
         // TODO: Need to fix
-        it.skip('Contains a predefined index pattern', () => {
+        it('Contains a predefined index pattern', () => {
           getIndicatorIndicatorIndex().should('have.text', getThreatIndexPatterns().join(''));
         });
 
@@ -393,7 +393,7 @@ describe('indicator match', () => {
       });
 
       // TODO: Need to fix
-      it.skip('Creates and activates a new Indicator Match rule', () => {
+      it('Creates and activates a new Indicator Match rule', () => {
         waitForAlertsPanelToBeLoaded();
         waitForAlertsIndexToBeCreated();
         goToManageAlertsDetectionRules();
@@ -492,7 +492,7 @@ describe('indicator match', () => {
       });
 
       // TODO: Need to fix
-      it.skip('Investigate alert in timeline', () => {
+      it('Investigate alert in timeline', () => {
         const accessibilityText = `Press enter for options, or press space to begin dragging.`;
 
         loadPrepackagedTimelineTemplates();
