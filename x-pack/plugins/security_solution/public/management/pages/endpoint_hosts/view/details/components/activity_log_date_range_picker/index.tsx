@@ -18,6 +18,14 @@ import {
 
 import { useEndpointSelector } from '../../../hooks';
 import { getActivityLogDataPaging } from '../../../../store/selectors';
+import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../../../common/constants';
+import { useUiSetting$ } from '../../../../../../../../public/common/lib/kibana';
+
+interface Range {
+  from: string;
+  to: string;
+  display: string;
+}
 
 const DatePickerWrapper = styled.div`
   width: ${(props) => props.theme.eui.fractions.single.percentage};
@@ -103,12 +111,22 @@ export const DateRangePicker = memo(() => {
     [dispatch, page, pageSize, recentlyUsedRanges, startLoading]
   );
 
+  const [quickRanges] = useUiSetting$<Range[]>(DEFAULT_TIMEPICKER_QUICK_RANGES);
+  const commonlyUsedRanges = !quickRanges.length
+    ? []
+    : quickRanges.map(({ from, to, display }) => ({
+        start: from,
+        end: to,
+        label: display,
+      }));
+
   return (
     <StickyFlexItem grow={false}>
       <EuiFlexGroup justifyContent="flexEnd" responsive>
         <DatePickerWrapper data-test-subj="activityLogSuperDatePicker">
           <EuiFlexItem>
             <EuiSuperDatePicker
+              commonlyUsedRanges={commonlyUsedRanges}
               end={dateMath.parse(endDate)?.toISOString()}
               isLoading={isLoading}
               isPaused={!autoRefreshOptions.enabled}
