@@ -120,7 +120,7 @@ export const DeprecationLoggingToggle: FunctionComponent<DeprecationLoggingPrevi
   }
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
+    <EuiFlexGroup gutterSize="m" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiSwitch
           data-test-subj="deprecationLoggingToggle"
