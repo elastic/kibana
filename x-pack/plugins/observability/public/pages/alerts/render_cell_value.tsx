@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLink, EuiHealth } from '@elastic/eui';
+import { EuiLink, EuiHealth, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 /**
@@ -34,6 +34,7 @@ import { SeverityBadge } from './severity_badge';
 import { TopAlert } from '.';
 import { parseAlert } from './parse_alert';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useTheme } from '../../hooks/use_theme';
 
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
@@ -86,6 +87,8 @@ export const getRenderCellValue = ({
       }
     }, [columnId, setCellProps]);
 
+    const theme = useTheme();
+
     switch (columnId) {
       case ALERT_STATUS:
         switch (value) {
@@ -99,10 +102,12 @@ export const getRenderCellValue = ({
             );
           case 'closed':
             return (
-              <EuiHealth color="subdued">
-                {i18n.translate('xpack.observability.alertsTGrid.statusRecoveredDescription', {
-                  defaultMessage: 'Recovered',
-                })}
+              <EuiHealth color={theme.eui.euiColorLightShade}>
+                <EuiText color={theme.eui.euiColorLightShade} size="relative">
+                  {i18n.translate('xpack.observability.alertsTGrid.statusRecoveredDescription', {
+                    defaultMessage: 'Recovered',
+                  })}
+                </EuiText>
               </EuiHealth>
             );
           default:
