@@ -116,7 +116,7 @@ describe('indicator match', () => {
     const expectedTags = getNewThreatIndicatorRule().tags.join('');
     const expectedMitre = formatMitreAttackDescription(getNewThreatIndicatorRule().mitre);
     const expectedNumberOfRules = 1;
-    const expectedNumberOfAlerts = 1;
+    const expectedNumberOfAlerts = '1 alert';
 
     before(() => {
       cleanKibana();
