@@ -107,10 +107,10 @@ export const columns: Array<
   {
     columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate('xpack.observability.alertsTGrid.statusColumnDescription', {
-      defaultMessage: 'Alert status',
+      defaultMessage: 'Alert Status',
     }),
     id: ALERT_STATUS,
-    initialWidth: 79,
+    initialWidth: 110,
   },
   {
     columnHeaderType: 'not-filtered',

@@ -89,10 +89,22 @@ export const getRenderCellValue = ({
     switch (columnId) {
       case ALERT_STATUS:
         switch (value) {
-          case 'active':
-            return <EuiHealth color="active" />;
-          case 'recovered':
-            return <EuiHealth color="inactive" />;
+          case 'open':
+            return (
+              <EuiHealth color="primary">
+                {i18n.translate('xpack.observability.alertsTGrid.statusActiveDescription', {
+                  defaultMessage: 'Active',
+                })}
+              </EuiHealth>
+            );
+          case 'closed':
+            return (
+              <EuiHealth color="subdued">
+                {i18n.translate('xpack.observability.alertsTGrid.statusRecoveredDescription', {
+                  defaultMessage: 'Recovered',
+                })}
+              </EuiHealth>
+            );
           default:
             // NOTE: This fallback shouldn't be needed. Status should be either "active" or "recovered".
             return null;
