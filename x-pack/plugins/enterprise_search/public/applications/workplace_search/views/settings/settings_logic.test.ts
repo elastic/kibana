@@ -22,12 +22,7 @@ import { SettingsLogic } from './settings_logic';
 describe('SettingsLogic', () => {
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const {
-    clearFlashMessages,
-    flashAPIErrors,
-    flashSuccessToast,
-    setQueuedSuccessMessage,
-  } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(SettingsLogic);
   const ORG_NAME = 'myOrg';
   const defaultValues = {
@@ -309,7 +304,7 @@ describe('SettingsLogic', () => {
 
         await nextTick();
         expect(navigateToUrl).toHaveBeenCalledWith('/settings/connectors');
-        expect(setQueuedSuccessMessage).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
       });
 
       it('handles error', async () => {
