@@ -30,22 +30,23 @@ interface RawResponse {
   ccsWarning: boolean;
 }
 
-interface TransactionDistributionFetcherState {
+interface TransactionLatencyCorrelationsFetcherState {
   error?: Error;
   isComplete: boolean;
   isRunning: boolean;
   loaded: number;
   ccsWarning: RawResponse['ccsWarning'];
+  histograms: RawResponse['values'];
   log: RawResponse['log'];
-  transactionDistribution?: RawResponse['overallHistogram'];
+  overallHistogram?: RawResponse['overallHistogram'];
   percentileThresholdValue?: RawResponse['percentileThresholdValue'];
   timeTook?: number;
   total: number;
 }
 
-export function useTransactionDistributionFetcher(
+export const useTransactionLatencyCorrelationsFetcher = (
   params: Omit<SearchServiceParams, 'analyzeCorrelations'>
-) {
+) => {
   const {
     services: { data },
   } = useKibana<ApmPluginStartDeps>();
@@ -53,11 +54,12 @@ export function useTransactionDistributionFetcher(
   const [
     fetchState,
     setFetchState,
-  ] = useState<TransactionDistributionFetcherState>({
+  ] = useState<TransactionLatencyCorrelationsFetcherState>({
     isComplete: false,
     isRunning: false,
     loaded: 0,
     ccsWarning: false,
+    histograms: [],
     log: [],
     total: 100,
   });
@@ -80,7 +82,7 @@ export function useTransactionDistributionFetcher(
       ...(response.rawResponse?.percentileThresholdValue !== undefined &&
       response.rawResponse?.overallHistogram !== undefined
         ? {
-            transactionDistribution: response.rawResponse?.overallHistogram,
+            overallHistogram: response.rawResponse?.overallHistogram,
             percentileThresholdValue:
               response.rawResponse?.percentileThresholdValue,
           }
@@ -100,7 +102,7 @@ export function useTransactionDistributionFetcher(
 
     const searchServiceParams: SearchServiceParams = {
       ...params,
-      analyzeCorrelations: false,
+      analyzeCorrelations: true,
     };
     const req = { params: searchServiceParams };
 
@@ -155,4 +157,4 @@ export function useTransactionDistributionFetcher(
     startFetch,
     cancelFetch,
   };
-}
+};
