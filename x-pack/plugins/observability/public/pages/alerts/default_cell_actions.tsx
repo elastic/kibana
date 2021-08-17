@@ -61,7 +61,7 @@ const commonCellActions: TGridCellAction[] = [
 
 /** actions for adding filters to the search bar */
 const buildFilterCellActions = (addToQuery: (value: string) => void): TGridCellAction[] => [
-  ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component, ...rest }) => {
+  ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
     const value = getMappedNonEcsValue({
       data: data[rowIndex],
       fieldName: columnId,
