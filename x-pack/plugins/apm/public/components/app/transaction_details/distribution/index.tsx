@@ -167,6 +167,8 @@ export function TransactionDistribution({
             <EuiBadge
               iconType="cross"
               iconSide="left"
+              onClick={onTrackedClearSelection}
+              onClickAriaLabel={clearSelectionAriaLabel}
               iconOnClick={onTrackedClearSelection}
               iconOnClickAriaLabel={clearSelectionAriaLabel}
               data-test-sub="apmTransactionDetailsDistributionClearSelectionBadge"
