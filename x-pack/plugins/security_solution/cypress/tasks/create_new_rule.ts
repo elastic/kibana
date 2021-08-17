@@ -273,7 +273,7 @@ export const fillDefineThresholdRule = (rule: ThresholdRule) => {
 
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(rule.timeline.id!)).click();
-  cy.get(COMBO_BOX_CLEAR_BTN).click();
+  cy.get(COMBO_BOX_CLEAR_BTN).first().click();
 
   rule.index.forEach((index) => {
     cy.get(COMBO_BOX_INPUT).first().type(`${index}{enter}`);
@@ -447,7 +447,7 @@ export const getIndicatorIndicatorIndex = () =>
   cy.get(THREAT_MATCH_INDICATOR_INDICATOR_INDEX).eq(0);
 
 /** Returns the index pattern's clear button  */
-export const getIndexPatternClearButton = () => cy.get(COMBO_BOX_CLEAR_BTN);
+export const getIndexPatternClearButton = () => cy.get(COMBO_BOX_CLEAR_BTN).first();
 
 /** Returns the custom query input */
 export const getCustomQueryInput = () => cy.get(THREAT_MATCH_CUSTOM_QUERY_INPUT).eq(0);
