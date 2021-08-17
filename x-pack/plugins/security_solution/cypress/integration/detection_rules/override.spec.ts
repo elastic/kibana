@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_RULE_RISK_SCORE } from '@kbn/rule-data-utils';
 import { formatMitreAttackDescription } from '../../helpers/rules';
 import {
   getIndexPatterns,

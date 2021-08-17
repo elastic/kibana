@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { JsonObject, JsonArray } from '@kbn/common-utils';
+import { JsonObject, JsonArray } from '@kbn/utility-types';
 import {
   ALERT_ORIGINAL_TIME,
   ALERT_RULE_INDEX,
