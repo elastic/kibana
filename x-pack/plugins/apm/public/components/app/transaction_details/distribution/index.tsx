@@ -11,6 +11,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -55,6 +56,13 @@ export function TransactionDistribution({
   const { urlParams } = useUrlParams();
 
   const { transactionName, start, end } = urlParams;
+
+  const emptySelectionText = i18n.translate(
+    'xpack.apm.transactionDetails.emptySelectionText',
+    {
+      defaultMessage: 'Click and drag to select a range',
+    }
+  );
 
   const clearSelectionButtonLabel = i18n.translate(
     'xpack.apm.transactionDetails.clearSelectionButtonLabel',
@@ -136,6 +144,24 @@ export function TransactionDistribution({
             </h5>
           </EuiTitle>
         </EuiFlexItem>
+        {!selection && (
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
+              <EuiFlexItem
+                grow={false}
+                style={{ flexDirection: 'row', alignItems: 'center' }}
+              >
+                <EuiIcon type="iInCircle" title={emptySelectionText} size="s" />
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+                style={{ flexDirection: 'row', alignItems: 'center' }}
+              >
+                <EuiText size="xs">{emptySelectionText}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
         {selection && (
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
