@@ -14,22 +14,21 @@ curl -X POST ${KIBANA_URL}${SPACE_URL}/api/alerts/alert \
      -d '
 {
   "params":{
-     "anomalyThreshold": 23
+     "anomalyThreshold": 23,
      "author": [],
-     "description": "Basic Machine Learning rule",
+     "description": "Basic Machine Learning Rule",
      "exceptionsList": [],
      "falsePositives": [],
-     "from": "now-300s",
+     "from": "now-45m",
      "immutable": false,
-     "language": "kuery",
-     "machineLearningJobId": "test-ml-job"
-     "maxSignals": 10,
+     "machineLearningJobId": ["test-ml-job"],
+     "maxSignals": 101,
      "outputIndex": "",
      "references": [],
-     "riskScore": 21,
+     "riskScore": 23,
      "riskScoreMapping": [],
-     "ruleId": "91dec1ba-b779-469c-9667-6b0e865fb86b",
-     "severity": "low",
+     "ruleId": "1781d055-5c66-4adf-9c59-fc0fa58336a5",
+     "severity": "high",
      "severityMapping": [],
      "threat": [],
      "to": "now",
@@ -39,15 +38,16 @@ curl -X POST ${KIBANA_URL}${SPACE_URL}/api/alerts/alert \
    "consumer":"alerts",
    "alertTypeId":"siem.mlRule",
    "schedule":{
-      "interval":"1m"
+      "interval":"15m"
    },
    "actions":[],
    "tags":[
       "custom",
+      "ml",
       "persistence"
    ],
    "notifyWhen":"onActionGroupChange",
-   "name":"Basic Machine Learning rule"
+   "name":"Basic Machine Learning Rule"
 }'
 
 

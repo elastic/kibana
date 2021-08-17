@@ -14,17 +14,8 @@ import { createSecurityRuleTypeFactory } from '../create_security_rule_type_fact
 import { CreateRuleOptions } from '../types';
 
 export const createMlAlertType = (createOptions: CreateRuleOptions) => {
-  const {
-    indexAlias,
-    lists,
-    logger,
-    mergeStrategy,
-    ml,
-    ruleDataClient,
-    ruleDataService,
-  } = createOptions;
+  const { lists, logger, mergeStrategy, ml, ruleDataClient, ruleDataService } = createOptions;
   const createSecurityRuleType = createSecurityRuleTypeFactory({
-    indexAlias,
     lists,
     logger,
     mergeStrategy,
