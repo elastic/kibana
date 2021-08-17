@@ -72,7 +72,7 @@ export type AnomalyDetectionJobRealtimeIssue = typeof ANOMALY_DETECTION_JOB_REAL
 export const REALTIME_ISSUE_DETECTED: ActionGroup<AnomalyDetectionJobRealtimeIssue> = {
   id: ANOMALY_DETECTION_JOB_REALTIME_ISSUE,
   name: i18n.translate('xpack.ml.jobsHealthAlertingRule.actionGroupName', {
-    defaultMessage: 'Real-time issue detected',
+    defaultMessage: 'Issue detected',
   }),
 };
 
