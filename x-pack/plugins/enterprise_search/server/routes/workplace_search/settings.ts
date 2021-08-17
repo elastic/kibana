@@ -9,6 +9,8 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../plugin';
 
+const MAX_IMAGE_BYTES = 2000000;
+
 export function registerOrgSettingsRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -55,6 +57,11 @@ export function registerOrgSettingsUploadImagesRoute({
           logo: schema.maybe(schema.nullable(schema.string())),
           icon: schema.maybe(schema.nullable(schema.string())),
         }),
+      },
+      options: {
+        body: {
+          maxBytes: MAX_IMAGE_BYTES,
+        },
       },
     },
     enterpriseSearchRequestHandler.createRequest({

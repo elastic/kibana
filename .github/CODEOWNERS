@@ -9,6 +9,9 @@
 /dev_docs @elastic/kibana-tech-leads
 /packages/kbn-docs-utils/ @elastic/kibana-tech-leads @elastic/kibana-operations
 
+# Virtual teams
+/x-pack/plugins/rule_registry/ @elastic/rac
+
 # App
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-app
 /x-pack/plugins/lens/ @elastic/kibana-app
@@ -31,6 +34,7 @@
 /src/plugins/vis_type_pie/ @elastic/kibana-app
 /src/plugins/visualize/ @elastic/kibana-app
 /src/plugins/visualizations/ @elastic/kibana-app
+/src/plugins/url_forwarding/ @elastic/kibana-app
 /packages/kbn-tinymath/ @elastic/kibana-app
 
 # Application Services
@@ -45,6 +49,7 @@
 /examples/ui_actions_explorer/ @elastic/kibana-app-services
 /examples/url_generators_examples/ @elastic/kibana-app-services
 /examples/url_generators_explorer/ @elastic/kibana-app-services
+/examples/field_formats_example/ @elastic/kibana-app-services
 /packages/elastic-datemath/ @elastic/kibana-app-services
 /packages/kbn-interpreter/ @elastic/kibana-app-services
 /src/plugins/bfetch/ @elastic/kibana-app-services
@@ -125,6 +130,12 @@
 
 # Presentation
 /src/plugins/dashboard/ @elastic/kibana-presentation
+/src/plugins/expression_error/ @elastic/kibana-presentation
+/src/plugins/expression_image/ @elastic/kibana-presentation
+/src/plugins/expression_metric/ @elastic/kibana-presentation
+/src/plugins/expression_repeat_image/ @elastic/kibana-presentation
+/src/plugins/expression_reveal_image/ @elastic/kibana-presentation
+/src/plugins/expression_shape/ @elastic/kibana-presentation
 /src/plugins/input_control_vis/ @elastic/kibana-presentation
 /src/plugins/vis_type_markdown/ @elastic/kibana-presentation
 /src/plugins/presentation_util/ @elastic/kibana-presentation
@@ -362,6 +373,7 @@
 /x-pack/test/plugin_functional/plugins/resolver_test/ @elastic/security-solution
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
 /x-pack/plugins/security_solution/ @elastic/security-solution
+/x-pack/plugins/metrics_entities/ @elastic/security-solution
 /x-pack/test/detection_engine_api_integration @elastic/security-solution
 /x-pack/test/lists_api_integration @elastic/security-solution
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution

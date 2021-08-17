@@ -43,8 +43,8 @@ function searchLatency({
   start,
   end,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -127,8 +127,8 @@ export async function getLatencyTimeseries({
   start,
   end,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -192,8 +192,8 @@ export async function getLatencyPeriods({
   latencyAggregationType: LatencyAggregationType;
   comparisonStart?: number;
   comparisonEnd?: number;
-  kuery?: string;
-  environment?: string;
+  kuery: string;
+  environment: string;
 }) {
   const { start, end } = setup;
   const options = {

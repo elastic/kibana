@@ -7,7 +7,7 @@
 
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { PDF_JOB_TYPE } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../../types';
@@ -16,9 +16,9 @@ import {
   getConditionalHeaders,
   getFullUrls,
   omitBlockedHeaders,
+  getCustomLogo,
 } from '../../common';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
-import { getCustomLogo } from '../lib/get_custom_logo';
 import { TaskPayloadPDF } from '../types';
 
 export const runTaskFnFactory: RunTaskFnFactory<
@@ -59,20 +59,16 @@ export const runTaskFnFactory: RunTaskFnFactory<
           logo
         );
       }),
-      map(({ buffer, warnings }) => {
+      tap(({ buffer }) => {
         apmGeneratePdf?.end();
-        const apmEncode = apmTrans?.startSpan('encode_pdf', 'output');
-        const content = buffer?.toString('base64') || null;
-        apmEncode?.end();
-
-        stream.write(content);
-
-        return {
-          content_type: 'application/pdf',
-          size: buffer?.byteLength || 0,
-          warnings,
-        };
+        if (buffer) {
+          stream.write(buffer);
+        }
       }),
+      map(({ warnings }) => ({
+        content_type: 'application/pdf',
+        warnings,
+      })),
       catchError((err) => {
         jobLogger.error(err);
         return Rx.throwError(err);

@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
+import { SerializableRecord } from '@kbn/utility-types';
 import { NodeTypes } from './node_types';
 
 /** @public */
@@ -15,16 +17,13 @@ export interface KueryNode {
 }
 
 /**
- * TODO: Replace with real type
  * @public
  */
-export type DslQuery = any;
+export type DslQuery = estypes.QueryDslQueryContainer;
 
 /** @internal */
 export interface KueryParseOptions {
-  helpers: {
-    [key: string]: any;
-  };
+  helpers: SerializableRecord;
   startRule: string;
   allowLeadingWildcards: boolean;
   cursorSymbol?: string;
