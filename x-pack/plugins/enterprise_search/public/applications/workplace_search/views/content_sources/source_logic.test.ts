@@ -30,7 +30,6 @@ describe('SourceLogic', () => {
     clearFlashMessages,
     flashAPIErrors,
     flashSuccessToast,
-    setQueuedSuccessMessage,
     setErrorMessage,
   } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
@@ -391,7 +390,7 @@ describe('SourceLogic', () => {
         expect(clearFlashMessages).toHaveBeenCalled();
         expect(http.delete).toHaveBeenCalledWith('/api/workplace_search/org/sources/123');
         await promise;
-        expect(setQueuedSuccessMessage).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
         expect(setButtonNotLoadingSpy).toHaveBeenCalled();
       });
 

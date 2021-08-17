@@ -14,7 +14,6 @@ import {
   flashAPIErrors,
   flashSuccessToast,
   setErrorMessage,
-  setQueuedSuccessMessage,
   clearFlashMessages,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
@@ -239,7 +238,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
 
       try {
         const response = await HttpLogic.values.http.delete(route);
-        setQueuedSuccessMessage(
+        KibanaLogic.values.navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
+        flashSuccessToast(
           i18n.translate(
             'xpack.enterpriseSearch.workplaceSearch.sources.flashMessages.contentSourceRemoved',
             {
@@ -248,7 +248,6 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
             }
           )
         );
-        KibanaLogic.values.navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
       } catch (e) {
         flashAPIErrors(e);
       } finally {

@@ -14,7 +14,6 @@ import {
   clearFlashMessages,
   flashAPIErrors,
   flashSuccessToast,
-  setQueuedSuccessMessage,
   setQueuedErrorMessage,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
@@ -206,7 +205,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
           }
         );
 
-        setQueuedSuccessMessage(GROUP_DELETED_MESSAGE);
+        flashSuccessToast(GROUP_DELETED_MESSAGE);
         KibanaLogic.values.navigateToUrl(GROUPS_PATH);
       } catch (e) {
         flashAPIErrors(e);
