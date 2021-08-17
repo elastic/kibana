@@ -52,7 +52,7 @@ describe('Processor: Dot Expander', () => {
     // Click submit button with only the type defined
     await saveNewProcessor();
 
-    // Expect form error as "field" and "target_field" are required parameters
+    // Expect form error as "field" is a required parameter
     expect(form.getErrorsMessages()).toEqual(['A field value is required.']);
   });
 
@@ -63,14 +63,19 @@ describe('Processor: Dot Expander', () => {
       component,
     } = testBed;
 
-    // Add "field" value (required)
-    form.setInputValue('fieldNameField.input', 'missing');
-    component.update();
+    // Add invalid "field" value (required)
+    form.setInputValue('fieldNameField.input', 'missingTheDot');
 
-    // Click submit button with only the type defined
+    // Save the processor with invalid field
     await saveNewProcessor();
 
-    // Expect form error as "field" and "target_field" are required parameters
+    // Move ahead the debounce time which will then execute any validations
+    await act(async () => {
+      jest.runAllTimers();
+    });
+    component.update();
+
+    // Expect form error as "field" does not contain '.'
     expect(form.getErrorsMessages()).toEqual([
       'A field value requires at least one dot character.',
     ]);
