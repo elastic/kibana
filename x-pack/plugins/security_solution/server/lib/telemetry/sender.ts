@@ -22,8 +22,10 @@ import { TelemetryEndpointTask } from './endpoint_task';
 import { TelemetryExceptionListsTask } from './security_lists_task';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
-import { ExceptionListClient } from '../../../../lists/server';
 import { getTrustedAppsList } from '../../endpoint/routes/trusted_apps/service';
+import { ExceptionListClient } from '../../../../lists/server';
+import { GetEndpointListResponse } from './types';
+import { exceptionListItemToEndpointEntry } from './helpers';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
@@ -268,6 +270,32 @@ export class TelemetryEventsSender {
     }
 
     return getTrustedAppsList(this.exceptionListClient, { page: 1, per_page: 10_000 });
+  }
+
+  public async fetchEndpointList(listId: string): Promise<GetEndpointListResponse> {
+    if (this?.exceptionListClient === undefined || this?.exceptionListClient === null) {
+      throw Error('could not fetch trusted applications. exception list client not available.');
+    }
+
+    // Ensure list is created if it does not exist
+    await this.exceptionListClient.createTrustedAppsList();
+
+    const results = await this.exceptionListClient.findExceptionListItem({
+      listId,
+      page: 1,
+      perPage: this.max_records,
+      filter: '',
+      namespaceType: 'agnostic',
+      sortField: 'name',
+      sortOrder: 'asc',
+    });
+
+    return {
+      data: results?.data.map(exceptionListItemToEndpointEntry) ?? [],
+      total: results?.total ?? 0,
+      page: results?.page ?? 1,
+      per_page: results?.per_page ?? this.max_records,
+    };
   }
 
   public queueTelemetryEvents(events: TelemetryEvent[]) {

@@ -7,13 +7,10 @@
 
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ExceptionListClient } from '../../../../lists/server';
-import {
-  GetEndpointListResponse,
-  GetEndpointListRequest,
-  EndpointExceptionListItem,
-} from './types';
 import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
+import { EndpointExceptionListItem, ListTemplate } from './types';
+import { LIST_TRUSTED_APP, LIST_ENDPOINT_EXCEPTION, LIST_ENDPOINT_EVENT_FILTER } from './constants';
+import { ListData } from '../../../common/endpoint/types';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -92,40 +89,12 @@ export function isPackagePolicyList(
 }
 
 /**
- * Gets Endpoint Exception lists based on list id
+ * Maps Exception list item to telemetry payload
  *
- * @param exceptionsListClient
- * @param listId
- * @param param2
- * @returns the list of endpoint exceptions
+ * @param exceptionListItem
+ * @returns
  */
-export const getEndpointList = async (
-  exceptionsListClient: ExceptionListClient,
-  listId: string,
-  { page, per_page: perPage, kuery }: GetEndpointListRequest
-): Promise<GetEndpointListResponse> => {
-  // Ensure list is created if it does not exist
-  await exceptionsListClient.createTrustedAppsList();
-
-  const results = await exceptionsListClient.findExceptionListItem({
-    listId,
-    page,
-    perPage,
-    filter: kuery,
-    namespaceType: 'agnostic',
-    sortField: 'name',
-    sortOrder: 'asc',
-  });
-
-  return {
-    data: results?.data.map(exceptionListItemToEndpointEntry) ?? [],
-    total: results?.total ?? 0,
-    page: results?.page ?? 1,
-    per_page: results?.per_page ?? perPage!,
-  };
-};
-
-const exceptionListItemToEndpointEntry = (exceptionListItem: ExceptionListItemSchema) => {
+export const exceptionListItemToEndpointEntry = (exceptionListItem: ExceptionListItemSchema) => {
   return {
     id: exceptionListItem.id,
     version: exceptionListItem._version || '',
@@ -136,4 +105,38 @@ const exceptionListItemToEndpointEntry = (exceptionListItem: ExceptionListItemSc
     updated_at: exceptionListItem.updated_at,
     updated_by: exceptionListItem.updated_by,
   } as EndpointExceptionListItem;
+};
+
+/**
+ * Templates list item to schema
+ *
+ * @param listData
+ * @param listType
+ * @returns
+ */
+export const templateListData = (listData: ListData, listType: string) => {
+  return listData.map((item) => {
+    const template: ListTemplate = {
+      trusted_application: [],
+      endpoint_exception: [],
+      endpoint_event_filter: [],
+    };
+
+    if (listType === LIST_TRUSTED_APP) {
+      template.trusted_application.push(item);
+      return template;
+    }
+
+    if (listType === LIST_ENDPOINT_EXCEPTION) {
+      template.endpoint_exception.push(item);
+      return template;
+    }
+
+    if (listType === LIST_ENDPOINT_EVENT_FILTER) {
+      template.endpoint_event_filter.push(item);
+      return template;
+    }
+
+    return null;
+  });
 };

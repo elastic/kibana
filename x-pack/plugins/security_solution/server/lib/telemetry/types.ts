@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { TrustedApp } from '../../../common/endpoint/types';
 
 // EP Policy Response
 
@@ -169,4 +170,12 @@ export interface GetEndpointListResponse {
   page: number;
   total: number;
   data: EndpointExceptionListItem[];
+}
+
+export type ListData = EndpointExceptionListItem[] | TrustedApp[];
+
+export interface ListTemplate {
+  trusted_application: ListData;
+  endpoint_exception: ListData;
+  endpoint_event_filter: ListData;
 }

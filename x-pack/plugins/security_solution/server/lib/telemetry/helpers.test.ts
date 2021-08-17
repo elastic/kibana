@@ -7,11 +7,13 @@
 
 import moment from 'moment';
 import { createMockPackagePolicy } from './mocks';
+import { LIST_TRUSTED_APP, LIST_ENDPOINT_EXCEPTION, LIST_ENDPOINT_EVENT_FILTER } from './constants';
 import {
   getPreviousDiagTaskTimestamp,
   getPreviousEpMetaTaskTimestamp,
   batchTelemetryRecords,
   isPackagePolicyList,
+  templateListData,
 } from './helpers';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
@@ -123,5 +125,34 @@ describe('test package policy type guard', () => {
     const result = isPackagePolicyList(arr);
 
     expect(result).toEqual(true);
+  });
+});
+
+describe('list telemetry schema', () => {
+  test('trusted apps telemetry is properly formed', () => {
+    const data = [{ key: 'value' }];
+    const templatedItems = templateListData(data, LIST_TRUSTED_APP);
+
+    expect(templatedItems[0]?.trusted_application.length).toEqual(1);
+    expect(templatedItems[0]?.endpoint_exception.length).toEqual(0);
+    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(0);
+  });
+
+  test('endpoint exception telemetry is properly formed', () => {
+    const data = [{ key: 'value' }];
+    const templatedItems = templateListData(data, LIST_ENDPOINT_EXCEPTION);
+
+    expect(templatedItems[0]?.trusted_application.length).toEqual(0);
+    expect(templatedItems[0]?.endpoint_exception.length).toEqual(1);
+    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(0);
+  });
+
+  test('endpoint event filters telemetry is properly formed', () => {
+    const data = [{ key: 'value' }];
+    const templatedItems = templateListData(data, LIST_ENDPOINT_EVENT_FILTER);
+
+    expect(templatedItems[0]?.trusted_application.length).toEqual(0);
+    expect(templatedItems[0]?.endpoint_exception.length).toEqual(0);
+    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(1);
   });
 });
