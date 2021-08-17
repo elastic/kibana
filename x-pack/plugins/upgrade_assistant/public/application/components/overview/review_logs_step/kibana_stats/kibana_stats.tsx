@@ -113,17 +113,16 @@ export const KibanaDeprecationStats: FunctionComponent = () => {
         <>
           {i18nTexts.statsTitle}
           {error && (
-            <span className="upgWarningIcon">
-              <EuiIconTip
-                type="alert"
-                color="danger"
-                size="m"
-                content={i18nTexts.loadingError}
-                iconProps={{
-                  'data-test-subj': 'kibanaRequestErrorIconTip',
-                }}
-              />
-            </span>
+            <EuiIconTip
+              type="alert"
+              color="danger"
+              size="m"
+              content={i18nTexts.loadingError}
+              anchorClassName="upgWarningIcon"
+              iconProps={{
+                'data-test-subj': 'kibanaRequestErrorIconTip',
+              }}
+            />
           )}
         </>
       }
