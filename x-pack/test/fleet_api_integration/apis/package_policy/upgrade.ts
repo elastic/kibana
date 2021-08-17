@@ -77,7 +77,23 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: agentPolicyId,
             enabled: true,
             output_id: '',
-            inputs: [],
+            inputs: [
+              {
+                policy_template: 'package_policy_upgrade',
+                type: 'test_input',
+                enabled: true,
+                streams: [
+                  {
+                    id: 'test-package_policy_upgrade-xxxx',
+                    enabled: true,
+                    data_stream: {
+                      type: 'test_stream',
+                      dataset: 'package_policy_upgrade.test_stream',
+                    },
+                  },
+                ],
+              },
+            ],
             package: {
               name: 'package_policy_upgrade',
               title: 'This is a test package for upgrading package policies',

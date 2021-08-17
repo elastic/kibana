@@ -979,6 +979,10 @@ export function overridePackageInputs(
 function deepMergeVars(original: any, override: any): any {
   const result = { ...original };
 
+  if (!result.vars || !override.vars) {
+    return;
+  }
+
   const overrideVars = Array.isArray(override.vars)
     ? override.vars
     : Object.entries(override.vars!).map(([key, rest]) => ({
@@ -987,12 +991,13 @@ function deepMergeVars(original: any, override: any): any {
       }));
 
   for (const { name, ...overrideVal } of overrideVars) {
-    if (!original.vars || !(name in original.vars)) {
-      continue;
+    const originalVar = original.vars[name];
+
+    if (!result.vars) {
+      result.vars = {};
     }
 
-    const originalVar = original.vars[name];
-    result[name] = { ...originalVar, ...overrideVal };
+    result.vars[name] = { ...overrideVal, ...originalVar };
   }
 
   return result;
