@@ -232,11 +232,10 @@ function ObservabilityActions({
         <EuiFlexItem>
           <EuiButtonIcon
             size="s"
-            target="_blank"
-            rel="nofollow noreferrer"
             href={prepend(alert.link ?? '')}
-            iconType="inspect"
+            iconType="eye"
             color="text"
+            aria-label="View alert in app"
           />
         </EuiFlexItem>
         <EuiFlexItem>
