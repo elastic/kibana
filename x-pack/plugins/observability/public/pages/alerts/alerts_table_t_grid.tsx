@@ -75,7 +75,6 @@ interface AlertsTableTGridProps {
 }
 
 interface ObservabilityActionsProps extends ActionProps {
-  flyoutAlert: TopAlert | undefined;
   setFlyoutAlert: React.Dispatch<React.SetStateAction<TopAlert | undefined>>;
 }
 
@@ -155,19 +154,17 @@ const OBSERVABILITY_ALERT_CONSUMERS = [
   AlertConsumers.APM,
   AlertConsumers.LOGS,
   AlertConsumers.INFRASTRUCTURE,
-  AlertConsumers.SYNTHETICS,
+  AlertConsumers.UPTIME,
 ];
 
 function ObservabilityActions({
   data,
   eventId,
   ecsData,
-  flyoutAlert,
   setFlyoutAlert,
 }: ObservabilityActionsProps) {
   const { core, observabilityRuleTypeRegistry } = usePluginContext();
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
-  const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const [openActionsPopoverId, setActionsPopover] = useState(null);
   const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
   const parseObservabilityAlert = useMemo(() => parseAlert(observabilityRuleTypeRegistry), [
@@ -223,16 +220,7 @@ function ObservabilityActions({
   }, [afterCaseSelection, casePermissions, timelines, event]);
   return (
     <>
-      {flyoutAlert && (
-        <Suspense fallback={null}>
-          <LazyAlertsFlyout
-            alert={flyoutAlert}
-            observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-            onClose={handleFlyoutClose}
-          />
-        </Suspense>
-      )}
-      <EuiFlexGroup gutterSize="none">
+      <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem>
           <EuiButtonIcon
             size="s"
@@ -298,17 +286,11 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           );
         },
         rowCellRender: (actionProps: ActionProps) => {
-          return (
-            <ObservabilityActions
-              {...actionProps}
-              flyoutAlert={flyoutAlert}
-              setFlyoutAlert={setFlyoutAlert}
-            />
-          );
+          return <ObservabilityActions {...actionProps} setFlyoutAlert={setFlyoutAlert} />;
         },
       },
     ];
-  }, [flyoutAlert]);
+  }, []);
 
   const tGridProps = useMemo(() => {
     const type: TGridType = 'standalone';
@@ -366,6 +348,21 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     setRefetch,
     status,
   ]);
+  const handleFlyoutClose = () => setFlyoutAlert(undefined);
+  const { observabilityRuleTypeRegistry } = usePluginContext();
 
-  return <>{timelines.getTGrid<'standalone'>(tGridProps)}</>;
+  return (
+    <>
+      {flyoutAlert && (
+        <Suspense fallback={null}>
+          <LazyAlertsFlyout
+            alert={flyoutAlert}
+            observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+            onClose={handleFlyoutClose}
+          />
+        </Suspense>
+      )}
+      {timelines.getTGrid<'standalone'>(tGridProps)}
+    </>
+  );
 }

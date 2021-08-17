@@ -30,8 +30,8 @@ export interface NavigationEntry {
   ignoreTrailingSlash?: boolean;
   // handler to be called when the item is clicked
   onClick?: (event: React.MouseEvent<HTMLElement | HTMLButtonElement, MouseEvent>) => void;
-  // the label of the badge that is shown besides the navigation label
-  sideBadgeLabel?: string;
+  // shows NEW badge besides the navigation label, which will automatically disappear when menu item is clicked.
+  isNewFeature?: boolean;
 }
 
 export interface NavigationRegistry {
