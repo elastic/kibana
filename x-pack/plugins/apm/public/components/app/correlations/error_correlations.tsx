@@ -42,11 +42,7 @@ type CorrelationsApiResponse = NonNullable<
   APIReturnType<'GET /api/apm/correlations/errors/failed_transactions'>
 >;
 
-interface Props {
-  onClose: () => void;
-}
-
-export function ErrorCorrelations({ onClose }: Props) {
+export function ErrorCorrelations() {
   const [
     selectedSignificantTerm,
     setSelectedSignificantTerm,
@@ -130,7 +126,9 @@ export function ErrorCorrelations({ onClose }: Props) {
   );
 
   const trackApmEvent = useUiTracker({ app: 'apm' });
-  trackApmEvent({ metric: 'view_errors_correlations' });
+  trackApmEvent({ metric: 'view_failed_transactions' });
+
+  const onFilter = () => {};
 
   return (
     <>
@@ -175,7 +173,7 @@ export function ErrorCorrelations({ onClose }: Props) {
             }
             status={correlationsStatus}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
-            onFilter={onClose}
+            onFilter={onFilter}
           />
         </EuiFlexItem>
         <EuiFlexItem>
