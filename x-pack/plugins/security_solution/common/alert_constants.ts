@@ -84,7 +84,7 @@ export const ALERT_RULE_INDEX = `${ALERT_RULE_NAMESPACE}.index` as const;
 export const ALERT_RULE_LANGUAGE = `${ALERT_RULE_NAMESPACE}.language` as const;
 export const ALERT_RULE_MAX_SIGNALS = `${ALERT_RULE_NAMESPACE}.max_signals` as const;
 // TODO: Not supported in new RAC implementation. Can be removed
-export const ALERT_RULE_OUTPUT_INDEX = `${ALERT_RULE_NAMESPACE}.ouput_index` as const;
+export const ALERT_RULE_OUTPUT_INDEX = `${ALERT_RULE_NAMESPACE}.output_index` as const;
 export const ALERT_RULE_QUERY = `${ALERT_RULE_NAMESPACE}.query` as const;
 // TODO: Could be depracated
 export const ALERT_RULE_SAVED_ID = `${ALERT_RULE_NAMESPACE}.saved_id` as const;

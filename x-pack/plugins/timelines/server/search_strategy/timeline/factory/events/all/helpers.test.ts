@@ -341,78 +341,80 @@ describe('#formatTimelineData', () => {
           event: {
             kind: ['signal'],
           },
-          signal: {
-            original_time: ['2021-01-09T13:39:32.595Z'],
-            status: ['open'],
-            threshold_result: ['{"count":10000,"value":"2a990c11-f61b-4c8e-b210-da2574e9f9db"}'],
-            rule: {
-              building_block_type: [],
-              exceptions_list: [],
-              from: ['now-360s'],
-              id: ['696c24e0-526d-11eb-836c-e1620268b945'],
-              index: [
-                'apm-*-transaction*',
-                'traces-apm*',
-                'auditbeat-*',
-                'endgame-*',
-                'filebeat-*',
-                'logs-*',
-                'packetbeat-*',
-                'winlogbeat-*',
-              ],
-              language: ['kuery'],
-              name: ['Threshold test'],
-              output_index: ['.siem-signals-patrykkopycinski-default'],
-              risk_score: ['21'],
-              query: ['_id :*'],
-              severity: ['low'],
-              to: ['now'],
-              type: ['threshold'],
-              version: ['1'],
-              timeline_id: [],
-              timeline_title: [],
-              saved_id: [],
-              note: [],
-              threshold: [
-                JSON.stringify({
-                  field: '',
-                  value: 200,
-                }),
-              ],
-              filters: [
-                JSON.stringify({
-                  $state: {
-                    store: 'appState',
-                  },
-                  meta: {
-                    negate: false,
-                    alias: null,
-                    disabled: false,
-                    type: 'exists',
-                    value: 'exists',
-                    key: '_index',
-                  },
-                  exists: {
-                    field: '_index',
-                  },
-                }),
-                JSON.stringify({
-                  $state: {
-                    store: 'appState',
-                  },
-                  meta: {
-                    negate: false,
-                    alias: 'id_exists',
-                    disabled: false,
-                    type: 'exists',
-                    value: 'exists',
-                    key: '_id',
-                  },
-                  exists: {
-                    field: '_id',
-                  },
-                }),
-              ],
+          kibana: {
+            alert: {
+              original_time: ['2021-01-09T13:39:32.595Z'],
+              status: ['open'],
+              threshold_result: ['{"count":10000,"value":"2a990c11-f61b-4c8e-b210-da2574e9f9db"}'],
+              rule: {
+                building_block_type: [],
+                exceptions_list: [],
+                from: ['now-360s'],
+                id: ['696c24e0-526d-11eb-836c-e1620268b945'],
+                index: [
+                  'apm-*-transaction*',
+                  'traces-apm*',
+                  'auditbeat-*',
+                  'endgame-*',
+                  'filebeat-*',
+                  'logs-*',
+                  'packetbeat-*',
+                  'winlogbeat-*',
+                ],
+                language: ['kuery'],
+                name: ['Threshold test'],
+                output_index: ['.siem-signals-patrykkopycinski-default'],
+                risk_score: ['21'],
+                query: ['_id :*'],
+                severity: ['low'],
+                to: ['now'],
+                type: ['threshold'],
+                version: ['1'],
+                timeline_id: [],
+                timeline_title: [],
+                saved_id: [],
+                note: [],
+                threshold: [
+                  JSON.stringify({
+                    field: '',
+                    value: 200,
+                  }),
+                ],
+                filters: [
+                  JSON.stringify({
+                    $state: {
+                      store: 'appState',
+                    },
+                    meta: {
+                      negate: false,
+                      alias: null,
+                      disabled: false,
+                      type: 'exists',
+                      value: 'exists',
+                      key: '_index',
+                    },
+                    exists: {
+                      field: '_index',
+                    },
+                  }),
+                  JSON.stringify({
+                    $state: {
+                      store: 'appState',
+                    },
+                    meta: {
+                      negate: false,
+                      alias: 'id_exists',
+                      disabled: false,
+                      type: 'exists',
+                      value: 'exists',
+                      key: '_id',
+                    },
+                    exists: {
+                      field: '_id',
+                    },
+                  }),
+                ],
+              },
             },
           },
         },

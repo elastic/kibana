@@ -199,11 +199,11 @@ describe('field_items', () => {
       const mockSelectedCategoryId = 'signal';
       const mockBrowserFieldsWithSignal = {
         ...mockBrowserFields,
-        signal: {
+        kibana: {
           fields: {
             [ALERT_RULE_NAME]: {
               aggregatable: true,
-              category: 'signal',
+              category: 'kibana',
               description: 'rule name',
               example: '',
               format: '',

@@ -110,10 +110,10 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     }
   }, []);
 
-  const isAlert = some({ category: 'signal', field: ALERT_RULE_ID }, detailsData);
+  const isAlert = some({ category: 'kibana', field: ALERT_RULE_ID }, detailsData);
 
   const ruleName = useMemo(
-    () => getFieldValue({ category: 'signal', field: ALERT_RULE_NAME }, detailsData),
+    () => getFieldValue({ category: 'kibana', field: ALERT_RULE_NAME }, detailsData),
     [detailsData]
   );
 
