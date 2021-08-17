@@ -58,7 +58,7 @@ interface MlCorrelationsTerms {
   duplicatedFields?: string[];
 }
 
-export function LatencyCorrelations() {
+export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const {
     core: { notifications, uiSettings },
   } = useApmPluginContext();
@@ -215,6 +215,7 @@ export function LatencyCorrelations() {
                   )}"`,
                 },
               });
+              onFilter();
               trackApmEvent({ metric: 'correlations_term_include_filter' });
             },
           },
@@ -247,7 +248,7 @@ export function LatencyCorrelations() {
         ),
       },
     ],
-    [history, trackApmEvent]
+    [history, onFilter, trackApmEvent]
   );
 
   const histogramTerms: MlCorrelationsTerms[] = useMemo(() => {

@@ -81,6 +81,15 @@ export function TransactionDetailsTabs() {
     });
   };
 
+  // When filtering in either the latency correlations or failed transactions correlations tab,
+  // scroll to the top of the page and switch to the 'Trace samples' tab to trigger a refresh.
+  const onFilter = () => {
+    // Scroll to the top of the page
+    window.scrollTo(0, 0);
+    // Switch back to the 'trace samples' tab
+    setCurrentTab(traceSamplesTab.key);
+  };
+
   useEffect(() => {
     const selectedSample = traceSamples.find(
       (sample) =>
@@ -125,10 +134,11 @@ export function TransactionDetailsTabs() {
         <EuiPanel hasBorder={true}>
           <TabContent
             {...{
-              selectSampleFromChartSelection,
               clearChartSelection,
+              onFilter,
               sampleRangeFrom,
               sampleRangeTo,
+              selectSampleFromChartSelection,
               traceSamples,
             }}
           />
