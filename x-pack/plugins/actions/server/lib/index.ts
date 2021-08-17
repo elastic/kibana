@@ -13,7 +13,10 @@ export { ILicenseState, LicenseState } from './license_state';
 export { verifyApiAccess } from './verify_api_access';
 export { getActionTypeFeatureUsageName } from './get_action_type_feature_usage_name';
 export { spaceIdToNamespace } from './space_id_to_namespace';
-export { extractSavedObjectReferences } from './extract_so_references_for_action_task_params';
+export {
+  extractSavedObjectReferences,
+  injectSavedObjectReferences,
+} from './action_task_params_utils';
 export {
   ActionTypeDisabledError,
   ActionTypeDisabledReason,

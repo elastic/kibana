@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from 'src/core/server/types';
+import { omit } from 'lodash';
+import { SavedObjectAttribute, SavedObjectReference } from 'src/core/server/types';
 import { RelatedSavedObjectRef, RelatedSavedObjects } from './related_saved_objects';
 
-const ACTION_REF_NAME = `actionRef`;
+export const ACTION_REF_NAME = `actionRef`;
 
 export function extractSavedObjectReferences(
   actionId: string,
@@ -49,5 +50,28 @@ export function extractSavedObjectReferences(
     actionIdOrRef: isPreconfigured ? actionId : ACTION_REF_NAME,
     references,
     ...(relatedSavedObjects ? { relatedSavedObjectRefs } : {}),
+  };
+}
+
+export function injectSavedObjectReferences(
+  references: SavedObjectReference[],
+  relatedSavedObjectRefs?: RelatedSavedObjectRef[]
+): { actionId?: string; relatedSavedObjects?: SavedObjectAttribute } {
+  references = references ?? [];
+
+  // Look for for the action id
+  const action = references.find((ref) => ref.name === ACTION_REF_NAME);
+
+  const relatedSavedObjects = (relatedSavedObjectRefs ?? []).flatMap((relatedSavedObjectRef) => {
+    const reference = references.find((ref) => ref.name === relatedSavedObjectRef.ref);
+
+    // These are used to provide context in the event log so we will not throw an error
+    // if it is not found because we don't want to block the action execution
+    return reference ? [{ ...omit(relatedSavedObjectRef, 'ref'), id: reference.id }] : [];
+  });
+
+  return {
+    ...(action ? { actionId: action.id } : {}),
+    ...(relatedSavedObjectRefs ? { relatedSavedObjects } : {}),
   };
 }
