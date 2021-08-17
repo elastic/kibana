@@ -20,10 +20,7 @@ export function buildVectorRequestMeta(
   return {
     ...dataFilters,
     fieldNames: _.uniq(fieldNames).sort(),
-    geogridPrecision:
-      typeof dataFilters.zoom === 'number'
-        ? source.getGeoGridPrecision(dataFilters.zoom)
-        : undefined,
+    geogridPrecision: source.getGeoGridPrecision(dataFilters.zoom),
     sourceQuery: sourceQuery ? sourceQuery : undefined,
     applyGlobalQuery: source.getApplyGlobalQuery(),
     applyGlobalTime: source.getApplyGlobalTime(),

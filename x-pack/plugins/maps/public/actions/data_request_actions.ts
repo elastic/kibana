@@ -181,11 +181,7 @@ export function syncDataForLayer(layer: ILayer, forceRefreshDueToDrawing: boolea
       layer.getId(),
       forceRefreshDueToDrawing
     );
-    if (
-      !layer.isVisible() ||
-      (typeof dataRequestContext.dataFilters.zoom === 'number' &&
-        !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom))
-    ) {
+    if (!layer.isVisible() || !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)) {
       return;
     }
     await layer.syncData(dataRequestContext);

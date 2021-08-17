@@ -266,7 +266,6 @@ export function setQuery({
     }
 
     const nextQueryContext = {
-      forceRefreshTriggeredFromGlobalQueryTime: forceRefresh,
       timeFilters: timeFilters ? timeFilters : prevTimeFilters,
       timeslice: getNextTimeslice(),
       query: query ? query : prevQuery,
@@ -284,13 +283,7 @@ export function setQuery({
       searchSessionMapBuffer: getSearchSessionMapBuffer(getState()),
     };
 
-    if (
-      !forceRefresh &&
-      _.isEqual(nextQueryContext, {
-        forceRefreshTriggeredFromGlobalQueryTime: false,
-        ...prevQueryContext,
-      })
-    ) {
+    if (!forceRefresh && _.isEqual(nextQueryContext, prevQueryContext)) {
       // do nothing if query context has not changed
       return;
     }
@@ -298,6 +291,7 @@ export function setQuery({
     dispatch({
       type: SET_QUERY,
       ...nextQueryContext,
+      forceRefreshTriggeredFromGlobalQueryTime: forceRefresh,
     });
 
     if (getMapSettings(getState()).autoFitToDataBounds) {
