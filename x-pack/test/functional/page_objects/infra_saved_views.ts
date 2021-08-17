@@ -78,6 +78,11 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
       expect(await subject.getVisibleText()).to.be(name);
     },
 
+    async ensureViewIsLoadable(name: string) {
+      const subject = await testSubjects.find('savedViews-loadList');
+      await subject.findByCssSelector(`li[title="${name}"]`);
+    },
+
     async closeSavedViewsLoadModal() {
       return await testSubjects.click('cancelSavedViewModal');
     },
