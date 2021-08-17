@@ -30,7 +30,6 @@ export type DataFilters = {
   timeslice?: Timeslice;
   zoom: number;
   isReadOnly: boolean;
-  searchSessionMapBuffer?: MapExtent;
   forceRefreshTriggeredFromGlobalQueryTime?: boolean;
 };
 
