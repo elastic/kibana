@@ -9,9 +9,9 @@ import datemath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { JsonObject } from '@kbn/utility-types';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { UptimeAlertTypeFactory } from './types';
-import { esKuery } from '../../../../../../src/plugins/data/server';
 import {
   StatusCheckFilters,
   Ping,
@@ -99,7 +99,7 @@ export const generateFilterDSL = async (
   getIndexPattern: () => Promise<IndexPatternTitleAndFields | undefined>,
   filters: StatusCheckFilters,
   search: string
-): Promise<JsonObject | undefined> => {
+) => {
   const filtersExist = hasFilters(filters);
   if (!filtersExist && !search) return undefined;
 
@@ -110,10 +110,7 @@ export const generateFilterDSL = async (
 
   const combinedString = combineFiltersAndUserSearch(filterString, search);
 
-  return esKuery.toElasticsearchQuery(
-    esKuery.fromKueryExpression(combinedString ?? ''),
-    await getIndexPattern()
-  );
+  return toElasticsearchQuery(fromKueryExpression(combinedString ?? ''), await getIndexPattern());
 };
 
 export const formatFilterString = async (
@@ -349,7 +346,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         timestampRange,
         numTimes,
         locations: [],
-        filters: filterString,
+        filters: filterString as JsonObject,
       });
     }
 
