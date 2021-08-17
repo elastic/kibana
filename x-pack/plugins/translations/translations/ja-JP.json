@@ -20321,7 +20321,6 @@
     "xpack.securitySolution.cases.pageTitle": "ケース",
     "xpack.securitySolution.certificate.fingerprint.clientCertLabel": "クライアント証明書",
     "xpack.securitySolution.certificate.fingerprint.serverCertLabel": "サーバー証明書",
-    "xpack.securitySolution.chart.allOthersGroupingLabel": "その他すべて",
     "xpack.securitySolution.chart.dataAllValuesZerosTitle": "すべての値はゼロを返します",
     "xpack.securitySolution.chart.dataNotAvailableTitle": "チャートデータが利用できません",
     "xpack.securitySolution.chrome.help.appName": "セキュリティ",
