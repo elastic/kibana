@@ -34,6 +34,8 @@ import {
 } from './';
 import { errorLogger } from './error_logger';
 
+type CompletedReportOutput = Omit<ReportOutput, 'content'>;
+
 interface ReportingExecuteTaskInstance {
   state: object;
   taskType: string;
@@ -41,7 +43,7 @@ interface ReportingExecuteTaskInstance {
   runAt?: Date;
 }
 
-function isOutput(output: any): output is TaskRunResult {
+function isOutput(output: any): output is CompletedReportOutput {
   return output?.size != null;
 }
 
@@ -204,7 +206,7 @@ export class ExecuteReportTask implements ReportingTask {
     return await store.setReportFailed(report, doc);
   }
 
-  private _formatOutput(output: TaskRunResult | Error): ReportOutput {
+  private _formatOutput(output: CompletedReportOutput | Error): ReportOutput {
     const docOutput = {} as ReportOutput;
     const unknownMime = null;
 
@@ -248,7 +250,7 @@ export class ExecuteReportTask implements ReportingTask {
       .toPromise();
   }
 
-  public async _completeJob(report: Report, output: TaskRunResult): Promise<Report> {
+  public async _completeJob(report: Report, output: CompletedReportOutput): Promise<Report> {
     let docId = `/${report._index}/_doc/${report._id}`;
 
     this.logger.debug(`Saving ${report.jobtype} to ${docId}.`);
@@ -337,7 +339,11 @@ export class ExecuteReportTask implements ReportingTask {
             report._primary_term = stream.getPrimaryTerm();
 
             if (output) {
-              report = await this._completeJob(report, output);
+              this.logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);
+              report = await this._completeJob(report, {
+                ...output,
+                size: stream.bytesWritten,
+              });
             }
             // untrack the report for concurrency awareness
             this.logger.debug(`Stopping ${jobId}.`);

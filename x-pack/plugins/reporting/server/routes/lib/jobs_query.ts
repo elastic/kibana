@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { ElasticsearchClient } from 'src/core/server';
 import { ReportingCore } from '../../';
+import { statuses } from '../../lib/statuses';
 import { ReportApiJSON, ReportSource } from '../../../common/types';
 import { Report } from '../../lib/store';
 import { ReportingUser } from '../../types';
@@ -46,6 +47,7 @@ interface JobsQueryFactory {
   ): Promise<ReportApiJSON[]>;
   count(jobTypes: string[], user: ReportingUser): Promise<number>;
   get(user: ReportingUser, id: string): Promise<ReportApiJSON | void>;
+  getError(id: string): Promise<string>;
   delete(deleteIndex: string, id: string): Promise<ApiResponse<DeleteResponse>>;
 }
 
@@ -164,6 +166,36 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
 
       const report = new Report({ ...result, ...result._source });
       return report.toApiJSON();
+    },
+
+    async getError(id) {
+      const body: SearchRequest['body'] = {
+        _source: {
+          includes: ['output.content', 'status'],
+        },
+        query: {
+          constant_score: {
+            filter: {
+              bool: {
+                must: [{ term: { _id: id } }],
+              },
+            },
+          },
+        },
+        size: 1,
+      };
+
+      const response = await execQuery((elasticsearchClient) =>
+        elasticsearchClient.search<ReportSource>({ body, index: getIndex() })
+      );
+      const hits = response?.body.hits?.hits?.[0];
+      const status = hits?._source?.status;
+
+      if (status !== statuses.JOB_STATUS_FAILED) {
+        throw new Error(`Can not get error for ${id}`);
+      }
+
+      return hits?._source?.output?.content!;
     },
 
     async delete(deleteIndex, id) {

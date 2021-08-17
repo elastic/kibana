@@ -76,3 +76,6 @@ export const PERCENTILES_STEP = 2;
 export const TERMS_SIZE = 20;
 export const SIGNIFICANT_FRACTION = 3;
 export const SIGNIFICANT_VALUE_DIGITS = 3;
+
+export const CORRELATION_THRESHOLD = 0.3;
+export const KS_TEST_THRESHOLD = 0.1;

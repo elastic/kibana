@@ -62,6 +62,8 @@ describe('PieVisualization component', () => {
       numberDisplay: 'hidden',
       categoryDisplay: 'default',
       legendDisplay: 'default',
+      legendMaxLines: 1,
+      truncateLegend: true,
       nestedLegend: false,
       percentDecimals: 3,
       hideLabels: false,
@@ -104,6 +106,20 @@ describe('PieVisualization component', () => {
         <PieComponent args={{ ...args, hideLabels: true }} {...getDefaultArgs()} />
       );
       expect(component.find(Settings).prop('showLegend')).toEqual(false);
+    });
+
+    test('it sets the correct lines per legend item', () => {
+      const component = shallow(<PieComponent args={args} {...getDefaultArgs()} />);
+      expect(component.find(Settings).prop('theme')).toEqual({
+        background: {
+          color: undefined,
+        },
+        legend: {
+          labelOptions: {
+            maxLines: 1,
+          },
+        },
+      });
     });
 
     test('it calls the color function with the right series layers', () => {

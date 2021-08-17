@@ -9,7 +9,12 @@
 import _ from 'lodash';
 
 import { FilterManager } from './filter_manager';
-import { esFilters, RangeFilter, RangeFilterParams, IFieldType } from '../../../../data/public';
+import {
+  esFilters,
+  RangeFilter,
+  RangeFilterParams,
+  IndexPatternField,
+} from '../../../../data/public';
 
 interface SliderValue {
   min?: string | number;
@@ -53,7 +58,7 @@ export class RangeFilterManager extends FilterManager {
     const indexPattern = this.getIndexPattern()!;
     const newFilter = esFilters.buildRangeFilter(
       // TODO: Fix type to be required
-      indexPattern.fields.getByName(this.fieldName) as IFieldType,
+      indexPattern.fields.getByName(this.fieldName) as IndexPatternField,
       toRange(value),
       indexPattern
     );

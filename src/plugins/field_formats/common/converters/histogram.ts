@@ -14,6 +14,7 @@ import { BytesFormat } from './bytes';
 import { NumberFormat } from './number';
 import { PercentFormat } from './percent';
 
+/** @public */
 export class HistogramFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.HISTOGRAM;
   static fieldType = KBN_FIELD_TYPES.HISTOGRAM;

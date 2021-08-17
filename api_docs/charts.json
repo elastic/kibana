@@ -2539,7 +2539,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/charts/common/palette.ts",
@@ -2597,7 +2597,7 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "Serializable",
           ">>"
         ],
         "path": "src/plugins/charts/common/palette.ts",

@@ -8,7 +8,6 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
 import { useApmBackendContext } from '../../../context/apm_backend/use_apm_backend_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useComparison } from '../../../hooks/use_comparison';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -19,17 +18,18 @@ import {
   getMaxY,
   getResponseTimeTickFormatter,
 } from '../../shared/charts/transaction_charts/helper';
+import { useApmParams } from '../../../hooks/use_apm_params';
 
 export function BackendLatencyChart({ height }: { height: number }) {
   const { backendName } = useApmBackendContext();
 
   const theme = useTheme();
 
-  const { start, end } = useTimeRange();
-
   const {
-    urlParams: { kuery, environment },
-  } = useUrlParams();
+    query: { rangeFrom, rangeTo, kuery, environment },
+  } = useApmParams('/backends/:backendName/overview');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { offset, comparisonChartTheme } = useComparison();
 

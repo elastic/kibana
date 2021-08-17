@@ -15,15 +15,19 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Legacy } from '../legacy_shims';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { MonitoringStartPluginDependencies } from '../types';
 
 export const AlertsDropdown: React.FC<{}> = () => {
   const $injector = Legacy.shims.getAngularInjector();
   const alertsEnableModalProvider: any = $injector.get('enableAlertsModal');
+  const { navigateToApp } = useKibana<
+    MonitoringStartPluginDependencies['core']
+  >().services.application;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const closePopover = () => {
-    alertsEnableModalProvider.enableAlerts();
     setIsPopoverOpen(false);
   };
 
@@ -32,6 +36,7 @@ export const AlertsDropdown: React.FC<{}> = () => {
   };
 
   const createDefaultRules = () => {
+    alertsEnableModalProvider.enableAlerts();
     closePopover();
   };
 
@@ -44,12 +49,20 @@ export const AlertsDropdown: React.FC<{}> = () => {
     </EuiButtonEmpty>
   );
 
-  const items = [
+  const items: EuiContextMenuPanelDescriptor['items'] = [
     {
       name: i18n.translate('xpack.monitoring.alerts.dropdown.createAlerts', {
         defaultMessage: 'Create default rules',
       }),
       onClick: createDefaultRules,
+    },
+    {
+      name: i18n.translate('xpack.monitoring.alerts.dropdown.manageRules', {
+        defaultMessage: 'Manage rules',
+      }),
+      icon: 'tableOfContents',
+      onClick: () =>
+        navigateToApp('management', { path: '/insightsAndAlerting/triggersActions/rules' }),
     },
   ];
 

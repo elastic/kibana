@@ -14,12 +14,13 @@ import { get, isEqual } from 'lodash';
 import { EuiIconProps } from '@elastic/eui';
 
 import { METRIC_TYPE } from '@kbn/analytics';
+import { Query, Filter } from '@kbn/es-query';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
 import { IDataPluginServices } from '../../types';
-import { TimeRange, Query, Filter, IIndexPattern } from '../../../common';
+import { TimeRange, IIndexPattern } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
@@ -349,6 +350,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       />
     );
 
+    const timeRangeForSuggestionsOverride = this.props.showDatePicker ? undefined : false;
+
     let queryBar;
     if (this.shouldRenderQueryBar()) {
       queryBar = (
@@ -381,6 +384,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           iconType={this.props.iconType}
           nonKqlMode={this.props.nonKqlMode}
           nonKqlModeHelpText={this.props.nonKqlModeHelpText}
+          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
         />
       );
     }
@@ -391,6 +395,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
       });
+
       filterBar = (
         <div id="GlobalFilterGroup" className={filterGroupClasses}>
           <FilterBar
@@ -399,6 +404,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             onFiltersUpdated={this.props.onFiltersUpdated}
             indexPatterns={this.props.indexPatterns!}
             appName={this.services.appName}
+            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           />
         </div>
       );
