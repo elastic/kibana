@@ -114,7 +114,6 @@ export const MetricDetail = withMetricPageProviders(
             requiredMetrics={filteredRequiredMetrics}
             sourceId={sourceId}
             timeRange={timeRange}
-            parsedTimeRange={parsedTimeRange}
             nodeType={nodeType}
             nodeId={nodeId}
             cloudId={cloudId}

@@ -6,7 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import { useCallback, useRef, useState } from 'react';
+import { useRef } from 'react';
 import { getDateRange } from '../context/url_params_context/helpers';
 
 export function useTimeRange({
@@ -18,24 +18,19 @@ export function useTimeRange({
 }) {
   const rangeRef = useRef({ rangeFrom, rangeTo });
 
-  const [timeRangeId, setTimeRangeId] = useState(0);
-
   const stateRef = useRef(getDateRange({ state: {}, rangeFrom, rangeTo }));
 
-  const updateParsedTime = useCallback(() => {
+  const updateParsedTime = () => {
     stateRef.current = getDateRange({ state: {}, rangeFrom, rangeTo });
-  }, [rangeFrom, rangeTo]);
+  };
 
   if (!isEqual(rangeRef.current, { rangeFrom, rangeTo })) {
     updateParsedTime();
   }
 
-  const { start, end } = stateRef.current;
+  rangeRef.current = { rangeFrom, rangeTo };
 
-  const refreshTimeRange = useCallback(() => {
-    updateParsedTime();
-    setTimeRangeId((id) => id + 1);
-  }, [setTimeRangeId, updateParsedTime]);
+  const { start, end } = stateRef.current;
 
   if (!start || !end) {
     throw new Error('start and/or end were unexpectedly not set');
@@ -44,7 +39,5 @@ export function useTimeRange({
   return {
     start,
     end,
-    refreshTimeRange,
-    timeRangeId,
   };
 }

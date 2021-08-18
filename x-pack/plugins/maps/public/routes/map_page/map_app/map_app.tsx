@@ -456,6 +456,7 @@ export class MapApp extends React.Component<Props, State> {
             title={this.props.savedMap.getAttributes().title}
             description={this.props.savedMap.getAttributes().description}
             waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this.props.savedMap.getStore())}
+            isSharable
           />
         </div>
       </div>

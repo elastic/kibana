@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// TODO: Remove EuiPage & EuiPageBody before exposing full app
-
 import React from 'react';
 
 import { KibanaPageTemplate } from '../../../../../../../../src/plugins/kibana_react/public';
