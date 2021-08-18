@@ -24,11 +24,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { ProcessedImportResponse } from 'src/plugins/saved_objects_management/public';
 
-import { processImportResponse } from '../../../../../../src/plugins/saved_objects_management/public';
 import { useSpaces } from '../../spaces_context';
 import type { SpacesDataEntry } from '../../types';
+import { processImportResponse } from '../lib';
+import type { ProcessedImportResponse } from '../lib';
 import type { CopyOptions, CopyToSpaceFlyoutProps, ImportRetry } from '../types';
 import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
 import { CopyToSpaceForm } from './copy_to_space_form';

@@ -9,11 +9,8 @@ import type {
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportConflictError,
 } from 'src/core/public';
-import type {
-  FailedImport,
-  ProcessedImportResponse,
-} from 'src/plugins/saved_objects_management/public';
 
+import type { FailedImport, ProcessedImportResponse } from '../lib';
 import type { CopyToSpaceSavedObjectTarget } from '../types';
 
 export interface SummarizedSavedObjectResult {
