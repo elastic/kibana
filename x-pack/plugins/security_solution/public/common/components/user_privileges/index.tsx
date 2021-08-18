@@ -7,9 +7,9 @@
 
 import React, { createContext, useContext } from 'react';
 import { DeepReadonly } from 'utility-types';
-import { RecursiveReadonly } from '@kbn/utility-types';
 import { useGetUserAlertsPermissions } from '@kbn/alerts';
 
+import { Capabilities } from '../../../../../../../src/core/public';
 import { useFetchDetectionEnginePrivileges } from '../../../detections/components/user_privileges/use_fetch_detection_engine_privileges';
 import { useFetchListPrivileges } from '../../../detections/components/user_privileges/use_fetch_list_privileges';
 import { EndpointPrivileges, useEndpointPrivileges } from './use_endpoint_privileges';
@@ -32,7 +32,7 @@ export const initialUserPrivilegesState = (): UserPrivilegesState => ({
 const UserPrivilegesContext = createContext<UserPrivilegesState>(initialUserPrivilegesState());
 
 interface UserPrivilegesProviderProps {
-  kibanaCapabilities: RecursiveReadonly<Record<string, any>>;
+  kibanaCapabilities: Capabilities;
   children: React.ReactNode;
 }
 

@@ -7,8 +7,10 @@
  */
 
 import { useEffect, useState } from 'react';
-import { RecursiveReadonly } from '@kbn/utility-types';
 
+// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
+// import { Capabilities } from 'kibana/public';
+type Capabilities = any;
 export interface UseGetUserAlertsPermissionsProps {
   crud: boolean;
   read: boolean;
@@ -16,7 +18,7 @@ export interface UseGetUserAlertsPermissionsProps {
 }
 
 export const useGetUserAlertsPermissions = (
-  uiCapabilities: RecursiveReadonly<Record<string, any>>,
+  uiCapabilities: Capabilities,
   featureId: string
 ): UseGetUserAlertsPermissionsProps => {
   const [alertsPermissions, setAlertsPermissions] = useState<UseGetUserAlertsPermissionsProps>({
