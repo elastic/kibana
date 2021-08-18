@@ -39,7 +39,10 @@ describe('Indices tab', () => {
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
-      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({ isEnabled: true });
+      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({
+        isDeprecationLogIndexingEnabled: true,
+        isDeprecationLoggingEnabled: true,
+      });
 
       await act(async () => {
         testBed = await setupIndicesPage({ isReadOnlyMode: false });
