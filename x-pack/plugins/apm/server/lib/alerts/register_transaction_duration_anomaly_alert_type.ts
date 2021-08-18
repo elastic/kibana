@@ -256,7 +256,6 @@ export function registerTransactionDurationAnomalyAlertType({
                 [TRANSACTION_TYPE]: transactionType,
                 [PROCESSOR_EVENT]: ProcessorEvent.transaction,
                 [ALERT_SEVERITY]: severityLevel,
-                // [ALERT_SEVERITY_VALUE]: score,
                 [ALERT_EVALUATION_VALUE]: score,
                 [ALERT_EVALUATION_THRESHOLD]: threshold,
                 [ALERT_REASON]: formatTransactionDurationAnomalyReason({
