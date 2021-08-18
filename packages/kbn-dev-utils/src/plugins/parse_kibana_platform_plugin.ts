@@ -65,7 +65,7 @@ export function parseKibanaPlatformPlugin(manifestPath: string): KibanaPlatformP
 
   if (!manifest.owner || typeof manifest.owner.name !== 'string') {
     throw new TypeError(
-      `Expected plugin ${manifest.id} manifest to have an owner with name specified`
+      `Expected plugin ${manifest.id} manifest to have an owner with name specified (${manifestPath})`
     );
   }
 
