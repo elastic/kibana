@@ -31,7 +31,7 @@ export const registerHasIndexPatternWithUserDataRoute = (
 
         return res.ok({
           body: {
-            has_index_pattern_with_user_data: await indexPatternsService.hasIndexPatternWithUserData(),
+            result: await indexPatternsService.hasIndexPatternWithUserData(),
           },
         });
       })

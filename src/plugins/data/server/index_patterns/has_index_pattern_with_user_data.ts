@@ -8,14 +8,7 @@
 
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../core/server';
 import { IndexPatternSavedObjectAttrs } from '../../common/index_patterns/index_patterns';
-
-const LOGS_INDEX_PATTERN = 'logs-*';
-const METRICS_INDEX_PATTERN = 'metrics-*';
-
-const INDEX_PREFIXES_TO_IGNORE = [
-  '.ds-metrics-elastic_agent', // ignore index created by Fleet server itself
-  '.ds-logs-elastic_agent', // ignore index created by Fleet server itself
-];
+import { KNOWN_FLEET_ASSETS } from '../../common/index_patterns/constants';
 
 interface Deps {
   esClient: ElasticsearchClient;
@@ -44,7 +37,8 @@ export const hasIndexPatternWithUserData = async ({
   if (
     indexPatterns.saved_objects.some(
       (ip) =>
-        ip.attributes.title !== LOGS_INDEX_PATTERN && ip.attributes.title !== METRICS_INDEX_PATTERN
+        ip.attributes.title !== KNOWN_FLEET_ASSETS.METRICS_INDEX_PATTERN &&
+        ip.attributes.title !== KNOWN_FLEET_ASSETS.LOGS_INDEX_PATTERN
     )
   ) {
     return true;
@@ -52,13 +46,16 @@ export const hasIndexPatternWithUserData = async ({
 
   try {
     const logsAndMetricsIndices = await esClient.cat.indices({
-      index: `${LOGS_INDEX_PATTERN},${METRICS_INDEX_PATTERN}`,
+      index: `${KNOWN_FLEET_ASSETS.METRICS_INDEX_PATTERN},${KNOWN_FLEET_ASSETS.LOGS_INDEX_PATTERN}`,
       format: 'json',
     });
 
     const anyIndicesContainingUserData = logsAndMetricsIndices.body
       // Ignore some data that is shipped by default
-      .filter(({ index }) => !INDEX_PREFIXES_TO_IGNORE.some((prefix) => index?.startsWith(prefix)))
+      .filter(
+        ({ index }) =>
+          !KNOWN_FLEET_ASSETS.INDEX_PREFIXES_TO_IGNORE.some((prefix) => index?.startsWith(prefix))
+      )
       // If any other logs and metrics indices have data, return true
       .some((catResult) => Number(catResult['docs.count'] ?? '0') > 0);
 

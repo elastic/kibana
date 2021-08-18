@@ -18,6 +18,7 @@ import { getIndices } from '../../lib';
 import { EmptyIndexListPrompt } from './empty_index_list_prompt';
 import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
 import { PromptFooter } from './prompt_footer';
+import { KNOWN_FLEET_ASSETS } from '../../../../data/common';
 
 const removeAliases = (item: MatchedItem) =>
   !((item as unknown) as ResolveIndexResponseItemAlias).indices;
@@ -28,16 +29,19 @@ interface Props {
   loadSources: () => void;
 }
 
-const FLEET_INDEX_PREFIXES_TO_IGNORE = [
-  '.ds-metrics-elastic_agent', // ignore index created by Fleet server itself
-  '.ds-logs-elastic_agent', // ignore index created by Fleet server itself
-];
-
-function isDataIndex(source: MatchedItem) {
+export function isDataIndex(source: MatchedItem) {
+  // filter out indexes that start with `.`
   if (source.name.startsWith('.')) return false;
-  return !source.item.backing_indices?.every((index) =>
-    FLEET_INDEX_PREFIXES_TO_IGNORE.some((ignorePrefix) => index.startsWith(ignorePrefix))
+
+  // filter out indexes that backed up only by indexes from KNOWN_FLEET_ASSETS.INDEX_PREFIXES_TO_IGNORE
+  const onlyFleetServerIndexes = source.item.backing_indices?.every((index) =>
+    KNOWN_FLEET_ASSETS.INDEX_PREFIXES_TO_IGNORE.some((ignorePrefix) =>
+      index.startsWith(ignorePrefix)
+    )
   );
+  if (onlyFleetServerIndexes) return false;
+
+  return true;
 }
 
 export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSources }) => {

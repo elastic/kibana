@@ -15,3 +15,15 @@ export const RUNTIME_FIELD_TYPES = [
   'boolean',
   'geo_point',
 ] as const;
+
+/**
+ * Used to determine if the instance has any user created data by filtering data created by Fleet server
+ */
+export const KNOWN_FLEET_ASSETS = {
+  LOGS_INDEX_PATTERN: 'logs-*',
+  METRICS_INDEX_PATTERN: 'metrics-*',
+  INDEX_PREFIXES_TO_IGNORE: [
+    '.ds-metrics-elastic_agent', // ignore index created by Fleet server itself
+    '.ds-logs-elastic_agent', // ignore index created by Fleet server itself
+  ],
+};
