@@ -74,6 +74,8 @@ describe('Actions', () => {
           timelineId={'test'}
           refetch={jest.fn()}
           showCheckboxes={true}
+          setEventsLoading={jest.fn()}
+          setEventsDeleted={jest.fn()}
         />
       </TestProviders>
     );
@@ -104,6 +106,8 @@ describe('Actions', () => {
           onEventDetailsPanelOpened={jest.fn()}
           onRowSelected={jest.fn()}
           showCheckboxes={false}
+          setEventsLoading={jest.fn()}
+          setEventsDeleted={jest.fn()}
         />
       </TestProviders>
     );
@@ -136,6 +140,8 @@ describe('Actions', () => {
           onEventDetailsPanelOpened={jest.fn()}
           onRowSelected={jest.fn()}
           showCheckboxes={true}
+          setEventsLoading={jest.fn()}
+          setEventsDeleted={jest.fn()}
         />
       </TestProviders>
     );
