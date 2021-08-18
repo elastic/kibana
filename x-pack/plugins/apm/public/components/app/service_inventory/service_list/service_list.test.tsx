@@ -13,6 +13,11 @@ import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock
 import { mockMoment, renderWithTheme } from '../../../../utils/testHelpers';
 import { getServiceColumns, ServiceList } from './';
 import { items } from './__fixtures__/service_api_mock_data';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import {
+  getCallApmApiSpy,
+  getCreateCallApmApiSpy,
+} from '../../../../services/rest/callApmApiSpy';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -25,6 +30,17 @@ function Wrapper({ children }: { children?: ReactNode }) {
 describe('ServiceList', () => {
   beforeAll(() => {
     mockMoment();
+
+    const callApmApiSpy = getCallApmApiSpy().mockImplementation(
+      ({ endpoint }) => {
+        if (endpoint === 'GET /api/apm/fallback_to_transactions') {
+          return Promise.resolve({ fallbackToTransactions: false });
+        }
+        return Promise.reject(`Response for ${endpoint} is not defined`);
+      }
+    );
+
+    getCreateCallApmApiSpy().mockImplementation(() => callApmApiSpy as any);
   });
 
   it('renders empty state', () => {
@@ -47,6 +63,8 @@ describe('ServiceList', () => {
     const query = {
       rangeFrom: 'now-15m',
       rangeTo: 'now',
+      environment: ENVIRONMENT_ALL.value,
+      kuery: '',
     };
 
     const service: any = {

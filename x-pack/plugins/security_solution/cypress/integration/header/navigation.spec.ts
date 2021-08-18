@@ -51,7 +51,7 @@ import {
 } from '../../screens/kibana_navigation';
 import { cleanKibana } from '../../tasks/common';
 
-describe('top-level navigation common to all pages in the Security app', () => {
+describe.skip('top-level navigation common to all pages in the Security app', () => {
   before(() => {
     cleanKibana();
     loginAndWaitForPage(TIMELINES_URL);
@@ -111,7 +111,7 @@ describe('top-level navigation common to all pages in the Security app', () => {
   });
 });
 
-describe('Kibana navigation to all pages in the Security app ', () => {
+describe.skip('Kibana navigation to all pages in the Security app ', () => {
   before(() => {
     loginAndWaitForPage(KIBANA_HOME);
   });

@@ -29,8 +29,7 @@ describe('SourceLogic', () => {
   const {
     clearFlashMessages,
     flashAPIErrors,
-    setSuccessMessage,
-    setQueuedSuccessMessage,
+    flashSuccessToast,
     setErrorMessage,
   } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
@@ -79,7 +78,7 @@ describe('SourceLogic', () => {
         ...contentSource,
         name: NAME,
       });
-      expect(setSuccessMessage).toHaveBeenCalled();
+      expect(flashSuccessToast).toHaveBeenCalled();
     });
 
     it('setSearchResults', () => {
@@ -330,6 +329,21 @@ describe('SourceLogic', () => {
         expect(onUpdateSourceNameSpy).toHaveBeenCalledWith(contentSource.name);
       });
 
+      it('does not call onUpdateSourceName when the name is not supplied', async () => {
+        AppLogic.values.isOrganization = true;
+
+        const onUpdateSourceNameSpy = jest.spyOn(SourceLogic.actions, 'onUpdateSourceName');
+        const promise = Promise.resolve(contentSource);
+        http.patch.mockReturnValue(promise);
+        SourceLogic.actions.updateContentSource(contentSource.id, { indexing: { enabled: true } });
+
+        expect(http.patch).toHaveBeenCalledWith('/api/workplace_search/org/sources/123/settings', {
+          body: JSON.stringify({ content_source: { indexing: { enabled: true } } }),
+        });
+        await promise;
+        expect(onUpdateSourceNameSpy).not.toHaveBeenCalledWith(contentSource.name);
+      });
+
       it('calls API and sets values (account)', async () => {
         AppLogic.values.isOrganization = false;
 
@@ -376,7 +390,7 @@ describe('SourceLogic', () => {
         expect(clearFlashMessages).toHaveBeenCalled();
         expect(http.delete).toHaveBeenCalledWith('/api/workplace_search/org/sources/123');
         await promise;
-        expect(setQueuedSuccessMessage).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
         expect(setButtonNotLoadingSpy).toHaveBeenCalled();
       });
 

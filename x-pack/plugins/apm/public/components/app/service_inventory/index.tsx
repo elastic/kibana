@@ -14,9 +14,8 @@ import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detecti
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
-import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
 import { useUpgradeAssistantHref } from '../../shared/Links/kibana';
 import { SearchBar } from '../../shared/search_bar';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
@@ -35,16 +34,15 @@ const initialData = {
 
 let hasDisplayedToast = false;
 
-function useServicesFetcher() {
+function useServicesFetcher({
+  environment,
+  kuery,
+}: {
+  environment: string;
+  kuery: string;
+}) {
   const {
-    urlParams: {
-      environment,
-      kuery,
-      start,
-      end,
-      comparisonEnabled,
-      comparisonType,
-    },
+    urlParams: { start, end, comparisonEnabled, comparisonType },
   } = useUrlParams();
   const { core } = useApmPluginContext();
   const upgradeAssistantHref = useUpgradeAssistantHref();
@@ -82,7 +80,7 @@ function useServicesFetcher() {
 
   const { mainStatisticsData, requestId } = data;
 
-  const { data: comparisonData, status: comparisonStatus } = useFetcher(
+  const { data: comparisonData } = useFetcher(
     (callApmApi) => {
       if (start && end && mainStatisticsData.items.length) {
         return callApmApi({
@@ -146,24 +144,24 @@ function useServicesFetcher() {
   ]);
 
   return {
-    servicesData: mainStatisticsData,
-    servicesStatus: mainStatisticsStatus,
+    mainStatisticsData,
+    mainStatisticsStatus,
     comparisonData,
-    isLoading:
-      mainStatisticsStatus === FETCH_STATUS.LOADING ||
-      comparisonStatus === FETCH_STATUS.LOADING,
   };
 }
 
 export function ServiceInventory() {
   const { core } = useApmPluginContext();
-  const { fallbackToTransactions } = useFallbackToTransactionsFetcher();
+
   const {
-    servicesData,
-    servicesStatus,
+    query: { environment, kuery },
+  } = useApmParams('/services');
+
+  const {
+    mainStatisticsData,
+    mainStatisticsStatus,
     comparisonData,
-    isLoading,
-  } = useServicesFetcher();
+  } = useServicesFetcher({ environment, kuery });
 
   const {
     anomalyDetectionJobsData,
@@ -183,6 +181,8 @@ export function ServiceInventory() {
     canCreateJob &&
     !userHasDismissedCallout;
 
+  const isLoading = mainStatisticsStatus === FETCH_STATUS.LOADING;
+
   return (
     <>
       <SearchBar showTimeComparison />
@@ -192,21 +192,16 @@ export function ServiceInventory() {
             <MLCallout onDismiss={() => setUserHasDismissedCallout(true)} />
           </EuiFlexItem>
         )}
-        {fallbackToTransactions && (
-          <EuiFlexItem>
-            <AggregatedTransactionsCallout />
-          </EuiFlexItem>
-        )}
         <EuiFlexItem>
           <ServiceList
             isLoading={isLoading}
-            items={servicesData.items}
+            items={mainStatisticsData.items}
             comparisonData={comparisonData}
             noItemsMessage={
               !isLoading && (
                 <NoServicesMessage
-                  historicalDataFound={servicesData.hasHistoricalData}
-                  status={servicesStatus}
+                  historicalDataFound={mainStatisticsData.hasHistoricalData}
+                  status={mainStatisticsStatus}
                 />
               )
             }

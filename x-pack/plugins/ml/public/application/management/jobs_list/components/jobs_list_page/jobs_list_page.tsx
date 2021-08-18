@@ -241,7 +241,7 @@ export const JobsListPage: FC<{
                 description={
                   <FormattedMessage
                     id="xpack.ml.management.jobsList.jobsListTagline"
-                    defaultMessage="View machine learning analytics and anomaly detection jobs."
+                    defaultMessage="View, export, and import machine learning analytics and anomaly detection jobs."
                   />
                 }
                 rightSideItems={[docsLink]}
@@ -258,7 +258,10 @@ export const JobsListPage: FC<{
                   <EuiFlexItem grow={false}>
                     {spacesEnabled && (
                       <>
-                        <EuiButtonEmpty onClick={() => setShowSyncFlyout(true)}>
+                        <EuiButtonEmpty
+                          onClick={() => setShowSyncFlyout(true)}
+                          data-test-subj="mlStackMgmtSyncButton"
+                        >
                           {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
                             defaultMessage: 'Synchronize saved objects',
                           })}

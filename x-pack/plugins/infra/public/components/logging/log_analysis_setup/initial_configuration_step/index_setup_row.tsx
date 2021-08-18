@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCheckbox, EuiCode, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { EuiCheckbox, EuiCode, EuiIconTip, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
 import { DatasetFilter, QualityWarning } from '../../../../../common/log_analysis';
@@ -63,36 +63,36 @@ export const IndexSetupRow: React.FC<{
   const isSelected = index.validity === 'valid' && index.isSelected;
 
   return (
-    <EuiFlexGroup alignItems="center">
-      <EuiFlexItem>
-        <EuiCheckbox
-          key={index.name}
-          id={index.name}
-          label={
-            <>
-              <EuiCode>{index.name}</EuiCode>{' '}
-              {index.validity === 'valid' && hasWarnings ? (
-                <EuiIconTip
-                  content={
-                    <FormattedMessage
-                      id="xpack.infra.logs.analsysisSetup.indexQualityWarningTooltipMessage"
-                      defaultMessage="While analyzing the log messages from these indices we've detected some problems which might indicate a reduced quality of the results. Consider excluding these indices or problematic datasets from the analysis."
-                    />
-                  }
-                  type="alert"
-                  color="warning"
-                />
-              ) : null}
-            </>
-          }
-          onChange={changeIsSelected}
-          checked={isSelected}
-          disabled={isDisabled || index.validity === 'invalid'}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+    <>
+      <EuiCheckbox
+        key={index.name}
+        id={index.name}
+        label={
+          <>
+            {index.name}
+            {index.validity === 'valid' && hasWarnings ? (
+              <EuiIconTip
+                content={
+                  <FormattedMessage
+                    id="xpack.infra.logs.analsysisSetup.indexQualityWarningTooltipMessage"
+                    defaultMessage="While analyzing the log messages from these indices we've detected some problems which might indicate a reduced quality of the results. Consider excluding these indices or problematic datasets from the analysis."
+                  />
+                }
+                type="alert"
+                color="warning"
+              />
+            ) : null}
+          </>
+        }
+        onChange={changeIsSelected}
+        checked={isSelected}
+        disabled={isDisabled || index.validity === 'invalid'}
+      />
+      <>
         {index.validity === 'invalid' ? (
-          <EuiIconTip content={formatValidationError(index.errors)} type="alert" color="danger" />
+          <EuiText size="xs" color="textSubduedColor">
+            {formatValidationError(index.errors)}
+          </EuiText>
         ) : index.validity === 'valid' ? (
           <IndexSetupDatasetFilter
             availableDatasets={datasets}
@@ -101,8 +101,9 @@ export const IndexSetupRow: React.FC<{
             onChangeDatasetFilter={changeDatasetFilter}
           />
         ) : null}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </>
+      <EuiSpacer size="l" />
+    </>
   );
 };
 

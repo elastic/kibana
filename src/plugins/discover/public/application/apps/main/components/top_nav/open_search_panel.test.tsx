@@ -9,18 +9,38 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+const mockCapabilities = jest.fn().mockReturnValue({
+  savedObjectsManagement: {
+    edit: true,
+  },
+});
+
 jest.mock('../../../../../kibana_services', () => {
   return {
     getServices: () => ({
       core: { uiSettings: {}, savedObjects: {} },
       addBasePath: (path: string) => path,
+      capabilities: mockCapabilities(),
     }),
   };
 });
 
 import { OpenSearchPanel } from './open_search_panel';
 
-test('render', () => {
-  const component = shallow(<OpenSearchPanel onClose={jest.fn()} makeUrl={jest.fn()} />);
-  expect(component).toMatchSnapshot();
+describe('OpenSearchPanel', () => {
+  test('render', () => {
+    const component = shallow(<OpenSearchPanel onClose={jest.fn()} makeUrl={jest.fn()} />);
+    expect(component).toMatchSnapshot();
+  });
+
+  test('should not render manage searches button without permissions', () => {
+    mockCapabilities.mockReturnValue({
+      savedObjectsManagement: {
+        edit: false,
+        delete: false,
+      },
+    });
+    const component = shallow(<OpenSearchPanel onClose={jest.fn()} makeUrl={jest.fn()} />);
+    expect(component.find('[data-test-subj="manageSearches"]').exists()).toBe(false);
+  });
 });

@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { SerializableRecord } from '@kbn/utility-types';
 import { Query } from '../filters';
 import { fromKueryExpression, toElasticsearchQuery, nodeTypes, KueryNode } from '../kuery';
-import { IndexPatternBase } from './types';
+import { BoolQuery, IndexPatternBase } from './types';
 
 /** @internal */
 export function buildQueryFromKuery(
@@ -17,7 +18,7 @@ export function buildQueryFromKuery(
   allowLeadingWildcards: boolean = false,
   dateFormatTZ?: string,
   filtersInMustClause: boolean = false
-) {
+): BoolQuery {
   const queryASTs = queries.map((query) => {
     return fromKueryExpression(query.query, { allowLeadingWildcards });
   });
@@ -28,8 +29,8 @@ export function buildQueryFromKuery(
 function buildQuery(
   indexPattern: IndexPatternBase | undefined,
   queryASTs: KueryNode[],
-  config: Record<string, any> = {}
-) {
+  config: SerializableRecord = {}
+): BoolQuery {
   const compoundQueryAST = nodeTypes.function.buildNode('and', queryASTs);
   const kueryQuery = toElasticsearchQuery(compoundQueryAST, indexPattern, config);
 
