@@ -28,7 +28,7 @@ import {
 } from './providers/anomaly_detectors';
 import { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/capabilities';
 import { hasMlCapabilitiesProvider, HasMlCapabilities } from '../lib/capabilities';
-import { MLClusterClientUninitialized } from './errors';
+import { getCustomError } from './errors';
 import { MlClient, getMlClient } from '../lib/ml_client';
 import { jobSavedObjectServiceFactory, JobSavedObjectService } from '../saved_objects';
 import {
@@ -191,13 +191,38 @@ function getRequestItemsProvider(
       isMlReady
     );
 
-    const uiSettingsClient = getUiSettings()!.asScopedToClient(savedObjectsClient);
-    const getFieldsFormatRegistry = () =>
-      getFieldsFormat()!.fieldFormatServiceFactory(uiSettingsClient);
-
     if (clusterClient === null) {
-      throw new MLClusterClientUninitialized(`ML's cluster client has not been initialized`);
+      throw getCustomError(
+        'MLClusterClientUninitialized',
+        `ML's cluster client has not been initialized`
+      );
     }
+
+    const uiSettingsClient = getUiSettings()!.asScopedToClient(savedObjectsClient);
+    if (uiSettingsClient === null) {
+      throw getCustomError(
+        'MLUISettingsClientUninitialized',
+        `ML's UI settings client has not been initialized`
+      );
+    }
+
+    const getFieldsFormatRegistry = async () => {
+      let fieldFormatRegistry;
+      try {
+        fieldFormatRegistry = await getFieldsFormat()!.fieldFormatServiceFactory(uiSettingsClient);
+      } catch (e) {
+        // throw an custom error during the fieldFormatRegistry check
+      }
+
+      if (!fieldFormatRegistry) {
+        throw getCustomError(
+          'MLFieldFormatRegistryUninitialized',
+          `ML's field format registry has not been initialized`
+        );
+      }
+
+      return fieldFormatRegistry;
+    };
 
     if (request instanceof KibanaRequest) {
       hasMlCapabilities = getHasMlCapabilities(request);

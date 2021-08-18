@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-export class MLClusterClientUninitialized extends Error {
-  constructor(message?: string) {
-    super(message);
-    Object.setPrototypeOf(this, new.target.prototype);
-  }
-}
+export const getCustomError = (className: string, errorMessage: string) => {
+  const C = class extends Error {
+    constructor(message?: string) {
+      super(message);
+      Object.setPrototypeOf(this, new.target.prototype);
+    }
+  };
+  Object.defineProperty(C, 'name', { value: className });
+  return new C(errorMessage);
+};
