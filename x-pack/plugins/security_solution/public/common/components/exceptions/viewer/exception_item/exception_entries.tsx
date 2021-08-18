@@ -139,12 +139,12 @@ const ExceptionEntriesComponent = ({
               </ValueBadgeGroup>
             );
           } else {
-            return (
-              (
-                <EuiToolTip content={values} anchorClassName="eui-textTruncate">
-                  <span>{values}</span>
-                </EuiToolTip>
-              ) ?? getEmptyValue()
+            return values ? (
+              <EuiToolTip content={values} anchorClassName="eui-textTruncate">
+                <span>{values}</span>
+              </EuiToolTip>
+            ) : (
+              getEmptyValue()
             );
           }
         },
