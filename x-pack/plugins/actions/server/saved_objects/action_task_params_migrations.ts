@@ -113,6 +113,7 @@ function useSavedObjectReferences(
     attributes: {
       ...doc.attributes,
       actionId: 'actionRef',
+      ...(relatedSavedObjects ? { relatedSavedObjects: relatedSavedObjectRefs } : {}),
     },
     references: [...(references ?? []), ...(newReferences ?? [])],
   };

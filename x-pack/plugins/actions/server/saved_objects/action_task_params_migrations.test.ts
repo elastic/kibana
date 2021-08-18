@@ -1,0 +1,327 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import uuid from 'uuid';
+import { getActionTaskParamsMigrations } from './action_task_params_migrations';
+import { ActionTaskParams } from '../types';
+import { SavedObjectReference, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
+import { migrationMocks } from 'src/core/server/mocks';
+
+const context = migrationMocks.createContext();
+const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
+
+describe('successful migrations', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    encryptedSavedObjectsSetup.createMigration.mockImplementation(({ migration }) => migration);
+  });
+
+  describe('7.16.0', () => {
+    test('moves actionId to references array', () => {
+      const migration716 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const actionTaskParam = getMockData();
+      const migratedActionTaskParam = migration716(actionTaskParam, context);
+      expect(migratedActionTaskParam).toEqual({
+        ...actionTaskParam,
+        attributes: {
+          ...actionTaskParam.attributes,
+          actionId: 'actionRef',
+        },
+        references: [
+          {
+            id: actionTaskParam.attributes.actionId,
+            name: 'actionRef',
+            type: 'action',
+          },
+        ],
+      });
+    });
+
+    test('handles empty relatedSavedObjects array', () => {
+      const migration716 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const actionTaskParam = getMockData({ relatedSavedObjects: [] });
+      const migratedActionTaskParam = migration716(actionTaskParam, context);
+      expect(migratedActionTaskParam).toEqual({
+        ...actionTaskParam,
+        attributes: {
+          ...actionTaskParam.attributes,
+          actionId: 'actionRef',
+          relatedSavedObjects: [],
+        },
+        references: [
+          {
+            id: actionTaskParam.attributes.actionId,
+            name: 'actionRef',
+            type: 'action',
+          },
+        ],
+      });
+    });
+
+    test('moves actionId and relatedSavedObjects to references array', () => {
+      const migration716 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const actionTaskParam = getMockData({
+        relatedSavedObjects: [
+          {
+            id: 'some-id',
+            namespace: 'some-namespace',
+            type: 'some-type',
+            typeId: 'some-typeId',
+          },
+        ],
+      });
+      const migratedActionTaskParam = migration716(actionTaskParam, context);
+      expect(migratedActionTaskParam).toEqual({
+        ...actionTaskParam,
+        attributes: {
+          ...actionTaskParam.attributes,
+          actionId: 'actionRef',
+          relatedSavedObjects: [
+            {
+              ref: 'related_some-type_0',
+              namespace: 'some-namespace',
+              type: 'some-type',
+              typeId: 'some-typeId',
+            },
+          ],
+        },
+        references: [
+          {
+            id: actionTaskParam.attributes.actionId,
+            name: 'actionRef',
+            type: 'action',
+          },
+          {
+            id: 'some-id',
+            name: 'related_some-type_0',
+            type: 'some-type',
+          },
+        ],
+      });
+    });
+
+    test('moves actionId and multiple relatedSavedObjects to references array', () => {
+      const migration716 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const actionTaskParam = getMockData({
+        relatedSavedObjects: [
+          {
+            id: 'some-id',
+            namespace: 'some-namespace',
+            type: 'some-type',
+            typeId: 'some-typeId',
+          },
+          {
+            id: 'another-id',
+            type: 'another-type',
+            typeId: 'another-typeId',
+          },
+        ],
+      });
+      const migratedActionTaskParam = migration716(actionTaskParam, context);
+      expect(migratedActionTaskParam).toEqual({
+        ...actionTaskParam,
+        attributes: {
+          ...actionTaskParam.attributes,
+          actionId: 'actionRef',
+          relatedSavedObjects: [
+            {
+              ref: 'related_some-type_0',
+              namespace: 'some-namespace',
+              type: 'some-type',
+              typeId: 'some-typeId',
+            },
+            {
+              ref: 'related_another-type_1',
+              type: 'another-type',
+              typeId: 'another-typeId',
+            },
+          ],
+        },
+        references: [
+          {
+            id: actionTaskParam.attributes.actionId,
+            name: 'actionRef',
+            type: 'action',
+          },
+          {
+            id: 'some-id',
+            name: 'related_some-type_0',
+            type: 'some-type',
+          },
+          {
+            id: 'another-id',
+            name: 'related_another-type_1',
+            type: 'another-type',
+          },
+        ],
+      });
+    });
+
+    test('does not overwrite existing references', () => {
+      const migration716 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const actionTaskParam = getMockData(
+        {
+          relatedSavedObjects: [
+            {
+              id: 'some-id',
+              namespace: 'some-namespace',
+              type: 'some-type',
+              typeId: 'some-typeId',
+            },
+          ],
+        },
+        [
+          {
+            id: 'existing-ref-id',
+            name: 'existingRef',
+            type: 'existing-ref-type',
+          },
+        ]
+      );
+      const migratedActionTaskParam = migration716(actionTaskParam, context);
+      expect(migratedActionTaskParam).toEqual({
+        ...actionTaskParam,
+        attributes: {
+          ...actionTaskParam.attributes,
+          actionId: 'actionRef',
+          relatedSavedObjects: [
+            {
+              ref: 'related_some-type_0',
+              namespace: 'some-namespace',
+              type: 'some-type',
+              typeId: 'some-typeId',
+            },
+          ],
+        },
+        references: [
+          {
+            id: 'existing-ref-id',
+            name: 'existingRef',
+            type: 'existing-ref-type',
+          },
+          {
+            id: actionTaskParam.attributes.actionId,
+            name: 'actionRef',
+            type: 'action',
+          },
+          {
+            id: 'some-id',
+            name: 'related_some-type_0',
+            type: 'some-type',
+          },
+        ],
+      });
+    });
+
+    test('does not overwrite existing references if relatedSavedObjects is undefined', () => {
+      const migration716 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const actionTaskParam = getMockData({}, [
+        {
+          id: 'existing-ref-id',
+          name: 'existingRef',
+          type: 'existing-ref-type',
+        },
+      ]);
+      const migratedActionTaskParam = migration716(actionTaskParam, context);
+      expect(migratedActionTaskParam).toEqual({
+        ...actionTaskParam,
+        attributes: {
+          ...actionTaskParam.attributes,
+          actionId: 'actionRef',
+        },
+        references: [
+          {
+            id: 'existing-ref-id',
+            name: 'existingRef',
+            type: 'existing-ref-type',
+          },
+          {
+            id: actionTaskParam.attributes.actionId,
+            name: 'actionRef',
+            type: 'action',
+          },
+        ],
+      });
+    });
+
+    test('does not overwrite existing references if relatedSavedObjects is empty', () => {
+      const migration716 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const actionTaskParam = getMockData({ relatedSavedObjects: [] }, [
+        {
+          id: 'existing-ref-id',
+          name: 'existingRef',
+          type: 'existing-ref-type',
+        },
+      ]);
+      const migratedActionTaskParam = migration716(actionTaskParam, context);
+      expect(migratedActionTaskParam).toEqual({
+        ...actionTaskParam,
+        attributes: {
+          ...actionTaskParam.attributes,
+          actionId: 'actionRef',
+          relatedSavedObjects: [],
+        },
+        references: [
+          {
+            id: 'existing-ref-id',
+            name: 'existingRef',
+            type: 'existing-ref-type',
+          },
+          {
+            id: actionTaskParam.attributes.actionId,
+            name: 'actionRef',
+            type: 'action',
+          },
+        ],
+      });
+    });
+  });
+});
+
+describe('handles errors during migrations', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    encryptedSavedObjectsSetup.createMigration.mockImplementation(() => () => {
+      throw new Error(`Can't migrate!`);
+    });
+  });
+
+  describe('7.16.0 throws if migration fails', () => {
+    test('should show the proper exception', () => {
+      const migration716 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const actionTaskParam = getMockData();
+      expect(() => {
+        migration716(actionTaskParam, context);
+      }).toThrowError(`Can't migrate!`);
+      expect(context.log.error).toHaveBeenCalledWith(
+        `encryptedSavedObject 7.16.0 migration failed for action task param ${actionTaskParam.id} with error: Can't migrate!`,
+        {
+          migrations: {
+            actionTaskParamDocument: actionTaskParam,
+          },
+        }
+      );
+    });
+  });
+});
+
+function getMockData(
+  overwrites: Record<string, unknown> = {},
+  referencesOverwrites: SavedObjectReference[] = []
+): SavedObjectUnsanitizedDoc<ActionTaskParams> {
+  return {
+    attributes: {
+      actionId: uuid.v4(),
+      params: {},
+      ...overwrites,
+    },
+    references: [...referencesOverwrites],
+    id: uuid.v4(),
+    type: 'action_task_param',
+  };
+}
