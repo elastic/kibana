@@ -7,6 +7,8 @@ Log in to your account, then go to the {kib} page.
 +
 To remotely connect to {kib}, set <server-host,server.host>> to a non-loopback address.
 
+[[status]]
+
 . Log in to your account.
 
 . Go to the home page, then click *{kib}*.

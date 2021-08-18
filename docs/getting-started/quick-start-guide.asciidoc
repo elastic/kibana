@@ -17,6 +17,7 @@ When you've finished, you'll know how to:
 When security is enabled, you must have `read`, `write`, and `manage` privileges on the `kibana_sample_data_*` indices. 
 Learn how to <<tutorial-secure-access-to-kibana, secure access to {kib}>>, or refer to {ref}/security-privileges.html[Security privileges] for more information.
 
+[[gs-get-data-into-kibana]]
 Sample data sets come with sample visualizations, dashboards, and more to help you explore {kib} before you ingest or add your own data. Add this sample data:
 
 . On the home page, click *Try our sample data*.
@@ -114,7 +115,7 @@ To view a subset of the data, you can apply filters to the dashboard panels. App
 image::getting-started/images/tutorial-sample-filter2.png[The [eCommerce] Revenue Dashboard that shows only the women's clothing data generated on Wednesday from the Gnomehouse manufacturer]
 
 [float]
-[[quick-start-whats-next]]
+[[kibana-concepts-analysts]]
 == What's next?
 
 * Ready to add your own data? Learn the different ways on how you can <<connect-to-elasticsearch,add your own data>>. 
