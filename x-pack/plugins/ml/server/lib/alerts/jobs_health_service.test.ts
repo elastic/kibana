@@ -150,7 +150,7 @@ describe('JobsHealthService', () => {
 
   const jobAuditMessagesService = ({
     getJobsErrorMessages: jest.fn().mockImplementation((jobIds: string) => {
-      return Promise.resolve({});
+      return Promise.resolve([]);
     }),
   } as unknown) as jest.Mocked<JobAuditMessagesService>;
 
@@ -161,7 +161,15 @@ describe('JobsHealthService', () => {
   } as unknown) as jest.Mocked<Logger>;
 
   const getFieldsFormatRegistry = jest.fn().mockImplementation(() => {
-    return Promise.resolve({});
+    return Promise.resolve({
+      deserialize: jest.fn().mockImplementation(() => {
+        return {
+          convert: jest.fn().mockImplementation((v) => {
+            return new Date(v).toUTCString();
+          }),
+        };
+      }),
+    });
   }) as jest.Mocked<FieldFormatsRegistryProvider>;
 
   const jobHealthService: JobsHealthService = jobsHealthServiceProvider(
@@ -281,7 +289,7 @@ describe('JobsHealthService', () => {
               job_id: 'test_job_01',
               annotation:
                 'Datafeed has missed 11 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
-              end_timestamp: 1627653300000,
+              end_timestamp: 'Fri, 30 Jul 2021 13:55:00 GMT',
               missed_docs_count: 11,
             },
           ],
@@ -348,7 +356,7 @@ describe('JobsHealthService', () => {
           results: [
             {
               job_id: 'test_job_01',
-              log_time: 1626935914540,
+              log_time: 'Thu, 22 Jul 2021 06:38:34 GMT',
               memory_status: 'hard_limit',
             },
           ],
@@ -364,14 +372,14 @@ describe('JobsHealthService', () => {
               job_id: 'test_job_01',
               annotation:
                 'Datafeed has missed 11 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
-              end_timestamp: 1627653300000,
+              end_timestamp: 'Fri, 30 Jul 2021 13:55:00 GMT',
               missed_docs_count: 11,
             },
             {
               job_id: 'test_job_02',
               annotation:
                 'Datafeed has missed 8 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
-              end_timestamp: 1627653300000,
+              end_timestamp: 'Fri, 30 Jul 2021 13:55:00 GMT',
               missed_docs_count: 8,
             },
           ],
