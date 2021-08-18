@@ -9,7 +9,7 @@
 import { mapValues } from 'lodash';
 import { SavedObjectsType, SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { EmbeddableSetup } from '../../../src/plugins/embeddable/server';
-import { mergeMigrationFunctionMaps } from '../../../src/plugins/kibana_utils/common';
+import { mergeMigrationFunctionMaps } from '../../../src/plugins/kibana_utils/server';
 
 export const searchableListSavedObject = (embeddable: EmbeddableSetup) => {
   const searchableListSO: SavedObjectsType = {
