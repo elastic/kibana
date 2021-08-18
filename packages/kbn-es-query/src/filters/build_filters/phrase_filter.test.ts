@@ -10,6 +10,7 @@ import {
   buildInlineScriptForPhraseFilter,
   buildPhraseFilter,
   getPhraseFilterField,
+  PhraseFilter,
 } from './phrase_filter';
 import { fields, getField } from '../stubs';
 import { IndexPatternBase } from '../../es_query';
@@ -153,7 +154,7 @@ describe('getPhraseFilterField', function () {
   it('should return the name of the field a phrase query is targeting', () => {
     const field = indexPattern.fields.find((patternField) => patternField.name === 'extension');
     const filter = buildPhraseFilter(field!, 'jpg', indexPattern);
-    const result = getPhraseFilterField(filter);
+    const result = getPhraseFilterField(filter as PhraseFilter);
     expect(result).toBe('extension');
   });
 });
