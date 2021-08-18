@@ -64,6 +64,9 @@ export function decorateMochaUi(log, lifecycle, context, { isDockerGroup, rootTa
           const relativeFilePath = relative(REPO_ROOT, this.file);
           this._tags = [
             ...(isDockerGroup ? ['ciGroupDocker', relativeFilePath] : [relativeFilePath]),
+            // we attach the "root tags" to all the child suites of the root suite, so that if they
+            // need to be excluded they can be removed from the root suite without removing the entire
+            // root suite
             ...(this.parent.root ? [...(rootTags ?? [])] : []),
           ];
           this.suiteTag = relativeFilePath; // The tag that uniquely targets this suite/file
