@@ -53,6 +53,7 @@ export function toElasticsearchQuery(
   }
 
   return {
+    // @ts-expect-error @elastic/elasticsearch doesn't support ignore_unmapped in QueryDslGeoBoundingBoxQuery
     geo_bounding_box: {
       [fieldName]: queryParams,
       ignore_unmapped: true,

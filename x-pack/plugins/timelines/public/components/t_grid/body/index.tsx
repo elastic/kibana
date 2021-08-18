@@ -13,6 +13,8 @@ import {
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
   EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
@@ -41,6 +43,8 @@ import {
   SortColumnTimeline,
   TimelineId,
   TimelineTabs,
+  SetEventsLoading,
+  SetEventsDeleted,
 } from '../../../../common/types/timeline';
 
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
@@ -65,6 +69,8 @@ import * as i18n from './translations';
 import { AlertCount } from '../styles';
 import { checkBoxControlColumn } from './control_columns';
 import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
+import { ViewSelection } from '../event_rendered_view/selector';
+import { EventRenderedView } from '../event_rendered_view';
 
 const StatefulAlertStatusBulkActions = lazy(
   () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
@@ -74,25 +80,28 @@ interface OwnProps {
   activePage: number;
   additionalControls?: React.ReactNode;
   browserFields: BrowserFields;
-  filterQuery: string;
+  bulkActions?: BulkActionsProp;
   data: TimelineItem[];
   defaultCellActions?: TGridCellAction[];
+  filterQuery: string;
+  filterStatus?: AlertStatus;
   id: string;
+  indexNames: string[];
   isEventViewer?: boolean;
-  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
-  rowRenderers: RowRenderer[];
-  tabType: TimelineTabs;
+  itemsPerPageOptions: number[];
   leadingControlColumns?: ControlColumnProps[];
   loadPage: (newActivePage: number) => void;
-  trailingControlColumns?: ControlColumnProps[];
-  totalPages: number;
-  totalItems: number;
-  bulkActions?: BulkActionsProp;
-  filterStatus?: AlertStatus;
-  unit?: (total: number) => React.ReactNode;
   onRuleChange?: () => void;
-  indexNames: string[];
+  querySize: number;
   refetch: Refetch;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
+  tableView: ViewSelection;
+  tabType: TimelineTabs;
+  totalItems: number;
+  totalPages: number;
+  trailingControlColumns?: ControlColumnProps[];
+  unit?: (total: number) => React.ReactNode;
 }
 
 const basicUnit = (n: number) => i18n.UNIT(n);
@@ -131,6 +140,8 @@ const transformControlColumns = ({
   browserFields,
   sort,
   theme,
+  setEventsLoading,
+  setEventsDeleted,
 }: {
   actionColumnsWidth: number;
   columnHeaders: ColumnHeaderOptions[];
@@ -149,6 +160,8 @@ const transformControlColumns = ({
   onSelectPage: OnSelectAll;
   sort: SortColumnTimeline[];
   theme: EuiTheme;
+  setEventsLoading: SetEventsLoading;
+  setEventsDeleted: SetEventsDeleted;
 }): EuiDataGridControlColumn[] =>
   controlColumns.map(
     ({ id: columnId, headerCellRender = EmptyHeaderCellRender, rowCellRender, width }, i) => ({
@@ -208,6 +221,8 @@ const transformControlColumns = ({
             tabType={tabType}
             timelineId={timelineId}
             width={width ?? MIN_ACTION_COLUMN_WIDTH}
+            setEventsLoading={setEventsLoading}
+            setEventsDeleted={setEventsDeleted}
           />
         );
       },
@@ -227,34 +242,37 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     activePage,
     additionalControls,
     browserFields,
-    filterQuery,
+    bulkActions = true,
+    clearSelected,
     columnHeaders,
     data,
     defaultCellActions,
     excludedRowRendererIds,
+    filterQuery,
+    filterStatus,
     id,
+    indexNames,
     isEventViewer = false,
     isSelectAllChecked,
+    itemsPerPageOptions,
+    leadingControlColumns = EMPTY_CONTROL_COLUMNS,
     loadingEventIds,
     loadPage,
-    selectedEventIds,
-    setSelected,
-    clearSelected,
     onRuleChange,
-    showCheckboxes,
+    querySize,
+    refetch,
     renderCellValue,
     rowRenderers,
+    selectedEventIds,
+    setSelected,
+    showCheckboxes,
     sort,
+    tableView = 'gridView',
     tabType,
-    totalPages,
     totalItems,
-    filterStatus,
-    bulkActions = true,
-    unit = basicUnit,
-    leadingControlColumns = EMPTY_CONTROL_COLUMNS,
+    totalPages,
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
-    indexNames,
-    refetch,
+    unit = basicUnit,
   }) => {
     const dispatch = useDispatch();
     const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
@@ -327,6 +345,43 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       }
       return bulkActions.alertStatusActions ?? true;
     }, [selectedCount, showCheckboxes, bulkActions]);
+
+    const alertToolbar = useMemo(
+      () => (
+        <EuiFlexGroup gutterSize="m" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <AlertCount>{alertCountText}</AlertCount>
+          </EuiFlexItem>
+          {showBulkActions && (
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <StatefulAlertStatusBulkActions
+                data-test-subj="bulk-actions"
+                id={id}
+                totalItems={totalItems}
+                filterStatus={filterStatus}
+                query={filterQuery}
+                indexName={indexNames.join()}
+                onActionSuccess={onAlertStatusActionSuccess}
+                onActionFailure={onAlertStatusActionFailure}
+                refetch={refetch}
+              />
+            </Suspense>
+          )}
+        </EuiFlexGroup>
+      ),
+      [
+        alertCountText,
+        filterQuery,
+        filterStatus,
+        id,
+        indexNames,
+        onAlertStatusActionFailure,
+        onAlertStatusActionSuccess,
+        refetch,
+        showBulkActions,
+        totalItems,
+      ]
+    );
 
     const toolbarVisibility: EuiDataGridToolBarVisibilityOptions = useMemo(
       () => ({
@@ -438,6 +493,20 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       setVisibleColumns(columnHeaders.map(({ id: cid }) => cid));
     }, [columnHeaders]);
 
+    const setEventsLoading = useCallback<SetEventsLoading>(
+      ({ eventIds, isLoading }) => {
+        dispatch(tGridActions.setEventsLoading({ id, eventIds, isLoading }));
+      },
+      [dispatch, id]
+    );
+
+    const setEventsDeleted = useCallback<SetEventsDeleted>(
+      ({ eventIds, isDeleted }) => {
+        dispatch(tGridActions.setEventsDeleted({ id, eventIds, isDeleted }));
+      },
+      [dispatch, id]
+    );
+
     const [leadingTGridControlColumns, trailingTGridControlColumns] = useMemo(() => {
       return [
         showCheckboxes ? [checkBoxControlColumn, ...leadingControlColumns] : leadingControlColumns,
@@ -467,6 +536,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           browserFields,
           onSelectPage,
           theme,
+          setEventsLoading,
+          setEventsDeleted,
         })
       );
     }, [
@@ -487,6 +558,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       onSelectPage,
       sort,
       theme,
+      setEventsLoading,
+      setEventsDeleted,
     ]);
 
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
@@ -547,20 +620,39 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     }, [columnHeaders, data, id, renderCellValue, tabType, theme, browserFields, rowRenderers]);
 
     return (
-      <EuiDataGrid
-        data-test-subj="body-data-grid"
-        aria-label={i18n.TGRID_BODY_ARIA_LABEL}
-        columns={columnsWithCellActions}
-        columnVisibility={{ visibleColumns, setVisibleColumns }}
-        gridStyle={gridStyle}
-        leadingControlColumns={leadingTGridControlColumns}
-        trailingControlColumns={trailingTGridControlColumns}
-        toolbarVisibility={toolbarVisibility}
-        rowCount={data.length}
-        renderCellValue={renderTGridCellValue}
-        inMemory={{ level: 'sorting' }}
-        sorting={{ columns: sortingColumns, onSort }}
-      />
+      <>
+        {tableView === 'gridView' && (
+          <EuiDataGrid
+            data-test-subj="body-data-grid"
+            aria-label={i18n.TGRID_BODY_ARIA_LABEL}
+            columns={columnsWithCellActions}
+            columnVisibility={{ visibleColumns, setVisibleColumns }}
+            gridStyle={gridStyle}
+            leadingControlColumns={leadingTGridControlColumns}
+            trailingControlColumns={trailingTGridControlColumns}
+            toolbarVisibility={toolbarVisibility}
+            rowCount={data.length}
+            renderCellValue={renderTGridCellValue}
+            inMemory={{ level: 'sorting' }}
+            sorting={{ columns: sortingColumns, onSort }}
+          />
+        )}
+        {tableView === 'eventRenderedView' && (
+          <EventRenderedView
+            alertToolbar={alertToolbar}
+            browserFields={browserFields}
+            events={data}
+            leadingControlColumns={leadingTGridControlColumns ?? []}
+            onChangePage={loadPage}
+            pageIndex={activePage}
+            pageSize={querySize}
+            pageSizeOptions={itemsPerPageOptions}
+            rowRenderers={rowRenderers}
+            timelineId={id}
+            totalItemCount={totalItems}
+          />
+        )}
+      </>
     );
   }
 );
@@ -609,4 +701,4 @@ const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
-export const StatefulBody = connector(BodyComponent);
+export const StatefulBody: React.FunctionComponent<OwnProps> = connector(BodyComponent);
