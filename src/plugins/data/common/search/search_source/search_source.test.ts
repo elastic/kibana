@@ -915,7 +915,9 @@ describe('SearchSource', () => {
                 "index": "456",
                 "negate": false,
               },
-              "query": "query",
+              "query": Object {
+                "q": "query",
+              },
             },
           ],
           "index": "123",

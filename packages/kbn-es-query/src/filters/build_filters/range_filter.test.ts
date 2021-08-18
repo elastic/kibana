@@ -34,6 +34,7 @@ describe('Range filter builder', () => {
 
     expect(buildRangeFilter(field!, { gte: 1, lte: 3 }, indexPattern)).toEqual({
       meta: {
+        field: 'bytes',
         index: 'id',
         params: {},
       },
