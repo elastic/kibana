@@ -66,7 +66,7 @@ function createManifest(
     requiredBundles: [],
     owner: {
       name: 'Core',
-      githubTeam: '@elastic/kibana-core',
+      githubTeam: 'kibana-core',
     },
   };
 }
