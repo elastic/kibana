@@ -36,7 +36,7 @@ That kind of scale in the United States is often captured with what the Census B
 
 To get the CSA boundary data, download the https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html[Cartographic Boundary shapefile (.shp)] from the Census Bureau’s website.
 
-To use it in Kibana, GeoJSON format is required. You can use QGIS to convert the Cartographic Boundary shapefile to GeoJSON. Follow this https://gist.github.com/YKCzoli/b7f5ff0e0f641faba0f47fa5d16c4d8d[helpful tutorial] if you'd like to do the same or you can https://gist.githubusercontent.com/thomasneirynck/3813ddde31052b6b58b458ec2a86f81f/raw/2925c87f13324c75b6ed82ead9bf593f3224e847/csba.geojson[Download a prebuilt GeoJSON version].
+To use it in Kibana, GeoJSON format is required. You can use QGIS to convert the Cartographic Boundary shapefile to GeoJSON. Follow this https://gist.github.com/YKCzoli/b7f5ff0e0f641faba0f47fa5d16c4d8d[helpful tutorial] if you'd like to do the same or you can https://raw.githubusercontent.com/elastic/examples/master/blog/reverse-geocoding/csba.json[Download a prebuilt GeoJSON version].
 
 Once you have your GeoJSON file:
 
