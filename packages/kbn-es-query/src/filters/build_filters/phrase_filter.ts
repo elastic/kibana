@@ -62,7 +62,7 @@ export const isScriptedPhraseFilter = (filter: Filter): filter is ScriptedPhrase
 
 /** @internal */
 export const getPhraseFilterField = (filter: PhraseFilter) => {
-  const queryConfig = filter.query?.match_phrase ?? filter.query?.match ?? {};
+  const queryConfig = filter.query.match_phrase ?? filter.query.match ?? {};
   return Object.keys(queryConfig)[0];
 };
 
@@ -73,7 +73,7 @@ export const getPhraseFilterValue = (
   filter: PhraseFilter | ScriptedPhraseFilter
 ): PhraseFilterValue => {
   if (isPhraseFilter(filter)) {
-    const queryConfig = filter.query.match_phrase ?? filter.query.match ?? {};
+    const queryConfig = filter.query.match_phrase || filter.query.match || {};
     const queryValue = Object.values(queryConfig)[0];
     return isPlainObject(queryValue) ? queryValue.query : queryValue;
   } else {
