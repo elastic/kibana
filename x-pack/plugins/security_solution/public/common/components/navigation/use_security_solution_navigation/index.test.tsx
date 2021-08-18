@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useGetUserAlertsPermissions } from '@kbn/alerts';
 
 import { renderHook } from '@testing-library/react-hooks';
 import { KibanaPageTemplateProps } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -23,7 +24,7 @@ jest.mock('../../../lib/kibana');
 jest.mock('../../../hooks/use_selector');
 jest.mock('../../../hooks/use_experimental_features');
 jest.mock('../../../utils/route/use_route_spy');
-
+jest.mock('@kbn/alerts');
 describe('useSecuritySolutionNavigation', () => {
   const mockUrlState = {
     [CONSTANTS.appQuery]: { query: 'host.name:"security-solution-es"', language: 'kuery' },
@@ -75,12 +76,24 @@ describe('useSecuritySolutionNavigation', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useDeepEqualSelector as jest.Mock).mockReturnValue({ urlState: mockUrlState });
     (useRouteSpy as jest.Mock).mockReturnValue(mockRouteSpy);
+    (useGetUserAlertsPermissions as jest.Mock).mockReturnValue({
+      loading: false,
+      crud: true,
+      read: true,
+    });
+
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         application: {
           navigateToApp: jest.fn(),
           getUrlForApp: (appId: string, options?: { path?: string; deepLinkId?: boolean }) =>
             `${appId}/${options?.deepLinkId ?? ''}${options?.path ?? ''}`,
+          capabilities: {
+            siem: {
+              crud_alerts: true,
+              read_alerts: true,
+            },
+          },
         },
         chrome: {
           setBreadcrumbs: jest.fn(),

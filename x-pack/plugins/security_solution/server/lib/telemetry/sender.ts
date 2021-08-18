@@ -12,11 +12,13 @@ import { SearchRequest } from '@elastic/elasticsearch/api/types';
 import { URL } from 'url';
 import { CoreStart, ElasticsearchClient, Logger } from 'src/core/server';
 import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { transformDataToNdjson } from '../../utils/read_stream/create_stream_from_ndjson';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
+import { createUsageCounterLabel } from './helpers';
 import { TelemetryDiagTask } from './diagnostic_task';
 import { TelemetryEndpointTask } from './endpoint_task';
 import { TelemetryTrustedAppsTask } from './trusted_apps_task';
@@ -27,6 +29,7 @@ import { getTrustedAppsList } from '../../endpoint/routes/trusted_apps/service';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
+const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
 
 export interface TelemetryEvent {
   [key: string]: SearchTypes;
@@ -66,13 +69,19 @@ export class TelemetryEventsSender {
   private esClient?: ElasticsearchClient;
   private savedObjectsClient?: SavedObjectsClientContract;
   private exceptionListClient?: ExceptionListClient;
+  private telemetryUsageCounter?: UsageCounter;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
   }
 
-  public setup(telemetrySetup?: TelemetryPluginSetup, taskManager?: TaskManagerSetupContract) {
+  public setup(
+    telemetrySetup?: TelemetryPluginSetup,
+    taskManager?: TaskManagerSetupContract,
+    telemetryUsageCounter?: UsageCounter
+  ) {
     this.telemetrySetup = telemetrySetup;
+    this.telemetryUsageCounter = telemetryUsageCounter;
 
     if (taskManager) {
       this.diagTask = new TelemetryDiagTask(this.logger, taskManager, this);
@@ -285,6 +294,16 @@ export class TelemetryEventsSender {
     }
 
     if (events.length > this.maxQueueSize - qlength) {
+      this.telemetryUsageCounter?.incrementCounter({
+        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['queue_stats'])),
+        counterType: 'docs_lost',
+        incrementBy: events.length,
+      });
+      this.telemetryUsageCounter?.incrementCounter({
+        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['queue_stats'])),
+        counterType: 'num_capacity_exceeded',
+        incrementBy: 1,
+      });
       this.queue.push(...this.processEvents(events.slice(0, this.maxQueueSize - qlength)));
     } else {
       this.queue.push(...this.processEvents(events));
@@ -344,6 +363,7 @@ export class TelemetryEventsSender {
       await this.sendEvents(
         toSend,
         telemetryUrl,
+        'alerts-endpoint',
         clusterInfo.cluster_uuid,
         clusterInfo.version?.number,
         licenseInfo?.uid
@@ -379,6 +399,7 @@ export class TelemetryEventsSender {
       await this.sendEvents(
         toSend,
         telemetryUrl,
+        channel,
         clusterInfo.cluster_uuid,
         clusterInfo.version?.number,
         licenseInfo?.uid
@@ -429,6 +450,7 @@ export class TelemetryEventsSender {
   private async sendEvents(
     events: unknown[],
     telemetryUrl: string,
+    channel: string,
     clusterUuid: string,
     clusterVersionNumber: string | undefined,
     licenseId: string | undefined
@@ -445,11 +467,31 @@ export class TelemetryEventsSender {
           ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
         },
       });
+      this.telemetryUsageCounter?.incrementCounter({
+        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
+        counterType: resp.status.toString(),
+        incrementBy: 1,
+      });
+      this.telemetryUsageCounter?.incrementCounter({
+        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
+        counterType: 'docs_sent',
+        incrementBy: events.length,
+      });
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {
       this.logger.warn(
         `Error sending events: ${err.response.status} ${JSON.stringify(err.response.data)}`
       );
+      this.telemetryUsageCounter?.incrementCounter({
+        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
+        counterType: 'docs_lost',
+        incrementBy: events.length,
+      });
+      this.telemetryUsageCounter?.incrementCounter({
+        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
+        counterType: 'num_exceptions',
+        incrementBy: 1,
+      });
     }
   }
 }
