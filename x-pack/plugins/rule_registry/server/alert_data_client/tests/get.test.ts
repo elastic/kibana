@@ -42,6 +42,13 @@ beforeEach(() => {
     Promise.resolve({ filter: [] })
   );
 
+  // @ts-expect-error
+  alertingAuthMock.getAugmentedRuleTypesWithAuthorization.mockImplementation(async () => {
+    const authorizedRuleTypes = new Set();
+    authorizedRuleTypes.add({ producer: 'apm' });
+    return Promise.resolve({ authorizedRuleTypes });
+  });
+
   alertingAuthMock.ensureAuthorized.mockImplementation(
     // @ts-expect-error
     async ({
@@ -119,6 +126,8 @@ describe('get()', () => {
       Array [
         Object {
           "body": Object {
+            "_source": undefined,
+            "aggs": undefined,
             "fields": Array [
               "kibana.alert.rule.rule_type_id",
               "kibana.alert.rule.consumer",
@@ -152,6 +161,7 @@ describe('get()', () => {
                 "should": Array [],
               },
             },
+            "size": undefined,
             "sort": Array [
               Object {
                 "@timestamp": Object {
@@ -160,6 +170,7 @@ describe('get()', () => {
                 },
               },
             ],
+            "track_total_hits": undefined,
           },
           "ignore_unavailable": true,
           "index": ".alerts-observability-apm",
@@ -258,8 +269,8 @@ describe('get()', () => {
       })
     );
 
-    await expect(alertsClient.get({ id: fakeAlertId, index: '.alerts-observability-apm' })).rejects
-      .toThrowErrorMatchingInlineSnapshot(`
+    await expect(alertsClient.get({ id: fakeAlertId, index: '.alerts-observability-apm.alerts' }))
+      .rejects.toThrowErrorMatchingInlineSnapshot(`
             "Unable to retrieve alert details for alert with id of \\"myfakeid1\\" or with query \\"undefined\\" and operation get 
             Error: Error: Unauthorized for fake.rule and apm"
           `);

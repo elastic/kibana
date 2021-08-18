@@ -39,16 +39,16 @@ export const CLOSED_ALERTS_FILTER_BTN = '[data-test-subj="closedAlerts"]';
 
 export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';
 
-export const IN_PROGRESS_ALERTS_FILTER_BTN = '[data-test-subj="inProgressAlerts"]';
+export const ACKNOWLEDGED_ALERTS_FILTER_BTN = '[data-test-subj="acknowledgedAlerts"]';
 
 export const LOADING_ALERTS_PANEL = '[data-test-subj="loading-alerts-panel"]';
 
 export const MANAGE_ALERT_DETECTION_RULES_BTN = '[data-test-subj="manage-alert-detection-rules"]';
 
-export const MARK_ALERT_IN_PROGRESS_BTN = '[data-test-subj="in-progress-alert-status"]';
+export const MARK_ALERT_ACKNOWLEDGED_BTN = '[data-test-subj="acknowledged-alert-status"]';
 
-export const MARK_SELECTED_ALERTS_IN_PROGRESS_BTN =
-  '[data-test-subj="markSelectedAlertsInProgressButton"]';
+export const MARK_SELECTED_ALERTS_ACKNOWLEDGED_BTN =
+  '[data-test-subj="markSelectedAlertsAcknowledgedButton"]';
 
 export const NUMBER_OF_ALERTS =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="server-side-event-count"]';
