@@ -1,4 +1,4 @@
-[[get-started]]
+[[kibana-concepts-analysts]]
 = Get started with Analytics
 
 [partintro]
@@ -115,7 +115,7 @@ To view a subset of the data, you can apply filters to the dashboard panels. App
 image::getting-started/images/tutorial-sample-filter2.png[The [eCommerce] Revenue Dashboard that shows only the women's clothing data generated on Wednesday from the Gnomehouse manufacturer]
 
 [float]
-[[kibana-concepts-analysts]]
+[[kibana-concepts-analysts-whats-next]]
 == What's next?
 
 * Ready to add your own data? Learn the different ways on how you can <<connect-to-elasticsearch,add your own data>>. 
