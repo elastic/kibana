@@ -68,6 +68,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const navLinks = await appsMenu.readLinks();
         expect(navLinks.map((link) => link.text)).to.eql([
           'Overview',
+          'Alerts',
           'Uptime',
           'Stack Management',
         ]);
