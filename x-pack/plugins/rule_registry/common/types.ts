@@ -66,7 +66,7 @@ interface BucketAggsSchemas {
     exclude?: string | string[];
     include?: string | string[];
     execution_hint?: string;
-    missing?: number;
+    missing?: number | string;
     min_doc_count?: number;
     size?: number;
     show_term_doc_count_error?: boolean;
@@ -170,7 +170,7 @@ export const BucketAggsSchemas: t.Type<BucketAggsSchemas> = t.recursion('BucketA
           exclude: t.union([t.string, t.array(t.string)]),
           include: t.union([t.string, t.array(t.string)]),
           execution_hint: t.string,
-          missing: t.number,
+          missing: t.union([t.number, t.string]),
           min_doc_count: t.number,
           size: t.number,
           show_term_doc_count_error: t.boolean,

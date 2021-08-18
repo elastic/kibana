@@ -612,8 +612,7 @@ export class AlertsClient {
     query,
     aggs,
     _source,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    track_total_hits,
+    track_total_hits: trackTotalHits,
     size,
     index,
   }: {
@@ -624,16 +623,13 @@ export class AlertsClient {
     _source?: string[] | undefined;
     size?: number | undefined;
   }) {
-    this.logger.debug(
-      JSON.stringify({ query, aggs, _source, track_total_hits, size, index }, null, 2)
-    );
     try {
       // first search for the alert by id, then use the alert info to check if user has access to it
       const alertsSearchResponse = await this.singleSearchAfterAndAudit({
         query,
         aggs,
         _source,
-        track_total_hits,
+        track_total_hits: trackTotalHits,
         size,
         index,
         operation: ReadOperations.Find,
