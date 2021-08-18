@@ -8,8 +8,10 @@
 
 import { EsQuerySortValue, SortDirection } from '../../../../../../data/public';
 import { createIndexPatternsStub, createSearchSourceStub } from './_stubs';
-import { fetchAnchorProvider } from './anchor';
+import { fetchAnchorProvider, updateSearchSource } from './anchor';
 import { EsHitRecord, EsHitRecordList } from './context';
+import { indexPatternMock } from '../../../../__mocks__/index_pattern';
+import { savedSearchMock } from '../../../../__mocks__/saved_search';
 
 describe('context app', function () {
   let fetchAnchor: (
@@ -112,6 +114,28 @@ describe('context app', function () {
           { _doc: SortDirection.desc },
         ]);
       });
+    });
+
+    it('should update search source correctly when useFieldApi set to false', function () {
+      const searchSource = updateSearchSource(
+        savedSearchMock.searchSource,
+        'id',
+        [],
+        false,
+        indexPatternMock
+      );
+      expect(searchSource.getSearchRequestBody()).toMatchSnapshot();
+    });
+
+    it('should update search source correctly when useFieldApi set to true', function () {
+      const searchSource = updateSearchSource(
+        savedSearchMock.searchSource,
+        'id',
+        [],
+        true,
+        indexPatternMock
+      );
+      expect(searchSource.getSearchRequestBody()).toMatchSnapshot();
     });
 
     it('should reject with an error when no hits were found', function () {

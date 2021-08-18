@@ -13,6 +13,7 @@ import {
   ISearchSource,
   IndexPatternsContract,
   EsQuerySortValue,
+  IndexPattern,
 } from '../../../../../../data/public';
 import { EsHitRecord } from './context';
 
@@ -27,29 +28,8 @@ export function fetchAnchorProvider(
     sort: EsQuerySortValue[]
   ): Promise<EsHitRecord> {
     const indexPattern = await indexPatterns.get(indexPatternId);
-    searchSource
-      .setParent(undefined)
-      .setField('index', indexPattern)
-      .setField('version', true)
-      .setField('size', 1)
-      .setField('query', {
-        query: {
-          constant_score: {
-            filter: {
-              ids: {
-                values: [anchorId],
-              },
-            },
-          },
-        },
-        language: 'lucene',
-      })
-      .setField('sort', sort)
-      .setField('trackTotalHits', false);
-    if (useNewFieldsApi) {
-      searchSource.removeField('fieldsFromSource');
-      searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
-    }
+    updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, indexPattern);
+
     const response = await searchSource.fetch();
     const doc = get(response, ['hits', 'hits', 0]);
 
@@ -66,4 +46,37 @@ export function fetchAnchorProvider(
       isAnchor: true,
     } as EsHitRecord;
   };
+}
+
+export function updateSearchSource(
+  searchSource: ISearchSource,
+  anchorId: string,
+  sort: EsQuerySortValue[],
+  useNewFieldsApi: boolean,
+  indexPattern: IndexPattern
+) {
+  searchSource
+    .setParent(undefined)
+    .setField('index', indexPattern)
+    .setField('version', true)
+    .setField('size', 1)
+    .setField('query', {
+      query: {
+        constant_score: {
+          filter: {
+            ids: {
+              values: [anchorId],
+            },
+          },
+        },
+      },
+      language: 'lucene',
+    })
+    .setField('sort', sort)
+    .setField('trackTotalHits', false);
+  if (useNewFieldsApi) {
+    searchSource.removeField('fieldsFromSource');
+    searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
+  }
+  return searchSource;
 }
