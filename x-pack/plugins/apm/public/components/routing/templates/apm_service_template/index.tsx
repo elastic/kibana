@@ -18,6 +18,7 @@ import React from 'react';
 import {
   isIosAgentName,
   isJavaAgentName,
+  isJRubyAgent,
   isRumAgentName,
 } from '../../../../../common/agent_name';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -26,7 +27,6 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { Correlations } from '../../../app/correlations';
 import { SearchBar } from '../../../shared/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
 import { ApmMainTemplate } from '../apm_main_template';
@@ -108,10 +108,6 @@ function TemplateWithContext({
             <EuiFlexItem grow={false}>
               <AnalyzeDataButton />
             </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <Correlations />
-            </EuiFlexItem>
           </EuiFlexGroup>
         ),
       }}
@@ -123,8 +119,34 @@ function TemplateWithContext({
   );
 }
 
+export function isMetricsTabHidden({
+  agentName,
+  runtimeName,
+}: {
+  agentName?: string;
+  runtimeName?: string;
+}) {
+  return (
+    !agentName ||
+    isRumAgentName(agentName) ||
+    isJavaAgentName(agentName) ||
+    isIosAgentName(agentName) ||
+    isJRubyAgent(agentName, runtimeName)
+  );
+}
+
+export function isJVMsTabHidden({
+  agentName,
+  runtimeName,
+}: {
+  agentName?: string;
+  runtimeName?: string;
+}) {
+  return !(isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName));
+}
+
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
-  const { agentName } = useApmServiceContext();
+  const { agentName, runtimeName } = useApmServiceContext();
   const { config } = useApmPluginContext();
 
   const router = useApmRouter();
@@ -172,6 +194,8 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.dependenciesTabLabel', {
         defaultMessage: 'Dependencies',
       }),
+      hidden:
+        !agentName || isRumAgentName(agentName) || isIosAgentName(agentName),
     },
     {
       key: 'errors',
@@ -192,11 +216,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
-      hidden:
-        !agentName ||
-        isRumAgentName(agentName) ||
-        isJavaAgentName(agentName) ||
-        isIosAgentName(agentName),
+      hidden: isMetricsTabHidden({ agentName, runtimeName }),
     },
     {
       key: 'nodes',
@@ -207,7 +227,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
         defaultMessage: 'JVMs',
       }),
-      hidden: !isJavaAgentName(agentName),
+      hidden: isJVMsTabHidden({ agentName, runtimeName }),
     },
     {
       key: 'service-map',
