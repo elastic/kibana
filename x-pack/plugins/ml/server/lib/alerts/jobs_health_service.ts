@@ -18,6 +18,7 @@ import { GetGuards } from '../../shared_services/shared_services';
 import {
   AnomalyDetectionJobsHealthAlertContext,
   DelayedDataResponse,
+  JobsErrorsResponse,
   JobsHealthExecutorOptions,
   MmlTestResponse,
   NotStartedDatafeedResponse,
@@ -226,13 +227,13 @@ export function jobsHealthServiceProvider(
 
       const getFormattedDate = await getDateFormatter();
 
-      const annotations: DelayedDataResponse[] = (
+      return (
         await annotationService.getDelayedDataAnnotations({
           jobIds: resultJobIds,
           earliestMs,
         })
       )
-        .map<DelayedDataResponse>((v) => {
+        .map((v) => {
           const match = v.annotation.match(/Datafeed has missed (\d+)\s/);
           const missedDocsCount = match ? parseInt(match[1], 10) : 0;
           return {
@@ -265,8 +266,6 @@ export function jobsHealthServiceProvider(
             end_timestamp: getFormattedDate(v.end_timestamp),
           };
         });
-
-      return annotations;
     },
     /**
      * Retrieves a list of the latest errors per jobs.
@@ -274,7 +273,10 @@ export function jobsHealthServiceProvider(
      * @param previousStartedAt Time of the previous rule execution. As we intend to notify
      *                          about an error only once, limit the scope of the errors search.
      */
-    async getErrorsReport(jobIds: string[], previousStartedAt: Date) {
+    async getErrorsReport(
+      jobIds: string[],
+      previousStartedAt: Date
+    ): Promise<JobsErrorsResponse[]> {
       const getFormattedDate = await getDateFormatter();
 
       return (
