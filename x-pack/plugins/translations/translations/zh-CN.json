@@ -25343,12 +25343,6 @@
     "xpack.upgradeAssistant.esDeprecationStats.criticalDeprecationsTitle": "紧急",
     "xpack.upgradeAssistant.esDeprecationStats.loadingText": "正在加载 Elasticsearch 弃用统计……",
     "xpack.upgradeAssistant.esDeprecationStats.statsTitle": "Elasticsearch",
-<<<<<<< HEAD
-    "xpack.upgradeAssistant.esDeprecationStats.totalDeprecationsTitle": "弃用",
-    "xpack.upgradeAssistant.esDeprecationStats.viewDeprecationsLinkText": "查看弃用",
-=======
-    "xpack.upgradeAssistant.esDeprecationStats.totalDeprecationsTooltip": "此集群正在使用 {clusterCount} 个已弃用集群设置和 {indexCount} 个已弃用的索引设置",
->>>>>>> 8f7e10aaba344e28be2622b85441be4cff297717
     "xpack.upgradeAssistant.kibanaDeprecationErrors.loadingErrorDescription": "请在 Kibana 服务器日志中查看错误。",
     "xpack.upgradeAssistant.kibanaDeprecationErrors.loadingErrorTitle": "无法检索 Kibana 弃用",
     "xpack.upgradeAssistant.kibanaDeprecationErrors.pluginErrorDescription": "请在 Kibana 服务器日志中查看错误。",
@@ -25372,22 +25366,8 @@
     "xpack.upgradeAssistant.kibanaDeprecationStats.loadingErrorMessage": "检索 Kibana 弃用时发生错误。",
     "xpack.upgradeAssistant.kibanaDeprecationStats.loadingText": "正在加载 Kibana 弃用统计……",
     "xpack.upgradeAssistant.kibanaDeprecationStats.statsTitle": "Kibana",
-<<<<<<< HEAD
-    "xpack.upgradeAssistant.kibanaDeprecationStats.totalDeprecationsLabel": "Kibana 总共有 {totalDeprecations} 个弃用",
-    "xpack.upgradeAssistant.kibanaDeprecationStats.totalDeprecationsTitle": "弃用",
-    "xpack.upgradeAssistant.kibanaDeprecationStats.viewDeprecationsLinkText": "查看弃用",
     "xpack.upgradeAssistant.noDeprecationsPrompt.nextStepsDescription": "查看{overviewButton}以了解其他 Stack 弃用。",
     "xpack.upgradeAssistant.noDeprecationsPrompt.overviewLinkText": "“概览”页面",
-    "xpack.upgradeAssistant.overview.deprecationLogging.loadingLabel": "正在检索日志记录状态",
-    "xpack.upgradeAssistant.overview.deprecationLoggingDescription": "启用{deprecationLoggingLink}以查看是否正在使用升级到 Elastic {nextMajor} 后将不再可用的已弃用功能。",
-    "xpack.upgradeAssistant.overview.deprecationLoggingTitle": "弃用日志",
-    "xpack.upgradeAssistant.overview.deprecationLogs.disableButtonLabel": "禁用弃用日志记录",
-=======
-    "xpack.upgradeAssistant.noDeprecationsPrompt.description": "您的配置是最新的。",
-    "xpack.upgradeAssistant.noDeprecationsPrompt.nextStepsDescription": "查看{overviewButton}以了解其他 Stack 弃用。",
-    "xpack.upgradeAssistant.noDeprecationsPrompt.overviewLinkText": "“概览”页面",
-    "xpack.upgradeAssistant.noDeprecationsPrompt.title": "准备好升级！",
->>>>>>> 8f7e10aaba344e28be2622b85441be4cff297717
     "xpack.upgradeAssistant.overview.deprecationLogs.disabledToastMessage": "不记录弃用的操作。",
     "xpack.upgradeAssistant.overview.deprecationLogs.enabledToastMessage": "记录弃用的操作。",
     "xpack.upgradeAssistant.overview.deprecationLogs.fetchErrorMessage": "无法检索日志记录信息。",

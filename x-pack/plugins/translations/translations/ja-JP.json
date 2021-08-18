@@ -24779,12 +24779,6 @@
     "xpack.upgradeAssistant.esDeprecationStats.criticalDeprecationsTitle": "重大",
     "xpack.upgradeAssistant.esDeprecationStats.loadingText": "Elasticsearchの廃止統計情報を読み込んでいます...",
     "xpack.upgradeAssistant.esDeprecationStats.statsTitle": "Elasticsearch",
-<<<<<<< HEAD
-    "xpack.upgradeAssistant.esDeprecationStats.totalDeprecationsTitle": "廃止予定",
-    "xpack.upgradeAssistant.esDeprecationStats.viewDeprecationsLinkText": "廃止予定を表示",
-=======
-    "xpack.upgradeAssistant.esDeprecationStats.totalDeprecationsTooltip": "このクラスターは{clusterCount}個の廃止予定のクラスター設定と{indexCount}個の廃止予定のインデックス設定を使用しています。",
->>>>>>> 8f7e10aaba344e28be2622b85441be4cff297717
     "xpack.upgradeAssistant.kibanaDeprecationErrors.loadingErrorDescription": "エラーについては、Kibanaサーバーログを確認してください。",
     "xpack.upgradeAssistant.kibanaDeprecationErrors.loadingErrorTitle": "Kibana廃止予定を取得できませんでした",
     "xpack.upgradeAssistant.kibanaDeprecationErrors.pluginErrorDescription": "エラーについては、Kibanaサーバーログを確認してください。",
@@ -24808,22 +24802,8 @@
     "xpack.upgradeAssistant.kibanaDeprecationStats.loadingErrorMessage": "Kibana廃止予定の取得中にエラーが発生しました。",
     "xpack.upgradeAssistant.kibanaDeprecationStats.loadingText": "Kibana廃止予定統計情報を読み込んでいます…",
     "xpack.upgradeAssistant.kibanaDeprecationStats.statsTitle": "Kibana",
-<<<<<<< HEAD
-    "xpack.upgradeAssistant.kibanaDeprecationStats.totalDeprecationsLabel": "Kibanaには合計{totalDeprecations}個の廃止予定があります",
-    "xpack.upgradeAssistant.kibanaDeprecationStats.totalDeprecationsTitle": "廃止予定",
-    "xpack.upgradeAssistant.kibanaDeprecationStats.viewDeprecationsLinkText": "廃止予定を表示",
     "xpack.upgradeAssistant.noDeprecationsPrompt.nextStepsDescription": "他のスタック廃止予定については、{overviewButton}を確認してください。",
     "xpack.upgradeAssistant.noDeprecationsPrompt.overviewLinkText": "概要ページ",
-    "xpack.upgradeAssistant.overview.deprecationLogging.loadingLabel": "ロギング状態を取得しています",
-    "xpack.upgradeAssistant.overview.deprecationLoggingDescription": "{deprecationLoggingLink}を有効にすると、Elastic {nextMajor}にアップグレードした後に使用できない廃止予定の機能を使用しているかどうかがわかります。",
-    "xpack.upgradeAssistant.overview.deprecationLoggingTitle": "廃止ログ",
-    "xpack.upgradeAssistant.overview.deprecationLogs.disableButtonLabel": "廃止ログを無効にする",
-=======
-    "xpack.upgradeAssistant.noDeprecationsPrompt.description": "構成は最新です。",
-    "xpack.upgradeAssistant.noDeprecationsPrompt.nextStepsDescription": "他のスタック廃止予定については、{overviewButton}を確認してください。",
-    "xpack.upgradeAssistant.noDeprecationsPrompt.overviewLinkText": "概要ページ",
-    "xpack.upgradeAssistant.noDeprecationsPrompt.title": "アップグレードする準備ができました。",
->>>>>>> 8f7e10aaba344e28be2622b85441be4cff297717
     "xpack.upgradeAssistant.overview.deprecationLogs.disabledToastMessage": "廃止予定のアクションをログに出力しません。",
     "xpack.upgradeAssistant.overview.deprecationLogs.enabledToastMessage": "廃止予定のアクションをログに出力します。",
     "xpack.upgradeAssistant.overview.deprecationLogs.fetchErrorMessage": "ログ情報を取得できませんでした。",
