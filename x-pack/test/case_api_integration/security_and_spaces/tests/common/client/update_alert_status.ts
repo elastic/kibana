@@ -160,7 +160,7 @@ export default ({ getService }: FtrProviderContext): void => {
         CaseStatuses.closed
       );
       expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
-        CaseStatuses['in-progress']
+        'acknowledged'
       );
     });
   });

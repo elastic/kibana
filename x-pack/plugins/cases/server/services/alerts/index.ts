@@ -10,11 +10,12 @@ import { isEmpty } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { Logger } from 'kibana/server';
-import { MAX_ALERTS_PER_SUB_CASE } from '../../../common';
+import { CaseStatuses, MAX_ALERTS_PER_SUB_CASE } from '../../../common';
 import { AlertInfo, createCaseError } from '../../common';
 import { UpdateAlertRequest } from '../../client/alerts/types';
 import { AlertsClient } from '../../../../rule_registry/server';
 import { Alert } from './types';
+import { STATUS_VALUES } from '../../../../rule_registry/common/technical_rule_data_field_names';
 
 export type AlertServiceContract = PublicMethodsOf<AlertService>;
 
@@ -50,8 +51,13 @@ export class AlertService {
       }
 
       const updatedAlerts = await Promise.allSettled(
-        alertsToUpdate.map(({ id, index, status }) =>
-          this.alertsClient?.update({ id, index, status, _version: undefined })
+        alertsToUpdate.map((alert) =>
+          this.alertsClient?.update({
+            id: alert.id,
+            index: alert.index,
+            status: translateStatus({ alert, logger }),
+            _version: undefined,
+          })
         )
       );
 
@@ -126,4 +132,28 @@ export class AlertService {
       });
     }
   }
+}
+
+function translateStatus({
+  alert,
+  logger,
+}: {
+  alert: UpdateAlertRequest;
+  logger: Logger;
+}): STATUS_VALUES {
+  const translatedStatuses: Record<string, STATUS_VALUES> = {
+    [CaseStatuses.open]: 'open',
+    [CaseStatuses['in-progress']]: 'acknowledged',
+    [CaseStatuses.closed]: 'closed',
+  };
+
+  const translatedStatus = translatedStatuses[alert.status];
+  if (!translatedStatus) {
+    logger.error(
+      `Unable to translate case status ${alert.status} during alert update: ${JSON.stringify(
+        alert
+      )}`
+    );
+  }
+  return translatedStatus ?? 'open';
 }

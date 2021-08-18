@@ -653,7 +653,7 @@ export default ({ getService }: FtrProviderContext): void => {
             CaseStatuses.closed
           );
           expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
-            CaseStatuses['in-progress']
+            'acknowledged'
           );
         });
       });
@@ -846,7 +846,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .send(getQuerySignalIds([alert._id]))
             .expect(200);
 
-          expect(updatedAlert.hits.hits[0]._source?.signal.status).eql('in-progress');
+          expect(updatedAlert.hits.hits[0]._source?.signal.status).eql('acknowledged');
         });
 
         it('does NOT updates alert status when the status is updated and syncAlerts=false', async () => {
@@ -970,7 +970,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .send(getQuerySignalIds([alert._id]))
             .expect(200);
 
-          expect(updatedAlert.hits.hits[0]._source?.signal.status).eql('in-progress');
+          expect(updatedAlert.hits.hits[0]._source?.signal.status).eql('acknowledged');
         });
 
         it('it does NOT updates alert status when syncAlerts is turned off', async () => {

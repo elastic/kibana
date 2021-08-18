@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
 import { CaseStatuses } from '../../../common';
 import { AlertService, AlertServiceContract } from '.';
 import { loggingSystemMock } from 'src/core/server/mocks';
@@ -15,23 +14,22 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 
 describe('updateAlertsStatus', () => {
   const logger = loggingSystemMock.create().get('case');
+  let alertsClient: jest.Mocked<PublicMethodsOf<AlertsClient>>;
+  let alertService: AlertServiceContract;
+
+  beforeEach(async () => {
+    alertsClient = ruleRegistryMocks.createAlertsClientMock.create();
+    alertService = new AlertService(alertsClient);
+    jest.restoreAllMocks();
+  });
 
   describe('happy path', () => {
-    let alertsClient: jest.Mocked<PublicMethodsOf<AlertsClient>>;
-    let alertService: AlertServiceContract;
     const args = {
       alerts: [{ id: 'alert-id-1', index: '.siem-signals', status: CaseStatuses.closed }],
-      request: {} as KibanaRequest,
       logger,
     };
 
-    beforeEach(async () => {
-      alertsClient = ruleRegistryMocks.createAlertsClientMock.create();
-      alertService = new AlertService(alertsClient);
-      jest.restoreAllMocks();
-    });
-
-    test('it update the status of the alert correctly', async () => {
+    it('updates the status of the alert correctly', async () => {
       await alertService.updateAlertsStatus(args);
 
       expect(alertsClient.update).toHaveBeenCalledWith({
@@ -41,15 +39,41 @@ describe('updateAlertsStatus', () => {
       });
     });
 
-    describe('unhappy path', () => {
-      it('ignores empty indices', async () => {
-        expect(
-          await alertService.updateAlertsStatus({
-            alerts: [{ id: 'alert-id-1', index: '', status: CaseStatuses.closed }],
-            logger,
-          })
-        ).toBeUndefined();
+    it('translates the in-progress status to acknowledged', async () => {
+      await alertService.updateAlertsStatus({
+        alerts: [{ id: 'alert-id-1', index: '.siem-signals', status: CaseStatuses['in-progress'] }],
+        logger,
       });
+
+      expect(alertsClient.update).toHaveBeenCalledWith({
+        id: 'alert-id-1',
+        index: '.siem-signals',
+        status: 'acknowledged',
+      });
+    });
+
+    it('defaults an unknown status to open', async () => {
+      await alertService.updateAlertsStatus({
+        alerts: [{ id: 'alert-id-1', index: '.siem-signals', status: 'bananas' as CaseStatuses }],
+        logger,
+      });
+
+      expect(alertsClient.update).toHaveBeenCalledWith({
+        id: 'alert-id-1',
+        index: '.siem-signals',
+        status: 'open',
+      });
+    });
+  });
+
+  describe('unhappy path', () => {
+    it('ignores empty indices', async () => {
+      expect(
+        await alertService.updateAlertsStatus({
+          alerts: [{ id: 'alert-id-1', index: '', status: CaseStatuses.closed }],
+          logger,
+        })
+      ).toBeUndefined();
     });
   });
 });
