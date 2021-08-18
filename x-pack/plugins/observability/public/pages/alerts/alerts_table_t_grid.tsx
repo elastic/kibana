@@ -15,14 +15,14 @@ import {
   ALERT_DURATION as ALERT_DURATION_TYPED,
   ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
   ALERT_STATUS as ALERT_STATUS_TYPED,
-  ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
+  ALERT_REASON as ALERT_REASON_TYPED,
   ALERT_RULE_CONSUMER,
 } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
   ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
   ALERT_STATUS as ALERT_STATUS_NON_TYPED,
-  ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
+  ALERT_REASON as ALERT_REASON_NON_TYPED,
   TIMESTAMP,
   // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
@@ -41,7 +41,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback } from 'react';
-
 import { get } from 'lodash';
 import { useGetUserAlertsPermissions } from '../../hooks/use_alert_permission';
 import type { TimelinesUIStart, TGridType, SortDirection } from '../../../../timelines/public';
@@ -68,7 +67,7 @@ const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
 const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
-const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
+const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 
 interface AlertsTableTGridProps {
   indexName: string;
@@ -77,6 +76,7 @@ interface AlertsTableTGridProps {
   kuery: string;
   status: string;
   setRefetch: (ref: () => void) => void;
+  addToQuery: (value: string) => void;
 }
 
 interface ObservabilityActionsProps extends ActionProps {
@@ -113,10 +113,10 @@ export const columns: Array<
   {
     columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate('xpack.observability.alertsTGrid.statusColumnDescription', {
-      defaultMessage: 'Status',
+      defaultMessage: 'Alert Status',
     }),
     id: ALERT_STATUS,
-    initialWidth: 79,
+    initialWidth: 110,
   },
   {
     columnHeaderType: 'not-filtered',
@@ -147,8 +147,8 @@ export const columns: Array<
     displayAsText: i18n.translate('xpack.observability.alertsTGrid.reasonColumnDescription', {
       defaultMessage: 'Reason',
     }),
+    id: ALERT_REASON,
     linkField: '*',
-    id: ALERT_RULE_NAME,
   },
 ];
 
@@ -299,7 +299,7 @@ function ObservabilityActions({
 }
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
-  const { indexName, rangeFrom, rangeTo, kuery, status, setRefetch } = props;
+  const { indexName, rangeFrom, rangeTo, kuery, status, setRefetch, addToQuery } = props;
   const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
@@ -343,7 +343,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       type,
       columns,
       deletedEventIds: [],
-      defaultCellActions: getDefaultCellActions({ enableFilterActions: false }),
+      defaultCellActions: getDefaultCellActions({ addToQuery }),
       end: rangeTo,
       filters: [],
       indexNames: [indexName],
@@ -388,6 +388,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     rangeTo,
     setRefetch,
     status,
+    addToQuery,
   ]);
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const { observabilityRuleTypeRegistry } = usePluginContext();

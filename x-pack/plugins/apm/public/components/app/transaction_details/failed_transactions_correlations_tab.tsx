@@ -24,7 +24,7 @@ import { FailedTransactionsCorrelations } from '../correlations/failed_transacti
 
 import type { TabContentProps } from './types';
 
-function FailedTransactionsCorrelationsTab({}: TabContentProps) {
+function FailedTransactionsCorrelationsTab({ onFilter }: TabContentProps) {
   const license = useLicenseContext();
 
   const hasActivePlatinumLicense = isActivePlatinumLicense(license);
@@ -40,7 +40,7 @@ function FailedTransactionsCorrelationsTab({}: TabContentProps) {
   useTrackMetric({ ...metric, delay: 15000 });
 
   return hasActivePlatinumLicense ? (
-    <FailedTransactionsCorrelations />
+    <FailedTransactionsCorrelations onFilter={onFilter} />
   ) : (
     <LicensePrompt
       text={i18n.translate(
