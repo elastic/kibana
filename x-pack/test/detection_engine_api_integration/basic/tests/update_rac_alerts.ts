@@ -37,12 +37,10 @@ export default ({ getService }: FtrProviderContext) => {
           .post(RAC_ALERTS_BULK_UPDATE_URL)
           .set('kbn-xsrf', 'true')
           .send({ ids: ['123'], status: 'open', index: '.siem-signals-default' });
-
         // remove any server generated items that are indeterministic
         delete body.took;
         expect(body).to.eql(getSignalStatusEmptyResponse());
       });
-
       it('should not give errors when querying and the signals index does exist and is empty', async () => {
         await createSignalsIndex(supertest);
         await supertest
@@ -146,6 +144,37 @@ export default ({ getService }: FtrProviderContext) => {
           (hit) => hit._source?.signal?.status === 'closed'
         );
         expect(everySignalClosed).to.eql(true);
+      });
+
+      it('should be able mark 10 signals as acknowledged immediately and they all should be acknowledged', async () => {
+        const rule = getRuleForSignalTesting(['auditbeat-*']);
+        const { id } = await createRule(supertest, rule);
+        await waitForRuleSuccessOrStatus(supertest, id);
+        await waitForSignalsToBePresent(supertest, 10, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, [id]);
+        const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
+
+        // set all of the signals to the state of acknowledged. There is no reason to use a waitUntil here
+        // as this route intentionally has a waitFor within it and should only return when the query has
+        // the data.
+        await supertest
+          .post(RAC_ALERTS_BULK_UPDATE_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ ids: signalIds, status: 'acknowledged', index: '.siem-signals-default' })
+          .expect(200);
+
+        const {
+          body: acknowledgedSignals,
+        }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
+          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getQuerySignalIds(signalIds))
+          .expect(200);
+
+        const everyAcknowledgedSignal = acknowledgedSignals.hits.hits.every(
+          (hit) => hit._source?.signal?.status === 'acknowledged'
+        );
+        expect(everyAcknowledgedSignal).to.eql(true);
       });
     });
   });

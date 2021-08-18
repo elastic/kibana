@@ -16,8 +16,6 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
-import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
 import { useUpgradeAssistantHref } from '../../shared/Links/kibana';
 import { SearchBar } from '../../shared/search_bar';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
@@ -159,9 +157,6 @@ export function ServiceInventory() {
     query: { environment, kuery },
   } = useApmParams('/services');
 
-  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
-    kuery,
-  });
   const {
     mainStatisticsData,
     mainStatisticsStatus,
@@ -195,11 +190,6 @@ export function ServiceInventory() {
         {displayMlCallout && (
           <EuiFlexItem>
             <MLCallout onDismiss={() => setUserHasDismissedCallout(true)} />
-          </EuiFlexItem>
-        )}
-        {fallbackToTransactions && (
-          <EuiFlexItem>
-            <AggregatedTransactionsCallout />
           </EuiFlexItem>
         )}
         <EuiFlexItem>
