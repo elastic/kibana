@@ -26,6 +26,7 @@ import { SerializedPolicy } from '../../../../../common/types';
 
 import { useFormContext, useFormData } from '../../../../shared_imports';
 
+import { i18nTexts } from '../i18n_texts';
 import { FormInternal } from '../types';
 
 interface Props {
@@ -55,17 +56,22 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, c
    */
   const [policy, setPolicy] = useState<undefined | null | SerializedPolicy>(undefined);
 
-  const { validate: validateForm } = useFormContext();
+  const { validate: validateForm, getErrors } = useFormContext();
   const [, getFormData] = useFormData<FormInternal>();
 
   const updatePolicy = useCallback(async () => {
     setPolicy(undefined);
-    if (await validateForm()) {
+    const isFormValid = await validateForm();
+    const errorMessages = getErrors();
+    const isOnlyMissingPolicyName =
+      errorMessages.length === 1 &&
+      errorMessages[0] === i18nTexts.editPolicy.errors.policyNameRequiredMessage;
+    if (isFormValid || isOnlyMissingPolicyName) {
       setPolicy(prettifyFormJson(getFormData()));
     } else {
       setPolicy(null);
     }
-  }, [setPolicy, getFormData, validateForm]);
+  }, [setPolicy, getFormData, validateForm, getErrors]);
 
   useEffect(() => {
     updatePolicy();
@@ -79,6 +85,7 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, c
     case null:
       content = (
         <EuiCallOut
+          data-test-subj="policyRequestInvalidAlert"
           iconType="alert"
           color="danger"
           title={i18n.translate(
@@ -118,7 +125,7 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, c
             </p>
           </EuiText>
           <EuiSpacer />
-          <EuiCodeBlock language="json" isCopyable>
+          <EuiCodeBlock language="json" isCopyable data-test-subj="policyRequestJson">
             {request}
           </EuiCodeBlock>
         </>
@@ -150,7 +157,12 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, c
       <EuiFlyoutBody>{content}</EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <EuiButtonEmpty iconType="cross" onClick={close} flush="left">
+        <EuiButtonEmpty
+          iconType="cross"
+          onClick={close}
+          flush="left"
+          data-test-subj="policyRequestClose"
+        >
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.policyJsonFlyout.closeButtonLabel"
             defaultMessage="Close"

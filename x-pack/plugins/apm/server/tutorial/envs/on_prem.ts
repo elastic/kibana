@@ -21,7 +21,7 @@ import {
   createPhpAgentInstructions,
   createRackAgentInstructions,
   createRailsAgentInstructions,
-} from '../instructions/apm_agent_instructions';
+} from '../../../common/tutorial/instructions/apm_agent_instructions';
 import {
   createDownloadServerDeb,
   createDownloadServerOsx,
@@ -30,7 +30,7 @@ import {
   createStartServerUnix,
   createStartServerUnixSysv,
   createWindowsServerInstructions,
-} from '../instructions/apm_server_instructions';
+} from '../../../common/tutorial/instructions/apm_server_instructions';
 
 export function onPremInstructions({
   errorIndices,

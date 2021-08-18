@@ -894,6 +894,14 @@ export interface DeprecationInfo {
     url: string;
 }
 
+// @public
+export interface DeprecationsClient {
+    // Warning: (ae-forgotten-export) The symbol "DomainDeprecationDetails" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
+}
+
 // Warning: (ae-missing-release-tag) "DeprecationsDetails" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -2102,6 +2110,9 @@ export interface RequestHandlerContext {
         uiSettings: {
             client: IUiSettingsClient;
         };
+        deprecations: {
+            client: DeprecationsClient;
+        };
     };
 }
 
@@ -2517,7 +2528,7 @@ export class SavedObjectsErrorHelpers {
     // (undocumented)
     static createGenericNotFoundError(type?: string | null, id?: string | null): DecoratedError;
     // (undocumented)
-    static createGenericNotFoundEsUnavailableError(type: string, id: string): DecoratedError;
+    static createGenericNotFoundEsUnavailableError(type?: string | null, id?: string | null): DecoratedError;
     // (undocumented)
     static createIndexAliasNotFoundError(alias: string): DecoratedError;
     // (undocumented)

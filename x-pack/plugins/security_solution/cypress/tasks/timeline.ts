@@ -24,6 +24,7 @@ import {
   ID_FIELD,
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
+  ID_HOVER_ACTION_OVERFLOW_BTN,
   NOTES_TAB_BUTTON,
   NOTES_TEXT_AREA,
   OPEN_TIMELINE_ICON,
@@ -63,6 +64,7 @@ import {
   TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN,
   TIMELINE_COLLAPSED_ITEMS_BTN,
   TIMELINE_TAB_CONTENT_EQL,
+  TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 
@@ -131,15 +133,16 @@ export const goToQueryTab = () => {
 
 export const addNotesToTimeline = (notes: string) => {
   goToNotesTab().then(() => {
-    cy.get(NOTES_TEXT_AREA).type(notes);
-    cy.root()
-      .pipe(($el) => {
-        $el.find(ADD_NOTE_BUTTON).trigger('click');
-        return $el.find(NOTES_TAB_BUTTON).find('.euiBadge');
-      })
-      .should('have.text', '1');
-  });
+    cy.get(NOTES_TAB_BUTTON)
+      .find('.euiBadge__text')
+      .then(($el) => {
+        const notesCount = parseInt($el.text(), 10);
 
+        cy.get(NOTES_TEXT_AREA).type(notes);
+        cy.get(ADD_NOTE_BUTTON).trigger('click');
+        cy.get(`${NOTES_TAB_BUTTON} .euiBadge`).should('have.text', `${notesCount + 1}`);
+      });
+  });
   goToQueryTab();
   goToNotesTab();
 };
@@ -188,7 +191,14 @@ export const attachTimelineToExistingCase = () => {
   cy.get(ATTACH_TIMELINE_TO_EXISTING_CASE_ICON).click({ force: true });
 };
 
+const clickIdHoverActionOverflowButton = () => {
+  cy.get(ID_HOVER_ACTION_OVERFLOW_BTN).should('exist');
+
+  cy.get(ID_HOVER_ACTION_OVERFLOW_BTN).click({ force: true });
+};
+
 export const clickIdToggleField = () => {
+  clickIdHoverActionOverflowButton();
   cy.get(ID_HEADER_FIELD).should('not.exist');
 
   cy.get(ID_TOGGLE_FIELD).click({
@@ -293,7 +303,15 @@ export const unpinFirstEvent = () => {
   cy.get(PIN_EVENT).first().click({ force: true });
 };
 
+const clickTimestampHoverActionOverflowButton = () => {
+  cy.get(TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN).should('exist');
+
+  cy.get(TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN).click({ force: true });
+};
+
 export const clickTimestampToggleField = () => {
+  clickTimestampHoverActionOverflowButton();
+
   cy.get(TIMESTAMP_TOGGLE_FIELD).should('exist');
 
   cy.get(TIMESTAMP_TOGGLE_FIELD).click({ force: true });
