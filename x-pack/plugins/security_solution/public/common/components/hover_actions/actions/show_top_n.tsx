@@ -29,7 +29,6 @@ const SHOW_TOP = (fieldName: string) =>
   });
 
 interface Props {
-  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
   enablePopOver?: boolean;
   field: string;
@@ -66,7 +65,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
         : SourcererScopeName.default;
     const { browserFields, indexPattern } = useSourcererScope(activeScope);
 
-    const button = useMemo(
+    const basicButton = useMemo(
       () =>
         Component ? (
           <Component
@@ -92,6 +91,30 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
       [Component, field, onClick]
     );
 
+    const button = useMemo(
+      () =>
+        showTooltip && !showTopN ? (
+          <EuiToolTip
+            content={
+              <TooltipWithKeyboardShortcut
+                additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
+                  field,
+                  value,
+                })}
+                content={SHOW_TOP(field)}
+                shortcut={SHOW_TOP_N_KEYBOARD_SHORTCUT}
+                showShortcut={ownFocus}
+              />
+            }
+          >
+            {basicButton}
+          </EuiToolTip>
+        ) : (
+          basicButton
+        ),
+      [basicButton, field, ownFocus, showTooltip, showTopN, value]
+    );
+
     const topNPannel = useMemo(
       () => (
         <StatefulTopN
@@ -110,7 +133,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
     return showTopN ? (
       enablePopOver ? (
         <EuiPopover
-          button={button}
+          button={basicButton}
           isOpen={showTopN}
           closePopover={onClick}
           panelClassName="withHoverActions__popover"
@@ -121,22 +144,6 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
       ) : (
         topNPannel
       )
-    ) : showTooltip ? (
-      <EuiToolTip
-        content={
-          <TooltipWithKeyboardShortcut
-            additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
-              field,
-              value,
-            })}
-            content={SHOW_TOP(field)}
-            shortcut={SHOW_TOP_N_KEYBOARD_SHORTCUT}
-            showShortcut={ownFocus}
-          />
-        }
-      >
-        {button}
-      </EuiToolTip>
     ) : (
       button
     );
