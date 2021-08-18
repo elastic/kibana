@@ -21,7 +21,7 @@ import { useSourcererScope } from '../../containers/sourcerer';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
 
-interface UseHoverActionItemsProps {
+export interface UseHoverActionItemsProps {
   dataProvider?: DataProvider | DataProvider[];
   dataType?: string;
   defaultFocusedButtonRef: React.MutableRefObject<HTMLButtonElement | null>;
@@ -43,7 +43,7 @@ interface UseHoverActionItemsProps {
   values?: string[] | string | null;
 }
 
-interface UseHoverActionItems {
+export interface UseHoverActionItems {
   overflowActionItems: JSX.Element[];
   allActionItems: JSX.Element[];
 }
@@ -116,7 +116,6 @@ export const useHoverActionItems = ({
    */
   const showFilters =
     values != null && (enableOverflowButton || (!showTopN && !enableOverflowButton));
-
   const allItems = useMemo(
     () =>
       [
