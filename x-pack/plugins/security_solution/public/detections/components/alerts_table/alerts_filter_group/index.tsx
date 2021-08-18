@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import * as i18n from '../translations';
 
@@ -41,6 +41,13 @@ const AlertsTableFilterGroupComponent: React.FC<Props> = ({
     },
   ];
 
+  const onChange = useCallback(
+    (id: string) => {
+      onFilterGroupChanged(id as Status);
+    },
+    [onFilterGroupChanged]
+  );
+
   return (
     <EuiButtonGroup
       legend="filter status"
@@ -48,7 +55,7 @@ const AlertsTableFilterGroupComponent: React.FC<Props> = ({
       options={options}
       idSelected={status}
       data-test-subj="alerts-table-filter-group"
-      onChange={(id) => onFilterGroupChanged(id as Status)}
+      onChange={onChange}
     />
   );
 };
