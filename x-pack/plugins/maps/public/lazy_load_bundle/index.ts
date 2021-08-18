@@ -26,7 +26,7 @@ interface LazyLoadedMapModules {
   ) => Embeddable<MapEmbeddableInput, MapEmbeddableOutput>;
   getIndexPatternService: () => IndexPatternsContract;
   getMapsCapabilities: () => any;
-  renderApp: (params: AppMountParameters) => Promise<() => void>;
+  renderApp: (params: AppMountParameters, AppUsageTracker: React.FC) => Promise<() => void>;
   createSecurityLayerDescriptors: (
     indexPatternId: string,
     indexPatternTitle: string
