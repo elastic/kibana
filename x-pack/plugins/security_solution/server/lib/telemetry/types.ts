@@ -172,10 +172,8 @@ export interface GetEndpointListResponse {
   data: EndpointExceptionListItem[];
 }
 
-export type ListData = EndpointExceptionListItem[] | TrustedApp[];
-
 export interface ListTemplate {
-  trusted_application: ListData;
-  endpoint_exception: ListData;
-  endpoint_event_filter: ListData;
+  trusted_application: TrustedApp[];
+  endpoint_exception: EndpointExceptionListItem[];
+  endpoint_event_filter: EndpointExceptionListItem[];
 }

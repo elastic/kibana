@@ -7,10 +7,10 @@
 
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { TrustedApp } from '../../../common/endpoint/types';
 import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 import { EndpointExceptionListItem, ListTemplate } from './types';
-import { LIST_TRUSTED_APP, LIST_ENDPOINT_EXCEPTION, LIST_ENDPOINT_EVENT_FILTER } from './constants';
-import { ListData } from '../../../common/endpoint/types';
+import { LIST_ENDPOINT_EXCEPTION, LIST_ENDPOINT_EVENT_FILTER } from './constants';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -107,25 +107,16 @@ export const exceptionListItemToEndpointEntry = (exceptionListItem: ExceptionLis
   } as EndpointExceptionListItem;
 };
 
-/**
- * Templates list item to schema
- *
- * @param listData
- * @param listType
- * @returns
- */
-export const templateListData = (listData: ListData, listType: string) => {
+export const templateEndpointExceptions = (
+  listData: EndpointExceptionListItem[],
+  listType: string
+) => {
   return listData.map((item) => {
     const template: ListTemplate = {
       trusted_application: [],
       endpoint_exception: [],
       endpoint_event_filter: [],
     };
-
-    if (listType === LIST_TRUSTED_APP) {
-      template.trusted_application.push(item);
-      return template;
-    }
 
     if (listType === LIST_ENDPOINT_EXCEPTION) {
       template.endpoint_exception.push(item);
@@ -138,5 +129,18 @@ export const templateListData = (listData: ListData, listType: string) => {
     }
 
     return null;
+  });
+};
+
+export const templateTrustedApps = (listData: TrustedApp[]) => {
+  return listData.map((item) => {
+    const template: ListTemplate = {
+      trusted_application: [],
+      endpoint_exception: [],
+      endpoint_event_filter: [],
+    };
+
+    template.trusted_application.push(item);
+    return template;
   });
 };
