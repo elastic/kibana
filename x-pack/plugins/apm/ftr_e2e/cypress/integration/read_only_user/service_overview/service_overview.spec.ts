@@ -18,15 +18,10 @@ const baseUrl = url.format({
 });
 
 describe('Service Overview', () => {
-  before(() => {
-    esArchiverLoad('apm_8.0.0');
-  });
-  after(() => {
-    esArchiverUnload('apm_8.0.0');
-  });
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
+
   it('persists transaction type selected when clicking on Transactions tab', () => {
     cy.visit(baseUrl);
     cy.get('[data-test-subj="headerFilterTransactionType"]').should(

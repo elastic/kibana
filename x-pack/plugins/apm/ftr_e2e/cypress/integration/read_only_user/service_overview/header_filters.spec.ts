@@ -59,15 +59,10 @@ const apisToIntercept = [
 ];
 
 describe('Service overview - header filters', () => {
-  before(() => {
-    esArchiverLoad('apm_8.0.0');
-  });
-  after(() => {
-    esArchiverUnload('apm_8.0.0');
-  });
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
+
   describe('Filtering by transaction type', () => {
     it('changes url when selecting different value', () => {
       cy.visit(serviceOverviewHref);

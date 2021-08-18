@@ -47,12 +47,6 @@ const apisToIntercept = [
 ];
 
 describe('Service overview: Time Comparison', () => {
-  before(() => {
-    esArchiverLoad('apm_8.0.0');
-  });
-  after(() => {
-    esArchiverUnload('apm_8.0.0');
-  });
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
