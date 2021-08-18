@@ -10,16 +10,18 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const retry = getService('retry');
 
   describe('lens drag and drop tests', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/108352
-    describe.skip('basic drag and drop', () => {
+    describe('basic drag and drop', () => {
       it('should construct the basic split xy chart', async () => {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickVisType('lens');
         await PageObjects.lens.goToTimeRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.lens.dragFieldToWorkspace('@timestamp');
+        await retry.try(async () => {
+          await PageObjects.lens.dragFieldToWorkspace('@timestamp');
+        });
 
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
           '@timestamp'
