@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RoleType } from './create_role';
+import { RoleType } from '../helpers/create_role';
 
 export const readOnlyUserRole: RoleType = {
   elasticsearch: { cluster: [], indices: [], run_as: [] },

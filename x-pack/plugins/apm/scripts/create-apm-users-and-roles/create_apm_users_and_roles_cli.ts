@@ -62,7 +62,9 @@ async function init() {
     .map((u) => ` - ${u.username} / ${esPassword}`)
     .join('\n');
 
-  console.log(`\nYou can now login with:\n${credentials}`);
+  console.log(
+    `\nYou can now login to ${kibana.hostname} with:\n${credentials}`
+  );
 }
 
 init().catch((e) => {
