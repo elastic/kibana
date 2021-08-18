@@ -45,10 +45,10 @@ export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
   }
 );
 
-export const BULK_ACTION_IN_PROGRESS_SELECTED = i18n.translate(
-  'xpack.timelines.timeline.inProgressSelectedTitle',
+export const BULK_ACTION_ACKNOWLEDGED_SELECTED = i18n.translate(
+  'xpack.timelines.timeline.acknowledgedSelectedTitle',
   {
-    defaultMessage: 'Mark in progress',
+    defaultMessage: 'Mark as acknowledged',
   }
 );
 
@@ -73,11 +73,11 @@ export const OPENED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
       'Successfully opened {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
   });
 
-export const IN_PROGRESS_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
-  i18n.translate('xpack.timelines.timeline.inProgressAlertSuccessToastMessage', {
+export const ACKNOWLEDGED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
+  i18n.translate('xpack.timelines.timeline.acknowledgedAlertSuccessToastMessage', {
     values: { totalAlerts },
     defaultMessage:
-      'Successfully marked {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}} as in progress.',
+      'Successfully marked {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}} as acknowledged.',
   });
 
 export const CLOSED_ALERT_FAILED_TOAST = i18n.translate(
@@ -94,10 +94,10 @@ export const OPENED_ALERT_FAILED_TOAST = i18n.translate(
   }
 );
 
-export const IN_PROGRESS_ALERT_FAILED_TOAST = i18n.translate(
-  'xpack.timelines.timeline.inProgressAlertFailedToastMessage',
+export const ACKNOWLEDGED_ALERT_FAILED_TOAST = i18n.translate(
+  'xpack.timelines.timeline.acknowledgedAlertFailedToastMessage',
   {
-    defaultMessage: 'Failed to mark alert(s) as in progress',
+    defaultMessage: 'Failed to mark alert(s) as acknowledged',
   }
 );
 

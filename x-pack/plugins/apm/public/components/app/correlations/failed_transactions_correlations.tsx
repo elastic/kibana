@@ -45,7 +45,11 @@ import { useFailedTransactionsCorrelationsFetcher } from '../../../hooks/use_fai
 import { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 import { useApmParams } from '../../../hooks/use_apm_params';
 
-export function FailedTransactionsCorrelations() {
+export function FailedTransactionsCorrelations({
+  onFilter,
+}: {
+  onFilter: () => void;
+}) {
   const {
     core: { notifications, uiSettings },
   } = useApmPluginContext();
@@ -189,6 +193,7 @@ export function FailedTransactionsCorrelations() {
                   )}"`,
                 },
               });
+              onFilter();
               trackApmEvent({ metric: 'correlations_term_include_filter' });
             },
           },
@@ -211,6 +216,7 @@ export function FailedTransactionsCorrelations() {
                   )}"`,
                 },
               });
+              onFilter();
               trackApmEvent({ metric: 'correlations_term_exclude_filter' });
             },
           },
@@ -250,7 +256,7 @@ export function FailedTransactionsCorrelations() {
         },
       },
     ],
-    [history, trackApmEvent]
+    [history, onFilter, trackApmEvent]
   );
 
   useEffect(() => {
