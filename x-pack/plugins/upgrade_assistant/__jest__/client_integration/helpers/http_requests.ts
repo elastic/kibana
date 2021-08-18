@@ -7,7 +7,7 @@
 
 import sinon, { SinonFakeServer } from 'sinon';
 import { API_BASE_PATH } from '../../../common/constants';
-import { ESUpgradeStatus } from '../../../common/types';
+import { ESUpgradeStatus, DeprecationLoggingStatus } from '../../../common/types';
 import { ResponseError } from '../../../public/application/lib/api';
 
 // Register helpers to mock HTTP Requests
@@ -24,7 +24,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   };
 
   const setLoadDeprecationLoggingResponse = (
-    response?: { isEnabled: boolean },
+    response?: DeprecationLoggingStatus,
     error?: ResponseError
   ) => {
     const status = error ? error.statusCode || 400 : 200;
@@ -38,7 +38,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   };
 
   const setUpdateDeprecationLoggingResponse = (
-    response?: { isEnabled: boolean },
+    response?: DeprecationLoggingStatus,
     error?: ResponseError
   ) => {
     const status = error ? error.statusCode || 400 : 200;

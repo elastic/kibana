@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ResponseError } from '../lib/api';
+
 export enum LoadingState {
   Loading,
   Success,
@@ -27,3 +29,13 @@ export type DeprecationTableColumns =
   | 'isCritical';
 
 export type Status = 'in_progress' | 'complete' | 'idle' | 'error';
+export interface DeprecationLoggingPreviewProps {
+  isDeprecationLogIndexingEnabled: boolean;
+  onlyDeprecationLogWritingEnabled: boolean;
+  isLoading: boolean;
+  isUpdating: boolean;
+  fetchError: ResponseError | null;
+  updateError: ResponseError | undefined;
+  resendRequest: () => void;
+  toggleLogging: () => void;
+}

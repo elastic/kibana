@@ -198,6 +198,8 @@ export class DocLinksService {
           transportSettings: `${ELASTICSEARCH_DOCS}modules-network.html#common-network-settings`,
           typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
           deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
+          setupUpgrade: `${ELASTICSEARCH_DOCS}setup-upgrade.html`,
+          releaseHighlights: `${ELASTICSEARCH_DOCS}release-highlights.html`,
           deprecationInfo: `${ELASTICSEARCH_DOCS}migration-api-deprecation.html`,
         },
         siem: {

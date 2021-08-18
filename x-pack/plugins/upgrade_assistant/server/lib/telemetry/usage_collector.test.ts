@@ -31,6 +31,11 @@ describe('Upgrade Assistant Usage Collector', () => {
           logger: {
             deprecation: 'WARN',
           },
+          cluster: {
+            deprecation_indexing: {
+              enabled: 'true',
+            },
+          },
         },
       },
     });
