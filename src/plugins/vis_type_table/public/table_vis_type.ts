@@ -29,6 +29,7 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
   visConfig: {
     defaults: {
       perPage: 10,
+      autoFitRowToContent: false,
       showPartialRows: false,
       showMetricsAtAllLevels: false,
       showTotal: false,

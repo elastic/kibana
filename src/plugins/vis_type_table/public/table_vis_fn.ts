@@ -86,6 +86,11 @@ export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
       help: '',
       default: false,
     },
+    autoFitRowToContent: {
+      types: ['boolean'],
+      help: '',
+      default: false,
+    },
     showMetricsAtAllLevels: {
       types: ['boolean'],
       help: '',

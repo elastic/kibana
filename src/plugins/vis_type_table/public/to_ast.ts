@@ -59,6 +59,7 @@ export const toExpressionAst: VisToExpressionAst<TableVisParams> = (vis, params)
     // explicitly pass each param to prevent extra values trapping
     perPage: vis.params.perPage,
     percentageCol: vis.params.percentageCol,
+    autoFitRowToContent: vis.params.autoFitRowToContent,
     row: vis.params.row,
     showPartialRows: vis.params.showPartialRows,
     showMetricsAtAllLevels: vis.params.showMetricsAtAllLevels,

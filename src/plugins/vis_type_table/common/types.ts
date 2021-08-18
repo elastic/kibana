@@ -18,6 +18,7 @@ export enum AggTypes {
 
 export interface TableVisParams {
   perPage: number | '';
+  autoFitRowToContent: boolean;
   showPartialRows: boolean;
   showMetricsAtAllLevels: boolean;
   showToolbar: boolean;

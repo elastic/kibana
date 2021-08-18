@@ -51,6 +51,11 @@ export const TableVisBasic = memo(
       sortedRows,
     ]);
 
+    const rowHeightsOptions = useMemo(
+      () => (visConfig.autoFitRowToContent ? { defaultHeight: 'auto' } : null),
+      [visConfig.autoFitRowToContent]
+    );
+
     // Columns config
     const gridColumns = createGridColumns(
       columns,
@@ -117,6 +122,7 @@ export const TableVisBasic = memo(
             border: 'horizontal',
             header: 'underline',
           }}
+          rowHeightsOptions={rowHeightsOptions}
           rowCount={rows.length}
           columnVisibility={{
             visibleColumns: columns.map(({ id }) => id),
