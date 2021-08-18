@@ -30,10 +30,18 @@ const MyExceptionDetails = styled(EuiFlexItem)`
 
 const MyDescriptionListTitle = styled(EuiDescriptionListTitle)`
   width: 40%;
+  &&& {
+    margin-top: 0;
+  }
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const MyDescriptionListDescription = styled(EuiDescriptionListDescription)`
   width: 60%;
+  &&& {
+    margin-top: 0;
+  }
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const ExceptionDetailsComponent = ({
@@ -81,8 +89,10 @@ const ExceptionDetailsComponent = ({
           <EuiDescriptionList compressed type="column" data-test-subj="exceptionsViewerItemDetails">
             {descriptionListItems.map((item) => (
               <Fragment key={`${item.title}`}>
-                <MyDescriptionListTitle>{item.title}</MyDescriptionListTitle>
-                <MyDescriptionListDescription className="eui-textBreakWord">
+                <MyDescriptionListTitle className="eui-textTruncate">
+                  {item.title}
+                </MyDescriptionListTitle>
+                <MyDescriptionListDescription className="eui-textBreakWord eui-textTruncate">
                   {item.description}
                 </MyDescriptionListDescription>
               </Fragment>
