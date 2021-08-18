@@ -31,7 +31,7 @@ export const searchableListSavedObject = (embeddable: EmbeddableSetup) => {
       },
     },
     migrations: () => {
-      // there are no migrations defined for the saved object at the moment, possibly they wuuld be added in the future
+      // there are no migrations defined for the saved object at the moment, possibly they would be added in the future
       const searchableListSavedObjectMigrations = {};
 
       // we don't know if embeddables have any migrations defined so we need to fetch them and map the received functions so we pass
