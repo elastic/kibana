@@ -364,9 +364,10 @@ This content has moved. Refer to <<xpack-profiler>>.
 
 This content has moved. Refer to <<get-started>>.
 
-[role="exclude",id="autocomplete-suggestions"]
-== Suggestions for autocomplete
+[float]
+[[autocomplete-suggestions]]
+=== Suggestions for autocomplete
 
-This content has moved. Refer to <<suggestions-for-autocomplete>>.
+This page has been moved. Refer to <<suggestions-for-autocomplete>>.
 
 
