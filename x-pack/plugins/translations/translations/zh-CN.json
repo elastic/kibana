@@ -23041,7 +23041,6 @@
     "xpack.securitySolution.trustedapps.list.columns.actions": "操作",
     "xpack.securitySolution.trustedapps.list.pageTitle": "受信任的应用程序",
     "xpack.securitySolution.trustedapps.list.search.placeholder": "搜索下面的字段：name、description、value",
-    "xpack.securitySolution.trustedapps.list.totalCount": "{totalItemCount, plural, other {# 个受信任的应用程序}}",
     "xpack.securitySolution.trustedapps.listEmptyState.message": "当前在您的终端上没有受信任应用程序。",
     "xpack.securitySolution.trustedapps.listEmptyState.title": "添加您的首个受信任应用程序",
     "xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.description.hash": "md5、sha1 或 sha256",
