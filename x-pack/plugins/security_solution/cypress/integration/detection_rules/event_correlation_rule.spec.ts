@@ -8,7 +8,7 @@
 import { formatMitreAttackDescription } from '../../helpers/rules';
 import { getEqlRule, getEqlSequenceRule, getIndexPatterns } from '../../objects/rule';
 
-import { ALERT_DATA_GRID, ALERT_GRID_CELL, NUMBER_OF_ALERTS } from '../../screens/alerts';
+import { ALERT_DATA_GRID, NUMBER_OF_ALERTS } from '../../screens/alerts';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
