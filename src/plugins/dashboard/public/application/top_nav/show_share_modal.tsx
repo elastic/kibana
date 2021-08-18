@@ -118,7 +118,6 @@ export function ShowShareModal({
 
   const locatorParams: DashboardAppLocatorParams = {
     ...rawDashboardState,
-    forwardStateToHistory: true,
     options: rawDashboardState.options as SerializableRecord & DashboardOptions,
     panels: rawDashboardState.panels as SerializableRecord & SavedDashboardPanel[],
     timeRange,
