@@ -34,6 +34,7 @@ describe('EventLogger', () => {
       config: { enabled: true, logEntries: true, indexEntries: true },
       kibanaUUID: KIBANA_SERVER_UUID,
       savedObjectProviderRegistry: savedObjectProviderRegistryMock.create(),
+      kibanaVersion: '1.0.1',
     });
     eventLogger = service.getLogger({});
   });
@@ -86,6 +87,7 @@ describe('EventLogger', () => {
       },
       kibana: {
         server_uuid: '424-24-2424',
+        version: '1.0.1',
       },
     });
 
