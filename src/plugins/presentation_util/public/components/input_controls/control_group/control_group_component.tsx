@@ -7,27 +7,18 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import {
-  EuiPopover,
-  EuiButtonEmpty,
-  EuiDragDropContext,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiDroppable,
-  EuiDraggable,
-  EuiText,
-  euiDragDropReorder,
-  DropResult,
-  EuiIcon,
-  htmlIdGenerator,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import uuid from 'uuid';
+import classNames from 'classnames';
 import { OptionsListEmbeddable, OptionsListEmbeddableFactory } from '../control_types/options_list';
 import { FlightField, flightFieldLabels } from '../__stories__/flights';
 import { ControlFrame } from './control_frame/control_frame';
 
 import './control_group.scss';
+import {
+  InputControlMeta,
+  ManageControlGroupComponent,
+} from './control_group_editor/manage_control_group_component';
 
 interface OptionsListStorybookArgs {
   fields: string[];
@@ -35,19 +26,19 @@ interface OptionsListStorybookArgs {
   embeddableFactory: OptionsListEmbeddableFactory;
 }
 
+interface InputControlEmbeddableMap {
+  [key: string]: OptionsListEmbeddable;
+}
+
 export const ControlGroupComponent = ({
   fields,
   twoLine,
   embeddableFactory,
 }: OptionsListStorybookArgs) => {
-  // const [embeddables, setEmbeddables] = useState<{ [key: string]: OptionsListEmbeddable }>({});
-  // const [embeddableIds, setEmbeddableIds] = useState<string[]>([]);
-  const [isOrderPopoverOpen, setIsOrderPopoverOpen] = useState(false);
-
-  const [embeddables, setEmbeddables] = useState<OptionsListEmbeddable[]>([]);
+  const [embeddablesMap, setEmbeddablesMap] = useState<InputControlEmbeddableMap>({});
+  const [controlMeta, setControlMeta] = useState<InputControlMeta[]>([]);
 
   useEffect(() => {
-    console.log('creating embeddables');
     const embeddableCreatePromises = fields.map((field) => {
       return embeddableFactory.create({
         field,
@@ -58,67 +49,39 @@ export const ControlGroupComponent = ({
         title: flightFieldLabels[field as FlightField],
       });
     });
-    Promise.all(embeddableCreatePromises).then((newEmbeddables) => setEmbeddables(newEmbeddables));
+    Promise.all(embeddableCreatePromises).then((newEmbeddables) => {
+      setEmbeddablesMap(
+        newEmbeddables.reduce<InputControlEmbeddableMap>(
+          (map, embeddable) => ((map[embeddable.id] = embeddable), map),
+          {}
+        )
+      );
+      setControlMeta(
+        newEmbeddables.map((embeddable) => ({
+          title: embeddable.getTitle(),
+          embeddableId: embeddable.id,
+          width: 'small',
+          grow: true,
+        }))
+      );
+    });
   }, [fields, embeddableFactory, twoLine]);
-
-  const onDragEnd = ({ source, destination }: DropResult) => {
-    if (source && destination) {
-      setEmbeddables(euiDragDropReorder(embeddables, source.index, destination.index));
-    }
-  };
-
-  const orderButton = (
-    <EuiButtonEmpty
-      size="xs"
-      iconType="sortable"
-      color="text"
-      data-test-subj="inputControlsSortingButton"
-      onClick={() => setIsOrderPopoverOpen(!isOrderPopoverOpen)}
-    >
-      Sort Me plz
-    </EuiButtonEmpty>
-  );
 
   return (
     <>
-      <EuiPopover
-        panelPaddingSize="s"
-        button={orderButton}
-        isOpen={isOrderPopoverOpen}
-        panelClassName="controlGroup--sortPopover"
-        closePopover={() => setIsOrderPopoverOpen(false)}
-      >
-        <EuiDragDropContext onDragEnd={onDragEnd}>
-          <EuiDroppable droppableId="CUSTOM_HANDLE_DROPPABLE_AREA" spacing="s">
-            {embeddables.map((embeddable, index) => (
-              <EuiDraggable
-                spacing="m"
-                index={index}
-                key={embeddable.id}
-                customDragHandle={true}
-                draggableId={embeddable.id}
-              >
-                {(provided) => (
-                  <EuiPanel className="custom" paddingSize="m">
-                    <EuiFlexGroup>
-                      <EuiFlexItem grow={false}>
-                        <div {...provided.dragHandleProps} aria-label="Drag Handle">
-                          <EuiIcon type="grab" />
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>{embeddable.getTitle()}</EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiPanel>
-                )}
-              </EuiDraggable>
-            ))}
-          </EuiDroppable>
-        </EuiDragDropContext>
-      </EuiPopover>
+      <ManageControlGroupComponent controlMeta={controlMeta} setControlMeta={setControlMeta} />
       <EuiFlexGroup alignItems="center" wrap={true} gutterSize={'s'}>
-        {embeddables.map((embeddable) => (
-          <EuiFlexItem key={embeddable.id}>
-            <ControlFrame twoLine={twoLine} embeddable={embeddable} />
+        {controlMeta.map(({ embeddableId, width, grow }) => (
+          <EuiFlexItem
+            grow={grow}
+            key={embeddableId}
+            className={classNames({
+              'controlFrame--wrapper-small': width === 'small',
+              'controlFrame--wrapper-medium': width === 'medium',
+              'controlFrame--wrapper-large': width === 'large',
+            })}
+          >
+            <ControlFrame twoLine={twoLine} embeddable={embeddablesMap[embeddableId]} />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

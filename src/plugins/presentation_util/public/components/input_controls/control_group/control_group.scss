@@ -1,3 +1,19 @@
+.controlFrame--wrapper {
+  flex-basis: auto;
+
+  &-small {
+    width: 200px;
+  }
+
+  &-medium {
+    width: 400px;
+  }
+
+  &-large {
+    width: 600px;
+  }
+}
+
 .controlFrame--formControlLayout {
   width: 100%;
   min-width: $euiSize * 12.5;
@@ -21,4 +37,11 @@
   margin-top: -$euiSizeS;
   // IE11 needs a min-width
   min-width: $euiSize * 12;
+}
+
+.controlGroup--sortItem {
+  &-isDragging {
+    @include euiBottomShadow;
+    background: $euiColorEmptyShade;
+  }
 }
