@@ -20,10 +20,14 @@
   "requiredPlugins":[
      "actions",
      "esUiShared",
+     "lens",
      "features",
      "kibanaReact",
      "kibanaUtils",
      "triggersActionsUi"
+  ],
+  "requiredBundles": [
+    "savedObjects"
   ],
   "server":true,
   "ui":true,
