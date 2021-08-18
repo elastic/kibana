@@ -171,13 +171,12 @@ export function initIndexingRoutes({
       },
     },
     async (context, request, response) => {
-      const result = await getMatchingIndexes(
+      return await getMatchingIndexes(
         request.query.indexPattern,
         context.core.elasticsearch.client,
         response,
         logger
       );
-      return response.ok({ body: result });
     }
   );
 

@@ -446,10 +446,8 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     if (!(this.indexPattern && this.indexPattern.title)) {
       return [];
     }
-    const {
-      payload: { matchingIndexes },
-    } = await getMatchingIndexes(this.indexPattern.title);
-    return matchingIndexes;
+    const { success, matchingIndexes } = await getMatchingIndexes(this.indexPattern.title);
+    return success ? matchingIndexes : [];
   }
 
   async supportsFeatureEditing(): Promise<boolean> {
