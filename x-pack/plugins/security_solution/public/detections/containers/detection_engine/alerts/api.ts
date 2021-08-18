@@ -77,7 +77,7 @@ export const fetchQueryRuleRegistryAlerts = async <Hit, Aggregations>({
  * Update alert status by query
  *
  * @param query of alerts to update
- * @param status to update to('open' / 'closed' / 'in-progress')
+ * @param status to update to('open' / 'closed' / 'acknowledged')
  * @param signal AbortSignal for cancelling request
  *
  * @throws An error if response is not OK
