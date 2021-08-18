@@ -72,7 +72,6 @@ const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
 const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
   overflow: hidden;
   margin: 0;
-  min-height: 490px;
   display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
 `;
 
