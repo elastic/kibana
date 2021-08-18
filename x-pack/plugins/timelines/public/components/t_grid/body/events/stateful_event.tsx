@@ -18,7 +18,11 @@ import { StatefulRowRenderer } from './stateful_row_renderer';
 import { getMappedNonEcsValue } from '../data_driven_columns';
 import { StatefulEventContext } from './stateful_event_context';
 import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
-import { TimelineTabs } from '../../../../../common/types/timeline';
+import {
+  SetEventsDeleted,
+  SetEventsLoading,
+  TimelineTabs,
+} from '../../../../../common/types/timeline';
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -137,6 +141,20 @@ const StatefulEventComponent: React.FC<Props> = ({
     );
   }, [dispatch, event._id, event._index, tabType, timelineId]);
 
+  const setEventsLoading = useCallback<SetEventsLoading>(
+    ({ eventIds, isLoading }) => {
+      dispatch(tGridActions.setEventsLoading({ id: timelineId, eventIds, isLoading }));
+    },
+    [dispatch, timelineId]
+  );
+
+  const setEventsDeleted = useCallback<SetEventsDeleted>(
+    ({ eventIds, isDeleted }) => {
+      dispatch(tGridActions.setEventsDeleted({ id: timelineId, eventIds, isDeleted }));
+    },
+    [dispatch, timelineId]
+  );
+
   const RowRendererContent = useMemo(
     () => (
       <EventsTrSupplement>
@@ -195,6 +213,8 @@ const StatefulEventComponent: React.FC<Props> = ({
           timelineId={timelineId}
           leadingControlColumns={leadingControlColumns}
           trailingControlColumns={trailingControlColumns}
+          setEventsLoading={setEventsLoading}
+          setEventsDeleted={setEventsDeleted}
         />
 
         <div>{RowRendererContent}</div>

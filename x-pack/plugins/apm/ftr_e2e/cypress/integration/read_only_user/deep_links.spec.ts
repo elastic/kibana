@@ -18,22 +18,24 @@ describe('APM deep links', () => {
     cy.contains('APM / Service Map');
 
     // navigates to home page
-    cy.contains('APM').click();
+    // Force click because welcome screen changes
+    // https://github.com/elastic/kibana/pull/108193
+    cy.contains('APM').click({ force: true });
     cy.url().should('include', '/apm/services');
 
     cy.get('[data-test-subj="nav-search-input"]').type('APM');
     // navigates to services page
-    cy.contains('APM / Services').click();
+    cy.contains('APM / Services').click({ force: true });
     cy.url().should('include', '/apm/services');
 
     cy.get('[data-test-subj="nav-search-input"]').type('APM');
     // navigates to traces page
-    cy.contains('APM / Traces').click();
+    cy.contains('APM / Traces').click({ force: true });
     cy.url().should('include', '/apm/traces');
 
     cy.get('[data-test-subj="nav-search-input"]').type('APM');
     // navigates to service maps
-    cy.contains('APM / Service Map').click();
+    cy.contains('APM / Service Map').click({ force: true });
     cy.url().should('include', '/apm/service-map');
   });
 });

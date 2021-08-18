@@ -13,11 +13,11 @@ import {
   CLOSE_SELECTED_ALERTS_BTN,
   CLOSED_ALERTS_FILTER_BTN,
   EXPAND_ALERT_BTN,
-  IN_PROGRESS_ALERTS_FILTER_BTN,
+  ACKNOWLEDGED_ALERTS_FILTER_BTN,
   LOADING_ALERTS_PANEL,
   MANAGE_ALERT_DETECTION_RULES_BTN,
-  MARK_ALERT_IN_PROGRESS_BTN,
-  MARK_SELECTED_ALERTS_IN_PROGRESS_BTN,
+  MARK_ALERT_ACKNOWLEDGED_BTN,
+  MARK_SELECTED_ALERTS_ACKNOWLEDGED_BTN,
   OPEN_ALERT_BTN,
   OPENED_ALERTS_FILTER_BTN,
   SEND_ALERT_TO_TIMELINE_BTN,
@@ -112,18 +112,21 @@ export const openAlerts = () => {
   cy.get(OPEN_ALERT_BTN).click();
 };
 
-export const goToInProgressAlerts = () => {
-  cy.get(IN_PROGRESS_ALERTS_FILTER_BTN).click();
+export const goToAcknowledgedAlerts = () => {
+  cy.get(ACKNOWLEDGED_ALERTS_FILTER_BTN).click();
+  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
+  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
-export const markInProgressFirstAlert = () => {
+export const markAcknowledgedFirstAlert = () => {
   cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
-  cy.get(MARK_ALERT_IN_PROGRESS_BTN).click();
+  cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).click();
 };
 
-export const markInProgressAlerts = () => {
+export const markAcknowledgedAlerts = () => {
   cy.get(TAKE_ACTION_POPOVER_BTN).click({ force: true });
-  cy.get(MARK_SELECTED_ALERTS_IN_PROGRESS_BTN).click();
+  cy.get(MARK_SELECTED_ALERTS_ACKNOWLEDGED_BTN).click();
 };
 
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
