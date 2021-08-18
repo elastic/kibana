@@ -26,6 +26,18 @@ export async function getMatchingIndexes(
     const errorStatusCode = error.meta?.statusCode;
     if (errorStatusCode === 404) {
       return response.ok({ body: { success: true, matchingIndexes: [] } });
+    } else if (errorStatusCode === 401) {
+      return response.unauthorized({
+        body: {
+          message: 'User not authorized to search indexes',
+        },
+      });
+    } else if (errorStatusCode === 403) {
+      return response.forbidden({
+        body: {
+          message: 'Access to index search forbidden',
+        },
+      });
     } else {
       logger.error(error);
       return response.custom({
