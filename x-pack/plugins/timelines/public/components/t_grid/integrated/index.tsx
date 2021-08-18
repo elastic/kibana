@@ -47,19 +47,17 @@ import {
 } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
-import { HeaderSection } from '../header_section';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
-import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem } from '../styles';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
 import * as i18n from '../translations';
-import { ExitFullScreen } from '../../exit_full_screen';
 import { Sort } from '../body/sort';
-import { InspectButtonContainer } from '../../inspect';
+import { InspectButton, InspectButtonContainer } from '../../inspect';
+import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
 
 const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
-const COMPACT_HEADER_HEIGHT = 36; // px
 
 const TitleText = styled.span`
   margin-right: 12px;
@@ -80,13 +78,10 @@ const StyledEuiPanel = styled(EuiPanel)<{ $isFullScreen: boolean }>`
   `}
 `;
 
-const TitleFlexGroup = styled(EuiFlexGroup)`
-  margin-top: 8px;
-`;
-
 const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
   className: `${SELECTOR_TIMELINE_GLOBAL_CONTAINER} ${className}`,
 }))`
+  position: relative;
   width: 100%;
   overflow: hidden;
   flex: 1;
@@ -104,14 +99,6 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
   overflow: auto;
 `;
 
-/**
- * Hides stateful headerFilterGroup implementations, but prevents the component
- * from being unmounted, to preserve the state of the component
- */
-const HeaderFilterGroupWrapper = styled.header<{ show: boolean }>`
-  ${({ show }) => (show ? '' : 'visibility: hidden;')}
-`;
-
 const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
 export interface TGridIntegratedProps {
@@ -126,7 +113,6 @@ export interface TGridIntegratedProps {
   filters: Filter[];
   globalFullScreen: boolean;
   graphOverlay?: React.ReactNode;
-  headerFilterGroup?: React.ReactNode;
   filterStatus?: AlertStatus;
   height?: number;
   id: TimelineId;
@@ -150,6 +136,7 @@ export interface TGridIntegratedProps {
   leadingControlColumns?: ControlColumnProps[];
   trailingControlColumns?: ControlColumnProps[];
   data?: DataPublicPluginStart;
+  tGridEventRenderedViewEnabled: boolean;
 }
 
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
@@ -163,7 +150,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   entityType,
   filters,
   globalFullScreen,
-  headerFilterGroup,
   filterStatus,
   id,
   indexNames,
@@ -185,6 +171,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   graphEventId,
   leadingControlColumns,
   trailingControlColumns,
+  tGridEventRenderedViewEnabled,
   data,
 }) => {
   const dispatch = useDispatch();
@@ -192,6 +179,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const { uiSettings } = useKibana<CoreStart>().services;
   const [isQueryLoading, setIsQueryLoading] = useState(false);
 
+  const [tableView, setTableView] = useState<ViewSelection>('gridView');
   const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
   const unit = useMemo(() => (n: number) => i18n.ALERTS_UNIT(n), []);
   const { queryFields, title } = useDeepEqualSelector((state) =>
@@ -203,17 +191,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   }, [dispatch, id, isQueryLoading]);
 
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
-  const titleWithExitFullScreen = useMemo(
-    () => (
-      <TitleFlexGroup alignItems="center" data-test-subj="title-flex-group" gutterSize="none">
-        <EuiFlexItem grow={false}>{justTitle}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ExitFullScreen fullScreen={globalFullScreen} setFullScreen={setGlobalFullScreen} />
-        </EuiFlexItem>
-      </TitleFlexGroup>
-    ),
-    [globalFullScreen, justTitle, setGlobalFullScreen]
-  );
 
   const combinedQueries = buildCombinedQuery({
     config: esQuery.getEsQueryConfig(uiSettings),
@@ -255,6 +232,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     loading,
     { events, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
+    // We rely on entityType to determine Events vs Alerts
     alertConsumers: SECURITY_ALERTS_CONSUMERS,
     docValueFields,
     entityType,
@@ -295,22 +273,11 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     events,
   ]);
 
-  const HeaderSectionContent = useMemo(
-    () =>
-      headerFilterGroup && (
-        <HeaderFilterGroupWrapper
-          data-test-subj="header-filter-group-wrapper"
-          show={!resolverIsShowing(graphEventId)}
-        >
-          {headerFilterGroup}
-        </HeaderFilterGroupWrapper>
-      ),
-    [headerFilterGroup, graphEventId]
-  );
-
   useEffect(() => {
     setIsQueryLoading(loading);
   }, [loading]);
+
+  const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
 
   return (
     <InspectButtonContainer>
@@ -325,27 +292,23 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
         {canQueryTimeline ? (
           <>
-            <HeaderSection
-              id={!resolverIsShowing(graphEventId) ? id : undefined}
-              inspect={inspect}
-              loading={loading}
-              height={
-                headerFilterGroup == null ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT
-              }
-              title={globalFullScreen ? titleWithExitFullScreen : justTitle}
-            >
-              {HeaderSectionContent}
-            </HeaderSection>
             <EventsContainerLoading
               data-timeline-id={id}
               data-test-subj={`events-container-loading-${loading}`}
             >
-              {graphOverlay}
-              <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+              <UpdatedFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems={alignItems}>
+                <UpdatedFlexItem grow={false} show={!loading}>
+                  <InspectButton title={justTitle} inspect={inspect} loading={loading} />
+                </UpdatedFlexItem>
                 <UpdatedFlexItem grow={false} show={!loading}>
                   {!resolverIsShowing(graphEventId) && additionalFilters}
                 </UpdatedFlexItem>
-              </EuiFlexGroup>
+                {tGridEventRenderedViewEnabled && entityType === 'alerts' && (
+                  <UpdatedFlexItem grow={false} show={!loading}>
+                    <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
+                  </UpdatedFlexItem>
+                )}
+              </UpdatedFlexGroup>
 
               <FullWidthFlexGroup
                 $visible={!graphEventId && graphOverlay == null}
@@ -382,11 +345,14 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                         defaultCellActions={defaultCellActions}
                         id={id}
                         isEventViewer={true}
+                        itemsPerPageOptions={itemsPerPageOptions}
                         loadPage={loadPage}
                         onRuleChange={onRuleChange}
+                        querySize={pageInfo.querySize}
                         renderCellValue={renderCellValue}
                         rowRenderers={rowRenderers}
                         tabType={TimelineTabs.query}
+                        tableView={tableView}
                         totalPages={calculateTotalPages({
                           itemsCount: totalCountMinusDeleted,
                           itemsPerPage,
@@ -399,19 +365,21 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                         refetch={refetch}
                         indexNames={indexNames}
                       />
-                      <Footer
-                        activePage={pageInfo.activePage}
-                        data-test-subj="events-viewer-footer"
-                        height={footerHeight}
-                        id={id}
-                        isLive={isLive}
-                        isLoading={loading}
-                        itemsCount={nonDeletedEvents.length}
-                        itemsPerPage={itemsPerPage}
-                        itemsPerPageOptions={itemsPerPageOptions}
-                        onChangePage={loadPage}
-                        totalCount={totalCountMinusDeleted}
-                      />
+                      {tableView === 'gridView' && (
+                        <Footer
+                          activePage={pageInfo.activePage}
+                          data-test-subj="events-viewer-footer"
+                          height={footerHeight}
+                          id={id}
+                          isLive={isLive}
+                          isLoading={loading}
+                          itemsCount={nonDeletedEvents.length}
+                          itemsPerPage={itemsPerPage}
+                          itemsPerPageOptions={itemsPerPageOptions}
+                          onChangePage={loadPage}
+                          totalCount={totalCountMinusDeleted}
+                        />
+                      )}
                     </>
                   )}
                 </ScrollableFlexItem>
