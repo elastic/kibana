@@ -426,6 +426,7 @@ export function jobsHealthServiceProvider(
       if (config.errorMessages.enabled && previousStartedAt) {
         const response = await this.getErrorsReport(jobIds, previousStartedAt);
         if (response.length > 0) {
+          const { count, jobsString } = getJobsAlertingMessageValues(response);
           results.push({
             name: HEALTH_CHECK_NAMES.errorMessages.name,
             context: {
@@ -435,7 +436,7 @@ export function jobsHealthServiceProvider(
                 {
                   defaultMessage:
                     '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {contains} other {contain}} errors in the messages.',
-                  values: getJobsAlertingMessageValues(response),
+                  values: { count, jobsString },
                 }
               ),
             },
