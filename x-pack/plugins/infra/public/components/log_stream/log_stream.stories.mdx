@@ -432,7 +432,7 @@ By default the `<LogStream />` component will provide default empty and loading 
   sourceId="my_source"
   startTimestamp={...}
   endTimestamp={...}
-  renderLoadingState={<p>Loading...</p>}
+  renderLoadingState: () => (<p>Loading</p>),
   renderEmptyState={({ handleReload }) => (
     <div>
       <p>No entries.</p>
@@ -448,7 +448,7 @@ By default the `<LogStream />` component will provide default empty and loading 
     args={{
       startTimestamp,
       endTimestamp,
-      renderLoadingState: (<p>Loading</p>),
+      renderLoadingState: () => (<p>Loading</p>),
       renderEmptyState: ({ handleReload }) => (
         <div>
           <p>No entries.</p>

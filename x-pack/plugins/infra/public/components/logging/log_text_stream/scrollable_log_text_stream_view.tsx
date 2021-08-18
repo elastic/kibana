@@ -166,7 +166,9 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       <ScrollableLogTextStreamViewWrapper>
         {isReloading && (!isStreaming || !hasItems) ? (
           <>
-            {renderLoadingState ?? (
+            {renderLoadingState ? (
+              renderLoadingState()
+            ) : (
               <InfraLoadingPanel
                 width="100%"
                 height="100%"
