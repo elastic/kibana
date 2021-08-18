@@ -53,11 +53,7 @@ export function createExecutionEnqueuerFunction({
       );
     }
 
-    const { action, isPreconfigured } = await getAction(
-      unsecuredSavedObjectsClient,
-      preconfiguredActions,
-      id
-    );
+    const action = await getAction(unsecuredSavedObjectsClient, preconfiguredActions, id);
     validateCanActionBeUsed(action);
 
     const { actionTypeId } = action;
@@ -66,9 +62,8 @@ export function createExecutionEnqueuerFunction({
     }
 
     // Get saved object references from action ID and relatedSavedObjects
-    const { actionIdOrRef, references, relatedSavedObjectRefs } = extractSavedObjectReferences(
+    const { references, relatedSavedObjectRefs } = extractSavedObjectReferences(
       id,
-      isPreconfigured,
       relatedSavedObjects
     );
     const executionSourceReference = executionSourceAsSavedObjectReferences(source);
@@ -76,7 +71,7 @@ export function createExecutionEnqueuerFunction({
     const actionTaskParamsRecord = await unsecuredSavedObjectsClient.create(
       ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
       {
-        actionId: actionIdOrRef,
+        actionId: id,
         params,
         apiKey,
         relatedSavedObjects: relatedSavedObjectRefs,
@@ -107,7 +102,7 @@ export function createEphemeralExecutionEnqueuerFunction({
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
     { id, params, spaceId, source, apiKey }: ExecuteOptions
   ): Promise<RunNowResult> {
-    const { action } = await getAction(unsecuredSavedObjectsClient, preconfiguredActions, id);
+    const action = await getAction(unsecuredSavedObjectsClient, preconfiguredActions, id);
     validateCanActionBeUsed(action);
 
     const { actionTypeId } = action;
@@ -162,12 +157,12 @@ async function getAction(
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
   preconfiguredActions: PreConfiguredAction[],
   actionId: string
-): Promise<{ action: PreConfiguredAction | RawAction; isPreconfigured: boolean }> {
+): Promise<PreConfiguredAction | RawAction> {
   const pcAction = preconfiguredActions.find((action) => action.id === actionId);
   if (pcAction) {
-    return { action: pcAction, isPreconfigured: true };
+    return pcAction;
   }
 
   const { attributes } = await unsecuredSavedObjectsClient.get<RawAction>('action', actionId);
-  return { action: attributes, isPreconfigured: false };
+  return attributes;
 }

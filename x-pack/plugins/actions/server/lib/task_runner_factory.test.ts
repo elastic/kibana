@@ -97,7 +97,7 @@ test(`throws an error if factory is already initialized`, () => {
   ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory already initialized"`);
 });
 
-test('executes the task by calling the executor with proper parameters with no actionRef', async () => {
+test('executes the task by calling the executor with proper parameters, using given actionId when no actionRef in references', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
   });
@@ -146,7 +146,7 @@ test('executes the task by calling the executor with proper parameters with no a
   );
 });
 
-test('executes the task by calling the executor with proper parameters when actionId is stored in references', async () => {
+test('executes the task by calling the executor with proper parameters, using stored actionId when actionRef is in references', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
   });
@@ -157,13 +157,13 @@ test('executes the task by calling the executor with proper parameters when acti
     id: '3',
     type: 'action_task_params',
     attributes: {
-      actionId: 'actionRef',
+      actionId: '2',
       params: { baz: true },
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
       {
-        id: '2',
+        id: '9',
         name: 'actionRef',
         type: 'action',
       },
@@ -179,7 +179,7 @@ test('executes the task by calling the executor with proper parameters when acti
   ).toHaveBeenCalledWith('action_task_params', '3', { namespace: 'namespace-test' });
 
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
-    actionId: '2',
+    actionId: '9',
     isEphemeral: false,
     params: { baz: true },
     relatedSavedObjects: [],
@@ -212,7 +212,7 @@ test('cleans up action_task_params object', async () => {
     id: '3',
     type: 'action_task_params',
     attributes: {
-      actionId: 'actionRef',
+      actionId: '2',
       params: { baz: true },
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
@@ -241,7 +241,7 @@ test('runs successfully when cleanup fails and logs the error', async () => {
     id: '3',
     type: 'action_task_params',
     attributes: {
-      actionId: 'actionRef',
+      actionId: '2',
       params: { baz: true },
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
@@ -272,7 +272,7 @@ test('throws an error with suggested retry logic when return status is error', a
     id: '3',
     type: 'action_task_params',
     attributes: {
-      actionId: 'actionRef',
+      actionId: '2',
       params: { baz: true },
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
@@ -313,7 +313,7 @@ test('uses API key when provided', async () => {
     id: '3',
     type: 'action_task_params',
     attributes: {
-      actionId: 'actionRef',
+      actionId: '2',
       params: { baz: true },
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
@@ -362,7 +362,7 @@ test('uses relatedSavedObjects when provided', async () => {
     id: '3',
     type: 'action_task_params',
     attributes: {
-      actionId: 'actionRef',
+      actionId: '2',
       params: { baz: true },
       apiKey: Buffer.from('123:abc').toString('base64'),
       relatedSavedObjects: [{ ref: 'related_some-type_0', type: 'some-type' }],
@@ -416,7 +416,7 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
     id: '3',
     type: 'action_task_params',
     attributes: {
-      actionId: 'actionRef',
+      actionId: '2',
       params: { baz: true },
       apiKey: Buffer.from('123:abc').toString('base64'),
       relatedSavedObjects: [{ Xid: 'related_some-type_0', type: 'some-type' }],
@@ -464,7 +464,7 @@ test('sanitizes invalid relatedSavedObject refs when provided', async () => {
     id: '3',
     type: 'action_task_params',
     attributes: {
-      actionId: 'actionRef',
+      actionId: '2',
       params: { baz: true },
       apiKey: Buffer.from('123:abc').toString('base64'),
       relatedSavedObjects: [{ ref: 'invalid-related_some-type_0', type: 'some-type' }],
@@ -512,7 +512,7 @@ test(`doesn't use API key when not provided`, async () => {
     id: '3',
     type: 'action_task_params',
     attributes: {
-      actionId: 'actionRef',
+      actionId: '2',
       params: { baz: true },
     },
     references: [
@@ -555,7 +555,7 @@ test(`throws an error when license doesn't support the action type`, async () =>
     id: '3',
     type: 'action_task_params',
     attributes: {
-      actionId: 'actionRef',
+      actionId: '2',
       params: { baz: true },
       apiKey: Buffer.from('123:abc').toString('base64'),
     },

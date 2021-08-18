@@ -13,24 +13,20 @@ export const ACTION_REF_NAME = `actionRef`;
 
 export function extractSavedObjectReferences(
   actionId: string,
-  isPreconfigured: boolean,
   relatedSavedObjects?: RelatedSavedObjects
 ): {
-  actionIdOrRef: string;
   references: SavedObjectReference[];
   relatedSavedObjectRefs?: RelatedSavedObjectRef[];
 } {
   const references: SavedObjectReference[] = [];
   const relatedSavedObjectRefs: RelatedSavedObjectRef[] = [];
 
-  // Add action saved object to reference if it is not preconfigured
-  if (!isPreconfigured) {
-    references.push({
-      id: actionId,
-      name: ACTION_REF_NAME,
-      type: 'action',
-    });
-  }
+  // Add action saved object to reference
+  references.push({
+    id: actionId,
+    name: ACTION_REF_NAME,
+    type: 'action',
+  });
 
   // Add related saved objects, if any
   (relatedSavedObjects ?? []).forEach((relatedSavedObject, index) => {
@@ -47,7 +43,6 @@ export function extractSavedObjectReferences(
   });
 
   return {
-    actionIdOrRef: isPreconfigured ? actionId : ACTION_REF_NAME,
     references,
     ...(relatedSavedObjects ? { relatedSavedObjectRefs } : {}),
   };

@@ -22,16 +22,12 @@ describe('successful migrations', () => {
   });
 
   describe('7.16.0', () => {
-    test('moves actionId to references array', () => {
+    test('adds actionId to references array', () => {
       const migration716 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
       const actionTaskParam = getMockData();
       const migratedActionTaskParam = migration716(actionTaskParam, context);
       expect(migratedActionTaskParam).toEqual({
         ...actionTaskParam,
-        attributes: {
-          ...actionTaskParam.attributes,
-          actionId: 'actionRef',
-        },
         references: [
           {
             id: actionTaskParam.attributes.actionId,
@@ -50,7 +46,6 @@ describe('successful migrations', () => {
         ...actionTaskParam,
         attributes: {
           ...actionTaskParam.attributes,
-          actionId: 'actionRef',
           relatedSavedObjects: [],
         },
         references: [
@@ -63,7 +58,7 @@ describe('successful migrations', () => {
       });
     });
 
-    test('moves actionId and relatedSavedObjects to references array', () => {
+    test('adds actionId and relatedSavedObjects to references array', () => {
       const migration716 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
       const actionTaskParam = getMockData({
         relatedSavedObjects: [
@@ -80,7 +75,6 @@ describe('successful migrations', () => {
         ...actionTaskParam,
         attributes: {
           ...actionTaskParam.attributes,
-          actionId: 'actionRef',
           relatedSavedObjects: [
             {
               ref: 'related_some-type_0',
@@ -127,7 +121,6 @@ describe('successful migrations', () => {
         ...actionTaskParam,
         attributes: {
           ...actionTaskParam.attributes,
-          actionId: 'actionRef',
           relatedSavedObjects: [
             {
               ref: 'related_some-type_0',
@@ -188,7 +181,6 @@ describe('successful migrations', () => {
         ...actionTaskParam,
         attributes: {
           ...actionTaskParam.attributes,
-          actionId: 'actionRef',
           relatedSavedObjects: [
             {
               ref: 'related_some-type_0',
@@ -230,10 +222,6 @@ describe('successful migrations', () => {
       const migratedActionTaskParam = migration716(actionTaskParam, context);
       expect(migratedActionTaskParam).toEqual({
         ...actionTaskParam,
-        attributes: {
-          ...actionTaskParam.attributes,
-          actionId: 'actionRef',
-        },
         references: [
           {
             id: 'existing-ref-id',
@@ -263,7 +251,6 @@ describe('successful migrations', () => {
         ...actionTaskParam,
         attributes: {
           ...actionTaskParam.attributes,
-          actionId: 'actionRef',
           relatedSavedObjects: [],
         },
         references: [

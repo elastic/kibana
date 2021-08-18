@@ -87,7 +87,6 @@ function useSavedObjectReferences(
   const newReferences: SavedObjectReference[] = [];
   const relatedSavedObjectRefs: RelatedSavedObjectRef[] = [];
 
-  // No way to differentiate preconfigured from non-preconfigured action here
   newReferences.push({
     id: actionId,
     name: 'actionRef',
@@ -112,7 +111,6 @@ function useSavedObjectReferences(
     ...doc,
     attributes: {
       ...doc.attributes,
-      actionId: 'actionRef',
       ...(relatedSavedObjects ? { relatedSavedObjects: relatedSavedObjectRefs } : {}),
     },
     references: [...(references ?? []), ...(newReferences ?? [])],

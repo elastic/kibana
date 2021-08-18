@@ -72,7 +72,7 @@ describe('execute()', () => {
     expect(savedObjectsClient.create).toHaveBeenCalledWith(
       'action_task_params',
       {
-        actionId: 'actionRef',
+        actionId: '123',
         params: { baz: false },
         apiKey: Buffer.from('123:abc').toString('base64'),
       },
@@ -131,7 +131,7 @@ describe('execute()', () => {
     expect(savedObjectsClient.create).toHaveBeenCalledWith(
       'action_task_params',
       {
-        actionId: 'actionRef',
+        actionId: '123',
         params: { baz: false },
         apiKey: Buffer.from('123:abc').toString('base64'),
         relatedSavedObjects: [
@@ -230,6 +230,11 @@ describe('execute()', () => {
             name: 'source',
             type: source.type,
           },
+          {
+            id: '123',
+            name: 'actionRef',
+            type: 'action',
+          },
         ],
       }
     );
@@ -320,6 +325,11 @@ describe('execute()', () => {
             id: source.id,
             name: 'source',
             type: source.type,
+          },
+          {
+            id: '123',
+            name: 'actionRef',
+            type: 'action',
           },
           {
             id: 'some-id',
