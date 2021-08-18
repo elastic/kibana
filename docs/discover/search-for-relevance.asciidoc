@@ -7,7 +7,7 @@ The higher the score, the better it matches your query.
 
 This example shows how to use *Discover* to list
 your documents from most relevant to least relevant. This example uses
-the <<get-started, sample flights data set>>, or you can use your own data.
+the <<kibana-concepts-analysts, sample flights data set>>, or you can use your own data.
 
 .  In *Discover*, open the index pattern dropdown, and select that data you want to work with.
 +

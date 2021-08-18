@@ -21,7 +21,7 @@ image::maps/images/sample_data_web_logs.png[]
 === Prerequisites
 
 - If you don’t already have {kib}, set it up with https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
-- This tutorial requires the <<get-started, web logs sample data set>>. The sample data includes a [Logs] Total Requests and Bytes map, which you’ll re-create in this tutorial.
+- This tutorial requires the <<kibana-concepts-analysts, web logs sample data set>>. The sample data includes a [Logs] Total Requests and Bytes map, which you’ll re-create in this tutorial.
 - You must have the correct privileges for creating a map.
 If you don't have sufficient privileges to create or save maps,
 a read-only icon appears in the toolbar. For more information,

@@ -88,7 +88,7 @@ The panels you create using the following editors support dashboard drilldowns:
 [float]
 ==== Create and set up the dashboards you want to connect
 
-Use the <<get-started,*Sample web logs*>> data to create a dashboard and add panels, then set a search and filter on the *[Logs] Web Traffic* dashboard.
+Use the <<kibana-concepts-analysts,*Sample web logs*>> data to create a dashboard and add panels, then set a search and filter on the *[Logs] Web Traffic* dashboard.
 
 . Add the *Sample web logs* data.
 

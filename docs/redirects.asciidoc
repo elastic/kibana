@@ -75,7 +75,7 @@ This page has moved. Please see <<reporting-getting-started>>.
 [role="exclude",id="add-sample-data"]
 == Add sample data
 
-This page has moved. Please see <<get-started>>.
+This page has moved. Please see <<kibana-concepts-analysts>>.
 
 [role="exclude",id="tilemap"]
 == Coordinate map
@@ -151,8 +151,8 @@ This content has moved. See
 [role="exclude",id="tutorial-define-index"]
 == Define your index patterns
 
-This content has moved. See
-<<get-started, Quick start>>.
+This content has moved. Refer to
+<<kibana-concepts-analysts, Quick start>>.
 
 [role="exclude",id="managing-indices"]
 == Index management
