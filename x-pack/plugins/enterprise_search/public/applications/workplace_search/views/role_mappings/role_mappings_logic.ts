@@ -10,7 +10,7 @@ import { kea, MakeLogicType } from 'kea';
 import {
   clearFlashMessages,
   flashAPIErrors,
-  setSuccessMessage,
+  flashSuccessToast,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import {
@@ -397,7 +397,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       try {
         await http.delete(route);
         actions.initializeRoleMappings();
-        setSuccessMessage(ROLE_MAPPING_DELETED_MESSAGE);
+        flashSuccessToast(ROLE_MAPPING_DELETED_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -435,7 +435,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       try {
         await request;
         actions.initializeRoleMappings();
-        setSuccessMessage(SUCCESS_MESSAGE);
+        flashSuccessToast(SUCCESS_MESSAGE);
       } catch (e) {
         actions.setRoleMappingErrors(e?.body?.attributes?.errors);
       }
