@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { createMockPackagePolicy } from './mocks';
-import { TrustedApp } from '../../../../../../node_modules/x-pack/plugins/security_solution/common/endpoint/types';
+import { TrustedApp } from '../../../common/endpoint/types';
 import { LIST_ENDPOINT_EXCEPTION, LIST_ENDPOINT_EVENT_FILTER } from './constants';
 import {
   getPreviousDiagTaskTimestamp,
