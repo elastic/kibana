@@ -12363,7 +12363,7 @@ elastic-apm-node@^3.16.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elasticsearch@^16.4.0, elasticsearch@^16.7.0:
+elasticsearch@^16.4.0:
   version "16.7.0"
   resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-16.7.0.tgz#9055e3f586934d8de5fd407b04050e9d54173333"
   integrity sha512-du+//TbjCFEkaG0jNcAC95Fp4B6/X5shnCRIXALFL+M4U5iT3YL5ZVUPNf1NgR7dy/sc8Dvw2Ob6IUJKB7FrCw==
