@@ -71,7 +71,7 @@ export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={null}>
-            <EuiText textAlign="right" size="s">
+            <EuiText className="sourceStatus" textAlign="right" size="s">
               <EuiHealth color="success">{READY_TEXT}</EuiHealth>
             </EuiText>
           </EuiFlexItem>
