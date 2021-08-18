@@ -110,7 +110,7 @@ export const buildPhraseFilter = (
           [field.name]: convertedValue,
         },
       },
-    };
+    } as PhraseFilter;
   }
 };
 

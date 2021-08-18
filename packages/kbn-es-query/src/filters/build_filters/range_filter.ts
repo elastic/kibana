@@ -36,9 +36,9 @@ const dateComparators = {
  * An interface for all possible range filter params
  * @public
  */
-export interface RangeFilterParams extends estypes.QueryDslRangeQuery {
+export type RangeFilterParams = estypes.QueryDslRangeQuery & {
   format?: string;
-}
+};
 
 const hasRangeKeys = (params: RangeFilterParams) =>
   Boolean(
