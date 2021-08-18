@@ -125,17 +125,14 @@ export class TelemetryExceptionListsTask {
 
     // Lists Telemetry: Endpoint Event Filters
 
-    const epFilterLists = await this.sender.fetchEndpointList(ENDPOINT_EVENT_FILTERS_LIST_ID);
-    const epFilterListsJson = templateEndpointExceptions(
-      epFilterLists.data,
-      LIST_ENDPOINT_EVENT_FILTER
-    );
-    this.logger.debug(`EP Event Filters: ${epFilterListsJson}`);
+    const epFilters = await this.sender.fetchEndpointList(ENDPOINT_EVENT_FILTERS_LIST_ID);
+    const epFiltersJson = templateEndpointExceptions(epFilters.data, LIST_ENDPOINT_EVENT_FILTER);
+    this.logger.debug(`EP Event Filters: ${epFiltersJson}`);
 
-    batchTelemetryRecords(epFilterListsJson, MAX_TELEMETRY_BATCH).forEach((batch) =>
+    batchTelemetryRecords(epFiltersJson, MAX_TELEMETRY_BATCH).forEach((batch) =>
       this.sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch)
     );
 
-    return trustedAppsJson.length + epExceptionsJson.length + epFilterListsJson.length;
+    return trustedAppsJson.length + epExceptionsJson.length + epFiltersJson.length;
   };
 }
