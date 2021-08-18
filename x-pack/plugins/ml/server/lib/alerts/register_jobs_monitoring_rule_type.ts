@@ -143,7 +143,7 @@ export function registerJobsMonitoringRuleType({
       const executionResult = await getTestsResults(options);
 
       if (executionResult.length > 0) {
-        logger.info(
+        logger.debug(
           `"${name}" rule is scheduling actions for tests: ${executionResult
             .map((v) => v.name)
             .join(', ')}`

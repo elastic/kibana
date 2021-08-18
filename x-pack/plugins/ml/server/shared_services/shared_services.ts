@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { IClusterClient, IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import {
+  IClusterClient,
+  IScopedClusterClient,
+  SavedObjectsClientContract,
+  UiSettingsServiceStart,
+} from 'kibana/server';
 import { SpacesPluginStart } from '../../../spaces/server';
 import { KibanaRequest } from '../../.././../../src/core/server';
 import { MlLicense } from '../../common/license';
@@ -34,6 +39,8 @@ import {
   getJobsHealthServiceProvider,
   JobsHealthServiceProvider,
 } from '../lib/alerts/jobs_health_service';
+import type { FieldFormatsStart } from '../../../../../src/plugins/field_formats/server';
+import type { FieldFormatsRegistryProvider } from '../../common/types/kibana';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
@@ -64,6 +71,7 @@ interface OkParams {
   scopedClient: IScopedClusterClient;
   mlClient: MlClient;
   jobSavedObjectService: JobSavedObjectService;
+  getFieldsFormatRegistry: FieldFormatsRegistryProvider;
 }
 
 type OkCallback = (okParams: OkParams) => any;
@@ -76,6 +84,8 @@ export function createSharedServices(
   resolveMlCapabilities: ResolveMlCapabilities,
   getClusterClient: () => IClusterClient | null,
   getInternalSavedObjectsClient: () => SavedObjectsClientContract | null,
+  getUiSettings: () => UiSettingsServiceStart | null,
+  getFieldsFormat: () => FieldFormatsStart | null,
   isMlReady: () => Promise<void>
 ): {
   sharedServicesProviders: SharedServices;
@@ -97,12 +107,18 @@ export function createSharedServices(
       internalSavedObjectsClient,
       authorization,
       getSpaces !== undefined,
-      isMlReady
+      isMlReady,
+      getUiSettings,
+      getFieldsFormat
     );
 
-    const { hasMlCapabilities, scopedClient, mlClient, jobSavedObjectService } = getRequestItems(
-      request
-    );
+    const {
+      hasMlCapabilities,
+      scopedClient,
+      mlClient,
+      jobSavedObjectService,
+      getFieldsFormatRegistry,
+    } = getRequestItems(request);
     const asyncGuards: Array<Promise<void>> = [];
 
     const guards: Guards = {
@@ -120,7 +136,7 @@ export function createSharedServices(
       },
       async ok(callback: OkCallback) {
         await Promise.all(asyncGuards);
-        return callback({ scopedClient, mlClient, jobSavedObjectService });
+        return callback({ scopedClient, mlClient, jobSavedObjectService, getFieldsFormatRegistry });
       },
     };
     return guards;
@@ -154,7 +170,9 @@ function getRequestItemsProvider(
   internalSavedObjectsClient: SavedObjectsClientContract,
   authorization: SecurityPluginSetup['authz'] | undefined,
   spaceEnabled: boolean,
-  isMlReady: () => Promise<void>
+  isMlReady: () => Promise<void>,
+  getUiSettings: () => UiSettingsServiceStart | null,
+  getFieldsFormat: () => FieldFormatsStart | null
 ) {
   return (request: KibanaRequest) => {
     const getHasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities);
@@ -173,6 +191,10 @@ function getRequestItemsProvider(
       isMlReady
     );
 
+    const uiSettingsClient = getUiSettings()!.asScopedToClient(savedObjectsClient);
+    const getFieldsFormatRegistry = () =>
+      getFieldsFormat()!.fieldFormatServiceFactory(uiSettingsClient);
+
     if (clusterClient === null) {
       throw new MLClusterClientUninitialized(`ML's cluster client has not been initialized`);
     }
@@ -190,6 +212,12 @@ function getRequestItemsProvider(
       };
       mlClient = getMlClient(scopedClient, jobSavedObjectService);
     }
-    return { hasMlCapabilities, scopedClient, mlClient, jobSavedObjectService };
+    return {
+      hasMlCapabilities,
+      scopedClient,
+      mlClient,
+      jobSavedObjectService,
+      getFieldsFormatRegistry,
+    };
   };
 }

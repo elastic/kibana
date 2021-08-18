@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { memoize, keyBy, groupBy } from 'lodash';
-import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { groupBy, keyBy, memoize } from 'lodash';
+import { KibanaRequest, Logger, SavedObjectsClientContract } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
-import { Logger } from 'kibana/server';
 import { MlJob } from '@elastic/elasticsearch/api/types';
 import { MlClient } from '../ml_client';
 import { JobSelection } from '../../routes/schemas/alerting_schema';
@@ -35,6 +34,7 @@ import {
   jobAuditMessagesProvider,
   JobAuditMessagesService,
 } from '../../models/job_audit_messages/job_audit_messages';
+import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 
 interface TestResult {
   name: string;
@@ -48,8 +48,18 @@ export function jobsHealthServiceProvider(
   datafeedsService: DatafeedsService,
   annotationService: AnnotationService,
   jobAuditMessagesService: JobAuditMessagesService,
+  getFieldsFormatRegistry: FieldFormatsRegistryProvider,
   logger: Logger
 ) {
+  /**
+   * Provides a callback for date formatting based on the Kibana settings.
+   */
+  const getDateFormatter = memoize(async () => {
+    const fieldFormatsRegistry = await getFieldsFormatRegistry();
+    const dateFormatter = fieldFormatsRegistry.deserialize({ id: 'date' });
+    return dateFormatter.convert.bind(dateFormatter);
+  });
+
   /**
    * Extracts result list of jobs based on included and excluded selection of jobs and groups.
    * @param includeJobs
@@ -122,8 +132,8 @@ export function jobsHealthServiceProvider(
   );
 
   /** Gets values for translation string */
-  const getJobsAlertingMessageValues = <T extends Array<{ job_id: string }>>(response: T) => {
-    const jobIds = response.map((v) => v.job_id);
+  const getJobsAlertingMessageValues = <T extends Array<{ job_id: string }>>(results: T) => {
+    const jobIds = results.map((v) => v.job_id);
     return {
       count: jobIds.length,
       jobsString: jobIds.join(', '),
@@ -173,13 +183,15 @@ export function jobsHealthServiceProvider(
     async getMmlReport(jobIds: string[]): Promise<MmlTestResponse[]> {
       const jobsStats = await getJobStats(jobIds);
 
+      const dateFormatter = await getDateFormatter();
+
       return jobsStats
         .filter((j) => j.state === 'opened' && j.model_size_stats.memory_status !== 'ok')
         .map(({ job_id: jobId, model_size_stats: modelSizeStats }) => {
           return {
             job_id: jobId,
             memory_status: modelSizeStats.memory_status,
-            log_time: modelSizeStats.log_time,
+            log_time: dateFormatter(modelSizeStats.log_time),
             model_bytes: modelSizeStats.model_bytes,
             model_bytes_memory_limit: modelSizeStats.model_bytes_memory_limit,
             peak_model_bytes: modelSizeStats.peak_model_bytes,
@@ -211,6 +223,8 @@ export function jobsHealthServiceProvider(
 
       const defaultLookbackInterval = resolveLookbackInterval(resultJobs, datafeeds!);
       const earliestMs = getDelayedDataLookbackTimestamp(timeInterval, defaultLookbackInterval);
+
+      const getFormattedDate = await getDateFormatter();
 
       const annotations: DelayedDataResponse[] = (
         await annotationService.getDelayedDataAnnotations({
@@ -244,6 +258,12 @@ export function jobsHealthServiceProvider(
             v.end_timestamp > getDelayedDataLookbackTimestamp(timeInterval, jobLookbackInterval);
 
           return isDocCountExceededThreshold && isEndTimestampWithinRange;
+        })
+        .map((v) => {
+          return {
+            ...v,
+            end_timestamp: getFormattedDate(v.end_timestamp),
+          };
         });
 
       return annotations;
@@ -255,10 +275,21 @@ export function jobsHealthServiceProvider(
      *                          about an error only once, limit the scope of the errors search.
      */
     async getErrorsReport(jobIds: string[], previousStartedAt: Date) {
-      return await jobAuditMessagesService.getJobsErrorMessages(
-        jobIds,
-        previousStartedAt.getTime()
-      );
+      const getFormattedDate = await getDateFormatter();
+
+      return (
+        await jobAuditMessagesService.getJobsErrorMessages(jobIds, previousStartedAt.getTime())
+      ).map((v) => {
+        return {
+          ...v,
+          errors: v.errors.map((e) => {
+            return {
+              ...e,
+              timestamp: getFormattedDate(e.timestamp),
+            };
+          }),
+        };
+      });
     },
     /**
      * Retrieves report grouped by test.
@@ -307,7 +338,7 @@ export function jobsHealthServiceProvider(
       if (config.mml.enabled) {
         const response = await this.getMmlReport(jobIds);
         if (response && response.length > 0) {
-          const { hard_limit: hardLimitJobs, soft_limit: sofLimitJobs } = groupBy(
+          const { hard_limit: hardLimitJobs, soft_limit: softLimitJobs } = groupBy(
             response,
             'memory_status'
           );
@@ -331,7 +362,7 @@ export function jobsHealthServiceProvider(
                       {
                         defaultMessage:
                           '{count, plural, one {Job} other {Jobs}} {jobsString} reached the soft model memory limit. Assign the job more memory or edit the datafeed filter to limit scope of analysis.',
-                        values: getJobsAlertingMessageValues(sofLimitJobs),
+                        values: getJobsAlertingMessageValues(softLimitJobs),
                       }
                     ),
             },
@@ -405,12 +436,13 @@ export function getJobsHealthServiceProvider(getGuards: GetGuards) {
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
-            .ok(({ mlClient, scopedClient }) =>
+            .ok(({ mlClient, scopedClient, getFieldsFormatRegistry }) =>
               jobsHealthServiceProvider(
                 mlClient,
                 datafeedsProvider(scopedClient, mlClient),
                 annotationServiceProvider(scopedClient),
                 jobAuditMessagesProvider(scopedClient, mlClient),
+                getFieldsFormatRegistry,
                 logger
               ).getTestsResults(...args)
             );

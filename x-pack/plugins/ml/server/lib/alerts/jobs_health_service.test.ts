@@ -14,6 +14,7 @@ import { AnnotationService } from '../../models/annotation_service/annotation';
 import { JobsHealthExecutorOptions } from './register_jobs_monitoring_rule_type';
 import { JobAuditMessagesService } from '../../models/job_audit_messages/job_audit_messages';
 import { DeepPartial } from '../../../common/types/common';
+import { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 
 const MOCK_DATE_NOW = 1487076708000;
 
@@ -159,11 +160,16 @@ describe('JobsHealthService', () => {
     debug: jest.fn(),
   } as unknown) as jest.Mocked<Logger>;
 
+  const getFieldsFormatRegistry = jest.fn().mockImplementation(() => {
+    return Promise.resolve({});
+  }) as jest.Mocked<FieldFormatsRegistryProvider>;
+
   const jobHealthService: JobsHealthService = jobsHealthServiceProvider(
     mlClient,
     datafeedsService,
     annotationService,
     jobAuditMessagesService,
+    getFieldsFormatRegistry,
     logger
   );
 
