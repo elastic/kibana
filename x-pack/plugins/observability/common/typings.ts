@@ -8,11 +8,11 @@ import * as t from 'io-ts';
 
 export type Maybe<T> = T | null | undefined;
 
-export const alertWorkflowStatusRt = t.union([
-  t.literal('open'),
-  t.literal('acknowledged'),
-  t.literal('closed'),
-]);
+export const alertWorkflowStatusRt = t.keyof({
+  open: null,
+  acknowledged: null,
+  closed: null,
+});
 export type AlertWorkflowStatus = t.TypeOf<typeof alertWorkflowStatusRt>;
 
 export interface ApmIndicesConfig {
