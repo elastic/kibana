@@ -37,12 +37,10 @@ export default ({ getService }: FtrProviderContext) => {
           .post(RAC_ALERTS_BULK_UPDATE_URL)
           .set('kbn-xsrf', 'true')
           .send({ ids: ['123'], status: 'open', index: '.siem-signals-default' });
-
         // remove any server generated items that are indeterministic
         delete body.took;
         expect(body).to.eql(getSignalStatusEmptyResponse());
       });
-
       it('should not give errors when querying and the signals index does exist and is empty', async () => {
         await createSignalsIndex(supertest);
         await supertest

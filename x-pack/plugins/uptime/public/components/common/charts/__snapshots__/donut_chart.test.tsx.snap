@@ -53,7 +53,6 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "fill": "#333",
               "fontFamily": "sans-serif",
               "fontSize": 10,
-              "fontStyle": "bold",
               "padding": Object {
                 "inner": 8,
                 "outer": 0,
@@ -64,7 +63,6 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "fill": "#333",
               "fontFamily": "sans-serif",
               "fontSize": 12,
-              "fontStyle": "bold",
               "padding": Object {
                 "inner": 8,
                 "outer": 0,
