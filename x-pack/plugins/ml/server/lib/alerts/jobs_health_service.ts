@@ -133,8 +133,10 @@ export function jobsHealthServiceProvider(
   );
 
   /** Gets values for translation string */
-  const getJobsAlertingMessageValues = <T extends Array<{ job_id: string }>>(results: T) => {
-    const jobIds = results.map((v) => v.job_id);
+  const getJobsAlertingMessageValues = <T extends Array<{ job_id: string } | undefined>>(
+    results: T
+  ) => {
+    const jobIds = (results || []).filter(isDefined).map((v) => v.job_id);
     return {
       count: jobIds.length,
       jobsString: jobIds.join(', '),
@@ -320,6 +322,7 @@ export function jobsHealthServiceProvider(
       if (config.datafeed.enabled) {
         const response = await this.getNotStartedDatafeeds(jobIds);
         if (response && response.length > 0) {
+          const { count, jobsString } = getJobsAlertingMessageValues(response);
           results.push({
             name: HEALTH_CHECK_NAMES.datafeed.name,
             context: {
@@ -329,7 +332,7 @@ export function jobsHealthServiceProvider(
                 {
                   defaultMessage:
                     'Datafeed is not started for {count, plural, one {job} other {jobs}} {jobsString}',
-                  values: getJobsAlertingMessageValues(response),
+                  values: { count, jobsString },
                 }
               ),
             },
@@ -345,28 +348,49 @@ export function jobsHealthServiceProvider(
             'memory_status'
           );
 
+          const {
+            count: hardLimitCount,
+            jobsString: hardLimitJobsString,
+          } = getJobsAlertingMessageValues(hardLimitJobs);
+          const {
+            count: softLimitCount,
+            jobsString: softLimitJobsString,
+          } = getJobsAlertingMessageValues(softLimitJobs);
+
+          let message = '';
+
+          if (hardLimitCount > 0) {
+            message = i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlMessage', {
+              defaultMessage: `{count, plural, one {Job} other {Jobs}} {jobsString} reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.`,
+              values: {
+                count: hardLimitCount,
+                jobsString: hardLimitJobsString,
+              },
+            });
+          }
+
+          if (softLimitCount > 0) {
+            if (message.length > 0) {
+              message += '\n';
+            }
+            message += i18n.translate(
+              'xpack.ml.alertTypes.jobsHealthAlertingRule.mmlSoftLimitMessage',
+              {
+                defaultMessage:
+                  '{count, plural, one {Job} other {Jobs}} {jobsString} reached the soft model memory limit. Assign the job more memory or edit the datafeed filter to limit scope of analysis.',
+                values: {
+                  count: softLimitCount,
+                  jobsString: softLimitJobsString,
+                },
+              }
+            );
+          }
+
           results.push({
             name: HEALTH_CHECK_NAMES.mml.name,
             context: {
               results: response,
-              message:
-                hardLimitJobs.length > 0
-                  ? i18n.translate(
-                      'xpack.ml.alertTypes.jobsHealthAlertingRule.mmlHardLimitMessage',
-                      {
-                        defaultMessage:
-                          '{count, plural, one {Job} other {Jobs}} {jobsString} reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.',
-                        values: getJobsAlertingMessageValues(hardLimitJobs),
-                      }
-                    )
-                  : i18n.translate(
-                      'xpack.ml.alertTypes.jobsHealthAlertingRule.mmlSoftLimitMessage',
-                      {
-                        defaultMessage:
-                          '{count, plural, one {Job} other {Jobs}} {jobsString} reached the soft model memory limit. Assign the job more memory or edit the datafeed filter to limit scope of analysis.',
-                        values: getJobsAlertingMessageValues(softLimitJobs),
-                      }
-                    ),
+              message,
             },
           });
         }
@@ -379,6 +403,8 @@ export function jobsHealthServiceProvider(
           config.delayedData.docsCount
         );
 
+        const { count, jobsString } = getJobsAlertingMessageValues(response);
+
         if (response.length > 0) {
           results.push({
             name: HEALTH_CHECK_NAMES.delayedData.name,
@@ -389,7 +415,7 @@ export function jobsHealthServiceProvider(
                 {
                   defaultMessage:
                     '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {is} other {are}} suffering from delayed data.',
-                  values: getJobsAlertingMessageValues(response),
+                  values: { count, jobsString },
                 }
               ),
             },

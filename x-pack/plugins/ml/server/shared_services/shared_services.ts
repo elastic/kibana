@@ -199,7 +199,7 @@ function getRequestItemsProvider(
     }
 
     const uiSettingsClient = getUiSettings()?.asScopedToClient(savedObjectsClient);
-    if (uiSettingsClient === null) {
+    if (!uiSettingsClient) {
       throw getCustomError(
         'MLUISettingsClientUninitialized',
         `ML's UI settings client has not been initialized`
