@@ -29,7 +29,6 @@ export enum TELEMETRY_LAYER_TYPE {
   ES_AGG_HEATMAP = 'es_agg_heatmap',
   EMS_REGION = 'ems_region',
   EMS_BASEMAP = 'ems_basemap',
-  KBN_REGION = 'kbn_region',
   KBN_TMS_RASTER = 'kbn_tms_raster',
   UX_TMS_RASTER = 'ux_tms_raster', // configured in the UX layer wizard of Maps
   UX_TMS_MVT = 'ux_tms_mvt', // configured in the UX layer wizard of Maps

@@ -398,7 +398,6 @@
     "tar": "4.4.13",
     "tinycolor2": "1.4.1",
     "tinygradient": "0.4.3",
-    "topojson-client": "3.1.0",
     "tree-kill": "^1.2.2",
     "ts-easing": "^0.2.0",
     "tslib": "^2.0.0",

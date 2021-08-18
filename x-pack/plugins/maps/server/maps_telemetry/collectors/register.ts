@@ -134,18 +134,6 @@ export function registerMapsUsageCollector(
             _meta: { description: 'total number of es track layers in cluster' },
           },
         },
-        kbn_region: {
-          min: { type: 'long', _meta: { description: 'min number of kbn region layers per map' } },
-          max: { type: 'long', _meta: { description: 'max number of kbn region layers per map' } },
-          avg: {
-            type: 'float',
-            _meta: { description: 'avg number of kbn region layers per map' },
-          },
-          total: {
-            type: 'long',
-            _meta: { description: 'total number of kbn region layers in cluster' },
-          },
-        },
         kbn_tms_raster: {
           min: { type: 'long', _meta: { description: 'min number of kbn tms layers per map' } },
           max: { type: 'long', _meta: { description: 'max number of kbn tms layers per map' } },

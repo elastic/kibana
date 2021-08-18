@@ -77,14 +77,6 @@ export const getEMSSettings = () => {
 
 export const getEmsTileLayerId = () => getKibanaCommonConfig().emsTileLayerId;
 
-export const getRegionmapLayers = () => {
-  const config = getKibanaCommonConfig();
-  if (config.regionmap && config.regionmap.layers) {
-    return config.regionmap.layers;
-  } else {
-    return [];
-  }
-};
 export const getTilemap = () => {
   const config = getKibanaCommonConfig();
   if (config.tilemap) {

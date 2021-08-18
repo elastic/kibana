@@ -76,37 +76,6 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
       });
       return completeConfig;
     },
-    (
-      completeConfig: Record<string, any>,
-      rootPath: string,
-      addDeprecation: AddConfigDeprecation
-    ) => {
-      if (_.get(completeConfig, 'map.regionmap') === undefined) {
-        return completeConfig;
-      }
-      addDeprecation({
-        message: i18n.translate('xpack.maps.deprecation.regionmap.message', {
-          defaultMessage: 'map.regionmap is deprecated and is no longer used',
-        }),
-        correctiveActions: {
-          manualSteps: [
-            i18n.translate('xpack.maps.deprecation.regionmap.step1', {
-              defaultMessage:
-                'Remove "map.regionmap" in the Kibana config file, CLI flag, or environment variable (in Docker only).',
-            }),
-            i18n.translate('xpack.maps.deprecation.regionmap.step2', {
-              defaultMessage:
-                'Use "Upload GeoJSON" to upload each layer defined by "map.regionmap.layers".',
-            }),
-            i18n.translate('xpack.maps.deprecation.regionmap.step3', {
-              defaultMessage:
-                'Update all maps with "Configured GeoJSON" layers. Use Choropleth layer wizard to build a replacement layer. Delete "Configured GeoJSON" layer from your map.',
-            }),
-          ],
-        },
-      });
-      return completeConfig;
-    },
   ],
 };
 
