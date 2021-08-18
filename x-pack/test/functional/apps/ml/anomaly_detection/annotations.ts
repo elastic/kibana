@@ -202,6 +202,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.jobTable.filterWithSearchString(jobId, 1);
         await ml.jobTable.openAnnotationsTab(jobId);
 
+        await ml.jobAnnotations.openDatafeedChartFlyout(annotationId, jobId);
         await ml.jobAnnotations.assertDelayedDataChartExists(annotationId);
       });
     });

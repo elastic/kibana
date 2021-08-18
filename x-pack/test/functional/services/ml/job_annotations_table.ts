@@ -348,31 +348,44 @@ export function MachineLearningJobAnnotationsProvider({ getService }: FtrProvide
       });
     }
 
-    public async clickAnnotationsDelayedDataChartAction(annotationId: string) {
+    public async ensureAllMenuPopoversClosed() {
+      await retry.tryForTime(5000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        const popoverExists = await find.existsByCssSelector('euiContextMenuPanel');
+        expect(popoverExists).to.eql(false, 'All popovers should be closed');
+      });
+    }
+
+    public async ensureAnnotationsActionsMenuOpen(annotationId: string) {
       await retry.tryForTime(10 * 1000, async () => {
+        await this.ensureAllMenuPopoversClosed();
         const annotationsTable = await testSubjects.find('mlAnnotationsTable', 30 * 1000);
         const collapsedActionsButton = await annotationsTable.findByCssSelector(
           `[data-test-subj="euiCollapsedItemActionsButton"]`
         );
         collapsedActionsButton.click();
+        await find.existsByCssSelector('euiContextMenuPanel');
+      });
+    }
+
+    public async openDatafeedChartFlyout(annotationId: string, jobId: string) {
+      await retry.tryForTime(10 * 1000, async () => {
+        await this.ensureAnnotationsActionsMenuOpen(annotationId);
+        await this.assertAnnotationsDelayedDataChartActionExists(annotationId);
+
+        await testSubjects.clickWhenNotDisabled('mlAnnotationsActionViewDatafeed');
+        await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyout');
+        await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyoutTitle');
+
+        const title = await testSubjects.getVisibleText('mlAnnotationsViewDatafeedFlyoutTitle');
+        expect(title).to.eql(
+          `Datafeed chart for ${jobId}`,
+          `Expected annotations flyout title to be 'Datafeed chart for ${jobId}' but got ${title}`
+        );
       });
     }
 
     public async assertDelayedDataChartExists(annotationId: string) {
-      await this.clickAnnotationsDelayedDataChartAction(annotationId);
-      await this.assertAnnotationsDelayedDataChartActionExists(annotationId);
-      await testSubjects.clickWhenNotDisabled('mlAnnotationsActionViewDatafeed');
-
-      await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyout');
-
-      await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyoutTitle');
-
-      const title = await testSubjects.getVisibleText('mlAnnotationsViewDatafeedFlyoutTitle');
-      expect(title).to.contain(
-        `Datafeed chart for`,
-        `Expected annotations flyout title to be 'Datafeed chart for {jobId}' but got ${title}`
-      );
-
       await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyoutChart');
     }
   })();
