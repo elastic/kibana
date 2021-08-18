@@ -75,7 +75,7 @@ This page has moved. Please see <<reporting-getting-started>>.
 [role="exclude",id="add-sample-data"]
 == Add sample data
 
-This page has moved. Please see <<kibana-concepts-analysts>>.
+This page has moved. Refer to <<get-started>>.
 
 [role="exclude",id="tilemap"]
 == Coordinate map
@@ -359,10 +359,10 @@ This content has moved. Refer to <<xpack-profiler>>.
 
 This content has moved. Refer to <<xpack-profiler>>.
 
-[role="exclude",id="get-started"]
+[role="exclude",id="kibana-concepts-analysts"]
 == Quick start guide
 
-This content has moved. Refer to <<kibana-concepts-analysts>>.
+This content has moved. Refer to <<get-started>>.
 
 [role="exclude",id="autocomplete-suggestions"]
 == Suggestions for autocomplete
