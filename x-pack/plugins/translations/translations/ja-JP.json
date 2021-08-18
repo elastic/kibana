@@ -18230,7 +18230,6 @@
     "xpack.observability.alertsFlyout.durationLabel": "期間",
     "xpack.observability.alertsFlyout.expectedValueLabel": "想定された値",
     "xpack.observability.alertsFlyout.ruleTypeLabel": "ルールタイプ",
-    "xpack.observability.alertsFlyout.severityLabel": "深刻度",
     "xpack.observability.alertsFlyout.statusLabel": "ステータス",
     "xpack.observability.alertsLinkTitle": "アラート",
     "xpack.observability.alertsTitle": "アラート",

@@ -44,7 +44,6 @@ import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana
 import { asDuration } from '../../../../common/utils/formatters';
 import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 import { parseAlert } from '../parse_alert';
-import { SeverityBadge } from '../severity_badge';
 
 type AlertsFlyoutProps = {
   alert?: TopAlert;
