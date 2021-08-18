@@ -18,6 +18,7 @@ export function LatencyCorrelationsHelpPopover() {
       anchorPosition="leftUp"
       button={
         <HelpPopoverButton
+          buttonTextEnabled={true}
           onClick={() => {
             setIsPopoverOpen(!isPopoverOpen);
           }}

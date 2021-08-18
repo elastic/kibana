@@ -77,7 +77,23 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: agentPolicyId,
             enabled: true,
             output_id: '',
-            inputs: [],
+            inputs: [
+              {
+                policy_template: 'package_policy_upgrade',
+                type: 'test_input',
+                enabled: true,
+                streams: [
+                  {
+                    id: 'test-package_policy_upgrade-xxxx',
+                    enabled: true,
+                    data_stream: {
+                      type: 'test_stream',
+                      dataset: 'package_policy_upgrade.test_stream',
+                    },
+                  },
+                ],
+              },
+            ],
             package: {
               name: 'package_policy_upgrade',
               title: 'This is a test package for upgrading package policies',
@@ -226,7 +242,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       describe('when "dryRun: true" is provided', function () {
-        it('should return a diff with missingVars', async function () {
+        it('should return a diff with no errors', async function () {
           const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
             .post(`/api/fleet/package_policies/upgrade`)
             .set('kbn-xsrf', 'xxxx')
@@ -239,7 +255,6 @@ export default function (providerContext: FtrProviderContext) {
           expect(body.length).to.be(1);
           expect(body[0].diff?.length).to.be(2);
           expect(body[0].hasErrors).to.be(false);
-          expect(body[0].diff?.[1].missingVars).to.contain('test_var');
         });
       });
 
