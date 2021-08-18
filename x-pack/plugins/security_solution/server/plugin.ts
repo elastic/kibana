@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { once } from 'lodash';
 import { Observable } from 'rxjs';
 import LRU from 'lru-cache';
 import { estypes } from '@elastic/elasticsearch';
@@ -22,7 +21,10 @@ import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '../../../../src/plugins/data/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import {
+  UsageCollectionSetup,
+  UsageCounter,
+} from '../../../../src/plugins/usage_collection/server';
 import {
   PluginSetupContract as AlertingSetup,
   PluginStartContract as AlertPluginStartContract,
@@ -30,15 +32,13 @@ import {
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 
 import { PluginStartContract as CasesPluginStartContract } from '../../cases/server';
-import {
-  ECS_COMPONENT_TEMPLATE_NAME,
-  TECHNICAL_COMPONENT_TEMPLATE_NAME,
-} from '../../rule_registry/common/assets';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
 import { SecurityPluginSetup as SecuritySetup, SecurityPluginStart } from '../../security/server';
 import {
-  RuleDataClient,
+  IRuleDataClient,
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
+  Dataset,
 } from '../../rule_registry/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
@@ -146,6 +146,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   private manifestTask: ManifestTask | undefined;
   private artifactsCache: LRU<string, Buffer>;
+  private telemetryUsageCounter?: UsageCounter;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
@@ -184,6 +185,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       usageCollection: plugins.usageCollection,
     });
 
+    this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
+
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
       APP_ID,
@@ -206,74 +209,46 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // TODO: Once we are past experimental phase this check can be removed along with legacy registration of rules
     const isRuleRegistryEnabled = experimentalFeatures.ruleRegistryEnabled;
 
-    let ruleDataClient: RuleDataClient | null = null;
     const { ruleDataService } = plugins.ruleRegistry;
+    let ruleDataClient: IRuleDataClient | null = null;
+
     if (isRuleRegistryEnabled) {
-      const alertsIndexPattern = ruleDataService.getFullAssetName('security.alerts*');
-
-      const initializeRuleDataTemplates = once(async () => {
-        if (!ruleDataService.isWriteEnabled()) {
-          return;
-        }
-
-        // TODO: convert the aliases to FieldMaps. Requires enhancing FieldMap to support alias path.
-        // Split aliases by component template since we need to alias some fields in technical field mappings,
-        // some fields in security solution specific component template.
-        const aliases: Record<string, estypes.MappingProperty> = {};
-        Object.entries(aadFieldConversion).forEach(([key, value]) => {
-          aliases[key] = {
-            type: 'alias',
-            path: value,
-          };
-        });
-
-        const componentTemplateName = ruleDataService.getFullAssetName('security.alerts-mappings');
-        await ruleDataService.createOrUpdateComponentTemplate({
-          name: componentTemplateName,
-          body: {
-            template: {
-              settings: {
-                number_of_shards: 1,
-              },
-              mappings: mappingFromFieldMap(
-                { ...alertsFieldMap, ...rulesFieldMap, ...ctiFieldMap },
-                false
-              ),
-            },
-          },
-        });
-
-        await ruleDataService.createOrUpdateIndexTemplate({
-          name: ruleDataService.getFullAssetName('security.alerts-index-template'),
-          body: {
-            index_patterns: [alertsIndexPattern],
-            composed_of: [
-              ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
-              ruleDataService.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
-              componentTemplateName,
-            ],
-          },
-        });
-        await ruleDataService.updateIndexMappingsMatchingPattern(alertsIndexPattern);
+      // NOTE: this is not used yet
+      // TODO: convert the aliases to FieldMaps. Requires enhancing FieldMap to support alias path.
+      // Split aliases by component template since we need to alias some fields in technical field mappings,
+      // some fields in security solution specific component template.
+      const aliases: Record<string, estypes.MappingProperty> = {};
+      Object.entries(aadFieldConversion).forEach(([key, value]) => {
+        aliases[key] = {
+          type: 'alias',
+          path: value,
+        };
       });
 
-      // initialize eagerly
-      const initializeRuleDataTemplatesPromise = initializeRuleDataTemplates().catch((err) => {
-        this.logger!.error(err);
+      ruleDataClient = ruleDataService.initializeIndex({
+        feature: SERVER_APP_ID,
+        registrationContext: 'security',
+        dataset: Dataset.alerts,
+        componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
+        componentTemplates: [
+          {
+            name: 'mappings',
+            version: 0,
+            mappings: mappingFromFieldMap(
+              { ...alertsFieldMap, ...rulesFieldMap, ...ctiFieldMap },
+              false
+            ),
+          },
+        ],
+        indexTemplate: {
+          version: 0,
+        },
+        secondaryAlias: config.signalsIndex,
       });
-
-      const indexAlias = ruleDataService.getFullAssetName('security.alerts');
-
-      ruleDataClient = ruleDataService.getRuleDataClient(
-        SERVER_APP_ID,
-        indexAlias,
-        () => initializeRuleDataTemplatesPromise
-      );
 
       // Register rule types via rule-registry
       const createRuleOptions: CreateRuleOptions = {
         experimentalFeatures,
-        indexAlias,
         lists: plugins.lists,
         logger: this.logger,
         mergeStrategy: this.config.alertMergeStrategy,
@@ -310,9 +285,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       ...(isRuleRegistryEnabled ? racRuleTypes : []),
     ];
 
-    plugins.features.registerKibanaFeature(
-      getKibanaPrivilegesFeaturePrivileges(ruleTypes, isRuleRegistryEnabled)
-    );
+    plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));
 
     // Continue to register legacy rules against alerting client exposed through rule-registry
     if (this.setupPlugins.alerting != null) {
@@ -362,7 +335,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     });
 
-    this.telemetryEventsSender.setup(plugins.telemetry, plugins.taskManager);
+    this.telemetryEventsSender.setup(
+      plugins.telemetry,
+      plugins.taskManager,
+      this.telemetryUsageCounter
+    );
 
     return {};
   }

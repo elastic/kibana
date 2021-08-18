@@ -108,9 +108,14 @@ export const FieldName = React.memo<{
       });
     }, [handleClosePopOverTrigger]);
 
+    const closeTopN = useCallback(() => {
+      setShowTopN(false);
+    }, []);
+
     const hoverContent = useMemo(
       () => (
         <HoverActions
+          closeTopN={closeTopN}
           closePopOver={handleClosePopOverTrigger}
           field={fieldId}
           isObjectArray={false}
@@ -122,6 +127,7 @@ export const FieldName = React.memo<{
         />
       ),
       [
+        closeTopN,
         fieldId,
         handleClosePopOverTrigger,
         hoverActionsOwnFocus,
