@@ -486,7 +486,7 @@ describe('<EditPolicy /> serialization', () => {
 
     describe('deserialization', () => {
       beforeEach(async () => {
-        const policyToEdit = getDefaultHotPhasePolicy('my_policy');
+        const policyToEdit = getDefaultHotPhasePolicy();
         policyToEdit.policy.phases.frozen = {
           min_age: '1234m',
           actions: { searchable_snapshot: { snapshot_repository: 'myRepo' } },

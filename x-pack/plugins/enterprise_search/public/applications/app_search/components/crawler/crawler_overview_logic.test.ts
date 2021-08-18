@@ -52,6 +52,9 @@ const MOCK_SERVER_CRAWLER_DATA: CrawlerDataFromServer = {
       sitemaps: [],
       entry_points: [],
       crawl_rules: [],
+      deduplication_enabled: false,
+      deduplication_fields: ['title'],
+      available_deduplication_fields: ['title', 'description'],
     },
   ],
 };
@@ -112,6 +115,9 @@ describe('CrawlerOverviewLogic', () => {
             entryPoints: [],
             crawlRules: [],
             defaultCrawlRule: DEFAULT_CRAWL_RULE,
+            deduplicationEnabled: false,
+            deduplicationFields: ['title'],
+            availableDeduplicationFields: ['title', 'description'],
           },
         ],
       };

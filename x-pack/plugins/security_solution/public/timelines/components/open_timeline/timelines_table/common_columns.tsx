@@ -20,7 +20,7 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { TimelineType } from '../../../../../common/types/timeline';
 
-const DescriptionCell = styled.span`
+const LineClampTextContainer = styled.span`
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 5;
@@ -79,7 +79,11 @@ export const getCommonColumns = ({
             })
           }
         >
-          {isUntitled(timelineResult) ? i18n.UNTITLED_TIMELINE : title}
+          {isUntitled(timelineResult) ? (
+            i18n.UNTITLED_TIMELINE
+          ) : (
+            <LineClampTextContainer>{title}</LineClampTextContainer>
+          )}
         </EuiLink>
       ) : (
         <div data-test-subj={`title-no-saved-object-id-${title || 'no-title'}`}>
@@ -93,9 +97,9 @@ export const getCommonColumns = ({
     field: 'description',
     name: i18n.DESCRIPTION,
     render: (description: string) => (
-      <DescriptionCell data-test-subj="description">
+      <LineClampTextContainer data-test-subj="description">
         {description != null && description.trim().length > 0 ? description : getEmptyTagValue()}
-      </DescriptionCell>
+      </LineClampTextContainer>
     ),
     sortable: false,
   },

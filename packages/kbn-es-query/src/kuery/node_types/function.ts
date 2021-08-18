@@ -9,7 +9,7 @@
 import _ from 'lodash';
 
 import { functions } from '../functions';
-import { IndexPatternBase, KueryNode } from '../..';
+import { IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
 import { FunctionName, FunctionTypeBuildNode } from './types';
 
 export function buildNode(functionName: FunctionName, ...args: any[]) {
@@ -46,7 +46,7 @@ export function buildNodeWithArgumentNodes(
 export function toElasticsearchQuery(
   node: KueryNode,
   indexPattern?: IndexPatternBase,
-  config?: Record<string, any>,
+  config?: KueryQueryOptions,
   context?: Record<string, any>
 ) {
   const kueryFunction = functions[node.function as FunctionName];
