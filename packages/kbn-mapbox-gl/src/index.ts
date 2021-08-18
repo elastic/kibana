@@ -35,7 +35,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 mapboxgl.workerUrl = mbWorkerUrl;
 mapboxgl.setRTLTextPlugin(mbRtlPlugin);
 
-export {
+export type {
   mapboxgl,
   Map,
   GeoJSONSource,
