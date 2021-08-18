@@ -20,6 +20,8 @@ import {
 import { SourceIcon } from '../../../components/shared/source_icon';
 import { REMOTE_SOURCE_LABEL, CREATED_LABEL, STATUS_LABEL, READY_TEXT } from '../constants';
 
+import './source_info_card.scss';
+
 interface SourceInfoCardProps {
   sourceName: string;
   sourceType: string;
@@ -71,7 +73,7 @@ export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={null}>
-            <EuiText className="sourceStatus" textAlign="right" size="s">
+            <EuiText className="sourceInfoStatus" textAlign="right" size="s">
               <EuiHealth color="success">{READY_TEXT}</EuiHealth>
             </EuiText>
           </EuiFlexItem>
