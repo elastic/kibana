@@ -63,7 +63,7 @@ function buildBaseFilter(
     case 'phrases':
       return buildPhrasesFilter(field, params as string[], indexPattern);
     case 'range':
-      const { from: gte, to: lt } = params as RangeFilterParams;
+      const { from: gte, to: lt } = params as Record<string, string>;
       return buildRangeFilter(field, { lt, gte }, indexPattern);
     case 'range_from_value':
       return buildRangeFilter(field, params as RangeFilterParams, indexPattern);
