@@ -8,5 +8,6 @@
 export interface Alert {
   id: string;
   index: string;
-  source: unknown;
+  error?: Error;
+  source?: unknown;
 }

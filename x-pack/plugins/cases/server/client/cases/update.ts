@@ -567,16 +567,6 @@ export const update = async (
       );
     });
 
-    // Update the alert's status to match any case status or sync settings changes
-    await updateAlerts({
-      casesWithStatusChangedAndSynced,
-      casesWithSyncSettingChangedToOn,
-      caseService,
-      unsecuredSavedObjectsClient,
-      casesClientInternal,
-      logger,
-    });
-
     const returnUpdatedCase = myCases.saved_objects
       .filter((myCase) =>
         updatedCases.saved_objects.some((updatedCase) => updatedCase.id === myCase.id)
@@ -602,6 +592,17 @@ export const update = async (
         actionDate: updatedDt,
         actionBy: { email, full_name, username },
       }),
+    });
+
+    // Update the alert's status to match any case status or sync settings changes
+    // Attempt to do this after creating/changing the other entities just in case it fails
+    await updateAlerts({
+      casesWithStatusChangedAndSynced,
+      casesWithSyncSettingChangedToOn,
+      caseService,
+      unsecuredSavedObjectsClient,
+      casesClientInternal,
+      logger,
     });
 
     return CasesResponseRt.encode(returnUpdatedCase);

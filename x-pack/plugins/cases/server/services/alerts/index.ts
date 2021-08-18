@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import { isEmpty } from 'lodash';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { Logger } from 'kibana/server';
-import { MAX_ALERTS_PER_SUB_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common';
+import { MAX_ALERTS_PER_SUB_CASE } from '../../../common';
 import { AlertInfo, createCaseError } from '../../common';
 import { UpdateAlertRequest } from '../../client/alerts/types';
 import { AlertsClient } from '../../../../rule_registry/server';
@@ -50,19 +49,21 @@ export class AlertService {
         return;
       }
 
-      return await pMap(
-        alertsToUpdate,
-        async (alert: UpdateAlertRequest) =>
-          this.alertsClient?.update({
-            id: alert.id,
-            index: alert.index,
-            _version: undefined,
-            status: alert.status,
-          }),
-        {
-          concurrency: MAX_CONCURRENT_SEARCHES,
-        }
+      const updatedAlerts = await Promise.allSettled(
+        alertsToUpdate.map(({ id, index, status }) =>
+          this.alertsClient?.update({ id, index, status, _version: undefined })
+        )
       );
+
+      updatedAlerts.forEach((updatedAlert, index) => {
+        if (updatedAlert.status === 'rejected') {
+          logger.error(
+            `Failed to update status for alert: ${JSON.stringify(alertsToUpdate[index])}: ${
+              updatedAlert.reason
+            }`
+          );
+        }
+      });
     } catch (error) {
       throw createCaseError({
         message: `Failed to update alert status ids: ${JSON.stringify(alerts)}: ${error}`,
@@ -88,19 +89,35 @@ export class AlertService {
         return;
       }
 
-      const retrievedAlertsSource = await pMap(
-        alertsToGet,
-        async (alert: AlertInfo) => this.alertsClient?.get({ id: alert.id, index: alert.index }),
-        {
-          concurrency: MAX_CONCURRENT_SEARCHES,
-        }
+      const retrievedAlerts = await Promise.allSettled(
+        alertsToGet.map(({ id, index }) => this.alertsClient?.get({ id, index }))
       );
 
-      return retrievedAlertsSource.map((alert, index) => ({
-        id: alertsToGet[index].id,
-        index: alertsToGet[index].index,
-        source: alert,
-      }));
+      retrievedAlerts.forEach((alert, index) => {
+        if (alert.status === 'rejected') {
+          logger.error(
+            `Failed to retrieve alert: ${JSON.stringify(alertsToGet[index])}: ${alert.reason}`
+          );
+        }
+      });
+
+      return retrievedAlerts.map((alert, index) => {
+        let source: unknown | undefined;
+        let error: Error | undefined;
+
+        if (alert.status === 'fulfilled') {
+          source = alert.value;
+        } else {
+          error = alert.reason;
+        }
+
+        return {
+          id: alertsToGet[index].id,
+          index: alertsToGet[index].index,
+          source,
+          error,
+        };
+      });
     } catch (error) {
       throw createCaseError({
         message: `Failed to retrieve alerts ids: ${JSON.stringify(alertsInfo)}: ${error}`,
