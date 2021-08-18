@@ -6,12 +6,15 @@
  */
 
 export const getCustomError = (className: string, errorMessage: string) => {
-  const C = class extends Error {
+  const CustomError = class extends Error {
     constructor(message?: string) {
       super(message);
       Object.setPrototypeOf(this, new.target.prototype);
+      // Override the error instance name
+      Object.defineProperty(this, 'name', { value: className });
     }
   };
-  Object.defineProperty(C, 'name', { value: className });
-  return new C(errorMessage);
+  // set class name dynamically
+  Object.defineProperty(CustomError, 'name', { value: className });
+  return new CustomError(errorMessage);
 };
