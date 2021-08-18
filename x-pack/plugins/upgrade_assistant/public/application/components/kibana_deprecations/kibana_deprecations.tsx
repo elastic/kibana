@@ -8,27 +8,39 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-import { EuiButtonEmpty, EuiPageContent, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiPageContent, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { DomainDeprecationDetails } from 'kibana/public';
 import { SectionLoading } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
 import { NoDeprecationsPrompt } from '../shared';
-import { KibanaDeprecationList } from './deprecation_list';
+import { LEVEL_MAP } from '../constants';
 import { StepsModal, StepsModalContent } from './steps_modal';
 import { KibanaDeprecationErrors } from './kibana_deprecation_errors';
 import { ResolveDeprecationModal } from './resolve_deprecation_modal';
-import { LEVEL_MAP } from '../constants';
+import { KibanaDeprecationsTable } from './kibana_deprecations_table';
 
 const i18nTexts = {
   pageTitle: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.pageTitle', {
-    defaultMessage: 'Kibana',
+    defaultMessage: 'Kibana deprecation warnings',
   }),
-  pageDescription: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.pageDescription', {
-    defaultMessage:
-      'Review the issues listed here and make the necessary changes before upgrading. Critical issues must be resolved before you upgrade.',
-  }),
+  pageDescription: (
+    <FormattedMessage
+      id="xpack.upgradeAssistant.kibanaDeprecations.pageDescription"
+      defaultMessage="You must resolve all critical issues before upgrading. Follow the instructions or use {quickResolve} to fix issues automatically."
+      values={{
+        quickResolve: (
+          <strong>
+            {i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.quickResolveText', {
+              defaultMessage: 'Quick Resolve',
+            })}
+          </strong>
+        ),
+      }}
+    />
+  ),
   docLinkText: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.docLinkText', {
     defaultMessage: 'Documentation',
   }),
@@ -64,7 +76,7 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
   >(undefined);
   const [isResolvingDeprecation, setIsResolvingDeprecation] = useState(false);
 
-  const { deprecations, breadcrumbs, docLinks, api, notifications } = useAppContext();
+  const { deprecations, breadcrumbs, api, notifications } = useAppContext();
 
   const getAllDeprecations = useCallback(async () => {
     setIsLoading(true);
@@ -145,36 +157,22 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
         <SectionLoading>{i18nTexts.isLoading}</SectionLoading>
       </EuiPageContent>
     );
-  } else if (kibanaDeprecations?.length) {
+  }
+
+  if (kibanaDeprecations?.length) {
     return (
       <div data-test-subj="kibanaDeprecationsContent">
         <EuiPageHeader
           bottomBorder
           pageTitle={i18nTexts.pageTitle}
           description={i18nTexts.pageDescription}
-          rightSideItems={[
-            <EuiButtonEmpty
-              href={docLinks.links.upgradeAssistant}
-              target="_blank"
-              iconType="help"
-              data-test-subj="documentationLink"
-            >
-              {i18nTexts.docLinkText}
-            </EuiButtonEmpty>,
-          ]}
         />
 
         <EuiSpacer size="l" />
 
-        <KibanaDeprecationList
-          deprecations={kibanaDeprecations}
-          showStepsModal={toggleStepsModal}
-          showResolveModal={toggleResolveModal}
-          reloadDeprecations={getAllDeprecations}
-          isLoading={isLoading}
-        />
+        <KibanaDeprecationsTable deprecations={kibanaDeprecations} reload={getAllDeprecations} />
 
-        {stepsModalContent && (
+        {/* {stepsModalContent && (
           <StepsModal closeModal={() => toggleStepsModal()} modalContent={stepsModalContent} />
         )}
 
@@ -185,10 +183,12 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
             isResolvingDeprecation={isResolvingDeprecation}
             deprecation={resolveModalContent}
           />
-        )}
+        )} */}
       </div>
     );
-  } else if (error) {
+  }
+
+  if (error) {
     return <KibanaDeprecationErrors errorType="requestError" />;
   }
 
