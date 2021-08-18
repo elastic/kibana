@@ -183,15 +183,25 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.jobTable.openAnnotationsTab(jobId);
         await ml.jobAnnotations.assertAnnotationContentById(annotationId, expectedEditedAnnotation);
       });
+    });
+
+    describe('data feed flyout', function () {
+      const annotationId = `data-feed-flyout-annotation-id-${Date.now()}`;
+
+      before(async () => {
+        await ml.api.indexAnnotation(annotation as Partial<Annotation>, annotationId);
+      });
 
       it('displays delayed data chart for annotation', async () => {
         await ml.testExecution.logTestStep(
           'should display delayed data action in annotations table'
         );
-        // await ml.navigation.navigateToJobManagement();
-        // await ml.jobTable.waitForJobsToLoad();
-        // await ml.jobTable.filterWithSearchString(jobId, 1);
-        // await ml.jobTable.openAnnotationsTab(jobId);
+
+        await ml.navigation.navigateToJobManagement();
+        await ml.jobTable.waitForJobsToLoad();
+        await ml.jobTable.filterWithSearchString(jobId, 1);
+        await ml.jobTable.openAnnotationsTab(jobId);
+
         await ml.jobAnnotations.assertDelayedDataChartExists(annotationId);
       });
     });

@@ -344,40 +344,36 @@ export function MachineLearningJobAnnotationsProvider({ getService }: FtrProvide
 
     public async assertAnnotationsDelayedDataChartActionExists(annotationId: string) {
       await retry.tryForTime(1000, async () => {
-        await testSubjects.existOrFail(
-          this.rowSelector(annotationId, 'mlAnnotationsActionViewDatafeed')
-        );
+        await testSubjects.existOrFail('mlAnnotationsActionViewDatafeed');
       });
     }
 
     public async clickAnnotationsDelayedDataChartAction(annotationId: string) {
-      // await this.assertAnnotationsDelayedDataChartActionExists(annotationId);
-      await retry.tryForTime(1000, async () => {
-        await testSubjects.clickWhenNotDisabled('euiCollapsedItemActionsButton');
-        await testSubjects.clickWhenNotDisabled(
-          this.rowSelector(annotationId, 'mlAnnotationsActionViewDatafeed')
+      await retry.tryForTime(10 * 1000, async () => {
+        const annotationsTable = await testSubjects.find('mlAnnotationsTable', 30 * 1000);
+        const collapsedActionsButton = await annotationsTable.findByCssSelector(
+          `[data-test-subj="euiCollapsedItemActionsButton"]`
         );
-        await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyout');
-        // await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyoutChart');
-
-        // const title = await testSubjects.getVisibleText('mlAnnotationFlyoutTitle');
-        // expect(title).to.eql(
-        //   'Edit annotation',
-        //   `Expected annotations flyout title to be 'Edit annotation' but got ${title}`
-        // );
+        collapsedActionsButton.click();
       });
     }
 
     public async assertDelayedDataChartExists(annotationId: string) {
       await this.clickAnnotationsDelayedDataChartAction(annotationId);
-      // await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyout');
-      await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyoutChart');
+      await this.assertAnnotationsDelayedDataChartActionExists(annotationId);
+      await testSubjects.clickWhenNotDisabled('mlAnnotationsActionViewDatafeed');
 
-      // await retry.tryForTime(1000, async () => {
-      //   await testSubjects.existOrFail(
-      //     this.rowSelector(annotationId, 'mlAnnotationsActionViewDatafeed')
-      //   );
-      // });
+      await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyout');
+
+      await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyoutTitle');
+
+      const title = await testSubjects.getVisibleText('mlAnnotationsViewDatafeedFlyoutTitle');
+      expect(title).to.contain(
+        `Datafeed chart for`,
+        `Expected annotations flyout title to be 'Datafeed chart for {jobId}' but got ${title}`
+      );
+
+      await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyoutChart');
     }
   })();
 }
