@@ -104,7 +104,11 @@ const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage)
 describe('DetectionEnginePageComponent', () => {
   beforeAll(() => {
     (useParams as jest.Mock).mockReturnValue({});
-    (useUserData as jest.Mock).mockReturnValue([{}]);
+    (useUserData as jest.Mock).mockReturnValue([
+      {
+        hasIndexRead: true,
+      },
+    ]);
     (useSourcererScope as jest.Mock).mockReturnValue({
       indicesExist: true,
       indexPattern: {},

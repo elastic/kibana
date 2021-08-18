@@ -74,7 +74,11 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
     <MockKibanaContextProvider>
       <ReduxStoreProvider store={store}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <UserPrivilegesProvider kibanaCapabilities={({ siem: {} } as unknown) as Capabilities}>
+          <UserPrivilegesProvider
+            kibanaCapabilities={
+              ({ siem: { crud_alerts: true, read_alerts: true } } as unknown) as Capabilities
+            }
+          >
             <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
           </UserPrivilegesProvider>
         </ThemeProvider>
