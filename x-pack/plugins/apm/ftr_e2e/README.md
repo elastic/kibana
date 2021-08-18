@@ -15,7 +15,7 @@ node x-pack/plugins/apm/scripts/ftr_e2e/cypress_run.js
 
 ```sh
 //kibana directory
-node x-pack/plugins/apm/scripts/ftr_e2e/cypress_run.js --spec ./cypress/integration/read_only_user/home.spec.ts
+node x-pack/plugins/apm/scripts/ftr_e2e/cypress_run.js --grep ./cypress/integration/read_only_user/home.spec.ts
 ```
 
 ## Opening tests

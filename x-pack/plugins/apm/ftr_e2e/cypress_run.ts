@@ -11,9 +11,9 @@ import { cypressRunTests } from './cypress_start';
 const spec = argv.grep as string;
 
 async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
-  const cypressConfig = await readConfigFile(require.resolve('./config.ts'));
+  const kibanaConfig = await readConfigFile(require.resolve('./config.ts'));
   return {
-    ...cypressConfig.getAll(),
+    ...kibanaConfig.getAll(),
     testRunner: cypressRunTests(spec),
   };
 }
