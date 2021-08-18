@@ -37,7 +37,10 @@ import { getMockArtifacts, toArtifactRecords } from '../endpoint/lib/artifacts/m
 import { Manifest } from '../endpoint/lib/artifacts';
 import { NewPackagePolicy } from '../../../fleet/common/types/models';
 import { ManifestSchema } from '../../common/endpoint/schema/manifest';
-import { ExperimentalFeatures } from '../../common/experimental_features';
+import {
+  allowedExperimentalValues,
+  ExperimentalFeatures,
+} from '../../common/experimental_features';
 import { DeletePackagePoliciesResponse } from '../../../fleet/common';
 import { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
@@ -293,7 +296,7 @@ describe('ingest_integration tests ', () => {
       experimentalFeatures?: ExperimentalFeatures
     ): Promise<void> => {
       const callback = getPackagePolicyDeleteCallback(exceptionListClient, experimentalFeatures);
-      await callback(deletePackagePolicyMock(), ctx, req);
+      await callback(deletePackagePolicyMock());
     };
 
     let removedPolicies: DeletePackagePoliciesResponse;
@@ -318,12 +321,8 @@ describe('ingest_integration tests ', () => {
 
     it('removes policy from trusted app FF enabled', async () => {
       await invokeDeleteCallback({
-        metricsEntitiesEnabled: false,
-        ruleRegistryEnabled: false,
-        tGridEnabled: false,
+        ...allowedExperimentalValues,
         trustedAppsByPolicyEnabled: true, // Needs to be enabled, it needs also a test with this disabled.
-        excludePoliciesInFilterEnabled: false,
-        uebaEnabled: false,
       });
 
       expect(exceptionListClient.findExceptionListItem).toHaveBeenCalledWith({
@@ -346,12 +345,7 @@ describe('ingest_integration tests ', () => {
 
     it("doesn't remove policy from trusted app FF disabled", async () => {
       await invokeDeleteCallback({
-        metricsEntitiesEnabled: false,
-        ruleRegistryEnabled: false,
-        tGridEnabled: false,
-        trustedAppsByPolicyEnabled: false,
-        excludePoliciesInFilterEnabled: false,
-        uebaEnabled: false,
+        ...allowedExperimentalValues,
       });
 
       expect(exceptionListClient.findExceptionListItem).toHaveBeenCalledTimes(0);
