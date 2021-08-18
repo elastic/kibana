@@ -81,6 +81,7 @@ export type SubsetTimelineModel = Readonly<
     | 'activeTab'
     | 'prevActiveTab'
     | 'columns'
+    | 'defaultColumns'
     | 'dataProviders'
     | 'deletedEventIds'
     | 'description'
