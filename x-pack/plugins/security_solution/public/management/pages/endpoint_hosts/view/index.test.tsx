@@ -10,6 +10,9 @@ import * as reactTestingLibrary from '@testing-library/react';
 import { EndpointList } from './index';
 import '../../../../common/mock/match_media';
 
+import { useUiSetting$ } from '../../../../../public/common/lib/kibana';
+import { createUseUiSetting$Mock } from '../../../../../public/common/lib/kibana/kibana_react.mock';
+
 import {
   mockEndpointDetailsApiResult,
   mockEndpointResultList,
@@ -40,7 +43,11 @@ import {
 import { getCurrentIsolationRequestState } from '../store/selectors';
 import { licenseService } from '../../../../common/hooks/use_license';
 import { FleetActionGenerator } from '../../../../../common/endpoint/data_generators/fleet_action_generator';
-import { APP_PATH, MANAGEMENT_PATH } from '../../../../../common/constants';
+import {
+  APP_PATH,
+  MANAGEMENT_PATH,
+  DEFAULT_TIMEPICKER_QUICK_RANGES,
+} from '../../../../../common/constants';
 import { TransformStats, TRANSFORM_STATE } from '../types';
 import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
 
@@ -63,6 +70,59 @@ jest.mock('../../policy/store/services/ingest', () => {
     sendGetEndpointSecurityPackage: () => Promise.resolve({}),
   };
 });
+const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
+const timepickerRanges = [
+  {
+    from: 'now/d',
+    to: 'now/d',
+    display: 'Today',
+  },
+  {
+    from: 'now/w',
+    to: 'now/w',
+    display: 'This week',
+  },
+  {
+    from: 'now-15m',
+    to: 'now',
+    display: 'Last 15 minutes',
+  },
+  {
+    from: 'now-30m',
+    to: 'now',
+    display: 'Last 30 minutes',
+  },
+  {
+    from: 'now-1h',
+    to: 'now',
+    display: 'Last 1 hour',
+  },
+  {
+    from: 'now-24h',
+    to: 'now',
+    display: 'Last 24 hours',
+  },
+  {
+    from: 'now-7d',
+    to: 'now',
+    display: 'Last 7 days',
+  },
+  {
+    from: 'now-30d',
+    to: 'now',
+    display: 'Last 30 days',
+  },
+  {
+    from: 'now-90d',
+    to: 'now',
+    display: 'Last 90 days',
+  },
+  {
+    from: 'now-1y',
+    to: 'now',
+    display: 'Last 1 year',
+  },
+];
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_license');
@@ -758,6 +818,14 @@ describe('when on the endpoint list page', () => {
           unobserve: jest.fn(),
           disconnect: jest.fn(),
         }));
+
+        mockUseUiSetting$.mockImplementation((key, defaultValue) => {
+          const useUiSetting$Mock = createUseUiSetting$Mock();
+
+          return key === DEFAULT_TIMEPICKER_QUICK_RANGES
+            ? [timepickerRanges, jest.fn()]
+            : useUiSetting$Mock(key, defaultValue);
+        });
 
         const fleetActionGenerator = new FleetActionGenerator('seed');
         const responseData = fleetActionGenerator.generateResponse({
