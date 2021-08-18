@@ -1,10 +1,11 @@
 {
   "id": "securitySolutionFixtures",
+  "owner": { "name": "Security solution", "githubTeam": "security-solution" },
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack"],
   "requiredPlugins": ["features", "cases"],
-  "optionalPlugins": ["security",  "spaces"],
+  "optionalPlugins": ["security", "spaces"],
   "server": true,
   "ui": false
 }

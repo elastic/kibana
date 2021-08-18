@@ -1,14 +1,11 @@
 {
   "id": "resolverTest",
+  "owner": { "name": "Security solution", "githubTeam": "security-solution" },
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "resolverTest"],
-  "requiredPlugins": [
-    "securitySolution"
-  ],
-  "requiredBundles": [
-    "kibanaReact"
-  ],
+  "requiredPlugins": ["securitySolution"],
+  "requiredBundles": ["kibanaReact"],
   "server": false,
   "ui": true
 }
