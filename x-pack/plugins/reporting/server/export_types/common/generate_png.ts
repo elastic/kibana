@@ -15,15 +15,6 @@ import { LayoutParams, PreserveLayout } from '../../lib/layouts';
 import { getScreenshots$, ScreenshotResults } from '../../lib/screenshots';
 import { ConditionalHeaders } from '../common';
 
-function getBase64DecodedSize(value: string) {
-  // @see https://en.wikipedia.org/wiki/Base64#Output_padding
-  return (
-    (value.length * 3) / 4 -
-    Number(value[value.length - 1] === '=') -
-    Number(value[value.length - 2] === '=')
-  );
-}
-
 export async function generatePngObservableFactory(reporting: ReportingCore) {
   const config = reporting.getConfig();
   const captureConfig = config.get('capture');
@@ -35,7 +26,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
     browserTimezone: string | undefined,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams
-  ): Rx.Observable<{ base64: string | null; warnings: string[] }> {
+  ): Rx.Observable<{ buffer: Buffer; warnings: string[] }> {
     const apmTrans = apm.startTransaction('reporting generate_png', 'reporting');
     const apmLayout = apmTrans?.startSpan('create_layout', 'setup');
     if (!layoutParams || !layoutParams.dimensions) {
@@ -58,7 +49,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
         apmBuffer = apmTrans?.startSpan('get_buffer', 'output') ?? null;
       }),
       map((results: ScreenshotResults[]) => ({
-        base64: results[0].screenshots[0].base64EncodedData,
+        buffer: results[0].screenshots[0].data,
         warnings: results.reduce((found, current) => {
           if (current.error) {
             found.push(current.error.message);
@@ -66,11 +57,9 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
           return found;
         }, [] as string[]),
       })),
-      tap(({ base64 }) => {
-        const byteLength = getBase64DecodedSize(base64);
-
-        logger.debug(`PNG buffer byte length: ${byteLength}`);
-        apmTrans?.setLabel('byte_length', byteLength, false);
+      tap(({ buffer }) => {
+        logger.debug(`PNG buffer byte length: ${buffer.byteLength}`);
+        apmTrans?.setLabel('byte_length', buffer.byteLength, false);
       }),
       finalize(() => {
         apmBuffer?.end();

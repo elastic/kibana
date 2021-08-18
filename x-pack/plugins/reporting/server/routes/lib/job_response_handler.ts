@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { promisify } from 'util';
 import { kibanaResponseFactory } from 'kibana/server';
 import { ReportingCore } from '../../';
 import { ALLOWED_JOB_CONTENT_TYPES } from '../../../common/constants';
+import { getContentStream } from '../../lib';
 import { ReportingUser } from '../../types';
 import { getDocumentPayloadFactory } from './get_document_payload';
 import { jobsQueryFactory } from './jobs_query';
@@ -85,8 +87,12 @@ export async function deleteJobResponseHandler(
     });
   }
 
+  const docIndex = doc.index;
+  const stream = await getContentStream(reporting, { id: docId, index: docIndex });
+
   try {
-    const docIndex = doc.index;
+    /** @note Overwriting existing content with an empty buffer to remove all the chunks. */
+    await promisify(stream.end.bind(stream))();
     await jobsQuery.delete(docIndex, docId);
     return res.ok({
       body: { deleted: true },

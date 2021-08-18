@@ -24,6 +24,8 @@ import { defaultHeaders } from '../../timelines/components/timeline/body/column_
 interface Global extends NodeJS.Global {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   window?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  document?: any;
 }
 
 export const globalNode: Global = global;
