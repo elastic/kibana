@@ -27,6 +27,8 @@ export const ALERT_RULE_RISK_SCORE = '[data-test-subj="formatted-field-signal.ru
 
 export const ALERT_RULE_SEVERITY = '[data-test-subj="formatted-field-signal.rule.severity"]';
 
+export const ALERT_DATA_GRID = '[data-test-subj="dataGridWrapper"]';
+
 export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
 
 export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="close-alert-status"]';
