@@ -234,6 +234,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     loading,
     { events, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
+    // We rely on entityType to determine Events vs Alerts
     alertConsumers: SECURITY_ALERTS_CONSUMERS,
     docValueFields,
     entityType,
@@ -304,7 +305,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                 <UpdatedFlexItem grow={false} show={!loading}>
                   {!resolverIsShowing(graphEventId) && additionalFilters}
                 </UpdatedFlexItem>
-                {tGridEventRenderedViewEnabled && (
+                {tGridEventRenderedViewEnabled && entityType === 'alerts' && (
                   <UpdatedFlexItem grow={false} show={!loading}>
                     <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
                   </UpdatedFlexItem>
