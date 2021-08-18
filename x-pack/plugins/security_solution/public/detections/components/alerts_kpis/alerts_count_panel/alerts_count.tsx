@@ -16,7 +16,6 @@ import { DefaultDraggable } from '../../../../common/components/draggables';
 import type { GenericBuckets } from '../../../../../common';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import type { AlertsCountAggregation } from './types';
-import { MISSING_IP } from '../common/helpers';
 
 interface AlertsCountProps {
   loading: boolean;
@@ -29,10 +28,6 @@ const Wrapper = styled.div`
   margin-top: -8px;
 `;
 
-const StyledSpan = styled.span`
-  padding-left: 8px;
-`;
-
 const getAlertsCountTableColumns = (
   selectedStackByOption: string,
   defaultNumberFormat: string
@@ -43,9 +38,7 @@ const getAlertsCountTableColumns = (
       name: selectedStackByOption,
       truncateText: true,
       render: function DraggableStackOptionField(value: string) {
-        return value === i18n.ALL_OTHERS || value === MISSING_IP ? (
-          <StyledSpan>{value}</StyledSpan>
-        ) : (
+        return (
           <DefaultDraggable
             field={selectedStackByOption}
             id={`alert-count-draggable-${selectedStackByOption}-${value}`}

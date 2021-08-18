@@ -46,7 +46,7 @@ export function isDataIndex(source: MatchedItem) {
 
 export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSources }) => {
   const {
-    services: { docLinks, application, http, indexPatternService },
+    services: { docLinks, application, http, searchClient, indexPatternService },
   } = useKibana<IndexPatternEditorContext>();
 
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
@@ -60,7 +60,13 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
   useCallback(() => {
     let isMounted = true;
     if (!hasDataIndices)
-      getIndices(http, () => false, '*:*', false).then((dataSources) => {
+      getIndices({
+        http,
+        isRollupIndex: () => false,
+        pattern: '*:*',
+        showAllIndices: false,
+        searchClient,
+      }).then((dataSources) => {
         if (isMounted) {
           setRemoteClustersExist(!!dataSources.filter(removeAliases).length);
         }
@@ -68,7 +74,7 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
     return () => {
       isMounted = false;
     };
-  }, [http, hasDataIndices]);
+  }, [http, hasDataIndices, searchClient]);
 
   if (hasExistingIndexPatternsWithUserData.loading) return null; // return null to prevent UI flickering while loading
 

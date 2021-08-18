@@ -70,7 +70,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
 }: Props) => {
   const isMounted = useRef<boolean>(false);
   const {
-    services: { http, indexPatternService, uiSettings },
+    services: { http, indexPatternService, uiSettings, searchClient },
   } = useKibana<IndexPatternEditorContext>();
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
@@ -128,13 +128,19 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   // load all data sources and set initial matchedIndices
   const loadSources = useCallback(() => {
-    getIndices(http, () => false, '*', allowHidden).then((dataSources) => {
+    getIndices({
+      http,
+      isRollupIndex: () => false,
+      pattern: '*',
+      showAllIndices: allowHidden,
+      searchClient,
+    }).then((dataSources) => {
       setAllSources(dataSources);
       const matchedSet = getMatchedIndices(dataSources, [], [], allowHidden);
       setMatchedIndices(matchedSet);
       setIsLoadingSources(false);
     });
-  }, [http, allowHidden]);
+  }, [http, allowHidden, searchClient]);
 
   // loading list of index patterns
   useEffect(() => {
@@ -223,13 +229,31 @@ const IndexPatternEditorFlyoutContentComponent = ({
         const indexRequests = [];
 
         if (query?.endsWith('*')) {
-          const exactMatchedQuery = getIndices(http, isRollupIndex, query, allowHidden);
+          const exactMatchedQuery = getIndices({
+            http,
+            isRollupIndex,
+            pattern: query,
+            showAllIndices: allowHidden,
+            searchClient,
+          });
           indexRequests.push(exactMatchedQuery);
           // provide default value when not making a request for the partialMatchQuery
           indexRequests.push(Promise.resolve([]));
         } else {
-          const exactMatchQuery = getIndices(http, isRollupIndex, query, allowHidden);
-          const partialMatchQuery = getIndices(http, isRollupIndex, `${query}*`, allowHidden);
+          const exactMatchQuery = getIndices({
+            http,
+            isRollupIndex,
+            pattern: query,
+            showAllIndices: allowHidden,
+            searchClient,
+          });
+          const partialMatchQuery = getIndices({
+            http,
+            isRollupIndex,
+            pattern: `${query}*`,
+            showAllIndices: allowHidden,
+            searchClient,
+          });
 
           indexRequests.push(exactMatchQuery);
           indexRequests.push(partialMatchQuery);
@@ -264,7 +288,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
       return fetchIndices(newTitle);
     },
-    [http, allowHidden, allSources, type, rollupIndicesCapabilities]
+    [http, allowHidden, allSources, type, rollupIndicesCapabilities, searchClient]
   );
 
   useEffect(() => {

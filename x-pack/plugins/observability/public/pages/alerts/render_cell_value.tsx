@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiIconTip, EuiLink } from '@elastic/eui';
+import { EuiLink, EuiHealth, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 /**
@@ -34,6 +34,7 @@ import { SeverityBadge } from './severity_badge';
 import { TopAlert } from '.';
 import { parseAlert } from './parse_alert';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useTheme } from '../../hooks/use_theme';
 
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
@@ -86,24 +87,33 @@ export const getRenderCellValue = ({
       }
     }, [columnId, setCellProps]);
 
+    const theme = useTheme();
+
     switch (columnId) {
       case ALERT_STATUS:
-        return value !== 'closed' ? (
-          <EuiIconTip
-            content={i18n.translate('xpack.observability.alertsTGrid.statusOpenDescription', {
-              defaultMessage: 'Open',
-            })}
-            color="danger"
-            type="alert"
-          />
-        ) : (
-          <EuiIconTip
-            content={i18n.translate('xpack.observability.alertsTGrid.statusClosedDescription', {
-              defaultMessage: 'Closed',
-            })}
-            type="check"
-          />
-        );
+        switch (value) {
+          case 'open':
+            return (
+              <EuiHealth color="primary" textSize="xs">
+                {i18n.translate('xpack.observability.alertsTGrid.statusActiveDescription', {
+                  defaultMessage: 'Active',
+                })}
+              </EuiHealth>
+            );
+          case 'closed':
+            return (
+              <EuiHealth color={theme.eui.euiColorLightShade} textSize="xs">
+                <EuiText color={theme.eui.euiColorLightShade} size="relative">
+                  {i18n.translate('xpack.observability.alertsTGrid.statusRecoveredDescription', {
+                    defaultMessage: 'Recovered',
+                  })}
+                </EuiText>
+              </EuiHealth>
+            );
+          default:
+            // NOTE: This fallback shouldn't be needed. Status should be either "active" or "recovered".
+            return null;
+        }
       case TIMESTAMP:
         return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
       case ALERT_DURATION:
