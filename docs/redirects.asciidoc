@@ -152,7 +152,7 @@ This content has moved. See
 == Define your index patterns
 
 This content has moved. Refer to
-<<kibana-concepts-analysts, Quick start>>.
+<<get-started, Quick start>>.
 
 [role="exclude",id="managing-indices"]
 == Index management
