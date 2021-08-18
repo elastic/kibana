@@ -7,3 +7,8 @@
 
 export { getShareToSpaceFlyoutComponent, getLegacyUrlConflict } from './components';
 export { createRedirectLegacyUrl } from './utils';
+export type {
+  LegacyUrlConflictProps,
+  ShareToSpaceFlyoutProps,
+  ShareToSpaceSavedObjectTarget,
+} from './types';

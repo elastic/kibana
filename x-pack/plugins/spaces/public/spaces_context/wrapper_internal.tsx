@@ -9,13 +9,12 @@ import type { PropsWithChildren } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import type { ApplicationStart, DocLinksStart, NotificationsStart } from 'src/core/public';
-import type { SpacesContextProps } from 'src/plugins/spaces_oss/public';
 
 import type { GetAllSpacesPurpose } from '../../common';
 import type { SpacesManager } from '../spaces_manager';
 import type { SpacesData, SpacesDataEntry } from '../types';
 import { createSpacesReactContext } from './context';
-import type { InternalProps, SpacesReactContext } from './types';
+import type { InternalProps, SpacesContextProps, SpacesReactContext } from './types';
 
 interface Services {
   application: ApplicationStart;

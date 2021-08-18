@@ -31,3 +31,13 @@ export interface InternalProps {
   spacesManager: SpacesManager;
   getStartServices: StartServicesAccessor<PluginsStart>;
 }
+
+/**
+ * Properties for the SpacesContext.
+ */
+export interface SpacesContextProps {
+  /**
+   * If a feature is specified, all Spaces components will treat it appropriately if the feature is disabled in a given Space.
+   */
+  feature?: string;
+}

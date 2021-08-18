@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { uiApiMock } from '../../../../../../x-pack/plugins/spaces/public/ui_api/mocks';
+import { spacesPluginMock } from '../../../../../../x-pack/plugins/spaces/public/mocks';
 import type { SavedObjectsManagementRecord } from '../types';
 import { ShareToSpaceSavedObjectsManagementAction } from './share_saved_objects_to_space_action';
 
 describe('ShareToSpaceSavedObjectsManagementAction', () => {
   const createAction = () => {
-    const spacesApiUi = uiApiMock.create();
+    const { ui: spacesApiUi } = spacesPluginMock.createStartContract();
     return new ShareToSpaceSavedObjectsManagementAction(spacesApiUi);
   };
   describe('#euiAction.available', () => {

@@ -9,7 +9,6 @@ import type { FC, PropsWithChildren, PropsWithRef } from 'react';
 import React from 'react';
 
 import type { StartServicesAccessor } from 'src/core/public';
-import type { SpacesApiUiComponent } from 'src/plugins/spaces_oss/public';
 
 import { getCopyToSpaceFlyoutComponent } from '../copy_saved_objects_to_space';
 import type { PluginsStart } from '../plugin';
@@ -22,6 +21,7 @@ import { getSpaceListComponent } from '../space_list';
 import { getSpacesContextProviderWrapper } from '../spaces_context';
 import type { SpacesManager } from '../spaces_manager';
 import { LazyWrapper } from './lazy_wrapper';
+import type { SpacesApiUiComponent } from './types';
 
 export interface GetComponentsOptions {
   spacesManager: SpacesManager;
