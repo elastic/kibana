@@ -323,7 +323,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           return (
             <ObservabilityActions
               {...actionProps}
-              currentStatus={workflowStatus as AlertWorkflowStatus}
+              currentStatus={workflowStatus}
               setFlyoutAlert={setFlyoutAlert}
             />
           );
