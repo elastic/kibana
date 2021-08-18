@@ -2726,6 +2726,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerts@link:bazel-bin/packages/kbn-alerts":
+  version "0.0.0"
+  uid ""
+
 "@kbn/analytics@link:bazel-bin/packages/kbn-analytics":
   version "0.0.0"
   uid ""
@@ -12363,7 +12367,7 @@ elastic-apm-node@^3.16.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elasticsearch@^16.4.0, elasticsearch@^16.7.0:
+elasticsearch@^16.4.0:
   version "16.7.0"
   resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-16.7.0.tgz#9055e3f586934d8de5fd407b04050e9d54173333"
   integrity sha512-du+//TbjCFEkaG0jNcAC95Fp4B6/X5shnCRIXALFL+M4U5iT3YL5ZVUPNf1NgR7dy/sc8Dvw2Ob6IUJKB7FrCw==
@@ -18270,26 +18274,6 @@ lead@^1.0.0:
   integrity sha1-bxT5mje+Op3XhPVJVpDlkDRm7kI=
   dependencies:
     flush-write-stream "^1.0.2"
-
-leaflet-draw@0.4.14:
-  version "0.4.14"
-  resolved "https://registry.yarnpkg.com/leaflet-draw/-/leaflet-draw-0.4.14.tgz#1b5b06d570873a015aa96b80d664dab496c45a4a"
-  integrity sha512-O99KSPjyHNMDE+uD/fpdPydvQfTE8QruaG7ylEEtKCIaSSb60mCWoDdGUqGEHU9PGPu2JxbEfkGTXY9eYv7aEw==
-
-leaflet-responsive-popup@0.6.4:
-  version "0.6.4"
-  resolved "https://registry.yarnpkg.com/leaflet-responsive-popup/-/leaflet-responsive-popup-0.6.4.tgz#b93d9368ef9f96d6dc911cf5b96d90e08601c6b3"
-  integrity sha512-2D8G9aQA6NHkulDBPN9kqbUCkCpWQQ6dF0xFL11AuEIWIbsL4UC/ZPP5m8GYM0dpU6YTlmyyCh1Tz+cls5Q4dg==
-
-leaflet.heat@0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/leaflet.heat/-/leaflet.heat-0.2.0.tgz#109d8cf586f0adee41f05aff031e27a77fecc229"
-  integrity sha1-EJ2M9Ybwre5B8Fr/Ax4np3/swik=
-
-leaflet@1.5.1:
-  version "1.5.1"
-  resolved "https://registry.yarnpkg.com/leaflet/-/leaflet-1.5.1.tgz#9afb9d963d66c870066b1342e7a06f92840f46bf"
-  integrity sha512-ekM9KAeG99tYisNBg0IzEywAlp0hYI5XRipsqRXyRTeuU8jcuntilpp+eFf5gaE0xubc9RuSNIVtByEKwqFV0w==
 
 "less@npm:@elastic/less@2.7.3-kibana":
   version "2.7.3-kibana"
