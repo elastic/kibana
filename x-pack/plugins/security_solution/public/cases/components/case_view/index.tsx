@@ -7,8 +7,6 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-
 import {
   getCaseDetailsUrl,
   getCaseDetailsUrlWithCommentId,
@@ -21,7 +19,7 @@ import { Case, CaseViewRefreshPropInterface } from '../../../../../cases/common'
 import { TimelineId } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';
-import { APP_ID } from '../../../../common/constants';
+import { APP_ID, SECURITY_SOLUTION_ALERT_CONSUMERS } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -55,8 +53,6 @@ export interface CaseProps extends Props {
   updateCase: (newCase: Case) => void;
 }
 
-const ALERT_CONSUMER: AlertConsumers[] = [AlertConsumers.SIEM];
-
 const TimelineDetailsPanel = ({ alertConsumers }: { alertConsumers?: AlertConsumers[] }) => {
   const { browserFields, docValueFields } = useSourcererScope(SourcererScopeName.detections);
 
@@ -65,7 +61,7 @@ const TimelineDetailsPanel = ({ alertConsumers }: { alertConsumers?: AlertConsum
       alertConsumers={alertConsumers}
       browserFields={browserFields}
       docValueFields={docValueFields}
-      entityType={EntityType.ALERTS}
+      entityType="alerts"
       isFlyoutView
       timelineId={TimelineId.casePage}
     />
@@ -234,7 +230,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         showAlertDetails,
         subCaseId,
         timelineIntegration: {
-          alertConsumers: ALERT_CONSUMER,
+          alertConsumers: SECURITY_SOLUTION_ALERT_CONSUMERS,
           editor_plugins: {
             parsingPlugin: timelineMarkdownPlugin.parser,
             processingPluginRenderer: timelineMarkdownPlugin.renderer,
