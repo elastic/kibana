@@ -1,14 +1,15 @@
 # This file is needed by node scripts/ensure_all_tests_in_ci_group  for the list of ciGroups. That must be changed before this file can be removed
 
 JOB:
-  - kibana-intake
+  - kibana-ciGroup14
+#  - kibana-intake
 #  - kibana-firefoxSmoke
 #  - kibana-ciGroup1
 #  - kibana-ciGroup2
 #  - kibana-ciGroup3
 #  - kibana-ciGroup4
 #  - kibana-ciGroup5
-  - kibana-ciGroup6
+#  - kibana-ciGroup6
 #  - kibana-ciGroup7
 #  - kibana-ciGroup8
 #  - kibana-ciGroup9
