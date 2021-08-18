@@ -626,6 +626,23 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
           'the UNIX epoch beginning. Timestamps before 01/01/1970 00:00:00 (UTC) are not supported for machine learning jobs.',
       }),
     },
+    datafeed_preview_no_documents: {
+      status: VALIDATION_STATUS.WARNING,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.datafeedPreviewNoDocumentsHeading',
+        {
+          defaultMessage: 'Datafeed preview',
+        }
+      ),
+      text: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.datafeedPreviewNoDocumentsMessage',
+        {
+          defaultMessage:
+            'The selected or available time range contains data with timestamps before ' +
+            'the UNIX epoch beginning. Timestamps before 01/01/1970 00:00:00 (UTC) are not supported for machine learning jobs.',
+        }
+      ),
+    },
   };
 });
 
