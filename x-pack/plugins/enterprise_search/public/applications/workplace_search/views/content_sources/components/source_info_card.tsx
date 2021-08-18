@@ -20,8 +20,6 @@ import {
 import { SourceIcon } from '../../../components/shared/source_icon';
 import { REMOTE_SOURCE_LABEL, CREATED_LABEL, STATUS_LABEL, READY_TEXT } from '../constants';
 
-import './source_info_card.scss';
-
 interface SourceInfoCardProps {
   sourceName: string;
   sourceType: string;
@@ -66,16 +64,12 @@ export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
       </EuiText>
 
       {isFederatedSource && (
-        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd" alignItems="center">
+        <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={null}>
-            <EuiText textAlign="right" size="s">
-              <strong>{STATUS_LABEL}</strong>
-            </EuiText>
+            <strong>{STATUS_LABEL}</strong>
           </EuiFlexItem>
           <EuiFlexItem grow={null}>
-            <EuiText className="sourceInfoStatus" textAlign="right" size="s">
-              <EuiHealth color="success">{READY_TEXT}</EuiHealth>
-            </EuiText>
+            <EuiHealth color="success">{READY_TEXT}</EuiHealth>
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
