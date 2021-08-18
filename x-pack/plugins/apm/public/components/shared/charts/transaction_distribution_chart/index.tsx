@@ -15,11 +15,12 @@ import {
   CurveType,
   LineAnnotation,
   LineAnnotationDatum,
+  LineAnnotationStyle,
   Position,
   RectAnnotation,
   ScaleType,
   Settings,
-  LineAnnotationStyle,
+  TickFormatter,
 } from '@elastic/charts';
 
 import { euiPaletteColorBlind } from '@elastic/eui';
@@ -28,10 +29,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useChartTheme } from '../../../../../../observability/public';
 
-import {
-  getDurationUnitKey,
-  getUnitLabelAndConvertedValue,
-} from '../../../../../common/utils/formatters';
+import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { HistogramItem } from '../../../../../common/search_strategies/correlations/types';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -39,7 +37,7 @@ import { useTheme } from '../../../../hooks/use_theme';
 
 import { ChartContainer } from '../chart_container';
 
-interface CorrelationsChartProps {
+interface TransactionDistributionChartProps {
   field?: string;
   value?: string;
   histogram?: HistogramItem[];
@@ -90,9 +88,16 @@ export const replaceHistogramDotsWithBars = (
   }
 };
 
+const xAxisTickFormat: TickFormatter<number> = (d) => {
+  // Create a formatter and directly call it for every value since the log axis might have a wide range of values
+  // e.g. from low milliseconds to large seconds. This way we can get different suitable units across ticks.
+  const { value, unit } = getDurationFormatter(d, 0.9999)(d);
+  return `${value}${unit}`;
+};
+
 export function TransactionDistributionChart({
-  field,
-  value,
+  field: fieldName,
+  value: fieldValue,
   histogram: originalHistogram,
   markerCurrentTransaction,
   markerValue,
@@ -100,7 +105,7 @@ export function TransactionDistributionChart({
   overallHistogram,
   onChartSelection,
   selection,
-}: CorrelationsChartProps) {
+}: TransactionDistributionChartProps) {
   const chartTheme = useChartTheme();
   const euiTheme = useTheme();
 
@@ -246,17 +251,7 @@ export function TransactionDistributionChart({
             id="x-axis"
             title=""
             position={Position.Bottom}
-            tickFormat={(d) => {
-              const unit = getDurationUnitKey(d, 1);
-              const converted = getUnitLabelAndConvertedValue(unit, d);
-              const convertedValueParts = converted.convertedValue.split('.');
-              const convertedValue =
-                convertedValueParts.length === 2 &&
-                convertedValueParts[1] === '0'
-                  ? convertedValueParts[0]
-                  : converted.convertedValue;
-              return `${convertedValue}${converted.unitLabel}`;
-            }}
+            tickFormat={xAxisTickFormat}
             gridLine={{ visible: false }}
           />
           <Axis
@@ -285,19 +280,10 @@ export function TransactionDistributionChart({
             fit="lookahead"
           />
           {Array.isArray(histogram) &&
-            field !== undefined &&
-            value !== undefined && (
+            fieldName !== undefined &&
+            fieldValue !== undefined && (
               <AreaSeries
-                id={i18n.translate(
-                  'xpack.apm.transactionDistribution.chart.selectedTermLatencyDistributionLabel',
-                  {
-                    defaultMessage: '{fieldName}:{fieldValue}',
-                    values: {
-                      fieldName: field,
-                      fieldValue: value,
-                    },
-                  }
-                )}
+                id={`apmTransactionDistributionChartAreaSeries${fieldName}${fieldValue}`}
                 xScaleType={ScaleType.Log}
                 yScaleType={ScaleType.Log}
                 data={histogram}
