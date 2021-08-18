@@ -50,6 +50,12 @@ export interface Props {
   settings: MapSettings;
   layerList: ILayer[];
   waitUntilTimeLayersLoad$: Observable<void>;
+  /*
+   * Set to false to exclude sharing attributes 'data-*'.
+   * An example usage is tile_map and region_map visualizations. The visualizations use MapEmbeddable for rendering.
+   * Visualize Embeddable handles sharing attributes so sharing attributes are not needed in the children.
+   */
+  isSharable: boolean;
 }
 
 interface State {
@@ -80,7 +86,11 @@ export class MapContainer extends Component<Props, State> {
   componentDidUpdate() {
     this._loadShowFitToBoundsButton();
     this._loadShowTimesliderButton();
-    if (this.props.areLayersLoaded && !this._isInitalLoadRenderTimerStarted) {
+    if (
+      this.props.isSharable &&
+      this.props.areLayersLoaded &&
+      !this._isInitalLoadRenderTimerStarted
+    ) {
       this._isInitalLoadRenderTimerStarted = true;
       this._startInitialLoadRenderTimer();
     }
@@ -195,16 +205,18 @@ export class MapContainer extends Component<Props, State> {
         <ExitFullScreenButton onExitFullScreenMode={exitFullScreen} chrome={getCoreChrome()} />
       );
     }
+    const shareAttributes = this.props.isSharable
+      ? {
+          ['data-dom-id']: this.state.domId,
+          ['data-render-complete']: this.state.isInitialLoadRenderTimeoutComplete,
+          ['data-shared-item']: true,
+          ['data-title']: this.props.title,
+          ['data-description']: this.props.description,
+        }
+      : {};
+
     return (
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
-        data-dom-id={this.state.domId}
-        data-render-complete={this.state.isInitialLoadRenderTimeoutComplete}
-        data-shared-item
-        data-title={this.props.title}
-        data-description={this.props.description}
-      >
+      <EuiFlexGroup gutterSize="none" responsive={false} {...shareAttributes}>
         <EuiFlexItem
           className="mapMapWrapper"
           style={{ backgroundColor: this.props.settings.backgroundColor }}
