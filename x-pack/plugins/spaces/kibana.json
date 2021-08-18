@@ -21,7 +21,6 @@
   "requiredBundles": [
     "esUiShared",
     "kibanaReact",
-    "savedObjectsManagement",
     "home"
   ]
 }
