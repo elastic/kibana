@@ -219,7 +219,6 @@ export class CommonPageObject extends FtrService {
       basePath = '',
       shouldLoginIfPrompted = true,
       hash = '',
-      search = '',
       disableWelcomePrompt = true,
       insertTimestamp = true,
     } = {}
@@ -231,13 +230,11 @@ export class CommonPageObject extends FtrService {
       appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
         pathname: `${basePath}${appConfig.pathname}`,
         hash: hash || appConfig.hash,
-        search,
       });
     } else {
       appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
         pathname: `${basePath}/app/${appName}`,
         hash,
-        search,
       });
     }
 

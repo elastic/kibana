@@ -19,6 +19,7 @@ import {
   RectAnnotation,
   ScaleType,
   Settings,
+  LineAnnotationStyle,
 } from '@elastic/charts';
 
 import { euiPaletteColorBlind } from '@elastic/eui';
@@ -50,7 +51,7 @@ interface CorrelationsChartProps {
   selection?: [number, number];
 }
 
-const getAnnotationsStyle = (color = 'gray') => ({
+const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
   line: {
     strokeWidth: 1,
     stroke: color,
