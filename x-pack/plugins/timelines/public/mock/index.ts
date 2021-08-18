@@ -8,6 +8,7 @@
 export * from './browser_fields';
 export * from './header';
 export * from './index_pattern';
+export * from './kibana_react.mock';
 export * from './mock_and_providers';
 export * from './mock_data_providers';
 export * from './mock_timeline_control_columns';

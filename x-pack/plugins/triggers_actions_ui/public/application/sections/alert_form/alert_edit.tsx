@@ -40,7 +40,7 @@ export const AlertEdit = ({
   onClose,
   reloadAlerts,
   onSave,
-  alertTypeRegistry,
+  ruleTypeRegistry,
   actionTypeRegistry,
   metadata,
 }: AlertEditProps) => {
@@ -65,7 +65,7 @@ export const AlertEdit = ({
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
 
-  const alertType = alertTypeRegistry.get(alert.alertTypeId);
+  const alertType = ruleTypeRegistry.get(alert.alertTypeId);
 
   useEffect(() => {
     (async () => {
@@ -133,6 +133,7 @@ export const AlertEdit = ({
         aria-labelledby="flyoutAlertEditTitle"
         size="m"
         maxWidth={620}
+        ownFocus={false}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s" data-test-subj="editAlertFlyoutTitle">
@@ -167,7 +168,7 @@ export const AlertEdit = ({
                 dispatch={dispatch}
                 errors={alertErrors}
                 actionTypeRegistry={actionTypeRegistry}
-                alertTypeRegistry={alertTypeRegistry}
+                ruleTypeRegistry={ruleTypeRegistry}
                 canChangeTrigger={false}
                 setHasActionsDisabled={setHasActionsDisabled}
                 setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}

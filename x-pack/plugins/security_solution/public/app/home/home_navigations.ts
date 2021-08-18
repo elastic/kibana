@@ -24,6 +24,7 @@ import {
   APP_ENDPOINTS_PATH,
   APP_TRUSTED_APPS_PATH,
   APP_EVENT_FILTERS_PATH,
+  APP_UEBA_PATH,
   SecurityPageName,
 } from '../../../common/constants';
 
@@ -69,6 +70,13 @@ export const navTabs: SecurityNav = {
     href: APP_NETWORK_PATH,
     disabled: false,
     urlKey: 'network',
+  },
+  [SecurityPageName.ueba]: {
+    id: SecurityPageName.ueba,
+    name: i18n.UEBA,
+    href: APP_UEBA_PATH,
+    disabled: false,
+    urlKey: 'ueba',
   },
   [SecurityPageName.timelines]: {
     id: SecurityPageName.timelines,

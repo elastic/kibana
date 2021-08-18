@@ -35,6 +35,12 @@ interface GetNewStreamProps {
   platform?: string | undefined;
   version?: string | undefined;
   scheduledQueryGroupId?: string;
+  ecs_mapping?: Record<
+    string,
+    {
+      field: string;
+    }
+  >;
 }
 
 interface GetNewStreamReturn extends Omit<OsqueryManagerPackagePolicyInputStream, 'id'> {
@@ -64,6 +70,11 @@ const getNewStream = (payload: GetNewStreamProps) =>
       }
       if (payload.version && draft.vars) {
         draft.vars.version = { type: 'text', value: payload.version };
+      }
+      if (payload.ecs_mapping && draft.vars) {
+        draft.vars.ecs_mapping = {
+          value: payload.ecs_mapping,
+        };
       }
       return draft;
     }
@@ -146,6 +157,14 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
                 delete draft[0].streams[showEditQueryFlyout].vars.version;
               }
 
+              if (updatedQuery.ecs_mapping) {
+                draft[0].streams[showEditQueryFlyout].vars.ecs_mapping = {
+                  value: updatedQuery.ecs_mapping,
+                };
+              } else {
+                delete draft[0].streams[showEditQueryFlyout].vars.ecs_mapping;
+              }
+
               return draft;
             })
           );
@@ -216,6 +235,20 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
     field.value,
   ]);
 
+  const uniqueQueryIds = useMemo<string[]>(
+    () =>
+      field.value && field.value[0].streams.length
+        ? field.value[0].streams.reduce((acc, stream) => {
+            if (stream.vars?.id.value) {
+              acc.push(stream.vars?.id.value);
+            }
+
+            return acc;
+          }, [] as string[])
+        : [],
+    [field.value]
+  );
+
   return (
     <>
       <EuiFlexGroup justifyContent="flexEnd">
@@ -256,6 +289,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       {<OsqueryPackUploader onChange={handlePackUpload} />}
       {showAddQueryFlyout && (
         <QueryFlyout
+          uniqueQueryIds={uniqueQueryIds}
           integrationPackageVersion={integrationPackageVersion}
           onSave={handleAddQuery}
           onClose={handleHideAddFlyout}
@@ -263,6 +297,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       )}
       {showEditQueryFlyout != null && showEditQueryFlyout >= 0 && (
         <QueryFlyout
+          uniqueQueryIds={uniqueQueryIds}
           defaultValue={field.value[0].streams[showEditQueryFlyout]?.vars}
           integrationPackageVersion={integrationPackageVersion}
           onSave={handleEditQuery}

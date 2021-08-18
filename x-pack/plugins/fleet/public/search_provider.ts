@@ -45,10 +45,8 @@ const toSearchResult = (
     title: pkg.title,
     score: 80,
     url: {
-      // TODO: See https://github.com/elastic/kibana/issues/96134 for details about why we use '#' here. Below should be updated
-      // as part of migrating to non-hash based router.
       // prettier-ignore
-      path: `${application.getUrlForApp(INTEGRATIONS_PLUGIN_ID)}#${pagePathGetters.integration_details_overview({ pkgkey })[1]}`,
+      path: `${application.getUrlForApp(INTEGRATIONS_PLUGIN_ID)}${pagePathGetters.integration_details_overview({ pkgkey })[1]}`,
       prependBasePath: false,
     },
   };

@@ -7,15 +7,15 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import * as t from 'io-ts';
-
 import {
-  UUID,
-  NonEmptyString,
+  enumeration,
   IsoDateString,
-  PositiveIntegerGreaterThanZero,
+  NonEmptyString,
   PositiveInteger,
+  PositiveIntegerGreaterThanZero,
+  UUID,
 } from '@kbn/securitysolution-io-ts-types';
+import * as t from 'io-ts';
 
 export const author = t.array(t.string);
 export type Author = t.TypeOf<typeof author>;
@@ -170,17 +170,26 @@ export type RuleNameOverride = t.TypeOf<typeof rule_name_override>;
 export const ruleNameOverrideOrUndefined = t.union([rule_name_override, t.undefined]);
 export type RuleNameOverrideOrUndefined = t.TypeOf<typeof ruleNameOverrideOrUndefined>;
 
-export const status = t.keyof({ open: null, closed: null, 'in-progress': null });
+export const status = t.keyof({
+  open: null,
+  closed: null,
+  acknowledged: null,
+  'in-progress': null, // TODO: Remove after `acknowledged` migrations
+});
 export type Status = t.TypeOf<typeof status>;
 
-export const job_status = t.keyof({
-  succeeded: null,
-  failed: null,
-  'going to run': null,
-  'partial failure': null,
-  warning: null,
-});
-export type JobStatus = t.TypeOf<typeof job_status>;
+export enum RuleExecutionStatus {
+  'succeeded' = 'succeeded',
+  'failed' = 'failed',
+  'going to run' = 'going to run',
+  'partial failure' = 'partial failure',
+  /**
+   * @deprecated 'partial failure' status should be used instead
+   */
+  'warning' = 'warning',
+}
+
+export const ruleExecutionStatus = enumeration('RuleExecutionStatus', RuleExecutionStatus);
 
 export const conflicts = t.keyof({ abort: null, proceed: null });
 export type Conflicts = t.TypeOf<typeof conflicts>;
@@ -419,4 +428,4 @@ export enum BulkAction {
   'duplicate' = 'duplicate',
 }
 
-export const bulkAction = t.keyof(BulkAction);
+export const bulkAction = enumeration('BulkAction', BulkAction);

@@ -42,14 +42,10 @@ To troubleshoot the problem, start the {kib} server with environment variables t
 [[grant-user-access]]
 === Grant users access to reporting
 
-When security is enabled, access to the {report-features} is controlled by roles and privileges. 
+When security is enabled, access to the {report-features} is controlled by roles and <<kibana-privileges, privileges>>. With privileges, you can define custom roles that grant *Reporting* privileges as sub-features of {kib} applications. To grant users permission to generate reports and view their reports in *Reporting*, create and assign the reporting role.
 
 [[reporting-app-users]]
-In 7.12.0 and earlier, you grant access to the {report-features} by assigning users the `reporting_user` role in {es}. 
-
-In 7.14.0 and later, you configure *Reporting* to use <<kibana-privileges, {kib} privileges>>. By using {kib} privileges, you can define custom roles that grant *Reporting* privileges as sub-features of {kib} applications.
-
-To grant users permission to generate reports and view their reports in *Reporting*, create and assign the reporting role.
+NOTE: In 7.12.0 and earlier, you grant access to the {report-features} by assigning users the `reporting_user` role in {es}. 
 
 . Create the reporting role. 
 
@@ -59,6 +55,7 @@ To grant users permission to generate reports and view their reports in *Reporti
 
 . Specify the role settings.
 
+
 .. Enter the *Role name*. For example, `custom_reporting_user`.
 
 .. Specify the *Indices* and *Privileges*.
@@ -66,22 +63,18 @@ To grant users permission to generate reports and view their reports in *Reporti
 Access to data is an index-level privilege. For each index that contains the data you want to include in reports, add a line, then give each index `read` and `view_index_metadata` privileges.
 +
 For more information, refer to {ref}/security-privileges.html[Security privileges].
-+
-[role="screenshot"]
-image::user/security/images/reporting-privileges-example.png["Reporting privileges"]
 
 . Add the {kib} privileges.
 
 .. Click *Add Kibana privilege*.
 
-.. Select one or more *Spaces* that you want to grant reporting privileges to.
+.. Select one or more *Spaces*.
 
 .. Click *Customize*, then click *Analytics*.
 
-.. Next to each application you want to grant reporting privileges to, click *All*.
+.. Next to the applications you want to grant reporting privileges, click *All*.
 +
-[role="screenshot"]
-image::user/security/images/reporting-custom-role.png["Reporting custom role"]
+If the *Reporting* option is unavailable, contact your administrator, or <<reporting-advanced-settings,enable the option in kibana.yml>>. 
 
 .. Click *Add {kib} privilege*.
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { getFlattenedObject } from '@kbn/std';
 import type { KibanaRequest } from 'src/core/server';
 import type {
   ElasticsearchClient,
@@ -16,11 +19,15 @@ import uuid from 'uuid';
 import type { AuthenticatedUser } from '../../../security/server';
 import {
   packageToPackagePolicy,
+  packageToPackagePolicyInputs,
   isPackageLimited,
   doesAgentPolicyAlreadyIncludePackage,
+  validatePackagePolicy,
+  validationHasErrors,
 } from '../../common';
 import type {
   DeletePackagePoliciesResponse,
+  UpgradePackagePolicyResponse,
   PackagePolicyInput,
   NewPackagePolicyInput,
   PackagePolicyConfigRecordEntry,
@@ -28,6 +35,7 @@ import type {
   PackageInfo,
   ListWithKuery,
   ListResult,
+  UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
@@ -42,6 +50,7 @@ import type {
   PackagePolicy,
   PackagePolicySOAttributes,
   RegistryPackage,
+  DryRunPackagePolicy,
 } from '../types';
 import type { ExternalCallback } from '..';
 
@@ -53,6 +62,10 @@ import { getAssetsData } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
 import { appContextService } from '.';
+
+export type InputsOverride = Partial<NewPackagePolicyInput> & {
+  vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
+};
 
 const SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 
@@ -414,6 +427,11 @@ class PackagePolicyService {
           id,
           name: packagePolicy.name,
           success: true,
+          package: {
+            name: packagePolicy.name,
+            title: '',
+            version: packagePolicy.version || '',
+          },
         });
       } catch (error) {
         result.push({
@@ -425,6 +443,159 @@ class PackagePolicyService {
     }
 
     return result;
+  }
+
+  public async getUpgradePackagePolicyInfo(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    packageVersion?: string
+  ) {
+    const packagePolicy = await this.get(soClient, id);
+    if (!packagePolicy) {
+      throw new Error(
+        i18n.translate('xpack.fleet.packagePolicy.policyNotFoundError', {
+          defaultMessage: 'Package policy with id {id} not found',
+          values: { id },
+        })
+      );
+    }
+
+    if (!packagePolicy.package?.name) {
+      throw new Error(
+        i18n.translate('xpack.fleet.packagePolicy.packageNotFoundError', {
+          defaultMessage: 'Package policy with id {id} has no named package',
+          values: { id },
+        })
+      );
+    }
+
+    let packageInfo: PackageInfo;
+
+    if (packageVersion) {
+      packageInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: packagePolicy.package.name,
+        pkgVersion: packageVersion,
+      });
+    } else {
+      const installedPackage = await getInstallation({
+        savedObjectsClient: soClient,
+        pkgName: packagePolicy.package.name,
+      });
+
+      packageInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: packagePolicy.package.name,
+        pkgVersion: installedPackage?.version ?? '',
+      });
+    }
+
+    return {
+      packagePolicy: packagePolicy as Required<PackagePolicy>,
+      packageInfo,
+    };
+  }
+
+  public async upgrade(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    ids: string[],
+    options?: { user?: AuthenticatedUser }
+  ): Promise<UpgradePackagePolicyResponse> {
+    const result: UpgradePackagePolicyResponse = [];
+
+    for (const id of ids) {
+      try {
+        const { packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soClient, id);
+
+        const updatePackagePolicy = overridePackageInputs(
+          {
+            ...omit(packagePolicy, 'id'),
+            inputs: packagePolicy.inputs,
+            package: {
+              ...packagePolicy.package,
+              version: packageInfo.version,
+            },
+          },
+          packageInfo,
+          packageToPackagePolicyInputs(packageInfo) as InputsOverride[]
+        );
+
+        updatePackagePolicy.inputs = await this.compilePackagePolicyInputs(
+          packageInfo,
+          updatePackagePolicy.vars || {},
+          updatePackagePolicy.inputs as PackagePolicyInput[]
+        );
+
+        await this.update(
+          soClient,
+          esClient,
+          id,
+          omit(updatePackagePolicy, 'missingVars'),
+          options
+        );
+        result.push({
+          id,
+          name: packagePolicy.name,
+          success: true,
+        });
+      } catch (error) {
+        result.push({
+          id,
+          success: false,
+          ...ingestErrorToResponseOptions(error),
+        });
+      }
+    }
+
+    return result;
+  }
+
+  public async getUpgradeDryRunDiff(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    packageVersion?: string
+  ): Promise<UpgradePackagePolicyDryRunResponseItem> {
+    try {
+      const { packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(
+        soClient,
+        id,
+        packageVersion
+      );
+
+      const updatedPackagePolicy = overridePackageInputs(
+        {
+          ...omit(packagePolicy, 'id'),
+          inputs: packagePolicy.inputs,
+          package: {
+            ...packagePolicy.package,
+            version: packageInfo.version,
+          },
+        },
+        packageInfo,
+        packageToPackagePolicyInputs(packageInfo) as InputsOverride[],
+        true
+      );
+
+      updatedPackagePolicy.inputs = await this.compilePackagePolicyInputs(
+        packageInfo,
+        updatedPackagePolicy.vars || {},
+        updatedPackagePolicy.inputs as PackagePolicyInput[]
+      );
+
+      const hasErrors = 'errors' in updatedPackagePolicy;
+
+      return {
+        name: updatedPackagePolicy.name,
+        diff: [packagePolicy, updatedPackagePolicy],
+        hasErrors,
+      };
+    } catch (error) {
+      return {
+        hasErrors: true,
+        ...ingestErrorToResponseOptions(error),
+      };
+    }
   }
 
   public async buildPackagePolicyFromPackage(
@@ -469,30 +640,47 @@ class PackagePolicyService {
     return Promise.all(inputsPromises);
   }
 
-  public async runExternalCallbacks(
-    externalCallbackType: ExternalCallback[0],
-    newPackagePolicy: NewPackagePolicy,
+  public async runExternalCallbacks<A extends ExternalCallback[0]>(
+    externalCallbackType: A,
+    packagePolicy: NewPackagePolicy | DeletePackagePoliciesResponse,
     context: RequestHandlerContext,
     request: KibanaRequest
-  ): Promise<NewPackagePolicy> {
-    let newData = newPackagePolicy;
-
-    const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
-    if (externalCallbacks && externalCallbacks.size > 0) {
-      let updatedNewData: NewPackagePolicy = newData;
-
-      for (const callback of externalCallbacks) {
-        const result = await callback(updatedNewData, context, request);
-        if (externalCallbackType === 'packagePolicyCreate') {
-          updatedNewData = NewPackagePolicySchema.validate(result);
-        } else if (externalCallbackType === 'packagePolicyUpdate') {
-          updatedNewData = UpdatePackagePolicySchema.validate(result);
+  ): Promise<A extends 'postPackagePolicyDelete' ? void : NewPackagePolicy>;
+  public async runExternalCallbacks(
+    externalCallbackType: ExternalCallback[0],
+    packagePolicy: NewPackagePolicy | DeletePackagePoliciesResponse,
+    context: RequestHandlerContext,
+    request: KibanaRequest
+  ): Promise<NewPackagePolicy | void> {
+    if (externalCallbackType === 'postPackagePolicyDelete') {
+      const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
+      if (externalCallbacks && externalCallbacks.size > 0) {
+        for (const callback of externalCallbacks) {
+          if (Array.isArray(packagePolicy)) {
+            await callback(packagePolicy, context, request);
+          }
         }
       }
+    } else {
+      if (!Array.isArray(packagePolicy)) {
+        let newData = packagePolicy;
+        const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
+        if (externalCallbacks && externalCallbacks.size > 0) {
+          let updatedNewData = newData;
+          for (const callback of externalCallbacks) {
+            const result = await callback(updatedNewData, context, request);
+            if (externalCallbackType === 'packagePolicyCreate') {
+              updatedNewData = NewPackagePolicySchema.validate(result);
+            } else if (externalCallbackType === 'packagePolicyUpdate') {
+              updatedNewData = UpdatePackagePolicySchema.validate(result);
+            }
+          }
 
-      newData = updatedNewData;
+          newData = updatedNewData;
+        }
+        return newData;
+      }
     }
-    return newData;
   }
 }
 
@@ -668,3 +856,149 @@ export type PackagePolicyServiceInterface = PackagePolicyService;
 export const packagePolicyService = new PackagePolicyService();
 
 export type { PackagePolicyService };
+
+export function overridePackageInputs(
+  basePackagePolicy: NewPackagePolicy,
+  packageInfo: PackageInfo,
+  inputsOverride?: InputsOverride[],
+  dryRun?: boolean
+): DryRunPackagePolicy {
+  if (!inputsOverride) return basePackagePolicy;
+
+  const inputs = [...basePackagePolicy.inputs];
+  const packageName = basePackagePolicy.package!.name;
+  let errors = [];
+
+  for (const override of inputsOverride) {
+    let originalInput = inputs.find((i) => i.type === override.type);
+
+    if (!originalInput) {
+      const e = {
+        error: new Error(
+          i18n.translate('xpack.fleet.packagePolicyInputOverrideError', {
+            defaultMessage: 'Input type {inputType} does not exist on package {packageName}',
+            values: {
+              inputType: override.type,
+              packageName,
+            },
+          })
+        ),
+        package: { name: packageName, version: basePackagePolicy.package!.version },
+      };
+
+      if (dryRun) {
+        errors.push({
+          key: override.type,
+          message: String(e.error),
+        });
+        continue;
+      } else {
+        throw e;
+      }
+    }
+
+    if (typeof override.enabled !== 'undefined') originalInput.enabled = override.enabled;
+    if (typeof override.keep_enabled !== 'undefined')
+      originalInput.keep_enabled = override.keep_enabled;
+
+    if (override.vars) {
+      originalInput = deepMergeVars(originalInput, override);
+    }
+
+    if (override.streams) {
+      for (const stream of override.streams) {
+        let originalStream = originalInput?.streams.find(
+          (s) => s.data_stream.dataset === stream.data_stream.dataset
+        );
+
+        if (!originalStream) {
+          const streamSet = stream.data_stream.dataset;
+          const e = {
+            error: new Error(
+              i18n.translate('xpack.fleet.packagePolicyStreamOverrideError', {
+                defaultMessage:
+                  'Data stream {streamSet} does not exist on {inputType} of package {packageName}',
+                values: {
+                  streamSet,
+                  inputType: override.type,
+                  packageName,
+                },
+              })
+            ),
+            package: { name: packageName, version: basePackagePolicy.package!.version },
+          };
+
+          if (dryRun) {
+            errors.push({
+              key: `${override.type}.streams.${streamSet}`,
+              message: String(e.error),
+            });
+
+            continue;
+          } else {
+            throw e;
+          }
+        }
+
+        if (typeof stream.enabled !== 'undefined') {
+          originalStream.enabled = stream.enabled;
+        }
+
+        if (stream.vars) {
+          originalStream = deepMergeVars(originalStream, stream as InputsOverride);
+        }
+      }
+    }
+  }
+
+  const resultingPackagePolicy: NewPackagePolicy = {
+    ...basePackagePolicy,
+    inputs,
+  };
+
+  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo);
+
+  if (validationHasErrors(validationResults)) {
+    const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
+      .map(([key, value]) => ({
+        key,
+        message: value,
+      }))
+      .filter(({ message }) => !!message);
+
+    errors = [...errors, ...responseFormattedValidationErrors];
+  }
+
+  if (dryRun && errors.length) {
+    return { ...resultingPackagePolicy, errors };
+  }
+
+  return resultingPackagePolicy;
+}
+
+function deepMergeVars(original: any, override: any): any {
+  const result = { ...original };
+
+  if (!result.vars || !override.vars) {
+    return;
+  }
+
+  const overrideVars = Array.isArray(override.vars)
+    ? override.vars
+    : Object.entries(override.vars!).map(([key, rest]) => ({
+        name: key,
+        ...(rest as any),
+      }));
+
+  for (const { name, ...overrideVal } of overrideVars) {
+    const originalVar = original.vars[name];
+
+    if (!result.vars) {
+      result.vars = {};
+    }
+
+    result.vars[name] = { ...overrideVal, ...originalVar };
+  }
+
+  return result;
+}

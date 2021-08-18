@@ -25,7 +25,7 @@ export type ResponseProviderCallback<F extends (...args: any) => any = (...args:
  *
  * @example
  *  type FleetSetupResponseProvidersMock = ResponseProvidersInterface<{
- *    fleetSetup: () => PostIngestSetupResponse;
+ *    fleetSetup: () => PostFleetSetupResponse;
  *  }>;
  */
 export type ResponseProvidersInterface<

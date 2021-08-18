@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 
@@ -16,13 +15,12 @@ export function useInstanceDetailsFetcher({
   serviceNodeName: string;
 }) {
   const {
-    urlParams: { start, end, kuery, environment },
+    urlParams: { start, end },
   } = useUrlParams();
-  const { transactionType } = useApmServiceContext();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (!start || !end || !transactionType) {
+      if (!start || !end) {
         return;
       }
       return callApmApi({
@@ -33,19 +31,11 @@ export function useInstanceDetailsFetcher({
             serviceName,
             serviceNodeName,
           },
-          query: { start, end, transactionType, environment, kuery },
+          query: { start, end },
         },
       });
     },
-    [
-      serviceName,
-      serviceNodeName,
-      start,
-      end,
-      transactionType,
-      environment,
-      kuery,
-    ]
+    [serviceName, serviceNodeName, start, end]
   );
 
   return { data, status };

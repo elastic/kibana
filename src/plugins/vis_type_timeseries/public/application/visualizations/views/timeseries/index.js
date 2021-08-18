@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
@@ -23,8 +23,7 @@ import {
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
-import { activeCursor$ } from '../../lib/active_cursor';
-import { getUISettings, getChartsSetup } from '../../../../services';
+import { getUISettings, getCharts } from '../../../../services';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
@@ -33,7 +32,7 @@ import { getBaseTheme, getChartClasses } from './utils/theme';
 import { TOOLTIP_MODES } from '../../../../../common/enums';
 import { getValueOrEmpty } from '../../../../../common/empty_label';
 import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
-import { renderEndzoneTooltip } from '../../../../../../charts/public';
+import { renderEndzoneTooltip, useActiveCursor } from '../../../../../../charts/public';
 import { getAxisLabelString } from '../../../components/lib/get_axis_label_string';
 import { calculateDomainForSeries } from './utils/series_domain_calculation';
 
@@ -48,9 +47,9 @@ const generateAnnotationData = (values, formatter) =>
 
 const decorateFormatter = (formatter) => ({ value }) => formatter(value);
 
-const handleCursorUpdate = (cursor) => {
-  activeCursor$.next(cursor);
-};
+/** When displaying the annotation, we must slightly shift the labels for
+ * the x-axis so that they do not overlap the annotations. **/
+const TICK_LABEL_WITH_ANNOTATIONS_PADDING = 19;
 
 export const TimeSeries = ({
   backgroundColor,
@@ -69,22 +68,22 @@ export const TimeSeries = ({
   interval,
   isLastBucketDropped,
 }) => {
+  // If the color isn't configured by the user, use the color mapping service
+  // to assign a color from the Kibana palette. Colors will be shared across the
+  // session, including dashboards.
+  const { theme: themeService, activeCursor: activeCursorService } = getCharts();
+
   const chartRef = useRef();
-  // const [palettesRegistry, setPalettesRegistry] = useState(null);
+  const chartTheme = themeService.useChartsTheme();
 
-  useEffect(() => {
-    const updateCursor = (cursor) => {
-      if (chartRef.current) {
-        chartRef.current.dispatchExternalPointerEvent(cursor);
-      }
-    };
+  const handleCursorUpdate = useActiveCursor(activeCursorService, chartRef, {
+    isDateHistogram: true,
+  });
 
-    const subscription = activeCursor$.subscribe(updateCursor);
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+  const hasVisibleAnnotations = useMemo(
+    () => (annotations ?? []).some((annotation) => Boolean(annotation.data?.length)),
+    [annotations]
+  );
 
   let tooltipFormatter = decorateFormatter(xAxisFormatter);
   if (!isLastBucketDropped) {
@@ -103,11 +102,6 @@ export const TimeSeries = ({
 
   // apply legend style change if bgColor is configured
   const classes = classNames(getChartClasses(backgroundColor));
-
-  // If the color isn't configured by the user, use the color mapping service
-  // to assign a color from the Kibana palette. Colors will be shared across the
-  // session, including dashboards.
-  const { theme: themeService } = getChartsSetup();
 
   const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
 
@@ -139,10 +133,10 @@ export const TimeSeries = ({
     },
     [palettesService, series, syncColors]
   );
-
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
       <Settings
+        debugState={window._echDebugStateFlag ?? false}
         showLegend={legend}
         showLegendExtra={true}
         legendPosition={legendPosition}
@@ -151,6 +145,20 @@ export const TimeSeries = ({
         animateData={false}
         onPointerUpdate={handleCursorUpdate}
         theme={[
+          {
+            crosshair: {
+              ...chartTheme.crosshair,
+            },
+            axes: {
+              tickLabel: {
+                padding: {
+                  inner: hasVisibleAnnotations
+                    ? TICK_LABEL_WITH_ANNOTATIONS_PADDING
+                    : chartTheme.axes.tickLabel.padding.inner,
+                },
+              },
+            },
+          },
           hasBarChart
             ? {}
             : {
@@ -165,6 +173,7 @@ export const TimeSeries = ({
               color: backgroundColor,
             },
           },
+          chartTheme,
         ]}
         baseTheme={baseTheme}
         tooltip={{

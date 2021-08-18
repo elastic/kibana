@@ -9,9 +9,9 @@ import React from 'react';
 import { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
-import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { ReactWrapper } from 'enzyme';
-import { CustomPaletteParams } from './types';
+import type { CustomPaletteParams } from '../../../common';
 import { applyPaletteParams } from './utils';
 import { CustomizablePalette } from './palette_configuration';
 

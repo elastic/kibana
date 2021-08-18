@@ -38,17 +38,17 @@ import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
 import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';
-import { FormattedTooltip, MlTooltipComponent } from '../components/chart_tooltip/chart_tooltip';
+import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
 import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
 
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { useUiSettings } from '../contexts/kibana';
 import {
-  SwimlaneAnnotationContainer,
   Y_AXIS_LABEL_WIDTH,
   Y_AXIS_LABEL_PADDING,
   Y_AXIS_LABEL_FONT_COLOR,
+  X_AXIS_RIGHT_OVERFLOW,
 } from './swimlane_annotation_container';
 import { AnnotationsTable } from '../../../common/types/annotations';
 
@@ -333,6 +333,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
           return moment(v).format(scaledDateFormat);
         },
         fontSize: 12,
+        // Required to calculate where the swimlane ends
+        width: X_AXIS_RIGHT_OVERFLOW * 2,
       },
       brushMask: {
         fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
@@ -480,21 +482,6 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                   )}
                 </div>
               </div>
-              {swimlaneType === SWIMLANE_TYPE.OVERALL &&
-                showSwimlane &&
-                xDomain !== undefined &&
-                !isLoading && (
-                  <MlTooltipComponent>
-                    {(tooltipService) => (
-                      <SwimlaneAnnotationContainer
-                        chartWidth={chartWidth}
-                        domain={xDomain}
-                        annotationsData={annotationsData}
-                        tooltipService={tooltipService}
-                      />
-                    )}
-                  </MlTooltipComponent>
-                )}
             </>
           </EuiFlexItem>
 

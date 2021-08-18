@@ -18,7 +18,7 @@ import { UserPercentile } from './UserPercentile';
 import { useBreakPoints } from '../../../hooks/use_break_points';
 
 export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
-  defaultMessage: 'User Experience',
+  defaultMessage: 'Dashboard',
 });
 
 export function RumHome() {
@@ -27,7 +27,7 @@ export function RumHome() {
 
   const { isSmall, isXXL } = useBreakPoints();
 
-  const envStyle = isSmall ? {} : { maxWidth: 200 };
+  const envStyle = isSmall ? {} : { maxWidth: 500 };
 
   return (
     <CsmSharedContextProvider>
@@ -36,7 +36,7 @@ export function RumHome() {
           isXXL
             ? {
                 pageTitle: i18n.translate('xpack.apm.ux.overview', {
-                  defaultMessage: 'Overview',
+                  defaultMessage: 'Dashboard',
                 }),
                 rightSideItems: [
                   <DatePicker />,
@@ -59,7 +59,7 @@ export function RumHome() {
 function PageHeader() {
   const { isSmall } = useBreakPoints();
 
-  const envStyle = isSmall ? {} : { maxWidth: 200 };
+  const envStyle = isSmall ? {} : { maxWidth: 400 };
 
   return (
     <div style={{ width: '100%' }}>

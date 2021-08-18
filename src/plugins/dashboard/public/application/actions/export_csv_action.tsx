@@ -8,7 +8,7 @@
 
 import { Datatable } from 'src/plugins/expressions/public';
 import { CoreStart } from '../../../../../core/public';
-import { FormatFactory } from '../../../../data/common/field_formats/utils';
+import { FormatFactory } from '../../../../field_formats/common';
 
 import { DataPublicPluginStart, exporters } from '../../services/data';
 import { downloadMultipleAs } from '../../services/share';
@@ -94,6 +94,7 @@ export class ExportCSVAction implements Action<ExportContext> {
                 csvSeparator: this.params.core.uiSettings.get('csv:separator', ','),
                 quoteValues: this.params.core.uiSettings.get('csv:quoteValues', true),
                 formatFactory,
+                escapeFormulaValues: false,
               }),
               type: exporters.CSV_MIME_TYPE,
             };

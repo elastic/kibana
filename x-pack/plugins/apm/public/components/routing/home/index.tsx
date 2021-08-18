@@ -9,9 +9,13 @@ import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { environmentRt } from '../../../../common/environment_rt';
+import { BackendDetailOverview } from '../../app/backend_detail_overview';
+import { BackendInventory } from '../../app/backend_inventory';
 import { Breadcrumb } from '../../app/breadcrumb';
 import { ServiceInventory } from '../../app/service_inventory';
-import { ServiceMap } from '../../app/service_map';
+import { ServiceMapHome } from '../../app/service_map';
 import { TraceOverview } from '../../app/trace_overview';
 import { ApmMainTemplate } from '../templates/apm_main_template';
 
@@ -41,15 +45,34 @@ export const ServiceInventoryTitle = i18n.translate(
   }
 );
 
+export const BackendInventoryTitle = i18n.translate(
+  'xpack.apm.views.backendInventory.title',
+  {
+    defaultMessage: 'Backends',
+  }
+);
+
 export const home = {
   path: '/',
   element: <Outlet />,
-  params: t.partial({
-    query: t.partial({
-      rangeFrom: t.string,
-      rangeTo: t.string,
-    }),
+  params: t.type({
+    query: t.intersection([
+      environmentRt,
+      t.type({
+        rangeFrom: t.string,
+        rangeTo: t.string,
+        kuery: t.string,
+      }),
+    ]),
   }),
+  defaults: {
+    query: {
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+      environment: ENVIRONMENT_ALL.value,
+      kuery: '',
+    },
+  },
   children: [
     page({
       path: '/services',
@@ -68,8 +91,34 @@ export const home = {
       title: i18n.translate('xpack.apm.views.serviceMap.title', {
         defaultMessage: 'Service Map',
       }),
-      element: <ServiceMap />,
+      element: <ServiceMapHome />,
     }),
+    {
+      path: '/backends',
+      element: <Outlet />,
+      params: t.partial({
+        query: t.partial({
+          comparisonEnabled: t.string,
+          comparisonType: t.string,
+        }),
+      }),
+      children: [
+        {
+          path: '/:backendName/overview',
+          element: <BackendDetailOverview />,
+          params: t.type({
+            path: t.type({
+              backendName: t.string,
+            }),
+          }),
+        },
+        page({
+          path: '/',
+          title: BackendInventoryTitle,
+          element: <BackendInventory />,
+        }),
+      ],
+    },
     {
       path: '/',
       element: <Redirect to="/services" />,

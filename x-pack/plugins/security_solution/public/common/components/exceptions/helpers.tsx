@@ -33,10 +33,10 @@ import {
   addIdToEntries,
   ExceptionsBuilderExceptionItem,
 } from '@kbn/securitysolution-list-utils';
+import { IndexPatternBase } from '@kbn/es-query';
 import * as i18n from './translations';
 import { AlertData, Flattened } from './types';
 
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { Ecs } from '../../../../common/ecs';
 import { CodeSignature } from '../../../../common/ecs/file';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
@@ -46,10 +46,10 @@ import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
 import exceptionableEndpointEventFields from './exceptionable_endpoint_event_fields.json';
 
 export const filterIndexPatterns = (
-  patterns: IIndexPattern,
+  patterns: IndexPatternBase,
   type: ExceptionListType,
   osTypes?: OsTypeArray
-): IIndexPattern => {
+): IndexPatternBase => {
   switch (type) {
     case 'endpoint':
       const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')
@@ -325,8 +325,8 @@ export const getCodeSignatureValue = (
   if (Array.isArray(codeSignature) && codeSignature.length > 0) {
     return codeSignature.map((signature) => {
       return {
-        subjectName: signature.subject_name ?? '',
-        trusted: signature.trusted.toString() ?? '',
+        subjectName: signature?.subject_name ?? '',
+        trusted: signature?.trusted?.toString() ?? '',
       };
     });
   } else {
@@ -342,6 +342,29 @@ export const getCodeSignatureValue = (
     ];
   }
 };
+
+// helper type to filter empty-valued exception entries
+interface ExceptionEntry {
+  value?: string;
+  entries?: ExceptionEntry[];
+}
+
+/**
+ * Takes an array of Entries and filter out the ones with empty values.
+ * It will also filter out empty values for nested entries.
+ */
+function filterEmptyExceptionEntries<T extends ExceptionEntry>(entries: T[]): T[] {
+  const finalEntries: T[] = [];
+  for (const entry of entries) {
+    if (entry.entries !== undefined) {
+      entry.entries = entry.entries.filter((el) => el.value !== undefined && el.value.length > 0);
+      finalEntries.push(entry);
+    } else if (entry.value !== undefined && entry.value.length > 0) {
+      finalEntries.push(entry);
+    }
+  }
+  return finalEntries;
+}
 
 /**
  * Returns the default values from the alert data to autofill new endpoint exceptions
@@ -510,34 +533,35 @@ export const getPrepopulatedMemorySignatureException = ({
   alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
   const { process } = alertEcsData;
+  const entries = filterEmptyExceptionEntries([
+    {
+      field: 'Memory_protection.feature',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.Memory_protection?.feature ?? '',
+    },
+    {
+      field: 'process.executable.caseless',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.executable ?? '',
+    },
+    {
+      field: 'process.name.caseless',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.name ?? '',
+    },
+    {
+      field: 'process.hash.sha256',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.hash?.sha256 ?? '',
+    },
+  ]);
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
-    entries: addIdToEntries([
-      {
-        field: 'Memory_protection.feature',
-        operator: 'included',
-        type: 'match',
-        value: alertEcsData.Memory_protection?.feature ?? '',
-      },
-      {
-        field: 'process.executable.caseless',
-        operator: 'included',
-        type: 'match',
-        value: process?.executable ?? '',
-      },
-      {
-        field: 'process.name.caseless',
-        operator: 'included',
-        type: 'match',
-        value: process?.name ?? '',
-      },
-      {
-        field: 'process.hash.sha256',
-        operator: 'included',
-        type: 'match',
-        value: process?.hash?.sha256 ?? '',
-      },
-    ]),
+    entries: addIdToEntries(entries),
   };
 };
 export const getPrepopulatedMemoryShellcodeException = ({
@@ -554,87 +578,219 @@ export const getPrepopulatedMemoryShellcodeException = ({
   alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
   const { process, Target } = alertEcsData;
+  const entries = filterEmptyExceptionEntries([
+    {
+      field: 'Memory_protection.feature',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.Memory_protection?.feature ?? '',
+    },
+    {
+      field: 'Memory_protection.self_injection',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: String(alertEcsData.Memory_protection?.self_injection) ?? '',
+    },
+    {
+      field: 'process.executable.caseless',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.executable ?? '',
+    },
+    {
+      field: 'process.name.caseless',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.name ?? '',
+    },
+    {
+      field: 'process.Ext.token.integrity_level_name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.Ext?.token?.integrity_level_name ?? '',
+    },
+    {
+      field: 'Target.process.thread.Ext.start_address_details',
+      type: 'nested' as const,
+      entries: [
+        {
+          field: 'allocation_type',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: Target?.process?.thread?.Ext?.start_address_details?.allocation_type ?? '',
+        },
+        {
+          field: 'allocation_size',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: String(Target?.process?.thread?.Ext?.start_address_details?.allocation_size) ?? '',
+        },
+        {
+          field: 'region_size',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: String(Target?.process?.thread?.Ext?.start_address_details?.region_size) ?? '',
+        },
+        {
+          field: 'region_protection',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value:
+            String(Target?.process?.thread?.Ext?.start_address_details?.region_protection) ?? '',
+        },
+        {
+          field: 'memory_pe.imphash',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value:
+            String(Target?.process?.thread?.Ext?.start_address_details?.memory_pe?.imphash) ?? '',
+        },
+      ],
+    },
+  ]);
+
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
-    entries: addIdToEntries([
-      {
-        field: 'Memory_protection.feature',
-        operator: 'included',
-        type: 'match',
-        value: alertEcsData.Memory_protection?.feature ?? '',
-      },
-      {
-        field: 'Memory_protection.self_injection',
-        operator: 'included',
-        type: 'match',
-        value: String(alertEcsData.Memory_protection?.self_injection) ?? '',
-      },
-      {
-        field: 'process.executable.caseless',
-        operator: 'included',
-        type: 'match',
-        value: process?.executable ?? '',
-      },
-      {
-        field: 'process.name.caseless',
-        operator: 'included',
-        type: 'match',
-        value: process?.name ?? '',
-      },
-      {
-        field: 'process.Ext.token.integrity_level_name',
-        operator: 'included',
-        type: 'match',
-        value: process?.Ext?.token?.integrity_level_name ?? '',
-      },
-      {
-        field: 'Target.process.thread.Ext.start_address_details',
-        type: 'nested',
-        entries: [
-          {
-            field: 'allocation_type',
-            operator: 'included',
-            type: 'match',
-            value: Target?.process?.thread?.Ext?.start_address_details?.allocation_type ?? '',
-          },
-          {
-            field: 'allocation_size',
-            operator: 'included',
-            type: 'match',
-            value:
-              String(Target?.process?.thread?.Ext?.start_address_details?.allocation_size) ?? '',
-          },
-          {
-            field: 'region_size',
-            operator: 'included',
-            type: 'match',
-            value: String(Target?.process?.thread?.Ext?.start_address_details?.region_size) ?? '',
-          },
-          {
-            field: 'region_protection',
-            operator: 'included',
-            type: 'match',
-            value:
-              String(Target?.process?.thread?.Ext?.start_address_details?.region_protection) ?? '',
-          },
-          {
-            field: 'memory_pe.imphash',
-            operator: 'included',
-            type: 'match',
-            value:
-              String(Target?.process?.thread?.Ext?.start_address_details?.memory_pe?.imphash) ?? '',
-          },
-        ],
-      },
-    ]),
+    entries: addIdToEntries(entries),
   };
 };
+
+export const getPrepopulatedBehaviorException = ({
+  listId,
+  ruleName,
+  eventCode,
+  listNamespace = 'agnostic',
+  alertEcsData,
+}: {
+  listId: string;
+  listNamespace?: NamespaceType;
+  ruleName: string;
+  eventCode: string;
+  alertEcsData: Flattened<Ecs>;
+}): ExceptionsBuilderExceptionItem => {
+  const { process } = alertEcsData;
+  const entries = filterEmptyExceptionEntries([
+    {
+      field: 'rule.id',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.rule?.id ?? '',
+    },
+    {
+      field: 'process.executable.caseless',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.executable ?? '',
+    },
+    {
+      field: 'process.command_line',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.command_line ?? '',
+    },
+    {
+      field: 'process.parent.executable',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.parent?.executable ?? '',
+    },
+    {
+      field: 'process.code_signature.subject_name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.code_signature?.subject_name ?? '',
+    },
+    {
+      field: 'file.path',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.file?.path ?? '',
+    },
+    {
+      field: 'file.name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.file?.name ?? '',
+    },
+    {
+      field: 'source.ip',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.source?.ip ?? '',
+    },
+    {
+      field: 'destination.ip',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.destination?.ip ?? '',
+    },
+    {
+      field: 'registry.path',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.registry?.path ?? '',
+    },
+    {
+      field: 'registry.value',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.registry?.value ?? '',
+    },
+    {
+      field: 'registry.data.strings',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.registry?.data?.strings ?? '',
+    },
+    {
+      field: 'dll.path',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dll?.path ?? '',
+    },
+    {
+      field: 'dll.code_signature.subject_name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dll?.code_signature?.subject_name ?? '',
+    },
+    {
+      field: 'dll.pe.original_file_name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dll?.pe?.original_file_name ?? '',
+    },
+    {
+      field: 'dns.question.name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dns?.question?.name ?? '',
+    },
+    {
+      field: 'dns.question.type',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dns?.question?.type ?? '',
+    },
+    {
+      field: 'user.id',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.user?.id ?? '',
+    },
+  ]);
+  return {
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    entries: addIdToEntries(entries),
+  };
+};
+
 /**
  * Determines whether or not any entries within the given exceptionItems contain values not in the specified ECS mapping
  */
 export const entryHasNonEcsType = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
-  indexPatterns: IIndexPattern
+  indexPatterns: IndexPatternBase
 ): boolean => {
   const doesFieldNameExist = (exceptionEntry: Entry): boolean => {
     return indexPatterns.fields.some(({ name }) => name === exceptionEntry.field);
@@ -671,6 +827,15 @@ export const defaultEndpointExceptionItems = (
   const eventCode = alertEvent?.code ?? '';
 
   switch (eventCode) {
+    case 'behavior':
+      return [
+        getPrepopulatedBehaviorException({
+          listId,
+          ruleName,
+          eventCode,
+          alertEcsData,
+        }),
+      ];
     case 'memory_signature':
       return [
         getPrepopulatedMemorySignatureException({

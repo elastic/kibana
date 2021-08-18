@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import './feature_table.scss';
-
 import type { EuiCheckboxProps } from '@elastic/eui';
 import {
   EuiAccordion,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -88,9 +86,9 @@ export class FeatureTable extends Component<Props, {}> {
       const buttonContent = (
         <EuiFlexGroup
           data-test-subj={`featureCategoryButton_${category.id}`}
-          alignItems={'center'}
+          alignItems="center"
           responsive={false}
-          gutterSize="m"
+          gutterSize="s"
           onClick={() => {
             if (!canExpandCategory) {
               const isChecked = enabledCount > 0;
@@ -101,31 +99,28 @@ export class FeatureTable extends Component<Props, {}> {
             }
           }}
         >
-          <EuiFlexItem grow={false}>
-            <EuiCheckbox {...checkboxProps} />
-          </EuiFlexItem>
           {category.euiIconType ? (
             <EuiFlexItem grow={false}>
               <EuiIcon size="m" type={category.euiIconType} />
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={1}>
-            <EuiTitle size="xs">
-              <h4 className="eui-displayInlineBlock">{category.label}</h4>
+            <EuiTitle size="xxs">
+              <h4>{category.label}</h4>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
 
       const label: string = i18n.translate('xpack.spaces.management.featureAccordionSwitchLabel', {
-        defaultMessage: '{enabledCount} / {featureCount} features visible',
+        defaultMessage: '{enabledCount}/{featureCount} features visible',
         values: {
           enabledCount,
           featureCount,
         },
       });
       const extraAction = (
-        <EuiText size="s" aria-hidden="true" color={'subdued'}>
+        <EuiText size="xs" aria-hidden="true" color="subdued">
           {label}
         </EuiText>
       );
@@ -133,46 +128,50 @@ export class FeatureTable extends Component<Props, {}> {
       const helpText = this.getCategoryHelpText(category);
 
       const accordion = (
-        <EuiAccordion
-          id={`featureCategory_${category.id}`}
-          data-test-subj={`featureCategory_${category.id}`}
-          key={category.id}
-          arrowDisplay={canExpandCategory ? 'right' : 'none'}
-          forceState={canExpandCategory ? undefined : 'closed'}
-          buttonContent={buttonContent}
-          extraAction={canExpandCategory ? extraAction : undefined}
-        >
-          <div className="spcFeatureTableAccordionContent">
-            <EuiSpacer size="s" />
-            {helpText && (
-              <>
-                <EuiCallOut iconType="iInCircle" size="s">
-                  {helpText}
-                </EuiCallOut>
-                <EuiSpacer size="s" />
-              </>
-            )}
-            {featuresInCategory.map((feature) => {
-              const featureChecked = !(
-                space.disabledFeatures && space.disabledFeatures.includes(feature.id)
-              );
+        <EuiFlexGroup key={category.id} alignItems="baseline" responsive={false} gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiCheckbox {...checkboxProps} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <EuiAccordion
+              id={`featureCategory_${category.id}`}
+              data-test-subj={`featureCategory_${category.id}`}
+              arrowDisplay={canExpandCategory ? 'right' : 'none'}
+              forceState={canExpandCategory ? undefined : 'closed'}
+              buttonContent={buttonContent}
+              extraAction={canExpandCategory ? extraAction : undefined}
+            >
+              <EuiSpacer size="m" />
+              {helpText && (
+                <>
+                  <EuiCallOut iconType="iInCircle" size="s">
+                    {helpText}
+                  </EuiCallOut>
+                  <EuiSpacer size="m" />
+                </>
+              )}
+              {featuresInCategory.map((feature) => {
+                const featureChecked = !(
+                  space.disabledFeatures && space.disabledFeatures.includes(feature.id)
+                );
 
-              return (
-                <EuiFlexGroup key={`${feature.id}-toggle`}>
-                  <EuiFlexItem grow={false}>
-                    <EuiCheckbox
-                      id={`featureCheckbox_${feature.id}`}
-                      data-test-subj={`featureCheckbox_${feature.id}`}
-                      checked={featureChecked}
-                      onChange={this.onChange(feature.id) as any}
-                      label={feature.name}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              );
-            })}
-          </div>
-        </EuiAccordion>
+                return (
+                  <EuiFlexGroup key={`${feature.id}-toggle`}>
+                    <EuiFlexItem grow={false}>
+                      <EuiCheckbox
+                        id={`featureCheckbox_${feature.id}`}
+                        data-test-subj={`featureCheckbox_${feature.id}`}
+                        checked={featureChecked}
+                        onChange={this.onChange(feature.id) as any}
+                        label={feature.name}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                );
+              })}
+            </EuiAccordion>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
 
       accordions.push({
@@ -188,30 +187,34 @@ export class FeatureTable extends Component<Props, {}> {
     const controls = [];
     if (enabledCount < featureCount) {
       controls.push(
-        <EuiLink onClick={() => this.showAll()} data-test-subj="showAllFeaturesLink">
-          <EuiText size="xs">
-            {i18n.translate('xpack.spaces.management.selectAllFeaturesLink', {
-              defaultMessage: 'Select all',
-            })}
-          </EuiText>
-        </EuiLink>
+        <EuiButtonEmpty
+          onClick={() => this.showAll()}
+          size="xs"
+          data-test-subj="showAllFeaturesLink"
+        >
+          {i18n.translate('xpack.spaces.management.selectAllFeaturesLink', {
+            defaultMessage: 'Show all',
+          })}
+        </EuiButtonEmpty>
       );
     }
     if (enabledCount > 0) {
       controls.push(
-        <EuiLink onClick={() => this.hideAll()} data-test-subj="hideAllFeaturesLink">
-          <EuiText size="xs">
-            {i18n.translate('xpack.spaces.management.deselectAllFeaturesLink', {
-              defaultMessage: 'Deselect all',
-            })}
-          </EuiText>
-        </EuiLink>
+        <EuiButtonEmpty
+          onClick={() => this.hideAll()}
+          size="xs"
+          data-test-subj="hideAllFeaturesLink"
+        >
+          {i18n.translate('xpack.spaces.management.deselectAllFeaturesLink', {
+            defaultMessage: 'Hide all',
+          })}
+        </EuiButtonEmpty>
       );
     }
 
     return (
       <div>
-        <EuiFlexGroup alignItems={'flexEnd'}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem>
             <EuiText size="xs">
               <b>
@@ -227,10 +230,10 @@ export class FeatureTable extends Component<Props, {}> {
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
-        <EuiHorizontalRule margin={'m'} />
+        <EuiHorizontalRule margin="m" />
         {accordions.flatMap((a, idx) => [
           a.element,
-          <EuiHorizontalRule key={`accordion-hr-${idx}`} margin={'m'} />,
+          <EuiHorizontalRule key={`accordion-hr-${idx}`} margin="m" />,
         ])}
       </div>
     );

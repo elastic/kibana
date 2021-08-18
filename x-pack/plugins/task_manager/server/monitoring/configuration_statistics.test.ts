@@ -35,6 +35,10 @@ describe('Configuration Statistics Aggregator', () => {
         },
         custom: {},
       },
+      ephemeral_tasks: {
+        enabled: true,
+        request_capacity: 10,
+      },
     };
 
     const managedConfig = {

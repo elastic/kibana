@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-getSearchSourceTimeFilter(forceNow?: Date): RangeFilter[] | {
+getSearchSourceTimeFilter(forceNow?: Date): import("@kbn/es-query").RangeFilter[] | {
         meta: {
             index: string | undefined;
             params: {};
@@ -43,7 +43,7 @@ getSearchSourceTimeFilter(forceNow?: Date): RangeFilter[] | {
 
 <b>Returns:</b>
 
-`RangeFilter[] | {
+`import("@kbn/es-query").RangeFilter[] | {
         meta: {
             index: string | undefined;
             params: {};

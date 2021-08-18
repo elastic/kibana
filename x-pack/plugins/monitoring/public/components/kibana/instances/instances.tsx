@@ -41,7 +41,7 @@ import { AlertsStatus } from '../../../alerts/status';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
 
-const getColumns = (setupMode: any, alerts: { [alertTypeId: string]: CommonAlertStatus }) => {
+const getColumns = (setupMode: any, alerts: { [alertTypeId: string]: CommonAlertStatus[] }) => {
   const columns = [
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.nameColumnTitle', {
@@ -173,7 +173,7 @@ const getColumns = (setupMode: any, alerts: { [alertTypeId: string]: CommonAlert
 
 interface Props {
   clusterStatus: any;
-  alerts: { [alertTypeId: string]: CommonAlertStatus };
+  alerts: { [alertTypeId: string]: CommonAlertStatus[] };
   setupMode: any;
   sorting: any;
   pagination: any;

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps, EuiFormRow } from '@elastic/eui';
 import { JobId } from '../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from '../application/services/ml_api_service';
+import { ALL_JOBS_SELECTION } from '../../common/constants/alerts';
 
 interface JobSelection {
   jobIds?: JobId[];
@@ -25,6 +26,17 @@ export interface JobSelectorControlProps {
    * Validation is handled by alerting framework
    */
   errors: string[];
+  /** Enables multiple selection of jobs and groups */
+  multiSelect?: boolean;
+  label?: ReactNode;
+  /**
+   * Allows selecting all jobs, even those created afterward.
+   */
+  allowSelectAll?: boolean;
+  /**
+   * Available options to select. By default suggest all existing jobs.
+   */
+  options?: Array<EuiComboBoxOptionOption<string>>;
 }
 
 export const JobSelectorControl: FC<JobSelectorControlProps> = ({
@@ -32,6 +44,10 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   onChange,
   adJobsApiService,
   errors,
+  multiSelect = false,
+  label,
+  allowSelectAll = false,
+  options: defaultOptions,
 }) => {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const jobIds = useMemo(() => new Set(), []);
@@ -60,12 +76,39 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
       });
 
       setOptions([
+        ...(allowSelectAll
+          ? [
+              {
+                label: i18n.translate('xpack.ml.jobSelector.selectAllGroupLabel', {
+                  defaultMessage: 'Select all',
+                }),
+                options: [
+                  {
+                    label: i18n.translate('xpack.ml.jobSelector.selectAllOptionLabel', {
+                      defaultMessage: '*',
+                    }),
+                    value: ALL_JOBS_SELECTION,
+                  },
+                ],
+              },
+            ]
+          : []),
         {
           label: i18n.translate('xpack.ml.jobSelector.jobOptionsLabel', {
             defaultMessage: 'Jobs',
           }),
           options: jobIdOptions.map((v) => ({ label: v })),
         },
+        ...(multiSelect
+          ? [
+              {
+                label: i18n.translate('xpack.ml.jobSelector.groupOptionsLabel', {
+                  defaultMessage: 'Groups',
+                }),
+                options: groupIdOptions.map((v) => ({ label: v })),
+              },
+            ]
+          : []),
       ]);
     } catch (e) {
       // TODO add error handling
@@ -73,25 +116,33 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   }, [adJobsApiService]);
 
   const onSelectionChange: EuiComboBoxProps<string>['onChange'] = useCallback(
-    (selectionUpdate) => {
+    ((selectionUpdate) => {
+      if (selectionUpdate.some((selectedOption) => selectedOption.value === ALL_JOBS_SELECTION)) {
+        onChange({ jobIds: [ALL_JOBS_SELECTION] });
+        return;
+      }
+
       const selectedJobIds: JobId[] = [];
       const selectedGroupIds: string[] = [];
-      selectionUpdate.forEach(({ label }: { label: string }) => {
-        if (jobIds.has(label)) {
-          selectedJobIds.push(label);
-        } else if (groupIds.has(label)) {
-          selectedGroupIds.push(label);
+      selectionUpdate.forEach(({ label: selectedLabel }: { label: string }) => {
+        if (jobIds.has(selectedLabel)) {
+          selectedJobIds.push(selectedLabel);
+        } else if (groupIds.has(selectedLabel)) {
+          selectedGroupIds.push(selectedLabel);
+        } else if (defaultOptions?.some((v) => v.options?.some((o) => o.label === selectedLabel))) {
+          selectedJobIds.push(selectedLabel);
         }
       });
       onChange({
         ...(selectedJobIds.length > 0 ? { jobIds: selectedJobIds } : {}),
         ...(selectedGroupIds.length > 0 ? { groupIds: selectedGroupIds } : {}),
       });
-    },
-    [jobIds, groupIds]
+    }) as Exclude<EuiComboBoxProps<string>['onChange'], undefined>,
+    [jobIds, groupIds, defaultOptions]
   );
 
   useEffect(() => {
+    if (defaultOptions) return;
     fetchOptions();
   }, []);
 
@@ -99,15 +150,20 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
     <EuiFormRow
       fullWidth
       label={
-        <FormattedMessage id="xpack.ml.jobSelector.formControlLabel" defaultMessage="Select job" />
+        label ?? (
+          <FormattedMessage
+            id="xpack.ml.jobSelector.formControlLabel"
+            defaultMessage="Select job"
+          />
+        )
       }
       isInvalid={!!errors?.length}
       error={errors}
     >
       <EuiComboBox<string>
-        singleSelection
+        singleSelection={!multiSelect}
         selectedOptions={selectedOptions}
-        options={options}
+        options={defaultOptions ?? options}
         onChange={onSelectionChange}
         fullWidth
         data-test-subj={'mlAnomalyAlertJobSelection'}

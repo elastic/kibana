@@ -12,7 +12,7 @@ import {
   getReadRequest,
   getFindResultWithSingleHit,
   nonRuleFindResult,
-  getFindResultStatusEmpty,
+  getEmptySavedObjectsResponse,
 } from '../__mocks__/request_responses';
 import { requestMock, requestContextMock, serverMock } from '../__mocks__';
 
@@ -24,8 +24,9 @@ describe('read_signals', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatusEmpty()); // successful transform
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
+    clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // successful transform
+    clients.ruleExecutionLogClient.find.mockResolvedValue([]);
 
     readRulesRoute(server.router);
   });
@@ -37,14 +38,14 @@ describe('read_signals', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getAlertsClient = jest.fn();
+      context.alerting!.getRulesClient = jest.fn();
       const response = await server.inject(getReadRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('returns error if requesting a non-rule', async () => {
-      clients.alertsClient.find.mockResolvedValue(nonRuleFindResult());
+      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
       const response = await server.inject(getReadRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
@@ -54,7 +55,7 @@ describe('read_signals', () => {
     });
 
     test('catches error if search throws error', async () => {
-      clients.alertsClient.find.mockImplementation(async () => {
+      clients.rulesClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getReadRequest(), context);
@@ -68,7 +69,7 @@ describe('read_signals', () => {
 
   describe('data validation', () => {
     test('returns 404 if given a non-existent id', async () => {
-      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
+      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       const request = requestMock.create({
         method: 'get',
         path: DETECTION_ENGINE_RULES_URL,

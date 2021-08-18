@@ -20,6 +20,7 @@ import {
 } from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 
 describe('buildSignal', () => {
   beforeEach(() => {
@@ -30,8 +31,10 @@ describe('buildSignal', () => {
     const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
     delete doc._source.event;
     const rule = getRulesSchemaMock();
+    const reason = 'signal reasonable reason';
+
     const signal = {
-      ...buildSignal([doc], rule),
+      ...buildSignal([doc], rule, reason),
       ...additionalSignalFields(doc),
     };
     const expected: Signal = {
@@ -61,6 +64,7 @@ describe('buildSignal', () => {
         },
       ],
       original_time: '2020-04-20T21:27:45.000Z',
+      reason: 'signal reasonable reason',
       status: 'open',
       rule: {
         author: [],
@@ -84,7 +88,7 @@ describe('buildSignal', () => {
         type: 'query',
         threat: [],
         version: 1,
-        status: 'succeeded',
+        status: RuleExecutionStatus.succeeded,
         status_date: '2020-02-22T16:47:50.047Z',
         last_success_at: '2020-02-22T16:47:50.047Z',
         last_success_message: 'succeeded',
@@ -111,8 +115,9 @@ describe('buildSignal', () => {
       module: 'system',
     };
     const rule = getRulesSchemaMock();
+    const reason = 'signal reasonable reason';
     const signal = {
-      ...buildSignal([doc], rule),
+      ...buildSignal([doc], rule, reason),
       ...additionalSignalFields(doc),
     };
     const expected: Signal = {
@@ -142,6 +147,7 @@ describe('buildSignal', () => {
         },
       ],
       original_time: '2020-04-20T21:27:45.000Z',
+      reason: 'signal reasonable reason',
       original_event: {
         action: 'socket_opened',
         dataset: 'socket',
@@ -171,7 +177,7 @@ describe('buildSignal', () => {
         type: 'query',
         threat: [],
         version: 1,
-        status: 'succeeded',
+        status: RuleExecutionStatus.succeeded,
         status_date: '2020-02-22T16:47:50.047Z',
         last_success_at: '2020-02-22T16:47:50.047Z',
         last_success_message: 'succeeded',

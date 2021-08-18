@@ -25,12 +25,11 @@ import {
   HostStatus,
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
-import { POLICY_STATUS_TO_TEXT } from './host_constants';
+import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 import { getEndpointDetailsPath } from '../../../common/routing';
 import { KibanaServices, useKibana, useToasts } from '../../../../common/lib/kibana';
 import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint_isolation/mocks';
-import { fireEvent } from '@testing-library/dom';
 import {
   createFailedResourceState,
   createLoadedResourceState,
@@ -42,6 +41,8 @@ import { getCurrentIsolationRequestState } from '../store/selectors';
 import { licenseService } from '../../../../common/hooks/use_license';
 import { FleetActionGenerator } from '../../../../../common/endpoint/data_generators/fleet_action_generator';
 import { APP_PATH, MANAGEMENT_PATH } from '../../../../../common/constants';
+import { TransformStats, TRANSFORM_STATE } from '../types';
+import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough it needs to be inline in this one file
@@ -68,7 +69,7 @@ jest.mock('../../../../common/hooks/use_license');
 
 describe('when on the endpoint list page', () => {
   const docGenerator = new EndpointDocGenerator();
-  const act = reactTestingLibrary.act;
+  const { act, screen, fireEvent } = reactTestingLibrary;
 
   let render: () => ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
@@ -336,7 +337,7 @@ describe('when on the endpoint list page', () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
         const total = await renderResult.findByTestId('endpointListTableTotal');
-        expect(total.textContent).toEqual('5 Hosts');
+        expect(total.textContent).toEqual('Showing 5 endpoints');
       });
       it('should display correct status', async () => {
         const renderResult = render();
@@ -379,18 +380,14 @@ describe('when on the endpoint list page', () => {
         const policyStatuses = await renderResult.findAllByTestId('rowPolicyStatus');
 
         policyStatuses.forEach((status, index) => {
-          const policyStatusToRGBColor: Array<[string, string]> = [
-            ['Success', 'background-color: rgb(109, 204, 177);'],
-            ['Warning', 'background-color: rgb(241, 216, 111);'],
-            ['Failure', 'background-color: rgb(255, 126, 98);'],
-            ['Unsupported', 'background-color: rgb(211, 218, 230);'],
-          ];
-          const policyStatusStyleMap: ReadonlyMap<string, string> = new Map<string, string>(
-            policyStatusToRGBColor
-          );
-          const expectedStatusColor: string = policyStatusStyleMap.get(status.textContent!) ?? '';
           expect(status.textContent).toEqual(POLICY_STATUS_TO_TEXT[generatedPolicyStatuses[index]]);
-          expect(status.getAttribute('style')).toMatch(expectedStatusColor);
+          expect(
+            status.querySelector(
+              `[data-euiicon-type][color=${
+                POLICY_STATUS_TO_HEALTH_COLOR[generatedPolicyStatuses[index]]
+              }]`
+            )
+          ).not.toBeNull();
         });
       });
 
@@ -879,6 +876,25 @@ describe('when on the endpoint list page', () => {
         expect(emptyState).toBe(null);
         expect(dateRangePicker).not.toBe(null);
       });
+
+      it('should display activity log when tab is loaded using the URL', async () => {
+        const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
+        reactTestingLibrary.act(() => {
+          history.push(
+            `${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=activity_log`
+          );
+        });
+        const changedUrlAction = await userChangedUrlChecker;
+        expect(changedUrlAction.payload.search).toEqual(
+          '?page_index=0&page_size=10&selected_endpoint=1&show=activity_log'
+        );
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', getMockData());
+        });
+        const logEntries = await renderResult.queryAllByTestId('timelineEntry');
+        expect(logEntries.length).toEqual(2);
+      });
     });
 
     describe('when showing host Policy Response panel', () => {
@@ -1248,18 +1264,56 @@ describe('when on the endpoint list page', () => {
     });
     it('navigates to the Ingest Agent Policy page', async () => {
       const agentPolicyLink = await renderResult.findByTestId('agentPolicyLink');
-      expect(agentPolicyLink.getAttribute('href')).toEqual(`/app/fleet#/policies/${agentPolicyId}`);
+      expect(agentPolicyLink.getAttribute('href')).toEqual(`/app/fleet/policies/${agentPolicyId}`);
     });
     it('navigates to the Ingest Agent Details page', async () => {
       const agentDetailsLink = await renderResult.findByTestId('agentDetailsLink');
-      expect(agentDetailsLink.getAttribute('href')).toEqual(`/app/fleet#/agents/${agentId}`);
+      expect(agentDetailsLink.getAttribute('href')).toEqual(`/app/fleet/agents/${agentId}`);
     });
 
     it('navigates to the Ingest Agent Details page with policy reassign', async () => {
       const agentPolicyReassignLink = await renderResult.findByTestId('agentPolicyReassignLink');
       expect(agentPolicyReassignLink.getAttribute('href')).toEqual(
-        `/app/fleet#/agents/${agentId}/activity?openReassignFlyout=true`
+        `/app/fleet/agents/${agentId}?openReassignFlyout=true`
       );
+    });
+  });
+
+  describe('required transform failed banner', () => {
+    it('is not displayed when transform state is not failed', () => {
+      const transforms: TransformStats[] = [
+        {
+          id: `${metadataTransformPrefix}-0.20.0`,
+          state: TRANSFORM_STATE.STARTED,
+        } as TransformStats,
+      ];
+      setEndpointListApiMockImplementation(coreStart.http, { transforms });
+      render();
+      const banner = screen.queryByTestId('callout-endpoints-list-transform-failed');
+      expect(banner).toBeNull();
+    });
+
+    it('is not displayed when non-relevant transform is failing', () => {
+      const transforms: TransformStats[] = [
+        { id: 'not-metadata', state: TRANSFORM_STATE.FAILED } as TransformStats,
+      ];
+      setEndpointListApiMockImplementation(coreStart.http, { transforms });
+      render();
+      const banner = screen.queryByTestId('callout-endpoints-list-transform-failed');
+      expect(banner).toBeNull();
+    });
+
+    it('is displayed when relevant transform state is failed state', async () => {
+      const transforms: TransformStats[] = [
+        {
+          id: `${metadataTransformPrefix}-0.20.0`,
+          state: TRANSFORM_STATE.FAILED,
+        } as TransformStats,
+      ];
+      setEndpointListApiMockImplementation(coreStart.http, { transforms });
+      render();
+      const banner = await screen.findByTestId('callout-endpoints-list-transform-failed');
+      expect(banner).toBeInTheDocument();
     });
   });
 });

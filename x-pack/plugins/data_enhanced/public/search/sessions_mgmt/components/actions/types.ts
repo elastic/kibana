@@ -6,6 +6,7 @@
  */
 
 export type OnActionComplete = () => void;
+export type OnActionDismiss = () => void;
 
 export enum ACTION {
   INSPECT = 'inspect',

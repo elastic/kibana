@@ -33,7 +33,6 @@ export declare interface SwimlaneData {
   points: SwimlanePoint[];
   interval: number;
 }
-
 interface ChartRecord extends RecordForInfluencer {
   function: string;
 }

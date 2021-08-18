@@ -172,7 +172,7 @@ const createCoreStartMock = (
 ): ReturnType<typeof coreMock.createStart> => {
   const coreStart = coreMock.createStart({ basePath: '/mock' });
 
-  const deepLinkPaths = getDeepLinkPaths(getDeepLinks());
+  const deepLinkPaths = getDeepLinkPaths(getDeepLinks(mockGlobalState.app.enableExperimental));
 
   // Mock the certain APP Ids returned by `application.getUrlForApp()`
   coreStart.application.getUrlForApp.mockImplementation((appId, { deepLinkId, path } = {}) => {

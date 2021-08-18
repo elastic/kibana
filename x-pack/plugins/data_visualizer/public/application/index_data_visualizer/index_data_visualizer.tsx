@@ -65,20 +65,16 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
     const parsedQueryString = parse(prevSearchString, { sort: false });
 
     const getIndexPattern = async () => {
-      if (typeof parsedQueryString?.index === 'string') {
-        const indexPattern = await indexPatterns.get(parsedQueryString.index);
-        setCurrentIndexPattern(indexPattern);
-      }
-
       if (typeof parsedQueryString?.savedSearchId === 'string') {
         const savedSearchId = parsedQueryString.savedSearchId;
         try {
           const savedSearch = await savedObjectsClient.get('search', savedSearchId);
           const indexPatternId = savedSearch.references.find((ref) => ref.type === 'index-pattern')
             ?.id;
-          if (indexPatternId !== undefined) {
+          if (indexPatternId !== undefined && savedSearch) {
             try {
               const indexPattern = await indexPatterns.get(indexPatternId);
+              setCurrentSavedSearch(savedSearch);
               setCurrentIndexPattern(indexPattern);
             } catch (e) {
               toasts.addError(e, {
@@ -88,7 +84,6 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
               });
             }
           }
-          setCurrentSavedSearch(savedSearch);
         } catch (e) {
           toasts.addError(e, {
             title: i18n.translate('xpack.dataVisualizer.index.savedSearchErrorMessage', {
@@ -97,6 +92,11 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
             }),
           });
         }
+      }
+
+      if (typeof parsedQueryString?.index === 'string') {
+        const indexPattern = await indexPatterns.get(parsedQueryString.index);
+        setCurrentIndexPattern(indexPattern);
       }
     };
     getIndexPattern();

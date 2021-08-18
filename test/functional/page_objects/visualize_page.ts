@@ -8,7 +8,7 @@
 
 import { FtrService } from '../ftr_provider_context';
 import { VisualizeConstants } from '../../../src/plugins/visualize/public/application/visualize_constants';
-import { UI_SETTINGS } from '../../../src/plugins/data/common';
+import { FORMATS_UI_SETTINGS } from '../../../src/plugins/field_formats/common';
 
 // TODO: Remove & Refactor to use the TTV page objects
 interface VisualizeSaveModalArgs {
@@ -55,7 +55,7 @@ export class VisualizePageObject extends FtrService {
 
     await this.kibanaServer.uiSettings.replace({
       defaultIndex: 'logstash-*',
-      [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
+      [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
       'visualization:visualize:legacyChartsLibrary': !isNewLibrary,
       'visualization:visualize:legacyPieChartsLibrary': !isNewLibrary,
     });
@@ -165,14 +165,6 @@ export class VisualizePageObject extends FtrService {
     await this.clickVisType('line');
   }
 
-  public async clickRegionMap() {
-    await this.clickVisType('region_map');
-  }
-
-  public async hasRegionMap() {
-    return await this.hasVisType('region_map');
-  }
-
   public async clickMarkdownWidget() {
     await this.clickVisType('markdown');
   }
@@ -189,12 +181,8 @@ export class VisualizePageObject extends FtrService {
     await this.clickVisType('pie');
   }
 
-  public async clickTileMap() {
-    await this.clickVisType('tile_map');
-  }
-
-  public async hasTileMap() {
-    return await this.hasVisType('tile_map');
+  public async clickTimelion() {
+    await this.clickVisType('timelion');
   }
 
   public async clickTagCloud() {
@@ -449,6 +437,14 @@ export class VisualizePageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.existOrFail('visualizesaveAndReturnButton');
     await this.testSubjects.click('visualizesaveAndReturnButton');
+  }
+
+  public async getDeprecationWarningStatus() {
+    if (await this.visChart.isNewChartsLibraryEnabled()) {
+      await this.testSubjects.missingOrFail('vizDeprecationWarning');
+    } else {
+      await this.testSubjects.existOrFail('vizDeprecationWarning');
+    }
   }
 
   public async linkedToOriginatingApp() {

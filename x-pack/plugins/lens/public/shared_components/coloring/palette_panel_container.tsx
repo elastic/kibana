@@ -7,6 +7,7 @@
 
 import './palette_panel_container.scss';
 
+import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, MutableRefObject } from 'react';
 import {
   EuiFlyoutHeader,
@@ -20,8 +21,6 @@ import {
   EuiOutsideClickDetector,
   EuiPortal,
 } from '@elastic/eui';
-
-import { i18n } from '@kbn/i18n';
 
 export function PalettePanelContainer({
   isOpen,

@@ -7,6 +7,14 @@
 
 import datemath from '@elastic/datemath';
 
+export interface AlertMetadata {
+  environment: string;
+  serviceName?: string;
+  transactionType?: string;
+  start?: string;
+  end?: string;
+}
+
 export function getAbsoluteTimeRange(windowSize: number, windowUnit: string) {
   const now = new Date().toISOString();
 

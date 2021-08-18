@@ -1,4 +1,4 @@
-title: EnrollmentApiKey
+title: Enrollment API key
 type: object
 properties:
   id:

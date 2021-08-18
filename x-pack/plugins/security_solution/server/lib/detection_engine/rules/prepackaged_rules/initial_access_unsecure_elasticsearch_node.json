@@ -6,8 +6,12 @@
   "false_positives": [
     "If you have front-facing proxies that provide authentication and TLS, this rule would need to be tuned to eliminate the source IP address of your reverse-proxy."
   ],
+  "from": "now-9m",
   "index": [
-    "packetbeat-*"
+    "auditbeat-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "lucene",
   "license": "Elastic License v2",
@@ -25,7 +29,8 @@
     "Elastic",
     "Network",
     "Threat Detection",
-    "Initial Access"
+    "Initial Access",
+    "Host"
   ],
   "threat": [
     {
@@ -46,5 +51,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 5
 }

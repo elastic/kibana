@@ -168,7 +168,7 @@ describe('math(resp, panel, series)', () => {
       )(await mathAgg(resp, panel, series)((results) => results))([]);
     } catch (e) {
       expect(e.message).toEqual(
-        'Failed to parse expression. Expected "*", "+", "-", "/", or end of input but "(" found.'
+        'Failed to parse expression. Expected "*", "+", "-", "/", end of input, or whitespace but "(" found.'
       );
     }
   });

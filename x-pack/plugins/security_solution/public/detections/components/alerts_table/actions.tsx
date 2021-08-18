@@ -12,7 +12,7 @@ import { getOr, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
-import type { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
+import { FilterStateStore, Filter } from '@kbn/es-query';
 import {
   KueryFilterQueryKind,
   TimelineId,
@@ -49,7 +49,6 @@ import {
   DataProvider,
   QueryOperator,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { getTimelineTemplate } from '../../../timelines/containers/api';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
@@ -95,7 +94,7 @@ export const updateAlertStatusAction = async ({
     // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: alertIds, isDeleted: true });
 
-    if (response.version_conflicts > 0 && alertIds.length === 1) {
+    if (response.version_conflicts && alertIds.length === 1) {
       throw new Error(
         i18n.translate(
           'xpack.securitySolution.detectionEngine.alerts.updateAlertStatusFailedSingleAlert',
@@ -106,7 +105,11 @@ export const updateAlertStatusAction = async ({
       );
     }
 
-    onAlertStatusUpdateSuccess(response.updated, response.version_conflicts, selectedStatus);
+    onAlertStatusUpdateSuccess(
+      response.updated ?? 0,
+      response.version_conflicts ?? 0,
+      selectedStatus
+    );
   } catch (error) {
     onAlertStatusUpdateFailure(selectedStatus, error);
   } finally {
@@ -283,7 +286,7 @@ export const buildAlertsKqlFilter = (
         params: alertIds,
       },
       $state: {
-        store: esFilters.FilterStateStore.APP_STATE,
+        store: FilterStateStore.APP_STATE,
       },
     },
   ];

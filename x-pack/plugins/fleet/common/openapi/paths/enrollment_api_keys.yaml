@@ -1,5 +1,5 @@
 get:
-  summary: Enrollment - List
+  summary: Enrollment API Keys - List
   tags: []
   responses:
     '200':
@@ -24,10 +24,10 @@ get:
               - page
               - perPage
               - total
-  operationId: get-fleet-enrollment-api-keys
+  operationId: get-enrollment-api-keys
   parameters: []
 post:
-  summary: Enrollment - Create
+  summary: Enrollment API Key - Create
   tags: []
   responses:
     '200':
@@ -43,6 +43,6 @@ post:
                 type: string
                 enum:
                   - created
-  operationId: post-fleet-enrollment-api-keys
+  operationId: create-enrollment-api-keys
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

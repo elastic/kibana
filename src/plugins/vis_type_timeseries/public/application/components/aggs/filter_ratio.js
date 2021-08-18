@@ -106,6 +106,7 @@ export const FilterRatioAgg = (props) => {
               query={model.numerator}
               onChange={handleNumeratorQueryChange}
               indexPatterns={[indexPattern]}
+              data-test-subj="filterRatioNumeratorInput"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -124,6 +125,7 @@ export const FilterRatioAgg = (props) => {
               query={model.denominator}
               onChange={handleDenominatorQueryChange}
               indexPatterns={[indexPattern]}
+              data-test-subj="filterRatioDenominatorInput"
             />
           </EuiFormRow>
         </EuiFlexItem>

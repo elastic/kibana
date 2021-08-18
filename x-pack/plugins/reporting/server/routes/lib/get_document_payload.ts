@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { Stream } from 'stream';
 // @ts-ignore
 import contentDisposition from 'content-disposition';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '../../../common/constants';
-import { ExportTypesRegistry, statuses } from '../../lib';
-import { TaskRunResult } from '../../lib/tasks';
+import { ReportApiJSON } from '../../../common/types';
+import { ReportingCore } from '../../';
+import { getContentStream, statuses } from '../../lib';
 import { ExportTypeDefinition } from '../../types';
-import { ReportContent } from './jobs_query';
+import { jobsQueryFactory } from './jobs_query';
 
 export interface ErrorFromPayload {
   message: string;
@@ -20,10 +22,12 @@ export interface ErrorFromPayload {
 // interface of the API result
 interface Payload {
   statusCode: number;
-  content: string | Buffer | ErrorFromPayload;
+  content: string | Stream | ErrorFromPayload;
   contentType: string | null;
   headers: Record<string, any>;
 }
+
+type TaskRunResult = Required<ReportApiJSON>['output'];
 
 const DEFAULT_TITLE = 'report';
 
@@ -44,20 +48,15 @@ const getReportingHeaders = (output: TaskRunResult, exportType: ExportTypeDefini
   return metaDataHeaders;
 };
 
-export function getDocumentPayloadFactory(exportTypesRegistry: ExportTypesRegistry) {
-  function encodeContent(
-    content: string | null,
-    exportType: ExportTypeDefinition
-  ): Buffer | string {
-    switch (exportType.jobContentEncoding) {
-      case 'base64':
-        return content ? Buffer.from(content, 'base64') : ''; // convert null to empty string
-      default:
-        return content ? content : ''; // convert null to empty string
-    }
-  }
+export function getDocumentPayloadFactory(reporting: ReportingCore) {
+  const exportTypesRegistry = reporting.getExportTypesRegistry();
 
-  function getCompleted(output: TaskRunResult, jobType: string, title: string): Payload {
+  async function getCompleted(
+    output: TaskRunResult,
+    jobType: string,
+    title: string,
+    content: Stream
+  ): Promise<Payload> {
     const exportType = exportTypesRegistry.get(
       (item: ExportTypeDefinition) => item.jobType === jobType
     );
@@ -65,23 +64,24 @@ export function getDocumentPayloadFactory(exportTypesRegistry: ExportTypesRegist
     const headers = getReportingHeaders(output, exportType);
 
     return {
+      content,
       statusCode: 200,
-      content: encodeContent(output.content, exportType),
       contentType: output.content_type,
       headers: {
         ...headers,
         'Content-Disposition': contentDisposition(filename, { type: 'inline' }),
+        'Content-Length': output.size,
       },
     };
   }
 
   // @TODO: These should be semantic HTTP codes as 500/503's indicate
   // error then these are really operating properly.
-  function getFailure(output: TaskRunResult): Payload {
+  function getFailure(content: string): Payload {
     return {
       statusCode: 500,
       content: {
-        message: `Reporting generation failed: ${output.content}`,
+        message: `Reporting generation failed: ${content}`,
       },
       contentType: 'application/json',
       headers: {},
@@ -97,19 +97,26 @@ export function getDocumentPayloadFactory(exportTypesRegistry: ExportTypesRegist
     };
   }
 
-  return function getDocumentPayload({
+  return async function getDocumentPayload({
+    id,
+    index,
+    output,
     status,
     jobtype: jobType,
-    payload: { title } = { title: 'unknown' },
-    output,
-  }: ReportContent): Payload {
+    payload: { title },
+  }: ReportApiJSON): Promise<Payload> {
     if (output) {
       if (status === statuses.JOB_STATUS_COMPLETED || status === statuses.JOB_STATUS_WARNINGS) {
-        return getCompleted(output, jobType, title);
+        const stream = await getContentStream(reporting, { id, index });
+
+        return getCompleted(output, jobType, title, stream);
       }
 
       if (status === statuses.JOB_STATUS_FAILED) {
-        return getFailure(output);
+        const jobsQuery = jobsQueryFactory(reporting);
+        const error = await jobsQuery.getError(id);
+
+        return getFailure(error);
       }
     }
 

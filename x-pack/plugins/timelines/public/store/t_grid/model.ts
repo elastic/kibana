@@ -10,11 +10,11 @@ import type { Filter, FilterManager } from '../../../../../../src/plugins/data/p
 import type { TimelineNonEcsData } from '../../../common/search_strategy';
 import type {
   ColumnHeaderOptions,
+  DataProvider,
   TimelineExpandedDetail,
   SortColumnTimeline,
   SerializedFilterQuery,
 } from '../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
 import { RowRendererId } from '../../../common/types/timeline';
 
 export interface TGridModelSettings {
@@ -31,6 +31,7 @@ export interface TGridModelSettings {
   queryFields: string[];
   selectAll: boolean;
   showCheckboxes?: boolean;
+  sort: SortColumnTimeline[];
   title: string;
   unit?: (n: number) => string | React.ReactNode;
 }
@@ -40,6 +41,8 @@ export interface TGridModel extends TGridModelSettings {
     Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
       ColumnHeaderOptions
   >;
+  /** The sources of the event data shown in the timeline */
+  dataProviders: DataProvider[];
   /** Specifies the granularity of the date range (e.g. 1 Day / Week / Month) applicable to the mini-map */
   dateRange: {
     start: string;
@@ -60,6 +63,8 @@ export interface TGridModel extends TGridModelSettings {
   /** Uniquely identifies the timeline */
   id: string;
   indexNames: string[];
+  isAddToExistingCaseOpen: boolean;
+  isCreateNewCaseOpen: boolean;
   isLoading: boolean;
   /** If selectAll checkbox in header is checked **/
   isSelectAllChecked: boolean;
@@ -73,7 +78,7 @@ export interface TGridModel extends TGridModelSettings {
   showCheckboxes: boolean;
   /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
   sort: SortColumnTimeline[];
-  /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for batch actions **/
+  /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for bulk actions **/
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   savedObjectId: string | null;
   version: string | null;
@@ -82,6 +87,8 @@ export interface TGridModel extends TGridModelSettings {
 export type TGridModelForTimeline = Pick<
   TGridModel,
   | 'columns'
+  | 'defaultColumns'
+  | 'dataProviders'
   | 'dateRange'
   | 'deletedEventIds'
   | 'excludedRowRendererIds'
@@ -108,6 +115,7 @@ export type SubsetTGridModel = Readonly<
   Pick<
     TGridModel,
     | 'columns'
+    | 'defaultColumns'
     | 'dateRange'
     | 'deletedEventIds'
     | 'excludedRowRendererIds'

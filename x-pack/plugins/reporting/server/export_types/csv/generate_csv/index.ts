@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import { Writable } from 'stream';
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient, IUiSettingsClient } from 'src/core/server';
 import { ReportingConfig } from '../../../';
+import { createEscapeValue } from '../../../../../../../src/plugins/data/common';
 import { CancellationToken } from '../../../../../../plugins/reporting/common';
 import { CSV_BOM_CHARS } from '../../../../common/constants';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
 import { LevelLogger } from '../../../lib';
 import { getFieldFormats } from '../../../services';
-import { createEscapeValue } from '../../csv_searchsource/generate_csv/escape_value';
 import { MaxSizeStringBuilder } from '../../csv_searchsource/generate_csv/max_size_string_builder';
 import {
   IndexPatternSavedObjectDeprecatedCSV,
@@ -57,12 +58,17 @@ export function createGenerateCsv(logger: LevelLogger) {
     config: ReportingConfig,
     uiSettingsClient: IUiSettingsClient,
     elasticsearchClient: ElasticsearchClient,
-    cancellationToken: CancellationToken
+    cancellationToken: CancellationToken,
+    stream: Writable
   ): Promise<SavedSearchGeneratorResultDeprecatedCSV> {
     const settings = await getUiSettings(job.browserTimezone, uiSettingsClient, config, logger);
     const escapeValue = createEscapeValue(settings.quoteValues, settings.escapeFormulaValues);
     const bom = config.get('csv', 'useByteOrderMarkEncoding') ? CSV_BOM_CHARS : '';
-    const builder = new MaxSizeStringBuilder(byteSizeValueToNumber(settings.maxSizeBytes), bom);
+    const builder = new MaxSizeStringBuilder(
+      stream,
+      byteSizeValueToNumber(settings.maxSizeBytes),
+      bom
+    );
 
     const { fields, metaFields, conflictedTypesFields } = job;
     const header = `${fields.map(escapeValue).join(settings.separator)}\n`;
@@ -70,8 +76,6 @@ export function createGenerateCsv(logger: LevelLogger) {
 
     if (!builder.tryAppend(header)) {
       return {
-        size: 0,
-        content: '',
         maxSizeReached: true,
         warnings: [],
       };
@@ -136,8 +140,6 @@ export function createGenerateCsv(logger: LevelLogger) {
     } finally {
       await iterator.return();
     }
-    const size = builder.getSizeInBytes();
-    logger.debug(`finished generating, total size in bytes: ${size}`);
 
     if (csvContainsFormulas && settings.escapeFormulaValues) {
       warnings.push(
@@ -148,10 +150,8 @@ export function createGenerateCsv(logger: LevelLogger) {
     }
 
     return {
-      content: builder.getString(),
       csvContainsFormulas: csvContainsFormulas && !settings.escapeFormulaValues,
       maxSizeReached,
-      size,
       warnings,
     };
   };

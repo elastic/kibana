@@ -33,8 +33,8 @@ export async function fetchAndTransformGcMetrics({
   fieldName,
   operationName,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
@@ -77,11 +77,11 @@ export async function fetchAndTransformGcMetrics({
           },
           aggs: {
             timeseries: {
-              date_histogram: getMetricsDateHistogramParams(
+              date_histogram: getMetricsDateHistogramParams({
                 start,
                 end,
-                config['xpack.apm.metricsInterval']
-              ),
+                metricsInterval: config['xpack.apm.metricsInterval'],
+              }),
               aggs: {
                 // get the max value
                 max: {

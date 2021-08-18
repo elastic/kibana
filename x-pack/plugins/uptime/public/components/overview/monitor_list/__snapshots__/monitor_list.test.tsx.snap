@@ -1052,7 +1052,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               scope="col"
             >
               <span
-                class="euiTableCellContent euiTableCellContent--alignCenter"
+                class="euiTableCellContent"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -1263,7 +1263,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               class="euiTableRowCell euiTableRowCell--hideForMobile"
             >
               <div
-                class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
                   class="euiToolTipAnchor"
@@ -1525,7 +1525,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               class="euiTableRowCell euiTableRowCell--hideForMobile"
             >
               <div
-                class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span
                   class="euiToolTipAnchor"

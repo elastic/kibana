@@ -80,8 +80,6 @@ export interface SourceDataItem {
   connected?: boolean;
   features?: Features;
   objTypes?: string[];
-  sourceDescription: string;
-  connectStepDescription: string;
   addPath: string;
   editPath: string;
   accountContextOnly: boolean;
@@ -129,12 +127,27 @@ interface SourceActivity {
   status: string;
 }
 
+interface IndexingConfig {
+  enabled: boolean;
+  features: {
+    contentExtraction: {
+      enabled: boolean;
+    };
+    thumbnails: {
+      enabled: boolean;
+    };
+  };
+}
+
 export interface ContentSourceFullData extends ContentSourceDetails {
   activities: SourceActivity[];
   details: DescriptionList[];
   summary: DocumentSummaryItem[];
   groups: Group[];
+  indexing: IndexingConfig;
   custom: boolean;
+  isIndexedSource: boolean;
+  areThumbnailsConfigEnabled: boolean;
   accessToken: string;
   urlField: string;
   titleField: string;

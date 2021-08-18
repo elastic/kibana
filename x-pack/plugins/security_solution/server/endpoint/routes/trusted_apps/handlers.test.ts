@@ -32,9 +32,16 @@ import {
   getTrustedAppsUpdateRouteHandler,
 } from './handlers';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
-import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
+import {
+  TrustedAppNotFoundError,
+  TrustedAppVersionConflictError,
+  TrustedAppPolicyNotExistsError,
+} from './errors';
 import { updateExceptionListItemImplementationMock } from './test_utils';
 import { Logger } from '@kbn/logging';
+import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
+import { createPackagePolicyServiceMock } from '../../../../../fleet/server/mocks';
+import { getPackagePoliciesResponse, getTrustedAppByPolicy } from './mocks';
 
 const EXCEPTION_LIST_ITEM: ExceptionListItemSchema = {
   _version: 'abc123',
@@ -88,7 +95,13 @@ const TRUSTED_APP: TrustedApp = {
   ],
 };
 
+const packagePolicyClient = createPackagePolicyServiceMock() as jest.Mocked<PackagePolicyServiceInterface>;
+
 describe('handlers', () => {
+  beforeEach(() => {
+    packagePolicyClient.getByIDs.mockReset();
+  });
+
   const createAppContextMock = () => {
     const context = {
       logFactory: loggingSystemMock.create(),
@@ -96,6 +109,8 @@ describe('handlers', () => {
       config: () => Promise.resolve(createMockConfig()),
       experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
     };
+
+    context.service.getPackagePolicyService = () => packagePolicyClient;
 
     // Ensure that `logFactory.get()` always returns the same instance for the same given prefix
     const instances = new Map<string, ReturnType<typeof context.logFactory.get>>();
@@ -223,6 +238,28 @@ describe('handlers', () => {
           mockResponse
         )
       ).rejects.toThrowError(error);
+    });
+
+    it("should return error when policy doesn't exists", async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
+      packagePolicyClient.getByIDs.mockReset();
+      packagePolicyClient.getByIDs.mockResolvedValueOnce(getPackagePoliciesResponse());
+
+      const trustedAppByPolicy = getTrustedAppByPolicy();
+      await createTrustedAppHandler(
+        createHandlerContextMock(),
+        httpServerMock.createKibanaRequest({ body: trustedAppByPolicy }),
+        mockResponse
+      );
+
+      const error = new TrustedAppPolicyNotExistsError(trustedAppByPolicy.name, [
+        '9da95be9-9bee-4761-a8c4-28d6d9bd8c71',
+      ]);
+
+      expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(error);
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: { message: error.message, attributes: { type: error.type } },
+      });
     });
   });
 
@@ -507,6 +544,24 @@ describe('handlers', () => {
       expect(mockResponse.conflict).toHaveBeenCalledWith({
         body: expect.any(TrustedAppVersionConflictError),
       });
+    });
+
+    it("should return error when policy doesn't exists", async () => {
+      packagePolicyClient.getByIDs.mockReset();
+      packagePolicyClient.getByIDs.mockResolvedValueOnce(getPackagePoliciesResponse());
+
+      const trustedAppByPolicy = getTrustedAppByPolicy();
+      await updateHandler(
+        createHandlerContextMock(),
+        httpServerMock.createKibanaRequest({ body: trustedAppByPolicy }),
+        mockResponse
+      );
+
+      expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(
+        new TrustedAppPolicyNotExistsError(trustedAppByPolicy.name, [
+          '9da95be9-9bee-4761-a8c4-28d6d9bd8c71',
+        ])
+      );
     });
   });
 });

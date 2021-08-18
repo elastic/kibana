@@ -23,13 +23,15 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { EsQueryConfig, Query, Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart } from 'kibana/public';
-import { DataPublicPluginStart, EsQueryConfig, Query, Filter } from 'src/plugins/data/public';
+import type { CoreStart } from 'kibana/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { htmlIdGenerator } from '@elastic/eui';
-import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
+import type { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
-import {
+import type {
   IndexPattern,
   IndexPatternPrivateState,
   IndexPatternField,
@@ -39,12 +41,13 @@ import { trackUiEvent } from '../lens_ui_telemetry';
 import { loadIndexPatterns, syncExistingFields } from './loader';
 import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
-import { esQuery, IIndexPattern } from '../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../src/plugins/data/public';
 import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
 
 export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'core'> & {
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   changeIndexPattern: (
     id: string,
     state: IndexPatternPrivateState,
@@ -93,7 +96,7 @@ const fieldTypeNames: Record<DataType, string> = {
 // Wrapper around esQuery.buildEsQuery, handling errors (e.g. because a query can't be parsed) by
 // returning a query dsl object not matching anything
 function buildSafeEsQuery(
-  indexPattern: IIndexPattern,
+  indexPattern: IndexPattern,
   query: Query,
   filters: Filter[],
   queryConfig: EsQueryConfig
@@ -117,6 +120,7 @@ export function IndexPatternDataPanel({
   dragDropContext,
   core,
   data,
+  fieldFormats,
   query,
   filters,
   dateRange,
@@ -163,7 +167,7 @@ export function IndexPatternDataPanel({
     }));
 
   const dslQuery = buildSafeEsQuery(
-    indexPatterns[currentIndexPatternId] as IIndexPattern,
+    indexPatterns[currentIndexPatternId],
     query,
     filters,
     esQuery.getEsQueryConfig(core.uiSettings)
@@ -230,6 +234,7 @@ export function IndexPatternDataPanel({
           dragDropContext={dragDropContext}
           core={core}
           data={data}
+          fieldFormats={fieldFormats}
           charts={charts}
           indexPatternFieldEditor={indexPatternFieldEditor}
           onChangeIndexPattern={onChangeIndexPattern}
@@ -268,7 +273,7 @@ const defaultFieldGroups: {
 };
 
 const fieldFiltersLabel = i18n.translate('xpack.lens.indexPatterns.fieldFiltersLabel', {
-  defaultMessage: 'Field filters',
+  defaultMessage: 'Filter by type',
 });
 
 const htmlId = htmlIdGenerator('datapanel');
@@ -288,6 +293,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   onUpdateIndexPattern,
   core,
   data,
+  fieldFormats,
   indexPatternFieldEditor,
   existingFields,
   charts,
@@ -296,6 +302,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   uiActions,
 }: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover' | 'core'> & {
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   core: CoreStart;
   currentIndexPatternId: string;
   indexPatternRefs: IndexPatternRef[];
@@ -346,23 +353,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       supportedFieldTypes.has(field.type)
     );
     const sorted = allSupportedTypesFields.sort(sortFields);
-    let groupedFields;
-    // optimization before existingFields are synced
-    if (!hasSyncedExistingFields) {
-      groupedFields = {
-        ...defaultFieldGroups,
-        ...groupBy(sorted, (field) => {
-          if (field.type === 'document') {
-            return 'specialFields';
-          } else if (field.meta) {
-            return 'metaFields';
-          } else {
-            return 'emptyFields';
-          }
-        }),
-      };
-    }
-    groupedFields = {
+    const groupedFields = {
       ...defaultFieldGroups,
       ...groupBy(sorted, (field) => {
         if (field.type === 'document') {
@@ -454,7 +445,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     return fieldGroupDefinitions;
   }, [
     allFields,
-    hasSyncedExistingFields,
     fieldInfoUnavailable,
     filters.length,
     existenceFetchTimeout,
@@ -581,6 +571,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     () => ({
       core,
       data,
+      fieldFormats,
       indexPattern: currentIndexPattern,
       highlight: localState.nameFilter.toLowerCase(),
       dateRange,
@@ -591,6 +582,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     [
       core,
       data,
+      fieldFormats,
       currentIndexPattern,
       dateRange,
       query,

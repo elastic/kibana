@@ -81,6 +81,10 @@ export const packagePolicyRouteService = {
   getDeletePath: () => {
     return PACKAGE_POLICY_API_ROUTES.DELETE_PATTERN;
   },
+
+  getUpgradePath: () => {
+    return PACKAGE_POLICY_API_ROUTES.UPGRADE_PATTERN;
+  },
 };
 
 export const agentPolicyRouteService = {

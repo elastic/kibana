@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
 import { getDefaultConfigs } from '../../configurations/default_configs';
 import {
   mockAppIndexPattern,
@@ -45,10 +45,12 @@ describe('Series Builder ReportDefinitionCol', function () {
       initSeries,
     });
 
-    screen.getByText('Web Application');
-    screen.getByText('Environment');
-    screen.getByText('Select an option: Page load time, is selected');
-    screen.getByText('Page load time');
+    await waitFor(() => {
+      screen.getByText('Web Application');
+      screen.getByText('Environment');
+      screen.getByText('Select an option: Page load time, is selected');
+      screen.getByText('Page load time');
+    });
   });
 
   it('should render selected report definitions', async function () {

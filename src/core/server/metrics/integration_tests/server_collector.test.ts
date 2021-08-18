@@ -29,6 +29,7 @@ describe('ServerMetricsCollector', () => {
 
   beforeEach(async () => {
     server = createHttpServer();
+    await server.preboot({ context: contextServiceMock.createPrebootContract() });
     const contextSetup = contextServiceMock.createSetupContract();
     const httpSetup = await server.setup({
       context: contextSetup,

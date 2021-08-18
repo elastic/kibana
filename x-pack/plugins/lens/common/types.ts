@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { FilterMeta, Filter } from 'src/plugins/data/common';
+import type { FilterMeta, Filter } from '../../../../src/plugins/data/common';
+import type { IFieldFormat } from '../../../../src/plugins/field_formats/common';
+import type { Datatable, SerializedFieldFormat } from '../../../../src/plugins/expressions/common';
+
+export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
 export interface ExistingFields {
   indexPatternTitle: string;
@@ -24,3 +28,34 @@ export interface PersistableFilterMeta extends FilterMeta {
 export interface PersistableFilter extends Filter {
   meta: PersistableFilterMeta;
 }
+
+export interface LensMultiTable {
+  type: 'lens_multitable';
+  tables: Record<string, Datatable>;
+  dateRange?: {
+    fromDate: Date;
+    toDate: Date;
+  };
+}
+
+export interface ColorStop {
+  color: string;
+  stop: number;
+}
+
+export interface CustomPaletteParams {
+  name?: string;
+  reverse?: boolean;
+  rangeType?: 'number' | 'percent';
+  continuity?: 'above' | 'below' | 'all' | 'none';
+  progression?: 'fixed';
+  rangeMin?: number;
+  rangeMax?: number;
+  stops?: ColorStop[];
+  colorStops?: ColorStop[];
+  steps?: number;
+}
+
+export type RequiredPaletteParamTypes = Required<CustomPaletteParams>;
+
+export type LayerType = 'data' | 'threshold';

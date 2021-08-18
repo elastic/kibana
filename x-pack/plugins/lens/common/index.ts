@@ -8,3 +8,6 @@
 export * from './api';
 export * from './constants';
 export * from './types';
+
+// Note: do not import the expression folder here or the page bundle will be bloated with all
+// the package

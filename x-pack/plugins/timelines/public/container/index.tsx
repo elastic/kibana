@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AlertConsumers } from '@kbn/rule-data-utils';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isString, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -21,8 +22,8 @@ import {
   Direction,
   TimelineFactoryQueryTypes,
   TimelineEventsQueries,
+  EntityType,
 } from '../../common/search_strategy';
-// eslint-disable-next-line no-duplicate-imports
 import type {
   DocValueFields,
   Inspect,
@@ -71,6 +72,7 @@ export interface UseTimelineEventsProps {
   filterQuery?: ESQuery | string;
   skip?: boolean;
   endDate: string;
+  entityType: EntityType;
   excludeEcsData?: boolean;
   id: string;
   fields: string[];
@@ -81,6 +83,7 @@ export interface UseTimelineEventsProps {
   startDate: string;
   timerangeKind?: 'absolute' | 'relative';
   data?: DataPublicPluginStart;
+  alertConsumers?: AlertConsumers[];
 }
 
 const createFilter = (filterQuery: ESQuery | string | undefined) =>
@@ -107,9 +110,12 @@ export const initSortDefault = [
   },
 ];
 
+const NO_CONSUMERS: AlertConsumers[] = [];
 export const useTimelineEvents = ({
+  alertConsumers = NO_CONSUMERS,
   docValueFields,
   endDate,
+  entityType,
   excludeEcsData = false,
   id = ID,
   indexNames,
@@ -156,6 +162,13 @@ export const useTimelineEvents = ({
     wrappedLoadPage(0);
   }, [wrappedLoadPage]);
 
+  const setUpdated = useCallback(
+    (updatedAt: number) => {
+      dispatch(tGridActions.setTimelineUpdatedAt({ id, updated: updatedAt }));
+    },
+    [dispatch, id]
+  );
+
   const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
     id,
     inspect: {
@@ -186,15 +199,19 @@ export const useTimelineEvents = ({
         setLoading(true);
         if (data && data.search) {
           searchSubscription$.current = data.search
-            .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(request, {
-              strategy:
-                request.language === 'eql' ? 'timelineEqlSearchStrategy' : 'timelineSearchStrategy',
-              abortSignal: abortCtrl.current.signal,
-            })
+            .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(
+              { ...request, entityType },
+              {
+                strategy:
+                  request.language === 'eql'
+                    ? 'timelineEqlSearchStrategy'
+                    : 'timelineSearchStrategy',
+                abortSignal: abortCtrl.current.signal,
+              }
+            )
             .subscribe({
               next: (response) => {
                 if (isCompleteResponse(response)) {
-                  setLoading(false);
                   setTimelineResponse((prevResponse) => {
                     const newTimelineResponse = {
                       ...prevResponse,
@@ -204,8 +221,11 @@ export const useTimelineEvents = ({
                       totalCount: response.totalCount,
                       updatedAt: Date.now(),
                     };
+                    setUpdated(newTimelineResponse.updatedAt);
                     return newTimelineResponse;
                   });
+                  setLoading(false);
+
                   searchSubscription$.current.unsubscribe();
                 } else if (isErrorResponse(response)) {
                   setLoading(false);
@@ -229,7 +249,7 @@ export const useTimelineEvents = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data, addWarning, addError, skip]
+    [skip, data, entityType, setUpdated, addWarning, addError]
   );
 
   useEffect(() => {
@@ -263,6 +283,7 @@ export const useTimelineEvents = ({
         : 0;
 
       const currentRequest = {
+        alertConsumers,
         defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
         excludeEcsData,
@@ -292,6 +313,7 @@ export const useTimelineEvents = ({
       return prevRequest;
     });
   }, [
+    alertConsumers,
     dispatch,
     indexNames,
     activePage,

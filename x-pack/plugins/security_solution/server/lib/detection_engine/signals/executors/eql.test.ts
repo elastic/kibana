@@ -16,6 +16,7 @@ import { getIndexVersion } from '../../routes/index/get_index_version';
 import { SIGNALS_TEMPLATE_VERSION } from '../../routes/index/get_signals_template';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 
 jest.mock('../../routes/index/get_index_version');
 
@@ -73,6 +74,7 @@ describe('eql_executor', () => {
         rule: eqlSO,
         tuple,
         exceptionItems,
+        experimentalFeatures: allowedExperimentalValues,
         services: alertServices,
         version,
         logger,

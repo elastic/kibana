@@ -128,7 +128,7 @@ export default function ({
           });
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.home.addSampleDataSet('flights');
-          await PageObjects.maps.loadSavedMap('[Flights] Origin and Destination Flight Time');
+          await PageObjects.maps.loadSavedMap('[Flights] Origin Time Delayed');
           await PageObjects.maps.toggleLayerVisibility('Road map');
           await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
           await PageObjects.maps.enterFullScreen();

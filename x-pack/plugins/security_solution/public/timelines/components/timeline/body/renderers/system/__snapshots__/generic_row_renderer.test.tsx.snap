@@ -56,6 +56,7 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
           },
         }
       }
+      isDraggable={true}
       text="some text"
       timelineId="test"
     />
@@ -119,6 +120,7 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
           },
         }
       }
+      isDraggable={true}
       text="some text"
       timelineId="test"
     />

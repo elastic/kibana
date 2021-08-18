@@ -5,12 +5,19 @@
  * 2.0.
  */
 
+import {
+  ALERT_RULE_CONSUMER,
+  ALERT_STATUS,
+  SPACE_IDS,
+  ALERT_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { alertingAuthorizationMock } from '../../../../alerting/server/authorization/alerting_authorization.mock';
 import { AuditLogger } from '../../../../security/server';
+import { AlertingAuthorizationEntity } from '../../../../alerting/server';
 
 const alertingAuthMock = alertingAuthorizationMock.create();
 const esClientMock = elasticsearchClientMock.createElasticsearchClient();
@@ -25,8 +32,42 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
 };
 
+const DEFAULT_SPACE = 'test_default_space_id';
+
 beforeEach(() => {
   jest.resetAllMocks();
+  alertingAuthMock.getSpaceId.mockImplementation(() => DEFAULT_SPACE);
+  // @ts-expect-error
+  alertingAuthMock.getAuthorizationFilter.mockImplementation(async () =>
+    Promise.resolve({ filter: [] })
+  );
+
+  // @ts-expect-error
+  alertingAuthMock.getAugmentedRuleTypesWithAuthorization.mockImplementation(async () => {
+    const authorizedRuleTypes = new Set();
+    authorizedRuleTypes.add({ producer: 'apm' });
+    return Promise.resolve({ authorizedRuleTypes });
+  });
+
+  alertingAuthMock.ensureAuthorized.mockImplementation(
+    // @ts-expect-error
+    async ({
+      ruleTypeId,
+      consumer,
+      operation,
+      entity,
+    }: {
+      ruleTypeId: string;
+      consumer: string;
+      operation: string;
+      entity: typeof AlertingAuthorizationEntity.Alert;
+    }) => {
+      if (ruleTypeId === 'apm.error_rate' && consumer === 'apm') {
+        return Promise.resolve();
+      }
+      return Promise.reject(new Error(`Unauthorized for ${ruleTypeId} and ${consumer}`));
+    }
+  );
 });
 
 describe('get()', () => {
@@ -56,10 +97,11 @@ describe('get()', () => {
                 _seq_no: 362,
                 _primary_term: 2,
                 _source: {
-                  'rule.id': 'apm.error_rate',
+                  [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
-                  'kibana.rac.alert.owner': 'apm',
-                  'kibana.rac.alert.status': 'open',
+                  [ALERT_RULE_CONSUMER]: 'apm',
+                  [ALERT_STATUS]: 'open',
+                  [SPACE_IDS]: ['test_default_space_id'],
                 },
               },
             ],
@@ -70,11 +112,13 @@ describe('get()', () => {
     const result = await alertsClient.get({ id: '1', index: '.alerts-observability-apm' });
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "_version": "WzM2MiwyXQ==",
-        "kibana.rac.alert.owner": "apm",
-        "kibana.rac.alert.status": "open",
+        "kibana.alert.rule.consumer": "apm",
+        "kibana.alert.rule.rule_type_id": "apm.error_rate",
+        "kibana.alert.status": "open",
+        "kibana.space_ids": Array [
+          "test_default_space_id",
+        ],
         "message": "hello world 1",
-        "rule.id": "apm.error_rate",
       }
     `);
     expect(esClientMock.search).toHaveBeenCalledTimes(1);
@@ -82,11 +126,51 @@ describe('get()', () => {
       Array [
         Object {
           "body": Object {
+            "_source": undefined,
+            "aggs": undefined,
+            "fields": Array [
+              "kibana.alert.rule.rule_type_id",
+              "kibana.alert.rule.consumer",
+              "kibana.alert.workflow_status",
+              "kibana.space_ids",
+            ],
             "query": Object {
-              "term": Object {
-                "_id": "1",
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "match": Object {
+                            "_id": "1",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  Object {},
+                  Object {
+                    "term": Object {
+                      "kibana.space_ids": "test_default_space_id",
+                    },
+                  },
+                ],
+                "must": Array [],
+                "must_not": Array [],
+                "should": Array [],
               },
             },
+            "size": undefined,
+            "sort": Array [
+              Object {
+                "@timestamp": Object {
+                  "order": "asc",
+                  "unmapped_type": "date",
+                },
+              },
+            ],
+            "track_total_hits": undefined,
           },
           "ignore_unavailable": true,
           "index": ".alerts-observability-apm",
@@ -122,10 +206,11 @@ describe('get()', () => {
                 _seq_no: 362,
                 _primary_term: 2,
                 _source: {
-                  'rule.id': 'apm.error_rate',
+                  [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
-                  'kibana.rac.alert.owner': 'apm',
-                  'kibana.rac.alert.status': 'open',
+                  [ALERT_RULE_CONSUMER]: 'apm',
+                  [ALERT_STATUS]: 'open',
+                  [SPACE_IDS]: ['test_default_space_id'],
                 },
               },
             ],
@@ -133,12 +218,75 @@ describe('get()', () => {
         },
       })
     );
-    await alertsClient.get({ id: '1', index: '.alerts-observability-apm' });
+    await alertsClient.get({ id: 'NoxgpHkBqbdrfX07MqXV', index: '.alerts-observability-apm' });
 
     expect(auditLogger.log).toHaveBeenCalledWith({
       error: undefined,
       event: { action: 'alert_get', category: ['database'], outcome: 'success', type: ['access'] },
-      message: 'User has accessed alert [id=1]',
+      message: 'User has accessed alert [id=NoxgpHkBqbdrfX07MqXV]',
+    });
+  });
+
+  test('audit error access if user is unauthorized for given alert', async () => {
+    const indexName = '.alerts-observability-apm.alerts';
+    const fakeAlertId = 'myfakeid1';
+    // fakeRuleTypeId will cause authz to fail
+    const fakeRuleTypeId = 'fake.rule';
+    const alertsClient = new AlertsClient(alertsClientParams);
+    esClientMock.search.mockResolvedValueOnce(
+      elasticsearchClientMock.createApiResponse({
+        body: {
+          took: 5,
+          timed_out: false,
+          _shards: {
+            total: 1,
+            successful: 1,
+            failed: 0,
+            skipped: 0,
+          },
+          hits: {
+            total: 1,
+            max_score: 999,
+            hits: [
+              {
+                found: true,
+                _type: 'alert',
+                _version: 1,
+                _seq_no: 362,
+                _primary_term: 2,
+                _id: fakeAlertId,
+                _index: indexName,
+                _source: {
+                  [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
+                  [ALERT_RULE_CONSUMER]: 'apm',
+                  [ALERT_STATUS]: 'open',
+                  [SPACE_IDS]: [DEFAULT_SPACE],
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
+
+    await expect(alertsClient.get({ id: fakeAlertId, index: '.alerts-observability-apm.alerts' }))
+      .rejects.toThrowErrorMatchingInlineSnapshot(`
+            "Unable to retrieve alert details for alert with id of \\"myfakeid1\\" or with query \\"undefined\\" and operation get 
+            Error: Error: Unauthorized for fake.rule and apm"
+          `);
+
+    expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+      message: `Failed attempt to access alert [id=${fakeAlertId}]`,
+      event: {
+        action: 'alert_get',
+        category: ['database'],
+        outcome: 'failure',
+        type: ['access'],
+      },
+      error: {
+        code: 'Error',
+        message: 'Unauthorized for fake.rule and apm',
+      },
     });
   });
 
@@ -148,13 +296,11 @@ describe('get()', () => {
     esClientMock.search.mockRejectedValue(error);
 
     await expect(
-      alertsClient.get({ id: '1', index: '.alerts-observability-apm' })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong"`);
-    expect(auditLogger.log).toHaveBeenCalledWith({
-      error: { code: 'Error', message: 'something went wrong' },
-      event: { action: 'alert_get', category: ['database'], outcome: 'failure', type: ['access'] },
-      message: 'Failed attempt to access alert [id=1]',
-    });
+      alertsClient.get({ id: 'NoxgpHkBqbdrfX07MqXV', index: '.alerts-observability-apm' })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+            "Unable to retrieve alert details for alert with id of \\"NoxgpHkBqbdrfX07MqXV\\" or with query \\"undefined\\" and operation get 
+            Error: Error: something went wrong"
+          `);
   });
 
   describe('authorization', () => {
@@ -183,10 +329,11 @@ describe('get()', () => {
                   _seq_no: 362,
                   _primary_term: 2,
                   _source: {
-                    'rule.id': 'apm.error_rate',
+                    [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                     message: 'hello world 1',
-                    'kibana.rac.alert.owner': 'apm',
-                    'kibana.rac.alert.status': 'open',
+                    [ALERT_RULE_CONSUMER]: 'apm',
+                    [ALERT_STATUS]: 'open',
+                    [SPACE_IDS]: ['test_default_space_id'],
                   },
                 },
               ],
@@ -198,43 +345,22 @@ describe('get()', () => {
 
     test('returns alert if user is authorized to read alert under the consumer', async () => {
       const alertsClient = new AlertsClient(alertsClientParams);
-      const result = await alertsClient.get({ id: '1', index: '.alerts-observability-apm' });
-
-      expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledWith({
-        entity: 'alert',
-        consumer: 'apm',
-        operation: 'get',
-        ruleTypeId: 'apm.error_rate',
+      const result = await alertsClient.get({
+        id: 'NoxgpHkBqbdrfX07MqXV',
+        index: '.alerts-observability-apm',
       });
+
       expect(result).toMatchInlineSnapshot(`
         Object {
-          "_version": "WzM2MiwyXQ==",
-          "kibana.rac.alert.owner": "apm",
-          "kibana.rac.alert.status": "open",
+          "kibana.alert.rule.consumer": "apm",
+          "kibana.alert.rule.rule_type_id": "apm.error_rate",
+          "kibana.alert.status": "open",
+          "kibana.space_ids": Array [
+            "test_default_space_id",
+          ],
           "message": "hello world 1",
-          "rule.id": "apm.error_rate",
         }
       `);
-    });
-
-    test('throws when user is not authorized to get this type of alert', async () => {
-      const alertsClient = new AlertsClient(alertsClientParams);
-      alertingAuthMock.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to get a "apm.error_rate" alert for "apm"`)
-      );
-
-      await expect(
-        alertsClient.get({ id: '1', index: '.alerts-observability-apm' })
-      ).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to get a "apm.error_rate" alert for "apm"]`
-      );
-
-      expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledWith({
-        entity: 'alert',
-        consumer: 'apm',
-        operation: 'get',
-        ruleTypeId: 'apm.error_rate',
-      });
     });
   });
 });

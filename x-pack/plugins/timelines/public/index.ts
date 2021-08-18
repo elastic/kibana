@@ -22,6 +22,7 @@ export type {
 export { Direction } from '../common/search_strategy/common';
 export { tGridReducer } from './store/t_grid/reducer';
 export type { TGridModelForTimeline, TimelineState, TimelinesUIStart } from './types';
+export { TGridType, SortDirection } from './types';
 export {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
@@ -51,7 +52,8 @@ export {
   addFieldToTimelineColumns,
   getTimelineIdFromColumnDroppableId,
 } from './components/drag_and_drop/helpers';
-
+export { StatefulFieldsBrowser } from './components/t_grid/toolbar/fields_browser';
+export { useStatusBulkActionItems } from './hooks/use_status_bulk_action_items';
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
 export function plugin(initializerContext: PluginInitializerContext) {

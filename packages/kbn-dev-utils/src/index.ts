@@ -31,3 +31,4 @@ export * from './plugin_list';
 export * from './plugins';
 export * from './streams';
 export * from './babel';
+export * from './extract';

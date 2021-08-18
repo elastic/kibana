@@ -15,6 +15,7 @@ describe('http auth', () => {
 
   beforeEach(async () => {
     root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+    await root.preboot();
   }, 30000);
 
   afterEach(async () => {

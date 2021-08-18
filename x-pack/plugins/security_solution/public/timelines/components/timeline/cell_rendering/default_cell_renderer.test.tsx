@@ -55,6 +55,7 @@ describe('DefaultCellRenderer', () => {
               eventId={eventId}
               header={header}
               isDetails={isDetails}
+              isDraggable={true}
               isExpandable={isExpandable}
               isExpanded={isExpanded}
               linkValues={linkValues}
@@ -84,6 +85,7 @@ describe('DefaultCellRenderer', () => {
               eventId={eventId}
               header={header}
               isDetails={isDetails}
+              isDraggable={true}
               isExpandable={isExpandable}
               isExpanded={isExpanded}
               linkValues={linkValues}
@@ -100,6 +102,7 @@ describe('DefaultCellRenderer', () => {
       columnName: header.id,
       eventId,
       field: header,
+      isDraggable: true,
       linkValues,
       timelineId,
       truncate: true,

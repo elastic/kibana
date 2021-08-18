@@ -117,14 +117,32 @@ describe('UsageStatsClient', () => {
         createNewCopies: true,
         overwrite: true,
       } as IncrementCopySavedObjectsOptions);
-      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
-      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
+      await usageStatsClient.incrementCopySavedObjects({
+        headers: firstPartyRequestHeaders,
+        createNewCopies: false,
+        overwrite: true,
+      } as IncrementCopySavedObjectsOptions);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(2);
+      expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
+        1,
         SPACES_USAGE_STATS_TYPE,
         SPACES_USAGE_STATS_ID,
         [
           `${COPY_STATS_PREFIX}.total`,
           `${COPY_STATS_PREFIX}.kibanaRequest.yes`,
           `${COPY_STATS_PREFIX}.createNewCopiesEnabled.yes`,
+          // excludes 'overwriteEnabled.yes' and 'overwriteEnabled.no' when createNewCopies is true
+        ],
+        incrementOptions
+      );
+      expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
+        2,
+        SPACES_USAGE_STATS_TYPE,
+        SPACES_USAGE_STATS_ID,
+        [
+          `${COPY_STATS_PREFIX}.total`,
+          `${COPY_STATS_PREFIX}.kibanaRequest.yes`,
+          `${COPY_STATS_PREFIX}.createNewCopiesEnabled.no`,
           `${COPY_STATS_PREFIX}.overwriteEnabled.yes`,
         ],
         incrementOptions

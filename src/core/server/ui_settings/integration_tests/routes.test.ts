@@ -15,6 +15,7 @@ describe('ui settings service', () => {
     beforeAll(async () => {
       root = kbnTestServer.createRoot({ plugins: { initialize: false } });
 
+      await root.preboot();
       const { uiSettings } = await root.setup();
       uiSettings.register({
         custom: {

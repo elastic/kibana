@@ -37,6 +37,7 @@ import { parseExperimentalConfigValue } from '../../common/experimental_features
 // a restricted path.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createCasesClientMock } from '../../../cases/server/client/mocks';
+import { EndpointMetadataService } from './services/metadata';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -65,7 +66,6 @@ export const createMockEndpointAppContextService = (
     getAgentService: jest.fn(),
     getAgentPolicyService: jest.fn(),
     getManifestManager: jest.fn().mockReturnValue(mockManifestManager ?? jest.fn()),
-    getScopedSavedObjectsClient: jest.fn(),
   } as unknown) as jest.Mocked<EndpointAppContextService>;
 };
 
@@ -76,14 +76,23 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
   const factory = new AppClientFactory();
   const config = createMockConfig();
   const casesClientMock = createCasesClientMock();
+  const savedObjectsStart = savedObjectsServiceMock.createStartContract();
+  const agentService = createMockAgentService();
+  const agentPolicyService = createMockAgentPolicyService();
+  const endpointMetadataService = new EndpointMetadataService(
+    savedObjectsStart,
+    agentService,
+    agentPolicyService
+  );
 
   factory.setup({ getSpaceId: () => 'mockSpace', config });
 
   return {
-    agentService: createMockAgentService(),
+    agentService,
+    agentPolicyService,
+    endpointMetadataService,
     packageService: createMockPackageService(),
     logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
-    savedObjectsStart: savedObjectsServiceMock.createStartContract(),
     manifestManager: getManifestManagerMock(),
     appClientFactory: factory,
     security: securityMock.createStart(),

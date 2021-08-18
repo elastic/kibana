@@ -16,6 +16,7 @@ import { Exceptions } from './exceptions';
 
 import { Hosts } from './hosts';
 import { Network } from './network';
+import { Ueba } from './ueba';
 import { Overview } from './overview';
 import { Rules } from './rules';
 
@@ -31,6 +32,7 @@ const subPluginClasses = {
   Exceptions,
   Hosts,
   Network,
+  Ueba,
   Overview,
   Rules,
   Timelines,

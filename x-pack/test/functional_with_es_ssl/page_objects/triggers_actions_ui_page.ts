@@ -190,8 +190,6 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
     ) {
       await retry.tryForTime(30000, async () => {
         await this.searchAlerts(ruleName);
-        await testSubjects.click('collapsedItemActions');
-
         const switchControl = await testSubjects.find(switchName);
         const isChecked = await switchControl.getAttribute('aria-checked');
         expect(isChecked).to.eql(shouldBeCheckedAsString);

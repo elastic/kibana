@@ -112,7 +112,7 @@ export interface GetStateReturn {
    */
   appStateContainer: ReduxLikeStateContainer<AppState>;
   /**
-   * Function starting state sync when Discover main is loaded
+   * Initialize state with filters and query,  start state syncing
    */
   initializeAndSync: (
     indexPattern: IndexPattern,
@@ -392,6 +392,12 @@ function createUrlGeneratorState({
     sort: appState.sort,
     savedQuery: appState.savedQuery,
     interval: appState.interval,
+    refreshInterval: shouldRestoreSearchSession
+      ? {
+          pause: true, // force pause refresh interval when restoring a session
+          value: 0,
+        }
+      : undefined,
     useHash: false,
   };
 }

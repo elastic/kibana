@@ -15,9 +15,12 @@ import {
 
 export type CommonAlert = Alert<AlertTypeParams> | SanitizedAlert<AlertTypeParams>;
 
+export interface RulesByType {
+  [type: string]: CommonAlertStatus[];
+}
 export interface CommonAlertStatus {
   states: CommonAlertState[];
-  rawAlert: Alert<AlertTypeParams> | SanitizedAlert<AlertTypeParams>;
+  sanitizedRule: Alert<AlertTypeParams> | SanitizedAlert<AlertTypeParams>;
 }
 
 export interface CommonAlertState {

@@ -12,6 +12,7 @@ import { managementPluginMock } from '../../management/public/mocks';
 import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import { indexPatternFieldEditorPluginMock } from '../../index_pattern_field_editor/public/mocks';
+import { indexPatternEditorPluginMock } from '../../index_pattern_editor/public/mocks';
 import {
   IndexPatternManagementSetup,
   IndexPatternManagementStart,
@@ -19,19 +20,9 @@ import {
 } from './plugin';
 import { IndexPatternManagmentContext } from './types';
 
-const createSetupContract = (): IndexPatternManagementSetup => {};
+const createSetupContract = (): IndexPatternManagementSetup => ({});
 
-const createStartContract = (): IndexPatternManagementStart => ({
-  creation: {
-    getType: jest.fn(),
-    getIndexPatternCreationOptions: jest.fn(),
-  } as any,
-  list: {
-    getIndexPatternTags: jest.fn(),
-    getFieldInfo: jest.fn(),
-    areScriptedFieldsEnabled: jest.fn(),
-  } as any,
-});
+const createStartContract = (): IndexPatternManagementStart => ({});
 
 const createInstance = async () => {
   const plugin = new IndexPatternManagementPlugin({} as PluginInitializerContext);
@@ -40,11 +31,7 @@ const createInstance = async () => {
     management: managementPluginMock.createSetupContract(),
     urlForwarding: urlForwardingPluginMock.createSetupContract(),
   });
-  const doStart = () =>
-    plugin.start(coreMock.createStart(), {
-      data: dataPluginMock.createStartContract(),
-      indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
-    });
+  const doStart = () => plugin.start();
 
   return {
     plugin,
@@ -84,6 +71,8 @@ const createIndexPatternManagmentContext = (): {
     indexPatternManagementStart: createStartContract(),
     setBreadcrumbs: () => {},
     fieldFormatEditors: indexPatternFieldEditor.fieldFormatEditors,
+    IndexPatternEditor: indexPatternEditorPluginMock.createStartContract()
+      .IndexPatternEditorComponent,
   };
 };
 

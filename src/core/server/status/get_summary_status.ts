@@ -31,7 +31,7 @@ export const getSummaryStatus = (
       // TODO: include URL to status page
       detail: status.detail ?? `See the status page for more information`,
       meta: {
-        affectedServices: { [serviceName]: status },
+        affectedServices: [serviceName],
       },
     };
   } else {
@@ -41,7 +41,7 @@ export const getSummaryStatus = (
       // TODO: include URL to status page
       detail: `See the status page for more information`,
       meta: {
-        affectedServices: Object.fromEntries(highestStatuses),
+        affectedServices: highestStatuses.map(([serviceName]) => serviceName),
       },
     };
   }

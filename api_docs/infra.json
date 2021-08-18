@@ -12,13 +12,16 @@
         "description": [],
         "signature": [
           "(props: React.PropsWithChildren<",
-          "LogStreamProps",
+          {
+            "pluginId": "infra",
+            "scope": "public",
+            "docId": "kibInfraPluginApi",
+            "section": "def-public.LogStreamProps",
+            "text": "LogStreamProps"
+          },
           ">) => JSX.Element"
         ],
-        "source": {
-          "path": "x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx",
-          "lineNumber": 13
-        },
+        "path": "x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx",
         "deprecated": false,
         "children": [
           {
@@ -30,13 +33,16 @@
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
-              "LogStreamProps",
+              {
+                "pluginId": "infra",
+                "scope": "public",
+                "docId": "kibInfraPluginApi",
+                "section": "def-public.LogStreamProps",
+                "text": "LogStreamProps"
+              },
               ">"
             ],
-            "source": {
-              "path": "x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx",
-              "lineNumber": 13
-            },
+            "path": "x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx",
             "deprecated": false,
             "isRequired": true
           }
@@ -45,7 +51,44 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "infra",
+        "id": "def-public.LogStreamProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogStreamProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "infra",
+            "scope": "public",
+            "docId": "kibInfraPluginApi",
+            "section": "def-public.LogStreamProps",
+            "text": "LogStreamProps"
+          },
+          " extends LogStreamContentProps"
+        ],
+        "path": "x-pack/plugins/infra/public/components/log_stream/log_stream.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "infra",
+            "id": "def-public.LogStreamProps.height",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "height",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "x-pack/plugins/infra/public/components/log_stream/log_stream.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [
       {
         "parentPluginId": "infra",
@@ -54,10 +97,7 @@
         "tags": [],
         "label": "InfraFormatterType",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/infra/public/lib/lib.ts",
-          "lineNumber": 147
-        },
+        "path": "x-pack/plugins/infra/public/lib/lib.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -73,10 +113,7 @@
         "signature": [
           "\"metrics\" | \"logs\""
         ],
-        "source": {
-          "path": "x-pack/plugins/infra/public/index.ts",
-          "lineNumber": 29
-        },
+        "path": "x-pack/plugins/infra/public/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -89,10 +126,7 @@
         "tags": [],
         "label": "FORMATTERS",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/infra/common/formatters/index.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/infra/common/formatters/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -105,10 +139,7 @@
             "signature": [
               "(val: number) => string"
             ],
-            "source": {
-              "path": "x-pack/plugins/infra/common/formatters/index.ts",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/infra/common/formatters/index.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -119,10 +150,7 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/infra/common/formatters/number.ts",
-                  "lineNumber": 8
-                },
+                "path": "x-pack/plugins/infra/common/formatters/number.ts",
                 "deprecated": false
               }
             ]
@@ -139,10 +167,7 @@
             "signature": [
               "(bytes: number) => string"
             ],
-            "source": {
-              "path": "x-pack/plugins/infra/common/formatters/index.ts",
-              "lineNumber": 19
-            },
+            "path": "x-pack/plugins/infra/common/formatters/index.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -153,10 +178,7 @@
                 "tags": [],
                 "label": "bytes",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/infra/common/formatters/bytes.ts",
-                  "lineNumber": 42
-                },
+                "path": "x-pack/plugins/infra/common/formatters/bytes.ts",
                 "deprecated": false
               }
             ]
@@ -173,10 +195,7 @@
             "signature": [
               "(bytes: number) => string"
             ],
-            "source": {
-              "path": "x-pack/plugins/infra/common/formatters/index.ts",
-              "lineNumber": 21
-            },
+            "path": "x-pack/plugins/infra/common/formatters/index.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -187,10 +206,7 @@
                 "tags": [],
                 "label": "bytes",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/infra/common/formatters/bytes.ts",
-                  "lineNumber": 42
-                },
+                "path": "x-pack/plugins/infra/common/formatters/bytes.ts",
                 "deprecated": false
               }
             ]
@@ -207,10 +223,7 @@
             "signature": [
               "(bytes: number) => string"
             ],
-            "source": {
-              "path": "x-pack/plugins/infra/common/formatters/index.ts",
-              "lineNumber": 23
-            },
+            "path": "x-pack/plugins/infra/common/formatters/index.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -221,10 +234,7 @@
                 "tags": [],
                 "label": "bytes",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/infra/common/formatters/bytes.ts",
-                  "lineNumber": 42
-                },
+                "path": "x-pack/plugins/infra/common/formatters/bytes.ts",
                 "deprecated": false
               }
             ]
@@ -239,10 +249,7 @@
             "signature": [
               "(val: number) => string"
             ],
-            "source": {
-              "path": "x-pack/plugins/infra/common/formatters/index.ts",
-              "lineNumber": 24
-            },
+            "path": "x-pack/plugins/infra/common/formatters/index.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -253,10 +260,7 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/infra/common/formatters/percent.ts",
-                  "lineNumber": 9
-                },
+                "path": "x-pack/plugins/infra/common/formatters/percent.ts",
                 "deprecated": false
               }
             ]
@@ -271,10 +275,7 @@
             "signature": [
               "(val: number) => string"
             ],
-            "source": {
-              "path": "x-pack/plugins/infra/common/formatters/index.ts",
-              "lineNumber": 25
-            },
+            "path": "x-pack/plugins/infra/common/formatters/index.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -285,10 +286,7 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/infra/common/formatters/high_precision.ts",
-                  "lineNumber": 8
-                },
+                "path": "x-pack/plugins/infra/common/formatters/high_precision.ts",
                 "deprecated": false
               }
             ]
@@ -314,10 +312,7 @@
         "signature": [
           "{ readonly sources?: Readonly<{ default?: Readonly<{ fields?: Readonly<{ host?: string | undefined; message?: string[] | undefined; container?: string | undefined; timestamp?: string | undefined; tiebreaker?: string | undefined; pod?: string | undefined; } & {}> | undefined; logAlias?: string | undefined; metricAlias?: string | undefined; } & {}> | undefined; } & {}> | undefined; readonly enabled: boolean; readonly inventory: Readonly<{} & { compositeSize: number; }>; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/infra/server/plugin.ts",
-          "lineNumber": 65
-        },
+        "path": "x-pack/plugins/infra/server/plugin.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -333,10 +328,7 @@
           " & ",
           "InfraSpacesRequestHandlerContext"
         ],
-        "source": {
-          "path": "x-pack/plugins/infra/server/types.ts",
-          "lineNumber": 24
-        },
+        "path": "x-pack/plugins/infra/server/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -349,10 +341,7 @@
       "tags": [],
       "label": "InfraPluginSetup",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/infra/server/plugin.ts",
-        "lineNumber": 75
-      },
+      "path": "x-pack/plugins/infra/server/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -367,29 +356,26 @@
             "InfraStaticSourceConfiguration",
             ") => void"
           ],
-          "source": {
-            "path": "x-pack/plugins/infra/server/plugin.ts",
-            "lineNumber": 76
-          },
+          "path": "x-pack/plugins/infra/server/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "infra",
-              "id": "def-server.sourceId",
+              "id": "def-server.InfraPluginSetup.defineInternalSourceConfiguration.$1",
               "type": "string",
               "tags": [],
               "label": "sourceId",
               "description": [],
-              "source": {
-                "path": "x-pack/plugins/infra/server/plugin.ts",
-                "lineNumber": 77
-              },
-              "deprecated": false
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/plugins/infra/server/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
             },
             {
               "parentPluginId": "infra",
-              "id": "def-server.sourceProperties",
+              "id": "def-server.InfraPluginSetup.defineInternalSourceConfiguration.$2",
               "type": "Object",
               "tags": [],
               "label": "sourceProperties",
@@ -397,13 +383,12 @@
               "signature": [
                 "InfraStaticSourceConfiguration"
               ],
-              "source": {
-                "path": "x-pack/plugins/infra/server/plugin.ts",
-                "lineNumber": 78
-              },
-              "deprecated": false
+              "path": "x-pack/plugins/infra/server/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",

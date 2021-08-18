@@ -82,6 +82,7 @@ describe('Background Search Session Management Main', () => {
               timezone="UTC"
               documentation={new AsyncSearchIntroDocumentation(docLinks)}
               config={mockConfig}
+              kibanaVersion={'8.0.0'}
             />
           </LocaleWrapper>
         );

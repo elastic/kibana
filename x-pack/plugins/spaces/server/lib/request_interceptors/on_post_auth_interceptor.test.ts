@@ -57,6 +57,7 @@ describe.skip('onPostAuthInterceptor', () => {
     availableSpaces: any[],
     testOptions = { simulateGetSpacesFailure: false, simulateGetSingleSpaceFailure: false }
   ) {
+    await root.preboot();
     const { http, elasticsearch } = await root.setup();
 
     // Mock esNodesCompatibility$ to prevent `root.start()` from blocking on ES version check

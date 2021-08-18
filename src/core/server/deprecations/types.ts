@@ -37,6 +37,8 @@ export interface DeprecationsDetails {
   deprecationType?: 'config' | 'feature';
   /* (optional) link to the documentation for more details on the deprecation. */
   documentationUrl?: string;
+  /* (optional) specify the fix for this deprecation requires a full kibana restart. */
+  requireRestart?: boolean;
   /* corrective action needed to fix this deprecation. */
   correctiveActions: {
     /**

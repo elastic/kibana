@@ -6,14 +6,13 @@
  */
 
 import { IHttpFetchError } from 'kibana/public';
-import { DefaultMalwareMessage } from '../../../../../../common/endpoint/models/policy_config';
+import { DefaultPolicyNotificationMessage } from '../../../../../../common/endpoint/models/policy_config';
 import { PolicyDetailsState, UpdatePolicyResponse } from '../../types';
 import {
   policyIdFromParams,
   isOnPolicyDetailsPage,
   policyDetails,
   policyDetailsForUpdate,
-  getPolicyDataForUpdate,
 } from './selectors';
 import {
   sendGetPackagePolicy,
@@ -22,6 +21,7 @@ import {
 } from '../services/ingest';
 import { NewPolicyData, PolicyData } from '../../../../../../common/endpoint/types';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
+import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy/get_policy_data_for_update';
 
 export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = (
   coreStart
@@ -39,12 +39,30 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
         policyItem = (await sendGetPackagePolicy(http, id)).item;
         // sets default user notification message if policy config message is empty
         if (policyItem.inputs[0].config.policy.value.windows.popup.malware.message === '') {
-          policyItem.inputs[0].config.policy.value.windows.popup.malware.message = DefaultMalwareMessage;
-          policyItem.inputs[0].config.policy.value.mac.popup.malware.message = DefaultMalwareMessage;
-          policyItem.inputs[0].config.policy.value.linux.popup.malware.message = DefaultMalwareMessage;
+          policyItem.inputs[0].config.policy.value.windows.popup.malware.message = DefaultPolicyNotificationMessage;
+          policyItem.inputs[0].config.policy.value.mac.popup.malware.message = DefaultPolicyNotificationMessage;
+          policyItem.inputs[0].config.policy.value.linux.popup.malware.message = DefaultPolicyNotificationMessage;
         }
         if (policyItem.inputs[0].config.policy.value.windows.popup.ransomware.message === '') {
-          policyItem.inputs[0].config.policy.value.windows.popup.ransomware.message = DefaultMalwareMessage;
+          policyItem.inputs[0].config.policy.value.windows.popup.ransomware.message = DefaultPolicyNotificationMessage;
+        }
+        if (
+          policyItem.inputs[0].config.policy.value.windows.popup.memory_protection.message === ''
+        ) {
+          policyItem.inputs[0].config.policy.value.windows.popup.memory_protection.message = DefaultPolicyNotificationMessage;
+        }
+        if (
+          policyItem.inputs[0].config.policy.value.windows.popup.behavior_protection.message === ''
+        ) {
+          policyItem.inputs[0].config.policy.value.windows.popup.behavior_protection.message = DefaultPolicyNotificationMessage;
+        }
+        if (policyItem.inputs[0].config.policy.value.mac.popup.behavior_protection.message === '') {
+          policyItem.inputs[0].config.policy.value.mac.popup.behavior_protection.message = DefaultPolicyNotificationMessage;
+        }
+        if (
+          policyItem.inputs[0].config.policy.value.linux.popup.behavior_protection.message === ''
+        ) {
+          policyItem.inputs[0].config.policy.value.linux.popup.behavior_protection.message = DefaultPolicyNotificationMessage;
         }
       } catch (error) {
         dispatch({
@@ -94,7 +112,7 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
               return sendPutPackagePolicy(
                 http,
                 id,
-                getPolicyDataForUpdate(latestUpdatedPolicyItem) as NewPolicyData
+                getPolicyDataForUpdate(latestUpdatedPolicyItem)
               );
             });
           }

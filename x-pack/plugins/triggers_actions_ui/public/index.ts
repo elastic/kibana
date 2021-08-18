@@ -13,7 +13,7 @@ export type {
   AlertTypeModel,
   ActionType,
   ActionTypeRegistryContract,
-  AlertTypeRegistryContract,
+  RuleTypeRegistryContract,
   AlertTypeParamsExpressionProps,
   ValidationResult,
   ActionVariables,
@@ -21,6 +21,7 @@ export type {
   IErrorObject,
   AlertFlyoutCloseReason,
   AlertTypeParams,
+  AsApiContract,
 } from './types';
 
 export {

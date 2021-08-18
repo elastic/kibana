@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-source?: NameList;
+source?: boolean | estypes.Fields;
 ```

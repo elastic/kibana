@@ -14,7 +14,7 @@ exports[`it renders without blowing up 1`] = `
       grow={false}
     >
       <EuiTitle
-        size="m"
+        size="s"
       >
         <h2>
           <EuiIcon

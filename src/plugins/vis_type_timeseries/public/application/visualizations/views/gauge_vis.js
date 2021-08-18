@@ -131,15 +131,19 @@ export class GaugeVis extends Component {
     if (type === 'half') {
       svg = (
         <svg width={120.72} height={78.72}>
-          <circle {...props.circleBackground} style={styles.innerLine} />
-          <circle {...props.circle} style={styles.gaugeLine} />
+          <circle
+            {...props.circleBackground}
+            style={styles.innerLine}
+            data-test-subj="gaugeCircleInner"
+          />
+          <circle {...props.circle} style={styles.gaugeLine} data-test-subj="gaugeCircle" />
         </svg>
       );
     } else {
       svg = (
         <svg width={120.72} height={120.72}>
-          <circle {...props.circleBackground} />
-          <circle {...props.circle} />
+          <circle {...props.circleBackground} data-test-subj="gaugeCircleInner" />
+          <circle {...props.circle} data-test-subj="gaugeCircle" />
         </svg>
       );
     }

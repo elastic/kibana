@@ -50,9 +50,15 @@ interface Props {
   addPairControlLabel: string | React.ReactElement;
   defaultPairs: Pair[];
   onChange: (pairs: Pair[]) => void;
+  'data-test-subj'?: string;
 }
 
-export const KeyValuePairsField = ({ addPairControlLabel, defaultPairs, onChange }: Props) => {
+export const KeyValuePairsField = ({
+  addPairControlLabel,
+  defaultPairs,
+  onChange,
+  'data-test-subj': dataTestSubj,
+}: Props) => {
   const [pairs, setPairs] = useState<Pair[]>(defaultPairs);
 
   const handleOnChange = useCallback(
@@ -89,11 +95,15 @@ export const KeyValuePairsField = ({ addPairControlLabel, defaultPairs, onChange
   }, [onChange, pairs]);
 
   return (
-    <>
+    <div data-test-subj={dataTestSubj}>
       <EuiSpacer size="s" />
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton iconType="plus" onClick={handleAddPair}>
+          <EuiButton
+            iconType="plus"
+            onClick={handleAddPair}
+            data-test-subj={`${dataTestSubj}__button`}
+          >
             {addPairControlLabel}
           </EuiButton>
         </EuiFlexItem>
@@ -176,6 +186,6 @@ export const KeyValuePairsField = ({ addPairControlLabel, defaultPairs, onChange
           );
         })}
       </StyledFieldset>
-    </>
+    </div>
   );
 };

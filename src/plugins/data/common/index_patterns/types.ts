@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 import type { estypes } from '@elastic/elasticsearch';
+import type { IndexPatternFieldBase, IFieldSubType, IndexPatternBase } from '@kbn/es-query';
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
-import type { IndexPatternFieldBase, IFieldSubType, IndexPatternBase } from '../es_query';
 import { IFieldType } from './fields';
 import { RUNTIME_FIELD_TYPES } from './constants';
 import { SerializedFieldFormat } from '../../../expressions/common';
-import { KBN_FIELD_TYPES, IndexPatternField, FieldFormat } from '..';
+import { KBN_FIELD_TYPES, IndexPatternField } from '..';
+import { FieldFormat } from '../../../field_formats/common';
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
@@ -184,6 +185,7 @@ export interface FieldSpecExportFmt {
 }
 
 /**
+ * @public
  * Serialized version of IndexPatternField
  */
 export interface FieldSpec extends IndexPatternFieldBase {

@@ -11,6 +11,7 @@ import React, { useState } from 'react';
 import uuid from 'uuid';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { InstancesLatencyDistributionChart } from '../../shared/charts/instances_latency_distribution_chart';
@@ -25,14 +26,6 @@ interface ServiceOverviewInstancesChartAndTableProps {
   serviceName: string;
 }
 
-export interface MainStatsServiceInstanceItem {
-  serviceNodeName: string;
-  errorRate: number;
-  throughput: number;
-  latency: number;
-  cpuUsage: number;
-  memoryUsage: number;
-}
 type ApiResponseMainStats = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type ApiResponseDetailedStats = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
@@ -77,9 +70,11 @@ export function ServiceOverviewInstancesChartAndTable({
   const { direction, field } = sort;
 
   const {
+    query: { environment, kuery },
+  } = useApmParams('/services/:serviceName/overview');
+
+  const {
     urlParams: {
-      environment,
-      kuery,
       latencyAggregationType,
       start,
       end,
@@ -174,7 +169,6 @@ export function ServiceOverviewInstancesChartAndTable({
 
   const {
     data: detailedStatsData = INITIAL_STATE_DETAILED_STATISTICS,
-    status: detailedStatsStatus,
   } = useFetcher(
     (callApmApi) => {
       if (
@@ -236,10 +230,7 @@ export function ServiceOverviewInstancesChartAndTable({
             detailedStatsData={detailedStatsData}
             serviceName={serviceName}
             tableOptions={tableOptions}
-            isLoading={
-              mainStatsStatus === FETCH_STATUS.LOADING ||
-              detailedStatsStatus === FETCH_STATUS.LOADING
-            }
+            isLoading={mainStatsStatus === FETCH_STATUS.LOADING}
             onChangeTableOptions={(newTableOptions) => {
               setTableOptions({
                 pageIndex: newTableOptions.page?.index ?? 0,

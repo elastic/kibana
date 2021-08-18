@@ -24,6 +24,9 @@ describe('createApmEventClient', () => {
     await server.stop();
   });
   it('cancels a search when a request is aborted', async () => {
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+    });
     const { server: innerServer, createRouter } = await server.setup({
       context: contextServiceMock.createSetupContract(),
       executionContext: executionContextServiceMock.createInternalSetupContract(),

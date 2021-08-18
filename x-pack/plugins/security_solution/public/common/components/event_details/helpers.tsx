@@ -7,6 +7,7 @@
 
 import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
 
+import styled from 'styled-components';
 import React from 'react';
 import { EuiBasicTableColumn, EuiTitle } from '@elastic/eui';
 import {
@@ -21,6 +22,7 @@ import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
 } from '../../../timelines/components/timeline/body/constants';
+import { FieldsData } from './types';
 
 import * as i18n from './translations';
 import { ColumnHeaderOptions } from '../../../../common';
@@ -55,12 +57,12 @@ export interface Item {
 export interface AlertSummaryRow {
   title: string;
   description: {
-    contextId: string;
+    data: FieldsData;
     eventId: string;
-    fieldName: string;
-    value: string;
-    fieldType: string;
+    fieldFromBrowserField?: BrowserField;
     linkValue: string | undefined;
+    timelineId: string;
+    values: string[] | null | undefined;
   };
 }
 
@@ -196,9 +198,13 @@ export const onEventDetailsTabKeyPressed = ({
   }
 };
 
+const StyledH5 = styled.h5`
+  line-height: 1.7rem;
+`;
+
 const getTitle = (title: string) => (
-  <EuiTitle size="xxs">
-    <h5>{title}</h5>
+  <EuiTitle size="xxxs">
+    <StyledH5>{title}</StyledH5>
   </EuiTitle>
 );
 getTitle.displayName = 'getTitle';
@@ -213,10 +219,11 @@ export const getSummaryColumns = (
       field: 'title',
       truncateText: false,
       render: getTitle,
-      width: '160px',
+      width: '220px',
       name: '',
     },
     {
+      className: 'flyoutOverviewDescription',
       field: 'description',
       truncateText: false,
       render: DescriptionComponent,

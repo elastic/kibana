@@ -4,7 +4,6 @@
 
 ## SearchSourceFields.query property
 
-[Query](./kibana-plugin-plugins-data-public.query.md)
 
 <b>Signature:</b>
 

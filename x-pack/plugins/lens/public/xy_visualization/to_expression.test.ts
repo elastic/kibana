@@ -11,12 +11,13 @@ import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks'
 import { getXyVisualization } from './xy_visualization';
 import { Operation } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { layerTypes } from '../../common';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({
     paletteService: chartPluginMock.createPaletteRegistry(),
-    data: dataPluginMock.createStartContract(),
+    fieldFormats: fieldFormatsServiceMock.createStartContract(),
   });
   let mockDatasource: ReturnType<typeof createMockDatasource>;
   let frame: ReturnType<typeof createMockFramePublicAPI>;
@@ -50,6 +51,11 @@ describe('#toExpression', () => {
           preferredSeriesType: 'bar',
           fittingFunction: 'Carry',
           tickLabelsVisibilitySettings: { x: false, yLeft: true, yRight: true },
+          labelsOrientation: {
+            x: 0,
+            yLeft: -90,
+            yRight: -45,
+          },
           gridlinesVisibilitySettings: { x: false, yLeft: true, yRight: true },
           hideEndzones: true,
           yRightExtent: {
@@ -60,6 +66,7 @@ describe('#toExpression', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               splitAccessor: 'd',
               xAccessor: 'a',
@@ -82,6 +89,7 @@ describe('#toExpression', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               splitAccessor: 'd',
               xAccessor: 'a',
@@ -103,6 +111,7 @@ describe('#toExpression', () => {
         layers: [
           {
             layerId: 'first',
+            layerType: layerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'd',
             xAccessor: 'a',
@@ -130,6 +139,7 @@ describe('#toExpression', () => {
         layers: [
           {
             layerId: 'first',
+            layerType: layerTypes.DATA,
             seriesType: 'area',
             splitAccessor: undefined,
             xAccessor: undefined,
@@ -154,6 +164,7 @@ describe('#toExpression', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               splitAccessor: undefined,
               xAccessor: 'a',
@@ -175,6 +186,7 @@ describe('#toExpression', () => {
         layers: [
           {
             layerId: 'first',
+            layerType: layerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'd',
             xAccessor: 'a',
@@ -211,6 +223,7 @@ describe('#toExpression', () => {
         layers: [
           {
             layerId: 'first',
+            layerType: layerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'd',
             xAccessor: 'a',
@@ -229,6 +242,32 @@ describe('#toExpression', () => {
     });
   });
 
+  it('should default the tick labels orientation settings to 0', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers
+    ) as Ast;
+    expect((expression.chain[0].arguments.labelsOrientation[0] as Ast).chain[0].arguments).toEqual({
+      x: [0],
+      yLeft: [0],
+      yRight: [0],
+    });
+  });
+
   it('should default the gridlines visibility settings to true', () => {
     const expression = xyVisualization.toExpression(
       {
@@ -238,6 +277,7 @@ describe('#toExpression', () => {
         layers: [
           {
             layerId: 'first',
+            layerType: layerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'd',
             xAccessor: 'a',
@@ -265,6 +305,7 @@ describe('#toExpression', () => {
         layers: [
           {
             layerId: 'first',
+            layerType: layerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'd',
             xAccessor: 'a',

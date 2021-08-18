@@ -40,9 +40,10 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
     savedObjectsPublic,
   } = visualizeServices;
   const embeddableHandler = (await createVisEmbeddableFromObject(vis, {
+    id: '',
     timeRange: data.query.timefilter.timefilter.getTime(),
     filters: data.query.filterManager.getFilters(),
-    id: '',
+    searchSessionId: data.search.session.getSessionId(),
   })) as VisualizeEmbeddableContract;
 
   embeddableHandler.getOutput$().subscribe((output) => {

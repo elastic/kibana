@@ -57,6 +57,109 @@ export interface HttpAuth {
 }
 
 /**
+ * Kibana HTTP Service provides an abstraction to work with the HTTP stack at the `preboot` stage. This functionality
+ * allows Kibana to serve user requests even before Kibana becomes fully operational. Only Core and `preboot` plugins
+ * can define HTTP routes at this stage.
+ *
+ * @example
+ * To handle an incoming request in your preboot plugin you should:
+ * - Use `@kbn/config-schema` package to create a schema to validate the request `params`, `query`, and `body`. Every incoming request will be validated against the created schema. If validation failed, the request is rejected with `400` status and `Bad request` error without calling the route's handler.
+ * To opt out of validating the request, specify `false`.
+ * ```ts
+ * import { schema, TypeOf } from '@kbn/config-schema';
+ * const validate = {
+ *   params: schema.object({
+ *     id: schema.string(),
+ *   }),
+ * };
+ * ```
+ *
+ * - Declare a function to respond to incoming request.
+ * The function will receive `request` object containing request details: url, headers, matched route, as well as validated `params`, `query`, `body`.
+ * And `response` object instructing HTTP server to create HTTP response with information sent back to the client as the response body, headers, and HTTP status.
+ * Any exception raised during the handler call will generate `500 Server error` response and log error details for further investigation. See below for returning custom error responses.
+ * ```ts
+ * const handler = async (context: RequestHandlerContext, request: KibanaRequest, response: ResponseFactory) => {
+ *   const data = await findObject(request.params.id);
+ *   // creates a command to respond with 'not found' error
+ *   if (!data) {
+ *     return response.notFound();
+ *   }
+ *   // creates a command to send found data to the client and set response headers
+ *   return response.ok({
+ *     body: data,
+ *     headers: { 'content-type': 'application/json' }
+ *   });
+ * }
+ * ```
+ * * - Acquire `preboot` {@link IRouter} instance and register route handler for GET request to 'path/{id}' path.
+ * ```ts
+ * import { schema, TypeOf } from '@kbn/config-schema';
+ *
+ * const validate = {
+ *   params: schema.object({
+ *     id: schema.string(),
+ *   }),
+ * };
+ *
+ * httpPreboot.registerRoutes('my-plugin', (router) => {
+ *   router.get({ path: 'path/{id}', validate }, async (context, request, response) => {
+ *     const data = await findObject(request.params.id);
+ *     if (!data) {
+ *       return response.notFound();
+ *     }
+ *     return response.ok({
+ *       body: data,
+ *       headers: { 'content-type': 'application/json' }
+ *     });
+ *   });
+ * });
+ * ```
+ * @public
+ */
+export interface HttpServicePreboot {
+  /**
+   * Provides ability to acquire `preboot` {@link IRouter} instance for a particular top-level path and register handler
+   * functions for any number of nested routes.
+   *
+   * @remarks
+   * Each route can have only one handler function, which is executed when the route is matched.
+   * See the {@link IRouter} documentation for more information.
+   *
+   * @example
+   * ```ts
+   * registerRoutes('my-plugin', (router) => {
+   *   // handler is called when '/my-plugin/path' resource is requested with `GET` method
+   *   router.get({ path: '/path', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
+   * });
+   * ```
+   * @public
+   */
+  registerRoutes(path: string, callback: (router: IRouter) => void): void;
+
+  /**
+   * Access or manipulate the Kibana base path
+   * See {@link IBasePath}.
+   */
+  basePath: IBasePath;
+}
+
+/** @internal */
+export interface InternalHttpServicePreboot
+  extends Pick<
+    InternalHttpServiceSetup,
+    | 'auth'
+    | 'csp'
+    | 'basePath'
+    | 'externalUrl'
+    | 'registerStaticDir'
+    | 'registerRouteHandlerContext'
+    | 'server'
+  > {
+  registerRoutes(path: string, callback: (router: IRouter) => void): void;
+}
+
+/**
  * Kibana HTTP Service provides own abstraction for work with HTTP stack.
  * Plugins don't have direct access to `hapi` server and its primitives anymore. Moreover,
  * plugins shouldn't rely on the fact that HTTP Service uses one or another library under the hood.
@@ -278,11 +381,6 @@ export interface HttpServiceSetup {
 }
 
 /** @internal */
-export interface InternalNotReadyHttpServiceSetup {
-  registerRoutes(path: string, callback: (router: IRouter) => void): void;
-}
-
-/** @internal */
 export interface InternalHttpServiceSetup
   extends Omit<HttpServiceSetup, 'createRouter' | 'registerRouteHandlerContext'> {
   auth: HttpServerSetup['auth'];
@@ -303,7 +401,7 @@ export interface InternalHttpServiceSetup
     contextName: ContextName,
     provider: RequestHandlerContextProvider<Context, ContextName>
   ) => RequestHandlerContextContainer;
-  notReadyServer?: InternalNotReadyHttpServiceSetup;
+  registerPrebootRoutes(path: string, callback: (router: IRouter) => void): void;
 }
 
 /** @public */

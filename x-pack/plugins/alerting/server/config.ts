@@ -8,6 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { validateDurationSchema } from './lib';
 
+export const DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT = 10;
 export const configSchema = schema.object({
   healthCheck: schema.object({
     interval: schema.string({ validate: validateDurationSchema, defaultValue: '60m' }),
@@ -15,6 +16,9 @@ export const configSchema = schema.object({
   invalidateApiKeysTask: schema.object({
     interval: schema.string({ validate: validateDurationSchema, defaultValue: '5m' }),
     removalDelay: schema.string({ validate: validateDurationSchema, defaultValue: '1h' }),
+  }),
+  maxEphemeralActionsPerAlert: schema.number({
+    defaultValue: DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT,
   }),
 });
 

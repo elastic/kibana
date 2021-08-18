@@ -8,6 +8,9 @@
 import type { estypes } from '@elastic/elasticsearch';
 
 import { SearchStrategyDependencies } from 'src/plugins/data/server';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+
+import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 
 import {
   apmCorrelationsSearchStrategyProvider,
@@ -94,10 +97,19 @@ const clientSearchMock = (
   };
 };
 
+const getApmIndicesMock = async () =>
+  ({
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    'apm_oss.transactionIndices': 'apm-*',
+  } as ApmIndicesConfig);
+
 describe('APM Correlations search strategy', () => {
   describe('strategy interface', () => {
     it('returns a custom search strategy with a `search` and `cancel` function', async () => {
-      const searchStrategy = await apmCorrelationsSearchStrategyProvider();
+      const searchStrategy = await apmCorrelationsSearchStrategyProvider(
+        getApmIndicesMock,
+        false
+      );
       expect(typeof searchStrategy.search).toBe('function');
       expect(typeof searchStrategy.cancel).toBe('function');
     });
@@ -106,12 +118,14 @@ describe('APM Correlations search strategy', () => {
   describe('search', () => {
     let mockClientFieldCaps: jest.Mock;
     let mockClientSearch: jest.Mock;
+    let mockGetApmIndicesMock: jest.Mock;
     let mockDeps: SearchStrategyDependencies;
     let params: Required<PartialSearchRequest>['params'];
 
     beforeEach(() => {
       mockClientFieldCaps = jest.fn(clientFieldCapsMock);
       mockClientSearch = jest.fn(clientSearchMock);
+      mockGetApmIndicesMock = jest.fn(getApmIndicesMock);
       mockDeps = ({
         esClient: {
           asCurrentUser: {
@@ -121,16 +135,23 @@ describe('APM Correlations search strategy', () => {
         },
       } as unknown) as SearchStrategyDependencies;
       params = {
-        index: 'apm-*',
         start: '2020',
         end: '2021',
+        environment: ENVIRONMENT_ALL.value,
+        kuery: '',
       };
     });
 
     describe('async functionality', () => {
       describe('when no params are provided', () => {
         it('throws an error', async () => {
-          const searchStrategy = await apmCorrelationsSearchStrategyProvider();
+          const searchStrategy = await apmCorrelationsSearchStrategyProvider(
+            mockGetApmIndicesMock,
+            false
+          );
+
+          expect(mockGetApmIndicesMock).toHaveBeenCalledTimes(0);
+
           expect(() => searchStrategy.search({}, {}, mockDeps)).toThrow(
             'Invalid request parameters.'
           );
@@ -139,8 +160,14 @@ describe('APM Correlations search strategy', () => {
 
       describe('when no ID is provided', () => {
         it('performs a client search with params', async () => {
-          const searchStrategy = await apmCorrelationsSearchStrategyProvider();
+          const searchStrategy = await apmCorrelationsSearchStrategyProvider(
+            mockGetApmIndicesMock,
+            false
+          );
           await searchStrategy.search({ params }, {}, mockDeps).toPromise();
+
+          expect(mockGetApmIndicesMock).toHaveBeenCalledTimes(1);
+
           const [[request]] = mockClientSearch.mock.calls;
 
           expect(request.index).toEqual('apm-*');
@@ -179,7 +206,10 @@ describe('APM Correlations search strategy', () => {
 
       describe('when an ID with params is provided', () => {
         it('retrieves the current request', async () => {
-          const searchStrategy = await apmCorrelationsSearchStrategyProvider();
+          const searchStrategy = await apmCorrelationsSearchStrategyProvider(
+            mockGetApmIndicesMock,
+            false
+          );
           const response = await searchStrategy
             .search({ params }, {}, mockDeps)
             .toPromise();
@@ -190,6 +220,7 @@ describe('APM Correlations search strategy', () => {
             .search({ id: searchStrategyId, params }, {}, mockDeps)
             .toPromise();
 
+          expect(mockGetApmIndicesMock).toHaveBeenCalledTimes(1);
           expect(response2).toEqual(
             expect.objectContaining({ id: searchStrategyId })
           );
@@ -201,10 +232,15 @@ describe('APM Correlations search strategy', () => {
           mockClientSearch
             .mockReset()
             .mockRejectedValueOnce(new Error('client error'));
-          const searchStrategy = await apmCorrelationsSearchStrategyProvider();
+          const searchStrategy = await apmCorrelationsSearchStrategyProvider(
+            mockGetApmIndicesMock,
+            false
+          );
           const response = await searchStrategy
             .search({ params }, {}, mockDeps)
             .toPromise();
+
+          expect(mockGetApmIndicesMock).toHaveBeenCalledTimes(1);
 
           expect(response).toEqual(
             expect.objectContaining({ isRunning: true })
@@ -213,11 +249,15 @@ describe('APM Correlations search strategy', () => {
       });
 
       it('triggers the subscription only once', async () => {
-        expect.assertions(1);
-        const searchStrategy = await apmCorrelationsSearchStrategyProvider();
+        expect.assertions(2);
+        const searchStrategy = await apmCorrelationsSearchStrategyProvider(
+          mockGetApmIndicesMock,
+          false
+        );
         searchStrategy
           .search({ params }, {}, mockDeps)
           .subscribe((response) => {
+            expect(mockGetApmIndicesMock).toHaveBeenCalledTimes(1);
             expect(response).toEqual(
               expect.objectContaining({ loaded: 0, isRunning: true })
             );
@@ -227,12 +267,16 @@ describe('APM Correlations search strategy', () => {
 
     describe('response', () => {
       it('sends an updated response on consecutive search calls', async () => {
-        const searchStrategy = await apmCorrelationsSearchStrategyProvider();
+        const searchStrategy = await apmCorrelationsSearchStrategyProvider(
+          mockGetApmIndicesMock,
+          false
+        );
 
         const response1 = await searchStrategy
           .search({ params }, {}, mockDeps)
           .toPromise();
 
+        expect(mockGetApmIndicesMock).toHaveBeenCalledTimes(1);
         expect(typeof response1.id).toEqual('string');
         expect(response1).toEqual(
           expect.objectContaining({ loaded: 0, isRunning: true })
@@ -244,6 +288,7 @@ describe('APM Correlations search strategy', () => {
           .search({ id: response1.id, params }, {}, mockDeps)
           .toPromise();
 
+        expect(mockGetApmIndicesMock).toHaveBeenCalledTimes(1);
         expect(response2.id).toEqual(response1.id);
         expect(response2).toEqual(
           expect.objectContaining({ loaded: 100, isRunning: false })

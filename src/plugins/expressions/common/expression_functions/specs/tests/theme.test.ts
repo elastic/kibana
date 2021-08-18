@@ -28,6 +28,7 @@ describe('expression_functions', () => {
       context = {
         getSearchContext: () => ({} as any),
         getSearchSessionId: () => undefined,
+        getExecutionContext: () => undefined,
         types: {},
         variables: { theme: themeProps },
         abortSignal: {} as any,

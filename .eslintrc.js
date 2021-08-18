@@ -446,6 +446,7 @@ module.exports = {
                   '!(src|x-pack)/plugins/**/(public|server)/mocks/index.{js,mjs,ts}',
                   '!(src|x-pack)/plugins/**/(public|server)/(index|mocks).{js,mjs,ts,tsx}',
                   '!(src|x-pack)/plugins/**/__stories__/index.{js,mjs,ts,tsx}',
+                  '!(src|x-pack)/plugins/**/__fixtures__/index.{js,mjs,ts,tsx}',
                 ],
                 allowSameFolder: true,
                 errorMessage: 'Plugins may only import from top-level public and server modules.',
@@ -468,11 +469,6 @@ module.exports = {
                 ],
                 errorMessage:
                   'Server modules cannot be imported into client modules or shared modules.',
-              },
-              {
-                target: ['src/**/*'],
-                from: ['x-pack/**/*'],
-                errorMessage: 'OSS cannot import x-pack files.',
               },
               {
                 target: ['src/core/**/*'],
@@ -894,7 +890,8 @@ module.exports = {
     {
       files: ['x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}'],
       rules: {
-        'no-duplicate-imports': 'error',
+        'no-duplicate-imports': 'off',
+        '@typescript-eslint/no-duplicate-imports': ['error'],
       },
     },
 
@@ -911,6 +908,8 @@ module.exports = {
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
+        'no-duplicate-imports': 'off',
+        '@typescript-eslint/no-duplicate-imports': ['error'],
         'no-restricted-imports': [
           'error',
           {
@@ -953,7 +952,7 @@ module.exports = {
         'no-continue': 'error',
         'no-dupe-keys': 'error',
         'no-duplicate-case': 'error',
-        'no-duplicate-imports': 'error',
+        'no-duplicate-imports': 'off',
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
@@ -1024,6 +1023,7 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
+        '@typescript-eslint/no-duplicate-imports': ['error'],
       },
     },
 
@@ -1568,6 +1568,7 @@ module.exports = {
       files: [
         'src/plugins/security_oss/**/*.{js,mjs,ts,tsx}',
         'src/plugins/spaces_oss/**/*.{js,mjs,ts,tsx}',
+        'src/plugins/interactive_setup/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/spaces/**/*.{js,mjs,ts,tsx}',

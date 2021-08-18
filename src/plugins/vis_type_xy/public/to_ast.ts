@@ -8,16 +8,19 @@
 
 import moment from 'moment';
 
-import { VisToExpressionAst, getVisSchemas } from '../../visualizations/public';
+import {
+  VisToExpressionAst,
+  getVisSchemas,
+  DateHistogramParams,
+  HistogramParams,
+} from '../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { BUCKET_TYPES } from '../../data/public';
 import { Labels } from '../../charts/public';
 
 import {
-  DateHistogramParams,
   Dimensions,
   Dimension,
-  HistogramParams,
   VisParams,
   CategoryAxis,
   SeriesParam,

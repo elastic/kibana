@@ -7,9 +7,22 @@
 
 /* eslint-disable max-classes-per-file */
 
-export class TrustedAppNotFoundError extends Error {
+import { NotFoundError } from '../../errors';
+
+export class TrustedAppNotFoundError extends NotFoundError {
   constructor(id: string) {
     super(`Trusted Application (${id}) not found`);
+  }
+}
+export class TrustedAppPolicyNotExistsError extends Error {
+  public readonly type = 'TrustedApps/PolicyNotFound';
+
+  constructor(name: string, policyIds: string[]) {
+    super(
+      `Trusted Application (${name}) is assigned with a policy that no longer exists: ${policyIds.join(
+        ', '
+      )}`
+    );
   }
 }
 

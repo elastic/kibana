@@ -177,11 +177,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
-      await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
+      await testSubjects.click('disableButton');
 
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
-        'disableSwitch',
+        'enableSwitch',
         'true'
       );
     });
@@ -194,10 +194,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
-      await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
+      await testSubjects.click('disableButton');
       await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
         createdAlert.name,
-        'disableSwitch',
+        'enableSwitch',
         'false'
       );
     });
@@ -209,12 +209,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
-      await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
-        createdAlert.name,
-        'muteSwitch',
-        'true'
-      );
+      await testSubjects.click('muteButton');
+
+      await retry.tryForTime(30000, async () => {
+        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+        const muteBadge = await testSubjects.find('mutedActionsBadge');
+        expect(await muteBadge.isDisplayed()).to.eql(true);
+      });
     });
 
     it('should unmute single alert', async () => {
@@ -226,12 +227,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
-      await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
-        createdAlert.name,
-        'muteSwitch',
-        'false'
-      );
+      await testSubjects.click('muteButton');
+      await retry.tryForTime(30000, async () => {
+        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+        await testSubjects.missingOrFail('mutedActionsBadge');
+      });
     });
 
     it('should delete single alert', async () => {
@@ -273,11 +273,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      await testSubjects.click('collapsedItemActions');
-
-      const muteSwitch = await testSubjects.find('muteSwitch');
-      const isChecked = await muteSwitch.getAttribute('aria-checked');
-      expect(isChecked).to.eql('true');
+      await retry.tryForTime(30000, async () => {
+        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+        const muteBadge = await testSubjects.find('mutedActionsBadge');
+        expect(await muteBadge.isDisplayed()).to.eql(true);
+      });
     });
 
     it('should unmute all selection', async () => {
@@ -296,13 +296,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Mute all button shows after clicking unmute all
       await testSubjects.existOrFail('muteAll');
 
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      const muteSwitch = await testSubjects.find('muteSwitch');
-      const isChecked = await muteSwitch.getAttribute('aria-checked');
-      expect(isChecked).to.eql('false');
+      await retry.tryForTime(30000, async () => {
+        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+        await testSubjects.missingOrFail('mutedActionsBadge');
+      });
     });
 
     it('should disable all selection', async () => {
@@ -319,13 +316,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Enable all button shows after clicking disable all
       await testSubjects.existOrFail('enableAll');
 
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      const disableSwitch = await testSubjects.find('disableSwitch');
-      const isChecked = await disableSwitch.getAttribute('aria-checked');
-      expect(isChecked).to.eql('true');
+      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+        createdAlert.name,
+        'enableSwitch',
+        'false'
+      );
     });
 
     it('should enable all selection', async () => {
@@ -344,13 +339,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Disable all button shows after clicking enable all
       await testSubjects.existOrFail('disableAll');
 
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      const disableSwitch = await testSubjects.find('disableSwitch');
-      const isChecked = await disableSwitch.getAttribute('aria-checked');
-      expect(isChecked).to.eql('false');
+      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+        createdAlert.name,
+        'enableSwitch',
+        'true'
+      );
     });
 
     it('should delete all selection', async () => {

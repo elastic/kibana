@@ -59,7 +59,7 @@ export function renderApp(
         links: [
           {
             linkType: 'documentation',
-            href: `${ELASTIC_WEBSITE_URL}guide/en/uptime/${DOC_LINK_VERSION}/uptime-app-overview.html`,
+            href: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-uptime.html`,
           },
           {
             linkType: 'discuss',

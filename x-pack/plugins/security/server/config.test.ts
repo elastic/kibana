@@ -61,6 +61,8 @@ describe('config schema', () => {
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
+          "idleTimeout": "PT1H",
+          "lifespan": "P30D",
         },
       }
     `);
@@ -110,6 +112,8 @@ describe('config schema', () => {
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
+          "idleTimeout": "PT1H",
+          "lifespan": "P30D",
         },
       }
     `);
@@ -158,6 +162,8 @@ describe('config schema', () => {
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
+          "idleTimeout": "PT1H",
+          "lifespan": "P30D",
         },
       }
     `);
@@ -1615,11 +1621,11 @@ describe('createConfig()', () => {
     it('returns default values if neither global nor provider specific settings are set', async () => {
       expect(createMockConfig().session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
         .toMatchInlineSnapshot(`
-          Object {
-            "idleTimeout": null,
-            "lifespan": null,
-          }
-        `);
+        Object {
+          "idleTimeout": "PT1H",
+          "lifespan": "P30D",
+        }
+      `);
     });
 
     it('correctly handles explicitly disabled global settings', async () => {
@@ -1653,11 +1659,11 @@ describe('createConfig()', () => {
           name: 'basic1',
         })
       ).toMatchInlineSnapshot(`
-          Object {
-            "idleTimeout": "PT0.123S",
-            "lifespan": null,
-          }
-        `);
+        Object {
+          "idleTimeout": "PT0.123S",
+          "lifespan": "P30D",
+        }
+      `);
 
       expect(
         createMockConfig({ session: { lifespan: 456 } }).session.getExpirationTimeouts({
@@ -1665,11 +1671,11 @@ describe('createConfig()', () => {
           name: 'basic1',
         })
       ).toMatchInlineSnapshot(`
-          Object {
-            "idleTimeout": null,
-            "lifespan": "PT0.456S",
-          }
-        `);
+        Object {
+          "idleTimeout": "PT1H",
+          "lifespan": "PT0.456S",
+        }
+      `);
 
       expect(
         createMockConfig({
@@ -1692,7 +1698,7 @@ describe('createConfig()', () => {
       ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT0.123S",
-          "lifespan": null,
+          "lifespan": "P30D",
         }
       `);
 
@@ -1703,7 +1709,7 @@ describe('createConfig()', () => {
         })
       ).toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": null,
+          "idleTimeout": "PT1H",
           "lifespan": "PT0.456S",
         }
       `);
@@ -1734,14 +1740,14 @@ describe('createConfig()', () => {
         .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT0.321S",
-          "lifespan": null,
+          "lifespan": "P30D",
         }
       `);
       expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
         .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT5M32.211S",
-          "lifespan": null,
+          "lifespan": "P30D",
         }
       `);
 
@@ -1758,14 +1764,14 @@ describe('createConfig()', () => {
         .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT0.321S",
-          "lifespan": null,
+          "lifespan": "P30D",
         }
       `);
       expect(configWithGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
         .toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT5M32.211S",
-          "lifespan": null,
+          "lifespan": "P30D",
         }
       `);
     });
@@ -1783,14 +1789,14 @@ describe('createConfig()', () => {
       expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": null,
+          "idleTimeout": "PT1H",
           "lifespan": "PT0.654S",
         }
       `);
       expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": null,
+          "idleTimeout": "PT1H",
           "lifespan": "PT11M5.544S",
         }
       `);
@@ -1807,7 +1813,7 @@ describe('createConfig()', () => {
       expect(configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": null,
+          "idleTimeout": "PT1H",
           "lifespan": "PT0.654S",
         }
       `);

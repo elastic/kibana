@@ -37,6 +37,7 @@ export function buildSearchBody(
       },
       stored_fields: computedFields.storedFields,
       script_fields: computedFields.scriptFields,
+      version: true,
     },
   };
   if (!request.body) {

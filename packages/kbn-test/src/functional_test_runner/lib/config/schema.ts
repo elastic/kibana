@@ -200,6 +200,8 @@ export const schema = Joi.object()
               .default(/Kibana is now available/),
           })
           .default(),
+        env: Joi.object().unknown().default(),
+        delayShutdown: Joi.number(),
       })
       .default(),
 

@@ -31,6 +31,7 @@ import { transformRuleToAlertAction } from '../../../../common/detection_engine/
 import { SanitizedAlert } from '../../../../../alerting/common';
 import { IRuleStatusSOAttributes } from '../rules/types';
 import { transformTags } from '../routes/rules/utils';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
@@ -315,7 +316,7 @@ export const mergeAlertWithSidecarStatus = (
       lastFailureMessage: `Reason: ${alert.executionStatus.error?.reason} Message: ${alert.executionStatus.error?.message}`,
       lastFailureAt: alert.executionStatus.lastExecutionDate.toISOString(),
       statusDate: alert.executionStatus.lastExecutionDate.toISOString(),
-      status: 'failed',
+      status: RuleExecutionStatus.failed,
     };
   }
   return status;

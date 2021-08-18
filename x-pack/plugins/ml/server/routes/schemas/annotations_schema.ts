@@ -21,7 +21,15 @@ export const indexAnnotationSchema = schema.object({
   create_username: schema.maybe(schema.string()),
   modified_time: schema.maybe(schema.number()),
   modified_username: schema.maybe(schema.string()),
-  event: schema.maybe(schema.string()),
+  event: schema.maybe(
+    schema.oneOf([
+      schema.literal('user'),
+      schema.literal('delayed_data'),
+      schema.literal('model_snapshot_stored'),
+      schema.literal('model_change'),
+      schema.literal('categorization_status_change'),
+    ])
+  ),
   detector_index: schema.maybe(schema.number()),
   partition_field_name: schema.maybe(schema.string()),
   partition_field_value: schema.maybe(schema.string()),

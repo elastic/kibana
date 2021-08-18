@@ -65,6 +65,7 @@ describe('migration v2', () => {
     root = createRoot();
 
     esServer = await startES();
+    await root.preboot();
     const coreSetup = await root.setup();
 
     coreSetup.savedObjects.registerType({

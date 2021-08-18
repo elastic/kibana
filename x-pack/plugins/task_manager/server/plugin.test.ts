@@ -38,12 +38,18 @@ describe('TaskManagerPlugin', () => {
           },
           custom: {},
         },
+        ephemeral_tasks: {
+          enabled: false,
+          request_capacity: 10,
+        },
       });
 
       pluginInitializerContext.env.instanceUuid = '';
 
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
-      expect(() => taskManagerPlugin.setup(coreMock.createSetup())).toThrow(
+      expect(() =>
+        taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined })
+      ).toThrow(
         new Error(`TaskManager is unable to start as Kibana has no valid UUID assigned to it.`)
       );
     });
@@ -72,11 +78,17 @@ describe('TaskManagerPlugin', () => {
           },
           custom: {},
         },
+        ephemeral_tasks: {
+          enabled: true,
+          request_capacity: 10,
+        },
       });
 
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
 
-      const setupApi = await taskManagerPlugin.setup(coreMock.createSetup());
+      const setupApi = await taskManagerPlugin.setup(coreMock.createSetup(), {
+        usageCollection: undefined,
+      });
 
       // we only start a poller if we have task types that we support and we track
       // phases (moving from Setup to Start) based on whether the poller is working

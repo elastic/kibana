@@ -39,7 +39,6 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "fill": "white",
               "opacity": 1,
               "radius": 2,
-              "shape": "circle",
               "strokeWidth": 1,
               "visible": false,
             },
@@ -54,7 +53,6 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "fill": "#333",
               "fontFamily": "sans-serif",
               "fontSize": 10,
-              "fontStyle": "bold",
               "padding": Object {
                 "inner": 8,
                 "outer": 0,
@@ -65,7 +63,6 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "fill": "#333",
               "fontFamily": "sans-serif",
               "fontSize": 12,
-              "fontStyle": "bold",
               "padding": Object {
                 "inner": 8,
                 "outer": 0,
@@ -146,7 +143,6 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "fill": "white",
               "opacity": 1,
               "radius": 2,
-              "shape": "circle",
               "strokeWidth": 1,
               "visible": true,
             },
@@ -200,6 +196,9 @@ exports[`DonutChart component passes correct props without errors for valid prop
           },
           "legend": Object {
             "horizontalHeight": 64,
+            "labelOptions": Object {
+              "maxLines": 1,
+            },
             "margin": 0,
             "spacingBuffer": 10,
             "verticalWidth": 200,
@@ -214,7 +213,6 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "fill": "white",
               "opacity": 1,
               "radius": 2,
-              "shape": "circle",
               "strokeWidth": 1,
               "visible": true,
             },

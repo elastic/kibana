@@ -1,0 +1,12 @@
+{
+  "id": "helloWorld",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "ui": true,
+  "owner": {
+    "name": "Kibana core",
+    "githubTeam": "kibana-core"
+  },
+  "description": "A plugin which registers a very simple hello world application.",
+  "requiredPlugins": ["developerExamples"]
+}

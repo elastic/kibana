@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
   const find = getService('find');
+  const testSubjects = getService('testSubjects');
 
   describe('discover tab', function describeIndexTests() {
     this.tags('includeFirefox');
@@ -33,7 +34,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
-    describe('field data', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/100437
+    describe.skip('field data', function () {
       it('search php should show the correct hit count', async function () {
         const expectedHitCount = '445';
         await retry.try(async function () {
@@ -107,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await kibanaServer.uiSettings.replace({});
         });
         it('doc view should show Time and _source columns', async function () {
-          const expectedHeader = 'Time _source';
+          const expectedHeader = 'Time\n_source';
           const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
           const docHeaderText = await docHeader.getVisibleText();
           expect(docHeaderText).to.be(expectedHeader);
@@ -115,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('doc view should sort ascending', async function () {
           const expectedTimeStamp = 'Sep 20, 2015 @ 00:00:00.000';
-          await find.clickByCssSelector('.fa-sort-down');
+          await testSubjects.click('docTableHeaderFieldSort_@timestamp');
 
           // we don't technically need this sleep here because the tryForTime will retry and the
           // results will match on the 2nd or 3rd attempt, but that debug output is huge in this

@@ -17,9 +17,8 @@ import {
   createGridHideHandler,
   createTransposeColumnFilterHandler,
 } from './table_actions';
-import { LensGridDirection } from './types';
-import { ColumnConfig } from './table_basic';
-import { LensMultiTable } from '../../types';
+import { LensMultiTable } from '../../../common';
+import { LensGridDirection, ColumnConfig } from '../../../common/expressions';
 
 function getDefaultConfig(): ColumnConfig {
   return {

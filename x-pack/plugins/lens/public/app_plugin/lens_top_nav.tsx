@@ -9,9 +9,15 @@ import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
-import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
+import {
+  LensAppServices,
+  LensTopNavActions,
+  LensTopNavMenuProps,
+  LensTopNavTooltips,
+} from './types';
 import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import { trackUiEvent } from '../lens_ui_telemetry';
+import { tableHasFormulas } from '../../../../../src/plugins/data/common';
 import { exporters, IndexPattern } from '../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
@@ -30,6 +36,7 @@ function getLensTopNavConfig(options: {
   isByValueMode: boolean;
   allowByValue: boolean;
   actions: LensTopNavActions;
+  tooltips: LensTopNavTooltips;
   savingToLibraryPermitted: boolean;
   savingToDashboardPermitted: boolean;
 }): TopNavMenuData[] {
@@ -41,6 +48,7 @@ function getLensTopNavConfig(options: {
     showSaveAndReturn,
     savingToLibraryPermitted,
     savingToDashboardPermitted,
+    tooltips,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
@@ -73,6 +81,7 @@ function getLensTopNavConfig(options: {
       defaultMessage: 'Download the data as CSV file',
     }),
     disableButton: !enableExportToCSV,
+    tooltip: tooltips.showExportWarning,
   });
 
   if (showCancel) {
@@ -132,6 +141,7 @@ export const LensTopNavMenu = ({
 }: LensTopNavMenuProps) => {
   const {
     data,
+    fieldFormats,
     navigation,
     uiSettings,
     application,
@@ -156,6 +166,7 @@ export const LensTopNavMenu = ({
     activeDatasourceId,
     datasourceStates,
   } = useLensSelector((state) => state.lens);
+  const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
 
   useEffect(() => {
     const activeDatasource =
@@ -213,6 +224,23 @@ export const LensTopNavMenu = ({
         showCancel: Boolean(isLinkedToOriginatingApp),
         savingToLibraryPermitted,
         savingToDashboardPermitted,
+        tooltips: {
+          showExportWarning: () => {
+            if (activeData) {
+              const datatables = Object.values(activeData);
+              const formulaDetected = datatables.some((datatable) => {
+                return tableHasFormulas(datatable.columns, datatable.rows);
+              });
+              if (formulaDetected) {
+                return i18n.translate('xpack.lens.app.downloadButtonFormulasWarning', {
+                  defaultMessage:
+                    'Your CSV contains characters that spreadsheet applications might interpret as formulas.',
+                });
+              }
+            }
+            return undefined;
+          },
+        },
         actions: {
           exportToCSV: () => {
             if (!activeData) {
@@ -229,7 +257,8 @@ export const LensTopNavMenu = ({
                     content: exporters.datatableToCSV(datatable, {
                       csvSeparator: uiSettings.get('csv:separator', ','),
                       quoteValues: uiSettings.get('csv:quoteValues', true),
-                      formatFactory: data.fieldFormats.deserialize,
+                      formatFactory: fieldFormats.deserialize,
+                      escapeFormulaValues: false,
                     }),
                     type: exporters.CSV_MIME_TYPE,
                   };
@@ -278,7 +307,7 @@ export const LensTopNavMenu = ({
       activeData,
       attributeService,
       dashboardFeatureFlag.allowByValueEmbeddables,
-      data.fieldFormats.deserialize,
+      fieldFormats.deserialize,
       getIsByValueMode,
       initialInput,
       isLinkedToOriginatingApp,
@@ -362,7 +391,16 @@ export const LensTopNavMenu = ({
       dateRangeTo={to}
       indicateNoData={indicateNoData}
       showSearchBar={true}
-      showDatePicker={true}
+      showDatePicker={
+        indexPatterns.some((ip) => ip.isTimeBased()) ||
+        Boolean(
+          allLoaded &&
+            activeDatasourceId &&
+            datasourceMap[activeDatasourceId].isTimeBased(
+              datasourceStates[activeDatasourceId].state
+            )
+        )
+      }
       showQueryBar={true}
       showFilterBar={true}
       data-test-subj="lnsApp_topNav"

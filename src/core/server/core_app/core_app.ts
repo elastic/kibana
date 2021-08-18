@@ -12,11 +12,24 @@ import { Env } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/utils';
 
-import { InternalCoreSetup } from '../internal_types';
+import { IRouter, IBasePath, IKibanaResponse, KibanaResponseFactory } from '../http';
+import { HttpResources, HttpResourcesServiceToolkit } from '../http_resources';
+import { InternalCorePreboot, InternalCoreSetup } from '../internal_types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { registerBundleRoutes } from './bundle_routes';
 import { UiPlugins } from '../plugins';
+
+/** @internal */
+interface CommonRoutesParams {
+  router: IRouter;
+  httpResources: HttpResources;
+  basePath: IBasePath;
+  uiPlugins: UiPlugins;
+  onResourceNotFound: (
+    res: HttpResourcesServiceToolkit & KibanaResponseFactory
+  ) => Promise<IKibanaResponse>;
+}
 
 /** @internal */
 export class CoreApp {
@@ -28,10 +41,32 @@ export class CoreApp {
     this.env = core.env;
   }
 
+  preboot(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
+    this.logger.debug('Prebooting core app.');
+
+    // We register app-serving routes only if there are `preboot` plugins that may need them.
+    if (uiPlugins.public.size > 0) {
+      this.registerPrebootDefaultRoutes(corePreboot, uiPlugins);
+      this.registerStaticDirs(corePreboot);
+    }
+  }
+
   setup(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
     this.logger.debug('Setting up core app.');
     this.registerDefaultRoutes(coreSetup, uiPlugins);
     this.registerStaticDirs(coreSetup);
+  }
+
+  private registerPrebootDefaultRoutes(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
+    corePreboot.http.registerRoutes('', (router) => {
+      this.registerCommonDefaultRoutes({
+        basePath: corePreboot.http.basePath,
+        httpResources: corePreboot.httpResources.createRegistrar(router),
+        router,
+        uiPlugins,
+        onResourceNotFound: (res) => res.renderAnonymousCoreApp(),
+      });
+    });
   }
 
   private registerDefaultRoutes(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
@@ -51,50 +86,12 @@ export class CoreApp {
       });
     });
 
-    // remove trailing slash catch-all
-    router.get(
-      {
-        path: '/{path*}',
-        validate: {
-          params: schema.object({
-            path: schema.maybe(schema.string()),
-          }),
-          query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-        },
-      },
-      async (context, req, res) => {
-        const { query, params } = req;
-        const { path } = params;
-        if (!path || !path.endsWith('/') || path.startsWith('/')) {
-          return res.notFound();
-        }
-
-        const basePath = httpSetup.basePath.get(req);
-        let rewrittenPath = path.slice(0, -1);
-        if (`/${path}`.startsWith(basePath)) {
-          rewrittenPath = rewrittenPath.substring(basePath.length);
-        }
-
-        const querystring = query ? stringify(query) : undefined;
-        const url = `${basePath}/${rewrittenPath}${querystring ? `?${querystring}` : ''}`;
-
-        return res.redirected({
-          headers: {
-            location: url,
-          },
-        });
-      }
-    );
-
-    router.get({ path: '/core', validate: false }, async (context, req, res) =>
-      res.ok({ body: { version: '0.0.1' } })
-    );
-
-    registerBundleRoutes({
+    this.registerCommonDefaultRoutes({
+      basePath: coreSetup.http.basePath,
+      httpResources: resources,
       router,
       uiPlugins,
-      packageInfo: this.env.packageInfo,
-      serverBasePath: coreSetup.http.basePath.serverBasePath,
+      onResourceNotFound: async (res) => res.notFound(),
     });
 
     resources.register(
@@ -129,10 +126,65 @@ export class CoreApp {
     );
   }
 
-  private registerStaticDirs(coreSetup: InternalCoreSetup) {
-    coreSetup.http.registerStaticDir('/ui/{path*}', Path.resolve(__dirname, './assets'));
+  private registerCommonDefaultRoutes({
+    router,
+    basePath,
+    uiPlugins,
+    onResourceNotFound,
+    httpResources,
+  }: CommonRoutesParams) {
+    // catch-all route
+    httpResources.register(
+      {
+        path: '/{path*}',
+        validate: {
+          params: schema.object({
+            path: schema.maybe(schema.string()),
+          }),
+          query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+        },
+      },
+      async (context, req, res) => {
+        const { query, params } = req;
+        const { path } = params;
+        if (!path || !path.endsWith('/') || path.startsWith('/')) {
+          return onResourceNotFound(res);
+        }
 
-    coreSetup.http.registerStaticDir(
+        // remove trailing slash
+        const requestBasePath = basePath.get(req);
+        let rewrittenPath = path.slice(0, -1);
+        if (`/${path}`.startsWith(requestBasePath)) {
+          rewrittenPath = rewrittenPath.substring(requestBasePath.length);
+        }
+
+        const querystring = query ? stringify(query) : undefined;
+        const url = `${requestBasePath}/${rewrittenPath}${querystring ? `?${querystring}` : ''}`;
+
+        return res.redirected({
+          headers: {
+            location: url,
+          },
+        });
+      }
+    );
+
+    router.get({ path: '/core', validate: false }, async (context, req, res) =>
+      res.ok({ body: { version: '0.0.1' } })
+    );
+
+    registerBundleRoutes({
+      router,
+      uiPlugins,
+      packageInfo: this.env.packageInfo,
+      serverBasePath: basePath.serverBasePath,
+    });
+  }
+
+  private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot) {
+    core.http.registerStaticDir('/ui/{path*}', Path.resolve(__dirname, './assets'));
+
+    core.http.registerStaticDir(
       '/node_modules/@kbn/ui-framework/dist/{path*}',
       fromRoot('node_modules/@kbn/ui-framework/dist')
     );

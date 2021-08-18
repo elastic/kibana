@@ -16,17 +16,21 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { setSignalsStatusRoute } from './open_close_signals_route';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 describe('set signal status', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let { context } = requestContextMock.createTools();
 
   beforeEach(() => {
     server = serverMock.create();
-    ({ clients, context } = requestContextMock.createTools());
-
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getSuccessfulSignalUpdateResponse());
-
+    ({ context } = requestContextMock.createTools());
+    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(
+        getSuccessfulSignalUpdateResponse()
+      )
+    );
     setSignalsStatusRoute(server.router);
   });
 
@@ -52,10 +56,10 @@ describe('set signal status', () => {
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
-    test('catches error if callAsCurrentUser throws error', async () => {
-      clients.clusterClient.callAsCurrentUser.mockImplementation(async () => {
-        throw new Error('Test error');
-      });
+    test('catches error if asCurrentUser throws error', async () => {
+      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResolvedValue(
+        elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
+      );
       const response = await server.inject(getSetSignalStatusByQueryRequest(), context);
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({

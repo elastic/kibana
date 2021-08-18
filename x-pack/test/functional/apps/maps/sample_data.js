@@ -135,7 +135,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
 
     describe('flights', () => {
       before(async () => {
-        await PageObjects.maps.loadSavedMap('[Flights] Origin and Destination Flight Time');
+        await PageObjects.maps.loadSavedMap('[Flights] Origin Time Delayed');
         await PageObjects.maps.toggleLayerVisibility('Road map');
         await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
         await PageObjects.maps.enterFullScreen();

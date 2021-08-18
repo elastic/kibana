@@ -16,9 +16,10 @@ import {
   Chart,
 } from '@elastic/charts';
 import { shallow } from 'enzyme';
-import { LensMultiTable } from '../types';
+import type { LensMultiTable } from '../../common';
+import type { PieExpressionArgs } from '../../common/expressions';
 import { PieComponent } from './render_function';
-import { PieExpressionArgs } from './types';
+import { VisualizationContainer } from '../visualization_container';
 import { EmptyPlaceholder } from '../shared_components';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { LensIconChartDonut } from '../assets/chart_donut';
@@ -61,6 +62,8 @@ describe('PieVisualization component', () => {
       numberDisplay: 'hidden',
       categoryDisplay: 'default',
       legendDisplay: 'default',
+      legendMaxLines: 1,
+      truncateLegend: true,
       nestedLegend: false,
       percentDecimals: 3,
       hideLabels: false,
@@ -103,6 +106,20 @@ describe('PieVisualization component', () => {
         <PieComponent args={{ ...args, hideLabels: true }} {...getDefaultArgs()} />
       );
       expect(component.find(Settings).prop('showLegend')).toEqual(false);
+    });
+
+    test('it sets the correct lines per legend item', () => {
+      const component = shallow(<PieComponent args={args} {...getDefaultArgs()} />);
+      expect(component.find(Settings).prop('theme')).toEqual({
+        background: {
+          color: undefined,
+        },
+        legend: {
+          labelOptions: {
+            maxLines: 1,
+          },
+        },
+      });
     });
 
     test('it calls the color function with the right series layers', () => {
@@ -311,6 +328,7 @@ describe('PieVisualization component', () => {
       const component = shallow(
         <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
       );
+      expect(component.find(VisualizationContainer)).toHaveLength(1);
       expect(component.find(EmptyPlaceholder)).toHaveLength(1);
     });
 
@@ -331,6 +349,7 @@ describe('PieVisualization component', () => {
         <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
       );
 
+      expect(component.find(VisualizationContainer)).toHaveLength(1);
       expect(component.find(EmptyPlaceholder)).toHaveLength(0);
       expect(component.find(Chart)).toHaveLength(1);
     });
@@ -353,6 +372,7 @@ describe('PieVisualization component', () => {
       const component = shallow(
         <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
       );
+      expect(component.find(VisualizationContainer)).toHaveLength(1);
       expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(LensIconChartDonut);
     });
   });

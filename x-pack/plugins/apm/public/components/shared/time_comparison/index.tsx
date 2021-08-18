@@ -150,7 +150,7 @@ export function getSelectOptions({
 export function TimeComparison() {
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const history = useHistory();
-  const { isMedium, isLarge } = useBreakPoints();
+  const { isSmall } = useBreakPoints();
   const {
     urlParams: { comparisonEnabled, comparisonType, exactStart, exactEnd },
   } = useUrlParams();
@@ -191,7 +191,7 @@ export function TimeComparison() {
 
   return (
     <EuiSelect
-      fullWidth={!isMedium && isLarge}
+      fullWidth={isSmall}
       data-test-subj="comparisonSelect"
       disabled={!comparisonEnabled}
       options={selectOptions}

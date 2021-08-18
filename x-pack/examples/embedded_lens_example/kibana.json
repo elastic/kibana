@@ -12,5 +12,9 @@
     "developerExamples"
   ],
   "optionalPlugins": [],
-  "requiredBundles": []
+  "requiredBundles": [],
+  "owner": {
+    "name": "Kibana App",
+    "githubTeam": "kibana-app"
+  }
 }

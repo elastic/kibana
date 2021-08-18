@@ -23,7 +23,13 @@ export function getOptionTabs(showElasticChartsOptions = false) {
         defaultMessage: 'Metrics & axes',
       }),
       editor: (props: VisEditorOptionsProps<VisParams>) => (
-        <ValidationWrapper {...props} component={MetricsAxisOptions} />
+        <ValidationWrapper
+          {...props}
+          extraProps={{
+            showElasticChartsOptions,
+          }}
+          component={MetricsAxisOptions}
+        />
       ),
     },
     {

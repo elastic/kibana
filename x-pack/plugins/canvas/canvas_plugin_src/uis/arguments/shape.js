@@ -14,18 +14,20 @@ import { ArgumentStrings } from '../../../i18n';
 
 const { Shape: strings } = ArgumentStrings;
 
-const ShapeArgInput = ({ onValueChange, argValue, typeInstance }) => (
-  <EuiFlexGroup gutterSize="s">
-    <EuiFlexItem grow={false}>
-      <ShapePickerPopover
-        value={argValue}
-        onChange={onValueChange}
-        shapes={typeInstance.options.shapes}
-        ariaLabel={typeInstance.displayName}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+const ShapeArgInput = ({ onValueChange, argValue, typeInstance }) => {
+  return (
+    <EuiFlexGroup gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <ShapePickerPopover
+          value={argValue}
+          onChange={onValueChange}
+          shapes={typeInstance.options.shapes}
+          ariaLabel={typeInstance.displayName}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 ShapeArgInput.propTypes = {
   argValue: PropTypes.any.isRequired,

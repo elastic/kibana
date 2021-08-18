@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { AlertConsumers as AlertConsumersTyped } from '@kbn/rule-data-utils';
+// @ts-expect-error
+import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 import { Router } from 'react-router-dom';
 import React, { useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom';
@@ -12,12 +15,17 @@ import { AppMountParameters, CoreStart } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimelinesUIStart } from '../../../../../../../plugins/timelines/public';
+import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
+
+const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
+
+type CoreStartTimelines = CoreStart & { data: DataPublicPluginStart };
 
 /**
  * Render the Timeline Test app. Returns a cleanup function.
  */
 export function renderApp(
-  coreStart: CoreStart,
+  coreStart: CoreStartTimelines,
   parameters: AppMountParameters,
   timelinesPluginSetup: TimelinesUIStart | null
 ) {
@@ -34,6 +42,7 @@ export function renderApp(
     ReactDOM.unmountComponentAtNode(parameters.element);
   };
 }
+const ALERT_RULE_CONSUMER = [AlertConsumers.SIEM];
 
 const AppRoot = React.memo(
   ({
@@ -41,7 +50,7 @@ const AppRoot = React.memo(
     parameters,
     timelinesPluginSetup,
   }: {
-    coreStart: CoreStart;
+    coreStart: CoreStartTimelines;
     parameters: AppMountParameters;
     timelinesPluginSetup: TimelinesUIStart | null;
   }) => {
@@ -50,6 +59,7 @@ const AppRoot = React.memo(
     const setRefetch = useCallback((_refetch) => {
       refetch.current = _refetch;
     }, []);
+
     return (
       <I18nProvider>
         <Router history={parameters.history}>
@@ -57,7 +67,13 @@ const AppRoot = React.memo(
             {(timelinesPluginSetup &&
               timelinesPluginSetup.getTGrid &&
               timelinesPluginSetup.getTGrid<'standalone'>({
+                alertConsumers: ALERT_RULE_CONSUMER,
+                appId: 'securitySolution',
                 type: 'standalone',
+                casePermissions: {
+                  read: true,
+                  crud: true,
+                },
                 columns: [],
                 indexNames: [],
                 deletedEventIds: [],
@@ -78,6 +94,7 @@ const AppRoot = React.memo(
                 setRefetch,
                 start: '',
                 rowRenderers: [],
+                filterStatus: 'open',
                 unit: (n: number) => `${n}`,
               })) ??
               null}

@@ -50,19 +50,26 @@ export const querySignalsRoute = (router: SecuritySolutionPluginRouter, config: 
           body: '"value" must have at least 1 children',
         });
       }
-      const clusterClient = context.core.elasticsearch.legacy.client;
+      const esClient = context.core.elasticsearch.client.asCurrentUser;
       const siemClient = context.securitySolution!.getAppClient();
 
       // TODO: Once we are past experimental phase this code should be removed
       const { ruleRegistryEnabled } = parseExperimentalConfigValue(config.enableExperimental);
 
       try {
-        const result = await clusterClient.callAsCurrentUser('search', {
+        const { body } = await esClient.search({
           index: ruleRegistryEnabled ? DEFAULT_ALERTS_INDEX : siemClient.getSignalsIndex(),
-          body: { query, aggs, _source, track_total_hits, size },
-          ignoreUnavailable: true,
+          body: {
+            query,
+            // Note: I use a spread operator to please TypeScript with aggs: { ...aggs }
+            aggs: { ...aggs },
+            _source,
+            track_total_hits,
+            size,
+          },
+          ignore_unavailable: true,
         });
-        return response.ok({ body: result });
+        return response.ok({ body });
       } catch (err) {
         // error while getting or updating signal with id: id in signal index .siem-signals
         const error = transformError(err);

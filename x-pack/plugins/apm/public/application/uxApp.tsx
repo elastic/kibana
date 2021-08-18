@@ -10,7 +10,8 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Route, Router } from 'react-router-dom';
+import { Route as ReactRouterRoute } from 'react-router-dom';
+import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import type { ObservabilityRuleTypeRegistry } from '../../../observability/public';
@@ -49,10 +50,15 @@ function UxApp() {
   const basePath = core.http.basePath.get();
 
   useBreadcrumbs([
-    { text: UX_LABEL, href: basePath + '/app/ux' },
     {
-      text: i18n.translate('xpack.apm.ux.overview', {
-        defaultMessage: 'Overview',
+      text: i18n.translate('xpack.apm.ux.breadcrumbs.root', {
+        defaultMessage: 'User Experience',
+      }),
+      href: basePath + '/app/ux',
+    },
+    {
+      text: i18n.translate('xpack.apm.ux.breadcrumbs.dashboard', {
+        defaultMessage: 'Dashboard',
       }),
     },
   ]);
@@ -66,12 +72,14 @@ function UxApp() {
       })}
     >
       <div data-test-subj="csmMainContainer" role="main">
-        <Route component={ScrollToTopOnPathChange} />
+        <ReactRouterRoute component={ScrollToTopOnPathChange} />
         <RumHome />
       </div>
     </ThemeProvider>
   );
 }
+
+const uxRouter = createRouter([]);
 
 export function UXAppRoot({
   appMountParameters,
@@ -107,12 +115,12 @@ export function UXAppRoot({
           services={{ ...core, ...plugins, embeddable, data }}
         >
           <i18nCore.Context>
-            <Router history={history}>
+            <RouterProvider history={history} router={uxRouter}>
               <UrlParamsProvider>
                 <UxApp />
                 <UXActionMenu appMountParameters={appMountParameters} />
               </UrlParamsProvider>
-            </Router>
+            </RouterProvider>
           </i18nCore.Context>
         </KibanaContextProvider>
       </ApmPluginContext.Provider>

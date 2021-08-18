@@ -63,6 +63,20 @@ import { appContextService } from './app_context';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
+const MONITORING_DATASETS = [
+  'elastic_agent',
+  'elastic_agent.elastic_agent',
+  'elastic_agent.apm_server',
+  'elastic_agent.filebeat',
+  'elastic_agent.fleet_server',
+  'elastic_agent.metricbeat',
+  'elastic_agent.osquerybeat',
+  'elastic_agent.packetbeat',
+  'elastic_agent.endpoint_security',
+  'elastic_agent.auditbeat',
+  'elastic_agent.heartbeat',
+];
+
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
     soClient: SavedObjectsClientContract,
@@ -320,14 +334,30 @@ class AgentPolicyService {
       withPackagePolicies = false,
     } = options;
 
-    const agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({
+    const baseFindParams = {
       type: SAVED_OBJECT_TYPE,
       sortField,
       sortOrder,
       page,
       perPage,
-      filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
-    });
+    };
+    const filter = kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined;
+    let agentPoliciesSO;
+    try {
+      agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({ ...baseFindParams, filter });
+    } catch (e) {
+      const isBadRequest = e.output?.statusCode === 400;
+      const isKQLSyntaxError = e.message?.startsWith('KQLSyntaxError');
+      if (isBadRequest && !isKQLSyntaxError) {
+        // fall back to simple search if the kuery is just a search term i.e not KQL
+        agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({
+          ...baseFindParams,
+          search: kuery,
+        });
+      } else {
+        throw e;
+      }
+    }
 
     const agentPolicies = await Promise.all(
       agentPoliciesSO.saved_objects.map(async (agentPolicySO) => {
@@ -762,7 +792,7 @@ class AgentPolicyService {
       cluster: DEFAULT_PERMISSIONS.cluster,
     };
 
-    // TODO fetch this from the elastic agent package
+    // TODO: fetch this from the elastic agent package
     const monitoringOutput = fullAgentPolicy.agent?.monitoring.use_output;
     const monitoringNamespace = fullAgentPolicy.agent?.monitoring.namespace;
     if (
@@ -771,12 +801,16 @@ class AgentPolicyService {
       monitoringOutput &&
       fullAgentPolicy.outputs[monitoringOutput]?.type === 'elasticsearch'
     ) {
-      const names: string[] = [];
+      let names: string[] = [];
       if (fullAgentPolicy.agent.monitoring.logs) {
-        names.push(`logs-elastic_agent*-${monitoringNamespace}`);
+        names = names.concat(
+          MONITORING_DATASETS.map((dataset) => `logs-${dataset}-${monitoringNamespace}`)
+        );
       }
       if (fullAgentPolicy.agent.monitoring.metrics) {
-        names.push(`metrics-elastic_agent*-${monitoringNamespace}`);
+        names = names.concat(
+          MONITORING_DATASETS.map((dataset) => `metrics-${dataset}-${monitoringNamespace}`)
+        );
       }
 
       permissions._elastic_agent_checks.indices = [

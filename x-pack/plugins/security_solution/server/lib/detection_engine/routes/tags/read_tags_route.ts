@@ -23,15 +23,15 @@ export const readTagsRoute = (router: SecuritySolutionPluginRouter) => {
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const alertsClient = context.alerting?.getAlertsClient();
+      const rulesClient = context.alerting?.getRulesClient();
 
-      if (!alertsClient) {
+      if (!rulesClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
       try {
         const tags = await readTags({
-          alertsClient,
+          rulesClient,
         });
         return response.ok({ body: tags });
       } catch (err) {

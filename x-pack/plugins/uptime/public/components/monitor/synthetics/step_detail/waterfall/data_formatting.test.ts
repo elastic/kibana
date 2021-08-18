@@ -206,6 +206,7 @@ describe('Palettes', () => {
       ssl: '#edc5a2',
       stylesheet: '#ca8eae',
       wait: '#b0c9e0',
+      xhr: '#e7664c',
     });
   });
 });

@@ -24,6 +24,9 @@ import { MatrixHistogramType } from '../../../../common/search_strategy/security
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
 
 const EVENTS_HISTOGRAM_ID = 'eventsHistogramQuery';
 
@@ -66,14 +69,23 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
 
+  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
+
   useEffect(() => {
     dispatch(
       timelineActions.initializeTGridSettings({
         id: TimelineId.hostsPageEvents,
-        defaultColumns: eventsDefaultModel.columns,
+        defaultColumns: eventsDefaultModel.columns.map((c) =>
+          !tGridEnabled && c.initialWidth == null
+            ? {
+                ...c,
+                initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+              }
+            : c
+        ),
       })
     );
-  }, [dispatch]);
+  }, [dispatch, tGridEnabled]);
 
   useEffect(() => {
     return () => {
@@ -97,8 +109,10 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
         />
       )}
       <StatefulEventsViewer
+        defaultCellActions={defaultCellActions}
         defaultModel={eventsDefaultModel}
         end={endDate}
+        entityType="events"
         id={TimelineId.hostsPageEvents}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}

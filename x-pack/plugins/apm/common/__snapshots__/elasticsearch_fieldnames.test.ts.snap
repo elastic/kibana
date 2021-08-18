@@ -75,6 +75,8 @@ exports[`Error HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Error HOST_OS_PLATFORM 1`] = `undefined`;
 
+exports[`Error HOSTNAME 1`] = `undefined`;
+
 exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
 
 exports[`Error HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
@@ -114,6 +116,8 @@ exports[`Error METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
 exports[`Error METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Error METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
+
+exports[`Error METRICSET_NAME 1`] = `undefined`;
 
 exports[`Error OBSERVER_HOSTNAME 1`] = `undefined`;
 
@@ -312,6 +316,8 @@ exports[`Span HOST_NAME 1`] = `undefined`;
 
 exports[`Span HOST_OS_PLATFORM 1`] = `undefined`;
 
+exports[`Span HOSTNAME 1`] = `undefined`;
+
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 
 exports[`Span HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
@@ -351,6 +357,8 @@ exports[`Span METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
 exports[`Span METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Span METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
+
+exports[`Span METRICSET_NAME 1`] = `undefined`;
 
 exports[`Span OBSERVER_HOSTNAME 1`] = `undefined`;
 
@@ -549,6 +557,8 @@ exports[`Transaction HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Transaction HOST_OS_PLATFORM 1`] = `undefined`;
 
+exports[`Transaction HOSTNAME 1`] = `undefined`;
+
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
 
 exports[`Transaction HTTP_RESPONSE_STATUS_CODE 1`] = `200`;
@@ -594,6 +604,8 @@ exports[`Transaction METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
 exports[`Transaction METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Transaction METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
+
+exports[`Transaction METRICSET_NAME 1`] = `undefined`;
 
 exports[`Transaction OBSERVER_HOSTNAME 1`] = `undefined`;
 

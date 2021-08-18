@@ -6,113 +6,126 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import {
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
-import styled from 'styled-components';
-import { getOr } from 'lodash/fp';
+
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { indexOf } from 'lodash';
 
-import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
+import { get, getOr } from 'lodash/fp';
+import {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui/src/components/context_menu/context_menu';
+import styled from 'styled-components';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { TimelineId } from '../../../../../common/types/timeline';
-import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { timelineActions } from '../../../../timelines/store/timeline';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../../timelines/components/timeline/helpers';
-import { FILTER_OPEN, FILTER_CLOSED, FILTER_IN_PROGRESS } from '../alerts_filter_group';
-import { updateAlertStatusAction } from '../actions';
-import { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
 import { Ecs } from '../../../../../common/ecs';
 import {
   AddExceptionModal,
   AddExceptionModalProps,
 } from '../../../../common/components/exceptions/add_exception_modal';
-import * as i18nCommon from '../../../../common/translations';
 import * as i18n from '../translations';
-import {
-  useStateToaster,
-  displaySuccessToast,
-  displayErrorToast,
-} from '../../../../common/components/toasters';
 import { inputsModel } from '../../../../common/store';
-import { useUserData } from '../../user_info';
 import { AlertData, EcsHit } from '../../../../common/components/exceptions/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
 import { EventFiltersModal } from '../../../../management/pages/event_filters/view/components/modal';
+import { useAlertsActions } from './use_alerts_actions';
+import { useExceptionModal } from './use_add_exception_modal';
+import { useExceptionActions } from './use_add_exception_actions';
+import { useEventFilterModal } from './use_event_filter_modal';
+import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { useInsertTimeline } from '../../../../cases/components/use_insert_timeline';
+import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
+import { useInvestigateInResolverContextItem } from './investigate_in_resolver';
+import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
+import { TimelineId } from '../../../../../common';
+import { APP_ID } from '../../../../../common/constants';
+import { useEventFilterAction } from './use_event_filter_action';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
+  ariaRowindex: number;
+  columnValues: string;
   disabled: boolean;
   ecsRowData: Ecs;
   refetch: inputsModel.Refetch;
   onRuleChange?: () => void;
   timelineId: string;
 }
+export const NestedWrapper = styled.span`
+  button.euiContextMenuItem {
+    padding: 0;
+  }
+`;
 
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   ariaLabel = i18n.MORE_ACTIONS,
+  ariaRowindex,
+  columnValues,
   disabled,
   ecsRowData,
   refetch,
   onRuleChange,
   timelineId,
 }) => {
-  const dispatch = useDispatch();
-  const [, dispatchToaster] = useStateToaster();
   const [isPopoverOpen, setPopover] = useState(false);
-  const eventId = ecsRowData._id;
-  const ruleId = useMemo(
-    (): string | null =>
-      (ecsRowData.signal?.rule && ecsRowData.signal.rule.id && ecsRowData.signal.rule.id[0]) ??
-      null,
-    [ecsRowData]
-  );
-  const ruleName = useMemo(
-    (): string =>
-      (ecsRowData.signal?.rule && ecsRowData.signal.rule.name && ecsRowData.signal.rule.name[0]) ??
-      '',
-    [ecsRowData]
-  );
 
-  const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
-  const ruleIndices = useMemo((): string[] => {
-    if (
-      ecsRowData.signal?.rule &&
-      ecsRowData.signal.rule.index &&
-      ecsRowData.signal.rule.index.length > 0
-    ) {
-      return ecsRowData.signal.rule.index;
-    } else {
-      return DEFAULT_INDEX_PATTERN;
-    }
-  }, [ecsRowData]);
-
-  const { addWarning } = useAppToasts();
-
-  const alertStatus = useMemo(() => {
-    return ecsRowData.signal?.status && (ecsRowData.signal.status[0] as Status);
-  }, [ecsRowData]);
-
-  const onButtonClick = useCallback(() => {
-    setPopover(!isPopoverOpen);
-  }, [isPopoverOpen]);
-
-  const closePopover = useCallback((): void => {
+  const afterItemSelection = useCallback(() => {
     setPopover(false);
   }, []);
-  const [exceptionModalType, setOpenAddExceptionModal] = useState<ExceptionListType | null>(null);
-  const [isAddEventFilterModalOpen, setIsAddEventFilterModalOpen] = useState<boolean>(false);
-  const [{ canUserCRUD, hasIndexWrite, hasIndexMaintenance, hasIndexUpdateDelete }] = useUserData();
+  const ruleId = get(0, ecsRowData?.signal?.rule?.id);
+  const ruleName = get(0, ecsRowData?.signal?.rule?.name);
+  const { timelines: timelinesUi } = useKibana().services;
+  const casePermissions = useGetUserCasesPermissions();
+  const insertTimelineHook = useInsertTimeline;
+  const addToCaseActionProps = useMemo(
+    () => ({
+      ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
+      event: { data: [], ecs: ecsRowData, _id: ecsRowData._id },
+      useInsertTimeline: insertTimelineHook,
+      casePermissions,
+      appId: APP_ID,
+      onClose: afterItemSelection,
+    }),
+    [
+      ariaRowindex,
+      columnValues,
+      ecsRowData,
+      insertTimelineHook,
+      casePermissions,
+      afterItemSelection,
+    ]
+  );
+  const hasWritePermissions = useGetUserCasesPermissions()?.crud ?? false;
+  const addToCaseAction = useMemo(
+    () =>
+      [
+        TimelineId.detectionsPage,
+        TimelineId.detectionsRulesDetailsPage,
+        TimelineId.active,
+      ].includes(timelineId as TimelineId) && hasWritePermissions
+        ? {
+            actionItem: [
+              {
+                name: i18n.ACTION_ADD_TO_CASE,
+                panel: 2,
+                'data-test-subj': 'attach-alert-to-case-button',
+              },
+            ],
+            content: [
+              timelinesUi.getAddToExistingCaseButton(addToCaseActionProps),
+              timelinesUi.getAddToNewCaseButton(addToCaseActionProps),
+            ],
+          }
+        : { actionItem: [], content: [] },
+    [addToCaseActionProps, hasWritePermissions, timelineId, timelinesUi]
+  );
+
+  const alertStatus = get(0, ecsRowData?.signal?.status) as Status;
+
+  const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
 
   const isEndpointAlert = useMemo((): boolean => {
     if (ecsRowData == null) {
@@ -125,187 +138,13 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     return eventModules.includes('endpoint') && kinds.includes('alert');
   }, [ecsRowData]);
 
-  const closeAddExceptionModal = useCallback((): void => {
-    setOpenAddExceptionModal(null);
+  const onButtonClick = useCallback(() => {
+    setPopover(!isPopoverOpen);
+  }, [isPopoverOpen]);
+
+  const closePopover = useCallback((): void => {
+    setPopover(false);
   }, []);
-
-  const closeAddEventFilterModal = useCallback((): void => {
-    setIsAddEventFilterModalOpen(false);
-  }, []);
-
-  const onAddExceptionCancel = useCallback(() => {
-    closeAddExceptionModal();
-  }, [closeAddExceptionModal]);
-
-  const onAddExceptionConfirm = useCallback(
-    (didCloseAlert: boolean, didBulkCloseAlert) => {
-      closeAddExceptionModal();
-      if (timelineId !== TimelineId.active || didBulkCloseAlert) {
-        refetch();
-      }
-    },
-    [closeAddExceptionModal, timelineId, refetch]
-  );
-
-  const onAlertStatusUpdateSuccess = useCallback(
-    (updated: number, conflicts: number, newStatus: Status) => {
-      if (conflicts > 0) {
-        // Partial failure
-        addWarning({
-          title: i18nCommon.UPDATE_ALERT_STATUS_FAILED(conflicts),
-          text: i18nCommon.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
-        });
-      } else {
-        let title: string;
-        switch (newStatus) {
-          case 'closed':
-            title = i18n.CLOSED_ALERT_SUCCESS_TOAST(updated);
-            break;
-          case 'open':
-            title = i18n.OPENED_ALERT_SUCCESS_TOAST(updated);
-            break;
-          case 'in-progress':
-            title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(updated);
-        }
-        displaySuccessToast(title, dispatchToaster);
-      }
-    },
-    [dispatchToaster, addWarning]
-  );
-
-  const onAlertStatusUpdateFailure = useCallback(
-    (newStatus: Status, error: Error) => {
-      let title: string;
-      switch (newStatus) {
-        case 'closed':
-          title = i18n.CLOSED_ALERT_FAILED_TOAST;
-          break;
-        case 'open':
-          title = i18n.OPENED_ALERT_FAILED_TOAST;
-          break;
-        case 'in-progress':
-          title = i18n.IN_PROGRESS_ALERT_FAILED_TOAST;
-      }
-      displayErrorToast(title, [error.message], dispatchToaster);
-    },
-    [dispatchToaster]
-  );
-
-  const setEventsLoading = useCallback(
-    ({ eventIds, isLoading }: SetEventsLoadingProps) => {
-      dispatch(timelineActions.setEventsLoading({ id: timelineId, eventIds, isLoading }));
-    },
-    [dispatch, timelineId]
-  );
-
-  const setEventsDeleted = useCallback(
-    ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
-      dispatch(timelineActions.setEventsDeleted({ id: timelineId, eventIds, isDeleted }));
-    },
-    [dispatch, timelineId]
-  );
-
-  const openAlertActionOnClick = useCallback(() => {
-    updateAlertStatusAction({
-      alertIds: [eventId],
-      onAlertStatusUpdateFailure,
-      onAlertStatusUpdateSuccess,
-      setEventsDeleted,
-      setEventsLoading,
-      selectedStatus: FILTER_OPEN,
-    });
-    closePopover();
-  }, [
-    closePopover,
-    eventId,
-    onAlertStatusUpdateFailure,
-    onAlertStatusUpdateSuccess,
-    setEventsDeleted,
-    setEventsLoading,
-  ]);
-
-  const openAlertActionComponent = useMemo(() => {
-    return (
-      <EuiContextMenuItem
-        key="open-alert"
-        aria-label="Open alert"
-        data-test-subj="open-alert-status"
-        id={FILTER_OPEN}
-        onClick={openAlertActionOnClick}
-        disabled={!hasIndexUpdateDelete && !hasIndexMaintenance}
-      >
-        <EuiText size="m">{i18n.ACTION_OPEN_ALERT}</EuiText>
-      </EuiContextMenuItem>
-    );
-  }, [openAlertActionOnClick, hasIndexUpdateDelete, hasIndexMaintenance]);
-
-  const closeAlertActionClick = useCallback(() => {
-    updateAlertStatusAction({
-      alertIds: [eventId],
-      onAlertStatusUpdateFailure,
-      onAlertStatusUpdateSuccess,
-      setEventsDeleted,
-      setEventsLoading,
-      selectedStatus: FILTER_CLOSED,
-    });
-    closePopover();
-  }, [
-    closePopover,
-    eventId,
-    onAlertStatusUpdateFailure,
-    onAlertStatusUpdateSuccess,
-    setEventsDeleted,
-    setEventsLoading,
-  ]);
-
-  const closeAlertActionComponent = useMemo(() => {
-    return (
-      <EuiContextMenuItem
-        key="close-alert"
-        aria-label="Close alert"
-        data-test-subj="close-alert-status"
-        id={FILTER_CLOSED}
-        onClick={closeAlertActionClick}
-        disabled={!hasIndexUpdateDelete && !hasIndexMaintenance}
-      >
-        <EuiText size="m">{i18n.ACTION_CLOSE_ALERT}</EuiText>
-      </EuiContextMenuItem>
-    );
-  }, [closeAlertActionClick, hasIndexUpdateDelete, hasIndexMaintenance]);
-
-  const inProgressAlertActionClick = useCallback(() => {
-    updateAlertStatusAction({
-      alertIds: [eventId],
-      onAlertStatusUpdateFailure,
-      onAlertStatusUpdateSuccess,
-      setEventsDeleted,
-      setEventsLoading,
-      selectedStatus: FILTER_IN_PROGRESS,
-    });
-    closePopover();
-  }, [
-    closePopover,
-    eventId,
-    onAlertStatusUpdateFailure,
-    onAlertStatusUpdateSuccess,
-    setEventsDeleted,
-    setEventsLoading,
-  ]);
-
-  const inProgressAlertActionComponent = useMemo(() => {
-    return (
-      <EuiContextMenuItem
-        key="in-progress-alert"
-        aria-label="Mark alert in progress"
-        data-test-subj="in-progress-alert-status"
-        id={FILTER_IN_PROGRESS}
-        onClick={inProgressAlertActionClick}
-        disabled={!canUserCRUD || !hasIndexUpdateDelete}
-      >
-        <EuiText size="m">{i18n.ACTION_IN_PROGRESS_ALERT}</EuiText>
-      </EuiContextMenuItem>
-    );
-  }, [canUserCRUD, hasIndexUpdateDelete, inProgressAlertActionClick]);
 
   const button = useMemo(() => {
     return (
@@ -322,109 +161,97 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     );
   }, [disabled, onButtonClick, ariaLabel]);
 
-  const handleAddEndpointExceptionClick = useCallback((): void => {
-    closePopover();
-    setOpenAddExceptionModal('endpoint');
-  }, [closePopover]);
+  const {
+    exceptionModalType,
+    onAddExceptionCancel,
+    onAddExceptionConfirm,
+    onAddExceptionTypeClick,
+    ruleIndices,
+  } = useExceptionModal({
+    ruleIndex: ecsRowData?.signal?.rule?.index,
+    refetch,
+    timelineId,
+  });
 
-  const addEndpointExceptionComponent = useMemo(() => {
-    return (
-      <EuiContextMenuItem
-        key="add-endpoint-exception-menu-item"
-        aria-label="Add Endpoint Exception"
-        data-test-subj="add-endpoint-exception-menu-item"
-        id="addEndpointException"
-        onClick={handleAddEndpointExceptionClick}
-        disabled={!canUserCRUD || !hasIndexWrite || !isEndpointAlert}
-      >
-        <EuiText size="m">{i18n.ACTION_ADD_ENDPOINT_EXCEPTION}</EuiText>
-      </EuiContextMenuItem>
-    );
-  }, [canUserCRUD, hasIndexWrite, isEndpointAlert, handleAddEndpointExceptionClick]);
+  const {
+    closeAddEventFilterModal,
+    isAddEventFilterModalOpen,
+    onAddEventFilterClick,
+  } = useEventFilterModal();
 
-  const handleAddExceptionClick = useCallback((): void => {
-    closePopover();
-    setOpenAddExceptionModal('detection');
-  }, [closePopover]);
+  const { actionItems } = useAlertsActions({
+    alertStatus,
+    eventId: ecsRowData?._id,
+    indexName: ecsRowData?._index ?? '',
+    timelineId,
+    refetch,
+    closePopover,
+  });
 
-  const addExceptionComponent = useMemo(() => {
-    return (
-      <EuiContextMenuItem
-        key="add-exception-menu-item"
-        aria-label="Add Exception"
-        data-test-subj="add-exception-menu-item"
-        id="addException"
-        onClick={handleAddExceptionClick}
-        disabled={!canUserCRUD || !hasIndexWrite}
-      >
-        <EuiText data-test-subj="addExceptionButton" size="m">
-          {i18n.ACTION_ADD_EXCEPTION}
-        </EuiText>
-      </EuiContextMenuItem>
-    );
-  }, [handleAddExceptionClick, canUserCRUD, hasIndexWrite]);
-
-  const handleAddEventFilterClick = useCallback((): void => {
-    closePopover();
-    setIsAddEventFilterModalOpen(true);
-  }, [closePopover]);
-
-  const addEventFilterComponent = useMemo(
-    () => (
-      <EuiContextMenuItem
-        key="add-event-filter-menu-item"
-        aria-label="Add event filter"
-        data-test-subj="add-event-filter-menu-item"
-        id="addEventFilter"
-        onClick={handleAddEventFilterClick}
-      >
-        <EuiText data-test-subj="addEventFilterButton" size="m">
-          {i18n.ACTION_ADD_EVENT_FILTER}
-        </EuiText>
-      </EuiContextMenuItem>
-    ),
-    [handleAddEventFilterClick]
+  const handleOnAddExceptionTypeClick = useCallback(
+    (type: ExceptionListType) => {
+      onAddExceptionTypeClick(type);
+      closePopover();
+    },
+    [closePopover, onAddExceptionTypeClick]
   );
 
-  const statusFilters = useMemo(() => {
-    if (!alertStatus) {
-      return [];
-    }
+  const handleOnAddEventFilterClick = useCallback(() => {
+    onAddEventFilterClick();
+    closePopover();
+  }, [closePopover, onAddEventFilterClick]);
 
-    switch (alertStatus) {
-      case 'open':
-        return [inProgressAlertActionComponent, closeAlertActionComponent];
-      case 'in-progress':
-        return [openAlertActionComponent, closeAlertActionComponent];
-      case 'closed':
-        return [openAlertActionComponent, inProgressAlertActionComponent];
-      default:
-        return [];
-    }
-  }, [
-    closeAlertActionComponent,
-    inProgressAlertActionComponent,
-    openAlertActionComponent,
-    alertStatus,
-  ]);
-
-  const items = useMemo(
+  const { exceptionActions } = useExceptionActions({
+    isEndpointAlert,
+    onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
+  });
+  const investigateInResolverAction = useInvestigateInResolverContextItem({
+    timelineId,
+    ecsData: ecsRowData,
+    onClose: afterItemSelection,
+  });
+  const eventFilterAction = useEventFilterAction({
+    onAddEventFilterClick: handleOnAddEventFilterClick,
+  });
+  const items: EuiContextMenuPanelItemDescriptor[] = useMemo(
     () =>
       !isEvent && ruleId
-        ? [...statusFilters, addEndpointExceptionComponent, addExceptionComponent]
-        : [addEventFilterComponent],
+        ? [
+            ...investigateInResolverAction,
+            ...addToCaseAction.actionItem,
+            ...actionItems.map((aI) => ({ name: <NestedWrapper>{aI}</NestedWrapper> })),
+            ...exceptionActions,
+          ]
+        : [...investigateInResolverAction, ...addToCaseAction.actionItem, eventFilterAction],
     [
-      addEndpointExceptionComponent,
-      addExceptionComponent,
-      addEventFilterComponent,
-      statusFilters,
-      ruleId,
+      actionItems,
+      addToCaseAction.actionItem,
+      eventFilterAction,
+      exceptionActions,
+      investigateInResolverAction,
       isEvent,
+      ruleId,
     ]
+  );
+
+  const panels: EuiContextMenuPanelDescriptor[] = useMemo(
+    () => [
+      {
+        id: 0,
+        items,
+      },
+      {
+        id: 2,
+        title: i18n.ACTION_ADD_TO_CASE,
+        content: addToCaseAction.content,
+      },
+    ],
+    [addToCaseAction.content, items]
   );
 
   return (
     <>
+      {timelinesUi.getAddToCaseAction(addToCaseActionProps)}
       <div key="actions-context-menu">
         <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
           <EuiPopover
@@ -436,23 +263,26 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             anchorPosition="downLeft"
             repositionOnScroll
           >
-            <ContextMenuPanel items={items} />
+            <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
           </EuiPopover>
         </EventsTdContent>
       </div>
-      {exceptionModalType != null && ruleId != null && ecsRowData != null && (
-        <AddExceptionModalWrapper
-          ruleName={ruleName}
-          ruleId={ruleId}
-          ruleIndices={ruleIndices}
-          exceptionListType={exceptionModalType}
-          ecsData={ecsRowData}
-          onCancel={onAddExceptionCancel}
-          onConfirm={onAddExceptionConfirm}
-          alertStatus={alertStatus}
-          onRuleChange={onRuleChange}
-        />
-      )}
+      {exceptionModalType != null &&
+        ruleId != null &&
+        ruleName != null &&
+        ecsRowData?._id != null && (
+          <AddExceptionModalWrapper
+            ruleName={ruleName}
+            ruleId={ruleId}
+            ruleIndices={ruleIndices}
+            exceptionListType={exceptionModalType}
+            eventId={ecsRowData?._id}
+            onCancel={onAddExceptionCancel}
+            onConfirm={onAddExceptionConfirm}
+            alertStatus={alertStatus}
+            onRuleChange={onRuleChange}
+          />
+        )}
       {isAddEventFilterModalOpen && ecsRowData != null && (
         <EventFiltersModal data={ecsRowData} onCancel={closeAddEventFilterModal} />
       )}
@@ -460,19 +290,13 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   );
 };
 
-const ContextMenuPanel = styled(EuiContextMenuPanel)`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
-`;
-
-ContextMenuPanel.displayName = 'ContextMenuPanel';
-
 export const AlertContextMenu = React.memo(AlertContextMenuComponent);
 
 type AddExceptionModalWrapperProps = Omit<
   AddExceptionModalProps,
   'alertData' | 'isAlertDataLoading'
 > & {
-  ecsData: Ecs;
+  eventId?: string;
 };
 
 /**
@@ -480,12 +304,12 @@ type AddExceptionModalWrapperProps = Omit<
  * Due to the conditional nature of the modal and how we use the `ecsData` field,
  * we cannot use the fetch hook within the modal component itself
  */
-const AddExceptionModalWrapper: React.FC<AddExceptionModalWrapperProps> = ({
+export const AddExceptionModalWrapper: React.FC<AddExceptionModalWrapperProps> = ({
   ruleName,
   ruleId,
   ruleIndices,
   exceptionListType,
-  ecsData,
+  eventId,
   onCancel,
   onConfirm,
   alertStatus,
@@ -494,7 +318,7 @@ const AddExceptionModalWrapper: React.FC<AddExceptionModalWrapperProps> = ({
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
 
   const { loading: isLoadingAlertData, data } = useQueryAlerts<EcsHit, {}>({
-    query: buildGetAlertByIdQuery(ecsData?._id),
+    query: buildGetAlertByIdQuery(eventId),
     indexName: signalIndexName,
   });
 

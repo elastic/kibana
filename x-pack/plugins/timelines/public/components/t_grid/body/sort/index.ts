@@ -6,7 +6,6 @@
  */
 
 import { SortDirection } from '../../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
 import type { SortColumnTimeline } from '../../../../../common/types/timeline';
 
 // TODO: Cleanup this type to match SortColumnTimeline

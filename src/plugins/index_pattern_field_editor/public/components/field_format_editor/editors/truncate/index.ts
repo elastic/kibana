@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { TruncateFormatEditor } from './truncate';
+import { formatId } from './constants';
+import { FieldFormatEditorFactory } from '../types';
+
+export type { TruncateFormatEditor } from './truncate';
+export const truncateFormatEditorFactory: FieldFormatEditorFactory = () =>
+  import('./truncate').then((m) => m.TruncateFormatEditor);
+truncateFormatEditorFactory.formatId = formatId;

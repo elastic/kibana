@@ -7,6 +7,7 @@
 
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
+import { metadataTransformPattern } from './endpoint/constants';
 
 export const APP_ID = 'securitySolution';
 export const SERVER_APP_ID = 'siem';
@@ -25,7 +26,7 @@ export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults';
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults';
 export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults';
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults';
-export const DEFAULT_ALERTS_INDEX = '.alerts-security-solution';
+export const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts';
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
 export const DEFAULT_LISTS_INDEX = '.lists';
 export const DEFAULT_ITEMS_INDEX = '.items';
@@ -55,27 +56,31 @@ export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000; // ms
 export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100;
 export const SAVED_OBJECTS_MANAGEMENT_FEATURE_ID = 'Saved Objects Management';
+export const DEFAULT_SPACE_ID = 'default';
 
 // Document path where threat indicator fields are expected. Fields are used
-// to enrich signals, and are copied to threat.indicator.
+// to enrich signals, and are copied to threat.enrichments.
 export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
-export const INDICATOR_DESTINATION_PATH = 'threat.indicator';
+export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
+export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex';
+export const DEFAULT_THREAT_INDEX_VALUE = ['filebeat-*'];
 
 export enum SecurityPageName {
-  overview = 'overview',
-  detections = 'detections',
+  administration = 'administration',
   alerts = 'alerts',
-  rules = 'rules',
+  case = 'case',
+  detections = 'detections',
+  endpoints = 'endpoints',
+  eventFilters = 'event_filters',
   exceptions = 'exceptions',
   hosts = 'hosts',
   network = 'network',
-  timelines = 'timelines',
-  case = 'case',
-  administration = 'administration',
-  endpoints = 'endpoints',
+  overview = 'overview',
   policies = 'policies',
+  rules = 'rules',
+  timelines = 'timelines',
   trustedApps = 'trusted_apps',
-  eventFilters = 'event_filters',
+  ueba = 'ueba',
 }
 
 export const TIMELINES_PATH = '/timelines';
@@ -86,6 +91,7 @@ export const ALERTS_PATH = '/alerts';
 export const RULES_PATH = '/rules';
 export const EXCEPTIONS_PATH = '/exceptions';
 export const HOSTS_PATH = '/hosts';
+export const UEBA_PATH = '/ueba';
 export const NETWORK_PATH = '/network';
 export const MANAGEMENT_PATH = '/administration';
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints`;
@@ -100,6 +106,7 @@ export const APP_RULES_PATH = `${APP_PATH}${RULES_PATH}`;
 export const APP_EXCEPTIONS_PATH = `${APP_PATH}${EXCEPTIONS_PATH}`;
 
 export const APP_HOSTS_PATH = `${APP_PATH}${HOSTS_PATH}`;
+export const APP_UEBA_PATH = `${APP_PATH}${UEBA_PATH}`;
 export const APP_NETWORK_PATH = `${APP_PATH}${NETWORK_PATH}`;
 export const APP_TIMELINES_PATH = `${APP_PATH}${TIMELINES_PATH}`;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}`;
@@ -117,6 +124,11 @@ export const DEFAULT_INDEX_PATTERN = [
   'logs-*',
   'packetbeat-*',
   'winlogbeat-*',
+];
+
+export const DEFAULT_INDEX_PATTERN_EXPERIMENTAL = [
+  // TODO: Steph/ueba TEMP for testing UEBA data
+  'ml_host_risk_score_*',
 ];
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
@@ -183,7 +195,7 @@ export const SIGNALS_ID = `siem.signals`;
 export const REFERENCE_RULE_ALERT_TYPE_ID = `siem.referenceRule`;
 export const REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID = `siem.referenceRulePersistence`;
 
-export const CUSTOM_ALERT_TYPE_ID = `siem.customRule`;
+export const QUERY_ALERT_TYPE_ID = `siem.queryRule`;
 export const EQL_ALERT_TYPE_ID = `siem.eqlRule`;
 export const INDICATOR_ALERT_TYPE_ID = `siem.indicatorRule`;
 export const ML_ALERT_TYPE_ID = `siem.mlRule`;
@@ -239,6 +251,9 @@ export const DETECTION_ENGINE_SIGNALS_MIGRATION_URL = `${DETECTION_ENGINE_SIGNAL
 export const DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/migration_status`;
 export const DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL = `${DETECTION_ENGINE_SIGNALS_URL}/finalize_migration`;
 
+export const ALERTS_AS_DATA_URL = '/internal/rac/alerts';
+export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find`;
+
 /**
  * Common naming convention for an unauthenticated user
  */
@@ -278,11 +293,6 @@ if (ENABLE_CASE_CONNECTOR) {
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';
 export const NOTIFICATION_THROTTLE_RULE = 'rule';
 
-/**
- * Histograms for fields named in this list should be displayed with an
- * "All others" bucket, to count events that don't specify a value for
- * the field being counted
- */
 export const showAllOthersBucket: string[] = [
   'destination.ip',
   'event.action',
@@ -301,3 +311,5 @@ export const showAllOthersBucket: string[] = [
  * than use it from here.
  */
 export const ELASTIC_NAME = 'estc';
+
+export const TRANSFORM_STATS_URL = `/api/transform/transforms/${metadataTransformPattern}-*/_stats`;

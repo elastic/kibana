@@ -5,7 +5,7 @@ set -euo pipefail
 export KBN_NP_PLUGINS_BUILT=true
 
 echo "--- Build Kibana Distribution"
-node scripts/build --debug --no-oss
+node scripts/build --debug
 
 echo "--- Archive Kibana Distribution"
 linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"

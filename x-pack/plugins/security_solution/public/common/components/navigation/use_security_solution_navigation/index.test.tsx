@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useGetUserAlertsPermissions } from '@kbn/alerts';
 
 import { renderHook } from '@testing-library/react-hooks';
 import { KibanaPageTemplateProps } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -16,12 +17,14 @@ import { TimelineTabs } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { UrlInputsModel } from '../../../store/inputs/model';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 jest.mock('../../../lib/kibana/kibana_react');
 jest.mock('../../../lib/kibana');
 jest.mock('../../../hooks/use_selector');
+jest.mock('../../../hooks/use_experimental_features');
 jest.mock('../../../utils/route/use_route_spy');
-
+jest.mock('@kbn/alerts');
 describe('useSecuritySolutionNavigation', () => {
   const mockUrlState = {
     [CONSTANTS.appQuery]: { query: 'host.name:"security-solution-es"', language: 'kuery' },
@@ -70,14 +73,27 @@ describe('useSecuritySolutionNavigation', () => {
   ];
 
   beforeEach(() => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useDeepEqualSelector as jest.Mock).mockReturnValue({ urlState: mockUrlState });
     (useRouteSpy as jest.Mock).mockReturnValue(mockRouteSpy);
+    (useGetUserAlertsPermissions as jest.Mock).mockReturnValue({
+      loading: false,
+      crud: true,
+      read: true,
+    });
+
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         application: {
           navigateToApp: jest.fn(),
           getUrlForApp: (appId: string, options?: { path?: string; deepLinkId?: boolean }) =>
             `${appId}/${options?.deepLinkId ?? ''}${options?.path ?? ''}`,
+          capabilities: {
+            siem: {
+              crud_alerts: true,
+              read_alerts: true,
+            },
+          },
         },
         chrome: {
           setBreadcrumbs: jest.fn(),
@@ -229,6 +245,17 @@ describe('useSecuritySolutionNavigation', () => {
         "name": "Security",
       }
     `);
+  });
+
+  // TODO: Steph/ueba remove when no longer experimental
+  it('should include ueba when feature flag is on', async () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(() =>
+      useSecuritySolutionNavigation()
+    );
+
+    // @ts-ignore possibly undefined, but if undefined we want this test to fail
+    expect(result.current.items[2].items[2].id).toEqual(SecurityPageName.ueba);
   });
 
   describe('Permission gated routes', () => {

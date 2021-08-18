@@ -4,17 +4,13 @@
 
 ## PhraseFilter type
 
+> Warning: This API is now obsolete.
+> 
+> Import from the "<!-- -->@<!-- -->kbn/es-query" package directly instead.  8.1
+> 
+
 <b>Signature:</b>
 
 ```typescript
-export declare type PhraseFilter = Filter & {
-    meta: PhraseFilterMeta;
-    script?: {
-        script: {
-            source?: any;
-            lang?: estypes.ScriptLanguage;
-            params: any;
-        };
-    };
-};
+declare type PhraseFilter = oldPhraseFilter;
 ```

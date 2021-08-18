@@ -9,9 +9,9 @@
 import { useLocation } from 'react-router-dom';
 import { useRouter } from './use_router';
 
-export function useParams(path: string) {
+export function useParams(path: string, optional: boolean = false) {
   const router = useRouter();
   const location = useLocation();
 
-  return router.getParams(path as never, location);
+  return router.getParams(path as never, location, optional);
 }

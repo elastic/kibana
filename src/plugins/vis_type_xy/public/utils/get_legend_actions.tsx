@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
@@ -24,9 +24,11 @@ export const getLegendActions = (
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [isfilterable, setIsfilterable] = useState(false);
     const series = xySeries as XYChartSeriesIdentifier;
-    const filterData = getFilterEventData(series);
+    const filterData = useMemo(() => getFilterEventData(series), [series]);
 
-    (async () => setIsfilterable(await canFilter(filterData)))();
+    useEffect(() => {
+      (async () => setIsfilterable(await canFilter(filterData)))();
+    }, [filterData]);
 
     if (!isfilterable || !filterData) {
       return null;
@@ -66,6 +68,9 @@ export const getLegendActions = (
 
     const Button = (
       <div
+        tabIndex={0}
+        role="button"
+        aria-pressed="false"
         style={{
           display: 'flex',
           justifyContent: 'center',
@@ -75,7 +80,7 @@ export const getLegendActions = (
           marginRight: 4,
         }}
         data-test-subj={`legend-${name}`}
-        onKeyPress={() => undefined}
+        onKeyPress={() => setPopoverOpen(!popoverOpen)}
         onClick={() => setPopoverOpen(!popoverOpen)}
       >
         <EuiIcon size="s" type="boxesVertical" />

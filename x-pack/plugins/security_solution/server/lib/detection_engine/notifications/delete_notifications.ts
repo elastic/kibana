@@ -9,21 +9,21 @@ import { readNotifications } from './read_notifications';
 import { DeleteNotificationParams } from './types';
 
 export const deleteNotifications = async ({
-  alertsClient,
+  rulesClient,
   id,
   ruleAlertId,
 }: DeleteNotificationParams) => {
-  const notification = await readNotifications({ alertsClient, id, ruleAlertId });
+  const notification = await readNotifications({ rulesClient, id, ruleAlertId });
   if (notification == null) {
     return null;
   }
 
   if (notification.id != null) {
-    await alertsClient.delete({ id: notification.id });
+    await rulesClient.delete({ id: notification.id });
     return notification;
   } else if (id != null) {
     try {
-      await alertsClient.delete({ id });
+      await rulesClient.delete({ id });
       return notification;
     } catch (err) {
       if (err.output.statusCode === 404) {

@@ -198,6 +198,8 @@ export class DocLinksService {
           transportSettings: `${ELASTICSEARCH_DOCS}modules-network.html#common-network-settings`,
           typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
           deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
+          setupUpgrade: `${ELASTICSEARCH_DOCS}setup-upgrade.html`,
+          releaseHighlights: `${ELASTICSEARCH_DOCS}release-highlights.html`,
         },
         siem: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
@@ -213,6 +215,7 @@ export class DocLinksService {
           luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
           percolate: `${ELASTICSEARCH_DOCS}query-dsl-percolate-query.html`,
           queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
+          autocompleteChanges: `${KIBANA_DOCS}kibana-concepts-analysts.html#autocomplete-suggestions`,
         },
         search: {
           sessions: `${KIBANA_DOCS}search-sessions.html`,
@@ -227,6 +230,7 @@ export class DocLinksService {
           indexManagement: `${ELASTICSEARCH_DOCS}index-mgmt.html`,
           kibanaSearchSettings: `${KIBANA_DOCS}advanced-options.html#kibana-search-settings`,
           visualizationSettings: `${KIBANA_DOCS}advanced-options.html#kibana-visualization-settings`,
+          timelionSettings: `${KIBANA_DOCS}advanced-options.html#kibana-timelion-settings`,
         },
         ml: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/index.html`,
@@ -242,6 +246,7 @@ export class DocLinksService {
           anomalyDetectionJobResource: `${ELASTICSEARCH_DOCS}ml-put-job.html#ml-put-job-path-parms`,
           anomalyDetectionJobResourceAnalysisConfig: `${ELASTICSEARCH_DOCS}ml-put-job.html#put-analysisconfig`,
           anomalyDetectionJobTips: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-ad-finding-anomalies.html#ml-ad-job-tips`,
+          alertingRules: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-configuring-alerts.html`,
           anomalyDetectionModelMemoryLimits: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-ad-finding-anomalies.html#ml-ad-model-memory-limits`,
           calendars: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-ad-finding-anomalies.html#ml-ad-calendars`,
           classificationEvaluation: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfa-classification.html#ml-dfanalytics-classification-evaluation`,
@@ -576,6 +581,7 @@ export interface DocLinksStart {
       readonly luceneQuerySyntax: string;
       readonly percolate: string;
       readonly queryDsl: string;
+      readonly autocompleteChanges: string;
     };
     readonly date: {
       readonly dateMath: string;

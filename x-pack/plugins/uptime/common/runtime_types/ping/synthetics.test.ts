@@ -80,22 +80,6 @@ describe('synthetics runtime types', () => {
       maxSteps: 1,
       ref: {
         screenshotRef: refResult,
-        blocks: [
-          {
-            id: 'hash1',
-            synthetics: {
-              blob: 'image data',
-              blob_mime: 'image/jpeg',
-            },
-          },
-          {
-            id: 'hash2',
-            synthetics: {
-              blob: 'image data',
-              blob_mime: 'image/jpeg',
-            },
-          },
-        ],
       },
     };
   });

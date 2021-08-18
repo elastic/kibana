@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useEffect } from 'react';
+import styled from 'styled-components';
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -21,7 +22,11 @@ import { MonitorPage, StepDetailPage, NotFoundPage, SettingsPage } from './pages
 import { CertificatesPage } from './pages/certificates';
 import { UptimePage, useUptimeTelemetry } from './hooks';
 import { OverviewPageComponent } from './pages/overview';
-import { SyntheticsCheckSteps } from './pages/synthetics/synthetics_checks';
+import {
+  SyntheticsCheckSteps,
+  SyntheticsCheckStepsPageHeader,
+  SyntheticsCheckStepsPageRightSideItem,
+} from './pages/synthetics/synthetics_checks';
 import { ClientPluginsStart } from './apps/plugin';
 import { MonitorPageTitle, MonitorPageTitleContent } from './components/monitor/monitor_title';
 import { UptimeDatePicker } from './components/common/uptime_date_picker';
@@ -29,6 +34,11 @@ import { useKibana } from '../../../../src/plugins/kibana_react/public';
 import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
 import { CertificateTitle } from './components/certificates/certificate_title';
 import { SyntheticsCallout } from './components/overview/synthetics_callout';
+import {
+  StepDetailPageChildren,
+  StepDetailPageHeader,
+  StepDetailPageRightSideItem,
+} from './pages/synthetics/step_detail_page';
 
 interface RouteProps {
   path: string;
@@ -36,9 +46,9 @@ interface RouteProps {
   dataTestSubj: string;
   title: string;
   telemetryId: UptimePage;
-  pageHeader?: {
-    children?: JSX.Element;
+  pageHeader: {
     pageTitle: string | JSX.Element;
+    children?: JSX.Element;
     rightSideItems?: JSX.Element[];
   };
 }
@@ -105,6 +115,11 @@ const Routes: RouteProps[] = [
     component: StepDetailPage,
     dataTestSubj: 'uptimeStepDetailPage',
     telemetryId: UptimePage.StepDetail,
+    pageHeader: {
+      children: <StepDetailPageChildren />,
+      pageTitle: <StepDetailPageHeader />,
+      rightSideItems: [<StepDetailPageRightSideItem />],
+    },
   },
   {
     title: baseTitle,
@@ -112,6 +127,10 @@ const Routes: RouteProps[] = [
     component: SyntheticsCheckSteps,
     dataTestSubj: 'uptimeSyntheticCheckStepsPage',
     telemetryId: UptimePage.SyntheticCheckStepsPage,
+    pageHeader: {
+      pageTitle: <SyntheticsCheckStepsPageHeader />,
+      rightSideItems: [<SyntheticsCheckStepsPageRightSideItem />],
+    },
   },
   {
     title: baseTitle,
@@ -144,6 +163,12 @@ export const PageRouter: FC = () => {
   } = useKibana<ClientPluginsStart>();
   const PageTemplateComponent = observability.navigation.PageTemplate;
 
+  const StyledPageTemplateComponent = styled(PageTemplateComponent)`
+    .euiPageHeaderContent > .euiFlexGroup {
+      flex-wrap: wrap;
+    }
+  `;
+
   return (
     <Switch>
       {Routes.map(
@@ -152,13 +177,9 @@ export const PageRouter: FC = () => {
             <div data-test-subj={dataTestSubj}>
               <SyntheticsCallout />
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
-              {pageHeader ? (
-                <PageTemplateComponent pageHeader={pageHeader}>
-                  <RouteComponent />
-                </PageTemplateComponent>
-              ) : (
+              <StyledPageTemplateComponent pageHeader={pageHeader}>
                 <RouteComponent />
-              )}
+              </StyledPageTemplateComponent>
             </div>
           </Route>
         )

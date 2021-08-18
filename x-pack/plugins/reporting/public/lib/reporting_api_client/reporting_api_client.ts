@@ -5,24 +5,35 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { stringify } from 'query-string';
-import rison from 'rison-node';
-import { HttpSetup } from 'src/core/public';
+import rison, { RisonObject } from 'rison-node';
+import { HttpSetup, IUiSettingsClient } from 'src/core/public';
 import {
   API_BASE_GENERATE,
   API_BASE_URL,
+  API_GENERATE_IMMEDIATE,
   API_LIST_URL,
   API_MIGRATE_ILM_POLICY_URL,
   REPORTING_MANAGEMENT_HOME,
 } from '../../../common/constants';
-import { DownloadReportFn, JobId, ManagementLinkFn, ReportApiJSON } from '../../../common/types';
+import {
+  BaseParams,
+  DownloadReportFn,
+  JobId,
+  ManagementLinkFn,
+  ReportApiJSON,
+} from '../../../common/types';
 import { add } from '../../notifier/job_completion_notifications';
 import { Job } from '../job';
 
-export interface JobContent {
-  content: string;
-  content_type: boolean;
-}
+/*
+ * For convenience, apps do not have to provide the browserTimezone and Kibana version.
+ * Those fields are added in this client as part of the service.
+ * TODO: export a type like this to other plugins: https://github.com/elastic/kibana/issues/107085
+ */
+type AppParams = Omit<BaseParams, 'browserTimezone' | 'version'>;
 
 export interface DiagnoseResponse {
   help: string[];
@@ -30,14 +41,10 @@ export interface DiagnoseResponse {
   logs: string;
 }
 
-interface JobParams {
-  [paramName: string]: any;
-}
-
 interface IReportingAPI {
   // Helpers
   getReportURL(jobId: string): string;
-  getReportingJobPath(exportType: string, jobParams: JobParams): string; // Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
+  getReportingJobPath<T>(exportType: string, jobParams: BaseParams & T): string; // Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
   createReportingJob(exportType: string, jobParams: any): Promise<Job>; // Sends a request to queue a job, with the job params in the POST body
   getServerBasePath(): string; // Provides the raw server basePath to allow it to be stripped out from relativeUrls in job params
 
@@ -46,7 +53,7 @@ interface IReportingAPI {
   deleteReport(jobId: string): Promise<void>;
   list(page: number, jobIds: string[]): Promise<Job[]>; // gets the first 10 report of the page
   total(): Promise<number>;
-  getError(jobId: string): Promise<JobContent>;
+  getError(jobId: string): Promise<string>;
   getInfo(jobId: string): Promise<Job>;
   findForJobIds(jobIds: string[]): Promise<Job[]>;
 
@@ -55,17 +62,16 @@ interface IReportingAPI {
   getDownloadLink: DownloadReportFn;
 
   // Diagnostic-related API calls
-  verifyConfig(): Promise<DiagnoseResponse>;
   verifyBrowser(): Promise<DiagnoseResponse>;
   verifyScreenCapture(): Promise<DiagnoseResponse>;
 }
 
 export class ReportingAPIClient implements IReportingAPI {
-  private http: HttpSetup;
-
-  constructor(http: HttpSetup) {
-    this.http = http;
-  }
+  constructor(
+    private http: HttpSetup,
+    private uiSettings: IUiSettingsClient,
+    private kibanaVersion: string
+  ) {}
 
   public getReportURL(jobId: string) {
     const apiBaseUrl = this.http.basePath.prepend(API_LIST_URL);
@@ -108,8 +114,16 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public async getError(jobId: string) {
-    return await this.http.get(`${API_LIST_URL}/output/${jobId}`, {
-      asSystemRequest: true,
+    const job = await this.getInfo(jobId);
+
+    if (job.warnings?.[0]) {
+      // the error message of a failed report is a singular string in the warnings array
+      return job.warnings[0];
+    }
+
+    return i18n.translate('xpack.reporting.apiClient.unknownError', {
+      defaultMessage: `Report job {job} failed. Error unknown.`,
+      values: { job: jobId },
     });
   }
 
@@ -128,13 +142,15 @@ export class ReportingAPIClient implements IReportingAPI {
     return reports.map((report) => new Job(report));
   }
 
-  public getReportingJobPath(exportType: string, jobParams: JobParams) {
-    const params = stringify({ jobParams: rison.encode(jobParams) });
+  public getReportingJobPath(exportType: string, jobParams: BaseParams) {
+    const risonObject: RisonObject = jobParams as Record<string, any>;
+    const params = stringify({ jobParams: rison.encode(risonObject) });
     return `${this.http.basePath.prepend(API_BASE_GENERATE)}/${exportType}?${params}`;
   }
 
-  public async createReportingJob(exportType: string, jobParams: any) {
-    const jobParamsRison = rison.encode(jobParams);
+  public async createReportingJob(exportType: string, jobParams: BaseParams) {
+    const risonObject: RisonObject = jobParams as Record<string, any>;
+    const jobParamsRison = rison.encode(risonObject);
     const resp: { job: ReportApiJSON } = await this.http.post(
       `${API_BASE_GENERATE}/${exportType}`,
       {
@@ -150,6 +166,27 @@ export class ReportingAPIClient implements IReportingAPI {
     return new Job(resp.job);
   }
 
+  public async createImmediateReport(baseParams: BaseParams) {
+    const { objectType: _objectType, ...params } = baseParams; // objectType is not needed for immediate download api
+    return this.http.post(`${API_GENERATE_IMMEDIATE}`, { body: JSON.stringify(params) });
+  }
+
+  public getDecoratedJobParams<T extends AppParams>(baseParams: T): BaseParams {
+    // If the TZ is set to the default "Browser", it will not be useful for
+    // server-side export. We need to derive the timezone and pass it as a param
+    // to the export API.
+    const browserTimezone: string =
+      this.uiSettings.get('dateFormat:tz') === 'Browser'
+        ? moment.tz.guess()
+        : this.uiSettings.get('dateFormat:tz');
+
+    return {
+      browserTimezone,
+      version: this.kibanaVersion,
+      ...baseParams,
+    };
+  }
+
   public getManagementLink: ManagementLinkFn = () =>
     this.http.basePath.prepend(REPORTING_MANAGEMENT_HOME);
 
@@ -157,12 +194,6 @@ export class ReportingAPIClient implements IReportingAPI {
     this.http.basePath.prepend(`${API_LIST_URL}/download/${jobId}`);
 
   public getServerBasePath = () => this.http.basePath.serverBasePath;
-
-  public async verifyConfig() {
-    return await this.http.post(`${API_BASE_URL}/diagnose/config`, {
-      asSystemRequest: true,
-    });
-  }
 
   public async verifyBrowser() {
     return await this.http.post(`${API_BASE_URL}/diagnose/browser`, {

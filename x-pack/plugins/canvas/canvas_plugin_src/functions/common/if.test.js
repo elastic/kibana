@@ -12,6 +12,7 @@ import { ifFn } from './if';
 
 describe('if', () => {
   const fn = functionWrapper(ifFn);
+
   let testScheduler;
 
   beforeEach(() => {

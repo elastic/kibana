@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-// Sec Sol Kbn telemetry instrumentation specific
-
-export interface FleetAgentCacheItem {
-  policy_id: string | undefined;
-  policy_version: number | undefined | null;
-}
-
 // EP Policy Response
 
 export interface EndpointPolicyResponseAggregation {
@@ -45,7 +38,23 @@ export interface EndpointPolicyResponseDocument {
     event: {
       agent_id_status: string;
     };
-    Endpoint: {};
+    Endpoint: {
+      policy: {
+        applied: {
+          actions: Array<{
+            name: string;
+            message: string;
+            status: string;
+          }>;
+          artifacts: {
+            global: {
+              version: string;
+            };
+          };
+          status: string;
+        };
+      };
+    };
   };
 }
 
@@ -74,6 +83,7 @@ interface EndpointMetricDocument {
     '@timestamp': string;
     agent: {
       id: string;
+      version: string;
     };
     Endpoint: {
       metrics: EndpointMetrics;

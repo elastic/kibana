@@ -12,35 +12,30 @@ import { addBasePath } from '../index';
 
 const bodySchema = schema.object({}, { unknowns: 'allow' });
 
-export function registerSimulateRoute({ router, lib }: RouteDependencies) {
+export function registerSimulateRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
     {
       path: addBasePath('/index_templates/simulate'),
       validate: { body: bodySchema },
     },
-    async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
-      const template = req.body as TypeOf<typeof bodySchema>;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const template = request.body as TypeOf<typeof bodySchema>;
 
       try {
-        const templatePreview = await callAsCurrentUser('dataManagement.simulateTemplate', {
-          body: template,
+        const { body: templatePreview } = await client.asCurrentUser.indices.simulateTemplate({
+          body: {
+            ...template,
+            // Until ES fixes a bug on their side we need to send a fake index pattern
+            // that won't match any indices.
+            // Issue: https://github.com/elastic/elasticsearch/issues/59152
+            index_patterns: ['a_fake_index_pattern_that_wont_match_any_indices'],
+          },
         });
 
-        return res.ok({ body: templatePreview });
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          const error = lib.parseEsError(e.response);
-          return res.customError({
-            statusCode: e.statusCode,
-            body: {
-              message: error.message,
-              attributes: error,
-            },
-          });
-        }
-        // Case: default
-        throw e;
+        return response.ok({ body: templatePreview });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

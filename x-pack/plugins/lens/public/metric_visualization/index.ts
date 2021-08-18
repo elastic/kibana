@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/public';
-import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
-import { EditorFrameSetup, FormatFactory } from '../types';
+import type { CoreSetup } from 'kibana/public';
+import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
+import type { EditorFrameSetup } from '../types';
+import type { FormatFactory } from '../../common';
 
 export interface MetricVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
-  formatFactory: Promise<FormatFactory>;
+  formatFactory: FormatFactory;
   editorFrame: EditorFrameSetup;
 }
 

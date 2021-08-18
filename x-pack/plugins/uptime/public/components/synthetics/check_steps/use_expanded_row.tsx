@@ -18,6 +18,10 @@ interface HookProps {
 
 type ExpandRowType = Record<string, JSX.Element>;
 
+export function getExpandedStepCallback(key: number) {
+  return (step: JourneyStep) => step.synthetics?.step?.index === key;
+}
+
 export const useExpandedRow = ({ loading, steps, allSteps }: HookProps) => {
   const [expandedRows, setExpandedRows] = useState<ExpandRowType>({});
   // eui table uses index from 0, synthetics uses 1
@@ -37,12 +41,10 @@ export const useExpandedRow = ({ loading, steps, allSteps }: HookProps) => {
 
   useEffect(() => {
     const expandedRowsN: ExpandRowType = {};
-    for (const expandedRowKeyStr in expandedRows) {
-      if (expandedRows.hasOwnProperty(expandedRowKeyStr)) {
-        const expandedRowKey = Number(expandedRowKeyStr);
+    for (const expandedRowKey of Object.keys(expandedRows).map((key) => Number(key))) {
+      const step = steps.find(getExpandedStepCallback(expandedRowKey + 1));
 
-        const step = steps.find((stepF) => stepF.synthetics?.step?.index !== expandedRowKey)!;
-
+      if (step) {
         expandedRowsN[expandedRowKey] = (
           <ExecutedStep
             step={step}

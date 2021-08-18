@@ -24,7 +24,7 @@ const layerList = [
   {
     id: 'jzppx',
     label: 'Flights',
-    minZoom: 9,
+    minZoom: 8,
     maxZoom: 24,
     alpha: 1,
     sourceDescriptor: {
@@ -45,26 +45,41 @@ const layerList = [
         'AvgTicketPrice',
         'FlightDelay',
       ],
+      applyGlobalQuery: true,
+      scalingType: 'MVT',
+      sortField: 'timestamp',
       indexPatternRefName: 'layer_1_source_index_pattern',
     },
     visible: true,
     style: {
       type: 'VECTOR',
       properties: {
+        icon: {
+          type: 'STATIC',
+          options: {
+            value: 'marker',
+          },
+        },
         fillColor: {
           type: 'DYNAMIC',
           options: {
             field: {
-              name: 'FlightTimeMin',
+              name: 'FlightDelayMin',
               origin: 'source',
             },
-            color: 'Greens',
+            color: 'Yellow to Red',
+            fieldMetaOptions: {
+              isEnabled: false,
+              sigma: 3,
+            },
+            type: 'ORDINAL',
+            useCustomColorRamp: false,
           },
         },
         lineColor: {
           type: 'STATIC',
           options: {
-            color: '#FFFFFF',
+            color: '#000',
           },
         },
         lineWidth: {
@@ -74,25 +89,61 @@ const layerList = [
           },
         },
         iconSize: {
-          type: 'DYNAMIC',
+          type: 'STATIC',
           options: {
-            field: {
-              name: 'DistanceMiles',
-              origin: 'source',
-            },
-            minSize: 1,
-            maxSize: 32,
+            size: 6,
+          },
+        },
+        iconOrientation: {
+          type: 'STATIC',
+          options: {
+            orientation: 0,
+          },
+        },
+        labelText: {
+          type: 'STATIC',
+          options: {
+            value: '',
+          },
+        },
+        labelColor: {
+          type: 'STATIC',
+          options: {
+            color: '#000000',
+          },
+        },
+        labelSize: {
+          type: 'STATIC',
+          options: {
+            size: 14,
+          },
+        },
+        labelBorderColor: {
+          type: 'STATIC',
+          options: {
+            color: '#FFFFFF',
+          },
+        },
+        symbolizeAs: {
+          options: {
+            value: 'circle',
+          },
+        },
+        labelBorderSize: {
+          options: {
+            size: 'SMALL',
           },
         },
       },
+      isTimeAware: true,
     },
-    type: 'VECTOR',
+    type: 'TILED_VECTOR',
   },
   {
     id: 'y4jsz',
     label: 'Flight Origin Location',
     minZoom: 0,
-    maxZoom: 9,
+    maxZoom: 8,
     alpha: 1,
     sourceDescriptor: {
       type: 'ES_GEO_GRID',
@@ -106,25 +157,37 @@ const layerList = [
           label: 'flight count',
         },
         {
-          type: 'avg',
-          field: 'FlightTimeMin',
-          label: 'minimum flight time',
+          type: 'sum',
+          field: 'FlightDelayMin',
         },
       ],
+      applyGlobalQuery: true,
       indexPatternRefName: 'layer_2_source_index_pattern',
     },
     visible: true,
     style: {
       type: 'VECTOR',
       properties: {
+        icon: {
+          type: 'STATIC',
+          options: {
+            value: 'marker',
+          },
+        },
         fillColor: {
           type: 'DYNAMIC',
           options: {
+            color: 'Yellow to Red',
+            fieldMetaOptions: {
+              isEnabled: false,
+              sigma: 3,
+            },
+            type: 'ORDINAL',
+            useCustomColorRamp: false,
             field: {
-              name: 'doc_count',
+              name: 'sum_of_FlightDelayMin',
               origin: 'source',
             },
-            color: 'Blues',
           },
         },
         lineColor: {
@@ -143,80 +206,59 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              name: 'avg_of_FlightTimeMin',
               origin: 'source',
-            },
-            minSize: 1,
-            maxSize: 32,
-          },
-        },
-      },
-    },
-    type: 'VECTOR',
-  },
-  {
-    id: 'x8xpo',
-    label: 'Flight Destination Location',
-    minZoom: 0,
-    maxZoom: 9,
-    alpha: 1,
-    sourceDescriptor: {
-      type: 'ES_GEO_GRID',
-      resolution: 'COARSE',
-      id: '60a7346a-8c5f-4c03-b7d1-e8b36e847551',
-      geoField: 'DestLocation',
-      requestType: 'point',
-      metrics: [
-        {
-          type: 'count',
-          label: 'flight count',
-        },
-        {
-          type: 'avg',
-          field: 'FlightDelayMin',
-          label: 'average delay',
-        },
-      ],
-      indexPatternRefName: 'layer_3_source_index_pattern',
-    },
-    visible: true,
-    style: {
-      type: 'VECTOR',
-      properties: {
-        fillColor: {
-          type: 'DYNAMIC',
-          options: {
-            field: {
               name: 'doc_count',
-              origin: 'source',
             },
-            color: 'Reds',
-          },
-        },
-        lineColor: {
-          type: 'STATIC',
-          options: {
-            color: '#af0303',
-          },
-        },
-        lineWidth: {
-          type: 'STATIC',
-          options: {
-            size: 1,
-          },
-        },
-        iconSize: {
-          type: 'DYNAMIC',
-          options: {
-            field: {
-              name: 'avg_of_FlightDelayMin',
-              origin: 'source',
-            },
-            minSize: 1,
+            minSize: 4,
             maxSize: 32,
+            fieldMetaOptions: {
+              isEnabled: false,
+              sigma: 3,
+            },
+          },
+        },
+        iconOrientation: {
+          type: 'STATIC',
+          options: {
+            orientation: 0,
+          },
+        },
+        labelText: {
+          type: 'STATIC',
+          options: {
+            value: '',
+          },
+        },
+        labelColor: {
+          type: 'STATIC',
+          options: {
+            color: '#000000',
+          },
+        },
+        labelSize: {
+          type: 'STATIC',
+          options: {
+            size: 14,
+          },
+        },
+        labelBorderColor: {
+          type: 'STATIC',
+          options: {
+            color: '#FFFFFF',
+          },
+        },
+        symbolizeAs: {
+          options: {
+            value: 'circle',
+          },
+        },
+        labelBorderSize: {
+          options: {
+            size: 'SMALL',
           },
         },
       },
+      isTimeAware: true,
     },
     type: 'VECTOR',
   },
@@ -227,45 +269,34 @@ export const getFlightsSavedObjects = () => {
     {
       id: '5dd88580-1906-11e9-919b-ffe5949a18d2',
       type: 'map',
-      updated_at: '2019-01-15T20:44:54.767Z',
-      version: 2,
-      references: [
-        {
-          name: 'layer_1_source_index_pattern',
-          type: 'index-pattern',
-          id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-        },
-        {
-          name: 'layer_2_source_index_pattern',
-          type: 'index-pattern',
-          id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-        },
-        {
-          name: 'layer_3_source_index_pattern',
-          type: 'index-pattern',
-          id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-        },
-      ],
-      migrationVersion: {
-        map: '7.4.0',
-      },
+      updated_at: '2021-07-07T02:20:04.294Z',
+      version: '3',
       attributes: {
-        title: i18n.translate('xpack.maps.sampleData.flightaSpec.mapsTitle', {
-          defaultMessage: '[Flights] Origin and Destination Flight Time',
+        title: i18n.translate('xpack.maps.sampleData.flightsSpec.mapsTitle', {
+          defaultMessage: '[Flights] Origin Time Delayed',
         }),
         description: '',
-        mapStateJSON:
-          '{"zoom":3.14,"center":{"lon":-89.58746,"lat":38.38637},"timeFilters":{"from":"now-7d","to":"now"},"refreshConfig":{"isPaused":true,"interval":0},"query":{"query":"","language":"kuery"}}',
         layerListJSON: JSON.stringify(layerList),
-        uiStateJSON: '{"isDarkMode":false}',
-        bounds: {
-          type: 'envelope',
-          coordinates: [
-            [-139.83779, 56.64828],
-            [-39.33713, 14.04811],
-          ],
-        },
+        mapStateJSON:
+          '{"zoom":4.28,"center":{"lon":-112.44472,"lat":34.65823},"timeFilters":{"from":"now-7d","to":"now"},"refreshConfig":{"isPaused":true,"interval":0},"query":{"query":"","language":"kuery"},"filters":[],"settings":{"autoFitToDataBounds":false,"backgroundColor":"#ffffff","disableInteractive":false,"disableTooltipControl":false,"hideToolbarOverlay":false,"hideLayerControl":false,"hideViewControl":false,"initialLocation":"LAST_SAVED_LOCATION","fixedLocation":{"lat":0,"lon":0,"zoom":2},"browserLocation":{"zoom":2},"maxZoom":24,"minZoom":0,"showScaleControl":false,"showSpatialFilters":true,"showTimesliderToggleButton":true,"spatialFiltersAlpa":0.3,"spatialFiltersFillColor":"#DA8B45","spatialFiltersLineColor":"#DA8B45"}}',
+        title: '[Flights] Origin Time Delayed',
+        uiStateJSON: '{"isLayerTOCOpen":true,"openTOCDetails":[]}',
       },
+      migrationVersion: {
+        map: '7.14.0',
+      },
+      references: [
+        {
+          id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+          name: 'layer_1_source_index_pattern',
+          type: 'index-pattern',
+        },
+        {
+          id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+          name: 'layer_2_source_index_pattern',
+          type: 'index-pattern',
+        },
+      ],
     },
   ];
 };

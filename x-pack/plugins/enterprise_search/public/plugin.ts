@@ -15,6 +15,7 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
@@ -43,13 +44,14 @@ export interface ClientData extends InitialAppData {
 interface PluginsSetup {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
-  security?: SecurityPluginSetup;
+  security: SecurityPluginSetup;
 }
 export interface PluginsStart {
   cloud?: CloudSetup;
   licensing: LicensingPluginStart;
   charts: ChartsPluginStart;
-  security?: SecurityPluginStart;
+  data: DataPublicPluginStart;
+  security: SecurityPluginStart;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
@@ -134,11 +136,10 @@ export class EnterpriseSearchPlugin implements Plugin {
       plugins.home.featureCatalogue.registerSolution({
         id: ENTERPRISE_SEARCH_PLUGIN.ID,
         title: ENTERPRISE_SEARCH_PLUGIN.NAME,
-        subtitle: ENTERPRISE_SEARCH_PLUGIN.SUBTITLE,
         icon: 'logoEnterpriseSearch',
         description: ENTERPRISE_SEARCH_PLUGIN.DESCRIPTION,
-        appDescriptions: ENTERPRISE_SEARCH_PLUGIN.APP_DESCRIPTIONS,
         path: ENTERPRISE_SEARCH_PLUGIN.URL,
+        order: 100,
       });
 
       plugins.home.featureCatalogue.register({

@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { RuleDataClient } from '../../../../../../rule_registry/server';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import {
   queryRulesSchema,
@@ -20,11 +20,11 @@ import { buildSiemResponse } from '../utils';
 
 import { readRules } from '../../rules/read_rules';
 import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 export const readRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient?: RuleDataClient | null
+  ruleDataClient?: IRuleDataClient | null
 ) => {
   router.get(
     {
@@ -47,17 +47,17 @@ export const readRulesRoute = (
 
       const { id, rule_id: ruleId } = request.query;
 
-      const alertsClient = context.alerting?.getAlertsClient();
+      const rulesClient = context.alerting?.getRulesClient();
       const savedObjectsClient = context.core.savedObjects.client;
 
       try {
-        if (!alertsClient) {
+        if (!rulesClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
         const rule = await readRules({
-          alertsClient,
+          rulesClient,
           id,
           ruleId,
         });
@@ -67,18 +67,16 @@ export const readRulesRoute = (
             ruleAlertId: rule.id,
           });
           const ruleStatuses = await ruleStatusClient.find({
-            perPage: 1,
-            sortField: 'statusDate',
-            sortOrder: 'desc',
-            search: rule.id,
-            searchFields: ['alertId'],
+            logsCount: 1,
+            ruleId: rule.id,
+            spaceId: context.securitySolution.getSpaceId(),
           });
-          const [currentStatus] = ruleStatuses.saved_objects;
+          const [currentStatus] = ruleStatuses;
           if (currentStatus != null && rule.executionStatus.status === 'error') {
             currentStatus.attributes.lastFailureMessage = `Reason: ${rule.executionStatus.error?.reason} Message: ${rule.executionStatus.error?.message}`;
             currentStatus.attributes.lastFailureAt = rule.executionStatus.lastExecutionDate.toISOString();
             currentStatus.attributes.statusDate = rule.executionStatus.lastExecutionDate.toISOString();
-            currentStatus.attributes.status = 'failed';
+            currentStatus.attributes.status = RuleExecutionStatus.failed;
           }
           const transformed = transform(rule, ruleActions, currentStatus);
           if (transformed == null) {

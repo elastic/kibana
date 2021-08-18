@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { migrateToKibana660 } from './migrate_6x';
+import * as spaceMigrations from './space_migrations';
+import * as usageStatsMigrations from './usage_stats_migrations';
+
+export { spaceMigrations, usageStatsMigrations };

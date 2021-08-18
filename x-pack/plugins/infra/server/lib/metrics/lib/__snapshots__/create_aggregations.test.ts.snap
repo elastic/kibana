@@ -17,7 +17,7 @@ Object {
       },
       "field": "@timestamp",
       "fixed_interval": "1m",
-      "offset": "-60s",
+      "offset": "-60000ms",
     },
   },
 }

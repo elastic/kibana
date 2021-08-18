@@ -45,10 +45,11 @@ describe('agg_expression_functions', () => {
     test('includes optional params when they are provided', () => {
       const actual = fn({
         field: 'field',
-        timeRange: JSON.stringify({
+        timeRange: {
           from: 'from',
           to: 'to',
-        }),
+          type: 'timerange',
+        },
         useNormalizedEsInterval: true,
         scaleMetricValues: true,
         interval: 'interval',
@@ -56,10 +57,11 @@ describe('agg_expression_functions', () => {
         drop_partials: false,
         format: 'format',
         min_doc_count: 1,
-        extended_bounds: JSON.stringify({
+        extended_bounds: {
+          type: 'extended_bounds',
           min: 1,
           max: 2,
-        }),
+        },
       });
 
       expect(actual.value).toMatchInlineSnapshot(`

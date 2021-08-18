@@ -40,13 +40,22 @@ export const defaultErrorMessage = i18n.translate(
   }
 );
 
+export const getErrorsFromHttpResponse = (response: HttpResponse<ErrorResponse>) => {
+  return Array.isArray(response?.body?.attributes?.errors)
+    ? response.body!.attributes.errors
+    : [response?.body?.message || defaultErrorMessage];
+};
+
 /**
  * Converts API/HTTP errors into user-facing Flash Messages
  */
-export const flashAPIErrors = (error: HttpResponse<ErrorResponse>, { isQueued }: Options = {}) => {
-  const errorFlashMessages: IFlashMessage[] = Array.isArray(error?.body?.attributes?.errors)
-    ? error.body!.attributes.errors.map((message) => ({ type: 'error', message }))
-    : [{ type: 'error', message: error?.body?.message || defaultErrorMessage }];
+export const flashAPIErrors = (
+  response: HttpResponse<ErrorResponse>,
+  { isQueued }: Options = {}
+) => {
+  const errorFlashMessages: IFlashMessage[] = getErrorsFromHttpResponse(
+    response
+  ).map((message) => ({ type: 'error', message }));
 
   if (isQueued) {
     FlashMessagesLogic.actions.setQueuedMessages(errorFlashMessages);
@@ -56,7 +65,7 @@ export const flashAPIErrors = (error: HttpResponse<ErrorResponse>, { isQueued }:
 
   // If this was a programming error or a failed request (such as a CORS) error,
   // we rethrow the error so it shows up in the developer console
-  if (!error?.body?.message) {
-    throw error;
+  if (!response?.body?.message) {
+    throw response;
   }
 };

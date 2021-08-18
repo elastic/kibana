@@ -15,6 +15,7 @@ describe('Platform assets', function () {
   beforeAll(async function () {
     root = kbnTestServer.createRoot({ plugins: { initialize: false } });
 
+    await root.preboot();
     await root.setup();
     await root.start();
   });

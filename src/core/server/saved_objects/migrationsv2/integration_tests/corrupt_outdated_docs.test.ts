@@ -76,6 +76,7 @@ describe('migration v2 with corrupt saved object documents', () => {
     root = createRoot();
 
     esServer = await startES();
+    await root.preboot();
     const coreSetup = await root.setup();
 
     coreSetup.savedObjects.registerType({

@@ -14,13 +14,15 @@ import { APIReturnType } from '../../../../plugins/apm/public/services/rest/crea
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { registry } from '../../common/registry';
+import { createApmApiSupertest } from '../../common/apm_api_supertest';
+import { getServiceNodeIds } from './get_service_node_ids';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const apmApiSupertest = createApmApiSupertest(supertest);
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
-  const serviceNodeIds = ['02950c4c5fbb0fda1cc98c47bf4024b473a8a17629db6530d95dcee68bd54c6c'];
 
   interface Response {
     status: number;
@@ -42,7 +44,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 numBuckets: 20,
                 transactionType: 'request',
-                serviceNodeIds: JSON.stringify(serviceNodeIds),
+                serviceNodeIds: JSON.stringify(
+                  await getServiceNodeIds({ apmApiSupertest, start, end })
+                ),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -60,6 +66,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('fetching data without comparison', () => {
         let response: Response;
+        let serviceNodeIds: string[];
+
+        beforeEach(async () => {
+          serviceNodeIds = await getServiceNodeIds({ apmApiSupertest, start, end });
+        });
 
         beforeEach(async () => {
           response = await supertest.get(
@@ -72,6 +83,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 numBuckets: 20,
                 transactionType: 'request',
                 serviceNodeIds: JSON.stringify(serviceNodeIds),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -82,7 +95,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(Object.values(response.body.previousPeriod)).to.eql(0);
         });
 
-        it('returns statistics for each service node', () => {
+        it('returns statistics for each service node', async () => {
           const item = response.body.currentPeriod[serviceNodeIds[0]];
 
           expect(item?.cpuUsage?.some((point) => isFiniteNumber(point.y))).to.be(true);
@@ -96,9 +109,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expectSnapshot(Object.values(response.body.currentPeriod).length).toMatchInline(`1`);
 
           expectSnapshot(Object.keys(response.body.currentPeriod)).toMatchInline(`
-          Array [
-            "02950c4c5fbb0fda1cc98c47bf4024b473a8a17629db6530d95dcee68bd54c6c",
-          ]
+            Array [
+              "31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad",
+            ]
           `);
 
           expectSnapshot(response.body).toMatch();
@@ -107,6 +120,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('fetching data with comparison', () => {
         let response: Response;
+        let serviceNodeIds: string[];
+
+        beforeEach(async () => {
+          serviceNodeIds = await getServiceNodeIds({ apmApiSupertest, start, end });
+        });
 
         beforeEach(async () => {
           response = await supertest.get(
@@ -121,6 +139,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 comparisonStart: start,
                 comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -158,14 +178,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expectSnapshot(Object.values(response.body.previousPeriod).length).toMatchInline(`1`);
 
           expectSnapshot(Object.keys(response.body.currentPeriod)).toMatchInline(`
-          Array [
-            "02950c4c5fbb0fda1cc98c47bf4024b473a8a17629db6530d95dcee68bd54c6c",
-          ]
+            Array [
+              "31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad",
+            ]
           `);
           expectSnapshot(Object.keys(response.body.previousPeriod)).toMatchInline(`
-          Array [
-            "02950c4c5fbb0fda1cc98c47bf4024b473a8a17629db6530d95dcee68bd54c6c",
-          ]
+            Array [
+              "31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad",
+            ]
           `);
 
           expectSnapshot(response.body).toMatch();

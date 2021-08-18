@@ -11,7 +11,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { Connectors, Props } from './connectors';
 import { TestProviders } from '../../common/mock';
 import { ConnectorsDropdown } from './connectors_dropdown';
-import { connectors } from './__mock__';
+import { connectors, actionTypes } from './__mock__';
 import { ConnectorTypes } from '../../../common';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -24,6 +24,7 @@ describe('Connectors', () => {
   const handleShowEditFlyout = jest.fn();
 
   const props: Props = {
+    actionTypes,
     connectors,
     disabled: false,
     handleShowEditFlyout,

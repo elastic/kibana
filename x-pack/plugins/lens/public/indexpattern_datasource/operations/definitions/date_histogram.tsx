@@ -32,6 +32,7 @@ import {
   search,
   UI_SETTINGS,
 } from '../../../../../../../src/plugins/data/public';
+import { extendedBoundsToAst } from '../../../../../../../src/plugins/data/common';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
 import { HelpPopover, HelpPopoverButton } from '../../help_popover';
@@ -156,7 +157,7 @@ export const dateHistogramOperation: OperationDefinition<
       interval,
       drop_partials: false,
       min_doc_count: 0,
-      extended_bounds: JSON.stringify({}),
+      extended_bounds: extendedBoundsToAst({}),
     }).toAst();
   },
   paramEditor: function ParamEditor({

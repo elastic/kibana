@@ -42,6 +42,7 @@ import { isUrlInvalid } from '../../utils/validators';
 
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
+import { getUebaDetailsUrl } from '../link_to/redirect_to_ueba';
 
 export const DEFAULT_NUMBER_OF_LINK = 5;
 
@@ -61,6 +62,45 @@ export const PortContainer = styled.div`
 `;
 
 // Internal Links
+const UebaDetailsLinkComponent: React.FC<{
+  children?: React.ReactNode;
+  hostName: string;
+  isButton?: boolean;
+}> = ({ children, hostName, isButton }) => {
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.ueba);
+  const { navigateToApp } = useKibana().services.application;
+  const goToUebaDetails = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.ueba,
+        path: getUebaDetailsUrl(encodeURIComponent(hostName), search),
+      });
+    },
+    [hostName, navigateToApp, search]
+  );
+
+  return isButton ? (
+    <LinkButton
+      data-test-subj={'ueba-link-button'}
+      onClick={goToUebaDetails}
+      href={formatUrl(getUebaDetailsUrl(encodeURIComponent(hostName)))}
+    >
+      {children ? children : hostName}
+    </LinkButton>
+  ) : (
+    <LinkAnchor
+      data-test-subj={'ueba-link-anchor'}
+      onClick={goToUebaDetails}
+      href={formatUrl(getUebaDetailsUrl(encodeURIComponent(hostName)))}
+    >
+      {children ? children : hostName}
+    </LinkAnchor>
+  );
+};
+
+export const UebaDetailsLink = React.memo(UebaDetailsLinkComponent);
+
 const HostDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   hostName: string;

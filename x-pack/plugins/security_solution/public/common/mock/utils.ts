@@ -12,6 +12,7 @@ import { tGridReducer } from '../../../../timelines/public';
 
 import { hostsReducer } from '../../hosts/store';
 import { networkReducer } from '../../network/store';
+import { uebaReducer } from '../../ueba/store';
 import { timelineReducer } from '../../timelines/store/timeline/reducer';
 import { managementReducer } from '../../management/store/reducer';
 import { ManagementPluginReducer } from '../../management';
@@ -23,6 +24,8 @@ import { defaultHeaders } from '../../timelines/components/timeline/body/column_
 interface Global extends NodeJS.Global {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   window?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  document?: any;
 }
 
 export const globalNode: Global = global;
@@ -52,6 +55,7 @@ const combineTimelineReducer = reduceReducers<any>(
 export const SUB_PLUGINS_REDUCER: SubPluginsInitReducer = {
   hosts: hostsReducer,
   network: networkReducer,
+  ueba: uebaReducer,
   timeline: combineTimelineReducer,
   /**
    * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,

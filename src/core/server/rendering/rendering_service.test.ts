@@ -16,9 +16,14 @@ import {
 import { load } from 'cheerio';
 
 import { httpServerMock } from '../http/http_server.mocks';
+import { mockRouter } from '../http/router/router.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
-import { mockRenderingServiceParams, mockRenderingSetupDeps } from './__mocks__/params';
-import { InternalRenderingServiceSetup } from './types';
+import {
+  mockRenderingServiceParams,
+  mockRenderingPrebootDeps,
+  mockRenderingSetupDeps,
+} from './__mocks__/params';
+import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from './types';
 import { RenderingService } from './rendering_service';
 
 const INJECTED_METADATA = {
@@ -43,6 +48,99 @@ const INJECTED_METADATA = {
 
 const { createKibanaRequest, createRawRequest } = httpServerMock;
 
+function renderTestCases(
+  getRender: () => Promise<
+    [
+      InternalRenderingServicePreboot['render'] | InternalRenderingServiceSetup['render'],
+      typeof mockRenderingPrebootDeps | typeof mockRenderingSetupDeps
+    ]
+  >
+) {
+  describe('render()', () => {
+    let uiSettings: ReturnType<typeof uiSettingsServiceMock.createClient>;
+
+    beforeEach(async () => {
+      uiSettings = uiSettingsServiceMock.createClient();
+      uiSettings.getRegistered.mockReturnValue({
+        registered: { name: 'title' },
+      });
+    });
+
+    it('renders "core" page', async () => {
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings);
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
+    });
+
+    it('renders "core" page for blank basepath', async () => {
+      const [render, deps] = await getRender();
+      deps.http.basePath.get.mockReturnValueOnce('');
+
+      const content = await render(createKibanaRequest(), uiSettings);
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
+    });
+
+    it('renders "core" page driven by settings', async () => {
+      uiSettings.getUserProvided.mockResolvedValue({ 'theme:darkMode': { userValue: true } });
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings);
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
+    });
+
+    it('renders "core" with excluded user settings', async () => {
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings, {
+        includeUserSettings: false,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
+    });
+
+    it('renders "core" from legacy request', async () => {
+      const [render] = await getRender();
+      const content = await render(createRawRequest(), uiSettings);
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
+    });
+
+    it('calls `getStylesheetPaths` with the correct parameters', async () => {
+      getSettingValueMock.mockImplementation((settingName: string) => {
+        if (settingName === 'theme:darkMode') {
+          return true;
+        }
+        if (settingName === 'theme:version') {
+          return 'v8';
+        }
+        return settingName;
+      });
+
+      const [render] = await getRender();
+      await render(createKibanaRequest(), uiSettings);
+
+      expect(getStylesheetPathsMock).toHaveBeenCalledTimes(1);
+      expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+        darkMode: true,
+        themeVersion: 'v8',
+        basePath: '/mock-server-basepath',
+        buildNum: expect.any(Number),
+      });
+    });
+  });
+}
+
 describe('RenderingService', () => {
   let service: RenderingService;
 
@@ -52,6 +150,27 @@ describe('RenderingService', () => {
 
     getSettingValueMock.mockImplementation((settingName: string) => settingName);
     getStylesheetPathsMock.mockReturnValue(['/style-1.css', '/style-2.css']);
+  });
+
+  describe('preboot()', () => {
+    it('calls `registerBootstrapRoute` with the correct parameters', async () => {
+      const routerMock = mockRouter.create();
+      mockRenderingPrebootDeps.http.registerRoutes.mockImplementation((path, callback) =>
+        callback(routerMock)
+      );
+
+      await service.preboot(mockRenderingPrebootDeps);
+
+      expect(registerBootstrapRouteMock).toHaveBeenCalledTimes(1);
+      expect(registerBootstrapRouteMock).toHaveBeenCalledWith({
+        router: routerMock,
+        renderer: bootstrapRendererMock,
+      });
+    });
+
+    renderTestCases(async () => {
+      return [(await service.preboot(mockRenderingPrebootDeps)).render, mockRenderingPrebootDeps];
+    });
   });
 
   describe('setup()', () => {
@@ -65,84 +184,9 @@ describe('RenderingService', () => {
       });
     });
 
-    describe('render()', () => {
-      let uiSettings: ReturnType<typeof uiSettingsServiceMock.createClient>;
-      let render: InternalRenderingServiceSetup['render'];
-
-      beforeEach(async () => {
-        uiSettings = uiSettingsServiceMock.createClient();
-        uiSettings.getRegistered.mockReturnValue({
-          registered: { name: 'title' },
-        });
-        render = (await service.setup(mockRenderingSetupDeps)).render;
-      });
-
-      it('renders "core" page', async () => {
-        const content = await render(createKibanaRequest(), uiSettings);
-        const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
-
-        expect(data).toMatchSnapshot(INJECTED_METADATA);
-      });
-
-      it('renders "core" page for blank basepath', async () => {
-        mockRenderingSetupDeps.http.basePath.get.mockReturnValueOnce('');
-
-        const content = await render(createKibanaRequest(), uiSettings);
-        const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
-
-        expect(data).toMatchSnapshot(INJECTED_METADATA);
-      });
-
-      it('renders "core" page driven by settings', async () => {
-        uiSettings.getUserProvided.mockResolvedValue({ 'theme:darkMode': { userValue: true } });
-        const content = await render(createKibanaRequest(), uiSettings);
-        const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
-
-        expect(data).toMatchSnapshot(INJECTED_METADATA);
-      });
-
-      it('renders "core" with excluded user settings', async () => {
-        const content = await render(createKibanaRequest(), uiSettings, {
-          includeUserSettings: false,
-        });
-        const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
-
-        expect(data).toMatchSnapshot(INJECTED_METADATA);
-      });
-
-      it('renders "core" from legacy request', async () => {
-        const content = await render(createRawRequest(), uiSettings);
-        const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
-
-        expect(data).toMatchSnapshot(INJECTED_METADATA);
-      });
-
-      it('calls `getStylesheetPaths` with the correct parameters', async () => {
-        getSettingValueMock.mockImplementation((settingName: string) => {
-          if (settingName === 'theme:darkMode') {
-            return true;
-          }
-          if (settingName === 'theme:version') {
-            return 'v8';
-          }
-          return settingName;
-        });
-
-        await render(createKibanaRequest(), uiSettings);
-
-        expect(getStylesheetPathsMock).toHaveBeenCalledTimes(1);
-        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
-          darkMode: true,
-          themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
-          buildNum: expect.any(Number),
-        });
-      });
+    renderTestCases(async () => {
+      await service.preboot(mockRenderingPrebootDeps);
+      return [(await service.setup(mockRenderingSetupDeps)).render, mockRenderingSetupDeps];
     });
   });
 });

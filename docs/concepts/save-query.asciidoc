@@ -35,7 +35,7 @@ For more information, see <<xpack-security-authorization, Granting access to Kib
 By default, filters are automatically included, but the time filter is not.
 +
 [role="screenshot"]
-image:concepts/images/saved-query-popup.png["Example of the saved query management popover with a list of saved queries"]
+image:concepts/images/saved-query-popup.png["Example of the saved query management popover with a list of saved queries", width=50%]
 
 . Click *Save*.
 . To load a saved query, select it in the *Saved query* popover.
