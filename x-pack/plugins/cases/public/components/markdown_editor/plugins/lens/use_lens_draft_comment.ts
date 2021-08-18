@@ -10,7 +10,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { first } from 'rxjs/operators';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DRAFT_COMMENT_STORAGE_ID } from './constants';
-import { INSERT_LENS } from './translations';
+import { ADD_VISUALIZATION } from './translations';
 
 interface DraftComment {
   commentId: string;
@@ -53,7 +53,9 @@ export const useLensDraftComment = () => {
 
   const openLensModal = useCallback(({ editorRef }) => {
     if (editorRef && editorRef.textarea && editorRef.toolbar) {
-      const lensPluginButton = editorRef.toolbar?.querySelector(`[aria-label="${INSERT_LENS}"]`);
+      const lensPluginButton = editorRef.toolbar?.querySelector(
+        `[aria-label="${ADD_VISUALIZATION}"]`
+      );
       if (lensPluginButton) {
         lensPluginButton.click();
       }
