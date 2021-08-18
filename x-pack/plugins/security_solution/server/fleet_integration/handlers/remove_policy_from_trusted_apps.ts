@@ -31,7 +31,9 @@ export const removePolicyFromTrustedApps = async (
   };
 
   let findResponse = await findTrustedAppsByPolicy(page);
-  if (!findResponse) return;
+  if (!findResponse) {
+    return;
+  }
   const trustedApps = findResponse.data;
 
   while (findResponse && (trustedApps.length < findResponse.total || findResponse.data.length)) {
