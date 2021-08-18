@@ -7,7 +7,7 @@
 
 import { getBasePath, isIntegrationsPopupOpen } from './index';
 import { AppState } from '../../state';
-import { mockState } from '../../lib/__mocks__/uptime_store.mock';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants/settings_defaults';
 
 describe('state selectors', () => {
   const state: AppState = {
