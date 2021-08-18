@@ -22,10 +22,10 @@ export const createJobFnFactory: CreateJobFnFactory<
     validateUrls([jobParams.relativeUrl]);
 
     return {
+      ...jobParams,
       headers: serializedEncryptedHeaders,
       spaceId: reporting.getSpaceId(req, logger),
       forceNow: new Date().toISOString(),
-      ...jobParams,
     };
   };
 };

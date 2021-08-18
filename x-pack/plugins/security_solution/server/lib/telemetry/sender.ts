@@ -506,6 +506,7 @@ const allowlistProcessFields: AllowlistFields = {
   args: true,
   name: true,
   executable: true,
+  code_signature: true,
   command_line: true,
   hash: true,
   pid: true,
@@ -518,6 +519,7 @@ const allowlistProcessFields: AllowlistFields = {
     code_signature: true,
     dll: true,
     malware_signature: true,
+    memory_region: true,
     token: {
       integrity_level_name: true,
     },
@@ -597,8 +599,10 @@ const allowlistEventFields: AllowlistFields = {
   data_stream: true,
   ecs: true,
   elastic: true,
-  // behavioral protection re-nests some field sets under events.*
+  // behavioral protection re-nests some field sets under events.* (< 7.15)
   events: allowlistBaseEventFields,
+  // behavioral protection re-nests some field sets under Events.* (>=7.15)
+  Events: allowlistBaseEventFields,
   rule: {
     id: true,
     name: true,

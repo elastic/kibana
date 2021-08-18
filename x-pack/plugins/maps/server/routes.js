@@ -77,7 +77,10 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
         landingPageUrl: emsSettings.getEMSLandingPageUrl(),
         fetchFunction: fetch,
       });
-      emsClient.addQueryParams({ license: currentLicenseId });
+      emsClient.addQueryParams({
+        license: currentLicenseId,
+        is_kibana_proxy: '1', // identifies this is proxied request from kibana
+      });
       return emsClient;
     } else {
       return EMPTY_EMS_CLIENT;

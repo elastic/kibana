@@ -82,8 +82,8 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     });
 
     // Services
-    describe('services/agent_name', function () {
-      loadTestFile(require.resolve('./services/agent_name'));
+    describe('services/agent', function () {
+      loadTestFile(require.resolve('./services/agent'));
     });
 
     describe('services/annotations', function () {
@@ -158,8 +158,8 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./transactions/breakdown'));
     });
 
-    describe('transactions/distribution', function () {
-      loadTestFile(require.resolve('./transactions/distribution'));
+    describe('transactions/trace_samples', function () {
+      loadTestFile(require.resolve('./transactions/trace_samples'));
     });
 
     describe('transactions/error_rate', function () {
