@@ -11,7 +11,7 @@ or searching with fuzzy terms. To use the legacy Lucene syntax, click *KQL* next
 and then turn off KQL.
 
 [float]
-[[autocomplete-suggestions]]
+[[suggestions-for-autocomplete]]
 === Suggestions for autocomplete
 
 KQL is able to suggest field names, values, and operators as you type.

@@ -358,3 +358,15 @@ This content has moved. Refer to <<xpack-profiler>>.
 == Rendering pre-captured profiler JSON
 
 This content has moved. Refer to <<xpack-profiler>>.
+
+[role="exclude",id="get-started"]
+== Quick start guide
+
+This content has moved. Refer to <<kibana-concepts-analysts>>.
+
+[role="exclude",id="autocomplete-suggestions"]
+== Suggestions for autocomplete
+
+This content has moved. Refer to <<suggestions-for-autocomplete>>.
+
+
