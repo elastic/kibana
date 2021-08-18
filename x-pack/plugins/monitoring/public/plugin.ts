@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Legacy } from './legacy_shims';
 import {
   App,
   AppMountParameters,
@@ -65,6 +66,7 @@ export class MonitoringPlugin
     if (!monitoring.ui.enabled || !monitoring.enabled) {
       return false;
     }
+    
 
     if (home) {
       home.featureCatalogue.register({
@@ -107,6 +109,22 @@ export class MonitoringPlugin
           usageCollection: plugins.usageCollection,
           appMountParameters: params,
         };
+
+        Legacy.init(
+          {
+            core: deps.core,
+            element: deps.element,
+            data: deps.data,
+            navigation: deps.navigation,
+            isCloud: deps.isCloud,
+            pluginInitializerContext: deps.pluginInitializerContext,
+            externalConfig: deps.externalConfig,
+            kibanaLegacy: deps.kibanaLegacy,
+            triggersActionsUi: deps.triggersActionsUi,
+            usageCollection: deps.usageCollection,
+            appMountParameters: deps.appMountParameters,
+          }
+        );
 
         const monitoringApp = new AngularApp(deps);
         const removeHistoryListener = params.history.listen((location) => {
