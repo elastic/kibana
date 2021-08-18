@@ -41,6 +41,12 @@ beforeEach(() => {
   alertingAuthMock.getAuthorizationFilter.mockImplementation(async () =>
     Promise.resolve({ filter: [] })
   );
+  // @ts-expect-error
+  alertingAuthMock.getAugmentedRuleTypesWithAuthorization.mockImplementation(async () => {
+    const authorizedRuleTypes = new Set();
+    authorizedRuleTypes.add({ producer: 'apm' });
+    return Promise.resolve({ authorizedRuleTypes });
+  });
   alertingAuthMock.ensureAuthorized.mockImplementation(
     // @ts-expect-error
     async ({
