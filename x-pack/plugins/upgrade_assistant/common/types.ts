@@ -248,3 +248,8 @@ export interface MlOperation extends SavedObjectAttributes {
   snapshotId: string;
   jobId: string;
 }
+
+export interface DeprecationLoggingStatus {
+  isDeprecationLogIndexingEnabled: boolean;
+  isDeprecationLoggingEnabled: boolean;
+}
