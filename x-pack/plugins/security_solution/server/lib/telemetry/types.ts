@@ -152,6 +152,17 @@ export const GetTrustedAppsRequestSchema = {
   }),
 };
 
+export type GetEndpointListRequest = TypeOf<typeof GetTrustedAppsRequestSchema.query>;
+
+export interface GetEndpointListResponse {
+  per_page: number;
+  page: number;
+  total: number;
+  data: EndpointExceptionListItem[];
+}
+
+// Telemetry List types
+
 export interface EndpointExceptionListItem {
   id: string;
   version: string;
@@ -161,15 +172,6 @@ export interface EndpointExceptionListItem {
   created_by: string;
   updated_at: string;
   updated_by: string;
-}
-
-export type GetEndpointListRequest = TypeOf<typeof GetTrustedAppsRequestSchema.query>;
-
-export interface GetEndpointListResponse {
-  per_page: number;
-  page: number;
-  total: number;
-  data: EndpointExceptionListItem[];
 }
 
 export interface ListTemplate {

@@ -89,10 +89,10 @@ export function isPackagePolicyList(
 }
 
 /**
- * Maps Exception list item to telemetry payload
+ * Maps Exception list item to parsable object
  *
  * @param exceptionListItem
- * @returns
+ * @returns collection of endpoint exceptions
  */
 export const exceptionListItemToEndpointEntry = (exceptionListItem: ExceptionListItemSchema) => {
   return {
@@ -107,6 +107,32 @@ export const exceptionListItemToEndpointEntry = (exceptionListItem: ExceptionLis
   } as EndpointExceptionListItem;
 };
 
+/**
+ * Constructs the lists telemetry schema from a collection of Trusted Apps
+ *
+ * @param listData
+ * @returns lists telemetry schema
+ */
+export const templateTrustedApps = (listData: TrustedApp[]) => {
+  return listData.map((item) => {
+    const template: ListTemplate = {
+      trusted_application: [],
+      endpoint_exception: [],
+      endpoint_event_filter: [],
+    };
+
+    template.trusted_application.push(item);
+    return template;
+  });
+};
+
+/**
+ * Consructs the list telemetry schema from a collection of endpoint exceptions
+ *
+ * @param listData
+ * @param listType
+ * @returns lists telemetry schema
+ */
 export const templateEndpointExceptions = (
   listData: EndpointExceptionListItem[],
   listType: string
@@ -129,18 +155,5 @@ export const templateEndpointExceptions = (
     }
 
     return null;
-  });
-};
-
-export const templateTrustedApps = (listData: TrustedApp[]) => {
-  return listData.map((item) => {
-    const template: ListTemplate = {
-      trusted_application: [],
-      endpoint_exception: [],
-      endpoint_event_filter: [],
-    };
-
-    template.trusted_application.push(item);
-    return template;
   });
 };
