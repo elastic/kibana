@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { spacesApiMock } from '../../../spaces_oss/public/api.mock';
+import { spacesPluginMock } from '../../../../../x-pack/plugins/spaces/public/mocks';
 // import { ShareToSpaceSavedObjectsManagementColumn } from './columns';
 import {
   SavedObjectsManagementColumnService,
@@ -42,7 +42,7 @@ describe('SavedObjectsManagementColumnRegistry', () => {
     it('allows columns to be registered and retrieved', () => {
       const column = createColumn('foo');
       setup.register(column);
-      const start = service.start(spacesApiMock.create());
+      const start = service.start(spacesPluginMock.createStartContract());
       expect(start.getAll()).toEqual([
         column,
         // expect.any(ShareToSpaceSavedObjectsManagementColumn),

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { spacesApiMock } from '../../../spaces_oss/public/api.mock';
+import { spacesPluginMock } from '../../../../../x-pack/plugins/spaces/public/mocks';
 import {
   CopyToSpaceSavedObjectsManagementAction,
   ShareToSpaceSavedObjectsManagementAction,
@@ -49,7 +49,7 @@ describe('SavedObjectsManagementActionRegistry', () => {
     it('allows actions to be registered and retrieved', () => {
       const action = createAction('foo');
       setup.register(action);
-      const start = service.start(spacesApiMock.create());
+      const start = service.start(spacesPluginMock.createStartContract());
       expect(start.getAll()).toEqual([
         action,
         expect.any(ShareToSpaceSavedObjectsManagementAction),

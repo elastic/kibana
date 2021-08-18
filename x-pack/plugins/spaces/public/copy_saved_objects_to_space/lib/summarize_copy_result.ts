@@ -13,7 +13,8 @@ import type {
   FailedImport,
   ProcessedImportResponse,
 } from 'src/plugins/saved_objects_management/public';
-import type { CopyToSpaceSavedObjectTarget } from 'src/plugins/spaces_oss/public';
+
+import type { CopyToSpaceSavedObjectTarget } from '../types';
 
 export interface SummarizedSavedObjectResult {
   type: string;

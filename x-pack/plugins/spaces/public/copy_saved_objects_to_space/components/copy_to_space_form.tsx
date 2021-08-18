@@ -9,10 +9,9 @@ import { EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { CopyToSpaceSavedObjectTarget } from 'src/plugins/spaces_oss/public';
 
 import type { SpacesDataEntry } from '../../types';
-import type { CopyOptions } from '../types';
+import type { CopyOptions, CopyToSpaceSavedObjectTarget } from '../types';
 import type { CopyMode } from './copy_mode_control';
 import { CopyModeControl } from './copy_mode_control';
 import { SelectableSpacesControl } from './selectable_spaces_control';

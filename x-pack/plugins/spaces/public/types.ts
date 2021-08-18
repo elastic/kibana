@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { GetAllSpacesPurpose, GetSpaceResult } from '../common';
+import type { Observable } from 'rxjs';
+
+import type { GetAllSpacesPurpose, GetSpaceResult, Space } from '../common';
+import type { SpacesApiUi } from './ui_api';
 
 /**
  * The structure for all of the space data that must be loaded for share-to-space components to function.
@@ -29,4 +32,25 @@ export interface SpacesDataEntry
   isFeatureDisabled?: true;
   /** Returns true if the user is authorized for the given purpose. */
   isAuthorizedForPurpose(purpose: GetAllSpacesPurpose): boolean;
+}
+
+/**
+ * Client-side Spaces API.
+ */
+export interface SpacesApi {
+  /**
+   * Observable representing the currently active space.
+   * The details of the space can change without a full page reload (such as display name, color, etc.)
+   */
+  getActiveSpace$(): Observable<Space>;
+
+  /**
+   * Retrieve the currently active space.
+   */
+  getActiveSpace(): Promise<Space>;
+
+  /**
+   * UI components and services to add spaces capabilities to an application.
+   */
+  ui: SpacesApiUi;
 }

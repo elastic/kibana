@@ -26,17 +26,17 @@ import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { SavedObjectReferenceWithContext, ToastsStart } from 'src/core/public';
-import type {
-  ShareToSpaceFlyoutProps,
-  ShareToSpaceSavedObjectTarget,
-} from 'src/plugins/spaces_oss/public';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { getCopyToSpaceFlyoutComponent } from '../../copy_saved_objects_to_space';
 import { useSpaces } from '../../spaces_context';
 import type { SpacesManager } from '../../spaces_manager';
 import type { SpacesDataEntry } from '../../types';
-import type { ShareOptions } from '../types';
+import type {
+  ShareOptions,
+  ShareToSpaceFlyoutProps,
+  ShareToSpaceSavedObjectTarget,
+} from '../types';
 import { AliasTable } from './alias_table';
 import { DEFAULT_OBJECT_NOUN } from './constants';
 import { RelativesFooter } from './relatives_footer';

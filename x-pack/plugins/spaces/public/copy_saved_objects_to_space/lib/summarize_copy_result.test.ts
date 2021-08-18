@@ -10,8 +10,8 @@ import type {
   ProcessedImportResponse,
   SavedObjectsManagementRecord,
 } from 'src/plugins/saved_objects_management/public';
-import type { CopyToSpaceSavedObjectTarget } from 'src/plugins/spaces_oss/public';
 
+import type { CopyToSpaceSavedObjectTarget } from '../types';
 import { summarizeCopyResult } from './summarize_copy_result';
 
 // Sample data references:
