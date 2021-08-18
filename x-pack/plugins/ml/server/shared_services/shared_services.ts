@@ -198,7 +198,7 @@ function getRequestItemsProvider(
       );
     }
 
-    const uiSettingsClient = getUiSettings()!.asScopedToClient(savedObjectsClient);
+    const uiSettingsClient = getUiSettings()?.asScopedToClient(savedObjectsClient);
     if (uiSettingsClient === null) {
       throw getCustomError(
         'MLUISettingsClientUninitialized',
@@ -209,7 +209,7 @@ function getRequestItemsProvider(
     const getFieldsFormatRegistry = async () => {
       let fieldFormatRegistry;
       try {
-        fieldFormatRegistry = await getFieldsFormat()!.fieldFormatServiceFactory(uiSettingsClient);
+        fieldFormatRegistry = await getFieldsFormat()!.fieldFormatServiceFactory(uiSettingsClient!);
       } catch (e) {
         // throw an custom error during the fieldFormatRegistry check
       }
