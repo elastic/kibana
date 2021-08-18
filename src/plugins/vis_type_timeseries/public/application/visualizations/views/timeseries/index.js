@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
@@ -47,6 +47,10 @@ const generateAnnotationData = (values, formatter) =>
 
 const decorateFormatter = (formatter) => ({ value }) => formatter(value);
 
+/** When displaying the annotation, we must slightly shift the labels for
+ * the x-axis so that they do not overlap the annotations. **/
+const TICK_LABEL_WITH_ANNOTATIONS_PADDING = 19;
+
 export const TimeSeries = ({
   backgroundColor,
   showGrid,
@@ -77,6 +81,11 @@ export const TimeSeries = ({
   const handleCursorUpdate = useActiveCursor(activeCursorService, chartRef, {
     isDateHistogram: true,
   });
+
+  const hasVisibleAnnotations = useMemo(
+    () => (annotations ?? []).some((annotation) => Boolean(annotation.data?.length)),
+    [annotations]
+  );
 
   let tooltipFormatter = decorateFormatter(xAxisFormatter);
   if (!isLastBucketDropped) {
@@ -126,7 +135,6 @@ export const TimeSeries = ({
     },
     [palettesService, series, syncColors]
   );
-
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
       <Settings
@@ -139,7 +147,20 @@ export const TimeSeries = ({
         animateData={false}
         onPointerUpdate={handleCursorUpdate}
         theme={[
-          chartTheme,
+          {
+            crosshair: {
+              ...chartTheme.crosshair,
+            },
+            axes: {
+              tickLabel: {
+                padding: {
+                  inner: hasVisibleAnnotations
+                    ? TICK_LABEL_WITH_ANNOTATIONS_PADDING
+                    : chartTheme.axes.tickLabel.padding.inner,
+                },
+              },
+            },
+          },
           hasBarChart
             ? {}
             : {
@@ -157,6 +178,7 @@ export const TimeSeries = ({
               labelOptions: { maxLines: truncateLegend ? maxLegendLines ?? 1 : 0 },
             },
           },
+          chartTheme,
         ]}
         baseTheme={baseTheme}
         tooltip={{

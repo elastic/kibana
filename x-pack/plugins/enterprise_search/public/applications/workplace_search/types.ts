@@ -80,8 +80,6 @@ export interface SourceDataItem {
   connected?: boolean;
   features?: Features;
   objTypes?: string[];
-  sourceDescription: string;
-  connectStepDescription: string;
   addPath: string;
   editPath: string;
   accountContextOnly: boolean;

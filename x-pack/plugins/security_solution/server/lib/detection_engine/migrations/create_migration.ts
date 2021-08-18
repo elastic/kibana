@@ -71,10 +71,14 @@ export const createMigration = async ({
                     enrichment.indicator.reference = indicator.event?.reference;
                     enrichment.matched = indicator.matched;
                     enrichment.indicator.remove("matched");
-
                     ctx._source.threat.enrichments.add(enrichment);
                   }
                   ctx._source.threat.remove("indicator");
+                }
+
+                // migrate status
+                if(ctx._source.signal?.status == "in-progress") {
+                  ctx._source.signal.status = "acknowledged";
                 }
               `,
         params: {

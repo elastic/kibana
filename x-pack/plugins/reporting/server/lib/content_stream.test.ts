@@ -6,20 +6,36 @@
  */
 
 import { set } from 'lodash';
-import { ElasticsearchClient } from 'src/core/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { createMockLevelLogger } from '../test_helpers';
 import { ContentStream } from './content_stream';
+import { ExportTypesRegistry } from './export_types_registry';
 
 describe('ContentStream', () => {
-  let client: jest.Mocked<ElasticsearchClient>;
+  let client: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+  let exportTypesRegistry: jest.Mocked<ExportTypesRegistry>;
+  let logger: ReturnType<typeof createMockLevelLogger>;
   let stream: ContentStream;
 
   beforeEach(() => {
     client = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    stream = new ContentStream(client, { id: 'something', index: 'somewhere' });
+    exportTypesRegistry = ({
+      get: jest.fn(() => ({})),
+    } as unknown) as typeof exportTypesRegistry;
+    logger = createMockLevelLogger();
+    stream = new ContentStream(client, exportTypesRegistry, logger, {
+      id: 'something',
+      index: 'somewhere',
+    });
 
     client.search.mockResolvedValue(
-      set<any>({}, 'body.hits.hits.0._source.output.content', 'some content')
+      set<any>({}, 'body.hits.hits.0._source', {
+        jobtype: 'pdf',
+        output: {
+          content: 'some content',
+          size: 12,
+        },
+      })
     );
   });
 
@@ -61,17 +77,145 @@ describe('ContentStream', () => {
 
       expect(error).toBe('some error');
     });
-  });
 
-  describe('toString', () => {
-    it('should return the document contents', async () => {
-      await expect(stream.toString()).resolves.toBe('some content');
+    it('should decode base64 encoded content', async () => {
+      exportTypesRegistry.get.mockReturnValueOnce({ jobContentEncoding: 'base64' } as ReturnType<
+        typeof exportTypesRegistry.get
+      >);
+      client.search.mockResolvedValueOnce(
+        set<any>(
+          {},
+          'body.hits.hits.0._source.output.content',
+          Buffer.from('encoded content').toString('base64')
+        )
+      );
+      const data = await new Promise((resolve) => stream.once('data', resolve));
+
+      expect(data).toEqual(Buffer.from('encoded content'));
     });
 
-    it('should return an empty string for the empty document', async () => {
-      client.search.mockResolvedValueOnce({ body: {} } as any);
+    it('should compound content from multiple chunks', async () => {
+      client.search.mockResolvedValueOnce(
+        set<any>({}, 'body.hits.hits.0._source', {
+          jobtype: 'pdf',
+          output: {
+            content: '12',
+            size: 6,
+          },
+        })
+      );
+      client.search.mockResolvedValueOnce(
+        set<any>({}, 'body.hits.hits.0._source.output.content', '34')
+      );
+      client.search.mockResolvedValueOnce(
+        set<any>({}, 'body.hits.hits.0._source.output.content', '56')
+      );
+      let data = '';
+      for await (const chunk of stream) {
+        data += chunk;
+      }
 
-      await expect(stream.toString()).resolves.toBe('');
+      expect(data).toEqual('123456');
+      expect(client.search).toHaveBeenCalledTimes(3);
+
+      const [[request1], [request2], [request3]] = client.search.mock.calls;
+
+      expect(request1).toHaveProperty(
+        'body.query.constant_score.filter.bool.must.0.term._id',
+        'something'
+      );
+      expect(request2).toHaveProperty('index', 'somewhere');
+      expect(request2).toHaveProperty(
+        'body.query.constant_score.filter.bool.must.0.term.parent_id',
+        'something'
+      );
+      expect(request3).toHaveProperty('index', 'somewhere');
+      expect(request3).toHaveProperty(
+        'body.query.constant_score.filter.bool.must.0.term.parent_id',
+        'something'
+      );
+    });
+
+    it('should stop reading on empty chunk', async () => {
+      client.search.mockResolvedValueOnce(
+        set<any>({}, 'body.hits.hits.0._source', {
+          jobtype: 'pdf',
+          output: {
+            content: '12',
+            size: 6,
+          },
+        })
+      );
+      client.search.mockResolvedValueOnce(
+        set<any>({}, 'body.hits.hits.0._source.output.content', '34')
+      );
+      client.search.mockResolvedValueOnce(
+        set<any>({}, 'body.hits.hits.0._source.output.content', '')
+      );
+      let data = '';
+      for await (const chunk of stream) {
+        data += chunk;
+      }
+
+      expect(data).toEqual('1234');
+      expect(client.search).toHaveBeenCalledTimes(3);
+    });
+
+    it('should read until chunks are present when there is no size', async () => {
+      client.search.mockResolvedValueOnce(
+        set<any>({}, 'body.hits.hits.0._source', {
+          jobtype: 'pdf',
+          output: {
+            content: '12',
+          },
+        })
+      );
+      client.search.mockResolvedValueOnce(
+        set<any>({}, 'body.hits.hits.0._source.output.content', '34')
+      );
+      client.search.mockResolvedValueOnce({ body: {} } as any);
+      let data = '';
+      for await (const chunk of stream) {
+        data += chunk;
+      }
+
+      expect(data).toEqual('1234');
+      expect(client.search).toHaveBeenCalledTimes(3);
+    });
+
+    it('should decode every chunk separately', async () => {
+      exportTypesRegistry.get.mockReturnValueOnce({ jobContentEncoding: 'base64' } as ReturnType<
+        typeof exportTypesRegistry.get
+      >);
+      client.search.mockResolvedValueOnce(
+        set<any>({}, 'body.hits.hits.0._source', {
+          jobtype: 'pdf',
+          output: {
+            content: Buffer.from('12').toString('base64'),
+            size: 6,
+          },
+        })
+      );
+      client.search.mockResolvedValueOnce(
+        set<any>(
+          {},
+          'body.hits.hits.0._source.output.content',
+          Buffer.from('34').toString('base64')
+        )
+      );
+      client.search.mockResolvedValueOnce(
+        set<any>(
+          {},
+          'body.hits.hits.0._source.output.content',
+          Buffer.from('56').toString('base64')
+        )
+      );
+      let data = '';
+      for await (const chunk of stream) {
+        data += chunk;
+      }
+
+      expect(data).toEqual('123456');
     });
   });
 
@@ -97,6 +241,15 @@ describe('ContentStream', () => {
       expect(request).toHaveProperty('body.doc.output.content', '123456');
     });
 
+    it('should update a number of written bytes', async () => {
+      stream.write('123');
+      stream.write('456');
+      stream.end();
+      await new Promise((resolve) => stream.once('finish', resolve));
+
+      expect(stream.bytesWritten).toBe(6);
+    });
+
     it('should emit an error event', async () => {
       client.update.mockRejectedValueOnce('some error');
 
@@ -119,6 +272,139 @@ describe('ContentStream', () => {
 
       expect(stream.getPrimaryTerm()).toBe(1);
       expect(stream.getSeqNo()).toBe(10);
+    });
+
+    it('should encode using base64', async () => {
+      exportTypesRegistry.get.mockReturnValueOnce({ jobContentEncoding: 'base64' } as ReturnType<
+        typeof exportTypesRegistry.get
+      >);
+
+      stream.end('12345');
+      await new Promise((resolve) => stream.once('finish', resolve));
+
+      expect(client.update).toHaveBeenCalledTimes(1);
+
+      const [[request]] = client.update.mock.calls;
+
+      expect(request).toHaveProperty(
+        'body.doc.output.content',
+        Buffer.from('12345').toString('base64')
+      );
+    });
+
+    it('should remove all previous chunks before writing', async () => {
+      stream.end('12345');
+      await new Promise((resolve) => stream.once('finish', resolve));
+
+      expect(client.deleteByQuery).toHaveBeenCalledTimes(1);
+
+      const [[request]] = client.deleteByQuery.mock.calls;
+
+      expect(request).toHaveProperty('index', 'somewhere');
+      expect(request).toHaveProperty('body.query.match.parent_id', 'something');
+    });
+
+    it('should split raw data into chunks', async () => {
+      client.cluster.getSettings.mockResolvedValueOnce(
+        set<any>({}, 'body.defaults.http.max_content_length', 1028)
+      );
+      stream.end('123456');
+      await new Promise((resolve) => stream.once('finish', resolve));
+
+      expect(client.update).toHaveBeenCalledTimes(1);
+      expect(client.update).toHaveBeenCalledWith(
+        expect.objectContaining(set({}, 'body.doc.output.content', '12'))
+      );
+      expect(client.index).toHaveBeenCalledTimes(2);
+      expect(client.index).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          id: expect.any(String),
+          index: 'somewhere',
+          body: {
+            parent_id: 'something',
+            output: {
+              content: '34',
+              chunk: 1,
+            },
+          },
+        })
+      );
+      expect(client.index).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          id: expect.any(String),
+          index: 'somewhere',
+          body: {
+            parent_id: 'something',
+            output: {
+              content: '56',
+              chunk: 2,
+            },
+          },
+        })
+      );
+    });
+
+    it('should encode every chunk separately', async () => {
+      exportTypesRegistry.get.mockReturnValueOnce({ jobContentEncoding: 'base64' } as ReturnType<
+        typeof exportTypesRegistry.get
+      >);
+      client.cluster.getSettings.mockResolvedValueOnce(
+        set<any>({}, 'body.defaults.http.max_content_length', 1028)
+      );
+      stream.end('12345678');
+      await new Promise((resolve) => stream.once('finish', resolve));
+
+      expect(client.update).toHaveBeenCalledTimes(1);
+      expect(client.update).toHaveBeenCalledWith(
+        expect.objectContaining(
+          set({}, 'body.doc.output.content', Buffer.from('123').toString('base64'))
+        )
+      );
+      expect(client.index).toHaveBeenCalledTimes(2);
+      expect(client.index).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          id: expect.any(String),
+          index: 'somewhere',
+          body: {
+            parent_id: 'something',
+            output: {
+              content: Buffer.from('456').toString('base64'),
+              chunk: 1,
+            },
+          },
+        })
+      );
+      expect(client.index).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          id: expect.any(String),
+          index: 'somewhere',
+          body: {
+            parent_id: 'something',
+            output: {
+              content: Buffer.from('78').toString('base64'),
+              chunk: 2,
+            },
+          },
+        })
+      );
+    });
+
+    it('should clear the job contents on writing empty data', async () => {
+      stream.end();
+      await new Promise((resolve) => stream.once('finish', resolve));
+
+      expect(client.deleteByQuery).toHaveBeenCalledTimes(1);
+      expect(client.update).toHaveBeenCalledTimes(1);
+
+      const [[deleteRequest]] = client.deleteByQuery.mock.calls;
+      const [[updateRequest]] = client.update.mock.calls;
+
+      expect(deleteRequest).toHaveProperty('body.query.match.parent_id', 'something');
+      expect(updateRequest).toHaveProperty('body.doc.output.content', '');
     });
   });
 });

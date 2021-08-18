@@ -7,7 +7,7 @@
  */
 
 import { IndexPatternsContract } from 'src/plugins/data/public';
-import { IndexPattern, IFieldType } from 'src/plugins/data/public';
+import { IFieldType, IndexPattern, IndexPatternListItem } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
 
 const defaultIndexPatternListName = i18n.translate(
@@ -24,8 +24,8 @@ const rollupIndexPatternListName = i18n.translate(
   }
 );
 
-const isRollup = (indexPattern: IndexPattern) => {
-  return indexPattern.type === 'rollup';
+const isRollup = (indexPatternType: string = '') => {
+  return indexPatternType === 'rollup';
 };
 
 export async function getIndexPatterns(
@@ -33,24 +33,22 @@ export async function getIndexPatterns(
   indexPatternsService: IndexPatternsContract
 ) {
   const existingIndexPatterns = await indexPatternsService.getIdsWithTitle(true);
-  const indexPatternsListItems = await Promise.all(
-    existingIndexPatterns.map(async ({ id, title }) => {
-      const isDefault = defaultIndex === id;
-      const pattern = await indexPatternsService.get(id);
-      const tags = getTags(pattern, isDefault);
+  const indexPatternsListItems = existingIndexPatterns.map((idxPattern) => {
+    const { id, title } = idxPattern;
+    const isDefault = defaultIndex === id;
+    const tags = getTags(idxPattern, isDefault);
 
-      return {
-        id,
-        title,
-        default: isDefault,
-        tags,
-        // the prepending of 0 at the default pattern takes care of prioritization
-        // so the sorting will but the default index on top
-        // or on bottom of a the table
-        sort: `${isDefault ? '0' : '1'}${title}`,
-      };
-    })
-  );
+    return {
+      id,
+      title,
+      default: isDefault,
+      tags,
+      // the prepending of 0 at the default pattern takes care of prioritization
+      // so the sorting will but the default index on top
+      // or on bottom of a the table
+      sort: `${isDefault ? '0' : '1'}${title}`,
+    };
+  });
 
   return (
     indexPatternsListItems.sort((a, b) => {
@@ -65,7 +63,7 @@ export async function getIndexPatterns(
   );
 }
 
-export const getTags = (indexPattern: IndexPattern, isDefault: boolean) => {
+export const getTags = (indexPattern: IndexPatternListItem | IndexPattern, isDefault: boolean) => {
   const tags = [];
   if (isDefault) {
     tags.push({
@@ -73,7 +71,7 @@ export const getTags = (indexPattern: IndexPattern, isDefault: boolean) => {
       name: defaultIndexPatternListName,
     });
   }
-  if (isRollup(indexPattern)) {
+  if (isRollup(indexPattern.type)) {
     tags.push({
       key: 'rollup',
       name: rollupIndexPatternListName,
@@ -82,17 +80,21 @@ export const getTags = (indexPattern: IndexPattern, isDefault: boolean) => {
   return tags;
 };
 
-export const areScriptedFieldsEnabled = (indexPattern: IndexPattern) => {
-  return !isRollup(indexPattern);
+export const areScriptedFieldsEnabled = (indexPattern: IndexPatternListItem | IndexPattern) => {
+  return !isRollup(indexPattern.type);
 };
 
-export const getFieldInfo = (indexPattern: IndexPattern, field: IFieldType) => {
-  if (!isRollup(indexPattern)) {
+export const getFieldInfo = (
+  indexPattern: IndexPatternListItem | IndexPattern,
+  field: IFieldType
+) => {
+  if (!isRollup(indexPattern.type)) {
     return [];
   }
 
-  const allAggs = indexPattern.typeMeta && indexPattern.typeMeta.aggs;
-  const fieldAggs = allAggs && Object.keys(allAggs).filter((agg) => allAggs[agg][field.name]);
+  const allAggs = indexPattern.typeMeta?.aggs;
+  const fieldAggs: string[] | undefined =
+    allAggs && Object.keys(allAggs).filter((agg) => allAggs[agg][field.name]);
 
   if (!fieldAggs || !fieldAggs.length) {
     return [];
