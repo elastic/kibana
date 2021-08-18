@@ -10,74 +10,34 @@ import {
   AnnotationDomainType,
   AreaSeries,
   Axis,
-  AxisStyle,
   BrushEndListener,
   Chart,
   CurveType,
   LineAnnotation,
   LineAnnotationDatum,
-  PartialTheme,
   Position,
   RectAnnotation,
-  RecursivePartial,
   ScaleType,
   Settings,
+  LineAnnotationStyle,
 } from '@elastic/charts';
-
-import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { useChartTheme } from '../../../../../../observability/public';
+
 import {
   getDurationUnitKey,
   getUnitLabelAndConvertedValue,
 } from '../../../../../common/utils/formatters';
-
 import { HistogramItem } from '../../../../../common/search_strategies/correlations/types';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 
 import { ChartContainer } from '../chart_container';
-
-const { euiColorMediumShade } = euiVars;
-const axisColor = euiColorMediumShade;
-
-const axes: RecursivePartial<AxisStyle> = {
-  axisLine: {
-    stroke: axisColor,
-  },
-  tickLabel: {
-    fontSize: 10,
-    fill: axisColor,
-    padding: 0,
-  },
-  tickLine: {
-    stroke: axisColor,
-    size: 5,
-  },
-  gridLine: {
-    horizontal: {
-      dash: [1, 2],
-    },
-    vertical: {
-      strokeWidth: 1,
-    },
-  },
-};
-const chartTheme: PartialTheme = {
-  axes,
-  legend: {
-    spacingBuffer: 100,
-  },
-  areaSeriesStyle: {
-    line: {
-      visible: false,
-    },
-  },
-};
 
 interface CorrelationsChartProps {
   field?: string;
@@ -91,7 +51,7 @@ interface CorrelationsChartProps {
   selection?: [number, number];
 }
 
-const getAnnotationsStyle = (color = 'gray') => ({
+const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
   line: {
     strokeWidth: 1,
     stroke: color,
@@ -141,6 +101,7 @@ export function TransactionDistributionChart({
   onChartSelection,
   selection,
 }: CorrelationsChartProps) {
+  const chartTheme = useChartTheme();
   const euiTheme = useTheme();
 
   const patchedOverallHistogram = useMemo(
@@ -209,7 +170,28 @@ export function TransactionDistributionChart({
         <Chart>
           <Settings
             rotation={0}
-            theme={chartTheme}
+            theme={{
+              ...chartTheme,
+              legend: {
+                spacingBuffer: 100,
+              },
+              areaSeriesStyle: {
+                line: {
+                  visible: false,
+                },
+              },
+              axes: {
+                ...chartTheme.axes,
+                tickLine: {
+                  size: 5,
+                },
+                tickLabel: {
+                  fontSize: 10,
+                  fill: euiTheme.eui.euiColorMediumShade,
+                  padding: 0,
+                },
+              },
+            }}
             showLegend
             legendPosition={Position.Bottom}
             onBrushEnd={onChartSelection}
@@ -220,8 +202,8 @@ export function TransactionDistributionChart({
               id="rect_annotation_1"
               style={{
                 strokeWidth: 1,
-                stroke: '#e5e5e5',
-                fill: '#e5e5e5',
+                stroke: euiTheme.eui.euiColorLightShade,
+                fill: euiTheme.eui.euiColorLightShade,
                 opacity: 0.9,
               }}
               hideTooltips={true}
@@ -249,7 +231,7 @@ export function TransactionDistributionChart({
                   defaultMessage: 'Current sample',
                 }
               )}
-              markerPosition={'top'}
+              markerPosition={'bottom'}
             />
           )}
           <LineAnnotation
@@ -275,6 +257,7 @@ export function TransactionDistributionChart({
                   : converted.convertedValue;
               return `${convertedValue}${converted.unitLabel}`;
             }}
+            gridLine={{ visible: false }}
           />
           <Axis
             id="y-axis"
@@ -285,11 +268,12 @@ export function TransactionDistributionChart({
             )}
             position={Position.Left}
             ticks={yTicks}
+            gridLine={{ visible: true }}
           />
           <AreaSeries
             id={i18n.translate(
-              'xpack.apm.transactionDistribution.chart.overallLatencyDistributionLabel',
-              { defaultMessage: 'Overall latency distribution' }
+              'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
+              { defaultMessage: 'All transactions' }
             )}
             xScaleType={ScaleType.Log}
             yScaleType={ScaleType.Log}
