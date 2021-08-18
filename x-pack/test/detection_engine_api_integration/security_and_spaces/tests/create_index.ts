@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send()
           .expect(200);
         expect(body).to.eql({
-          index_mapping_outdated: null,
+          index_mapping_outdated: false,
           name: `${DEFAULT_SIGNALS_INDEX}-default`,
         });
       });
