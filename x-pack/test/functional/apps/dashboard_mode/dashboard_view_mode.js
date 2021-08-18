@@ -61,6 +61,8 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/dashboard_view_mode'
       );
+      const types = ['search', 'dashboard', 'visualization', 'search-session'];
+      await kibanaServer.savedObjects.clean({ types });
     });
 
     describe('Dashboard viewer', () => {
@@ -87,7 +89,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      before('Create user with mixes roles', async () => {
+      before('Create user with mixed roles', async () => {
         await PageObjects.security.createUser({
           username: 'mixeduser',
           password: '123456',
