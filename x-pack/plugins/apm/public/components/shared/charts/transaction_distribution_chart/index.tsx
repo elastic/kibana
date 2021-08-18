@@ -22,6 +22,7 @@ import {
   RecursivePartial,
   ScaleType,
   Settings,
+  LineAnnotationStyle,
 } from '@elastic/charts';
 
 import euiVars from '@elastic/eui/dist/eui_theme_light.json';
@@ -91,7 +92,7 @@ interface CorrelationsChartProps {
   selection?: [number, number];
 }
 
-const getAnnotationsStyle = (color = 'gray') => ({
+const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
   line: {
     strokeWidth: 1,
     stroke: color,
