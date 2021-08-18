@@ -8,6 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import '../../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor/jest_mock';
 import { setupEnvironment } from './helpers';
 import { setup, ComponentTemplateCreateTestBed } from './helpers/component_template_create.helpers';
 
@@ -74,7 +75,7 @@ describe('<ComponentTemplateCreate />', () => {
 
         // Meta editor should be hidden by default
         // Since the editor itself is mocked, we checked for the mocked element
-        expect(exists('mockCodeEditor')).toBe(false);
+        expect(exists('metaEditor')).toBe(false);
 
         await act(async () => {
           actions.toggleMetaSwitch();
@@ -82,7 +83,7 @@ describe('<ComponentTemplateCreate />', () => {
 
         component.update();
 
-        expect(exists('mockCodeEditor')).toBe(true);
+        expect(exists('metaEditor')).toBe(true);
       });
 
       describe('Validation', () => {

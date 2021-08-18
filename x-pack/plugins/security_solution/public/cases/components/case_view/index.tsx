@@ -7,7 +7,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   getCaseDetailsUrl,
   getCaseDetailsUrlWithCommentId,
@@ -53,13 +53,17 @@ export interface CaseProps extends Props {
   updateCase: (newCase: Case) => void;
 }
 
-const TimelineDetailsPanel = () => {
+const SECURITY_SOLUTION_ALERT_CONSUMERS: AlertConsumers[] = [AlertConsumers.SIEM];
+
+const TimelineDetailsPanel = ({ alertConsumers }: { alertConsumers?: AlertConsumers[] }) => {
   const { browserFields, docValueFields } = useSourcererScope(SourcererScopeName.detections);
 
   return (
     <DetailsPanel
+      alertConsumers={alertConsumers}
       browserFields={browserFields}
       docValueFields={docValueFields}
+      entityType="alerts"
       isFlyoutView
       timelineId={TimelineId.casePage}
     />
@@ -228,6 +232,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         showAlertDetails,
         subCaseId,
         timelineIntegration: {
+          alertConsumers: SECURITY_SOLUTION_ALERT_CONSUMERS,
           editor_plugins: {
             parsingPlugin: timelineMarkdownPlugin.parser,
             processingPluginRenderer: timelineMarkdownPlugin.renderer,

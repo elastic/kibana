@@ -16,7 +16,7 @@ import { getThroughputUnit } from '../lib/helpers/calculate_throughput';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
-import { getServiceAgentName } from '../lib/services/get_service_agent_name';
+import { getServiceAgent } from '../lib/services/get_service_agent';
 import { getServiceAlerts } from '../lib/services/get_service_alerts';
 import { getServiceDependencies } from '../lib/services/get_service_dependencies';
 import { getServiceInstanceMetadataDetails } from '../lib/services/get_service_instance_metadata_details';
@@ -120,9 +120,13 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
     const { params } = resources;
     const { serviceName } = params.path;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      apmEventClient: setup.apmEventClient,
+      config: setup.config,
+      start: setup.start,
+      end: setup.end,
+      kuery: '',
+    });
 
     return getServiceMetadataDetails({
       serviceName,
@@ -144,9 +148,13 @@ const serviceMetadataIconsRoute = createApmServerRoute({
     const { params } = resources;
     const { serviceName } = params.path;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      apmEventClient: setup.apmEventClient,
+      config: setup.config,
+      start: setup.start,
+      end: setup.end,
+      kuery: '',
+    });
 
     return getServiceMetadataIcons({
       serviceName,
@@ -156,8 +164,8 @@ const serviceMetadataIconsRoute = createApmServerRoute({
   },
 });
 
-const serviceAgentNameRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/agent_name',
+const serviceAgentRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/agent',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -169,11 +177,15 @@ const serviceAgentNameRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      apmEventClient: setup.apmEventClient,
+      config: setup.config,
+      start: setup.start,
+      end: setup.end,
+      kuery: '',
+    });
 
-    return getServiceAgentName({
+    return getServiceAgent({
       serviceName,
       setup,
       searchAggregatedTransactions,
@@ -198,9 +210,13 @@ const serviceTransactionTypesRoute = createApmServerRoute({
     return getServiceTransactionTypes({
       serviceName,
       setup,
-      searchAggregatedTransactions: await getSearchAggregatedTransactions(
-        setup
-      ),
+      searchAggregatedTransactions: await getSearchAggregatedTransactions({
+        apmEventClient: setup.apmEventClient,
+        config: setup.config,
+        start: setup.start,
+        end: setup.end,
+        kuery: '',
+      }),
     });
   },
 });
@@ -248,17 +264,22 @@ const serviceAnnotationsRoute = createApmServerRoute({
 
     const { observability } = plugins;
 
-    const [
-      annotationsClient,
-      searchAggregatedTransactions,
-    ] = await Promise.all([
-      observability
-        ? withApmSpan('get_scoped_annotations_client', () =>
-            observability.setup.getScopedAnnotationsClient(context, request)
-          )
-        : undefined,
-      getSearchAggregatedTransactions(setup),
-    ]);
+    const [annotationsClient, searchAggregatedTransactions] = await Promise.all(
+      [
+        observability
+          ? withApmSpan('get_scoped_annotations_client', () =>
+              observability.setup.getScopedAnnotationsClient(context, request)
+            )
+          : undefined,
+        getSearchAggregatedTransactions({
+          apmEventClient: setup.apmEventClient,
+          config: setup.config,
+          start: setup.start,
+          end: setup.end,
+          kuery: '',
+        }),
+      ]
+    );
 
     return getServiceAnnotations({
       environment,
@@ -888,7 +909,7 @@ export const serviceRouteRepository = createApmServerRouteRepository()
   .add(servicesDetailedStatisticsRoute)
   .add(serviceMetadataDetailsRoute)
   .add(serviceMetadataIconsRoute)
-  .add(serviceAgentNameRoute)
+  .add(serviceAgentRoute)
   .add(serviceTransactionTypesRoute)
   .add(serviceNodeMetadataRoute)
   .add(serviceAnnotationsRoute)
