@@ -284,7 +284,7 @@ export class TelemetryEventsSender {
       listId,
       page: 1,
       perPage: this.max_records,
-      filter: '',
+      filter: undefined,
       namespaceType: 'agnostic',
       sortField: 'name',
       sortOrder: 'asc',

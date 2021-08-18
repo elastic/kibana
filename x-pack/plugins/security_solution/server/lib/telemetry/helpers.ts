@@ -104,6 +104,8 @@ export const exceptionListItemToEndpointEntry = (exceptionListItem: ExceptionLis
     created_by: exceptionListItem.created_by,
     updated_at: exceptionListItem.updated_at,
     updated_by: exceptionListItem.updated_by,
+    entries: exceptionListItem.entries,
+    os_types: exceptionListItem.os_types,
   } as EndpointExceptionListItem;
 };
 

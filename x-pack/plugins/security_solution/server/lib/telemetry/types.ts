@@ -172,6 +172,8 @@ export interface EndpointExceptionListItem {
   created_by: string;
   updated_at: string;
   updated_by: string;
+  entries: object;
+  os_types: object;
 }
 
 export interface ListTemplate {
