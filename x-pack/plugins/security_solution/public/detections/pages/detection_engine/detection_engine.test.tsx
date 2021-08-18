@@ -67,11 +67,21 @@ jest.mock('../../../common/lib/kibana', () => {
       services: {
         application: {
           navigateToUrl: jest.fn(),
+          capabilities: {
+            siem: { crud_alerts: true, read_alerts: true },
+          },
         },
         timelines: { ...mockTimelines },
         data: {
           query: {
             filterManager: jest.fn().mockReturnValue({}),
+          },
+        },
+        docLinks: {
+          links: {
+            siem: {
+              gettingStarted: 'link',
+            },
           },
         },
       },

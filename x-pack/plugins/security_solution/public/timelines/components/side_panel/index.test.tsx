@@ -21,8 +21,34 @@ import { DetailsPanel } from './index';
 import { TimelineExpandedDetail, TimelineTabs } from '../../../../common/types/timeline';
 import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../common/lib/kibana');
 
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        application: {
+          navigateToUrl: jest.fn(),
+          capabilities: {
+            actions: jest.fn().mockReturnValue({}),
+            siem: { crud_alerts: true, read_alerts: true },
+          },
+        },
+        data: {
+          query: {
+            filterManager: jest.fn().mockReturnValue({}),
+          },
+        },
+      },
+    }),
+    useToasts: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+    }),
+  };
+});
 describe('Details Panel Component', () => {
   const state: State = { ...mockGlobalState };
 

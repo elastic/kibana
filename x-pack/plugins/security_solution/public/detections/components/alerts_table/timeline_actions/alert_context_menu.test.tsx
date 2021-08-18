@@ -36,6 +36,9 @@ jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       timelines: { ...mockTimelines },
+      application: {
+        capabilities: { siem: { crud_alerts: true, read_alerts: true } },
+      },
     },
   }),
   useGetUserCasesPermissions: jest.fn().mockReturnValue({

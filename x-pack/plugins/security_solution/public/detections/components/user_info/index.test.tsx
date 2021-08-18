@@ -47,6 +47,7 @@ describe('useUserInfo', () => {
         hasIndexManage: null,
         hasIndexMaintenance: null,
         hasIndexWrite: null,
+        hasIndexRead: null,
         hasIndexUpdateDelete: null,
         isAuthenticated: null,
         isSignalIndexExists: null,
@@ -66,7 +67,11 @@ describe('useUserInfo', () => {
     });
     const wrapper = ({ children }: { children: JSX.Element }) => (
       <TestProviders>
-        <UserPrivilegesProvider kibanaCapabilities={{ siem: {} } as Capabilities}>
+        <UserPrivilegesProvider
+          kibanaCapabilities={
+            ({ siem: { crud_alerts: true, read_alerts: true } } as unknown) as Capabilities
+          }
+        >
           <ManageUserInfo>{children}</ManageUserInfo>
         </UserPrivilegesProvider>
       </TestProviders>
