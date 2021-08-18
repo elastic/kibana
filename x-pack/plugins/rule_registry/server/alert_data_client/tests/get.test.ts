@@ -8,6 +8,7 @@
 import {
   ALERT_RULE_CONSUMER,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
   SPACE_IDS,
   ALERT_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
@@ -93,7 +94,7 @@ describe('get()', () => {
                   [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
                   [ALERT_RULE_CONSUMER]: 'apm',
-                  [ALERT_STATUS]: 'open',
+                  [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                   [SPACE_IDS]: ['test_default_space_id'],
                 },
               },
@@ -107,7 +108,7 @@ describe('get()', () => {
       Object {
         "kibana.alert.rule.consumer": "apm",
         "kibana.alert.rule.rule_type_id": "apm.error_rate",
-        "kibana.alert.status": "open",
+        "kibana.alert.status": "active",
         "kibana.space_ids": Array [
           "test_default_space_id",
         ],
@@ -198,7 +199,7 @@ describe('get()', () => {
                   [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
                   [ALERT_RULE_CONSUMER]: 'apm',
-                  [ALERT_STATUS]: 'open',
+                  [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                   [SPACE_IDS]: ['test_default_space_id'],
                 },
               },
@@ -248,7 +249,7 @@ describe('get()', () => {
                 _source: {
                   [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
                   [ALERT_RULE_CONSUMER]: 'apm',
-                  [ALERT_STATUS]: 'open',
+                  [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
@@ -321,7 +322,7 @@ describe('get()', () => {
                     [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                     message: 'hello world 1',
                     [ALERT_RULE_CONSUMER]: 'apm',
-                    [ALERT_STATUS]: 'open',
+                    [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                     [SPACE_IDS]: ['test_default_space_id'],
                   },
                 },
@@ -343,7 +344,7 @@ describe('get()', () => {
         Object {
           "kibana.alert.rule.consumer": "apm",
           "kibana.alert.rule.rule_type_id": "apm.error_rate",
-          "kibana.alert.status": "open",
+          "kibana.alert.status": "active",
           "kibana.space_ids": Array [
             "test_default_space_id",
           ],

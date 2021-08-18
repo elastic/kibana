@@ -10,6 +10,7 @@ import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAMESPACE,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
 } from '@kbn/rule-data-utils';
@@ -71,7 +72,7 @@ describe('buildAlert', () => {
       ],
       [ALERT_ORIGINAL_TIME]: '2020-04-20T21:27:45.000Z',
       [ALERT_REASON]: 'alert reasonable reason',
-      [ALERT_STATUS]: 'open',
+      [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
       [ALERT_WORKFLOW_STATUS]: 'open',
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         author: [],
@@ -148,7 +149,7 @@ describe('buildAlert', () => {
         module: 'system',
       },
       [ALERT_REASON]: 'alert reasonable reason',
-      [ALERT_STATUS]: 'open',
+      [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
       [ALERT_WORKFLOW_STATUS]: 'open',
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         author: [],

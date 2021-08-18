@@ -9,6 +9,7 @@ import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_RISK_SCORE,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
   ECS_VERSION,
   ALERT_RULE_TYPE_ID,
   SPACE_IDS,
@@ -29,7 +30,7 @@ const getMockAlert = (): ParsedTechnicalFields => ({
   [VERSION]: '7.13.0',
   [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
   [ALERT_RULE_CONSUMER]: 'apm',
-  [ALERT_STATUS]: 'open',
+  [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
   [ALERT_RULE_RISK_SCORE]: 20,
   [SPACE_IDS]: ['fake-space-id'],
 });
