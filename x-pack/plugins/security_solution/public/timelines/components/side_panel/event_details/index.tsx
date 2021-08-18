@@ -35,7 +35,6 @@ import { TimelineNonEcsData } from '../../../../../common';
 import { Ecs } from '../../../../../common/ecs';
 import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
-import { SECURITY_SOLUTION_ALERT_CONSUMERS } from '../../../../../common/constants';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -68,6 +67,8 @@ interface EventDetailsPanelProps {
   tabType: TimelineTabs;
   timelineId: string;
 }
+
+const SECURITY_SOLUTION_ALERT_CONSUMERS: AlertConsumers[] = [AlertConsumers.SIEM];
 
 const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   alertConsumers = SECURITY_SOLUTION_ALERT_CONSUMERS, // Default to Security Solution so only other applications have to pass this in

@@ -7,6 +7,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   getCaseDetailsUrl,
   getCaseDetailsUrlWithCommentId,
@@ -19,7 +20,7 @@ import { Case, CaseViewRefreshPropInterface } from '../../../../../cases/common'
 import { TimelineId } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';
-import { APP_ID, SECURITY_SOLUTION_ALERT_CONSUMERS } from '../../../../common/constants';
+import { APP_ID } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -32,7 +33,6 @@ import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import * as timelineMarkdownPlugin from '../../../common/components/markdown_editor/plugins/timeline';
 import { CaseDetailsRefreshContext } from '../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { getEndpointDetailsPath } from '../../../management/common/routing';
-import { EntityType } from '../../../../../timelines/common';
 
 interface Props {
   caseId: string;
@@ -52,6 +52,8 @@ export interface CaseProps extends Props {
   caseData: Case;
   updateCase: (newCase: Case) => void;
 }
+
+const SECURITY_SOLUTION_ALERT_CONSUMERS: AlertConsumers[] = [AlertConsumers.SIEM];
 
 const TimelineDetailsPanel = ({ alertConsumers }: { alertConsumers?: AlertConsumers[] }) => {
   const { browserFields, docValueFields } = useSourcererScope(SourcererScopeName.detections);

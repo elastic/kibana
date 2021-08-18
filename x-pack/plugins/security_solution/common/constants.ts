@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 import { metadataTransformPattern } from './endpoint/constants';
@@ -311,5 +310,3 @@ export const showAllOthersBucket: string[] = [
 export const ELASTIC_NAME = 'estc';
 
 export const TRANSFORM_STATS_URL = `/api/transform/transforms/${metadataTransformPattern}-*/_stats`;
-
-export const SECURITY_SOLUTION_ALERT_CONSUMERS: AlertConsumers[] = [AlertConsumers.SIEM];
