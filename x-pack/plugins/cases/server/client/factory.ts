@@ -21,6 +21,7 @@ import {
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
 import { RuleRegistryPluginStartContract } from '../../../rule_registry/server';
+import { LensServerPluginSetup } from '../../../lens/server';
 import { AuthorizationAuditLogger } from '../authorization';
 import { CasesClient, createCasesClient } from '.';
 
@@ -31,6 +32,7 @@ interface CasesClientFactoryArgs {
   featuresPluginStart: FeaturesPluginStart;
   actionsPluginStart: ActionsPluginStart;
   ruleRegistryPluginStart?: RuleRegistryPluginStartContract;
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }
 
 /**
@@ -106,6 +108,7 @@ export class CasesClientFactory {
       userActionService: new CaseUserActionService(this.logger),
       attachmentService: new AttachmentService(this.logger),
       logger: this.logger,
+      lensEmbeddableFactory: this.options.lensEmbeddableFactory,
       authorization: auth,
       actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
     });

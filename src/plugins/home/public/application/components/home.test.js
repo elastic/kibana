@@ -188,7 +188,9 @@ describe('home', () => {
       defaultProps.localStorage.getItem = sinon.spy(() => 'true');
 
       const component = await renderHome({
-        find: () => Promise.resolve({ total: 0 }),
+        http: {
+          get: () => Promise.resolve({ isNewInstance: true }),
+        },
       });
 
       sinon.assert.calledOnce(defaultProps.localStorage.getItem);

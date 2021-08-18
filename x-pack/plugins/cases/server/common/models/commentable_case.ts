@@ -10,9 +10,11 @@ import {
   SavedObject,
   SavedObjectReference,
   SavedObjectsClientContract,
+  SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   Logger,
 } from 'src/core/server';
+import { LensServerPluginSetup } from '../../../../lens/server';
 import {
   AssociationType,
   CASE_SAVED_OBJECT,
@@ -29,6 +31,7 @@ import {
   SUB_CASE_SAVED_OBJECT,
   SubCaseAttributes,
   User,
+  CommentRequestUserType,
   CaseAttributes,
 } from '../../../common';
 import {
@@ -41,6 +44,7 @@ import { AttachmentService, CasesService } from '../../services';
 import { createCaseError } from '../error';
 import { countAlertsForID } from '../index';
 import { CasesClientInternal } from '../../client';
+import { getOrUpdateLensReferences } from '../utils';
 
 interface UpdateCommentResp {
   comment: SavedObjectsUpdateResponse<CommentAttributes>;
@@ -59,6 +63,7 @@ interface CommentableCaseParams {
   caseService: CasesService;
   attachmentService: AttachmentService;
   logger: Logger;
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }
 
 /**
@@ -72,6 +77,7 @@ export class CommentableCase {
   private readonly caseService: CasesService;
   private readonly attachmentService: AttachmentService;
   private readonly logger: Logger;
+  private readonly lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 
   constructor({
     collection,
@@ -80,6 +86,7 @@ export class CommentableCase {
     caseService,
     attachmentService,
     logger,
+    lensEmbeddableFactory,
   }: CommentableCaseParams) {
     this.collection = collection;
     this.subCase = subCase;
@@ -87,6 +94,7 @@ export class CommentableCase {
     this.caseService = caseService;
     this.attachmentService = attachmentService;
     this.logger = logger;
+    this.lensEmbeddableFactory = lensEmbeddableFactory;
   }
 
   public get status(): CaseStatuses {
@@ -194,6 +202,7 @@ export class CommentableCase {
         caseService: this.caseService,
         attachmentService: this.attachmentService,
         logger: this.logger,
+        lensEmbeddableFactory: this.lensEmbeddableFactory,
       });
     } catch (error) {
       throw createCaseError({
@@ -218,6 +227,23 @@ export class CommentableCase {
   }): Promise<UpdateCommentResp> {
     try {
       const { id, version, ...queryRestAttributes } = updateRequest;
+      const options: SavedObjectsUpdateOptions<CommentAttributes> = {
+        version,
+      };
+
+      if (queryRestAttributes.type === CommentType.user && queryRestAttributes?.comment) {
+        const currentComment = (await this.attachmentService.get({
+          unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
+          attachmentId: id,
+        })) as SavedObject<CommentRequestUserType>;
+
+        const updatedReferences = getOrUpdateLensReferences(
+          this.lensEmbeddableFactory,
+          queryRestAttributes.comment,
+          currentComment
+        );
+        options.references = updatedReferences;
+      }
 
       const [comment, commentableCase] = await Promise.all([
         this.attachmentService.update({
@@ -228,7 +254,7 @@ export class CommentableCase {
             updated_at: updatedAt,
             updated_by: user,
           },
-          version,
+          options,
         }),
         this.update({ date: updatedAt, user }),
       ]);
@@ -280,6 +306,16 @@ export class CommentableCase {
       // we'll throw an error early before creating the attachment
       await this.syncAlertStatus(commentReq, casesClientInternal);
 
+      let references = this.buildRefsToCase();
+
+      if (commentReq.type === CommentType.user && commentReq?.comment) {
+        const commentStringReferences = getOrUpdateLensReferences(
+          this.lensEmbeddableFactory,
+          commentReq.comment
+        );
+        references = [...references, ...commentStringReferences];
+      }
+
       const [comment, commentableCase] = await Promise.all([
         this.attachmentService.create({
           unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
@@ -289,7 +325,7 @@ export class CommentableCase {
             ...commentReq,
             ...user,
           }),
-          references: this.buildRefsToCase(),
+          references,
           id,
         }),
         this.update({ date: createdDate, user }),
