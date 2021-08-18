@@ -41,7 +41,9 @@ def test() {
 def ossCiGroups() {
 //  def ciGroups = 1..12
 //  tasks(ciGroups.collect { kibanaPipeline.ossCiGroupProcess(it, true) })
-  task(kibanaPipeline.ossCiGroupProcess(99, true))
+  task {
+    kibanaPipeline.ossCiGroupProcess(99, true)
+  }
 }
 
 def xpackCiGroups() {
