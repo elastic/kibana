@@ -5,13 +5,22 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'kibana/server';
+import {
+  CoreStart,
+  SavedObject,
+  SavedObjectsExportTransformContext,
+  SavedObjectsType,
+} from 'kibana/server';
 import {
   exceptionListAgnosticSavedObjectType,
   exceptionListSavedObjectType,
 } from '@kbn/securitysolution-list-utils';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+
+import { ExceptionListSoSchema } from '../schemas/saved_objects/exceptions_list_so_schema';
 
 import { migrations } from './migrations';
+import { onExport } from './on_export';
 
 /**
  * This is a super set of exception list and exception list items. The switch
@@ -176,18 +185,46 @@ const combinedMappings: SavedObjectsType['mappings'] = {
   },
 };
 
-export const exceptionListType: SavedObjectsType = {
+export const getExceptionListType = (
+  startServices: Promise<[CoreStart, object, unknown]>
+): SavedObjectsType => ({
   hidden: false,
+  management: {
+    getTitle(savedObject: SavedObject<ExceptionListItemSchema>): string {
+      return `Exception List: [${savedObject.attributes.name}]`;
+    },
+    importableAndExportable: true,
+    onExport(
+      context: SavedObjectsExportTransformContext,
+      exceptionLists: Array<SavedObject<ExceptionListSoSchema>>
+    ): Promise<Array<SavedObject<ExceptionListSoSchema>>> {
+      return onExport({ context, exceptionLists, startServices });
+    },
+  },
   mappings: combinedMappings,
   migrations,
   name: exceptionListSavedObjectType,
   namespaceType: 'single',
-};
+});
 
-export const exceptionListAgnosticType: SavedObjectsType = {
+export const exceptionListAgnosticType = (
+  startServices: Promise<[CoreStart, object, unknown]>
+): SavedObjectsType => ({
   hidden: false,
+  management: {
+    getTitle(savedObject: SavedObject<ExceptionListItemSchema>): string {
+      return `Exception List: [${savedObject.attributes.name}]`;
+    },
+    importableAndExportable: true,
+    onExport(
+      context: SavedObjectsExportTransformContext,
+      exceptionLists: Array<SavedObject<ExceptionListSoSchema>>
+    ): Promise<Array<SavedObject<ExceptionListSoSchema>>> {
+      return onExport({ context, exceptionLists, startServices });
+    },
+  },
   mappings: combinedMappings,
   migrations,
   name: exceptionListAgnosticSavedObjectType,
   namespaceType: 'agnostic',
-};
+});

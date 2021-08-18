@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/server';
+import { CoreSetup, CoreStart } from 'kibana/server';
 
-import { exceptionListAgnosticType, exceptionListType } from './exception_list';
+import { exceptionListAgnosticType, getExceptionListType } from './exception_list';
 
-export const initSavedObjects = (savedObjects: CoreSetup['savedObjects']): void => {
-  savedObjects.registerType(exceptionListAgnosticType);
-  savedObjects.registerType(exceptionListType);
+export const initSavedObjects = (
+  savedObjects: CoreSetup['savedObjects'],
+  startServices: Promise<[CoreStart, object, unknown]>
+): void => {
+  savedObjects.registerType(exceptionListAgnosticType(startServices));
+  savedObjects.registerType(getExceptionListType(startServices));
 };

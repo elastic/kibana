@@ -40,9 +40,9 @@ export class ListPlugin
   }
 
   public async setup(core: CoreSetup): Promise<ListPluginSetup> {
+    const startServices = core.getStartServices();
     const { config } = this;
-
-    initSavedObjects(core.savedObjects);
+    initSavedObjects(core.savedObjects, startServices);
 
     core.http.registerRouteHandlerContext<ListsRequestHandlerContext, 'lists'>(
       'lists',
