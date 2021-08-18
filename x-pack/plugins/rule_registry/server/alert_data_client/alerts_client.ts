@@ -56,7 +56,7 @@ type AlertType = { _index: string; _id: string } & NonNullableProps<
   typeof ALERT_RULE_TYPE_ID | typeof ALERT_RULE_CONSUMER | typeof SPACE_IDS
 >;
 
-const isValidAlert = (source?: estypes.SearchHit<any>): source is AlertType => {
+const isValidAlert = (source?: estypes.SearchHit<ParsedTechnicalFields>): source is AlertType => {
   return (
     (source?._source?.[ALERT_RULE_TYPE_ID] != null &&
       source?._source?.[ALERT_RULE_CONSUMER] != null &&
@@ -93,11 +93,15 @@ interface GetAlertParams {
 }
 
 interface SingleSearchAfterAndAudit {
-  id: string | null | undefined;
-  query: object | string | null | undefined;
+  id?: string | null | undefined;
+  query?: string | object | undefined;
+  aggs?: object | undefined;
   index?: string;
+  _source?: string[] | undefined;
+  track_total_hits?: boolean | undefined;
+  size?: number | undefined;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
-  lastSortIds: Array<string | number> | undefined;
+  lastSortIds?: Array<string | number> | undefined;
 }
 
 /**
@@ -216,6 +220,10 @@ export class AlertsClient {
   private async singleSearchAfterAndAudit({
     id,
     query,
+    aggs,
+    _source,
+    track_total_hits: trackTotalHits,
+    size,
     index,
     operation,
     lastSortIds = [],
@@ -233,6 +241,10 @@ export class AlertsClient {
       let queryBody = {
         fields: [ALERT_RULE_TYPE_ID, ALERT_RULE_CONSUMER, ALERT_WORKFLOW_STATUS, SPACE_IDS],
         query: await this.buildEsQueryWithAuthz(query, id, alertSpaceId, operation, config),
+        aggs,
+        _source,
+        track_total_hits: trackTotalHits,
+        size,
         sort: [
           {
             '@timestamp': {
@@ -265,17 +277,19 @@ export class AlertsClient {
         throw Boom.badData(errorMessage);
       }
 
-      await this.ensureAllAuthorized(result.body.hits.hits, operation);
+      if (result?.body?.hits?.hits != null && result?.body.hits.hits.length > 0) {
+        await this.ensureAllAuthorized(result.body.hits.hits, operation);
 
-      result?.body.hits.hits.map((item) =>
-        this.auditLogger?.log(
-          alertAuditEvent({
-            action: operationAlertAuditActionMap[operation],
-            id: item._id,
-            ...this.getOutcome(operation),
-          })
-        )
-      );
+        result?.body.hits.hits.map((item) =>
+          this.auditLogger?.log(
+            alertAuditEvent({
+              action: operationAlertAuditActionMap[operation],
+              id: item._id,
+              ...this.getOutcome(operation),
+            })
+          )
+        );
+      }
 
       return result.body;
     } catch (error) {
@@ -474,10 +488,8 @@ export class AlertsClient {
       // first search for the alert by id, then use the alert info to check if user has access to it
       const alert = await this.singleSearchAfterAndAudit({
         id,
-        query: undefined,
         index,
         operation: ReadOperations.Get,
-        lastSortIds: undefined,
       });
 
       if (alert == null || alert.hits.hits.length === 0) {
@@ -503,10 +515,8 @@ export class AlertsClient {
     try {
       const alert = await this.singleSearchAfterAndAudit({
         id,
-        query: null,
         index,
         operation: WriteOperations.Update,
-        lastSortIds: undefined,
       });
 
       if (alert == null || alert.hits.hits.length === 0) {
@@ -565,7 +575,7 @@ export class AlertsClient {
         });
 
         if (!fetchAndAuditResponse?.auditedAlerts) {
-          throw Boom.unauthorized('Failed to audit alerts');
+          throw Boom.forbidden('Failed to audit alerts');
         }
 
         // executes updateByQuery with query + authorization filter
@@ -595,6 +605,46 @@ export class AlertsClient {
       }
     } else {
       throw Boom.badRequest('no ids or query were provided for updating');
+    }
+  }
+
+  public async find<Params extends AlertTypeParams = never>({
+    query,
+    aggs,
+    _source,
+    track_total_hits: trackTotalHits,
+    size,
+    index,
+  }: {
+    query?: object | undefined;
+    aggs?: object | undefined;
+    index: string | undefined;
+    track_total_hits?: boolean | undefined;
+    _source?: string[] | undefined;
+    size?: number | undefined;
+  }) {
+    try {
+      // first search for the alert by id, then use the alert info to check if user has access to it
+      const alertsSearchResponse = await this.singleSearchAfterAndAudit({
+        query,
+        aggs,
+        _source,
+        track_total_hits: trackTotalHits,
+        size,
+        index,
+        operation: ReadOperations.Find,
+      });
+
+      if (alertsSearchResponse == null) {
+        const errorMessage = `Unable to retrieve alert details for alert with query and operation ${ReadOperations.Find}`;
+        this.logger.error(errorMessage);
+        throw Boom.notFound(errorMessage);
+      }
+
+      return alertsSearchResponse;
+    } catch (error) {
+      this.logger.error(`find threw an error: ${error}`);
+      throw error;
     }
   }
 
