@@ -82,15 +82,15 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body).to.eql({ message: 'index for this space does not exist', status_code: 404 });
       });
 
-      it('should NOT be able to create a signal index when it has not been created yet. Should return a 403 and error that the user is unauthorized', async () => {
+      it('should be able to create a signal index when it has not been created yet', async () => {
         const { body } = await supertestWithoutAuth
           .post(DETECTION_ENGINE_INDEX_URL)
           .set('kbn-xsrf', 'true')
           .auth(role, 'changeme')
           .send()
-          .expect(403);
-        expect(body.message).to.match(/^security_exception/);
-        expect(body.status_code).to.eql(403);
+          .expect(200);
+
+        expect(body).to.eql({ acknowledged: true });
       });
 
       it('should be able to read the index name and status as not being outdated', async () => {
