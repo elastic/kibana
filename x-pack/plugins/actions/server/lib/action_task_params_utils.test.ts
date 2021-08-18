@@ -12,7 +12,7 @@ import {
 
 describe('extractSavedObjectReferences()', () => {
   test('correctly extracts action id into references array', () => {
-    expect(extractSavedObjectReferences('my-action-id')).toEqual({
+    expect(extractSavedObjectReferences('my-action-id', false)).toEqual({
       references: [
         {
           id: 'my-action-id',
@@ -43,13 +43,78 @@ describe('extractSavedObjectReferences()', () => {
       },
     ];
 
-    expect(extractSavedObjectReferences('my-action-id', relatedSavedObjects)).toEqual({
+    expect(extractSavedObjectReferences('my-action-id', false, relatedSavedObjects)).toEqual({
       references: [
         {
           id: 'my-action-id',
           name: 'actionRef',
           type: 'action',
         },
+        {
+          id: 'abc',
+          name: 'related_alert_0',
+          type: 'alert',
+        },
+        {
+          id: 'def',
+          name: 'related_action_1',
+          type: 'action',
+        },
+        {
+          id: 'xyz',
+          name: 'related_alert_2',
+          type: 'alert',
+        },
+      ],
+      relatedSavedObjectRefs: [
+        {
+          ref: 'related_alert_0',
+          type: 'alert',
+          typeId: 'ruleTypeA',
+        },
+        {
+          ref: 'related_action_1',
+          type: 'action',
+          typeId: 'connectorTypeB',
+        },
+        {
+          ref: 'related_alert_2',
+          type: 'alert',
+          typeId: 'ruleTypeB',
+          namespace: 'custom',
+        },
+      ],
+    });
+  });
+
+  test('correctly skips extracting action id if action is preconfigured', () => {
+    expect(extractSavedObjectReferences('my-action-id', true)).toEqual({
+      references: [],
+    });
+  });
+
+  test('correctly extracts related saved object into references array if isPreconfigured is true', () => {
+    const relatedSavedObjects = [
+      {
+        id: 'abc',
+        type: 'alert',
+        typeId: 'ruleTypeA',
+      },
+      {
+        id: 'def',
+        type: 'action',
+        typeId: 'connectorTypeB',
+      },
+      {
+        id: 'xyz',
+        type: 'alert',
+        typeId: 'ruleTypeB',
+        namespace: 'custom',
+      },
+    ];
+
+    expect(extractSavedObjectReferences('my-action-id', true, relatedSavedObjects)).toEqual({
+      references: [
         {
           id: 'abc',
           name: 'related_alert_0',

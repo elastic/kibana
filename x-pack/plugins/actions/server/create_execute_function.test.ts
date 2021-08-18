@@ -230,11 +230,6 @@ describe('execute()', () => {
             name: 'source',
             type: source.type,
           },
-          {
-            id: '123',
-            name: 'actionRef',
-            type: 'action',
-          },
         ],
       }
     );
@@ -325,11 +320,6 @@ describe('execute()', () => {
             id: source.id,
             name: 'source',
             type: source.type,
-          },
-          {
-            id: '123',
-            name: 'actionRef',
-            type: 'action',
           },
           {
             id: 'some-id',
