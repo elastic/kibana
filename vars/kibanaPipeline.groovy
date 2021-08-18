@@ -470,28 +470,28 @@ def allCiTasks() {
   parallel([
     general: {
       withTasks {
-        tasks.check()
-        tasks.lint()
-        tasks.test()
+//        tasks.check()
+//        tasks.lint()
+//        tasks.test()
         task {
           buildKibana(16)
           tasks.functionalOss()
-          tasks.functionalXpack()
+//          tasks.functionalXpack()
         }
-        tasks.storybooksCi()
+//        tasks.storybooksCi()
       }
     },
-    jest: {
-      workers.ci(name: 'jest', size: 'n2-standard-16', ramDisk: false) {
-        catchErrors {
-          scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh')()
-        }
-
-        catchErrors {
-          runbld.junit()
-        }
-      }
-    },
+//    jest: {
+//      workers.ci(name: 'jest', size: 'n2-standard-16', ramDisk: false) {
+//        catchErrors {
+//          scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh')()
+//        }
+//
+//        catchErrors {
+//          runbld.junit()
+//        }
+//      }
+//    },
   ])
 }
 
