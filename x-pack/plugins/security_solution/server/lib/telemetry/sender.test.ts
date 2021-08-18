@@ -182,7 +182,7 @@ describe('TelemetryEventsSender', () => {
         };
       });
       sender['sendEvents'] = jest.fn(async () => {
-        sender['telemetryUsageCounter'].incrementCounter({
+        sender['telemetryUsageCounter']?.incrementCounter({
           counterName: 'test_counter',
           counterType: 'invoked',
           incrementBy: 1,
