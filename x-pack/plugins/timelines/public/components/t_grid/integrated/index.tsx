@@ -232,6 +232,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     loading,
     { events, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
+    // We rely on entityType to determine Events vs Alerts
     alertConsumers: SECURITY_ALERTS_CONSUMERS,
     docValueFields,
     entityType,

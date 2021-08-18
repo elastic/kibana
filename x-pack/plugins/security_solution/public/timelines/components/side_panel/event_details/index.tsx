@@ -35,6 +35,7 @@ import { TimelineNonEcsData } from '../../../../../common';
 import { Ecs } from '../../../../../common/ecs';
 import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
+import { SECURITY_SOLUTION_ALERT_CONSUMERS } from '../../../../../common/constants';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -69,10 +70,10 @@ interface EventDetailsPanelProps {
 }
 
 const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
-  alertConsumers,
+  alertConsumers = SECURITY_SOLUTION_ALERT_CONSUMERS, // Default to Security Solution so only other applications have to pass this in
   browserFields,
   docValueFields,
-  entityType,
+  entityType = 'events', // Default to events so only alerts have to pass entityType in
   expandedEvent,
   handleOnEventClosed,
   isFlyoutView,

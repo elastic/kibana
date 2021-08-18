@@ -16,7 +16,6 @@ import {
   EuiPanel,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -70,8 +69,6 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 const Username = styled(EuiText)`
   font-weight: bold;
 `;
-
-const alertConsumers: AlertConsumers[] = [AlertConsumers.SIEM];
 
 interface UsernameWithAvatar {
   username: string;
@@ -185,7 +182,6 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
     () =>
       expandedDetail[TimelineTabs.notes]?.panelView ? (
         <DetailsPanel
-          alertConsumers={alertConsumers}
           browserFields={browserFields}
           docValueFields={docValueFields}
           handleOnPanelClosed={handleOnPanelClosed}
