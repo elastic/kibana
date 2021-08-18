@@ -131,7 +131,6 @@ export interface TGridIntegratedProps {
   query: Query;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
-  setGlobalFullScreen: (fullscreen: boolean) => void;
   sort: Sort[];
   start: string;
   tGridEventRenderedViewEnabled: boolean;
@@ -168,7 +167,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   query,
   renderCellValue,
   rowRenderers,
-  setGlobalFullScreen,
   sort,
   start,
   tGridEventRenderedViewEnabled,
@@ -341,33 +339,33 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                   ) : (
                     <>
                       <StatefulBody
-                        hasAlertsCrud={hasAlertsCrud}
                         activePage={pageInfo.activePage}
                         browserFields={browserFields}
-                        filterQuery={filterQuery}
                         data={nonDeletedEvents}
                         defaultCellActions={defaultCellActions}
+                        filterQuery={filterQuery}
+                        filterStatus={filterStatus}
+                        hasAlertsCrud={hasAlertsCrud}
                         id={id}
+                        indexNames={indexNames}
                         isEventViewer={true}
                         itemsPerPageOptions={itemsPerPageOptions}
+                        leadingControlColumns={leadingControlColumns}
                         loadPage={loadPage}
                         onRuleChange={onRuleChange}
                         querySize={pageInfo.querySize}
+                        refetch={refetch}
                         renderCellValue={renderCellValue}
                         rowRenderers={rowRenderers}
-                        tabType={TimelineTabs.query}
                         tableView={tableView}
+                        tabType={TimelineTabs.query}
+                        totalItems={totalCountMinusDeleted}
                         totalPages={calculateTotalPages({
                           itemsCount: totalCountMinusDeleted,
                           itemsPerPage,
                         })}
-                        totalItems={totalCountMinusDeleted}
-                        unit={unit}
-                        filterStatus={filterStatus}
-                        leadingControlColumns={leadingControlColumns}
                         trailingControlColumns={trailingControlColumns}
-                        refetch={refetch}
-                        indexNames={indexNames}
+                        unit={unit}
                       />
                       {tableView === 'gridView' && (
                         <Footer

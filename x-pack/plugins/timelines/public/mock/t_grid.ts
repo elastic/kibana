@@ -140,7 +140,6 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   },
   renderCellValue: () => null,
   rowRenderers: [],
-  setGlobalFullScreen: jest.fn(),
   sort: [
     {
       columnId: '@timestamp',
