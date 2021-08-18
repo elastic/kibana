@@ -18642,7 +18642,6 @@
     "xpack.observability.alertsFlyout.ruleTypeLabel": "规则类型",
     "xpack.observability.alertsFlyout.severityLabel": "严重性",
     "xpack.observability.alertsFlyout.statusLabel": "状态",
-    "xpack.observability.alertsFlyout.triggeredLabel": "已触发",
     "xpack.observability.alertsLinkTitle": "告警",
     "xpack.observability.alertsTitle": "告警",
     "xpack.observability.breadcrumbs.alertsLinkText": "告警",
