@@ -41,6 +41,14 @@ const EventRenderedFlexItem = styled(EuiFlexItem)`
   }
 `;
 
+const ActionsContainer = styled.div`
+  display: flex;
+  align-items: center;
+  div div:first-child div.siemEventsTable__tdContent {
+    margin-left: ${({ theme }) => theme.eui.paddingSizes.m};
+  }
+`;
+
 // Fix typing issue with EuiBasicTable and styled
 type BasicTableType = ComponentType<EuiBasicTableProps<TimelineItem>>;
 
@@ -113,25 +121,31 @@ const EventRenderedViewComponent = ({
         name: ActionTitle,
         truncateText: false,
         hideForMobile: false,
+        // eslint-disable-next-line react/display-name
         render: (name: unknown, item: unknown) => {
           const alertId = get(item, '_id');
           const rowIndex = events.findIndex((evt) => evt._id === alertId);
-          return leadingControlColumns.length > 0
-            ? leadingControlColumns.map((action) => {
-                const getActions = action.rowCellRender as (
-                  props: EuiDataGridCellValueElementProps
-                ) => React.ReactNode;
-                return getActions({
-                  columnId: 'actions',
-                  isDetails: false,
-                  isExpandable: false,
-                  isExpanded: false,
-                  rowIndex,
-                  setCellProps: () => null,
-                });
-              })
-            : null;
+          return (
+            <ActionsContainer>
+              {leadingControlColumns.length > 0
+                ? leadingControlColumns.map((action) => {
+                    const getActions = action.rowCellRender as (
+                      props: EuiDataGridCellValueElementProps
+                    ) => React.ReactNode;
+                    return getActions({
+                      columnId: 'actions',
+                      isDetails: false,
+                      isExpandable: false,
+                      isExpanded: false,
+                      rowIndex,
+                      setCellProps: () => null,
+                    });
+                  })
+                : null}
+            </ActionsContainer>
+          );
         },
+        width: '120px',
       },
       {
         field: 'ecs.@timestamp',
