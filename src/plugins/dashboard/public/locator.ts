@@ -7,6 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
+import { flow } from 'lodash';
 import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
 import type { LocatorDefinition, LocatorPublic } from '../../share/public';
 import type { SavedDashboardPanel } from '../common/types';
@@ -16,6 +17,11 @@ import { esFilters } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { ViewMode } from '../../embeddable/public';
 import { DashboardConstants } from './dashboard_constants';
+
+/**
+ * Useful for ensuring that we don't pass any non-serializable values to history.push (for example, functions).
+ */
+const getSerializableRecord: <O>(o: O) => O & SerializableRecord = flow(JSON.stringify, JSON.parse);
 
 const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
   Object.keys(stateObj).forEach((key) => {
@@ -42,7 +48,7 @@ export interface DashboardAppLocatorParams extends SerializableRecord {
   /**
    * Optionally set the refresh interval.
    */
-  refreshInterval?: RefreshInterval & SerializableRecord;
+  refreshInterval?: RefreshInterval;
 
   /**
    * Optionally apply filers. NOTE: if given and used in conjunction with `dashboardId`, and the
@@ -161,7 +167,7 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
     return {
       app: DashboardConstants.DASHBOARDS_ID,
       path,
-      state: cleanEmptyKeys(state),
+      state: getSerializableRecord(cleanEmptyKeys(state)),
     };
   };
 }

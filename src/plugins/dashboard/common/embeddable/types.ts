@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-export interface GridData {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type GridData = {
   w: number;
   h: number;
   x: number;
   y: number;
   i: string;
-}
+};

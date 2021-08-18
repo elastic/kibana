@@ -6,8 +6,6 @@
  */
 
 import type { KibanaLocation } from 'src/plugins/share/public';
-import type { SerializableRecord } from '@kbn/utility-types';
-import { flow } from 'lodash';
 import { DashboardAppLocatorParams } from '../../../../../../../src/plugins/dashboard/public';
 import {
   ApplyGlobalFilterActionContext,
@@ -38,8 +36,6 @@ interface EmbeddableQueryInput extends EmbeddableInput {
 
 type Context = EnhancedEmbeddableContext & ApplyGlobalFilterActionContext;
 export type Params = AbstractDashboardDrilldownParams;
-
-const getSerializableRecord: <O>(o: O) => O & SerializableRecord = flow(JSON.stringify, JSON.parse);
 
 /**
  * This drilldown is the "Go to Dashboard" you can find in Dashboard app panles.
@@ -90,7 +86,7 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
       params.timeRange = timeRangeFromEvent;
     }
 
-    const location = await this.locator.getLocation(getSerializableRecord(params));
+    const location = await this.locator.getLocation(params);
 
     return location;
   }
