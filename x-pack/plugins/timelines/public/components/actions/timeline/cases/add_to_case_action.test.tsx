@@ -11,6 +11,7 @@ import { TestProviders, mockGetAllCasesSelectorModal } from '../../../../mock';
 import { AddToCaseAction } from './add_to_case_action';
 import { SECURITY_SOLUTION_OWNER } from '../../../../../../cases/common';
 import { AddToCaseActionButton } from './add_to_case_action_button';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -21,10 +22,14 @@ jest.mock('./helpers');
 
 describe('AddToCaseAction', () => {
   const props = {
-    ecsRowData: {
+    event: {
       _id: 'test-id',
-      _index: 'test-index',
-      signal: { rule: { id: ['rule-id'], name: ['rule-name'], false_positives: [] } },
+      data: [],
+      ecs: {
+        _id: 'test-id',
+        _index: 'test-index',
+        signal: { rule: { id: ['rule-id'], name: ['rule-name'], false_positives: [] } },
+      },
     },
     casePermissions: {
       crud: true,
@@ -94,18 +99,26 @@ describe('AddToCaseAction', () => {
       <TestProviders>
         <AddToCaseActionButton
           {...props}
-          ecsRowData={{
+          event={{
             _id: 'test-id',
-            _index: 'test-index',
-            signal: { rule: { id: ['rule-id'], false_positives: [] } },
+            data: [{ field: ALERT_RULE_UUID, value: ['rule-id'] }],
+            ecs: {
+              _id: 'test-id',
+              _index: 'test-index',
+              signal: { rule: { id: ['rule-id'], false_positives: [] } },
+            },
           }}
         />
         <AddToCaseAction
           {...props}
-          ecsRowData={{
+          event={{
             _id: 'test-id',
-            _index: 'test-index',
-            signal: { rule: { id: ['rule-id'], false_positives: [] } },
+            data: [{ field: ALERT_RULE_UUID, value: ['rule-id'] }],
+            ecs: {
+              _id: 'test-id',
+              _index: 'test-index',
+              signal: { rule: { id: ['rule-id'], false_positives: [] } },
+            },
           }}
         />
       </TestProviders>
@@ -129,16 +142,24 @@ describe('AddToCaseAction', () => {
       <TestProviders>
         <AddToCaseActionButton
           {...props}
-          ecsRowData={{
+          event={{
             _id: 'test-id',
-            _index: 'test-index',
+            data: [],
+            ecs: {
+              _id: 'test-id',
+              _index: 'test-index',
+            },
           }}
         />
         <AddToCaseAction
           {...props}
-          ecsRowData={{
+          event={{
             _id: 'test-id',
-            _index: 'test-index',
+            data: [],
+            ecs: {
+              _id: 'test-id',
+              _index: 'test-index',
+            },
           }}
         />
       </TestProviders>

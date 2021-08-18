@@ -66,8 +66,10 @@ describe('Body', () => {
     excludedRowRendererIds: [],
     id: 'timeline-test',
     isSelectAllChecked: false,
+    itemsPerPageOptions: [],
     loadingEventIds: [],
     loadPage: jest.fn(),
+    querySize: 25,
     renderCellValue: TestCellRenderer,
     rowRenderers: [],
     selectedEventIds: {},
@@ -75,12 +77,15 @@ describe('Body', () => {
     sort: mockSort,
     showCheckboxes: false,
     tabType: TimelineTabs.query,
+    tableView: 'gridView',
     totalPages: 1,
     totalItems: 1,
     leadingControlColumns: [],
     trailingControlColumns: [],
     filterStatus: 'open',
+    filterQuery: '',
     refetch: jest.fn(),
+    indexNames: [''],
   };
 
   describe('rendering', () => {

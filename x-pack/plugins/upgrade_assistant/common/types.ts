@@ -220,8 +220,8 @@ export interface EnrichedDeprecationInfo extends DeprecationInfo {
   correctiveAction?: ReindexAction | MlAction | IndexSettingAction;
 }
 
-export interface UpgradeAssistantStatus {
-  readyForUpgrade: boolean;
+export interface ESUpgradeStatus {
+  totalCriticalDeprecations: number;
   cluster: EnrichedDeprecationInfo[];
   indices: EnrichedDeprecationInfo[];
 }
@@ -247,4 +247,9 @@ export interface MlOperation extends SavedObjectAttributes {
   nodeId: string;
   snapshotId: string;
   jobId: string;
+}
+
+export interface DeprecationLoggingStatus {
+  isDeprecationLogIndexingEnabled: boolean;
+  isDeprecationLoggingEnabled: boolean;
 }
