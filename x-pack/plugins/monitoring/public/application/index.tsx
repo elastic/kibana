@@ -9,8 +9,8 @@ import { CoreStart, AppMountParameters } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Switch, Redirect, HashRouter } from 'react-router-dom';
-// import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { PageLoading } from '../components';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { LoadingPage } from './pages/loading_page';
 import { MonitoringStartPluginDependencies } from '../types';
 
 export const renderApp = (
@@ -18,7 +18,7 @@ export const renderApp = (
   plugins: MonitoringStartPluginDependencies,
   { element }: AppMountParameters
 ) => {
-  ReactDOM.render(<MonitoringApp core={core} />, element);
+  ReactDOM.render(<MonitoringApp core={core} plugins={plugins} />, element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
@@ -27,12 +27,13 @@ export const renderApp = (
 
 const MonitoringApp: React.FC<{
   core: CoreStart;
-}> = ({ core }) => {
+  plugins: MonitoringStartPluginDependencies;
+}> = ({ core, plugins }) => {
   return (
-    <core.i18n.Context>
+    <KibanaContextProvider services={{ ...core, ...plugins }}>
       <HashRouter>
         <Switch>
-          <Route path="/loading" component={Loading} />
+          <Route path="/loading" component={LoadingPage} />
           <Route path="/no-data" component={NoData} />
           <Route path="/home" component={Home} />
           <Route path="/overview" component={ClusterOverview} />
@@ -43,12 +44,8 @@ const MonitoringApp: React.FC<{
           />
         </Switch>
       </HashRouter>
-    </core.i18n.Context>
+    </KibanaContextProvider>
   );
-};
-
-const Loading: React.FC<{}> = () => {
-  return <PageLoading />;
 };
 
 const NoData: React.FC<{}> = () => {
