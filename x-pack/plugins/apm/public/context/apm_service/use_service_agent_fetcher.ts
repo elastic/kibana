@@ -8,14 +8,19 @@
 import { useFetcher } from '../../hooks/use_fetcher';
 import { useUrlParams } from '../url_params_context/use_url_params';
 
-export function useServiceAgentNameFetcher(serviceName?: string) {
+const INITIAL_STATE = {
+  agentName: undefined,
+  runtimeName: undefined,
+};
+
+export function useServiceAgentFetcher(serviceName?: string) {
   const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
-  const { data, error, status } = useFetcher(
+  const { data = INITIAL_STATE, error, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/agent_name',
+          endpoint: 'GET /api/apm/services/{serviceName}/agent',
           params: {
             path: { serviceName },
             query: { start, end },
@@ -26,5 +31,5 @@ export function useServiceAgentNameFetcher(serviceName?: string) {
     [serviceName, start, end]
   );
 
-  return { agentName: data?.agentName, status, error };
+  return { ...data, status, error };
 }
