@@ -59,12 +59,18 @@ interface Props {
   hideViewTransactionsLink?: boolean;
   numberOfTransactionsPerPage?: number;
   showAggregationAccurateCallout?: boolean;
+  environment: string;
+  fixedHeight?: boolean;
+  kuery: string;
 }
 
 export function TransactionsTable({
+  fixedHeight = false,
   hideViewTransactionsLink = false,
   numberOfTransactionsPerPage = 5,
   showAggregationAccurateCallout = false,
+  environment,
+  kuery,
 }: Props) {
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
@@ -88,8 +94,6 @@ export function TransactionsTable({
       latencyAggregationType,
       comparisonType,
       comparisonEnabled,
-      environment,
-      kuery,
     },
   } = useUrlParams();
 
@@ -169,10 +173,7 @@ export function TransactionsTable({
     },
   } = data;
 
-  const {
-    data: transactionGroupDetailedStatistics,
-    status: transactionGroupDetailedStatisticsStatus,
-  } = useFetcher(
+  const { data: transactionGroupDetailedStatistics } = useFetcher(
     (callApmApi) => {
       if (
         transactionGroupsTotalItems &&
@@ -217,9 +218,7 @@ export function TransactionsTable({
     comparisonEnabled,
   });
 
-  const isLoading =
-    status === FETCH_STATUS.LOADING ||
-    transactionGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING;
+  const isLoading = status === FETCH_STATUS.LOADING;
 
   const pagination = {
     pageIndex,
@@ -304,6 +303,7 @@ export function TransactionsTable({
         <EuiFlexItem>
           <TableFetchWrapper status={status}>
             <OverviewTableContainer
+              fixedHeight={fixedHeight}
               isEmptyAndLoading={transactionGroupsTotalItems === 0 && isLoading}
             >
               <EuiBasicTable

@@ -62,7 +62,6 @@ interface IReportingAPI {
   getDownloadLink: DownloadReportFn;
 
   // Diagnostic-related API calls
-  verifyConfig(): Promise<DiagnoseResponse>;
   verifyBrowser(): Promise<DiagnoseResponse>;
   verifyScreenCapture(): Promise<DiagnoseResponse>;
 }
@@ -123,7 +122,7 @@ export class ReportingAPIClient implements IReportingAPI {
     }
 
     return i18n.translate('xpack.reporting.apiClient.unknownError', {
-      defaultMessage: `Report job {job} failed: Unknown error.`,
+      defaultMessage: `Report job {job} failed. Error unknown.`,
       values: { job: jobId },
     });
   }
@@ -195,12 +194,6 @@ export class ReportingAPIClient implements IReportingAPI {
     this.http.basePath.prepend(`${API_LIST_URL}/download/${jobId}`);
 
   public getServerBasePath = () => this.http.basePath.serverBasePath;
-
-  public async verifyConfig() {
-    return await this.http.post(`${API_BASE_URL}/diagnose/config`, {
-      asSystemRequest: true,
-    });
-  }
 
   public async verifyBrowser() {
     return await this.http.post(`${API_BASE_URL}/diagnose/browser`, {

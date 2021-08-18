@@ -22,10 +22,15 @@ const topBackendsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/backends/top_backends',
   params: t.intersection([
     t.type({
-      query: t.intersection([rangeRt, t.type({ numBuckets: toNumberRt })]),
+      query: t.intersection([
+        rangeRt,
+        environmentRt,
+        kueryRt,
+        t.type({ numBuckets: toNumberRt }),
+      ]),
     }),
     t.partial({
-      query: t.intersection([environmentRt, offsetRt, kueryRt]),
+      query: offsetRt,
     }),
   ]),
   options: {
@@ -237,7 +242,7 @@ const backendThroughputChartsRoute = createApmServerRoute({
   },
 });
 
-const backendErrorRateChartsRoute = createApmServerRoute({
+const backendFailedTransactionRateChartsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/backends/{backendName}/charts/error_rate',
   params: t.type({
     path: t.type({
@@ -288,4 +293,4 @@ export const backendsRouteRepository = createApmServerRouteRepository()
   .add(backendMetadataRoute)
   .add(backendLatencyChartsRoute)
   .add(backendThroughputChartsRoute)
-  .add(backendErrorRateChartsRoute);
+  .add(backendFailedTransactionRateChartsRoute);

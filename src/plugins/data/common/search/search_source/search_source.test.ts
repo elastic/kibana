@@ -359,6 +359,69 @@ describe('SearchSource', () => {
         expect(request.fields).toEqual(['*']);
         expect(request._source).toEqual(false);
       });
+
+      test('includes queries in the "filter" clause by default', async () => {
+        searchSource.setField('query', {
+          query: 'agent.keyword : "Mozilla" ',
+          language: 'kuery',
+        });
+        const request = searchSource.getSearchRequestBody();
+        expect(request.query).toMatchInlineSnapshot(`
+          Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match_phrase": Object {
+                          "agent.keyword": "Mozilla",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+              "must": Array [],
+              "must_not": Array [],
+              "should": Array [],
+            },
+          }
+        `);
+      });
+
+      test('includes queries in the "must" clause if sorting by _score', async () => {
+        searchSource.setField('query', {
+          query: 'agent.keyword : "Mozilla" ',
+          language: 'kuery',
+        });
+        searchSource.setField('sort', [{ _score: SortDirection.asc }]);
+        const request = searchSource.getSearchRequestBody();
+        expect(request.query).toMatchInlineSnapshot(`
+          Object {
+            "bool": Object {
+              "filter": Array [],
+              "must": Array [
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match_phrase": Object {
+                          "agent.keyword": "Mozilla",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+              "must_not": Array [],
+              "should": Array [],
+            },
+          }
+        `);
+      });
     });
 
     describe('source filters handling', () => {
@@ -564,7 +627,7 @@ describe('SearchSource', () => {
         expect(request.fields).toEqual(['@timestamp']);
         expect(request.script_fields).toEqual({ hello: {} });
         expect(request.stored_fields).toEqual(['@timestamp', 'bar']);
-        expect(request.runtime_mappings).toEqual({ runtime_field: runtimeFieldDef });
+        expect(request.runtime_mappings).toEqual(runtimeFields);
       });
 
       test('filters request when a specific list of fields is provided with fieldsFromSource or fields', async () => {
@@ -943,27 +1006,27 @@ describe('SearchSource', () => {
         expect(next).toBeCalledTimes(2);
         expect(complete).toBeCalledTimes(1);
         expect(next.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "isPartial": true,
-            "isRunning": true,
-            "rawResponse": Object {
-              "test": 1,
-            },
-          },
-        ]
-        `);
+                  Array [
+                    Object {
+                      "isPartial": true,
+                      "isRunning": true,
+                      "rawResponse": Object {
+                        "test": 1,
+                      },
+                    },
+                  ]
+                `);
         expect(next.mock.calls[1]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "isPartial": false,
-            "isRunning": false,
-            "rawResponse": Object {
-              "test": 2,
-            },
-          },
-        ]
-        `);
+                  Array [
+                    Object {
+                      "isPartial": false,
+                      "isRunning": false,
+                      "rawResponse": Object {
+                        "test": 2,
+                      },
+                    },
+                  ]
+                `);
       });
 
       test('shareReplays result', async () => {

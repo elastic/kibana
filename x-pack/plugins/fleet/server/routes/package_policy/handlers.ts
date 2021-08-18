@@ -171,6 +171,17 @@ export const deletePackagePolicyHandler: RequestHandler<
       request.body.packagePolicyIds,
       { user, force: request.body.force }
     );
+    try {
+      await packagePolicyService.runExternalCallbacks(
+        'postPackagePolicyDelete',
+        body,
+        context,
+        request
+      );
+    } catch (error) {
+      const logger = appContextService.getLogger();
+      logger.error(`An error occurred executing external callback: ${error}`);
+    }
     return response.ok({
       body,
     });
@@ -192,7 +203,11 @@ export const upgradePackagePolicyHandler: RequestHandler<
       const body: UpgradePackagePolicyDryRunResponse = [];
 
       for (const id of request.body.packagePolicyIds) {
-        const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
+        const result = await packagePolicyService.getUpgradeDryRunDiff(
+          soClient,
+          id,
+          request.body.packageVersion
+        );
         body.push(result);
       }
       return response.ok({
