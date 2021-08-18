@@ -26,6 +26,7 @@ const AddEndpointExceptionComponent: React.FC<AddEndpointExceptionProps> = ({
       id="addEndpointException"
       onClick={onClick}
       disabled={disabled}
+      size="s"
     >
       {i18n.ACTION_ADD_ENDPOINT_EXCEPTION}
     </EuiContextMenuItem>

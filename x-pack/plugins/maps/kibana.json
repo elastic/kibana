@@ -19,14 +19,27 @@
     "dashboard",
     "embeddable",
     "mapsEms",
-    "usageCollection",
     "savedObjects",
     "share",
     "presentationUtil"
   ],
-  "optionalPlugins": ["home", "savedObjectsTagging", "charts", "security"],
+  "optionalPlugins": [
+    "home",
+    "savedObjectsTagging",
+    "charts",
+    "security",
+    "usageCollection"
+  ],
   "ui": true,
   "server": true,
-  "extraPublicDirs": ["common/constants"],
-  "requiredBundles": ["kibanaReact", "kibanaUtils", "home", "mapsEms"]
+  "extraPublicDirs": [
+    "common/constants"
+  ],
+  "requiredBundles": [
+    "kibanaReact",
+    "kibanaUtils",
+    "usageCollection",
+    "home",
+    "mapsEms"
+  ]
 }

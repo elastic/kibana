@@ -25,11 +25,12 @@ const tableHeight = 282;
  * Hide the empty message when we don't yet have any items and are still loading.
  */
 const OverviewTableContainerDiv = euiStyled.div<{
+  fixedHeight?: boolean;
   isEmptyAndLoading: boolean;
   shouldUseMobileLayout: boolean;
 }>`
-  ${({ shouldUseMobileLayout }) =>
-    shouldUseMobileLayout
+  ${({ fixedHeight, shouldUseMobileLayout }) =>
+    shouldUseMobileLayout || !fixedHeight
       ? ''
       : `
   min-height: ${tableHeight}px;
@@ -54,15 +55,18 @@ const OverviewTableContainerDiv = euiStyled.div<{
 
 export function OverviewTableContainer({
   children,
+  fixedHeight,
   isEmptyAndLoading,
 }: {
   children?: ReactNode;
+  fixedHeight?: boolean;
   isEmptyAndLoading: boolean;
 }) {
   const { isMedium } = useBreakPoints();
 
   return (
     <OverviewTableContainerDiv
+      fixedHeight={fixedHeight}
       isEmptyAndLoading={isEmptyAndLoading}
       shouldUseMobileLayout={isMedium}
     >

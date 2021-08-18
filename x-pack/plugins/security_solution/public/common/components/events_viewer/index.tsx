@@ -11,7 +11,6 @@ import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
 
 import { isEmpty } from 'lodash/fp';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
@@ -24,7 +23,7 @@ import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
-import { EntityType } from '../../../../../timelines/common';
+import type { EntityType } from '../../../../../timelines/common';
 import { TGridCellAction } from '../../../../../timelines/common/types';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
@@ -58,7 +57,6 @@ export interface OwnProps {
   scopeId: SourcererScopeName;
   start: string;
   showTotalCount?: boolean;
-  headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
   currentFilter?: Status;
   onRuleChange?: () => void;
@@ -69,8 +67,6 @@ export interface OwnProps {
 }
 
 type Props = OwnProps & PropsFromRedux;
-
-const alertConsumers: AlertConsumers[] = [AlertConsumers.SIEM];
 
 /**
  * The stateful events viewer component is the highest level component that is utilized across the security_solution pages layer where
@@ -88,7 +84,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   entityType,
   excludedRowRendererIds,
   filters,
-  headerFilterGroup,
   id,
   isLive,
   itemsPerPage,
@@ -120,6 +115,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   // TODO: Once we are past experimental phase this code should be removed
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
+  const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
+    'tGridEventRenderedViewEnabled'
+  );
   useEffect(() => {
     if (createTimeline != null) {
       createTimeline({
@@ -153,6 +151,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         <InspectButtonContainer>
           {tGridEnabled ? (
             timelinesUi.getTGrid<'embedded'>({
+              id,
               type: 'embedded',
               browserFields,
               columns,
@@ -165,8 +164,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               filters: globalFilters,
               globalFullScreen,
               graphOverlay,
-              headerFilterGroup,
-              id,
               indexNames: selectedPatterns,
               indexPattern,
               isLive,
@@ -186,6 +183,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               filterStatus: currentFilter,
               leadingControlColumns,
               trailingControlColumns,
+              tGridEventRenderedViewEnabled,
             })
           ) : (
             <EventsViewer
@@ -198,7 +196,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               end={end}
               isLoadingIndexPattern={isLoadingIndexPattern}
               filters={globalFilters}
-              headerFilterGroup={headerFilterGroup}
               indexNames={selectedPatterns}
               indexPattern={indexPattern}
               isLive={isLive}
@@ -219,9 +216,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         </InspectButtonContainer>
       </FullScreenContainer>
       <DetailsPanel
-        alertConsumers={alertConsumers}
         browserFields={browserFields}
-        entityType={EntityType.ALERTS}
+        entityType={entityType}
         docValueFields={docValueFields}
         isFlyoutView
         timelineId={id}
