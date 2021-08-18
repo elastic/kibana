@@ -158,10 +158,6 @@ export class SavedSearchEmbeddable
       searchSource.setField('fields', [fields]);
     } else {
       searchSource.removeField('fields');
-      if (this.searchProps.indexPattern) {
-        const fieldNames = this.searchProps.indexPattern.fields.map((field) => field.name);
-        searchSource.setField('fieldsFromSource', fieldNames);
-      }
     }
 
     // Log request to inspector
