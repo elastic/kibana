@@ -7,9 +7,9 @@
 
 import {
   ALERT_RULE_CONSUMER,
-  ALERT_STATUS,
-  SPACE_IDS,
   ALERT_RULE_TYPE_ID,
+  SPACE_IDS,
+  ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-data-utils';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
@@ -41,7 +41,6 @@ beforeEach(() => {
   alertingAuthMock.getAuthorizationFilter.mockImplementation(async () =>
     Promise.resolve({ filter: [] })
   );
-
   // @ts-expect-error
   alertingAuthMock.getAugmentedRuleTypesWithAuthorization.mockImplementation(async () => {
     const authorizedRuleTypes = new Set();
@@ -70,7 +69,7 @@ beforeEach(() => {
   );
 });
 
-describe('get()', () => {
+describe('find()', () => {
   test('calls ES client with given params', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     esClientMock.search.mockResolvedValueOnce(
@@ -100,7 +99,7 @@ describe('get()', () => {
                   [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
                   [ALERT_RULE_CONSUMER]: 'apm',
-                  [ALERT_STATUS]: 'open',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
                   [SPACE_IDS]: ['test_default_space_id'],
                 },
               },
@@ -109,16 +108,44 @@ describe('get()', () => {
         },
       })
     );
-    const result = await alertsClient.get({ id: '1', index: '.alerts-observability-apm' });
+    const result = await alertsClient.find({
+      query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+      index: '.alerts-observability-apm',
+    });
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "kibana.alert.rule.consumer": "apm",
-        "kibana.alert.rule.rule_type_id": "apm.error_rate",
-        "kibana.alert.status": "open",
-        "kibana.space_ids": Array [
-          "test_default_space_id",
-        ],
-        "message": "hello world 1",
+        "_shards": Object {
+          "failed": 0,
+          "skipped": 0,
+          "successful": 1,
+          "total": 1,
+        },
+        "hits": Object {
+          "hits": Array [
+            Object {
+              "_id": "NoxgpHkBqbdrfX07MqXV",
+              "_index": ".alerts-observability-apm",
+              "_primary_term": 2,
+              "_seq_no": 362,
+              "_source": Object {
+                "kibana.alert.rule.consumer": "apm",
+                "kibana.alert.rule.rule_type_id": "apm.error_rate",
+                "kibana.alert.workflow_status": "open",
+                "kibana.space_ids": Array [
+                  "test_default_space_id",
+                ],
+                "message": "hello world 1",
+              },
+              "_type": "alert",
+              "_version": 1,
+              "found": true,
+            },
+          ],
+          "max_score": 999,
+          "total": 1,
+        },
+        "timed_out": false,
+        "took": 5,
       }
     `);
     expect(esClientMock.search).toHaveBeenCalledTimes(1);
@@ -137,18 +164,6 @@ describe('get()', () => {
             "query": Object {
               "bool": Object {
                 "filter": Array [
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "match": Object {
-                            "_id": "1",
-                          },
-                        },
-                      ],
-                    },
-                  },
                   Object {},
                   Object {
                     "term": Object {
@@ -156,7 +171,13 @@ describe('get()', () => {
                     },
                   },
                 ],
-                "must": Array [],
+                "must": Array [
+                  Object {
+                    "match": Object {
+                      "kibana.alert.workflow_status": "open",
+                    },
+                  },
+                ],
                 "must_not": Array [],
                 "should": Array [],
               },
@@ -209,7 +230,7 @@ describe('get()', () => {
                   [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
                   [ALERT_RULE_CONSUMER]: 'apm',
-                  [ALERT_STATUS]: 'open',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
                   [SPACE_IDS]: ['test_default_space_id'],
                 },
               },
@@ -218,17 +239,20 @@ describe('get()', () => {
         },
       })
     );
-    await alertsClient.get({ id: 'NoxgpHkBqbdrfX07MqXV', index: '.alerts-observability-apm' });
+    await alertsClient.find({
+      query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+      index: '.alerts-observability-apm',
+    });
 
     expect(auditLogger.log).toHaveBeenCalledWith({
       error: undefined,
-      event: { action: 'alert_get', category: ['database'], outcome: 'success', type: ['access'] },
+      event: { action: 'alert_find', category: ['database'], outcome: 'success', type: ['access'] },
       message: 'User has accessed alert [id=NoxgpHkBqbdrfX07MqXV]',
     });
   });
 
   test('audit error access if user is unauthorized for given alert', async () => {
-    const indexName = '.alerts-observability-apm.alerts';
+    const indexName = '.alerts-observability-apm';
     const fakeAlertId = 'myfakeid1';
     // fakeRuleTypeId will cause authz to fail
     const fakeRuleTypeId = 'fake.rule';
@@ -259,7 +283,7 @@ describe('get()', () => {
                 _source: {
                   [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
                   [ALERT_RULE_CONSUMER]: 'apm',
-                  [ALERT_STATUS]: 'open',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
@@ -269,16 +293,20 @@ describe('get()', () => {
       })
     );
 
-    await expect(alertsClient.get({ id: fakeAlertId, index: '.alerts-observability-apm.alerts' }))
-      .rejects.toThrowErrorMatchingInlineSnapshot(`
-            "Unable to retrieve alert details for alert with id of \\"myfakeid1\\" or with query \\"undefined\\" and operation get 
+    await expect(
+      alertsClient.find({
+        query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+        index: '.alerts-observability-apm',
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+            "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"[object Object]\\" and operation find 
             Error: Error: Unauthorized for fake.rule and apm"
           `);
 
     expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
       message: `Failed attempt to access alert [id=${fakeAlertId}]`,
       event: {
-        action: 'alert_get',
+        action: 'alert_find',
         category: ['database'],
         outcome: 'failure',
         type: ['access'],
@@ -296,9 +324,12 @@ describe('get()', () => {
     esClientMock.search.mockRejectedValue(error);
 
     await expect(
-      alertsClient.get({ id: 'NoxgpHkBqbdrfX07MqXV', index: '.alerts-observability-apm' })
+      alertsClient.find({
+        query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+        index: '.alerts-observability-apm',
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-            "Unable to retrieve alert details for alert with id of \\"NoxgpHkBqbdrfX07MqXV\\" or with query \\"undefined\\" and operation get 
+            "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"[object Object]\\" and operation find 
             Error: Error: something went wrong"
           `);
   });
@@ -332,7 +363,7 @@ describe('get()', () => {
                     [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                     message: 'hello world 1',
                     [ALERT_RULE_CONSUMER]: 'apm',
-                    [ALERT_STATUS]: 'open',
+                    [ALERT_WORKFLOW_STATUS]: 'open',
                     [SPACE_IDS]: ['test_default_space_id'],
                   },
                 },
@@ -345,20 +376,45 @@ describe('get()', () => {
 
     test('returns alert if user is authorized to read alert under the consumer', async () => {
       const alertsClient = new AlertsClient(alertsClientParams);
-      const result = await alertsClient.get({
-        id: 'NoxgpHkBqbdrfX07MqXV',
+      const result = await alertsClient.find({
+        query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
         index: '.alerts-observability-apm',
       });
 
       expect(result).toMatchInlineSnapshot(`
         Object {
-          "kibana.alert.rule.consumer": "apm",
-          "kibana.alert.rule.rule_type_id": "apm.error_rate",
-          "kibana.alert.status": "open",
-          "kibana.space_ids": Array [
-            "test_default_space_id",
-          ],
-          "message": "hello world 1",
+          "_shards": Object {
+            "failed": 0,
+            "skipped": 0,
+            "successful": 1,
+            "total": 1,
+          },
+          "hits": Object {
+            "hits": Array [
+              Object {
+                "_id": "NoxgpHkBqbdrfX07MqXV",
+                "_index": ".alerts-observability-apm",
+                "_primary_term": 2,
+                "_seq_no": 362,
+                "_source": Object {
+                  "kibana.alert.rule.consumer": "apm",
+                  "kibana.alert.rule.rule_type_id": "apm.error_rate",
+                  "kibana.alert.workflow_status": "open",
+                  "kibana.space_ids": Array [
+                    "test_default_space_id",
+                  ],
+                  "message": "hello world 1",
+                },
+                "_type": "alert",
+                "_version": 1,
+                "found": true,
+              },
+            ],
+            "max_score": 999,
+            "total": 1,
+          },
+          "timed_out": false,
+          "took": 5,
         }
       `);
     });
