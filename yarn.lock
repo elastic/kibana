@@ -2726,6 +2726,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerts@link:bazel-bin/packages/kbn-alerts":
+  version "0.0.0"
+  uid ""
+
 "@kbn/analytics@link:bazel-bin/packages/kbn-analytics":
   version "0.0.0"
   uid ""
