@@ -251,6 +251,9 @@ export const DETECTION_ENGINE_SIGNALS_MIGRATION_URL = `${DETECTION_ENGINE_SIGNAL
 export const DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/migration_status`;
 export const DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL = `${DETECTION_ENGINE_SIGNALS_URL}/finalize_migration`;
 
+export const ALERTS_AS_DATA_URL = '/internal/rac/alerts';
+export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find`;
+
 /**
  * Common naming convention for an unauthenticated user
  */
@@ -290,11 +293,6 @@ if (ENABLE_CASE_CONNECTOR) {
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';
 export const NOTIFICATION_THROTTLE_RULE = 'rule';
 
-/**
- * Histograms for fields named in this list should be displayed with an
- * "All others" bucket, to count events that don't specify a value for
- * the field being counted
- */
 export const showAllOthersBucket: string[] = [
   'destination.ip',
   'event.action',

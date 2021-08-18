@@ -30,6 +30,8 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
   const query = toQuery(location.search);
 
   const {
+    sampleRangeFrom,
+    sampleRangeTo,
     traceId,
     transactionId,
     transactionName,
@@ -73,6 +75,8 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     pageSize: pageSize ? toNumber(pageSize) : undefined,
     transactionId: toString(transactionId),
     traceId: toString(traceId),
+    sampleRangeFrom: sampleRangeFrom ? toNumber(sampleRangeFrom) : undefined,
+    sampleRangeTo: sampleRangeTo ? toNumber(sampleRangeTo) : undefined,
     waterfallItemId: toString(waterfallItemId),
     detailTab: toString(detailTab),
     flyoutDetailTab: toString(flyoutDetailTab),

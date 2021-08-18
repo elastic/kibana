@@ -23,7 +23,7 @@ import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
-import { EntityType } from '../../../../../timelines/common';
+import type { EntityType } from '../../../../../timelines/common';
 import { TGridCellAction } from '../../../../../timelines/common/types';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
@@ -57,7 +57,6 @@ export interface OwnProps {
   scopeId: SourcererScopeName;
   start: string;
   showTotalCount?: boolean;
-  headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
   currentFilter?: Status;
   onRuleChange?: () => void;
@@ -85,7 +84,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   entityType,
   excludedRowRendererIds,
   filters,
-  headerFilterGroup,
   id,
   isLive,
   itemsPerPage,
@@ -117,6 +115,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   // TODO: Once we are past experimental phase this code should be removed
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
+  const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
+    'tGridEventRenderedViewEnabled'
+  );
   useEffect(() => {
     if (createTimeline != null) {
       createTimeline({
@@ -150,6 +151,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         <InspectButtonContainer>
           {tGridEnabled ? (
             timelinesUi.getTGrid<'embedded'>({
+              id,
               type: 'embedded',
               browserFields,
               columns,
@@ -162,8 +164,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               filters: globalFilters,
               globalFullScreen,
               graphOverlay,
-              headerFilterGroup,
-              id,
               indexNames: selectedPatterns,
               indexPattern,
               isLive,
@@ -183,6 +183,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               filterStatus: currentFilter,
               leadingControlColumns,
               trailingControlColumns,
+              tGridEventRenderedViewEnabled,
             })
           ) : (
             <EventsViewer
@@ -195,7 +196,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               end={end}
               isLoadingIndexPattern={isLoadingIndexPattern}
               filters={globalFilters}
-              headerFilterGroup={headerFilterGroup}
               indexNames={selectedPatterns}
               indexPattern={indexPattern}
               isLive={isLive}
@@ -217,6 +217,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       </FullScreenContainer>
       <DetailsPanel
         browserFields={browserFields}
+        entityType={entityType}
         docValueFields={docValueFields}
         isFlyoutView
         timelineId={id}

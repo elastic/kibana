@@ -38,10 +38,10 @@ export const CLOSED_ALERTS = i18n.translate(
   }
 );
 
-export const IN_PROGRESS_ALERTS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.inProgressAlertsTitle',
+export const ACKNOWLEDGED_ALERTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.acknowledgedAlertsTitle',
   {
-    defaultMessage: 'In progress',
+    defaultMessage: 'Acknowledged',
   }
 );
 
@@ -150,10 +150,10 @@ export const ACTION_CLOSE_ALERT = i18n.translate(
   }
 );
 
-export const ACTION_IN_PROGRESS_ALERT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.inProgressAlertTitle',
+export const ACTION_ACKNOWLEDGED_ALERT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.acknowledgedAlertTitle',
   {
-    defaultMessage: 'Mark in progress',
+    defaultMessage: 'Mark as acknowledged',
   }
 );
 
@@ -220,16 +220,6 @@ export const OPENED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
       'Successfully opened {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
   });
 
-export const IN_PROGRESS_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.alerts.inProgressAlertSuccessToastMessage',
-    {
-      values: { totalAlerts },
-      defaultMessage:
-        'Successfully marked {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}} as in progress.',
-    }
-  );
-
 export const ACKNOWLEDGED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.alerts.acknowledgedAlertSuccessToastMessage',
@@ -251,13 +241,6 @@ export const OPENED_ALERT_FAILED_TOAST = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.openedAlertFailedToastMessage',
   {
     defaultMessage: 'Failed to open alert(s)',
-  }
-);
-
-export const IN_PROGRESS_ALERT_FAILED_TOAST = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.inProgressAlertFailedToastMessage',
-  {
-    defaultMessage: 'Failed to mark alert(s) as in progress',
   }
 );
 
