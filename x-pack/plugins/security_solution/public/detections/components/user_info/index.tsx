@@ -243,9 +243,7 @@ export const useUserInfo = (): State => {
   }, [dispatch, loading, hasIndexWrite, hasApiIndexWrite]);
 
   useEffect(() => {
-    console.log('USER INFO', { loading, hasIndexRead, hasApiIndexRead });
     if (!loading && hasIndexRead !== hasApiIndexRead && hasApiIndexRead != null) {
-      console.log('IN HERE', hasApiIndexRead);
       dispatch({ type: 'updateHasIndexRead', hasIndexRead: hasApiIndexRead });
     }
   }, [dispatch, loading, hasIndexRead, hasApiIndexRead]);

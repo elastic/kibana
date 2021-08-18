@@ -65,7 +65,7 @@ export const requestIndexFieldSearch = async (
           });
           return get(searchResponse, 'body.hits.total.value', 0) > 0;
         } else {
-          if (index.includes('.alerts-security.alerts-default')) {
+          if (index.startsWith('.alerts-security.alerts')) {
             return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
               pattern: index,
             });

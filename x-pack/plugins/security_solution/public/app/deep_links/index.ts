@@ -416,9 +416,7 @@ export function updateGlobalNavigation({
             link.deepLinks != null
               ? [
                   ...link.deepLinks.map((detLink) => {
-                    if (detLink.id !== SecurityPageName.alerts) {
-                      return detLink;
-                    } else {
+                    if (detLink.id === SecurityPageName.alerts) {
                       return {
                         ...detLink,
                         navLinkStatus: capabilities.siem.read_alerts
@@ -427,6 +425,7 @@ export function updateGlobalNavigation({
                         searchable: capabilities.siem.read_alerts === true,
                       };
                     }
+                    return detLink;
                   }),
                 ]
               : [],

@@ -616,7 +616,11 @@ export class AlertsClient {
 
       const toReturn = Array.from(authorizedFeatures).flatMap((feature) => {
         if (isValidFeatureId(feature)) {
-          return `${mapConsumerToIndexName[feature]}-${this.spaceId}`;
+          if (feature === 'siem') {
+            return `${mapConsumerToIndexName[feature]}-${this.spaceId}`;
+          } else {
+            return `${mapConsumerToIndexName[feature]}`;
+          }
         }
         return [];
       });

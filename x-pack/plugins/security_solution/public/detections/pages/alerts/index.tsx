@@ -33,7 +33,6 @@ const AlertsContainerComponent: React.FC = () => {
 
   useEffect(() => {
     // if the user is read only then display the glasses badge in the global navigation header
-    console.log('USER_PERMISSIONS', userPermissions);
     if (userPermissions != null && !userPermissions.crud && userPermissions.read) {
       chrome.setBadge({
         text: i18n.READ_ONLY_BADGE_TEXT,
