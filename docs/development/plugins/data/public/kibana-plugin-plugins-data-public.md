@@ -80,7 +80,6 @@
 |  [QuerySuggestionField](./kibana-plugin-plugins-data-public.querysuggestionfield.md) | \* |
 |  [QuerySuggestionGetFnArgs](./kibana-plugin-plugins-data-public.querysuggestiongetfnargs.md) | \* |
 |  [Reason](./kibana-plugin-plugins-data-public.reason.md) |  |
-|  [RefreshInterval](./kibana-plugin-plugins-data-public.refreshinterval.md) |  |
 |  [SavedQuery](./kibana-plugin-plugins-data-public.savedquery.md) |  |
 |  [SavedQueryService](./kibana-plugin-plugins-data-public.savedqueryservice.md) |  |
 |  [SearchSessionInfoProvider](./kibana-plugin-plugins-data-public.searchsessioninfoprovider.md) | Provide info about current search session to be stored in the Search Session saved object |
@@ -176,6 +175,7 @@
 |  [RangeFilter](./kibana-plugin-plugins-data-public.rangefilter.md) |  |
 |  [RangeFilterMeta](./kibana-plugin-plugins-data-public.rangefiltermeta.md) |  |
 |  [RangeFilterParams](./kibana-plugin-plugins-data-public.rangefilterparams.md) |  |
+|  [RefreshInterval](./kibana-plugin-plugins-data-public.refreshinterval.md) |  |
 |  [SavedQueryTimeFilter](./kibana-plugin-plugins-data-public.savedquerytimefilter.md) |  |
 |  [SearchBarProps](./kibana-plugin-plugins-data-public.searchbarprops.md) |  |
 |  [StatefulSearchBarProps](./kibana-plugin-plugins-data-public.statefulsearchbarprops.md) |  |

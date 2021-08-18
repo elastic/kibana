@@ -2,18 +2,13 @@
 
 [Home](./index.md) &gt; [kibana-plugin-plugins-data-public](./kibana-plugin-plugins-data-public.md) &gt; [RefreshInterval](./kibana-plugin-plugins-data-public.refreshinterval.md)
 
-## RefreshInterval interface
+## RefreshInterval type
 
 <b>Signature:</b>
 
 ```typescript
-export interface RefreshInterval 
+export declare type RefreshInterval = {
+    pause: boolean;
+    value: number;
+};
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [pause](./kibana-plugin-plugins-data-public.refreshinterval.pause.md) | <code>boolean</code> |  |
-|  [value](./kibana-plugin-plugins-data-public.refreshinterval.value.md) | <code>number</code> |  |
-
