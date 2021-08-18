@@ -645,7 +645,7 @@ class PackagePolicyService {
     request: KibanaRequest
   ): Promise<NewPackagePolicy | void> {
     if (externalCallbackType === 'postPackagePolicyDelete') {
-      await this.runDeleteExternalCallbacks(packagePolicy as DeletePackagePoliciesResponse);
+      return await this.runDeleteExternalCallbacks(packagePolicy as DeletePackagePoliciesResponse);
     } else {
       if (!Array.isArray(packagePolicy)) {
         let newData = packagePolicy;
