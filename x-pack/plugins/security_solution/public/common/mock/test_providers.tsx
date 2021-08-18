@@ -14,6 +14,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
+import { Capabilities } from 'src/core/public';
 
 import { createStore, State } from '../store';
 import { mockGlobalState } from './global_state';
@@ -73,7 +74,11 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
     <MockKibanaContextProvider>
       <ReduxStoreProvider store={store}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <UserPrivilegesProvider>
+          <UserPrivilegesProvider
+            kibanaCapabilities={
+              ({ siem: { crud_alerts: true, read_alerts: true } } as unknown) as Capabilities
+            }
+          >
             <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
           </UserPrivilegesProvider>
         </ThemeProvider>
