@@ -378,7 +378,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
 }
 
 .c5 {
-  padding: 12px 12px 24px 0;
+  padding: 12px 24px 24px 0;
+}
+
+.c5.c5.c5 {
+  margin-left: 0;
 }
 
 .c5 .trustedAppsConditionsTable {
@@ -3641,7 +3645,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
 }
 
 .c5 {
-  padding: 12px 12px 24px 0;
+  padding: 12px 24px 24px 0;
+}
+
+.c5.c5.c5 {
+  margin-left: 0;
 }
 
 .c5 .trustedAppsConditionsTable {
@@ -6867,7 +6875,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
 }
 
 .c5 {
-  padding: 12px 12px 24px 0;
+  padding: 12px 24px 24px 0;
+}
+
+.c5.c5.c5 {
+  margin-left: 0;
 }
 
 .c5 .trustedAppsConditionsTable {
