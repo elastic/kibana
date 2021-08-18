@@ -102,6 +102,71 @@ export default ({ getService }: FtrProviderContext) => {
 
           await deleteSignalsIndex(supertest);
         });
+
+        it('should not give errors when executing security solution histogram aggs', async () => {
+          await createSignalsIndex(supertest);
+          await supertest
+            .post(ALERTS_AS_DATA_FIND_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              index: '.siem-signals-default',
+              aggs: {
+                alertsByGrouping: {
+                  terms: {
+                    field: 'event.category',
+                    missing: 'All others',
+                    order: { _count: 'desc' },
+                    size: 10,
+                  },
+                  aggs: {
+                    alerts: {
+                      date_histogram: {
+                        field: '@timestamp',
+                        fixed_interval: '2699999ms',
+                        min_doc_count: 0,
+                        extended_bounds: {
+                          min: '2021-08-17T04:00:00.000Z',
+                          max: '2021-08-18T03:59:59.999Z',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        must: [],
+                        filter: [
+                          {
+                            match_phrase: {
+                              'signal.rule.id': 'c76f1a10-ffb6-11eb-8914-9b237bf6808c',
+                            },
+                          },
+                          { term: { 'signal.status': 'open' } },
+                        ],
+                        should: [],
+                        must_not: [{ exists: { field: 'signal.rule.building_block_type' } }],
+                      },
+                    },
+                    {
+                      range: {
+                        '@timestamp': {
+                          gte: '2021-08-17T04:00:00.000Z',
+                          lte: '2021-08-18T03:59:59.999Z',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            })
+            .expect(200);
+
+          await deleteSignalsIndex(supertest);
+        });
       });
     });
   });
