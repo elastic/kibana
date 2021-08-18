@@ -96,7 +96,7 @@ export const TIMELINE_TEMPLATE_DETAILS = 'Timeline template';
 export const TIMESTAMP_OVERRIDE_DETAILS = 'Timestamp override';
 
 export const TIMELINE_FIELD = (field: string) => {
-  return `[data-test-subj="draggable-content-${field}"]`;
+  return `[data-test-subj="formatted-field-${field}"]`;
 };
 
 export const getDetails = (title: string) =>
