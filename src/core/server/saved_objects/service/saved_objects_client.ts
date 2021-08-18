@@ -334,7 +334,7 @@ export interface SavedObjectsResolveResponse<T = unknown> {
 /**
  * @public
  */
-export interface SavedObjectsOpenPointInTimeOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsOpenPointInTimeOptions {
   /**
    * Optionally specify how long ES should keep the PIT alive until the next request. Defaults to `5m`.
    */
@@ -343,6 +343,18 @@ export interface SavedObjectsOpenPointInTimeOptions extends SavedObjectsBaseOpti
    * An optional ES preference value to be used for the query.
    */
   preference?: string;
+  /**
+   * An optional list of namespaces to be used by the PIT.
+   */
+  namespaces?: string[];
+  /**
+   * This map defines each type to search for, and the namespace(s) to search for the type in; this is only intended to be used by a saved
+   * object client wrapper.
+   * If this is defined, it supersedes the `type` and `namespaces` fields when building the Elasticsearch query.
+   * Any types that are not included in this map will be excluded entirely.
+   * If a type is included but its value is undefined, the operation will search for that type in the Default namespace.
+   */
+  typeToNamespacesMap?: Map<string, string[] | undefined>;
 }
 
 /**

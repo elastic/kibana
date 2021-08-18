@@ -30,7 +30,7 @@ import type {
   SavedObjectsUpdateOptions,
 } from 'src/core/server';
 
-import { SavedObjectsUtils } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '../../../../../src/core/server';
 import { ALL_SPACES_ID } from '../../common/constants';
 import { spaceIdToNamespace } from '../lib/utils/namespace';
 import type { ISpacesClient } from '../spaces_client';
@@ -177,30 +177,19 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   public async find<T = unknown, A = unknown>(options: SavedObjectsFindOptions) {
     throwErrorIfNamespaceSpecified(options);
 
-    let namespaces = options.namespaces;
-    if (namespaces) {
-      try {
-        const availableSpaces = await this.spacesClient.getAll({ purpose: 'findSavedObjects' });
-        if (namespaces.includes(ALL_SPACES_ID)) {
-          namespaces = availableSpaces.map((space) => space.id);
-        } else {
-          namespaces = namespaces.filter((namespace) =>
-            availableSpaces.some((space) => space.id === namespace)
-          );
-        }
-        if (namespaces.length === 0) {
-          // return empty response, since the user is unauthorized in this space (or these spaces), but we don't return forbidden errors for `find` operations
-          return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
-        }
-      } catch (err) {
-        if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
-          // return empty response, since the user is unauthorized in any space, but we don't return forbidden errors for `find` operations
-          return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
-        }
-        throw err;
+    let namespaces: string[];
+    try {
+      namespaces = await this.getSearchableSpaces(options.namespaces);
+    } catch (err) {
+      if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
+        // return empty response, since the user is unauthorized in any space, but we don't return forbidden errors for `find` operations
+        return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
       }
-    } else {
-      namespaces = [this.spaceId];
+      throw err;
+    }
+    if (namespaces.length === 0) {
+      // return empty response, since the user is unauthorized in this space (or these spaces), but we don't return forbidden errors for `find` operations
+      return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
     }
 
     return await this.client.find<T, A>({
@@ -210,6 +199,21 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
       ),
       namespaces,
     });
+  }
+
+  private async getSearchableSpaces(namespaces?: string[]): Promise<string[]> {
+    if (namespaces) {
+      const availableSpaces = await this.spacesClient.getAll({ purpose: 'findSavedObjects' });
+      if (namespaces.includes(ALL_SPACES_ID)) {
+        return availableSpaces.map((space) => space.id);
+      } else {
+        return namespaces.filter((namespace) =>
+          availableSpaces.some((space) => space.id === namespace)
+        );
+      }
+    } else {
+      return [this.spaceId];
+    }
   }
 
   /**
@@ -397,9 +401,16 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     options: SavedObjectsOpenPointInTimeOptions = {}
   ) {
     throwErrorIfNamespaceSpecified(options);
+
+    const namespaces = await this.getSearchableSpaces(options.namespaces);
+    if (namespaces.length === 0) {
+      // throw bad request if no valid spaces were found.
+      throw SavedObjectsErrorHelpers.createBadRequestError();
+    }
+
     return await this.client.openPointInTimeForType(type, {
       ...options,
-      namespace: spaceIdToNamespace(this.spaceId),
+      namespaces,
     });
   }
 
