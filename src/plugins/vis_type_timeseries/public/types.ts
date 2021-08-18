@@ -19,3 +19,13 @@ export type DragHandleProps = FirstArgumentOf<
 >['dragHandleProps'];
 
 export type TimeseriesVisParams = Panel;
+
+export type TimeseriesVisDefaultParams = TimeseriesVisParams & {
+  id: () => string;
+  series: {
+    id: () => string;
+    metrics: {
+      id: () => string;
+    };
+  };
+};
