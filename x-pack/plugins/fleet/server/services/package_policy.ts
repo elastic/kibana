@@ -682,10 +682,24 @@ class PackagePolicyService {
     deletedPackagePolicies: DeletePackagePoliciesResponse
   ): Promise<void> {
     const externalCallbacks = appContextService.getExternalCallbacks('postPackagePolicyDelete');
+    const errorsThrown: Error[] = [];
 
     if (externalCallbacks && externalCallbacks.size > 0) {
       for (const callback of externalCallbacks) {
-        await callback(deletedPackagePolicies);
+        // Failures from an external callback should not prevent other external callbacks from being
+        // executed. Errors (if any) will be collected and `throw`n after processing the entire set
+        try {
+          await callback(deletedPackagePolicies);
+        } catch (error) {
+          errorsThrown.push(error);
+        }
+      }
+
+      if (errorsThrown.length > 0) {
+        throw new IngestManagerError(
+          `${errorsThrown.length} encountered while executing package delete external callbacks`,
+          errorsThrown
+        );
       }
     }
   }
