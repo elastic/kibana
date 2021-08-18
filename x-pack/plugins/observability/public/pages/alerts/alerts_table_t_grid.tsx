@@ -13,14 +13,12 @@
 import {
   AlertConsumers as AlertConsumersTyped,
   ALERT_DURATION as ALERT_DURATION_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
   ALERT_STATUS as ALERT_STATUS_TYPED,
   ALERT_REASON as ALERT_REASON_TYPED,
   ALERT_RULE_CONSUMER,
 } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
   ALERT_STATUS as ALERT_STATUS_NON_TYPED,
   ALERT_REASON as ALERT_REASON_NON_TYPED,
   TIMESTAMP,
@@ -65,7 +63,6 @@ import { CoreStart } from '../../../../../../src/core/public';
 
 const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
-const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
 const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
 const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 
@@ -133,14 +130,6 @@ export const columns: Array<
     }),
     id: ALERT_DURATION,
     initialWidth: 116,
-  },
-  {
-    columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.observability.alertsTGrid.severityColumnDescription', {
-      defaultMessage: 'Severity',
-    }),
-    id: ALERT_SEVERITY_LEVEL,
-    initialWidth: 102,
   },
   {
     columnHeaderType: 'not-filtered',
