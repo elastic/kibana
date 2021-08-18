@@ -64,9 +64,16 @@ Object {
   },
   "body": Object {
     "_source": Array [
-      "service.runtime.name",
       "agent.name",
     ],
+    "aggs": Object {
+      "runtimeName": Object {
+        "terms": Object {
+          "field": "service.runtime.name",
+          "size": 1,
+        },
+      },
+    },
     "query": Object {
       "bool": Object {
         "filter": Array [
@@ -82,11 +89,6 @@ Object {
                 "gte": 1528113600000,
                 "lte": 1528977600000,
               },
-            },
-          },
-          Object {
-            "exists": Object {
-              "field": "service.runtime.name",
             },
           },
           Object {
