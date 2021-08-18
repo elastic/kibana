@@ -65,7 +65,7 @@ export const usePrimaryNavigationItems = ({
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const uiCapabilities = useKibana().services.application.capabilities;
   const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
-  const hasAlertsReadPermissions = useGetUserAlertsPermissions(uiCapabilities, SERVER_APP_ID)?.read;
+  const hasAlertsReadPermissions = useGetUserAlertsPermissions(uiCapabilities, SERVER_APP_ID);
   return useMemo(
     () => [
       {
@@ -75,7 +75,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
       },
       {
         ...securityNavGroup.detect,
-        items: hasAlertsReadPermissions
+        items: hasAlertsReadPermissions.read
           ? [navTabs.alerts, navTabs.rules, navTabs.exceptions]
           : [navTabs.rules, navTabs.exceptions],
       },

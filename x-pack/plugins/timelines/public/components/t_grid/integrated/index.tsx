@@ -137,6 +137,7 @@ export interface TGridIntegratedProps {
   trailingControlColumns?: ControlColumnProps[];
   data?: DataPublicPluginStart;
   tGridEventRenderedViewEnabled: boolean;
+  hasAlertsCrud: boolean;
 }
 
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
@@ -173,6 +174,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   trailingControlColumns,
   tGridEventRenderedViewEnabled,
   data,
+  hasAlertsCrud,
 }) => {
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -337,6 +339,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                   ) : (
                     <>
                       <StatefulBody
+                        hasAlertsCrud={hasAlertsCrud}
                         activePage={pageInfo.activePage}
                         browserFields={browserFields}
                         filterQuery={filterQuery}

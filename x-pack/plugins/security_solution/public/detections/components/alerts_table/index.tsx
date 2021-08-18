@@ -394,6 +394,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       start={from}
       utilityBar={utilityBarCallback}
       additionalFilters={additionalFiltersComponent}
+      hasAlertsCrud={hasIndexWrite}
     />
   );
 };

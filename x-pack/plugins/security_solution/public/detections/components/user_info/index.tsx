@@ -119,7 +119,7 @@ export const userInfoReducer = (state: State, action: Action): State => {
     case 'updateHasIndexRead': {
       return {
         ...state,
-        hasIndexWrite: action.hasIndexRead,
+        hasIndexRead: action.hasIndexRead,
       };
     }
     case 'updateHasIndexUpdateDelete': {
@@ -208,8 +208,8 @@ export const useUserInfo = (): State => {
     hasIndexManage: hasApiIndexManage,
     hasIndexMaintenance: hasApiIndexMaintenance,
     hasIndexUpdateDelete: hasApiIndexUpdateDelete,
-    hasKibanaPrivilegesCrud,
-    hasKibanaPrivilegesRead,
+    hasIndexWrite: hasApiIndexWrite,
+    hasIndexRead: hasApiIndexRead,
   } = useAlertsPrivileges();
   const {
     loading: indexNameLoading,
@@ -237,16 +237,18 @@ export const useUserInfo = (): State => {
   }, [dispatch, loading, hasIndexManage, hasApiIndexManage]);
 
   useEffect(() => {
-    if (!loading && hasIndexWrite !== hasKibanaPrivilegesCrud && hasKibanaPrivilegesCrud != null) {
-      dispatch({ type: 'updateHasIndexWrite', hasIndexWrite: hasKibanaPrivilegesCrud });
+    if (!loading && hasIndexWrite !== hasApiIndexWrite && hasApiIndexWrite != null) {
+      dispatch({ type: 'updateHasIndexWrite', hasIndexWrite: hasApiIndexWrite });
     }
-  }, [dispatch, loading, hasIndexWrite, hasKibanaPrivilegesCrud]);
+  }, [dispatch, loading, hasIndexWrite, hasApiIndexWrite]);
 
   useEffect(() => {
-    if (!loading && hasIndexRead !== hasKibanaPrivilegesRead && hasKibanaPrivilegesRead != null) {
-      dispatch({ type: 'updateHasIndexRead', hasIndexRead: hasKibanaPrivilegesRead });
+    console.log('USER INFO', { loading, hasIndexRead, hasApiIndexRead });
+    if (!loading && hasIndexRead !== hasApiIndexRead && hasApiIndexRead != null) {
+      console.log('IN HERE', hasApiIndexRead);
+      dispatch({ type: 'updateHasIndexRead', hasIndexRead: hasApiIndexRead });
     }
-  }, [dispatch, loading, hasIndexRead, hasKibanaPrivilegesRead]);
+  }, [dispatch, loading, hasIndexRead, hasApiIndexRead]);
 
   useEffect(() => {
     if (

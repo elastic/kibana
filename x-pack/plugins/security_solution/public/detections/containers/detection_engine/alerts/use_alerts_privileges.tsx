@@ -20,8 +20,6 @@ export interface AlertsPrivelegesState {
   hasIndexUpdateDelete: boolean | null;
   hasIndexMaintenance: boolean | null;
   hasIndexRead: boolean | null;
-  hasKibanaPrivilegesRead: boolean | null;
-  hasKibanaPrivilegesCrud: boolean | null;
 }
 /**
  * Hook to get user privilege from
@@ -36,8 +34,6 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
     hasIndexWrite: null,
     hasIndexUpdateDelete: null,
     hasIndexMaintenance: null,
-    hasKibanaPrivilegesRead: null,
-    hasKibanaPrivilegesCrud: null,
   });
   const { detectionEnginePrivileges, alertsPrivileges } = useUserPrivileges();
 
@@ -51,8 +47,6 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
         hasIndexWrite: false,
         hasIndexUpdateDelete: false,
         hasIndexMaintenance: false,
-        hasKibanaPrivilegesRead: false,
-        hasKibanaPrivilegesCrud: false,
       });
     }
   }, [detectionEnginePrivileges.error]);
@@ -68,15 +62,9 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
           hasEncryptionKey: privilege.has_encryption_key,
           hasIndexManage: privilege.index[indexName].manage && privilege.cluster.manage,
           hasIndexMaintenance: privilege.index[indexName].maintenance,
-          hasIndexRead: privilege.index[indexName].read,
-          hasIndexWrite:
-            privilege.index[indexName].create ||
-            privilege.index[indexName].create_doc ||
-            privilege.index[indexName].index ||
-            privilege.index[indexName].write,
+          hasIndexRead: alertsPrivileges.read,
+          hasIndexWrite: alertsPrivileges.crud,
           hasIndexUpdateDelete: privilege.index[indexName].write,
-          hasKibanaPrivilegesRead: alertsPrivileges.read,
-          hasKibanaPrivilegesCrud: alertsPrivileges.crud,
         });
       }
     }
