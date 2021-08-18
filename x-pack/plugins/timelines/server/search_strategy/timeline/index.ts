@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
+import {
+  AlertConsumers as CONSUMERS,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_TYPE_ID,
+  SPACE_IDS,
+} from '@kbn/rule-data-utils';
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import { from } from 'rxjs';
 
@@ -138,7 +143,13 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
 }) => {
   // Based on what solution alerts you want to see, figures out what corresponding
   // index to query (ex: siem --> .alerts-security.alerts)
-  const indices = alertConsumers.flatMap((consumer) => `${mapConsumerToIndexName[consumer]}*`);
+  const indices = alertConsumers.flatMap((consumer) => {
+    if (consumer === CONSUMERS.SIEM) {
+      return request.defaultIndex ?? request.indexType;
+    }
+
+    return `${mapConsumerToIndexName[consumer]}`;
+  });
   const requestWithAlertsIndices = { ...request, defaultIndex: indices, indexName: indices };
 
   // Note: Alerts RBAC are built off of the alerting's authorization class, which
