@@ -76,7 +76,6 @@ export function createGenerateCsv(logger: LevelLogger) {
 
     if (!builder.tryAppend(header)) {
       return {
-        size: 0,
         maxSizeReached: true,
         warnings: [],
       };
@@ -141,8 +140,6 @@ export function createGenerateCsv(logger: LevelLogger) {
     } finally {
       await iterator.return();
     }
-    const size = builder.getSizeInBytes();
-    logger.debug(`finished generating, total size in bytes: ${size}`);
 
     if (csvContainsFormulas && settings.escapeFormulaValues) {
       warnings.push(
@@ -155,7 +152,6 @@ export function createGenerateCsv(logger: LevelLogger) {
     return {
       csvContainsFormulas: csvContainsFormulas && !settings.escapeFormulaValues,
       maxSizeReached,
-      size,
       warnings,
     };
   };

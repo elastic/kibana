@@ -29,14 +29,14 @@ export const getScreenshots = async (
     const endTrace = startTrace('get_screenshots', 'read');
     const item = elementsPositionAndAttributes[i];
 
-    const base64EncodedData = await browser.screenshot(item.position);
+    const data = await browser.screenshot(item.position);
 
-    if (!base64EncodedData) {
-      throw new Error(`Failure in getScreenshots! Base64 data is void`);
+    if (!data?.byteLength) {
+      throw new Error(`Failure in getScreenshots! Screenshot data is void`);
     }
 
     screenshots.push({
-      base64EncodedData,
+      data,
       title: item.attributes.title,
       description: item.attributes.description,
     });

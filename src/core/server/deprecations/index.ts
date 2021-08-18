@@ -16,6 +16,8 @@ export type {
 export type {
   DeprecationsServiceSetup,
   InternalDeprecationsServiceSetup,
+  InternalDeprecationsServiceStart,
+  DeprecationsClient,
 } from './deprecations_service';
 
 export { DeprecationsService } from './deprecations_service';
