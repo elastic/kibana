@@ -84,8 +84,8 @@ describe('Body', () => {
     trailingControlColumns: [],
     filterStatus: 'open',
     filterQuery: '',
-    indexNames: [''],
     refetch: jest.fn(),
+    indexNames: [''],
   };
 
   describe('rendering', () => {

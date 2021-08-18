@@ -105,6 +105,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     const [initLoadingData, setInitLoadingData] = useState(true);
     const init = useRef(true);
     const timelineUi = useTimelineContext()?.ui;
+    const alertConsumers = useTimelineContext()?.alertConsumers;
 
     const {
       caseUserActions,
@@ -486,7 +487,9 @@ export const CaseComponent = React.memo<CaseComponentProps>(
             </EuiFlexGroup>
           </ContentWrapper>
         </WhitePageWrapper>
-        {timelineUi?.renderTimelineDetailsPanel ? timelineUi.renderTimelineDetailsPanel() : null}
+        {timelineUi?.renderTimelineDetailsPanel
+          ? timelineUi.renderTimelineDetailsPanel({ alertConsumers })
+          : null}
       </>
     );
   }
