@@ -60,11 +60,13 @@ const i18nTexts = {
 interface Props {
   deprecations?: DomainDeprecationDetails[];
   reload: () => void;
+  toggleFlyout: (newFlyoutContent?: DomainDeprecationDetails) => void;
 }
 
 export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
   deprecations,
   reload,
+  toggleFlyout
 }) => {
   const columns: Array<EuiBasicTableColumn<DomainDeprecationDetails>> = [
     {
@@ -87,9 +89,8 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       name: i18nTexts.issueColumnTitle,
       truncateText: true,
       sortable: true,
-      render: (domainId: DomainDeprecationDetails['domainId']) => {
-        // TODO update to handle opening flyout
-        return <EuiLink href="#">{i18nTexts.getDeprecationIssue(domainId)}</EuiLink>;
+      render: (domainId: DomainDeprecationDetails['domainId'], deprecation: DomainDeprecationDetails) => {
+        return <EuiLink onClick={() => toggleFlyout(deprecation)}>{i18nTexts.getDeprecationIssue(domainId)}</EuiLink>;
       },
     },
   ];

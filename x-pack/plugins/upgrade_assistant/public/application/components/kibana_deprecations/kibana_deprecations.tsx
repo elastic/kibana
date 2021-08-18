@@ -13,14 +13,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { DomainDeprecationDetails } from 'kibana/public';
-import { SectionLoading } from '../../../shared_imports';
+import { SectionLoading, GlobalFlyout } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
 import { NoDeprecationsPrompt } from '../shared';
-import { LEVEL_MAP } from '../constants';
-import { StepsModal, StepsModalContent } from './steps_modal';
 import { KibanaDeprecationErrors } from './kibana_deprecation_errors';
-import { ResolveDeprecationModal } from './resolve_deprecation_modal';
 import { KibanaDeprecationsTable } from './kibana_deprecations_table';
+import {
+  DeprecationDetailsFlyout,
+  DeprecationDetailsFlyoutProps,
+} from './deprecation_details_flyout';
+
+const { useGlobalFlyout } = GlobalFlyout;
 
 const i18nTexts = {
   pageTitle: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.pageTitle', {
@@ -58,33 +61,25 @@ const i18nTexts = {
   }),
 };
 
-const sortByLevelDesc = (a: DomainDeprecationDetails, b: DomainDeprecationDetails) => {
-  return -1 * (LEVEL_MAP[a.level] - LEVEL_MAP[b.level]);
-};
-
 export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponentProps) => {
   const [kibanaDeprecations, setKibanaDeprecations] = useState<
     DomainDeprecationDetails[] | undefined
   >(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>(undefined);
-  const [stepsModalContent, setStepsModalContent] = useState<StepsModalContent | undefined>(
+  const [flyoutContent, setFlyoutContent] = useState<undefined | DomainDeprecationDetails>(
     undefined
   );
-  const [resolveModalContent, setResolveModalContent] = useState<
-    undefined | DomainDeprecationDetails
-  >(undefined);
-  const [isResolvingDeprecation, setIsResolvingDeprecation] = useState(false);
+  // const [isResolvingDeprecation, setIsResolvingDeprecation] = useState(false);
 
-  const { deprecations, breadcrumbs, api, notifications } = useAppContext();
+  const { deprecations, breadcrumbs, api } = useAppContext();
 
   const getAllDeprecations = useCallback(async () => {
     setIsLoading(true);
 
     try {
       const response = await deprecations.getAllDeprecations();
-      const sortedDeprecations = response.sort(sortByLevelDesc);
-      setKibanaDeprecations(sortedDeprecations);
+      setKibanaDeprecations(response);
     } catch (e) {
       setError(e);
     }
@@ -92,35 +87,60 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
     setIsLoading(false);
   }, [deprecations]);
 
-  const toggleStepsModal = (newStepsModalContent?: StepsModalContent) => {
-    setStepsModalContent(newStepsModalContent);
+  const toggleFlyout = (newFlyoutContent?: DomainDeprecationDetails) => {
+    setFlyoutContent(newFlyoutContent);
   };
 
-  const toggleResolveModal = (newResolveModalContent?: DomainDeprecationDetails) => {
-    setResolveModalContent(newResolveModalContent);
-  };
+  const {
+    addContent: addContentToGlobalFlyout,
+    removeContent: removeContentFromGlobalFlyout,
+  } = useGlobalFlyout();
 
-  const resolveDeprecation = async (deprecationDetails: DomainDeprecationDetails) => {
-    setIsResolvingDeprecation(true);
+  const closeFlyout = useCallback(() => {
+    toggleFlyout();
+    removeContentFromGlobalFlyout('deprecationDetails');
+  }, [removeContentFromGlobalFlyout]);
 
-    const response = await deprecations.resolveDeprecation(deprecationDetails);
-
-    setIsResolvingDeprecation(false);
-    toggleResolveModal();
-
-    // Handle error case
-    if (response.status === 'fail') {
-      notifications.toasts.addError(new Error(response.reason), {
-        title: i18nTexts.errorMessage,
+  useEffect(() => {
+    if (flyoutContent) {
+      addContentToGlobalFlyout<DeprecationDetailsFlyoutProps>({
+        id: 'deprecationDetails',
+        Component: DeprecationDetailsFlyout,
+        props: {
+          deprecation: flyoutContent,
+          closeFlyout,
+        },
+        flyoutProps: {
+          onClose: closeFlyout,
+          'data-test-subj': 'kibanaDeprecationDetails',
+          'aria-labelledby': 'kibanaDeprecationDetailsFlyoutTitle',
+        },
       });
-
-      return;
     }
+  }, [addContentToGlobalFlyout, closeFlyout, flyoutContent]);
 
-    notifications.toasts.addSuccess(i18nTexts.successMessage);
-    // Refetch deprecations
-    getAllDeprecations();
-  };
+  // TODO finish implementing
+  // const resolveDeprecation = async (deprecationDetails: DomainDeprecationDetails) => {
+  //   setIsResolvingDeprecation(true);
+
+  //   const response = await deprecations.resolveDeprecation(deprecationDetails);
+
+  //   setIsResolvingDeprecation(false);
+  //   // toggleResolveModal();
+
+  //   // Handle error case
+  //   if (response.status === 'fail') {
+  //     notifications.toasts.addError(new Error(response.reason), {
+  //       title: i18nTexts.errorMessage,
+  //     });
+
+  //     return;
+  //   }
+
+  //   notifications.toasts.addSuccess(i18nTexts.successMessage);
+  //   // Refetch deprecations
+  //   getAllDeprecations();
+  // };
 
   useEffect(() => {
     async function sendTelemetryData() {
@@ -170,20 +190,11 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
 
         <EuiSpacer size="l" />
 
-        <KibanaDeprecationsTable deprecations={kibanaDeprecations} reload={getAllDeprecations} />
-
-        {/* {stepsModalContent && (
-          <StepsModal closeModal={() => toggleStepsModal()} modalContent={stepsModalContent} />
-        )}
-
-        {resolveModalContent && (
-          <ResolveDeprecationModal
-            closeModal={() => toggleResolveModal()}
-            resolveDeprecation={resolveDeprecation}
-            isResolvingDeprecation={isResolvingDeprecation}
-            deprecation={resolveModalContent}
-          />
-        )} */}
+        <KibanaDeprecationsTable
+          deprecations={kibanaDeprecations}
+          reload={getAllDeprecations}
+          toggleFlyout={toggleFlyout}
+        />
       </div>
     );
   }

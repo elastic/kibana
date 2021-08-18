@@ -10,6 +10,8 @@ import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { I18nStart, ScopedHistory } from 'src/core/public';
 
 import { ApplicationStart } from 'kibana/public';
+import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
+import { GlobalFlyout } from '../shared_imports';
 import { KibanaContextProvider } from '../shared_imports';
 import { AppServicesContext } from '../types';
 import { AppContextProvider, ContextValue, useAppContext } from './app_context';
@@ -17,8 +19,8 @@ import { ComingSoonPrompt } from './components/coming_soon_prompt';
 import { EsDeprecationsContent } from './components/es_deprecations';
 import { KibanaDeprecationsContent } from './components/kibana_deprecations';
 import { Overview } from './components/overview';
-import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 
+const { GlobalFlyoutProvider } = GlobalFlyout;
 export interface AppDependencies extends ContextValue {
   i18n: I18nStart;
   history: ScopedHistory;
@@ -64,7 +66,9 @@ export const RootComponent = ({
       <i18n.Context>
         <KibanaContextProvider services={services}>
           <AppContextProvider value={contextValue}>
-            <AppWithRouter history={history} />
+            <GlobalFlyoutProvider>
+              <AppWithRouter history={history} />
+            </GlobalFlyoutProvider>
           </AppContextProvider>
         </KibanaContextProvider>
       </i18n.Context>
