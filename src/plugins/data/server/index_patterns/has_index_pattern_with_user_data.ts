@@ -46,7 +46,7 @@ export const hasIndexPatternWithUserData = async ({
 
   try {
     const logsAndMetricsIndices = await esClient.cat.indices({
-      index: `${KNOWN_FLEET_ASSETS.METRICS_INDEX_PATTERN},${KNOWN_FLEET_ASSETS.LOGS_INDEX_PATTERN}`,
+      index: `${KNOWN_FLEET_ASSETS.LOGS_INDEX_PATTERN},${KNOWN_FLEET_ASSETS.METRICS_INDEX_PATTERN}`,
       format: 'json',
     });
 
