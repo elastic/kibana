@@ -322,6 +322,7 @@ export const mockHistory = {
 
 export const mockIndexPattern = createStubIndexPattern({
   spec: {
+    id: 'apm-*',
     title: 'apm-*',
     timeFieldName: '@timestamp',
     fields: JSON.parse(indexPatternData.attributes.fields),
