@@ -53,7 +53,6 @@ export default function ({ getPageObjects, getService }) {
 
       it('should create filters when create filter button is clicked', async () => {
         await testSubjects.click('mapTooltipCreateFilterButton');
-        await testSubjects.click('applyFiltersPopoverButton');
 
         const numFilters = await filterBar.getFilterCount();
         expect(numFilters).to.be(1);
