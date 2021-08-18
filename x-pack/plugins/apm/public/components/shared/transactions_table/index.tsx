@@ -60,10 +60,12 @@ interface Props {
   numberOfTransactionsPerPage?: number;
   showAggregationAccurateCallout?: boolean;
   environment: string;
+  fixedHeight?: boolean;
   kuery: string;
 }
 
 export function TransactionsTable({
+  fixedHeight = false,
   hideViewTransactionsLink = false,
   numberOfTransactionsPerPage = 5,
   showAggregationAccurateCallout = false,
@@ -301,6 +303,7 @@ export function TransactionsTable({
         <EuiFlexItem>
           <TableFetchWrapper status={status}>
             <OverviewTableContainer
+              fixedHeight={fixedHeight}
               isEmptyAndLoading={transactionGroupsTotalItems === 0 && isLoading}
             >
               <EuiBasicTable

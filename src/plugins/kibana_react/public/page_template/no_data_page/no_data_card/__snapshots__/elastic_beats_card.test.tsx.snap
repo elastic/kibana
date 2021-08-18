@@ -2,8 +2,7 @@
 
 exports[`ElasticBeatsCard props button 1`] = `
 <EuiCard
-  description="
-            Beats send data from hundreds or thousands of machines and systems to Logstash or Elasticsearch."
+  description="Use Beats to add data from various systems to Elasticsearch."
   footer={
     <EuiButton
       fill={true}
@@ -20,8 +19,7 @@ exports[`ElasticBeatsCard props button 1`] = `
 
 exports[`ElasticBeatsCard props href 1`] = `
 <EuiCard
-  description="
-            Beats send data from hundreds or thousands of machines and systems to Logstash or Elasticsearch."
+  description="Use Beats to add data from various systems to Elasticsearch."
   footer={
     <EuiButton
       fill={true}
@@ -39,8 +37,7 @@ exports[`ElasticBeatsCard props href 1`] = `
 exports[`ElasticBeatsCard props recommended 1`] = `
 <EuiCard
   betaBadgeLabel="Recommended"
-  description="
-            Beats send data from hundreds or thousands of machines and systems to Logstash or Elasticsearch."
+  description="Use Beats to add data from various systems to Elasticsearch."
   footer={
     <EuiButton
       fill={true}
@@ -57,8 +54,7 @@ exports[`ElasticBeatsCard props recommended 1`] = `
 
 exports[`ElasticBeatsCard renders 1`] = `
 <EuiCard
-  description="
-            Beats send data from hundreds or thousands of machines and systems to Logstash or Elasticsearch."
+  description="Use Beats to add data from various systems to Elasticsearch."
   footer={
     <EuiButton
       fill={true}
