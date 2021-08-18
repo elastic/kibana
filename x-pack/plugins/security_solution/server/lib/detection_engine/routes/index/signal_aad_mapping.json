@@ -35,7 +35,7 @@
   "signal.rule.enabled": "kibana.alert.rule.enabled",
   "signal.rule.false_positives": "kibana.alert.rule.false_positives",
   "signal.rule.from": "kibana.alert.rule.from",
-  "signal.rule.id": "kibana.alert.rule.id",
+  "signal.rule.id": "kibana.alert.rule.uuid",
   "signal.rule.immutable": "kibana.alert.rule.immutable",
   "signal.rule.index": "kibana.alert.rule.index",
   "signal.rule.interval": "kibana.alert.rule.interval",
