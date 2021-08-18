@@ -31,7 +31,6 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { inputsSelectors } from '../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { useAlertInfo } from '../../components/alerts_info';
 import { AlertsTable } from '../../components/alerts_table';
 import { NoApiIntegrationKeyCallOut } from '../../components/callouts/no_api_integration_callout';
 import { AlertsHistogramPanel } from '../../components/alerts_kpis/alerts_histogram_panel';
@@ -42,7 +41,7 @@ import { DetectionEngineHeaderPage } from '../../components/detection_engine_hea
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
-import { LinkButton } from '../../../common/components/links';
+import { LinkAnchor } from '../../../common/components/links';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { Display } from '../../../hosts/pages/display';
@@ -95,6 +94,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const graphEventId = useShallowEqualSelector(
     (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).graphEventId
   );
+  const updatedAt = useShallowEqualSelector(
+    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).updated
+  );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -122,12 +124,14 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
-  const [lastAlerts] = useAlertInfo({});
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const loading = userInfoLoading || listsConfigLoading;
-  const { navigateToUrl } = useKibana().services.application;
+  const {
+    application: { navigateToUrl },
+    timelines: timelinesUi,
+  } = useKibana().services;
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
@@ -281,30 +285,27 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             data-test-subj="detectionsAlertsPage"
           >
             <Display show={!globalFullScreen}>
-              <DetectionEngineHeaderPage
-                subtitle={
-                  lastAlerts != null && (
-                    <>
-                      {i18n.LAST_ALERT}
-                      {': '}
-                      {lastAlerts}
-                    </>
-                  )
-                }
-                title={i18n.PAGE_TITLE}
-              >
-                <LinkButton
-                  fill
+              <DetectionEngineHeaderPage title={i18n.PAGE_TITLE}>
+                <LinkAnchor
                   onClick={goToRules}
                   href={formatUrl(getRulesUrl())}
-                  iconType="gear"
                   data-test-subj="manage-alert-detection-rules"
                 >
                   {i18n.BUTTON_MANAGE_RULES}
-                </LinkButton>
+                </LinkAnchor>
               </DetectionEngineHeaderPage>
               <EuiHorizontalRule margin="m" />
-              <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <AlertsTableFilterGroup
+                    status={filterGroup}
+                    onFilterGroupChanged={onFilterGroupChangedCallback}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {timelinesUi.getLastUpdated({ updatedAt: updatedAt || 0, showUpdating: loading })}
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiSpacer size="m" />
               <EuiFlexGroup wrap>
                 <EuiFlexItem grow={2}>

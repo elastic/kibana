@@ -6,6 +6,7 @@
  */
 
 import { LevelLogger } from '../';
+import { UrlOrUrlLocatorTuple } from '../../../common/types';
 import { ConditionalHeaders } from '../../export_types/common';
 import { LayoutInstance } from '../layouts';
 
@@ -13,7 +14,7 @@ export { getScreenshots$ } from './observable';
 
 export interface ScreenshotObservableOpts {
   logger: LevelLogger;
-  urls: string[];
+  urlsOrUrlLocatorTuples: UrlOrUrlLocatorTuple[];
   conditionalHeaders: ConditionalHeaders;
   layout: LayoutInstance;
   browserTimezone?: string;
@@ -43,7 +44,7 @@ export interface ElementsPositionAndAttribute {
 }
 
 export interface Screenshot {
-  base64EncodedData: string;
+  data: Buffer;
   title: string;
   description: string;
 }

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import 'jest-canvas-mock';
 
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
@@ -11,8 +12,10 @@ import { render } from '../../lib/helper/rtl_helpers';
 import {
   TCPContextProvider,
   HTTPContextProvider,
+  BrowserContextProvider,
   ICMPSimpleFieldsContextProvider,
   MonitorTypeContextProvider,
+  TLSFieldsContextProvider,
 } from './contexts';
 import { CustomFields } from './custom_fields';
 import { ConfigKeys, DataStream, ScheduleUnit } from './types';
@@ -30,14 +33,26 @@ const defaultHTTPConfig = defaultConfig[DataStream.HTTP];
 const defaultTCPConfig = defaultConfig[DataStream.TCP];
 
 describe('<CustomFields />', () => {
-  const WrappedComponent = ({ validate = defaultValidation, typeEditable = false }) => {
+  const WrappedComponent = ({
+    validate = defaultValidation,
+    typeEditable = false,
+    dataStreams = [DataStream.HTTP, DataStream.TCP, DataStream.ICMP, DataStream.BROWSER],
+  }) => {
     return (
       <HTTPContextProvider>
         <MonitorTypeContextProvider>
           <TCPContextProvider>
-            <ICMPSimpleFieldsContextProvider>
-              <CustomFields validate={validate} typeEditable={typeEditable} />
-            </ICMPSimpleFieldsContextProvider>
+            <BrowserContextProvider>
+              <ICMPSimpleFieldsContextProvider>
+                <TLSFieldsContextProvider>
+                  <CustomFields
+                    validate={validate}
+                    typeEditable={typeEditable}
+                    dataStreams={dataStreams}
+                  />
+                </TLSFieldsContextProvider>
+              </ICMPSimpleFieldsContextProvider>
+            </BrowserContextProvider>
           </TCPContextProvider>
         </MonitorTypeContextProvider>
       </HTTPContextProvider>
@@ -149,7 +164,7 @@ describe('<CustomFields />', () => {
   });
 
   it('handles switching monitor type', () => {
-    const { getByText, getByLabelText, queryByLabelText } = render(
+    const { getByText, getByLabelText, queryByLabelText, getAllByLabelText } = render(
       <WrappedComponent typeEditable />
     );
     const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
@@ -168,7 +183,7 @@ describe('<CustomFields />', () => {
     expect(queryByLabelText('Max redirects')).not.toBeInTheDocument();
 
     // ensure at least one tcp advanced option is present
-    const advancedOptionsButton = getByText('Advanced TCP options');
+    let advancedOptionsButton = getByText('Advanced TCP options');
     fireEvent.click(advancedOptionsButton);
 
     expect(queryByLabelText('Request method')).not.toBeInTheDocument();
@@ -181,6 +196,21 @@ describe('<CustomFields />', () => {
 
     // expect TCP fields not to be in the DOM
     expect(queryByLabelText('Proxy URL')).not.toBeInTheDocument();
+
+    fireEvent.change(monitorType, { target: { value: DataStream.BROWSER } });
+
+    // expect browser fields to be in the DOM
+    getAllByLabelText('Zip URL').forEach((node) => {
+      expect(node).toBeInTheDocument();
+    });
+
+    // ensure at least one browser advanced option is present
+    advancedOptionsButton = getByText('Advanced Browser options');
+    fireEvent.click(advancedOptionsButton);
+    expect(getByLabelText('Screenshot options')).toBeInTheDocument();
+
+    // expect ICMP fields not to be in the DOM
+    expect(queryByLabelText('Wait in seconds')).not.toBeInTheDocument();
   });
 
   it('shows resolve hostnames locally field when proxy url is filled for tcp monitors', () => {
@@ -213,7 +243,7 @@ describe('<CustomFields />', () => {
     const urlError = getByText('URL is required');
     const monitorIntervalError = getByText('Monitor interval is required');
     const maxRedirectsError = getByText('Max redirects must be 0 or greater');
-    const timeoutError = getByText('Timeout must be 0 or greater and less than schedule interval');
+    const timeoutError = getByText('Timeout must be greater than or equal to 0');
 
     expect(urlError).toBeInTheDocument();
     expect(monitorIntervalError).toBeInTheDocument();
@@ -229,16 +259,35 @@ describe('<CustomFields />', () => {
     expect(queryByText('URL is required')).not.toBeInTheDocument();
     expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
     expect(queryByText('Max redirects must be 0 or greater')).not.toBeInTheDocument();
-    expect(
-      queryByText('Timeout must be 0 or greater and less than schedule interval')
-    ).not.toBeInTheDocument();
+    expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
 
     // create more errors
     fireEvent.change(monitorIntervalNumber, { target: { value: '1' } }); // 1 minute
-    fireEvent.change(timeout, { target: { value: '61' } }); // timeout cannot be more than monitor interval
+    fireEvent.change(timeout, { target: { value: '611' } }); // timeout cannot be more than monitor interval
 
-    const timeoutError2 = getByText('Timeout must be 0 or greater and less than schedule interval');
+    const timeoutError2 = getByText('Timeout must be less than the monitor interval');
 
     expect(timeoutError2).toBeInTheDocument();
+  });
+
+  it('does not show monitor options that are not contained in datastreams', async () => {
+    const { getByText, queryByText, queryByLabelText } = render(
+      <WrappedComponent
+        dataStreams={[DataStream.HTTP, DataStream.TCP, DataStream.ICMP]}
+        typeEditable
+      />
+    );
+
+    const monitorType = queryByLabelText('Monitor Type') as HTMLInputElement;
+
+    // resolve errors
+    fireEvent.click(monitorType);
+
+    waitFor(() => {
+      expect(getByText('http')).toBeInTheDocument();
+      expect(getByText('tcp')).toBeInTheDocument();
+      expect(getByText('icmp')).toBeInTheDocument();
+      expect(queryByText('browser')).not.toBeInTheDocument();
+    });
   });
 });

@@ -21,7 +21,7 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 interface Options {
   setup: Setup & SetupTimeRange;
-  environment?: string;
+  environment: string;
   backendName: string;
 }
 

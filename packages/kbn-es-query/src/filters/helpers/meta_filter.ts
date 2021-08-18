@@ -135,4 +135,4 @@ export const isFilters = (x: unknown): x is Filter[] =>
  *
  * @public
  */
-export const cleanFilter = (filter: Filter): Filter => omit(filter, ['meta', '$state']) as Filter;
+export const cleanFilter = (filter: Filter): Partial<Filter> => omit(filter, ['meta', '$state']);

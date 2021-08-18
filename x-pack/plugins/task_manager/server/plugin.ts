@@ -31,7 +31,6 @@ import { createMonitoringStats, MonitoringStats } from './monitoring';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTask } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
-import { TASK_MANAGER_INDEX } from './constants';
 
 export type TaskManagerSetupContract = {
   /**
@@ -115,7 +114,7 @@ export class TaskManagerPlugin
     }
 
     return {
-      index: TASK_MANAGER_INDEX,
+      index: this.config.index,
       addMiddleware: (middleware: Middleware) => {
         this.assertStillInSetup('add Middleware');
         this.middleware = addMiddlewareToChain(this.middleware, middleware);
@@ -127,7 +126,11 @@ export class TaskManagerPlugin
     };
   }
 
-  public start({ savedObjects, elasticsearch }: CoreStart): TaskManagerStartContract {
+  public start({
+    savedObjects,
+    elasticsearch,
+    executionContext,
+  }: CoreStart): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
     const serializer = savedObjects.createSerializer();
@@ -135,7 +138,7 @@ export class TaskManagerPlugin
       serializer,
       savedObjectsRepository,
       esClient: elasticsearch.createClient('taskManager').asInternalUser,
-      index: TASK_MANAGER_INDEX,
+      index: this.config!.index,
       definitions: this.definitions,
       taskManagerId: `kibana:${this.taskManagerId!}`,
     });
@@ -151,6 +154,7 @@ export class TaskManagerPlugin
       config: this.config!,
       definitions: this.definitions,
       logger: this.logger,
+      executionContext,
       taskStore,
       middleware: this.middleware,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
@@ -161,6 +165,7 @@ export class TaskManagerPlugin
       config: this.config!,
       definitions: this.definitions,
       logger: this.logger,
+      executionContext,
       middleware: this.middleware,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
       pool: this.taskPollingLifecycle.pool,

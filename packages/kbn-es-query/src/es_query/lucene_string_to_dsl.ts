@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { isString } from 'lodash';
-import { DslQuery } from './es_query_dsl';
 
 /**
  *
@@ -16,7 +16,9 @@ import { DslQuery } from './es_query_dsl';
  *
  * @public
  */
-export function luceneStringToDsl(query: string | any): DslQuery {
+export function luceneStringToDsl(
+  query: string | estypes.QueryDslQueryContainer
+): estypes.QueryDslQueryContainer {
   if (isString(query)) {
     if (query.trim() === '') {
       return { match_all: {} };

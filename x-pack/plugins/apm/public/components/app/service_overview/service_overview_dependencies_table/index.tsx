@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
+import React, { ReactNode } from 'react';
 import { useUiTracker } from '../../../../../../observability/public';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -21,12 +19,19 @@ import { DependenciesTable } from '../../../shared/dependencies_table';
 import { ServiceLink } from '../../../shared/service_link';
 import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 
-export function ServiceOverviewDependenciesTable() {
+interface ServiceOverviewDependenciesTableProps {
+  fixedHeight?: boolean;
+  link?: ReactNode;
+}
+
+export function ServiceOverviewDependenciesTable({
+  fixedHeight,
+  link,
+}: ServiceOverviewDependenciesTableProps) {
   const {
     urlParams: {
       start,
       end,
-      environment,
       comparisonEnabled,
       comparisonType,
       latencyAggregationType,
@@ -34,8 +39,7 @@ export function ServiceOverviewDependenciesTable() {
   } = useUrlParams();
 
   const {
-    query,
-    query: { kuery, rangeFrom, rangeTo },
+    query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName/*');
 
   const { offset } = getTimeRangeComparison({
@@ -46,15 +50,6 @@ export function ServiceOverviewDependenciesTable() {
   });
 
   const { serviceName, transactionType } = useApmServiceContext();
-
-  const router = useApmRouter();
-
-  const dependenciesLink = router.link('/services/:serviceName/dependencies', {
-    path: {
-      serviceName,
-    },
-    query,
-  });
 
   const trackEvent = useUiTracker();
 
@@ -79,7 +74,7 @@ export function ServiceOverviewDependenciesTable() {
     data?.serviceDependencies.map((dependency) => {
       const { location } = dependency;
       const name = getNodeName(location);
-      const link =
+      const itemLink =
         location.type === NodeType.backend ? (
           <BackendLink
             backendName={location.backendName}
@@ -122,13 +117,14 @@ export function ServiceOverviewDependenciesTable() {
         name,
         currentStats: dependency.currentStats,
         previousStats: dependency.previousStats,
-        link,
+        link: itemLink,
       };
     }) ?? [];
 
   return (
     <DependenciesTable
       dependencies={dependencies}
+      fixedHeight={fixedHeight}
       title={i18n.translate(
         'xpack.apm.serviceOverview.dependenciesTableTitle',
         {
@@ -142,14 +138,7 @@ export function ServiceOverviewDependenciesTable() {
         }
       )}
       status={status}
-      link={
-        <EuiLink href={dependenciesLink}>
-          {i18n.translate(
-            'xpack.apm.serviceOverview.dependenciesTableTabLink',
-            { defaultMessage: 'View dependencies' }
-          )}
-        </EuiLink>
-      }
+      link={link}
     />
   );
 }

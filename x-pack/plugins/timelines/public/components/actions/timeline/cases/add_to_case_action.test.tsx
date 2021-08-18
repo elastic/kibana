@@ -10,6 +10,7 @@ import { mount } from 'enzyme';
 import { TestProviders, mockGetAllCasesSelectorModal } from '../../../../mock';
 import { AddToCaseAction } from './add_to_case_action';
 import { SECURITY_SOLUTION_OWNER } from '../../../../../../cases/common';
+import { AddToCaseActionButton } from './add_to_case_action_button';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -20,16 +21,21 @@ jest.mock('./helpers');
 
 describe('AddToCaseAction', () => {
   const props = {
-    ecsRowData: {
+    event: {
       _id: 'test-id',
-      _index: 'test-index',
-      signal: { rule: { id: ['rule-id'], name: ['rule-name'], false_positives: [] } },
+      data: [],
+      ecs: {
+        _id: 'test-id',
+        _index: 'test-index',
+        signal: { rule: { id: ['rule-id'], name: ['rule-name'], false_positives: [] } },
+      },
     },
     casePermissions: {
       crud: true,
       read: true,
     },
     appId: 'securitySolution',
+    onClose: () => null,
   };
 
   beforeEach(() => {
@@ -39,6 +45,7 @@ describe('AddToCaseAction', () => {
   it('it renders', () => {
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton {...props} />
         <AddToCaseAction {...props} />
       </TestProviders>
     );
@@ -49,6 +56,7 @@ describe('AddToCaseAction', () => {
   it('it opens the context menu', () => {
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton {...props} />
         <AddToCaseAction {...props} />
       </TestProviders>
     );
@@ -61,6 +69,7 @@ describe('AddToCaseAction', () => {
   it('it opens the create case modal', () => {
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton {...props} />
         <AddToCaseAction {...props} />
       </TestProviders>
     );
@@ -73,6 +82,7 @@ describe('AddToCaseAction', () => {
   it('it opens the all cases modal', () => {
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton {...props} />
         <AddToCaseAction {...props} />
       </TestProviders>
     );
@@ -86,12 +96,28 @@ describe('AddToCaseAction', () => {
   it('it set rule information as null when missing', () => {
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton
+          {...props}
+          event={{
+            _id: 'test-id',
+            data: [{ field: 'kibana.alert.rule.id', value: ['rule-id'] }],
+            ecs: {
+              _id: 'test-id',
+              _index: 'test-index',
+              signal: { rule: { id: ['rule-id'], false_positives: [] } },
+            },
+          }}
+        />
         <AddToCaseAction
           {...props}
-          ecsRowData={{
+          event={{
             _id: 'test-id',
-            _index: 'test-index',
-            signal: { rule: { id: ['rule-id'], false_positives: [] } },
+            data: [{ field: 'kibana.alert.rule.id', value: ['rule-id'] }],
+            ecs: {
+              _id: 'test-id',
+              _index: 'test-index',
+              signal: { rule: { id: ['rule-id'], false_positives: [] } },
+            },
           }}
         />
       </TestProviders>
@@ -113,11 +139,26 @@ describe('AddToCaseAction', () => {
   it('disabled when event type is not supported', () => {
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton
+          {...props}
+          event={{
+            _id: 'test-id',
+            data: [],
+            ecs: {
+              _id: 'test-id',
+              _index: 'test-index',
+            },
+          }}
+        />
         <AddToCaseAction
           {...props}
-          ecsRowData={{
+          event={{
             _id: 'test-id',
-            _index: 'test-index',
+            data: [],
+            ecs: {
+              _id: 'test-id',
+              _index: 'test-index',
+            },
           }}
         />
       </TestProviders>
@@ -138,6 +179,7 @@ describe('AddToCaseAction', () => {
     };
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton {...newProps} />
         <AddToCaseAction {...newProps} />
       </TestProviders>
     );

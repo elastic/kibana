@@ -24,6 +24,7 @@ interface Percentile {
   shade?: number | string;
   value?: number | string;
   percentile?: string;
+  color?: string;
 }
 
 export interface Metric {
@@ -52,6 +53,7 @@ export interface Metric {
   type: string;
   value?: string;
   values?: string[];
+  colors?: string[];
   size?: string | number;
   agg_with?: string;
   order?: string;
