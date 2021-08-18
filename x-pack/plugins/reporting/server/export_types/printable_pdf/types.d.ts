@@ -10,9 +10,8 @@ import { BaseParams, BasePayload } from '../../types';
 
 interface BaseParamsPDF {
   layout: LayoutParams;
-  forceNow?: string;
-  // TODO: Add comment explaining this field
   relativeUrls: string[];
+  isDeprecated?: boolean;
 }
 
 // Job params: structure of incoming user request data, after being parsed from RISON
@@ -22,7 +21,11 @@ export type JobParamsPDF = BaseParamsPDF & BaseParams;
 export interface TaskPayloadPDF extends BasePayload {
   layout: LayoutParams;
   forceNow?: string;
-  objects: Array<{
-    relativeUrl: string;
-  }>;
+  objects: Array<{ relativeUrl: string }>;
+}
+
+type Legacy = Omit<JobParamsPDF, 'relativeUrls'>;
+export interface JobParamsPDFLegacy extends Legacy {
+  savedObjectId: string;
+  queryString: string;
 }
