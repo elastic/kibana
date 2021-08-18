@@ -18,6 +18,7 @@ export function FailedTransactionsCorrelationsHelpPopover() {
       anchorPosition="leftUp"
       button={
         <HelpPopoverButton
+          buttonTextEnabled={true}
           onClick={() => {
             setIsPopoverOpen((prevIsPopoverOpen) => !prevIsPopoverOpen);
           }}
@@ -25,25 +26,28 @@ export function FailedTransactionsCorrelationsHelpPopover() {
       }
       closePopover={() => setIsPopoverOpen(false)}
       isOpen={isPopoverOpen}
-      title={i18n.translate('xpack.apm.correlations.failurePopoverTitle', {
-        defaultMessage: 'Failure correlations',
-      })}
+      title={i18n.translate(
+        'xpack.apm.correlations.failedTransactions.popoverTitle',
+        {
+          defaultMessage: 'Failed transactions correlations',
+        }
+      )}
     >
       <p>
         <FormattedMessage
-          id="xpack.apm.correlations.failurePopoverBasicExplanation"
+          id="xpack.apm.correlations.failedTransactions.basicExplanation"
           defaultMessage="Correlations help you discover which attributes are contributing to failed transactions."
         />
       </p>
       <p>
         <FormattedMessage
-          id="xpack.apm.correlations.failurePopoverTableExplanation"
+          id="xpack.apm.correlations.failedTransactions.tableExplanation"
           defaultMessage="The table is sorted by scores, which are mapped to high, medium, or low impact levels. Attributes with high impact levels are more likely to contribute to failed transactions."
         />
       </p>
       <p>
         <FormattedMessage
-          id="xpack.apm.correlations.failurePopoverPerformanceExplanation"
+          id="xpack.apm.correlations.failedTransactions.performanceExplanation"
           defaultMessage="This analysis performs statistical searches across a large number of attributes. For large time ranges and services with high transaction throughput, this might take some time. Reduce the time range to improve performance."
         />
       </p>

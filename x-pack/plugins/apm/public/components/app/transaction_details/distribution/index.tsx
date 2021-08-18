@@ -132,7 +132,7 @@ export function TransactionDistribution({
 
   return (
     <div data-test-subj="apmTransactionDistributionTabContent">
-      <EuiFlexGroup>
+      <EuiFlexGroup style={{ minHeight: 56 }}>
         <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
           <EuiTitle size="xs">
             <h5 data-test-subj="apmTransactionDistributionChartTitle">

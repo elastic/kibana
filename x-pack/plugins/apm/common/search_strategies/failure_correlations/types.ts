@@ -15,6 +15,7 @@ export interface FailedTransactionsCorrelationValue {
   pValue: number | null;
   fieldName: string;
   fieldValue: string;
+  normalizedScore: number;
 }
 
 export type FailureCorrelationImpactThreshold = typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD[keyof typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD];

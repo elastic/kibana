@@ -5,45 +5,42 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiCallOut,
-  EuiCode,
-  EuiAccordion,
-  EuiPanel,
   EuiBasicTableColumn,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiProgress,
   EuiSpacer,
-  EuiText,
-  EuiBadge,
   EuiIcon,
   EuiLink,
   EuiTitle,
   EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { useHistory } from 'react-router-dom';
+import { sortBy } from 'lodash';
+import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { CorrelationsTable } from './correlations_table';
 import { enableInspectEsQueries } from '../../../../../observability/public';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { FailedTransactionsCorrelationsHelpPopover } from './failed_transactions_correlations_help_popover';
-import { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { isErrorMessage } from './utils/is_error_message';
-import { Summary } from '../../shared/Summary';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { getFailedTransactionsCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 import { createHref, push } from '../../shared/Links/url_helpers';
 import { useUiTracker } from '../../../../../observability/public';
 import { useFailedTransactionsCorrelationsFetcher } from '../../../hooks/use_failed_transactions_correlations_fetcher';
-import { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { CorrelationsLog } from './log';
+import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
+import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
+import { CorrelationsProgressControls } from './progress_controls';
+import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
+import type { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
 
 export function FailedTransactionsCorrelations({
   onFilter,
@@ -76,7 +73,7 @@ export function FailedTransactionsCorrelations({
     end,
   };
 
-  const result = useFailedTransactionsCorrelationsFetcher(searchServicePrams);
+  const result = useFailedTransactionsCorrelationsFetcher();
 
   const {
     ccsWarning,
@@ -87,10 +84,20 @@ export function FailedTransactionsCorrelations({
     startFetch,
     cancelFetch,
   } = result;
+
+  const startFetchHandler = useCallback(() => {
+    startFetch(searchServicePrams);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [environment, serviceName, kuery, start, end]);
+
   // start fetching on load
   // we want this effect to execute exactly once after the component mounts
   useEffect(() => {
-    startFetch();
+    if (isRunning) {
+      cancelFetch();
+    }
+
+    startFetchHandler();
 
     return () => {
       // cancel any running async partial request when unmounting the component
@@ -98,7 +105,7 @@ export function FailedTransactionsCorrelations({
       cancelFetch();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [startFetchHandler]);
 
   const [
     selectedSignificantTerm,
@@ -140,6 +147,7 @@ export function FailedTransactionsCorrelations({
             </>
           );
         },
+        sortable: true,
       },
       {
         width: '116px',
@@ -155,6 +163,7 @@ export function FailedTransactionsCorrelations({
           </>
         ),
         render: getFailedTransactionsCorrelationImpactLabel,
+        sortable: true,
       },
       {
         field: 'fieldName',
@@ -162,6 +171,7 @@ export function FailedTransactionsCorrelations({
           'xpack.apm.correlations.failedTransactions.correlationsTable.fieldNameLabel',
           { defaultMessage: 'Field name' }
         ),
+        sortable: true,
       },
       {
         field: 'key',
@@ -170,6 +180,7 @@ export function FailedTransactionsCorrelations({
           { defaultMessage: 'Field value' }
         ),
         render: (fieldValue: string) => String(fieldValue).slice(0, 50),
+        sortable: true,
       },
       {
         width: '100px',
@@ -273,171 +284,124 @@ export function FailedTransactionsCorrelations({
       });
     }
   }, [error, notifications.toasts]);
+
+  const [sortField, setSortField] = useState<
+    keyof FailedTransactionsCorrelationValue
+  >('normalizedScore');
+  const [sortDirection, setSortDirection] = useState<Direction>('desc');
+
+  const onTableChange = useCallback(({ sort }) => {
+    const { field: currentSortField, direction: currentSortDirection } = sort;
+
+    setSortField(currentSortField);
+    setSortDirection(currentSortDirection);
+  }, []);
+
+  const { sorting, correlationTerms } = useMemo(() => {
+    if (!Array.isArray(result.values)) {
+      return { correlationTerms: [], sorting: undefined };
+    }
+    const sortedTerms = sortBy(result.values, sortField);
+    return {
+      correlationTerms:
+        sortDirection === 'asc' ? sortedTerms : sortedTerms.reverse(),
+      sorting: {
+        sort: {
+          field: sortField,
+          direction: sortDirection,
+        },
+      } as EuiTableSortingType<FailedTransactionsCorrelationValue>,
+    };
+  }, [result?.values, sortField, sortDirection]);
+
   return (
-    <>
-      <EuiFlexGroup
-        data-test-subj="apmFailedTransactionsCorrelationsTabContent"
-        gutterSize="s"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h5 data-test-subj="apmFailedTransactionsCorrelationsChartTitle">
-              {i18n.translate(
-                'xpack.apm.correlations.failedTransactions.panelTitle',
+    <div data-test-subj="apmFailedTransactionsCorrelationsTabContent">
+      <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <EuiFlexGroup direction="row" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h5 data-test-subj="apmFailedTransactionsCorrelationsChartTitle">
+                {i18n.translate(
+                  'xpack.apm.correlations.failedTransactions.panelTitle',
+                  {
+                    defaultMessage: 'Failed transactions',
+                  }
+                )}
+              </h5>
+            </EuiTitle>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge
+              label={i18n.translate(
+                'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaLabel',
                 {
-                  defaultMessage: 'Failed transactions',
+                  defaultMessage: 'Beta',
                 }
               )}
-            </h5>
-          </EuiTitle>
-        </EuiFlexItem>
+              title={i18n.translate(
+                'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaTitle',
+                {
+                  defaultMessage: 'Failed transaction correlations',
+                }
+              )}
+              tooltipContent={i18n.translate(
+                'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaDescription',
+                {
+                  defaultMessage:
+                    'Failed transaction correlations is not GA. Please help us by reporting any bugs.',
+                }
+              )}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-        <EuiFlexItem grow={false}>
-          <EuiBetaBadge
-            label={i18n.translate(
-              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaLabel',
-              {
-                defaultMessage: 'Beta',
-              }
-            )}
-            title={i18n.translate(
-              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaTitle',
-              {
-                defaultMessage: 'Failed transaction rate',
-              }
-            )}
-            tooltipContent={i18n.translate(
-              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaDescription',
-              {
-                defaultMessage:
-                  'Failed transaction rate is not GA. Please help us by reporting any bugs.',
-              }
-            )}
-            size="s"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          {!isRunning && (
-            <EuiButton size="s" onClick={startFetch}>
-              <FormattedMessage
-                id="xpack.apm.correlations.failedTransactions.refreshButtonTitle"
-                defaultMessage="Refresh"
-              />
-            </EuiButton>
-          )}
-          {isRunning && (
-            <EuiButton size="s" onClick={cancelFetch}>
-              <FormattedMessage
-                id="xpack.apm.correlations.failedTransactions.cancelButtonTitle"
-                defaultMessage="Cancel"
-              />
-            </EuiButton>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem data-test-subj="apmCorrelationsFailedTransactionsCorrelationsProgressTitle">
-              <EuiText size="xs" color="subdued">
-                <FormattedMessage
-                  data-test-subj="apmCorrelationsFailedTransactionsCorrelationsProgressMessage"
-                  id="xpack.apm.correlations.failedTransactions.progressTitle"
-                  defaultMessage="Progress: {progress}%"
-                  values={{ progress: Math.round(progress * 100) }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiProgress
-                aria-label={i18n.translate(
-                  'xpack.apm.correlations.failedTransactions.progressAriaLabel',
-                  { defaultMessage: 'Progress' }
-                )}
-                value={Math.round(progress * 100)}
-                max={100}
-                size="m"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <FailedTransactionsCorrelationsHelpPopover />
         </EuiFlexItem>
-      </EuiFlexGroup>
-      {selectedTerm?.pValue != null ? (
-        <>
-          <EuiSpacer size="m" />
-          <Summary
-            items={[
-              <EuiBadge color="hollow">
-                {`${selectedTerm.fieldName}: ${selectedTerm.key}`}
-              </EuiBadge>,
-              <>{`p-value: ${selectedTerm.pValue.toPrecision(3)}`}</>,
-            ]}
-          />
-          <EuiSpacer size="m" />
-        </>
-      ) : null}
-      <CorrelationsTable<FailedTransactionsCorrelationValue>
-        columns={failedTransactionsCorrelationsColumns}
-        significantTerms={result?.values}
-        status={FETCH_STATUS.SUCCESS}
-        setSelectedSignificantTerm={setSelectedSignificantTerm}
-        selectedTerm={selectedTerm}
-      />
+      </EuiFlexItem>
 
-      {ccsWarning && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.apm.correlations.failedTransactions.ccsWarningCalloutTitle',
-              {
-                defaultMessage: 'Cross-cluster search compatibility',
-              }
-            )}
-            color="warning"
-          >
-            <p>
-              {i18n.translate(
-                'xpack.apm.correlations.failedTransactions.ccsWarningCalloutBody',
-                {
-                  defaultMessage:
-                    'Data for the correlation analysis could not be fully retrieved. This feature is supported only for 7.15 and later versions.',
-                }
-              )}
-            </p>
-          </EuiCallOut>
-        </>
-      )}
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
-      {log.length > 0 && displayLog && (
-        <EuiAccordion
-          id="apmFailedTransactionsCorrelationsLogAccordion"
-          buttonContent={i18n.translate(
-            'xpack.apm.correlations.failedTransactions.logButtonContent',
+      <EuiTitle size="xs">
+        <span data-test-subj="apmCorrelationsLatencyCorrelationsTablePanelTitle">
+          {i18n.translate(
+            'xpack.apm.correlations.latencyCorrelations.tableTitle',
             {
-              defaultMessage: 'Log',
+              defaultMessage: 'Correlations',
             }
           )}
-        >
-          <EuiPanel color="subdued">
-            {log.map((d, i) => {
-              const splitItem = d.split(': ');
-              return (
-                <p key={i}>
-                  <small>
-                    <EuiCode>{splitItem[0]}</EuiCode> {splitItem[1]}
-                  </small>
-                </p>
-              );
-            })}
-          </EuiPanel>
-        </EuiAccordion>
-      )}
-    </>
+        </span>
+      </EuiTitle>
+
+      <EuiSpacer size="s" />
+
+      <CorrelationsProgressControls
+        progress={progress}
+        isRunning={isRunning}
+        onRefresh={startFetchHandler}
+        onCancel={cancelFetch}
+      />
+
+      {ccsWarning && <CrossClusterSearchCompatibilityWarning version="7.15" />}
+      <EuiSpacer size="m" />
+      <div data-test-subj="apmCorrelationsTable">
+        {(isRunning || correlationTerms.length > 0) && (
+          <CorrelationsTable<FailedTransactionsCorrelationValue>
+            columns={failedTransactionsCorrelationsColumns}
+            significantTerms={correlationTerms}
+            status={isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS}
+            setSelectedSignificantTerm={setSelectedSignificantTerm}
+            selectedTerm={selectedTerm}
+            onTableChange={onTableChange}
+            sorting={sorting}
+          />
+        )}
+        {correlationTerms.length < 1 && (progress === 1 || !isRunning) ? (
+          <CorrelationsEmptyStatePrompt />
+        ) : null}
+      </div>
+      {displayLog ? <CorrelationsLog log={log} /> : null}
+    </div>
   );
 }
