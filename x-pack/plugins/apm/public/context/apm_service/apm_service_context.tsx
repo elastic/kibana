@@ -13,7 +13,7 @@ import {
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
 import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
-import { useServiceAgentNameFetcher } from './use_service_agent_name_fetcher';
+import { useServiceAgentFetcher } from './use_service_agent_fetcher';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
 import { useServiceAlertsFetcher } from './use_service_alerts_fetcher';
 import { useApmParams } from '../../hooks/use_apm_params';
@@ -28,6 +28,7 @@ export const APMServiceContext = createContext<{
   transactionType?: string;
   transactionTypes: string[];
   alerts: APMServiceAlert[];
+  runtimeName?: string;
 }>({ serviceName: '', transactionTypes: [], alerts: [] });
 
 export function ApmServiceContextProvider({
@@ -40,7 +41,7 @@ export function ApmServiceContextProvider({
     query,
   } = useApmParams('/services/:serviceName');
 
-  const { agentName } = useServiceAgentNameFetcher(serviceName);
+  const { agentName, runtimeName } = useServiceAgentFetcher(serviceName);
 
   const transactionTypes = useServiceTransactionTypesFetcher(serviceName);
 
@@ -65,6 +66,7 @@ export function ApmServiceContextProvider({
         transactionType,
         transactionTypes,
         alerts,
+        runtimeName,
       }}
       children={children}
     />

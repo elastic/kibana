@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
 import type { UiActionsStart } from 'src/plugins/ui_actions/public';
 import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import type { DashboardStart } from 'src/plugins/dashboard/public';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import type {
   AppMountParameters,
   CoreSetup,
@@ -81,6 +83,7 @@ export interface MapsPluginSetupDependencies {
   mapsEms: MapsEmsPluginSetup;
   share: SharePluginSetup;
   licensing: LicensingPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface MapsPluginStartDependencies {
@@ -168,8 +171,10 @@ export class MapsPlugin
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.kibana,
       async mount(params: AppMountParameters) {
+        const UsageTracker =
+          plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
         const { renderApp } = await lazyLoadMapModules();
-        return renderApp(params);
+        return renderApp(params, UsageTracker);
       },
     });
   }

@@ -220,6 +220,21 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
             layers: [{ ...layer, nestedLegend: !layer.nestedLegend }],
           });
         }}
+        shouldTruncate={layer.truncateLegend ?? true}
+        onTruncateLegendChange={() => {
+          const current = layer.truncateLegend ?? true;
+          setState({
+            ...state,
+            layers: [{ ...layer, truncateLegend: !current }],
+          });
+        }}
+        maxLines={layer?.legendMaxLines}
+        onMaxLinesChange={(val) => {
+          setState({
+            ...state,
+            layers: [{ ...layer, legendMaxLines: val }],
+          });
+        }}
       />
     </EuiFlexGroup>
   );

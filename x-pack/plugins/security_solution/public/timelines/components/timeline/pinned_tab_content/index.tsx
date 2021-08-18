@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo, useCallback } from 'react';
 import styled from 'styled-components';
@@ -87,6 +88,8 @@ const VerticalRule = styled.div`
 `;
 
 VerticalRule.displayName = 'VerticalRule';
+
+const alertConsumers: AlertConsumers[] = [AlertConsumers.SIEM];
 
 interface OwnProps {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
@@ -266,6 +269,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
             <VerticalRule />
             <ScrollableFlexItem grow={1}>
               <DetailsPanel
+                alertConsumers={alertConsumers}
                 browserFields={browserFields}
                 docValueFields={docValueFields}
                 handleOnPanelClosed={handleOnPanelClosed}
