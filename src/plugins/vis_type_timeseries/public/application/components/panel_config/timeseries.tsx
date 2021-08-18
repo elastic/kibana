@@ -103,6 +103,9 @@ const legendPositionOptions = [
   },
 ];
 
+const MAX_TRUNCATE_LINES = 5;
+const MIN_TRUNCATE_LINES = 1;
+
 export class TimeseriesPanelConfig extends Component<
   PanelConfigProps,
   { selectedTab: PANEL_CONFIG_TABS }
@@ -426,12 +429,18 @@ export class TimeseriesPanelConfig extends Component<
                 <EuiFieldNumber
                   data-test-subj="timeSeriesEditorDataMaxLegendLines"
                   value={model.max_lines_legend}
-                  min={1}
-                  max={5}
+                  min={MIN_TRUNCATE_LINES}
+                  max={MAX_TRUNCATE_LINES}
                   compressed
                   disabled={!Boolean(model.truncate_legend)}
                   onChange={(e) => {
-                    this.props.onChange({ max_lines_legend: Number(e.target.value) });
+                    const val = Number(e.target.value);
+                    this.props.onChange({
+                      max_lines_legend: Math.min(
+                        MAX_TRUNCATE_LINES,
+                        Math.max(val, MIN_TRUNCATE_LINES)
+                      ),
+                    });
                   }}
                 />
               </EuiFlexItem>
