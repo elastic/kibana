@@ -2,31 +2,31 @@
   flex-basis: auto;
 
   &-small {
-    width: 200px;
+    width: $euiSize * 14;
   }
 
   &-medium {
-    width: 400px;
+    width: $euiSize * 25;
   }
 
   &-large {
-    width: 600px;
+    width: $euiSize * 50;
   }
 }
 
 .controlFrame--formControlLayout {
   width: 100%;
-  min-width: $euiSize * 12.5;
+  min-width: $euiSize * 14;
 }
 
 .controlFrame--control {
-  &.controlFrame--filterBtnSingle {
+  &.controlFrame--single {
     height: 100%;
   }
-}
 
-.controlFrame--filterBtnTwoLine {
-  width: 100%;
+  &.controlFrame--twoLine {
+    width: 100%;
+  }
 }
 
 .controlGroup--sortPopover {

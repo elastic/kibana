@@ -37,8 +37,8 @@ export const ControlFrame = ({ twoLine, embeddable }: ControlFrameProps) => {
     >
       <div
         className={classNames('controlFrame--control', {
-          'controlFrame--filterBtnTwoLine': twoLine,
-          'controlFrame--filterBtnSingle': !twoLine,
+          'controlFrame--twoLine': twoLine,
+          'controlFrame--single': !twoLine,
         })}
         id={embeddable.id}
         ref={embeddableRoot}

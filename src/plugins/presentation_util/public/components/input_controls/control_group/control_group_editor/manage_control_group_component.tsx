@@ -19,12 +19,16 @@ import {
   DropResult,
   EuiIcon,
   EuiButtonGroup,
-  EuiCheckbox,
   EuiFormLabel,
   EuiPanel,
+  EuiButtonIcon,
 } from '@elastic/eui';
 
 const widthButtons: Array<{ id: ControlWidth; label: string }> = [
+  {
+    id: `auto`,
+    label: 'Auto',
+  },
   {
     id: `small`,
     label: 'Small',
@@ -39,13 +43,12 @@ const widthButtons: Array<{ id: ControlWidth; label: string }> = [
   },
 ];
 
-type ControlWidth = 'small' | 'medium' | 'large';
+type ControlWidth = 'auto' | 'small' | 'medium' | 'large';
 
 export interface InputControlMeta {
   embeddableId: string;
   width: ControlWidth;
   title: string;
-  grow: boolean;
 }
 
 interface ManageControlGroupProps {
@@ -86,7 +89,7 @@ export const ManageControlGroupComponent = ({
     dragHandleProps: any;
     index: number;
   }) => {
-    const { embeddableId, title, width, grow } = currentControlMeta;
+    const { title, width } = currentControlMeta;
     return (
       <EuiFlexGroup alignItems="center" gutterSize="m">
         <EuiFlexItem>
@@ -107,17 +110,7 @@ export const ManageControlGroupComponent = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiCheckbox
-            id={`growSetting${embeddableId}`}
-            label="grow"
-            checked={grow}
-            onChange={(event) =>
-              setControlMeta((currentControls) => {
-                currentControls[index].grow = event.target.checked;
-                return [...currentControls];
-              })
-            }
-          />
+          <EuiButtonIcon iconType="trash" color="danger" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <div {...dragHandleProps} aria-label="Drag Handle">

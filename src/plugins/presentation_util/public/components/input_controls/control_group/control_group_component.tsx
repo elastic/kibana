@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 import classNames from 'classnames';
 import { OptionsListEmbeddable, OptionsListEmbeddableFactory } from '../control_types/options_list';
@@ -60,7 +60,7 @@ export const ControlGroupComponent = ({
         newEmbeddables.map((embeddable) => ({
           title: embeddable.getTitle(),
           embeddableId: embeddable.id,
-          width: 'small',
+          width: 'auto',
           grow: true,
         }))
       );
@@ -70,10 +70,11 @@ export const ControlGroupComponent = ({
   return (
     <>
       <ManageControlGroupComponent controlMeta={controlMeta} setControlMeta={setControlMeta} />
+      <EuiSpacer size="l" />
       <EuiFlexGroup alignItems="center" wrap={true} gutterSize={'s'}>
-        {controlMeta.map(({ embeddableId, width, grow }) => (
+        {controlMeta.map(({ embeddableId, width }) => (
           <EuiFlexItem
-            grow={grow}
+            grow={width === 'auto'}
             key={embeddableId}
             className={classNames({
               'controlFrame--wrapper-small': width === 'small',
