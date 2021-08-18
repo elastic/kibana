@@ -13,8 +13,8 @@ import {
   waitForAlertsPanelToBeLoaded,
   waitForAlerts,
   waitForAlertsToBeLoaded,
-  markInProgressFirstAlert,
-  goToInProgressAlerts,
+  markAcknowledgedFirstAlert,
+  goToAcknowledgedAlerts,
   waitForAlertsIndexToBeCreated,
   goToOpenedAlerts,
 } from '../../tasks/alerts';
@@ -26,7 +26,7 @@ import { refreshPage } from '../../tasks/security_header';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe('Marking alerts as in-progress', () => {
+describe('Marking alerts as acknowledged', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL);
@@ -37,30 +37,30 @@ describe('Marking alerts as in-progress', () => {
     waitForAlertsToPopulate(500);
   });
 
-  it('Mark one alert in progress when more than one open alerts are selected', () => {
+  it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
     cy.get(ALERTS_COUNT)
       .invoke('text')
       .then((alertNumberString) => {
         const numberOfAlerts = alertNumberString.split(' ')[0];
-        const numberOfAlertsToBeMarkedInProgress = 1;
+        const numberOfAlertsToBeMarkedAcknowledged = 1;
         const numberOfAlertsToBeSelected = 3;
 
         cy.get(TAKE_ACTION_POPOVER_BTN).should('not.exist');
         selectNumberOfAlerts(numberOfAlertsToBeSelected);
         cy.get(TAKE_ACTION_POPOVER_BTN).should('exist');
 
-        markInProgressFirstAlert();
+        markAcknowledgedFirstAlert();
         refreshPage();
         waitForAlertsToBeLoaded();
         goToOpenedAlerts();
 
-        const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedInProgress;
+        const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
         cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
 
-        goToInProgressAlerts();
+        goToAcknowledgedAlerts();
         waitForAlerts();
 
-        cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeMarkedInProgress} alert`);
+        cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeMarkedAcknowledged} alert`);
       });
   });
 });
