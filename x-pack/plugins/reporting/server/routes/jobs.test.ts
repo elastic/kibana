@@ -9,6 +9,7 @@ jest.mock('../lib/content_stream', () => ({
   getContentStream: jest.fn(),
 }));
 
+import { Readable } from 'stream';
 import { UnwrapPromise } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { of } from 'rxjs';
@@ -98,7 +99,12 @@ describe('GET /api/reporting/jobs/download', () => {
     core.getExportTypesRegistry = () => exportTypesRegistry;
 
     mockEsClient = (await core.getEsClient()).asInternalUser as typeof mockEsClient;
-    stream = ({ toString: jest.fn(() => 'test') } as unknown) as typeof stream;
+    stream = new Readable({
+      read() {
+        this.push('test');
+        this.push(null);
+      },
+    }) as typeof stream;
 
     (getContentStream as jest.MockedFunction<typeof getContentStream>).mockResolvedValue(stream);
   });
@@ -192,14 +198,14 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   it('when a job fails', async () => {
-    mockEsClient.search.mockResolvedValueOnce({
+    mockEsClient.search.mockResolvedValue({
       body: getHits({
         jobtype: 'unencodedJobType',
         status: 'failed',
+        output: { content: 'job failure message' },
         payload: { title: 'failing job!' },
       }),
     } as any);
-    stream.toString.mockResolvedValueOnce('job failure message');
     registerJobInfoRoutes(core);
 
     await server.start();
@@ -255,7 +261,7 @@ describe('GET /api/reporting/jobs/download', () => {
         .expect('content-disposition', 'inline; filename="report.csv"');
     });
 
-    it(`doesn't encode output-content for non-specified job-types`, async () => {
+    it('forwards job content stream', async () => {
       mockEsClient.search.mockResolvedValueOnce({
         body: getCompleteHits({
           jobType: 'unencodedJobType',
@@ -269,24 +275,6 @@ describe('GET /api/reporting/jobs/download', () => {
         .expect(200)
         .expect('Content-Type', 'text/plain; charset=utf-8')
         .then(({ text }) => expect(text).toEqual('test'));
-    });
-
-    it(`base64 encodes output content for configured jobTypes`, async () => {
-      mockEsClient.search.mockResolvedValueOnce({
-        body: getCompleteHits({
-          jobType: 'base64EncodedJobType',
-          outputContentType: 'application/pdf',
-        }),
-      } as any);
-      registerJobInfoRoutes(core);
-
-      await server.start();
-      await supertest(httpSetup.server.listener)
-        .get('/api/reporting/jobs/download/dank')
-        .expect(200)
-        .expect('Content-Type', 'application/pdf')
-        .expect('content-disposition', 'inline; filename="report.pdf"')
-        .then(({ body }) => expect(Buffer.from(body).toString('base64')).toEqual('test'));
     });
 
     it('refuses to return unknown content-types', async () => {

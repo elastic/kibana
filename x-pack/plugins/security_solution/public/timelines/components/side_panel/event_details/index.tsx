@@ -17,10 +17,10 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
-import { EntityType, useTimelineEventsDetails } from '../../../containers/details';
+import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
@@ -34,6 +34,7 @@ import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoin
 import { TimelineNonEcsData } from '../../../../../common';
 import { Ecs } from '../../../../../common/ecs';
 import { EventDetailsFooter } from './footer';
+import { EntityType } from '../../../../../../timelines/common';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -44,7 +45,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
     .euiFlyoutBody__overflowContent {
       flex: 1;
       overflow: hidden;
-      padding: ${({ theme }) => `${theme.eui.paddingSizes.m}`};
+      padding: ${({ theme }) => `0 ${theme.eui.paddingSizes.m} ${theme.eui.paddingSizes.m}`};
     }
   }
 `;
@@ -67,11 +68,13 @@ interface EventDetailsPanelProps {
   timelineId: string;
 }
 
+const SECURITY_SOLUTION_ALERT_CONSUMERS: AlertConsumers[] = [AlertConsumers.SIEM];
+
 const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
-  alertConsumers,
+  alertConsumers = SECURITY_SOLUTION_ALERT_CONSUMERS, // Default to Security Solution so only other applications have to pass this in
   browserFields,
   docValueFields,
-  entityType,
+  entityType = 'events', // Default to events so only alerts have to pass entityType in
   expandedEvent,
   handleOnEventClosed,
   isFlyoutView,
@@ -161,7 +164,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
   return isFlyoutView ? (
     <>
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader hasBorder={isHostIsolationPanelOpen}>
         {isHostIsolationPanelOpen ? (
           backToAlertDetailsLink
         ) : (

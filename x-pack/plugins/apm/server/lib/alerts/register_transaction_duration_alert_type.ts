@@ -11,12 +11,16 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import type {
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
   ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
+  ALERT_REASON as ALERT_REASON_TYPED,
 } from '@kbn/rule-data-utils';
 import {
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_NON_TYPED,
   ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
+  ALERT_REASON as ALERT_REASON_NON_TYPED,
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
+import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
+import { asDuration } from '../../../../observability/common/utils/formatters';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
   getEnvironmentLabel,
@@ -26,6 +30,7 @@ import {
   AlertType,
   APM_SERVER_FEATURE_ID,
   ALERT_TYPES_CONFIG,
+  formatTransactionDurationReason,
 } from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
@@ -40,9 +45,11 @@ import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
+import { getDocumentTypeFilterForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
 const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED = ALERT_EVALUATION_THRESHOLD_NON_TYPED;
 const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED = ALERT_EVALUATION_VALUE_NON_TYPED;
+const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 
 const paramsSchema = schema.object({
   serviceName: schema.string(),
@@ -100,8 +107,19 @@ export function registerTransactionDurationAlertType({
         savedObjectsClient: services.savedObjectsClient,
       });
 
+      // only query transaction events when set to 'never',
+      // to prevent (likely) unnecessary blocking request
+      // in rule execution
+      const searchAggregatedTransactions =
+        config['xpack.apm.searchAggregatedTransactions'] !==
+        SearchAggregatedTransactionSetting.never;
+
+      const index = searchAggregatedTransactions
+        ? indices['apm_oss.metricsIndices']
+        : indices['apm_oss.transactionIndices'];
+
       const searchParams = {
-        index: indices['apm_oss.transactionIndices'],
+        index,
         body: {
           size: 0,
           query: {
@@ -114,9 +132,9 @@ export function registerTransactionDurationAlertType({
                     },
                   },
                 },
-                {
-                  term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction },
-                },
+                ...getDocumentTypeFilterForAggregatedTransactions(
+                  searchAggregatedTransactions
+                ),
                 { term: { [SERVICE_NAME]: alertParams.serviceName } },
                 {
                   term: {
@@ -178,6 +196,12 @@ export function registerTransactionDurationAlertType({
               [PROCESSOR_EVENT]: ProcessorEvent.transaction,
               [ALERT_EVALUATION_VALUE]: transactionDuration,
               [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold,
+              [ALERT_REASON]: formatTransactionDurationReason({
+                measured: transactionDuration,
+                serviceName: alertParams.serviceName,
+                threshold: alertParams.threshold,
+                asDuration,
+              }),
             },
           })
           .scheduleActions(alertTypeConfig.defaultActionGroupId, {

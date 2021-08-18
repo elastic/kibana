@@ -13,7 +13,7 @@ import { mockAlertDetailsData } from './__mocks__';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
 
-import { TestProviders } from '../../mock';
+import { TestProviders, TestProvidersComponent } from '../../mock';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
@@ -77,5 +77,27 @@ describe('AlertSummaryView', () => {
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="summary-view-guide"]').exists()).toEqual(false);
     });
+  });
+  test('Memory event code renders additional summary rows', () => {
+    const renderProps = {
+      ...props,
+      data: mockAlertDetailsData.map((item) => {
+        if (item.category === 'event' && item.field === 'event.code') {
+          return {
+            category: 'event',
+            field: 'event.code',
+            values: ['malicious_thread'],
+            originalValue: ['malicious_thread'],
+          };
+        }
+        return item;
+      }) as TimelineEventsDetailsItem[],
+    };
+    const wrapper = mount(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+    expect(wrapper.find('div[data-test-subj="summary-view"]').render()).toMatchSnapshot();
   });
 });

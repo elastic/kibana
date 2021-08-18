@@ -9,7 +9,7 @@ import { isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
-import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
@@ -23,11 +23,8 @@ import {
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
+import { EntityType } from '../../../../../timelines/common';
 
-export enum EntityType {
-  ALERTS = 'alerts',
-  EVENTS = 'events',
-}
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
 }

@@ -3,6 +3,10 @@
   "id": "dataEnhanced",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
   "configPath": ["xpack", "data_enhanced"],
   "requiredPlugins": ["bfetch", "data", "features", "management", "share", "taskManager"],
   "optionalPlugins": ["kibanaUtils", "usageCollection", "security"],

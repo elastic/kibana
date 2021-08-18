@@ -105,14 +105,19 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     if (
       (action.type === 'userChangedUrl' || action.type === 'appRequestedEndpointList') &&
       isOnEndpointPage(getState()) &&
-      hasSelectedEndpoint(getState()) !== true
+      !hasSelectedEndpoint(getState())
     ) {
-      endpointDetailsListMiddleware({ coreStart, store, fetchIndexPatterns });
+      await endpointDetailsListMiddleware({ coreStart, store, fetchIndexPatterns });
     }
 
     // Endpoint Details
-    if (action.type === 'userChangedUrl' && hasSelectedEndpoint(getState()) === true) {
-      endpointDetailsMiddleware({ store, coreStart });
+    if (action.type === 'userChangedUrl' && hasSelectedEndpoint(getState())) {
+      const { selected_endpoint: selectedEndpoint } = uiQueryParams(getState());
+      await endpointDetailsMiddleware({ store, coreStart, selectedEndpoint });
+    }
+
+    if (action.type === 'endpointDetailsLoad') {
+      await loadEndpointDetails({ store, coreStart, selectedEndpoint: action.payload.endpointId });
     }
 
     if (
@@ -120,7 +125,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       hasSelectedEndpoint(getState()) === true &&
       getIsOnEndpointDetailsActivityLog(getState())
     ) {
-      endpointDetailsActivityLogChangedMiddleware({ store, coreStart });
+      await endpointDetailsActivityLogChangedMiddleware({ store, coreStart });
     }
 
     // page activity log API
@@ -128,7 +133,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       action.type === 'endpointDetailsActivityLogUpdatePaging' &&
       hasSelectedEndpoint(getState())
     ) {
-      endpointDetailsActivityLogPagingMiddleware({ store, coreStart });
+      await endpointDetailsActivityLogPagingMiddleware({ store, coreStart });
     }
 
     // Isolate Host
@@ -420,30 +425,7 @@ async function endpointDetailsListMiddleware({
       });
     }
 
-    try {
-      const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
-        coreStart.http,
-        endpointResponse.hosts,
-        nonExistingPolicies(getState())
-      );
-      if (ingestPolicies?.packagePolicy !== undefined) {
-        dispatch({
-          type: 'serverReturnedEndpointNonExistingPolicies',
-          payload: ingestPolicies.packagePolicy,
-        });
-      }
-      if (ingestPolicies?.agentPolicy !== undefined) {
-        dispatch({
-          type: 'serverReturnedEndpointAgentPolicies',
-          payload: ingestPolicies.agentPolicy,
-        });
-      }
-    } catch (error) {
-      // TODO should handle the error instead of logging it to the browser
-      // Also this is an anti-pattern we shouldn't use
-      // Ignore Errors, since this should not hinder the user's ability to use the UI
-      logError(error);
-    }
+    dispatchIngestPolicies({ http: coreStart.http, hosts: endpointResponse.hosts, store });
   } catch (error) {
     dispatch({
       type: 'serverFailedToReturnEndpointList',
@@ -613,71 +595,17 @@ async function endpointDetailsActivityLogPagingMiddleware({
   }
 }
 
-async function endpointDetailsMiddleware({
+async function loadEndpointDetails({
+  selectedEndpoint,
   store,
   coreStart,
 }: {
   store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
   coreStart: CoreStart;
+  selectedEndpoint: string;
 }) {
   const { getState, dispatch } = store;
-  dispatch({
-    type: 'serverCancelledPolicyItemsLoading',
-  });
-
-  // If user navigated directly to a endpoint details page, load the endpoint list
-  if (listData(getState()).length === 0) {
-    const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
-    try {
-      const response = await coreStart.http.post(HOST_METADATA_LIST_ROUTE, {
-        body: JSON.stringify({
-          paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
-        }),
-      });
-      response.request_page_index = Number(pageIndex);
-      dispatch({
-        type: 'serverReturnedEndpointList',
-        payload: response,
-      });
-
-      try {
-        const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
-          coreStart.http,
-          response.hosts,
-          nonExistingPolicies(getState())
-        );
-        if (ingestPolicies?.packagePolicy !== undefined) {
-          dispatch({
-            type: 'serverReturnedEndpointNonExistingPolicies',
-            payload: ingestPolicies.packagePolicy,
-          });
-        }
-        if (ingestPolicies?.agentPolicy !== undefined) {
-          dispatch({
-            type: 'serverReturnedEndpointAgentPolicies',
-            payload: ingestPolicies.agentPolicy,
-          });
-        }
-      } catch (error) {
-        // TODO should handle the error instead of logging it to the browser
-        // Also this is an anti-pattern we shouldn't use
-        // Ignore Errors, since this should not hinder the user's ability to use the UI
-        logError(error);
-      }
-    } catch (error) {
-      dispatch({
-        type: 'serverFailedToReturnEndpointList',
-        payload: error,
-      });
-    }
-  } else {
-    dispatch({
-      type: 'serverCancelledEndpointListLoading',
-    });
-  }
-
   // call the endpoint details api
-  const { selected_endpoint: selectedEndpoint } = uiQueryParams(getState());
   try {
     const response = await coreStart.http.get<HostInfo>(
       resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: selectedEndpoint as string })
@@ -736,6 +664,54 @@ async function endpointDetailsMiddleware({
     });
   }
 }
+
+async function endpointDetailsMiddleware({
+  coreStart,
+  selectedEndpoint,
+  store,
+}: {
+  coreStart: CoreStart;
+  selectedEndpoint?: string;
+  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
+}) {
+  const { getState, dispatch } = store;
+  dispatch({
+    type: 'serverCancelledPolicyItemsLoading',
+  });
+
+  // If user navigated directly to a endpoint details page, load the endpoint list
+  if (listData(getState()).length === 0) {
+    const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
+    try {
+      const response = await coreStart.http.post(HOST_METADATA_LIST_ROUTE, {
+        body: JSON.stringify({
+          paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
+        }),
+      });
+      response.request_page_index = Number(pageIndex);
+      dispatch({
+        type: 'serverReturnedEndpointList',
+        payload: response,
+      });
+
+      dispatchIngestPolicies({ http: coreStart.http, hosts: response.hosts, store });
+    } catch (error) {
+      dispatch({
+        type: 'serverFailedToReturnEndpointList',
+        payload: error,
+      });
+    }
+  } else {
+    dispatch({
+      type: 'serverCancelledEndpointListLoading',
+    });
+  }
+  if (typeof selectedEndpoint === 'undefined') {
+    return;
+  }
+  await loadEndpointDetails({ store, coreStart, selectedEndpoint });
+}
+
 async function endpointDetailsActivityLogChangedMiddleware({
   store,
   coreStart,
@@ -801,5 +777,41 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
       type: 'metadataTransformStatsChanged',
       payload: createFailedResourceState<TransformStats[]>(error),
     });
+  }
+}
+
+async function dispatchIngestPolicies({
+  store,
+  hosts,
+  http,
+}: {
+  store: EndpointPageStore;
+  hosts: HostResultList['hosts'];
+  http: HttpStart;
+}) {
+  const { getState, dispatch } = store;
+  try {
+    const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
+      http,
+      hosts,
+      nonExistingPolicies(getState())
+    );
+    if (ingestPolicies?.packagePolicy !== undefined) {
+      dispatch({
+        type: 'serverReturnedEndpointNonExistingPolicies',
+        payload: ingestPolicies.packagePolicy,
+      });
+    }
+    if (ingestPolicies?.agentPolicy !== undefined) {
+      dispatch({
+        type: 'serverReturnedEndpointAgentPolicies',
+        payload: ingestPolicies.agentPolicy,
+      });
+    }
+  } catch (error) {
+    // TODO should handle the error instead of logging it to the browser
+    // Also this is an anti-pattern we shouldn't use
+    // Ignore Errors, since this should not hinder the user's ability to use the UI
+    logError(error);
   }
 }
