@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { EuiIconTip, EuiSpacer } from '@elastic/eui';
-import { ResponseError } from '../../lib/api';
-import { getEsDeprecationError } from '../../lib/es_deprecation_errors';
+import { EuiIconTip } from '@elastic/eui';
+import { ResponseError } from '../../../../lib/api';
+import { getEsDeprecationError } from '../../../../lib/es_deprecation_errors';
 
 interface Props {
   error: ResponseError;
@@ -26,7 +26,7 @@ export const EsStatsErrors: React.FunctionComponent<Props> = ({ error }) => {
         <EuiIconTip
           type="alert"
           color="danger"
-          size="l"
+          size="m"
           content={message}
           iconProps={{
             'data-test-subj': 'unauthorizedErrorIconTip',
@@ -39,7 +39,7 @@ export const EsStatsErrors: React.FunctionComponent<Props> = ({ error }) => {
         <EuiIconTip
           type="alert"
           color="warning"
-          size="l"
+          size="m"
           content={message}
           iconProps={{
             'data-test-subj': 'partiallyUpgradedErrorIconTip',
@@ -52,7 +52,7 @@ export const EsStatsErrors: React.FunctionComponent<Props> = ({ error }) => {
         <EuiIconTip
           type="alert"
           color="warning"
-          size="l"
+          size="m"
           content={message}
           iconProps={{
             'data-test-subj': 'upgradedErrorIconTip',
@@ -66,19 +66,14 @@ export const EsStatsErrors: React.FunctionComponent<Props> = ({ error }) => {
         <EuiIconTip
           type="alert"
           color="danger"
-          size="l"
+          size="m"
           content={message}
           iconProps={{
-            'data-test-subj': 'requestErrorIconTip',
+            'data-test-subj': 'esRequestErrorIconTip',
           }}
         />
       );
   }
 
-  return (
-    <>
-      <EuiSpacer size="s" />
-      {iconContent}
-    </>
-  );
+  return <span className="upgWarningIcon">{iconContent}</span>;
 };
