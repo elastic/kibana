@@ -8,6 +8,7 @@
 
 import type { ApiResponse } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
+import type { Duration } from 'moment';
 import type { Observable } from 'rxjs';
 import { from, of, timer } from 'rxjs';
 import {
@@ -33,9 +34,37 @@ import { getDetailedErrorMessage } from './errors';
 interface EnrollParameters {
   apiKey: string;
   hosts: string[];
-  // TODO: Integrate fingerprint check as soon ES client is upgraded:
-  // https://github.com/elastic/kibana/pull/107536
+  // TODO: Integrate fingerprint check as soon core supports this new option:
+  // https://github.com/elastic/kibana/pull/108514
   caFingerprint?: string;
+}
+
+export interface ElasticsearchServiceSetupDeps {
+  /**
+   * Core Elasticsearch service preboot contract;
+   */
+  elasticsearch: ElasticsearchServicePreboot;
+
+  /**
+   * Interval for the Elasticsearch connection check (whether it's configured or not).
+   */
+  connectionCheckInterval: Duration;
+}
+
+export interface ElasticsearchServiceSetup {
+  /**
+   * Observable that yields the last result of the Elasticsearch connection status check.
+   */
+  connectionStatus$: Observable<ElasticsearchConnectionStatus>;
+
+  /**
+   * Iterates through provided {@param hosts} one by one trying to call Kibana enrollment API using
+   * the specified {@param apiKey}.
+   * @param apiKey The ApiKey to use to authenticate Kibana enrollment request.
+   * @param hosts The list of Elasticsearch node addresses to enroll with. The addresses are supposed
+   * to point to exactly same Elasticsearch node, potentially available via different network interfaces.
+   */
+  enroll: (params: EnrollParameters) => Promise<EnrollResult>;
 }
 
 /**
@@ -56,22 +85,6 @@ export interface EnrollResult {
   serviceAccountToken: { name: string; value: string };
 }
 
-export interface ElasticsearchServiceSetup {
-  /**
-   * Observable that yields the last result of the Elasticsearch connection status check.
-   */
-  connectionStatus$: Observable<ElasticsearchConnectionStatus>;
-
-  /**
-   * Iterates through provided {@param hosts} one by one trying to call Kibana enrollment API using
-   * the specified {@param apiKey}.
-   * @param apiKey The ApiKey to use to authenticate Kibana enrollment request.
-   * @param hosts The list of Elasticsearch node addresses to enroll with. The addresses are supposed
-   * to point to exactly same Elasticsearch node, potentially available via different network interfaces.
-   */
-  enroll: (params: EnrollParameters) => Promise<EnrollResult>;
-}
-
 export class ElasticsearchService {
   /**
    * Elasticsearch client used to check Elasticsearch connection status.
@@ -79,13 +92,16 @@ export class ElasticsearchService {
   private connectionStatusClient?: ICustomClusterClient;
   constructor(private readonly logger: Logger) {}
 
-  public setup(elasticsearch: ElasticsearchServicePreboot): ElasticsearchServiceSetup {
+  public setup({
+    elasticsearch,
+    connectionCheckInterval,
+  }: ElasticsearchServiceSetupDeps): ElasticsearchServiceSetup {
     const connectionStatusClient = (this.connectionStatusClient = elasticsearch.createClient(
       'ping'
     ));
 
     return {
-      connectionStatus$: timer(0, 5000).pipe(
+      connectionStatus$: timer(0, connectionCheckInterval.asMilliseconds()).pipe(
         exhaustMap(() => {
           return from(connectionStatusClient.asInternalUser.ping()).pipe(
             map(() => ElasticsearchConnectionStatus.Configured),

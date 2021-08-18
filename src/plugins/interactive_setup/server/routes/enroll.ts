@@ -32,16 +32,16 @@ export function defineEnrollRoutes({
           hosts: schema.arrayOf(schema.uri({ scheme: 'https' }), {
             minSize: 1,
           }),
-          apiKey: schema.string(),
-          caFingerprint: schema.string(),
+          apiKey: schema.string({ minLength: 1 }),
+          caFingerprint: schema.string({ maxLength: 64, minLength: 64 }),
         }),
       },
       options: { authRequired: false },
     },
     async (context, request, response) => {
       if (!preboot.isSetupOnHold()) {
-        logger.error(`Invalid request to [path=${request.url.pathname}] outside of preboot phase`);
-        return response.badRequest();
+        logger.error(`Invalid request to [path=${request.url.pathname}] outside of preboot stage`);
+        return response.badRequest({ body: 'Cannot process request outside of preboot stage.' });
       }
 
       const connectionStatus = await elasticsearch.connectionStatus$.pipe(first()).toPromise();

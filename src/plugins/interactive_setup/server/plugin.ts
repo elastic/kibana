@@ -75,7 +75,10 @@ export class UserSetupPlugin implements PrebootPlugin {
     // register our routes to let interactive setup UI to handle user requests until the check is
     // complete. Moreover Elasticsearch may be just temporarily unavailable and we should poll its
     // status until we can connect or use configures connection via interactive setup mode.
-    const elasticsearch = this.#elasticsearch.setup(core.elasticsearch);
+    const elasticsearch = this.#elasticsearch.setup({
+      elasticsearch: core.elasticsearch,
+      connectionCheckInterval: this.#getConfig().connectionCheck.interval,
+    });
     this.#elasticsearchConnectionStatusSubscription = elasticsearch.connectionStatus$.subscribe(
       (status) => {
         if (status === ElasticsearchConnectionStatus.Configured) {
