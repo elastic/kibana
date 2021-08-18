@@ -32,6 +32,7 @@ import {
   PaginatedContentProps,
 } from '../../../../../components/paginated_content';
 import { TrustedApp } from '../../../../../../../common/endpoint/types';
+import { ArtifactEntryCard } from '../../../../../components/artifact_entry_card';
 
 export interface PaginationBarProps {
   pagination: Pagination;
@@ -82,6 +83,9 @@ export const TrustedAppsGrid = memo(() => {
 
   return (
     <RootWrapper>
+      {/* FIXME:PT Delete/Adjust this after dev of card is done */}
+      <ArtifactEntryCard item={listItem[0]} />
+
       <PaginatedContent<TrustedApp, TrustedAppCardType>
         items={listItems as TrustedApp[]}
         onChange={handlePaginationChange}
