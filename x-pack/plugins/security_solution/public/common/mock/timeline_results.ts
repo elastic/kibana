@@ -1999,7 +1999,7 @@ export const mockTimelineModel: TimelineModel = {
         params: '"{"query":"placeholder"}"',
         type: 'phrase',
       },
-      query: '"{"match_phrase":{"host.name":"placeholder"}}"',
+      query: { match_phrase: { 'host.name': 'placeholder' } },
     },
   ],
   highlightedDropAndProviderId: '',
