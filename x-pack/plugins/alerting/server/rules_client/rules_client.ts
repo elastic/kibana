@@ -1478,6 +1478,10 @@ export class RulesClient {
     );
   }
 
+  public getSpaceId(): string | undefined {
+    return this.spaceId;
+  }
+
   private async scheduleAlert(id: string, alertTypeId: string, schedule: IntervalSchedule) {
     return await this.taskManager.schedule({
       taskType: `alerting:${alertTypeId}`,
