@@ -11,6 +11,7 @@ import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
 
 import { isEmpty } from 'lodash/fp';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
@@ -31,7 +32,7 @@ import { useKibana } from '../../lib/kibana';
 import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { EventsViewer } from './events_viewer';
 import * as i18n from './translations';
-
+import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 const leadingControlColumns: ControlColumnProps[] = [
   {
@@ -57,7 +58,6 @@ export interface OwnProps {
   scopeId: SourcererScopeName;
   start: string;
   showTotalCount?: boolean;
-  headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
   currentFilter?: Status;
   onRuleChange?: () => void;
@@ -68,6 +68,8 @@ export interface OwnProps {
 }
 
 type Props = OwnProps & PropsFromRedux;
+
+const alertConsumers: AlertConsumers[] = [AlertConsumers.SIEM];
 
 /**
  * The stateful events viewer component is the highest level component that is utilized across the security_solution pages layer where
@@ -85,7 +87,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   entityType,
   excludedRowRendererIds,
   filters,
-  headerFilterGroup,
   id,
   isLive,
   itemsPerPage,
@@ -117,6 +118,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   // TODO: Once we are past experimental phase this code should be removed
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
+  const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
+    'tGridEventRenderedViewEnabled'
+  );
   useEffect(() => {
     if (createTimeline != null) {
       createTimeline({
@@ -137,13 +141,20 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
-
+  const graphOverlay = useMemo(
+    () =>
+      graphEventId != null && graphEventId.length > 0 ? (
+        <GraphOverlay isEventViewer={true} timelineId={id} />
+      ) : null,
+    [graphEventId, id]
+  );
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
         <InspectButtonContainer>
           {tGridEnabled ? (
             timelinesUi.getTGrid<'embedded'>({
+              id,
               type: 'embedded',
               browserFields,
               columns,
@@ -155,8 +166,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               entityType,
               filters: globalFilters,
               globalFullScreen,
-              headerFilterGroup,
-              id,
+              graphOverlay,
               indexNames: selectedPatterns,
               indexPattern,
               isLive,
@@ -176,6 +186,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               filterStatus: currentFilter,
               leadingControlColumns,
               trailingControlColumns,
+              tGridEventRenderedViewEnabled,
             })
           ) : (
             <EventsViewer
@@ -188,7 +199,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               end={end}
               isLoadingIndexPattern={isLoadingIndexPattern}
               filters={globalFilters}
-              headerFilterGroup={headerFilterGroup}
               indexNames={selectedPatterns}
               indexPattern={indexPattern}
               isLive={isLive}
@@ -209,7 +219,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         </InspectButtonContainer>
       </FullScreenContainer>
       <DetailsPanel
+        alertConsumers={alertConsumers}
         browserFields={browserFields}
+        entityType={EntityType.ALERTS}
         docValueFields={docValueFields}
         isFlyoutView
         timelineId={id}

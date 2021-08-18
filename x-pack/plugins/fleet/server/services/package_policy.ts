@@ -7,6 +7,7 @@
 
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { getFlattenedObject } from '@kbn/std';
 import type { KibanaRequest } from 'src/core/server';
 import type {
   ElasticsearchClient,
@@ -21,6 +22,8 @@ import {
   packageToPackagePolicyInputs,
   isPackageLimited,
   doesAgentPolicyAlreadyIncludePackage,
+  validatePackagePolicy,
+  validationHasErrors,
 } from '../../common';
 import type {
   DeletePackagePoliciesResponse,
@@ -442,7 +445,11 @@ class PackagePolicyService {
     return result;
   }
 
-  public async getUpgradePackagePolicyInfo(soClient: SavedObjectsClientContract, id: string) {
+  public async getUpgradePackagePolicyInfo(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    packageVersion?: string
+  ) {
     const packagePolicy = await this.get(soClient, id);
     if (!packagePolicy) {
       throw new Error(
@@ -462,28 +469,30 @@ class PackagePolicyService {
       );
     }
 
-    const installedPackage = await getInstallation({
-      savedObjectsClient: soClient,
-      pkgName: packagePolicy.package.name,
-    });
-    if (!installedPackage) {
-      throw new Error(
-        i18n.translate('xpack.fleet.packagePolicy.packageNotInstalledError', {
-          defaultMessage: 'Cannot upgrade package policy {id} because {pkgName} is not installed',
-          values: { id, pkgName: packagePolicy.package.name },
-        })
-      );
-    }
+    let packageInfo: PackageInfo;
 
-    const installedPkgInfo = await getPackageInfo({
-      savedObjectsClient: soClient,
-      pkgName: packagePolicy.package.name,
-      pkgVersion: installedPackage.version,
-    });
+    if (packageVersion) {
+      packageInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: packagePolicy.package.name,
+        pkgVersion: packageVersion,
+      });
+    } else {
+      const installedPackage = await getInstallation({
+        savedObjectsClient: soClient,
+        pkgName: packagePolicy.package.name,
+      });
+
+      packageInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: packagePolicy.package.name,
+        pkgVersion: installedPackage?.version ?? '',
+      });
+    }
 
     return {
       packagePolicy: packagePolicy as Required<PackagePolicy>,
-      installedPkgInfo,
+      packageInfo,
     };
   }
 
@@ -497,25 +506,23 @@ class PackagePolicyService {
 
     for (const id of ids) {
       try {
-        const { packagePolicy, installedPkgInfo } = await this.getUpgradePackagePolicyInfo(
-          soClient,
-          id
-        );
+        const { packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soClient, id);
 
         const updatePackagePolicy = overridePackageInputs(
           {
             ...omit(packagePolicy, 'id'),
-            inputs: packageToPackagePolicyInputs(installedPkgInfo),
+            inputs: packagePolicy.inputs,
             package: {
               ...packagePolicy.package,
-              version: installedPkgInfo.version,
+              version: packageInfo.version,
             },
           },
-          packagePolicy.inputs as InputsOverride[]
+          packageInfo,
+          packageToPackagePolicyInputs(packageInfo) as InputsOverride[]
         );
 
         updatePackagePolicy.inputs = await this.compilePackagePolicyInputs(
-          installedPkgInfo,
+          packageInfo,
           updatePackagePolicy.vars || {},
           updatePackagePolicy.inputs as PackagePolicyInput[]
         );
@@ -546,29 +553,32 @@ class PackagePolicyService {
 
   public async getUpgradeDryRunDiff(
     soClient: SavedObjectsClientContract,
-    id: string
+    id: string,
+    packageVersion?: string
   ): Promise<UpgradePackagePolicyDryRunResponseItem> {
     try {
-      const { packagePolicy, installedPkgInfo } = await this.getUpgradePackagePolicyInfo(
+      const { packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(
         soClient,
-        id
+        id,
+        packageVersion
       );
 
       const updatedPackagePolicy = overridePackageInputs(
         {
           ...omit(packagePolicy, 'id'),
-          inputs: packageToPackagePolicyInputs(installedPkgInfo),
+          inputs: packagePolicy.inputs,
           package: {
             ...packagePolicy.package,
-            version: installedPkgInfo.version,
+            version: packageInfo.version,
           },
         },
-        packagePolicy.inputs as InputsOverride[],
+        packageInfo,
+        packageToPackagePolicyInputs(packageInfo) as InputsOverride[],
         true
       );
 
       updatedPackagePolicy.inputs = await this.compilePackagePolicyInputs(
-        installedPkgInfo,
+        packageInfo,
         updatedPackagePolicy.vars || {},
         updatedPackagePolicy.inputs as PackagePolicyInput[]
       );
@@ -849,6 +859,7 @@ export type { PackagePolicyService };
 
 export function overridePackageInputs(
   basePackagePolicy: NewPackagePolicy,
+  packageInfo: PackageInfo,
   inputsOverride?: InputsOverride[],
   dryRun?: boolean
 ): DryRunPackagePolicy {
@@ -856,11 +867,11 @@ export function overridePackageInputs(
 
   const inputs = [...basePackagePolicy.inputs];
   const packageName = basePackagePolicy.package!.name;
-  const errors = [];
-  let responseMissingVars: string[] = [];
+  let errors = [];
 
   for (const override of inputsOverride) {
     let originalInput = inputs.find((i) => i.type === override.type);
+
     if (!originalInput) {
       const e = {
         error: new Error(
@@ -874,13 +885,16 @@ export function overridePackageInputs(
         ),
         package: { name: packageName, version: basePackagePolicy.package!.version },
       };
+
       if (dryRun) {
         errors.push({
           key: override.type,
           message: String(e.error),
         });
         continue;
-      } else throw e;
+      } else {
+        throw e;
+      }
     }
 
     if (typeof override.enabled !== 'undefined') originalInput.enabled = override.enabled;
@@ -888,33 +902,7 @@ export function overridePackageInputs(
       originalInput.keep_enabled = override.keep_enabled;
 
     if (override.vars) {
-      try {
-        const { result, missingVars } = deepMergeVars(override, originalInput);
-        originalInput = result;
-        responseMissingVars = [...responseMissingVars, ...missingVars];
-      } catch (e) {
-        const varName = e.message;
-        const err = {
-          error: new Error(
-            i18n.translate('xpack.fleet.packagePolicyVarOverrideError', {
-              defaultMessage:
-                'Var {varName} does not exist on {inputType} of package {packageName}',
-              values: {
-                varName,
-                inputType: override.type,
-                packageName,
-              },
-            })
-          ),
-          package: { name: packageName, version: basePackagePolicy.package!.version },
-        };
-        if (dryRun) {
-          errors.push({
-            key: `${override.type}.vars.${varName}`,
-            message: String(err.error),
-          });
-        } else throw err;
-      }
+      originalInput = deepMergeVars(originalInput, override);
     }
 
     if (override.streams) {
@@ -922,6 +910,7 @@ export function overridePackageInputs(
         let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
         );
+
         if (!originalStream) {
           const streamSet = stream.data_stream.dataset;
           const e = {
@@ -938,62 +927,61 @@ export function overridePackageInputs(
             ),
             package: { name: packageName, version: basePackagePolicy.package!.version },
           };
+
           if (dryRun) {
             errors.push({
               key: `${override.type}.streams.${streamSet}`,
               message: String(e.error),
             });
+
             continue;
-          } else throw e;
+          } else {
+            throw e;
+          }
         }
 
-        if (typeof stream.enabled !== 'undefined') originalStream.enabled = stream.enabled;
+        if (typeof stream.enabled !== 'undefined') {
+          originalStream.enabled = stream.enabled;
+        }
 
         if (stream.vars) {
-          try {
-            const { result, missingVars } = deepMergeVars(stream as InputsOverride, originalStream);
-            originalStream = result;
-            responseMissingVars = [...responseMissingVars, ...missingVars];
-          } catch (e) {
-            const varName = e.message;
-            const streamSet = stream.data_stream.dataset;
-            const err = {
-              error: new Error(
-                i18n.translate('xpack.fleet.packagePolicyStreamVarOverrideError', {
-                  defaultMessage:
-                    'Var {varName} does not exist on {streamSet} for {inputType} of package {packageName}',
-                  values: {
-                    varName,
-                    streamSet,
-                    inputType: override.type,
-                    packageName,
-                  },
-                })
-              ),
-              package: { name: packageName, version: basePackagePolicy.package!.version },
-            };
-            if (dryRun) {
-              errors.push({
-                key: `${override.type}.streams.${streamSet}.${varName}`,
-                message: String(err.error),
-              });
-            } else throw err;
-          }
+          originalStream = deepMergeVars(originalStream, stream as InputsOverride);
         }
       }
     }
   }
 
-  if (dryRun && errors.length) {
-    return { ...basePackagePolicy, inputs, errors, missingVars: responseMissingVars };
+  const resultingPackagePolicy: NewPackagePolicy = {
+    ...basePackagePolicy,
+    inputs,
+  };
+
+  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo);
+
+  if (validationHasErrors(validationResults)) {
+    const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
+      .map(([key, value]) => ({
+        key,
+        message: value,
+      }))
+      .filter(({ message }) => !!message);
+
+    errors = [...errors, ...responseFormattedValidationErrors];
   }
 
-  return { ...basePackagePolicy, inputs, missingVars: responseMissingVars };
+  if (dryRun && errors.length) {
+    return { ...resultingPackagePolicy, errors };
+  }
+
+  return resultingPackagePolicy;
 }
 
-function deepMergeVars(override: any, original: any): { result: any; missingVars: string[] } {
+function deepMergeVars(original: any, override: any): any {
   const result = { ...original };
-  const missingVars: string[] = [];
+
+  if (!result.vars || !override.vars) {
+    return;
+  }
 
   const overrideVars = Array.isArray(override.vars)
     ? override.vars
@@ -1002,15 +990,15 @@ function deepMergeVars(override: any, original: any): { result: any; missingVars
         ...(rest as any),
       }));
 
-  for (const { name, ...val } of overrideVars) {
-    if (!original.vars || !(name in original.vars)) {
-      missingVars.push(name);
-      continue;
+  for (const { name, ...overrideVal } of overrideVars) {
+    const originalVar = original.vars[name];
+
+    if (!result.vars) {
+      result.vars = {};
     }
 
-    const originalVar = original.vars[name];
-    result[name] = { ...originalVar, ...val };
+    result.vars[name] = { ...overrideVal, ...originalVar };
   }
 
-  return { result, missingVars };
+  return result;
 }
