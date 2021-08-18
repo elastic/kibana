@@ -296,7 +296,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                 <UpdatedFlexItem grow={false} show={!loading}>
                   {!resolverIsShowing(graphEventId) && additionalFilters}
                 </UpdatedFlexItem>
-                {tGridEventRenderedViewEnabled && (
+                {tGridEventRenderedViewEnabled && entityType === 'alerts' && (
                   <UpdatedFlexItem grow={false} show={!loading}>
                     <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
                   </UpdatedFlexItem>
