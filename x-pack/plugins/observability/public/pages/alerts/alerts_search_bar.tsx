@@ -51,6 +51,7 @@ export function AlertsSearchBar({
         });
         setQueryLanguage((nextQuery?.language || 'kuery') as 'kuery' | 'lucene');
       }}
+      displayStyle="inPage"
     />
   );
 }
