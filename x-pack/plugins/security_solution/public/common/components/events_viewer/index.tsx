@@ -64,6 +64,7 @@ export interface OwnProps {
   rowRenderers: RowRenderer[];
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
   additionalFilters?: React.ReactNode;
+  hasAlertsCrud?: boolean;
 }
 
 type Props = OwnProps & PropsFromRedux;
@@ -103,6 +104,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   additionalFilters,
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId,
+  hasAlertsCrud = false,
 }) => {
   const { timelines: timelinesUi } = useKibana().services;
   const {
@@ -164,6 +166,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               filters: globalFilters,
               globalFullScreen,
               graphOverlay,
+              hasAlertsCrud,
               indexNames: selectedPatterns,
               indexPattern,
               isLive,
