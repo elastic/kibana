@@ -44,9 +44,8 @@ export function getActionTaskParamsMigrations(
 ): SavedObjectMigrationMap {
   const migrationActionTaskParamsSixteen = createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<ActionTaskParams> =>
-      !isPreconfiguredAction(doc, preconfiguredActions),
-    pipeMigrations(useSavedObjectReferences)
+    (doc): doc is SavedObjectUnsanitizedDoc<ActionTaskParams> => true,
+    pipeMigrations(getUseSavedObjectReferencesFn(preconfiguredActions))
   );
 
   return {
@@ -85,8 +84,15 @@ export function isPreconfiguredAction(
   return !!preconfiguredActions.find((action) => action.id === doc.attributes.actionId);
 }
 
+function getUseSavedObjectReferencesFn(preconfiguredActions: PreConfiguredAction[]) {
+  return (doc: SavedObjectUnsanitizedDoc<ActionTaskParams>) => {
+    return useSavedObjectReferences(doc, preconfiguredActions);
+  };
+}
+
 function useSavedObjectReferences(
-  doc: SavedObjectUnsanitizedDoc<ActionTaskParams>
+  doc: SavedObjectUnsanitizedDoc<ActionTaskParams>,
+  preconfiguredActions: PreConfiguredAction[]
 ): SavedObjectUnsanitizedDoc<ActionTaskParams> {
   const {
     attributes: { actionId, relatedSavedObjects },
@@ -96,11 +102,13 @@ function useSavedObjectReferences(
   const newReferences: SavedObjectReference[] = [];
   const relatedSavedObjectRefs: RelatedSavedObjects = [];
 
-  newReferences.push({
-    id: actionId,
-    name: 'actionRef',
-    type: 'action',
-  });
+  if (!isPreconfiguredAction(doc, preconfiguredActions)) {
+    newReferences.push({
+      id: actionId,
+      name: 'actionRef',
+      type: 'action',
+    });
+  }
 
   // Add related saved objects, if any
   ((relatedSavedObjects as RelatedSavedObjects) ?? []).forEach((relatedSavedObject, index) => {

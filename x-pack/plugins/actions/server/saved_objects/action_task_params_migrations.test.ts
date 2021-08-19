@@ -36,7 +36,7 @@ describe('successful migrations', () => {
   });
 
   describe('7.16.0', () => {
-    test('adds actionId to references array', () => {
+    test('adds actionId to references array if actionId is not preconfigured', () => {
       const migration716 = getActionTaskParamsMigrations(
         encryptedSavedObjectsSetup,
         preconfiguredActions
@@ -52,6 +52,19 @@ describe('successful migrations', () => {
             type: 'action',
           },
         ],
+      });
+    });
+
+    test('does not add actionId to references array if actionId is preconfigured', () => {
+      const migration716 = getActionTaskParamsMigrations(
+        encryptedSavedObjectsSetup,
+        preconfiguredActions
+      )['7.16.0'];
+      const actionTaskParam = getMockData({ actionId: 'my-slack1' });
+      const migratedActionTaskParam = migration716(actionTaskParam, context);
+      expect(migratedActionTaskParam).toEqual({
+        ...actionTaskParam,
+        references: [],
       });
     });
 
@@ -122,7 +135,47 @@ describe('successful migrations', () => {
       });
     });
 
-    test('moves actionId and multiple relatedSavedObjects to references array', () => {
+    test('only adds relatedSavedObjects to references array if action is preconfigured', () => {
+      const migration716 = getActionTaskParamsMigrations(
+        encryptedSavedObjectsSetup,
+        preconfiguredActions
+      )['7.16.0'];
+      const actionTaskParam = getMockData({
+        actionId: 'my-slack1',
+        relatedSavedObjects: [
+          {
+            id: 'some-id',
+            namespace: 'some-namespace',
+            type: 'some-type',
+            typeId: 'some-typeId',
+          },
+        ],
+      });
+      const migratedActionTaskParam = migration716(actionTaskParam, context);
+      expect(migratedActionTaskParam).toEqual({
+        ...actionTaskParam,
+        attributes: {
+          ...actionTaskParam.attributes,
+          relatedSavedObjects: [
+            {
+              id: 'related_some-type_0',
+              namespace: 'some-namespace',
+              type: 'some-type',
+              typeId: 'some-typeId',
+            },
+          ],
+        },
+        references: [
+          {
+            id: 'some-id',
+            name: 'related_some-type_0',
+            type: 'some-type',
+          },
+        ],
+      });
+    });
+
+    test('adds actionId and multiple relatedSavedObjects to references array', () => {
       const migration716 = getActionTaskParamsMigrations(
         encryptedSavedObjectsSetup,
         preconfiguredActions
