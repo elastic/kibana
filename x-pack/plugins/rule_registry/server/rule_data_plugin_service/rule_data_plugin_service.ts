@@ -104,10 +104,7 @@ export class RuleDataPluginService {
       );
     }
 
-    const indexInfo = new IndexInfo({
-      getResourceName: (name) => this.getResourceName(name),
-      indexOptions,
-    });
+    const indexInfo = new IndexInfo(indexOptions);
 
     const indicesAssociatedWithFeature = this.indicesByFeatureId.get(indexOptions.feature) ?? [];
     this.indicesByFeatureId.set(indexOptions.feature, [...indicesAssociatedWithFeature, indexInfo]);
