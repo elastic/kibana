@@ -11,4 +11,3 @@ import 'angular-sanitize';
 
 import './doc';
 import './context';
-import './redirect';

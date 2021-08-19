@@ -58,7 +58,7 @@ describe('test useSavedSearch', () => {
       return useDiscoverState({
         services: discoverServiceMock,
         history,
-        initialSavedSearch: savedSearchMock,
+        savedSearch: savedSearchMock,
       });
     });
 
@@ -99,7 +99,7 @@ describe('test useSavedSearch', () => {
       return useDiscoverState({
         services: discoverServiceMock,
         history,
-        initialSavedSearch: savedSearchMock,
+        savedSearch: savedSearchMock,
       });
     });
 

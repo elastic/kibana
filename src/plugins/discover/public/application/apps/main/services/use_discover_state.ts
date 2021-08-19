@@ -28,18 +28,17 @@ import { SortPairArr } from '../components/doc_table/lib/get_sort';
 export function useDiscoverState({
   services,
   history,
-  initialSavedSearch,
+  savedSearch,
 }: {
   services: DiscoverServices;
-  initialSavedSearch: SavedSearch;
+  savedSearch: SavedSearch;
   history: History;
 }) {
   const { uiSettings: config, data, filterManager, indexPatterns } = services;
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
   const { timefilter } = data.query.timefilter;
 
-  const indexPattern = initialSavedSearch.searchSource.getField('index')!;
-  const savedSearch = initialSavedSearch;
+  const indexPattern = savedSearch.searchSource.getField('index')!;
 
   const searchSource = useMemo(() => {
     savedSearch.searchSource.setField('index', indexPattern);
@@ -195,18 +194,18 @@ export function useDiscoverState({
   );
 
   useEffect(() => {
-    if (!initialSavedSearch || !initialSavedSearch.id) {
+    if (!savedSearch || !savedSearch.id) {
       return;
     }
     // handling pushing to state of a persisted saved object
     const newAppState = getStateDefaults({
       config,
       data,
-      savedSearch: initialSavedSearch,
+      savedSearch,
     });
     stateContainer.replaceUrlAppState(newAppState);
     setState(newAppState);
-  }, [config, data, initialSavedSearch, reset, stateContainer]);
+  }, [config, data, savedSearch, reset, stateContainer]);
 
   /**
    * Initial data fetching, also triggered when index pattern changes
@@ -228,7 +227,6 @@ export function useDiscoverState({
     resetSavedSearch,
     onChangeIndexPattern,
     onUpdateQuery,
-    savedSearch,
     searchSource,
     setState,
     state,

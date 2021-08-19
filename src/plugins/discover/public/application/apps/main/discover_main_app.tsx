@@ -46,7 +46,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     },
     [history]
   );
-  const initialSavedSearch = props.savedSearch;
+  const savedSearch = props.savedSearch;
 
   /**
    * State related logic
@@ -58,7 +58,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     onChangeIndexPattern,
     onUpdateQuery,
     refetch$,
-    savedSearch,
     resetSavedSearch,
     searchSource,
     state,
@@ -66,7 +65,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   } = useDiscoverState({
     services,
     history,
-    initialSavedSearch,
+    savedSearch,
   });
 
   /**

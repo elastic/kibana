@@ -22,13 +22,12 @@ describe('test useDiscoverState', () => {
       return useDiscoverState({
         services: discoverServiceMock,
         history,
-        initialSavedSearch: savedSearchMock,
+        savedSearch: savedSearchMock,
       });
     });
     expect(result.current.state.index).toBe(indexPatternMock.id);
     expect(result.current.stateContainer).toBeInstanceOf(Object);
     expect(result.current.setState).toBeInstanceOf(Function);
-    expect(result.current.savedSearch.id).toBe(savedSearchMock.id);
     expect(result.current.searchSource).toBeInstanceOf(SearchSource);
   });
 
@@ -39,7 +38,7 @@ describe('test useDiscoverState', () => {
       return useDiscoverState({
         services: discoverServiceMock,
         history,
-        initialSavedSearch: savedSearchMock,
+        savedSearch: savedSearchMock,
       });
     });
     await act(async () => {
@@ -55,7 +54,7 @@ describe('test useDiscoverState', () => {
       return useDiscoverState({
         services: discoverServiceMock,
         history,
-        initialSavedSearch: savedSearchMock,
+        savedSearch: savedSearchMock,
       });
     });
 

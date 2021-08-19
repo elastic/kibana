@@ -89,6 +89,8 @@ describe('EventColumnView', () => {
     isEventPinned: false,
     leadingControlColumns: [defaultControlColumn],
     trailingControlColumns: [],
+    setEventsLoading: jest.fn(),
+    setEventsDeleted: jest.fn(),
   };
 
   test('it does NOT render a notes button when isEventsViewer is true', () => {
