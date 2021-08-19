@@ -11,7 +11,11 @@ import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { BasicOptions, SwitchOption } from '../../../../../../vis_default_editor/public';
+import {
+  BasicOptions,
+  SwitchOption,
+  LongLegendOptions,
+} from '../../../../../../vis_default_editor/public';
 import { BUCKET_TYPES } from '../../../../../../data/public';
 
 import { VisParams } from '../../../../types';
@@ -58,6 +62,14 @@ export function PointSeriesOptions(
         <EuiSpacer size="m" />
 
         <BasicOptions {...props} legendPositions={legendPositions} />
+        {props.extraProps?.showElasticChartsOptions && (
+          <LongLegendOptions
+            data-test-subj="xyLongLegendsOptions"
+            truncateLegend={stateParams.truncateLegend ?? true}
+            maxLegendLines={stateParams.maxLegendLines ?? 1}
+            setValue={setValue}
+          />
+        )}
 
         {vis.data.aggs!.aggs.some(
           (agg) => agg.schema === 'segment' && agg.type.name === BUCKET_TYPES.DATE_HISTOGRAM

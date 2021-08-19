@@ -37,6 +37,9 @@ jest.mock('../../../../common/lib/kibana', () => {
         application: {
           navigateToApp: jest.fn(),
           getUrlForApp: jest.fn(),
+          capabilities: {
+            siem: { crud_alerts: true, read_alerts: true },
+          },
         },
         uiSettings: {
           get: jest.fn(),
