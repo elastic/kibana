@@ -51,7 +51,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         });
         // Should have reference entry for each relatedSavedObject entry
         (relatedSavedObjects ?? []).forEach((relatedSavedObject: any) => {
-          expect(references.find((ref) => ref.name === relatedSavedObject.ref)).not.to.be(null);
+          expect(references.find((ref) => ref.name === relatedSavedObject.id)).not.to.be(null);
         });
       });
     });
