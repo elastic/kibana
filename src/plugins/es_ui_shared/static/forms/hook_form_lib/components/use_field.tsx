@@ -7,6 +7,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
+import { Observable } from 'rxjs';
 
 import { FieldHook, FieldConfig, FormData } from '../types';
 import { useField } from '../hooks';
@@ -19,6 +20,8 @@ export interface Props<T, FormType = FormData, I = T> {
   component?: FunctionComponent<any>;
   componentProps?: Record<string, any>;
   readDefaultValueOnForm?: boolean;
+  validationData$?: Observable<unknown>;
+  validationData?: unknown;
   onChange?: (value: I) => void;
   onError?: (errors: string[] | null) => void;
   children?: (field: FieldHook<T, I>) => JSX.Element | null;
@@ -36,6 +39,8 @@ function UseFieldComp<T = unknown, FormType = FormData, I = T>(props: Props<T, F
     onChange,
     onError,
     children,
+    validationData: customValidationData,
+    validationData$: customValidationData$,
     ...rest
   } = props;
 
@@ -63,7 +68,10 @@ function UseFieldComp<T = unknown, FormType = FormData, I = T>(props: Props<T, F
     }
   }
 
-  const field = useField<T, FormType, I>(form, path, fieldConfig, onChange, onError);
+  const field = useField<T, FormType, I>(form, path, fieldConfig, onChange, onError, {
+    customValidationData$,
+    customValidationData,
+  });
 
   // Children prevails over anything else provided.
   if (children) {

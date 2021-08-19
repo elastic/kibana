@@ -193,6 +193,10 @@ export interface ValidationFuncArg<I extends FormData, V = unknown> {
   };
   formData: I;
   errors: readonly ValidationError[];
+  customData: {
+    provider: () => Promise<unknown>;
+    current: unknown;
+  };
 }
 
 export type ValidationFunc<

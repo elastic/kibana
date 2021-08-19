@@ -6,16 +6,25 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, FunctionComponent } from 'react';
+import React, { useEffect, FunctionComponent, useState } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBed } from '../shared_imports';
 import { FormHook, OnUpdateHandler, FieldConfig, FieldHook } from '../types';
 import { useForm } from '../hooks/use_form';
+import { useAsyncValidationData } from '../hooks/use_async_validation_data';
 import { Form } from './form';
 import { UseField } from './use_field';
 
 describe('<UseField />', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   test('should read the default value from the prop and fallback to the config object', () => {
     const onFormData = jest.fn();
 
@@ -277,6 +286,236 @@ describe('<UseField />', () => {
 
       ({ isValid } = formHook);
       expect(isValid).toBe(false);
+    });
+
+    describe('dynamic data', () => {
+      let nameFieldHook: FieldHook<string> | null = null;
+      let lastNameFieldHook: FieldHook<string> | null = null;
+
+      const schema = {
+        name: {
+          validations: [
+            {
+              validator: async ({ customData: { provider } }) => {
+                // Async validator that requires the observable to emit a value
+                // to complete the validation. Once it emits a value, the dataProvider
+                // Promise fullfills.
+                const dynamicData = await provider();
+                if (dynamicData === 'bad') {
+                  return {
+                    message: 'Invalid dynamic data',
+                  };
+                }
+              },
+            },
+          ],
+        } as FieldConfig,
+        lastName: {
+          validations: [
+            {
+              validator: ({ customData: { current: validationData } }) => {
+                // Sync validator that receives the validationData passed through
+                // props on <UseField validationData={...} />
+                if (validationData === 'bad') {
+                  return {
+                    message: `Invalid dynamic data: ${validationData}`,
+                  };
+                }
+              },
+            },
+          ],
+        } as FieldConfig,
+      };
+
+      const onNameFieldHook = (field: FieldHook<string>) => {
+        nameFieldHook = field;
+      };
+      const onLastNameFieldHook = (field: FieldHook<string>) => {
+        lastNameFieldHook = field;
+      };
+
+      interface DynamicValidationDataProps {
+        validationData?: unknown;
+      }
+
+      const TestComp = ({ validationData }: DynamicValidationDataProps) => {
+        const { form } = useForm({ schema });
+        const [stateValue, setStateValue] = useState('initialValue');
+        const [validationData$, next] = useAsyncValidationData<string>(stateValue);
+
+        const setInvalidDynamicData = () => {
+          next('bad');
+        };
+
+        const setValidDynamicData = () => {
+          next('good');
+        };
+
+        // Updating the state should emit a new value in the observable
+        // which in turn should be available in the validation and allow it to complete.
+        const setStateValueWithValidValue = () => {
+          setStateValue('good');
+        };
+
+        const setStateValueWithInValidValue = () => {
+          setStateValue('bad');
+        };
+
+        return (
+          <Form form={form}>
+            <>
+              {/* Dynamic async validation data with an observable. The validation
+              will complete **only after** the observable has emitted a value. */}
+              <UseField<string> path="name" validationData$={validationData$}>
+                {(field) => {
+                  onNameFieldHook(field);
+                  return (
+                    <input
+                      data-test-subj="nameField"
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  );
+                }}
+              </UseField>
+
+              {/* Dynamic validation data passed synchronously through props */}
+              <UseField<string> path="lastName" validationData={validationData}>
+                {(field) => {
+                  onLastNameFieldHook(field);
+                  return (
+                    <input
+                      data-test-subj="lastNameField"
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  );
+                }}
+              </UseField>
+
+              <button data-test-subj="setValidValueBtn" onClick={setValidDynamicData}>
+                Update dynamic data (valid)
+              </button>
+              <button data-test-subj="setInvalidValueBtn" onClick={setInvalidDynamicData}>
+                Update dynamic data (invalid)
+              </button>
+              <button data-test-subj="setValidStateValueBtn" onClick={setStateValueWithValidValue}>
+                Update state value (valid)
+              </button>
+              <button
+                data-test-subj="setInvalidStateValueBtn"
+                onClick={setStateValueWithInValidValue}
+              >
+                Update state value (invalid)
+              </button>
+            </>
+          </Form>
+        );
+      };
+
+      const setupDynamicData = (defaultProps?: Partial<DynamicValidationDataProps>) => {
+        return registerTestBed(TestComp, {
+          memoryRouter: { wrapComponent: false },
+          defaultProps,
+        })() as TestBed;
+      };
+
+      beforeEach(() => {
+        nameFieldHook = null;
+      });
+
+      test('it should access dynamic data provided **after** the field value changed', async () => {
+        const { form, find } = setupDynamicData();
+
+        await act(async () => {
+          form.setInputValue('nameField', 'newValue');
+        });
+        // If the field is validating this will prevent the form from being submitted as
+        // it will wait for all the fields to finish validating to return the form validity.
+        expect(nameFieldHook?.isValidating).toBe(true);
+
+        // Let's wait 10 sec to make sure the validation does not complete
+        // until the observable receives a value
+        await act(async () => {
+          jest.advanceTimersByTime(10000);
+        });
+        // The field is still validating as no value has been sent to the observable
+        expect(nameFieldHook?.isValidating).toBe(true);
+
+        // We now send a valid value to the observable
+        await act(async () => {
+          find('setValidValueBtn').simulate('click');
+        });
+
+        expect(nameFieldHook?.isValidating).toBe(false);
+        expect(nameFieldHook?.isValid).toBe(true);
+
+        // Let's change the input value to trigger the validation once more
+        await act(async () => {
+          form.setInputValue('nameField', 'anotherValue');
+        });
+        expect(nameFieldHook?.isValidating).toBe(true);
+
+        // And send an invalid value to the observable
+        await act(async () => {
+          find('setInvalidValueBtn').simulate('click');
+        });
+        expect(nameFieldHook?.isValidating).toBe(false);
+        expect(nameFieldHook?.isValid).toBe(false);
+        expect(nameFieldHook?.getErrorsMessages()).toBe('Invalid dynamic data');
+      });
+
+      test('it should access dynamic data coming after the field value changed, **in sync** with a state change', async () => {
+        const { form, find } = setupDynamicData();
+
+        await act(async () => {
+          form.setInputValue('nameField', 'newValue');
+        });
+        expect(nameFieldHook?.isValidating).toBe(true);
+
+        // We now update the state with a valid value
+        // this should update the observable
+        await act(async () => {
+          find('setValidStateValueBtn').simulate('click');
+        });
+
+        expect(nameFieldHook?.isValidating).toBe(false);
+        expect(nameFieldHook?.isValid).toBe(true);
+
+        // Let's change the input value to trigger the validation once more
+        await act(async () => {
+          form.setInputValue('nameField', 'anotherValue');
+        });
+        expect(nameFieldHook?.isValidating).toBe(true);
+
+        // And change the state with an invalid value
+        await act(async () => {
+          find('setInvalidStateValueBtn').simulate('click');
+        });
+
+        expect(nameFieldHook?.isValidating).toBe(false);
+        expect(nameFieldHook?.isValid).toBe(false);
+      });
+
+      test('it should access dynamic data provided through props', async () => {
+        let { form } = setupDynamicData({ validationData: 'good' });
+
+        await act(async () => {
+          form.setInputValue('lastNameField', 'newValue');
+        });
+        // As this is a sync validation it should not be validating anymore at this stage
+        expect(lastNameFieldHook?.isValidating).toBe(false);
+        expect(lastNameFieldHook?.isValid).toBe(true);
+
+        // Now let's provide invalid dynamic data through props
+        ({ form } = setupDynamicData({ validationData: 'bad' }));
+        await act(async () => {
+          form.setInputValue('lastNameField', 'newValue');
+        });
+        expect(lastNameFieldHook?.isValidating).toBe(false);
+        expect(lastNameFieldHook?.isValid).toBe(false);
+        expect(lastNameFieldHook?.getErrorsMessages()).toBe('Invalid dynamic data: bad');
+      });
     });
   });
 
