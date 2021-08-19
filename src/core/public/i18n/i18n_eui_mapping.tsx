@@ -526,7 +526,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiFilterButton.filterBadge': ({ count, hasActiveFilters }: EuiValues) =>
       i18n.translate('core.euiFilterButton.filterBadge', {
         defaultMessage: '{count} {hasActiveFilters} filters',
-        values: { count, hasActiveFilters: hasActiveFilters ? 'active' : 'available' },
+        values: {
+          count,
+          hasActiveFilters: hasActiveFilters
+            ? i18n.translate('core.euiFilterButton.filterBadgeActive', {
+                defaultMessage: 'active',
+              })
+            : i18n.translate('core.euiFilterButton.filterBadgeAvailable', {
+                defaultMessage: 'available',
+              }),
+        },
       }),
     'euiFlyout.closeAriaLabel': i18n.translate('core.euiFlyout.closeAriaLabel', {
       defaultMessage: 'Close this dialog',
