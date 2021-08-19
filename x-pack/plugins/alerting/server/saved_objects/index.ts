@@ -20,8 +20,8 @@ import { RawAlert } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import { RuleTypeRegistry } from '../rule_type_registry';
-
 export { partiallyUpdateAlert } from './partially_update_alert';
+import type { PreConfiguredAction } from '../../../actions/server';
 
 export const AlertAttributesExcludedFromAAD = [
   'scheduledTaskId',
@@ -48,13 +48,14 @@ export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
   ruleTypeRegistry: RuleTypeRegistry,
-  logger: Logger
+  logger: Logger,
+  preconfiguredConnectors: PreConfiguredAction[]
 ) {
   savedObjects.registerType({
     name: 'alert',
     hidden: true,
     namespaceType: 'single',
-    migrations: getMigrations(encryptedSavedObjects),
+    migrations: getMigrations(encryptedSavedObjects, preconfiguredConnectors),
     mappings: mappings.alert as SavedObjectsTypeMappingDefinition,
     management: {
       importableAndExportable: true,

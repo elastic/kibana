@@ -19,6 +19,7 @@ import {
 import { RawAlert, RawAlertAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
+import type { PreConfiguredAction } from '../../../actions/server';
 
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';
@@ -55,7 +56,8 @@ export const isSecuritySolutionRule = (doc: SavedObjectUnsanitizedDoc<RawAlert>)
   doc.attributes.alertTypeId === 'siem.signals';
 
 export function getMigrations(
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  preconfiguredConnectors: PreConfiguredAction[]
 ): SavedObjectMigrationMap {
   const migrationWhenRBACWasIntroduced = createEsoMigration(
     encryptedSavedObjects,
@@ -99,10 +101,13 @@ export function getMigrations(
     pipeMigrations(addExceptionListsToReferences)
   );
 
-  const migrateLegacyIds716 = createEsoMigration(
+  const migrateRules716 = createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
-    pipeMigrations(setLegacyId)
+    pipeMigrations(
+      setLegacyId,
+      getRemovePreconfiguredConnectorsFromReferencesFn(preconfiguredConnectors)
+    )
   );
 
   return {
@@ -112,7 +117,7 @@ export function getMigrations(
     '7.13.0': executeMigrationWithErrorHandling(migrationSecurityRules713, '7.13.0'),
     '7.14.1': executeMigrationWithErrorHandling(migrationSecurityRules714, '7.14.1'),
     '7.15.0': executeMigrationWithErrorHandling(migrationSecurityRules715, '7.15.0'),
-    '7.16.0': executeMigrationWithErrorHandling(migrateLegacyIds716, '7.16.0'),
+    '7.16.0': executeMigrationWithErrorHandling(migrateRules716, '7.16.0'),
   };
 }
 
@@ -585,6 +590,21 @@ function setLegacyId(
       legacyId: id,
     },
   };
+}
+
+function getRemovePreconfiguredConnectorsFromReferencesFn(
+  preconfiguredConnectors: PreConfiguredAction[]
+) {
+  return (doc: SavedObjectUnsanitizedDoc<RawAlert>) => {
+    return removePreconfiguredConnectorsFromReferences(doc, preconfiguredConnectors);
+  };
+}
+
+function removePreconfiguredConnectorsFromReferences(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>,
+  preconfiguredConnectors: PreConfiguredAction[]
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  return doc;
 }
 
 function pipeMigrations(...migrations: AlertMigration[]): AlertMigration {
