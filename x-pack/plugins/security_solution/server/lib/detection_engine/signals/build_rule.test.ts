@@ -19,13 +19,13 @@ import { ThreatRuleParams } from '../schemas/rule_schemas';
 
 describe('buildRuleWithoutOverrides', () => {
   test('builds a rule using rule alert', () => {
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const ruleSO = sampleRuleSO(getQueryRuleParams(false));
     const rule = buildRuleWithoutOverrides(ruleSO);
     expect(rule).toEqual(expectedRule());
   });
 
   test('builds a rule and removes internal tags', () => {
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const ruleSO = sampleRuleSO(getQueryRuleParams(false));
     ruleSO.attributes.tags = [
       'some fake tag 1',
       'some fake tag 2',
@@ -37,7 +37,7 @@ describe('buildRuleWithoutOverrides', () => {
   });
 
   test('it builds a rule as expected with filters present', () => {
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const ruleSO = sampleRuleSO(getQueryRuleParams(false));
     const ruleFilters = [
       {
         query: 'host.name: Rebecca',
@@ -106,7 +106,7 @@ describe('buildRuleWithoutOverrides', () => {
 
 describe('buildRuleWithOverrides', () => {
   test('it applies rule name override in buildRule', () => {
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const ruleSO = sampleRuleSO(getQueryRuleParams(false));
     ruleSO.attributes.params.ruleNameOverride = 'someKey';
     const rule = buildRuleWithOverrides(ruleSO, sampleDocNoSortId()._source!);
     const expected = {
@@ -123,7 +123,7 @@ describe('buildRuleWithOverrides', () => {
 
   test('it applies risk score override in buildRule', () => {
     const newRiskScore = 79;
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const ruleSO = sampleRuleSO(getQueryRuleParams(false));
     ruleSO.attributes.params.riskScoreMapping = [
       {
         field: 'new_risk_score',
@@ -150,7 +150,7 @@ describe('buildRuleWithOverrides', () => {
 
   test('it applies severity override in buildRule', () => {
     const eventSeverity = '42';
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const ruleSO = sampleRuleSO(getQueryRuleParams(false));
     ruleSO.attributes.params.severityMapping = [
       {
         field: 'event.severity',

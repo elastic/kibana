@@ -35,7 +35,7 @@ describe('buildBulkBody', () => {
   });
 
   test('bulk body builds well-defined body', () => {
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const ruleSO = sampleRuleSO(getQueryRuleParams(false));
     const doc = sampleDocNoSortId();
     const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete doc._source.source;
@@ -185,7 +185,7 @@ describe('buildBulkBody', () => {
   });
 
   test('bulk body builds original_event if it exists on the event to begin with', () => {
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const ruleSO = sampleRuleSO(getQueryRuleParams(false));
     const doc = sampleDocNoSortId();
     const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete doc._source.source;
@@ -257,7 +257,7 @@ describe('buildBulkBody', () => {
   });
 
   test('bulk body builds original_event if it exists on the event to begin with but no kind information', () => {
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const ruleSO = sampleRuleSO(getQueryRuleParams(false));
     const doc = sampleDocNoSortId();
     const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete doc._source.source;
@@ -327,7 +327,7 @@ describe('buildBulkBody', () => {
   });
 
   test('bulk body builds original_event if it exists on the event to begin with with only kind information', () => {
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const ruleSO = sampleRuleSO(getQueryRuleParams(false));
     const doc = sampleDocNoSortId();
     const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete doc._source.source;
@@ -390,7 +390,7 @@ describe('buildBulkBody', () => {
   });
 
   test('bulk body builds "original_signal" if it exists already as a numeric', () => {
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const ruleSO = sampleRuleSO(getQueryRuleParams(false));
     const sampleDoc = sampleDocNoSortId();
     const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete sampleDoc._source.source;
@@ -453,7 +453,7 @@ describe('buildBulkBody', () => {
   });
 
   test('bulk body builds "original_signal" if it exists already as an object', () => {
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const ruleSO = sampleRuleSO(getQueryRuleParams(false));
     const sampleDoc = sampleDocNoSortId();
     const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete sampleDoc._source.source;
@@ -524,7 +524,7 @@ describe('buildSignalFromSequence', () => {
     const block2 = sampleWrappedSignalHit();
     block2._source.new_key = 'new_key_value';
     const blocks = [block1, block2];
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const ruleSO = sampleRuleSO(getQueryRuleParams(false));
     const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     const signal: SignalHitOptionalTimestamp = buildSignalFromSequence(
       blocks,
@@ -615,7 +615,7 @@ describe('buildSignalFromSequence', () => {
     const block2 = sampleWrappedSignalHit();
     block2._source['@timestamp'] = '2021-05-20T22:28:46+0000';
     block2._source.someKey = 'someOtherValue';
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const ruleSO = sampleRuleSO(getQueryRuleParams(false));
     const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     const signal: SignalHitOptionalTimestamp = buildSignalFromSequence(
       [block1, block2],
@@ -705,7 +705,7 @@ describe('buildSignalFromEvent', () => {
   test('builds a basic signal from a single event', () => {
     const ancestor = sampleDocWithAncestors().hits.hits[0];
     delete ancestor._source.source;
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const ruleSO = sampleRuleSO(getQueryRuleParams(false));
     const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     const signal: SignalHitOptionalTimestamp = buildSignalFromEvent(
       ancestor,

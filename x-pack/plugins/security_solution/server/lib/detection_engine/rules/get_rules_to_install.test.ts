@@ -20,7 +20,7 @@ describe('get_rules_to_install', () => {
     const ruleFromFileSystem = getAddPrepackagedRulesSchemaDecodedMock();
     ruleFromFileSystem.rule_id = 'rule-1';
 
-    const installedRule = getAlertMock(getQueryRuleParams());
+    const installedRule = getAlertMock(getQueryRuleParams(false));
     installedRule.params.ruleId = 'rule-1';
     const update = getRulesToInstall([ruleFromFileSystem], [installedRule]);
     expect(update).toEqual([]);
@@ -30,7 +30,7 @@ describe('get_rules_to_install', () => {
     const ruleFromFileSystem = getAddPrepackagedRulesSchemaDecodedMock();
     ruleFromFileSystem.rule_id = 'rule-1';
 
-    const installedRule = getAlertMock(getQueryRuleParams());
+    const installedRule = getAlertMock(getQueryRuleParams(false));
     installedRule.params.ruleId = 'rule-2';
     const update = getRulesToInstall([ruleFromFileSystem], [installedRule]);
     expect(update).toEqual([ruleFromFileSystem]);
@@ -43,7 +43,7 @@ describe('get_rules_to_install', () => {
     const ruleFromFileSystem2 = getAddPrepackagedRulesSchemaDecodedMock();
     ruleFromFileSystem2.rule_id = 'rule-2';
 
-    const installedRule = getAlertMock(getQueryRuleParams());
+    const installedRule = getAlertMock(getQueryRuleParams(false));
     installedRule.params.ruleId = 'rule-3';
     const update = getRulesToInstall([ruleFromFileSystem1, ruleFromFileSystem2], [installedRule]);
     expect(update).toEqual([ruleFromFileSystem1, ruleFromFileSystem2]);
@@ -59,7 +59,7 @@ describe('get_rules_to_install', () => {
     const ruleFromFileSystem3 = getAddPrepackagedRulesSchemaDecodedMock();
     ruleFromFileSystem3.rule_id = 'rule-3';
 
-    const installedRule = getAlertMock(getQueryRuleParams());
+    const installedRule = getAlertMock(getQueryRuleParams(false));
     installedRule.params.ruleId = 'rule-3';
     const update = getRulesToInstall(
       [ruleFromFileSystem1, ruleFromFileSystem2, ruleFromFileSystem3],

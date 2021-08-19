@@ -123,7 +123,7 @@ describe('get_prepackaged_rule_status_route', () => {
     });
 
     test('1 rule installed, 1 custom rules, 0 rules not installed, and 1 rule to not updated', async () => {
-      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(false));
       const request = getPrepackagedRulesStatusRequest();
       const response = await server.inject(request, context);
 

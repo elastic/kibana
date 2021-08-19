@@ -16,7 +16,7 @@ describe('updateRules', () => {
     const rulesOptionsMock = getUpdateRulesOptionsMock();
     rulesOptionsMock.ruleUpdate.enabled = false;
     ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).get.mockResolvedValue(
-      getAlertMock(getQueryRuleParams())
+      getAlertMock(getQueryRuleParams(false))
     );
 
     await updateRules(rulesOptionsMock);
@@ -33,7 +33,7 @@ describe('updateRules', () => {
     rulesOptionsMock.ruleUpdate.enabled = true;
 
     ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).get.mockResolvedValue({
-      ...getAlertMock(getQueryRuleParams()),
+      ...getAlertMock(getQueryRuleParams(false)),
       enabled: false,
     });
 

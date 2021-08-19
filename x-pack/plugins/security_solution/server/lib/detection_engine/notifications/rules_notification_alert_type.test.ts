@@ -85,7 +85,7 @@ describe('rules_notification_alert_type', () => {
     });
 
     it('should call buildSignalsSearchQuery with proper params', async () => {
-      const ruleAlert = getAlertMock(getQueryRuleParams());
+      const ruleAlert = getAlertMock(getQueryRuleParams(false));
       alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'id',
         type: 'type',
@@ -112,7 +112,7 @@ describe('rules_notification_alert_type', () => {
     });
 
     it('should resolve results_link when meta is undefined to use "/app/security"', async () => {
-      const ruleAlert = getAlertMock(getQueryRuleParams());
+      const ruleAlert = getAlertMock(getQueryRuleParams(false));
       delete ruleAlert.params.meta;
       alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'rule-id',
@@ -140,7 +140,7 @@ describe('rules_notification_alert_type', () => {
     });
 
     it('should resolve results_link when meta is an empty object to use "/app/security"', async () => {
-      const ruleAlert = getAlertMock(getQueryRuleParams());
+      const ruleAlert = getAlertMock(getQueryRuleParams(false));
       ruleAlert.params.meta = {};
       alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'rule-id',
@@ -167,7 +167,7 @@ describe('rules_notification_alert_type', () => {
     });
 
     it('should resolve results_link to custom kibana link when given one', async () => {
-      const ruleAlert = getAlertMock(getQueryRuleParams());
+      const ruleAlert = getAlertMock(getQueryRuleParams(false));
       ruleAlert.params.meta = {
         kibana_siem_app_url: 'http://localhost',
       };
@@ -196,7 +196,7 @@ describe('rules_notification_alert_type', () => {
     });
 
     it('should not call alertInstanceFactory if signalsCount was 0', async () => {
-      const ruleAlert = getAlertMock(getQueryRuleParams());
+      const ruleAlert = getAlertMock(getQueryRuleParams(false));
       alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'id',
         type: 'type',
@@ -213,7 +213,7 @@ describe('rules_notification_alert_type', () => {
     });
 
     it('should call scheduleActions if signalsCount was greater than 0', async () => {
-      const ruleAlert = getAlertMock(getQueryRuleParams());
+      const ruleAlert = getAlertMock(getQueryRuleParams(false));
       alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'id',
         type: 'type',

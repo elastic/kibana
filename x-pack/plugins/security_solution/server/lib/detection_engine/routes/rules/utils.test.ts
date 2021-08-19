@@ -44,13 +44,13 @@ type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 describe('utils', () => {
   describe('transformAlertToRule', () => {
     test('should work with a full data set', () => {
-      const fullRule = getAlertMock(getQueryRuleParams());
+      const fullRule = getAlertMock(getQueryRuleParams(false));
       const rule = transformAlertToRule(fullRule);
       expect(rule).toEqual(getOutputRuleAlertForRest());
     });
 
     test('should omit note if note is undefined', () => {
-      const fullRule = getAlertMock(getQueryRuleParams());
+      const fullRule = getAlertMock(getQueryRuleParams(false));
       fullRule.params.note = undefined;
       const rule = transformAlertToRule(fullRule);
       const { note, ...expectedWithoutNote } = getOutputRuleAlertForRest();
@@ -58,7 +58,7 @@ describe('utils', () => {
     });
 
     test('should return enabled is equal to false', () => {
-      const fullRule = getAlertMock(getQueryRuleParams());
+      const fullRule = getAlertMock(getQueryRuleParams(false));
       fullRule.enabled = false;
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
       const expected = getOutputRuleAlertForRest();
@@ -67,7 +67,7 @@ describe('utils', () => {
     });
 
     test('should return immutable is equal to false', () => {
-      const fullRule = getAlertMock(getQueryRuleParams());
+      const fullRule = getAlertMock(getQueryRuleParams(false));
       fullRule.params.immutable = false;
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
       const expected = getOutputRuleAlertForRest();
@@ -75,7 +75,7 @@ describe('utils', () => {
     });
 
     test('should work with tags but filter out any internal tags', () => {
-      const fullRule = getAlertMock(getQueryRuleParams());
+      const fullRule = getAlertMock(getQueryRuleParams(false));
       fullRule.tags = ['tag 1', 'tag 2', `${INTERNAL_IDENTIFIER}_some_other_value`];
       const rule = transformAlertToRule(fullRule);
       const expected = getOutputRuleAlertForRest();
@@ -153,7 +153,7 @@ describe('utils', () => {
     test('does not leak a lists structure in the transform which would cause validation issues', () => {
       const result: RuleAlertType & { lists: [] } = {
         lists: [],
-        ...getAlertMock(getQueryRuleParams()),
+        ...getAlertMock(getQueryRuleParams(false)),
       };
       const rule = transformAlertToRule(result);
       expect(rule).toEqual(
@@ -168,7 +168,7 @@ describe('utils', () => {
     test('does not leak an exceptions_list structure in the transform which would cause validation issues', () => {
       const result: RuleAlertType & { exceptions_list: [] } = {
         exceptions_list: [],
-        ...getAlertMock(getQueryRuleParams()),
+        ...getAlertMock(getQueryRuleParams(false)),
       };
       const rule = transformAlertToRule(result);
       expect(rule).toEqual(
@@ -270,7 +270,7 @@ describe('utils', () => {
           page: 1,
           perPage: 0,
           total: 0,
-          data: [getAlertMock(getQueryRuleParams())],
+          data: [getAlertMock(getQueryRuleParams(false))],
         },
         {},
         {},
@@ -288,7 +288,7 @@ describe('utils', () => {
 
   describe('transform', () => {
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transform(getAlertMock(getQueryRuleParams()));
+      const output = transform(getAlertMock(getQueryRuleParams(false)));
       const expected = getOutputRuleAlertForRest();
       expect(output).toEqual(expected);
     });
@@ -403,7 +403,7 @@ describe('utils', () => {
 
   describe('transformOrBulkError', () => {
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transformOrBulkError('rule-1', getAlertMock(getQueryRuleParams()), {
+      const output = transformOrBulkError('rule-1', getAlertMock(getQueryRuleParams(false)), {
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         actions: [],
         ruleThrottle: 'no_actions',
@@ -435,15 +435,15 @@ describe('utils', () => {
     });
 
     test('given single alert will return the alert transformed', () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getAlertMock(getQueryRuleParams(false));
       const transformed = transformAlertsToRules([result1]);
       const expected = getOutputRuleAlertForRest();
       expect(transformed).toEqual([expected]);
     });
 
     test('given two alerts will return the two alerts transformed', () => {
-      const result1 = getAlertMock(getQueryRuleParams());
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result1 = getAlertMock(getQueryRuleParams(false));
+      const result2 = getAlertMock(getQueryRuleParams(false));
       result2.id = 'some other id';
       result2.params.ruleId = 'some other id';
 
@@ -458,7 +458,7 @@ describe('utils', () => {
 
   describe('transformOrImportError', () => {
     test('returns 1 given success if the alert is an alert type and the existing success count is 0', () => {
-      const output = transformOrImportError('rule-1', getAlertMock(getQueryRuleParams()), {
+      const output = transformOrImportError('rule-1', getAlertMock(getQueryRuleParams(false)), {
         success: true,
         success_count: 0,
         errors: [],
@@ -472,7 +472,7 @@ describe('utils', () => {
     });
 
     test('returns 2 given successes if the alert is an alert type and the existing success count is 1', () => {
-      const output = transformOrImportError('rule-1', getAlertMock(getQueryRuleParams()), {
+      const output = transformOrImportError('rule-1', getAlertMock(getQueryRuleParams(false)), {
         success: true,
         success_count: 1,
         errors: [],

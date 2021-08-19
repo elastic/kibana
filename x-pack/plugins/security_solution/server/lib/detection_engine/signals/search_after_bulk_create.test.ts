@@ -44,8 +44,8 @@ describe('searchAfterAndBulkCreate', () => {
   let inputIndexPattern: string[] = [];
   let listClient = listMock.getListClient();
   const someGuids = Array.from({ length: 13 }).map(() => uuid.v4());
-  const sampleParams = getQueryRuleParams();
-  const ruleSO = sampleRuleSO(getQueryRuleParams());
+  const sampleParams = getQueryRuleParams(false);
+  const ruleSO = sampleRuleSO(getQueryRuleParams(false));
   sampleParams.maxSignals = 30;
   let tuple: RuleRangeTuple;
   beforeEach(() => {

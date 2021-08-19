@@ -32,8 +32,8 @@ describe('patch_rules_bulk', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
-    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams())); // update succeeds
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(false)); // rule exists
+    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams(false))); // update succeeds
 
     patchRulesBulkRoute(server.router, ml);
   });

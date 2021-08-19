@@ -19,8 +19,8 @@ import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 describe('getExportAll', () => {
   test('it exports everything from the alerts client', async () => {
     const rulesClient = rulesClientMock.create();
-    const result = getFindResultWithSingleHit();
-    const alert = getAlertMock(getQueryRuleParams());
+    const result = getFindResultWithSingleHit(false);
+    const alert = getAlertMock(getQueryRuleParams(false));
     alert.params = {
       ...alert.params,
       filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],

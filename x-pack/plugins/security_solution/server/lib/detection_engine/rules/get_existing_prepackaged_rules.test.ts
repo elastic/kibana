@@ -28,23 +28,23 @@ describe('get_existing_prepackaged_rules', () => {
   describe('getExistingPrepackagedRules', () => {
     test('should return a single item in a single page', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(false));
       const rules = await getExistingPrepackagedRules({ rulesClient });
-      expect(rules).toEqual([getAlertMock(getQueryRuleParams())]);
+      expect(rules).toEqual([getAlertMock(getQueryRuleParams(false))]);
     });
 
     test('should return 3 items over 1 page with all on one page', async () => {
       const rulesClient = rulesClientMock.create();
 
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getAlertMock(getQueryRuleParams(false));
       result1.params.immutable = true;
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getAlertMock(getQueryRuleParams(false));
       result2.params.immutable = true;
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
 
-      const result3 = getAlertMock(getQueryRuleParams());
+      const result3 = getAlertMock(getQueryRuleParams(false));
       result3.params.immutable = true;
       result3.id = 'f3e1bf0b-b95f-43da-b1de-5d2f0af2287a';
 
@@ -76,18 +76,18 @@ describe('get_existing_prepackaged_rules', () => {
   describe('getNonPackagedRules', () => {
     test('should return a single item in a single page', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(false));
       const rules = await getNonPackagedRules({ rulesClient });
-      expect(rules).toEqual([getAlertMock(getQueryRuleParams())]);
+      expect(rules).toEqual([getAlertMock(getQueryRuleParams(false))]);
     });
 
     test('should return 2 items over 1 page', async () => {
       const rulesClient = rulesClientMock.create();
 
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getAlertMock(getQueryRuleParams(false));
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getAlertMock(getQueryRuleParams(false));
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
 
       // first result mock which is for returning the total
@@ -112,13 +112,13 @@ describe('get_existing_prepackaged_rules', () => {
     test('should return 3 items over 1 page with all on one page', async () => {
       const rulesClient = rulesClientMock.create();
 
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getAlertMock(getQueryRuleParams(false));
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getAlertMock(getQueryRuleParams(false));
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
 
-      const result3 = getAlertMock(getQueryRuleParams());
+      const result3 = getAlertMock(getQueryRuleParams(false));
       result3.id = 'f3e1bf0b-b95f-43da-b1de-5d2f0af2287a';
 
       // first result mock which is for returning the total
@@ -149,18 +149,18 @@ describe('get_existing_prepackaged_rules', () => {
   describe('getRules', () => {
     test('should return a single item in a single page', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(false));
       const rules = await getRules({ rulesClient, filter: '' });
-      expect(rules).toEqual([getAlertMock(getQueryRuleParams())]);
+      expect(rules).toEqual([getAlertMock(getQueryRuleParams(false))]);
     });
 
     test('should return 2 items over two pages, one per page', async () => {
       const rulesClient = rulesClientMock.create();
 
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getAlertMock(getQueryRuleParams(false));
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getAlertMock(getQueryRuleParams(false));
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
 
       // first result mock which is for returning the total
@@ -186,7 +186,7 @@ describe('get_existing_prepackaged_rules', () => {
   describe('getRulesCount', () => {
     test('it returns a count', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(false));
       const rules = await getRulesCount({ rulesClient, filter: '' });
       expect(rules).toEqual(1);
     });
@@ -195,7 +195,7 @@ describe('get_existing_prepackaged_rules', () => {
   describe('getNonPackagedRulesCount', () => {
     test('it returns a count', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(false));
       const rules = await getNonPackagedRulesCount({ rulesClient });
       expect(rules).toEqual(1);
     });

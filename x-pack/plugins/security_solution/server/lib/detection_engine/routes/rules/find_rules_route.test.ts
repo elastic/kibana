@@ -28,8 +28,8 @@ describe('find_rules', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
-    clients.rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(false));
+    clients.rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams(false)));
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
     clients.ruleExecutionLogClient.findBulk.mockResolvedValue(getFindBulkResultStatus());
     ruleDataClientMock = createRuleDataClientMock();

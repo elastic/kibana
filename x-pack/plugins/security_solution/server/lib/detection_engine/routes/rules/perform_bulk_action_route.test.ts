@@ -30,7 +30,7 @@ describe('perform_bulk_action', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(false));
 
     performBulkActionRoute(server.router, ml);
   });

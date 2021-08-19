@@ -60,7 +60,7 @@ export const getPatchRulesOptionsMock = (): PatchRulesOptions => ({
   version: 1,
   exceptionsList: [],
   actions: [],
-  rule: getAlertMock(getQueryRuleParams()),
+  rule: getAlertMock(getQueryRuleParams(false)),
 });
 
 export const getPatchMlRulesOptionsMock = (): PatchRulesOptions => ({

@@ -35,7 +35,7 @@ describe('create_rules_bulk', () => {
     ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
-    clients.rulesClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful creation
+    clients.rulesClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams(false))); // successful creation
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
@@ -105,7 +105,7 @@ describe('create_rules_bulk', () => {
     });
 
     test('returns a duplicate error if rule_id already exists', async () => {
-      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(false));
       const response = await server.inject(getReadBulkRequest(), context);
 
       expect(response.status).toEqual(200);

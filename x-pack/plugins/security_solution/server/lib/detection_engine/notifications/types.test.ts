@@ -17,7 +17,7 @@ describe('types', () => {
   });
 
   it('isAlertTypes should return false if is not RuleNotificationAlertType', () => {
-    expect(isAlertTypes([getAlertMock(getQueryRuleParams())])).toEqual(false);
+    expect(isAlertTypes([getAlertMock(getQueryRuleParams(false))])).toEqual(false);
   });
 
   it('isNotificationAlertExecutor should return true it passed object is NotificationAlertTypeDefinition type', () => {

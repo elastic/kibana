@@ -25,7 +25,7 @@ describe('get_export_by_object_ids', () => {
   describe('getExportByObjectIds', () => {
     test('it exports object ids into an expected string with new line characters', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(false));
 
       const objects = [{ rule_id: 'rule-1' }];
       const exports = await getExportByObjectIds(rulesClient, objects);
@@ -85,7 +85,7 @@ describe('get_export_by_object_ids', () => {
 
     test('it does not export immutable rules', async () => {
       const rulesClient = rulesClientMock.create();
-      const result = getAlertMock(getQueryRuleParams());
+      const result = getAlertMock(getQueryRuleParams(false));
       result.params.immutable = true;
 
       const findResult: FindHit = {
@@ -95,7 +95,7 @@ describe('get_export_by_object_ids', () => {
         data: [result],
       };
 
-      rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+      rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams(false)));
       rulesClient.find.mockResolvedValue(findResult);
 
       const objects = [{ rule_id: 'rule-1' }];
@@ -111,7 +111,7 @@ describe('get_export_by_object_ids', () => {
   describe('getRulesFromObjects', () => {
     test('it returns transformed rules from objects sent in', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(false));
 
       const objects = [{ rule_id: 'rule-1' }];
       const exports = await getRulesFromObjects(rulesClient, objects);
@@ -175,7 +175,7 @@ describe('get_export_by_object_ids', () => {
 
     test('it does not transform the rule if the rule is an immutable rule and designates it as a missing rule', async () => {
       const rulesClient = rulesClientMock.create();
-      const result = getAlertMock(getQueryRuleParams());
+      const result = getAlertMock(getQueryRuleParams(false));
       result.params.immutable = true;
 
       const findResult: FindHit = {
