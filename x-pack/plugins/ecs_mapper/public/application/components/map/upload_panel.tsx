@@ -46,12 +46,25 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
   const [file, setFile] = useState<FileList | null>(null);
   const [pipelineName, setPipelineName] = useState('');
 
+  const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
+
   const selectedAction = [];
   if (action) {
     selectedAction.push({ value: action, label: action });
   }
 
   const options = getOptions(actionOptions);
+
+  const hasPipelineName = !!pipelineName || !!pipelineName.trim();
+  const hasFile = file?.length;
+
+  const onSubmit = async () => {
+    setHasSubmitted(true);
+
+    if (hasPipelineName && hasFile) {
+      onFileUpload(action, file, pipelineName);
+    }
+  };
 
   return (
     <EuiFlexGroup gutterSize="xl">
@@ -105,18 +118,40 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
             </p>
           }
         >
-          <EuiFormRow fullWidth={true} hasEmptyLabelSpace>
+          <EuiFormRow 
+            fullWidth
+            isInvalid={hasSubmitted && !hasPipelineName} 
+            error={
+              !hasPipelineName
+                ? i18n.translate('xpack.ecsMapper.file.upload.pipelineName.nameErrorMessage', {
+                    defaultMessage: 'Name is required.',
+                  })
+                : null
+            }
+            hasEmptyLabelSpace
+          >
             <EuiFieldText
               onChange={(e) => {
                 setPipelineName(e.target.value);
               }}
+              isInvalid={hasSubmitted && !hasPipelineName}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
 
         <EuiSpacer size="l" />
 
-        <EuiFormRow fullWidth>
+        <EuiFormRow 
+          fullWidth
+          isInvalid={hasSubmitted && !hasFile} 
+            error={
+              !hasFile
+                ? i18n.translate('xpack.ecsMapper.file.upload.selectOrDragAndDropFileDescription.noAttachedError', {
+                    defaultMessage: 'CSV file required.',
+                  })
+                : null
+            }
+        >
           <EuiFilePicker
             id="filePicker"
             initialPromptText={i18n.translate(
@@ -128,6 +163,7 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
             onChange={(files) => setFile(files)}
             className="ecs-mapper-file-picker"
             accept=".csv"
+            isInvalid={hasSubmitted && !hasFile}
           />
         </EuiFormRow>
 
@@ -136,7 +172,7 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
         {!isUploaded && (
           <EuiButton
             target="_self"
-            onClick={() => onFileUpload(action, file, pipelineName)}
+            onClick={() => onSubmit()}
             isLoading={isLoading}
             data-test-subj="ecsMapperProcessFileButton"
             fill
