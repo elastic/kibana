@@ -106,9 +106,9 @@ it('builds a generated plugin into a viable archive', async () => {
       "kibanaVersion": "7.5.0",
       "optionalPlugins": Array [],
       "owner": Object {
-         "githubTeam": "",
-          "name": "",
-       },
+        "githubTeam": "",
+        "name": "",
+      },
       "requiredPlugins": Array [
         "navigation",
       ],
