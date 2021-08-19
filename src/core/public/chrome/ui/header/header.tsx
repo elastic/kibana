@@ -101,9 +101,7 @@ export function Header({
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
 
-  const Breadcrumbs = (
-    <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />
-  );
+  const Breadcrumbs = <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />;
 
   return (
     <>
