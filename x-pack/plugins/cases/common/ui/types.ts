@@ -66,7 +66,9 @@ export interface CaseUserActions {
   caseId: string;
   commentId: string | null;
   newValue: string | null;
+  newValConnectorId: string | null;
   oldValue: string | null;
+  oldValConnectorId: string | null;
 }
 
 export interface CaseExternalService {

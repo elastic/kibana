@@ -5,23 +5,19 @@
  * 2.0.
  */
 
+import { ConnectorTypes, noneConnectorId } from '../../../common';
 import { CaseUserActions } from '../../containers/types';
 
 export const getConnectorFieldsFromUserActions = (id: string, userActions: CaseUserActions[]) => {
   try {
     for (const action of [...userActions].reverse()) {
       if (action.actionField.length === 1 && action.actionField[0] === 'connector') {
-        if (action.oldValue && action.newValue) {
-          const oldValue = JSON.parse(action.oldValue);
-          const newValue = JSON.parse(action.newValue);
+        if (isMatchingActionValue(id, action.newValConnectorId, action.newValue)) {
+          return JSON.parse(action.newValue).fields;
+        }
 
-          if (newValue.id === id) {
-            return newValue.fields;
-          }
-
-          if (oldValue.id === id) {
-            return oldValue.fields;
-          }
+        if (isMatchingActionValue(id, action.oldValConnectorId, action.oldValue)) {
+          return JSON.parse(action.oldValue).fields;
         }
       }
     }
@@ -30,4 +26,27 @@ export const getConnectorFieldsFromUserActions = (id: string, userActions: CaseU
   } catch {
     return null;
   }
+};
+
+const isMatchingActionValue = (
+  id: string,
+  valueId: string | null,
+  encodedValue: string | null
+): encodedValue is string => {
+  try {
+    if (id === valueId && encodedValue != null) {
+      return true;
+    }
+
+    if (id === noneConnectorId && valueId === null && encodedValue != null) {
+      const decodedValue = JSON.parse(encodedValue);
+      if (decodedValue.type === ConnectorTypes.none) {
+        return true;
+      }
+    }
+  } catch (error) {
+    // just return false when an error occurs
+  }
+
+  return false;
 };
