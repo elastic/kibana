@@ -29,6 +29,9 @@ const SHOW_TOP = (fieldName: string) =>
   });
 
 interface Props {
+  /** When `Component` is used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality.
+   * When `Component` is used with `EuiContextMenu`, we pass EuiContextMenuItem to render the right style.
+   */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
   enablePopOver?: boolean;
   field: string;

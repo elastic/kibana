@@ -69,7 +69,7 @@ describe('show topN button', () => {
   });
 
   describe('tooltip', () => {
-    test('should tooltip by default', () => {
+    test('should show tooltip by default', () => {
       const wrapper = mount(
         <TestProviders>
           <ShowTopNButton {...defaultProps} />

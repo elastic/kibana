@@ -140,7 +140,7 @@ export const defaultCellActions: TGridCellAction[] = [
         }) && (
           <ShowTopNButton
             Component={Component}
-            enablePopOver={true}
+            enablePopOver
             data-test-subj="hover-actions-show-top-n"
             field={columnId}
             onClick={onClick}
