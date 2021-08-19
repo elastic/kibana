@@ -29,7 +29,9 @@ function TruncateLabelsOption({ disabled, value = null, setValue }: TruncateLabe
       display="rowCompressed"
       labelAppend={
         <EuiIconTip
-          content="Number of characters for labels positioned outside the chart."
+          content={i18n.translate('visTypePie.controls.truncateTooltip', {
+            defaultMessage: 'Number of characters for labels positioned outside the chart.',
+          })}
           position="top"
           type="iInCircle"
           color="subdued"

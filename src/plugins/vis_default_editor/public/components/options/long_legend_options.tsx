@@ -12,6 +12,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { SwitchOption } from './switch';
 
+const MAX_TRUNCATE_LINES = 5;
+const MIN_TRUNCATE_LINES = 1;
+
 export interface LongLegendOptionsProps {
   setValue: (paramName: 'maxLegendLines' | 'truncateLegend', value: boolean | number) => void;
   truncateLegend: boolean;
@@ -48,12 +51,16 @@ function LongLegendOptions({
         <EuiFieldNumber
           data-test-subj="timeSeriesEditorDataMaxLegendLines"
           value={maxLegendLines}
-          min={1}
-          max={5}
+          min={MIN_TRUNCATE_LINES}
+          max={MAX_TRUNCATE_LINES}
           fullWidth
           disabled={!Boolean(truncateLegend)}
           onChange={(e) => {
-            setValue('maxLegendLines', Number(e.target.value));
+            const val = Number(e.target.value);
+            setValue(
+              'maxLegendLines',
+              Math.min(MAX_TRUNCATE_LINES, Math.max(val, MIN_TRUNCATE_LINES))
+            );
           }}
         />
       </EuiFormRow>
