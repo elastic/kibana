@@ -18,7 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visualize',
     'header',
     'discover',
-    'tileMap',
     'visChart',
     'share',
     'timePicker',
@@ -27,11 +26,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const queryBar = getService('queryBar');
   const pieChart = getService('pieChart');
-  const inspector = getService('inspector');
   const retry = getService('retry');
   const elasticChart = getService('elasticChart');
   const kibanaServer = getService('kibanaServer');
-  const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   const enableNewChartLibraryDebug = async () => {
@@ -164,38 +161,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const headers = await PageObjects.discover.getColumnHeaders();
       // will be zero because the query inserted in the url doesn't match anything
       expect(headers.length).to.be(0);
-    });
-
-    it('Tile map with no changes will update with visualization changes', async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.timePicker.setHistoricalDataRange();
-
-      await dashboardAddPanel.addVisualization('Visualization TileMap');
-      await PageObjects.dashboard.saveDashboard('No local edits');
-
-      await dashboardPanelActions.openInspector();
-      const tileMapData = await inspector.getTableData();
-      await inspector.close();
-
-      await PageObjects.dashboard.switchToEditMode();
-      await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.clickEdit();
-
-      await PageObjects.tileMap.clickMapZoomIn();
-      await PageObjects.tileMap.clickMapZoomIn();
-      await PageObjects.tileMap.clickMapZoomIn();
-      await PageObjects.tileMap.clickMapZoomIn();
-
-      await PageObjects.visualize.saveVisualizationExpectSuccess('Visualization TileMap');
-
-      await PageObjects.header.clickDashboard();
-
-      await dashboardPanelActions.openInspector();
-      const changedTileMapData = await inspector.getTableData();
-      await inspector.close();
-      expect(changedTileMapData.length).to.not.equal(tileMapData.length);
     });
 
     const getUrlFromShare = async () => {

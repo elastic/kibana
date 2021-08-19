@@ -144,6 +144,8 @@ describe('getColumns', () => {
       },
       legendPosition: 'right',
       nestedLegend: false,
+      maxLegendLines: 1,
+      truncateLegend: false,
       palette: {
         name: 'default',
         type: 'palette',
