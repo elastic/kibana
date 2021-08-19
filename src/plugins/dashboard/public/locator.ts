@@ -86,7 +86,7 @@ export interface DashboardAppLocatorParams {
   /**
    * List of dashboard panels
    */
-  panels?: SavedDashboardPanel[] & SerializableRecord;
+  panels?: SavedDashboardPanel[];
 
   /**
    * Saved query ID
@@ -94,7 +94,9 @@ export interface DashboardAppLocatorParams {
   savedQuery?: string;
 }
 
-export type DashboardAppLocator = LocatorPublic<DashboardAppLocatorParams & SerializableRecord>;
+export type SerializableDashboardAppLocatorParams = DashboardAppLocatorParams & SerializableRecord;
+
+export type DashboardAppLocator = LocatorPublic<SerializableDashboardAppLocatorParams>;
 
 export interface DashboardAppLocatorDependencies {
   useHashedUrl: boolean;
@@ -103,11 +105,11 @@ export interface DashboardAppLocatorDependencies {
 
 export type ForwardedDashboardState = Omit<
   DashboardAppLocatorParams,
-  'dashboardId' | 'preserveSavedFilters' | 'useHash'
+  'dashboardId' | 'preserveSavedFilters' | 'useHash' | 'searchSessionId'
 >;
 
 export class DashboardAppLocatorDefinition
-  implements LocatorDefinition<DashboardAppLocatorParams & SerializableRecord> {
+  implements LocatorDefinition<SerializableDashboardAppLocatorParams> {
   public readonly id = DASHBOARD_APP_LOCATOR;
 
   constructor(protected readonly deps: DashboardAppLocatorDependencies) {}

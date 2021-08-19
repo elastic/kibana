@@ -90,7 +90,6 @@ describe('dashboard locator', () => {
       app: 'dashboards',
       path: `#/view/123?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))`,
       state: {
-        dashboardId: '123',
         filters: [
           {
             meta: {
@@ -151,7 +150,6 @@ describe('dashboard locator', () => {
       app: 'dashboards',
       path: `#/view/123?_g=(filters:!(),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&searchSessionId=__sessionSearchId__`,
       state: {
-        dashboardId: '123',
         filters: [],
         query: {
           language: 'kuery',
@@ -161,7 +159,6 @@ describe('dashboard locator', () => {
           pause: false,
           value: 300,
         },
-        searchSessionId: '__sessionSearchId__',
         timeRange: {
           from: 'now-15m',
           mode: 'relative',
@@ -202,16 +199,7 @@ describe('dashboard locator', () => {
       app: 'dashboards',
       path: `#/create?_g=()`,
       state: {
-        panels: {
-          '0': {
-            explicitInput: {
-              id: undefined,
-            },
-            gridData: undefined,
-            panelRefName: undefined,
-            type: undefined,
-          },
-        },
+        panels: [{ fakePanelContent: 'fakePanelContent' }],
       },
     });
   });
@@ -301,7 +289,6 @@ describe('dashboard locator', () => {
 
       expect(location1.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=(filters:!())"`);
       expect(location1.state).toMatchObject({
-        dashboardId: 'dashboard1',
         filters: [
           {
             meta: {
@@ -333,7 +320,6 @@ describe('dashboard locator', () => {
 
       expect(location2.path).toMatchInlineSnapshot(`"#/view/dashboard2?_g=(filters:!())"`);
       expect(location2.state).toMatchObject({
-        dashboardId: 'dashboard2',
         filters: [
           {
             meta: {
@@ -377,7 +363,6 @@ describe('dashboard locator', () => {
 
       expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=(filters:!())"`);
       expect(location.state).toMatchObject({
-        dashboardId: 'dashboard1',
         filters: [
           {
             meta: {
@@ -412,9 +397,7 @@ describe('dashboard locator', () => {
 
       expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=(filters:!())"`);
       expect(location.state).toMatchObject({
-        dashboardId: 'dashboard1',
         filters: [],
-        preserveSavedFilters: false,
       });
     });
 
@@ -434,9 +417,7 @@ describe('dashboard locator', () => {
       });
 
       expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=()"`);
-      expect(location.state).toMatchObject({
-        dashboardId: 'dashboard1',
-      });
+      expect(location.state).toMatchObject({});
     });
 
     test('can turn off preserving filters', async () => {
@@ -458,7 +439,6 @@ describe('dashboard locator', () => {
 
       expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=(filters:!())"`);
       expect(location.state).toMatchObject({
-        dashboardId: 'dashboard1',
         filters: [
           {
             meta: {
@@ -471,7 +451,6 @@ describe('dashboard locator', () => {
             },
           },
         ],
-        preserveSavedFilters: false,
       });
     });
   });
