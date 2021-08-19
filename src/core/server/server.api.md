@@ -1603,8 +1603,6 @@ export interface RegisterDeprecationsConfig {
 // @public
 export type RequestHandler<P = unknown, Q = unknown, B = unknown, Context extends RequestHandlerContext = RequestHandlerContext, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory> = (context: Context, request: KibanaRequest<P, Q, B, Method>, response: ResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "LegacyScopedClusterClient"
-//
 // @public
 export interface RequestHandlerContext {
     // (undocumented)
