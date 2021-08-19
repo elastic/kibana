@@ -10,9 +10,7 @@ import { joinWithDash } from './utils';
 
 interface ConstructorOptions {
   /**
-   * Prepends a relative resource name (defined in the code) with
-   * a full resource prefix, which starts with '.alerts' and can
-   * optionally include a user-defined part in it.
+   * Prepends a relative resource name with the resource prefix.
    * @example 'security.alerts' => '.alerts-security.alerts'
    */
   getResourceName(relativeName: string): string;
@@ -45,7 +43,7 @@ export class IndexInfo {
   public readonly indexOptions: IndexOptions;
 
   /**
-   * Base index name, prefixed with the full resource prefix.
+   * Base index name, prefixed with the resource prefix.
    * @example '.alerts-security.alerts'
    */
   public readonly baseName: string;

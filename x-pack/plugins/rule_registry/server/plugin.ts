@@ -19,7 +19,7 @@ import {
 import { PluginStartContract as AlertingStart } from '../../alerting/server';
 import { SecurityPluginSetup } from '../../security/server';
 
-import { INDEX_PREFIX, RuleRegistryPluginConfig } from './config';
+import { RuleRegistryPluginConfig } from './config';
 import { RuleDataPluginService } from './rule_data_plugin_service';
 import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
 import { AlertsClient } from './alert_data_client/alerts_client';
@@ -100,7 +100,6 @@ export class RuleRegistryPlugin
     this.ruleDataService = new RuleDataPluginService({
       logger,
       isWriteEnabled: isWriteEnabled(this.config, this.legacyConfig),
-      index: INDEX_PREFIX,
       getClusterClient: async () => {
         const deps = await startDependencies;
         return deps.core.elasticsearch.client.asInternalUser;
