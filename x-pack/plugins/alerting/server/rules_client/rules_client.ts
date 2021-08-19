@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { omit, isEqual, map, uniq, pick, truncate, trim } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -33,6 +34,7 @@ import {
   AlertExecutionStatusValues,
   AlertNotifyWhenType,
   AlertTypeParams,
+  ResolvedSanitizedRule,
 } from '../types';
 import {
   validateAlertTypeParams,
@@ -296,11 +298,13 @@ export class RulesClient {
     );
 
     const createTime = Date.now();
+    const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
     const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
 
     const rawAlert: RawAlert = {
       ...data,
       ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
+      legacyId,
       actions,
       createdBy: username,
       updatedBy: username,
@@ -409,6 +413,52 @@ export class RulesClient {
       result.attributes,
       result.references
     );
+  }
+
+  public async resolve<Params extends AlertTypeParams = never>({
+    id,
+  }: {
+    id: string;
+  }): Promise<ResolvedSanitizedRule<Params>> {
+    const {
+      saved_object: result,
+      ...resolveResponse
+    } = await this.unsecuredSavedObjectsClient.resolve<RawAlert>('alert', id);
+    try {
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: result.attributes.alertTypeId,
+        consumer: result.attributes.consumer,
+        operation: ReadOperations.Get,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.RESOLVE,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.RESOLVE,
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    const rule = this.getAlertFromRaw<Params>(
+      result.id,
+      result.attributes.alertTypeId,
+      result.attributes,
+      result.references
+    );
+
+    return {
+      ...rule,
+      ...resolveResponse,
+    };
   }
 
   public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
@@ -1431,6 +1481,10 @@ export class RulesClient {
     );
   }
 
+  public getSpaceId(): string | undefined {
+    return this.spaceId;
+  }
+
   private async scheduleAlert(id: string, alertTypeId: string, schedule: IntervalSchedule) {
     return await this.taskManager.schedule({
       taskType: `alerting:${alertTypeId}`,
@@ -1488,36 +1542,29 @@ export class RulesClient {
       notifyWhen,
       scheduledTaskId,
       params,
-      ...rawAlert
+      legacyId, // exclude from result because it is an internal variable
+      executionStatus,
+      schedule,
+      actions,
+      ...partialRawAlert
     }: Partial<RawAlert>,
     references: SavedObjectReference[] | undefined
   ): PartialAlert<Params> {
-    // Not the prettiest code here, but if we want to use most of the
-    // alert fields from the rawAlert using `...rawAlert` kind of access, we
-    // need to specifically delete the executionStatus as it's a different type
-    // in RawAlert and Alert.  Probably next time we need to do something similar
-    // here, we should look at redesigning the implementation of this method.
-    const rawAlertWithoutExecutionStatus: Partial<Omit<RawAlert, 'executionStatus'>> = {
-      ...rawAlert,
-    };
-    delete rawAlertWithoutExecutionStatus.executionStatus;
-    const executionStatus = alertExecutionStatusFromRaw(this.logger, id, rawAlert.executionStatus);
-
     return {
       id,
       notifyWhen,
-      ...rawAlertWithoutExecutionStatus,
+      ...partialRawAlert,
       // we currently only support the Interval Schedule type
       // Once we support additional types, this type signature will likely change
-      schedule: rawAlert.schedule as IntervalSchedule,
-      actions: rawAlert.actions
-        ? this.injectReferencesIntoActions(id, rawAlert.actions, references || [])
-        : [],
+      schedule: schedule as IntervalSchedule,
+      actions: actions ? this.injectReferencesIntoActions(id, actions, references || []) : [],
       params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),
-      ...(executionStatus ? { executionStatus } : {}),
+      ...(executionStatus
+        ? { executionStatus: alertExecutionStatusFromRaw(this.logger, id, executionStatus) }
+        : {}),
     };
   }
 

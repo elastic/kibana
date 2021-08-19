@@ -31,8 +31,10 @@ describe('buildSignal', () => {
     const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
     delete doc._source.event;
     const rule = getRulesSchemaMock();
+    const reason = 'signal reasonable reason';
+
     const signal = {
-      ...buildSignal([doc], rule),
+      ...buildSignal([doc], rule, reason),
       ...additionalSignalFields(doc),
     };
     const expected: Signal = {
@@ -62,6 +64,7 @@ describe('buildSignal', () => {
         },
       ],
       original_time: '2020-04-20T21:27:45.000Z',
+      reason: 'signal reasonable reason',
       status: 'open',
       rule: {
         author: [],
@@ -112,8 +115,9 @@ describe('buildSignal', () => {
       module: 'system',
     };
     const rule = getRulesSchemaMock();
+    const reason = 'signal reasonable reason';
     const signal = {
-      ...buildSignal([doc], rule),
+      ...buildSignal([doc], rule, reason),
       ...additionalSignalFields(doc),
     };
     const expected: Signal = {
@@ -143,6 +147,7 @@ describe('buildSignal', () => {
         },
       ],
       original_time: '2020-04-20T21:27:45.000Z',
+      reason: 'signal reasonable reason',
       original_event: {
         action: 'socket_opened',
         dataset: 'socket',

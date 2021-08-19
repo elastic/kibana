@@ -21,7 +21,7 @@ export class HelloWorldPlugin implements Plugin<void, void, SetupDeps> {
       id: 'helloWorld',
       title: 'Hello World',
       async mount({ element }: AppMountParameters) {
-        ReactDOM.render(<div id="helloWorldDiv">Hello World!</div>, element);
+        ReactDOM.render(<div data-test-subj="helloWorldDiv">Hello World!</div>, element);
         return () => ReactDOM.unmountComponentAtNode(element);
       },
     });

@@ -7,12 +7,12 @@
 
 import React from 'react';
 
-import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../../common/types';
+import { EnrichedDeprecationInfo, ESUpgradeStatus } from '../../../common/types';
 import { ResponseError } from '../lib/api';
 
 export interface UpgradeAssistantTabProps {
   alertBanner?: React.ReactNode;
-  checkupData?: UpgradeAssistantStatus | null;
+  checkupData?: ESUpgradeStatus | null;
   deprecations?: EnrichedDeprecationInfo[];
   refreshCheckupData: () => void;
   error: ResponseError | null;
@@ -46,3 +46,14 @@ export enum TelemetryState {
 }
 
 export type EsTabs = 'cluster' | 'indices';
+
+export interface DeprecationLoggingPreviewProps {
+  isDeprecationLogIndexingEnabled: boolean;
+  onlyDeprecationLogWritingEnabled: boolean;
+  isLoading: boolean;
+  isUpdating: boolean;
+  fetchError: ResponseError | null;
+  updateError: ResponseError | undefined;
+  resendRequest: () => void;
+  toggleLogging: () => void;
+}

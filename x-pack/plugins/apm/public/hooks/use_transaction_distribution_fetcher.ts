@@ -5,108 +5,154 @@
  * 2.0.
  */
 
-import { flatten, omit, isEmpty } from 'lodash';
-import { useHistory } from 'react-router-dom';
-import { useFetcher } from './use_fetcher';
-import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
-import { maybe } from '../../common/utils/maybe';
-import { APIReturnType } from '../services/rest/createCallApmApi';
-import { useUrlParams } from '../context/url_params_context/use_url_params';
-import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
+import { useRef, useState } from 'react';
+import type { Subscription } from 'rxjs';
+import {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../src/plugins/data/public';
+import type {
+  HistogramItem,
+  SearchServiceParams,
+  SearchServiceValue,
+} from '../../common/search_strategies/correlations/types';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { ApmPluginStartDeps } from '../plugin';
 
-type APIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/distribution'>;
+interface RawResponse {
+  percentileThresholdValue?: number;
+  took: number;
+  values: SearchServiceValue[];
+  overallHistogram: HistogramItem[];
+  log: string[];
+  ccsWarning: boolean;
+}
 
-const INITIAL_DATA = {
-  buckets: [] as APIResponse['buckets'],
-  noHits: true,
-  bucketSize: 0,
-};
+interface TransactionDistributionFetcherState {
+  error?: Error;
+  isComplete: boolean;
+  isRunning: boolean;
+  loaded: number;
+  ccsWarning: RawResponse['ccsWarning'];
+  log: RawResponse['log'];
+  transactionDistribution?: RawResponse['overallHistogram'];
+  percentileThresholdValue?: RawResponse['percentileThresholdValue'];
+  timeTook?: number;
+  total: number;
+}
 
-export function useTransactionDistributionFetcher({
-  transactionName,
-}: {
-  transactionName: string;
-}) {
-  const { serviceName, transactionType } = useApmServiceContext();
-
+export function useTransactionDistributionFetcher() {
   const {
-    urlParams: { environment, kuery, start, end, transactionId, traceId },
-  } = useUrlParams();
+    services: { data },
+  } = useKibana<ApmPluginStartDeps>();
 
-  const history = useHistory();
-  const { data = INITIAL_DATA, status, error } = useFetcher(
-    async (callApmApi) => {
-      if (serviceName && start && end && transactionType && transactionName) {
-        const response = await callApmApi({
-          endpoint:
-            'GET /api/apm/services/{serviceName}/transactions/charts/distribution',
-          params: {
-            path: {
-              serviceName,
-            },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              transactionType,
-              transactionName,
-              transactionId,
-              traceId,
-            },
-          },
-        });
+  const [
+    fetchState,
+    setFetchState,
+  ] = useState<TransactionDistributionFetcherState>({
+    isComplete: false,
+    isRunning: false,
+    loaded: 0,
+    ccsWarning: false,
+    log: [],
+    total: 100,
+  });
 
-        const selectedSample =
-          transactionId && traceId
-            ? flatten(response.buckets.map((bucket) => bucket.samples)).find(
-                (sample) =>
-                  sample.transactionId === transactionId &&
-                  sample.traceId === traceId
-              )
-            : undefined;
+  const abortCtrl = useRef(new AbortController());
+  const searchSubscription$ = useRef<Subscription>();
 
-        if (!selectedSample) {
-          // selected sample was not found. select a new one:
-          // sorted by total number of requests, but only pick
-          // from buckets that have samples
-          const bucketsSortedByCount = response.buckets
-            .filter((bucket) => !isEmpty(bucket.samples))
-            .sort((bucket) => bucket.count);
+  function setResponse(response: IKibanaSearchResponse<RawResponse>) {
+    setFetchState((prevState) => ({
+      ...prevState,
+      isRunning: response.isRunning || false,
+      ccsWarning: response.rawResponse?.ccsWarning ?? false,
+      histograms: response.rawResponse?.values ?? [],
+      log: response.rawResponse?.log ?? [],
+      loaded: response.loaded!,
+      total: response.total!,
+      timeTook: response.rawResponse.took,
+      // only set percentileThresholdValue and overallHistogram once it's repopulated on a refresh,
+      // otherwise the consuming chart would flicker with an empty state on reload.
+      ...(response.rawResponse?.percentileThresholdValue !== undefined &&
+      response.rawResponse?.overallHistogram !== undefined
+        ? {
+            transactionDistribution: response.rawResponse?.overallHistogram,
+            percentileThresholdValue:
+              response.rawResponse?.percentileThresholdValue,
+          }
+        : {}),
+    }));
+  }
 
-          const preferredSample = maybe(bucketsSortedByCount[0]?.samples[0]);
+  const startFetch = (
+    params: Omit<SearchServiceParams, 'analyzeCorrelations'>
+  ) => {
+    setFetchState((prevState) => ({
+      ...prevState,
+      error: undefined,
+      isComplete: false,
+    }));
+    searchSubscription$.current?.unsubscribe();
+    abortCtrl.current.abort();
+    abortCtrl.current = new AbortController();
 
-          history.replace({
-            ...history.location,
-            search: fromQuery({
-              ...omit(toQuery(history.location.search), [
-                'traceId',
-                'transactionId',
-              ]),
-              ...preferredSample,
-            }),
-          });
-        }
+    const searchServiceParams: SearchServiceParams = {
+      ...params,
+      analyzeCorrelations: false,
+    };
+    const req = { params: searchServiceParams };
 
-        return response;
-      }
-    },
-    // the histogram should not be refetched if the transactionId or traceId changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      environment,
-      kuery,
-      serviceName,
-      start,
-      end,
-      transactionType,
-      transactionName,
-    ]
-  );
+    // Submit the search request using the `data.search` service.
+    searchSubscription$.current = data.search
+      .search<IKibanaSearchRequest, IKibanaSearchResponse<RawResponse>>(req, {
+        strategy: 'apmCorrelationsSearchStrategy',
+        abortSignal: abortCtrl.current.signal,
+      })
+      .subscribe({
+        next: (res: IKibanaSearchResponse<RawResponse>) => {
+          setResponse(res);
+          if (isCompleteResponse(res)) {
+            searchSubscription$.current?.unsubscribe();
+            setFetchState((prevState) => ({
+              ...prevState,
+              isRunnning: false,
+              isComplete: true,
+            }));
+          } else if (isErrorResponse(res)) {
+            searchSubscription$.current?.unsubscribe();
+            setFetchState((prevState) => ({
+              ...prevState,
+              error: (res as unknown) as Error,
+              setIsRunning: false,
+            }));
+          }
+        },
+        error: (error: Error) => {
+          setFetchState((prevState) => ({
+            ...prevState,
+            error,
+            setIsRunning: false,
+          }));
+        },
+      });
+  };
+
+  const cancelFetch = () => {
+    searchSubscription$.current?.unsubscribe();
+    searchSubscription$.current = undefined;
+    abortCtrl.current.abort();
+    setFetchState((prevState) => ({
+      ...prevState,
+      setIsRunning: false,
+    }));
+  };
 
   return {
-    distributionData: data,
-    distributionStatus: status,
-    distributionError: error,
+    ...fetchState,
+    progress: fetchState.loaded / fetchState.total,
+    startFetch,
+    cancelFetch,
   };
 }

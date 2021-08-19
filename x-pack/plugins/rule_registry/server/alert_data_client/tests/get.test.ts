@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ALERT_OWNER, ALERT_STATUS, RULE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_CONSUMER,
+  ALERT_STATUS,
+  SPACE_IDS,
+  ALERT_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -36,6 +41,13 @@ beforeEach(() => {
   alertingAuthMock.getAuthorizationFilter.mockImplementation(async () =>
     Promise.resolve({ filter: [] })
   );
+
+  // @ts-expect-error
+  alertingAuthMock.getAugmentedRuleTypesWithAuthorization.mockImplementation(async () => {
+    const authorizedRuleTypes = new Set();
+    authorizedRuleTypes.add({ producer: 'apm' });
+    return Promise.resolve({ authorizedRuleTypes });
+  });
 
   alertingAuthMock.ensureAuthorized.mockImplementation(
     // @ts-expect-error
@@ -85,9 +97,9 @@ describe('get()', () => {
                 _seq_no: 362,
                 _primary_term: 2,
                 _source: {
-                  'rule.id': 'apm.error_rate',
+                  [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
-                  [ALERT_OWNER]: 'apm',
+                  [ALERT_RULE_CONSUMER]: 'apm',
                   [ALERT_STATUS]: 'open',
                   [SPACE_IDS]: ['test_default_space_id'],
                 },
@@ -100,13 +112,13 @@ describe('get()', () => {
     const result = await alertsClient.get({ id: '1', index: '.alerts-observability-apm' });
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "kibana.alert.owner": "apm",
+        "kibana.alert.rule.consumer": "apm",
+        "kibana.alert.rule.rule_type_id": "apm.error_rate",
         "kibana.alert.status": "open",
         "kibana.space_ids": Array [
           "test_default_space_id",
         ],
         "message": "hello world 1",
-        "rule.id": "apm.error_rate",
       }
     `);
     expect(esClientMock.search).toHaveBeenCalledTimes(1);
@@ -114,6 +126,14 @@ describe('get()', () => {
       Array [
         Object {
           "body": Object {
+            "_source": undefined,
+            "aggs": undefined,
+            "fields": Array [
+              "kibana.alert.rule.rule_type_id",
+              "kibana.alert.rule.consumer",
+              "kibana.alert.workflow_status",
+              "kibana.space_ids",
+            ],
             "query": Object {
               "bool": Object {
                 "filter": Array [
@@ -141,6 +161,7 @@ describe('get()', () => {
                 "should": Array [],
               },
             },
+            "size": undefined,
             "sort": Array [
               Object {
                 "@timestamp": Object {
@@ -149,6 +170,7 @@ describe('get()', () => {
                 },
               },
             ],
+            "track_total_hits": undefined,
           },
           "ignore_unavailable": true,
           "index": ".alerts-observability-apm",
@@ -184,9 +206,9 @@ describe('get()', () => {
                 _seq_no: 362,
                 _primary_term: 2,
                 _source: {
-                  'rule.id': 'apm.error_rate',
+                  [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
-                  [ALERT_OWNER]: 'apm',
+                  [ALERT_RULE_CONSUMER]: 'apm',
                   [ALERT_STATUS]: 'open',
                   [SPACE_IDS]: ['test_default_space_id'],
                 },
@@ -235,8 +257,8 @@ describe('get()', () => {
                 _id: fakeAlertId,
                 _index: indexName,
                 _source: {
-                  [RULE_ID]: fakeRuleTypeId,
-                  [ALERT_OWNER]: 'apm',
+                  [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
+                  [ALERT_RULE_CONSUMER]: 'apm',
                   [ALERT_STATUS]: 'open',
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
@@ -247,9 +269,9 @@ describe('get()', () => {
       })
     );
 
-    await expect(alertsClient.get({ id: fakeAlertId, index: '.alerts-observability-apm' })).rejects
-      .toThrowErrorMatchingInlineSnapshot(`
-            "Unable to retrieve alert details for alert with id of \\"myfakeid1\\" or with query \\"null\\" and operation get 
+    await expect(alertsClient.get({ id: fakeAlertId, index: '.alerts-observability-apm.alerts' }))
+      .rejects.toThrowErrorMatchingInlineSnapshot(`
+            "Unable to retrieve alert details for alert with id of \\"myfakeid1\\" or with query \\"undefined\\" and operation get 
             Error: Error: Unauthorized for fake.rule and apm"
           `);
 
@@ -276,7 +298,7 @@ describe('get()', () => {
     await expect(
       alertsClient.get({ id: 'NoxgpHkBqbdrfX07MqXV', index: '.alerts-observability-apm' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-            "Unable to retrieve alert details for alert with id of \\"NoxgpHkBqbdrfX07MqXV\\" or with query \\"null\\" and operation get 
+            "Unable to retrieve alert details for alert with id of \\"NoxgpHkBqbdrfX07MqXV\\" or with query \\"undefined\\" and operation get 
             Error: Error: something went wrong"
           `);
   });
@@ -307,9 +329,9 @@ describe('get()', () => {
                   _seq_no: 362,
                   _primary_term: 2,
                   _source: {
-                    'rule.id': 'apm.error_rate',
+                    [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                     message: 'hello world 1',
-                    [ALERT_OWNER]: 'apm',
+                    [ALERT_RULE_CONSUMER]: 'apm',
                     [ALERT_STATUS]: 'open',
                     [SPACE_IDS]: ['test_default_space_id'],
                   },
@@ -330,13 +352,13 @@ describe('get()', () => {
 
       expect(result).toMatchInlineSnapshot(`
         Object {
-          "kibana.alert.owner": "apm",
+          "kibana.alert.rule.consumer": "apm",
+          "kibana.alert.rule.rule_type_id": "apm.error_rate",
           "kibana.alert.status": "open",
           "kibana.space_ids": Array [
             "test_default_space_id",
           ],
           "message": "hello world 1",
-          "rule.id": "apm.error_rate",
         }
       `);
     });

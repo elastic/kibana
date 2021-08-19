@@ -46,7 +46,14 @@ export async function getLensServices(
   startDependencies: LensPluginStartDependencies,
   attributeService: () => Promise<LensAttributeService>
 ): Promise<LensAppServices> {
-  const { data, navigation, embeddable, savedObjectsTagging, usageCollection } = startDependencies;
+  const {
+    data,
+    navigation,
+    embeddable,
+    savedObjectsTagging,
+    usageCollection,
+    fieldFormats,
+  } = startDependencies;
 
   const storage = new Storage(localStorage);
   const stateTransfer = embeddable?.getStateTransfer();
@@ -56,6 +63,7 @@ export async function getLensServices(
     data,
     storage,
     navigation,
+    fieldFormats,
     stateTransfer,
     usageCollection,
     savedObjectsTagging,
@@ -139,6 +147,7 @@ export async function mountApp(
     if (stateTransfer && props?.input) {
       const { input, isCopied } = props;
       stateTransfer.navigateToWithEmbeddablePackage(embeddableEditorIncomingState?.originatingApp, {
+        path: embeddableEditorIncomingState?.originatingPath,
         state: {
           embeddableId: isCopied ? undefined : embeddableEditorIncomingState.embeddableId,
           type: LENS_EMBEDDABLE_TYPE,
@@ -147,7 +156,9 @@ export async function mountApp(
         },
       });
     } else {
-      coreStart.application.navigateToApp(embeddableEditorIncomingState?.originatingApp);
+      coreStart.application.navigateToApp(embeddableEditorIncomingState?.originatingApp, {
+        path: embeddableEditorIncomingState?.originatingPath,
+      });
     }
   };
   const initialContext =
