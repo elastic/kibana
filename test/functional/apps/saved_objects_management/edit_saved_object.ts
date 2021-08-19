@@ -53,6 +53,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await button.focus();
     await delay(10);
     await button.click();
+    // Allow some time for the transition/animations to occur before assuming the click is done
+    await delay(10);
   };
 
   describe('saved objects edition page', () => {
