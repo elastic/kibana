@@ -28,6 +28,9 @@
       "consumer": {
         "type": "keyword"
       },
+      "legacyId": {
+        "type": "keyword"
+      },
       "actions": {
         "type": "nested",
         "properties": {
