@@ -128,5 +128,5 @@ export const userActionsMigrations = {
   ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
     return addOwnerToSO(doc);
   },
-  '7.15.0': userActionsConnectorIdMigration,
+  '7.16.0': userActionsConnectorIdMigration,
 };

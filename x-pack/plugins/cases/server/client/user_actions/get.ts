@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponse } from 'kibana/server';
+import { SavedObjectReference, SavedObjectsFindResponse } from 'kibana/server';
 import {
   CaseUserActionsResponse,
   CaseUserActionsResponseRt,
@@ -55,16 +55,15 @@ export const get = async (
   }
 };
 
-function extractAttributesWithoutSubCases(
+export function extractAttributesWithoutSubCases(
   userActions: SavedObjectsFindResponse<CaseUserActionResponse>
 ): CaseUserActionsResponse {
   // exclude user actions relating to sub cases from the results
+  const hasSubCaseReference = (references: SavedObjectReference[]) =>
+    references.find((ref) => ref.type === SUB_CASE_SAVED_OBJECT && ref.name === SUB_CASE_REF_NAME);
+
   return userActions.saved_objects
-    .filter((so) =>
-      so.references.some(
-        (ref) => ref.type === SUB_CASE_SAVED_OBJECT && ref.name === SUB_CASE_REF_NAME
-      )
-    )
+    .filter((so) => !hasSubCaseReference(so.references))
     .map((so) => so.attributes);
 }
 
