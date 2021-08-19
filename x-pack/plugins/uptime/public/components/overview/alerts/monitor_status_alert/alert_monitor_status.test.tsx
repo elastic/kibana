@@ -37,7 +37,7 @@ describe('alert monitor status component', () => {
       expect(await screen.findByText('Add filter')).toBeInTheDocument();
       expect(await screen.findByText('Availability')).toBeInTheDocument();
       expect(await screen.findByText('Status check')).toBeInTheDocument();
-      expect(await screen.findByText('matching monitors are up in')).toBeInTheDocument();
+      expect(await screen.findByText('any monitor is up in')).toBeInTheDocument();
       expect(await screen.findByText('days')).toBeInTheDocument();
       expect(await screen.findByText('hours')).toBeInTheDocument();
       expect(await screen.findByText('within the last')).toBeInTheDocument();
