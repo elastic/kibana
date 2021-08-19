@@ -5,10 +5,41 @@
  * 2.0.
  */
 
-import { RoleType } from './create_role';
+import { RoleType } from '../helpers/create_role';
 
 export const readOnlyUserRole: RoleType = {
-  elasticsearch: { cluster: [], indices: [], run_as: [] },
+  elasticsearch: {
+    run_as: [],
+    cluster: [],
+    indices: [
+      // apm
+      {
+        names: [
+          'apm-*',
+          'logs-apm*',
+          'metrics-apm*',
+          'traces-apm*',
+          'observability-annotations',
+        ],
+        privileges: ['read', 'view_index_metadata'],
+      },
+      // logs
+      {
+        names: ['logs-*', 'filebeat-*', 'kibana_sample_data_logs*'],
+        privileges: ['read', 'view_index_metadata'],
+      },
+      // metrics
+      {
+        names: ['metrics-*', 'metricbeat-*'],
+        privileges: ['read', 'view_index_metadata'],
+      },
+      // uptime
+      {
+        names: ['heartbeat-*', 'synthetics-*'],
+        privileges: ['read', 'view_index_metadata'],
+      },
+    ],
+  },
   kibana: [
     {
       base: [],
