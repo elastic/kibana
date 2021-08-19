@@ -128,7 +128,7 @@ export function FailedTransactionsCorrelations({
   > = useMemo(
     () => [
       {
-        width: '116px',
+        width: '80px',
         field: 'normalizedScore',
         name: (
           <>
