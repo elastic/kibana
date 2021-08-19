@@ -7,6 +7,8 @@
 
 import type { ReactElement } from 'react';
 
+import type { CoreStart } from 'src/core/public';
+
 import type { CopyToSpaceFlyoutProps } from '../copy_saved_objects_to_space';
 import type {
   LegacyUrlConflictProps,
@@ -14,7 +16,7 @@ import type {
 } from '../share_saved_objects_to_space';
 import type { SpaceAvatarProps } from '../space_avatar';
 import type { SpaceListProps } from '../space_list';
-import type { SpacesContextProps } from '../spaces_context';
+import type { SpacesContextProps, SpacesReactContextValue } from '../spaces_context';
 
 /**
  * Function that returns a promise for a lazy-loadable component.
@@ -50,6 +52,10 @@ export interface SpacesApiUi {
    * location_. Default value is 'object'.
    */
   redirectLegacyUrl: (path: string, objectNoun?: string) => Promise<void>;
+  /**
+   * Helper function to easily access the Spaces React Context provider.
+   */
+  useSpaces<Services extends Partial<CoreStart>>(): SpacesReactContextValue<Services>;
 }
 
 /**

@@ -6,5 +6,5 @@
  */
 
 export { useSpaces } from './context';
-export type { SpacesContextProps } from './types';
+export type { SpacesContextProps, SpacesReactContextValue } from './types';
 export { getSpacesContextProviderWrapper } from './wrapper';

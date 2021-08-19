@@ -13,18 +13,16 @@ import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';
 import type { SpacesData } from '../types';
 
-export type KibanaServices = Partial<CoreStart>;
-
-export interface SpacesReactContextValue<Services extends KibanaServices> {
+export interface SpacesReactContextValue<Services extends Partial<CoreStart>> {
   readonly spacesManager: SpacesManager;
   readonly spacesDataPromise: Promise<SpacesData>;
   readonly services: Services;
 }
 
-export interface SpacesReactContext<T extends KibanaServices> {
-  value: SpacesReactContextValue<T>;
+export interface SpacesReactContext<Services extends Partial<CoreStart>> {
+  value: SpacesReactContextValue<Services>;
   Provider: React.FC;
-  Consumer: React.Consumer<SpacesReactContextValue<T>>;
+  Consumer: React.Consumer<SpacesReactContextValue<Services>>;
 }
 
 export interface InternalProps {

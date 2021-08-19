@@ -30,7 +30,7 @@ export type { SpaceAvatarProps } from './space_avatar';
 
 export type { SpaceListProps } from './space_list';
 
-export type { SpacesContextProps } from './spaces_context';
+export type { SpacesContextProps, SpacesReactContextValue } from './spaces_context';
 
 export type { LazyComponentFn, SpacesApiUi, SpacesApiUiComponent } from './ui_api';
 
