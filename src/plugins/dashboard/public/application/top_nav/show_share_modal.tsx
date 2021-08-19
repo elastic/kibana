@@ -19,7 +19,7 @@ import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator'
 import { TimeRange } from '../../services/data';
 import { setStateToKbnUrl, unhashUrl } from '../../services/kibana_utils';
 import { SharePluginStart } from '../../services/share';
-import { DashboardAppCapabilities, DashboardOptions, DashboardState } from '../../types';
+import { DashboardAppCapabilities, DashboardState } from '../../types';
 import { dashboardUrlParams } from '../dashboard_router';
 import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
 
@@ -118,7 +118,6 @@ export function ShowShareModal({
 
   const locatorParams: DashboardAppLocatorParams = {
     ...rawDashboardState,
-    options: rawDashboardState.options as SerializableRecord & DashboardOptions,
     panels: rawDashboardState.panels as SerializableRecord & SavedDashboardPanel[],
     timeRange,
     refreshInterval: undefined, // We don't share refresh interval externally

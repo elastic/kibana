@@ -34,6 +34,7 @@ import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
 import { IKbnUrlStateStorage } from './services/kibana_utils';
 import { DashboardContainer, DashboardSavedObject } from '.';
 import { VisualizationsStart } from '../../visualizations/public';
+import { DashboardAppLocatorParams } from './locator';
 
 export { SavedDashboardPanel };
 
@@ -122,6 +123,8 @@ export type DashboardBuildContext = Pick<
   query: DashboardAppServices['data']['query'];
   search: DashboardAppServices['data']['search'];
   notifications: DashboardAppServices['core']['notifications'];
+
+  locatorState?: DashboardAppLocatorParams;
 
   history: History;
   kibanaVersion: string;

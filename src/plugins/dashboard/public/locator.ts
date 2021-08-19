@@ -11,8 +11,6 @@ import { flow } from 'lodash';
 import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
 import type { LocatorDefinition, LocatorPublic } from '../../share/public';
 import type { SavedDashboardPanel } from '../common/types';
-import type { DashboardPanelMap } from './types';
-import { convertSavedDashboardPanelToPanelState } from '../common/embeddable/embeddable_saved_object_converters';
 import { esFilters } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { ViewMode } from '../../embeddable/public';
@@ -34,7 +32,7 @@ const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
 
 export const DASHBOARD_APP_LOCATOR = 'DASHBOARD_APP_LOCATOR';
 
-export interface DashboardAppLocatorParams extends SerializableRecord {
+export interface DashboardAppLocatorParams {
   /**
    * If given, the dashboard saved object with this id will be loaded. If not given,
    * a new, unsaved dashboard will be loaded up.
@@ -96,28 +94,37 @@ export interface DashboardAppLocatorParams extends SerializableRecord {
   savedQuery?: string;
 }
 
-export type DashboardAppLocator = LocatorPublic<DashboardAppLocatorParams>;
+export type DashboardAppLocator = LocatorPublic<DashboardAppLocatorParams & SerializableRecord>;
 
 export interface DashboardAppLocatorDependencies {
   useHashedUrl: boolean;
   getDashboardFilterFields: (dashboardId: string) => Promise<Filter[]>;
 }
 
-export type ForwardedDashboardState = Omit<DashboardAppLocatorParams, 'panels'> & {
-  panels?: DashboardPanelMap;
-};
+export type ForwardedDashboardState = Omit<
+  DashboardAppLocatorParams,
+  'dashboardId' | 'preserveSavedFilters' | 'useHash'
+>;
 
-export class DashboardAppLocatorDefinition implements LocatorDefinition<DashboardAppLocatorParams> {
+export class DashboardAppLocatorDefinition
+  implements LocatorDefinition<DashboardAppLocatorParams & SerializableRecord> {
   public readonly id = DASHBOARD_APP_LOCATOR;
 
   constructor(protected readonly deps: DashboardAppLocatorDependencies) {}
 
   public readonly getLocation = async (params: DashboardAppLocatorParams) => {
-    const useHash = params.useHash ?? this.deps.useHashedUrl;
-    const hash = params.dashboardId ? `view/${params.dashboardId}` : `create`;
+    const {
+      filters,
+      useHash: paramsUseHash,
+      preserveSavedFilters,
+      dashboardId,
+      ...restParams
+    } = params;
+    const useHash = paramsUseHash ?? this.deps.useHashedUrl;
+    const hash = dashboardId ? `view/${dashboardId}` : `create`;
 
     const getSavedFiltersFromDestinationDashboardIfNeeded = async (): Promise<Filter[]> => {
-      if (params.preserveSavedFilters === false) return [];
+      if (preserveSavedFilters === false) return [];
       if (!params.dashboardId) return [];
       try {
         return await this.deps.getDashboardFilterFields(params.dashboardId);
@@ -128,7 +135,6 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       }
     };
 
-    const { filters, panels, ...restParams } = params;
     const state: ForwardedDashboardState = restParams;
 
     // leave filters `undefined` if no filters was applied
@@ -137,16 +143,6 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       ...(await getSavedFiltersFromDestinationDashboardIfNeeded()),
       ...params.filters,
     ];
-
-    const hasPanels = Boolean(params.panels?.length);
-    let panelsMap: undefined | DashboardPanelMap;
-    if (hasPanels) {
-      panelsMap = {};
-      params.panels?.forEach((panel, idx) => {
-        panelsMap![panel.panelIndex ?? String(idx)] = convertSavedDashboardPanelToPanelState(panel);
-      });
-    }
-    state.panels = panelsMap;
 
     let path = `#/${hash}`;
     path = setStateToKbnUrl<QueryState>(

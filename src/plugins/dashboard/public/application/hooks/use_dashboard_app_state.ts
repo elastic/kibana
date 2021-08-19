@@ -25,8 +25,9 @@ import {
   DashboardRedirect,
   DashboardState,
 } from '../../types';
-import { ForwardedDashboardState } from '../../locator';
+import { DashboardAppLocatorParams } from '../../locator';
 import {
+  loadDashboardHistoryLocationState,
   tryDestroyDashboardContainer,
   syncDashboardContainerInput,
   savedObjectToDashboardState,
@@ -151,8 +152,9 @@ export const useDashboardAppState = ({
        */
       const dashboardSessionStorageState = dashboardSessionStorage.getState(savedDashboardId) || {};
       const dashboardURLState = loadDashboardUrlState(dashboardBuildContext);
-      const forwardedAppState: undefined | ForwardedDashboardState = scopedHistory()?.location
-        ?.state as undefined | ForwardedDashboardState;
+      const forwardedAppState = loadDashboardHistoryLocationState(
+        scopedHistory()?.location?.state as undefined | DashboardAppLocatorParams
+      );
 
       const initialDashboardState = {
         ...savedDashboardState,

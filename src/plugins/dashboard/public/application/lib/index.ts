@@ -20,6 +20,7 @@ export { syncDashboardFilterState } from './sync_dashboard_filter_state';
 export { syncDashboardIndexPatterns } from './sync_dashboard_index_patterns';
 export { syncDashboardContainerInput } from './sync_dashboard_container_input';
 export { diffDashboardContainerInput, diffDashboardState } from './diff_dashboard_state';
+export { loadDashboardHistoryLocationState } from './load_dashboard_history_location_state';
 export { buildDashboardContainer, tryDestroyDashboardContainer } from './build_dashboard_container';
 export {
   stateToDashboardContainerInput,
