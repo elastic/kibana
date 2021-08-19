@@ -28,7 +28,9 @@ export const SyntheticsPolicyCreateExtensionWrapper = memo<PackagePolicyCreateEx
           <TCPContextProvider>
             <TLSFieldsContextProvider>
               <ICMPSimpleFieldsContextProvider>
-                <SyntheticsPolicyCreateExtension newPolicy={newPolicy} onChange={onChange} />
+                <TLSFieldsContextProvider>
+                  <SyntheticsPolicyCreateExtension newPolicy={newPolicy} onChange={onChange} />
+                </TLSFieldsContextProvider>
               </ICMPSimpleFieldsContextProvider>
             </TLSFieldsContextProvider>
           </TCPContextProvider>
