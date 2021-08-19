@@ -29,6 +29,10 @@ interface CrawlerSingleDomainActions {
   updateCrawlRules(crawlRules: CrawlRule[]): { crawlRules: CrawlRule[] };
   updateEntryPoints(entryPoints: EntryPoint[]): { entryPoints: EntryPoint[] };
   updateSitemaps(entryPoints: Sitemap[]): { sitemaps: Sitemap[] };
+  submitDeduplicationUpdate(
+    domain: CrawlerDomain,
+    payload: { fields?: string[]; enabled?: boolean }
+  ): { domain: CrawlerDomain; fields: string[]; enabled: boolean };
 }
 
 export const CrawlerSingleDomainLogic = kea<
@@ -42,6 +46,7 @@ export const CrawlerSingleDomainLogic = kea<
     updateCrawlRules: (crawlRules) => ({ crawlRules }),
     updateEntryPoints: (entryPoints) => ({ entryPoints }),
     updateSitemaps: (sitemaps) => ({ sitemaps }),
+    submitDeduplicationUpdate: (domain, { fields, enabled }) => ({ domain, fields, enabled }),
   },
   reducers: {
     dataLoading: [
@@ -84,6 +89,30 @@ export const CrawlerSingleDomainLogic = kea<
       try {
         const response = await http.get(
           `/api/app_search/engines/${engineName}/crawler/domains/${domainId}`
+        );
+
+        const domainData = crawlerDomainServerToClient(response);
+
+        actions.onReceiveDomainData(domainData);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    submitDeduplicationUpdate: async ({ domain, fields, enabled }) => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+
+      const payload = {
+        deduplication_enabled: enabled,
+        deduplication_fields: fields,
+      };
+
+      try {
+        const response = await http.put(
+          `/api/app_search/engines/${engineName}/crawler/domains/${domain.id}`,
+          {
+            body: JSON.stringify(payload),
+          }
         );
 
         const domainData = crawlerDomainServerToClient(response);
