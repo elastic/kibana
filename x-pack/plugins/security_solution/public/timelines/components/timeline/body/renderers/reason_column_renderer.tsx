@@ -111,7 +111,7 @@ const ReasonCell: React.FC<{
       rowRenderer.renderRow({
         browserFields,
         data: ecsData,
-        isDraggable: true,
+        isDraggable: false,
         timelineId,
       })
     );
