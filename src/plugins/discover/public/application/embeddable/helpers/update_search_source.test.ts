@@ -20,6 +20,7 @@ describe('updateSearchSource', () => {
     const searchSource = createSearchSourceMock({});
     updateSearchSource(searchSource, indexPatternMock, [] as SortOrder[], false, defaults);
     expect(searchSource.getField('fields')).toBe(undefined);
+    // does not explicitly request fieldsFromSource when not using fields API
     expect(searchSource.getField('fieldsFromSource')).toBe(undefined);
   });
 
@@ -27,13 +28,6 @@ describe('updateSearchSource', () => {
     const searchSource = createSearchSourceMock({});
     updateSearchSource(searchSource, indexPatternMock, [] as SortOrder[], true, defaults);
     expect(searchSource.getField('fields')).toEqual([{ field: '*', include_unmapped: 'true' }]);
-    expect(searchSource.getField('fieldsFromSource')).toBe(undefined);
-  });
-
-  it('does not explicitly request fieldsFromSource when not using fields API', async () => {
-    const searchSource = createSearchSourceMock({});
-    updateSearchSource(searchSource, indexPatternMock, [] as SortOrder[], false, defaults);
-    expect(searchSource.getField('fields')).toEqual(undefined);
     expect(searchSource.getField('fieldsFromSource')).toBe(undefined);
   });
 });
