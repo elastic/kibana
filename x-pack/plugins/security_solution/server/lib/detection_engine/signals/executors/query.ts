@@ -66,8 +66,6 @@ export const queryExecutor = async ({
     filters: ruleParams.filters,
     language: ruleParams.language,
     query: ruleParams.query,
-    savedId: ruleParams.savedId,
-    services,
     index: inputIndex,
     lists: exceptionItems,
   });

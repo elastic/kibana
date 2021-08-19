@@ -12,15 +12,8 @@ import { assertUnreachable } from '../../../../common/utility_types';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import {
   QueryOrUndefined,
-  SavedIdOrUndefined,
   IndexOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertServices,
-} from '../../../../../alerting/server';
-import { PartialFilter } from '../types';
 import { QueryFilter } from './types';
 
 interface GetFilterArgs {
@@ -28,27 +21,14 @@ interface GetFilterArgs {
   filters: unknown | undefined;
   language: LanguageOrUndefined;
   query: QueryOrUndefined;
-  savedId: SavedIdOrUndefined;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   index: IndexOrUndefined;
   lists: ExceptionListItemSchema[];
-}
-
-interface QueryAttributes {
-  // NOTE: doesn't match Query interface
-  query: {
-    query: string;
-    language: Language;
-  };
-  filters: PartialFilter[];
 }
 
 export const getFilter = async ({
   filters,
   index,
   language,
-  savedId,
-  services,
   type,
   query,
   lists,
@@ -61,47 +41,12 @@ export const getFilter = async ({
     }
   };
 
-  const savedQueryFilter = async () => {
-    if (savedId != null && index != null) {
-      try {
-        // try to get the saved object first
-        const savedObject = await services.savedObjectsClient.get<QueryAttributes>(
-          'query',
-          savedId
-        );
-        return getQueryFilter(
-          savedObject.attributes.query.query,
-          savedObject.attributes.query.language,
-          savedObject.attributes.filters,
-          index,
-          lists
-        );
-      } catch (err) {
-        // saved object does not exist, so try and fall back if the user pushed
-        // any additional language, query, filters, etc...
-        if (query != null && language != null && index != null) {
-          return getQueryFilter(query, language, filters || [], index, lists);
-        } else {
-          // user did not give any additional fall back mechanism for generating a rule
-          // rethrow error for activity monitoring
-          throw err;
-        }
-      }
-    } else {
-      throw new BadRequestError('savedId parameter should be defined');
-    }
-  };
-
   switch (type) {
     case 'threat_match':
-    case 'threshold': {
-      return savedId != null ? savedQueryFilter() : queryFilter();
-    }
-    case 'query': {
-      return queryFilter();
-    }
+    case 'threshold':
+    case 'query':
     case 'saved_query': {
-      return savedQueryFilter();
+      return queryFilter();
     }
     case 'machine_learning': {
       throw new BadRequestError(

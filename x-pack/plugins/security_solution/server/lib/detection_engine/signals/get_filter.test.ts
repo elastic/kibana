@@ -41,8 +41,6 @@ describe('get_filter', () => {
         filters: undefined,
         language: 'kuery',
         query: 'host.name: siem',
-        savedId: undefined,
-        services: servicesMock,
         index: ['auditbeat-*'],
         lists: [],
       });
@@ -76,8 +74,6 @@ describe('get_filter', () => {
           filters: undefined,
           language: undefined,
           query: 'host.name: siem',
-          savedId: undefined,
-          services: servicesMock,
           index: ['auditbeat-*'],
           lists: [],
         })
@@ -91,8 +87,6 @@ describe('get_filter', () => {
           filters: undefined,
           language: 'kuery',
           query: undefined,
-          savedId: undefined,
-          services: servicesMock,
           index: ['auditbeat-*'],
           lists: [],
         })
@@ -106,65 +100,10 @@ describe('get_filter', () => {
           filters: undefined,
           language: 'kuery',
           query: 'host.name: siem',
-          savedId: undefined,
-          services: servicesMock,
           index: undefined,
           lists: [],
         })
       ).rejects.toThrow('query, filters, and index parameter should be defined');
-    });
-
-    test('returns a saved query if given a type of query', async () => {
-      const filter = await getFilter({
-        type: 'saved_query',
-        filters: undefined,
-        language: undefined,
-        query: undefined,
-        savedId: 'some-id',
-        services: servicesMock,
-        index: ['auditbeat-*'],
-        lists: [],
-      });
-      expect(filter).toEqual({
-        bool: {
-          filter: [
-            { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
-          ],
-          must: [],
-          must_not: [],
-          should: [],
-        },
-      });
-    });
-
-    test('throws on saved query if saved_id is undefined', async () => {
-      await expect(
-        getFilter({
-          type: 'saved_query',
-          filters: undefined,
-          language: undefined,
-          query: undefined,
-          savedId: undefined,
-          services: servicesMock,
-          index: ['auditbeat-*'],
-          lists: [],
-        })
-      ).rejects.toThrow('savedId parameter should be defined');
-    });
-
-    test('throws on saved query if index is undefined', async () => {
-      await expect(
-        getFilter({
-          type: 'saved_query',
-          filters: undefined,
-          language: undefined,
-          query: undefined,
-          savedId: 'some-id',
-          services: servicesMock,
-          index: undefined,
-          lists: [],
-        })
-      ).rejects.toThrow('savedId parameter should be defined');
     });
 
     test('throws on machine learning query', async () => {
@@ -174,8 +113,6 @@ describe('get_filter', () => {
           filters: undefined,
           language: undefined,
           query: undefined,
-          savedId: 'some-id',
-          services: servicesMock,
           index: undefined,
           lists: [],
         })
@@ -188,8 +125,6 @@ describe('get_filter', () => {
         filters: undefined,
         language: 'kuery',
         query: 'host.name: siem',
-        savedId: undefined,
-        services: servicesMock,
         index: ['auditbeat-*'],
         lists: [getExceptionListItemSchemaMock()],
       });
