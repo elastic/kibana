@@ -32,6 +32,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
   const indexPatternsClient = appDeps.data.indexPatterns;
 
   useEffect(() => {
+    let unmounted = false;
     const getDateFields = async () => {
       if (indexPatternId !== undefined) {
         const indexPattern = await indexPatternsClient.get(indexPatternId);
@@ -40,12 +41,18 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
             .filter((f) => f.type === KBN_FIELD_TYPES.DATE)
             .map((f) => f.name)
             .sort();
-          setDateFieldNames(dateTimeFields);
+          if (!unmounted) {
+            setDateFieldNames(dateTimeFields);
+          }
         }
       }
     };
 
     getDateFields();
+
+    return () => {
+      unmounted = true;
+    };
   }, [indexPatternId, indexPatternsClient]);
 
   const retentionDateFieldOptions = useMemo(() => {
