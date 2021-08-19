@@ -105,6 +105,26 @@ describe('PointSeries Editor', function () {
     });
   });
 
+  it('not renders the long legend options if showElasticChartsOptions is false', async () => {
+    component = mountWithIntl(<PointSeriesOptions {...props} />);
+    await act(async () => {
+      expect(findTestSubject(component, 'xyLongLegendsOptions').length).toBe(0);
+    });
+  });
+
+  it('renders the long legend options if showElasticChartsOptions is true', async () => {
+    const newVisProps = ({
+      ...props,
+      extraProps: {
+        showElasticChartsOptions: true,
+      },
+    } as unknown) as PointSeriesOptionsProps;
+    component = mountWithIntl(<PointSeriesOptions {...newVisProps} />);
+    await act(async () => {
+      expect(findTestSubject(component, 'xyLongLegendsOptions').length).toBe(1);
+    });
+  });
+
   it('not renders the fitting function for a bar chart', async () => {
     const newVisProps = ({
       ...props,

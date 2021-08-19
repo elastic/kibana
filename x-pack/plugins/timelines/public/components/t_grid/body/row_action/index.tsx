@@ -10,13 +10,15 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
-import {
+import type {
   ColumnHeaderOptions,
   ControlColumnProps,
   OnRowSelected,
+  SetEventsLoading,
+  SetEventsDeleted,
   TimelineExpandedDetailType,
-  TimelineTabs,
 } from '../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 import { getMappedNonEcsValue } from '../data_driven_columns';
 import { tGridActions } from '../../../../store/t_grid';
 
@@ -34,6 +36,8 @@ type Props = EuiDataGridCellValueElementProps & {
   tabType?: TimelineTabs;
   timelineId: string;
   width: number;
+  setEventsLoading: SetEventsLoading;
+  setEventsDeleted: SetEventsDeleted;
 };
 
 const RowActionComponent = ({
@@ -50,6 +54,8 @@ const RowActionComponent = ({
   showCheckboxes,
   tabType,
   timelineId,
+  setEventsLoading,
+  setEventsDeleted,
   width,
 }: Props) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = useMemo(
@@ -120,6 +126,8 @@ const RowActionComponent = ({
           tabType={tabType}
           timelineId={timelineId}
           width={width}
+          setEventsLoading={setEventsLoading}
+          setEventsDeleted={setEventsDeleted}
         />
       )}
     </>

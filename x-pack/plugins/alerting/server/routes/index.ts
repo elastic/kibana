@@ -6,6 +6,7 @@
  */
 
 import { IRouter } from 'kibana/server';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { ILicenseState } from '../lib';
 import { defineLegacyRoutes } from './legacy';
 import { AlertingRequestHandlerContext } from '../types';
@@ -21,6 +22,7 @@ import { findRulesRoute } from './find_rules';
 import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
 import { getRuleStateRoute } from './get_rule_state';
 import { healthRoute } from './health';
+import { resolveRuleRoute } from './resolve_rule';
 import { ruleTypesRoute } from './rule_types';
 import { muteAllRuleRoute } from './mute_all_rule';
 import { muteAlertRoute } from './mute_alert';
@@ -28,14 +30,20 @@ import { unmuteAllRuleRoute } from './unmute_all_rule';
 import { unmuteAlertRoute } from './unmute_alert';
 import { updateRuleApiKeyRoute } from './update_rule_api_key';
 
-export function defineRoutes(
-  router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
-) {
-  defineLegacyRoutes(router, licenseState, encryptedSavedObjects);
-  createRuleRoute(router, licenseState);
+export interface RouteOptions {
+  router: IRouter<AlertingRequestHandlerContext>;
+  licenseState: ILicenseState;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  usageCounter?: UsageCounter;
+}
+
+export function defineRoutes(opts: RouteOptions) {
+  const { router, licenseState, encryptedSavedObjects } = opts;
+
+  defineLegacyRoutes(opts);
+  createRuleRoute(opts);
   getRuleRoute(router, licenseState);
+  resolveRuleRoute(router, licenseState);
   updateRuleRoute(router, licenseState);
   deleteRuleRoute(router, licenseState);
   aggregateRulesRoute(router, licenseState);

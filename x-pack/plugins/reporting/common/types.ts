@@ -16,13 +16,6 @@ export interface PageSizeParams {
   subheadingHeight: number;
 }
 
-export interface LayoutSelectorDictionary {
-  screenshot: string;
-  renderComplete: string;
-  itemsCountAttribute: string;
-  timefilterDurationAttribute: string;
-}
-
 export interface PdfImageSize {
   width: number;
   height?: number;
@@ -36,7 +29,6 @@ export interface Size {
 export interface LayoutParams {
   id: string;
   dimensions?: Size;
-  selectors?: LayoutSelectorDictionary;
 }
 
 export interface ReportDocumentHead {
@@ -46,16 +38,17 @@ export interface ReportDocumentHead {
   _primary_term: number;
 }
 
-export interface ReportOutput {
-  content_type: string | null;
+export interface ReportOutput extends TaskRunResult {
   content: string | null;
   size: number;
+}
+
+export interface TaskRunResult {
+  content_type: string | null;
   csv_contains_formulas?: boolean;
   max_size_reached?: boolean;
   warnings?: string[];
 }
-
-export type TaskRunResult = Omit<ReportOutput, 'content'>;
 
 export interface BaseParams {
   layout?: LayoutParams;
