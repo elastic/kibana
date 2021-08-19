@@ -89,7 +89,7 @@ describe('add_prepackaged_rules_route', () => {
 
     mockExceptionsClient = listMock.getExceptionListClient();
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(false));
 
     (installPrepackagedTimelines as jest.Mock).mockReset();
     (installPrepackagedTimelines as jest.Mock).mockResolvedValue({

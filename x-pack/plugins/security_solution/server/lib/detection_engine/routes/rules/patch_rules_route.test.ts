@@ -69,7 +69,7 @@ describe('patch_rules', () => {
     });
 
     test('returns error if requesting a non-rule', async () => {
-      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
+      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult(false));
       const response = await server.inject(getPatchRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({

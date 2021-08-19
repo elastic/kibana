@@ -83,7 +83,7 @@ describe('update_rules', () => {
     });
 
     test('returns error when updating non-rule', async () => {
-      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
+      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult(false));
       const response = await server.inject(getUpdateRequest(), context);
 
       expect(response.status).toEqual(404);
