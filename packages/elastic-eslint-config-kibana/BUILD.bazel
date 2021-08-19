@@ -8,6 +8,7 @@ SOURCE_FILES = glob([
   "javascript.js",
   "jest.js",
   "react.js",
+  "plugins.js",
   "restricted_globals.js",
   "typescript.js",
 ])

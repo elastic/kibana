@@ -1,0 +1,13 @@
+module.exports = {
+  overrides: [
+    {
+      plugins: [
+        '@kbn/eslint-plugin-eslint',
+      ],
+      files: ['{src,x-pack}/plugins/**/{server,common,public}/index.ts'],
+      rules: {
+        '@kbn/eslint/no_export_all': 'error',
+      },
+    }
+  ]
+}

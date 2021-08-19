@@ -652,6 +652,7 @@
     "@types/yauzl": "^2.9.1",
     "@types/zen-observable": "^0.8.0",
     "@typescript-eslint/eslint-plugin": "^4.14.1",
+    "@typescript-eslint/typescript-estree": "^4.14.1",
     "@typescript-eslint/parser": "^4.14.1",
     "@yarnpkg/lockfile": "^1.1.0",
     "abab": "^2.0.4",
