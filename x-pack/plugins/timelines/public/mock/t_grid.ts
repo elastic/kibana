@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { TGridIntegratedProps } from '../components/t_grid/integrated';
 import { mockBrowserFields, mockDocValueFields } from './browser_fields';
 import { mockDataProviders } from './mock_data_providers';
 import { ColumnHeaderOptions, TimelineId } from '../../common';
 import { mockIndexNames, mockIndexPattern } from './index_pattern';
-
 const columnHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: 'not-filtered',
     displayAsText: 'Status',
-    id: 'kibana.rac.alert.status',
+    id: ALERT_STATUS,
     initialWidth: 79,
     category: 'kibana',
     type: 'string',
@@ -49,7 +49,7 @@ const columnHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: 'not-filtered',
     displayAsText: 'Triggered',
-    id: 'kibana.rac.alert.start',
+    id: ALERT_START,
     initialWidth: 176,
     category: 'kibana',
     type: 'date',
