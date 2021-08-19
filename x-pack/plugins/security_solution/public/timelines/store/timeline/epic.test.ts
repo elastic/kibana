@@ -14,51 +14,53 @@ import { TimelineModel } from './model';
 describe('Epic Timeline', () => {
   describe('#convertTimelineAsInput ', () => {
     test('should return a TimelineInput instead of TimelineModel ', () => {
+      const columns: TimelineModel['columns'] = [
+        {
+          columnHeaderType: 'not-filtered',
+          id: '@timestamp',
+          initialWidth: 190,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'message',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'event.category',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'event.action',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'host.name',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'source.ip',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'destination.ip',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'user.name',
+          initialWidth: 180,
+        },
+      ];
       const timelineModel: TimelineModel = {
         activeTab: TimelineTabs.query,
         prevActiveTab: TimelineTabs.notes,
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            initialWidth: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.action',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            initialWidth: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            initialWidth: 180,
-          },
-        ],
+        columns,
+        defaultColumns: columns,
         dataProviders: [
           {
             id: 'hosts-table-hostName-DESKTOP-QBBSCUT',
