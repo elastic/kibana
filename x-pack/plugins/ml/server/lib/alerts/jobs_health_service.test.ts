@@ -14,6 +14,7 @@ import { AnnotationService } from '../../models/annotation_service/annotation';
 import { JobsHealthExecutorOptions } from './register_jobs_monitoring_rule_type';
 import { JobAuditMessagesService } from '../../models/job_audit_messages/job_audit_messages';
 import { DeepPartial } from '../../../common/types/common';
+import { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 
 const MOCK_DATE_NOW = 1487076708000;
 
@@ -148,8 +149,8 @@ describe('JobsHealthService', () => {
   } as unknown) as jest.Mocked<AnnotationService>;
 
   const jobAuditMessagesService = ({
-    getJobsErrors: jest.fn().mockImplementation((jobIds: string) => {
-      return Promise.resolve({});
+    getJobsErrorMessages: jest.fn().mockImplementation((jobIds: string) => {
+      return Promise.resolve([]);
     }),
   } as unknown) as jest.Mocked<JobAuditMessagesService>;
 
@@ -159,11 +160,24 @@ describe('JobsHealthService', () => {
     debug: jest.fn(),
   } as unknown) as jest.Mocked<Logger>;
 
+  const getFieldsFormatRegistry = jest.fn().mockImplementation(() => {
+    return Promise.resolve({
+      deserialize: jest.fn().mockImplementation(() => {
+        return {
+          convert: jest.fn().mockImplementation((v) => {
+            return new Date(v).toUTCString();
+          }),
+        };
+      }),
+    });
+  }) as jest.Mocked<FieldFormatsRegistryProvider>;
+
   const jobHealthService: JobsHealthService = jobsHealthServiceProvider(
     mlClient,
     datafeedsService,
     annotationService,
     jobAuditMessagesService,
+    getFieldsFormatRegistry,
     logger
   );
 
@@ -275,11 +289,11 @@ describe('JobsHealthService', () => {
               job_id: 'test_job_01',
               annotation:
                 'Datafeed has missed 11 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
-              end_timestamp: 1627653300000,
+              end_timestamp: 'Fri, 30 Jul 2021 13:55:00 GMT',
               missed_docs_count: 11,
             },
           ],
-          message: '1 job is suffering from delayed data.',
+          message: 'Job test_job_01 is suffering from delayed data.',
         },
       },
     ]);
@@ -333,7 +347,7 @@ describe('JobsHealthService', () => {
               datafeed_state: 'stopped',
             },
           ],
-          message: 'Datafeed is not started for the following jobs:',
+          message: 'Datafeed is not started for job test_job_02',
         },
       },
       {
@@ -342,12 +356,12 @@ describe('JobsHealthService', () => {
           results: [
             {
               job_id: 'test_job_01',
-              log_time: 1626935914540,
+              log_time: 'Thu, 22 Jul 2021 06:38:34 GMT',
               memory_status: 'hard_limit',
             },
           ],
           message:
-            '1 job reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.',
+            'Job test_job_01 reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.',
         },
       },
       {
@@ -358,18 +372,18 @@ describe('JobsHealthService', () => {
               job_id: 'test_job_01',
               annotation:
                 'Datafeed has missed 11 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
-              end_timestamp: 1627653300000,
+              end_timestamp: 'Fri, 30 Jul 2021 13:55:00 GMT',
               missed_docs_count: 11,
             },
             {
               job_id: 'test_job_02',
               annotation:
                 'Datafeed has missed 8 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay',
-              end_timestamp: 1627653300000,
+              end_timestamp: 'Fri, 30 Jul 2021 13:55:00 GMT',
               missed_docs_count: 8,
             },
           ],
-          message: '2 jobs are suffering from delayed data.',
+          message: 'Jobs test_job_01, test_job_02 are suffering from delayed data.',
         },
       },
     ]);
