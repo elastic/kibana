@@ -88,12 +88,11 @@ export const replaceHistogramDotsWithBars = (
   }
 };
 
-const xAxisTickFormat: TickFormatter<number> = (d) => {
-  // Create a formatter and directly call it for every value since the log axis might have a wide range of values
-  // e.g. from low milliseconds to large seconds. This way we can get different suitable units across ticks.
-  const { value, unit } = getDurationFormatter(d, 0.9999)(d);
-  return `${value}${unit}`;
-};
+// Create and call a duration formatter for every value since the durations for the
+// x axis might have a wide range of values e.g. from low milliseconds to large seconds.
+// This way we can get different suitable units across ticks.
+const xAxisTickFormat: TickFormatter<number> = (d) =>
+  getDurationFormatter(d, 0.9999)(d).formatted;
 
 export function TransactionDistributionChart({
   field: fieldName,
