@@ -43,6 +43,7 @@ const getAlertsCountTableColumns = (
             field={selectedStackByOption}
             id={`alert-count-draggable-${selectedStackByOption}-${value}`}
             value={value}
+            tooltipContent={null}
           />
         );
       },
