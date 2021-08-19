@@ -536,7 +536,6 @@ export class DashboardPageObject extends FtrService {
       { name: AREA_CHART_VIS_NAME, description: 'AreaChart' },
       { name: 'Visualization☺漢字 DataTable', description: 'DataTable' },
       { name: LINE_CHART_VIS_NAME, description: 'LineChart' },
-      { name: 'Visualization TileMap', description: 'TileMap' },
       { name: 'Visualization MetricChart', description: 'MetricChart' },
     ];
   }
