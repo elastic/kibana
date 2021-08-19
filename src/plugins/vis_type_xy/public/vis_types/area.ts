@@ -114,6 +114,8 @@ export const getAreaVisTypeDefinition = (
       fittingFunction: Fit.Linear,
       times: [],
       addTimeMarker: false,
+      truncateLegend: true,
+      maxLegendLines: 1,
       radiusRatio: 9,
       thresholdLine: {
         show: false,
