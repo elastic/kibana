@@ -71,7 +71,8 @@ function alertingTaskLegacyIdToSavedObjectIds(
   doc: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>
 ): SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields> {
   if (doc.attributes.taskType.startsWith('alerting:')) {
-    const params = doc.attributes.params;
+    let params: { spaceId?: string; alertId?: string } = {};
+    params = JSON.parse((doc.attributes.params as unknown) as string);
 
     if (params.alertId && params.spaceId && params.spaceId !== 'default') {
       const newId = SavedObjectsUtils.getConvertedObjectId(params.spaceId, 'alert', params.alertId);
@@ -79,10 +80,11 @@ function alertingTaskLegacyIdToSavedObjectIds(
         ...doc,
         attributes: {
           ...doc.attributes,
-          params: {
+          params: JSON.stringify({
             ...params,
             alertId: newId,
-          },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          }) as any,
         },
       };
     }
@@ -95,7 +97,8 @@ function actionsTasksLegacyIdToSavedObjectIds(
   doc: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>
 ): SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields> {
   if (doc.attributes.taskType.startsWith('actions:')) {
-    const params = doc.attributes.params;
+    let params: { spaceId?: string; actionTaskParamsId?: string } = {};
+    params = JSON.parse((doc.attributes.params as unknown) as string);
 
     if (params.actionTaskParamsId && params.spaceId && params.spaceId !== 'default') {
       const newId = SavedObjectsUtils.getConvertedObjectId(
@@ -107,10 +110,11 @@ function actionsTasksLegacyIdToSavedObjectIds(
         ...doc,
         attributes: {
           ...doc.attributes,
-          params: {
+          params: JSON.stringify({
             ...params,
             actionTaskParamsId: newId,
-          },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          }) as any,
         },
       };
     }

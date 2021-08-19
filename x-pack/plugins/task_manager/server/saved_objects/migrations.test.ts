@@ -44,17 +44,14 @@ describe('successful migrations', () => {
       const migration800 = getMigrations()['8.0.0'];
       const taskInstance = getMockData({
         taskType: 'actions:123456',
-        params: { spaceId: 'user1', actionTaskParamsId: '123456' },
+        params: JSON.stringify({ spaceId: 'user1', actionTaskParamsId: '123456' }),
       });
 
       expect(migration800(taskInstance, migrationContext)).toEqual({
         ...taskInstance,
         attributes: {
           ...taskInstance.attributes,
-          params: {
-            ...taskInstance.attributes.params,
-            actionTaskParamsId: '800f81f8-980e-58ca-b710-d1b0644adea2',
-          },
+          params: '{"spaceId":"user1","actionTaskParamsId":"800f81f8-980e-58ca-b710-d1b0644adea2"}',
         },
       });
     });
@@ -63,7 +60,7 @@ describe('successful migrations', () => {
       const migration800 = getMigrations()['8.0.0'];
       const taskInstance = getMockData({
         taskType: 'actions:123456',
-        params: { spaceId: 'default', actionTaskParamsId: '123456' },
+        params: JSON.stringify({ spaceId: 'default', actionTaskParamsId: '123456' }),
       });
 
       expect(migration800(taskInstance, migrationContext)).toEqual(taskInstance);
@@ -73,19 +70,44 @@ describe('successful migrations', () => {
       const migration800 = getMigrations()['8.0.0'];
       const taskInstance = getMockData({
         taskType: 'alerting:123456',
-        params: { spaceId: 'user1', alertId: '123456' },
+        params: JSON.stringify({ spaceId: 'user1', alertId: '123456' }),
       });
 
       expect(migration800(taskInstance, migrationContext)).toEqual({
         ...taskInstance,
         attributes: {
           ...taskInstance.attributes,
-          params: {
-            ...taskInstance.attributes.params,
-            alertId: '1a4f9206-e25f-58e6-bad5-3ff21e90648e',
-          },
+          params: '{"spaceId":"user1","alertId":"1a4f9206-e25f-58e6-bad5-3ff21e90648e"}',
         },
       });
+    });
+  });
+});
+
+describe('handles errors during migrations', () => {
+  describe('8.0.0 throws if migration fails', () => {
+    test('should throw the exception if task instance params format is wrong', () => {
+      const migration800 = getMigrations()['8.0.0'];
+      const taskInstance = getMockData({
+        taskType: 'alerting:123456',
+        params: `{ spaceId: 'user1', customId: '123456' }`,
+      });
+      expect(() => {
+        migration800(taskInstance, migrationContext);
+      }).toThrowError();
+      expect(migrationContext.log.error).toHaveBeenCalledWith(
+        `savedObject 8.0.0 migration failed for task instance ${taskInstance.id} with error: Unexpected token s in JSON at position 2`,
+        {
+          migrations: {
+            taskInstanceDocument: {
+              ...taskInstance,
+              attributes: {
+                ...taskInstance.attributes,
+              },
+            },
+          },
+        }
+      );
     });
   });
 });
