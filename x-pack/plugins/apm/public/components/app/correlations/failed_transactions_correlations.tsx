@@ -15,6 +15,7 @@ import {
   EuiLink,
   EuiTitle,
   EuiBetaBadge,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
@@ -162,7 +163,12 @@ export function FailedTransactionsCorrelations({
             )}
           </>
         ),
-        render: getFailedTransactionsCorrelationImpactLabel,
+        render: (item) => {
+          const impact = getFailedTransactionsCorrelationImpactLabel(item);
+          return impact ? (
+            <EuiBadge color={impact.color}>{impact.level}</EuiBadge>
+          ) : null;
+        },
         sortable: true,
       },
       {
