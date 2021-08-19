@@ -7,7 +7,6 @@
 
 import {
   EuiButton,
-  EuiCodeEditor,
   EuiFieldNumber,
   EuiFilePicker,
   EuiFlexGroup,
@@ -16,7 +15,13 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
+import { Meta, Story } from '@storybook/react';
 import React, { useEffect, useState } from 'react';
+import { CoreStart } from '../../../../../../../../src/core/public';
+import {
+  CodeEditor,
+  createKibanaReactContext,
+} from '../../../../../../../../src/plugins/kibana_react/public';
 import { Cytoscape } from '../Cytoscape';
 import { Centerer } from './centerer';
 import exampleResponseHipsterStore from './example_response_hipster_store.json';
@@ -38,12 +43,29 @@ function getHeight() {
   return window.innerHeight - 300;
 }
 
-export default {
+const stories: Meta<{}> = {
   title: 'app/ServiceMap/Example data',
   component: Cytoscape,
+  decorators: [
+    (StoryComponent, { globals }) => {
+      const KibanaReactContext = createKibanaReactContext(({
+        uiSettings: {
+          get: () => globals.euiTheme && globals.euiTheme.includes('dark'),
+        },
+      } as unknown) as Partial<CoreStart>);
+
+      return (
+        <KibanaReactContext.Provider>
+          <StoryComponent />
+        </KibanaReactContext.Provider>
+      );
+    },
+  ],
 };
 
-export function GenerateMap() {
+export default stories;
+
+export const GenerateMap: Story<{}> = () => {
   const [size, setSize] = useState<number>(10);
   const [json, setJson] = useState<string>('');
   const [elements, setElements] = useState<any[]>(
@@ -89,20 +111,18 @@ export function GenerateMap() {
       </Cytoscape>
 
       {json && (
-        <EuiCodeEditor
-          mode="json"
-          theme="github"
-          width="100%"
+        <CodeEditor
+          languageId="json"
           value={json}
-          setOptions={{ fontSize: '12px' }}
-          isReadOnly
+          height="200px"
+          options={{ fontFamily: 'monospace' }}
         />
       )}
     </div>
   );
-}
+};
 
-export function MapFromJSON() {
+export const MapFromJSON: Story<{}> = () => {
   const [json, setJson] = useState<string>(
     getSessionJson() || JSON.stringify(exampleResponseTodo, null, 2)
   );
@@ -126,15 +146,10 @@ export function MapFromJSON() {
       <EuiForm isInvalid={error !== undefined} error={error}>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiCodeEditor
-              mode="json"
-              theme="github"
-              width="100%"
+            <CodeEditor
+              languageId="json"
               value={json}
-              setOptions={{ fontSize: '12px' }}
-              onChange={(value) => {
-                setJson(value);
-              }}
+              options={{ fontFamily: 'monospace' }}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -179,9 +194,9 @@ export function MapFromJSON() {
       </EuiForm>
     </div>
   );
-}
+};
 
-export function TodoApp() {
+export const TodoApp: Story<{}> = () => {
   return (
     <div>
       <Cytoscape
@@ -192,9 +207,9 @@ export function TodoApp() {
       </Cytoscape>
     </div>
   );
-}
+};
 
-export function OpbeansAndBeats() {
+export const OpbeansAndBeats: Story<{}> = () => {
   return (
     <div>
       <Cytoscape
@@ -205,9 +220,9 @@ export function OpbeansAndBeats() {
       </Cytoscape>
     </div>
   );
-}
+};
 
-export function HipsterStore() {
+export const HipsterStore: Story<{}> = () => {
   return (
     <div>
       <Cytoscape
@@ -218,4 +233,4 @@ export function HipsterStore() {
       </Cytoscape>
     </div>
   );
-}
+};
