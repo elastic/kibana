@@ -61,7 +61,7 @@ export const ReasonComponent: React.FC<Props> = ({ eventId, data }) => {
 
       <Indent>
         <LinkAnchor
-          data-test-subj="ruleName?"
+          data-test-subj="ruleName"
           onClick={(ev: { preventDefault: () => void }) => {
             ev.preventDefault();
             navigateToApp(APP_ID, {

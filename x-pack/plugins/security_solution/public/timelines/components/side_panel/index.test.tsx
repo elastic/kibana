@@ -15,6 +15,7 @@ import {
   SUB_PLUGINS_REDUCER,
   kibanaObservable,
   createSecuritySolutionStorageMock,
+  mockEcsDataWithAlert,
 } from '../../../common/mock';
 import { createStore, State } from '../../../common/store';
 import { DetailsPanel } from './index';
@@ -69,6 +70,7 @@ describe('Details Panel Component', () => {
       params: {
         eventId: 'my-id',
         indexName: 'my-index',
+        ecsData: mockEcsDataWithAlert,
       },
     },
   };

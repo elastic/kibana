@@ -191,7 +191,9 @@ export const TakeActionDropdown = React.memo(
       }),
       [afterCaseSelection, casePermissions, detailsData, ecsData, insertTimelineHook]
     );
+
     const hasWritePermissions = useGetUserCasesPermissions()?.crud ?? false;
+
     const addToCaseAction = useMemo(
       () =>
         [
