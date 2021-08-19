@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('correlations', function () {
     this.tags('skipFirefox');
     loadTestFile(require.resolve('./latency_correlations'));
+    loadTestFile(require.resolve('./failed_transaction_correlations'));
   });
 }

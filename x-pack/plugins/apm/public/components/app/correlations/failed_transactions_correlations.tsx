@@ -323,7 +323,10 @@ export function FailedTransactionsCorrelations({
       <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
         <EuiFlexGroup direction="row" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
+            <EuiTitle
+              size="xs"
+              data-test-subj="apmFailedTransactionsCorrelationsTabTitle"
+            >
               <h5 data-test-subj="apmFailedTransactionsCorrelationsChartTitle">
                 {i18n.translate(
                   'xpack.apm.correlations.failedTransactions.panelTitle',

@@ -31,11 +31,11 @@ export function CorrelationsProgressControls({
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem data-test-subj="apmCorrelationsLatencyCorrelationsProgressTitle">
+          <EuiFlexItem data-test-subj="apmCorrelationsProgressTitle">
             <EuiText size="xs" color="subdued">
               <FormattedMessage
-                data-test-subj="apmCorrelationsLatencyCorrelationsProgressTitle"
-                id="xpack.apm.correlations.latencyCorrelations.progressTitle"
+                data-test-subj="apmCorrelationsProgressTitleMessage"
+                id="xpack.apm.correlations.progressTitle"
                 defaultMessage="Progress: {progress}%"
                 values={{ progress: Math.round(progress * 100) }}
               />
@@ -44,7 +44,7 @@ export function CorrelationsProgressControls({
           <EuiFlexItem>
             <EuiProgress
               aria-label={i18n.translate(
-                'xpack.apm.correlations.latencyCorrelations.progressAriaLabel',
+                'xpack.apm.correlations.progressAriaLabel',
                 { defaultMessage: 'Progress' }
               )}
               value={Math.round(progress * 100)}
@@ -58,7 +58,7 @@ export function CorrelationsProgressControls({
         {!isRunning && (
           <EuiButton size="s" onClick={onRefresh}>
             <FormattedMessage
-              id="xpack.apm.correlations.latencyCorrelations.refreshButtonTitle"
+              id="xpack.apm.correlations.refreshButtonTitle"
               defaultMessage="Refresh"
             />
           </EuiButton>
@@ -66,7 +66,7 @@ export function CorrelationsProgressControls({
         {isRunning && (
           <EuiButton size="s" onClick={onCancel}>
             <FormattedMessage
-              id="xpack.apm.correlations.latencyCorrelations.cancelButtonTitle"
+              id="xpack.apm.correlations.cancelButtonTitle"
               defaultMessage="Cancel"
             />
           </EuiButton>
