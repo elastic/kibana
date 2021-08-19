@@ -6,28 +6,11 @@
  */
 
 import React from 'react';
-import { Redirect, RouteProps, RouteComponentProps, Route, Switch } from 'react-router-dom';
-import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
-import { ALERTS_PATH, DETECTIONS_PATH, SecurityPageName } from '../../common/constants';
-import { NotFoundPage } from '../app/404';
+import { Redirect, RouteProps, RouteComponentProps } from 'react-router-dom';
+import { ALERTS_PATH, DETECTIONS_PATH } from '../../common/constants';
+import { Alerts } from './pages/alerts';
 
-import { SpyRoute } from '../common/utils/route/spy_routes';
-
-import { DetectionEnginePage } from './pages/detection_engine/detection_engine';
-
-const AlertsRoute = () => (
-  <TrackApplicationView viewId={SecurityPageName.alerts}>
-    <DetectionEnginePage />
-    <SpyRoute pageName={SecurityPageName.alerts} />
-  </TrackApplicationView>
-);
-
-const renderAlertsRoutes = () => (
-  <Switch>
-    <Route path={ALERTS_PATH} exact component={AlertsRoute} />
-    <Route component={NotFoundPage} />
-  </Switch>
-);
+const renderAlertsRoutes = () => <Alerts />;
 
 const DetectionsRedirects = ({ location }: RouteComponentProps) =>
   location.pathname === DETECTIONS_PATH ? (
