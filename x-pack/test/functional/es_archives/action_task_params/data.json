@@ -38,7 +38,7 @@
     "source": {
       "type": "action_task_params",
       "action_task_params" : {
-        "actionId" : "preconfigured-server-log",
+        "actionId" : "my-slack1",
         "params" : {
           "level" : "info",
           "message" : "hi hi"

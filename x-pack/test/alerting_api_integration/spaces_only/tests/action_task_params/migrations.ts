@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SavedObject } from 'src/core/server';
+import { SavedObject, SavedObjectReference } from 'src/core/server';
 import { ActionTaskParams } from '../../../../../plugins/actions/server/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -25,35 +25,66 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     it('7.16.0 migrates action_task_params to use references array', async () => {
-      const responses = await Promise.all(
-        [
-          'action_task_params:b9af6280-0052-11ec-917b-f7aa317691ed',
-          'action_task_params:0205a520-0054-11ec-917b-f7aa317691ed',
-        ].map((id) =>
-          es.get<SavedObject<ActionTaskParams>>({
-            index: '.kibana',
-            id,
-          })
-        )
+      // Inspect migration of non-preconfigured connector ID
+      const response = await es.get<SavedObject<ActionTaskParams>>({
+        index: '.kibana',
+        id: 'action_task_params:b9af6280-0052-11ec-917b-f7aa317691ed',
+      });
+      expect(response.statusCode).to.eql(200);
+      const { actionId, relatedSavedObjects, references } = getActionIdAndRelatedSavedObjects(
+        response.body._source
       );
-      responses.forEach((response) => {
-        expect(response.statusCode).to.eql(200);
-        const actionTaskParams = (response.body._source as any)
-          ?.action_task_params as ActionTaskParams;
-        const actionId = actionTaskParams.actionId;
-        const relatedSavedObjects = actionTaskParams.relatedSavedObjects as unknown[];
-        const references = response.body._source?.references ?? [];
-        // Should have 'actionRef' reference
-        expect(references.find((ref) => ref.name === 'actionRef')).to.eql({
-          name: 'actionRef',
-          id: actionId,
-          type: 'action',
-        });
-        // Should have reference entry for each relatedSavedObject entry
-        (relatedSavedObjects ?? []).forEach((relatedSavedObject: any) => {
-          expect(references.find((ref) => ref.name === relatedSavedObject.id)).not.to.be(null);
-        });
+
+      expect(references.find((ref: SavedObjectReference) => ref.name === 'actionRef')).to.eql({
+        name: 'actionRef',
+        id: actionId,
+        type: 'action',
+      });
+
+      // Should have reference entry for each relatedSavedObject entry
+      (relatedSavedObjects ?? []).forEach((relatedSavedObject: any) => {
+        expect(
+          references.find((ref: SavedObjectReference) => ref.name === relatedSavedObject.id)
+        ).not.to.be(undefined);
+      });
+
+      // Inspect migration of preconfigured connector ID
+      const preconfiguredConnectorResponse = await es.get<SavedObject<ActionTaskParams>>({
+        index: '.kibana',
+        id: 'action_task_params:0205a520-0054-11ec-917b-f7aa317691ed',
+      });
+      expect(preconfiguredConnectorResponse.statusCode).to.eql(200);
+
+      const {
+        relatedSavedObjects: preconfiguredRelatedSavedObjects,
+        references: preconfiguredReferences,
+      } = getActionIdAndRelatedSavedObjects(preconfiguredConnectorResponse.body._source);
+
+      expect(
+        preconfiguredReferences.find((ref: SavedObjectReference) => ref.name === 'actionRef')
+      ).to.eql(undefined);
+
+      // Should have reference entry for each relatedSavedObject entry
+      (preconfiguredRelatedSavedObjects ?? []).forEach((relatedSavedObject: any) => {
+        expect(
+          preconfiguredReferences.find(
+            (ref: SavedObjectReference) => ref.name === relatedSavedObject.id
+          )
+        ).not.to.be(undefined);
       });
     });
   });
+
+  function getActionIdAndRelatedSavedObjects(responseSource: any) {
+    if (!responseSource) {
+      return {};
+    }
+
+    const actionTaskParams = (responseSource as any)?.action_task_params as ActionTaskParams;
+    const actionId = actionTaskParams.actionId;
+    const relatedSavedObjects = actionTaskParams.relatedSavedObjects as unknown[];
+    const references = responseSource?.references ?? [];
+
+    return { actionId, relatedSavedObjects, references };
+  }
 }
