@@ -44,6 +44,7 @@ import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { PolicyDetailsForm } from './policy_details_form';
+import { AdministrationListPage } from '../../../components/administration_list_page';
 
 const maxFormWidth = '770px';
 const PolicyDetailsHeader = styled.div`
@@ -178,6 +179,18 @@ export const PolicyDetails = React.memo(() => {
     />
   );
 
+  const backToEndpointList = (
+        <HeaderLinkBack backOptions={{
+              text: i18n.translate(
+                'xpack.securitySolution.endpoint.policy.details.backToListTitle',
+                {
+                  defaultMessage: 'Back to endpoint hosts',
+                }
+              ),
+              pageId: SecurityPageName.endpoints,
+              dataTestSubj: 'policyDetailsBackLink',
+            }} />)
+
   return (
     <>
       {showConfirm && (
@@ -187,6 +200,21 @@ export const PolicyDetails = React.memo(() => {
           onConfirm={handleSaveConfirmation}
         />
       )}
+      <AdministrationListPage
+        data-test-subj="policyDetailsPage"
+        title={policyItem.name}
+       headerBackComponent={{
+              text: i18n.translate(
+                'xpack.securitySolution.endpoint.policy.details.backToListTitle',
+                {
+                  defaultMessage: 'Back to endpoint hosts',
+                }
+              ),
+              pageId: SecurityPageName.endpoints,
+              dataTestSubj: 'policyDetailsBackLink',
+            }} 
+        
+      />
       <SecuritySolutionPageWrapper
         noTimeline
         data-test-subj="policyDetailsPage"
