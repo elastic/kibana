@@ -7,10 +7,19 @@
 
 import { cloneDeep } from 'lodash';
 import { IUiSettingsClient } from 'kibana/public';
+import {
+  buildEsQuery,
+  buildQueryFromFilters,
+  decorateQuery,
+  fromKueryExpression,
+  luceneStringToDsl,
+  toElasticsearchQuery,
+} from '@kbn/es-query';
+import { estypes } from '@elastic/elasticsearch';
 import { SavedSearchSavedObject } from '../../../../common/types';
 import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
-import { esKuery, esQuery, Query } from '../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig, Query } from '../../../../../../../src/plugins/data/public';
 
 export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject) {
   const search = savedSearch.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
@@ -37,11 +46,11 @@ export function extractSearchData(
   const qryString = extractedQuery.query;
   let qry;
   if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
-    const ast = esKuery.fromKueryExpression(qryString);
-    qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern);
+    const ast = fromKueryExpression(qryString);
+    qry = toElasticsearchQuery(ast, currentIndexPattern);
   } else {
-    qry = esQuery.luceneStringToDsl(qryString);
-    esQuery.decorateQuery(qry, queryStringOptions);
+    qry = luceneStringToDsl(qryString);
+    decorateQuery(qry, queryStringOptions);
   }
   return {
     searchQuery: qry,
@@ -78,7 +87,7 @@ export function createSearchItems(
     language: 'lucene',
   };
 
-  let combinedQuery: any = getDefaultDatafeedQuery();
+  let combinedQuery: estypes.QueryDslQueryContainer = getDefaultDatafeedQuery();
   if (savedSearch !== null) {
     const data = getQueryFromSavedSearch(savedSearch);
 
@@ -88,18 +97,22 @@ export function createSearchItems(
     const filters = Array.isArray(filter) ? filter : [];
 
     if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
-      const ast = esKuery.fromKueryExpression(query.query);
+      const ast = fromKueryExpression(query.query);
       if (query.query !== '') {
-        combinedQuery = esKuery.toElasticsearchQuery(ast, indexPattern);
+        combinedQuery = toElasticsearchQuery(ast, indexPattern);
       }
-      const filterQuery = esQuery.buildQueryFromFilters(filters, indexPattern);
+      const filterQuery = buildQueryFromFilters(filters, indexPattern);
 
-      if (Array.isArray(combinedQuery.bool.filter) === false) {
+      if (!combinedQuery.bool) {
+        throw new Error('Missing bool on query');
+      }
+
+      if (!Array.isArray(combinedQuery.bool.filter)) {
         combinedQuery.bool.filter =
           combinedQuery.bool.filter === undefined ? [] : [combinedQuery.bool.filter];
       }
 
-      if (Array.isArray(combinedQuery.bool.must_not) === false) {
+      if (!Array.isArray(combinedQuery.bool.must_not)) {
         combinedQuery.bool.must_not =
           combinedQuery.bool.must_not === undefined ? [] : [combinedQuery.bool.must_not];
       }
@@ -107,8 +120,8 @@ export function createSearchItems(
       combinedQuery.bool.filter = [...combinedQuery.bool.filter, ...filterQuery.filter];
       combinedQuery.bool.must_not = [...combinedQuery.bool.must_not, ...filterQuery.must_not];
     } else {
-      const esQueryConfigs = esQuery.getEsQueryConfig(kibanaConfig);
-      combinedQuery = esQuery.buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
+      const esQueryConfigs = getEsQueryConfig(kibanaConfig);
+      combinedQuery = buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
     }
   }
 

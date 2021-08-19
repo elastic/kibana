@@ -1012,6 +1012,424 @@ describe('successful migrations', () => {
       });
     });
   });
+
+  describe('7.15.0', () => {
+    test('security solution is migrated to saved object references if it has 1 exceptionsList', () => {
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup)['7.15.0'];
+      const alert = getMockData({
+        alertTypeId: 'siem.signals',
+        params: {
+          note: 'some note', // extra data to ensure we do not overwrite other params
+          exceptionsList: [
+            {
+              id: '123',
+              list_id: '456',
+              type: 'detection',
+              namespace_type: 'single',
+            },
+          ],
+        },
+      });
+
+      expect(migration7150(alert, migrationContext)).toEqual({
+        ...alert,
+        references: [
+          {
+            name: 'param:exceptionsList_0',
+            id: '123',
+            type: 'exception-list',
+          },
+        ],
+      });
+    });
+
+    test('security solution is migrated to saved object references if it has 2 exceptionsLists', () => {
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup)['7.15.0'];
+      const alert = getMockData({
+        alertTypeId: 'siem.signals',
+        params: {
+          note: 'some note', // extra data to ensure we do not overwrite other params
+          exceptionsList: [
+            {
+              id: '123',
+              list_id: '456',
+              type: 'detection',
+              namespace_type: 'agnostic',
+            },
+            {
+              id: '789',
+              list_id: '0123',
+              type: 'detection',
+              namespace_type: 'single',
+            },
+          ],
+        },
+      });
+
+      expect(migration7150(alert, migrationContext)).toEqual({
+        ...alert,
+        references: [
+          {
+            name: 'param:exceptionsList_0',
+            id: '123',
+            type: 'exception-list-agnostic',
+          },
+          {
+            name: 'param:exceptionsList_1',
+            id: '789',
+            type: 'exception-list',
+          },
+        ],
+      });
+    });
+
+    test('security solution is migrated to saved object references if it has 3 exceptionsLists', () => {
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup)['7.15.0'];
+      const alert = getMockData({
+        alertTypeId: 'siem.signals',
+        params: {
+          note: 'some note', // extra data to ensure we do not overwrite other params
+          exceptionsList: [
+            {
+              id: '123',
+              list_id: '456',
+              type: 'detection',
+              namespace_type: 'single',
+            },
+            {
+              id: '789',
+              list_id: '0123',
+              type: 'detection',
+              namespace_type: 'agnostic',
+            },
+            {
+              id: '101112',
+              list_id: '777',
+              type: 'detection',
+              namespace_type: 'single',
+            },
+          ],
+        },
+      });
+
+      expect(migration7150(alert, migrationContext)).toEqual({
+        ...alert,
+        references: [
+          {
+            name: 'param:exceptionsList_0',
+            id: '123',
+            type: 'exception-list',
+          },
+          {
+            name: 'param:exceptionsList_1',
+            id: '789',
+            type: 'exception-list-agnostic',
+          },
+          {
+            name: 'param:exceptionsList_2',
+            id: '101112',
+            type: 'exception-list',
+          },
+        ],
+      });
+    });
+
+    test('security solution does not change anything if exceptionsList is missing', () => {
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup)['7.15.0'];
+      const alert = getMockData({
+        alertTypeId: 'siem.signals',
+        params: {
+          note: 'some note',
+        },
+      });
+
+      expect(migration7150(alert, migrationContext)).toEqual(alert);
+    });
+
+    test('security solution will keep existing references if we do not have an exceptionsList but we do already have references', () => {
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup)['7.15.0'];
+      const alert = {
+        ...getMockData({
+          alertTypeId: 'siem.signals',
+          params: {
+            note: 'some note',
+          },
+        }),
+        references: [
+          {
+            name: 'param:exceptionsList_0',
+            id: '123',
+            type: 'exception-list',
+          },
+        ],
+      };
+
+      expect(migration7150(alert, migrationContext)).toEqual({
+        ...alert,
+        references: [
+          {
+            name: 'param:exceptionsList_0',
+            id: '123',
+            type: 'exception-list',
+          },
+        ],
+      });
+    });
+
+    test('security solution keep any foreign references if they exist but still migrate other references', () => {
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup)['7.15.0'];
+      const alert = {
+        ...getMockData({
+          alertTypeId: 'siem.signals',
+          params: {
+            note: 'some note',
+            exceptionsList: [
+              {
+                id: '123',
+                list_id: '456',
+                type: 'detection',
+                namespace_type: 'single',
+              },
+              {
+                id: '789',
+                list_id: '0123',
+                type: 'detection',
+                namespace_type: 'single',
+              },
+              {
+                id: '101112',
+                list_id: '777',
+                type: 'detection',
+                namespace_type: 'single',
+              },
+            ],
+          },
+        }),
+        references: [
+          {
+            name: 'foreign-name',
+            id: '999',
+            type: 'foreign-name',
+          },
+        ],
+      };
+
+      expect(migration7150(alert, migrationContext)).toEqual({
+        ...alert,
+        references: [
+          {
+            name: 'foreign-name',
+            id: '999',
+            type: 'foreign-name',
+          },
+          {
+            name: 'param:exceptionsList_0',
+            id: '123',
+            type: 'exception-list',
+          },
+          {
+            name: 'param:exceptionsList_1',
+            id: '789',
+            type: 'exception-list',
+          },
+          {
+            name: 'param:exceptionsList_2',
+            id: '101112',
+            type: 'exception-list',
+          },
+        ],
+      });
+    });
+
+    test('security solution is idempotent and if re-run on the same migrated data will keep the same items', () => {
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup)['7.15.0'];
+      const alert = {
+        ...getMockData({
+          alertTypeId: 'siem.signals',
+          params: {
+            note: 'some note',
+            exceptionsList: [
+              {
+                id: '123',
+                list_id: '456',
+                type: 'detection',
+                namespace_type: 'single',
+              },
+              {
+                id: '789',
+                list_id: '0123',
+                type: 'detection',
+                namespace_type: 'single',
+              },
+            ],
+          },
+        }),
+        references: [
+          {
+            name: 'param:exceptionsList_0',
+            id: '123',
+            type: 'exception-list',
+          },
+          {
+            name: 'param:exceptionsList_1',
+            id: '789',
+            type: 'exception-list',
+          },
+        ],
+      };
+
+      expect(migration7150(alert, migrationContext)).toEqual(alert);
+    });
+
+    test('security solution will migrate with only missing data if we have partially migrated data', () => {
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup)['7.15.0'];
+      const alert = {
+        ...getMockData({
+          alertTypeId: 'siem.signals',
+          params: {
+            note: 'some note',
+            exceptionsList: [
+              {
+                id: '123',
+                list_id: '456',
+                type: 'detection',
+                namespace_type: 'single',
+              },
+              {
+                id: '789',
+                list_id: '0123',
+                type: 'detection',
+                namespace_type: 'single',
+              },
+            ],
+          },
+        }),
+        references: [
+          {
+            name: 'param:exceptionsList_0',
+            id: '123',
+            type: 'exception-list',
+          },
+        ],
+      };
+
+      expect(migration7150(alert, migrationContext)).toEqual({
+        ...alert,
+        references: [
+          {
+            name: 'param:exceptionsList_0',
+            id: '123',
+            type: 'exception-list',
+          },
+          {
+            name: 'param:exceptionsList_1',
+            id: '789',
+            type: 'exception-list',
+          },
+        ],
+      });
+    });
+
+    test('security solution will not migrate if exception list if it is invalid data', () => {
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup)['7.15.0'];
+      const alert = {
+        ...getMockData({
+          alertTypeId: 'siem.signals',
+          params: {
+            note: 'some note',
+            exceptionsList: [{ invalid: 'invalid' }],
+          },
+        }),
+      };
+      expect(migration7150(alert, migrationContext)).toEqual(alert);
+    });
+
+    test('security solution will migrate valid data if it is mixed with invalid data', () => {
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup)['7.15.0'];
+      const alert = {
+        ...getMockData({
+          alertTypeId: 'siem.signals',
+          params: {
+            note: 'some note',
+            exceptionsList: [
+              {
+                id: '123',
+                list_id: '456',
+                type: 'detection',
+                namespace_type: 'single',
+              },
+              { id: 555 }, // <-- Id is a number and not a string, and is invalid
+              {
+                id: '456',
+                list_id: '456',
+                type: 'detection',
+                namespace_type: 'single',
+              },
+            ],
+          },
+        }),
+      };
+      expect(migration7150(alert, migrationContext)).toEqual({
+        ...alert,
+        references: [
+          {
+            name: 'param:exceptionsList_0',
+            id: '123',
+            type: 'exception-list',
+          },
+          {
+            name: 'param:exceptionsList_1',
+            id: '456',
+            type: 'exception-list',
+          },
+        ],
+      });
+    });
+
+    test('security solution will not migrate if exception list is invalid data but will keep existing references', () => {
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup)['7.15.0'];
+      const alert = {
+        ...getMockData({
+          alertTypeId: 'siem.signals',
+          params: {
+            note: 'some note',
+            exceptionsList: [{ invalid: 'invalid' }],
+          },
+        }),
+        references: [
+          {
+            name: 'param:exceptionsList_0',
+            id: '123',
+            type: 'exception-list',
+          },
+        ],
+      };
+      expect(migration7150(alert, migrationContext)).toEqual({
+        ...alert,
+        references: [
+          {
+            name: 'param:exceptionsList_0',
+            id: '123',
+            type: 'exception-list',
+          },
+        ],
+      });
+    });
+  });
+
+  describe('7.16.0', () => {
+    test('add legacyId field to alert - set to SavedObject id attribute', () => {
+      const migration716 = getMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const alert = getMockData({}, true);
+      expect(migration716(alert, migrationContext)).toEqual({
+        ...alert,
+        attributes: {
+          ...alert.attributes,
+          legacyId: alert.id,
+        },
+      });
+    });
+  });
 });
 
 describe('handles errors during migrations', () => {

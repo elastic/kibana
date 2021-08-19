@@ -177,6 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
         'event.end',
         'event.duration',
         'kibana.server_uuid',
+        'kibana.version',
       ]);
 
       expect(propertiesToCheck).to.be.eql(event);

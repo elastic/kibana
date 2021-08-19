@@ -83,3 +83,12 @@ export function isPackagePolicyList(
 
   return (data as PackagePolicy[])[0].inputs !== undefined;
 }
+
+/**
+ * Convert counter label list to kebab case
+ * @params label_list the list of labels to create standardized UsageCounter from
+ * @returns a string label for usage in the UsageCounter
+ */
+export function createUsageCounterLabel(labelList: string[]): string {
+  return labelList.join('-');
+}
