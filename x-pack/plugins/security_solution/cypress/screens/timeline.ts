@@ -143,11 +143,7 @@ export const TIMELINE_CORRELATION_INPUT = '[data-test-subj="eqlQueryBarTextInput
 
 export const TIMELINE_CORRELATION_TAB = '[data-test-subj="timelineTabs-eql"]';
 
-export const IS_DRAGGING_DATA_PROVIDERS = '.is-dragging';
-
 export const TIMELINE_BOTTOM_BAR_CONTAINER = '[data-test-subj="timeline-bottom-bar-container"]';
-
-export const TIMELINE_DATA_PROVIDERS = '[data-test-subj="dataProviders"]';
 
 export const TIMELINE_DATA_PROVIDERS_ACTION_MENU = '[data-test-subj="providerActions"]';
 
@@ -160,9 +156,6 @@ export const TIMELINE_DATA_PROVIDER_OPERATOR = `[data-test-subj="operator"]`;
 export const TIMELINE_DATA_PROVIDER_VALUE = `[data-test-subj="value"]`;
 
 export const SAVE_DATA_PROVIDER_BTN = `[data-test-subj="save"]`;
-
-export const TIMELINE_DATA_PROVIDERS_EMPTY =
-  '[data-test-subj="dataProviders"] [data-test-subj="empty"]';
 
 export const TIMELINE_DESCRIPTION = '[data-test-subj="timeline-description"]';
 
