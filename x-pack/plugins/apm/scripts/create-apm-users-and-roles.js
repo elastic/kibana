@@ -13,11 +13,11 @@
  * The two roles will be assigned to the already existing users: `apm_read_user`, `apm_write_user`, `kibana_write_user`
  *
  * This makes it possible to use the existing cloud users locally
- * Usage: node setup-kibana-security.js --role-suffix <YOUR-GITHUB-USERNAME-OR-SOMETHING-UNIQUE>
+ * Usage: node create-apm-users-and-roles.js --role-suffix <YOUR-GITHUB-USERNAME-OR-SOMETHING-UNIQUE>
  ******************************/
 
 // compile typescript on the fly
 // eslint-disable-next-line import/no-extraneous-dependencies
 require('@kbn/optimizer').registerNodeAutoTranspilation();
 
-require('./kibana-security/setup-custom-kibana-user-role.ts');
+require('./create-apm-users-and-roles/create_apm_users_and_roles_cli.ts');
