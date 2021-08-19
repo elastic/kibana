@@ -21,12 +21,23 @@ jest.mock('../../../../../common/hooks/use_selector', () => ({
   useShallowEqualSelector: jest.fn(),
 }));
 
+jest.mock('@kbn/alerts', () => ({
+  useGetUserAlertsPermissions: () => ({
+    loading: false,
+    crud: true,
+    read: true,
+  }),
+}));
+
 jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       application: {
         navigateToApp: jest.fn(),
         getUrlForApp: jest.fn(),
+        capabilities: {
+          siem: { crud_alerts: true, read_alerts: true },
+        },
       },
       uiSettings: {
         get: jest.fn(),
