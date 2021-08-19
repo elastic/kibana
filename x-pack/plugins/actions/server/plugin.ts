@@ -96,6 +96,7 @@ export interface PluginSetupContract {
   >(
     actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
   ): void;
+  preconfiguredConnectors: PreConfiguredAction[];
 }
 
 export interface PluginStartContract {
@@ -288,6 +289,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         ensureSufficientLicense(actionType);
         actionTypeRegistry.register(actionType);
       },
+      preconfiguredConnectors: this.preconfiguredActions,
     };
   }
 
