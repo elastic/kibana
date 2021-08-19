@@ -59,17 +59,6 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
       optional = args[1];
     }
 
-    if (location.pathname === '' && location.hash.length > 0) {
-      // We just want the search and pathname so the host doesn't matter
-      const resolvedUrl = new URL(location.hash.slice(1), 'http://localhost');
-      location = {
-        ...location,
-        hash: '',
-        pathname: resolvedUrl.pathname,
-        search: resolvedUrl ? resolvedUrl.search : location.search,
-      };
-    }
-
     const greedy = path.endsWith('/*') || args.length === 1;
 
     if (!path) {
