@@ -50,6 +50,8 @@ export const toExpressionAst: VisToExpressionAst<PieVisParams> = async (vis, par
     addLegend: vis.params.addLegend,
     legendPosition: vis.params.legendPosition,
     nestedLegend: vis.params?.nestedLegend,
+    truncateLegend: vis.params.truncateLegend,
+    maxLegendLines: vis.params.maxLegendLines,
     distinctColors: vis.params?.distinctColors,
     isDonut: vis.params.isDonut,
     palette: vis.params?.palette?.name,
