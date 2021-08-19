@@ -21,15 +21,13 @@ export const ALERT_ID = '[data-test-subj="draggable-content-_id"]';
 export const ALERT_RISK_SCORE_HEADER =
   '[data-test-subj="dataGridHeaderCell-signal.rule.risk_score"]';
 
-export const ALERT_RULE_METHOD = '[data-test-subj="draggable-content-signal.rule.type"]';
+export const ALERT_RULE_NAME = '[data-test-subj="formatted-field-signal.rule.name"]';
 
-export const ALERT_RULE_NAME = '[data-test-subj="draggable-content-signal.rule.name"]';
+export const ALERT_RULE_RISK_SCORE = '[data-test-subj="formatted-field-signal.rule.risk_score"]';
 
-export const ALERT_RULE_RISK_SCORE = '[data-test-subj="draggable-content-signal.rule.risk_score"]';
+export const ALERT_RULE_SEVERITY = '[data-test-subj="formatted-field-signal.rule.severity"]';
 
-export const ALERT_RULE_SEVERITY = '[data-test-subj="draggable-content-signal.rule.severity"]';
-
-export const ALERT_RULE_VERSION = '[data-test-subj="draggable-content-signal.rule.version"]';
+export const ALERT_DATA_GRID = '[data-test-subj="dataGridWrapper"]';
 
 export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
 
