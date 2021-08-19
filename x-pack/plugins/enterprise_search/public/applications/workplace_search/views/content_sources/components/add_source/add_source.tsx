@@ -11,7 +11,7 @@ import { useActions, useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { setSuccessMessage } from '../../../../../shared/flash_messages';
+import { flashSuccessToast } from '../../../../../shared/flash_messages';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { AppLogic } from '../../../../app_logic';
 import {
@@ -90,7 +90,7 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
 
   const goToFormSourceCreated = () => {
     KibanaLogic.values.navigateToUrl(`${getSourcesPath(SOURCES_PATH, isOrganization)}`);
-    setSuccessMessage(FORM_SOURCE_ADDED_SUCCESS_MESSAGE);
+    flashSuccessToast(FORM_SOURCE_ADDED_SUCCESS_MESSAGE);
   };
 
   const header = <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />;
