@@ -138,22 +138,17 @@ node scripts/eslint.js x-pack/legacy/plugins/apm
 
 ## Setup default APM users
 
-APM behaves differently depending on which the role and permissions a logged in user has.
-For testing purposes APM uses 3 custom users:
-
-**apm_read_user**: Apps: read. Indices: read (`apm-*`)
-
-**apm_write_user**: Apps: read/write. Indices: read (`apm-*`)
-
-**kibana_write_user** Apps: read/write. Indices: None
-
-To create the users with the correct roles run the following script:
+APM behaves differently depending on which the role and permissions a logged in user has. To create the users run:
 
 ```sh
-node x-pack/plugins/apm/scripts/setup-kibana-security.js --role-suffix <github-username-or-something-unique>
+node x-pack/plugins/apm/scripts/create-apm-users-and-roles.js --username elastic --password changeme --kibana-url http://localhost:5601 --role-suffix <github-username-or-something-unique>
 ```
 
-The users will be created with the password specified in kibana.dev.yml for `elasticsearch.password`
+This will create:
+
+**apm_read_user**: Read only user
+
+**apm_power_user**: Read+write user.
 
 ## Debugging Elasticsearch queries
 

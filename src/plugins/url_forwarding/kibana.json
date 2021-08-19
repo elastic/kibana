@@ -3,5 +3,9 @@
   "version": "kibana",
   "server": false,
   "ui": true,
+  "owner": {
+    "name": "Kibana App",
+    "githubTeam": "kibana-app"
+  },
   "requiredPlugins": ["kibanaLegacy"]
 }
