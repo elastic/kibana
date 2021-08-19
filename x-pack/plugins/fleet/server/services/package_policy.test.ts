@@ -20,6 +20,12 @@ import type { PutPackagePolicyUpdateCallback, PostPackagePolicyCreateCallback } 
 
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
+import type { PostPackagePolicyDeleteCallback } from '../types';
+
+import type { DeletePackagePoliciesResponse } from '../../common';
+
+import { IngestManagerError } from '../errors';
+
 import { packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
 
@@ -812,6 +818,78 @@ describe('Package policy service', () => {
       const [modifiedStream] = modifiedInput.streams;
       expect(modifiedStream.vars!.paths.value).toEqual(expect.arrayContaining(['north', 'south']));
       expect(modifiedStream.vars!.period.value).toEqual('12mo');
+    });
+  });
+
+  describe('runDeleteExternalCallbacks', () => {
+    let callbackOne: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
+    let callbackTwo: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
+    let callingOrder: string[];
+    let deletedPackagePolicies: DeletePackagePoliciesResponse;
+
+    beforeEach(() => {
+      appContextService.start(createAppContextStartContractMock());
+      callingOrder = [];
+      deletedPackagePolicies = [
+        { id: 'a', success: true },
+        { id: 'a', success: true },
+      ];
+      callbackOne = jest.fn(async (deletedPolicies) => {
+        callingOrder.push('one');
+      });
+      callbackTwo = jest.fn(async (deletedPolicies) => {
+        callingOrder.push('two');
+      });
+      appContextService.addExternalCallback('postPackagePolicyDelete', callbackOne);
+      appContextService.addExternalCallback('postPackagePolicyDelete', callbackTwo);
+    });
+
+    afterEach(() => {
+      appContextService.stop();
+    });
+
+    it('should execute external callbacks', async () => {
+      await packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies);
+
+      expect(callbackOne).toHaveBeenCalledWith(deletedPackagePolicies);
+      expect(callbackTwo).toHaveBeenCalledWith(deletedPackagePolicies);
+      expect(callingOrder).toEqual(['one', 'two']);
+    });
+
+    it("should execute all external callbacks even if one throw's", async () => {
+      callbackOne.mockImplementation(async (deletedPolicies) => {
+        callingOrder.push('one');
+        throw new Error('foo');
+      });
+      await expect(
+        packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies)
+      ).rejects.toThrow(IngestManagerError);
+      expect(callingOrder).toEqual(['one', 'two']);
+    });
+
+    it('should provide an array of errors encountered by running external callbacks', async () => {
+      let error: IngestManagerError;
+      const callbackOneError = new Error('foo 1');
+      const callbackTwoError = new Error('foo 2');
+
+      callbackOne.mockImplementation(async (deletedPolicies) => {
+        callingOrder.push('one');
+        throw callbackOneError;
+      });
+      callbackTwo.mockImplementation(async (deletedPolicies) => {
+        callingOrder.push('two');
+        throw callbackTwoError;
+      });
+
+      await packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies).catch((e) => {
+        error = e;
+      });
+
+      expect(error!.message).toEqual(
+        '2 encountered while executing package delete external callbacks'
+      );
+      expect(error!.meta).toEqual([callbackOneError, callbackTwoError]);
+      expect(callingOrder).toEqual(['one', 'two']);
     });
   });
 
