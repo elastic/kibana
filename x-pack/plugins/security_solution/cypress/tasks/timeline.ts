@@ -8,6 +8,7 @@
 import { Timeline, TimelineFilter } from '../objects/timeline';
 
 import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
+import { FIELDS_BROWSER_CHECKBOX } from '../screens/fields_browser';
 import { LOADING_INDICATOR } from '../screens/security_header';
 
 import {
@@ -20,7 +21,7 @@ import {
   CLOSE_TIMELINE_BTN,
   COMBO_BOX,
   CREATE_NEW_TIMELINE,
-  DATAGRID_HEADERS,
+  FIELD_BROWSER,
   ID_FIELD,
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
@@ -69,6 +70,8 @@ import {
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 
 import { drag, drop } from '../tasks/common';
+
+import { closeFieldsBrowser, filterFieldsBrowser } from '../tasks/fields_browser';
 
 export const hostExistsQuery = 'host.name: *';
 
@@ -327,13 +330,11 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
     .then((headersDropArea) => drop(headersDropArea));
 };
 
-export const removeColumn = (column: number) => {
-  cy.get(DATAGRID_HEADERS)
-    .eq(column)
-    .click()
-    .within(() => {
-      cy.get('button').eq(0).click({ force: true });
-    });
+export const removeColumn = (columnName: string) => {
+  cy.get(FIELD_BROWSER).first().click();
+  filterFieldsBrowser(columnName);
+  cy.get(FIELDS_BROWSER_CHECKBOX(columnName)).click();
+  closeFieldsBrowser();
 };
 
 export const resetFields = () => {
