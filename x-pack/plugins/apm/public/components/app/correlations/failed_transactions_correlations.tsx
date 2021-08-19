@@ -35,7 +35,7 @@ import { createHref, push } from '../../shared/Links/url_helpers';
 import { useUiTracker } from '../../../../../observability/public';
 import { useFailedTransactionsCorrelationsFetcher } from '../../../hooks/use_failed_transactions_correlations_fetcher';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { CorrelationsLog } from './log';
+import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
@@ -199,9 +199,7 @@ export function FailedTransactionsCorrelations({
             onClick: (term: FailedTransactionsCorrelationValue) => {
               push(history, {
                 query: {
-                  kuery: `${term.fieldName}:"${encodeURIComponent(
-                    term.fieldValue
-                  )}"`,
+                  kuery: `${term.fieldName}:"${term.fieldValue}"`,
                 },
               });
               onFilter();
@@ -222,9 +220,7 @@ export function FailedTransactionsCorrelations({
             onClick: (term: FailedTransactionsCorrelationValue) => {
               push(history, {
                 query: {
-                  kuery: `not ${term.fieldName}:"${encodeURIComponent(
-                    term.fieldValue
-                  )}"`,
+                  kuery: `not ${term.fieldName}:"${term.fieldValue}"`,
                 },
               });
               onFilter();
@@ -242,9 +238,7 @@ export function FailedTransactionsCorrelations({
               <EuiLink
                 href={createHref(history, {
                   query: {
-                    kuery: `${term.fieldName}:"${encodeURIComponent(
-                      term.fieldValue
-                    )}"`,
+                    kuery: `${term.fieldName}:"${term.fieldValue}"`,
                   },
                 })}
               >
@@ -254,9 +248,7 @@ export function FailedTransactionsCorrelations({
               <EuiLink
                 href={createHref(history, {
                   query: {
-                    kuery: `not ${term.fieldName}:"${encodeURIComponent(
-                      term.fieldValue
-                    )}"`,
+                    kuery: `not ${term.fieldName}:"${term.fieldValue}"`,
                   },
                 })}
               >

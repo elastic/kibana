@@ -29,14 +29,14 @@ export function FailedTransactionsCorrelationsHelpPopover() {
       title={i18n.translate(
         'xpack.apm.correlations.failedTransactions.helpPopover.title',
         {
-          defaultMessage: 'Failed transactions correlations',
+          defaultMessage: 'Failed transaction correlations',
         }
       )}
     >
       <p>
         <FormattedMessage
           id="xpack.apm.correlations.failedTransactions.helpPopover.basicExplanation"
-          defaultMessage="Correlations help you discover which attributes are contributing to failed transactions."
+          defaultMessage="Correlations help you discover which attributes are contributing to failed transactions. Transactions are considered a failure when it returns a status code >= 5xx."
         />
       </p>
       <p>

@@ -36,7 +36,7 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { LatencyCorrelationsHelpPopover } from './latency_correlations_help_popover';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { isErrorMessage } from './utils/is_error_message';
-import { CorrelationsLog } from './log';
+import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
