@@ -100,7 +100,7 @@ describe('successful migrations', () => {
           ...actionTaskParam.attributes,
           relatedSavedObjects: [
             {
-              ref: 'related_some-type_0',
+              id: 'related_some-type_0',
               namespace: 'some-namespace',
               type: 'some-type',
               typeId: 'some-typeId',
@@ -149,13 +149,13 @@ describe('successful migrations', () => {
           ...actionTaskParam.attributes,
           relatedSavedObjects: [
             {
-              ref: 'related_some-type_0',
+              id: 'related_some-type_0',
               namespace: 'some-namespace',
               type: 'some-type',
               typeId: 'some-typeId',
             },
             {
-              ref: 'related_another-type_1',
+              id: 'related_another-type_1',
               type: 'another-type',
               typeId: 'another-typeId',
             },
@@ -212,7 +212,7 @@ describe('successful migrations', () => {
           ...actionTaskParam.attributes,
           relatedSavedObjects: [
             {
-              ref: 'related_some-type_0',
+              id: 'related_some-type_0',
               namespace: 'some-namespace',
               type: 'some-type',
               typeId: 'some-typeId',

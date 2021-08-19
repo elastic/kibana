@@ -16,7 +16,7 @@ import {
 import { ActionTaskParams, PreConfiguredAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
-import { RelatedSavedObjectRef, RelatedSavedObjects } from '../lib/related_saved_objects';
+import { RelatedSavedObjects } from '../lib/related_saved_objects';
 
 interface ActionTaskParamsLogMeta extends LogMeta {
   migrations: { actionTaskParamDocument: SavedObjectUnsanitizedDoc<ActionTaskParams> };
@@ -94,7 +94,7 @@ function useSavedObjectReferences(
   } = doc;
 
   const newReferences: SavedObjectReference[] = [];
-  const relatedSavedObjectRefs: RelatedSavedObjectRef[] = [];
+  const relatedSavedObjectRefs: RelatedSavedObjects = [];
 
   newReferences.push({
     id: actionId,
@@ -104,10 +104,9 @@ function useSavedObjectReferences(
 
   // Add related saved objects, if any
   ((relatedSavedObjects as RelatedSavedObjects) ?? []).forEach((relatedSavedObject, index) => {
-    const { id, ...restRelatedSavedObject } = relatedSavedObject;
     relatedSavedObjectRefs.push({
-      ...restRelatedSavedObject,
-      ref: `related_${relatedSavedObject.type}_${index}`,
+      ...relatedSavedObject,
+      id: `related_${relatedSavedObject.type}_${index}`,
     });
     newReferences.push({
       id: relatedSavedObject.id,
