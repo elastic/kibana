@@ -127,6 +127,33 @@ export function registerCrawlerRoutes({
     })
   );
 
+  router.put(
+    {
+      path: '/api/app_search/engines/{name}/crawler/domains/{id}',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+          id: schema.string(),
+        }),
+        body: schema.object({
+          crawl_rules: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                order: schema.number(),
+                id: schema.string(),
+              })
+            )
+          ),
+          deduplication_enabled: schema.maybe(schema.boolean()),
+          deduplication_fields: schema.maybe(schema.arrayOf(schema.string())),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/domains/:id',
+    })
+  );
+
   router.post(
     {
       path: '/api/app_search/crawler/validate_url',

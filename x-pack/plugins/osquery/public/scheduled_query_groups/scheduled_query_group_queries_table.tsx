@@ -15,7 +15,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   TypedLensByValueInput,
@@ -26,6 +25,20 @@ import { FilterStateStore } from '../../../../../src/plugins/data/common';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { PlatformIcons } from './queries/platforms';
 import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
+
+const VIEW_IN_DISCOVER = i18n.translate(
+  'xpack.osquery.scheduledQueryGroup.queriesTable.viewDiscoverResultsActionAriaLabel',
+  {
+    defaultMessage: 'View in Discover',
+  }
+);
+
+const VIEW_IN_LENS = i18n.translate(
+  'xpack.osquery.scheduledQueryGroup.queriesTable.viewLensResultsActionAriaLabel',
+  {
+    defaultMessage: 'View in Lens',
+  }
+);
 
 export enum ViewResultsActionButtonType {
   icon = 'icon',
@@ -154,7 +167,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
 
   const handleClick = useCallback(
     (event) => {
-      const openInNewWindow = !(!isModifiedEvent(event) && isLeftClickEvent(event));
+      const openInNewTab = !(!isModifiedEvent(event) && isLeftClickEvent(event));
 
       event.preventDefault();
 
@@ -168,7 +181,9 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
           },
           attributes: getLensAttributes(actionId),
         },
-        openInNewWindow
+        {
+          openInNewTab,
+        }
       );
     },
     [actionId, endDate, lensService, startDate]
@@ -182,33 +197,18 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
         onClick={handleClick}
         disabled={!lensService?.canUseEditor()}
       >
-        <FormattedMessage
-          id="xpack.osquery.scheduledQueryGroup.queriesTable.viewLensResultsActionAriaLabel"
-          defaultMessage="View results in Lens"
-        />
+        {VIEW_IN_LENS}
       </EuiButtonEmpty>
     );
   }
 
   return (
-    <EuiToolTip
-      content={i18n.translate(
-        'xpack.osquery.scheduledQueryGroup.queriesTable.viewLensResultsActionAriaLabel',
-        {
-          defaultMessage: 'View results in Lens',
-        }
-      )}
-    >
+    <EuiToolTip content={VIEW_IN_LENS}>
       <EuiButtonIcon
         iconType="lensApp"
         disabled={!lensService?.canUseEditor()}
         onClick={handleClick}
-        aria-label={i18n.translate(
-          'xpack.osquery.scheduledQueryGroup.queriesTable.viewLensResultsActionAriaLabel',
-          {
-            defaultMessage: 'View results in Lens',
-          }
-        )}
+        aria-label={VIEW_IN_LENS}
       />
     </EuiToolTip>
   );
@@ -271,33 +271,14 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
       <EuiButtonEmpty size="xs" iconType="discoverApp" href={discoverUrl}>
-        <FormattedMessage
-          id="xpack.osquery.scheduledQueryGroup.queriesTable.viewDiscoverResultsActionAriaLabel"
-          defaultMessage="View results in Discover"
-        />
+        {VIEW_IN_DISCOVER}
       </EuiButtonEmpty>
     );
   }
 
   return (
-    <EuiToolTip
-      content={i18n.translate(
-        'xpack.osquery.scheduledQueryGroup.queriesTable.viewDiscoverResultsActionAriaLabel',
-        {
-          defaultMessage: 'View results in Discover',
-        }
-      )}
-    >
-      <EuiButtonIcon
-        iconType="discoverApp"
-        href={discoverUrl}
-        aria-label={i18n.translate(
-          'xpack.osquery.scheduledQueryGroup.queriesTable.viewDiscoverResultsActionAriaLabel',
-          {
-            defaultMessage: 'View results in Discover',
-          }
-        )}
-      />
+    <EuiToolTip content={VIEW_IN_DISCOVER}>
+      <EuiButtonIcon iconType="discoverApp" href={discoverUrl} aria-label={VIEW_IN_DISCOVER} />
     </EuiToolTip>
   );
 };

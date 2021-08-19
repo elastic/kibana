@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { esKuery } from '../../../../../src/plugins/data/server';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 export function rangeQuery(
   start?: number,
@@ -26,11 +26,11 @@ export function rangeQuery(
   ];
 }
 
-export function kqlQuery(kql?: string): estypes.QueryDslQueryContainer[] {
+export function kqlQuery(kql: string): estypes.QueryDslQueryContainer[] {
   if (!kql) {
     return [];
   }
 
-  const ast = esKuery.fromKueryExpression(kql);
-  return [esKuery.toElasticsearchQuery(ast)];
+  const ast = fromKueryExpression(kql);
+  return [toElasticsearchQuery(ast)];
 }

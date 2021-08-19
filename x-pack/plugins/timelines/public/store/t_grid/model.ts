@@ -87,6 +87,7 @@ export interface TGridModel extends TGridModelSettings {
 export type TGridModelForTimeline = Pick<
   TGridModel,
   | 'columns'
+  | 'defaultColumns'
   | 'dataProviders'
   | 'dateRange'
   | 'deletedEventIds'
@@ -114,6 +115,7 @@ export type SubsetTGridModel = Readonly<
   Pick<
     TGridModel,
     | 'columns'
+    | 'defaultColumns'
     | 'dateRange'
     | 'deletedEventIds'
     | 'excludedRowRendererIds'

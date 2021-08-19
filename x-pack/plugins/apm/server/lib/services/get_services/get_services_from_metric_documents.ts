@@ -23,9 +23,9 @@ export async function getServicesFromMetricDocuments({
   kuery,
 }: {
   setup: Setup & SetupTimeRange;
-  environment?: string;
+  environment: string;
   maxNumServices: number;
-  kuery?: string;
+  kuery: string;
 }) {
   const { apmEventClient, start, end } = setup;
 
