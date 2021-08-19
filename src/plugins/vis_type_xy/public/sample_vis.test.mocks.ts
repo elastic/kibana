@@ -88,6 +88,8 @@ export const sampleAreaVis = {
         legendPosition: 'right',
         times: [],
         addTimeMarker: false,
+        truncateLegend: true,
+        maxLegendLines: 1,
         thresholdLine: {
           show: false,
           value: 10,
@@ -255,6 +257,8 @@ export const sampleAreaVis = {
     legendPosition: 'top',
     times: [],
     addTimeMarker: false,
+    truncateLegend: true,
+    maxLegendLines: 1,
     thresholdLine: {
       show: false,
       value: 10,

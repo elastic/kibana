@@ -13,7 +13,7 @@ import {
   EVENT_KIND,
   SPACE_IDS,
   TIMESTAMP,
-  ALERT_RULE_ID,
+  ALERT_RULE_UUID,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
 
@@ -98,7 +98,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
     }
 
     const filter: estypes.QueryDslQueryContainer[] = [
-      { terms: { [ALERT_RULE_ID]: ruleIds } },
+      { terms: { [ALERT_RULE_UUID]: ruleIds } },
       { terms: { [SPACE_IDS]: [spaceId] } },
     ];
 
@@ -117,7 +117,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         aggs: {
           rules: {
             terms: {
-              field: ALERT_RULE_ID,
+              field: ALERT_RULE_UUID,
               size: ruleIds.length,
             },
             aggs: {
@@ -151,7 +151,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         bucket.most_recent_logs.hits.hits.map<IRuleStatusSOAttributes>((event) => {
           const logEntry = parseRuleExecutionLog(event._source);
           invariant(
-            logEntry[ALERT_RULE_ID] ?? '',
+            logEntry[ALERT_RULE_UUID] ?? '',
             'Malformed execution log entry: rule.id field not found'
           );
 
@@ -185,7 +185,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
               ]
             : undefined;
 
-          const alertId = logEntry[ALERT_RULE_ID] ?? '';
+          const alertId = logEntry[ALERT_RULE_UUID] ?? '';
           const statusDate = logEntry[TIMESTAMP];
           const lastFailureAt = lastFailure?.[TIMESTAMP];
           const lastFailureMessage = lastFailure?.[MESSAGE];
@@ -232,7 +232,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         [EVENT_ACTION]: metric,
         [EVENT_KIND]: 'metric',
         [getMetricField(metric)]: value,
-        [ALERT_RULE_ID]: ruleId ?? '',
+        [ALERT_RULE_UUID]: ruleId ?? '',
         [TIMESTAMP]: new Date().toISOString(),
         [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
         [ALERT_RULE_TYPE_ID]: SERVER_APP_ID,
@@ -255,7 +255,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         [EVENT_KIND]: 'event',
         [EVENT_SEQUENCE]: this.sequence++,
         [MESSAGE]: message,
-        [ALERT_RULE_ID]: ruleId ?? '',
+        [ALERT_RULE_UUID]: ruleId ?? '',
         [RULE_STATUS_SEVERITY]: statusSeverityDict[newStatus],
         [RULE_STATUS]: newStatus,
         [TIMESTAMP]: new Date().toISOString(),
