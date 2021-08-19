@@ -9,6 +9,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { EuiContextMenu, EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 
+import { isEmpty } from 'lodash/fp';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 
 import { TimelineEventsDetailsItem, TimelineNonEcsData } from '../../../../common';
@@ -90,7 +91,9 @@ export const TakeActionDropdown = React.memo(
       [detailsData]
     );
 
-    const alertIds = useMemo(() => [actionsData.eventId], [actionsData.eventId]);
+    const alertIds = useMemo(() => (isEmpty(actionsData.eventId) ? null : [actionsData.eventId]), [
+      actionsData.eventId,
+    ]);
     const isEvent = actionsData.eventKind === 'event';
 
     const isEndpointAlert = useMemo((): boolean => {
