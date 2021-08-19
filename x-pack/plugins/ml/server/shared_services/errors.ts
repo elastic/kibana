@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const getCustomError = (className: string, errorMessage: string) => {
+export const getCustomErrorClass = (className: string) => {
   const CustomError = class extends Error {
     constructor(message?: string) {
       super(message);
@@ -16,5 +16,15 @@ export const getCustomError = (className: string, errorMessage: string) => {
   };
   // set class name dynamically
   Object.defineProperty(CustomError, 'name', { value: className });
-  return new CustomError(errorMessage);
+  return CustomError;
 };
+
+export const MLClusterClientUninitialized = getCustomErrorClass('MLClusterClientUninitialized');
+
+export const MLUISettingsClientUninitialized = getCustomErrorClass(
+  'MLUISettingsClientUninitialized'
+);
+
+export const MLFieldFormatRegistryUninitialized = getCustomErrorClass(
+  'MLFieldFormatRegistryUninitialized'
+);

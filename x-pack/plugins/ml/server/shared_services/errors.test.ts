@@ -5,14 +5,44 @@
  * 2.0.
  */
 
-import { getCustomError } from './errors';
+import {
+  getCustomErrorClass,
+  MLClusterClientUninitialized,
+  MLUISettingsClientUninitialized,
+  MLFieldFormatRegistryUninitialized,
+} from './errors';
 
-describe('getCustomError', () => {
+describe('Custom errors', () => {
   test('creates a custom error instance', () => {
-    const error = getCustomError('MLCustomError', 'farequote is not defined');
-    expect(error.message).toBe('farequote is not defined');
-    expect(error.name).toBe('MLCustomError');
+    const MLCustomError = getCustomErrorClass('MLCustomError');
+    const errorInstance = new MLCustomError('farequote is not defined');
+    expect(errorInstance.message).toBe('farequote is not defined');
+    expect(errorInstance.name).toBe('MLCustomError');
+    expect(errorInstance).toBeInstanceOf(MLCustomError);
     // make sure that custom class extends Error
-    expect(error).toBeInstanceOf(Error);
+    expect(errorInstance).toBeInstanceOf(Error);
+  });
+
+  test('MLClusterClientUninitialized', () => {
+    const errorInstance = new MLClusterClientUninitialized('cluster client is not initialized');
+    expect(errorInstance.message).toBe('cluster client is not initialized');
+    expect(errorInstance.name).toBe('MLClusterClientUninitialized');
+    expect(errorInstance).toBeInstanceOf(MLClusterClientUninitialized);
+  });
+
+  test('MLUISettingsClientUninitialized', () => {
+    const errorInstance = new MLUISettingsClientUninitialized('cluster client is not initialized');
+    expect(errorInstance.message).toBe('cluster client is not initialized');
+    expect(errorInstance.name).toBe('MLUISettingsClientUninitialized');
+    expect(errorInstance).toBeInstanceOf(MLUISettingsClientUninitialized);
+  });
+
+  test('MLFieldFormatRegistryUninitialized', () => {
+    const errorInstance = new MLFieldFormatRegistryUninitialized(
+      'cluster client is not initialized'
+    );
+    expect(errorInstance.message).toBe('cluster client is not initialized');
+    expect(errorInstance.name).toBe('MLFieldFormatRegistryUninitialized');
+    expect(errorInstance).toBeInstanceOf(MLFieldFormatRegistryUninitialized);
   });
 });

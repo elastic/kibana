@@ -28,7 +28,11 @@ import {
 } from './providers/anomaly_detectors';
 import { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/capabilities';
 import { hasMlCapabilitiesProvider, HasMlCapabilities } from '../lib/capabilities';
-import { getCustomError } from './errors';
+import {
+  MLClusterClientUninitialized,
+  MLFieldFormatRegistryUninitialized,
+  MLUISettingsClientUninitialized,
+} from './errors';
 import { MlClient, getMlClient } from '../lib/ml_client';
 import { jobSavedObjectServiceFactory, JobSavedObjectService } from '../saved_objects';
 import {
@@ -192,18 +196,12 @@ function getRequestItemsProvider(
     );
 
     if (clusterClient === null) {
-      throw getCustomError(
-        'MLClusterClientUninitialized',
-        `ML's cluster client has not been initialized`
-      );
+      throw new MLClusterClientUninitialized(`ML's cluster client has not been initialized`);
     }
 
     const uiSettingsClient = getUiSettings()?.asScopedToClient(savedObjectsClient);
     if (!uiSettingsClient) {
-      throw getCustomError(
-        'MLUISettingsClientUninitialized',
-        `ML's UI settings client has not been initialized`
-      );
+      throw new MLUISettingsClientUninitialized(`ML's UI settings client has not been initialized`);
     }
 
     const getFieldsFormatRegistry = async () => {
@@ -215,8 +213,7 @@ function getRequestItemsProvider(
       }
 
       if (!fieldFormatRegistry) {
-        throw getCustomError(
-          'MLFieldFormatRegistryUninitialized',
+        throw new MLFieldFormatRegistryUninitialized(
           `ML's field format registry has not been initialized`
         );
       }
