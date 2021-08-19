@@ -15,7 +15,7 @@ export interface WorkflowStatusFilterProps {
   onChange: (value: AlertWorkflowStatus) => void;
 }
 
-const options: EuiButtonGroupOptionProps[] = [
+const options: Array<EuiButtonGroupOptionProps & { id: AlertWorkflowStatus }> = [
   {
     id: 'open',
     label: i18n.translate('xpack.observability.alerts.workflowStatusFilter.openButtonLabel', {
