@@ -16,13 +16,6 @@ export interface PageSizeParams {
   subheadingHeight: number;
 }
 
-export interface LayoutSelectorDictionary {
-  screenshot: string;
-  renderComplete: string;
-  itemsCountAttribute: string;
-  timefilterDurationAttribute: string;
-}
-
 export interface PdfImageSize {
   width: number;
   height?: number;
@@ -36,7 +29,6 @@ export interface Size {
 export interface LayoutParams {
   id: string;
   dimensions?: Size;
-  selectors?: LayoutSelectorDictionary;
 }
 
 export interface ReportDocumentHead {
