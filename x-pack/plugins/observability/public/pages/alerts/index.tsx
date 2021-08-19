@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -47,7 +40,12 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   const history = useHistory();
   const refetch = useRef<() => void>();
   const {
-    query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', status = 'open' },
+    query: {
+      rangeFrom = 'now-15m',
+      rangeTo = 'now',
+      kuery = 'kibana.alert.status: "open"', // TODO change hardcoded values as part of another PR
+      status = 'open',
+    },
   } = routeParams;
 
   useBreadcrumbs([
@@ -105,6 +103,20 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
     [history, rangeFrom, rangeTo, kuery]
   );
 
+  const addToQuery = useCallback(
+    (value: string) => {
+      let output = value;
+      if (kuery !== '') {
+        output = `${kuery} and ${value}`;
+      }
+      onQueryChange({
+        dateRange: { from: rangeFrom, to: rangeTo },
+        query: output,
+      });
+    },
+    [kuery, onQueryChange, rangeFrom, rangeTo]
+  );
+
   const setRefetch = useCallback((ref) => {
     refetch.current = ref;
   }, []);
@@ -127,7 +139,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
         ],
       }}
     >
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiCallOut
             title={i18n.translate('xpack.observability.alertsDisclaimerTitle', {
@@ -160,26 +172,28 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             onQueryChange={onQueryChange}
           />
         </EuiFlexItem>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <StatusFilter status={status} onChange={setStatusFilter} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <AlertsTableTGrid
-              indexName={dynamicIndexPattern.length > 0 ? dynamicIndexPattern[0].title : ''}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              kuery={kuery}
-              status={status}
-              setRefetch={setRefetch}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem>
+              <EuiFlexGroup justifyContent="flexStart">
+                <EuiFlexItem grow={false}>
+                  <StatusFilter status={status} onChange={setStatusFilter} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <AlertsTableTGrid
+                indexName={dynamicIndexPattern.length > 0 ? dynamicIndexPattern[0].title : ''}
+                rangeFrom={rangeFrom}
+                rangeTo={rangeTo}
+                kuery={kuery}
+                status={status}
+                setRefetch={setRefetch}
+                addToQuery={addToQuery}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>
   );

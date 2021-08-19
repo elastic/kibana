@@ -534,17 +534,6 @@ of the chart. Use numbers between 0 and 1. The lower the number, the more the hi
 [[visualization-heatmap-maxbuckets]]`visualization:heatmap:maxBuckets`::
 The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.
 
-[[visualization-regionmap-showwarnings]]`visualization:regionmap:showWarnings`::
-Shows a warning in a region map when terms cannot be joined to a shape.
-
-[[visualization-tilemap-wmsdefaults]]`visualization:tileMap:WMSdefaults`::
-The default properties for the WMS map server supported in the coordinate map.
-
-[[visualization-tilemap-maxprecision]]`visualization:tileMap:maxPrecision`::
-The maximum geoHash precision displayed in tile maps. 7 is high, 10 is very high,
-and 12 is the maximum. For more information, refer to
-{ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[Cell dimensions at the equator].
-
 [[visualization-visualize-chartslibrary]]`visualization:visualize:legacyChartsLibrary`::
 **The legacy XY charts are deprecated and will not be supported as of 7.16.**
 The visualize editor uses a new XY charts library with improved performance, color palettes, fill capacity, and more. Enable this option if you prefer to use the legacy charts library.

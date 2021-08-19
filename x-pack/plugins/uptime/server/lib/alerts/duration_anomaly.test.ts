@@ -5,8 +5,7 @@
  * 2.0.
  */
 import {
-  ALERT_SEVERITY_LEVEL,
-  ALERT_SEVERITY_VALUE,
+  ALERT_SEVERITY,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_REASON,
@@ -171,8 +170,7 @@ describe('duration anomaly alert', () => {
             'observer.geo.name': anomaly.entityValue,
             [ALERT_EVALUATION_VALUE]: anomaly.actualSort,
             [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
-            [ALERT_SEVERITY_LEVEL]: getSeverityType(anomaly.severity),
-            [ALERT_SEVERITY_VALUE]: anomaly.severity,
+            [ALERT_SEVERITY]: getSeverityType(anomaly.severity),
             [ALERT_REASON]: `Abnormal (${getSeverityType(
               anomaly.severity
             )} level) response time detected on uptime-monitor with url ${
