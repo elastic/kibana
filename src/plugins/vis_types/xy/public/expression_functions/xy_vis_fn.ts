@@ -59,6 +59,18 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
         defaultMessage: 'Show time marker',
       }),
     },
+    truncateLegend: {
+      types: ['boolean'],
+      help: i18n.translate('visTypeXy.function.args.truncateLegend.help', {
+        defaultMessage: 'Defines if the legend will be truncated or not',
+      }),
+    },
+    maxLegendLines: {
+      types: ['number'],
+      help: i18n.translate('visTypeXy.function.args.args.maxLegendLines.help', {
+        defaultMessage: 'Defines the maximum lines per legend item',
+      }),
+    },
     addLegend: {
       types: ['boolean'],
       help: i18n.translate('visTypeXy.function.args.addLegend.help', {
@@ -229,6 +241,8 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
       addTooltip: args.addTooltip,
       legendPosition: args.legendPosition,
       addTimeMarker: args.addTimeMarker,
+      maxLegendLines: args.maxLegendLines,
+      truncateLegend: args.truncateLegend,
       categoryAxes: args.categoryAxes.map((categoryAxis) => ({
         ...categoryAxis,
         type: categoryAxis.axisType,

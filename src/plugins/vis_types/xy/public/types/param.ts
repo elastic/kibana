@@ -121,6 +121,8 @@ export interface VisParams {
   addTooltip: boolean;
   legendPosition: Position;
   addTimeMarker: boolean;
+  truncateLegend: boolean;
+  maxLegendLines: number;
   categoryAxes: CategoryAxis[];
   orderBucketsBySum?: boolean;
   labels: Labels;
@@ -158,6 +160,8 @@ export interface XYVisConfig {
   addTooltip: boolean;
   legendPosition: Position;
   addTimeMarker: boolean;
+  truncateLegend: boolean;
+  maxLegendLines: number;
   orderBucketsBySum?: boolean;
   labels: ExpressionValueLabel;
   thresholdLine: ExpressionValueThresholdLine;

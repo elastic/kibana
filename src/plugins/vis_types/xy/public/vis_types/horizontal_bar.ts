@@ -116,6 +116,8 @@ export const getHorizontalBarVisTypeDefinition = (
       legendPosition: Position.Right,
       times: [],
       addTimeMarker: false,
+      truncateLegend: true,
+      maxLegendLines: 1,
       labels: {},
       radiusRatio: 0,
       thresholdLine: {
