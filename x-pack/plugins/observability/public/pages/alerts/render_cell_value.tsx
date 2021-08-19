@@ -14,15 +14,15 @@ import React, { useEffect } from 'react';
  */
 import type {
   ALERT_DURATION as ALERT_DURATION_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
+  ALERT_SEVERITY as ALERT_SEVERITY_TYPED,
   ALERT_STATUS as ALERT_STATUS_TYPED,
-  ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
+  ALERT_REASON as ALERT_REASON_TYPED,
 } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
+  ALERT_SEVERITY as ALERT_SEVERITY_NON_TYPED,
   ALERT_STATUS as ALERT_STATUS_NON_TYPED,
-  ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
+  ALERT_REASON as ALERT_REASON_NON_TYPED,
   TIMESTAMP,
   // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
@@ -37,9 +37,9 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTheme } from '../../hooks/use_theme';
 
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
-const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
+const ALERT_SEVERITY: typeof ALERT_SEVERITY_TYPED = ALERT_SEVERITY_NON_TYPED;
 const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
-const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
+const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 
 export const getMappedNonEcsValue = ({
   data,
@@ -118,9 +118,9 @@ export const getRenderCellValue = ({
         return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
       case ALERT_DURATION:
         return asDuration(Number(value));
-      case ALERT_SEVERITY_LEVEL:
+      case ALERT_SEVERITY:
         return <SeverityBadge severityLevel={value ?? undefined} />;
-      case ALERT_RULE_NAME:
+      case ALERT_REASON:
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
         const alert = parseAlert(observabilityRuleTypeRegistry)(dataFieldEs);
 

@@ -31,7 +31,7 @@ export const mapConsumerToIndexName: Record<AlertConsumers, string | string[]> =
   logs: '.alerts-observability.logs',
   infrastructure: '.alerts-observability.metrics',
   observability: '.alerts-observability',
-  siem: ['.alerts-security.alerts', '.siem-signals'],
+  siem: '.alerts-security.alerts',
   uptime: '.alerts-observability.uptime',
 };
 export type ValidFeatureId = keyof typeof mapConsumerToIndexName;
