@@ -18,7 +18,7 @@ import { getFieldColumns, getFieldItems } from './field_items';
 import { FIELDS_PANE_WIDTH } from './helpers';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 import { ColumnHeaderOptions } from '../../../../../common';
-import { ALERT_RULE_THREAT_TECHNIQUE_NAME } from '../../../../../common/alert_constants';
+import { ALERT_RULE_THREAT_TECHNIQUE_NAME } from '../../../../../common/alerts';
 
 const selectedCategoryId = 'base';
 const selectedCategoryFields = mockBrowserFields[selectedCategoryId].fields;
@@ -195,8 +195,8 @@ describe('field_items', () => {
       });
     });
 
-    test('it returns the expected signal column settings', async () => {
-      const mockSelectedCategoryId = 'signal';
+    test('it returns the expected kibana column settings', async () => {
+      const mockSelectedCategoryId = 'kibana';
       const mockBrowserFieldsWithSignal = {
         ...mockBrowserFields,
         kibana: {

@@ -8,7 +8,7 @@
 import {
   ALERT_RULE_FROM,
   ALERT_RULE_TYPE,
-  ALERT_RULE_ID,
+  ALERT_RULE_UUID,
   ALERT_RULE_RISK_SCORE,
   ALERT_STATUS,
   ALERT_RULE_SEVERITY,
@@ -23,7 +23,7 @@ import {
   ALERT_RULE_QUERY,
   ALERT_RULE_INDEX,
   ALERT_ORIGINAL_TIME,
-} from '../../../../../../common/alert_constants';
+} from '../../../../../../common/alerts';
 import { EventHit } from '../../../../../../common/search_strategy';
 import { TIMELINE_EVENTS_FIELDS } from './constants';
 import { buildObjectForFieldPath, formatTimelineData } from './helpers';
@@ -289,7 +289,7 @@ describe('#formatTimelineData', () => {
         '@timestamp': ['2021-01-09T13:41:40.517Z'],
         [ALERT_RULE_QUERY]: ['_id :*'],
         [ALERT_RULE_TYPE]: ['threshold'],
-        [ALERT_RULE_ID]: ['696c24e0-526d-11eb-836c-e1620268b945'],
+        [ALERT_RULE_UUID]: ['696c24e0-526d-11eb-836c-e1620268b945'],
         [ALERT_RULE_RISK_SCORE]: [21],
         [ALERT_STATUS]: ['open'],
         'event.kind': ['signal'],

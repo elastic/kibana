@@ -9,7 +9,7 @@ import {
   ALERT_ORIGINAL_TIME,
   ALERT_RULE_INDEX,
   ALERT_RULE_LANGUAGE,
-} from './../../../../plugins/security_solution/common/alert_constants';
+} from './../../../../plugins/timelines/common/alerts';
 
 export const getFilterValue = (hostName: string, from: string, to: string): JsonObject => ({
   bool: {

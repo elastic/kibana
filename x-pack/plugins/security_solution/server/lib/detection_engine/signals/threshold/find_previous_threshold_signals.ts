@@ -6,7 +6,7 @@
  */
 
 import { TimestampOverrideOrUndefined } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { ALERT_ORIGINAL_TIME } from '../../../../../common/alert_constants';
+import { ALERT_ORIGINAL_TIME } from '../../../../../../timelines/common/alerts';
 import {
   AlertInstanceContext,
   AlertInstanceState,

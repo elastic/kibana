@@ -9,6 +9,7 @@ import { EuiTextColor, EuiFlexItem, EuiSpacer, EuiHorizontalRule, EuiTitle } fro
 import React, { useMemo } from 'react';
 
 import styled from 'styled-components';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { getRuleDetailsUrl, useFormatUrl } from '../link_to';
 import * as i18n from './translations';
 import { TimelineEventsDetailsItem } from '../../../../common';
@@ -33,13 +34,12 @@ export const ReasonComponent: React.FC<Props> = ({ eventId, data }) => {
   const { navigateToApp } = useKibana().services.application;
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 
-  const reason = useMemo(
-    () => getFieldValue({ category: 'signal', field: 'signal.reason' }, data),
-    [data]
-  );
+  const reason = useMemo(() => getFieldValue({ category: 'kibana', field: ALERT_REASON }, data), [
+    data,
+  ]);
 
   const ruleId = useMemo(
-    () => getFieldValue({ category: 'signal', field: 'signal.rule.id' }, data),
+    () => getFieldValue({ category: 'kibana', field: 'signal.rule.id' }, data),
     [data]
   );
 

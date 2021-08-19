@@ -11,7 +11,7 @@ import {
   ALERT_RULE_CREATED_BY,
   ALERT_RULE_DESCRIPTION,
   ALERT_RULE_FROM,
-  ALERT_RULE_ID,
+  ALERT_RULE_UUID,
   ALERT_RULE_INTERVAL,
   ALERT_RULE_LICENSE,
   ALERT_RULE_NAME,
@@ -56,7 +56,7 @@ import {
   ALERT_RULE_OUTPUT_INDEX,
   ALERT_RULE_QUERY,
   ALERT_RULE_THREAT,
-} from './../../../../../common/alert_constants';
+} from '../../../../../../timelines/common/alerts';
 
 export const mockAlertDetailsData = [
   { category: 'process', field: 'process.name', values: ['-'], originalValue: '-' },
@@ -403,7 +403,7 @@ export const mockAlertDetailsData = [
   { category: 'signal', field: ALERT_STATUS, values: ['open'], originalValue: 'open' },
   {
     category: 'signal',
-    field: ALERT_RULE_ID,
+    field: ALERT_RULE_UUID,
     values: ['b69d086c-325a-4f46-b17b-fb6d227006ba'],
     originalValue: 'b69d086c-325a-4f46-b17b-fb6d227006ba',
   },

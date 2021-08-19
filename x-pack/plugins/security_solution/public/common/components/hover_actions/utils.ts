@@ -10,7 +10,7 @@ import {
   ALERT_RULE_DESCRIPTION,
   ALERT_RULE_ENABLED,
   ALERT_RULE_FROM,
-  ALERT_RULE_ID,
+  ALERT_RULE_UUID,
   ALERT_RULE_INTERVAL,
   ALERT_RULE_NAME,
   ALERT_RULE_NOTE,
@@ -73,7 +73,7 @@ import {
   ALERT_RULE_THREAT_TECHNIQUE_REFERENCE,
   ALERT_RULE_TIMELINE_ID,
   ALERT_RULE_TIMELINE_TITLE,
-} from './../../../../common/alert_constants';
+} from '../../../../../timelines/common/alerts';
 
 export const getAdditionalScreenReaderOnlyContext = ({
   field,
@@ -110,7 +110,7 @@ export const allowTopN = ({
   ].includes(fieldType);
 
   // TODO: remove this explicit allowlist when the ECS documentation includes alerts
-  const isAllowlistedNonBrowserField = [
+  const isAllowlistedNonBrowserField = ([
     ALERT_ANCESTORS_DEPTH,
     ALERT_ANCESTORS_ID,
     ALERT_ANCESTORS_INDEX,
@@ -144,7 +144,7 @@ export const allowTopN = ({
     ALERT_RULE_FALSE_POSITIVES,
     ALERT_RULE_FILTERS,
     ALERT_RULE_FROM,
-    ALERT_RULE_ID,
+    ALERT_RULE_UUID,
     ALERT_RULE_IMMUTABLE,
     ALERT_RULE_INDEX,
     ALERT_RULE_INTERVAL,
@@ -175,8 +175,7 @@ export const allowTopN = ({
     ALERT_RULE_UPDATED_BY,
     ALERT_RULE_VERSION,
     ALERT_STATUS,
-    // @ts-expect-error fieldName does not need to match the string literals above
-  ].includes(fieldName);
+  ] as string[]).includes(fieldName);
 
   return isAllowlistedNonBrowserField || (isAggregatable && isAllowedType);
 };

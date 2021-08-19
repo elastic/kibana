@@ -10,7 +10,7 @@ import {
   ALERT_RULE_FROM,
   ALERT_RULE_NAME,
   ALERT_RULE_TO,
-  ALERT_RULE_ID,
+  ALERT_RULE_UUID,
   ALERT_RULE_TYPE,
   ALERT_RULE_VERSION,
   ALERT_RULE_SEVERITY,
@@ -35,7 +35,7 @@ import {
   ALERT_RULE_TIMELINE_ID,
   ALERT_RULE_TIMELINE_TITLE,
   ALERT_RULE_BUILDING_BLOCK_TYPE,
-} from '../../../../../../common/alert_constants';
+} from '../../../../../../common/alerts';
 
 // import { CTI_ROW_RENDERER_FIELDS } from '../../../../../../common/cti/constants';
 
@@ -83,7 +83,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   ALERT_RULE_QUERY,
   ALERT_RULE_NAME,
   ALERT_RULE_TO,
-  ALERT_RULE_ID,
+  ALERT_RULE_UUID,
   ALERT_RULE_INDEX,
   ALERT_RULE_TYPE,
   ALERT_ORIGINAL_EVENT_KIND,

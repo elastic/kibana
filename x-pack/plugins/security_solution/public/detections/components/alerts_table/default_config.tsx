@@ -36,7 +36,7 @@ import {
   ALERT_RULE_INDEX,
   ALERT_RULE_LANGUAGE,
   ALERT_RULE_QUERY,
-} from '../../../../common/alert_constants';
+} from '../../../../../timelines/common/alerts';
 
 export const buildAlertStatusFilter = (status: Status): Filter[] => [
   {
@@ -67,14 +67,14 @@ export const buildAlertsRuleIdFilter = (ruleId: string | null): Filter[] =>
             negate: false,
             disabled: false,
             type: 'phrase',
-            key: ALERT_RULE_ID,
+            key: ALERT_RULE_UUID,
             params: {
               query: ruleId,
             },
           },
           query: {
             match_phrase: {
-              [ALERT_RULE_ID]: ruleId,
+              [ALERT_RULE_UUID]: ruleId,
             },
           },
         },
@@ -135,7 +135,7 @@ export const requiredFieldsForActions = [
   ALERT_RULE_QUERY,
   ALERT_RULE_NAME,
   ALERT_RULE_TO,
-  ALERT_RULE_ID,
+  ALERT_RULE_UUID,
   ALERT_RULE_INDEX,
   ALERT_RULE_TYPE,
   ALERT_ORIGINAL_EVENT_KIND,

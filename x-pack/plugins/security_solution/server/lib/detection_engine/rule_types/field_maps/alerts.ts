@@ -68,7 +68,7 @@ import {
   ALERT_THRESHOLD_RESULT_TERMS,
   ALERT_THRESHOLD_RESULT_TERMS_FIELD,
   ALERT_THRESHOLD_RESULT_TERMS_VALUE,
-} from './../../../../../common/alert_constants';
+} from './../../../../../../timelines/common/alerts';
 
 export const alertsFieldMap: FieldMap = {
   [ALERT_ANCESTORS]: {

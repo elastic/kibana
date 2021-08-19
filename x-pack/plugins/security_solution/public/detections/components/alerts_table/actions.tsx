@@ -54,7 +54,7 @@ import {
   ALERT_GROUP_ID,
   ALERT_ORIGINAL_TIME,
   ALERT_RULE_FILTERS,
-} from '../../../../common/alert_constants';
+} from '../../../../../timelines/common/alerts';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   return {

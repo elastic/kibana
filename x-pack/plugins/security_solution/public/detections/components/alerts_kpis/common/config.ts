@@ -12,7 +12,7 @@ import {
   ALERT_RULE_TYPE,
 } from '@kbn/rule-data-utils';
 import type { AlertsStackByOption } from './types';
-import { ALERT_RULE_THREAT_TACTIC_NAME } from './../../../../../common/alert_constants';
+import { ALERT_RULE_THREAT_TACTIC_NAME } from '../../../../../../timelines/common/alerts';
 
 export const alertsStackByOptions: AlertsStackByOption[] = [
   { text: ALERT_RULE_RISK_SCORE, value: ALERT_RULE_RISK_SCORE },

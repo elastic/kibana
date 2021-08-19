@@ -22,7 +22,7 @@ import { HostTacticsFields } from '../../../../common';
 import {
   ALERT_RULE_THREAT_TACTIC_NAME,
   ALERT_RULE_THREAT_TECHNIQUE_NAME,
-} from '../../../../common/alert_constants';
+} from '../../../../../timelines/common/alerts';
 
 export const getHostTacticsColumns = (): HostTacticsColumns => [
   {

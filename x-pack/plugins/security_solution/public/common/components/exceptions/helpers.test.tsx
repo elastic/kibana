@@ -46,7 +46,7 @@ import { IndexPatternBase } from '@kbn/es-query';
 import {
   ALERT_ORIGINAL_EVENT_KIND,
   ALERT_ORIGINAL_EVENT_MODULE,
-} from '../../../../common/alert_constants';
+} from '../../../../../timelines/common/alerts';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),

@@ -17,7 +17,7 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import { ALERT_RULE_ID, ALERT_RULE_NAME, AlertConsumers } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID, ALERT_RULE_NAME, AlertConsumers } from '@kbn/rule-data-utils';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
@@ -112,7 +112,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     }
   }, []);
 
-  const isAlert = some({ category: 'kibana', field: ALERT_RULE_ID }, detailsData);
+  const isAlert = some({ category: 'kibana', field: ALERT_RULE_UUID }, detailsData);
 
   const ruleName = useMemo(
     () => getFieldValue({ category: 'kibana', field: ALERT_RULE_NAME }, detailsData),

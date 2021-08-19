@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_ID, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 export const buildLastAlertsQuery = (ruleId: string | undefined | null) => {
   const queryFilter = [
@@ -26,7 +26,7 @@ export const buildLastAlertsQuery = (ruleId: string | undefined | null) => {
                 ...queryFilter,
                 {
                   bool: {
-                    should: [{ match: { [ALERT_RULE_ID]: ruleId } }],
+                    should: [{ match: { [ALERT_RULE_UUID]: ruleId } }],
                     minimum_should_match: 1,
                   },
                 },

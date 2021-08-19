@@ -9,7 +9,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { EuiContextMenu, EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ALERT_RULE_ID, ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID, ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 
 import { TimelineEventsDetailsItem, TimelineNonEcsData } from '../../../../common';
@@ -76,7 +76,7 @@ export const TakeActionDropdown = React.memo(
     const actionsData = useMemo(
       () =>
         [
-          { category: 'signal', field: ALERT_RULE_ID, name: 'ruleId' },
+          { category: 'signal', field: ALERT_RULE_UUID, name: 'ruleId' },
           { category: 'signal', field: ALERT_RULE_NAME, name: 'ruleName' },
           { category: 'signal', field: ALERT_STATUS, name: 'alertStatus' },
           { category: 'event', field: 'event.kind', name: 'eventKind' },

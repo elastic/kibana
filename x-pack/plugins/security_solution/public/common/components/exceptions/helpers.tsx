@@ -44,7 +44,7 @@ import exceptionableLinuxFields from './exceptionable_linux_fields.json';
 import exceptionableWindowsMacFields from './exceptionable_windows_mac_fields.json';
 import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
 import exceptionableEndpointEventFields from './exceptionable_endpoint_event_fields.json';
-import { ALERT_ORIGINAL_EVENT } from '../../../../common/alert_constants';
+import { ALERT_ORIGINAL_EVENT } from '../../../../../timelines/common/alerts';
 
 export const filterIndexPatterns = (
   patterns: IndexPatternBase,

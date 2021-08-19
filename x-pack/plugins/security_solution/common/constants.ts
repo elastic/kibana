@@ -8,7 +8,7 @@
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 import { metadataTransformPattern } from './endpoint/constants';
-import { ALERT_RULE_THREAT_TACTIC_NAME } from './alert_constants';
+import { ALERT_RULE_THREAT_TACTIC_NAME } from '../../timelines/common/alerts';
 
 export const APP_ID = 'securitySolution';
 export const SERVER_APP_ID = 'siem';

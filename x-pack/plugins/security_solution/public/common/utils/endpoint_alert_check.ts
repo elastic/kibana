@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_ID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { find, some } from 'lodash/fp';
 import { TimelineEventsDetailsItem } from '../../../../timelines/common';
 
@@ -15,7 +15,7 @@ import { TimelineEventsDetailsItem } from '../../../../timelines/common';
  * @param data
  */
 export const endpointAlertCheck = ({ data }: { data: TimelineEventsDetailsItem[] }): boolean => {
-  const isAlert = some({ category: 'signal', field: ALERT_RULE_ID }, data);
+  const isAlert = some({ category: 'kibana', field: ALERT_RULE_UUID }, data);
 
   if (!isAlert) {
     return false;

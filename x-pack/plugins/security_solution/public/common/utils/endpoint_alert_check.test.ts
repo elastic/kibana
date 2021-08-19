@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_ID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import _ from 'lodash';
 import { generateMockDetailItemData } from '../mock';
 import { endpointAlertCheck } from './endpoint_alert_check';
@@ -22,7 +22,7 @@ describe('Endpoint Alert Check Utility', () => {
     mockDetailItemData.push(
       // Must be an Alert
       {
-        field: ALERT_RULE_ID,
+        field: ALERT_RULE_UUID,
         category: 'signal',
         originalValue: 'endpoint',
         values: ['endpoint'],
@@ -43,7 +43,7 @@ describe('Endpoint Alert Check Utility', () => {
   });
 
   it('should return false if it is not an Alert (ex. maybe an event)', () => {
-    _.remove(mockDetailItemData, { field: ALERT_RULE_ID });
+    _.remove(mockDetailItemData, { field: ALERT_RULE_UUID });
     expect(endpointAlertCheck({ data: mockDetailItemData })).toBeFalsy();
   });
 

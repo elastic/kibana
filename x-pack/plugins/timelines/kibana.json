@@ -7,7 +7,7 @@
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "timelines"],
-  "extraPublicDirs": ["common"],
+  "extraPublicDirs": ["common", "common/alerts"],
   "server": true,
   "ui": true,
   "requiredPlugins": ["alerting", "cases", "data", "dataEnhanced", "kibanaReact", "kibanaUtils"],

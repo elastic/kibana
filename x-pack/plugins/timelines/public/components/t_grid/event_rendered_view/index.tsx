@@ -15,10 +15,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  /* ALERT_REASON, ALERT_RULE_ID, */ ALERT_RULE_NAME,
-  TIMESTAMP,
-} from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_RULE_NAME, ALERT_RULE_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import moment from 'moment';
 import React, { ComponentType, useCallback, useMemo } from 'react';
@@ -169,8 +166,8 @@ const EventRenderedViewComponent = ({
         hideForMobile: false,
         // eslint-disable-next-line react/display-name
         render: (name: unknown, item: TimelineItem) => {
-          const ruleName = get(item, `ecs.signal.rule.name`); /* `ecs.${ALERT_RULE_NAME}`*/
-          const ruleId = get(item, `ecs.signal.rule.id}`); /* `ecs.${ALERT_RULE_ID}`*/
+          const ruleName = get(item, `ecs.${ALERT_RULE_NAME}`);
+          const ruleId = get(item, `ecs.${ALERT_RULE_UUID}`);
           return <RuleName name={ruleName} id={ruleId} />;
         },
       },
@@ -184,7 +181,7 @@ const EventRenderedViewComponent = ({
         // eslint-disable-next-line react/display-name
         render: (name: unknown, item: TimelineItem) => {
           const ecsData = get(item, 'ecs');
-          const reason = get(item, `ecs.signal.reason`); /* `ecs.${ALERT_REASON}`*/
+          const reason = get(item, `ecs.${ALERT_REASON}`);
           const rowRenderersValid = rowRenderers.filter((rowRenderer) =>
             rowRenderer.isInstance(ecsData)
           );

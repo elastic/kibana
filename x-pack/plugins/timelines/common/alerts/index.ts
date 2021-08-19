@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export * from './types';
-export * from './search_strategy';
-export * from './utils/accessibility';
-export * from './alerts';
-
-export const PLUGIN_ID = 'timelines';
-export const PLUGIN_NAME = 'timelines';
+export * from './constants';

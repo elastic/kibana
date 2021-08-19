@@ -11,7 +11,7 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import {
-  ALERT_RULE_ID,
+  ALERT_RULE_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_RISK_SCORE,
   ALERT_RULE_SEVERITY,
@@ -50,7 +50,7 @@ import {
   ALERT_THRESHOLD_RESULT_COUNT,
   ALERT_THRESHOLD_RESULT_TERMS,
   ALERT_THRESHOLD_RESULT_CARDINALITY,
-} from '../../../../common/alert_constants';
+} from '../../../../../timelines/common/alerts';
 import { EventCode } from '../../../../common/ecs/event';
 
 export const Indent = styled.div`
@@ -75,7 +75,7 @@ const defaultDisplayFields: EventSummaryField[] = [
   { id: '@timestamp', label: TIMESTAMP },
   {
     id: ALERT_RULE_NAME,
-    linkField: ALERT_RULE_ID,
+    linkField: ALERT_RULE_UUID,
     label: ALERTS_HEADERS_RULE,
   },
   { id: ALERT_RULE_SEVERITY, label: ALERTS_HEADERS_SEVERITY },
@@ -318,7 +318,7 @@ const AlertSummaryViewComponent: React.FC<{
   ]);
 
   const ruleId = useMemo(() => {
-    const item = data.find((d) => d.field === ALERT_RULE_ID);
+    const item = data.find((d) => d.field === ALERT_RULE_UUID);
     return Array.isArray(item?.originalValue)
       ? item?.originalValue[0]
       : item?.originalValue ?? null;

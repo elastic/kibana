@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { isNotFoundError } from '@kbn/securitysolution-t-grid';
 import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
-import { ALERT_RULE_ID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useQueryAlerts } from '../alerts/use_query';
 import { fetchRuleById } from './api';
@@ -42,7 +42,7 @@ const useFetchRule = () => useAsync(fetchWithOptionslSignal);
 const buildLastAlertQuery = (ruleId: string) => ({
   query: {
     bool: {
-      filter: [{ match: { [ALERT_RULE_ID]: ruleId } }],
+      filter: [{ match: { [ALERT_RULE_UUID]: ruleId } }],
     },
   },
   size: 1,

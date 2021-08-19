@@ -6,7 +6,7 @@
  */
 
 import {
-  ALERT_RULE_ID,
+  ALERT_RULE_UUID,
   ALERT_RULE_FROM,
   ALERT_RULE_TO,
   ALERT_RULE_RULE_ID,
@@ -43,7 +43,7 @@ import {
   ALERT_RULE_SIZE,
   ALERT_RULE_THRESHOLD,
   ALERT_RULE_EXCEPTIONS_LIST,
-} from '../../alert_constants';
+} from '../../alerts';
 import { extendMap } from './extend_map';
 
 export const auditdMap: Readonly<Record<string, string>> = {
@@ -332,7 +332,7 @@ export const systemFieldsMap: Readonly<Record<string, string>> = {
 export const alertFieldsMap: Readonly<Record<string, string>> = {
   [ALERT_ORIGINAL_TIME]: ALERT_ORIGINAL_TIME,
   [ALERT_REASON]: ALERT_REASON,
-  [ALERT_RULE_ID]: ALERT_RULE_ID,
+  [ALERT_RULE_UUID]: ALERT_RULE_UUID,
   [ALERT_RULE_SAVED_ID]: ALERT_RULE_SAVED_ID,
   [ALERT_RULE_TIMELINE_ID]: ALERT_RULE_TIMELINE_ID,
   [ALERT_RULE_TIMELINE_TITLE]: ALERT_RULE_TIMELINE_TITLE,

@@ -11,7 +11,7 @@ import {
   ALERT_RULE_SEVERITY,
   ALERT_RULE_TYPE,
 } from '@kbn/rule-data-utils';
-import { ALERT_RULE_THREAT_TACTIC_NAME } from './../../../../../common/alert_constants';
+import { ALERT_RULE_THREAT_TACTIC_NAME } from '../../../../../../timelines/common/alerts';
 
 export interface AlertsStackByOption {
   text: AlertsStackByField;

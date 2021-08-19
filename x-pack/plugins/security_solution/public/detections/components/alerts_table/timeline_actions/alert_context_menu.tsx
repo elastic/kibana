@@ -39,7 +39,7 @@ import { Status } from '../../../../../common/detection_engine/schemas/common/sc
 import {
   ALERT_ORIGINAL_EVENT_MODULE,
   ALERT_ORIGINAL_EVENT_KIND,
-} from '../../../../../common/alert_constants';
+} from '../../../../../../timelines/common/alerts';
 import { useInsertTimeline } from '../../../../cases/components/use_insert_timeline';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import { useInvestigateInResolverContextItem } from './investigate_in_resolver';

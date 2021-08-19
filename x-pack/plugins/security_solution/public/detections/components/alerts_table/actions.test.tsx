@@ -27,7 +27,7 @@ import { ISearchStart } from '../../../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { getTimelineTemplate } from '../../../timelines/containers/api';
 import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
-import { ALERT_GROUP_ID } from '../../../../common/alert_constants';
+import { ALERT_GROUP_ID } from '../../../../../timelines/common/alerts';
 
 jest.mock('../../../timelines/containers/api', () => ({
   getTimelineTemplate: jest.fn(),
