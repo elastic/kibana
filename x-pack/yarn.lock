@@ -2,30 +2,3 @@
 # yarn lockfile v1
 
 
-"@kbn/interpreter@link:../packages/kbn-interpreter":
-  version "0.0.0"
-  uid ""
-
-"@kbn/optimizer@link:../packages/kbn-optimizer":
-  version "0.0.0"
-  uid ""
-
-"@kbn/plugin-helpers@link:../packages/kbn-plugin-helpers":
-  version "0.0.0"
-  uid ""
-
-"@kbn/storybook@link:../packages/kbn-storybook":
-  version "0.0.0"
-  uid ""
-
-"@kbn/test@link:../packages/kbn-test":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ui-framework@link:../packages/kbn-ui-framework":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ui-shared-deps@link:../packages/kbn-ui-shared-deps":
-  version "0.0.0"
-  uid ""
