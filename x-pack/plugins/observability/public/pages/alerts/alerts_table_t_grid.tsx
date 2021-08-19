@@ -33,7 +33,7 @@ import {
   EuiDataGridColumn,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiContextMenu,
+  EuiContextMenuPanel,
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -219,26 +219,21 @@ function ObservabilityActions({
     onUpdateFailure: onAlertStatusUpdated,
   });
 
-  const actionsPanels = useMemo(() => {
+  const actionsMenuItems = useMemo(() => {
     return [
-      {
-        id: 0,
-        content: [
-          timelines.getAddToExistingCaseButton({
-            event,
-            casePermissions,
-            appId: observabilityFeatureId,
-            onClose: afterCaseSelection,
-          }),
-          timelines.getAddToNewCaseButton({
-            event,
-            casePermissions,
-            appId: observabilityFeatureId,
-            onClose: afterCaseSelection,
-          }),
-          ...(alertPermissions.crud ? statusActionItems : []),
-        ],
-      },
+      timelines.getAddToExistingCaseButton({
+        event,
+        casePermissions,
+        appId: observabilityFeatureId,
+        onClose: afterCaseSelection,
+      }),
+      timelines.getAddToNewCaseButton({
+        event,
+        casePermissions,
+        appId: observabilityFeatureId,
+        onClose: afterCaseSelection,
+      }),
+      ...(alertPermissions.crud ? statusActionItems : []),
     ];
   }, [afterCaseSelection, casePermissions, timelines, event, statusActionItems, alertPermissions]);
 
@@ -279,7 +274,7 @@ function ObservabilityActions({
             panelPaddingSize="none"
             anchorPosition="downLeft"
           >
-            <EuiContextMenu panels={actionsPanels} initialPanelId={0} />
+            <EuiContextMenuPanel size="s" items={actionsMenuItems} />
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>

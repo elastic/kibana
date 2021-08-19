@@ -33,7 +33,6 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
         <EuiContextMenuItem
           aria-label={ariaLabel}
           data-test-subj="attach-alert-to-case-button"
-          size="s"
           onClick={addExistingCaseClick}
           disabled={isDisabled}
         >
