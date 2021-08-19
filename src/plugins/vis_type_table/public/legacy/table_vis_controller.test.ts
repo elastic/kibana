@@ -10,7 +10,6 @@ import angular, { ICompileService, IRootScopeService, IScope } from 'angular';
 import 'angular-mocks';
 import 'angular-sanitize';
 import $ from 'jquery';
-import { identity } from 'lodash';
 
 import { getAngularModule } from './get_inner_angular';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
@@ -22,7 +21,6 @@ import { tableVisLegacyResponseHandler } from './table_vis_legacy_response_handl
 import { coreMock } from '../../../../core/public/mocks';
 import { IAggConfig, IndexPattern, search } from '../../../data/public';
 import { searchServiceMock } from '../../../data/public/search/mocks';
-import { FieldFormat } from '../../../field_formats/common';
 
 const { createAggConfigs } = searchServiceMock.createStartContract().aggs;
 
@@ -101,9 +99,6 @@ describe('Table Vis - Controller', () => {
         fields: stubFieldSpecMap,
       },
     });
-    jest
-      .spyOn(stubIndexPattern, 'getFormatterForField')
-      .mockImplementation(() => new (FieldFormat.from(identity))());
   });
 
   function getRangeVis(params?: object) {
