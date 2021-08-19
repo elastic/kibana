@@ -9,6 +9,7 @@ import { SavedObject, SavedObjectsFindResult } from 'kibana/server';
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import {
+  fullRACResponseSchema,
   FullResponseSchema,
   fullResponseSchema,
 } from '../../../../../common/detection_engine/schemas/request';
@@ -41,16 +42,21 @@ export const transformValidate = (
   }
 };
 
-export const newTransformValidate = (
-  alert: PartialAlert<RuleParams>,
+export const newTransformValidate = <TRuleParams extends RuleParams>(
+  alert: PartialAlert<TRuleParams>,
   ruleActions?: RuleActions | null,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
+  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
+  isRuleRegistryEnabled?: boolean
 ): [FullResponseSchema | null, string | null] => {
-  const transformed = transform(alert, ruleActions, ruleStatus);
+  const transformed = transform(alert, ruleActions, ruleStatus, isRuleRegistryEnabled);
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
-    return validateNonExact(transformed, fullResponseSchema);
+    const retVal = validateNonExact(
+      transformed,
+      isRuleRegistryEnabled ? fullRACResponseSchema : fullResponseSchema
+    );
+    return retVal;
   }
 };
 

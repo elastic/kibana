@@ -295,7 +295,7 @@ export const internalRuleToAPIResponse = <TRuleParams extends RuleParams>(
   ruleActions?: RuleActions | null,
   ruleStatus?: IRuleStatusSOAttributes,
   isRuleRegistryEnabled?: boolean
-): FullResponseSchema => {
+): FullResponseSchema & { namespace?: string } => {
   const mergedStatus = ruleStatus ? mergeAlertWithSidecarStatus(rule, ruleStatus) : undefined;
   const response = {
     // Alerting framework params
@@ -327,7 +327,7 @@ export const internalRuleToAPIResponse = <TRuleParams extends RuleParams>(
   if (isRuleRegistryEnabled) {
     return {
       ...response,
-      namespace: ((rule as unknown) as BaseRACRuleParams).namespace,
+      namespace: ((rule.params as unknown) as BaseRACRuleParams).namespace,
     } as FullRACResponseSchema;
   }
 

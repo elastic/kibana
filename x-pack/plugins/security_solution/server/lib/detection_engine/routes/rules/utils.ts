@@ -102,12 +102,18 @@ export const transformTags = (tags: string[]): string[] => {
 
 // Transforms the data but will remove any null or undefined it encounters and not include
 // those on the export
-export const transformAlertToRule = (
-  alert: SanitizedAlert<RuleParams>,
+export const transformAlertToRule = <TRuleParams extends RuleParams>(
+  alert: SanitizedAlert<TRuleParams>,
   ruleActions?: RuleActions | null,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
+  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
+  isRuleRegistryEnabled?: boolean
 ): Partial<RulesSchema> => {
-  return internalRuleToAPIResponse(alert, ruleActions, ruleStatus?.attributes);
+  return internalRuleToAPIResponse(
+    alert,
+    ruleActions,
+    ruleStatus?.attributes,
+    isRuleRegistryEnabled ?? false
+  );
 };
 
 export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<RulesSchema>> => {
@@ -145,13 +151,15 @@ export const transformFindAlerts = <TRuleParams extends RuleParams>(
 export const transform = <TRuleParams extends RuleParams>(
   alert: PartialAlert<TRuleParams>,
   ruleActions?: RuleActions | null,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
+  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
+  isRuleRegistryEnabled?: boolean
 ): Partial<RulesSchema> | null => {
-  if (isAlertType(false, alert)) {
+  if (isAlertType(isRuleRegistryEnabled ?? false, alert)) {
     return transformAlertToRule(
       alert,
       ruleActions,
-      isRuleStatusSavedObjectType(ruleStatus) ? ruleStatus : undefined
+      isRuleStatusSavedObjectType(ruleStatus) ? ruleStatus : undefined,
+      isRuleRegistryEnabled
     );
   }
 

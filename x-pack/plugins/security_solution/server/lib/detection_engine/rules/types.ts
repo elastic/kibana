@@ -204,7 +204,7 @@ export const isAlertType = <TRuleParams extends RuleParams>(
   partialAlert: PartialAlert<RuleParams>
 ): partialAlert is Alert<TRuleParams> => {
   return isRuleRegistryEnabled
-    ? Object.keys(ruleTypeMappings).includes(partialAlert.alertTypeId as string)
+    ? Object.values(ruleTypeMappings).includes(partialAlert.alertTypeId as string)
     : partialAlert.alertTypeId === SIGNALS_ID;
 };
 

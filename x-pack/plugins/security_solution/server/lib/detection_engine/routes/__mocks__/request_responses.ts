@@ -40,6 +40,7 @@ import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { FindBulkExecutionLogResponse } from '../../rule_execution_log/types';
+import { ruleTypeMappings } from '../../signals/utils';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -367,7 +368,7 @@ export const getAlertMock = <T extends RuleParams>(params: T): Alert<T> => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
-  alertTypeId: 'namespace' in params ? (params as T).type : 'siem.signals',
+  alertTypeId: 'namespace' in params ? ruleTypeMappings[(params as T).type] : 'siem.signals',
   consumer: 'siem',
   params,
   createdAt: new Date('2019-12-13T16:40:33.400Z'),

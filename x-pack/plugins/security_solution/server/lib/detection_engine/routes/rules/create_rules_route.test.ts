@@ -58,6 +58,7 @@ describe('create_rules', () => {
         clients.rulesClient.create.mockResolvedValue(
           getAlertMock(getQueryRuleParams(ruleDataClient != null))
         ); // creation succeeds
+        console.log('namespace' in getAlertMock(getQueryRuleParams(ruleDataClient != null)).params);
         createRulesRoute(server.router, ml, ruleDataClient);
         (updateRulesNotifications as jest.Mock).mockResolvedValue({
           id: 'id',
