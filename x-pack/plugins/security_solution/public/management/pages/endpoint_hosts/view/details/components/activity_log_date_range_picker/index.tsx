@@ -6,7 +6,7 @@
  */
 
 import { useDispatch } from 'react-redux';
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
 import dateMath from '@elastic/datemath';
 import {
@@ -50,11 +50,8 @@ export const DateRangePicker = memo(() => {
     recentlyUsedDateRanges,
   } = useEndpointSelector(getActivityLogDataPaging);
 
-  const [isLoading, setIsLoading] = useState(false);
-
   const dispatchActionUpdateActivityLogPaging = useCallback(
     async ({ start, end }) => {
-      setIsLoading(true);
       dispatch({
         type: 'endpointDetailsActivityLogUpdatePaging',
         payload: {
@@ -65,7 +62,6 @@ export const DateRangePicker = memo(() => {
           endDate: end ? dateMath.parse(end)?.toISOString() : undefined,
         },
       });
-      setIsLoading(false);
     },
     [dispatch, page, pageSize]
   );
@@ -133,7 +129,6 @@ export const DateRangePicker = memo(() => {
             <EuiSuperDatePicker
               commonlyUsedRanges={commonlyUsedRanges}
               end={dateMath.parse(endDate)?.toISOString()}
-              isLoading={isLoading}
               isPaused={!autoRefreshOptions.enabled}
               onTimeChange={onTimeChange}
               onRefreshChange={onRefreshChange}
