@@ -63,7 +63,8 @@ const i18nTexts = {
   resolutionTooltipLabel: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.reindex.resolutionTooltipLabel',
     {
-      defaultMessage: 'This deprecation requires reindexing an index to resolve.',
+      defaultMessage:
+        'Resolve this deprecation by reindexing this index. This is an automated resolution.',
     }
   ),
 };
@@ -146,10 +147,10 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
     <EuiToolTip position="top" content={i18nTexts.resolutionTooltipLabel}>
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
+          <EuiIcon type="indexSettings" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="indexSettings" />
+          <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiToolTip>

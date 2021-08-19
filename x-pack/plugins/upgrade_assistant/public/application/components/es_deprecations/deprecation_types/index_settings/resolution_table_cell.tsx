@@ -46,7 +46,8 @@ const i18nTexts = {
   resolutionTooltipLabel: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.indexSettings.resolutionTooltipLabel',
     {
-      defaultMessage: 'This deprecation requires removing index settings from an index to resolve.',
+      defaultMessage:
+        'Resolve this deprecation by removing settings from this index. This is an automated resolution.',
     }
   ),
 };
@@ -118,10 +119,10 @@ export const IndexSettingsResolutionCell: React.FunctionComponent<Props> = ({ st
         data-test-subj="indexSettingsResolutionStatusCell"
       >
         <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
+          <EuiIcon type="indexSettings" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="indexSettings" />
+          <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiToolTip>

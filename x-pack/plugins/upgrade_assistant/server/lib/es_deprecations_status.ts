@@ -25,7 +25,7 @@ export async function getESUpgradeStatus(
 
     return Object.keys(deprecations).reduce((combinedDeprecations, deprecationType) => {
       if (deprecationType === 'index_settings') {
-        combinedDeprecations = [...combinedDeprecations, ...indices];
+        combinedDeprecations = combinedDeprecations.concat(indices);
       } else {
         const deprecationsByType = deprecations[
           deprecationType as keyof MigrationDeprecationInfoResponse
@@ -54,7 +54,7 @@ export async function getESUpgradeStatus(
           }
         );
 
-        combinedDeprecations = [...combinedDeprecations, ...enrichedDeprecationInfo];
+        combinedDeprecations = combinedDeprecations.concat(enrichedDeprecationInfo);
       }
 
       return combinedDeprecations;
@@ -63,13 +63,10 @@ export async function getESUpgradeStatus(
 
   const combinedDeprecations = await getCombinedDeprecations();
   const criticalWarnings = combinedDeprecations.filter(({ isCritical }) => isCritical === true);
-  const sortByCritical = (a: EnrichedDeprecationInfo, b: EnrichedDeprecationInfo) => {
-    return a.isCritical === b.isCritical ? 0 : a.isCritical ? -1 : 1;
-  };
 
   return {
     totalCriticalDeprecations: criticalWarnings.length,
-    deprecations: combinedDeprecations.sort(sortByCritical),
+    deprecations: combinedDeprecations,
   };
 }
 

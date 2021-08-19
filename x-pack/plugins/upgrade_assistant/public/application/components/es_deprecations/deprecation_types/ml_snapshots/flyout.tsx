@@ -45,7 +45,7 @@ const i18nTexts = {
     }
   ),
   closeButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.cancelButtonLabel',
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.closeButtonLabel',
     {
       defaultMessage: 'Close',
     }
@@ -92,6 +92,9 @@ export const FixSnapshotsFlyout = ({
   upgradeSnapshot,
   deleteSnapshot,
 }: FixSnapshotsFlyoutProps) => {
+  // Flag used to hide certain parts of the UI if the deprecation has been resolved or is in progress
+  const isResolvable = ['idle', 'error'].includes(snapshotState.status);
+
   const onUpgradeSnapshot = () => {
     upgradeSnapshot();
     closeFlyout();
@@ -143,8 +146,8 @@ export const FixSnapshotsFlyout = ({
               {i18nTexts.closeButtonLabel}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {/* Hide the upgrade/delete actions if the deprecation has been resolved */}
-          {snapshotState.status !== 'complete' && (
+
+          {isResolvable && (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup>
                 <EuiFlexItem>

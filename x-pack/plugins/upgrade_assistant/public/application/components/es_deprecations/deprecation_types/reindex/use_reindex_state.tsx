@@ -131,7 +131,7 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
       cancelLoadingState: undefined,
     });
 
-    await api.sendReindexTelemetryData({ start: true });
+    api.sendReindexTelemetryData({ start: true });
 
     const { data, error } = await api.startReindexTask(indexName);
 
@@ -149,7 +149,7 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
   }, [api, indexName, reindexState, updateStatus]);
 
   const cancelReindex = useCallback(async () => {
-    await api.sendReindexTelemetryData({ stop: true });
+    api.sendReindexTelemetryData({ stop: true });
 
     const { error } = await api.cancelReindexTask(indexName);
 

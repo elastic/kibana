@@ -45,7 +45,7 @@ const i18nTexts = {
     }
   ),
   closeButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.deprecationDetailsFlyout.cancelButtonLabel',
+    'xpack.upgradeAssistant.esDeprecations.deprecationDetailsFlyout.closeButtonLabel',
     {
       defaultMessage: 'Close',
     }

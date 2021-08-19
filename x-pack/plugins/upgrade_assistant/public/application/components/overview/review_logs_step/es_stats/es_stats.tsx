@@ -52,7 +52,8 @@ const i18nTexts = {
     }),
   getWarningDeprecationMessage: (warningDeprecations: number) =>
     i18n.translate('xpack.upgradeAssistant.esDeprecationStats.warningDeprecationsTooltip', {
-      defaultMessage: 'This cluster has {warningDeprecations} non-critical deprecations',
+      defaultMessage:
+        'This cluster has {warningDeprecations} non-critical {warningDeprecations, plural, one {deprecation} other {deprecations}}',
       values: {
         warningDeprecations,
       },
@@ -63,7 +64,7 @@ export const ESDeprecationStats: FunctionComponent = () => {
   const history = useHistory();
   const { api } = useAppContext();
 
-  const { data: esDeprecations, isLoading, error } = api.useLoadUpgradeStatus();
+  const { data: esDeprecations, isLoading, error } = api.useLoadEsDeprecations();
 
   const warningDeprecations =
     esDeprecations?.deprecations?.filter((deprecation) => deprecation.isCritical === false) || [];

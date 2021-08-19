@@ -73,17 +73,19 @@ const i18nTexts = {
     }
   ),
   closeButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.removeSettingsFlyout.cancelButtonLabel',
+    'xpack.upgradeAssistant.esDeprecations.removeSettingsFlyout.closeButtonLabel',
     {
       defaultMessage: 'Close',
     }
   ),
-  confirmationText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.removeSettingsFlyout.description',
-    {
-      defaultMessage: 'Remove the following deprecated index settings?',
-    }
-  ),
+  getConfirmationText: (indexSettingsCount: number) =>
+    i18n.translate('xpack.upgradeAssistant.esDeprecations.removeSettingsFlyout.description', {
+      defaultMessage:
+        'Remove the following deprecated index {indexSettingsCount, plural, one {setting} other {settings}}?',
+      values: {
+        indexSettingsCount,
+      },
+    }),
   errorTitle: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.removeSettingsFlyout.deleteErrorTitle',
     {
@@ -100,6 +102,9 @@ export const RemoveIndexSettingsFlyout = ({
 }: RemoveIndexSettingsFlyoutProps) => {
   const { index, message, details, url, correctiveAction } = deprecation;
   const { statusType, details: statusDetails } = status;
+
+  // Flag used to hide certain parts of the UI if the deprecation has been resolved or is in progress
+  const isResolvable = ['idle', 'error'].includes(statusType);
 
   return (
     <>
@@ -127,6 +132,7 @@ export const RemoveIndexSettingsFlyout = ({
             <EuiSpacer />
           </>
         )}
+
         <EuiText>
           <p>{details}</p>
           <p>
@@ -136,13 +142,16 @@ export const RemoveIndexSettingsFlyout = ({
           </p>
         </EuiText>
 
-        {/* Hide the prompt to remove settings if the deprecation has been resolved */}
-        {statusType !== 'complete' && (
+        {isResolvable && (
           <div data-test-subj="removeSettingsPrompt">
             <EuiSpacer />
 
             <EuiTitle size="xs">
-              <h3>{i18nTexts.confirmationText}</h3>
+              <h3>
+                {i18nTexts.getConfirmationText(
+                  (correctiveAction as IndexSettingAction).deprecatedSettings.length
+                )}
+              </h3>
             </EuiTitle>
 
             <EuiSpacer />
@@ -168,8 +177,8 @@ export const RemoveIndexSettingsFlyout = ({
               {i18nTexts.closeButtonLabel}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {/* Hide the "Remove settings" button if the deprecation has been resolved */}
-          {statusType !== 'complete' && (
+
+          {isResolvable && (
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill

@@ -36,12 +36,6 @@ import { DeprecationTableColumns } from '../types';
 import { DEPRECATION_TYPE_MAP } from '../constants';
 
 const i18nTexts = {
-  criticalBadgeLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.table.criticalBadgeLabel',
-    {
-      defaultMessage: 'critical',
-    }
-  ),
   refreshButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.table.refreshButtonLabel',
     {
@@ -108,21 +102,19 @@ const cellTypes = Object.keys(cellToLabelMap) as DeprecationTableColumns[];
 const pageSizeOptions = [50, 100, 200];
 
 const renderTableRowCells = (deprecation: EnrichedDeprecationInfo) => {
-  const { correctiveAction } = deprecation;
+  switch (deprecation.correctiveAction?.type) {
+    case 'mlSnapshot':
+      return <MlSnapshotsTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
 
-  if (correctiveAction?.type === 'mlSnapshot') {
-    return <MlSnapshotsTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+    case 'indexSetting':
+      return <IndexSettingsTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+
+    case 'reindex':
+      return <ReindexTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+
+    default:
+      return <DefaultTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
   }
-
-  if (correctiveAction?.type === 'indexSetting') {
-    return <IndexSettingsTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
-  }
-
-  if (correctiveAction?.type === 'reindex') {
-    return <ReindexTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
-  }
-
-  return <DefaultTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
 };
 
 interface Props {
@@ -140,6 +132,7 @@ const getSortedItems = (deprecations: EnrichedDeprecationInfo[], sortConfig: Sor
   const sorted = sortBy(deprecations, [
     (deprecation) => {
       if (sortField === 'isCritical') {
+        // Critical deprecations should take precendence in ascending order
         return deprecation.isCritical !== true;
       }
       return deprecation[sortField];
@@ -172,6 +165,11 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
     deprecations,
     itemsPerPage,
   ]);
+
+  const visibleDeprecations = useMemo(
+    () => filteredDeprecations.slice(pager.firstItemIndex, pager.lastItemIndex + 1),
+    [filteredDeprecations, pager]
+  );
 
   const handleSort = useCallback(
     (fieldName: DeprecationTableColumns) => {
@@ -264,7 +262,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
 
       <EuiSpacer size="m" />
 
-      <EuiTable id="es_deprecations_table">
+      <EuiTable>
         <EuiTableHeader>
           {Object.entries(cellToLabelMap).map(([fieldName, cell]) => {
             return (
@@ -291,18 +289,13 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
           </EuiTableBody>
         ) : (
           <EuiTableBody>
-            {filteredDeprecations
-              .slice(pager.firstItemIndex, pager.lastItemIndex + 1)
-              .map((deprecation, index) => {
-                return (
-                  <EuiTableRow
-                    data-test-subj="deprecationTableRow"
-                    key={`deprecation-row-${index}`}
-                  >
-                    {renderTableRowCells(deprecation)}
-                  </EuiTableRow>
-                );
-              })}
+            {visibleDeprecations.map((deprecation, index) => {
+              return (
+                <EuiTableRow data-test-subj="deprecationTableRow" key={`deprecation-row-${index}`}>
+                  {renderTableRowCells(deprecation)}
+                </EuiTableRow>
+              );
+            })}
           </EuiTableBody>
         )}
       </EuiTable>

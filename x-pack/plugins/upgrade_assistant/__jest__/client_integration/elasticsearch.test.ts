@@ -142,7 +142,7 @@ describe('Elasticsearch deprecations', () => {
         });
 
         test('upgrades snapshots', async () => {
-          const { find, actions } = testBed;
+          const { find, actions, exists } = testBed;
 
           httpRequestsMockHelpers.setUpgradeMlSnapshotResponse({
             nodeId: 'my_node',
@@ -181,8 +181,8 @@ describe('Elasticsearch deprecations', () => {
           await actions.clickMlDeprecationAt(0);
 
           // Flyout actions should not be visible if deprecation was resolved
-          expect(find('mlSnapshotDetails.upgradeSnapshotButton').length).toBe(0);
-          expect(find('mlSnapshotDetails.deleteSnapshotButton').length).toBe(0);
+          expect(exists('mlSnapshotDetails.upgradeSnapshotButton')).toBe(false);
+          expect(exists('mlSnapshotDetails.deleteSnapshotButton')).toBe(false);
         });
 
         test('handles upgrade failure', async () => {

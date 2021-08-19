@@ -45,7 +45,7 @@ export class ApiService {
     this.client = httpClient;
   }
 
-  public useLoadUpgradeStatus() {
+  public useLoadEsDeprecations() {
     return this.useRequest<ESUpgradeStatus>({
       path: `${API_BASE_PATH}/es_deprecations`,
       method: 'get',

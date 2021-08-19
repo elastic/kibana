@@ -47,7 +47,7 @@ export const NoDeprecationsPrompt: FunctionComponent<Props> = ({
 }) => {
   return (
     <EuiEmptyPrompt
-      iconType="faceHappy"
+      iconType="check"
       data-test-subj="noDeprecationsPrompt"
       title={<h2>{i18nTexts.getEmptyPromptTitle(deprecationType)}</h2>}
       body={

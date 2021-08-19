@@ -66,7 +66,7 @@ const i18nTexts = {
     'xpack.upgradeAssistant.esDeprecations.mlSnapshots.resolutionTooltipLabel',
     {
       defaultMessage:
-        'This deprecation requires upgrading or deleting a job model snapshot to resolve.',
+        'Resolve this deprecation by upgrading or deleting a job model snapshot. This is an automated resolution.',
     }
   ),
 };
@@ -129,10 +129,10 @@ export const MlSnapshotsResolutionCell: React.FunctionComponent = () => {
     <EuiToolTip position="top" content={i18nTexts.resolutionTooltipLabel}>
       <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="mlActionResolutionCell">
         <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
+          <EuiIcon type="indexSettings" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="indexSettings" />
+          <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiToolTip>

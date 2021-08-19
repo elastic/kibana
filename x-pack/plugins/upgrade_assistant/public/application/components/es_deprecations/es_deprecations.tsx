@@ -30,7 +30,7 @@ const i18nTexts = {
   }),
 };
 
-export const EsDeprecationsContent = withRouter(({ history }: RouteComponentProps) => {
+export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
   const { api, breadcrumbs } = useAppContext();
 
   const {
@@ -39,7 +39,7 @@ export const EsDeprecationsContent = withRouter(({ history }: RouteComponentProp
     error,
     resendRequest,
     isInitialRequest,
-  } = api.useLoadUpgradeStatus();
+  } = api.useLoadEsDeprecations();
 
   useEffect(() => {
     breadcrumbs.setBreadcrumbs('esDeprecations');
