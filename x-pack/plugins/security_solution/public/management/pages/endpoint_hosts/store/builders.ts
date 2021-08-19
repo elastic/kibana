@@ -31,6 +31,7 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
             enabled: false,
             duration: DEFAULT_POLL_INTERVAL,
           },
+          recentlyUsedDateRanges: [],
         },
         logData: createUninitialisedResourceState(),
       },

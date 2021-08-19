@@ -55,6 +55,7 @@ describe('EndpointList store concerns', () => {
                 enabled: false,
                 duration: DEFAULT_POLL_INTERVAL,
               },
+              recentlyUsedDateRanges: [],
             },
             logData: { type: 'UninitialisedResourceState' },
           },

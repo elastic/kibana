@@ -41,20 +41,34 @@ const StickyFlexItem = styled(EuiFlexItem)`
 
 export const DateRangePicker = memo(() => {
   const dispatch = useDispatch();
-  const { page, pageSize, startDate, endDate, autoRefreshOptions } = useEndpointSelector(
-    getActivityLogDataPaging
-  );
+  const {
+    page,
+    pageSize,
+    startDate,
+    endDate,
+    autoRefreshOptions,
+    recentlyUsedDateRanges,
+  } = useEndpointSelector(getActivityLogDataPaging);
 
-  const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<EuiSuperDatePickerRecentRange[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const stopLoading = useCallback(() => {
-    setIsLoading(false);
-  }, [setIsLoading]);
-
-  const startLoading = useCallback(() => {
-    setTimeout(stopLoading, 1000);
-  }, [stopLoading]);
+  const dispatchActionUpdateActivityLogPaging = useCallback(
+    async ({ start, end }) => {
+      setIsLoading(true);
+      dispatch({
+        type: 'endpointDetailsActivityLogUpdatePaging',
+        payload: {
+          disabled: false,
+          page,
+          pageSize,
+          startDate: start ? dateMath.parse(start)?.toISOString() : undefined,
+          endDate: end ? dateMath.parse(end)?.toISOString() : undefined,
+        },
+      });
+      setIsLoading(false);
+    },
+    [dispatch, page, pageSize]
+  );
 
   const onRefreshChange = useCallback(
     (evt) => {
@@ -83,32 +97,23 @@ export const DateRangePicker = memo(() => {
 
   const onTimeChange = useCallback(
     ({ start: newStart, end: newEnd }) => {
-      const newRecentlyUsedRanges = [
+      const newRecentlyUsedDateRanges = [
         { start: newStart, end: newEnd },
-        ...recentlyUsedRanges
+        ...recentlyUsedDateRanges
           .filter(
             (recentlyUsedRange) =>
               !(recentlyUsedRange.start === newStart && recentlyUsedRange.end === newEnd)
           )
           .slice(0, 9),
       ];
-      recentlyUsedRanges.unshift({ start: newStart, end: newEnd });
-      setRecentlyUsedRanges(newRecentlyUsedRanges);
-
-      setIsLoading(true);
-      startLoading();
       dispatch({
-        type: 'endpointDetailsActivityLogUpdatePaging',
-        payload: {
-          disabled: false,
-          page,
-          pageSize,
-          startDate: newStart ? dateMath.parse(newStart)?.toISOString() : undefined,
-          endDate: newEnd ? dateMath.parse(newEnd)?.toISOString() : undefined,
-        },
+        type: 'userUpdatedActivityLogRecentlyUsedDateRanges',
+        payload: newRecentlyUsedDateRanges,
       });
+
+      dispatchActionUpdateActivityLogPaging({ start: newStart, end: newEnd });
     },
-    [dispatch, page, pageSize, recentlyUsedRanges, startLoading]
+    [dispatch, recentlyUsedDateRanges, dispatchActionUpdateActivityLogPaging]
   );
 
   const [quickRanges] = useUiSetting$<Range[]>(DEFAULT_TIMEPICKER_QUICK_RANGES);
@@ -134,7 +139,7 @@ export const DateRangePicker = memo(() => {
               onRefreshChange={onRefreshChange}
               refreshInterval={autoRefreshOptions.duration}
               onRefresh={onRefresh}
-              recentlyUsedRanges={recentlyUsedRanges}
+              recentlyUsedRanges={recentlyUsedDateRanges as EuiSuperDatePickerRecentRange[]}
               start={dateMath.parse(startDate)?.toISOString()}
               showUpdateButton={false}
             />
