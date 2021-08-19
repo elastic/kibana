@@ -98,11 +98,8 @@ class VisEditorVisualizationUI extends Component {
 
   componentDidUpdate() {
     if (this._handler) {
-      this._handler.updateInput({
-        timeRange: this.props.timeRange,
-        filters: this.props.filters || [],
-        query: this.props.query,
-      });
+      const { timeRange, filters, query } = this.props;
+      this._handler.updateInput({ timeRange, filters, query });
     }
   }
 

@@ -12,9 +12,8 @@ import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
 import { EventEmitter } from 'events';
 import type { IUiSettingsClient } from 'kibana/public';
-import {
+import type {
   Vis,
-  PersistedState,
   VisualizeEmbeddableContract,
 } from '../../../../../plugins/visualizations/public';
 import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
@@ -31,8 +30,9 @@ import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/enum
 import { VisPicker } from './vis_picker';
 import { fetchFields, VisFields } from '../lib/fetch_fields';
 import { getDataStart, getCoreStart } from '../../services';
-import { TimeseriesVisParams } from '../../types';
+import type { TimeseriesVisParams } from '../../types';
 import { UseIndexPatternModeCallout } from './use_index_patter_mode_callout';
+import type { EditorRenderProps } from '../../../../visualize/public';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 const APP_NAME = 'VisEditor';
@@ -42,7 +42,9 @@ export interface TimeseriesEditorProps {
   embeddableHandler: VisualizeEmbeddableContract;
   eventEmitter: EventEmitter;
   timeRange: TimeRange;
-  uiState: PersistedState;
+  filters: EditorRenderProps['filters'];
+  query: EditorRenderProps['query'];
+  uiState: EditorRenderProps['uiState'];
   vis: Vis<TimeseriesVisParams>;
 }
 
@@ -189,6 +191,8 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
             eventEmitter={this.props.eventEmitter}
             vis={this.props.vis}
             timeRange={this.props.timeRange}
+            filters={this.props.filters}
+            query={this.props.query}
             uiState={this.props.uiState}
             onCommit={this.handleCommit}
             onToggleAutoApply={this.handleAutoApplyToggle}
