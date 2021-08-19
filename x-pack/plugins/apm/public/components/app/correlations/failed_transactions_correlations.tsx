@@ -299,7 +299,13 @@ export function FailedTransactionsCorrelations({
     if (!Array.isArray(result.values)) {
       return { correlationTerms: [], sorting: undefined };
     }
-    const sortedTerms = sortBy(result.values, sortField);
+    const sortedTerms = sortBy(
+      result.values,
+      // The smaller the p value the higher the impact
+      // So we want to sort by the normalized score here
+      // which goes from 0 -> 1
+      sortField === 'pValue' ? 'normalizedScore' : sortField
+    );
     return {
       correlationTerms:
         sortDirection === 'asc' ? sortedTerms : sortedTerms.reverse(),
