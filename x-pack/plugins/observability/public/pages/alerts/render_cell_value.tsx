@@ -77,16 +77,6 @@ export const getRenderCellValue = ({
       fieldName: columnId,
     })?.reduce((x) => x[0]);
 
-    useEffect(() => {
-      if (columnId === ALERT_STATUS) {
-        setCellProps({
-          style: {
-            textAlign: 'center',
-          },
-        });
-      }
-    }, [columnId, setCellProps]);
-
     const theme = useTheme();
 
     switch (columnId) {
