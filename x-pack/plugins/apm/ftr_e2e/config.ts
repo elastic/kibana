@@ -37,7 +37,6 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.strict=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
-        `--home.disableWelcomeScreen=true`,
       ],
     },
   };
