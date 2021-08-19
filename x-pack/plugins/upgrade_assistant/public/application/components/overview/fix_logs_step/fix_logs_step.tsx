@@ -12,6 +12,7 @@ import { EuiText, EuiSpacer, EuiPanel, EuiCallOut } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { ExternalLinks } from './external_links';
+import { VerifyChanges } from './verify_changes';
 import { useDeprecationLogging } from './use_deprecation_logging';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 
@@ -24,6 +25,9 @@ const i18nTexts = {
   }),
   analyzeTitle: i18n.translate('xpack.upgradeAssistant.overview.analyzeTitle', {
     defaultMessage: 'Analyze deprecation logs',
+  }),
+  verifyChangesTitle: i18n.translate('xpack.upgradeAssistant.overview.verifyChangesTitle', {
+    defaultMessage: 'Resolve deprecation issues and verify your changes',
   }),
   onlyLogWritingEnabledTitle: i18n.translate(
     'xpack.upgradeAssistant.overview.deprecationLogs.deprecationWarningTitle',
@@ -75,6 +79,13 @@ const FixLogsStep: FunctionComponent = () => {
           </EuiText>
           <EuiSpacer size="m" />
           <ExternalLinks />
+
+          <EuiSpacer size="xl" />
+          <EuiText>
+            <h4>{i18nTexts.verifyChangesTitle}</h4>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <VerifyChanges />
         </>
       )}
     </>
