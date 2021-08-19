@@ -17,6 +17,7 @@ import { ControlFrame } from './control_frame/control_frame';
 import './control_group.scss';
 import {
   InputControlMeta,
+  ControlStyle,
   ManageControlGroupComponent,
 } from './control_group_editor/manage_control_group_component';
 
@@ -37,6 +38,7 @@ export const ControlGroupComponent = ({
 }: OptionsListStorybookArgs) => {
   const [embeddablesMap, setEmbeddablesMap] = useState<InputControlEmbeddableMap>({});
   const [controlMeta, setControlMeta] = useState<InputControlMeta[]>([]);
+  const [controlStyle, setControlStyle] = useState<ControlStyle>('oneLine');
 
   useEffect(() => {
     const embeddableCreatePromises = fields.map((field) => {
@@ -45,7 +47,6 @@ export const ControlGroupComponent = ({
         id: uuid.v4(),
         indexPattern: '',
         multiSelect: true,
-        twoLineLayout: twoLine,
         title: flightFieldLabels[field as FlightField],
       });
     });
@@ -65,11 +66,23 @@ export const ControlGroupComponent = ({
         }))
       );
     });
-  }, [fields, embeddableFactory, twoLine]);
+  }, [fields, embeddableFactory]);
+
+  // notify child embeddables when twoLineLayout changes
+  useEffect(() => {
+    Object.values(embeddablesMap).forEach((embeddable) => {
+      embeddable.updateInput({ twoLineLayout: controlStyle === 'twoLine' });
+    });
+  }, [embeddablesMap, controlStyle]);
 
   return (
     <>
-      <ManageControlGroupComponent controlMeta={controlMeta} setControlMeta={setControlMeta} />
+      <ManageControlGroupComponent
+        controlMeta={controlMeta}
+        controlStyle={controlStyle}
+        setControlMeta={setControlMeta}
+        setControlStyle={setControlStyle}
+      />
       <EuiSpacer size="l" />
       <EuiFlexGroup alignItems="center" wrap={true} gutterSize={'s'}>
         {controlMeta.map(({ embeddableId, width }) => (
@@ -82,7 +95,10 @@ export const ControlGroupComponent = ({
               'controlFrame--wrapper-large': width === 'large',
             })}
           >
-            <ControlFrame twoLine={twoLine} embeddable={embeddablesMap[embeddableId]} />
+            <ControlFrame
+              twoLine={controlStyle === 'twoLine'}
+              embeddable={embeddablesMap[embeddableId]}
+            />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

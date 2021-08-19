@@ -8,7 +8,6 @@
 
 import React, { useState } from 'react';
 import {
-  EuiPopover,
   EuiButtonEmpty,
   EuiDragDropContext,
   EuiFlexGroup,
@@ -22,28 +21,35 @@ import {
   EuiFormLabel,
   EuiPanel,
   EuiButtonIcon,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiSpacer,
 } from '@elastic/eui';
+import { ControlGroupStrings } from '../control_group_strings';
 
-const widthButtons: Array<{ id: ControlWidth; label: string }> = [
+type ControlWidth = 'auto' | 'small' | 'medium' | 'large';
+export type ControlStyle = 'twoLine' | 'oneLine';
+
+const widthOptions = [
   {
     id: `auto`,
-    label: 'Auto',
+    label: ControlGroupStrings.management.controlWidth.getAutoWidthTitle(),
   },
   {
     id: `small`,
-    label: 'Small',
+    label: ControlGroupStrings.management.controlWidth.getSmallWidthTitle(),
   },
   {
     id: `medium`,
-    label: 'Medium',
+    label: ControlGroupStrings.management.controlWidth.getMediumWidthTitle(),
   },
   {
     id: `large`,
-    label: 'Large',
+    label: ControlGroupStrings.management.controlWidth.getLargeWidthTitle(),
   },
 ];
-
-type ControlWidth = 'auto' | 'small' | 'medium' | 'large';
 
 export interface InputControlMeta {
   embeddableId: string;
@@ -54,13 +60,17 @@ export interface InputControlMeta {
 interface ManageControlGroupProps {
   controlMeta: InputControlMeta[];
   setControlMeta: React.Dispatch<React.SetStateAction<InputControlMeta[]>>;
+  controlStyle: ControlStyle;
+  setControlStyle: React.Dispatch<React.SetStateAction<ControlStyle>>;
 }
 
 export const ManageControlGroupComponent = ({
   controlMeta,
   setControlMeta,
+  controlStyle,
+  setControlStyle,
 }: ManageControlGroupProps) => {
-  const [isManagementPopoverOpen, setIsManagementPopoverOpen] = useState(false);
+  const [isManagementFlyoutVisible, setIsManagementFlyoutVisible] = useState(false);
 
   const onDragEnd = ({ source, destination }: DropResult) => {
     if (source && destination) {
@@ -74,9 +84,9 @@ export const ManageControlGroupComponent = ({
       iconType="sortable"
       color="text"
       data-test-subj="inputControlsSortingButton"
-      onClick={() => setIsManagementPopoverOpen(!isManagementPopoverOpen)}
+      onClick={() => setIsManagementFlyoutVisible(!isManagementFlyoutVisible)}
     >
-      Manage Controls
+      {ControlGroupStrings.management.getManageButtonTitle()}
     </EuiButtonEmpty>
   );
 
@@ -92,14 +102,19 @@ export const ManageControlGroupComponent = ({
     const { title, width } = currentControlMeta;
     return (
       <EuiFlexGroup alignItems="center" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <div {...dragHandleProps} aria-label={`drag-handle${title}`}>
+            <EuiIcon type="grab" />
+          </div>
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormLabel>{title}</EuiFormLabel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
             buttonSize="compressed"
-            legend="This is a basic group"
-            options={widthButtons}
+            legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
+            options={widthOptions}
             idSelected={width}
             onChange={(newWidth) =>
               setControlMeta((currentControls) => {
@@ -110,53 +125,118 @@ export const ManageControlGroupComponent = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon iconType="trash" color="danger" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <div {...dragHandleProps} aria-label="Drag Handle">
-            <EuiIcon type="grab" />
-          </div>
+          <EuiButtonIcon iconType="trash" color="danger" aria-label={`delete-${title}`} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   };
 
-  return (
-    <EuiPopover
-      panelPaddingSize="s"
-      button={manageControlsButton}
-      isOpen={isManagementPopoverOpen}
-      panelClassName="controlGroup--sortPopover"
-      closePopover={() => setIsManagementPopoverOpen(false)}
+  const manageControlGroupFlyout = (
+    <EuiFlyout
+      ownFocus
+      onClose={() => setIsManagementFlyoutVisible(false)}
+      aria-labelledby="flyoutTitle"
     >
-      <EuiDragDropContext onDragEnd={onDragEnd}>
-        <EuiDroppable droppableId="CUSTOM_HANDLE_DROPPABLE_AREA" spacing="s">
-          {controlMeta.map((currentControlMeta, index) => (
-            <EuiDraggable
-              spacing="m"
-              index={index}
-              customDragHandle={true}
-              key={currentControlMeta.embeddableId}
-              draggableId={currentControlMeta.embeddableId}
-            >
-              {(provided, state) => (
-                <EuiPanel
-                  paddingSize="s"
-                  className={`controlGroup--sortItem  ${
-                    state.isDragging && 'controlGroup--sortItem-isDragging'
-                  }`}
-                >
-                  <ManageInputControlLineItem
-                    index={index}
-                    currentControlMeta={currentControlMeta}
-                    dragHandleProps={provided.dragHandleProps}
-                  />
-                </EuiPanel>
-              )}
-            </EuiDraggable>
-          ))}
-        </EuiDroppable>
-      </EuiDragDropContext>
-    </EuiPopover>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id="flyoutTitle">{ControlGroupStrings.management.getFlyoutTitle()}</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiTitle size="s">
+          <h3>{ControlGroupStrings.management.getDesignTitle()}</h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiButtonGroup
+          legend={ControlGroupStrings.management.controlStyle.getDesignSwitchLegend()}
+          options={[
+            {
+              id: `oneLine`,
+              label: ControlGroupStrings.management.controlStyle.getSingleLineTitle(),
+            },
+            {
+              id: `twoLine`,
+              label: ControlGroupStrings.management.controlStyle.getTwoLineTitle(),
+            },
+          ]}
+          idSelected={controlStyle}
+          onChange={(newControlStyle) => setControlStyle(newControlStyle as ControlStyle)}
+        />
+        <EuiSpacer size="m" />
+        <EuiTitle size="s">
+          <h3>{ControlGroupStrings.management.getLayoutTitle()}</h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+
+        <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiFormLabel>
+              {ControlGroupStrings.management.controlWidth.getChangeAllControlWidthsTitle()}
+            </EuiFormLabel>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              buttonSize="compressed"
+              idSelected={
+                controlMeta.every((currentMeta) => currentMeta?.width === controlMeta[0]?.width)
+                  ? controlMeta[0]?.width
+                  : ''
+              }
+              legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
+              options={widthOptions}
+              onChange={(newWidth) =>
+                setControlMeta((currentControls) => {
+                  currentControls.forEach((currentMeta) => {
+                    currentMeta.width = newWidth as ControlWidth;
+                  });
+                  return [...currentControls];
+                })
+              }
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty iconType="trash" color="danger" aria-label={'delete-all'} size="s">
+              {ControlGroupStrings.management.getDeleteAllButtonTitle()}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <EuiDragDropContext onDragEnd={onDragEnd}>
+          <EuiDroppable droppableId="CUSTOM_HANDLE_DROPPABLE_AREA" spacing="s">
+            {controlMeta.map((currentControlMeta, index) => (
+              <EuiDraggable
+                spacing="m"
+                index={index}
+                customDragHandle={true}
+                key={currentControlMeta.embeddableId}
+                draggableId={currentControlMeta.embeddableId}
+              >
+                {(provided, state) => (
+                  <EuiPanel
+                    paddingSize="s"
+                    className={`controlGroup--sortItem  ${
+                      state.isDragging && 'controlGroup--sortItem-isDragging'
+                    }`}
+                  >
+                    <ManageInputControlLineItem
+                      index={index}
+                      currentControlMeta={currentControlMeta}
+                      dragHandleProps={provided.dragHandleProps}
+                    />
+                  </EuiPanel>
+                )}
+              </EuiDraggable>
+            ))}
+          </EuiDroppable>
+        </EuiDragDropContext>
+      </EuiFlyoutBody>
+    </EuiFlyout>
+  );
+
+  return (
+    <>
+      {manageControlsButton}
+      {isManagementFlyoutVisible && manageControlGroupFlyout}
+    </>
   );
 };

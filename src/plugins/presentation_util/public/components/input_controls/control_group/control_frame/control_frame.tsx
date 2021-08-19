@@ -46,11 +46,9 @@ export const ControlFrame = ({ twoLine, embeddable }: ControlFrameProps) => {
     </EuiFormControlLayout>
   );
 
-  return twoLine ? (
-    <EuiFormRow fullWidth label={embeddable.getInput().title}>
+  return (
+    <EuiFormRow fullWidth label={twoLine ? embeddable.getInput().title : undefined}>
       {form}
     </EuiFormRow>
-  ) : (
-    form
   );
 };
