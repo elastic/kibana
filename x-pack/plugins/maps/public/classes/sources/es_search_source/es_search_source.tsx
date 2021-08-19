@@ -18,6 +18,7 @@ import {
   getSearchService,
   getSecurityService,
   getTimeFilter,
+  getToasts,
 } from '../../../kibana_services';
 import {
   addFieldToDSL,
@@ -757,15 +758,28 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return MVT_SOURCE_LAYER_NAME;
   }
 
+  _errorUpdatingIndex(numIndexes: number) {
+    const indexLengthError = new Error(
+      `${numIndexes} indexes associated with index pattern. Only index patterns associated with a single index can be edited`
+    );
+    getToasts().addError(indexLengthError, {
+      title: i18n.translate('xpack.maps.source.esSearch.updateIndexError', {
+        defaultMessage: `Error updating index`,
+      }),
+      toastMessage: i18n.translate('xpack.maps.source.esSearch.updateIndexNotificationMsg', {
+        defaultMessage: `Only index patterns associated with a single index can be edited`,
+      }),
+    });
+    throw indexLengthError;
+  }
+
   async addFeature(
     geometry: Geometry | Position[],
     defaultFields: Record<string, Record<string, string>>
   ) {
     const indexList = await this.getSourceIndexList();
     if (indexList.length !== 1) {
-      throw new Error(
-        `Error: ${indexList.length} indexes associated with index pattern. Only index patterns associated with a single index can be edited`
-      );
+      this._errorUpdatingIndex(indexList.length);
     }
     await addFeatureToIndex(indexList[0], geometry, this.getGeoFieldName(), defaultFields);
   }
@@ -773,9 +787,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   async deleteFeature(featureId: string) {
     const indexList = await this.getSourceIndexList();
     if (indexList.length !== 1) {
-      throw new Error(
-        `Error: ${indexList.length} indexes associated with index pattern. Only index patterns associated with a single index can be edited`
-      );
+      this._errorUpdatingIndex(indexList.length);
     }
     await deleteFeatureFromIndex(indexList[0], featureId);
   }
