@@ -236,11 +236,14 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         `_find across namespaces is not permitted when the Spaces plugin is disabled.`
       );
     }
+
+    /* TODO: wait until https://github.com/elastic/kibana/pull/109062 is merged
     if (options.pit && Array.isArray(options.namespaces) && options.namespaces.length > 1) {
       throw this.errors.createBadRequestError(
         '_find across namespaces is not permitted when using the `pit` option.'
       );
     }
+    */
 
     const args = { options };
     const { status, typeMap } = await this.legacyEnsureAuthorized(

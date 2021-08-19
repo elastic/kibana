@@ -35,6 +35,7 @@ import {
   SavedObjectsExportResultDetails,
   getTagFindReferences,
   SpacesInfo,
+  getObjectRowIdentifier,
 } from '../../lib';
 import { SavedObjectWithMetadata } from '../../types';
 import {
@@ -674,7 +675,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             taggingApi={taggingApi}
             spacesInfo={spacesInfo}
             initialQuery={this.props.initialQuery}
-            itemId={'id'}
+            itemId={getObjectRowIdentifier}
             actionRegistry={this.props.actionRegistry}
             columnRegistry={this.props.columnRegistry}
             selectionConfig={selectionConfig}

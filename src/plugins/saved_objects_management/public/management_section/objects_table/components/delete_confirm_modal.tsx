@@ -156,6 +156,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
                 { defaultMessage: 'Id' }
               ),
             },
+            // TODO: add namespace column
             {
               field: 'title',
               name: i18n.translate(
