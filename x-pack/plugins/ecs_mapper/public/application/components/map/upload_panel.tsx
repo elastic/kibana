@@ -118,9 +118,9 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
             </p>
           }
         >
-          <EuiFormRow 
+          <EuiFormRow
             fullWidth
-            isInvalid={hasSubmitted && !hasPipelineName} 
+            isInvalid={hasSubmitted && !hasPipelineName}
             error={
               !hasPipelineName
                 ? i18n.translate('xpack.ecsMapper.file.upload.pipelineName.nameErrorMessage', {
@@ -141,16 +141,19 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
 
         <EuiSpacer size="l" />
 
-        <EuiFormRow 
+        <EuiFormRow
           fullWidth
-          isInvalid={hasSubmitted && !hasFile} 
-            error={
-              !hasFile
-                ? i18n.translate('xpack.ecsMapper.file.upload.selectOrDragAndDropFileDescription.noAttachedError', {
+          isInvalid={hasSubmitted && !hasFile}
+          error={
+            !hasFile
+              ? i18n.translate(
+                  'xpack.ecsMapper.file.upload.selectOrDragAndDropFileDescription.noAttachedError',
+                  {
                     defaultMessage: 'CSV file required.',
-                  })
-                : null
-            }
+                  }
+                )
+              : null
+          }
         >
           <EuiFilePicker
             id="filePicker"
