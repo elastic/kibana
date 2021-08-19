@@ -78,7 +78,7 @@ describe('Kibana deprecations', () => {
         // the component DOM tree.
         let modal = document.body.querySelector('[data-test-subj="stepsModal"]');
 
-        expect(modal).not.toBe(null);
+        expect(modal).not.toBeNull();
         expect(modal!.textContent).toContain(`Resolve deprecation in '${deprecation.domainId}'`);
 
         const steps: NodeListOf<Element> | null = modal!.querySelectorAll(

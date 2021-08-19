@@ -7,7 +7,7 @@
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
-import { EsDeprecationsContent } from '../../../public/application/components/es_deprecations';
+import { EsDeprecations } from '../../../public/application/components/es_deprecations';
 import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: TestBedConfig = {
@@ -18,7 +18,7 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-export type ElasticsearchTestBed = TestBed<ElasticsearchTestSubjects> & {
+export type ElasticsearchTestBed = TestBed & {
   actions: ReturnType<typeof createActions>;
 };
 
@@ -159,7 +159,7 @@ const createActions = (testBed: TestBed) => {
 
 export const setup = async (overrides?: Record<string, unknown>): Promise<ElasticsearchTestBed> => {
   const initTestBed = registerTestBed(
-    WithAppDependencies(EsDeprecationsContent, overrides),
+    WithAppDependencies(EsDeprecations, overrides),
     testBedConfig
   );
   const testBed = await initTestBed();
@@ -169,13 +169,3 @@ export const setup = async (overrides?: Record<string, unknown>): Promise<Elasti
     actions: createActions(testBed),
   };
 };
-
-export type ElasticsearchTestSubjects =
-  | 'expandAll'
-  | 'deprecationsContainer'
-  | 'permissionsError'
-  | 'requestError'
-  | 'upgradedCallout'
-  | 'partiallyUpgradedWarning'
-  | 'noDeprecationsPrompt'
-  | string;
