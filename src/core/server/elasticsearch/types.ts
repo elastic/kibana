@@ -8,7 +8,7 @@
 
 import { Observable } from 'rxjs';
 import { Headers } from '../http/router';
-import { LegacyRequest, KibanaRequest } from '../http';
+import { KibanaRequest } from '../http';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { IClusterClient, ICustomClusterClient, ElasticsearchClientConfig } from './client';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
@@ -156,7 +156,7 @@ export interface FakeRequest {
  * @public
  * See {@link KibanaRequest}.
  */
-export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
+export type ScopeableRequest = KibanaRequest | FakeRequest;
 
 /**
  * A limited set of Elasticsearch configuration entries exposed to the `preboot` plugins at `setup`.
