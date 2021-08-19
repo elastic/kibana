@@ -164,9 +164,9 @@ export function FailedTransactionsCorrelations({
           </>
         ),
         render: (item) => {
-          const impact = getFailedTransactionsCorrelationImpactLabel(item);
-          return impact ? (
-            <EuiBadge color={impact.color}>{impact.level}</EuiBadge>
+          const label = getFailedTransactionsCorrelationImpactLabel(item);
+          return label ? (
+            <EuiBadge color={label.color}>{label.impact}</EuiBadge>
           ) : null;
         },
         sortable: true,
