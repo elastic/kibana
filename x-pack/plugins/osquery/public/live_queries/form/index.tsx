@@ -185,7 +185,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <EuiButton disabled={!agentSelected || !queryValueProvided} onClick={submit}>
+            <EuiButton id={'submit-button'} disabled={!agentSelected || !queryValueProvided} onClick={submit}>
               <FormattedMessage
                 id="xpack.osquery.liveQueryForm.form.submitButtonLabel"
                 defaultMessage="Submit"

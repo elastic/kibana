@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const AGENT_FIELD = '[data-test-subj="comboBoxInput"]'
-export const ALL_AGENTS_OPTION = '[title="All agents"]'
-export const LIVE_QUERY_EDITOR = '#osquery_editor'
-export const SUBMIT_BUTTON = 'euiButton--primary'
+export const AGENT_FIELD = '[data-test-subj="comboBoxInput"]';
+export const ALL_AGENTS_OPTION = '[title="All agents"]';
+export const LIVE_QUERY_EDITOR = '#osquery_editor';
+export const SUBMIT_BUTTON = '#submit-button';

@@ -9,12 +9,13 @@ import {
   ADD_POLICY_BTN,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
   INTEGRATIONS_CARD,
+  SAVE_PACKAGE_CONFIRM,
 } from '../screens/integrations';
 
-export const addIntegration = (integration: string) => {
+export const addIntegration = (integration: string, osqueryPolicyId?: string) => {
   cy.get(INTEGRATIONS_CARD).contains(integration).click();
   cy.get(ADD_POLICY_BTN).click();
   cy.get(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
-  cy.get(CREATE_PACKAGE_POLICY_SAVE_BTN).should('not.exist');
-  cy.reload();
+  cy.get(SAVE_PACKAGE_CONFIRM).click()
+  return cy.reload();
 };
