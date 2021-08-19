@@ -67,14 +67,6 @@ Object {
       "agent.name",
       "service.runtime.name",
     ],
-    "aggs": Object {
-      "runtimeName": Object {
-        "terms": Object {
-          "field": "service.runtime.name",
-          "size": 1,
-        },
-      },
-    },
     "query": Object {
       "bool": Object {
         "filter": Array [
