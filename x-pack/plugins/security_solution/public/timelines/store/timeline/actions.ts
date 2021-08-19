@@ -17,7 +17,7 @@ import {
 import { KqlMode, TimelineModel } from './model';
 import { InsertTimeline } from './types';
 import { FieldsEqlOptions } from '../../../../common/search_strategy/timeline';
-import {
+import type {
   TimelineEventsType,
   RowRendererId,
   TimelineTabs,
@@ -204,6 +204,7 @@ export const updateIndexNames = actionCreator<{
 export const setActiveTabTimeline = actionCreator<{
   id: string;
   activeTab: TimelineTabs;
+  scrollToTop?: boolean;
 }>('SET_ACTIVE_TAB_TIMELINE');
 
 export const toggleModalSaveTimeline = actionCreator<{

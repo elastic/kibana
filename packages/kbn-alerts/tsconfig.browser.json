@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.browser_bazel.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "outDir": "./target_web",
+    "declaration": false,
+    "isolatedModules": true,
+    "sourceMap": true,
+    "sourceRoot": "../../../../../packages/kbn-alerts/src",
+    "types": [
+      "jest",
+      "node"
+    ],
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+  ],
+  "exclude": [
+    "**/__fixtures__/**/*"
+  ]
+}

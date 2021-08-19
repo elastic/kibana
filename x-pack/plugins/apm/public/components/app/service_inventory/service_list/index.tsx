@@ -42,6 +42,8 @@ import { ServiceLink } from '../../../shared/service_link';
 import { HealthBadge } from './HealthBadge';
 import { ServiceListMetric } from './ServiceListMetric';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
+import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 
 type ServiceListAPIResponse = APIReturnType<'GET /api/apm/services'>;
 type Items = ServiceListAPIResponse['items'];
@@ -161,7 +163,7 @@ export function getServiceColumns({
         />
       ),
       align: 'left',
-      width: showWhenSmallOrGreaterThanLarge ? `${unit * 10}px` : 'auto',
+      width: showWhenSmallOrGreaterThanLarge ? `${unit * 11}px` : 'auto',
     },
     {
       field: 'throughput',
@@ -182,7 +184,7 @@ export function getServiceColumns({
         />
       ),
       align: 'left',
-      width: showWhenSmallOrGreaterThanLarge ? `${unit * 10}px` : 'auto',
+      width: showWhenSmallOrGreaterThanLarge ? `${unit * 11}px` : 'auto',
     },
     {
       field: 'transactionErrorRate',
@@ -237,6 +239,11 @@ export function ServiceList({
 
   const { query } = useApmParams('/services');
 
+  const { kuery } = query;
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
+  });
+
   const serviceColumns = useMemo(
     () =>
       getServiceColumns({
@@ -256,14 +263,18 @@ export function ServiceList({
     : 'transactionsPerMinute';
 
   return (
-    <EuiFlexGroup
-      gutterSize="xs"
-      direction="column"
-      responsive={false}
-      alignItems="flexEnd"
-    >
+    <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
       <EuiFlexItem>
-        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="xs"
+          justifyContent="flexEnd"
+        >
+          {fallbackToTransactions && (
+            <EuiFlexItem>
+              <AggregatedTransactionsBadge />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="top"
