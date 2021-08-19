@@ -8,6 +8,7 @@
     "schema_parser.ts",
     "schema_extractor.ts",
     "version_filter.ts",
-    "types.ts"
+    "types.ts",
+    "header_generator.ts"
   ]
 }
