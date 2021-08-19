@@ -26,16 +26,14 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
 
   const closeFlyout = () => setIsFlyoutVisible(false);
 
-  const { getIndexPatternIdByTitle, loadIndexPatterns } = useSearchItems(undefined);
+  const { getIndexPatternIdByTitle } = useSearchItems(undefined);
   const toastNotifications = useToastNotifications();
   const appDeps = useAppDependencies();
-  const savedObjectsClient = appDeps.savedObjects.client;
   const indexPatterns = appDeps.data.indexPatterns;
 
   const clickHandler = useCallback(
     async (item: TransformListRow) => {
       try {
-        await loadIndexPatterns(savedObjectsClient, indexPatterns);
         const indexPatternTitle = Array.isArray(item.config.source.index)
           ? item.config.source.index.join(',')
           : item.config.source.index;
@@ -61,13 +59,8 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
         );
       }
     },
-    [
-      savedObjectsClient,
-      indexPatterns,
-      toastNotifications,
-      loadIndexPatterns,
-      getIndexPatternIdByTitle,
-    ]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [indexPatterns, toastNotifications, getIndexPatternIdByTitle]
   );
 
   const action: TransformListAction = useMemo(
