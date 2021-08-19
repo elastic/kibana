@@ -9,12 +9,6 @@
 import { esTestConfig } from '@kbn/test';
 import * as http from 'http';
 
-import { loggingSystemMock } from '../../logging/logging_system.mock';
-export const logger = loggingSystemMock.create();
-jest.doMock('../../logging/logging_system', () => ({
-  LoggingSystem: jest.fn(() => logger),
-}));
-
 import {
   createRootWithCorePlugins,
   createTestServers,
