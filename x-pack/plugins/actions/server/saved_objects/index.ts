@@ -15,7 +15,7 @@ import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objec
 import mappings from './mappings.json';
 import { getActionsMigrations } from './actions_migrations';
 import { getActionTaskParamsMigrations } from './action_task_params_migrations';
-import { RawAction } from '../types';
+import { PreConfiguredAction, RawAction } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { transformConnectorsForExport } from './transform_connectors_for_export';
 import { ActionTypeRegistry } from '../action_type_registry';
@@ -29,7 +29,8 @@ export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
   actionTypeRegistry: ActionTypeRegistry,
-  taskManagerIndex: string
+  taskManagerIndex: string,
+  preconfiguredActions: PreConfiguredAction[]
 ) {
   savedObjects.registerType({
     name: ACTION_SAVED_OBJECT_TYPE,
@@ -72,7 +73,7 @@ export function setupSavedObjects(
     hidden: true,
     namespaceType: 'single',
     mappings: mappings.action_task_params as SavedObjectsTypeMappingDefinition,
-    migrations: getActionTaskParamsMigrations(encryptedSavedObjects),
+    migrations: getActionTaskParamsMigrations(encryptedSavedObjects, preconfiguredActions),
     excludeOnUpgrade: async ({ readonlyEsClient }) => {
       const oldestIdleActionTask = await getOldestIdleActionTask(
         readonlyEsClient,

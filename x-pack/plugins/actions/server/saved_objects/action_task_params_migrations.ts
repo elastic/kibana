@@ -13,7 +13,7 @@ import {
   SavedObjectMigrationContext,
   SavedObjectReference,
 } from '../../../../../src/core/server';
-import { ActionTaskParams } from '../types';
+import { ActionTaskParams, PreConfiguredAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
 import { RelatedSavedObjectRef, RelatedSavedObjects } from '../lib/related_saved_objects';
@@ -39,11 +39,13 @@ function createEsoMigration(
 }
 
 export function getActionTaskParamsMigrations(
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  preconfiguredActions: PreConfiguredAction[]
 ): SavedObjectMigrationMap {
   const migrationActionTaskParamsSixteen = createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<ActionTaskParams> => true,
+    (doc): doc is SavedObjectUnsanitizedDoc<ActionTaskParams> =>
+      !isPreconfiguredAction(doc, preconfiguredActions),
     pipeMigrations(useSavedObjectReferences)
   );
 
@@ -74,6 +76,13 @@ function executeMigrationWithErrorHandling(
       throw ex;
     }
   };
+}
+
+export function isPreconfiguredAction(
+  doc: SavedObjectUnsanitizedDoc<ActionTaskParams>,
+  preconfiguredActions: PreConfiguredAction[]
+): boolean {
+  return !!preconfiguredActions.find((action) => action.id === doc.attributes.actionId);
 }
 
 function useSavedObjectReferences(
