@@ -231,7 +231,6 @@ export class CsvGenerator {
 
     if (!builder.tryAppend(header)) {
       return {
-        size: 0,
         content: '',
         maxSizeReached: true,
         warnings: [],
@@ -401,16 +400,12 @@ export class CsvGenerator {
       }
     }
 
-    const size = builder.getSizeInBytes();
-    this.logger.debug(
-      `Finished generating. Total size in bytes: ${size}. Row count: ${this.csvRowCount}.`
-    );
+    this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
 
     return {
       content_type: CONTENT_TYPE_CSV,
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
       max_size_reached: this.maxSizeReached,
-      size,
       warnings,
     };
   }

@@ -60,6 +60,8 @@ type XYSettingsProps = Pick<
   legendAction?: LegendAction;
   legendColorPicker: LegendColorPicker;
   legendPosition: Position;
+  truncateLegend: boolean;
+  maxLegendLines: number;
 };
 
 function getValueLabelsStyling() {
@@ -93,6 +95,8 @@ export const XYSettings: FC<XYSettingsProps> = ({
   legendAction,
   legendColorPicker,
   legendPosition,
+  maxLegendLines,
+  truncateLegend,
 }) => {
   const themeService = getThemeService();
   const theme = themeService.useChartsTheme();
@@ -112,6 +116,9 @@ export const XYSettings: FC<XYSettingsProps> = ({
     },
     crosshair: {
       ...theme.crosshair,
+    },
+    legend: {
+      labelOptions: { maxLines: truncateLegend ? maxLegendLines ?? 1 : 0 },
     },
     axes: {
       axisTitle: {

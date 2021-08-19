@@ -8,9 +8,11 @@ import { isEmpty } from 'lodash';
 import { useState, useCallback, useMemo, SyntheticEvent } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { Case, SubCase } from '../../../cases/common';
 import { TimelinesStartServices } from '../types';
+import { TimelineItem } from '../../common/';
 import { tGridActions } from '../store/t_grid';
 import { useDeepEqualSelector } from './use_selector';
 import { createUpdateSuccessToaster } from '../components/actions/timeline/cases/helpers';
@@ -83,7 +85,6 @@ export const useAddToCase = ({
 }: AddToCaseActionProps): UseAddToCase => {
   const eventId = event?.ecs._id ?? '';
   const eventIndex = event?.ecs._index ?? '';
-  const rule = event?.ecs.signal?.rule;
   const dispatch = useDispatch();
   // TODO: use correct value in standalone or integrated.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -154,6 +155,7 @@ export const useAddToCase = ({
       updateCase?: (newCase: Case) => void
     ) => {
       dispatch(tGridActions.setOpenAddToNewCase({ id: eventId, isOpen: false }));
+      const { ruleId, ruleName } = normalizedEventFields(event);
       if (postComment) {
         await postComment({
           caseId: theCase.id,
@@ -162,8 +164,8 @@ export const useAddToCase = ({
             alertId: eventId,
             index: eventIndex ?? '',
             rule: {
-              id: rule?.id != null ? rule.id[0] : null,
-              name: rule?.name != null ? rule.name[0] : null,
+              id: ruleId,
+              name: ruleName,
             },
             owner: appId,
           },
@@ -171,7 +173,7 @@ export const useAddToCase = ({
         });
       }
     },
-    [eventId, eventIndex, rule, appId, dispatch]
+    [eventId, eventIndex, appId, dispatch, event]
   );
   const onCaseSuccess = useCallback(
     async (theCase: Case) => {
@@ -239,3 +241,14 @@ export const useAddToCase = ({
     isCreateCaseFlyoutOpen,
   };
 };
+
+export function normalizedEventFields(event?: TimelineItem) {
+  const ruleUuid = event && event.data.find(({ field }) => field === ALERT_RULE_UUID);
+  const ruleName = event && event.data.find(({ field }) => field === ALERT_RULE_NAME);
+  const ruleUuidValue = ruleUuid && ruleUuid.value && ruleUuid.value[0];
+  const ruleNameValue = ruleName && ruleName.value && ruleName.value[0];
+  return {
+    ruleId: ruleUuidValue ?? null,
+    ruleName: ruleNameValue ?? null,
+  };
+}

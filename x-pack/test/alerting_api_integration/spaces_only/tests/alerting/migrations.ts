@@ -179,6 +179,27 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       ]);
     });
 
+    it('7.15.0 migrates security_solution alerts with exceptionLists to be saved object references', async () => {
+      // NOTE: We hae to use elastic search directly against the ".kibana" index because alerts do not expose the references which we want to test exists
+      const response = await es.get<{ references: [{}] }>({
+        index: '.kibana',
+        id: 'alert:38482620-ef1b-11eb-ad71-7de7959be71c',
+      });
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.references).to.eql([
+        {
+          name: 'param:exceptionsList_0',
+          id: 'endpoint_list',
+          type: 'exception-list-agnostic',
+        },
+        {
+          name: 'param:exceptionsList_1',
+          id: '50e3bd70-ef1b-11eb-ad71-7de7959be71c',
+          type: 'exception-list',
+        },
+      ]);
+    });
+
     it('7.16.0 migrates existing alerts to contain legacyId field', async () => {
       const searchResult: ApiResponse<estypes.SearchResponse<RawAlert>> = await es.search({
         index: '.kibana',
