@@ -11,16 +11,6 @@ import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants/settings_de
 
 describe('state selectors', () => {
   const state: AppState = {
-    overviewFilters: {
-      filters: {
-        locations: [],
-        ports: [],
-        schemes: [],
-        tags: [],
-      },
-      errors: [],
-      loading: false,
-    },
     dynamicSettings: {
       settings: DYNAMIC_SETTINGS_DEFAULTS,
       loading: false,
@@ -42,11 +32,6 @@ describe('state selectors', () => {
     monitorStatus: {
       status: null,
       loading: false,
-    },
-    indexPattern: {
-      index_pattern: null,
-      loading: false,
-      errors: [],
     },
     ping: {
       pingHistogram: null,

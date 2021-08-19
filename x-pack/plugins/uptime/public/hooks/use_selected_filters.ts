@@ -12,7 +12,7 @@ import { filterLabels } from '../components/overview/filter_group/translations';
 import { FILTER_FIELDS, MONITOR_ROUTE } from '../../common/constants';
 import { parseFiltersMap } from './use_filter_update';
 
-type FilterType = string[] | undefined;
+type FilterType = string[];
 interface Filters {
   locations: FilterType;
   ports: FilterType;
@@ -20,7 +20,16 @@ interface Filters {
   tags: FilterType;
 }
 
-export const getFiltersFromMap = (map: Map<string, string[]>): Filters => {
+export const getFiltersFromMap = (map?: Map<string, string[]>): Filters => {
+  if (typeof map === 'undefined') {
+    return {
+      locations: [],
+      ports: [],
+      schemes: [],
+      tags: [],
+    };
+  }
+
   const { LOCATION, TAGS, TYPE, PORT } = FILTER_FIELDS;
 
   return {

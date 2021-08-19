@@ -40,7 +40,7 @@ describe('selectedFiltersReducer', () => {
           null,
           setSelectedFilters({
             locations: [],
-            ports: [5601],
+            ports: ['5601'],
             schemes: [],
             tags: [],
           })
@@ -59,7 +59,7 @@ describe('selectedFiltersReducer', () => {
           },
           setSelectedFilters({
             locations: [],
-            ports: [5601],
+            ports: ['5601'],
             schemes: [],
             tags: ['prod'],
           })
