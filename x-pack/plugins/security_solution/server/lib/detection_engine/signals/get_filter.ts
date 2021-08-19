@@ -6,7 +6,7 @@
  */
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { Type, LanguageOrUndefined, Language } from '@kbn/securitysolution-io-ts-alerting-types';
+import { Type, LanguageOrUndefined } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { assertUnreachable } from '../../../../common/utility_types';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
