@@ -31,15 +31,16 @@ const DEFAULT_PERCENTILE_THRESHOLD = 95;
 
 type Selection = [number, number];
 
-function getFormattedSelection(selection: Selection): string {
+// Format the selected latency range for the "Clear selection" badge.
+// If the two values share the same unit, it will only displayed once.
+// For example: 12 - 23 ms / 12 ms - 3 s
+export function getFormattedSelection(selection: Selection): string {
   const from = getDurationFormatter(selection[0])(selection[0]);
   const to = getDurationFormatter(selection[1])(selection[1]);
 
-  if (from.unit === to.unit) {
-    return `${from.value} - ${to.value} ${to.unit}`;
-  }
-
-  return `${from.formatted} - ${to.formatted}`;
+  return `${from.unit === to.unit ? from.value : from.formatted} - ${
+    to.formatted
+  }`;
 }
 
 interface Props {
