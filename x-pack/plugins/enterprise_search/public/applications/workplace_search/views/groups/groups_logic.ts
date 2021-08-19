@@ -15,7 +15,7 @@ import { DEFAULT_META } from '../../../shared/constants';
 import {
   clearFlashMessages,
   flashAPIErrors,
-  setSuccessMessage,
+  flashSuccessToast,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { ContentSource, Group, User } from '../../types';
@@ -328,7 +328,7 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
           }
         );
 
-        setSuccessMessage(SUCCESS_MESSAGE);
+        flashSuccessToast(SUCCESS_MESSAGE);
         actions.setNewGroup(response);
       } catch (e) {
         flashAPIErrors(e);

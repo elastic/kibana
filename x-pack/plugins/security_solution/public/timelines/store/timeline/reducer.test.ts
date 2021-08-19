@@ -80,6 +80,7 @@ const basicTimeline: TimelineModel = {
   activeTab: TimelineTabs.query,
   prevActiveTab: TimelineTabs.graph,
   columns: [],
+  defaultColumns: [],
   dataProviders: [{ ...basicDataProvider }],
   dateRange: {
     start: '2020-07-07T08:20:18.966Z',

@@ -40,8 +40,8 @@ export const buildOSSFeatures = ({
           api: ['fileUpload:analyzeFile'],
           catalogue: ['discover'],
           savedObject: {
-            all: ['search', 'query', 'index-pattern'],
-            read: [],
+            all: ['search', 'query'],
+            read: ['index-pattern'],
           },
           ui: ['show', 'save', 'saveQuery'],
         },

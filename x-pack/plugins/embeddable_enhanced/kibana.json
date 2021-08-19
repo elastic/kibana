@@ -3,5 +3,9 @@
   "version": "kibana",
   "server": false,
   "ui": true,
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
   "requiredPlugins": ["embeddable", "kibanaReact", "uiActions", "uiActionsEnhanced"]
 }

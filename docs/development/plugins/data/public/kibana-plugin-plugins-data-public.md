@@ -66,6 +66,7 @@
 |  [IKibanaSearchRequest](./kibana-plugin-plugins-data-public.ikibanasearchrequest.md) |  |
 |  [IKibanaSearchResponse](./kibana-plugin-plugins-data-public.ikibanasearchresponse.md) |  |
 |  [IndexPatternAttributes](./kibana-plugin-plugins-data-public.indexpatternattributes.md) | Interface for an index pattern saved object |
+|  [IndexPatternListItem](./kibana-plugin-plugins-data-public.indexpatternlistitem.md) |  |
 |  [IndexPatternSpec](./kibana-plugin-plugins-data-public.indexpatternspec.md) | Static index pattern format Serialized data object, representing index pattern attributes and state |
 |  [ISearchOptions](./kibana-plugin-plugins-data-public.isearchoptions.md) |  |
 |  [ISearchSetup](./kibana-plugin-plugins-data-public.isearchsetup.md) | The setup contract exposed by the Search plugin exposes the search strategy extension point. |
@@ -84,6 +85,7 @@
 |  [SavedQueryService](./kibana-plugin-plugins-data-public.savedqueryservice.md) |  |
 |  [SearchSessionInfoProvider](./kibana-plugin-plugins-data-public.searchsessioninfoprovider.md) | Provide info about current search session to be stored in the Search Session saved object |
 |  [SearchSourceFields](./kibana-plugin-plugins-data-public.searchsourcefields.md) | search source fields |
+|  [TypeMeta](./kibana-plugin-plugins-data-public.typemeta.md) |  |
 |  [WaitUntilNextSessionCompletesOptions](./kibana-plugin-plugins-data-public.waituntilnextsessioncompletesoptions.md) | Options for [waitUntilNextSessionCompletes$()](./kibana-plugin-plugins-data-public.waituntilnextsessioncompletes_.md) |
 
 ## Variables
