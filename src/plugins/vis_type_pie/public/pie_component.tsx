@@ -320,7 +320,16 @@ const PieComponent = (props: PieComponentProps) => {
               services.actions,
               services.fieldFormats
             )}
-            theme={chartTheme}
+            theme={[
+              chartTheme,
+              {
+                legend: {
+                  labelOptions: {
+                    maxLines: visParams.truncateLegend ? visParams.maxLegendLines ?? 1 : 0,
+                  },
+                },
+              },
+            ]}
             baseTheme={chartBaseTheme}
             onRenderChange={onRenderChange}
           />
