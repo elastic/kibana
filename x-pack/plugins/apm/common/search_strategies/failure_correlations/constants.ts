@@ -30,9 +30,3 @@ export const FAILED_TRANSACTIONS_IMPACT_THRESHOLD = {
     }
   ),
 } as const;
-
-export const FAILED_TRANSACTIONS_IMPACT_THRESHOLD_COLOR = {
-  HIGH: '#f38967',
-  MEDIUM: '#f4d872',
-  LOW: '#dee5ec',
-} as const;
