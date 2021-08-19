@@ -315,10 +315,10 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
               data-test-subj={`events-container-loading-${loading}`}
             >
               <UpdatedFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="baseline">
-                <UpdatedFlexItem grow={false} show={!loading}>
+                <UpdatedFlexItem grow={false} $show={!loading}>
                   <InspectButton title={justTitle} inspect={inspect} loading={loading} />
                 </UpdatedFlexItem>
-                <UpdatedFlexItem grow={false} show={!loading}>
+                <UpdatedFlexItem grow={false} $show={!loading}>
                   <LastUpdatedAt updatedAt={updatedAt} />
                 </UpdatedFlexItem>
               </UpdatedFlexGroup>

@@ -92,40 +92,10 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   end: '2021-08-19T00:30:00.000Z',
   entityType: 'alerts',
   filterStatus: 'open',
-  filters: [
-    {
-      meta: {
-        alias: null,
-        negate: true,
-        disabled: false,
-        type: 'exists',
-        key: 'signal.rule.building_block_type',
-        value: 'exists',
-      },
-      exists: {
-        field: 'signal.rule.building_block_type',
-      },
-    },
-    {
-      meta: {
-        alias: null,
-        negate: false,
-        disabled: false,
-        type: 'phrase',
-        key: 'signal.status',
-        params: {
-          query: 'open',
-        },
-      },
-      query: {
-        term: {
-          'signal.status': 'open',
-        },
-      },
-    },
-  ],
+  filters: [],
   globalFullScreen: false,
   graphEventId: undefined,
+  hasAlertsCrud: true,
   id: TimelineId.active,
   indexNames: mockIndexNames,
   indexPattern: mockIndexPattern,
