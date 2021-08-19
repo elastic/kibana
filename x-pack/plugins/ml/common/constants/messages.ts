@@ -638,8 +638,8 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
         'xpack.ml.models.jobValidation.messages.datafeedPreviewNoDocumentsMessage',
         {
           defaultMessage:
-            'The selected or available time range contains data with timestamps before ' +
-            'the UNIX epoch beginning. Timestamps before 01/01/1970 00:00:00 (UTC) are not supported for machine learning jobs.',
+            'Running the datafeed preview over the current job configuration produces no results.' +
+            'If the index contains no documents this warning can be ignored, otherwise the job may be misconfigured.',
         }
       ),
     },
