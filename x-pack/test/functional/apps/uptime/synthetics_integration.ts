@@ -92,7 +92,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       host,
     });
 
-    describe('displays custom UI', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/109260
+    describe.skip('displays custom UI', () => {
       before(async () => {
         const version = await uptimeService.syntheticsPackage.getSyntheticsPackageVersion();
         await uptimePage.syntheticsIntegration.navigateToPackagePage(version!);
