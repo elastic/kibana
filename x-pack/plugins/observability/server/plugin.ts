@@ -120,6 +120,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       logger: this.initContext.logger.get(),
       repository: getGlobalObservabilityServerRouteRepository(),
       ruleDataClient,
+      ruleDataService,
     });
 
     return {

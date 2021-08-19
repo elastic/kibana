@@ -29,6 +29,7 @@ export class RuleDataPluginService {
   private readonly resourceInstaller: ResourceInstaller;
   private installCommonResources: Promise<Either<Error, 'ok'>>;
   private isInitialized: boolean;
+  private registrationContextWithBaseName: Map<string, string>;
 
   constructor(private readonly options: ConstructorOptions) {
     this.resourceInstaller = new ResourceInstaller({
@@ -40,6 +41,7 @@ export class RuleDataPluginService {
 
     this.installCommonResources = Promise.resolve(right('ok'));
     this.isInitialized = false;
+    this.registrationContextWithBaseName = new Map();
   }
 
   /**
@@ -105,6 +107,8 @@ export class RuleDataPluginService {
       indexOptions,
     });
 
+    this.registrationContextWithBaseName.set(indexOptions.registrationContext, indexInfo.baseName);
+
     const waitUntilClusterClientAvailable = async (): Promise<WaitResult> => {
       try {
         const clusterClient = await this.options.getClusterClient();
@@ -147,5 +151,14 @@ export class RuleDataPluginService {
       waitUntilReadyForReading,
       waitUntilReadyForWriting,
     });
+  }
+
+  /**
+   * Initializes alerts-as-data index and starts index bootstrapping right away.
+   * @param indexOptions Index parameters: names and resources.
+   * @returns Client for reading and writing data to this index.
+   */
+  public getBaseNameByRegistrationContext(registrationContext: string): string | undefined {
+    return this.registrationContextWithBaseName.get(registrationContext);
   }
 }

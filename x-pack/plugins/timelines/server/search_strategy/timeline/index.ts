@@ -143,13 +143,7 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
 }) => {
   // Based on what solution alerts you want to see, figures out what corresponding
   // index to query (ex: siem --> .alerts-security.alerts)
-  const indices = alertConsumers.flatMap((consumer) => {
-    if (consumer === CONSUMERS.SIEM) {
-      return request.defaultIndex ?? request.indexType;
-    }
-
-    return `${mapConsumerToIndexName[consumer]}`;
-  });
+  const indices = request.defaultIndex ?? request.indexType;
   const requestWithAlertsIndices = { ...request, defaultIndex: indices, indexName: indices };
 
   // Note: Alerts RBAC are built off of the alerting's authorization class, which

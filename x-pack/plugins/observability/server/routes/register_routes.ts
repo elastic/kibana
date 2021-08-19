@@ -13,7 +13,7 @@ import {
 import { CoreSetup, CoreStart, Logger, RouteRegistrar } from 'kibana/server';
 import Boom from '@hapi/boom';
 import { RequestAbortedError } from '@elastic/elasticsearch/lib/errors';
-import { IRuleDataClient } from '../../../rule_registry/server';
+import { IRuleDataClient, RuleDataPluginService } from '../../../rule_registry/server';
 import { ObservabilityRequestHandlerContext } from '../types';
 import { AbstractObservabilityServerRouteRepository } from './types';
 
@@ -22,6 +22,7 @@ export function registerRoutes({
   core,
   logger,
   ruleDataClient,
+  ruleDataService,
 }: {
   core: {
     setup: CoreSetup;
@@ -30,6 +31,7 @@ export function registerRoutes({
   repository: AbstractObservabilityServerRouteRepository;
   logger: Logger;
   ruleDataClient: IRuleDataClient;
+  ruleDataService: RuleDataPluginService;
 }) {
   const routes = repository.getRoutes();
 
@@ -63,6 +65,7 @@ export function registerRoutes({
             logger,
             params: decodedParams,
             ruleDataClient,
+            ruleDataService,
           })) as any;
 
           return response.ok({ body: data });

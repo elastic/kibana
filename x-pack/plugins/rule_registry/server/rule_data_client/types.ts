@@ -15,7 +15,7 @@ import { TechnicalRuleDataFieldName } from '../../common/technical_rule_data_fie
 export interface IRuleDataClient {
   indexName: string;
   isWriteEnabled(): boolean;
-  getReader(options?: { namespace?: string }): IRuleDataReader;
+  getReader(options?: { namespace?: string; indexNames?: string[] }): IRuleDataReader;
   getWriter(options?: { namespace?: string }): IRuleDataWriter;
 }
 
