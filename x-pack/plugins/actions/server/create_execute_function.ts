@@ -66,7 +66,7 @@ export function createExecutionEnqueuerFunction({
     }
 
     // Get saved object references from action ID and relatedSavedObjects
-    const { references, relatedSavedObjectRefs } = extractSavedObjectReferences(
+    const { references, relatedSavedObjectWithRefs } = extractSavedObjectReferences(
       id,
       isPreconfigured,
       relatedSavedObjects
@@ -79,7 +79,7 @@ export function createExecutionEnqueuerFunction({
         actionId: id,
         params,
         apiKey,
-        relatedSavedObjects: relatedSavedObjectRefs,
+        relatedSavedObjects: relatedSavedObjectWithRefs,
       },
       {
         references: [...(executionSourceReference.references ?? []), ...(references ?? [])],

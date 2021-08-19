@@ -136,7 +136,7 @@ describe('execute()', () => {
         apiKey: Buffer.from('123:abc').toString('base64'),
         relatedSavedObjects: [
           {
-            ref: 'related_some-type_0',
+            id: 'related_some-type_0',
             namespace: 'some-namespace',
             type: 'some-type',
             typeId: 'some-typeId',
@@ -307,7 +307,7 @@ describe('execute()', () => {
         apiKey: Buffer.from('123:abc').toString('base64'),
         relatedSavedObjects: [
           {
-            ref: 'related_some-type_0',
+            id: 'related_some-type_0',
             namespace: 'some-namespace',
             type: 'some-type',
             typeId: 'some-typeId',

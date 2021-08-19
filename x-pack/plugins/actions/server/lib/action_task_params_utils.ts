@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import { SavedObjectAttribute, SavedObjectReference } from 'src/core/server/types';
-import { RelatedSavedObjectRef, RelatedSavedObjects } from './related_saved_objects';
+import { RelatedSavedObjects } from './related_saved_objects';
 
 export const ACTION_REF_NAME = `actionRef`;
 
@@ -17,10 +16,10 @@ export function extractSavedObjectReferences(
   relatedSavedObjects?: RelatedSavedObjects
 ): {
   references: SavedObjectReference[];
-  relatedSavedObjectRefs?: RelatedSavedObjectRef[];
+  relatedSavedObjectWithRefs?: RelatedSavedObjects;
 } {
   const references: SavedObjectReference[] = [];
-  const relatedSavedObjectRefs: RelatedSavedObjectRef[] = [];
+  const relatedSavedObjectWithRefs: RelatedSavedObjects = [];
 
   // Add action saved object to reference if it is not preconfigured
   if (!isPreconfigured) {
@@ -33,10 +32,9 @@ export function extractSavedObjectReferences(
 
   // Add related saved objects, if any
   (relatedSavedObjects ?? []).forEach((relatedSavedObject, index) => {
-    const { id, ...restRelatedSavedObject } = relatedSavedObject;
-    relatedSavedObjectRefs.push({
-      ...restRelatedSavedObject,
-      ref: `related_${relatedSavedObject.type}_${index}`,
+    relatedSavedObjectWithRefs.push({
+      ...relatedSavedObject,
+      id: `related_${relatedSavedObject.type}_${index}`,
     });
     references.push({
       id: relatedSavedObject.id,
@@ -47,29 +45,29 @@ export function extractSavedObjectReferences(
 
   return {
     references,
-    ...(relatedSavedObjects ? { relatedSavedObjectRefs } : {}),
+    ...(relatedSavedObjects ? { relatedSavedObjectWithRefs } : {}),
   };
 }
 
 export function injectSavedObjectReferences(
   references: SavedObjectReference[],
-  relatedSavedObjectRefs?: RelatedSavedObjectRef[]
+  relatedSavedObjects?: RelatedSavedObjects
 ): { actionId?: string; relatedSavedObjects?: SavedObjectAttribute } {
   references = references ?? [];
 
   // Look for for the action id
   const action = references.find((ref) => ref.name === ACTION_REF_NAME);
 
-  const relatedSavedObjects = (relatedSavedObjectRefs ?? []).flatMap((relatedSavedObjectRef) => {
-    const reference = references.find((ref) => ref.name === relatedSavedObjectRef.ref);
+  const injectedRelatedSavedObjects = (relatedSavedObjects ?? []).flatMap((relatedSavedObject) => {
+    const reference = references.find((ref) => ref.name === relatedSavedObject.id);
 
     // These are used to provide context in the event log so we will not throw an error
     // if it is not found because we don't want to block the action execution
-    return reference ? [{ ...omit(relatedSavedObjectRef, 'ref'), id: reference.id }] : [];
+    return reference ? [{ ...relatedSavedObject, id: reference.id }] : [relatedSavedObject];
   });
 
   return {
     ...(action ? { actionId: action.id } : {}),
-    ...(relatedSavedObjectRefs ? { relatedSavedObjects } : {}),
+    ...(relatedSavedObjects ? { relatedSavedObjects: injectedRelatedSavedObjects } : {}),
   };
 }

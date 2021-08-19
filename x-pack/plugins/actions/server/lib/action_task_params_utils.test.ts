@@ -66,19 +66,19 @@ describe('extractSavedObjectReferences()', () => {
           type: 'alert',
         },
       ],
-      relatedSavedObjectRefs: [
+      relatedSavedObjectWithRefs: [
         {
-          ref: 'related_alert_0',
+          id: 'related_alert_0',
           type: 'alert',
           typeId: 'ruleTypeA',
         },
         {
-          ref: 'related_action_1',
+          id: 'related_action_1',
           type: 'action',
           typeId: 'connectorTypeB',
         },
         {
-          ref: 'related_alert_2',
+          id: 'related_alert_2',
           type: 'alert',
           typeId: 'ruleTypeB',
           namespace: 'custom',
@@ -131,19 +131,19 @@ describe('extractSavedObjectReferences()', () => {
           type: 'alert',
         },
       ],
-      relatedSavedObjectRefs: [
+      relatedSavedObjectWithRefs: [
         {
-          ref: 'related_alert_0',
+          id: 'related_alert_0',
           type: 'alert',
           typeId: 'ruleTypeA',
         },
         {
-          ref: 'related_action_1',
+          id: 'related_action_1',
           type: 'action',
           typeId: 'connectorTypeB',
         },
         {
-          ref: 'related_alert_2',
+          id: 'related_alert_2',
           type: 'alert',
           typeId: 'ruleTypeB',
           namespace: 'custom',
@@ -197,17 +197,17 @@ describe('injectSavedObjectReferences()', () => {
         ],
         [
           {
-            ref: 'related_alert_0',
+            id: 'related_alert_0',
             type: 'alert',
             typeId: 'ruleTypeA',
           },
           {
-            ref: 'related_action_1',
+            id: 'related_action_1',
             type: 'action',
             typeId: 'connectorTypeB',
           },
           {
-            ref: 'related_alert_2',
+            id: 'related_alert_2',
             type: 'alert',
             typeId: 'ruleTypeB',
             namespace: 'custom',
@@ -259,17 +259,17 @@ describe('injectSavedObjectReferences()', () => {
         ],
         [
           {
-            ref: 'related_alert_0',
+            id: 'related_alert_0',
             type: 'alert',
             typeId: 'ruleTypeA',
           },
           {
-            ref: 'related_action_1',
+            id: 'related_action_1',
             type: 'action',
             typeId: 'connectorTypeB',
           },
           {
-            ref: 'related_alert_2',
+            id: 'related_alert_2',
             type: 'alert',
             typeId: 'ruleTypeB',
             namespace: 'custom',
@@ -298,7 +298,52 @@ describe('injectSavedObjectReferences()', () => {
     });
   });
 
-  test('correctly skips missing related saved object ids in references array', () => {
+  test('correctly keeps related saved object ids if references array is empty', () => {
+    expect(
+      injectSavedObjectReferences(
+        [],
+        [
+          {
+            id: 'abc',
+            type: 'alert',
+            typeId: 'ruleTypeA',
+          },
+          {
+            id: 'def',
+            type: 'action',
+            typeId: 'connectorTypeB',
+          },
+          {
+            id: 'xyz',
+            type: 'alert',
+            typeId: 'ruleTypeB',
+            namespace: 'custom',
+          },
+        ]
+      )
+    ).toEqual({
+      relatedSavedObjects: [
+        {
+          id: 'abc',
+          type: 'alert',
+          typeId: 'ruleTypeA',
+        },
+        {
+          id: 'def',
+          type: 'action',
+          typeId: 'connectorTypeB',
+        },
+        {
+          id: 'xyz',
+          type: 'alert',
+          typeId: 'ruleTypeB',
+          namespace: 'custom',
+        },
+      ],
+    });
+  });
+
+  test('correctly skips injecting missing related saved object ids in references array', () => {
     expect(
       injectSavedObjectReferences(
         [
@@ -312,25 +357,20 @@ describe('injectSavedObjectReferences()', () => {
             name: 'related_alert_0',
             type: 'alert',
           },
-          {
-            id: 'xyz',
-            name: 'related_alert_2',
-            type: 'alert',
-          },
         ],
         [
           {
-            ref: 'related_alert_0',
+            id: 'related_alert_0',
             type: 'alert',
             typeId: 'ruleTypeA',
           },
           {
-            ref: 'related_action_1',
+            id: 'def',
             type: 'action',
             typeId: 'connectorTypeB',
           },
           {
-            ref: 'related_alert_2',
+            id: 'xyz',
             type: 'alert',
             typeId: 'ruleTypeB',
             namespace: 'custom',
@@ -344,6 +384,11 @@ describe('injectSavedObjectReferences()', () => {
           id: 'abc',
           type: 'alert',
           typeId: 'ruleTypeA',
+        },
+        {
+          id: 'def',
+          type: 'action',
+          typeId: 'connectorTypeB',
         },
         {
           id: 'xyz',

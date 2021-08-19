@@ -351,7 +351,7 @@ test('uses API key when provided', async () => {
   );
 });
 
-test('uses relatedSavedObjects when provided', async () => {
+test('uses relatedSavedObjects merged with references when provided', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
   });
@@ -365,7 +365,7 @@ test('uses relatedSavedObjects when provided', async () => {
       actionId: '2',
       params: { baz: true },
       apiKey: Buffer.from('123:abc').toString('base64'),
-      relatedSavedObjects: [{ ref: 'related_some-type_0', type: 'some-type' }],
+      relatedSavedObjects: [{ id: 'related_some-type_0', type: 'some-type' }],
     },
     references: [
       {
@@ -405,6 +405,56 @@ test('uses relatedSavedObjects when provided', async () => {
   });
 });
 
+test('uses relatedSavedObjects as is when references are empty', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+      relatedSavedObjects: [{ id: 'abc', type: 'some-type', namespace: 'yo' }],
+    },
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
+  });
+
+  await taskRunner.run();
+
+  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+    actionId: '2',
+    isEphemeral: false,
+    params: { baz: true },
+    relatedSavedObjects: [
+      {
+        id: 'abc',
+        type: 'some-type',
+        namespace: 'yo',
+      },
+    ],
+    request: expect.objectContaining({
+      headers: {
+        // base64 encoded "123:abc"
+        authorization: 'ApiKey MTIzOmFiYw==',
+      },
+    }),
+    taskInfo: {
+      scheduled: new Date(),
+    },
+  });
+});
+
 test('sanitizes invalid relatedSavedObjects when provided', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
@@ -420,54 +470,6 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
       params: { baz: true },
       apiKey: Buffer.from('123:abc').toString('base64'),
       relatedSavedObjects: [{ Xid: 'related_some-type_0', type: 'some-type' }],
-    },
-    references: [
-      {
-        id: '2',
-        name: 'actionRef',
-        type: 'action',
-      },
-      {
-        id: 'some-id',
-        name: 'related_some-type_0',
-        type: 'some-type',
-      },
-    ],
-  });
-
-  await taskRunner.run();
-  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
-    actionId: '2',
-    isEphemeral: false,
-    params: { baz: true },
-    request: expect.objectContaining({
-      headers: {
-        // base64 encoded "123:abc"
-        authorization: 'ApiKey MTIzOmFiYw==',
-      },
-    }),
-    relatedSavedObjects: [],
-    taskInfo: {
-      scheduled: new Date(),
-    },
-  });
-});
-
-test('sanitizes invalid relatedSavedObject refs when provided', async () => {
-  const taskRunner = taskRunnerFactory.create({
-    taskInstance: mockedTaskInstance,
-  });
-
-  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
-  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: '3',
-    type: 'action_task_params',
-    attributes: {
-      actionId: '2',
-      params: { baz: true },
-      apiKey: Buffer.from('123:abc').toString('base64'),
-      relatedSavedObjects: [{ ref: 'invalid-related_some-type_0', type: 'some-type' }],
     },
     references: [
       {

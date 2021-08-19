@@ -33,7 +33,7 @@ import {
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import { asSavedObjectExecutionSource } from './action_execution_source';
-import { RelatedSavedObjectRef, validatedRelatedSavedObjects } from './related_saved_objects';
+import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_saved_objects';
 import { injectSavedObjectReferences } from './action_task_params_utils';
 
 export interface TaskRunnerContext {
@@ -190,17 +190,17 @@ async function getActionTaskParams(
       references,
     } = actionTask;
 
-    const { actionId, relatedSavedObjects: relatedSOs } = injectSavedObjectReferences(
-      references,
-      relatedSavedObjects as RelatedSavedObjectRef[]
-    );
+    const {
+      actionId,
+      relatedSavedObjects: injectedRelatedSavedObjects,
+    } = injectSavedObjectReferences(references, relatedSavedObjects as RelatedSavedObjects);
 
     return {
       ...actionTask,
       attributes: {
         ...actionTask.attributes,
         ...(actionId ? { actionId } : {}),
-        ...(relatedSavedObjects ? { relatedSavedObjects: relatedSOs } : {}),
+        ...(relatedSavedObjects ? { relatedSavedObjects: injectedRelatedSavedObjects } : {}),
       },
     };
   } else {
