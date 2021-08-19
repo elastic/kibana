@@ -56,13 +56,6 @@ export const CLEAR_SELECTION = i18n.translate(
   }
 );
 
-export const TAKE_ACTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.utilityBar.takeActionTitle',
-  {
-    defaultMessage: 'Take action',
-  }
-);
-
 export const BATCH_ACTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.utilityBar.batchActionsTitle',
   {

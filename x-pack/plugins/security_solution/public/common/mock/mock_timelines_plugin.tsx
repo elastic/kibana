@@ -19,6 +19,12 @@ export const mockTimelines = {
     .fn()
     .mockReturnValue(<div data-test-subj="add-to-case-action">{'Add to case'}</div>),
   getAddToCaseAction: jest.fn(),
-  getAddToExistingCaseButton: jest.fn(),
-  getAddToNewCaseButton: jest.fn(),
+  getAddToExistingCaseButton: jest
+    .fn()
+    .mockReturnValue(
+      <div data-test-subj="add-to-existing-case-action">{'Add to existing case'}</div>
+    ),
+  getAddToNewCaseButton: jest
+    .fn()
+    .mockReturnValue(<div data-test-subj="add-to-new-case-action">{'Add to new case'}</div>),
 };
