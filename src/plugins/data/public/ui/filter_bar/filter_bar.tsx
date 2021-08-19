@@ -81,7 +81,7 @@ function FilterBarUI(props: Props) {
     const button = (
       <EuiButtonEmpty
         size="s"
-        onClick={() => setIsAddFilterPopoverOpen(true)}
+        onClick={() => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen)}
         data-test-subj="addFilter"
         className="globalFilterBar__addButton"
       >
