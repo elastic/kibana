@@ -64,6 +64,17 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
     return callObservabilityApi({
       signal,
       endpoint: 'GET /api/observability/rules/alerts/dynamic_index_pattern',
+      params: {
+        query: {
+          registrationContexts: [
+            'observability.apm',
+            'observability.logs',
+            'observability.infrastructure',
+            'observability.metrics',
+            'observability.uptime',
+          ],
+        },
+      },
     });
   }, []);
 

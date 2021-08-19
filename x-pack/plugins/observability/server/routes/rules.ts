@@ -19,12 +19,16 @@ const alertsDynamicIndexPatternRoute = createObservabilityServerRoute({
       registrationContexts: t.array(t.string),
     }),
   }),
-  handler: async ({ ruleDataService, ruleDataClient, params }) => {
+  handler: async ({ context, ruleDataService, ruleDataClient, params }) => {
     const { registrationContexts } = params.query;
-
-    const indexNames = registrationContexts.map((registrationContext) =>
-      ruleDataService.getBaseNameByRegistrationContext(registrationContext)
-    );
+    const spaceId = context.alerting.getRulesClient().getSpaceId();
+    const indexNames = registrationContexts.map((registrationContext) => {
+      const rcIndexName = ruleDataService.getBaseNameByRegistrationContext(registrationContext);
+      if (rcIndexName) {
+        return `${rcIndexName}-${spaceId}`;
+      }
+      return undefined;
+    });
     const reader = ruleDataClient.getReader({
       indexNames: indexNames.filter<string>((item: string | undefined): item is string => !!item),
     });

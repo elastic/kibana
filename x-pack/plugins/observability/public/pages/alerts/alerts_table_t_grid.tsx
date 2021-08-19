@@ -11,7 +11,6 @@
  * This way plugins can do targeted imports to reduce the final code bundle
  */
 import {
-  AlertConsumers as AlertConsumersTyped,
   ALERT_DURATION as ALERT_DURATION_TYPED,
   ALERT_STATUS as ALERT_STATUS_TYPED,
   ALERT_REASON as ALERT_REASON_TYPED,
@@ -24,9 +23,6 @@ import {
   TIMESTAMP,
   // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
-
-// @ts-expect-error importing from a place other than root because we want to limit what we import from this package
-import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 
 import {
   EuiButtonIcon,
@@ -61,7 +57,6 @@ import { LazyAlertsFlyout } from '../..';
 import { parseAlert } from './parse_alert';
 import { CoreStart } from '../../../../../../src/core/public';
 
-const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
 const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
@@ -144,13 +139,6 @@ export const columns: Array<
 const NO_ROW_RENDER: RowRenderer[] = [];
 
 const trailingControlColumns: never[] = [];
-
-const OBSERVABILITY_ALERT_CONSUMERS = [
-  AlertConsumers.APM,
-  AlertConsumers.LOGS,
-  AlertConsumers.INFRASTRUCTURE,
-  AlertConsumers.UPTIME,
-];
 
 function ObservabilityActions({
   data,
@@ -326,7 +314,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     const type: TGridType = 'standalone';
     const sortDirection: SortDirection = 'desc';
     return {
-      alertConsumers: OBSERVABILITY_ALERT_CONSUMERS,
       appId: observabilityFeatureId,
       casePermissions,
       type,
