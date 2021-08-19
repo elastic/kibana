@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import {
   RedirectAppLinks,
   useKibana,
@@ -73,7 +74,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const manageDataFeatures = getFeaturesByCategory(FeatureCatalogueCategory.ADMIN);
   const devTools = findFeatureById('console');
   const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
-    solution: 'Analytics',
+    solution: i18n.translate('kibanaOverview.noDataConfig.solutionName', {
+      defaultMessage: `Analytics`,
+    }),
     logo: 'logoKibana',
     actions: {
       beats: {

@@ -16,7 +16,7 @@ import { getThroughputUnit } from '../lib/helpers/calculate_throughput';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
-import { getServiceAgentName } from '../lib/services/get_service_agent_name';
+import { getServiceAgent } from '../lib/services/get_service_agent';
 import { getServiceAlerts } from '../lib/services/get_service_alerts';
 import { getServiceDependencies } from '../lib/services/get_service_dependencies';
 import { getServiceInstanceMetadataDetails } from '../lib/services/get_service_instance_metadata_details';
@@ -164,8 +164,8 @@ const serviceMetadataIconsRoute = createApmServerRoute({
   },
 });
 
-const serviceAgentNameRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/agent_name',
+const serviceAgentRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/agent',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -185,7 +185,7 @@ const serviceAgentNameRoute = createApmServerRoute({
       kuery: '',
     });
 
-    return getServiceAgentName({
+    return getServiceAgent({
       serviceName,
       setup,
       searchAggregatedTransactions,
@@ -909,7 +909,7 @@ export const serviceRouteRepository = createApmServerRouteRepository()
   .add(servicesDetailedStatisticsRoute)
   .add(serviceMetadataDetailsRoute)
   .add(serviceMetadataIconsRoute)
-  .add(serviceAgentNameRoute)
+  .add(serviceAgentRoute)
   .add(serviceTransactionTypesRoute)
   .add(serviceNodeMetadataRoute)
   .add(serviceAnnotationsRoute)
