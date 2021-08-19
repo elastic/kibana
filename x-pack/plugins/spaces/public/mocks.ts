@@ -25,6 +25,7 @@ const createApiUiMock = () => {
   const mock: SpacesApiUiMock = {
     components: createApiUiComponentsMock(),
     redirectLegacyUrl: jest.fn(),
+    useSpaces: jest.fn(),
   };
 
   return mock;
