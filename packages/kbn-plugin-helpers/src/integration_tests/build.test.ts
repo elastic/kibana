@@ -107,6 +107,7 @@ it('builds a generated plugin into a viable archive', async () => {
       "requiredPlugins": Array [
         "navigation",
       ],
+      "owner": { "name": "foo" },
       "server": true,
       "ui": true,
       "version": "1.0.0",
