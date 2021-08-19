@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { find, get } from 'lodash/fp';
+import { find } from 'lodash/fp';
 import { TakeActionDropdown } from '../../../../detections/components/take_action_dropdown';
 import type { TimelineEventsDetailsItem } from '../../../../../common';
 import { useExceptionModal } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_modal';
@@ -16,7 +16,6 @@ import { EventFiltersModal } from '../../../../management/pages/event_filters/vi
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { useFetchEcsAlertsData } from '../../../../detections/containers/detection_engine/alerts/use_fetch_ecs_alerts_data';
 import { Ecs } from '../../../../../common/ecs';
 
 interface EventDetailsFooterProps {
@@ -24,7 +23,7 @@ interface EventDetailsFooterProps {
   expandedEvent: {
     eventId: string;
     indexName: string;
-    ecsData?: Ecs;
+    ecsData: Ecs;
     refetch?: () => void;
   };
   handleOnEventClosed: () => void;
@@ -73,8 +72,6 @@ export const EventDetailsFooter = React.memo(
       [detailsData]
     );
 
-    const eventIds = useMemo(() => [expandedEvent?.eventId], [expandedEvent?.eventId]);
-
     const {
       exceptionModalType,
       onAddExceptionTypeClick,
@@ -92,12 +89,7 @@ export const EventDetailsFooter = React.memo(
       onAddEventFilterClick,
     } = useEventFilterModal();
 
-    const { alertsEcsData } = useFetchEcsAlertsData({
-      alertIds: eventIds,
-      skip: expandedEvent?.eventId == null,
-    });
-
-    const ecsData = get(0, alertsEcsData);
+    const ecsData = expandedEvent.ecsData;
     return (
       <>
         <EuiFlyoutFooter>

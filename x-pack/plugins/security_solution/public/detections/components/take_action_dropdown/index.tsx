@@ -11,14 +11,13 @@ import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 
-import { TimelineEventsDetailsItem, TimelineNonEcsData } from '../../../../common';
+import { TimelineEventsDetailsItem, TimelineId, TimelineNonEcsData } from '../../../../common';
 import { useExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';
 import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_investigate_in_timeline';
 import { ACTION_ADD_TO_CASE } from '../alerts_table/translations';
 import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
 import { useInsertTimeline } from '../../../cases/components/use_insert_timeline';
-import { addToCaseActionItem } from './helpers';
 import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
 import { CHANGE_ALERT_STATUS } from './translations';
@@ -44,7 +43,6 @@ export const TakeActionDropdown = React.memo(
     handleOnEventClosed,
     isHostIsolationPanelOpen,
     loadingEventDetails,
-    nonEcsData,
     onAddEventFilterClick,
     onAddExceptionTypeClick,
     onAddIsolationStatusClick,
@@ -53,7 +51,7 @@ export const TakeActionDropdown = React.memo(
     timelineId,
   }: {
     detailsData: TimelineEventsDetailsItem[] | null;
-    ecsData?: Ecs;
+    ecsData: Ecs;
     handleOnEventClosed: () => void;
     isHostIsolationPanelOpen: boolean;
     loadingEventDetails: boolean;
@@ -183,69 +181,89 @@ export const TakeActionDropdown = React.memo(
       [eventFilterActions, exceptionActions, isEvent, actionsData.ruleId]
     );
 
-    const addToCaseProps = useMemo(() => {
-      if (ecsData) {
-        return {
-          event: { data: [], ecs: ecsData, _id: ecsData._id },
-          useInsertTimeline: insertTimelineHook,
-          casePermissions,
-          appId: APP_ID,
-          onClose: afterCaseSelection,
-        };
-      } else {
-        return null;
-      }
-    }, [afterCaseSelection, casePermissions, ecsData, insertTimelineHook]);
-
-    const panels = useMemo(() => {
-      if (tGridEnabled) {
-        return [
-          {
-            id: 0,
-            items: [
-              ...alertsActionItems,
-              ...addToCaseActionItem(timelineId),
-              ...hostIsolationAction,
-              ...investigateInTimelineAction,
+    const addToCaseProps = useMemo(
+      () => ({
+        event: { data: detailsData, ecs: ecsData, _id: ecsData._id },
+        useInsertTimeline: insertTimelineHook,
+        casePermissions,
+        appId: APP_ID,
+        onClose: afterCaseSelection,
+      }),
+      [afterCaseSelection, casePermissions, detailsData, ecsData, insertTimelineHook]
+    );
+    const hasWritePermissions = useGetUserCasesPermissions()?.crud ?? false;
+    const addToCaseAction = useMemo(
+      () =>
+        [
+          TimelineId.detectionsPage,
+          TimelineId.detectionsRulesDetailsPage,
+          TimelineId.active,
+        ].includes(timelineId as TimelineId) && hasWritePermissions
+          ? {
+              actionItem: [
+                {
+                  name: ACTION_ADD_TO_CASE,
+                  panel: 2,
+                  'data-test-subj': 'attach-alert-to-case-dropdown-button',
+                },
+              ],
+              content: [
+                timelinesUi.getAddToExistingCaseButton(addToCaseProps),
+                timelinesUi.getAddToNewCaseButton(addToCaseProps),
+              ],
+            }
+          : { actionItem: [], content: [] },
+      [addToCaseProps, hasWritePermissions, timelineId, timelinesUi]
+    );
+    const panels = useMemo(
+      () =>
+        tGridEnabled
+          ? [
+              {
+                id: 0,
+                items: [
+                  ...alertsActionItems,
+                  ...addToCaseAction.actionItem,
+                  ...hostIsolationAction,
+                  ...investigateInTimelineAction,
+                ],
+              },
+              {
+                id: 1,
+                title: CHANGE_ALERT_STATUS,
+                content: <EuiContextMenuPanel size="s" items={actionItems} />,
+              },
+              {
+                id: 2,
+                title: ACTION_ADD_TO_CASE,
+                content: addToCaseAction.content,
+              },
+            ]
+          : [
+              {
+                id: 0,
+                items: [
+                  ...alertsActionItems,
+                  ...hostIsolationAction,
+                  ...investigateInTimelineAction,
+                ],
+              },
+              {
+                id: 1,
+                title: CHANGE_ALERT_STATUS,
+                content: <EuiContextMenuPanel size="s" items={actionItems} />,
+              },
             ],
-          },
-          {
-            id: 1,
-            title: CHANGE_ALERT_STATUS,
-            content: <EuiContextMenuPanel size="s" items={actionItems} />,
-          },
-          {
-            id: 2,
-            title: ACTION_ADD_TO_CASE,
-            content: [
-              <>{addToCaseProps && timelinesUi.getAddToExistingCaseButton(addToCaseProps)}</>,
-              <>{addToCaseProps && timelinesUi.getAddToNewCaseButton(addToCaseProps)}</>,
-            ],
-          },
-        ];
-      } else {
-        return [
-          {
-            id: 0,
-            items: [...alertsActionItems, ...hostIsolationAction, ...investigateInTimelineAction],
-          },
-          {
-            id: 1,
-            title: CHANGE_ALERT_STATUS,
-            content: <EuiContextMenuPanel size="s" items={actionItems} />,
-          },
-        ];
-      }
-    }, [
-      addToCaseProps,
-      alertsActionItems,
-      hostIsolationAction,
-      investigateInTimelineAction,
-      timelineId,
-      timelinesUi,
-      actionItems,
-      tGridEnabled,
-    ]);
+      [
+        actionItems,
+        addToCaseAction.actionItem,
+        addToCaseAction.content,
+        alertsActionItems,
+        hostIsolationAction,
+        investigateInTimelineAction,
+        tGridEnabled,
+      ]
+    );
 
     const takeActionButton = useMemo(() => {
       return (
@@ -256,19 +274,17 @@ export const TakeActionDropdown = React.memo(
     }, [togglePopoverHandler]);
 
     return panels[0].items?.length && !loadingEventDetails ? (
-      <>
-        <EuiPopover
-          id="hostIsolationTakeActionPanel"
-          button={takeActionButton}
-          isOpen={isPopoverOpen}
-          closePopover={closePopoverHandler}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-          repositionOnScroll
-        >
-          <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
-        </EuiPopover>
-      </>
+      <EuiPopover
+        id="hostIsolationTakeActionPanel"
+        button={takeActionButton}
+        isOpen={isPopoverOpen}
+        closePopover={closePopoverHandler}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+        repositionOnScroll
+      >
+        <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
+      </EuiPopover>
     ) : null;
   }
 );
