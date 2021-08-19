@@ -162,14 +162,14 @@ describe('Events Details Helpers', () => {
         isObjectArray: false,
       },
       {
-        category: 'signal',
+        category: 'kibana',
         field: ALERT_WORKFLOW_STATUS,
         values: ['open'],
         originalValue: ['open'],
         isObjectArray: false,
       },
       {
-        category: 'signal',
+        category: 'kibana',
         field: ALERT_RULE_NAME,
         values: ['Rawr'],
         originalValue: ['Rawr'],
