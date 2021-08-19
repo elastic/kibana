@@ -71,7 +71,6 @@ export function FieldValueSelection({
   selectedValue,
   excludedValue,
   compressed = true,
-  allowExclusions = true,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
   const [options, setOptions] = useState<EuiSelectableOption[]>(() =>
