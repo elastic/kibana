@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// import { act } from 'react-dom/test-utils';
-
 import { mockKibanaSemverVersion } from '../../../common/constants';
 import { OverviewTestBed, setupOverviewPage, setupEnvironment } from '../helpers';
 
@@ -32,7 +30,7 @@ describe('Overview Page', () => {
       expect(find('whatsNewLink').text()).toContain(`${nextMajor}.0`);
     });
 
-    test('Has a documentation link', () => {
+    test('Has a link for upgrade assistant in page header', () => {
       const { exists } = testBed;
 
       expect(exists('documentationLink')).toBe(true);
