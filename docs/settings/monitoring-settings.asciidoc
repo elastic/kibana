@@ -38,7 +38,7 @@ For more information, see
   cluster.
 
 | `monitoring.ui.ccs.enabled`
-  | Set to `true` (default) to enable {ref}/monitor-elasticsearch-cluster.html[cross-cluster search] of your monitoring data. The {ref}/modules-remote-clusters.html[`remote_cluster_client`] role must exist on each node.
+  | Set to `true` (default) to enable {ref}/modules-cross-cluster-search.html[cross-cluster search] of your monitoring data. The {ref}/modules-remote-clusters.html#remote-cluster-settings[`remote_cluster_client`] role must exist on each node.
 
 
 | `monitoring.ui.elasticsearch.hosts`
