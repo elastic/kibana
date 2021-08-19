@@ -6,7 +6,6 @@
  */
 
 import { TimestampOverrideOrUndefined } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { ALERT_ORIGINAL_TIME } from '../../../../../../timelines/common/alerts';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -55,7 +54,7 @@ export const findPreviousThresholdSignals = async ({
         // We might find a signal that was generated on the interval for old data... make sure to exclude those.
         {
           range: {
-            [ALERT_ORIGINAL_TIME]: {
+            'signal.original_time': {
               gte: from,
             },
           },
