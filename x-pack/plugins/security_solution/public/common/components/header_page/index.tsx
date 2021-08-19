@@ -84,7 +84,7 @@ export interface HeaderPageProps extends HeaderProps {
   titleNode?: React.ReactElement;
 }
 
-const HeaderLinkBack: React.FC<{ backOptions: BackOptions }> = React.memo(({ backOptions }) => {
+export const HeaderLinkBack: React.FC<{ backOptions: BackOptions }> = React.memo(({ backOptions }) => {
   const { navigateToUrl } = useKibana().services.application;
   const { formatUrl } = useFormatUrl(backOptions.pageId);
 

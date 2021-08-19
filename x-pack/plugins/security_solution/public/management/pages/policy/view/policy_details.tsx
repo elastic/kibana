@@ -42,7 +42,7 @@ import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/
 import { APP_ID } from '../../../../../common/constants';
 import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
-import { HeaderPage } from '../../../../common/components/header_page';
+import { HeaderPage, HeaderLinkBack } from '../../../../common/components/header_page';
 import { PolicyDetailsForm } from './policy_details_form';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 
@@ -180,16 +180,16 @@ export const PolicyDetails = React.memo(() => {
   );
 
   const backToEndpointList = (
-        <HeaderLinkBack backOptions={{
-              text: i18n.translate(
-                'xpack.securitySolution.endpoint.policy.details.backToListTitle',
-                {
-                  defaultMessage: 'Back to endpoint hosts',
-                }
-              ),
-              pageId: SecurityPageName.endpoints,
-              dataTestSubj: 'policyDetailsBackLink',
-            }} />)
+    <HeaderLinkBack
+      backOptions={{
+        text: i18n.translate('xpack.securitySolution.endpoint.policy.details.backToListTitle', {
+          defaultMessage: 'Back to endpoint hosts',
+        }),
+        pageId: SecurityPageName.endpoints,
+        dataTestSubj: 'policyDetailsBackLink',
+      }}
+    />
+  );
 
   return (
     <>
@@ -203,17 +203,7 @@ export const PolicyDetails = React.memo(() => {
       <AdministrationListPage
         data-test-subj="policyDetailsPage"
         title={policyItem.name}
-       headerBackComponent={{
-              text: i18n.translate(
-                'xpack.securitySolution.endpoint.policy.details.backToListTitle',
-                {
-                  defaultMessage: 'Back to endpoint hosts',
-                }
-              ),
-              pageId: SecurityPageName.endpoints,
-              dataTestSubj: 'policyDetailsBackLink',
-            }} 
-        
+        headerBackComponent={backToEndpointList}
       />
       <SecuritySolutionPageWrapper
         noTimeline
