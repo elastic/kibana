@@ -10,6 +10,7 @@ import { Observable, of } from 'rxjs';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { useHistory } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
+import { docLinksServiceMock } from 'src/core/public/mocks';
 import { UrlService } from '../../../../../../src/plugins/share/common/url_service';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../observability/public';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
@@ -58,10 +59,7 @@ const mockCore = {
     setHelpExtension: () => {},
     setBadge: () => {},
   },
-  docLinks: {
-    DOC_LINK_VERSION: '0',
-    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-  },
+  docLinks: docLinksServiceMock.createStartContract(),
   http: {
     basePath: {
       prepend: (path: string) => `/basepath${path}`,
