@@ -6,7 +6,7 @@
  */
 
 import { eventDetailsFormattedFields, eventHit } from '@kbn/securitysolution-t-grid';
-import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { EventHit, EventSource } from '../search_strategy';
 import { getDataFromFieldsHits, getDataFromSourceHits, getDataSafety } from './field_formatters';
 
@@ -136,7 +136,7 @@ describe('Events Details Helpers', () => {
   it('#getDataFromSourceHits', () => {
     const _source: EventSource = {
       '@timestamp': '2021-02-24T00:41:06.527Z',
-      [ALERT_STATUS]: 'open',
+      [ALERT_WORKFLOW_STATUS]: 'open',
       [ALERT_RULE_NAME]: 'Rawr',
       'threat.indicator': [
         {
@@ -162,14 +162,14 @@ describe('Events Details Helpers', () => {
         isObjectArray: false,
       },
       {
-        category: 'kibana',
-        field: ALERT_STATUS,
+        category: 'signal',
+        field: ALERT_WORKFLOW_STATUS,
         values: ['open'],
         originalValue: ['open'],
         isObjectArray: false,
       },
       {
-        category: 'kibana',
+        category: 'signal',
         field: ALERT_RULE_NAME,
         values: ['Rawr'],
         originalValue: ['Rawr'],

@@ -171,8 +171,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
       onConfirm(shouldCloseAlert, shouldBulkCloseAlert);
       if (conflicts > 0) {
         addWarning({
-          title: i18nCommon.UPDATE_ALERT_STATUS_FAILED(conflicts),
-          text: i18nCommon.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
+          title: i18nCommon.UPDATE_ALERT_WORKFLOW_STATUS_FAILED(conflicts),
+          text: i18nCommon.UPDATE_ALERT_WORKFLOW_STATUS_FAILED_DETAILED(updated, conflicts),
         });
       }
     },

@@ -10,7 +10,7 @@ import {
   ALERT_DURATION,
   ALERT_REASON,
   ALERT_RULE_SEVERITY,
-  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-data-utils';
 
 import { ColumnHeaderOptions } from '../../../../../common';
@@ -29,7 +29,7 @@ export const columns: Array<
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.STATUS,
-    id: ALERT_STATUS,
+    id: ALERT_WORKFLOW_STATUS,
     initialWidth: 74,
   },
   {

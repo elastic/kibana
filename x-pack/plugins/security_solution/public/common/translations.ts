@@ -63,14 +63,14 @@ export const EMPTY_ACTION_ENDPOINT_DESCRIPTION = i18n.translate(
   }
 );
 
-export const UPDATE_ALERT_STATUS_FAILED = (conflicts: number) =>
+export const UPDATE_ALERT_WORKFLOW_STATUS_FAILED = (conflicts: number) =>
   i18n.translate('xpack.securitySolution.pages.common.updateAlertStatusFailed', {
     values: { conflicts },
     defaultMessage:
       'Failed to update { conflicts } {conflicts, plural, =1 {alert} other {alerts}}.',
   });
 
-export const UPDATE_ALERT_STATUS_FAILED_DETAILED = (updated: number, conflicts: number) =>
+export const UPDATE_ALERT_WORKFLOW_STATUS_FAILED_DETAILED = (updated: number, conflicts: number) =>
   i18n.translate('xpack.securitySolution.pages.common.updateAlertStatusFailedDetailed', {
     values: { updated, conflicts },
     defaultMessage: `{ updated } {updated, plural, =1 {alert was} other {alerts were}} updated successfully, but { conflicts } failed to update

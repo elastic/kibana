@@ -197,7 +197,7 @@ describe('field_items', () => {
 
     test('it returns the expected kibana column settings', async () => {
       const mockSelectedCategoryId = 'kibana';
-      const mockBrowserFieldsWithSignal = {
+      const mockBrowserFieldsWithAlert = {
         ...mockBrowserFields,
         kibana: {
           fields: {
@@ -221,9 +221,9 @@ describe('field_items', () => {
           <Category
             categoryId={mockSelectedCategoryId}
             data-test-subj="category"
-            filteredBrowserFields={mockBrowserFieldsWithSignal}
+            filteredBrowserFields={mockBrowserFieldsWithAlert}
             fieldItems={getFieldItems({
-              category: mockBrowserFieldsWithSignal[mockSelectedCategoryId],
+              category: mockBrowserFieldsWithAlert[mockSelectedCategoryId],
               columnHeaders,
               highlight: '',
               timelineId,

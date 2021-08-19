@@ -13,6 +13,7 @@ import {
   ALERT_RULE_SEVERITY,
   ALERT_RULE_TYPE,
   ALERT_RULE_VERSION,
+  ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { ColumnHeaderOptions } from '../../../../common';
 
@@ -70,7 +71,7 @@ export const columns: Array<
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_REASON,
-    id: 'signal.reason',
+    id: ALERT_REASON,
     initialWidth: 450,
   },
   {

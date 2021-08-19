@@ -140,7 +140,7 @@ export const useTimelineEvents = ({
   );
   const prevTimelineRequest = useRef<TimelineRequest<typeof language> | null>(null);
 
-  const clearSignalsState = useCallback(() => {
+  const clearAlertsState = useCallback(() => {
     if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
       dispatch(tGridActions.clearEventsLoading({ id }));
       dispatch(tGridActions.clearEventsDeleted({ id }));
@@ -149,10 +149,10 @@ export const useTimelineEvents = ({
 
   const wrappedLoadPage = useCallback(
     (newActivePage: number) => {
-      clearSignalsState();
+      clearAlertsState();
       setActivePage(newActivePage);
     },
-    [clearSignalsState]
+    [clearAlertsState]
   );
 
   const refetchGrid = useCallback(() => {

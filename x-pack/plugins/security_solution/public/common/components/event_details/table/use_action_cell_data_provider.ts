@@ -10,7 +10,7 @@
 import { escapeDataProviderId } from '@kbn/securitysolution-t-grid';
 import { isArray, isEmpty, isString } from 'lodash/fp';
 import { useMemo } from 'react';
-import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import {
   AGENT_STATUS_FIELD_NAME,
   EVENT_MODULE_FIELD_NAME,
@@ -115,7 +115,7 @@ export const useActionCellDataProvider = ({
           id = `event-details-value-default-draggable-${appendedUniqueId}-${linkValue}`;
         } else if (field === EVENT_MODULE_FIELD_NAME) {
           id = `event-details-value-default-draggable-${appendedUniqueId}-${value}`;
-        } else if (field === ALERT_STATUS) {
+        } else if (field === ALERT_WORKFLOW_STATUS) {
           id = `alert-details-value-default-draggable-${appendedUniqueId}`;
         } else if (field === AGENT_STATUS_FIELD_NAME) {
           const valueToUse = typeof value === 'string' ? value : '';

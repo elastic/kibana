@@ -50,7 +50,7 @@ export interface Ecs {
   network?: NetworkEcs;
   registry?: RegistryEcs;
   rule?: RuleEcs;
-  signal?: SignalEcs; // TODO: Should remove?
+  signal?: SignalEcs;
   source?: SourceEcs;
   suricata?: SuricataEcs;
   tls?: TlsEcs;

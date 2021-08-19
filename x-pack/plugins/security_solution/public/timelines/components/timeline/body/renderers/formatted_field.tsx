@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isEmpty } from 'lodash/fp';
 import React from 'react';
 
-import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { Bytes, BYTES_FORMAT } from './bytes';
@@ -156,7 +156,7 @@ const FormattedFieldValueComponent: React.FC<{
       truncate,
       value,
     });
-  } else if (fieldName === ALERT_STATUS) {
+  } else if (fieldName === ALERT_WORKFLOW_STATUS) {
     return (
       <RuleStatus
         contextId={contextId}

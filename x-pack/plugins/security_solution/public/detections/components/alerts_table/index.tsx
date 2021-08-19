@@ -161,8 +161,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       if (conflicts > 0) {
         // Partial failure
         addWarning({
-          title: i18nCommon.UPDATE_ALERT_STATUS_FAILED(conflicts),
-          text: i18nCommon.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
+          title: i18nCommon.UPDATE_ALERT_WORKFLOW_STATUS_FAILED(conflicts),
+          text: i18nCommon.UPDATE_ALERT_WORKFLOW_STATUS_FAILED_DETAILED(updated, conflicts),
         });
       } else {
         let title: string;

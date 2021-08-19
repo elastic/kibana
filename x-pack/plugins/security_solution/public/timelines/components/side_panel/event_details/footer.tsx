@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { find, get } from 'lodash/fp';
-import { ALERT_RULE_UUID, ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID, ALERT_RULE_NAME, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { TakeActionDropdown } from '../../../../detections/components/take_action_dropdown';
 import type { TimelineEventsDetailsItem } from '../../../../../common';
 import { useExceptionModal } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_modal';
@@ -63,7 +63,7 @@ export const EventDetailsFooter = React.memo(
         [
           { category: 'signal', field: ALERT_RULE_UUID, name: 'ruleId' },
           { category: 'signal', field: ALERT_RULE_NAME, name: 'ruleName' },
-          { category: 'signal', field: ALERT_STATUS, name: 'alertStatus' },
+          { category: 'signal', field: ALERT_WORKFLOW_STATUS, name: 'alertStatus' },
           { category: '_id', field: '_id', name: 'eventId' },
         ].reduce<AddExceptionModalWrapperData>(
           (acc, curr) => ({

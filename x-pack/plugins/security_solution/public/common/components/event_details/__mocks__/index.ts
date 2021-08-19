@@ -27,7 +27,7 @@ import {
   ALERT_RULE_UPDATED_AT,
   ALERT_RULE_UPDATED_BY,
   ALERT_RULE_VERSION,
-  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-data-utils';
 import {
   ALERT_ANCESTORS,
@@ -400,7 +400,7 @@ export const mockAlertDetailsData = [
       },
     ],
   },
-  { category: 'signal', field: ALERT_STATUS, values: ['open'], originalValue: 'open' },
+  { category: 'signal', field: ALERT_WORKFLOW_STATUS, values: ['open'], originalValue: 'open' },
   {
     category: 'signal',
     field: ALERT_RULE_UUID,

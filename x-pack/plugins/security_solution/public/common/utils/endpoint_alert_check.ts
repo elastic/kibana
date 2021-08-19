@@ -15,7 +15,7 @@ import { TimelineEventsDetailsItem } from '../../../../timelines/common';
  * @param data
  */
 export const endpointAlertCheck = ({ data }: { data: TimelineEventsDetailsItem[] }): boolean => {
-  const isAlert = some({ category: 'kibana', field: ALERT_RULE_UUID }, data);
+  const isAlert = some({ category: 'signal', field: ALERT_RULE_UUID }, data);
 
   if (!isAlert) {
     return false;

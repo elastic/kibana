@@ -23,7 +23,7 @@ import {
   ALERT_RULE_TYPE,
   ALERT_RULE_UPDATED_BY,
   ALERT_RULE_VERSION,
-  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-data-utils';
 import { BrowserField } from '../../containers/source';
 import {
@@ -174,7 +174,7 @@ export const allowTopN = ({
     ALERT_RULE_TYPE,
     ALERT_RULE_UPDATED_BY,
     ALERT_RULE_VERSION,
-    ALERT_STATUS,
+    ALERT_WORKFLOW_STATUS,
   ] as string[]).includes(fieldName);
 
   return isAllowlistedNonBrowserField || (isAggregatable && isAllowedType);

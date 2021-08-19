@@ -9,7 +9,6 @@ import React from 'react';
 
 import { mockTimelineData } from '../../../../../common/mock';
 import { defaultColumnHeaderType } from '../column_headers/default_headers';
-import { REASON_FIELD_NAME } from './constants';
 import { reasonColumnRenderer } from './reason_column_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
 
@@ -23,6 +22,8 @@ import { fireEvent, render } from '@testing-library/react';
 import { TestProviders } from '../../../../../../../timelines/public/mock';
 import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '../../../../../../../timelines/public/components';
 import { cloneDeep } from 'lodash';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
+
 jest.mock('./plain_column_renderer');
 
 jest.mock('../../../../../common/lib/kibana', () => {
@@ -68,7 +69,7 @@ const rowRenderers: RowRenderer[] = [
 const browserFields: BrowserFields = {};
 
 const defaultProps = {
-  columnName: REASON_FIELD_NAME,
+  columnName: ALERT_REASON,
   eventId: 'test-event-id',
   field,
   timelineId: 'test-timeline-id',
@@ -81,8 +82,8 @@ describe('reasonColumnRenderer', () => {
   });
 
   describe('isIntance', () => {
-    it('returns true when columnName is `signal.reason`', () => {
-      expect(reasonColumnRenderer.isInstance(REASON_FIELD_NAME, [])).toBeTruthy();
+    it(`returns true when columnName is ${ALERT_REASON}`, () => {
+      expect(reasonColumnRenderer.isInstance(ALERT_REASON, [])).toBeTruthy();
     });
   });
 

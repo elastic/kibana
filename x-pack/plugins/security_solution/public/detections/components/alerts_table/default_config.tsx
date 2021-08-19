@@ -12,7 +12,6 @@ import {
   ALERT_RULE_TYPE,
   ALERT_RULE_PRODUCER,
   ALERT_START,
-  ALERT_STATUS,
   ALERT_UUID,
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
@@ -107,12 +106,12 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
             alias: null,
             disabled: false,
             negate: false,
-            key: 'signal.rule.threat_mapping', // TODO: These need to be updated
+            key: 'signal.rule.threat_mapping', // TODO: This needs to be updated to kibana.alert?
             type: 'exists',
             value: 'exists',
           },
           // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
-          exists: { field: 'signal.rule.threat_mapping' },
+          exists: { field: 'signal.rule.threat_mapping' }, // TODO: This needs to be updated to kibana.alert?
         },
       ]
     : [];
@@ -126,7 +125,7 @@ export const alertsDefaultModel: SubsetTimelineModel = {
 
 export const requiredFieldsForActions = [
   '@timestamp',
-  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
   ALERT_GROUP_ID,
   ALERT_ORIGINAL_TIME,
   ALERT_RULE_BUILDING_BLOCK_TYPE,
@@ -197,7 +196,7 @@ export const requiredFieldMappingsForActionsRuleRegistry = {
   'alert.start': ALERT_START,
   'alert.uuid': ALERT_UUID,
   'event.action': 'event.action',
-  'alert.status': ALERT_STATUS,
+  'alert.status': ALERT_WORKFLOW_STATUS,
   'alert.duration.us': ALERT_DURATION,
   'rule.uuid': ALERT_RULE_UUID,
   'rule.name': ALERT_RULE_NAME,

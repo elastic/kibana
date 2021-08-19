@@ -352,7 +352,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           .toPromise(),
       ]);
 
-      let signal: { name: string | null } = { name: null };
+      let kibanaAlert: { alert: { name: string | null } } = { alert: { name: null } };
       try {
         const { index_name: indexName } = await coreStart.http.fetch(
           `${BASE_RAC_ALERTS_API_PATH}/index`,
@@ -361,9 +361,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             query: { features: SERVER_APP_ID },
           }
         );
-        signal = { name: indexName[0] };
+        kibanaAlert = { alert: { name: indexName[0] } };
       } catch {
-        signal = { name: null };
+        kibanaAlert = { alert: { name: null } };
       }
 
       const appLibs: AppObservableLibs = { kibana: coreStart };
@@ -407,7 +407,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           {
             kibanaIndexPatterns,
             configIndexPatterns: configIndexPatterns.indicesExist,
-            signalIndexName: signal.name,
+            signalIndexName: kibanaAlert.alert.name,
             enableExperimental: this.experimentalFeatures,
           }
         ),

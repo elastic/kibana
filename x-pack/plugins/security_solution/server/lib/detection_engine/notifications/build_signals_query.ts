@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ALERT_RULE_RULE_ID } from '@kbn/rule-data-utils';
+
 interface BuildSignalsSearchQuery {
   ruleId: string;
   index: string;
@@ -30,7 +32,7 @@ export const buildSignalsSearchQuery = ({
             bool: {
               should: {
                 match: {
-                  'signal.rule.rule_id': ruleId,
+                  [ALERT_RULE_RULE_ID]: ruleId,
                 },
               },
               minimum_should_match: 1,
