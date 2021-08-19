@@ -13,9 +13,6 @@ import type { EsQueryConfig } from '@kbn/es-query';
  * registering a new instance of the rule data client
  * in a new plugin will require updating the below data structure
  * to include the index name where the alerts as data will be written to.
- *
- * This doesn't work in combination with the `xpack.ruleRegistry.index`
- * setting, with which the user can change the index prefix.
  */
 
 export const AlertConsumers = {
@@ -34,7 +31,7 @@ export const mapConsumerToIndexName: Record<AlertConsumers, string | string[]> =
   logs: '.alerts-observability.logs',
   infrastructure: '.alerts-observability.metrics',
   observability: '.alerts-observability',
-  siem: ['.alerts-security.alerts', '.siem-signals'],
+  siem: '.alerts-security.alerts',
   uptime: '.alerts-observability.uptime',
 };
 export type ValidFeatureId = keyof typeof mapConsumerToIndexName;
