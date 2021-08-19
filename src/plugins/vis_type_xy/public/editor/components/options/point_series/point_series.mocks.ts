@@ -426,6 +426,8 @@ export const getVis = (bucketType: string) => {
           fittingFunction: 'linear',
           times: [],
           addTimeMarker: false,
+          maxLegendLines: 1,
+          truncateLegend: true,
           radiusRatio: 9,
           thresholdLine: {
             show: false,
@@ -849,6 +851,8 @@ export const getStateParams = (type: string, thresholdPanelOn: boolean) => {
     legendPosition: 'right',
     times: [],
     addTimeMarker: false,
+    maxLegendLines: 1,
+    truncateLegend: true,
     detailedTooltip: true,
     palette: {
       type: 'palette',
