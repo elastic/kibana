@@ -14,7 +14,7 @@ import {
 } from '../../common/index_patterns/types';
 import { IndexPatternMissingIndices } from '../../common/index_patterns/lib';
 import { IndexPatternsFetcher } from './fetcher';
-import { hasIndexPatternWithUserData } from './has_index_pattern_with_user_data';
+import { hasUserIndexPattern } from './has_user_index_pattern';
 
 export class IndexPatternsApiServer implements IIndexPatternsApiClient {
   esClient: ElasticsearchClient;
@@ -55,8 +55,8 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
     return await indexPatterns.getFieldsForTimePattern(options);
   }
 
-  async hasIndexPatternWithUserData() {
-    return hasIndexPatternWithUserData({
+  async hasUserIndexPattern() {
+    return hasUserIndexPattern({
       esClient: this.esClient,
       soClient: this.savedObjectsClient,
     });

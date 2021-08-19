@@ -83,7 +83,7 @@ export const IndexPatternTable = ({
       setIsLoadingIndexPatterns(false);
       if (
         gettedIndexPatterns.length === 0 ||
-        !(await data.indexPatterns.hasIndexPatternWithUserData())
+        !(await data.indexPatterns.hasUserIndexPattern().catch(() => false))
       ) {
         setShowCreateDialog(true);
       }

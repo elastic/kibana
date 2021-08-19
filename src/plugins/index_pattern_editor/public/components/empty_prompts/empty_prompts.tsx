@@ -18,7 +18,7 @@ import { getIndices } from '../../lib';
 import { EmptyIndexListPrompt } from './empty_index_list_prompt';
 import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
 import { PromptFooter } from './prompt_footer';
-import { KNOWN_FLEET_ASSETS } from '../../../../data/common';
+import { FLEET_ASSETS_TO_IGNORE } from '../../../../data/common';
 
 const removeAliases = (item: MatchedItem) =>
   !((item as unknown) as ResolveIndexResponseItemAlias).indices;
@@ -29,17 +29,13 @@ interface Props {
   loadSources: () => void;
 }
 
-export function isDataIndex(source: MatchedItem) {
+export function isUserDataIndex(source: MatchedItem) {
   // filter out indexes that start with `.`
   if (source.name.startsWith('.')) return false;
 
-  // filter out indexes that backed up only by indexes from KNOWN_FLEET_ASSETS.INDEX_PREFIXES_TO_IGNORE
-  const onlyFleetServerIndexes = source.item.backing_indices?.every((index) =>
-    KNOWN_FLEET_ASSETS.INDEX_PREFIXES_TO_IGNORE.some((ignorePrefix) =>
-      index.startsWith(ignorePrefix)
-    )
-  );
-  if (onlyFleetServerIndexes) return false;
+  // filter out data streams from FLEET_ASSETS_TO_IGNORE
+  if (source.name === FLEET_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE) return false;
+  if (source.name === FLEET_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE) return false;
 
   return true;
 }
@@ -52,9 +48,9 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
   const [goToForm, setGoToForm] = useState<boolean>(false);
 
-  const hasDataIndices = allSources.some(isDataIndex);
-  const hasExistingIndexPatternsWithUserData = useAsync(() =>
-    indexPatternService.hasIndexPatternWithUserData()
+  const hasDataIndices = allSources.some(isUserDataIndex);
+  const hasUserIndexPattern = useAsync(() =>
+    indexPatternService.hasUserIndexPattern().catch(() => true)
   );
 
   useCallback(() => {
@@ -76,9 +72,9 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
     };
   }, [http, hasDataIndices, searchClient]);
 
-  if (hasExistingIndexPatternsWithUserData.loading) return null; // return null to prevent UI flickering while loading
+  if (hasUserIndexPattern.loading) return null; // return null to prevent UI flickering while loading
 
-  if (!hasExistingIndexPatternsWithUserData.value && !goToForm) {
+  if (!hasUserIndexPattern.value && !goToForm) {
     if (!hasDataIndices && !remoteClustersExist) {
       // load data
       return (

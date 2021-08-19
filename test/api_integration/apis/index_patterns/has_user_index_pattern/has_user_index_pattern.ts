@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  describe('has index pattern with user data API', () => {
+  describe('has user index pattern API', () => {
     beforeEach(async () => {
       await esArchiver.emptyKibanaIndex();
       if ((await es.indices.exists({ index: 'metrics-test' })).body) {
@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return false if no index patterns', async () => {
-      const response = await supertest.get('/api/index_patterns/has_index_pattern_with_user_data');
+      const response = await supertest.get('/api/index_patterns/has_user_index_pattern');
       expect(response.status).to.be(200);
       expect(response.body.result).to.be(false);
     });
@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      const response = await supertest.get('/api/index_patterns/has_index_pattern_with_user_data');
+      const response = await supertest.get('/api/index_patterns/has_user_index_pattern');
       expect(response.status).to.be(200);
       expect(response.body.result).to.be(true);
 
@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      const response = await supertest.get('/api/index_patterns/has_index_pattern_with_user_data');
+      const response = await supertest.get('/api/index_patterns/has_user_index_pattern');
       expect(response.status).to.be(200);
       expect(response.body.result).to.be(true);
     });
@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      const response = await supertest.get('/api/index_patterns/has_index_pattern_with_user_data');
+      const response = await supertest.get('/api/index_patterns/has_user_index_pattern');
       expect(response.status).to.be(200);
       expect(response.body.result).to.be(false);
     });
@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      const response = await supertest.get('/api/index_patterns/has_index_pattern_with_user_data');
+      const response = await supertest.get('/api/index_patterns/has_user_index_pattern');
       expect(response.status).to.be(200);
       expect(response.body.result).to.be(true);
     });
@@ -106,7 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      const response = await supertest.get('/api/index_patterns/has_index_pattern_with_user_data');
+      const response = await supertest.get('/api/index_patterns/has_user_index_pattern');
       expect(response.status).to.be(200);
       expect(response.body.result).to.be(false);
     });
@@ -126,7 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      const response = await supertest.get('/api/index_patterns/has_index_pattern_with_user_data');
+      const response = await supertest.get('/api/index_patterns/has_user_index_pattern');
       expect(response.status).to.be(200);
       expect(response.body.result).to.be(true);
     });

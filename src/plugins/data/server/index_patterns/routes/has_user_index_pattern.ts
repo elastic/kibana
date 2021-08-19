@@ -10,13 +10,13 @@ import { handleErrors } from './util/handle_errors';
 import { IRouter, StartServicesAccessor } from '../../../../../core/server';
 import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
 
-export const registerHasIndexPatternWithUserDataRoute = (
+export const registerHasUserIndexPatternRoute = (
   router: IRouter,
   getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>
 ) => {
   router.get(
     {
-      path: '/api/index_patterns/has_index_pattern_with_user_data',
+      path: '/api/index_patterns/has_user_index_pattern',
       validate: {},
     },
     router.handleLegacyErrors(
@@ -31,7 +31,7 @@ export const registerHasIndexPatternWithUserDataRoute = (
 
         return res.ok({
           body: {
-            result: await indexPatternsService.hasIndexPatternWithUserData(),
+            result: await indexPatternsService.hasUserIndexPattern(),
           },
         });
       })

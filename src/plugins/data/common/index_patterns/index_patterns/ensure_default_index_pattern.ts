@@ -36,8 +36,8 @@ export const createEnsureDefaultIndexPattern = (
     }
 
     // If there is any user index pattern created, set the first as default
-    // if there is 0 patterns, then don't even call `hasIndexPatternWithUserData()`
-    if (patterns.length >= 1 && (await this.hasIndexPatternWithUserData())) {
+    // if there is 0 patterns, then don't even call `hasUserIndexPattern()`
+    if (patterns.length >= 1 && (await this.hasUserIndexPattern().catch(() => true))) {
       defaultId = patterns[0];
       await uiSettings.set('defaultIndex', defaultId);
     } else {

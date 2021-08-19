@@ -233,13 +233,10 @@ export class IndexPatternsService {
   };
 
   /**
-   * Guess if there is an existing index pattern with real user data
+   * Checks if current user has a user created index pattern ignoring fleet's server default index patterns
    */
-  async hasIndexPatternWithUserData(): Promise<boolean> {
-    return this.apiClient.hasIndexPatternWithUserData().catch(() => {
-      // assume exists in case of error
-      return true;
-    });
+  async hasUserIndexPattern(): Promise<boolean> {
+    return this.apiClient.hasUserIndexPattern();
   }
 
   /**

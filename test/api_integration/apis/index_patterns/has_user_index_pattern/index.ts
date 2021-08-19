@@ -9,7 +9,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('has index pattern with user data API', () => {
-    loadTestFile(require.resolve('./has_index_pattern_with_user_data'));
+  describe('has user index pattern', () => {
+    loadTestFile(require.resolve('./has_user_index_pattern'));
   });
 }

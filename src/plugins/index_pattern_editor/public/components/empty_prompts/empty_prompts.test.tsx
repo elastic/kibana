@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { isDataIndex } from './empty_prompts';
+import { isUserDataIndex } from './empty_prompts';
 import { MatchedItem, ResolveIndexResponseItemIndexAttrs } from '../../types';
 
-describe('isDataIndex', () => {
+describe('isUserDataIndex', () => {
   test('system index is not data index', () => {
     const systemIndexes: MatchedItem[] = [
       {
@@ -42,7 +42,7 @@ describe('isDataIndex', () => {
       },
     ];
 
-    expect(systemIndexes.some(isDataIndex)).toBe(false);
+    expect(systemIndexes.some(isUserDataIndex)).toBe(false);
   });
 
   test('data index is data index', () => {
@@ -61,7 +61,7 @@ describe('isDataIndex', () => {
       },
     };
 
-    expect(isDataIndex(dataIndex)).toBe(true);
+    expect(isUserDataIndex(dataIndex)).toBe(true);
   });
 
   test('fleet asset is not data index', () => {
@@ -81,6 +81,6 @@ describe('isDataIndex', () => {
       },
     };
 
-    expect(isDataIndex(fleetAssetIndex)).toBe(false);
+    expect(isUserDataIndex(fleetAssetIndex)).toBe(false);
   });
 });

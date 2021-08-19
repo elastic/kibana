@@ -63,8 +63,8 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
     }).then((resp: any) => resp.fields || []);
   }
 
-  async hasIndexPatternWithUserData(): Promise<boolean> {
-    const response = await this._request(this._getUrl(['has_index_pattern_with_user_data']));
+  async hasUserIndexPattern(): Promise<boolean> {
+    const response = await this._request(this._getUrl(['has_user_index_pattern']));
     return response.result;
   }
 }

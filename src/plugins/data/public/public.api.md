@@ -1479,7 +1479,7 @@ export class IndexPatternsService {
     getIds: (refresh?: boolean) => Promise<string[]>;
     getIdsWithTitle: (refresh?: boolean) => Promise<IndexPatternListItem[]>;
     getTitles: (refresh?: boolean) => Promise<string[]>;
-    hasIndexPatternWithUserData(): Promise<boolean>;
+    hasUserIndexPattern(): Promise<boolean>;
     refreshFields: (indexPattern: IndexPattern) => Promise<void>;
     savedObjectToSpec: (savedObject: SavedObject<IndexPatternAttributes>) => IndexPatternSpec;
     setDefault: (id: string | null, force?: boolean) => Promise<void>;
