@@ -6,7 +6,7 @@
  */
 
 import type { KibanaLocation } from 'src/plugins/share/public';
-import { DashboardAppLocatorParams } from '../../../../../../../src/plugins/dashboard/public';
+import { SerializableDashboardAppLocatorParams } from '../../../../../../../src/plugins/dashboard/public';
 import {
   ApplyGlobalFilterActionContext,
   APPLY_FILTER_TRIGGER,
@@ -50,7 +50,7 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
   public readonly supportedTriggers = () => [APPLY_FILTER_TRIGGER];
 
   protected async getLocation(config: Config, context: Context): Promise<KibanaLocation> {
-    const params: DashboardAppLocatorParams = {
+    const params: SerializableDashboardAppLocatorParams = {
       dashboardId: config.dashboardId,
     };
 
