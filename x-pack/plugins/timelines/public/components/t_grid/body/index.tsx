@@ -15,6 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiProgress,
 } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
@@ -28,7 +29,6 @@ import React, {
   useState,
   useContext,
 } from 'react';
-
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 
 import { ThemeContext } from 'styled-components';
@@ -92,14 +92,13 @@ interface OwnProps {
   leadingControlColumns?: ControlColumnProps[];
   loadPage: (newActivePage: number) => void;
   onRuleChange?: () => void;
-  querySize: number;
+  pageSize: number;
   refetch: Refetch;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   tableView: ViewSelection;
   tabType: TimelineTabs;
   totalItems: number;
-  totalPages: number;
   trailingControlColumns?: ControlColumnProps[];
   unit?: (total: number) => React.ReactNode;
   hasAlertsCrud?: boolean;
@@ -123,6 +122,21 @@ const EmptyHeaderCellRender: ComponentType = () => null;
 
 const gridStyle: EuiDataGridStyle = { border: 'none', fontSize: 's', header: 'underline' };
 
+/**
+ * rowIndex is bigger than `data.length` for pages with page numbers bigger than one.
+ * For that reason, we must calculate `rowIndex % itemsPerPage`.
+ *
+ * Ex:
+ * Given `rowIndex` is `13` and `itemsPerPage` is `10`.
+ * It means that the `activePage` is `2` and the `pageRowIndex` is `3`
+ *
+ * **Warning**:
+ * Be careful with array out of bounds. `pageRowIndex` can be bigger or equal to `data.length`
+ *  in the scenario where the user changes the event status (Open, Acknowledged, Closed).
+ */
+
+export const getPageRowIndex = (rowIndex: number, itemsPerPage: number) => rowIndex % itemsPerPage;
+
 const transformControlColumns = ({
   actionColumnsWidth,
   columnHeaders,
@@ -139,6 +153,7 @@ const transformControlColumns = ({
   isSelectAllChecked,
   onSelectPage,
   browserFields,
+  pageSize,
   sort,
   theme,
   setEventsLoading,
@@ -159,6 +174,7 @@ const transformControlColumns = ({
   isSelectAllChecked: boolean;
   browserFields: BrowserFields;
   onSelectPage: OnSelectAll;
+  pageSize: number;
   sort: SortColumnTimeline[];
   theme: EuiTheme;
   setEventsLoading: SetEventsLoading;
@@ -199,7 +215,15 @@ const transformControlColumns = ({
         rowIndex,
         setCellProps,
       }: EuiDataGridCellValueElementProps) => {
-        addBuildingBlockStyle(data[rowIndex].ecs, theme, setCellProps);
+        const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+        const rowData = data[pageRowIndex];
+
+        if (rowData) {
+          addBuildingBlockStyle(data[pageRowIndex].ecs, theme, setCellProps);
+        } else {
+          // disable the cell when it has no data
+          setCellProps({ style: { display: 'none' } });
+        }
 
         return (
           <RowAction
@@ -216,6 +240,7 @@ const transformControlColumns = ({
             onRowSelected={onRowSelected}
             onRuleChange={onRuleChange}
             rowIndex={rowIndex}
+            pageRowIndex={pageRowIndex}
             selectedEventIds={selectedEventIds}
             setCellProps={setCellProps}
             showCheckboxes={showCheckboxes}
@@ -248,7 +273,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     columnHeaders,
     data,
     defaultCellActions,
-    excludedRowRendererIds,
     filterQuery,
     filterStatus,
     id,
@@ -258,9 +282,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     itemsPerPageOptions,
     leadingControlColumns = EMPTY_CONTROL_COLUMNS,
     loadingEventIds,
+    isLoading,
     loadPage,
     onRuleChange,
-    querySize,
+    pageSize,
     refetch,
     renderCellValue,
     rowRenderers,
@@ -271,7 +296,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     tableView = 'gridView',
     tabType,
     totalItems,
-    totalPages,
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
     unit = defaultUnit,
     hasAlertsCrud,
@@ -393,6 +417,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       () => ({
         additionalControls: (
           <>
+            {isLoading && <EuiProgress size="xs" position="absolute" color="accent" />}
             <AlertCount data-test-subj="server-side-event-count">{alertCountText}</AlertCount>
             {showBulkActions ? (
               <>
@@ -451,6 +476,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         onAlertStatusActionSuccess,
         onAlertStatusActionFailure,
         refetch,
+        isLoading,
       ]
     );
 
@@ -500,8 +526,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     }, [columnHeaders]);
 
     const setEventsLoading = useCallback<SetEventsLoading>(
-      ({ eventIds, isLoading }) => {
-        dispatch(tGridActions.setEventsLoading({ id, eventIds, isLoading }));
+      ({ eventIds, isLoading: loading }) => {
+        dispatch(tGridActions.setEventsLoading({ id, eventIds, isLoading: loading }));
       },
       [dispatch, id]
     );
@@ -544,6 +570,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           theme,
           setEventsLoading,
           setEventsDeleted,
+          pageSize,
         })
       );
     }, [
@@ -564,6 +591,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       onSelectPage,
       sort,
       theme,
+      pageSize,
       setEventsLoading,
       setEventsDeleted,
     ]);
@@ -576,6 +604,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               data: data.map((row) => row.data),
               browserFields,
               timelineId: id,
+              pageSize,
             });
 
           return {
@@ -584,7 +613,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               header.tGridCellActions?.map(buildAction) ?? defaultCellActions?.map(buildAction),
           };
         }),
-      [browserFields, columnHeaders, data, defaultCellActions, id]
+      [browserFields, columnHeaders, data, defaultCellActions, id, pageSize]
     );
 
     const renderTGridCellValue = useMemo(() => {
@@ -593,9 +622,13 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         rowIndex,
         setCellProps,
       }): React.ReactElement | null => {
-        const rowData = rowIndex < data.length ? data[rowIndex].data : null;
+        const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+
+        const rowData = pageRowIndex < data.length ? data[pageRowIndex].data : null;
         const header = columnHeaders.find((h) => h.id === columnId);
-        const eventId = rowIndex < data.length ? data[rowIndex]._id : null;
+        const eventId = pageRowIndex < data.length ? data[pageRowIndex]._id : null;
+        const ecs = pageRowIndex < data.length ? data[pageRowIndex].ecs : null;
+
         const defaultStyles = useMemo(
           () => ({
             overflow: 'hidden',
@@ -605,10 +638,15 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         setCellProps({ style: { ...defaultStyles } });
 
         useEffect(() => {
-          addBuildingBlockStyle(data[rowIndex].ecs, theme, setCellProps, defaultStyles);
-        }, [rowIndex, setCellProps, defaultStyles]);
+          if (ecs && rowData) {
+            addBuildingBlockStyle(ecs, theme, setCellProps, defaultStyles);
+          } else {
+            // disable the cell when it has no data
+            setCellProps({ style: { display: 'none' } });
+          }
+        }, [rowIndex, setCellProps, defaultStyles, ecs, rowData]);
 
-        if (rowData == null || header == null || eventId == null) {
+        if (rowData == null || header == null || eventId == null || ecs === null) {
           return null;
         }
 
@@ -621,17 +659,35 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           isExpandable: true,
           isExpanded: false,
           isDetails: false,
-          linkValues: getOr([], header.linkField ?? '', data[rowIndex].ecs),
+          linkValues: getOr([], header.linkField ?? '', ecs),
           rowIndex,
           setCellProps,
           timelineId: tabType != null ? `${id}-${tabType}` : id,
-          ecsData: data[rowIndex].ecs,
+          ecsData: ecs,
           browserFields,
           rowRenderers,
         }) as React.ReactElement;
       };
       return Cell;
-    }, [columnHeaders, data, id, renderCellValue, tabType, theme, browserFields, rowRenderers]);
+    }, [
+      columnHeaders,
+      data,
+      id,
+      renderCellValue,
+      tabType,
+      theme,
+      browserFields,
+      rowRenderers,
+      pageSize,
+    ]);
+
+    const onChangeItemsPerPage = useCallback(
+      (itemsChangedPerPage) => {
+        dispatch(tGridActions.updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage }));
+      },
+
+      [id, dispatch]
+    );
 
     return (
       <>
@@ -645,10 +701,16 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             leadingControlColumns={leadingTGridControlColumns}
             trailingControlColumns={trailingTGridControlColumns}
             toolbarVisibility={toolbarVisibility}
-            rowCount={data.length}
+            rowCount={totalItems}
             renderCellValue={renderTGridCellValue}
-            inMemory={{ level: 'sorting' }}
             sorting={{ columns: sortingColumns, onSort }}
+            pagination={{
+              pageIndex: activePage,
+              pageSize,
+              pageSizeOptions: itemsPerPageOptions,
+              onChangeItemsPerPage,
+              onChangePage: loadPage,
+            }}
           />
         )}
         {tableView === 'eventRenderedView' && (
@@ -658,8 +720,9 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             events={data}
             leadingControlColumns={leadingTGridControlColumns ?? []}
             onChangePage={loadPage}
+            onChangeItemsPerPage={onChangeItemsPerPage}
             pageIndex={activePage}
-            pageSize={querySize}
+            pageSize={pageSize}
             pageSizeOptions={itemsPerPageOptions}
             rowRenderers={rowRenderers}
             timelineId={id}
@@ -693,6 +756,7 @@ const makeMapStateToProps = () => {
       selectedEventIds,
       showCheckboxes,
       sort,
+      isLoading,
     } = timeline;
 
     return {
@@ -700,6 +764,7 @@ const makeMapStateToProps = () => {
       excludedRowRendererIds,
       isSelectAllChecked,
       loadingEventIds,
+      isLoading,
       id,
       selectedEventIds,
       showCheckboxes: hasAlertsCrud === true && showCheckboxes,

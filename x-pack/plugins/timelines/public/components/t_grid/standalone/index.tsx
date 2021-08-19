@@ -31,7 +31,7 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { calculateTotalPages, combineQueries, getCombinedFilterQuery } from '../helpers';
+import { combineQueries, getCombinedFilterQuery } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import type { State } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
@@ -335,13 +335,9 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                     renderCellValue={renderCellValue}
                     rowRenderers={rowRenderers}
                     onRuleChange={onRuleChange}
-                    querySize={pageInfo.querySize}
+                    pageSize={pageInfo.querySize}
                     tabType={TimelineTabs.query}
                     tableView="gridView"
-                    totalPages={calculateTotalPages({
-                      itemsCount: totalCountMinusDeleted,
-                      itemsPerPage: itemsPerPageStore,
-                    })}
                     totalItems={totalCountMinusDeleted}
                     unit={unit}
                     filterStatus={filterStatus}

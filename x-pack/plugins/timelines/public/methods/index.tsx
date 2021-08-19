@@ -6,7 +6,7 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingContent, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import type { Store } from 'redux';
 import { Provider } from 'react-redux';
@@ -51,7 +51,13 @@ export const getTGridLazy = (
 ) => {
   initializeStore({ store, storage, setStore });
   return (
-    <Suspense fallback={<EuiLoadingSpinner />}>
+    <Suspense
+      fallback={
+        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
+          <EuiLoadingContent />
+        </EuiPanel>
+      }
+    >
       <TimelineLazy {...props} store={store} storage={storage} data={data} setStore={setStore} />
     </Suspense>
   );

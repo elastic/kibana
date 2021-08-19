@@ -133,7 +133,7 @@ export const useTimelineEvents = ({
   const refetch = useRef<Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [activePage, setActivePage] = useState(0);
   const [timelineRequest, setTimelineRequest] = useState<TimelineRequest<typeof language> | null>(
     null

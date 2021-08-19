@@ -14,7 +14,6 @@ import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RowRendererId, TimelineIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
-import { HeaderSection } from '../../../common/components/header_section';
 import {
   displayErrorToast,
   displaySuccessToast,
@@ -371,8 +370,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   if (loading || indexPatternsLoading || isEmpty(selectedPatterns)) {
     return (
-      <EuiPanel hasBorder>
-        <HeaderSection title="" />
+      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
         <EuiLoadingContent data-test-subj="loading-alerts-panel" />
       </EuiPanel>
     );
