@@ -11,11 +11,11 @@ import classNames from 'classnames';
 
 import { EuiFilterButton, EuiFilterGroup, EuiPopover, EuiSelectableOption } from '@elastic/eui';
 import { Subject } from 'rxjs';
-import useMount from 'react-use/lib/useMount';
 import { OptionsListStrings } from './options_list_strings';
 import { OptionsListPopover } from './options_list_popover_component';
 
 import './options_list.scss';
+import { useStateObservable } from '../../use_state_observable';
 
 export interface OptionsListComponentState {
   availableOptions?: EuiSelectableOption[];
@@ -36,12 +36,8 @@ export const OptionsListComponent = ({
   updateOption: (index: number) => void;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [optionsListState, setOptionsListState] = useState<OptionsListComponentState>(
-    {} as OptionsListComponentState
-  );
-
-  useMount(() => {
-    componentStateSubject.subscribe((newState) => setOptionsListState(newState));
+  const optionsListState = useStateObservable<OptionsListComponentState>(componentStateSubject, {
+    loading: true,
   });
 
   const {
