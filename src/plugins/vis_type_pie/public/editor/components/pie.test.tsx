@@ -73,6 +73,20 @@ describe('PalettePicker', function () {
     });
   });
 
+  it('renders the long legend options for the elastic charts implementation', async () => {
+    component = mountWithIntl(<PieOptions {...props} />);
+    await act(async () => {
+      expect(findTestSubject(component, 'pieLongLegendsOptions').length).toBe(1);
+    });
+  });
+
+  it('not renders the long legend options for the vislib implementation', async () => {
+    component = mountWithIntl(<PieOptions {...props} showElasticChartsOptions={false} />);
+    await act(async () => {
+      expect(findTestSubject(component, 'pieLongLegendsOptions').length).toBe(0);
+    });
+  });
+
   it('renders the label position dropdown for the elastic charts implementation', async () => {
     component = mountWithIntl(<PieOptions {...props} />);
     await act(async () => {

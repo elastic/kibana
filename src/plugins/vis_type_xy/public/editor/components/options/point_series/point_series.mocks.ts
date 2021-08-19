@@ -76,7 +76,7 @@ export const getAggs = () => {
         title: 'kibana_sample_data_flights',
         timeFieldName: 'timestamp',
         fields:
-          '[{"count":0,"script":"doc[\'timestamp\'].value.hourOfDay","lang":"painless","name":"hour_of_day","type":"number","scripted":true,"searchable":true,"aggregatable":true,"readFromDocValues":false}]',
+          '[{"count":0,"script":"doc[\'timestamp\'].value.getHour()","lang":"painless","name":"hour_of_day","type":"number","scripted":true,"searchable":true,"aggregatable":true,"readFromDocValues":false}]',
         fieldFormatMap:
           '{"hour_of_day":{"id":"number","params":{"pattern":"00"}},"AvgTicketPrice":{"id":"number","params":{"pattern":"$0,0.[00]"}}}',
         runtimeFieldMap: '{}',
@@ -241,7 +241,7 @@ export const getVis = (bucketType: string) => {
             title: 'kibana_sample_data_flights',
             timeFieldName: 'timestamp',
             fields:
-              '[{"count":0,"script":"doc[\'timestamp\'].value.hourOfDay","lang":"painless","name":"hour_of_day","type":"number","scripted":true,"searchable":true,"aggregatable":true,"readFromDocValues":false}]',
+              '[{"count":0,"script":"doc[\'timestamp\'].value.getHour()","lang":"painless","name":"hour_of_day","type":"number","scripted":true,"searchable":true,"aggregatable":true,"readFromDocValues":false}]',
             fieldFormatMap:
               '{"hour_of_day":{"id":"number","params":{"pattern":"00"}},"AvgTicketPrice":{"id":"number","params":{"pattern":"$0,0.[00]"}}}',
             runtimeFieldMap: '{}',
@@ -426,6 +426,8 @@ export const getVis = (bucketType: string) => {
           fittingFunction: 'linear',
           times: [],
           addTimeMarker: false,
+          maxLegendLines: 1,
+          truncateLegend: true,
           radiusRatio: 9,
           thresholdLine: {
             show: false,
@@ -849,6 +851,8 @@ export const getStateParams = (type: string, thresholdPanelOn: boolean) => {
     legendPosition: 'right',
     times: [],
     addTimeMarker: false,
+    maxLegendLines: 1,
+    truncateLegend: true,
     detailedTooltip: true,
     palette: {
       type: 'palette',

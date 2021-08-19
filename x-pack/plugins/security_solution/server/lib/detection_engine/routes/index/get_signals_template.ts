@@ -29,7 +29,7 @@ import aadFieldConversion from './signal_aad_mapping.json';
   incremented by 10 in order to add "room" for the aforementioned patch
   release
 */
-export const SIGNALS_TEMPLATE_VERSION = 56;
+export const SIGNALS_TEMPLATE_VERSION = 57;
 /**
   @constant
   @type {number}
@@ -74,15 +74,6 @@ export const getSignalsTemplate = (index: string, spaceId: string, aadIndexAlias
           ...fieldAliases,
           ...getRbacRequiredFields(spaceId),
           signal: signalsMapping.mappings.properties.signal,
-          threat: {
-            ...ecsMapping.mappings.properties.threat,
-            properties: {
-              ...ecsMapping.mappings.properties.threat.properties,
-              enrichments: {
-                ...otherMapping.mappings.properties.threat.properties.enrichments,
-              },
-            },
-          },
         },
         _meta: {
           version: SIGNALS_TEMPLATE_VERSION,
