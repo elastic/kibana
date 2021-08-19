@@ -52,11 +52,11 @@ export const useCloneAction = (forceDisable: boolean, transformNodes: number) =>
           );
         }
       } catch (e) {
-        toastNotifications.addDanger(
-          i18n.translate('xpack.transform.clone.errorPromptText', {
+        toastNotifications.addError(e, {
+          title: i18n.translate('xpack.transform.clone.errorPromptText', {
             defaultMessage: 'An error occurred checking if source index pattern exists',
-          })
-        );
+          }),
+        });
       }
     },
     [
