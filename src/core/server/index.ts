@@ -172,7 +172,6 @@ export type {
   IKibanaResponse,
   LifecycleResponseFactory,
   KnownHeaders,
-  LegacyRequest,
   OnPreAuthHandler,
   OnPreAuthToolkit,
   OnPreRoutingHandler,
