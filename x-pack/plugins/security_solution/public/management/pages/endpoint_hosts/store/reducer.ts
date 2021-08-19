@@ -353,6 +353,8 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
               ...activityLog,
               paging: {
                 ...activityLog.paging,
+                startDate: state.endpointDetails.activityLog.paging.startDate,
+                endDate: state.endpointDetails.activityLog.paging.endDate,
                 recentlyUsedDateRanges:
                   state.endpointDetails.activityLog.paging.recentlyUsedDateRanges,
               },
@@ -378,6 +380,8 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
               ...activityLog,
               paging: {
                 ...activityLog.paging,
+                startDate: state.endpointDetails.activityLog.paging.startDate,
+                endDate: state.endpointDetails.activityLog.paging.endDate,
                 recentlyUsedDateRanges:
                   state.endpointDetails.activityLog.paging.recentlyUsedDateRanges,
               },
@@ -402,6 +406,8 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
               ...activityLog,
               paging: {
                 ...activityLog.paging,
+                startDate: state.endpointDetails.activityLog.paging.startDate,
+                endDate: state.endpointDetails.activityLog.paging.endDate,
                 recentlyUsedDateRanges:
                   state.endpointDetails.activityLog.paging.recentlyUsedDateRanges,
               },
@@ -428,6 +434,8 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
           ...activityLog,
           paging: {
             ...activityLog.paging,
+            startDate: state.endpointDetails.activityLog.paging.startDate,
+            endDate: state.endpointDetails.activityLog.paging.endDate,
             recentlyUsedDateRanges: state.endpointDetails.activityLog.paging.recentlyUsedDateRanges,
           },
         },

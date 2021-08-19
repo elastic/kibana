@@ -71,7 +71,7 @@ export const EndpointDetailsFlyoutTabs = memo(
     tabs: EndpointDetailsTabs[];
   }) => {
     const dispatch = useDispatch<(action: EndpointAction) => void>();
-    const { pageSize } = useEndpointSelector(getActivityLogDataPaging);
+    const { pageSize, startDate, endDate } = useEndpointSelector(getActivityLogDataPaging);
 
     const handleTabClick = useCallback(
       (tab: EuiTabbedContentTab) => {
@@ -82,13 +82,13 @@ export const EndpointDetailsFlyoutTabs = memo(
               disabled: false,
               page: 1,
               pageSize,
-              startDate: undefined,
-              endDate: undefined,
+              startDate,
+              endDate,
             },
           });
         }
       },
-      [dispatch, pageSize]
+      [dispatch, pageSize, startDate, endDate]
     );
 
     const selectedTab = useMemo(() => tabs.find((tab) => tab.id === show), [tabs, show]);

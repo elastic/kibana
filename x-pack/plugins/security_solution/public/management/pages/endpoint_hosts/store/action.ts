@@ -162,8 +162,8 @@ export interface EndpointDetailsActivityLogUpdatePaging {
     disabled?: boolean;
     page: number;
     pageSize: number;
-    startDate?: string;
-    endDate?: string;
+    startDate: string;
+    endDate: string;
   };
 }
 
