@@ -342,7 +342,7 @@ export function MachineLearningJobAnnotationsProvider({ getService }: FtrProvide
       });
     }
 
-    public async assertAnnotationsDelayedDataChartActionExists(annotationId: string) {
+    public async assertAnnotationsDelayedDataChartActionExists() {
       await retry.tryForTime(1000, async () => {
         await testSubjects.existOrFail('mlAnnotationsActionViewDatafeed');
       });
@@ -359,11 +359,10 @@ export function MachineLearningJobAnnotationsProvider({ getService }: FtrProvide
     public async ensureAnnotationsActionsMenuOpen(annotationId: string) {
       await retry.tryForTime(10 * 1000, async () => {
         await this.ensureAllMenuPopoversClosed();
-        const annotationsTable = await testSubjects.find('mlAnnotationsTable', 30 * 1000);
-        const collapsedActionsButton = await annotationsTable.findByCssSelector(
-          `[data-test-subj="euiCollapsedItemActionsButton"]`
+        await testSubjects.click(
+          `mlAnnotationsTableRow row-${annotationId} > euiCollapsedItemActionsButton`,
+          30 * 1000
         );
-        collapsedActionsButton.click();
         await find.existsByCssSelector('euiContextMenuPanel');
       });
     }
@@ -371,7 +370,7 @@ export function MachineLearningJobAnnotationsProvider({ getService }: FtrProvide
     public async openDatafeedChartFlyout(annotationId: string, jobId: string) {
       await retry.tryForTime(10 * 1000, async () => {
         await this.ensureAnnotationsActionsMenuOpen(annotationId);
-        await this.assertAnnotationsDelayedDataChartActionExists(annotationId);
+        await this.assertAnnotationsDelayedDataChartActionExists();
 
         await testSubjects.clickWhenNotDisabled('mlAnnotationsActionViewDatafeed');
         await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyout');
@@ -385,7 +384,7 @@ export function MachineLearningJobAnnotationsProvider({ getService }: FtrProvide
       });
     }
 
-    public async assertDelayedDataChartExists(annotationId: string) {
+    public async assertDelayedDataChartExists() {
       await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyoutChart');
     }
   })();

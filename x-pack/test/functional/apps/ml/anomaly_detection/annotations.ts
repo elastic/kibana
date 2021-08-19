@@ -197,13 +197,14 @@ export default function ({ getService }: FtrProviderContext) {
           'should display delayed data action in annotations table'
         );
 
+        await ml.navigation.navigateToMl();
         await ml.navigation.navigateToJobManagement();
         await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(jobId, 1);
         await ml.jobTable.openAnnotationsTab(jobId);
 
         await ml.jobAnnotations.openDatafeedChartFlyout(annotationId, jobId);
-        await ml.jobAnnotations.assertDelayedDataChartExists(annotationId);
+        await ml.jobAnnotations.assertDelayedDataChartExists();
       });
     });
 
