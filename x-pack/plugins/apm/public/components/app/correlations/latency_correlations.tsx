@@ -179,6 +179,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
         render: (correlation: number) => {
           return <div>{asPreciseDecimal(correlation, 2)}</div>;
         },
+        sortable: true,
       },
       {
         field: 'fieldName',
@@ -186,6 +187,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           'xpack.apm.correlations.latencyCorrelations.correlationsTable.fieldNameLabel',
           { defaultMessage: 'Field name' }
         ),
+        sortable: true,
       },
       {
         field: 'fieldValue',
@@ -194,6 +196,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           { defaultMessage: 'Field value' }
         ),
         render: (fieldValue: string) => String(fieldValue).slice(0, 50),
+        sortable: true,
       },
       {
         width: '100px',
