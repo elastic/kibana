@@ -300,6 +300,15 @@ export class ResourceInstaller {
       ? indexInfo.getIlmPolicyName()
       : getResourceName(DEFAULT_ILM_POLICY_ID);
 
+    const indexMetadata: estypes.Metadata = {
+      ...indexTemplate._meta,
+      kibana: {
+        ...indexTemplate._meta?.kibana,
+        version: indexInfo.kibanaVersion,
+      },
+      namespace,
+    };
+
     // TODO: need a way to update this template if/when we decide to make changes to the
     // built in index template. Probably do it as part of updateIndexMappingsForAsset?
     // (Before upgrading any indices, find and upgrade all namespaced index templates - component templates
@@ -335,6 +344,9 @@ export class ResourceInstaller {
               rollover_alias: primaryNamespacedAlias,
             },
           },
+          mappings: {
+            _meta: indexMetadata,
+          },
           aliases:
             secondaryNamespacedAlias != null
               ? {
@@ -345,10 +357,7 @@ export class ResourceInstaller {
               : undefined,
         },
 
-        _meta: {
-          ...indexTemplate._meta,
-          namespace,
-        },
+        _meta: indexMetadata,
 
         version: indexTemplate.version,
 
