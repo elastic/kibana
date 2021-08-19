@@ -345,7 +345,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     );
 
     const prevDataRequest = this.getDataRequest(sourceDataId);
-    const canSkipFetch = joinRequestMeta.forceRefreshTriggeredFromGlobalQueryTime
+    const canSkipFetch = joinRequestMeta.isForceRefresh
       ? false
       : await canSkipSourceUpdate({
           source: joinSource,

@@ -64,7 +64,7 @@ export async function canSkipSourceUpdate({
   getUpdateDueToTimeslice: (timeslice?: Timeslice) => boolean;
 }): Promise<boolean> {
   if (
-    nextRequestMeta.forceRefreshTriggeredFromGlobalQueryTime &&
+    nextRequestMeta.isForceRefresh &&
     nextRequestMeta.applyForceRefresh &&
     (nextRequestMeta.applyGlobalQuery || nextRequestMeta.applyGlobalTime)
   ) {

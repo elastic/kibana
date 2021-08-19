@@ -183,9 +183,8 @@ export const getQuery = ({ map }: MapStoreState): Query | undefined => map.mapSt
 
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
 
-export const getForceRefreshTriggeredFromGlobalQueryTime = ({
-  map,
-}: MapStoreState): boolean | undefined => map.mapState.forceRefreshTriggeredFromGlobalQueryTime;
+export const getIsForceRefresh = ({ map }: MapStoreState): boolean | undefined =>
+  map.mapState.isForceRefresh;
 
 export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =>
   map.mapState.searchSessionId;
@@ -235,7 +234,7 @@ export const getDataFilters = createSelector(
   getSearchSessionId,
   getSearchSessionMapBuffer,
   getIsReadOnly,
-  getForceRefreshTriggeredFromGlobalQueryTime,
+  getIsForceRefresh,
   (
     mapExtent,
     mapBuffer,
@@ -248,7 +247,7 @@ export const getDataFilters = createSelector(
     searchSessionId,
     searchSessionMapBuffer,
     isReadOnly,
-    forceRefreshTriggeredFromGlobalQueryTime
+    isForceRefresh
   ) => {
     return {
       extent: mapExtent,
@@ -261,7 +260,7 @@ export const getDataFilters = createSelector(
       filters,
       searchSessionId,
       isReadOnly,
-      forceRefreshTriggeredFromGlobalQueryTime,
+      isForceRefresh,
     };
   }
 );

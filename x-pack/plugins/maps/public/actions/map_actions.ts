@@ -176,7 +176,7 @@ export function mapExtentChanged(mapExtentState: MapExtentState) {
       mapState: {
         ...dataFilters,
         ...mapExtentState,
-        forceRefreshTriggeredFromGlobalQueryTime: false,
+        isForceRefresh: false,
       },
     });
 
@@ -291,7 +291,7 @@ export function setQuery({
     dispatch({
       type: SET_QUERY,
       ...nextQueryContext,
-      forceRefreshTriggeredFromGlobalQueryTime: forceRefresh,
+      isForceRefresh: forceRefresh,
     });
 
     if (getMapSettings(getState()).autoFitToDataBounds) {

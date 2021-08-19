@@ -233,7 +233,7 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
         filters,
         searchSessionId,
         searchSessionMapBuffer,
-        forceRefreshTriggeredFromGlobalQueryTime,
+        isForceRefresh,
       } = action;
       return {
         ...state,
@@ -245,7 +245,7 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
           filters,
           searchSessionId,
           searchSessionMapBuffer,
-          forceRefreshTriggeredFromGlobalQueryTime,
+          isForceRefresh,
         },
       };
     case SET_SELECTED_LAYER:

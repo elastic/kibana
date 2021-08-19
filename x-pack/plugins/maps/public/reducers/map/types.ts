@@ -40,7 +40,7 @@ export type MapContext = {
   editState?: EditState;
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
-  forceRefreshTriggeredFromGlobalQueryTime?: boolean;
+  isForceRefresh?: boolean;
 };
 
 export type MapSettings = {

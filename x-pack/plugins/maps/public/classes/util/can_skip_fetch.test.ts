@@ -173,7 +173,7 @@ describe('canSkipSourceUpdate', () => {
           applyGlobalQuery: prevApplyGlobalQuery,
           filters: prevFilters,
           query: prevQuery,
-          forceRefreshTriggeredFromGlobalQueryTime: true,
+          isForceRefresh: true,
           applyForceRefresh: true,
         };
 
@@ -264,7 +264,7 @@ describe('canSkipSourceUpdate', () => {
           applyGlobalQuery: prevApplyGlobalQuery,
           filters: prevFilters,
           query: prevQuery,
-          forceRefreshTriggeredFromGlobalQueryTime: true,
+          isForceRefresh: true,
           applyForceRefresh: true,
         };
 
