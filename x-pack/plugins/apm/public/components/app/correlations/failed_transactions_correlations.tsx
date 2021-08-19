@@ -364,9 +364,9 @@ export function FailedTransactionsCorrelations({
       <EuiSpacer size="s" />
 
       <EuiTitle size="xs">
-        <span data-test-subj="apmCorrelationsLatencyCorrelationsTablePanelTitle">
+        <span data-test-subj="apmFailedTransactionsCorrelationsTablePanelTitle">
           {i18n.translate(
-            'xpack.apm.correlations.latencyCorrelations.tableTitle',
+            'xpack.apm.correlations.failedTransactions.tableTitle',
             {
               defaultMessage: 'Correlations',
             }
@@ -383,8 +383,15 @@ export function FailedTransactionsCorrelations({
         onCancel={cancelFetch}
       />
 
-      {ccsWarning && <CrossClusterSearchCompatibilityWarning version="7.15" />}
+      {ccsWarning && (
+        <>
+          <EuiSpacer size="m" />
+          <CrossClusterSearchCompatibilityWarning version="7.15" />
+        </>
+      )}
+
       <EuiSpacer size="m" />
+
       <div data-test-subj="apmCorrelationsTable">
         {(isRunning || correlationTerms.length > 0) && (
           <CorrelationsTable<FailedTransactionsCorrelationValue>
@@ -397,11 +404,11 @@ export function FailedTransactionsCorrelations({
             sorting={sorting}
           />
         )}
-        {correlationTerms.length < 1 && (progress === 1 || !isRunning) ? (
+        {correlationTerms.length < 1 && (progress === 1 || !isRunning) && (
           <CorrelationsEmptyStatePrompt />
-        ) : null}
+        )}
       </div>
-      {displayLog ? <CorrelationsLog log={log} /> : null}
+      {displayLog && <CorrelationsLog log={log} />}
     </div>
   );
 }

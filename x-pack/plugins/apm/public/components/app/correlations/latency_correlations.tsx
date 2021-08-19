@@ -351,8 +351,15 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
         onCancel={cancelFetch}
       />
 
-      {ccsWarning && <CrossClusterSearchCompatibilityWarning version="7.14" />}
+      {ccsWarning && (
+        <>
+          <EuiSpacer size="m" />
+          <CrossClusterSearchCompatibilityWarning version="7.14" />
+        </>
+      )}
+
       <EuiSpacer size="m" />
+
       <div data-test-subj="apmCorrelationsTable">
         {(isRunning || histogramTerms.length > 0) && (
           <CorrelationsTable<MlCorrelationsTerms>
@@ -372,11 +379,11 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             sorting={sorting}
           />
         )}
-        {histogramTerms.length < 1 && (progress === 1 || !isRunning) ? (
+        {histogramTerms.length < 1 && (progress === 1 || !isRunning) && (
           <CorrelationsEmptyStatePrompt />
-        ) : null}
+        )}
       </div>
-      {displayLog ? <CorrelationsLog log={log} /> : null}
+      {displayLog && <CorrelationsLog log={log} />}
     </div>
   );
 }

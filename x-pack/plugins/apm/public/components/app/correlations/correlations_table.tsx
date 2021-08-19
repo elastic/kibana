@@ -9,12 +9,12 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
-import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
+import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useUiTracker } from '../../../../../observability/public';
 import { useTheme } from '../../../hooks/use_theme';
-import { CorrelationsTerm } from '../../../../common/search_strategies/failure_correlations/types';
+import type { CorrelationsTerm } from '../../../../common/search_strategies/failure_correlations/types';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 
