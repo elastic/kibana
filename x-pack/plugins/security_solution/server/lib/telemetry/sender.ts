@@ -18,7 +18,6 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
-import { createUsageCounterLabel } from './helpers';
 import { TelemetryDiagTask } from './diagnostic_task';
 import { TelemetryEndpointTask } from './endpoint_task';
 import { TelemetryExceptionListsTask } from './security_lists_task';
@@ -27,7 +26,7 @@ import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/ser
 import { getTrustedAppsList } from '../../endpoint/routes/trusted_apps/service';
 import { ExceptionListClient } from '../../../../lists/server';
 import { GetEndpointListResponse } from './types';
-import { exceptionListItemToEndpointEntry } from './helpers';
+import { createUsageCounterLabel, exceptionListItemToEndpointEntry } from './helpers';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
