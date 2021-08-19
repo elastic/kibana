@@ -68,11 +68,13 @@ interface EventDetailsPanelProps {
   timelineId: string;
 }
 
+const SECURITY_SOLUTION_ALERT_CONSUMERS: AlertConsumers[] = [AlertConsumers.SIEM];
+
 const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
-  alertConsumers,
+  alertConsumers = SECURITY_SOLUTION_ALERT_CONSUMERS, // Default to Security Solution so only other applications have to pass this in
   browserFields,
   docValueFields,
-  entityType,
+  entityType = 'events', // Default to events so only alerts have to pass entityType in
   expandedEvent,
   handleOnEventClosed,
   isFlyoutView,

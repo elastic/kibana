@@ -119,7 +119,7 @@ export function BackendDetailOverview() {
             </EuiFlexItem>
           </EuiFlexGroup>
         </ChartPointerEventContextProvider>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="l" />
         <BackendDetailDependenciesTable />
       </BackendDetailTemplate>
     </ApmBackendContextProvider>

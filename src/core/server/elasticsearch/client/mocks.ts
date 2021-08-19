@@ -6,20 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { Client, ApiResponse } from '@elastic/elasticsearch';
+import type { Client, ApiResponse } from '@elastic/elasticsearch';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { ElasticsearchClient } from './types';
 import { ICustomClusterClient } from './cluster_client';
 import { PRODUCT_RESPONSE_HEADER } from '../supported_server_response_check';
 
+// use jest.requireActual() to prevent weird errors when people mock @elastic/elasticsearch
+const { Client: UnmockedClient } = jest.requireActual('@elastic/elasticsearch');
+
 const createInternalClientMock = (
   res?: MockedTransportRequestPromise<unknown>
 ): DeeplyMockedKeys<Client> => {
   // we mimic 'reflection' on a concrete instance of the client to generate the mocked functions.
-  const client = new Client({
+  const client = new UnmockedClient({
     node: 'http://localhost',
-  }) as any;
+  });
 
   const omittedProps = [
     '_events',
