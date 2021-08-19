@@ -128,7 +128,8 @@ describe('Row formatter', () => {
   });
 
   it('formats document with highlighted fields first', () => {
-    expect(formatRow({ ...hit, highlight: { number: '42' } }, indexPattern, false)).toMatchInlineSnapshot(`
+    expect(formatRow({ ...hit, highlight: { number: '42' } }, indexPattern, false))
+      .toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
