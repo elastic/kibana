@@ -13,3 +13,10 @@ export const CHANGE_ALERT_STATUS = i18n.translate(
     defaultMessage: 'Change alert status',
   }
 );
+
+export const TAKE_ACTION = i18n.translate(
+  'xpack.securitySolution.endpoint.takeAction.takeActionTitle',
+  {
+    defaultMessage: 'Take action',
+  }
+);

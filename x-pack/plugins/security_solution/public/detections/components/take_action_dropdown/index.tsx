@@ -9,9 +9,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { EuiContextMenu, EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 
-import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
-
-import { TimelineEventsDetailsItem, TimelineId, TimelineNonEcsData } from '../../../../common';
+import { TimelineEventsDetailsItem, TimelineId } from '../../../../common';
 import { useExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';
 import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_investigate_in_timeline';
@@ -20,7 +18,7 @@ import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kiban
 import { useInsertTimeline } from '../../../cases/components/use_insert_timeline';
 import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
-import { CHANGE_ALERT_STATUS } from './translations';
+import { CHANGE_ALERT_STATUS, TAKE_ACTION } from './translations';
 import { getFieldValue } from '../host_isolation/helpers';
 import type { Ecs } from '../../../../common/ecs';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -36,33 +34,34 @@ interface ActionsData {
   ruleName: string;
 }
 
+export interface TakeActionDropdownProps {
+  detailsData: TimelineEventsDetailsItem[] | null;
+  ecsData?: Ecs;
+  handleOnEventClosed: () => void;
+  indexName: string;
+  isHostIsolationPanelOpen: boolean;
+  loadingEventDetails: boolean;
+  onAddEventFilterClick: () => void;
+  onAddExceptionTypeClick: (type: ExceptionListType) => void;
+  onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
+  refetch: (() => void) | undefined;
+  timelineId: string;
+}
+
 export const TakeActionDropdown = React.memo(
   ({
     detailsData,
     ecsData,
     handleOnEventClosed,
+    indexName,
     isHostIsolationPanelOpen,
     loadingEventDetails,
     onAddEventFilterClick,
     onAddExceptionTypeClick,
     onAddIsolationStatusClick,
     refetch,
-    indexName,
     timelineId,
-  }: {
-    detailsData: TimelineEventsDetailsItem[] | null;
-    ecsData?: Ecs;
-    handleOnEventClosed: () => void;
-    isHostIsolationPanelOpen: boolean;
-    loadingEventDetails: boolean;
-    nonEcsData?: TimelineNonEcsData[];
-    refetch: (() => void) | undefined;
-    indexName: string;
-    onAddEventFilterClick: () => void;
-    onAddExceptionTypeClick: (type: ExceptionListType) => void;
-    onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
-    timelineId: string;
-  }) => {
+  }: TakeActionDropdownProps) => {
     const casePermissions = useGetUserCasesPermissions();
     const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
 
@@ -154,11 +153,11 @@ export const TakeActionDropdown = React.memo(
 
     const { actionItems } = useAlertsActions({
       alertStatus: actionsData.alertStatus,
+      closePopover: closePopoverAndFlyout,
       eventId: actionsData.eventId,
       indexName,
-      timelineId,
       refetch,
-      closePopover: closePopoverAndFlyout,
+      timelineId,
     });
 
     const { investigateInTimelineAction } = useInvestigateInTimeline({
@@ -278,7 +277,13 @@ export const TakeActionDropdown = React.memo(
 
     const takeActionButton = useMemo(() => {
       return (
-        <EuiButton iconSide="right" fill iconType="arrowDown" onClick={togglePopoverHandler}>
+        <EuiButton
+          data-test-subj="take-action-dropdown-btn"
+          fill
+          iconSide="right"
+          iconType="arrowDown"
+          onClick={togglePopoverHandler}
+        >
           {TAKE_ACTION}
         </EuiButton>
       );
