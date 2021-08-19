@@ -19,7 +19,7 @@ describe('ThreatMatchRows', () => {
       _id: 'id',
       _index: 'index',
       threat: {
-        indicator: [{ matched: { atomic: ['atomic'], field: ['field'] } }],
+        enrichments: [{ matched: { atomic: ['atomic'], field: ['field'] } }],
       },
     };
 
@@ -39,7 +39,7 @@ describe('ThreatMatchRows', () => {
       _id: 'id',
       _index: 'index',
       threat: {
-        indicator: { matched: { atomic: ['value'] } },
+        enrichments: { matched: { atomic: ['value'] } },
       },
     } as Ecs;
 
