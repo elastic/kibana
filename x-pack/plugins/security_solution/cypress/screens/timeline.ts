@@ -39,6 +39,8 @@ export const DATAGRID_HEADERS =
 
 export const FAVORITE_TIMELINE = '[data-test-subj="timeline-favorite-filled-star"]';
 
+export const FIELD_BROWSER = '[data-test-subj="show-field-browser"]';
+
 export const GRAPH_TAB_BUTTON = '[data-test-subj="timelineTabs-graph"]';
 
 export const HEADER = '[data-test-subj="header"]';
