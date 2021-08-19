@@ -57,7 +57,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await delay(10);
   };
 
-  describe('saved objects edition page', () => {
+  describe.only('saved objects edition page', () => {
     beforeEach(async () => {
       await esArchiver.load(
         'test/functional/fixtures/es_archiver/saved_objects_management/edit_saved_object'
