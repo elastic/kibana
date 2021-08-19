@@ -326,6 +326,7 @@ export class VisualizePageObject extends FtrService {
     if (navigateToVisualize) {
       await this.clickLoadSavedVisButton();
     }
+    await this.listingTable.searchForItemWithName(vizName);
     await this.openSavedVisualization(vizName);
   }
 
