@@ -19,6 +19,11 @@ interface ServiceAgent {
   agent?: {
     name: string;
   };
+  service?: {
+    runtime?: {
+      name?: string;
+    };
+  };
 }
 
 export async function getServiceAgent({
@@ -45,7 +50,7 @@ export async function getServiceAgent({
     },
     body: {
       size: 1,
-      _source: [AGENT_NAME],
+      _source: [AGENT_NAME, SERVICE_RUNTIME_NAME],
       query: {
         bool: {
           filter: [
@@ -57,13 +62,10 @@ export async function getServiceAgent({
               },
             },
           ],
-        },
-      },
-      aggs: {
-        runtimeName: {
-          terms: {
-            field: SERVICE_RUNTIME_NAME,
-            size: 1,
+          should: {
+            exists: {
+              field: SERVICE_RUNTIME_NAME,
+            },
           },
         },
       },
@@ -78,9 +80,6 @@ export async function getServiceAgent({
     return {};
   }
 
-  const { agent } = response.hits.hits[0]._source as ServiceAgent;
-  const runtimeName = response.aggregations?.runtimeName.buckets[0]?.key as
-    | string
-    | undefined;
-  return { agentName: agent?.name, runtimeName };
+  const { agent, service } = response.hits.hits[0]._source as ServiceAgent;
+  return { agentName: agent?.name, runtimeName: service?.runtime?.name };
 }
