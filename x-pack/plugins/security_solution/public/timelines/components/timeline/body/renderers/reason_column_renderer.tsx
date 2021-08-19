@@ -12,7 +12,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { BrowserFields, ColumnHeaderOptions, RowRenderer } from '../../../../../../common';
 import { Ecs } from '../../../../../../common/ecs';
-import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { eventRendererNames } from '../../../row_renderers_browser/catalog';
 import { ColumnRenderer } from './column_renderer';
 import { REASON_FIELD_NAME } from './constants';
@@ -136,29 +135,21 @@ const ReasonCell: React.FC<{
 
   return (
     <>
-      <DefaultDraggable
-        field={fieldName}
-        id={`reason-column-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-        isDraggable={isDraggable}
-        value={`${value}`}
-        tooltipContent={value}
-      >
-        {rowRenderer && rowRender ? (
-          <EuiPopover
-            isOpen={isOpen}
-            anchorPosition="rightCenter"
-            closePopover={handleClosePopOver}
-            button={button}
-          >
-            <EuiPopoverTitle paddingSize="s">
-              {i18n.EVENT_RENDERER_POPOVER_TITLE(eventRendererNames[rowRenderer.id] ?? '')}
-            </EuiPopoverTitle>
-            {rowRender}
-          </EuiPopover>
-        ) : (
-          value
-        )}
-      </DefaultDraggable>
+      {rowRenderer && rowRender ? (
+        <EuiPopover
+          isOpen={isOpen}
+          anchorPosition="rightCenter"
+          closePopover={handleClosePopOver}
+          button={button}
+        >
+          <EuiPopoverTitle paddingSize="s">
+            {i18n.EVENT_RENDERER_POPOVER_TITLE(eventRendererNames[rowRenderer.id] ?? '')}
+          </EuiPopoverTitle>
+          {rowRender}
+        </EuiPopover>
+      ) : (
+        value
+      )}
     </>
   );
 };
