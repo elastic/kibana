@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import React, { ReactNode } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { ITooltipProperty } from './tooltip_property';
 import { InnerJoin } from '../joins/inner_join';
 import { Filter } from '../../../../../../src/plugins/data/public';
 
 export class JoinTooltipProperty implements ITooltipProperty {
   private readonly _tooltipProperty: ITooltipProperty;
-  private readonly _leftInnerJoins: InnerJoin[];
+  private readonly _innerJoins: InnerJoin[];
 
-  constructor(tooltipProperty: ITooltipProperty, leftInnerJoins: InnerJoin[]) {
+  constructor(tooltipProperty: ITooltipProperty, innerJoins: InnerJoin[]) {
     this._tooltipProperty = tooltipProperty;
-    this._leftInnerJoins = leftInnerJoins;
+    this._innerJoins = innerJoins;
   }
 
   isFilterable(): boolean {
@@ -26,8 +29,29 @@ export class JoinTooltipProperty implements ITooltipProperty {
     return this._tooltipProperty.getPropertyKey();
   }
 
-  getPropertyName(): string {
-    return this._tooltipProperty.getPropertyName();
+  getPropertyName(): ReactNode {
+    const content = i18n.translate('xpack.maps.tooltip.joinPropertyTooltipContent', {
+      defaultMessage:
+        '"{leftFieldName}" is a shared key joining statistics to this layer. "{leftFieldName}" is joined with: {rightSources}',
+      values: {
+        leftFieldName: this._tooltipProperty.getPropertyName() as string,
+        rightSources: this._innerJoins
+          .map((innerJoin) => {
+            const rightSource = innerJoin.getRightJoinSource();
+            const termField = rightSource.getTermField();
+            return `"${termField.getName()}"`;
+          })
+          .join(','),
+      },
+    });
+    return (
+      <>
+        {this._tooltipProperty.getPropertyName()}
+        <EuiToolTip position="bottom" content={content}>
+          <EuiIcon type="link" />
+        </EuiToolTip>
+      </>
+    );
   }
 
   getRawValue(): string | string[] | undefined {
@@ -43,8 +67,8 @@ export class JoinTooltipProperty implements ITooltipProperty {
 
     // only create filters for right sources.
     // do not create filters for left source.
-    for (let i = 0; i < this._leftInnerJoins.length; i++) {
-      const rightSource = this._leftInnerJoins[i].getRightJoinSource();
+    for (let i = 0; i < this._innerJoins.length; i++) {
+      const rightSource = this._innerJoins[i].getRightJoinSource();
       const termField = rightSource.getTermField();
       try {
         const esTooltipProperty = await termField.createTooltipProperty(

@@ -37,7 +37,7 @@ export class ESTooltipProperty implements ITooltipProperty {
     return this._tooltipProperty.getPropertyKey();
   }
 
-  getPropertyName(): string {
+  getPropertyName() {
     return this._tooltipProperty.getPropertyName();
   }
 
