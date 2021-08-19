@@ -85,7 +85,7 @@ export const OptionsListComponent = ({
       >
         <OptionsListPopover
           loading={loading}
-          updateItem={updateOption}
+          updateOption={updateOption}
           searchString={searchString}
           typeaheadSubject={typeaheadSubject}
           availableOptions={availableOptions}

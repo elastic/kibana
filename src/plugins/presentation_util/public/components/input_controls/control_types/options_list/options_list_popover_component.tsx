@@ -24,13 +24,13 @@ interface OptionsListPopoverProps {
   loading: boolean;
   typeaheadSubject: Subject<string>;
   searchString?: string;
-  updateItem: (index: number) => void;
+  updateOption: (index: number) => void;
   availableOptions?: EuiSelectableOption[];
 }
 
 export const OptionsListPopover = ({
   loading,
-  updateItem,
+  updateOption,
   searchString,
   typeaheadSubject,
   availableOptions,
@@ -53,7 +53,7 @@ export const OptionsListPopover = ({
             <EuiFilterSelectItem
               checked={item.checked}
               key={index}
-              onClick={() => updateItem(index)}
+              onClick={() => updateOption(index)}
             >
               {item.label}
             </EuiFilterSelectItem>
