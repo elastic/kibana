@@ -78,9 +78,7 @@ export function getStateColumnActions({
   state: DiscoverState | ContextState;
 }) {
   function onAddColumn(columnName: string) {
-    if (capabilities.discover.save) {
-      popularizeField(indexPattern, columnName, indexPatterns);
-    }
+    popularizeField(indexPattern, columnName, indexPatterns, capabilities);
     const columns = addColumn(state.columns || [], columnName, useNewFieldsApi);
     const defaultOrder = config.get(SORT_DEFAULT_ORDER_SETTING);
     const sort =
@@ -89,9 +87,7 @@ export function getStateColumnActions({
   }
 
   function onRemoveColumn(columnName: string) {
-    if (capabilities.discover.save) {
-      popularizeField(indexPattern, columnName, indexPatterns);
-    }
+    popularizeField(indexPattern, columnName, indexPatterns, capabilities);
     const columns = removeColumn(state.columns || [], columnName, useNewFieldsApi);
     // The state's sort property is an array of [sortByColumn,sortDirection]
     const sort =

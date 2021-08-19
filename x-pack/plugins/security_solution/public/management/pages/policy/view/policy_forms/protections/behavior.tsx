@@ -28,7 +28,7 @@ export const BehaviorProtection = React.memo(() => {
   const protectionLabel = i18n.translate(
     'xpack.securitySolution.endpoint.policy.protections.behavior',
     {
-      defaultMessage: 'Behaviour protections',
+      defaultMessage: 'Behavior protections',
     }
   );
   return (

@@ -98,3 +98,36 @@ Array [
   </div>,
 ]
 `;
+
+exports[`FieldName renders unknown field 1`] = `
+Array [
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldIcon"
+  >
+    <span
+      class="euiToken euiToken--gray euiToken--circle euiToken--light euiToken--small kbnFieldIcon"
+    >
+      <span
+        aria-label="Unknown field"
+        data-euiicon-type="questionInCircle"
+        title="Unknown field"
+      />
+    </span>
+  </div>,
+  <div
+    class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--wrap"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldName eui-textBreakAll"
+    >
+      <span
+        class="euiToolTipAnchor eui-textBreakAll"
+      >
+        <span>
+          test.test.test
+        </span>
+      </span>
+    </div>
+  </div>,
+]
+`;
