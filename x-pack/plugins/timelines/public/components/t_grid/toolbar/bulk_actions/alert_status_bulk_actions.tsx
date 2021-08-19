@@ -9,19 +9,15 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import type {
   AlertStatus,
-  OnAlertStatusActionSuccess,
-  OnAlertStatusActionFailure,
+  SetEventsLoading,
+  SetEventsDeleted,
+  OnUpdateAlertStatusSuccess,
+  OnUpdateAlertStatusError,
 } from '../../../../../common';
 import type { Refetch } from '../../../../store/t_grid/inputs';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../../store/t_grid';
 import { BulkActions } from './';
-import { useAppToasts } from '../../../../hooks/use_app_toasts';
-import * as i18n from '../../translations';
-import {
-  SetEventsDeletedProps,
-  SetEventsLoadingProps,
-  useStatusBulkActionItems,
-} from '../../../../hooks/use_status_bulk_action_items';
+import { useStatusBulkActionItems } from '../../../../hooks/use_status_bulk_action_items';
 
 interface OwnProps {
   id: string;
@@ -29,8 +25,8 @@ interface OwnProps {
   filterStatus?: AlertStatus;
   query: string;
   indexName: string;
-  onActionSuccess?: OnAlertStatusActionSuccess;
-  onActionFailure?: OnAlertStatusActionFailure;
+  onActionSuccess?: OnUpdateAlertStatusSuccess;
+  onActionFailure?: OnUpdateAlertStatusError;
   refetch: Refetch;
 }
 
@@ -54,7 +50,6 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
     refetch,
   }) => {
     const dispatch = useDispatch();
-    const { addSuccess, addError, addWarning } = useAppToasts();
 
     const [showClearSelection, setShowClearSelection] = useState(false);
 
@@ -82,67 +77,35 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
       setShowClearSelection(false);
     }, [clearSelected, dispatch, id]);
 
-    const onAlertStatusUpdateSuccess = useCallback(
+    const onUpdateSuccess = useCallback(
       (updated: number, conflicts: number, newStatus: AlertStatus) => {
-        if (conflicts > 0) {
-          // Partial failure
-          addWarning({
-            title: i18n.UPDATE_ALERT_STATUS_FAILED(conflicts),
-            text: i18n.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
-          });
-        } else {
-          let title: string;
-          switch (newStatus) {
-            case 'closed':
-              title = i18n.CLOSED_ALERT_SUCCESS_TOAST(updated);
-              break;
-            case 'open':
-              title = i18n.OPENED_ALERT_SUCCESS_TOAST(updated);
-              break;
-            case 'in-progress':
-              title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(updated);
-          }
-          addSuccess({ title });
-        }
         refetch();
         if (onActionSuccess) {
-          onActionSuccess(newStatus);
+          onActionSuccess(updated, conflicts, newStatus);
         }
       },
-      [addSuccess, addWarning, onActionSuccess, refetch]
+      [refetch, onActionSuccess]
     );
 
-    const onAlertStatusUpdateFailure = useCallback(
+    const onUpdateFailure = useCallback(
       (newStatus: AlertStatus, error: Error) => {
-        let title: string;
-        switch (newStatus) {
-          case 'closed':
-            title = i18n.CLOSED_ALERT_FAILED_TOAST;
-            break;
-          case 'open':
-            title = i18n.OPENED_ALERT_FAILED_TOAST;
-            break;
-          case 'in-progress':
-            title = i18n.IN_PROGRESS_ALERT_FAILED_TOAST;
-        }
-        addError(error.message, { title });
         refetch();
         if (onActionFailure) {
-          onActionFailure(newStatus, error.message);
+          onActionFailure(newStatus, error);
         }
       },
-      [addError, onActionFailure, refetch]
+      [refetch, onActionFailure]
     );
 
-    const setEventsLoading = useCallback(
-      ({ eventIds, isLoading }: SetEventsLoadingProps) => {
+    const setEventsLoading = useCallback<SetEventsLoading>(
+      ({ eventIds, isLoading }) => {
         dispatch(tGridActions.setEventsLoading({ id, eventIds, isLoading }));
       },
       [dispatch, id]
     );
 
-    const setEventsDeleted = useCallback(
-      ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
+    const setEventsDeleted = useCallback<SetEventsDeleted>(
+      ({ eventIds, isDeleted }) => {
         dispatch(tGridActions.setEventsDeleted({ id, eventIds, isDeleted }));
       },
       [dispatch, id]
@@ -155,8 +118,8 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
       ...(showClearSelection ? { query } : {}),
       setEventsLoading,
       setEventsDeleted,
-      onUpdateSuccess: onAlertStatusUpdateSuccess,
-      onUpdateFailure: onAlertStatusUpdateFailure,
+      onUpdateSuccess,
+      onUpdateFailure,
     });
 
     return (

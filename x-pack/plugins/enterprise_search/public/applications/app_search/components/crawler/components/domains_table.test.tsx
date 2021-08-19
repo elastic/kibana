@@ -30,6 +30,9 @@ const domains: CrawlerDomain[] = [
     sitemaps: [],
     lastCrawl: '2020-01-01T00:00:00-12:00',
     createdOn: '2020-01-01T00:00:00-12:00',
+    deduplicationEnabled: false,
+    deduplicationFields: ['title'],
+    availableDeduplicationFields: ['title', 'description'],
   },
   {
     id: '4567',
@@ -39,6 +42,9 @@ const domains: CrawlerDomain[] = [
     entryPoints: [],
     sitemaps: [],
     createdOn: '1970-01-01T00:00:00-12:00',
+    deduplicationEnabled: false,
+    deduplicationFields: ['title'],
+    availableDeduplicationFields: ['title', 'description'],
   },
 ];
 

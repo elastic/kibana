@@ -26,6 +26,7 @@ import { getFieldValue } from '../host_isolation/helpers';
 import type { Ecs } from '../../../../common/ecs';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { endpointAlertCheck } from '../../../common/utils/endpoint_alert_check';
+import { APP_ID } from '../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 interface ActionsData {
@@ -158,6 +159,7 @@ export const TakeActionDropdown = React.memo(
       eventId: actionsData.eventId,
       indexName,
       timelineId,
+      refetch,
       closePopover: closePopoverAndFlyout,
     });
 
@@ -181,6 +183,20 @@ export const TakeActionDropdown = React.memo(
       [eventFilterActions, exceptionActions, isEvent, actionsData.ruleId]
     );
 
+    const addToCaseProps = useMemo(() => {
+      if (ecsData) {
+        return {
+          event: { data: [], ecs: ecsData, _id: ecsData._id },
+          useInsertTimeline: insertTimelineHook,
+          casePermissions,
+          appId: APP_ID,
+          onClose: afterCaseSelection,
+        };
+      } else {
+        return null;
+      }
+    }, [afterCaseSelection, casePermissions, ecsData, insertTimelineHook]);
+
     const panels = useMemo(() => {
       if (tGridEnabled) {
         return [
@@ -202,26 +218,8 @@ export const TakeActionDropdown = React.memo(
             id: 2,
             title: ACTION_ADD_TO_CASE,
             content: [
-              <>
-                {ecsData &&
-                  timelinesUi.getAddToExistingCaseButton({
-                    ecsRowData: ecsData,
-                    useInsertTimeline: insertTimelineHook,
-                    casePermissions,
-                    appId: 'securitySolution',
-                    onClose: afterCaseSelection,
-                  })}
-              </>,
-              <>
-                {ecsData &&
-                  timelinesUi.getAddToNewCaseButton({
-                    ecsRowData: ecsData,
-                    useInsertTimeline: insertTimelineHook,
-                    casePermissions,
-                    appId: 'securitySolution',
-                    onClose: afterCaseSelection,
-                  })}
-              </>,
+              <>{addToCaseProps && timelinesUi.getAddToExistingCaseButton(addToCaseProps)}</>,
+              <>{addToCaseProps && timelinesUi.getAddToNewCaseButton(addToCaseProps)}</>,
             ],
           },
         ];
@@ -239,16 +237,13 @@ export const TakeActionDropdown = React.memo(
         ];
       }
     }, [
+      addToCaseProps,
       alertsActionItems,
       hostIsolationAction,
       investigateInTimelineAction,
-      ecsData,
-      casePermissions,
-      insertTimelineHook,
       timelineId,
       timelinesUi,
       actionItems,
-      afterCaseSelection,
       tGridEnabled,
     ]);
 

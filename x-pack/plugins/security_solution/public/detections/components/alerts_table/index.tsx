@@ -174,7 +174,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
             title = i18n.OPENED_ALERT_SUCCESS_TOAST(updated);
             break;
           case 'in-progress':
-            title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(updated);
+          case 'acknowledged':
+            title = i18n.ACKNOWLEDGED_ALERT_SUCCESS_TOAST(updated);
         }
         displaySuccessToast(title, dispatchToaster);
       }
@@ -193,7 +194,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           title = i18n.OPENED_ALERT_FAILED_TOAST;
           break;
         case 'in-progress':
-          title = i18n.IN_PROGRESS_ALERT_FAILED_TOAST;
+        case 'acknowledged':
+          title = i18n.ACKNOWLEDGED_ALERT_FAILED_TOAST;
       }
       displayErrorToast(title, [error.message], dispatchToaster);
     },
@@ -383,6 +385,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       pageFilters={defaultFiltersMemo}
       defaultCellActions={defaultCellActions}
       defaultModel={defaultTimelineModel}
+      entityType="alerts"
       end={to}
       currentFilter={filterGroup}
       id={timelineId}
@@ -393,6 +396,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       start={from}
       utilityBar={utilityBarCallback}
       additionalFilters={additionalFiltersComponent}
+      hasAlertsCrud={hasIndexWrite}
     />
   );
 };

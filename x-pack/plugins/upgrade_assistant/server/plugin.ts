@@ -16,6 +16,7 @@ import {
   SavedObjectsClient,
   SavedObjectsServiceStart,
 } from '../../../../src/core/server';
+import { InfraPluginSetup } from '../../infra/server';
 
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
@@ -31,6 +32,7 @@ import {
   reindexOperationSavedObjectType,
   mlSavedObjectType,
 } from './saved_object_types';
+import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX_PATTERN } from '../common/constants';
 
 import { RouteDependencies } from './types';
 
@@ -38,6 +40,7 @@ interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetup;
+  infra: InfraPluginSetup;
 }
 
 export class UpgradeAssistantServerPlugin implements Plugin {
@@ -66,8 +69,8 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   }
 
   setup(
-    { http, getStartServices, capabilities, savedObjects }: CoreSetup,
-    { usageCollection, features, licensing }: PluginsSetup
+    { http, getStartServices, savedObjects }: CoreSetup,
+    { usageCollection, features, licensing, infra }: PluginsSetup
   ) {
     this.licensing = licensing;
 
@@ -88,19 +91,34 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       ],
     });
 
+    // We need to initialize the deprecation logs plugin so that we can
+    // navigate from this app to the observability app using a source_id.
+    infra.defineInternalSourceConfiguration(DEPRECATION_LOGS_SOURCE_ID, {
+      name: 'deprecationLogs',
+      description: 'deprecation logs',
+      logIndices: {
+        type: 'index_name',
+        indexName: DEPRECATION_LOGS_INDEX_PATTERN,
+      },
+      logColumns: [
+        { timestampColumn: { id: 'timestampField' } },
+        { messageColumn: { id: 'messageField' } },
+      ],
+    });
+
     const router = http.createRouter();
 
     const dependencies: RouteDependencies = {
       router,
       credentialStore: this.credentialStore,
       log: this.logger,
+      licensing,
       getSavedObjectsService: () => {
         if (!this.savedObjectsServiceStart) {
           throw new Error('Saved Objects Start service not available');
         }
         return this.savedObjectsServiceStart;
       },
-      licensing,
     };
 
     // Initialize version service with current kibana version
