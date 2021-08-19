@@ -215,9 +215,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             onClick: (term: MlCorrelationsTerms) => {
               push(history, {
                 query: {
-                  kuery: `${term.fieldName}:"${encodeURIComponent(
-                    term.fieldValue
-                  )}"`,
+                  kuery: `${term.fieldName}:"${term.fieldValue}"`,
                 },
               });
               onFilter();
@@ -238,9 +236,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             onClick: (term: MlCorrelationsTerms) => {
               push(history, {
                 query: {
-                  kuery: `not ${term.fieldName}:"${encodeURIComponent(
-                    term.fieldValue
-                  )}"`,
+                  kuery: `not ${term.fieldName}:"${term.fieldValue}"`,
                 },
               });
               onFilter();
