@@ -29,8 +29,6 @@ import {
   isFilters as oldIsFilters,
   isExistsFilter as oldIsExistsFilter,
   isMatchAllFilter as oldIsMatchAllFilter,
-  isGeoBoundingBoxFilter as oldIsGeoBoundingBoxFilter,
-  isGeoPolygonFilter as oldIsGeoPolygonFilter,
   isMissingFilter as oldIsMissingFilter,
   isPhraseFilter as oldIsPhraseFilter,
   isPhrasesFilter as oldIsPhrasesFilter,
@@ -49,14 +47,12 @@ import {
   RangeFilterMeta as oldRangeFilterMeta,
   RangeFilterParams as oldRangeFilterParams,
   ExistsFilter as oldExistsFilter,
-  GeoPolygonFilter as oldGeoPolygonFilter,
   PhrasesFilter as oldPhrasesFilter,
   PhraseFilter as oldPhraseFilter,
   MatchAllFilter as oldMatchAllFilter,
   CustomFilter as oldCustomFilter,
   MissingFilter as oldMissingFilter,
   RangeFilter as oldRangeFilter,
-  GeoBoundingBoxFilter as oldGeoBoundingBoxFilter,
   KueryNode as oldKueryNode,
   FilterMeta as oldFilterMeta,
   FILTERS as oldFILTERS,
@@ -175,18 +171,6 @@ const isExistsFilter = oldIsExistsFilter;
  * @removeBy 8.1
  */
 const isMatchAllFilter = oldIsMatchAllFilter;
-
-/**
- * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.1
- */
-const isGeoBoundingBoxFilter = oldIsGeoBoundingBoxFilter;
-
-/**
- * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.1
- */
-const isGeoPolygonFilter = oldIsGeoPolygonFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
@@ -342,12 +326,6 @@ type ExistsFilter = oldExistsFilter;
  * @deprecated Import from the "@kbn/es-query" package directly instead.
  * @removeBy 8.1
  */
-type GeoPolygonFilter = oldGeoPolygonFilter;
-
-/**
- * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.1
- */
 type PhrasesFilter = oldPhrasesFilter;
 
 /**
@@ -379,12 +357,6 @@ type MissingFilter = oldMissingFilter;
  * @removeBy 8.1
  */
 type RangeFilter = oldRangeFilter;
-
-/**
- * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.1
- */
-type GeoBoundingBoxFilter = oldGeoBoundingBoxFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
@@ -436,8 +408,6 @@ export {
   isFilters,
   isExistsFilter,
   isMatchAllFilter,
-  isGeoBoundingBoxFilter,
-  isGeoPolygonFilter,
   isMissingFilter,
   isPhraseFilter,
   isPhrasesFilter,
@@ -463,14 +433,12 @@ export {
   RangeFilterMeta,
   RangeFilterParams,
   ExistsFilter,
-  GeoPolygonFilter,
   PhrasesFilter,
   PhraseFilter,
   MatchAllFilter,
   CustomFilter,
   MissingFilter,
   RangeFilter,
-  GeoBoundingBoxFilter,
   KueryNode,
   FilterMeta,
   IFieldSubType,

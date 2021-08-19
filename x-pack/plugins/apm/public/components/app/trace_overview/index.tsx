@@ -14,7 +14,7 @@ import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { SearchBar } from '../../shared/search_bar';
 import { TraceList } from './trace_list';
 import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
-import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
+import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 
 type TracesAPIResponse = APIReturnType<'GET /api/apm/traces'>;
 const DEFAULT_RESPONSE: TracesAPIResponse = {
@@ -58,7 +58,7 @@ export function TraceOverview() {
       {fallbackToTransactions && (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <AggregatedTransactionsCallout />
+            <AggregatedTransactionsBadge />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

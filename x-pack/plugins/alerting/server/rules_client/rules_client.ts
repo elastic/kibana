@@ -33,6 +33,7 @@ import {
   AlertExecutionStatusValues,
   AlertNotifyWhenType,
   AlertTypeParams,
+  ResolvedSanitizedRule,
 } from '../types';
 import {
   validateAlertTypeParams,
@@ -409,6 +410,52 @@ export class RulesClient {
       result.attributes,
       result.references
     );
+  }
+
+  public async resolve<Params extends AlertTypeParams = never>({
+    id,
+  }: {
+    id: string;
+  }): Promise<ResolvedSanitizedRule<Params>> {
+    const {
+      saved_object: result,
+      ...resolveResponse
+    } = await this.unsecuredSavedObjectsClient.resolve<RawAlert>('alert', id);
+    try {
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: result.attributes.alertTypeId,
+        consumer: result.attributes.consumer,
+        operation: ReadOperations.Get,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.RESOLVE,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.RESOLVE,
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    const rule = this.getAlertFromRaw<Params>(
+      result.id,
+      result.attributes.alertTypeId,
+      result.attributes,
+      result.references
+    );
+
+    return {
+      ...rule,
+      ...resolveResponse,
+    };
   }
 
   public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
