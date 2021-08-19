@@ -8,15 +8,14 @@
 
 import { EuiCheckboxGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SerializableRecord } from '@kbn/utility-types';
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
 import type { Capabilities } from 'src/core/public';
 import { DashboardSavedObject } from '../..';
-import { SavedDashboardPanel } from '../../../common/types';
 import { shareModalStrings } from '../../dashboard_strings';
 import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator';
 import { TimeRange } from '../../services/data';
+import { ViewMode } from '../../services/embeddable';
 import { setStateToKbnUrl, unhashUrl } from '../../services/kibana_utils';
 import { SharePluginStart } from '../../services/share';
 import { DashboardAppCapabilities, DashboardState } from '../../types';
@@ -117,9 +116,15 @@ export function ShowShareModal({
   });
 
   const locatorParams: DashboardAppLocatorParams = {
-    ...rawDashboardState,
-    panels: rawDashboardState.panels as SerializableRecord & SavedDashboardPanel[],
+    dashboardId: savedDashboard.id,
+    filters: rawDashboardState.filters,
+    preserveSavedFilters: true,
+    query: rawDashboardState.query,
+    savedQuery: rawDashboardState.savedQuery,
+    useHash: false,
+    panels: rawDashboardState.panels,
     timeRange,
+    viewMode: ViewMode.VIEW, // For share locators we always load the dashboard in view mode
     refreshInterval: undefined, // We don't share refresh interval externally
   };
 
