@@ -35,7 +35,7 @@ export interface TableRowProps {
   hideTimeColumn: boolean;
   filterManager: FilterManager;
   addBasePath: (path: string) => string;
-  showMultiFields?: boolean;
+  showMultiFields: boolean;
 }
 
 export const TableRow = ({

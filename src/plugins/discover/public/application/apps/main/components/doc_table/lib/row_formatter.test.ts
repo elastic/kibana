@@ -69,7 +69,7 @@ describe('Row formatter', () => {
   });
 
   it('formats document properly', () => {
-    expect(formatRow(hit, indexPattern)).toMatchInlineSnapshot(`
+    expect(formatRow(hit, indexPattern, false)).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
@@ -113,7 +113,7 @@ describe('Row formatter', () => {
         get: () => 1,
       },
     } as unknown) as DiscoverServices);
-    expect(formatRow(hit, indexPattern)).toMatchInlineSnapshot(`
+    expect(formatRow(hit, indexPattern, false)).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
@@ -128,7 +128,7 @@ describe('Row formatter', () => {
   });
 
   it('formats document with highlighted fields first', () => {
-    expect(formatRow({ ...hit, highlight: { number: '42' } }, indexPattern)).toMatchInlineSnapshot(`
+    expect(formatRow({ ...hit, highlight: { number: '42' } }, indexPattern, false)).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
