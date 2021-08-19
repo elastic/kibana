@@ -16,6 +16,10 @@ import {
   EuiLink,
   EuiPageBody,
   EuiPageContent,
+  EuiFlexItem,
+  EuiButton,
+  EuiFlexGroup,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -49,7 +53,7 @@ export const Overview: FunctionComponent = () => {
         <EuiPageHeader
           bottomBorder
           pageTitle={i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
-            defaultMessage: 'Upgrade Assistant',
+            defaultMessage: '8.0 Upgrade Assistant',
           })}
           description={i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
             defaultMessage: 'Get ready for the next version of the Elastic Stack!',
@@ -83,6 +87,38 @@ export const Overview: FunctionComponent = () => {
 
         <EuiSteps
           steps={[
+            {
+              title: 'Back up your data before making changes',
+              status: 'complete',
+              children: (
+                <>
+                  <EuiFlexGroup alignItems="center" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="check" color="success" />
+                    </EuiFlexItem>
+
+                    <EuiFlexItem grow={false}>
+                      <EuiText>
+                        <p>
+                          Snapshot saved <a href="#">September 5, 2021 3:59 PM PDT</a>
+                        </p>
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+
+                  <EuiSpacer size="m" />
+
+                  <EuiButton
+                    href="#"
+                    target="_blank"
+                    iconSide="right"
+                    iconType="popout"
+                  >
+                    Create snapshot
+                  </EuiButton>
+                </>
+              ),
+            },
             getReviewLogsStep({ currentMajor }),
             getFixDeprecationLogsStep(),
             getUpgradeStep({ docLinks, currentMajor }),

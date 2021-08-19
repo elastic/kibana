@@ -77,6 +77,43 @@ const DeprecationLogsPreview: FunctionComponent = () => {
           <ExternalLinks />
         </>
       )}
+  {/*
+      <EuiSpacer size="xxl" />
+      <EuiText>
+        <h4>Fix and verify</h4>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiCallOut title="6 new logs since your last checkpoint" color="warning">
+        <p>
+          Checkpoint set on September 6, 2021 11:22 AM PDT
+        </p>
+        <p>
+          <a href="">Reset checkpoint</a>
+        </p>
+      </EuiCallOut>
+      <EuiSpacer size="m" />
+      <EuiText>
+        <p>Address the requests in your applications which are producing deprecation logs. Then reset this logging checkpoint to verify the logs are no longer produced.</p>
+      </EuiText>
+  */}
+
+      <EuiSpacer size="xxl" />
+      <EuiText>
+        <h4>Fix and verify</h4>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiCallOut title="No new logs since your last checkpoint" color="success" iconType="check">
+        <p>
+          Checkpoint set on September 9, 2021 4:51 PM PDT
+        </p>
+        <p>
+          <a href="">Reset checkpoint</a>
+        </p>
+      </EuiCallOut>
+      <EuiSpacer size="m" />
+      <EuiText>
+        <p>Address the requests in your applications which are producing deprecation logs. Then reset this logging checkpoint to verify the logs are no longer produced.</p>
+      </EuiText>
     </>
   );
 };
@@ -84,7 +121,7 @@ const DeprecationLogsPreview: FunctionComponent = () => {
 export const getFixDeprecationLogsStep = (): EuiStepProps => {
   return {
     title: i18nTexts.identifyStepTitle,
-    status: 'incomplete',
+    status: 'complete',
     children: <DeprecationLogsPreview />,
   };
 };

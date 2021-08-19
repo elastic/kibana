@@ -130,58 +130,10 @@ export const KibanaDeprecationStats: FunctionComponent = () => {
     >
       <EuiSpacer />
       <EuiFlexGroup>
-        {hasNoDeprecations && (
           <EuiFlexItem>
             <NoDeprecations />
           </EuiFlexItem>
-        )}
-
-        {shouldRenderStat(hasCritical) && (
-          <EuiFlexItem>
-            <EuiStat
-              data-test-subj="criticalDeprecations"
-              title={
-                kibanaDeprecations ? getDeprecationsUpperLimit(criticalDeprecationsCount) : '--'
-              }
-              titleElement="span"
-              description={i18nTexts.criticalDeprecationsTitle}
-              titleColor="danger"
-              isLoading={isLoading}
-            >
-              {error === undefined && (
-                <EuiScreenReaderOnly>
-                  <p>
-                    {isLoading
-                      ? i18nTexts.loadingText
-                      : i18nTexts.getCriticalDeprecationsMessage(criticalDeprecationsCount)}
-                  </p>
-                </EuiScreenReaderOnly>
-              )}
-            </EuiStat>
-          </EuiFlexItem>
-        )}
-
-        {shouldRenderStat(hasWarnings) && (
-          <EuiFlexItem>
-            <EuiStat
-              data-test-subj="warningDeprecations"
-              title={error ? '--' : getDeprecationsUpperLimit(warningDeprecationsCount)}
-              titleElement="span"
-              description={i18nTexts.warningDeprecationsTitle}
-              isLoading={isLoading}
-            >
-              {!error && (
-                <EuiScreenReaderOnly>
-                  <p>
-                    {isLoading
-                      ? i18nTexts.loadingText
-                      : i18nTexts.getWarningDeprecationsMessage(warningDeprecationsCount)}
-                  </p>
-                </EuiScreenReaderOnly>
-              )}
-            </EuiStat>
-          </EuiFlexItem>
-        )}
+        
       </EuiFlexGroup>
     </EuiCard>
   );

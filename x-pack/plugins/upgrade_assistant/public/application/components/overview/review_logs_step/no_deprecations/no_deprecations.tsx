@@ -14,7 +14,7 @@ const i18nTexts = {
   noDeprecationsText: i18n.translate(
     'xpack.upgradeAssistant.esDeprecationStats.noDeprecationsText',
     {
-      defaultMessage: 'No warnings. Good to go!',
+      defaultMessage: 'No issues',
     }
   ),
 };

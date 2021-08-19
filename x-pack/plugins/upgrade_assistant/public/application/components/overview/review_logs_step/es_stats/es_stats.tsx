@@ -94,59 +94,10 @@ export const ESDeprecationStats: FunctionComponent = () => {
     >
       <EuiSpacer />
       <EuiFlexGroup>
-        {hasNoDeprecations && (
           <EuiFlexItem>
             <NoDeprecations />
           </EuiFlexItem>
-        )}
-
-        {shouldRenderStat(hasCritical) && (
-          <EuiFlexItem>
-            <EuiStat
-              data-test-subj="criticalDeprecations"
-              title={error ? '--' : getDeprecationsUpperLimit(criticalDeprecations.length)}
-              titleElement="span"
-              description={i18nTexts.criticalDeprecationsTitle}
-              titleColor="danger"
-              isLoading={isLoading}
-            >
-              {error === null && (
-                <EuiScreenReaderOnly>
-                  <p>
-                    {isLoading
-                      ? i18nTexts.loadingText
-                      : i18nTexts.getCriticalDeprecationsMessage(criticalDeprecations.length)}
-                  </p>
-                </EuiScreenReaderOnly>
-              )}
-            </EuiStat>
-          </EuiFlexItem>
-        )}
-
-        {shouldRenderStat(hasWarnings) && (
-          <EuiFlexItem>
-            <EuiStat
-              data-test-subj="warningDeprecations"
-              title={error ? '--' : getDeprecationsUpperLimit(warningDeprecations.length)}
-              titleElement="span"
-              description={i18nTexts.warningDeprecationsTitle}
-              isLoading={isLoading}
-            >
-              {!error && (
-                <EuiScreenReaderOnly>
-                  <p>
-                    {isLoading
-                      ? i18nTexts.loadingText
-                      : i18nTexts.getWarningDeprecationMessage(
-                          esDeprecations?.cluster.length ?? 0,
-                          esDeprecations?.indices.length ?? 0
-                        )}
-                  </p>
-                </EuiScreenReaderOnly>
-              )}
-            </EuiStat>
-          </EuiFlexItem>
-        )}
+        
       </EuiFlexGroup>
     </EuiCard>
   );
