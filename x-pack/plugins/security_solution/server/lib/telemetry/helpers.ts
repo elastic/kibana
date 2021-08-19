@@ -160,8 +160,10 @@ export const templateEndpointExceptions = (
   });
 };
 
+/**
  * Convert counter label list to kebab case
- * @params label_list the list of labels to create standardized UsageCounter from
+ *
+ * @param label_list the list of labels to create standardized UsageCounter from
  * @returns a string label for usage in the UsageCounter
  */
 export function createUsageCounterLabel(labelList: string[]): string {
