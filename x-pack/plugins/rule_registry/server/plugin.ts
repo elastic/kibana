@@ -54,6 +54,7 @@ export class RuleRegistryPlugin
   private readonly config: RuleRegistryPluginConfig;
   private readonly legacyConfig: SharedGlobalConfig;
   private readonly logger: Logger;
+  private readonly kibanaVersion: string;
   private readonly alertsClientFactory: AlertsClientFactory;
   private ruleDataService: RuleDataPluginService | null;
   private security: SecurityPluginSetup | undefined;
@@ -63,6 +64,7 @@ export class RuleRegistryPlugin
     // TODO: Can be removed in 8.0.0. Exists to work around multi-tenancy users.
     this.legacyConfig = initContext.config.legacy.get();
     this.logger = initContext.logger.get();
+    this.kibanaVersion = initContext.env.packageInfo.version;
     this.ruleDataService = null;
     this.alertsClientFactory = new AlertsClientFactory();
   }
@@ -71,7 +73,7 @@ export class RuleRegistryPlugin
     core: CoreSetup<RuleRegistryPluginStartDependencies, RuleRegistryPluginStartContract>,
     plugins: RuleRegistryPluginSetupDependencies
   ): RuleRegistryPluginSetupContract {
-    const { logger } = this;
+    const { logger, kibanaVersion } = this;
 
     const startDependencies = core.getStartServices().then(([coreStart, pluginStart]) => {
       return {
@@ -99,6 +101,7 @@ export class RuleRegistryPlugin
 
     this.ruleDataService = new RuleDataPluginService({
       logger,
+      kibanaVersion,
       isWriteEnabled: isWriteEnabled(this.config, this.legacyConfig),
       getClusterClient: async () => {
         const deps = await startDependencies;

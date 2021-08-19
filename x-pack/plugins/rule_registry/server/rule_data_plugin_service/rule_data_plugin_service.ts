@@ -20,6 +20,7 @@ import { joinWithDash } from './utils';
 interface ConstructorOptions {
   getClusterClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
+  kibanaVersion: string;
   isWriteEnabled: boolean;
 }
 
@@ -104,7 +105,7 @@ export class RuleDataPluginService {
       );
     }
 
-    const indexInfo = new IndexInfo(indexOptions);
+    const indexInfo = new IndexInfo({ indexOptions, kibanaVersion: this.options.kibanaVersion });
 
     const indicesAssociatedWithFeature = this.indicesByFeatureId.get(indexOptions.feature) ?? [];
     this.indicesByFeatureId.set(indexOptions.feature, [...indicesAssociatedWithFeature, indexInfo]);

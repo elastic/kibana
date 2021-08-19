@@ -9,6 +9,11 @@ import { INDEX_PREFIX, INDEX_PREFIX_FOR_BACKING_INDICES } from '../config';
 import { IndexOptions } from './index_options';
 import { joinWithDash } from './utils';
 
+interface ConstructorOptions {
+  indexOptions: IndexOptions;
+  kibanaVersion: string;
+}
+
 /**
  * Internal info used by the index bootstrapping logic, reader and writer.
  * Should not be exposed to clients of the library.
@@ -16,10 +21,12 @@ import { joinWithDash } from './utils';
  * Names returned by methods of this class should be used in Elasticsearch APIs.
  */
 export class IndexInfo {
-  constructor(indexOptions: IndexOptions) {
+  constructor(options: ConstructorOptions) {
+    const { indexOptions, kibanaVersion } = options;
     const { registrationContext, dataset } = indexOptions;
 
     this.indexOptions = indexOptions;
+    this.kibanaVersion = kibanaVersion;
     this.baseName = joinWithDash(INDEX_PREFIX, `${registrationContext}.${dataset}`);
     this.basePattern = joinWithDash(this.baseName, '*');
     this.baseNameForBackingIndices = joinWithDash(
@@ -32,6 +39,12 @@ export class IndexInfo {
    * Options provided by the plugin/solution defining the index.
    */
   public readonly indexOptions: IndexOptions;
+
+  /**
+   * Current version of Kibana. We version our index resources and documents based on it.
+   * @example '7.16.0'
+   */
+  public readonly kibanaVersion: string;
 
   /**
    * Base index name, prefixed with the resource prefix.
