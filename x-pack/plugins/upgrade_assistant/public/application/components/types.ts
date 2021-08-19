@@ -46,3 +46,14 @@ export enum TelemetryState {
 }
 
 export type EsTabs = 'cluster' | 'indices';
+
+export interface DeprecationLoggingPreviewProps {
+  isDeprecationLogIndexingEnabled: boolean;
+  onlyDeprecationLogWritingEnabled: boolean;
+  isLoading: boolean;
+  isUpdating: boolean;
+  fetchError: ResponseError | null;
+  updateError: ResponseError | undefined;
+  resendRequest: () => void;
+  toggleLogging: () => void;
+}
