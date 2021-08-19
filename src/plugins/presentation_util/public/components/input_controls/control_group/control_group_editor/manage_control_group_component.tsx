@@ -116,7 +116,7 @@ export const ManageControlGroupComponent = ({
             legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
             options={widthOptions}
             idSelected={width}
-            onChange={(newWidth) =>
+            onChange={(newWidth: string) =>
               setControlMeta((currentControls) => {
                 currentControls[index].width = newWidth as ControlWidth;
                 return [...currentControls];
@@ -184,7 +184,7 @@ export const ManageControlGroupComponent = ({
               }
               legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
               options={widthOptions}
-              onChange={(newWidth) =>
+              onChange={(newWidth: string) =>
                 setControlMeta((currentControls) => {
                   currentControls.forEach((currentMeta) => {
                     currentMeta.width = newWidth as ControlWidth;
