@@ -132,7 +132,6 @@ export class ResourceInstaller {
                 settings: ct.settings ?? {},
                 mappings: ct.mappings,
               },
-              version: ct.version,
               _meta: ct._meta,
             },
           });
@@ -281,7 +280,7 @@ export class ResourceInstaller {
     const {
       componentTemplateRefs,
       componentTemplates,
-      indexTemplate,
+      indexTemplate = {},
       ilmPolicy,
     } = indexInfo.indexOptions;
 
@@ -358,8 +357,6 @@ export class ResourceInstaller {
         },
 
         _meta: indexMetadata,
-
-        version: indexTemplate.version,
 
         // By setting the priority to namespace.length, we ensure that if one namespace is a prefix of another namespace
         // then newly created indices will use the matching template with the *longest* namespace
