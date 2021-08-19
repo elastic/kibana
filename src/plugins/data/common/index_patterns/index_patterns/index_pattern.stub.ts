@@ -11,6 +11,27 @@ import { IndexPatternSpec } from '../types';
 import { FieldFormatsStartCommon } from '../../../../field_formats/common';
 import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
 
+/**
+ * Create a custom stub index pattern. Use it in your unit tests where an {@link IndexPattern} expected.
+ * @param spec - Serialized index pattern object
+ * @param opts - Specify index pattern options
+ * @param deps - Optionally provide dependencies, you can provide a custom field formats implementation, by default a dummy mock is used
+ *
+ * @returns - an {@link IndexPattern} instance
+ *
+ *
+ * @example
+ *
+ * You can provide a custom implementation or assert calls using jest.spyOn:
+ *
+ * ```ts
+ *  const indexPattern = createStubIndexPattern({spec: {title: 'logs-*'}});
+ *  const spy = jest.spyOn(indexPattern, 'getFormatterForField');
+ *
+ *  // use `spy` as a regular jest mock
+ *
+ * ```
+ */
 export const createStubIndexPattern = ({
   spec,
   opts,
