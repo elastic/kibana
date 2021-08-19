@@ -14,6 +14,7 @@ import { FORMATS_UI_SETTINGS } from '../../../../../../../field_formats/common';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SAMPLE_SIZE_SETTING,
+  SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../../../common';
 import { getServices, IndexPattern } from '../../../../../kibana_services';
@@ -119,6 +120,7 @@ export const DocTableWrapper = ({
     hideTimeColumn,
     isShortDots,
     sampleSize,
+    showMultiFields,
     filterManager,
     addBasePath,
   ] = useMemo(() => {
@@ -128,6 +130,7 @@ export const DocTableWrapper = ({
       services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       services.uiSettings.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE),
       services.uiSettings.get(SAMPLE_SIZE_SETTING, 500),
+      services.uiSettings.get(SHOW_MULTIFIELDS, false),
       services.filterManager,
       services.addBasePath,
     ];
@@ -192,6 +195,7 @@ export const DocTableWrapper = ({
           onRemoveColumn={onRemoveColumn}
           filterManager={filterManager}
           addBasePath={addBasePath}
+          showMultiFields={showMultiFields}
         />
       ));
     },
@@ -205,6 +209,7 @@ export const DocTableWrapper = ({
       onRemoveColumn,
       filterManager,
       addBasePath,
+      showMultiFields,
     ]
   );
 

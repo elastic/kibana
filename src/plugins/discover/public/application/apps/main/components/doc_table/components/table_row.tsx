@@ -35,6 +35,7 @@ export interface TableRowProps {
   hideTimeColumn: boolean;
   filterManager: FilterManager;
   addBasePath: (path: string) => string;
+  showMultiFields?: boolean;
 }
 
 export const TableRow = ({
@@ -43,6 +44,7 @@ export const TableRow = ({
   row,
   indexPattern,
   useNewFieldsApi,
+  showMultiFields,
   hideTimeColumn,
   onAddColumn,
   onRemoveColumn,
@@ -125,7 +127,7 @@ export const TableRow = ({
   }
 
   if (columns.length === 0 && useNewFieldsApi) {
-    const formatted = formatRow(row, indexPattern);
+    const formatted = formatRow(row, indexPattern, showMultiFields);
 
     rowCells.push(
       <TableCell
