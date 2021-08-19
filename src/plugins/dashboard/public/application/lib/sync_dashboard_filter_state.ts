@@ -135,7 +135,7 @@ export const syncDashboardFilterState = ({
   return { applyFilters, stopSyncingDashboardFilterState };
 };
 
-interface ApplyTimeRestoreSettingsProps {
+interface ApplyDashboardFilterStateProps {
   kbnUrlStateStorage: DashboardBuildContext['kbnUrlStateStorage'];
   queryService: DashboardBuildContext['query'];
   currentDashboardState: DashboardState;
@@ -147,7 +147,7 @@ export const applyDashboardFilterState = ({
   kbnUrlStateStorage,
   savedDashboard,
   queryService,
-}: ApplyTimeRestoreSettingsProps) => {
+}: ApplyDashboardFilterStateProps) => {
   const { filterManager, queryString, timefilter } = queryService;
   const { timefilter: timefilterService } = timefilter;
 
