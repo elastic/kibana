@@ -6728,8 +6728,6 @@
     "xpack.canvas.renderer.dropdownFilter.matchAllOptionLabel": "任意",
     "xpack.canvas.renderer.embeddable.displayName": "可嵌入",
     "xpack.canvas.renderer.embeddable.helpDescription": "从 Kibana 的其他部分呈现可嵌入的已保存对象",
-    "xpack.canvas.renderer.image.displayName": "图像",
-    "xpack.canvas.renderer.image.helpDescription": "呈现图像",
     "xpack.canvas.renderer.markdown.displayName": "Markdown",
     "xpack.canvas.renderer.markdown.helpDescription": "使用 {MARKDOWN} 输入呈现 {HTML}",
     "xpack.canvas.renderer.pie.displayName": "饼图",

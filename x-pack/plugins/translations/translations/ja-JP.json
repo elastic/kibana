@@ -6696,8 +6696,6 @@
     "xpack.canvas.renderer.dropdownFilter.matchAllOptionLabel": "すべて",
     "xpack.canvas.renderer.embeddable.displayName": "埋め込み可能",
     "xpack.canvas.renderer.embeddable.helpDescription": "Kibana の他の部分から埋め込み可能な保存済みオブジェクトをレンダリングします",
-    "xpack.canvas.renderer.image.displayName": "画像",
-    "xpack.canvas.renderer.image.helpDescription": "画像をレンダリングします",
     "xpack.canvas.renderer.markdown.displayName": "マークダウン",
     "xpack.canvas.renderer.markdown.helpDescription": "{MARKDOWN} インプットを使用して {HTML} を表示",
     "xpack.canvas.renderer.pie.displayName": "円グラフ",
