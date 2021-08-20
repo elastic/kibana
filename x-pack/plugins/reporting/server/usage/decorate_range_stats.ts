@@ -17,12 +17,12 @@ import { AvailableTotal, ExportType, FeatureAvailabilityMap, RangeStats } from '
 
 const jobTypeIsDeprecated = (jobType: string) => DEPRECATED_JOB_TYPES.includes(jobType);
 
-function getForFeature<T>(
+function getForFeature(
   range: Partial<RangeStats>,
   typeKey: ExportType,
   featureAvailability: FeatureAvailabilityMap,
-  additional?: T
-): AvailableTotal & T {
+  additional?: any
+): AvailableTotal & typeof additional {
   const isAvailable = (feature: ExportType) => !!featureAvailability[feature];
   const jobType = range[typeKey] || { total: 0, ...additional, deprecated: 0 };
 
