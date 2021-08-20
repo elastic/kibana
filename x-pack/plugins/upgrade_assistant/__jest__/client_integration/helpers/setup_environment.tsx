@@ -23,8 +23,11 @@ import { mockKibanaSemverVersion } from '../../../common/constants';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
+import { GlobalFlyout } from '../../../public/shared_imports';
 import { servicesMock } from './services_mock';
 import { init as initHttpRequests } from './http_requests';
+
+const { GlobalFlyoutProvider } = GlobalFlyout;
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
@@ -55,7 +58,9 @@ export const WithAppDependencies = (Comp: any, overrides: Record<string, unknown
   return (
     <KibanaContextProvider services={{ ...servicesMock, ...(servicesOverrides as {}) }}>
       <AppContextProvider value={{ ...contextValue, ...contextOverrides }}>
-        <Comp {...props} />
+        <GlobalFlyoutProvider>
+          <Comp {...props} />
+        </GlobalFlyoutProvider>
       </AppContextProvider>
     </KibanaContextProvider>
   );
