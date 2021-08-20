@@ -32,14 +32,14 @@ export class JoinTooltipProperty implements ITooltipProperty {
   getPropertyName(): ReactNode {
     const content = i18n.translate('xpack.maps.tooltip.joinPropertyTooltipContent', {
       defaultMessage:
-        '"{leftFieldName}" is a shared key joining statistics to this layer. "{leftFieldName}" is joined with: {rightSources}',
+        `Shared key '{leftFieldName}' is joined with {rightSources}`,
       values: {
         leftFieldName: this._tooltipProperty.getPropertyName() as string,
         rightSources: this._innerJoins
           .map((innerJoin) => {
             const rightSource = innerJoin.getRightJoinSource();
             const termField = rightSource.getTermField();
-            return `"${termField.getName()}"`;
+            return `'${termField.getName()}'`;
           })
           .join(','),
       },
