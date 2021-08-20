@@ -131,7 +131,7 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
         ...state,
         mapState: {
           ...state.mapState,
-          mouseCoordinates: null,
+          mouseCoordinates: undefined,
         },
       };
     case SET_GOTO:
