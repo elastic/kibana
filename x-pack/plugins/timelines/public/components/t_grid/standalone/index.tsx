@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { AlertConsumers } from '@kbn/rule-data-utils';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -53,18 +53,9 @@ const TitleText = styled.span`
   margin-right: 12px;
 `;
 
-const StyledEuiPanel = styled(EuiPanel)<{ $isFullScreen: boolean }>`
-  display: flex;
-  flex-direction: column;
-
-  ${({ $isFullScreen }) =>
-    $isFullScreen &&
-    `
-      border: 0;
-      box-shadow: none;
-      padding-top: 0;
-      padding-bottom: 0;
-  `}
+const AlertsTableWrapper = styled.div`
+  width: 100%;
+  height: 100%;
 `;
 
 const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
@@ -315,8 +306,8 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   }, []);
 
   return (
-    <InspectButtonContainer>
-      <StyledEuiPanel data-test-subj="events-viewer-panel" $isFullScreen={false}>
+    <InspectButtonContainer data-test-subj="events-viewer-panel">
+      <AlertsTableWrapper>
         {canQueryTimeline ? (
           <>
             <EventsContainerLoading
@@ -381,7 +372,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
           </>
         ) : null}
         <AddToCaseAction {...addToCaseActionProps} />
-      </StyledEuiPanel>
+      </AlertsTableWrapper>
     </InspectButtonContainer>
   );
 };
