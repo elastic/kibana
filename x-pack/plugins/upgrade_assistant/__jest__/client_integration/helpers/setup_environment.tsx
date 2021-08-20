@@ -10,16 +10,9 @@ import axios from 'axios';
 // @ts-ignore
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
-import {
-  deprecationsServiceMock,
-  docLinksServiceMock,
-  notificationServiceMock,
-  applicationServiceMock,
-} from 'src/core/public/mocks';
 import { HttpSetup } from 'src/core/public';
 
 import { KibanaContextProvider } from '../../../public/shared_imports';
-import { mockKibanaSemverVersion } from '../../../common/constants';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
@@ -38,7 +31,7 @@ export const WithAppDependencies = (Comp: any, overrides: Record<string, unknown
   apiService.setup((mockHttpClient as unknown) as HttpSetup);
   breadcrumbService.setup(() => '');
 
-  const appContextMock = getAppContextMock(mockHttpClient);
+  const appContextMock = getAppContextMock((mockHttpClient as unknown) as HttpSetup);
 
   const { kibanaContextOverrides, ...appContextOverrides } = overrides;
 
