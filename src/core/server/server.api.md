@@ -159,12 +159,12 @@ export interface AuthToolkit {
 export class BasePath {
     // @internal
     constructor(serverBasePath?: string, publicBaseUrl?: string);
-    get: (request: KibanaRequest | LegacyRequest) => string;
+    get: (request: KibanaRequest) => string;
     prepend: (path: string) => string;
     readonly publicBaseUrl?: string;
     remove: (path: string) => string;
     readonly serverBasePath: string;
-    set: (request: KibanaRequest | LegacyRequest, requestSpecificBasePath: string) => void;
+    set: (request: KibanaRequest, requestSpecificBasePath: string) => void;
 }
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
@@ -896,10 +896,10 @@ export interface FakeRequest {
 }
 
 // @public
-export type GetAuthHeaders = (request: KibanaRequest | LegacyRequest) => AuthHeaders | undefined;
+export type GetAuthHeaders = (request: KibanaRequest) => AuthHeaders | undefined;
 
 // @public
-export type GetAuthState = <T = unknown>(request: KibanaRequest | LegacyRequest) => {
+export type GetAuthState = <T = unknown>(request: KibanaRequest) => {
     status: AuthStatus;
     state: T;
 };
@@ -1137,7 +1137,7 @@ export interface IRouter<Context extends RequestHandlerContext = RequestHandlerC
 }
 
 // @public
-export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolean;
+export type IsAuthenticated = (request: KibanaRequest) => boolean;
 
 // @public (undocumented)
 export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
@@ -1262,10 +1262,6 @@ export const kibanaResponseFactory: {
 //
 // @public
 export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
-
-// @public @deprecated (undocumented)
-export interface LegacyRequest extends Request {
-}
 
 // Warning: (ae-forgotten-export) The symbol "lifecycleResponseFactory" needs to be exported by the entry point index.d.ts
 //
@@ -1607,8 +1603,6 @@ export interface RegisterDeprecationsConfig {
 // @public
 export type RequestHandler<P = unknown, Q = unknown, B = unknown, Context extends RequestHandlerContext = RequestHandlerContext, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory> = (context: Context, request: KibanaRequest<P, Q, B, Method>, response: ResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "LegacyScopedClusterClient"
-//
 // @public
 export interface RequestHandlerContext {
     // (undocumented)
@@ -2719,7 +2713,7 @@ export class SavedObjectTypeRegistry {
 export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & Partial<Referencable>;
 
 // @public
-export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
+export type ScopeableRequest = KibanaRequest | FakeRequest;
 
 // @public (undocumented)
 export interface SearchResponse<T = unknown> {

@@ -7,17 +7,7 @@
 
 import { CaseStatuses } from '../../../common/api';
 import { AlertInfo } from '../../common';
-
-interface Alert {
-  id: string;
-  index: string;
-  destination?: {
-    ip: string;
-  };
-  source?: {
-    ip: string;
-  };
-}
+import { Alert } from '../../services/alerts/types';
 
 export type CasesClientGetAlertsResponse = Alert[];
 
