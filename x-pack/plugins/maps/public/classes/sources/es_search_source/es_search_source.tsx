@@ -763,14 +763,14 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       const indexList = await this.getSourceIndexList();
       if (indexList.length === 0) {
         throw new Error(
-          i18n.translate('xpack.maps.source.esSearch.indexLengthEditError', {
+          i18n.translate('xpack.maps.source.esSearch.indexZeroLengthEditError', {
             defaultMessage: `There are no indexes associated with this index pattern. Index pattern must be associated with a single index.`,
           })
         );
       }
       if (indexList.length > 1) {
         throw new Error(
-          i18n.translate('xpack.maps.source.esSearch.indexLengthEditError', {
+          i18n.translate('xpack.maps.source.esSearch.indexOverOneLengthEditError', {
             defaultMessage: `Multiple indexes are associated with this index pattern. Index pattern must be associated with a single index.`,
           })
         );
