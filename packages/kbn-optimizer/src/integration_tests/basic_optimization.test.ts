@@ -15,7 +15,7 @@ import cpy from 'cpy';
 import del from 'del';
 import { tap, filter } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/utils';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, createReplaceSerializer } from '@kbn/dev-utils';
 import { runOptimizer, OptimizerConfig, OptimizerUpdate, logOptimizerState } from '../index';
 
 import { allValuesFrom } from '../common';
@@ -28,6 +28,8 @@ expect.addSnapshotSerializer({
   serialize: (value: string) => value.split(REPO_ROOT).join('<absolute path>').replace(/\\/g, '/'),
   test: (value: any) => typeof value === 'string' && value.includes(REPO_ROOT),
 });
+
+expect.addSnapshotSerializer(createReplaceSerializer(/\w+-fastbuild/, '<platform>-fastbuild'));
 
 const log = new ToolingLog({
   level: 'error',
