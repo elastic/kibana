@@ -147,7 +147,7 @@ image::maps/images/reverse-geocoding-tutorial/discover_enriched_web_log.png[]
 
 [float]
 === Step 4: Visualize Combined Statistical Area (CSA) regions by web traffic
-Now that our web traffic contains CSA region identifiers, lets visualize CSA regions by web traffic.
+Now that our web traffic contains CSA region identifiers, you'll visualize CSA regions by web traffic.
 
 . Open the main menu, and click *Maps*.
 . Click *Create map*.
