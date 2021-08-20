@@ -373,7 +373,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('when upgrading to a version where a required input has been added', function () {
+    describe('when upgrading to a version where a required variable has been added', function () {
       withTestPackageVersion('0.4.0-add-test-var-as-bool');
 
       beforeEach(async function () {
