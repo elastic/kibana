@@ -97,6 +97,7 @@ describe('Enqueue Job', () => {
         "kibana_name": undefined,
         "max_attempts": undefined,
         "meta": Object {
+          "isDeprecated": undefined,
           "layout": undefined,
           "objectType": "cool_object_type",
         },
