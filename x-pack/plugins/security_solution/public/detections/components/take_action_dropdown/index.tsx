@@ -8,8 +8,8 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiContextMenu, EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
-
 import { isEmpty } from 'lodash/fp';
+import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 import { TimelineEventsDetailsItem } from '../../../../common';
 import { useExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';
@@ -20,7 +20,7 @@ import { useInsertTimeline } from '../../../cases/components/use_insert_timeline
 import { addToCaseActionItem } from './helpers';
 import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
-import { CHANGE_ALERT_STATUS, TAKE_ACTION } from './translations';
+import { CHANGE_ALERT_STATUS } from './translations';
 import { getFieldValue } from '../host_isolation/helpers';
 import type { Ecs } from '../../../../common/ecs';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
