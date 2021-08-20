@@ -125,6 +125,16 @@ export class ApiService {
       method: 'get',
     });
   }
+
+  public getDeprecationLogsCount(from: string) {
+    return this.useRequest<{
+      count: number;
+    }>({
+      path: `${API_BASE_PATH}/deprecation_logging/count`,
+      method: 'get',
+      query: { from },
+    });
+  }
 }
 
 export const apiService = new ApiService();

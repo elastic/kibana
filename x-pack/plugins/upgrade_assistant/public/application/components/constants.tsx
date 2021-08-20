@@ -26,3 +26,5 @@ export const COLOR_MAP: { [level: string]: IconColor } = {
 };
 
 export const DEPRECATIONS_PER_PAGE = 25;
+
+export const DEPRECATION_WARNINGS_POLLING_INTERVAL = 30000;
