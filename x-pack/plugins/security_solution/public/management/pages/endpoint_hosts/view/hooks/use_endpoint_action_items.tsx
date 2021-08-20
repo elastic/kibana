@@ -18,6 +18,8 @@ import { ContextMenuItemNavByRouterProps } from '../components/context_menu_item
 import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { isIsolationSupported } from '../../../../../../common/endpoint/service/host_isolation/utils';
+import { useRunningConsoleManagement } from '../../../../components/running_console_magenement_provider/running_console_management_provider';
+import { EndpointConsole } from '../components/endpoint_console';
 
 /**
  * Returns a list (array) of actions for an individual endpoint
@@ -30,6 +32,7 @@ export const useEndpointActionItems = (
   const { getAppUrl } = useAppUrl();
   const fleetAgentPolicies = useEndpointSelector(agentPolicies);
   const allCurrentUrlParams = useEndpointSelector(uiQueryParams);
+  const consoleManagement = useRunningConsoleManagement();
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
     if (endpointMetadata) {
@@ -129,6 +132,9 @@ export const useEndpointActionItems = (
           href: '/',
           onClick: (ev) => {
             ev.preventDefault();
+            consoleManagement.openConsole(<EndpointConsole endpoint={endpointId} />, {
+              title: endpointHostName,
+            });
           },
           children: (
             <FormattedMessage

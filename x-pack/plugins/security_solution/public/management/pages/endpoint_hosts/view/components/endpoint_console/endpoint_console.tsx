@@ -6,6 +6,18 @@
  */
 
 import React, { memo } from 'react';
-export const EndpointConsole = memo(() => {});
+import { Console, ConsoleProvider } from '../../../../../components/console';
+
+export interface EndpointConsoleProps {
+  endpoint: string;
+}
+
+export const EndpointConsole = memo<EndpointConsoleProps>(() => {
+  return (
+    <ConsoleProvider service={{}}>
+      <Console />
+    </ConsoleProvider>
+  );
+});
 
 EndpointConsole.displayName = 'EndpointConsole';

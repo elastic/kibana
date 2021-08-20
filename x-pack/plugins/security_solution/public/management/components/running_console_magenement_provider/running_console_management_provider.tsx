@@ -10,7 +10,7 @@ import { EuiModal, EuiModalBody } from '@elastic/eui';
 import { ConsoleProviderComponent } from '../console';
 
 interface ConsoleManagement {
-  openConsole(console: ConsoleProviderComponent): void;
+  openConsole(console: ConsoleProviderComponent, options: { title: ReactNode }): void;
   hideConsole(console: ConsoleProviderComponent): void;
   closeConsole(console: ConsoleProviderComponent): void;
 }
@@ -24,7 +24,17 @@ export const RunningConsoleManagementProvider = memo(({ children }) => {
   const [consoles, setConsoles] = useState<
     Map<ConsoleProviderComponent, { show: boolean; title: ReactNode }>
   >(new Map());
-  const openConsole = useCallback(() => {}, []);
+  const openConsole = useCallback<ConsoleManagement['openConsole']>((console, options) => {
+    setConsoles((prevState) => {
+      const newState = new Map(prevState);
+      newState.set(console, {
+        ...(prevState.get(console) || { show: true, title: '' }),
+        ...options,
+        ...{ show: true },
+      });
+      return newState;
+    });
+  }, []);
   const hideConsole = useCallback(() => {}, []);
   const closeConsole = useCallback(() => {}, []);
 
@@ -55,6 +65,7 @@ export const RunningConsoleManagementProvider = memo(({ children }) => {
   return (
     <RunningConsoleManagementContext.Provider value={consoleManagement}>
       {children}
+      {visibleConsoles}
     </RunningConsoleManagementContext.Provider>
   );
 });
