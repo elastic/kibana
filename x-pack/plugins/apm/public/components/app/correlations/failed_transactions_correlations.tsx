@@ -42,6 +42,7 @@ import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_w
 import { CorrelationsProgressControls } from './progress_controls';
 import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 import type { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
+import { Summary } from '../../shared/Summary';
 
 export function FailedTransactionsCorrelations({
   onFilter,
@@ -62,7 +63,7 @@ export function FailedTransactionsCorrelations({
   const { urlParams } = useUrlParams();
   const { transactionName, start, end } = urlParams;
 
-  const displayLog = uiSettings.get<boolean>(enableInspectEsQueries);
+  const inspectEnabled = uiSettings.get<boolean>(enableInspectEsQueries);
 
   const searchServicePrams: SearchServiceParams = {
     environment,
@@ -397,6 +398,22 @@ export function FailedTransactionsCorrelations({
         </>
       )}
 
+      {inspectEnabled &&
+      selectedTerm?.pValue != null &&
+      (isRunning || correlationTerms.length > 0) ? (
+        <>
+          <EuiSpacer size="m" />
+          <Summary
+            items={[
+              <EuiBadge color="hollow">
+                {`${selectedTerm.fieldName}: ${selectedTerm.key}`}
+              </EuiBadge>,
+              <>{`p-value: ${selectedTerm.pValue.toPrecision(3)}`}</>,
+            ]}
+          />
+        </>
+      ) : null}
+
       <EuiSpacer size="m" />
 
       <div data-test-subj="apmCorrelationsTable">
@@ -415,7 +432,7 @@ export function FailedTransactionsCorrelations({
           <CorrelationsEmptyStatePrompt />
         )}
       </div>
-      {displayLog && <CorrelationsLog logMessages={log} />}
+      {inspectEnabled && <CorrelationsLog logMessages={log} />}
     </div>
   );
 }
