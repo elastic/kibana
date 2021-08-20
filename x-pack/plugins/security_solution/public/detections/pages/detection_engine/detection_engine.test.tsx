@@ -67,11 +67,21 @@ jest.mock('../../../common/lib/kibana', () => {
       services: {
         application: {
           navigateToUrl: jest.fn(),
+          capabilities: {
+            siem: { crud_alerts: true, read_alerts: true },
+          },
         },
         timelines: { ...mockTimelines },
         data: {
           query: {
             filterManager: jest.fn().mockReturnValue({}),
+          },
+        },
+        docLinks: {
+          links: {
+            siem: {
+              gettingStarted: 'link',
+            },
           },
         },
       },
@@ -94,7 +104,11 @@ const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage)
 describe('DetectionEnginePageComponent', () => {
   beforeAll(() => {
     (useParams as jest.Mock).mockReturnValue({});
-    (useUserData as jest.Mock).mockReturnValue([{}]);
+    (useUserData as jest.Mock).mockReturnValue([
+      {
+        hasIndexRead: true,
+      },
+    ]);
     (useSourcererScope as jest.Mock).mockReturnValue({
       indicesExist: true,
       indexPattern: {},
