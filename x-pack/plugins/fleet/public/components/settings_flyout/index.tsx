@@ -196,11 +196,11 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
   });
 
   const validate = useCallback(() => {
-    if (
-      !fleetServerHostsInput.validate() ||
-      !elasticsearchUrlInput.validate() ||
-      !additionalYamlConfigInput.validate()
-    ) {
+    const fleetServerHostsValid = fleetServerHostsInput.validate();
+    const elasticsearchUrlsValid = elasticsearchUrlInput.validate();
+    const additionalYamlConfigValid = additionalYamlConfigInput.validate();
+
+    if (!fleetServerHostsValid || !elasticsearchUrlsValid || !additionalYamlConfigValid) {
       return false;
     }
 
