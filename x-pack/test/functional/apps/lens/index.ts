@@ -12,6 +12,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const PageObjects = getPageObjects(['timePicker']);
 
   describe('lens app', () => {
     before(async () => {
@@ -21,6 +22,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
+      // changing the timepicker default here saves us from having to set it in Discover (~8s)
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
     });
 
     after(async () => {
@@ -28,6 +32,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
+      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
     describe('', function () {
