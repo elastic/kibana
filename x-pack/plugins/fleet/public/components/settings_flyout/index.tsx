@@ -58,9 +58,11 @@ const CodeEditorPlaceholder = styled(EuiTextColor).attrs((props) => ({
 }))`
   position: absolute;
   top: 0;
-  right: 0;
+  left: 0;
   // Matches monaco editor
   font-family: Menlo, Monaco, 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 21px;
   pointer-events: none;
 `;
 
