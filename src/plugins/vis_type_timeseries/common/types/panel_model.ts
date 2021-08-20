@@ -161,6 +161,8 @@ export interface Panel {
   series: Series[];
   show_grid: number;
   show_legend: number;
+  truncate_legend?: number;
+  max_lines_legend?: number;
   time_field?: string;
   time_range_mode?: string;
   tooltip_mode?: TOOLTIP_MODES;
