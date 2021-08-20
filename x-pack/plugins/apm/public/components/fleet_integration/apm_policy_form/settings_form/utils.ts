@@ -59,7 +59,7 @@ export function isSettingsFormValid(
 }
 
 export function validateSettingValue(setting: Setting, value?: any) {
-  if (isEmpty(value)) {
+  if (!isFinite(value) && isEmpty(value)) {
     return {
       isValid: !setting.required,
       message: setting.required ? REQUIRED_FIELD : '',
