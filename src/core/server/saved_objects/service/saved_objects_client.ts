@@ -344,7 +344,12 @@ export interface SavedObjectsOpenPointInTimeOptions {
    */
   preference?: string;
   /**
-   * An optional list of namespaces to be used by the PIT.
+   * An optional list of namespaces to be used when opening the PIT.
+   *
+   * When the spaces plugin is enabled:
+   *  - this will default to the user's current space (as determined by the URL)
+   *  - if specified, the user's current space will be ignored
+   *  - `['*']` will search across all available spaces
    */
   namespaces?: string[];
 }
