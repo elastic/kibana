@@ -11,9 +11,4 @@
     "types": ["jest", "node"]
   },
   "include": ["src/**/*"],
-  "exclude": [
-    "**/*.test.*",
-    "**/*.mock.*",
-    "**/*.mocks.*"
-  ]
 }

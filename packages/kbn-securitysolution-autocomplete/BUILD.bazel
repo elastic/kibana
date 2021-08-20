@@ -37,6 +37,10 @@ RUNTIME_DEPS = [
   "//packages/kbn-securitysolution-list-utils",
   "//packages/kbn-securitysolution-io-ts-list-types",
   "@npm//@elastic/eui",
+  "@npm//@testing-library/react",
+  "@npm//@testing-library/react-hooks",
+  "@npm//enzyme",
+  "@npm//moment",
   "@npm//react",
 ]
 
@@ -47,6 +51,10 @@ TYPES_DEPS = [
   "//packages/kbn-securitysolution-list-utils",
   "//packages/kbn-securitysolution-io-ts-list-types",
   "@npm//@elastic/eui",
+  "@npm//@testing-library/react",
+  "@npm//@testing-library/react-hooks",
+  "@npm//moment",
+  "@npm//@types/enzyme",
   "@npm//@types/jest",
   "@npm//@types/node",
   "@npm//@types/react",
