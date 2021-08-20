@@ -11,7 +11,11 @@ import { ElasticsearchClient } from 'kibana/server';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-async function createPolicy(client: ElasticsearchClient, name: string, policy: any): Promise<any> {
+async function createPolicy(
+  client: ElasticsearchClient,
+  name: string,
+  policy: Omit<typeof bodySchema.type, 'name'>
+): Promise<any> {
   const body = { policy };
   const options = {
     ignore: [404],
@@ -51,7 +55,7 @@ export function registerCreateRoute({
       const { name, ...rest } = body;
 
       try {
-        await createPolicy(context.core.elasticsearch.client.asCurrentUser, name, { ...rest });
+        await createPolicy(context.core.elasticsearch.client.asCurrentUser, name, rest);
         return response.ok();
       } catch (error) {
         return handleEsError({ error, response });

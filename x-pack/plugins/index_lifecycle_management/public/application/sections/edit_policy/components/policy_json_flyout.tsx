@@ -39,22 +39,16 @@ interface Props {
  * Ensure that the JSON we get from the from has phases in the correct order.
  */
 const prettifyFormJson = (policy: SerializedPolicy): PolicyJson => {
-  const phasesInOrder = {
-    hot: policy.phases.hot,
-    warm: policy.phases.warm,
-    cold: policy.phases.cold,
-    frozen: policy.phases.frozen,
-    delete: policy.phases.delete,
+  return {
+    phases: {
+      hot: policy.phases.hot,
+      warm: policy.phases.warm,
+      cold: policy.phases.cold,
+      frozen: policy.phases.frozen,
+      delete: policy.phases.delete,
+    },
+    _meta: policy._meta,
   };
-  if (policy._meta) {
-    return {
-      phases: phasesInOrder,
-      _meta: {
-        ...policy._meta,
-      },
-    };
-  }
-  return { phases: phasesInOrder };
 };
 
 export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, close }) => {
