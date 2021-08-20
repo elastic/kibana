@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export const ALL_HOSTS_TABLE = '[data-test-subj="table-allHosts-loading-false"]';
+export const TELEMETRY_CHANNEL_LISTS = 'security-lists';
 
-export const HOSTS_NAMES = '[data-test-subj="render-content-host.name"] a.euiLink';
+export const TELEMETRY_CHANNEL_ENDPOINT_META = 'endpoint-metadata';
+
+export const LIST_ENDPOINT_EXCEPTION = 'endpoint_exception';
+
+export const LIST_ENDPOINT_EVENT_FILTER = 'endpoint_event_filter';
