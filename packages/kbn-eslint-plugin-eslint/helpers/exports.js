@@ -120,6 +120,11 @@ const getExportNamesFromStatement = (statement) => {
     return [statement.name];
   }
 
+  // export enum ...
+  if (ts.isEnumDeclaration(statement) && hasExportMod(statement)) {
+    return [statement.name];
+  }
+
   if (ts.isExportDeclaration(statement)) {
     const clause = statement.exportClause;
 
