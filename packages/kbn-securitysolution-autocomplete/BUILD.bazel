@@ -26,41 +26,27 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "react/package.json",
   "package.json",
   "README.md",
 ]
 
 RUNTIME_DEPS = [
-  "//packages/kbn-babel-preset",
-  "//packages/kbn-dev-utils",
-  "//packages/kbn-i18n",
-  "//packages/kbn-securitysolution-io-ts-list-types",
-  "//packages/kbn-securitysolution-list-hooks",
   "//packages/kbn-es-query",
-  "@npm//@babel/core",
-  "@npm//babel-loader",
+  "//packages/kbn-i18n",
+  "//packages/kbn-securitysolution-list-hooks",
+  "//packages/kbn-securitysolution-list-utils",
+  "//packages/kbn-securitysolution-io-ts-list-types",
   "@npm//@elastic/eui",
   "@npm//react",
-  "@npm//resize-observer-polyfill",
-  "@npm//rxjs",
-  "@npm//tslib",
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-babel-preset",
-  "//packages/kbn-dev-utils",
-  "//packages/kbn-i18n",
-  "//packages/kbn-securitysolution-io-ts-list-types",
-  "//packages/kbn-securitysolution-list-hooks",
   "//packages/kbn-es-query",
-  "@npm//@babel/core",
-  "@npm//babel-loader",
+  "//packages/kbn-i18n",
+  "//packages/kbn-securitysolution-list-hooks",
+  "//packages/kbn-securitysolution-list-utils",
+  "//packages/kbn-securitysolution-io-ts-list-types",
   "@npm//@elastic/eui",
-  "@npm//resize-observer-polyfill",
-  "@npm//rxjs",
-  "@npm//tslib",
-  "@npm//typescript",
   "@npm//@types/jest",
   "@npm//@types/node",
   "@npm//@types/react",
@@ -93,7 +79,6 @@ ts_project(
   args = ["--pretty"],
   srcs = SRCS,
   deps = TYPES_DEPS,
-  allow_js = True,
   declaration = True,
   declaration_map = True,
   emit_declaration_only = True,
