@@ -60,8 +60,9 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
     index: {
       types: ['index_pattern'],
       required: true,
+      // todo - how to handle this case?
       help: i18n.translate('data.search.functions.esaggs.index.help', {
-        defaultMessage: 'Index pattern retrieved with indexPatternLoad',
+        defaultMessage: 'Data view retrieved with indexPatternLoad',
       }),
     },
     aggs: {

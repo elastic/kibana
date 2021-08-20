@@ -25,6 +25,7 @@ export function getRequestInspectorStats(searchSource: ISearchSource) {
 
   if (index) {
     stats.indexPattern = {
+      // todo - KIP or string?
       label: i18n.translate('data.search.searchSource.indexPatternLabel', {
         defaultMessage: 'Index pattern',
       }),

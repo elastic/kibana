@@ -284,8 +284,8 @@ export class IndexPatternsService {
       }
 
       this.onError(err, {
-        title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
-          defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+        title: i18n.translate('data.dataViews.fetchFieldErrorTitle', {
+          defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
           values: { id: indexPattern.id, title: indexPattern.title },
         }),
       });
@@ -330,8 +330,8 @@ export class IndexPatternsService {
       }
 
       this.onError(err, {
-        title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
-          defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+        title: i18n.translate('data.dataViews.fetchFieldErrorTitle', {
+          defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
           values: { id, title },
         }),
       });
@@ -472,8 +472,8 @@ export class IndexPatternsService {
         });
       } else {
         this.onError(err, {
-          title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
-            defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+          title: i18n.translate('data.dataViews.fetchFieldErrorTitle', {
+            defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
             values: { id: savedObject.id, title },
           }),
         });
@@ -643,9 +643,9 @@ export class IndexPatternsService {
             if (ignoreErrors) {
               return;
             }
-            const title = i18n.translate('data.indexPatterns.unableWriteLabel', {
+            const title = i18n.translate('data.dataViews.unableWriteLabel', {
               defaultMessage:
-                'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
+                'Unable to write data view! Refresh the page to get the most up to date changes for this data view.',
             });
 
             this.onNotification({ title, color: 'danger' });
