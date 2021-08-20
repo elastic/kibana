@@ -116,6 +116,28 @@ export const useEndpointActionItems = (
           ),
         },
         {
+          'data-test-subj': 'console',
+          icon: 'console',
+          key: 'consoleLink',
+          navigateAppId: APP_ID,
+          navigateOptions: {
+            path: getEndpointDetailsPath({
+              name: 'endpointDetails',
+              selected_endpoint: endpointId,
+            }),
+          },
+          href: '/',
+          onClick: (ev) => {
+            ev.preventDefault();
+          },
+          children: (
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.actions.hostDetails"
+              defaultMessage="Live Console"
+            />
+          ),
+        },
+        {
           icon: 'gear',
           key: 'agentConfigLink',
           'data-test-subj': 'agentPolicyLink',
