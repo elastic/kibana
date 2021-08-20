@@ -35,6 +35,8 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           aria-label={ariaLabel}
           data-test-subj="attach-alert-to-case-button"
           onClick={addNewCaseClick}
+          // needs forced size="s" since it is lazy loaded and the EuiContextMenuPanel can not initialize the size
+          size="s"
           disabled={isDisabled}
         >
           {i18n.ACTION_ADD_NEW_CASE}
