@@ -13,20 +13,14 @@ import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { useAppContext } from '../../../app_context';
 
-interface Props {
-  nextMajor: number;
-}
-
 const i18nTexts = {
   backupStepTitle: i18n.translate('xpack.upgradeAssistant.overview.backupStepTitle', {
     defaultMessage: 'Back up your data',
   }),
 
-  backupStepDescription: (nextMajor: number) =>
-    i18n.translate('xpack.upgradeAssistant.overview.backupStepDescription', {
-      defaultMessage: 'Back up your data before addressing any deprecation issues.',
-      values: { nextMajor },
-    }),
+  backupStepDescription: i18n.translate('xpack.upgradeAssistant.overview.backupStepDescription', {
+    defaultMessage: 'Back up your data before addressing any deprecation issues.',
+  }),
 };
 
 const SnapshotRestoreAppLink: React.FunctionComponent = () => {
@@ -61,11 +55,11 @@ const SnapshotRestoreAppLink: React.FunctionComponent = () => {
   );
 };
 
-const BackupStep: React.FunctionComponent<Props> = ({ nextMajor }) => {
+const BackupStep: React.FunctionComponent = () => {
   return (
     <>
       <EuiText>
-        <p>{i18nTexts.backupStepDescription(nextMajor)}</p>
+        <p>{i18nTexts.backupStepDescription}</p>
       </EuiText>
 
       <EuiSpacer size="s" />
@@ -75,14 +69,10 @@ const BackupStep: React.FunctionComponent<Props> = ({ nextMajor }) => {
   );
 };
 
-interface GetStepConfig {
-  nextMajor: number;
-}
-
-export const getBackupStep = ({ nextMajor }: GetStepConfig): EuiStepProps => {
+export const getBackupStep = (): EuiStepProps => {
   return {
     title: i18nTexts.backupStepTitle,
     status: 'incomplete',
-    children: <BackupStep nextMajor={nextMajor} />,
+    children: <BackupStep />,
   };
 };
