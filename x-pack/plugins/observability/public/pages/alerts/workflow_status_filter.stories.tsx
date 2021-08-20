@@ -6,24 +6,24 @@
  */
 
 import React, { ComponentProps, useState } from 'react';
-import type { AlertStatus } from '../../../common/typings';
-import { StatusFilter } from './status_filter';
+import type { AlertWorkflowStatus } from '../../../common/typings';
+import { WorkflowStatusFilter } from './workflow_status_filter';
 
-type Args = ComponentProps<typeof StatusFilter>;
+type Args = ComponentProps<typeof WorkflowStatusFilter>;
 
 export default {
   title: 'app/Alerts/StatusFilter',
-  component: StatusFilter,
+  component: WorkflowStatusFilter,
   argTypes: {
     onChange: { action: 'change' },
   },
 };
 
 export function Example({ onChange }: Args) {
-  const [status, setStatus] = useState<AlertStatus>('open');
+  const [status, setStatus] = useState<AlertWorkflowStatus>('open');
 
   return (
-    <StatusFilter
+    <WorkflowStatusFilter
       status={status}
       onChange={(value) => {
         setStatus(value);
