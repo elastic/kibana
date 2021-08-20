@@ -7,7 +7,6 @@
 
 import React, { Fragment } from 'react';
 
-import { HttpSetup } from 'src/core/public';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -75,8 +74,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
   reindexState: ReindexState;
   startReindex: () => void;
   cancelReindex: () => void;
-  http: HttpSetup;
-}> = ({ closeFlyout, reindexState, startReindex, cancelReindex, http, renderGlobalCallouts }) => {
+}> = ({ closeFlyout, reindexState, startReindex, cancelReindex, renderGlobalCallouts }) => {
   const { loadingState, status, hasRequiredPrivileges } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
 
