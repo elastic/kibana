@@ -14,6 +14,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
+import { Capabilities } from 'src/core/public';
 
 import { createStore, State } from '../store';
 import { mockGlobalState } from './global_state';
@@ -44,7 +45,7 @@ const MockKibanaContextProvider = createKibanaContextProviderMock();
 const { storage } = createSecuritySolutionStorageMock();
 
 /** A utility for wrapping children in the providers required to run most tests */
-const TestProvidersComponent: React.FC<Props> = ({
+export const TestProvidersComponent: React.FC<Props> = ({
   children,
   store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
   onDragEnd = jest.fn(),
@@ -73,7 +74,11 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
     <MockKibanaContextProvider>
       <ReduxStoreProvider store={store}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <UserPrivilegesProvider>
+          <UserPrivilegesProvider
+            kibanaCapabilities={
+              ({ siem: { crud_alerts: true, read_alerts: true } } as unknown) as Capabilities
+            }
+          >
             <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
           </UserPrivilegesProvider>
         </ThemeProvider>
@@ -91,6 +96,8 @@ export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook
     type: 'type',
     value: ('mockedValue' as unknown) as T,
     isPristine: false,
+    isDirty: false,
+    isModified: false,
     isValidating: false,
     isValidated: false,
     isChangingValue: false,

@@ -22,7 +22,6 @@ export type {
   ScopeableRequest,
   ElasticsearchConfigPreboot,
 } from './types';
-export * from './legacy';
 export type {
   IClusterClient,
   ICustomClusterClient,
@@ -37,4 +36,9 @@ export type {
   GetResponse,
   DeleteDocumentResponse,
 } from './client';
-export { isSupportedEsServer } from './supported_server_response_check';
+export { getRequestDebugMeta, getErrorMessage } from './client';
+export {
+  isSupportedEsServer,
+  isNotFoundFromUnsupportedServer,
+  PRODUCT_RESPONSE_HEADER,
+} from './supported_server_response_check';

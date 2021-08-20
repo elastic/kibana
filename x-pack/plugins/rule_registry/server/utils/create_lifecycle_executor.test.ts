@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging/target/mocks';
+import { loggerMock } from '@kbn/logging/mocks';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
@@ -23,11 +23,11 @@ import {
   ALERT_STATUS,
   EVENT_ACTION,
   EVENT_KIND,
-  RULE_ID,
-  ALERT_OWNER,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_CONSUMER,
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
-import { createRuleDataClientMock } from '../rule_data_client/create_rule_data_client_mock';
+import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleExecutor } from './create_lifecycle_executor';
 
 describe('createLifecycleExecutor', () => {
@@ -131,16 +131,16 @@ describe('createLifecycleExecutor', () => {
           {
             fields: {
               [ALERT_ID]: 'TEST_ALERT_0',
-              [ALERT_OWNER]: 'CONSUMER',
-              [RULE_ID]: 'RULE_TYPE_ID',
+              [ALERT_RULE_CONSUMER]: 'CONSUMER',
+              [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
             },
           },
           {
             fields: {
               [ALERT_ID]: 'TEST_ALERT_1',
-              [ALERT_OWNER]: 'CONSUMER',
-              [RULE_ID]: 'RULE_TYPE_ID',
+              [ALERT_RULE_CONSUMER]: 'CONSUMER',
+              [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
             },
           },
@@ -229,8 +229,8 @@ describe('createLifecycleExecutor', () => {
             fields: {
               '@timestamp': '',
               [ALERT_ID]: 'TEST_ALERT_0',
-              [ALERT_OWNER]: 'CONSUMER',
-              [RULE_ID]: 'RULE_TYPE_ID',
+              [ALERT_RULE_CONSUMER]: 'CONSUMER',
+              [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
               [SPACE_IDS]: ['fake-space-id'],
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must show up in the written doc
             },
@@ -239,8 +239,8 @@ describe('createLifecycleExecutor', () => {
             fields: {
               '@timestamp': '',
               [ALERT_ID]: 'TEST_ALERT_1',
-              [ALERT_OWNER]: 'CONSUMER',
-              [RULE_ID]: 'RULE_TYPE_ID',
+              [ALERT_RULE_CONSUMER]: 'CONSUMER',
+              [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
               [SPACE_IDS]: ['fake-space-id'],
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
             },
@@ -335,7 +335,7 @@ const createDefaultAlertExecutorOptions = <
   ActionGroupIds extends string = ''
 >({
   alertId = 'ALERT_ID',
-  ruleName = 'RULE_NAME',
+  ruleName = 'ALERT_RULE_NAME',
   params,
   state,
   createdAt = new Date(),

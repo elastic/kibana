@@ -227,7 +227,7 @@ describe('resolveInstanceUuid', () => {
       await expect(
         resolveInstanceUuid({ pathConfig, serverConfig, logger })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to read Kibana UUID file, please check the uuid.server configuration value in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. Error was: EACCES"`
+        `"Unable to read UUID file at data-folder/uuid.  Ensure Kibana has sufficient permissions to read / write to this file.  Error was: EACCES"`
       );
     });
     it('throws an explicit error for file write errors', async () => {
@@ -235,7 +235,7 @@ describe('resolveInstanceUuid', () => {
       await expect(
         resolveInstanceUuid({ pathConfig, serverConfig, logger })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to write Kibana UUID file, please check the uuid.server configuration value in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. Error was: EISDIR"`
+        `"Unable to write to UUID file at data-folder/uuid. Ensure Kibana has sufficient permissions to read / write to this file.  Error was: EISDIR"`
       );
     });
   });

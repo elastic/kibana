@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type { SetEventsLoading, SetEventsDeleted } from '../../../../../../../timelines/common';
 import { OnRowSelected } from '../../events';
 import { EventsTrData, EventsTdGroupActions } from '../../styles';
 import { DataDrivenColumns, getMappedNonEcsValue } from '../data_driven_columns';
@@ -47,6 +48,8 @@ interface Props {
   toggleShowNotes: () => void;
   leadingControlColumns: ControlColumnProps[];
   trailingControlColumns: ControlColumnProps[];
+  setEventsLoading: SetEventsLoading;
+  setEventsDeleted: SetEventsDeleted;
 }
 
 export const EventColumnView = React.memo<Props>(
@@ -76,6 +79,8 @@ export const EventColumnView = React.memo<Props>(
     toggleShowNotes,
     leadingControlColumns,
     trailingControlColumns,
+    setEventsLoading,
+    setEventsDeleted,
   }) => {
     // Each action button shall announce itself to screen readers via an `aria-label`
     // in the following format:
@@ -139,6 +144,8 @@ export const EventColumnView = React.memo<Props>(
                   tabType={tabType}
                   timelineId={timelineId}
                   toggleShowNotes={toggleShowNotes}
+                  setEventsLoading={setEventsLoading}
+                  setEventsDeleted={setEventsDeleted}
                 />
               )}
             </EventsTdGroupActions>
@@ -167,6 +174,8 @@ export const EventColumnView = React.memo<Props>(
         tabType,
         timelineId,
         toggleShowNotes,
+        setEventsLoading,
+        setEventsDeleted,
       ]
     );
     return (
@@ -201,6 +210,8 @@ export const EventColumnView = React.memo<Props>(
           selectedEventIds={selectedEventIds}
           showNotes={showNotes}
           toggleShowNotes={toggleShowNotes}
+          setEventsLoading={setEventsLoading}
+          setEventsDeleted={setEventsDeleted}
         />
       </EventsTrData>
     );

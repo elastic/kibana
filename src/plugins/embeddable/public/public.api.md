@@ -185,6 +185,8 @@ export abstract class Container<TChildInput extends Partial<EmbeddableInput> = {
     // (undocumented)
     removeEmbeddable(embeddableId: string): void;
     // (undocumented)
+    setChildLoaded(embeddable: IEmbeddable): void;
+    // (undocumented)
     untilEmbeddableLoaded<TEmbeddable extends IEmbeddable>(id: string): Promise<TEmbeddable | ErrorEmbeddable>;
     // (undocumented)
     updateInputForChild<EEI extends EmbeddableInput = EmbeddableInput>(id: string, changes: Partial<EEI>): void;
@@ -265,6 +267,8 @@ export class EditPanelAction implements Action_3<ActionContext_3> {
 // @public (undocumented)
 export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = EmbeddableInput, TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput> implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput> {
     constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer);
+    // (undocumented)
+    readonly deferEmbeddableLoad: boolean;
     destroy(): void;
     // (undocumented)
     fatalError?: Error;
@@ -306,6 +310,7 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
     static runtimeId: number;
     // (undocumented)
     readonly runtimeId: number;
+    protected setInitializationFinished(): void;
     // (undocumented)
     supportedTriggers(): string[];
     // (undocumented)
@@ -364,6 +369,8 @@ export interface EmbeddableEditorState {
     embeddableId?: string;
     // (undocumented)
     originatingApp: string;
+    // (undocumented)
+    originatingPath?: string;
     searchSessionId?: string;
     // (undocumented)
     valueInput?: EmbeddableInput;
@@ -651,6 +658,7 @@ export interface IContainer<Inherited extends {} = {}, I extends ContainerInput<
     getChild<E extends Embeddable<EmbeddableInput> = Embeddable<EmbeddableInput>>(id: string): E;
     getInputForChild<EEI extends EmbeddableInput>(id: string): EEI;
     removeEmbeddable(embeddableId: string): void;
+    setChildLoaded<E extends IEmbeddable = IEmbeddable>(embeddable: E): void;
     untilEmbeddableLoaded<TEmbeddable extends IEmbeddable>(id: string): Promise<TEmbeddable | ErrorEmbeddable>;
     updateInputForChild<EEI extends EmbeddableInput>(id: string, changes: Partial<EEI>): void;
 }
@@ -659,6 +667,7 @@ export interface IContainer<Inherited extends {} = {}, I extends ContainerInput<
 //
 // @public (undocumented)
 export interface IEmbeddable<I extends EmbeddableInput = EmbeddableInput, O extends EmbeddableOutput = EmbeddableOutput> {
+    readonly deferEmbeddableLoad: boolean;
     destroy(): void;
     enhancements?: object;
     fatalError?: Error;

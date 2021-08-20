@@ -317,6 +317,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
+    const deprecationsStart = this.deprecations.start();
     this.status.start();
 
     this.coreStart = {
@@ -328,6 +329,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
       coreUsageData: coreUsageDataStart,
+      deprecations: deprecationsStart,
     };
 
     await this.plugins.start(this.coreStart);

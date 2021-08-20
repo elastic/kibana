@@ -122,7 +122,7 @@ export function DiscoverLayout({
   const onAddFilter = useCallback(
     (field: IndexPatternField | string, values: string, operation: '+' | '-') => {
       const fieldName = typeof field === 'string' ? field : field.name;
-      popularizeField(indexPattern, fieldName, indexPatterns);
+      popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
       const newFilters = esFilters.generateFilters(
         filterManager,
         field,
@@ -135,7 +135,7 @@ export function DiscoverLayout({
       }
       return filterManager.addFilters(newFilters);
     },
-    [filterManager, indexPattern, indexPatterns, trackUiMetric]
+    [filterManager, indexPattern, indexPatterns, trackUiMetric, capabilities]
   );
 
   const onEditRuntimeField = useCallback(() => {

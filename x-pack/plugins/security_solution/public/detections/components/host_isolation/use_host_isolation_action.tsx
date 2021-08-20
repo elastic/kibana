@@ -12,7 +12,7 @@ import { useIsolationPrivileges } from '../../../common/hooks/endpoint/use_isola
 import { endpointAlertCheck } from '../../../common/utils/endpoint_alert_check';
 import { useHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
-import { getFieldValue } from './helpers';
+import { getFieldValue, getFieldValues } from './helpers';
 
 interface UseHostIsolationActionProps {
   closePopover: () => void;
@@ -46,9 +46,19 @@ export const useHostIsolationAction = ({
     [detailsData]
   );
 
+  const hostCapabilities = useMemo(
+    () =>
+      getFieldValues(
+        { category: 'Endpoint', field: 'Endpoint.capabilities' },
+        detailsData
+      ) as string[],
+    [detailsData]
+  );
+
   const isolationSupported = isIsolationSupported({
     osName: hostOsFamily,
     version: agentVersion,
+    capabilities: hostCapabilities,
   });
 
   const {

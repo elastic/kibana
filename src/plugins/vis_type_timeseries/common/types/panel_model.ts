@@ -24,6 +24,7 @@ interface Percentile {
   shade?: number | string;
   value?: number | string;
   percentile?: string;
+  color?: string;
 }
 
 export interface Metric {
@@ -52,6 +53,7 @@ export interface Metric {
   type: string;
   value?: string;
   values?: string[];
+  colors?: string[];
   size?: string | number;
   agg_with?: string;
   order?: string;
@@ -159,6 +161,8 @@ export interface Panel {
   series: Series[];
   show_grid: number;
   show_legend: number;
+  truncate_legend?: number;
+  max_lines_legend?: number;
   time_field?: string;
   time_range_mode?: string;
   tooltip_mode?: TOOLTIP_MODES;

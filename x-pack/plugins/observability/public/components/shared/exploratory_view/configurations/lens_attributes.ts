@@ -621,6 +621,7 @@ export class LensAttributes {
           ...Object.keys(this.getChildYAxises(layerConfig)),
         ],
         layerId: `layer${index}`,
+        layerType: 'data',
         seriesType: layerConfig.seriesType || layerConfig.seriesConfig.defaultSeriesType,
         palette: layerConfig.seriesConfig.palette,
         yConfig: layerConfig.seriesConfig.yConfig || [

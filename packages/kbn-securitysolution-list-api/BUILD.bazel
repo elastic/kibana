@@ -47,7 +47,8 @@ ts_config(
   name = "tsconfig",
   src = "tsconfig.json",
   deps = [
-      "//:tsconfig.base.json",
+    "//:tsconfig.base.json",
+    "//:tsconfig.bazel.json",
   ],
 )
 
@@ -57,7 +58,6 @@ ts_project(
   args = ["--pretty"],
   declaration = True,
   declaration_map = True,
-  incremental = True,
   out_dir = "target",
   root_dir = "src",
   source_map = True,
