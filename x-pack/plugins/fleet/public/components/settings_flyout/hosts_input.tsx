@@ -158,33 +158,6 @@ export const HostsInput: FunctionComponent<Props> = ({
     [value, onChange]
   );
 
-  const onDelete = useCallback(
-    (idx: number) => {
-      onChange([...value.slice(0, idx), ...value.slice(idx + 1)]);
-    },
-    [value, onChange]
-  );
-
-  const addRowHandler = useCallback(() => {
-    setAutoFocus(true);
-    onChange([...value, '']);
-  }, [value, onChange]);
-
-  const onDragEndHandler = useCallback(
-    ({ source, destination }) => {
-      if (source && destination) {
-        const items = euiDragDropReorder(value, source.index, destination.index);
-
-        onChange(items);
-      }
-    },
-    [value, onChange]
-  );
-
-  const globalErrors = useMemo(() => {
-    return errors && errors.filter((err) => err.index === undefined).map(({ message }) => message);
-  }, [errors]);
-
   const indexedErrors = useMemo(() => {
     if (!errors) {
       return [];
@@ -202,6 +175,37 @@ export const HostsInput: FunctionComponent<Props> = ({
 
       return acc;
     }, [] as string[][]);
+  }, [errors]);
+
+  const onDelete = useCallback(
+    (idx: number) => {
+      indexedErrors.splice(idx, 1);
+      onChange([...value.slice(0, idx), ...value.slice(idx + 1)]);
+    },
+    [value, onChange, indexedErrors]
+  );
+
+  const addRowHandler = useCallback(() => {
+    setAutoFocus(true);
+    onChange([...value, '']);
+  }, [value, onChange]);
+
+  const onDragEndHandler = useCallback(
+    ({ source, destination }) => {
+      if (source && destination) {
+        const items = euiDragDropReorder(value, source.index, destination.index);
+
+        const destinationErrors = indexedErrors[destination.index];
+        indexedErrors[destination.index] = indexedErrors[source.index];
+        indexedErrors[source.index] = destinationErrors;
+        onChange(items);
+      }
+    },
+    [value, onChange, indexedErrors]
+  );
+
+  const globalErrors = useMemo(() => {
+    return errors && errors.filter((err) => err.index === undefined).map(({ message }) => message);
   }, [errors]);
 
   const isSortable = rows.length > 1;
