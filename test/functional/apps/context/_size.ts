@@ -15,6 +15,7 @@ const TEST_STEP_SIZE = 2;
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
+  const security = getService('security');
   const retry = getService('retry');
   const docTable = getService('docTable');
   const browser = getService('browser');
@@ -28,6 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'context:step': `${TEST_STEP_SIZE}`,
       });
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID);
+      await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
     });
 
     it('should default to the `context:defaultSize` setting', async function () {
