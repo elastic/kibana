@@ -51,7 +51,7 @@ export const TakeActionDropdown = React.memo(
     timelineId,
   }: {
     detailsData: TimelineEventsDetailsItem[] | null;
-    ecsData: Ecs;
+    ecsData?: Ecs;
     handleOnEventClosed: () => void;
     isHostIsolationPanelOpen: boolean;
     loadingEventDetails: boolean;
@@ -182,13 +182,20 @@ export const TakeActionDropdown = React.memo(
     );
 
     const addToCaseProps = useMemo(
-      () => ({
-        event: { data: detailsData, ecs: ecsData, _id: ecsData._id },
-        useInsertTimeline: insertTimelineHook,
-        casePermissions,
-        appId: APP_ID,
-        onClose: afterCaseSelection,
-      }),
+      () =>
+        ecsData?._id
+          ? {
+              event: {
+                data: detailsData?.map((d) => ({ field: d.field, value: d.values })) ?? [],
+                ecs: ecsData,
+                _id: ecsData?._id,
+              },
+              useInsertTimeline: insertTimelineHook,
+              casePermissions,
+              appId: APP_ID,
+              onClose: afterCaseSelection,
+            }
+          : null,
       [afterCaseSelection, casePermissions, detailsData, ecsData, insertTimelineHook]
     );
 
@@ -200,7 +207,9 @@ export const TakeActionDropdown = React.memo(
           TimelineId.detectionsPage,
           TimelineId.detectionsRulesDetailsPage,
           TimelineId.active,
-        ].includes(timelineId as TimelineId) && hasWritePermissions
+        ].includes(timelineId as TimelineId) &&
+        hasWritePermissions &&
+        addToCaseProps
           ? {
               actionItem: [
                 {
@@ -275,7 +284,7 @@ export const TakeActionDropdown = React.memo(
       );
     }, [togglePopoverHandler]);
 
-    return panels[0].items?.length && !loadingEventDetails ? (
+    return panels[0].items?.length && !loadingEventDetails && ecsData ? (
       <EuiPopover
         id="hostIsolationTakeActionPanel"
         button={takeActionButton}
