@@ -26,8 +26,7 @@ export const getFieldsToShow = (
     if (!isMultiField) {
       return true;
     }
-    if (!showMultiFields) return false;
     const parent = childParentFieldsMap[key];
-    return parent && fieldMapping && !fieldMapping.hasOwnProperty(parent);
+    return showMultiFields || (parent && !fields.includes(parent));
   });
 };
