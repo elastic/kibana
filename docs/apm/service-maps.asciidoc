@@ -28,7 +28,7 @@ endif::[]
 
 ifeval::["{is-current-version}"=="false"]
 [role="screenshot"]
-image::apm/images/service-maps.png[Example view of service maps in the APM app in Kibana]
+image::images/service-maps.png[Example view of service maps in the APM app in Kibana]
 endif::[]
 
 We currently surface two types of service maps:
