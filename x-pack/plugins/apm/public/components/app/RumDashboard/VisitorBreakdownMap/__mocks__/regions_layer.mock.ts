@@ -11,6 +11,7 @@ export const mockLayerList = [
       {
         leftField: 'iso2',
         right: {
+          applyForceRefresh: true,
           applyGlobalQuery: true,
           applyGlobalTime: true,
           type: 'ES_TERM_SOURCE',
@@ -86,6 +87,7 @@ export const mockLayerList = [
       {
         leftField: 'region_iso_code',
         right: {
+          applyForceRefresh: true,
           applyGlobalQuery: true,
           applyGlobalTime: true,
           type: 'ES_TERM_SOURCE',
