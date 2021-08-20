@@ -4,15 +4,13 @@
 {kib} requires an index pattern to access the {es} data that you want to explore.
 An index pattern selects the data to use and allows you to define properties of the fields.
 
-An index pattern can point to a specific index, for example, your log data from yesterday,
-or all indices that contain your data. An index pattern can also point to a
-{ref}/data-streams.html[data stream] or {ref}/alias.html[index alias].
+An index pattern can point to one or more indices, {ref}/data-streams.html[data stream], or {ref}/alias.html[index aliases].
+For example, an index pattern can point to your log data from yesterday,
+or all indices that contain your data.
 
 [float]
 [[index-patterns-read-only-access]]
 === Required permissions
-
-To create index patterns, you must meet the minimum requirements.
 
 * Access to *Index Patterns* requires the <<xpack-kibana-role-management, {kib} privilege>>
 `Index Pattern Management`.
@@ -67,7 +65,7 @@ based on different timestamps.
 
 . Click *Create index pattern*.
 +
-[[reload-fields]] {kib} is now configured to use your {es} data. When a new field is added to an index, 
+[[reload-fields]] {kib} is now configured to use your {es} data. When a new field is added to an index,
 the index pattern field list is updated
 the next time the index pattern is loaded, for example, when you load the page or
 move between {kib} apps.
