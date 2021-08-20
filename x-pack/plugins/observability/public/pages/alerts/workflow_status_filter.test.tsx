@@ -7,27 +7,27 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import type { AlertStatus } from '../../../common/typings';
-import { StatusFilter } from './status_filter';
+import type { AlertWorkflowStatus } from '../../../common/typings';
+import { WorkflowStatusFilter } from './workflow_status_filter';
 
 describe('StatusFilter', () => {
   describe('render', () => {
     it('renders', () => {
       const onChange = jest.fn();
-      const status: AlertStatus = 'all';
+      const status: AlertWorkflowStatus = 'open';
       const props = { onChange, status };
 
-      expect(() => render(<StatusFilter {...props} />)).not.toThrowError();
+      expect(() => render(<WorkflowStatusFilter {...props} />)).not.toThrowError();
     });
 
-    (['all', 'open', 'closed'] as AlertStatus[]).map((status) => {
+    (['open', 'acknowledged', 'closed'] as AlertWorkflowStatus[]).map((status) => {
       describe(`when clicking the ${status} button`, () => {
         it('calls the onChange callback with "${status}"', () => {
           const onChange = jest.fn();
           const props = { onChange, status };
 
-          const { getByTestId } = render(<StatusFilter {...props} />);
-          const button = getByTestId(`StatusFilter ${status} button`);
+          const { getByTestId } = render(<WorkflowStatusFilter {...props} />);
+          const button = getByTestId(`WorkflowStatusFilter ${status} button`);
 
           button.click();
 
