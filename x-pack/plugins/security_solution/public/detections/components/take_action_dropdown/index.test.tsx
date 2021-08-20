@@ -6,10 +6,12 @@
  */
 import React, { ReactElement } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
+import { waitFor } from '@testing-library/react';
+
 import { TakeActionDropdown, TakeActionDropdownProps } from '.';
 import { mockAlertDetailsData } from '../../../common/components/event_details/__mocks__';
 import { mockEcsDataWithAlert } from '../../../common/mock/mock_detection_alerts';
-import { TimelineEventsDetailsItem } from '../../../../common';
+import { TimelineEventsDetailsItem, TimelineId } from '../../../../common';
 import { TestProviders } from '../../../common/mock';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
@@ -21,7 +23,7 @@ jest.mock('../../../common/hooks/endpoint/use_isolate_privileges', () => ({
 }));
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
-  useGetUserCasesPermissions: jest.fn().mockReturnValue({}),
+  useGetUserCasesPermissions: jest.fn().mockReturnValue({ crud: true }),
 }));
 jest.mock('../../../cases/components/use_insert_timeline');
 
@@ -39,6 +41,16 @@ jest.mock('../../../common/utils/endpoint_alert_check', () => {
 jest.mock('../../../../common/endpoint/service/host_isolation/utils', () => {
   return {
     isIsolationSupported: jest.fn().mockReturnValue(true),
+  };
+});
+
+jest.mock('../../containers/detection_engine/alerts/use_host_isolation_status', () => {
+  return {
+    useHostIsolationStatus: jest.fn().mockReturnValue({
+      loading: false,
+      isIsolated: false,
+      agentStatus: 'healthy',
+    }),
   };
 });
 
@@ -64,7 +76,7 @@ describe('take action dropdown', () => {
     onAddExceptionTypeClick: jest.fn(),
     onAddIsolationStatusClick: jest.fn(),
     refetch: jest.fn(),
-    timelineId: 'timelineId',
+    timelineId: TimelineId.active,
   };
 
   beforeAll(() => {
@@ -117,41 +129,60 @@ describe('take action dropdown', () => {
       wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
     });
 
-    test('should render "Change alert status"', () => {
-      expect(
-        wrapper
-          .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
-          .prop<Panel[]>('panels')[0].items[0].name
-      ).toEqual('Change alert status');
+    test('should render "Change alert status"', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper
+            .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
+            .prop<Panel[]>('panels')[0].items[0].name
+        ).toEqual('Change alert status');
+      });
     });
 
-    test('should render "Add Endpoint exception"', () => {
-      expect(
-        wrapper
-          .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
-          .prop<Panel[]>('panels')[0].items[1].name
-      ).toEqual('Add Endpoint exception');
+    test('should render "Add Endpoint exception"', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper
+            .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
+            .prop<Panel[]>('panels')[0].items[1].name
+        ).toEqual('Add Endpoint exception');
+      });
     });
-    test('should render "Add rule exception"', () => {
-      expect(
-        wrapper
-          .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
-          .prop<Panel[]>('panels')[0].items[2].name
-      ).toEqual('Add rule exception');
+    test('should render "Add rule exception"', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper
+            .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
+            .prop<Panel[]>('panels')[0].items[2].name
+        ).toEqual('Add rule exception');
+      });
     });
-    test('should render "Isolate host"', () => {
-      expect(
-        wrapper
-          .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
-          .prop<Panel[]>('panels')[0].items[3].name
-      ).toEqual('Isolate host');
+    test('should render "Add to case"', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper
+            .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
+            .prop<Panel[]>('panels')[0].items[3].name
+        ).toEqual('Add to case');
+      });
     });
-    test('should render "Investigate in timeline"', () => {
-      expect(
-        wrapper
-          .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
-          .prop<Panel[]>('panels')[0].items[4].name
-      ).toEqual('Investigate in timeline');
+    test('should render "Isolate host"', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper
+            .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
+            .prop<Panel[]>('panels')[0].items[4].name
+        ).toEqual('Isolate host');
+      });
+    });
+    test('should render "Investigate in timeline"', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper
+            .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
+            .prop<Panel[]>('panels')[0].items[5].name
+        ).toEqual('Investigate in timeline');
+      });
     });
   });
 
@@ -169,52 +200,64 @@ describe('take action dropdown', () => {
       wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
     });
 
-    test('should render "Change alert status" title', () => {
-      expect(
-        wrapper
-          .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
-          .prop<Panel[]>('panels')[1].title
-      ).toEqual('Change alert status');
+    test('should render "Change alert status" title', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper
+            .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
+            .prop<Panel[]>('panels')[1].title
+        ).toEqual('Change alert status');
+      });
     });
 
-    test('should render "mark as acknowledge"', () => {
-      expect(
-        wrapper
-          .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
-          .prop<Panel[]>('panels')[1].content?.props.items[0].key
-      ).toEqual('acknowledge');
+    test('should render "mark as acknowledge"', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper
+            .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
+            .prop<Panel[]>('panels')[1].content?.props.items[0].key
+        ).toEqual('acknowledge');
+      });
     });
 
-    test('should render "mark as close"', () => {
-      expect(
-        wrapper
-          .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
-          .prop<Panel[]>('panels')[1].content?.props.items[1].key
-      ).toEqual('close');
+    test('should render "mark as close"', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper
+            .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
+            .prop<Panel[]>('panels')[1].content?.props.items[1].key
+        ).toEqual('close');
+      });
     });
 
-    test('should render "Add to case" title', () => {
-      expect(
-        wrapper
-          .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
-          .prop<Panel[]>('panels')[2].title
-      ).toEqual('Add to case');
+    test('should render "Add to case" title', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper
+            .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
+            .prop<Panel[]>('panels')[2].title
+        ).toEqual('Add to case');
+      });
     });
 
-    test('should render "Add to existing case"', () => {
-      expect(
-        wrapper
-          .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
-          .prop<CaseActionPanel[]>('panels')[2].content[0].props?.children.props['data-test-subj']
-      ).toEqual('add-to-existing-case-action');
+    test('should render "Add to existing case"', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper
+            .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
+            .prop<CaseActionPanel[]>('panels')[2].content[0].props.children
+        ).toEqual('Add to existing case');
+      });
     });
 
-    test('should render "Add to new case"', () => {
-      expect(
-        wrapper
-          .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
-          .prop<CaseActionPanel[]>('panels')[2].content[1].props?.children.props['data-test-subj']
-      ).toEqual('add-to-new-case-action');
+    test('should render "Add to new case"', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper
+            .find('EuiContextMenu[data-test-subj="takeActionPanelMenu"]')
+            .prop<CaseActionPanel[]>('panels')[2].content[1].props.children
+        ).toEqual('Add to new case');
+      });
     });
   });
 });

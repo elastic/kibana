@@ -302,7 +302,12 @@ export const TakeActionDropdown = React.memo(
         anchorPosition="downLeft"
         repositionOnScroll
       >
-        <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
+        <EuiContextMenu
+          size="s"
+          initialPanelId={0}
+          panels={panels}
+          data-test-subj="takeActionPanelMenu"
+        />
       </EuiPopover>
     ) : null;
   }
