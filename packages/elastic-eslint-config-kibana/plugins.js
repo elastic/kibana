@@ -7,6 +7,7 @@ module.exports = {
       files: ['{src,x-pack}/plugins/**/{server,common,public}/index.ts'],
       rules: {
         '@kbn/eslint/no_export_all': 'error',
+        '@kbn/eslint/no_duplicate_exports': 'error',
       },
     }
   ]
