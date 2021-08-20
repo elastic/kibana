@@ -53,7 +53,7 @@ describe('Marking alerts as acknowledged', () => {
         refreshPage();
         waitForAlertsToBeLoaded();
         goToOpenedAlerts();
-
+        waitForAlertsToBeLoaded();
         const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
         cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
 
