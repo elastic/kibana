@@ -11,8 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   clearFlashMessages,
-  setQueuedSuccessMessage,
-  setSuccessMessage,
+  flashSuccessToast,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
@@ -34,6 +33,8 @@ interface IOauthApplication {
 export interface SettingsServerProps {
   organizationName: string;
   oauthApplication: IOauthApplication;
+  logo: string | null;
+  icon: string | null;
 }
 
 interface SettingsActions {
@@ -41,6 +42,10 @@ interface SettingsActions {
   onOrgNameInputChange(orgNameInputValue: string): string;
   setUpdatedName({ organizationName }: { organizationName: string }): string;
   setServerProps(props: SettingsServerProps): SettingsServerProps;
+  setIcon(icon: string | null): string | null;
+  setStagedIcon(stagedIcon: string | null): string | null;
+  setLogo(logo: string | null): string | null;
+  setStagedLogo(stagedLogo: string | null): string | null;
   setOauthApplication(oauthApplication: IOauthApplication): IOauthApplication;
   setUpdatedOauthApplication({
     oauthApplication,
@@ -52,6 +57,11 @@ interface SettingsActions {
   initializeConnectors(): void;
   updateOauthApplication(): void;
   updateOrgName(): void;
+  updateOrgLogo(): void;
+  updateOrgIcon(): void;
+  resetOrgLogo(): void;
+  resetOrgIcon(): void;
+  resetButtonLoading(): void;
   deleteSourceConfig(
     serviceType: string,
     name: string
@@ -66,7 +76,15 @@ interface SettingsValues {
   connectors: Connector[];
   orgNameInputValue: string;
   oauthApplication: IOauthApplication | null;
+  logo: string | null;
+  icon: string | null;
+  stagedLogo: string | null;
+  stagedIcon: string | null;
+  logoButtonLoading: boolean;
+  iconButtonLoading: boolean;
 }
+
+const imageRoute = '/api/workplace_search/org/settings/upload_images';
 
 export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>({
   actions: {
@@ -74,6 +92,10 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     onOrgNameInputChange: (orgNameInputValue: string) => orgNameInputValue,
     setUpdatedName: ({ organizationName }) => organizationName,
     setServerProps: (props: SettingsServerProps) => props,
+    setIcon: (icon) => icon,
+    setStagedIcon: (stagedIcon) => stagedIcon,
+    setLogo: (logo) => logo,
+    setStagedLogo: (stagedLogo) => stagedLogo,
     setOauthApplication: (oauthApplication: IOauthApplication) => oauthApplication,
     setUpdatedOauthApplication: ({ oauthApplication }: { oauthApplication: IOauthApplication }) =>
       oauthApplication,
@@ -81,6 +103,11 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     initializeSettings: () => true,
     initializeConnectors: () => true,
     updateOrgName: () => true,
+    updateOrgLogo: () => true,
+    updateOrgIcon: () => true,
+    resetOrgLogo: () => true,
+    resetOrgIcon: () => true,
+    resetButtonLoading: () => true,
     updateOauthApplication: () => true,
     deleteSourceConfig: (serviceType: string, name: string) => ({
       serviceType,
@@ -113,8 +140,57 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     dataLoading: [
       true,
       {
+        setServerProps: () => false,
         onInitializeConnectors: () => false,
         resetSettingsState: () => true,
+      },
+    ],
+    logo: [
+      null,
+      {
+        setServerProps: (_, { logo }) => logo,
+        setLogo: (_, logo) => logo,
+        resetOrgLogo: () => null,
+      },
+    ],
+    stagedLogo: [
+      null,
+      {
+        setStagedLogo: (_, stagedLogo) => stagedLogo,
+        resetOrgLogo: () => null,
+        setLogo: () => null,
+      },
+    ],
+    icon: [
+      null,
+      {
+        setServerProps: (_, { icon }) => icon,
+        setIcon: (_, icon) => icon,
+        resetOrgIcon: () => null,
+      },
+    ],
+    stagedIcon: [
+      null,
+      {
+        setStagedIcon: (_, stagedIcon) => stagedIcon,
+        resetOrgIcon: () => null,
+        setIcon: () => null,
+      },
+    ],
+    logoButtonLoading: [
+      false,
+      {
+        updateOrgLogo: () => true,
+        setLogo: () => false,
+        resetButtonLoading: () => false,
+      },
+    ],
+    iconButtonLoading: [
+      false,
+      {
+        updateOrgIcon: () => true,
+        setIcon: () => false,
+        resetButtonLoading: () => false,
       },
     ],
   },
@@ -142,6 +218,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       }
     },
     updateOrgName: async () => {
+      clearFlashMessages();
       const { http } = HttpLogic.values;
       const route = '/api/workplace_search/org/settings/customize';
       const { orgNameInputValue: name } = values;
@@ -150,9 +227,39 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       try {
         const response = await http.put(route, { body });
         actions.setUpdatedName(response);
-        setSuccessMessage(ORG_UPDATED_MESSAGE);
+        flashSuccessToast(ORG_UPDATED_MESSAGE);
         AppLogic.actions.setOrgName(name);
       } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    updateOrgLogo: async () => {
+      clearFlashMessages();
+      const { http } = HttpLogic.values;
+      const { stagedLogo: logo } = values;
+      const body = JSON.stringify({ logo });
+
+      try {
+        const response = await http.put(imageRoute, { body });
+        actions.setLogo(response.logo);
+        flashSuccessToast(ORG_UPDATED_MESSAGE);
+      } catch (e) {
+        actions.resetButtonLoading();
+        flashAPIErrors(e);
+      }
+    },
+    updateOrgIcon: async () => {
+      clearFlashMessages();
+      const { http } = HttpLogic.values;
+      const { stagedIcon: icon } = values;
+      const body = JSON.stringify({ icon });
+
+      try {
+        const response = await http.put(imageRoute, { body });
+        actions.setIcon(response.icon);
+        flashSuccessToast(ORG_UPDATED_MESSAGE);
+      } catch (e) {
+        actions.resetButtonLoading();
         flashAPIErrors(e);
       }
     },
@@ -170,7 +277,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       try {
         const response = await http.put(route, { body });
         actions.setUpdatedOauthApplication(response);
-        setSuccessMessage(OAUTH_APP_UPDATED_MESSAGE);
+        flashSuccessToast(OAUTH_APP_UPDATED_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -182,7 +289,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       try {
         await http.delete(route);
         KibanaLogic.values.navigateToUrl(ORG_SETTINGS_CONNECTORS_PATH);
-        setQueuedSuccessMessage(
+        flashSuccessToast(
           i18n.translate('xpack.enterpriseSearch.workplaceSearch.settings.configRemoved.message', {
             defaultMessage: 'Successfully removed configuration for {name}.',
             values: { name },
@@ -194,6 +301,18 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     },
     resetSettingsState: () => {
       clearFlashMessages();
+    },
+    setStagedLogo: () => {
+      clearFlashMessages();
+    },
+    setStagedIcon: () => {
+      clearFlashMessages();
+    },
+    resetOrgLogo: () => {
+      actions.updateOrgLogo();
+    },
+    resetOrgIcon: () => {
+      actions.updateOrgIcon();
     },
   }),
 });

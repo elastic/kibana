@@ -21,6 +21,16 @@ import { DetailsPanel } from './index';
 import { TimelineExpandedDetail, TimelineTabs } from '../../../../common/types/timeline';
 import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
 
+jest.mock('../../../common/lib/kibana');
+
+jest.mock('@kbn/alerts', () => ({
+  useGetUserAlertsPermissions: () => ({
+    loading: false,
+    crud: true,
+    read: true,
+  }),
+}));
+
 describe('Details Panel Component', () => {
   const state: State = { ...mockGlobalState };
 

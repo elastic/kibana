@@ -20,20 +20,25 @@ import {
 } from './execution_context_container';
 
 /**
- * @public
- */
-export interface KibanaServerExecutionContext extends Partial<KibanaExecutionContext> {
-  requestId: string;
-}
-
-/**
  * @internal
  */
 export interface IExecutionContext {
   getParentContextFrom(headers: Record<string, string>): KibanaExecutionContext | undefined;
-  set(context: Partial<KibanaServerExecutionContext>): void;
-  reset(): void;
+  setRequestId(requestId: string): void;
+  set(context: KibanaExecutionContext): void;
+  /**
+   * The sole purpose of this imperative internal API is to be used by the http service.
+   * The event-based nature of Hapi server doesn't allow us to wrap a request handler with "withContext".
+   * Since all the Hapi event lifecycle will lose the execution context.
+   * Nodejs docs also recommend using AsyncLocalStorage.run() over AsyncLocalStorage.enterWith().
+   * https://nodejs.org/api/async_context.html#async_context_asynclocalstorage_enterwith_store
+   */
   get(): IExecutionContextContainer | undefined;
+  withContext<R>(context: KibanaExecutionContext | undefined, fn: () => R): R;
+  /**
+   * returns serialized representation to send as a header
+   **/
+  getAsHeader(): string | undefined;
 }
 
 /**
@@ -51,15 +56,11 @@ export type InternalExecutionContextStart = IExecutionContext;
  */
 export interface ExecutionContextSetup {
   /**
-   * Stores the meta-data of a runtime operation.
-   * Data are carried over all async operations automatically.
-   * The sequential calls merge provided "context" object shallowly.
+   * Keeps track of execution context while the passed function is executed.
+   * Data are carried over all async operations spawned by the passed function.
+   * The nested calls stack the registered context on top of each other.
    **/
-  set(context: Partial<KibanaServerExecutionContext>): void;
-  /**
-   * Retrieves an opearation meta-data for the current async context.
-   **/
-  get(): IExecutionContextContainer | undefined;
+  withContext<R>(context: KibanaExecutionContext | undefined, fn: (...args: any[]) => R): R;
 }
 
 /**
@@ -70,13 +71,15 @@ export type ExecutionContextStart = ExecutionContextSetup;
 export class ExecutionContextService
   implements CoreService<InternalExecutionContextSetup, InternalExecutionContextStart> {
   private readonly log: Logger;
-  private readonly asyncLocalStorage: AsyncLocalStorage<IExecutionContextContainer>;
+  private readonly contextStore: AsyncLocalStorage<IExecutionContextContainer>;
+  private readonly requestIdStore: AsyncLocalStorage<{ requestId: string }>;
   private enabled = false;
   private configSubscription?: Subscription;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('execution_context');
-    this.asyncLocalStorage = new AsyncLocalStorage<IExecutionContextContainer>();
+    this.contextStore = new AsyncLocalStorage<IExecutionContextContainer>();
+    this.requestIdStore = new AsyncLocalStorage<{ requestId: string }>();
   }
 
   setup(): InternalExecutionContextSetup {
@@ -89,8 +92,10 @@ export class ExecutionContextService
     return {
       getParentContextFrom,
       set: this.set.bind(this),
-      reset: this.reset.bind(this),
+      withContext: this.withContext.bind(this),
+      setRequestId: this.setRequestId.bind(this),
       get: this.get.bind(this),
+      getAsHeader: this.getAsHeader.bind(this),
     };
   }
 
@@ -98,8 +103,10 @@ export class ExecutionContextService
     return {
       getParentContextFrom,
       set: this.set.bind(this),
-      reset: this.reset.bind(this),
+      setRequestId: this.setRequestId.bind(this),
+      withContext: this.withContext.bind(this),
       get: this.get.bind(this),
+      getAsHeader: this.getAsHeader.bind(this),
     };
   }
 
@@ -111,25 +118,46 @@ export class ExecutionContextService
     }
   }
 
-  private set(context: KibanaServerExecutionContext) {
+  private set(context: KibanaExecutionContext) {
     if (!this.enabled) return;
-    const prevValue = this.asyncLocalStorage.getStore();
-    // merges context objects shallowly. repeats the deafult logic of apm.setCustomContext(ctx)
-    const contextContainer = new ExecutionContextContainer({ ...prevValue?.toJSON(), ...context });
+    const contextContainer = new ExecutionContextContainer(context);
     // we have to use enterWith since Hapi lifecycle model is built on event emitters.
     // therefore if we wrapped request handler in asyncLocalStorage.run(), we would lose context in other lifecycles.
-    this.asyncLocalStorage.enterWith(contextContainer);
-    this.log.debug(`stored the execution context: ${JSON.stringify(contextContainer)}`);
+    this.contextStore.enterWith(contextContainer);
+    this.log.debug(`set the execution context: ${JSON.stringify(contextContainer)}`);
   }
 
-  private reset() {
+  private withContext<R>(
+    context: KibanaExecutionContext | undefined,
+    fn: (...args: any[]) => R
+  ): R {
+    if (!this.enabled || !context) {
+      return fn();
+    }
+    const parent = this.contextStore.getStore();
+    const contextContainer = new ExecutionContextContainer(context, parent);
+    this.log.debug(`stored the execution context: ${JSON.stringify(contextContainer)}`);
+
+    return this.contextStore.run(contextContainer, fn);
+  }
+
+  private setRequestId(requestId: string) {
     if (!this.enabled) return;
-    // @ts-expect-error "undefined" is not supported in type definitions, which is wrong
-    this.asyncLocalStorage.enterWith(undefined);
+    this.requestIdStore.enterWith({ requestId });
   }
 
   private get(): IExecutionContextContainer | undefined {
     if (!this.enabled) return;
-    return this.asyncLocalStorage.getStore();
+    return this.contextStore.getStore();
+  }
+
+  private getAsHeader(): string | undefined {
+    if (!this.enabled) return;
+    // requestId may not be present in the case of FakeRequest
+    const requestId = this.requestIdStore.getStore()?.requestId ?? 'unknownId';
+    const executionContext = this.contextStore.getStore()?.toString();
+    const executionContextStr = executionContext ? `;kibana:${executionContext}` : '';
+
+    return `${requestId}${executionContextStr}`;
   }
 }

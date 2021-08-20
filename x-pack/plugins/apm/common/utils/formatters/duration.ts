@@ -13,6 +13,8 @@ import { asDecimalOrInteger, asInteger, asDecimal } from './formatters';
 import { TimeUnit } from './datetime';
 import { Maybe } from '../../../typings/common';
 import { isFiniteNumber } from '../is_finite_number';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { ThroughputUnit } from '../../../server/lib/helpers/calculate_throughput';
 
 interface FormatterOptions {
   defaultValue?: string;
@@ -31,12 +33,16 @@ export type TimeFormatter = (
   options?: FormatterOptions
 ) => ConvertedDuration;
 
-type TimeFormatterBuilder = (max: number) => TimeFormatter;
+type TimeFormatterBuilder = (max: number, threshold?: number) => TimeFormatter;
 
+// threshold defines the value from which upwards there should be no decimal places.
 function getUnitLabelAndConvertedValue(
   unitKey: DurationTimeUnit,
-  value: number
+  value: number,
+  threshold: number = 10
 ) {
+  const ms = value / 1000;
+
   switch (unitKey) {
     case 'hours': {
       return {
@@ -44,7 +50,8 @@ function getUnitLabelAndConvertedValue(
           defaultMessage: 'h',
         }),
         convertedValue: asDecimalOrInteger(
-          moment.duration(value / 1000).asHours()
+          moment.duration(ms).asHours(),
+          threshold
         ),
       };
     }
@@ -54,7 +61,8 @@ function getUnitLabelAndConvertedValue(
           defaultMessage: 'min',
         }),
         convertedValue: asDecimalOrInteger(
-          moment.duration(value / 1000).asMinutes()
+          moment.duration(ms).asMinutes(),
+          threshold
         ),
       };
     }
@@ -64,7 +72,8 @@ function getUnitLabelAndConvertedValue(
           defaultMessage: 's',
         }),
         convertedValue: asDecimalOrInteger(
-          moment.duration(value / 1000).asSeconds()
+          moment.duration(ms).asSeconds(),
+          threshold
         ),
       };
     }
@@ -74,7 +83,8 @@ function getUnitLabelAndConvertedValue(
           defaultMessage: 'ms',
         }),
         convertedValue: asDecimalOrInteger(
-          moment.duration(value / 1000).asMilliseconds()
+          moment.duration(ms).asMilliseconds(),
+          threshold
         ),
       };
     }
@@ -96,10 +106,12 @@ function convertTo({
   unit,
   microseconds,
   defaultValue = NOT_AVAILABLE_LABEL,
+  threshold = 10,
 }: {
   unit: DurationTimeUnit;
   microseconds: Maybe<number>;
   defaultValue?: string;
+  threshold?: number;
 }): ConvertedDuration {
   if (!isFiniteNumber(microseconds)) {
     return { value: defaultValue, formatted: defaultValue };
@@ -107,7 +119,8 @@ function convertTo({
 
   const { convertedValue, unitLabel } = getUnitLabelAndConvertedValue(
     unit,
-    microseconds
+    microseconds,
+    threshold
   );
 
   return {
@@ -120,14 +133,14 @@ function convertTo({
 export const toMicroseconds = (value: number, timeUnit: TimeUnit) =>
   moment.duration(value, timeUnit).asMilliseconds() * 1000;
 
-function getDurationUnitKey(max: number): DurationTimeUnit {
-  if (max > toMicroseconds(10, 'hours')) {
+function getDurationUnitKey(max: number, threshold = 10): DurationTimeUnit {
+  if (max > toMicroseconds(threshold, 'hours')) {
     return 'hours';
   }
-  if (max > toMicroseconds(10, 'minutes')) {
+  if (max > toMicroseconds(threshold, 'minutes')) {
     return 'minutes';
   }
-  if (max > toMicroseconds(10, 'seconds')) {
+  if (max > toMicroseconds(threshold, 'seconds')) {
     return 'seconds';
   }
   if (max > toMicroseconds(1, 'milliseconds')) {
@@ -136,13 +149,16 @@ function getDurationUnitKey(max: number): DurationTimeUnit {
   return 'microseconds';
 }
 
+// memoizer with a custom resolver to consider both arguments max/threshold.
+// by default lodash's memoize only considers the first argument.
 export const getDurationFormatter: TimeFormatterBuilder = memoize(
-  (max: number) => {
-    const unit = getDurationUnitKey(max);
-    return (value, { defaultValue }: FormatterOptions = {}) => {
-      return convertTo({ unit, microseconds: value, defaultValue });
+  (max: number, threshold: number = 10) => {
+    const unit = getDurationUnitKey(max, threshold);
+    return (value: Maybe<number>, { defaultValue }: FormatterOptions = {}) => {
+      return convertTo({ unit, microseconds: value, defaultValue, threshold });
     };
-  }
+  },
+  (max, threshold) => `${max}_${threshold}`
 );
 
 export function asTransactionRate(value: Maybe<number>) {
@@ -161,10 +177,15 @@ export function asTransactionRate(value: Maybe<number>) {
   }
 
   return i18n.translate('xpack.apm.transactionRateLabel', {
-    defaultMessage: `{value} tpm`,
-    values: {
-      value: displayedValue,
-    },
+    defaultMessage: `{displayedValue} tpm`,
+    values: { displayedValue },
+  });
+}
+
+export function asExactTransactionRate(value: number, unit: ThroughputUnit) {
+  return i18n.translate('xpack.apm.exactTransactionRateLabel', {
+    defaultMessage: `{value} { unit, select, minute {tpm} other {tps} }`,
+    values: { value: asDecimalOrInteger(value), unit },
   });
 }
 

@@ -7,10 +7,19 @@
 
 export const eventsIndexPattern = 'logs-endpoint.events.*';
 export const alertsIndexPattern = 'logs-endpoint.alerts-*';
+
+/** index pattern for the data source index (data stream) that the Endpoint streams documents to */
 export const metadataIndexPattern = 'metrics-endpoint.metadata-*';
+
+/** index that the metadata transform writes to (destination) and that is used by endpoint APIs */
 export const metadataCurrentIndexPattern = 'metrics-endpoint.metadata_current_*';
+
+/** The metadata Transform Name prefix with NO (package) version) */
 export const metadataTransformPrefix = 'endpoint.metadata_current-default';
+
+/** The metadata Transform Name prefix with NO namespace and NO (package) version) */
 export const metadataTransformPattern = 'endpoint.metadata_current-*';
+
 export const policyIndexPattern = 'metrics-endpoint.policy-*';
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 export const LIMITED_CONCURRENCY_ENDPOINT_ROUTE_TAG = 'endpoint:limited-concurrency';

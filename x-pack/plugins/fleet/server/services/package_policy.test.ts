@@ -16,9 +16,15 @@ import type { KibanaRequest } from 'kibana/server';
 
 import type { PackageInfo, PackagePolicySOAttributes, AgentPolicySOAttributes } from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
-import type { ExternalCallback } from '..';
+import type { PutPackagePolicyUpdateCallback, PostPackagePolicyCreateCallback } from '..';
 
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
+
+import type { PostPackagePolicyDeleteCallback } from '../types';
+
+import type { DeletePackagePoliciesResponse } from '../../common';
+
+import { IngestManagerError } from '../errors';
 
 import { packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
@@ -104,6 +110,8 @@ jest.mock('./agent_policy', () => {
     },
   };
 });
+
+type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
 
 describe('Package policy service', () => {
   describe('compilePackagePolicyInputs', () => {
@@ -813,6 +821,78 @@ describe('Package policy service', () => {
     });
   });
 
+  describe('runDeleteExternalCallbacks', () => {
+    let callbackOne: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
+    let callbackTwo: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
+    let callingOrder: string[];
+    let deletedPackagePolicies: DeletePackagePoliciesResponse;
+
+    beforeEach(() => {
+      appContextService.start(createAppContextStartContractMock());
+      callingOrder = [];
+      deletedPackagePolicies = [
+        { id: 'a', success: true },
+        { id: 'a', success: true },
+      ];
+      callbackOne = jest.fn(async (deletedPolicies) => {
+        callingOrder.push('one');
+      });
+      callbackTwo = jest.fn(async (deletedPolicies) => {
+        callingOrder.push('two');
+      });
+      appContextService.addExternalCallback('postPackagePolicyDelete', callbackOne);
+      appContextService.addExternalCallback('postPackagePolicyDelete', callbackTwo);
+    });
+
+    afterEach(() => {
+      appContextService.stop();
+    });
+
+    it('should execute external callbacks', async () => {
+      await packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies);
+
+      expect(callbackOne).toHaveBeenCalledWith(deletedPackagePolicies);
+      expect(callbackTwo).toHaveBeenCalledWith(deletedPackagePolicies);
+      expect(callingOrder).toEqual(['one', 'two']);
+    });
+
+    it("should execute all external callbacks even if one throw's", async () => {
+      callbackOne.mockImplementation(async (deletedPolicies) => {
+        callingOrder.push('one');
+        throw new Error('foo');
+      });
+      await expect(
+        packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies)
+      ).rejects.toThrow(IngestManagerError);
+      expect(callingOrder).toEqual(['one', 'two']);
+    });
+
+    it('should provide an array of errors encountered by running external callbacks', async () => {
+      let error: IngestManagerError;
+      const callbackOneError = new Error('foo 1');
+      const callbackTwoError = new Error('foo 2');
+
+      callbackOne.mockImplementation(async (deletedPolicies) => {
+        callingOrder.push('one');
+        throw callbackOneError;
+      });
+      callbackTwo.mockImplementation(async (deletedPolicies) => {
+        callingOrder.push('two');
+        throw callbackTwoError;
+      });
+
+      await packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies).catch((e) => {
+        error = e;
+      });
+
+      expect(error!.message).toEqual(
+        '2 encountered while executing package delete external callbacks'
+      );
+      expect(error!.meta).toEqual([callbackOneError, callbackTwoError]);
+      expect(callingOrder).toEqual(['one', 'two']);
+    });
+  });
+
   describe('runExternalCallbacks', () => {
     let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
     let request: KibanaRequest;
@@ -835,7 +915,7 @@ describe('Package policy service', () => {
     const callbackCallingOrder: string[] = [];
 
     // Callback one adds an input that includes a `config` property
-    const callbackOne: ExternalCallback[1] = jest.fn(async (ds) => {
+    const callbackOne: CombinedExternalCallback = jest.fn(async (ds) => {
       callbackCallingOrder.push('one');
       return {
         ...ds,
@@ -855,7 +935,7 @@ describe('Package policy service', () => {
     });
 
     // Callback two adds an additional `input[0].config` property
-    const callbackTwo: ExternalCallback[1] = jest.fn(async (ds) => {
+    const callbackTwo: CombinedExternalCallback = jest.fn(async (ds) => {
       callbackCallingOrder.push('two');
       return {
         ...ds,
@@ -886,12 +966,12 @@ describe('Package policy service', () => {
     });
 
     it('should call external callbacks in expected order', async () => {
-      const callbackA: ExternalCallback[1] = jest.fn(async (ds) => {
+      const callbackA: CombinedExternalCallback = jest.fn(async (ds) => {
         callbackCallingOrder.push('a');
         return ds;
       });
 
-      const callbackB: ExternalCallback[1] = jest.fn(async (ds) => {
+      const callbackB: CombinedExternalCallback = jest.fn(async (ds) => {
         callbackCallingOrder.push('b');
         return ds;
       });
@@ -927,12 +1007,12 @@ describe('Package policy service', () => {
     });
 
     describe('with a callback that throws an exception', () => {
-      const callbackThree: ExternalCallback[1] = jest.fn(async () => {
+      const callbackThree: CombinedExternalCallback = jest.fn(async () => {
         callbackCallingOrder.push('three');
         throw new Error('callbackThree threw error on purpose');
       });
 
-      const callbackFour: ExternalCallback[1] = jest.fn(async (ds) => {
+      const callbackFour: CombinedExternalCallback = jest.fn(async (ds) => {
         callbackCallingOrder.push('four');
         return {
           ...ds,

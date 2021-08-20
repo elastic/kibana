@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 
 const COMMAS_NUMS_ONLY_RE = /[^0-9,]/g;
 
-interface ColorProps {
+export interface ColorProps {
   [key: string]: string | null;
 }
 

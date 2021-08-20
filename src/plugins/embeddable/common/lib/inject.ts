@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
 import { SavedObjectReference } from '../../../../core/types';
 import { injectBaseEmbeddableInput } from './migrate_base_input';
-import { SerializableState } from '../../../kibana_utils/common/persistable_state';
 
 export const getInjectFunction = (embeddables: CommonEmbeddableStartContract) => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
@@ -27,7 +27,7 @@ export const getInjectFunction = (embeddables: CommonEmbeddableStartContract) =>
       if (!enhancements[key]) return;
       updatedInput.enhancements![key] = embeddables
         .getEnhancement(key)
-        .inject(enhancements[key] as SerializableState, references);
+        .inject(enhancements[key] as SerializableRecord, references);
     });
 
     return updatedInput;
