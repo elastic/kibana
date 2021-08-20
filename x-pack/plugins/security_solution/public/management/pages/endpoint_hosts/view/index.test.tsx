@@ -10,7 +10,6 @@ import * as reactTestingLibrary from '@testing-library/react';
 import { EndpointList } from './index';
 import '../../../../common/mock/match_media';
 
-import { useUiSetting$ } from '../../../../../public/common/lib/kibana';
 import { createUseUiSetting$Mock } from '../../../../../public/common/lib/kibana/kibana_react.mock';
 
 import {
@@ -31,7 +30,7 @@ import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_da
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 import { getEndpointDetailsPath } from '../../../common/routing';
-import { KibanaServices, useKibana, useToasts } from '../../../../common/lib/kibana';
+import { KibanaServices, useKibana, useToasts, useUiSetting$ } from '../../../../common/lib/kibana';
 import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint_isolation/mocks';
 import {
   createFailedResourceState,
