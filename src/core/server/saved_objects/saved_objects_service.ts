@@ -406,13 +406,18 @@ export class SavedObjectsService
         }
       });
 
-      await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
+      const compatibleNodes = await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
         filter((nodes) => nodes.isCompatible),
         take(1)
       ).toPromise();
 
-      this.logger.info('Starting saved objects migrations');
-      await migrator.runMigrations();
+      // Running migrations only if we got compatible nodes.
+      // It may happen that the observable completes due to Kibana shutting down
+      // and the promise above fulfils. We shouldn't trigger migrations at that point.
+      if (compatibleNodes) {
+        this.logger.info('Starting saved objects migrations');
+        await migrator.runMigrations();
+      }
     }
 
     const createRepository = (
