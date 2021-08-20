@@ -61,9 +61,12 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
               },
             },
           },
-          root: {
-            appenders: ['default', 'file'],
-          },
+          loggers: [
+            {
+              name: 'root',
+              appenders: ['file'],
+            },
+          ],
         },
       },
       {
