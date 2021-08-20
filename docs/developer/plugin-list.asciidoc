@@ -290,7 +290,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_type_pie[visTypePie]
+|{kib-repo}blob/{branch}/src/plugins/vis_types/pie[visTypePie]
 |WARNING: Missing README.
 
 
@@ -314,11 +314,11 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_type_vislib[visTypeVislib]
+|{kib-repo}blob/{branch}/src/plugins/vis_types/vislib[visTypeVislib]
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_type_xy[visTypeXy]
+|{kib-repo}blob/{branch}/src/plugins/vis_types/xy[visTypeXy]
 |WARNING: Missing README.
 
 
