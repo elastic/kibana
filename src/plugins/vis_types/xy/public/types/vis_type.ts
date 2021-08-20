@@ -6,15 +6,11 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '.',
-  projects: [
-    '<rootDir>/packages/*/jest.config.js',
-    '<rootDir>/src/*/jest.config.js',
-    '<rootDir>/src/plugins/*/jest.config.js',
-    '<rootDir>/src/plugins/vis_types/*/jest.config.js',
-    '<rootDir>/test/*/jest.config.js',
-    '<rootDir>/x-pack/plugins/*/jest.config.js',
-  ],
-};
+import { VisTypeDefinition } from '../../../../visualizations/public';
+import { ChartType } from '../../common';
+
+import { VisParams } from './param';
+
+export type VisTypeNames = ChartType | 'horizontal_bar';
+
+export type XyVisTypeDefinition = VisTypeDefinition<VisParams>;
