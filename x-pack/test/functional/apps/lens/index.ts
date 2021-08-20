@@ -7,7 +7,7 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
