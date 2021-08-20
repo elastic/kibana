@@ -32,8 +32,6 @@ const ALERT_ID = `${ALERT_NAMESPACE}.id` as const;
 const ALERT_REASON = `${ALERT_NAMESPACE}.reason` as const;
 const ALERT_RISK_SCORE = `${ALERT_NAMESPACE}.risk_score` as const;
 const ALERT_SEVERITY = `${ALERT_NAMESPACE}.severity` as const;
-const ALERT_SEVERITY_LEVEL = `${ALERT_NAMESPACE}.severity.level` as const;
-const ALERT_SEVERITY_VALUE = `${ALERT_NAMESPACE}.severity.value` as const;
 const ALERT_START = `${ALERT_NAMESPACE}.start` as const;
 const ALERT_STATUS = `${ALERT_NAMESPACE}.status` as const;
 const ALERT_SYSTEM_STATUS = `${ALERT_NAMESPACE}.system_status` as const;
@@ -127,8 +125,6 @@ const fields = {
   ALERT_RULE_VERSION,
   ALERT_START,
   ALERT_SEVERITY,
-  ALERT_SEVERITY_LEVEL,
-  ALERT_SEVERITY_VALUE,
   ALERT_STATUS,
   ALERT_SYSTEM_STATUS,
   ALERT_UUID,
@@ -183,8 +179,6 @@ export {
   ALERT_RULE_VERSION,
   ALERT_RULE_SEVERITY,
   ALERT_SEVERITY,
-  ALERT_SEVERITY_LEVEL,
-  ALERT_SEVERITY_VALUE,
   ALERT_START,
   ALERT_SYSTEM_STATUS,
   ALERT_UUID,
