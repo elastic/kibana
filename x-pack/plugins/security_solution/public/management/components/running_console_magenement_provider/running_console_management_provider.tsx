@@ -6,12 +6,20 @@
  */
 
 import React, { memo, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
-import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
+import {
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSuperSelect,
+} from '@elastic/eui';
 
 interface ConsoleManagement {
   openConsole(id: string, options: { title: ReactNode; console: JSX.Element }): void;
   hideConsole(id: string): void;
   closeConsole(id: string): void;
+  consoleCount: number;
+  getConsoleSelectorElement(): JSX.Element;
 }
 
 const RunningConsoleManagementContext = React.createContext<ConsoleManagement | null>(null);
@@ -51,13 +59,37 @@ export const RunningConsoleManagementProvider = memo(({ children }) => {
 
   const closeConsole = useCallback<ConsoleManagement['closeConsole']>(() => {}, []);
 
+  const getConsoleSelectorElement = useCallback<
+    ConsoleManagement['getConsoleSelectorElement']
+  >(() => {
+    const options = Object.entries(consoles).map(([id, opt]) => {
+      return {
+        value: id,
+        inputDisplay: opt.title,
+      };
+    });
+    return (
+      <EuiSuperSelect
+        options={options}
+        valueOfSelected={''}
+        onChange={(id) => openConsole(id, consoles[id])}
+      />
+    );
+  }, [consoles, openConsole]);
+
+  const consoleCount = useMemo(() => {
+    return Object.keys(consoles).length;
+  }, [consoles]);
+
   const consoleManagement = useMemo(() => {
     return {
       openConsole,
       hideConsole,
       closeConsole,
+      consoleCount,
+      getConsoleSelectorElement,
     };
-  }, [closeConsole, hideConsole, openConsole]);
+  }, [closeConsole, consoleCount, getConsoleSelectorElement, hideConsole, openConsole]);
 
   const visibleConsoles = useMemo(() => {
     const dialogs = [];
@@ -78,7 +110,7 @@ export const RunningConsoleManagementProvider = memo(({ children }) => {
     }
 
     return dialogs;
-  }, [consoles]);
+  }, [consoles, hideConsole]);
 
   return (
     <RunningConsoleManagementContext.Provider value={consoleManagement}>

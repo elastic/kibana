@@ -16,7 +16,10 @@ import {
 } from '@elastic/eui';
 import { SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { RunningConsoleManagementProvider } from './running_console_magenement_provider/running_console_management_provider';
+import {
+  RunningConsoleManagementProvider,
+  useRunningConsoleManagement,
+} from './running_console_magenement_provider/running_console_management_provider';
 
 interface AdministrationListPageProps {
   title: React.ReactNode;
@@ -24,6 +27,14 @@ interface AdministrationListPageProps {
   actions?: React.ReactNode;
   headerBackComponent?: React.ReactNode;
 }
+
+const RunningConsoles = memo(() => {
+  const { consoleCount, getConsoleSelectorElement } = useRunningConsoleManagement();
+
+  return consoleCount ? <div>{getConsoleSelectorElement()}</div> : null;
+});
+
+RunningConsoles.displayName = 'RunningConsoles';
 
 export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
   ({ title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {
@@ -48,6 +59,8 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
 
     return (
       <RunningConsoleManagementProvider>
+        <RunningConsoles />
+
         <EuiPageHeader
           pageTitle={header}
           description={description}
