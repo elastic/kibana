@@ -7,8 +7,8 @@
 /* eslint-disable no-console */
 
 import { Role } from '../../../../security/common/model';
-import { callKibana, isAxiosError } from '../call_kibana';
-import { Elasticsearch } from '../create_kibana_user_role';
+import { callKibana, isAxiosError } from './call_kibana';
+import { Elasticsearch, Kibana } from '../create_apm_users_and_roles';
 
 type Privilege = [] | ['read'] | ['all'];
 export interface KibanaPrivileges {
@@ -20,18 +20,18 @@ export type RoleType = Omit<Role, 'name' | 'metadata'>;
 
 export async function createRole({
   elasticsearch,
-  kibanaHostname,
+  kibana,
   roleName,
   role,
 }: {
   elasticsearch: Elasticsearch;
-  kibanaHostname: string;
+  kibana: Kibana;
   roleName: string;
   role: RoleType;
 }) {
   const roleFound = await getRole({
     elasticsearch,
-    kibanaHostname,
+    kibana,
     roleName,
   });
   if (roleFound) {
@@ -41,7 +41,7 @@ export async function createRole({
 
   await callKibana({
     elasticsearch,
-    kibanaHostname,
+    kibana,
     options: {
       method: 'PUT',
       url: `/api/security/role/${roleName}`,
@@ -52,24 +52,22 @@ export async function createRole({
     },
   });
 
-  console.log(
-    `Created role "${roleName}" with privilege "${JSON.stringify(role.kibana)}"`
-  );
+  console.log(`Created role "${roleName}"`);
 }
 
 async function getRole({
   elasticsearch,
-  kibanaHostname,
+  kibana,
   roleName,
 }: {
   elasticsearch: Elasticsearch;
-  kibanaHostname: string;
+  kibana: Kibana;
   roleName: string;
 }): Promise<Role | null> {
   try {
     return await callKibana({
       elasticsearch,
-      kibanaHostname,
+      kibana,
       options: {
         method: 'GET',
         url: `/api/security/role/${roleName}`,

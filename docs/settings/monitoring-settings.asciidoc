@@ -37,6 +37,10 @@ For more information, see
   monitoring back-end does not run and {kib} stats are not sent to the monitoring
   cluster.
 
+| `monitoring.ui.ccs.enabled`
+  | Set to `true` (default) to enable {ref}/modules-cross-cluster-search.html[cross-cluster search] of your monitoring data. The {ref}/modules-remote-clusters.html#remote-cluster-settings[`remote_cluster_client`] role must exist on each node.
+
+
 | `monitoring.ui.elasticsearch.hosts`
   | Specifies the location of the {es} cluster where your monitoring data is stored.
   By default, this is the same as <<elasticsearch-hosts, `elasticsearch.hosts`>>. This setting enables
