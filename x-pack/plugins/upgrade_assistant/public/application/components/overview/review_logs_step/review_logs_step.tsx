@@ -20,7 +20,7 @@ const i18nTexts = {
   }),
 };
 
-export const getReviewLogsStep = ({ currentMajor }: { currentMajor: number }): EuiStepProps => {
+export const getReviewLogsStep = ({ nextMajor }: { nextMajor: number }): EuiStepProps => {
   return {
     title: i18nTexts.reviewStepTitle,
     status: 'incomplete',
@@ -30,8 +30,8 @@ export const getReviewLogsStep = ({ currentMajor }: { currentMajor: number }): E
           <p>
             <FormattedMessage
               id="xpack.upgradeAssistant.overview.resolveStepDescription"
-              defaultMessage="Update your Elasticsearch and Kibana deployments to be compatible with {currentMajor}.0. Critical issues must be resolved before you upgrade."
-              values={{ currentMajor }}
+              defaultMessage="Update your Elasticsearch and Kibana deployments to be compatible with {nextMajor}.0. Critical issues must be resolved before you upgrade."
+              values={{ nextMajor }}
             />
           </p>
         </EuiText>

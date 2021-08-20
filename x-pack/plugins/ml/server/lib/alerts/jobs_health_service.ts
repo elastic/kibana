@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { memoize, keyBy } from 'lodash';
-import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { groupBy, keyBy, memoize } from 'lodash';
+import { KibanaRequest, Logger, SavedObjectsClientContract } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
-import { Logger } from 'kibana/server';
 import { MlJob } from '@elastic/elasticsearch/api/types';
 import { MlClient } from '../ml_client';
 import { JobSelection } from '../../routes/schemas/alerting_schema';
@@ -19,6 +18,7 @@ import { GetGuards } from '../../shared_services/shared_services';
 import {
   AnomalyDetectionJobsHealthAlertContext,
   DelayedDataResponse,
+  JobsErrorsResponse,
   JobsHealthExecutorOptions,
   MmlTestResponse,
   NotStartedDatafeedResponse,
@@ -35,6 +35,7 @@ import {
   jobAuditMessagesProvider,
   JobAuditMessagesService,
 } from '../../models/job_audit_messages/job_audit_messages';
+import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 
 interface TestResult {
   name: string;
@@ -48,8 +49,18 @@ export function jobsHealthServiceProvider(
   datafeedsService: DatafeedsService,
   annotationService: AnnotationService,
   jobAuditMessagesService: JobAuditMessagesService,
+  getFieldsFormatRegistry: FieldFormatsRegistryProvider,
   logger: Logger
 ) {
+  /**
+   * Provides a callback for date formatting based on the Kibana settings.
+   */
+  const getDateFormatter = memoize(async () => {
+    const fieldFormatsRegistry = await getFieldsFormatRegistry();
+    const dateFormatter = fieldFormatsRegistry.deserialize({ id: 'date' });
+    return dateFormatter.convert.bind(dateFormatter);
+  });
+
   /**
    * Extracts result list of jobs based on included and excluded selection of jobs and groups.
    * @param includeJobs
@@ -121,6 +132,17 @@ export function jobsHealthServiceProvider(
     async (jobIds: string[]) => (await mlClient.getJobStats({ job_id: jobIds.join(',') })).body.jobs
   );
 
+  /** Gets values for translation string */
+  const getJobsAlertingMessageValues = <T extends Array<{ job_id: string } | undefined>>(
+    results: T
+  ) => {
+    const jobIds = (results || []).filter(isDefined).map((v) => v.job_id);
+    return {
+      count: jobIds.length,
+      jobsString: jobIds.join(', '),
+    };
+  };
+
   return {
     /**
      * Gets not started datafeeds for opened jobs.
@@ -164,13 +186,15 @@ export function jobsHealthServiceProvider(
     async getMmlReport(jobIds: string[]): Promise<MmlTestResponse[]> {
       const jobsStats = await getJobStats(jobIds);
 
+      const dateFormatter = await getDateFormatter();
+
       return jobsStats
         .filter((j) => j.state === 'opened' && j.model_size_stats.memory_status !== 'ok')
         .map(({ job_id: jobId, model_size_stats: modelSizeStats }) => {
           return {
             job_id: jobId,
             memory_status: modelSizeStats.memory_status,
-            log_time: modelSizeStats.log_time,
+            log_time: dateFormatter(modelSizeStats.log_time),
             model_bytes: modelSizeStats.model_bytes,
             model_bytes_memory_limit: modelSizeStats.model_bytes_memory_limit,
             peak_model_bytes: modelSizeStats.peak_model_bytes,
@@ -203,13 +227,15 @@ export function jobsHealthServiceProvider(
       const defaultLookbackInterval = resolveLookbackInterval(resultJobs, datafeeds!);
       const earliestMs = getDelayedDataLookbackTimestamp(timeInterval, defaultLookbackInterval);
 
-      const annotations: DelayedDataResponse[] = (
+      const getFormattedDate = await getDateFormatter();
+
+      return (
         await annotationService.getDelayedDataAnnotations({
           jobIds: resultJobIds,
           earliestMs,
         })
       )
-        .map<DelayedDataResponse>((v) => {
+        .map((v) => {
           const match = v.annotation.match(/Datafeed has missed (\d+)\s/);
           const missedDocsCount = match ? parseInt(match[1], 10) : 0;
           return {
@@ -235,9 +261,13 @@ export function jobsHealthServiceProvider(
             v.end_timestamp > getDelayedDataLookbackTimestamp(timeInterval, jobLookbackInterval);
 
           return isDocCountExceededThreshold && isEndTimestampWithinRange;
+        })
+        .map((v) => {
+          return {
+            ...v,
+            end_timestamp: getFormattedDate(v.end_timestamp),
+          };
         });
-
-      return annotations;
     },
     /**
      * Retrieves a list of the latest errors per jobs.
@@ -245,8 +275,25 @@ export function jobsHealthServiceProvider(
      * @param previousStartedAt Time of the previous rule execution. As we intend to notify
      *                          about an error only once, limit the scope of the errors search.
      */
-    async getErrorsReport(jobIds: string[], previousStartedAt: Date) {
-      return await jobAuditMessagesService.getJobsErrors(jobIds, previousStartedAt.getTime());
+    async getErrorsReport(
+      jobIds: string[],
+      previousStartedAt: Date
+    ): Promise<JobsErrorsResponse[]> {
+      const getFormattedDate = await getDateFormatter();
+
+      return (
+        await jobAuditMessagesService.getJobsErrorMessages(jobIds, previousStartedAt.getTime())
+      ).map((v) => {
+        return {
+          ...v,
+          errors: v.errors.map((e) => {
+            return {
+              ...e,
+              timestamp: getFormattedDate(e.timestamp),
+            };
+          }),
+        };
+      });
     },
     /**
      * Retrieves report grouped by test.
@@ -275,6 +322,7 @@ export function jobsHealthServiceProvider(
       if (config.datafeed.enabled) {
         const response = await this.getNotStartedDatafeeds(jobIds);
         if (response && response.length > 0) {
+          const { count, jobsString } = getJobsAlertingMessageValues(response);
           results.push({
             name: HEALTH_CHECK_NAMES.datafeed.name,
             context: {
@@ -282,7 +330,9 @@ export function jobsHealthServiceProvider(
               message: i18n.translate(
                 'xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedStateMessage',
                 {
-                  defaultMessage: 'Datafeed is not started for the following jobs:',
+                  defaultMessage:
+                    'Datafeed is not started for {count, plural, one {job} other {jobs}} {jobsString}',
+                  values: { count, jobsString },
                 }
               ),
             },
@@ -293,32 +343,54 @@ export function jobsHealthServiceProvider(
       if (config.mml.enabled) {
         const response = await this.getMmlReport(jobIds);
         if (response && response.length > 0) {
-          const hardLimitJobsCount = response.reduce((acc, curr) => {
-            return acc + (curr.memory_status === 'hard_limit' ? 1 : 0);
-          }, 0);
+          const { hard_limit: hardLimitJobs, soft_limit: softLimitJobs } = groupBy(
+            response,
+            'memory_status'
+          );
+
+          const {
+            count: hardLimitCount,
+            jobsString: hardLimitJobsString,
+          } = getJobsAlertingMessageValues(hardLimitJobs);
+          const {
+            count: softLimitCount,
+            jobsString: softLimitJobsString,
+          } = getJobsAlertingMessageValues(softLimitJobs);
+
+          let message = '';
+
+          if (hardLimitCount > 0) {
+            message = i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlMessage', {
+              defaultMessage: `{count, plural, one {Job} other {Jobs}} {jobsString} reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.`,
+              values: {
+                count: hardLimitCount,
+                jobsString: hardLimitJobsString,
+              },
+            });
+          }
+
+          if (softLimitCount > 0) {
+            if (message.length > 0) {
+              message += '\n';
+            }
+            message += i18n.translate(
+              'xpack.ml.alertTypes.jobsHealthAlertingRule.mmlSoftLimitMessage',
+              {
+                defaultMessage:
+                  '{count, plural, one {Job} other {Jobs}} {jobsString} reached the soft model memory limit. Assign the job more memory or edit the datafeed filter to limit scope of analysis.',
+                values: {
+                  count: softLimitCount,
+                  jobsString: softLimitJobsString,
+                },
+              }
+            );
+          }
 
           results.push({
             name: HEALTH_CHECK_NAMES.mml.name,
             context: {
               results: response,
-              message:
-                hardLimitJobsCount > 0
-                  ? i18n.translate(
-                      'xpack.ml.alertTypes.jobsHealthAlertingRule.mmlHardLimitMessage',
-                      {
-                        defaultMessage:
-                          '{jobsCount, plural, one {# job} other {# jobs}} reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.',
-                        values: { jobsCount: hardLimitJobsCount },
-                      }
-                    )
-                  : i18n.translate(
-                      'xpack.ml.alertTypes.jobsHealthAlertingRule.mmlSoftLimitMessage',
-                      {
-                        defaultMessage:
-                          '{jobsCount, plural, one {# job} other {# jobs}} reached the soft model memory limit. Assign the job more memory or edit the datafeed filter to limit scope of analysis.',
-                        values: { jobsCount: response.length },
-                      }
-                    ),
+              message,
             },
           });
         }
@@ -331,6 +403,8 @@ export function jobsHealthServiceProvider(
           config.delayedData.docsCount
         );
 
+        const { count, jobsString } = getJobsAlertingMessageValues(response);
+
         if (response.length > 0) {
           results.push({
             name: HEALTH_CHECK_NAMES.delayedData.name,
@@ -340,8 +414,8 @@ export function jobsHealthServiceProvider(
                 'xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataMessage',
                 {
                   defaultMessage:
-                    '{jobsCount, plural, one {# job is} other {# jobs are}} suffering from delayed data.',
-                  values: { jobsCount: response.length },
+                    '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {is} other {are}} suffering from delayed data.',
+                  values: { count, jobsString },
                 }
               ),
             },
@@ -352,6 +426,7 @@ export function jobsHealthServiceProvider(
       if (config.errorMessages.enabled && previousStartedAt) {
         const response = await this.getErrorsReport(jobIds, previousStartedAt);
         if (response.length > 0) {
+          const { count, jobsString } = getJobsAlertingMessageValues(response);
           results.push({
             name: HEALTH_CHECK_NAMES.errorMessages.name,
             context: {
@@ -360,8 +435,8 @@ export function jobsHealthServiceProvider(
                 'xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesMessage',
                 {
                   defaultMessage:
-                    '{jobsCount, plural, one {# job contains} other {# jobs contain}} errors in the messages.',
-                  values: { jobsCount: response.length },
+                    '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {contains} other {contain}} errors in the messages.',
+                  values: { count, jobsString },
                 }
               ),
             },
@@ -390,12 +465,13 @@ export function getJobsHealthServiceProvider(getGuards: GetGuards) {
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
-            .ok(({ mlClient, scopedClient }) =>
+            .ok(({ mlClient, scopedClient, getFieldsFormatRegistry }) =>
               jobsHealthServiceProvider(
                 mlClient,
                 datafeedsProvider(scopedClient, mlClient),
                 annotationServiceProvider(scopedClient),
                 jobAuditMessagesProvider(scopedClient, mlClient),
+                getFieldsFormatRegistry,
                 logger
               ).getTestsResults(...args)
             );
