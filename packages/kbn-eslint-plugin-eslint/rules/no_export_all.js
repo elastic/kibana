@@ -102,9 +102,10 @@ const getImportPath = (dir, specifier) => {
  * @param {Parser} parser
  * @param {string} from
  * @param {ExportDeclaration} exportFrom
- * @returns {string[]|undefined}
+ * @param {Set<string>} exportNames
+ * @returns {Set<string>|undefined}
  */
-const getExportNames = (parser, from, exportFrom) => {
+const getExportNames = (parser, from, exportFrom, exportNames = new Set()) => {
   const specifier = ts.isStringLiteral(exportFrom.moduleSpecifier)
     ? exportFrom.moduleSpecifier.text
     : undefined;
@@ -120,39 +121,36 @@ const getExportNames = (parser, from, exportFrom) => {
 
   const sourceFile = parser(importPath);
 
-  /** @type {string[]} */
-  const exportNames = [];
-
   for (const statement of sourceFile.statements) {
     // export function xyz() ...
     if (ts.isFunctionDeclaration(statement) && statement.name && hasExportMod(statement)) {
-      exportNames.push(statement.name.getText());
+      exportNames.add(statement.name.getText());
       continue;
     }
 
     // export const/let foo = ...
     if (ts.isVariableStatement(statement) && hasExportMod(statement)) {
       for (const dec of statement.declarationList.declarations) {
-        exportNames.push(dec.name.getText());
+        exportNames.add(dec.name.getText());
       }
       continue;
     }
 
     // export class xyc
     if (ts.isClassDeclaration(statement) && statement.name && hasExportMod(statement)) {
-      exportNames.push(statement.name.getText());
+      exportNames.add(statement.name.getText());
       continue;
     }
 
     // export interface Foo {...}
     if (ts.isInterfaceDeclaration(statement) && hasExportMod(statement)) {
-      exportNames.push(statement.name.getText());
+      exportNames.add(statement.name.getText());
       continue;
     }
 
     // export type Foo = ...
     if (ts.isTypeAliasDeclaration(statement) && hasExportMod(statement)) {
-      exportNames.push(statement.name.getText());
+      exportNames.add(statement.name.getText());
       continue;
     }
 
@@ -161,20 +159,16 @@ const getExportNames = (parser, from, exportFrom) => {
 
       // export * from '../foo';
       if (!clause) {
-        const childExportNames = getExportNames(parser, sourceFile.fileName, statement);
-        if (!childExportNames) {
+        if (!getExportNames(parser, sourceFile.fileName, statement, exportNames)) {
           // abort if we can't get all the exported names
           return undefined;
-        }
-        for (const n of childExportNames) {
-          exportNames.push(n);
         }
         continue;
       }
 
       // export * as foo from './foo'
       if (ts.isNamespaceExport(clause)) {
-        exportNames.push(clause.name.getText());
+        exportNames.add(clause.name.getText());
         continue;
       }
 
@@ -182,7 +176,7 @@ const getExportNames = (parser, from, exportFrom) => {
       // export { foo as x } from 'other'
       // export { default as foo } from 'other'
       for (const element of clause.elements) {
-        exportNames.push(element.name.getText());
+        exportNames.add(element.name.getText());
       }
       continue;
     }
@@ -218,7 +212,7 @@ module.exports = {
 
         /** @param {Fixer} fixer */
         const fix = (fixer) => {
-          const newClause = `{ ${exportNames.join(', ')}}`;
+          const newClause = `{ ${Array.from(exportNames).join(', ')}}`;
 
           if (tsnode.exportClause && ts.isNamespaceExport(tsnode.exportClause)) {
             return fixer.replaceText(
@@ -235,7 +229,7 @@ module.exports = {
         context.report({
           message: ERROR_MSG,
           loc: node.loc,
-          fix: exportNames?.length ? fix : undefined,
+          fix: exportNames?.size ? fix : undefined,
         });
       },
     };
