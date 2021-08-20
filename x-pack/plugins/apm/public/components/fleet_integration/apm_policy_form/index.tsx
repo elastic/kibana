@@ -8,14 +8,27 @@ import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import {
+  getAgentAuthorizationSettings,
+  isAgentAuthorizationFormValid,
+} from './settings_definition/agent_authorization_settings';
+import {
   getAnonymousSettings,
   isAnonymousAuthFormValid,
-} from './settings/anonymous_auth_settings';
-import { getApmSettings, isAPMFormValid } from './settings/apm_settings';
-import { getRUMSettings, isRUMFormValid } from './settings/rum_settings';
-import { SettingsForm } from './settings/settings_form';
-import { getTLSSettings, isTLSFormValid } from './settings/tls_settings';
-import { mergeNewVars } from './settings/utils';
+} from './settings_definition/anonymous_auth_settings';
+import {
+  getApmSettings,
+  isAPMFormValid,
+} from './settings_definition/apm_settings';
+import {
+  getRUMSettings,
+  isRUMFormValid,
+} from './settings_definition/rum_settings';
+import {
+  getTLSSettings,
+  isTLSFormValid,
+} from './settings_definition/tls_settings';
+import { SettingsForm } from './settings_form';
+import { mergeNewVars } from './settings_form/utils';
 import { PackagePolicyVars } from './typings';
 
 interface Props {
@@ -34,12 +47,14 @@ export function APMPolicyForm({
     rumSettings,
     anonymousAuthSettings,
     tlsSettings,
+    agentAuthorizationSettings,
   } = useMemo(() => {
     return {
       apmSettings: getApmSettings(isCloudPolicy),
       rumSettings: getRUMSettings(),
-      anonymousAuthSettings: getAnonymousSettings(isCloudPolicy),
+      anonymousAuthSettings: getAnonymousSettings(),
       tlsSettings: getTLSSettings(),
+      agentAuthorizationSettings: getAgentAuthorizationSettings(isCloudPolicy),
     };
   }, [isCloudPolicy]);
 
@@ -52,71 +67,81 @@ export function APMPolicyForm({
       isAPMFormValid(newVars, apmSettings) &&
       isRUMFormValid(newVars, rumSettings) &&
       isTLSFormValid(newVars, tlsSettings) &&
-      isAnonymousAuthFormValid(newVars, anonymousAuthSettings);
+      isAnonymousAuthFormValid(newVars, anonymousAuthSettings) &&
+      isAgentAuthorizationFormValid(newVars, agentAuthorizationSettings);
 
     updateAPMPolicy(newVars, isFormValid);
   }
 
+  const settingsDefinition = [
+    {
+      id: 'apm',
+      title: i18n.translate(
+        'xpack.apm.fleet_integration.settings.apm.settings.title',
+        { defaultMessage: 'General' }
+      ),
+      subtitle: i18n.translate(
+        'xpack.apm.fleet_integration.settings.apm.settings.subtitle',
+        { defaultMessage: 'Settings for the APM integration.' }
+      ),
+      settings: apmSettings,
+    },
+    {
+      id: 'rum',
+      title: i18n.translate(
+        'xpack.apm.fleet_integration.settings.rum.settings.title',
+        { defaultMessage: 'Real User Monitoring' }
+      ),
+      subtitle: i18n.translate(
+        'xpack.apm.fleet_integration.settings.rum.settings.subtitle',
+        { defaultMessage: 'Manage the configuration of the RUM JS agent.' }
+      ),
+      settings: rumSettings,
+    },
+    {
+      id: 'tls',
+      title: i18n.translate(
+        'xpack.apm.fleet_integration.settings.tls.settings.title',
+        { defaultMessage: 'TLS Settings' }
+      ),
+      subtitle: i18n.translate(
+        'xpack.apm.fleet_integration.settings.tls.settings.subtitle',
+        { defaultMessage: 'Settings for TLS certification.' }
+      ),
+      settings: tlsSettings,
+    },
+    {
+      id: 'anonymousAuth',
+      title: i18n.translate(
+        'xpack.apm.fleet_integration.settings.anonymousAuth.settings.title',
+        { defaultMessage: 'Anonymous auth' }
+      ),
+      settings: anonymousAuthSettings,
+    },
+    {
+      id: 'agentAuthorization',
+      title: i18n.translate(
+        'xpack.apm.fleet_integration.settings.agentAuthorization.settings.title',
+        { defaultMessage: 'Agent authorization' }
+      ),
+      settings: agentAuthorizationSettings,
+    },
+  ];
+
   return (
     <>
-      {/* APM Settings */}
-      <SettingsForm
-        title={i18n.translate(
-          'xpack.apm.fleet_integration.settings.apm.settings.title',
-          { defaultMessage: 'General' }
-        )}
-        subtitle={i18n.translate(
-          'xpack.apm.fleet_integration.settings.apm.settings.subtitle',
-          { defaultMessage: 'Settings for the APM integration.' }
-        )}
-        settings={apmSettings}
-        vars={vars}
-        onChange={handleFormChange}
-      />
-      <EuiSpacer />
-
-      {/* RUM Settings */}
-      <SettingsForm
-        title={i18n.translate(
-          'xpack.apm.fleet_integration.settings.rum.settings.title',
-          { defaultMessage: 'Real User Monitoring' }
-        )}
-        subtitle={i18n.translate(
-          'xpack.apm.fleet_integration.settings.rum.settings.subtitle',
-          { defaultMessage: 'Manage the configuration of the RUM JS agent.' }
-        )}
-        settings={rumSettings}
-        vars={vars}
-        onChange={handleFormChange}
-      />
-      <EuiSpacer />
-
-      {/* TLS Settings */}
-      <SettingsForm
-        title={i18n.translate(
-          'xpack.apm.fleet_integration.settings.tls.settings.title',
-          { defaultMessage: 'TLS Settings' }
-        )}
-        subtitle={i18n.translate(
-          'xpack.apm.fleet_integration.settings.tls.settings.subtitle',
-          { defaultMessage: 'Settings for TLS certification.' }
-        )}
-        settings={tlsSettings}
-        vars={vars}
-        onChange={handleFormChange}
-      />
-      <EuiSpacer />
-
-      {/* Anonymous auth Settings */}
-      <SettingsForm
-        title={i18n.translate(
-          'xpack.apm.fleet_integration.settings.anonymousAuth.settings.title',
-          { defaultMessage: 'Anonymous auth' }
-        )}
-        settings={anonymousAuthSettings}
-        vars={vars}
-        onChange={handleFormChange}
-      />
+      {settingsDefinition.map(({ id, ...settingDefinition }) => {
+        return (
+          <React.Fragment key={id}>
+            <SettingsForm
+              {...settingDefinition}
+              vars={vars}
+              onChange={handleFormChange}
+            />
+            <EuiSpacer />
+          </React.Fragment>
+        );
+      })}
     </>
   );
 }

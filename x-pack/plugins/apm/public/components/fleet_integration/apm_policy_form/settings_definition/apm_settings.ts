@@ -7,9 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import { getDurationRt } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
 import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_types/integer_rt';
-import { PackagePolicyVars } from '../typings';
-import { SettingDefinition } from './typings';
-import { isSettingsFormValid, OPTIONAL_LABEL, REQUIRED_LABEL } from './utils';
+import { PackagePolicyVars, SettingDefinition } from '../typings';
+import {
+  isSettingsFormValid,
+  OPTIONAL_LABEL,
+  REQUIRED_LABEL,
+} from '../settings_form/utils';
 
 export function getApmSettings(isCloudPolicy: boolean): SettingDefinition[] {
   return [

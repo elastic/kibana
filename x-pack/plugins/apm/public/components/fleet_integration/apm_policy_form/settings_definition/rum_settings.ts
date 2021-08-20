@@ -5,9 +5,8 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { PackagePolicyVars } from '../typings';
-import { SettingDefinition } from './typings';
-import { isSettingsFormValid, OPTIONAL_LABEL } from './utils';
+import { PackagePolicyVars, SettingDefinition } from '../typings';
+import { isSettingsFormValid, OPTIONAL_LABEL } from '../settings_form/utils';
 
 const ENABLE_RUM_KEY = 'enable_rum';
 export function getRUMSettings(): SettingDefinition[] {
@@ -104,7 +103,7 @@ export function getRUMSettings(): SettingDefinition[] {
               type: 'text',
               label: i18n.translate(
                 'xpack.apm.fleet_integration.settings.rum.rumExcludeFromGroupingLabel',
-                { defaultMessage: 'RUM - Exclude from grouping' }
+                { defaultMessage: 'Exclude from grouping' }
               ),
               labelAppend: OPTIONAL_LABEL,
               helpText: i18n.translate(

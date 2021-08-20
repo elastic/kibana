@@ -190,4 +190,24 @@ export const apmConfigMapping: Record<
     name: 'tls_curve_types',
     type: 'text',
   },
+  // 'apm-server.anonymous_enabled': {
+  //   name: 'anonymous_enabled',
+  //   type: 'bool',
+  // },
+  // 'apm-server.anonymous_allow_agent': {
+  //   name: 'anonymous_allow_agent',
+  //   type: 'text',
+  // },
+  // 'apm-server.anonymous_allow_service': {
+  //   name: 'anonymous_allow_service',
+  //   type: 'text',
+  // },
+  // 'apm-server.anonymous_rate_limit_ip_limit': {
+  //   name: 'anonymous_rate_limit_ip_limit',
+  //   type: 'integer',
+  // },
+  // 'apm-server.anonymous_rate_limit_event_limit': {
+  //   name: 'anonymous_rate_limit_event_limit',
+  //   type: 'integer',
+  // },
 };
