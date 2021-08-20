@@ -123,6 +123,7 @@ export const BrandingSection: React.FC<Props> = ({
           <img
             src={`data:image/png;base64,${image || defaultImage}`}
             alt={`${BRAND_TEXT} ${imageType}`}
+            height={32} // Same as icon and logo height in the Search experience
           />
           <EuiSpacer size="m" />
           <EuiFilePicker
