@@ -82,6 +82,7 @@ export const createInitialState = ({
     retryDelay: 0,
     retryAttempts: migrationsConfig.retryAttempts,
     batchSize: migrationsConfig.batchSize,
+    batchSizeBytes: migrationsConfig.batchSizeBytes.getValueInBytes(),
     logs: [],
     unusedTypesQuery: excludeUnusedTypesQuery,
     knownTypes,

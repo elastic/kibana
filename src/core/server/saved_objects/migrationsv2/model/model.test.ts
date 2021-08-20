@@ -58,6 +58,7 @@ describe('migrations v2 model', () => {
     retryDelay: 0,
     retryAttempts: 15,
     batchSize: 1000,
+    batchSizeBytes: 1e8,
     indexPrefix: '.kibana',
     outdatedDocumentsQuery: {},
     targetIndexMappings: {
@@ -1119,16 +1120,19 @@ describe('migrations v2 model', () => {
     });
 
     describe('REINDEX_SOURCE_TO_TEMP_INDEX_BULK', () => {
-      const transformedDocs = [
-        {
-          _id: 'a:b',
-          _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-        },
-      ] as SavedObjectsRawDoc[];
+      const transformedDocBatches = [
+        [
+          {
+            _id: 'a:b',
+            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+          },
+        ],
+      ] as [SavedObjectsRawDoc[]];
       const reindexSourceToTempIndexBulkState: ReindexSourceToTempIndexBulk = {
         ...baseState,
         controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK',
-        transformedDocs,
+        transformedDocBatches,
+        currentBatch: 0,
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         sourceIndexPitId: 'pit_id',
@@ -1438,7 +1442,7 @@ describe('migrations v2 model', () => {
             res
           ) as TransformedDocumentsBulkIndex;
           expect(newState.controlState).toEqual('TRANSFORMED_DOCUMENTS_BULK_INDEX');
-          expect(newState.transformedDocs).toEqual(processedDocs);
+          expect(newState.transformedDocBatches).toEqual([processedDocs]);
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
           expect(newState.progress.processed).toBe(outdatedDocuments.length);
@@ -1521,16 +1525,19 @@ describe('migrations v2 model', () => {
     });
 
     describe('TRANSFORMED_DOCUMENTS_BULK_INDEX', () => {
-      const transformedDocs = [
-        {
-          _id: 'a:b',
-          _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-        },
-      ] as SavedObjectsRawDoc[];
+      const transformedDocBatches = [
+        [
+          {
+            _id: 'a:b',
+            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+          },
+        ],
+      ] as [SavedObjectsRawDoc[]];
       const transformedDocumentsBulkIndexState: TransformedDocumentsBulkIndex = {
         ...baseState,
         controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
-        transformedDocs,
+        transformedDocBatches,
+        currentBatch: 0,
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',

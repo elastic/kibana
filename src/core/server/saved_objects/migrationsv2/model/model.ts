@@ -31,6 +31,7 @@ import {
   throwBadControlState,
   throwBadResponse,
 } from './helpers';
+import { createBatches } from './create_batches';
 
 export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
   // The action response `resW` is weakly typed, the type includes all action
@@ -489,12 +490,22 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
     if (Either.isRight(res)) {
       if (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) {
-        return {
-          ...stateP,
-          controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK', // handles the actual bulk indexing into temp index
-          transformedDocs: [...res.right.processedDocs],
-          progress,
-        };
+        const batches = createBatches(res.right.processedDocs, stateP.batchSizeBytes);
+        if (Either.isRight(batches)) {
+          return {
+            ...stateP,
+            controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK', // handles the actual bulk indexing into temp index
+            transformedDocBatches: batches.right,
+            currentBatch: 0,
+            progress,
+          };
+        } else {
+          return {
+            ...stateP,
+            controlState: 'FATAL',
+            reason: `The document with _id "${batches.left.document._id}" is ${batches.left.docSizeBytes} bytes which exceeds the configured maximum batch size of ${batches.left.batchSizeBytes} bytes. To proceed, please increase the migrations.batchSizeBytes Kibana configuration option and ensure that the Elasticsearch http.max_content_length configuration option is set to an equal or larger value.`,
+          };
+        }
       } else {
         // we don't have any transform issues with the current batch of outdated docs but
         // we have carried through previous transformation issues.
@@ -525,13 +536,21 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
-        // we're still on the happy path with no transformation failures seen.
-        corruptDocumentIds: [],
-        transformErrors: [],
-      };
+      if (stateP.currentBatch + 1 < stateP.transformedDocBatches.length) {
+        return {
+          ...stateP,
+          controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK',
+          currentBatch: stateP.currentBatch + 1,
+        };
+      } else {
+        return {
+          ...stateP,
+          controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
+          // we're still on the happy path with no transformation failures seen.
+          corruptDocumentIds: [],
+          transformErrors: [],
+        };
+      }
     } else {
       if (
         isLeftTypeof(res.left, 'target_index_had_write_block') ||
@@ -677,13 +696,23 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       // we haven't seen corrupt documents or any transformation errors thus far in the migration
       // index the migrated docs
       if (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) {
-        return {
-          ...stateP,
-          controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
-          transformedDocs: [...res.right.processedDocs],
-          hasTransformedDocs: true,
-          progress,
-        };
+        const batches = createBatches(res.right.processedDocs, 1e8);
+        if (Either.isRight(batches)) {
+          return {
+            ...stateP,
+            controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
+            transformedDocBatches: batches.right,
+            currentBatch: 0,
+            hasTransformedDocs: true,
+            progress,
+          };
+        } else {
+          return {
+            ...stateP,
+            controlState: 'FATAL',
+            reason: `The document with _id "${batches.left.document._id}" is ${batches.left.docSizeBytes} bytes which exceeds the configured maximum batch size of ${batches.left.batchSizeBytes} bytes. To proceed, please increase the migrations.batchSizeBytes Kibana configuration option and ensure that the Elasticsearch http.max_content_length configuration option is set to an equal or larger value.`,
+          };
+        }
       } else {
         // We have seen corrupt documents and/or transformation errors
         // skip indexing and go straight to reading and transforming more docs
@@ -711,6 +740,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'TRANSFORMED_DOCUMENTS_BULK_INDEX') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
+      if (stateP.currentBatch < stateP.transformedDocBatches.length) {
+        return {
+          ...stateP,
+          controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
+          currentBatch: stateP.currentBatch + 1,
+        };
+      }
       return {
         ...stateP,
         controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',

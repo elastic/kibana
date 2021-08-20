@@ -12,6 +12,7 @@ import type { ConfigDeprecationProvider } from '../config';
 
 const migrationSchema = schema.object({
   batchSize: schema.number({ defaultValue: 1_000 }),
+  batchSizeBytes: schema.byteSize({ defaultValue: '100mb' }),
   scrollDuration: schema.string({ defaultValue: '15m' }),
   pollInterval: schema.number({ defaultValue: 1_500 }),
   skip: schema.boolean({ defaultValue: false }),
