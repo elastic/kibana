@@ -25,8 +25,7 @@ export const technicalRuleFieldMap = {
   [Fields.ALERT_START]: { type: 'date' },
   [Fields.ALERT_END]: { type: 'date' },
   [Fields.ALERT_DURATION]: { type: 'long' },
-  [Fields.ALERT_SEVERITY_LEVEL]: { type: 'keyword' },
-  [Fields.ALERT_SEVERITY_VALUE]: { type: 'long' },
+  [Fields.ALERT_SEVERITY]: { type: 'keyword' },
   [Fields.ALERT_STATUS]: { type: 'keyword' },
   [Fields.ALERT_EVALUATION_THRESHOLD]: { type: 'scaled_float', scaling_factor: 100 },
   [Fields.ALERT_EVALUATION_VALUE]: { type: 'scaled_float', scaling_factor: 100 },
@@ -91,11 +90,6 @@ export const technicalRuleFieldMap = {
     required: false,
   },
   [Fields.ALERT_RULE_UUID]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_ID]: {
     type: 'keyword',
     array: false,
     required: false,

@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  describe('Upgrade Assistant', () => {
+  // These tests need to be completely refactored to account for new UI
+  describe.skip('Upgrade Assistant', () => {
     before(async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
     });
