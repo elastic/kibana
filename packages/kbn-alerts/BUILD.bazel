@@ -13,8 +13,7 @@ SOURCE_FILES = glob(
   ],
   exclude = [
     "**/*.test.*",
-    "**/*.mock.*",
-    "**/*.mocks.*",
+    "**/__snapshots__"
   ],
 )
 
@@ -26,35 +25,19 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "react/package.json",
   "package.json",
   "README.md",
 ]
 
 RUNTIME_DEPS = [
-  "//packages/kbn-babel-preset",
-  "//packages/kbn-dev-utils",
   "//packages/kbn-i18n",
-  "@npm//@babel/core",
-  "@npm//babel-loader",
   "@npm//@elastic/eui",
   "@npm//react",
-  "@npm//resize-observer-polyfill",
-  "@npm//rxjs",
-  "@npm//tslib",
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-babel-preset",
-  "//packages/kbn-dev-utils",
   "//packages/kbn-i18n",
-  "@npm//@babel/core",
   "@npm//@elastic/eui",
-  "@npm//babel-loader",
-  "@npm//resize-observer-polyfill",
-  "@npm//rxjs",
-  "@npm//tslib",
-  "@npm//typescript",
   "@npm//@types/jest",
   "@npm//@types/node",
   "@npm//@types/react",
@@ -87,7 +70,6 @@ ts_project(
   args = ["--pretty"],
   srcs = SRCS,
   deps = TYPES_DEPS,
-  allow_js = True,
   declaration = True,
   declaration_map = True,
   emit_declaration_only = True,
