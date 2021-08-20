@@ -10,6 +10,7 @@ import { EuiContextMenu, EuiContextMenuPanel, EuiButton, EuiPopover } from '@ela
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 
 import { TimelineEventsDetailsItem, TimelineId } from '../../../../common';
+import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 import { useExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';
 import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_investigate_in_timeline';
@@ -18,7 +19,7 @@ import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kiban
 import { useInsertTimeline } from '../../../cases/components/use_insert_timeline';
 import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
-import { CHANGE_ALERT_STATUS, TAKE_ACTION } from './translations';
+import { CHANGE_ALERT_STATUS } from './translations';
 import { getFieldValue } from '../host_isolation/helpers';
 import type { Ecs } from '../../../../common/ecs';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
