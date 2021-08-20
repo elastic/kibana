@@ -204,7 +204,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   is_preconfigured: true,
                   connector_type_id: '.slack',
                   name: 'Slack#xyz',
-                  referenced_by_count: 1,
+                  referenced_by_count: 0,
                 },
                 {
                   id: 'custom-system-abc-connector',

@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { ApiResponse, estypes } from '@elastic/elasticsearch';
+import { SavedObject } from 'kibana/server';
 import { Spaces } from '../../scenarios';
 import {
   checkAAD,
@@ -17,6 +18,7 @@ import {
   TaskManagerDoc,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { RawAlert } from '../../../../../plugins/alerting/server/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertTests({ getService }: FtrProviderContext) {
@@ -112,6 +114,112 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         spaceId: Spaces.space1.id,
         type: 'alert',
         id: response.body.id,
+      });
+    });
+
+    it('should store references correctly for actions', async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          connector_type_id: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+              {
+                id: 'my-slack1',
+                group: 'default',
+                params: {
+                  message: 'something important happened!',
+                },
+              },
+            ],
+          })
+        );
+
+      expect(response.status).to.eql(200);
+      objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+      expect(response.body).to.eql({
+        id: response.body.id,
+        name: 'abc',
+        tags: ['foo'],
+        actions: [
+          {
+            id: createdAction.id,
+            connector_type_id: createdAction.connector_type_id,
+            group: 'default',
+            params: {},
+          },
+          {
+            id: 'my-slack1',
+            group: 'default',
+            connector_type_id: '.slack',
+            params: {
+              message: 'something important happened!',
+            },
+          },
+        ],
+        enabled: true,
+        rule_type_id: 'test.noop',
+        consumer: 'alertsFixture',
+        params: {},
+        created_by: null,
+        schedule: { interval: '1m' },
+        scheduled_task_id: response.body.scheduled_task_id,
+        updated_by: null,
+        api_key_owner: null,
+        throttle: '1m',
+        notify_when: 'onThrottleInterval',
+        mute_all: false,
+        muted_alert_ids: [],
+        created_at: response.body.created_at,
+        updated_at: response.body.updated_at,
+        execution_status: response.body.execution_status,
+      });
+
+      const esResponse = await es.get<SavedObject<RawAlert>>({
+        index: '.kibana',
+        id: `${Spaces.space1.id}:alert:${response.body.id}`,
+      });
+      expect(esResponse.statusCode).to.eql(200);
+      const rawActions = (esResponse.body._source as any)?.alert.actions ?? [];
+      expect(rawActions).to.eql([
+        {
+          actionRef: 'action_0',
+          actionTypeId: 'test.noop',
+          group: 'default',
+          params: {},
+        },
+        {
+          actionRef: 'preconfigured:my-slack1',
+          actionTypeId: '.slack',
+          group: 'default',
+          params: {
+            message: 'something important happened!',
+          },
+        },
+      ]);
+
+      const references = esResponse.body._source?.references ?? [];
+      expect(references.length).to.eql(1);
+      expect(references[0]).to.eql({
+        id: createdAction.id,
+        name: 'action_0',
+        type: 'action',
       });
     });
 
