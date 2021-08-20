@@ -36,8 +36,8 @@ describe('Overview - Upgrade Step', () => {
           servicesOverrides: {
             cloud: {
               isCloudEnabled: true,
-              baseUrl: 'https://test.com',
-              cloudId: '1234',
+              deploymentUrl:
+                'https://cloud.elastic.co./deployments/bfdad4ef99a24212a06d387593686d63',
             },
           },
         });
@@ -49,7 +49,9 @@ describe('Overview - Upgrade Step', () => {
       expect(exists('upgradeSetupCloudLink')).toBe(true);
       expect(exists('upgradeSetupDocsLink')).toBe(true);
 
-      expect(find('upgradeSetupCloudLink').props().href).toBe('https://test.com/deployments/1234');
+      expect(find('upgradeSetupCloudLink').props().href).toBe(
+        'https://cloud.elastic.co./deployments/bfdad4ef99a24212a06d387593686d63'
+      );
     });
   });
 });
