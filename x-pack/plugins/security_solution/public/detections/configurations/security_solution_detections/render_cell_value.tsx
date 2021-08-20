@@ -31,6 +31,9 @@ export const RenderCellValue: React.FC<
   rowIndex,
   setCellProps,
   timelineId,
+  ecsData,
+  rowRenderers,
+  browserFields,
 }) => (
   <DefaultCellRenderer
     columnId={columnId}
@@ -45,5 +48,8 @@ export const RenderCellValue: React.FC<
     rowIndex={rowIndex}
     setCellProps={setCellProps}
     timelineId={timelineId}
+    ecsData={ecsData}
+    rowRenderers={rowRenderers}
+    browserFields={browserFields}
   />
 );

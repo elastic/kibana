@@ -6,6 +6,7 @@
  */
 import expect from '@kbn/expect';
 
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import {
   superUser,
   globalRead,
@@ -26,6 +27,7 @@ import {
   secOnlySpacesAll,
   noKibanaPrivileges,
 } from '../../../common/lib/authentication/users';
+
 import type { User } from '../../../common/lib/authentication/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
@@ -56,7 +58,6 @@ export default ({ getService }: FtrProviderContext) => {
   const APM_ALERT_INDEX = '.alerts-observability-apm';
   const SECURITY_SOLUTION_ALERT_ID = '020202';
   const SECURITY_SOLUTION_ALERT_INDEX = '.alerts-security.alerts';
-  // const ALERT_VERSION = Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'); // required for optimistic concurrency control
 
   const getAPMIndexName = async (user: User) => {
     const {
@@ -80,10 +81,10 @@ export default ({ getService }: FtrProviderContext) => {
       .auth(user.username, user.password)
       .set('kbn-xsrf', 'true')
       .expect(200);
-    const securitySolution = indexNames?.index_name?.find(
-      (indexName) => indexName === SECURITY_SOLUTION_ALERT_INDEX
+    const securitySolution = indexNames?.index_name?.find((indexName) =>
+      indexName.startsWith(SECURITY_SOLUTION_ALERT_INDEX)
     );
-    expect(securitySolution).to.eql(SECURITY_SOLUTION_ALERT_INDEX); // assert this here so we can use constants in the dynamically-defined test cases below
+    expect(securitySolution).to.eql(`${SECURITY_SOLUTION_ALERT_INDEX}-${SPACE1}`); // assert this here so we can use constants in the dynamically-defined test cases below
   };
 
   describe('Alert - Bulk Update - RBAC - spaces', () => {
@@ -119,14 +120,30 @@ export default ({ getService }: FtrProviderContext) => {
           items.map((item) => expect(item.update.result).to.eql('updated'));
         });
 
-        it(`${username} should bulk update alerts which match query in ${space}/${index}`, async () => {
+        it(`${username} should bulk update alerts which match KQL query string in ${space}/${index}`, async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts'); // since this is a success case, reload the test data immediately beforehand
           const { body: updated } = await supertestWithoutAuth
             .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/bulk_update`)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .send({
               status: 'closed',
-              query: 'kibana.alert.status: open',
+              query: `${ALERT_WORKFLOW_STATUS}: open`,
+              index,
+            });
+          expect(updated.statusCode).to.eql(200);
+          expect(updated.body.updated).to.greaterThan(0);
+        });
+
+        it(`${username} should bulk update alerts which match query in DSL in ${space}/${index}`, async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts'); // since this is a success case, reload the test data immediately beforehand
+          const { body: updated } = await supertestWithoutAuth
+            .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/bulk_update`)
+            .auth(username, password)
+            .set('kbn-xsrf', 'true')
+            .send({
+              status: 'closed',
+              query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
               index,
             });
           expect(updated.statusCode).to.eql(200);

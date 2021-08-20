@@ -23,6 +23,7 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 import { inputsModel } from '../../store/inputs';
 import { TimelineId, SortDirection } from '../../../../common/types/timeline';
 import { KqlMode } from '../../../timelines/store/timeline/model';
+import { EntityType } from '../../../../../timelines/common';
 import { AlertsTableFilterGroup } from '../../../detections/components/alerts_table/alerts_filter_group';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
@@ -30,8 +31,44 @@ import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell
 import { useTimelineEvents } from '../../../timelines/containers';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
+import { mockTimelines } from '../../mock/mock_timelines_plugin';
 
-jest.mock('../../lib/kibana');
+jest.mock('@kbn/alerts', () => ({
+  useGetUserAlertsPermissions: () => ({
+    loading: false,
+    crud: true,
+    read: true,
+  }),
+}));
+
+jest.mock('../../lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        navigateToApp: jest.fn(),
+        getUrlForApp: jest.fn(),
+        capabilities: {
+          siem: { crud_alerts: true, read_alerts: true },
+        },
+      },
+      uiSettings: {
+        get: jest.fn(),
+      },
+      savedObjects: {
+        client: {},
+      },
+      timelines: { ...mockTimelines },
+    },
+  }),
+  useToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+  }),
+  useGetUserCasesPermissions: jest.fn(),
+  useDateFormat: jest.fn(),
+  useTimeZone: jest.fn(),
+}));
 
 jest.mock('../../hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -94,6 +131,7 @@ const eventsViewerDefaultProps = {
   deletedEventIds: [],
   docValueFields: [],
   end: to,
+  entityType: EntityType.ALERTS,
   filters: [],
   id: TimelineId.detectionsPage,
   indexNames: mockIndexNames,
@@ -128,6 +166,7 @@ describe('EventsViewer', () => {
     defaultCellActions,
     defaultModel: eventsDefaultModel,
     end: to,
+    entityType: EntityType.ALERTS,
     id: TimelineId.test,
     renderCellValue: DefaultCellRenderer,
     rowRenderers: defaultRowRenderers,
@@ -309,7 +348,9 @@ describe('EventsViewer', () => {
           <EventsViewer
             {...eventsViewerDefaultProps}
             graphEventId={undefined}
-            headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+            headerFilterGroup={
+              <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />
+            }
           />
         </TestProviders>
       );
@@ -322,7 +363,9 @@ describe('EventsViewer', () => {
           <EventsViewer
             {...eventsViewerDefaultProps}
             graphEventId={undefined}
-            headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+            headerFilterGroup={
+              <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />
+            }
           />
         </TestProviders>
       );
@@ -337,7 +380,9 @@ describe('EventsViewer', () => {
           <EventsViewer
             {...eventsViewerDefaultProps}
             graphEventId=""
-            headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+            headerFilterGroup={
+              <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />
+            }
           />
         </TestProviders>
       );
@@ -352,7 +397,9 @@ describe('EventsViewer', () => {
           <EventsViewer
             {...eventsViewerDefaultProps}
             graphEventId="a valid id"
-            headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+            headerFilterGroup={
+              <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />
+            }
           />
         </TestProviders>
       );
@@ -367,7 +414,9 @@ describe('EventsViewer', () => {
           <EventsViewer
             {...eventsViewerDefaultProps}
             graphEventId="a valid id"
-            headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+            headerFilterGroup={
+              <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />
+            }
           />
         </TestProviders>
       );

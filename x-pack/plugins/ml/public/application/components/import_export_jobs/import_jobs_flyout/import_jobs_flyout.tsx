@@ -47,6 +47,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
   const {
     jobs: { bulkCreateJobs },
     dataFrameAnalytics: { createDataFrameAnalytics },
+    filters: { filters: getFilters },
   } = useMlApiContext();
   const {
     services: {
@@ -130,7 +131,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       const validatedJobs = await jobImportService.validateJobs(
         loadedFile.jobs,
         loadedFile.jobType,
-        getIndexPatternTitles
+        getIndexPatternTitles,
+        getFilters
       );
 
       if (loadedFile.jobType === 'anomaly-detector') {
@@ -195,8 +197,10 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
     const results = await bulkCreateJobs(jobs);
     let successCount = 0;
     const errors: ErrorType[] = [];
+    const failedJobIds = new Set();
     Object.entries(results).forEach(([jobId, { job, datafeed }]) => {
       if (job.error || datafeed.error) {
+        failedJobIds.add(jobId);
         if (job.error) {
           errors.push(job.error);
         }
@@ -212,7 +216,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       displayImportSuccessToast(successCount);
     }
     if (errors.length > 0) {
-      displayImportErrorToast(errors);
+      displayImportErrorToast(errors, failedJobIds.size);
+      mlUsageCollection.count('import_failed_anomaly_detector_jobs', failedJobIds.size);
     }
   }, []);
 
@@ -232,7 +237,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       displayImportSuccessToast(successCount);
     }
     if (errors.length > 0) {
-      displayImportErrorToast(errors);
+      displayImportErrorToast(errors, errors.length);
+      mlUsageCollection.count('import_failed_data_frame_analytics_jobs', errors.length);
     }
   }, []);
 
@@ -244,10 +250,10 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
     displaySuccessToast(title);
   }, []);
 
-  const displayImportErrorToast = useCallback((errors: ErrorType[]) => {
+  const displayImportErrorToast = useCallback((errors: ErrorType[], failureCount: number) => {
     const title = i18n.translate('xpack.ml.importExport.importFlyout.importJobErrorToast', {
       defaultMessage: '{count, plural, one {# job} other {# jobs}} failed to import correctly',
-      values: { count: errors.length },
+      values: { count: failureCount },
     });
 
     const errorList = errors.map(extractErrorProperties);
@@ -499,7 +505,7 @@ const FlyoutButton: FC<{ isDisabled: boolean; onClick(): void }> = ({ isDisabled
       iconType="importAction"
       onClick={onClick}
       isDisabled={isDisabled}
-      data-test-subj="mlJobWizardButtonPreviewJobJson"
+      data-test-subj="mlJobsImportButton"
     >
       <FormattedMessage id="xpack.ml.importExport.importButton" defaultMessage="Import jobs" />
     </EuiButtonEmpty>

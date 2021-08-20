@@ -27,7 +27,7 @@ export const runTaskFnFactory: RunTaskFnFactory<
     const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest, logger);
     const { asCurrentUser: elasticsearchClient } = elasticsearch.asScoped(fakeRequest);
 
-    const { maxSizeReached, size, csvContainsFormulas, warnings } = await generateCsv(
+    const { maxSizeReached, csvContainsFormulas, warnings } = await generateCsv(
       job,
       config,
       uiSettingsClient,
@@ -40,7 +40,6 @@ export const runTaskFnFactory: RunTaskFnFactory<
     return {
       content_type: CONTENT_TYPE_CSV,
       max_size_reached: maxSizeReached,
-      size,
       csv_contains_formulas: csvContainsFormulas,
       warnings,
     };

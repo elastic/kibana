@@ -346,7 +346,7 @@ describe('ExecutionContextService', () => {
             id: 'id-a',
             description: 'description-a',
           },
-          (i) => i
+          () => null
         );
         expect(loggingSystemMock.collect(core.logger).debug).toMatchInlineSnapshot(`
                   Array [
@@ -378,6 +378,26 @@ describe('ExecutionContextService', () => {
 
         expect(result).toBeUndefined();
       });
+      it('executes provided function when disabled', async () => {
+        const coreWithDisabledService = mockCoreContext.create();
+        coreWithDisabledService.configService.atPath.mockReturnValue(
+          new BehaviorSubject({ enabled: false })
+        );
+        const disabledService = new ExecutionContextService(coreWithDisabledService).setup();
+        const fn = jest.fn();
+
+        disabledService.withContext(
+          {
+            type: 'type-b',
+            name: 'name-b',
+            id: 'id-b',
+            description: 'description-b',
+          },
+          fn
+        );
+
+        expect(fn).toHaveBeenCalledTimes(1);
+      });
     });
 
     describe('getAsHeader', () => {
@@ -385,6 +405,21 @@ describe('ExecutionContextService', () => {
         service.setRequestId('1234');
 
         expect(service.getAsHeader()).toBe('1234');
+      });
+
+      it('falls back to "unknownId" if no id provided', async () => {
+        expect(service.getAsHeader()).toBe('unknownId');
+      });
+
+      it('falls back to "unknownId" and context if no id provided', async () => {
+        service.set({
+          type: 'type-a',
+          name: 'name-a',
+          id: 'id-a',
+          description: 'description-a',
+        });
+
+        expect(service.getAsHeader()).toBe('unknownId;kibana:type-a:name-a:id-a');
       });
 
       it('returns request id and registered context', async () => {

@@ -8,7 +8,7 @@
 import React, { Fragment } from 'react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import { AlertPanel } from '../panel';
-import { ALERT_PANEL_MENU } from '../../../common/constants';
+import { RULE_PANEL_MENU } from '../../../common/constants';
 import { getDateFromNow, getCalendar } from '../../../common/formatting';
 import {
   AlertState,
@@ -22,7 +22,7 @@ import { Legacy } from '../../legacy_shims';
 
 interface MenuAlert {
   alert: CommonAlert;
-  alertName: string;
+  ruleName: string;
   states: CommonAlertState[];
 }
 interface MenuItem {
@@ -36,13 +36,13 @@ export function getAlertPanelsByCategory(
   alerts: CommonAlertStatus[],
   stateFilter: (state: AlertState) => boolean
 ) {
-  // return items organized by categories in ALERT_PANEL_MENU
+  // return items organized by categories in RULE_PANEL_MENU
   // only show rules in setup mode
   const menu = inSetupMode
-    ? ALERT_PANEL_MENU.reduce<MenuItem[]>((acc, category) => {
+    ? RULE_PANEL_MENU.reduce<MenuItem[]>((acc, category) => {
         // check if we have any rules with that match this category
-        const alertsInCategory = category.alerts.filter((alert) =>
-          alerts.find(({ rawAlert }) => rawAlert.alertTypeId === alert.alertName)
+        const alertsInCategory = category.rules.filter((rule) =>
+          alerts.find(({ sanitizedRule }) => sanitizedRule.alertTypeId === rule.ruleName)
         );
         // return all the categories that have rules and the rules
         if (alertsInCategory.length > 0) {
@@ -51,14 +51,14 @@ export function getAlertPanelsByCategory(
             ...category,
             // add the corresponding rules that belong to this category
             alerts: alertsInCategory
-              .map(({ alertName }) => {
+              .map(({ ruleName }) => {
                 return alerts
-                  .filter(({ rawAlert }) => rawAlert.alertTypeId === alertName)
+                  .filter(({ sanitizedRule }) => sanitizedRule.alertTypeId === ruleName)
                   .map((alert) => {
                     return {
-                      alert: alert.rawAlert,
+                      alert: alert.sanitizedRule,
                       states: [],
-                      alertName,
+                      ruleName,
                     };
                   });
               })
@@ -68,13 +68,14 @@ export function getAlertPanelsByCategory(
         }
         return acc;
       }, [])
-    : ALERT_PANEL_MENU.reduce<MenuItem[]>((acc, category) => {
-        // return items organized by categories in ALERT_PANEL_MENU, then rule name, then the actual alerts
+    : RULE_PANEL_MENU.reduce<MenuItem[]>((acc, category) => {
+        // return items organized by categories in RULE_PANEL_MENU, then rule name, then the actual alerts
         const firingAlertsInCategory: MenuAlert[] = [];
         let categoryFiringAlertCount = 0;
-        for (const { alertName } of category.alerts) {
+        for (const { ruleName } of category.rules) {
           const foundAlerts = alerts.filter(
-            ({ rawAlert, states }) => alertName === rawAlert.alertTypeId && states.length > 0
+            ({ sanitizedRule, states }) =>
+              ruleName === sanitizedRule.alertTypeId && states.length > 0
           );
           if (foundAlerts.length > 0) {
             foundAlerts.forEach((foundAlert) => {
@@ -82,9 +83,9 @@ export function getAlertPanelsByCategory(
               const states = foundAlert.states.filter(({ state }) => stateFilter(state));
               if (states.length > 0) {
                 firingAlertsInCategory.push({
-                  alert: foundAlert.rawAlert,
+                  alert: foundAlert.sanitizedRule,
                   states,
-                  alertName,
+                  ruleName,
                 });
                 categoryFiringAlertCount += states.length;
               }
@@ -169,7 +170,7 @@ export function getAlertPanelsByCategory(
       panels.push({
         id: nodeIndex + 1,
         title: `${category.label}`,
-        items: category.alerts.map(({ alert, alertName, states }) => {
+        items: category.alerts.map(({ alert, ruleName, states }) => {
           const filteredStates = states.filter(({ state }) => stateFilter(state));
           const name = inSetupMode ? (
             <EuiText>{alert.name}</EuiText>
