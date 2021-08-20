@@ -102,9 +102,10 @@ interface OwnProps {
   totalPages: number;
   trailingControlColumns?: ControlColumnProps[];
   unit?: (total: number) => React.ReactNode;
+  hasAlertsCrud?: boolean;
 }
 
-const basicUnit = (n: number) => i18n.UNIT(n);
+const defaultUnit = (n: number) => i18n.ALERTS_UNIT(n);
 const NUM_OF_ICON_IN_TIMELINE_ROW = 2;
 
 export const hasAdditionalActions = (id: TimelineId): boolean =>
@@ -272,7 +273,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     totalItems,
     totalPages,
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
-    unit = basicUnit,
+    unit = defaultUnit,
+    hasAlertsCrud,
   }) => {
     const dispatch = useDispatch();
     const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
@@ -337,6 +339,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     }, [bulkActions]);
 
     const showBulkActions = useMemo(() => {
+      if (!hasAlertsCrud) {
+        return false;
+      }
+
       if (selectedCount === 0 || !showCheckboxes) {
         return false;
       }
@@ -344,7 +350,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         return bulkActions;
       }
       return bulkActions.alertStatusActions ?? true;
-    }, [selectedCount, showCheckboxes, bulkActions]);
+    }, [hasAlertsCrud, selectedCount, showCheckboxes, bulkActions]);
 
     const alertToolbar = useMemo(
       () => (
@@ -666,7 +672,10 @@ const makeMapStateToProps = () => {
   ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
   const getTGrid = tGridSelectors.getTGridByIdSelector();
-  const mapStateToProps = (state: TimelineState, { browserFields, id }: OwnProps) => {
+  const mapStateToProps = (
+    state: TimelineState,
+    { browserFields, id, hasAlertsCrud }: OwnProps
+  ) => {
     const timeline: TGridModel = getTGrid(state, id);
     const {
       columns,
@@ -685,7 +694,7 @@ const makeMapStateToProps = () => {
       loadingEventIds,
       id,
       selectedEventIds,
-      showCheckboxes,
+      showCheckboxes: hasAlertsCrud === true && showCheckboxes,
       sort,
     };
   };
