@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, PropsWithChildren } from 'react';
+import styled from 'styled-components';
+import { CommonProps } from '@elastic/eui';
 
-export const OutputHistory = memo(() => {
-  return <div>history output here</div>;
+const OutputHistoryContainer = styled.div`
+  height: 100%;
+`;
+
+export type OutputHistoryProps = CommonProps & PropsWithChildren<{}>;
+
+export const OutputHistory = memo<OutputHistoryProps>(({ children, ...otherProps }) => {
+  return <OutputHistoryContainer {...otherProps}>{children}</OutputHistoryContainer>;
 });
+
+OutputHistory.displayName = 'OutputHistory';

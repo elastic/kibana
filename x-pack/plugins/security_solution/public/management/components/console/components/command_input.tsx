@@ -6,8 +6,13 @@
  */
 
 import React, { memo } from 'react';
+import { CommonProps } from '@elastic/eui';
 
-export const CommandInput = memo(() => {
+export interface CommandInputProps extends CommonProps {
+  prompt?: string;
+}
+
+export const CommandInput = memo<CommandInputProps>(() => {
   return <div>input here</div>;
 });
 
