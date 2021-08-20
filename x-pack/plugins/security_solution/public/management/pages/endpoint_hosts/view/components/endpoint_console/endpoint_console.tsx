@@ -21,3 +21,5 @@ export const EndpointConsole = memo<EndpointConsoleProps>(() => {
 });
 
 EndpointConsole.displayName = 'EndpointConsole';
+
+const e = <EndpointConsole />;

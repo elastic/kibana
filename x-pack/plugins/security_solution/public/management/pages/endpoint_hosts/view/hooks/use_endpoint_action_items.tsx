@@ -132,8 +132,9 @@ export const useEndpointActionItems = (
           href: '/',
           onClick: (ev) => {
             ev.preventDefault();
-            consoleManagement.openConsole(<EndpointConsole endpoint={endpointId} />, {
+            consoleManagement.openConsole(endpointId, {
               title: endpointHostName,
+              console: <EndpointConsole endpoint={endpointId} />,
             });
           },
           children: (

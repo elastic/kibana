@@ -6,13 +6,12 @@
  */
 
 import React, { memo, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
-import { EuiModal, EuiModalBody } from '@elastic/eui';
-import { ConsoleProviderComponent } from '../console';
+import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 
 interface ConsoleManagement {
-  openConsole(console: ConsoleProviderComponent, options: { title: ReactNode }): void;
-  hideConsole(console: ConsoleProviderComponent): void;
-  closeConsole(console: ConsoleProviderComponent): void;
+  openConsole(id: string, options: { title: ReactNode; console: JSX.Element }): void;
+  hideConsole(id: string): void;
+  closeConsole(id: string): void;
 }
 
 const RunningConsoleManagementContext = React.createContext<ConsoleManagement | null>(null);
@@ -22,21 +21,35 @@ const RunningConsoleManagementContext = React.createContext<ConsoleManagement | 
  */
 export const RunningConsoleManagementProvider = memo(({ children }) => {
   const [consoles, setConsoles] = useState<
-    Map<ConsoleProviderComponent, { show: boolean; title: ReactNode }>
-  >(new Map());
-  const openConsole = useCallback<ConsoleManagement['openConsole']>((console, options) => {
+    Record<string, { show: boolean; title: ReactNode; console: JSX.Element }>
+  >({});
+
+  const openConsole = useCallback<ConsoleManagement['openConsole']>((id, options) => {
     setConsoles((prevState) => {
-      const newState = new Map(prevState);
-      newState.set(console, {
-        ...(prevState.get(console) || { show: true, title: '' }),
+      const newState = { ...prevState };
+      newState[id] = {
+        ...(prevState[id] || { show: true, title: '', console: options.console }),
         ...options,
         ...{ show: true },
-      });
+      };
       return newState;
     });
   }, []);
-  const hideConsole = useCallback(() => {}, []);
-  const closeConsole = useCallback(() => {}, []);
+
+  const hideConsole = useCallback<ConsoleManagement['hideConsole']>((id) => {
+    setConsoles((prevState) => {
+      if (prevState[id] && prevState[id].show) {
+        return {
+          ...prevState,
+          ...{ [id]: { ...prevState[id], show: false } },
+        };
+      }
+
+      return prevState;
+    });
+  }, []);
+
+  const closeConsole = useCallback<ConsoleManagement['closeConsole']>(() => {}, []);
 
   const consoleManagement = useMemo(() => {
     return {
@@ -49,10 +62,15 @@ export const RunningConsoleManagementProvider = memo(({ children }) => {
   const visibleConsoles = useMemo(() => {
     const dialogs = [];
 
-    for (const [console, options] of consoles.entries()) {
-      if (options.show) {
+    for (const [id, { show, console, title }] of Object.entries(consoles)) {
+      if (show) {
         dialogs.push(
-          <EuiModal onClose={() => {}}>
+          <EuiModal onClose={() => hideConsole(id)}>
+            <EuiModalHeader>
+              <EuiModalHeaderTitle>
+                <h1>{title}</h1>
+              </EuiModalHeaderTitle>
+            </EuiModalHeader>
             <EuiModalBody>{console}</EuiModalBody>
           </EuiModal>
         );
