@@ -25,38 +25,22 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "react/package.json",
   "package.json",
   "README.md",
 ]
 
 RUNTIME_DEPS = [
-  "//packages/kbn-babel-preset",
-  "//packages/kbn-dev-utils",
-  "//packages/kbn-i18n",
-  "@npm//@babel/core",
-  "@npm//babel-loader",
-  "@npm//enzyme",
   "@npm//jest",
   "@npm//lodash",
-  "@npm//react",
   "@npm//react-beautiful-dnd",
   "@npm//tslib",
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-babel-preset",
-  "//packages/kbn-dev-utils",
-  "//packages/kbn-i18n",
-  "@npm//@babel/core",
-  "@npm//babel-loader",
   "@npm//tslib",
-  "@npm//typescript",
-  "@npm//@types/enzyme",
   "@npm//@types/jest",
   "@npm//@types/lodash",
   "@npm//@types/node",
-  "@npm//@types/react",
   "@npm//@types/react-beautiful-dnd",
 ]
 
