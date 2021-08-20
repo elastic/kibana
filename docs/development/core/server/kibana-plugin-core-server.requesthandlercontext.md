@@ -6,7 +6,7 @@
 
 Plugin specific context passed to a route handler.
 
-Provides the following clients and services: - [savedObjects.client](./kibana-plugin-core-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [savedObjects.typeRegistry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) - Type registry containing all the registered types. - [elasticsearch.client](./kibana-plugin-core-server.iscopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request -  - The legacy Elasticsearch data client which uses the credentials of the incoming request - [uiSettings.client](./kibana-plugin-core-server.iuisettingsclient.md) - uiSettings client which uses the credentials of the incoming request
+Provides the following clients and services: - [savedObjects.client](./kibana-plugin-core-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [savedObjects.typeRegistry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) - Type registry containing all the registered types. - [elasticsearch.client](./kibana-plugin-core-server.iscopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request - [uiSettings.client](./kibana-plugin-core-server.iuisettingsclient.md) - uiSettings client which uses the credentials of the incoming request
 
 <b>Signature:</b>
 
