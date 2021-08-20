@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.bazel.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "declarationDir": "./target_types",
+    "outDir": "target_node",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "sourceRoot": "../../../../packages/kbn-alerts/src",
+    "rootDir": "src",
+    "types": ["jest", "node", "resize-observer-polyfill"]
+  },
+  "include": ["src/**/*"]
+}
