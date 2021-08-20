@@ -54,7 +54,6 @@ interface SecureSavedObjectsClientWrapperOptions {
   baseClient: SavedObjectsClientContract;
   errors: SavedObjectsClientContract['errors'];
   checkSavedObjectsPrivilegesAsCurrentUser: CheckSavedObjectsPrivileges;
-
   getSpacesService(): SpacesService | undefined;
 }
 
