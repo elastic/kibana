@@ -204,26 +204,54 @@ describe('<UseField />', () => {
 
   describe('validation', () => {
     let formHook: FormHook | null = null;
+    let fieldHook: FieldHook | null = null;
 
     beforeEach(() => {
       formHook = null;
+      fieldHook = null;
     });
 
     const onFormHook = (form: FormHook) => {
       formHook = form;
     };
 
+    const onFieldHook = (field: FieldHook) => {
+      fieldHook = field;
+    };
+
     const getTestComp = (fieldConfig: FieldConfig) => {
-      const TestComp = ({ onForm }: { onForm: (form: FormHook) => void }) => {
+      const TestComp = () => {
         const { form } = useForm<any>();
+        const [isFieldActive, setIsFieldActive] = useState(true);
+
+        const unmountField = () => {
+          setIsFieldActive(false);
+        };
 
         useEffect(() => {
-          onForm(form);
-        }, [onForm, form]);
+          onFormHook(form);
+        }, [form]);
 
         return (
           <Form form={form}>
-            <UseField path="name" config={fieldConfig} data-test-subj="myField" />
+            {isFieldActive && (
+              <UseField path="name" config={fieldConfig}>
+                {(field) => {
+                  onFieldHook(field);
+
+                  return (
+                    <input
+                      value={field.value as string}
+                      onChange={field.onChange}
+                      data-test-subj="myField"
+                    />
+                  );
+                }}
+              </UseField>
+            )}
+            <button onClick={unmountField} data-test-subj="unmountFieldBtn">
+              Unmount field
+            </button>
           </Form>
         );
       };
@@ -233,7 +261,6 @@ describe('<UseField />', () => {
     const setup = (fieldConfig: FieldConfig) => {
       return registerTestBed(getTestComp(fieldConfig), {
         memoryRouter: { wrapComponent: false },
-        defaultProps: { onForm: onFormHook },
       })() as TestBed;
     };
 
@@ -286,6 +313,59 @@ describe('<UseField />', () => {
 
       ({ isValid } = formHook);
       expect(isValid).toBe(false);
+    });
+
+    test('should not update the state if the field has unmounted while validating', async () => {
+      const fieldConfig: FieldConfig = {
+        validations: [
+          {
+            validator: () => {
+              // The validation will return its value after 5s
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  resolve({ message: 'Invalid field' });
+                }, 5000);
+              });
+            },
+          },
+        ],
+      };
+
+      const {
+        find,
+        form: { setInputValue },
+      } = setup(fieldConfig);
+
+      expect(fieldHook?.isValidating).toBe(false);
+
+      // Trigger validation...
+      await act(async () => {
+        setInputValue('myField', 'changedValue');
+      });
+
+      expect(fieldHook?.isValidating).toBe(true);
+
+      // Unmount the field
+      await act(async () => {
+        find('unmountFieldBtn').simulate('click');
+      });
+
+      const originalConsoleError = console.error; // eslint-disable-line no-console
+      const spyConsoleError = jest.fn((message) => {
+        originalConsoleError(message);
+      });
+      console.error = spyConsoleError; // eslint-disable-line no-console
+
+      // Move the timer to resolve the validator
+      await act(async () => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      // The test should not display any warning
+      // "Can't perform a React state update on an unmounted component."
+      expect(spyConsoleError.mock.calls.length).toBe(0);
+
+      console.error = originalConsoleError; // eslint-disable-line no-console
     });
 
     describe('dynamic data', () => {

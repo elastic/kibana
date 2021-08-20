@@ -398,7 +398,7 @@ export const useField = <T, FormType = FormData, I = T>(
       const validateIteration = ++validateCounter.current;
 
       const onValidationResult = (_validationErrors: ValidationError[]): FieldValidateResponse => {
-        if (validateIteration === validateCounter.current) {
+        if (validateIteration === validateCounter.current && isMounted.current) {
           // This is the most recent invocation
           setValidating(false);
           // Update the errors array
