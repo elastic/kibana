@@ -101,7 +101,9 @@ export const fetchFailedTransactionsCorrelationPValues = async (
       // Percentage of time the term appears in failed transactions
       failurePercentage: bucket.doc_count / overallResult.doc_count,
       // Percentage of time the term appears in successful transactions
-      successPercentage: bucket.bg_count / overallResult.bg_count,
+      successPercentage:
+        (bucket.bg_count - bucket.doc_count) /
+        (overallResult.bg_count - overallResult.doc_count),
     };
   });
 

@@ -16,13 +16,13 @@ import {
   EuiTitle,
   EuiBetaBadge,
   EuiBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { orderBy } from 'lodash';
 import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
-import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { CorrelationsTable } from './correlations_table';
@@ -44,6 +44,7 @@ import { CorrelationsProgressControls } from './progress_controls';
 import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 import type { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
 import { Summary } from '../../shared/Summary';
+import { asPercent } from '../../../../common/utils/formatters';
 
 export function FailedTransactionsCorrelations({
   onFilter,
@@ -130,36 +131,75 @@ export function FailedTransactionsCorrelations({
     EuiBasicTableColumn<FailedTransactionsCorrelationValue>
   > = useMemo(() => {
     const percentageColumns: Array<
-      EuiTableComputedColumnType<FailedTransactionsCorrelationValue>
+      EuiBasicTableColumn<FailedTransactionsCorrelationValue>
     > = inspectEnabled
       ? [
           {
+            width: '100px',
+            field: 'failurePercentage',
             name: (
-              <>
-                {i18n.translate(
-                  'xpack.apm.correlations.failedTransactions.correlationsTable.failurePercentageLabel',
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.apm.correlations.failedTransactions.correlationsTable.failurePercentageDescription',
                   {
-                    defaultMessage: 'Failure %',
+                    defaultMessage:
+                      'Percentage of time the term appear in failed transactions.',
                   }
                 )}
-              </>
+              >
+                <>
+                  {i18n.translate(
+                    'xpack.apm.correlations.failedTransactions.correlationsTable.failurePercentageLabel',
+                    {
+                      defaultMessage: 'Failure %',
+                    }
+                  )}
+                  <EuiIcon
+                    size="s"
+                    color="subdued"
+                    type="questionInCircle"
+                    className="eui-alignTop"
+                  />
+                </>
+              </EuiToolTip>
             ),
-            render: (item) => item.failurePercentage * 100,
-            sortable: (item) => item.failurePercentage,
+            render: (failurePercentage: number) =>
+              asPercent(failurePercentage, 1),
+            sortable: true,
           },
           {
+            field: 'successPercentage',
+            width: '100px',
             name: (
-              <>
-                {i18n.translate(
-                  'xpack.apm.correlations.failedTransactions.correlationsTable.failurePercentageLabel',
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.apm.correlations.failedTransactions.correlationsTable.successPercentageDescription',
                   {
-                    defaultMessage: 'Success %',
+                    defaultMessage:
+                      'Percentage of time the term appear in successful transactions.',
                   }
                 )}
-              </>
+              >
+                <>
+                  {i18n.translate(
+                    'xpack.apm.correlations.failedTransactions.correlationsTable.successPercentageLabel',
+                    {
+                      defaultMessage: 'Success %',
+                    }
+                  )}
+                  <EuiIcon
+                    size="s"
+                    color="subdued"
+                    type="questionInCircle"
+                    className="eui-alignTop"
+                  />
+                </>
+              </EuiToolTip>
             ),
-            render: (item) => item.successPercentage * 100,
-            sortable: (item) => item.failurePercentage,
+
+            render: (successPercentage: number) =>
+              asPercent(successPercentage, 1),
+            sortable: true,
           },
         ]
       : [];
