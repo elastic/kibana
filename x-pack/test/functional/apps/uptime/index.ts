@@ -41,14 +41,14 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const server = getService('kibanaServer');
   const uptime = getService('uptime');
 
-  describe('Uptime app', function () {
+  describe.only('Uptime app', function () {
     this.tags('ciGroup6');
 
     beforeEach('delete settings', async () => {
       await deleteUptimeSettingsObject(server);
     });
 
-    describe('with generated data', () => {
+    describe.only('with generated data', () => {
       beforeEach('load heartbeat data', async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/uptime/blank');
       });
@@ -56,9 +56,9 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
       });
 
-      loadTestFile(require.resolve('./locations'));
-      loadTestFile(require.resolve('./settings'));
-      loadTestFile(require.resolve('./certificates'));
+      // loadTestFile(require.resolve('./locations'));
+      // loadTestFile(require.resolve('./settings'));
+      // loadTestFile(require.resolve('./certificates'));
       loadTestFile(require.resolve('./synthetics_integration'));
     });
 
