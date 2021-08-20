@@ -83,7 +83,8 @@ export class EventLogClient implements IEventLogClient {
   async findEventsBySavedObjectIds(
     type: string,
     ids: string[],
-    options?: Partial<FindOptionsType>
+    options?: Partial<FindOptionsType>,
+    legacyIds?: string[]
   ): Promise<QueryEventsBySavedObjectResult> {
     const findOptions = findOptionsSchema.validate(options ?? {});
 
@@ -98,7 +99,8 @@ export class EventLogClient implements IEventLogClient {
       namespace,
       type,
       ids,
-      findOptions
+      findOptions,
+      legacyIds
     );
   }
 }

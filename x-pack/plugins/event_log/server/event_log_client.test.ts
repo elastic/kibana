@@ -111,7 +111,12 @@ describe('EventLogStart', () => {
       esContext.esAdapter.queryEventsBySavedObjects.mockResolvedValue(result);
 
       expect(
-        await eventLogClient.findEventsBySavedObjectIds('saved-object-type', ['saved-object-id'])
+        await eventLogClient.findEventsBySavedObjectIds(
+          'saved-object-type',
+          ['saved-object-id'],
+          undefined,
+          ['legacy-id']
+        )
       ).toEqual(result);
 
       expect(esContext.esAdapter.queryEventsBySavedObjects).toHaveBeenCalledWith(
@@ -124,7 +129,8 @@ describe('EventLogStart', () => {
           per_page: 10,
           sort_field: '@timestamp',
           sort_order: 'asc',
-        }
+        },
+        ['legacy-id']
       );
     });
 
@@ -189,10 +195,15 @@ describe('EventLogStart', () => {
       const end = moment().add(1, 'days').toISOString();
 
       expect(
-        await eventLogClient.findEventsBySavedObjectIds('saved-object-type', ['saved-object-id'], {
-          start,
-          end,
-        })
+        await eventLogClient.findEventsBySavedObjectIds(
+          'saved-object-type',
+          ['saved-object-id'],
+          {
+            start,
+            end,
+          },
+          ['legacy-id']
+        )
       ).toEqual(result);
 
       expect(esContext.esAdapter.queryEventsBySavedObjects).toHaveBeenCalledWith(
@@ -207,7 +218,8 @@ describe('EventLogStart', () => {
           sort_order: 'asc',
           start,
           end,
-        }
+        },
+        ['legacy-id']
       );
     });
 

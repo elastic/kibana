@@ -376,17 +376,17 @@ describe('queryEventsBySavedObject', () => {
                             },
                           },
                           Object {
-                            "terms": Object {
-                              "kibana.saved_objects.id": Array [
-                                "saved-object-id",
-                              ],
-                            },
-                          },
-                          Object {
                             "term": Object {
                               "kibana.saved_objects.namespace": Object {
                                 "value": "namespace",
                               },
+                            },
+                          },
+                          Object {
+                            "terms": Object {
+                              "kibana.saved_objects.id": Array [
+                                "saved-object-id",
+                              ],
                             },
                           },
                         ],
@@ -467,19 +467,19 @@ describe('queryEventsBySavedObject', () => {
                             },
                           },
                           Object {
-                            "terms": Object {
-                              "kibana.saved_objects.id": Array [
-                                "saved-object-id",
-                              ],
-                            },
-                          },
-                          Object {
                             "bool": Object {
                               "must_not": Object {
                                 "exists": Object {
                                   "field": "kibana.saved_objects.namespace",
                                 },
                               },
+                            },
+                          },
+                          Object {
+                            "terms": Object {
+                              "kibana.saved_objects.id": Array [
+                                "saved-object-id",
+                              ],
                             },
                           },
                         ],
@@ -597,17 +597,17 @@ describe('queryEventsBySavedObject', () => {
                             },
                           },
                           Object {
-                            "terms": Object {
-                              "kibana.saved_objects.id": Array [
-                                "saved-object-id",
-                              ],
-                            },
-                          },
-                          Object {
                             "term": Object {
                               "kibana.saved_objects.namespace": Object {
                                 "value": "namespace",
                               },
+                            },
+                          },
+                          Object {
+                            "terms": Object {
+                              "kibana.saved_objects.id": Array [
+                                "saved-object-id",
+                              ],
                             },
                           },
                         ],
@@ -666,7 +666,8 @@ describe('queryEventsBySavedObject', () => {
       'namespace',
       'saved-object-type',
       ['saved-object-id'],
-      { ...DEFAULT_OPTIONS, start, end }
+      { ...DEFAULT_OPTIONS, start, end },
+      ['legacy-id']
     );
 
     const [query] = clusterClient.search.mock.calls[0];
@@ -699,13 +700,6 @@ describe('queryEventsBySavedObject', () => {
                             },
                           },
                           Object {
-                            "terms": Object {
-                              "kibana.saved_objects.id": Array [
-                                "saved-object-id",
-                              ],
-                            },
-                          },
-                          Object {
                             "term": Object {
                               "kibana.saved_objects.namespace": Object {
                                 "value": "namespace",
@@ -715,6 +709,74 @@ describe('queryEventsBySavedObject', () => {
                         ],
                       },
                     },
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "should": Array [
+                      Object {
+                        "bool": Object {
+                          "must": Array [
+                            Object {
+                              "nested": Object {
+                                "path": "kibana.saved_objects",
+                                "query": Object {
+                                  "bool": Object {
+                                    "must": Array [
+                                        Object {
+                                          "terms": Object {
+                                          "kibana.saved_objects.id": Array [
+                                            "legacy-id",
+                                          ],
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              },
+                            },
+                            Object {
+                              "range": Object {
+                                "kibana.version": Object {
+                                  "lt": "8.0.0",
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      Object {
+                        "bool": Object {
+                          "must": Array [
+                            Object {
+                              "nested": Object {
+                                "path": "kibana.saved_objects",
+                                "query": Object {
+                                  "bool": Object {
+                                    "must": Array [
+                                      Object {
+                                        "terms": Object {
+                                          "kibana.saved_objects.id": Array [
+                                              "saved-object-id",
+                                            ],
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              },
+                            },
+                            Object {
+                              "range": Object {
+                                "kibana.version": Object {
+                                  "gte": "8.0.0",
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
                   },
                 },
                 Object {
