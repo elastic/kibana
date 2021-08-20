@@ -169,7 +169,7 @@ export const TakeActionDropdown = React.memo(
     const alertsActionItems = useMemo(
       () =>
         !isEvent && actionsData.ruleId
-          ? [...exceptionActionItems, ...statusActionItems]
+          ? [...statusActionItems, ...exceptionActionItems]
           : eventFilterActionItems,
       [eventFilterActionItems, exceptionActionItems, statusActionItems, isEvent, actionsData.ruleId]
     );
@@ -209,6 +209,7 @@ export const TakeActionDropdown = React.memo(
         ...hostIsolationActionItems,
         ...investigateInTimelineActionItems,
       ],
+
       [
         tGridEnabled,
         alertsActionItems,
