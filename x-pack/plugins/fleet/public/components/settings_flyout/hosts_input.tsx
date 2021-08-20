@@ -194,10 +194,9 @@ export const HostsInput: FunctionComponent<Props> = ({
     ({ source, destination }) => {
       if (source && destination) {
         const items = euiDragDropReorder(value, source.index, destination.index);
-
-        const destinationErrors = indexedErrors[destination.index];
-        indexedErrors[destination.index] = indexedErrors[source.index];
-        indexedErrors[source.index] = destinationErrors;
+        const sourceErrors = indexedErrors[source.index];
+        indexedErrors.splice(source.index, 1);
+        indexedErrors.splice(destination.index, 0, sourceErrors);
         onChange(items);
       }
     },
