@@ -8,16 +8,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern, IndexPatternAttributes, SavedObject } from '../../../../../data/common';
+import { IndexPattern } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
 import { ContextApp } from '../../components/context_app/context_app';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 
-export interface ContextMainProps {
-  /**
-   * List of available index patterns
-   */
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+export interface ContextAppProps {
   /**
    * Kibana core services used by discover
    */
@@ -29,7 +25,7 @@ export interface ContextUrlParams {
   id: string;
 }
 
-export function ContextAppRoute(props: ContextMainProps) {
+export function ContextAppRoute(props: ContextAppProps) {
   const { services } = props;
   const { chrome } = services;
 
@@ -45,7 +41,7 @@ export function ContextAppRoute(props: ContextMainProps) {
         }),
       },
     ]);
-  }, [chrome, id]);
+  }, [chrome]);
 
   useEffect(() => {
     async function getIndexPattern() {
