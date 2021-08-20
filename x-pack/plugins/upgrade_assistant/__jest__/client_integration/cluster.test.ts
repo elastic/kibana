@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { MlAction, UpgradeAssistantStatus } from '../../common/types';
+import { MlAction, ESUpgradeStatus } from '../../common/types';
 
 import { ClusterTestBed, setupClusterPage, setupEnvironment } from './helpers';
 
@@ -21,8 +21,8 @@ describe('Cluster tab', () => {
   describe('with deprecations', () => {
     const snapshotId = '1';
     const jobId = 'deprecation_check_job';
-    const upgradeStatusMockResponse: UpgradeAssistantStatus = {
-      readyForUpgrade: false,
+    const esDeprecationsMockResponse: ESUpgradeStatus = {
+      totalCriticalDeprecations: 1,
       cluster: [
         {
           level: 'critical',
@@ -42,8 +42,11 @@ describe('Cluster tab', () => {
     };
 
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(upgradeStatusMockResponse);
-      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({ isEnabled: true });
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
+      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({
+        isDeprecationLogIndexingEnabled: true,
+        isDeprecationLoggingEnabled: true,
+      });
 
       await act(async () => {
         testBed = await setupClusterPage({ isReadOnlyMode: false });
@@ -79,7 +82,7 @@ describe('Cluster tab', () => {
         actions.clickExpandAll();
 
         // The data-test-subj is derived from the deprecation message
-        const accordionTestSubj = `depgroup_${upgradeStatusMockResponse.cluster[0].message
+        const accordionTestSubj = `depgroup_${esDeprecationsMockResponse.cluster[0].message
           .split(' ')
           .join('_')}`;
 
@@ -155,7 +158,7 @@ describe('Cluster tab', () => {
         expect(upgradeRequest.method).toBe('POST');
         expect(upgradeRequest.url).toBe('/api/upgrade_assistant/ml_snapshots');
 
-        const accordionTestSubj = `depgroup_${upgradeStatusMockResponse.cluster[0].message
+        const accordionTestSubj = `depgroup_${esDeprecationsMockResponse.cluster[0].message
           .split(' ')
           .join('_')}`;
 
@@ -180,7 +183,7 @@ describe('Cluster tab', () => {
         component.update();
 
         const request = server.requests[server.requests.length - 1];
-        const mlDeprecation = upgradeStatusMockResponse.cluster[0];
+        const mlDeprecation = esDeprecationsMockResponse.cluster[0];
 
         expect(request.method).toBe('DELETE');
         expect(request.url).toBe(
@@ -212,7 +215,7 @@ describe('Cluster tab', () => {
         component.update();
 
         const request = server.requests[server.requests.length - 1];
-        const mlDeprecation = upgradeStatusMockResponse.cluster[0];
+        const mlDeprecation = esDeprecationsMockResponse.cluster[0];
 
         expect(request.method).toBe('DELETE');
         expect(request.url).toBe(
@@ -221,7 +224,7 @@ describe('Cluster tab', () => {
           }/${(mlDeprecation.correctiveAction! as MlAction).snapshotId}`
         );
 
-        const accordionTestSubj = `depgroup_${upgradeStatusMockResponse.cluster[0].message
+        const accordionTestSubj = `depgroup_${esDeprecationsMockResponse.cluster[0].message
           .split(' ')
           .join('_')}`;
 
@@ -233,7 +236,7 @@ describe('Cluster tab', () => {
   describe('no deprecations', () => {
     beforeEach(async () => {
       const noDeprecationsResponse = {
-        readyForUpgrade: false,
+        totalCriticalDeprecations: 0,
         cluster: [],
         indices: [],
       };

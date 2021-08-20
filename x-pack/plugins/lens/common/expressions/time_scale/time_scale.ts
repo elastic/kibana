@@ -16,7 +16,10 @@ import {
   parseInterval,
   calculateBounds,
 } from '../../../../../../src/plugins/data/common';
-import { buildResultColumns } from '../../../../../../src/plugins/expressions/common';
+import {
+  buildResultColumns,
+  ExecutionContext,
+} from '../../../../../../src/plugins/expressions/common';
 import type { TimeScaleUnit } from './types';
 
 export interface TimeScaleArgs {
@@ -34,12 +37,14 @@ const unitInMs: Record<TimeScaleUnit, number> = {
   d: 1000 * 60 * 60 * 24,
 };
 
-export const timeScale: ExpressionFunctionDefinition<
+export const getTimeScale = (
+  getTimezone: (context: ExecutionContext) => string | Promise<string>
+): ExpressionFunctionDefinition<
   'lens_time_scale',
   Datatable,
   TimeScaleArgs,
   Promise<Datatable>
-> = {
+> => ({
   name: 'lens_time_scale',
   type: 'datatable',
   help: '',
@@ -73,7 +78,8 @@ export const timeScale: ExpressionFunctionDefinition<
   inputTypes: ['datatable'],
   async fn(
     input,
-    { dateColumnId, inputColumnId, outputColumnId, outputColumnName, targetUnit }: TimeScaleArgs
+    { dateColumnId, inputColumnId, outputColumnId, outputColumnName, targetUnit }: TimeScaleArgs,
+    context
   ) {
     const dateColumnDefinition = input.columns.find((column) => column.id === dateColumnId);
 
@@ -101,7 +107,9 @@ export const timeScale: ExpressionFunctionDefinition<
     }
 
     const targetUnitInMs = unitInMs[targetUnit];
-    const timeInfo = getDateHistogramMetaDataByDatatableColumn(dateColumnDefinition);
+    const timeInfo = getDateHistogramMetaDataByDatatableColumn(dateColumnDefinition, {
+      timeZone: await getTimezone(context),
+    });
     const intervalDuration = timeInfo?.interval && parseInterval(timeInfo.interval);
 
     if (!timeInfo || !intervalDuration) {
@@ -148,4 +156,4 @@ export const timeScale: ExpressionFunctionDefinition<
 
     return result;
   },
-};
+});
