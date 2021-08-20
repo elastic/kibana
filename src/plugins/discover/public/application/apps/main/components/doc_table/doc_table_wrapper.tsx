@@ -59,10 +59,6 @@ export interface DocTableProps {
    */
   isLoading: boolean;
   /**
-   * Number of table columns
-   */
-  columnLength: number;
-  /**
    * Filter callback
    */
   onFilter: DocViewFilterFn;
