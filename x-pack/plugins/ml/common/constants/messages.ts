@@ -645,13 +645,10 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
     },
     datafeed_preview_failed: {
       status: VALIDATION_STATUS.ERROR,
-      text: i18n.translate(
-        'xpack.ml.models.jobValidation.messages.datafeedPreviewNoDocumentsMessage',
-        {
-          defaultMessage:
-            'The datafeed preview failed. This may be due to an error in the job or datafeed configs',
-        }
-      ),
+      text: i18n.translate('xpack.ml.models.jobValidation.messages.datafeedPreviewFailedMessage', {
+        defaultMessage:
+          'The datafeed preview failed. This may be due to an error in the job or datafeed configs',
+      }),
     },
   };
 });
