@@ -72,6 +72,7 @@ export type TimelineModel = TGridModelForTimeline & {
   /** timeline is saving */
   isSaving: boolean;
   version: string | null;
+  initialized?: boolean;
 };
 
 export type SubsetTimelineModel = Readonly<
