@@ -130,7 +130,10 @@ describe('update()', () => {
     ruleTypeRegistry.get.mockReturnValue({
       id: 'myType',
       name: 'Test',
-      actionGroups: [{ id: 'default', name: 'Default' }],
+      actionGroups: [
+        { id: 'default', name: 'Default' },
+        { id: 'custom', name: 'Not the Default' },
+      ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
@@ -405,6 +408,252 @@ describe('update()', () => {
     `);
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test2', { notifyUsage: true });
+  });
+
+  test('should update a rule with some preconfigured actions', async () => {
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'another email connector',
+        isPreconfigured: false,
+      },
+      {
+        id: 'preconfigured',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'preconfigured email connector',
+        isPreconfigured: true,
+      },
+    ]);
+    actionsClient.isPreconfigured.mockReset();
+    actionsClient.isPreconfigured.mockReturnValueOnce(false);
+    actionsClient.isPreconfigured.mockReturnValueOnce(true);
+    actionsClient.isPreconfigured.mockReturnValueOnce(true);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'preconfigured:preconfigured',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'custom',
+            actionRef: 'preconfigured:preconfigured',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'param:soRef_0',
+          type: 'someSavedObjectType',
+          id: '9',
+        },
+      ],
+    });
+    const result = await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '10s' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            id: 'preconfigured',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'custom',
+            id: 'preconfigured',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+    });
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(
+      1,
+      'alert',
+      {
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'preconfigured:preconfigured',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'custom',
+            actionRef: 'preconfigured:preconfigured',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        alertTypeId: 'myType',
+        apiKey: null,
+        apiKeyOwner: null,
+        consumer: 'myApp',
+        enabled: true,
+        meta: { versionApiKeyLastmodified: 'v7.10.0' },
+        name: 'abc',
+        notifyWhen: 'onActiveAlert',
+        params: { bar: true },
+        schedule: { interval: '10s' },
+        scheduledTaskId: 'task-123',
+        tags: ['foo'],
+        throttle: null,
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+      },
+      {
+        id: '1',
+        overwrite: true,
+        references: [{ id: '1', name: 'action_0', type: 'action' }],
+        version: '123',
+      }
+    );
+
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "preconfigured",
+            "params": Object {
+              "foo": true,
+            },
+          },
+          Object {
+            "actionTypeId": "test",
+            "group": "custom",
+            "id": "preconfigured",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "enabled": true,
+        "id": "1",
+        "notifyWhen": "onActiveAlert",
+        "params": Object {
+          "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(actionsClient.isPreconfigured).toHaveBeenCalledTimes(3);
   });
 
   test('should call useSavedObjectReferences.extractReferences and useSavedObjectReferences.injectReferences if defined for rule type', async () => {
