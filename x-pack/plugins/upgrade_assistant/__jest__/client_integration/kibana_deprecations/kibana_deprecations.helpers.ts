@@ -7,7 +7,7 @@
 
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
 import { KibanaDeprecationsContent } from '../../../public/application/components/kibana_deprecations';
-import { WithAppDependencies } from './setup_environment';
+import { WithAppDependencies } from '../helpers';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
@@ -17,7 +17,7 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-export type KibanaTestBed = TestBed<KibanaTestSubjects> & {
+export type KibanaTestBed = TestBed & {
   actions: ReturnType<typeof createActions>;
 };
 
@@ -36,7 +36,9 @@ const createActions = (testBed: TestBed) => {
   };
 };
 
-export const setup = async (overrides?: Record<string, unknown>): Promise<KibanaTestBed> => {
+export const setupKibanaPage = async (
+  overrides?: Record<string, unknown>
+): Promise<KibanaTestBed> => {
   const initTestBed = registerTestBed(
     WithAppDependencies(KibanaDeprecationsContent, overrides),
     testBedConfig
@@ -48,12 +50,3 @@ export const setup = async (overrides?: Record<string, unknown>): Promise<Kibana
     actions: createActions(testBed),
   };
 };
-
-export type KibanaTestSubjects =
-  | 'expandAll'
-  | 'noDeprecationsPrompt'
-  | 'kibanaPluginError'
-  | 'kibanaDeprecationsContent'
-  | 'kibanaDeprecationItem'
-  | 'kibanaRequestError'
-  | string;

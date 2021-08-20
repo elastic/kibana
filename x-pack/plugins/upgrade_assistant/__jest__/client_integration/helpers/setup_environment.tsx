@@ -7,24 +7,20 @@
 
 import React from 'react';
 import axios from 'axios';
+import SemVer from 'semver/classes/semver';
 // @ts-ignore
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-import SemVer from 'semver/classes/semver';
-import {
-  deprecationsServiceMock,
-  docLinksServiceMock,
-  notificationServiceMock,
-  applicationServiceMock,
-} from 'src/core/public/mocks';
+
+import { MAJOR_VERSION } from '../../../common/constants';
 import { HttpSetup } from 'src/core/public';
 
 import { KibanaContextProvider } from '../../../public/shared_imports';
-import { MAJOR_VERSION } from '../../../common/constants';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
 import { GlobalFlyout } from '../../../public/shared_imports';
-import { servicesMock } from './services_mock';
+import { kibanaContextMock } from './kibana_context.mock';
+import { getAppContextMock } from './app_context.mock';
 import { init as initHttpRequests } from './http_requests';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
@@ -39,27 +35,13 @@ export const WithAppDependencies =
     apiService.setup(mockHttpClient as unknown as HttpSetup);
     breadcrumbService.setup(() => '');
 
-    const contextValue = {
-      http: mockHttpClient as unknown as HttpSetup,
-      docLinks: docLinksServiceMock.createStartContract(),
-      kibanaVersionInfo: {
-        currentMajor: kibanaVersion.major,
-        prevMajor: kibanaVersion.major - 1,
-        nextMajor: kibanaVersion.major + 1,
-      },
-      notifications: notificationServiceMock.createStartContract(),
-      isReadOnlyMode: false,
-      api: apiService,
-      breadcrumbs: breadcrumbService,
-      getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
-      deprecations: deprecationsServiceMock.createStartContract(),
-    };
+    const appContextMock = getAppContextMock(mockHttpClient as unknown as HttpSetup);
 
-    const { servicesOverrides, ...contextOverrides } = overrides;
+    const { kibanaContextOverrides, ...appContextOverrides } = overrides;
 
     return (
-      <KibanaContextProvider services={{ ...servicesMock, ...(servicesOverrides as {}) }}>
-        <AppContextProvider value={{ ...contextValue, ...contextOverrides }}>
+      <KibanaContextProvider services={{ ...kibanaContextMock, ...(kibanaContextOverrides as {}) }}>
+        <AppContextProvider value={{ ...appContextMock, ...appContextOverrides }}>
           <GlobalFlyoutProvider>
             <Comp {...props} />
           </GlobalFlyoutProvider>

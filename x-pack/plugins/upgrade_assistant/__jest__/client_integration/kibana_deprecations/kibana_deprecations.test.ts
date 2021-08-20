@@ -9,7 +9,8 @@ import type { DomainDeprecationDetails } from 'kibana/public';
 import { act } from 'react-dom/test-utils';
 import { deprecationsServiceMock } from 'src/core/public/mocks';
 
-import { KibanaTestBed, setupKibanaPage, setupEnvironment } from './helpers';
+import { setupEnvironment } from '../helpers';
+import { KibanaTestBed, setupKibanaPage } from './kibana_deprecations.helpers';
 
 describe('Kibana deprecations', () => {
   let testBed: KibanaTestBed;

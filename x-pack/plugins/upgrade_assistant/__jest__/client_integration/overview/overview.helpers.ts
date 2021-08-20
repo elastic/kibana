@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
 import { Overview } from '../../../public/application/components/overview';
-import { WithAppDependencies } from './setup_environment';
+import { WithAppDependencies } from '../helpers';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
@@ -18,7 +18,7 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-export type OverviewTestBed = TestBed<OverviewTestSubjects> & {
+export type OverviewTestBed = TestBed & {
   actions: ReturnType<typeof createActions>;
 };
 
@@ -42,7 +42,9 @@ const createActions = (testBed: TestBed) => {
   };
 };
 
-export const setup = async (overrides?: Record<string, unknown>): Promise<OverviewTestBed> => {
+export const setupOverviewPage = async (
+  overrides?: Record<string, unknown>
+): Promise<OverviewTestBed> => {
   const initTestBed = registerTestBed(WithAppDependencies(Overview, overrides), testBedConfig);
   const testBed = await initTestBed();
 
@@ -51,31 +53,3 @@ export const setup = async (overrides?: Record<string, unknown>): Promise<Overvi
     actions: createActions(testBed),
   };
 };
-
-export type OverviewTestSubjects =
-  | 'esStatsPanel'
-  | 'esStatsPanel.warningDeprecations'
-  | 'esStatsPanel.criticalDeprecations'
-  | 'kibanaStatsPanel'
-  | 'kibanaStatsPanel.warningDeprecations'
-  | 'kibanaStatsPanel.criticalDeprecations'
-  | 'deprecationLoggingFormRow'
-  | 'esRequestErrorIconTip'
-  | 'kibanaRequestErrorIconTip'
-  | 'partiallyUpgradedErrorIconTip'
-  | 'upgradedErrorIconTip'
-  | 'unauthorizedErrorIconTip'
-  | 'upgradedPrompt'
-  | 'partiallyUpgradedPrompt'
-  | 'deprecationLoggingToggle'
-  | 'updateLoggingError'
-  | 'fetchLoggingError'
-  | 'noDeprecationsLabel'
-  | 'viewObserveLogs'
-  | 'viewDiscoverLogs'
-  | 'upgradeSetupDocsLink'
-  | 'upgradeSetupCloudLink'
-  | 'deprecationWarningCallout'
-  | 'whatsNewLink'
-  | 'documentationLink'
-  | 'upgradeStatusError';

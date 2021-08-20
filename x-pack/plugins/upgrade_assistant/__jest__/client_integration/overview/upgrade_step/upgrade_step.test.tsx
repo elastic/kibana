@@ -7,7 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { OverviewTestBed, setupOverviewPage, setupEnvironment } from '../../helpers';
+import { setupEnvironment } from '../../helpers';
+import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
 describe('Overview - Upgrade Step', () => {
   let testBed: OverviewTestBed;
@@ -33,7 +34,7 @@ describe('Overview - Upgrade Step', () => {
     test('Shows upgrade cta and link to docs for cloud installations', async () => {
       await act(async () => {
         testBed = await setupOverviewPage({
-          servicesOverrides: {
+          kibanaContextOverrides: {
             cloud: {
               isCloudEnabled: true,
               deploymentUrl:

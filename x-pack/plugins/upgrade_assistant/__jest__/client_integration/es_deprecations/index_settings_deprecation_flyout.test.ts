@@ -7,8 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { ElasticsearchTestBed, setupElasticsearchPage, setupEnvironment } from '../helpers';
-
+import { setupEnvironment } from '../helpers';
+import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
 import { esDeprecationsMockResponse, MOCK_SNAPSHOT_ID, MOCK_JOB_ID } from './mocked_responses';
 
 describe('Index settings deprecation flyout', () => {
@@ -37,7 +37,7 @@ describe('Index settings deprecation flyout', () => {
 
     component.update();
 
-    await actions.clickIndexSettingsDeprecationAt(0);
+    await actions.table.clickDeprecationRowAt('indexSetting', 0);
 
     expect(exists('indexSettingsDetails')).toBe(true);
     expect(find('indexSettingsDetails.flyoutTitle').text()).toContain(
@@ -53,7 +53,7 @@ describe('Index settings deprecation flyout', () => {
       acknowledged: true,
     });
 
-    await actions.clickDeleteSettingsButton();
+    await actions.indexSettingsDeprecationFlyout.clickDeleteSettingsButton();
 
     const request = server.requests[server.requests.length - 1];
 
@@ -69,7 +69,7 @@ describe('Index settings deprecation flyout', () => {
     );
 
     // Reopen the flyout
-    await actions.clickIndexSettingsDeprecationAt(0);
+    await actions.table.clickDeprecationRowAt('indexSetting', 0);
 
     // Verify prompt to remove setting no longer displays
     expect(find('removeSettingsPrompt').length).toEqual(0);
@@ -87,7 +87,7 @@ describe('Index settings deprecation flyout', () => {
 
     httpRequestsMockHelpers.setUpdateIndexSettingsResponse(undefined, error);
 
-    await actions.clickDeleteSettingsButton();
+    await actions.indexSettingsDeprecationFlyout.clickDeleteSettingsButton();
 
     const request = server.requests[server.requests.length - 1];
 
@@ -103,7 +103,7 @@ describe('Index settings deprecation flyout', () => {
     );
 
     // Reopen the flyout
-    await actions.clickIndexSettingsDeprecationAt(0);
+    await actions.table.clickDeprecationRowAt('indexSetting', 0);
 
     // Verify the flyout shows an error message
     expect(find('indexSettingsDetails.deleteSettingsError').text()).toContain(

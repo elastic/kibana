@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { OverviewTestBed, setupOverviewPage, setupEnvironment, kibanaVersion } from '../helpers';
+import { setupEnvironment, kibanaVersion } from '../helpers';
+import { OverviewTestBed, setupOverviewPage } from './overview.helpers';
 
 describe('Overview Page', () => {
   let testBed: OverviewTestBed;
