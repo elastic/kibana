@@ -53,7 +53,7 @@ Once you have your GeoJSON file:
 .. Click *Add*.
 . Click *Save & close*.
 
-Looking at the map, we get a sense of what exactly constitutes a metro area in the eyes of the Census Bureau.
+Looking at the map, you get a sense of what constitutes a metro area in the eyes of the Census Bureau.
 
 [role="screenshot"]
 image::maps/images/reverse-geocoding-tutorial/csa_regions.jpeg[]
