@@ -91,13 +91,15 @@ export const getEqlRuleParams = (): EqlRuleParams => {
   };
 };
 
-export const getMlRuleParams = (): MachineLearningRuleParams => {
+export const getMlRuleParams = <T extends MachineLearningRuleParams>(
+  isRuleRegistryEnabled: boolean
+) => {
   return {
-    ...getBaseRuleParams(),
+    ...(isRuleRegistryEnabled ? getBaseRACRuleParams() : getBaseRuleParams()),
     type: 'machine_learning',
     anomalyThreshold: 42,
     machineLearningJobId: ['my-job'],
-  };
+  } as T;
 };
 
 export const getQueryRuleParams = <T extends QueryRuleParams>(isRuleRegistryEnabled: boolean) => {

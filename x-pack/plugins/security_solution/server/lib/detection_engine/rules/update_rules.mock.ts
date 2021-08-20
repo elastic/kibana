@@ -6,6 +6,7 @@
  */
 
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
 import {
   getUpdateMachineLearningSchemaMock,
   getUpdateRulesSchemaMock,
@@ -13,18 +14,26 @@ import {
 import { RuleExecutionLogClient } from '../rule_execution_log/__mocks__/rule_execution_log_client';
 import { UpdateRulesOptions } from './types';
 
-export const getUpdateRulesOptionsMock = (): UpdateRulesOptions => ({
-  spaceId: 'default',
-  rulesClient: rulesClientMock.create(),
-  ruleStatusClient: new RuleExecutionLogClient(),
-  defaultOutputIndex: '.siem-signals-default',
-  ruleUpdate: getUpdateRulesSchemaMock(),
-});
+export const getUpdateRulesOptionsMock = <TSchema extends UpdateRulesSchema>(
+  isRuleRegistryEnabled: boolean
+) =>
+  ({
+    spaceId: 'default',
+    rulesClient: rulesClientMock.create(),
+    ruleStatusClient: new RuleExecutionLogClient(),
+    defaultOutputIndex: '.siem-signals-default',
+    ruleUpdate: getUpdateRulesSchemaMock(undefined, isRuleRegistryEnabled) as TSchema,
+    isRuleRegistryEnabled,
+  } as UpdateRulesOptions<TSchema>);
 
-export const getUpdateMlRulesOptionsMock = (): UpdateRulesOptions => ({
-  spaceId: 'default',
-  rulesClient: rulesClientMock.create(),
-  ruleStatusClient: new RuleExecutionLogClient(),
-  defaultOutputIndex: '.siem-signals-default',
-  ruleUpdate: getUpdateMachineLearningSchemaMock(),
-});
+export const getUpdateMlRulesOptionsMock = <TSchema extends UpdateRulesSchema>(
+  isRuleRegistryEnabled: boolean
+) =>
+  ({
+    spaceId: 'default',
+    rulesClient: rulesClientMock.create(),
+    ruleStatusClient: new RuleExecutionLogClient(),
+    defaultOutputIndex: '.siem-signals-default',
+    ruleUpdate: getUpdateMachineLearningSchemaMock(undefined, isRuleRegistryEnabled) as TSchema,
+    isRuleRegistryEnabled,
+  } as UpdateRulesOptions<TSchema>);

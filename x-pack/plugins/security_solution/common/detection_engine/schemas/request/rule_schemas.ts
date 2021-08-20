@@ -219,6 +219,13 @@ export const sharedUpdateSchema = t.intersection([
 ]);
 export type SharedUpdateSchema = t.TypeOf<typeof sharedUpdateSchema>;
 
+export const racSharedUpdateSchema = t.intersection([
+  racBaseCreateParams,
+  t.exact(t.partial({ rule_id })),
+  t.exact(t.partial({ id })),
+]);
+export type RACSharedUpdateSchema = t.TypeOf<typeof racSharedUpdateSchema>;
+
 const eqlRuleParams = {
   required: {
     type: t.literal('eql'),
@@ -413,6 +420,9 @@ export type ResponseTypeSpecific = t.TypeOf<typeof responseTypeSpecific>;
 
 export const updateRulesSchema = t.intersection([createTypeSpecific, sharedUpdateSchema]);
 export type UpdateRulesSchema = t.TypeOf<typeof updateRulesSchema>;
+
+export const racUpdateRulesSchema = t.intersection([createTypeSpecific, racSharedUpdateSchema]);
+export type RACUpdateRulesSchema = t.TypeOf<typeof racUpdateRulesSchema>;
 
 export const fullPatchSchema = t.intersection([
   basePatchParams,

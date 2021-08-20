@@ -20,11 +20,14 @@ import { transformValidateBulkError } from './validate';
 import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '../utils';
 import { updateRules } from '../../rules/update_rules';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 
 export const updateRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  ruleDataClient?: IRuleDataClient | null
 ) => {
+  const isRuleRegistryEnabled = ruleDataClient != null;
   router.put(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
@@ -75,6 +78,7 @@ export const updateRulesBulkRoute = (
               ruleStatusClient,
               defaultOutputIndex: siemClient.getSignalsIndex(),
               ruleUpdate: payloadRule,
+              isRuleRegistryEnabled,
             });
             if (rule != null) {
               const ruleActions = await updateRulesNotifications({

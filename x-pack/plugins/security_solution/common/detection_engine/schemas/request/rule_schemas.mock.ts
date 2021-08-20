@@ -10,7 +10,6 @@ import {
   MachineLearningCreateSchema,
   MachineLearningUpdateSchema,
   QueryCreateSchema,
-  QueryUpdateSchema,
   SavedQueryCreateSchema,
   SavedQueryUpdateSchema,
   ThreatMatchCreateSchema,
@@ -117,8 +116,9 @@ export const getCreateThresholdRulesSchemaMock = (ruleId = 'rule-1'): ThresholdC
 });
 
 export const getUpdateRulesSchemaMock = (
-  id = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
-): QueryUpdateSchema => ({
+  id = '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+  isRuleRegistryEnabled = false
+) => ({
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
@@ -127,6 +127,7 @@ export const getUpdateRulesSchemaMock = (
   risk_score: 55,
   language: 'kuery',
   id,
+  ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
 });
 
 export const getUpdateSavedQuerySchemaMock = (
@@ -188,7 +189,8 @@ export const getUpdateThreatMatchSchemaMock = (
 });
 
 export const getUpdateMachineLearningSchemaMock = (
-  id = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
+  id = '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+  isRuleRegistryEnabled = false
 ): MachineLearningUpdateSchema => ({
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
@@ -198,4 +200,5 @@ export const getUpdateMachineLearningSchemaMock = (
   type: 'machine_learning',
   anomaly_threshold: 58,
   machine_learning_job_id: 'typical-ml-job-id',
+  ...(isRuleRegistryEnabled ? { namespace: 'defaiult' } : {}),
 });

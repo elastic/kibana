@@ -270,14 +270,16 @@ export interface CreateRulesOptions {
   version: Version;
   exceptionsList: ListArray;
   actions: RuleAlertAction[];
+  namespace?: string;
 }
 
-export interface UpdateRulesOptions {
+export interface UpdateRulesOptions<TSchema extends UpdateRulesSchema> {
+  isRuleRegistryEnabled: boolean;
   spaceId: string;
   ruleStatusClient: IRuleExecutionLogClient;
   rulesClient: RulesClient;
   defaultOutputIndex: string;
-  ruleUpdate: UpdateRulesSchema;
+  ruleUpdate: TSchema;
 }
 
 export interface PatchRulesOptions {

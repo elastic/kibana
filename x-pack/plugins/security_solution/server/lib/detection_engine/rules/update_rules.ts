@@ -14,18 +14,23 @@ import { readRules } from './read_rules';
 import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
-import { InternalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
+import { RuleParams } from '../schemas/rule_schemas';
 import { enableRule } from './enable_rule';
+import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
 
-export const updateRules = async ({
+export const updateRules = async <
+  TRuleParams extends RuleParams,
+  TSchema extends UpdateRulesSchema
+>({
+  isRuleRegistryEnabled,
   spaceId,
   rulesClient,
   ruleStatusClient,
   defaultOutputIndex,
   ruleUpdate,
-}: UpdateRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
-  const existingRule = await readRules({
-    isRuleRegistryEnabled: false, // TODO: support RAC
+}: UpdateRulesOptions<TSchema>): Promise<PartialAlert<RuleParams> | null> => {
+  const existingRule = await readRules<TRuleParams>({
+    isRuleRegistryEnabled,
     rulesClient,
     ruleId: ruleUpdate.rule_id,
     id: ruleUpdate.id,
@@ -36,7 +41,7 @@ export const updateRules = async ({
 
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
   const enabled = ruleUpdate.enabled ?? true;
-  const newInternalRule: InternalRuleUpdate = {
+  const newInternalRule = {
     name: ruleUpdate.name,
     tags: addTags(ruleUpdate.tags ?? [], existingRule.params.ruleId, existingRule.params.immutable),
     params: {

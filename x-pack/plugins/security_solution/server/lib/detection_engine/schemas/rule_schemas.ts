@@ -229,7 +229,7 @@ export type InternalRuleCreate = t.TypeOf<typeof internalRuleCreate>;
 export const internalRACRuleCreate = t.type({
   ...internalRuleCreateBase,
   alertTypeId: t.literal('siem.query'),
-  params: t.intersection([ruleParams, t.type({ namespace: t.string })]), // TODO: is this right?
+  params: t.intersection([ruleParams, t.type({ namespace: t.string })]),
 });
 export type InternalRACRuleCreate = t.TypeOf<typeof internalRACRuleCreate>;
 
@@ -244,7 +244,7 @@ export const isInternalRACRuleCreate = (
   return namespace != null;
 };
 
-export const internalRuleUpdate = t.type({
+export const internalRuleUpdateBase = {
   name,
   tags,
   schedule: t.type({
@@ -254,8 +254,31 @@ export const internalRuleUpdate = t.type({
   params: ruleParams,
   throttle: throttleOrNull,
   notifyWhen: t.null,
+};
+const internalRuleUpdateBaseType = t.type(internalRuleUpdateBase);
+export type InternalRuleUpdateBase = t.TypeOf<typeof internalRuleUpdateBaseType>;
+
+export const internalRuleUpdate = t.type({
+  ...internalRuleUpdateBase,
 });
 export type InternalRuleUpdate = t.TypeOf<typeof internalRuleUpdate>;
+
+export const internalRACRuleUpdate = t.type({
+  ...internalRuleUpdateBase,
+  params: t.intersection([ruleParams, t.type({ namespace: t.string })]),
+});
+export type InternalRACRuleUpdate = t.TypeOf<typeof internalRACRuleUpdate>;
+
+export const isInternalRuleUpdate = (obj: InternalRuleUpdateBase): obj is InternalRuleUpdate => {
+  return !('namespace' in obj.params);
+};
+
+export const isInternalRACRuleUpdate = (
+  obj: InternalRuleUpdateBase
+): obj is InternalRACRuleUpdate => {
+  const namespace = (obj as InternalRACRuleUpdate).params.namespace;
+  return namespace != null;
+};
 
 export const internalRuleResponse = t.intersection([
   internalRuleCreate,

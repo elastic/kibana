@@ -65,11 +65,14 @@ export const setStatusSignalMissingIdsAndQueryPayload = (): SetSignalsStatusSche
   status: 'closed',
 });
 
-export const getUpdateRequest = () =>
+export const getUpdateRequest = (isRuleRegistryEnabled: boolean) =>
   requestMock.create({
     method: 'put',
     path: DETECTION_ENGINE_RULES_URL,
-    body: getCreateRulesSchemaMock(),
+    body: {
+      ...getCreateRulesSchemaMock(),
+      ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
+    },
   });
 
 export const getPatchRequest = () =>
@@ -261,7 +264,7 @@ export const getCreateRequest = (isRuleRegistryEnabled: boolean = false) =>
   });
 
 // TODO: Replace this with the mocks version from the mocks file
-export const typicalMlRulePayload = () => {
+export const typicalMlRulePayload = (isRuleRegistryEnabled: boolean) => {
   const { query, language, index, ...mlParams } = getCreateRulesSchemaMock();
 
   return {
@@ -269,6 +272,7 @@ export const typicalMlRulePayload = () => {
     type: 'machine_learning',
     anomaly_threshold: 58,
     machine_learning_job_id: 'typical-ml-job-id',
+    ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
   };
 };
 
@@ -277,17 +281,17 @@ export const createMlRuleRequest = (isRuleRegistryEnabled: boolean = false) => {
     method: 'post',
     path: DETECTION_ENGINE_RULES_URL,
     body: {
-      ...typicalMlRulePayload(),
+      ...typicalMlRulePayload(isRuleRegistryEnabled),
       ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
     },
   });
 };
 
-export const createBulkMlRuleRequest = () => {
+export const createBulkMlRuleRequest = (isRuleRegistryEnabled: boolean = false) => {
   return requestMock.create({
     method: 'post',
     path: DETECTION_ENGINE_RULES_URL,
-    body: [typicalMlRulePayload()],
+    body: [typicalMlRulePayload(isRuleRegistryEnabled)],
   });
 };
 

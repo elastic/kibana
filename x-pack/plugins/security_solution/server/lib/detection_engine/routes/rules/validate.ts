@@ -29,12 +29,13 @@ import { transform, transformAlertToRule } from './utils';
 import { RuleActions } from '../../rule_actions/types';
 import { RuleParams } from '../../schemas/rule_schemas';
 
-export const transformValidate = (
-  alert: PartialAlert<RuleParams>,
+export const transformValidate = <TRuleParams extends RuleParams>(
+  alert: PartialAlert<TRuleParams>,
   ruleActions?: RuleActions | null,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
+  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
+  isRuleRegistryEnabled?: boolean
 ): [RulesSchema | null, string | null] => {
-  const transformed = transform(alert, ruleActions, ruleStatus);
+  const transformed = transform(alert, ruleActions, ruleStatus, isRuleRegistryEnabled);
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
@@ -52,11 +53,10 @@ export const newTransformValidate = <TRuleParams extends RuleParams>(
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
-    const retVal = validateNonExact(
+    return validateNonExact(
       transformed,
       isRuleRegistryEnabled ? fullRACResponseSchema : fullResponseSchema
     );
-    return retVal;
   }
 };
 

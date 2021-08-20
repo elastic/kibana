@@ -9,7 +9,6 @@ import { has } from 'lodash/fp';
 import { INTERNAL_IDENTIFIER } from '../../../../common/constants';
 import { RulesClient } from '../../../../../alerting/server';
 import { findRules } from '../rules/find_rules';
-import { RuleParams } from '../schemas/rule_schemas';
 
 export interface TagType {
   id: string;
@@ -56,8 +55,8 @@ export const readRawTags = async ({
   perPage?: number;
 }): Promise<string[]> => {
   // Get just one record so we can get the total count
-  const firstTags = await findRules<RuleParams>({
-    isRuleRegistryEnabled: false, // TODO: support RAC
+  const firstTags = await findRules({
+    isRuleRegistryEnabled: false,
     rulesClient,
     fields: ['tags'],
     perPage: 1,
@@ -67,8 +66,8 @@ export const readRawTags = async ({
     filter: undefined,
   });
   // Get all the rules to aggregate over all the tags of the rules
-  const rules = await findRules<RuleParams>({
-    isRuleRegistryEnabled: false, // TODO: support RAC
+  const rules = await findRules({
+    isRuleRegistryEnabled: false,
     rulesClient,
     fields: ['tags'],
     perPage: firstTags.total,
