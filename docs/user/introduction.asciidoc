@@ -20,19 +20,8 @@ Manage your indices and ingest pipelines, monitor the health of your
 Elastic Stack cluster, and control which users have access to
 which features.
 
-++++
-<script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
-</script>
-<img
-style="width: 100%; margin: auto; display: block;"
-class="vidyard-player-embed"
-src="https://play.vidyard.com/iyqMwJcvi8r4YfjeoPMjyH.jpg"
-data-uuid="iyqMwJcvi8r4YfjeoPMjyH"
-data-v="4"
-data-type="inline"
-/>
-</br>
-++++
+[role="screenshot"]
+image::images/analytics-home-page.png[Analytics home page]
 
 *{kib} is for administrators, analysts, and business users.*
 As an admin, your role is to manage the Elastic Stack, from creating your
@@ -50,14 +39,11 @@ No matter your data, {kib} can help you uncover patterns and relationships and v
 [[kibana-home-page]]
 === Where to start
 
-Start with the home page, where you’re presented options for adding your data.
-You can collect data from an app or service or upload a file that contains your data.
-If you’re not ready to use your own data, you can add a sample data set.
-
-The home page provides access to the *Enterprise Search*, *Observability*, and *Security* solutions,
+Start with the home page, which provides access to the *Enterprise Search*,
+*Observability*, and *Security* solutions,
 and everything you need to visualize and analyze your data.
 
-To access all of {kib} features, use the main menu.
+To access other {kib} managment features, use the main menu.
 Open this menu by clicking the
 menu icon.
 For a quick reference of all {kib} features, refer to <<whats-the-right-app,What’s the right app for you?>>
