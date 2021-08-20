@@ -758,38 +758,52 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return MVT_SOURCE_LAYER_NAME;
   }
 
-  _errorUpdatingIndex(numIndexes: number) {
-    const indexLengthError = new Error(
-      `${numIndexes} indexes associated with index pattern. Only index patterns associated with a single index can be edited`
-    );
-    getToasts().addError(indexLengthError, {
-      title: i18n.translate('xpack.maps.source.esSearch.updateIndexError', {
-        defaultMessage: `Error updating index`,
-      }),
-      toastMessage: i18n.translate('xpack.maps.source.esSearch.updateIndexNotificationMsg', {
-        defaultMessage: `Only index patterns associated with a single index can be edited`,
-      }),
-    });
-    throw indexLengthError;
+  async _getEditableIndex(): Promise<string> {
+    try {
+      const indexList = await this.getSourceIndexList();
+      if (indexList.length === 0) {
+        throw new Error(
+          i18n.translate('xpack.maps.source.esSearch.indexLengthEditError', {
+            defaultMessage: `There are no indexes associated with this index pattern. Index pattern must be associated with a single index.`,
+          })
+        );
+      }
+      if (indexList.length > 1) {
+        throw new Error(
+          i18n.translate('xpack.maps.source.esSearch.indexLengthEditError', {
+            defaultMessage: `Multiple indexes are associated with this index pattern. Index pattern must be associated with a single index.`,
+          })
+        );
+      }
+      return indexList[0];
+    } catch (e) {
+      getToasts().addError(e, {
+        title: i18n.translate('xpack.maps.source.esSearch.updateIndexError', {
+          defaultMessage: `Error updating index`,
+        }),
+        toastMessage: i18n.translate('xpack.maps.source.esSearch.editIndexErrorNotificationMsg', {
+          defaultMessage: `Only index patterns associated with a single index can be edited`,
+        }),
+      });
+      return '';
+    }
   }
 
   async addFeature(
     geometry: Geometry | Position[],
     defaultFields: Record<string, Record<string, string>>
   ) {
-    const indexList = await this.getSourceIndexList();
-    if (indexList.length !== 1) {
-      this._errorUpdatingIndex(indexList.length);
+    const index = await this._getEditableIndex();
+    if (index) {
+      await addFeatureToIndex(index, geometry, this.getGeoFieldName(), defaultFields);
     }
-    await addFeatureToIndex(indexList[0], geometry, this.getGeoFieldName(), defaultFields);
   }
 
   async deleteFeature(featureId: string) {
-    const indexList = await this.getSourceIndexList();
-    if (indexList.length !== 1) {
-      this._errorUpdatingIndex(indexList.length);
+    const index = await this._getEditableIndex();
+    if (index) {
+      await deleteFeatureFromIndex(index, featureId);
     }
-    await deleteFeatureFromIndex(indexList[0], featureId);
   }
 
   async getUrlTemplateWithMeta(
