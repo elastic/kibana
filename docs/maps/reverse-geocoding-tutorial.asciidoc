@@ -30,7 +30,7 @@ We’ll use the <<get-started, web logs sample data set>> that comes with Kibana
 
 [float]
 === Step 2: Index Combined Statistical Area (CSA) regions
-GeoIP level of detail can be very useful for driving decision-making. For example, say you want to spin up a marketing campaign based on the locations of your users or show executive stakeholders which metro areas are experiencing an uptick of traffic.
+GeoIP level of detail is very useful for driving decision-making. For example, say you want to spin up a marketing campaign based on the locations of your users or show executive stakeholders which metro areas are experiencing an uptick of traffic.
 
 That kind of scale in the United States is often captured with what the Census Bureau calls the Combined Statistical Area (CSA). Combined Statistical Area is roughly equivalent with how people intuitively think of which urban area they live in. It does not necessarily coincide with state or city boundaries. CSAs generally share the same telecom providers and ad networks. New fast food franchises expand to a CSA rather than a particular city or municipality. Basically, people in the same CSA shop in the same IKEA.
 
