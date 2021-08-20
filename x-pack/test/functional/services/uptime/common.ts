@@ -70,14 +70,20 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
         await this.setStatusFilterDown();
       }
     },
-    async selectFilterItem(filterType: string, option: string) {
-      const popoverId = `filter-popover_${filterType}`;
-      const optionId = `filter-popover-item_${option}`;
-      await testSubjects.existOrFail(popoverId);
-      await testSubjects.click(popoverId);
-      await testSubjects.existOrFail(optionId);
-      await testSubjects.click(optionId);
-      await testSubjects.click(popoverId);
+    async selectFilterItem(filterType: string, itemArg: string | string[]) {
+      const itemList = Array.isArray(itemArg) ? itemArg : [itemArg];
+      const filterPopoverButton = await find.byCssSelector(
+        `[aria-label="expands filter group for ${filterType} filter"]`
+      );
+      await filterPopoverButton.click();
+      for (const title of itemList) {
+        const filterItem = await find.byCssSelector(`[title="${title}"]`);
+        await filterItem.click();
+      }
+      const applyButton = await find.byCssSelector(
+        `[aria-label="Apply the selected filters for ${filterType}"]`
+      );
+      await applyButton.click();
     },
     async getSnapshotCount() {
       return {
