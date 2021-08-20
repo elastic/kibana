@@ -246,7 +246,9 @@ async function updateAlerts({
       []
     );
 
-    await casesClientInternal.alerts.updateStatus({ alerts: alertsToUpdate });
+    await casesClientInternal.alerts.updateStatus({
+      alerts: alertsToUpdate,
+    });
   } catch (error) {
     throw createCaseError({
       message: `Failed to update alert status while updating sub cases: ${JSON.stringify(
@@ -355,14 +357,6 @@ export async function update({
       );
     });
 
-    await updateAlerts({
-      caseService,
-      unsecuredSavedObjectsClient,
-      casesClientInternal,
-      subCasesToSync: subCasesToSyncAlertsFor,
-      logger: clientArgs.logger,
-    });
-
     const returnUpdatedSubCases = updatedCases.saved_objects.reduce<SubCaseResponse[]>(
       (acc, updatedSO) => {
         const originalSubCase = subCasesMap.get(updatedSO.id);
@@ -392,6 +386,15 @@ export async function update({
         actionDate: updatedAt,
         actionBy: user,
       }),
+    });
+
+    // attempt to update the status of the alerts after creating all the user actions just in case it fails
+    await updateAlerts({
+      caseService,
+      unsecuredSavedObjectsClient,
+      casesClientInternal,
+      subCasesToSync: subCasesToSyncAlertsFor,
+      logger: clientArgs.logger,
     });
 
     return SubCasesResponseRt.encode(returnUpdatedSubCases);

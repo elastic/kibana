@@ -428,9 +428,9 @@ class PackagePolicyService {
           name: packagePolicy.name,
           success: true,
           package: {
-            name: packagePolicy.name,
-            title: '',
-            version: packagePolicy.version || '',
+            name: packagePolicy.package?.name || '',
+            title: packagePolicy.package?.title || '',
+            version: packagePolicy.package?.version || '',
           },
         });
       } catch (error) {
@@ -642,7 +642,9 @@ class PackagePolicyService {
 
   public async runExternalCallbacks<A extends ExternalCallback[0]>(
     externalCallbackType: A,
-    packagePolicy: NewPackagePolicy | DeletePackagePoliciesResponse,
+    packagePolicy: A extends 'postPackagePolicyDelete'
+      ? DeletePackagePoliciesResponse
+      : NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
   ): Promise<A extends 'postPackagePolicyDelete' ? void : NewPackagePolicy>;
@@ -653,14 +655,7 @@ class PackagePolicyService {
     request: KibanaRequest
   ): Promise<NewPackagePolicy | void> {
     if (externalCallbackType === 'postPackagePolicyDelete') {
-      const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
-      if (externalCallbacks && externalCallbacks.size > 0) {
-        for (const callback of externalCallbacks) {
-          if (Array.isArray(packagePolicy)) {
-            await callback(packagePolicy, context, request);
-          }
-        }
-      }
+      return await this.runDeleteExternalCallbacks(packagePolicy as DeletePackagePoliciesResponse);
     } else {
       if (!Array.isArray(packagePolicy)) {
         let newData = packagePolicy;
@@ -679,6 +674,32 @@ class PackagePolicyService {
           newData = updatedNewData;
         }
         return newData;
+      }
+    }
+  }
+
+  public async runDeleteExternalCallbacks(
+    deletedPackagePolicies: DeletePackagePoliciesResponse
+  ): Promise<void> {
+    const externalCallbacks = appContextService.getExternalCallbacks('postPackagePolicyDelete');
+    const errorsThrown: Error[] = [];
+
+    if (externalCallbacks && externalCallbacks.size > 0) {
+      for (const callback of externalCallbacks) {
+        // Failures from an external callback should not prevent other external callbacks from being
+        // executed. Errors (if any) will be collected and `throw`n after processing the entire set
+        try {
+          await callback(deletedPackagePolicies);
+        } catch (error) {
+          errorsThrown.push(error);
+        }
+      }
+
+      if (errorsThrown.length > 0) {
+        throw new IngestManagerError(
+          `${errorsThrown.length} encountered while executing package delete external callbacks`,
+          errorsThrown
+        );
       }
     }
   }
