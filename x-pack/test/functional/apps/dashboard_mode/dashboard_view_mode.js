@@ -62,7 +62,8 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.savedObjects.clean({ types });
     });
 
-    describe('Dashboard viewer', () => {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/109351
+    describe.skip('Dashboard viewer', () => {
       after(async () => {
         await security.testUser.restoreDefaults();
       });
