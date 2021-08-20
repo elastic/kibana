@@ -34,8 +34,8 @@ describe('reason_formatter', () => {
   describe('buildCommonReasonMessage', () => {
     describe('when rule, mergedDoc, and timestamp are provided', () => {
       it('should return the full reason message', () => {
-        expect(buildCommonReasonMessage({ rule, mergedDoc, timestamp })).toEqual(
-          'Alert What is in a name created at 2021-08-11T02:28:59.401Z with a medium severity and risk score of 9000 by ferris bueller on party host.'
+        expect(buildCommonReasonMessage({ rule, mergedDoc })).toEqual(
+          'Alert What is in a name created with a medium severity and risk score of 9000 by ferris bueller on party host.'
         );
       });
     });
@@ -48,8 +48,8 @@ describe('reason_formatter', () => {
             'host.name': ['-'],
           },
         };
-        expect(buildCommonReasonMessage({ rule, mergedDoc: updatedMergedDoc, timestamp })).toEqual(
-          'Alert What is in a name created at 2021-08-11T02:28:59.401Z with a medium severity and risk score of 9000 by ferris bueller.'
+        expect(buildCommonReasonMessage({ rule, mergedDoc: updatedMergedDoc })).toEqual(
+          'Alert What is in a name created with a medium severity and risk score of 9000 by ferris bueller.'
         );
       });
     });
@@ -62,15 +62,15 @@ describe('reason_formatter', () => {
             'user.name': ['-'],
           },
         };
-        expect(buildCommonReasonMessage({ rule, mergedDoc: updatedMergedDoc, timestamp })).toEqual(
-          'Alert What is in a name created at 2021-08-11T02:28:59.401Z with a medium severity and risk score of 9000 on party host.'
+        expect(buildCommonReasonMessage({ rule, mergedDoc: updatedMergedDoc })).toEqual(
+          'Alert What is in a name created with a medium severity and risk score of 9000 on party host.'
         );
       });
     });
     describe('when only rule and timestamp are provided', () => {
       it('should return the reason message without host name or user name', () => {
-        expect(buildCommonReasonMessage({ rule, timestamp })).toEqual(
-          'Alert What is in a name created at 2021-08-11T02:28:59.401Z with a medium severity and risk score of 9000.'
+        expect(buildCommonReasonMessage({ rule })).toEqual(
+          'Alert What is in a name created with a medium severity and risk score of 9000.'
         );
       });
     });
