@@ -28,17 +28,18 @@ export function CorrelationsEmptyStatePrompt() {
         body={
           <>
             <EuiText size="s">
-              <FormattedMessage
-                id="xpack.apm.correlations.noCorrelationsTextLine1"
-                defaultMessage="Correlations will only be identified if they have significant impact."
-              />
-            </EuiText>
-            {/* Another EuiText element to enforce a line break */}
-            <EuiText size="s">
-              <FormattedMessage
-                id="xpack.apm.correlations.noCorrelationsTextLine2"
-                defaultMessage="Try selecting another time range or remove any added filter."
-              />
+              <p>
+                <FormattedMessage
+                  id="xpack.apm.correlations.noCorrelationsTextLine1"
+                  defaultMessage="Correlations will only be identified if they have significant impact."
+                />
+              </p>
+              <p>
+                <FormattedMessage
+                  id="xpack.apm.correlations.noCorrelationsTextLine2"
+                  defaultMessage="Try selecting another time range or remove any added filter."
+                />
+              </p>
             </EuiText>
           </>
         }

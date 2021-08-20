@@ -8,12 +8,12 @@
 import { EuiAccordion, EuiCode, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 
 interface Props {
-  log: string[];
-  displayLog?: boolean;
+  logMessages: string[];
 }
-export function CorrelationsLog({ log }: Props) {
+export function CorrelationsLog({ logMessages }: Props) {
   return (
     <EuiAccordion
       id="apmCorrelationsLogAccordion"
@@ -22,12 +22,12 @@ export function CorrelationsLog({ log }: Props) {
       })}
     >
       <EuiPanel color="subdued">
-        {log.map((d, i) => {
-          const splitItem = d.split(': ');
+        {logMessages.map((logMessage, i) => {
+          const [timestamp, message] = logMessage.split(': ');
           return (
             <p key={i}>
               <small>
-                <EuiCode>{splitItem[0]}</EuiCode> {splitItem[1]}
+                <EuiCode>{asAbsoluteDateTime(timestamp)}</EuiCode> {message}
               </small>
             </p>
           );

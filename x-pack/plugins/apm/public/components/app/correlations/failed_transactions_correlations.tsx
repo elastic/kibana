@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { sortBy } from 'lodash';
+import { orderBy } from 'lodash';
 import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -299,16 +299,16 @@ export function FailedTransactionsCorrelations({
     if (!Array.isArray(result.values)) {
       return { correlationTerms: [], sorting: undefined };
     }
-    const sortedTerms = sortBy(
+    const orderedTerms = orderBy(
       result.values,
       // The smaller the p value the higher the impact
       // So we want to sort by the normalized score here
       // which goes from 0 -> 1
-      sortField === 'pValue' ? 'normalizedScore' : sortField
+      sortField === 'pValue' ? 'normalizedScore' : sortField,
+      sortDirection
     );
     return {
-      correlationTerms:
-        sortDirection === 'asc' ? sortedTerms : sortedTerms.reverse(),
+      correlationTerms: orderedTerms,
       sorting: {
         sort: {
           field: sortField,
@@ -415,7 +415,7 @@ export function FailedTransactionsCorrelations({
           <CorrelationsEmptyStatePrompt />
         )}
       </div>
-      {displayLog && <CorrelationsLog log={log} />}
+      {displayLog && <CorrelationsLog logMessages={log} />}
     </div>
   );
 }

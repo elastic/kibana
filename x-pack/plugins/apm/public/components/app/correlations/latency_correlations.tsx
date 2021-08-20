@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
-import { sortBy } from 'lodash';
+import { orderBy } from 'lodash';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -131,15 +131,19 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     setSelectedSignificantTerm,
   ] = useState<MlCorrelationsTerms | null>(null);
 
-  let selectedHistogram = histograms.length > 0 ? histograms[0] : undefined;
+  const selectedHistogram = useMemo(() => {
+    let selected = histograms.length > 0 ? histograms[0] : undefined;
 
-  if (histograms.length > 0 && selectedSignificantTerm !== null) {
-    selectedHistogram = histograms.find(
-      (h) =>
-        h.field === selectedSignificantTerm.fieldName &&
-        h.value === selectedSignificantTerm.fieldValue
-    );
-  }
+    if (histograms.length > 0 && selectedSignificantTerm !== null) {
+      selected = histograms.find(
+        (h) =>
+          h.field === selectedSignificantTerm.fieldName &&
+          h.value === selectedSignificantTerm.fieldValue
+      );
+    }
+    return selected;
+  }, [histograms, selectedSignificantTerm]);
+
   const history = useHistory();
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
@@ -269,7 +273,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     if (!Array.isArray(histograms)) {
       return { histogramTerms: [], sorting: undefined };
     }
-    const sortedTerms = sortBy(
+    const orderedTerms = orderBy(
       histograms.map((d) => {
         return {
           fieldName: d.field,
@@ -279,14 +283,12 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           duplicatedFields: d.duplicatedFields,
         };
       }),
-      sortField
+      sortField,
+      sortDirection
     );
 
     return {
-      histogramTerms:
-        sortDirection === 'asc'
-          ? sortedTerms
-          : (sortedTerms.reverse() as MlCorrelationsTerms[]),
+      histogramTerms: orderedTerms,
       sorting: {
         sort: {
           field: sortField,
@@ -379,7 +381,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           <CorrelationsEmptyStatePrompt />
         )}
       </div>
-      {displayLog && <CorrelationsLog log={log} />}
+      {displayLog && <CorrelationsLog logMessages={log} />}
     </div>
   );
 }
