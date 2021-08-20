@@ -171,7 +171,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     const hardRefresh = async (newUrl: string) => {
-      // We need to add a timestamp to the URL because URL changes now only work with a hard refresh.
+      // We add a timestamp here to force a hard refresh
       await browser.get(newUrl.toString());
       const alert = await browser.getAlert();
       await alert?.accept();
@@ -186,16 +186,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setHistoricalDataRange();
       });
 
-      it('for query parameter', async function () {
+      const changeQuery = async (useHardRefresh: boolean, newQuery: string) => {
+        const currentUrl = await getUrlFromShare();
+        const newUrl = currentUrl.replace(`query:''`, `query:'${newQuery}'`);
+
+        await browser.get(newUrl.toString(), !useHardRefresh);
+        const queryBarContentsAfterRefresh = await queryBar.getQueryString();
+        expect(queryBarContentsAfterRefresh).to.equal(newQuery);
+      };
+
+      it('for query parameter with hard refresh', async function () {
         const currentQuery = await queryBar.getQueryString();
         expect(currentQuery).to.equal('');
-        const currentUrl = await getUrlFromShare();
-        const newUrl = currentUrl.replace(`query:''`, `query:'hi:hello'`);
+        changeQuery(true, 'hi:hello');
+        await queryBar.clearQuery();
+        await queryBar.clickQuerySubmitButton();
+      });
 
-        // We need to add a timestamp to the URL because URL changes now only work with a hard refresh.
-        await browser.get(newUrl.toString());
-        const newQuery = await queryBar.getQueryString();
-        expect(newQuery).to.equal('hi:hello');
+      it('for query parameter with soft refresh', async function () {
+        const currentQuery = await queryBar.getQueryString();
+        expect(currentQuery).to.equal('');
+        changeQuery(false, 'hi:goodbye');
         await queryBar.clearQuery();
         await queryBar.clickQuerySubmitButton();
       });
