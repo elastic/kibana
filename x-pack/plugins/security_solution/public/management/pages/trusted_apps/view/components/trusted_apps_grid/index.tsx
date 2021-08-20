@@ -84,7 +84,8 @@ export const TrustedAppsGrid = memo(() => {
   return (
     <RootWrapper>
       {/* FIXME:PT Delete/Adjust this after dev of card is done */}
-      <ArtifactEntryCard item={listItem[0]} />
+      <ArtifactEntryCard item={listItems[0]} />
+      <div style={{ height: '200px' }} />
 
       <PaginatedContent<TrustedApp, TrustedAppCardType>
         items={listItems as TrustedApp[]}
