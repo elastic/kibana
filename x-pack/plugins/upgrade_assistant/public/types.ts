@@ -8,19 +8,22 @@
 import { DiscoverStart } from 'src/plugins/discover/public';
 import { ManagementSetup } from 'src/plugins/management/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { SharePluginSetup } from 'src/plugins/share/public';
 import { CloudSetup } from '../../cloud/public';
 import { LicensingPluginStart } from '../../licensing/public';
 
 export interface AppServicesContext {
-  cloud?: CloudSetup;
   discover: DiscoverStart;
   data: DataPublicPluginStart;
+  cloud?: CloudSetup;
 }
 
 export interface SetupDependencies {
   management: ManagementSetup;
+  share: SharePluginSetup;
   cloud?: CloudSetup;
 }
+
 export interface StartDependencies {
   licensing: LicensingPluginStart;
   discover: DiscoverStart;

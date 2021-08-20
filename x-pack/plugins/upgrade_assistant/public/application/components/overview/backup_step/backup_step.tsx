@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-
-import { EuiText } from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+
+import { useAppContext } from '../../../app_context';
 
 interface Props {
   nextMajor: number;
@@ -27,12 +29,48 @@ const i18nTexts = {
     }),
 };
 
+const SnapshotRestoreAppLink: React.FunctionComponent = () => {
+  const { share } = useAppContext();
+
+  const [snapshotRestoreUrl, setSnapshotRestoreUrl] = useState<string | undefined>();
+
+  useEffect(() => {
+    const getSnapshotRestoreUrl = async () => {
+      const locator = share.url.locators.get('SNAPSHOT_RESTORE_LOCATOR');
+
+      if (!locator) {
+        return;
+      }
+
+      const url = await locator.getUrl({
+        page: 'snapshots',
+      });
+      setSnapshotRestoreUrl(url);
+    };
+
+    getSnapshotRestoreUrl();
+  }, [share]);
+
+  return (
+    <EuiButton href={snapshotRestoreUrl} data-test-subj="snapshotRestoreLink">
+      <FormattedMessage
+        id="xpack.upgradeAssistant.overview.snapshotRestoreLink"
+        defaultMessage="Create snapshot"
+      />
+    </EuiButton>
+  );
+};
+
 const BackupStep: React.FunctionComponent<Props> = ({ nextMajor }) => {
   return (
     <>
       <EuiText>
         <p>{i18nTexts.backupStepDescription(nextMajor)}</p>
       </EuiText>
+
+      <EuiSpacer size="s" />
+
+      <SnapshotRestoreAppLink />
     </>
   );
 };
