@@ -84,20 +84,16 @@ describe('fake elasticsearch', () => {
   let esServer: http.Server;
   let requestHandler: jest.Mock;
   let kibanaServer: Root;
+  let kibanaHttpServer: http.Server;
 
   beforeAll(async () => {
-    kibanaServer = createRootWithCorePlugins(
-      {
-        logging: { silent: false },
-        status: { allowAnonymous: true },
-      },
-      { verbose: true }
-    );
-    const fakeServer = await createFakeElasticsearchServer();
+    kibanaServer = createRootWithCorePlugins({ status: { allowAnonymous: true } });
+    const fakeServer = createFakeElasticsearchServer();
     esServer = fakeServer.server;
     requestHandler = fakeServer.requestHandler;
 
-    await kibanaServer.preboot();
+    const kibanaPreboot = await kibanaServer.preboot();
+    kibanaHttpServer = kibanaPreboot.http.server.listener; // Mind that we are using the prebootServer at this point because the migration gets hanging, while waiting for ES to be correct
     await kibanaServer.setup();
     kibanaServer.start();
     await fakeServer.firstRequestReceived$.pipe(first()).toPromise(); // Waiting for the first ES request instead of the start to complete, because start can't never complete due to waiting for ES to be ready
@@ -105,22 +101,13 @@ describe('fake elasticsearch', () => {
 
   afterAll(async () => {
     await kibanaServer.shutdown();
-    await esServer.close();
+    await new Promise((resolve, reject) =>
+      esServer.close((err) => (err ? reject(err) : resolve()))
+    );
   });
 
   test('should return unknown product when it cannot perform the Product check (503 response)', async () => {
-    expect(requestHandler).toHaveBeenCalledWith(
-      expect.objectContaining({
-        method: 'GET',
-        url: '/',
-      }),
-      expect.anything()
-    );
-
-    // eslint-disable-next-line
-    const resp = await supertest(kibanaServer['server']['http']['prebootServer']['server']!.listener) // Mind that we are using the prebootServer at this point because the migration gets hanging, while waiting for ES to be correct
-      .get('/api/status')
-      .expect(503);
+    const resp = await supertest(kibanaHttpServer).get('/api/status').expect(503);
     expect(resp.body.status.overall.state).toBe('red');
     expect(resp.body.status.statuses[0].message).toBe(
       'Unable to retrieve version information from Elasticsearch nodes. The client noticed that the server is not Elasticsearch and we do not support this unknown product.'
