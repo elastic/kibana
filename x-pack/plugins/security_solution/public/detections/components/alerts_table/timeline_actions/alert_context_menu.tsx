@@ -218,21 +218,23 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   return (
     <>
       {timelinesUi.getAddToCaseAction(addToCaseActionProps)}
-      <div key="actions-context-menu">
-        <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
-          <EuiPopover
-            id="singlePanel"
-            button={button}
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-            repositionOnScroll
-          >
-            <EuiContextMenuPanel size="s" items={items} />
-          </EuiPopover>
-        </EventsTdContent>
-      </div>
+      {items.length > 0 && (
+        <div key="actions-context-menu">
+          <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+            <EuiPopover
+              id="singlePanel"
+              button={button}
+              isOpen={isPopoverOpen}
+              closePopover={closePopover}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+              repositionOnScroll
+            >
+              <EuiContextMenuPanel size="s" items={items} />
+            </EuiPopover>
+          </EventsTdContent>
+        </div>
+      )}
       {exceptionModalType != null &&
         ruleId != null &&
         ruleName != null &&

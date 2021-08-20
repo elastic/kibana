@@ -209,7 +209,6 @@ export const TakeActionDropdown = React.memo(
         ...hostIsolationActionItems,
         ...investigateInTimelineActionItems,
       ],
-
       [
         tGridEnabled,
         alertsActionItems,
