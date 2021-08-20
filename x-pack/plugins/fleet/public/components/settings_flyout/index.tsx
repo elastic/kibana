@@ -102,6 +102,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
     }
 
     const res: Array<{ message: string; index: number }> = [];
+    const hostIndexes: { [key: string]: number[] } = {};
     value.forEach((val, idx) => {
       if (!val.match(URL_REGEX)) {
         res.push({
@@ -111,7 +112,23 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
           index: idx,
         });
       }
+      const curIndexes = hostIndexes[val] || [];
+      hostIndexes[val] = [...curIndexes, idx];
     });
+
+    Object.values(hostIndexes)
+      .filter(({ length }) => length > 1)
+      .forEach((indexes) => {
+        indexes.forEach((index) =>
+          res.push({
+            message: i18n.translate('xpack.fleet.settings.fleetServerHostsDuplicateError', {
+              defaultMessage: 'Duplicate URL',
+            }),
+            index,
+          })
+        );
+      });
+
     if (res.length) {
       return res;
     }
@@ -132,6 +149,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
 
   const elasticsearchUrlInput = useComboInput('esHostsComboxBox', [], (value) => {
     const res: Array<{ message: string; index: number }> = [];
+    const urlIndexes: { [key: string]: number[] } = {};
     value.forEach((val, idx) => {
       if (!val.match(URL_REGEX)) {
         res.push({
@@ -141,7 +159,23 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
           index: idx,
         });
       }
+      const curIndexes = urlIndexes[val] || [];
+      urlIndexes[val] = [...curIndexes, idx];
     });
+
+    Object.values(urlIndexes)
+      .filter(({ length }) => length > 1)
+      .forEach((indexes) => {
+        indexes.forEach((index) =>
+          res.push({
+            message: i18n.translate('xpack.fleet.settings.elasticHostDuplicateError', {
+              defaultMessage: 'Duplicate URL',
+            }),
+            index,
+          })
+        );
+      });
+
     if (res.length) {
       return res;
     }
