@@ -83,4 +83,16 @@ describe('isUserDataIndex', () => {
 
     expect(isUserDataIndex(fleetAssetIndex)).toBe(false);
   });
+
+  test('metrics-endpoint.metadata_current_default is not data index', () => {
+    const fleetAssetIndex: MatchedItem = {
+      name: 'metrics-endpoint.metadata_current_default',
+      tags: [{ key: 'index', name: 'Index', color: 'default' }],
+      item: {
+        name: 'metrics-endpoint.metadata_current_default',
+        attributes: [ResolveIndexResponseItemIndexAttrs.OPEN],
+      },
+    };
+    expect(isUserDataIndex(fleetAssetIndex)).toBe(false);
+  });
 });

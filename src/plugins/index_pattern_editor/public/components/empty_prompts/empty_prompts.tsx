@@ -30,12 +30,13 @@ interface Props {
 }
 
 export function isUserDataIndex(source: MatchedItem) {
-  // filter out indexes that start with `.`
+  // filter out indices that start with `.`
   if (source.name.startsWith('.')) return false;
 
-  // filter out data streams from FLEET_ASSETS_TO_IGNORE
+  // filter out sources from FLEET_ASSETS_TO_IGNORE
   if (source.name === FLEET_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE) return false;
   if (source.name === FLEET_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE) return false;
+  if (source.name === FLEET_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE) return false;
 
   return true;
 }

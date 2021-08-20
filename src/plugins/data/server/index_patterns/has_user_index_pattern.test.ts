@@ -138,6 +138,22 @@ describe('hasUserIndexPattern', () => {
       expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(false);
     });
 
+    it('returns false if only metrics-endpoint.metadata_current_default index exists', async () => {
+      esClient.indices.resolveIndex.mockReturnValue(
+        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+          indices: [
+            {
+              name: 'metrics-endpoint.metadata_current_default',
+              attributes: ['open'],
+            },
+          ],
+          aliases: [],
+          data_streams: [],
+        })
+      );
+      expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(false);
+    });
+
     it('returns true if any other data stream exists', async () => {
       esClient.indices.resolveIndex.mockReturnValue(
         elasticsearchServiceMock.createSuccessTransportRequestPromise({

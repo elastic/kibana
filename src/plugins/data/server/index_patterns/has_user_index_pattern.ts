@@ -44,8 +44,11 @@ export const hasUserIndexPattern = async ({ esClient, soClient }: Deps): Promise
     name: `${FLEET_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN},${FLEET_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN}`,
   });
 
-  // in case contains indices then assume these are user indices
-  if (resolveResponse.body.indices.length > 0) return true;
+  const hasAnyNonDefaultFleetIndices = resolveResponse.body.indices.some(
+    (ds) => ds.name !== FLEET_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE
+  );
+
+  if (hasAnyNonDefaultFleetIndices) return true;
 
   const hasAnyNonDefaultFleetDataStreams = resolveResponse.body.data_streams.some(
     (ds) =>
