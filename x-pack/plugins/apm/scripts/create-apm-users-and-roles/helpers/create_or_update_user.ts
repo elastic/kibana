@@ -8,61 +8,8 @@
 /* eslint-disable no-console */
 
 import { difference, union } from 'lodash';
-import { callKibana, isAxiosError } from '../call_kibana';
-import { Elasticsearch, Kibana } from '../create_kibana_user_role';
-import { createRole } from './create_role';
-import { powerUserRole } from './power_user_role';
-import { readOnlyUserRole } from './read_only_user_role';
-
-export async function createAPMUsers({
-  kibana: { roleSuffix, hostname },
-  elasticsearch,
-}: {
-  kibana: Kibana;
-  elasticsearch: Elasticsearch;
-}) {
-  const KIBANA_READ_ROLE = `kibana_read_${roleSuffix}`;
-  const KIBANA_POWER_ROLE = `kibana_power_${roleSuffix}`;
-  const APM_USER_ROLE = 'apm_user';
-
-  // roles definition
-  const roles = [
-    {
-      roleName: KIBANA_READ_ROLE,
-      role: readOnlyUserRole,
-    },
-    {
-      roleName: KIBANA_POWER_ROLE,
-      role: powerUserRole,
-    },
-  ];
-
-  // create roles
-  await Promise.all(
-    roles.map(async (role) =>
-      createRole({ elasticsearch, kibanaHostname: hostname, ...role })
-    )
-  );
-
-  // users definition
-  const users = [
-    {
-      username: 'apm_read_user',
-      roles: [APM_USER_ROLE, KIBANA_READ_ROLE],
-    },
-    {
-      username: 'apm_power_user',
-      roles: [APM_USER_ROLE, KIBANA_POWER_ROLE],
-    },
-  ];
-
-  // create users
-  await Promise.all(
-    users.map(async (user) =>
-      createOrUpdateUser({ elasticsearch, kibanaHostname: hostname, user })
-    )
-  );
-}
+import { Elasticsearch, Kibana } from '../create_apm_users_and_roles';
+import { callKibana, isAxiosError } from './call_kibana';
 
 interface User {
   username: string;
@@ -72,27 +19,27 @@ interface User {
   enabled?: boolean;
 }
 
-async function createOrUpdateUser({
+export async function createOrUpdateUser({
   elasticsearch,
-  kibanaHostname,
+  kibana,
   user,
 }: {
   elasticsearch: Elasticsearch;
-  kibanaHostname: string;
+  kibana: Kibana;
   user: User;
 }) {
   const existingUser = await getUser({
     elasticsearch,
-    kibanaHostname,
+    kibana,
     username: user.username,
   });
   if (!existingUser) {
-    return createUser({ elasticsearch, kibanaHostname, newUser: user });
+    return createUser({ elasticsearch, kibana, newUser: user });
   }
 
   return updateUser({
     elasticsearch,
-    kibanaHostname,
+    kibana,
     existingUser,
     newUser: user,
   });
@@ -100,16 +47,16 @@ async function createOrUpdateUser({
 
 async function createUser({
   elasticsearch,
-  kibanaHostname,
+  kibana,
   newUser,
 }: {
   elasticsearch: Elasticsearch;
-  kibanaHostname: string;
+  kibana: Kibana;
   newUser: User;
 }) {
   const user = await callKibana<User>({
     elasticsearch,
-    kibanaHostname,
+    kibana,
     options: {
       method: 'POST',
       url: `/internal/security/users/${newUser.username}`,
@@ -127,12 +74,12 @@ async function createUser({
 
 async function updateUser({
   elasticsearch,
-  kibanaHostname,
+  kibana,
   existingUser,
   newUser,
 }: {
   elasticsearch: Elasticsearch;
-  kibanaHostname: string;
+  kibana: Kibana;
   existingUser: User;
   newUser: User;
 }) {
@@ -149,7 +96,7 @@ async function updateUser({
   // assign role to user
   await callKibana({
     elasticsearch,
-    kibanaHostname,
+    kibana,
     options: {
       method: 'POST',
       url: `/internal/security/users/${username}`,
@@ -162,17 +109,17 @@ async function updateUser({
 
 async function getUser({
   elasticsearch,
-  kibanaHostname,
+  kibana,
   username,
 }: {
   elasticsearch: Elasticsearch;
-  kibanaHostname: string;
+  kibana: Kibana;
   username: string;
 }) {
   try {
     return await callKibana<User>({
       elasticsearch,
-      kibanaHostname,
+      kibana,
       options: {
         url: `/internal/security/users/${username}`,
       },
