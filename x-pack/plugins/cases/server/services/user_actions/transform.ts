@@ -16,6 +16,9 @@ import {
   CaseConnector,
   CaseConnectorRt,
   CaseExternalServiceBasicRt,
+  isCreateConnector,
+  isPush,
+  isUpdateConnector,
   noneConnectorId,
 } from '../../../common';
 import {
@@ -153,10 +156,6 @@ function isCreateCaseConnector(
   }
 }
 
-export function isCreateConnector(action?: string, actionFields?: string[]): boolean {
-  return action === 'create' && actionFields?.includes('connector') === true;
-}
-
 export const ConnectorIdReferenceName: Record<UserActionFieldType, ConnectorIdRefNameType> = {
   [UserActionFieldType.New]: CONNECTOR_ID_REFERENCE_NAME,
   [UserActionFieldType.Old]: USER_ACTION_OLD_ID_REF_NAME,
@@ -239,10 +238,6 @@ function isUpdateCaseConnector(
   }
 }
 
-export function isUpdateConnector(action?: string, actionFields?: string[]): boolean {
-  return action === 'update' && actionFields?.includes('connector') === true;
-}
-
 function transformUpdateConnector(
   connector: CaseConnector,
   fieldType: UserActionFieldType
@@ -270,10 +265,6 @@ function isPushConnector(
   } catch {
     return false;
   }
-}
-
-export function isPush(action?: string, actionFields?: string[]): boolean {
-  return action === 'push-to-service' && actionFields?.includes('pushed') === true;
 }
 
 export const PushConnectorIdReferenceName: Record<

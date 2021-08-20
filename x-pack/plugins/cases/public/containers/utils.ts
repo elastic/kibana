@@ -36,7 +36,11 @@ import * as i18n from './translations';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
 
-export const parseString = (params: string) => {
+export const parseString = (params: string | null) => {
+  if (params == null) {
+    return null;
+  }
+
   try {
     return JSON.parse(params);
   } catch {

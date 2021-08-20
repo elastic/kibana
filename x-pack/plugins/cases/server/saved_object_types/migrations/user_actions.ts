@@ -12,14 +12,9 @@ import {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
 } from '../../../../../../src/core/server';
-import { ConnectorTypes } from '../../../common';
+import { ConnectorTypes, isCreateConnector, isPush, isUpdateConnector } from '../../../common';
 
-import {
-  extractConnectorIdFromJson,
-  isCreateConnector,
-  isPush,
-  isUpdateConnector,
-} from '../../services/user_actions/transform';
+import { extractConnectorIdFromJson } from '../../services/user_actions/transform';
 import { UserActionFieldType } from '../../services/user_actions/types';
 
 interface UserActions {

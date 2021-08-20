@@ -299,7 +299,6 @@ describe('useGetCaseUserActions', () => {
       const pushAction123 = getUserAction(['pushed'], 'push-to-service');
       const push456 = {
         ...basicPushSnake,
-        connector_id: '456',
         connector_name: 'other connector name',
         external_id: 'other_external_id',
       };
@@ -307,6 +306,7 @@ describe('useGetCaseUserActions', () => {
       const pushAction456 = {
         ...getUserAction(['pushed'], 'push-to-service'),
         newValue: JSON.stringify(push456),
+        newValConnectorId: '456',
       };
 
       const userActions = [
@@ -346,7 +346,6 @@ describe('useGetCaseUserActions', () => {
       const pushAction123 = getUserAction(['pushed'], 'push-to-service');
       const push456 = {
         ...basicPushSnake,
-        connector_id: '456',
         connector_name: 'other connector name',
         external_id: 'other_external_id',
       };
@@ -354,6 +353,7 @@ describe('useGetCaseUserActions', () => {
       const pushAction456 = {
         ...getUserAction(['pushed'], 'push-to-service'),
         newValue: JSON.stringify(push456),
+        newValConnectorId: '456',
       };
 
       const userActions = [
@@ -547,45 +547,53 @@ describe('useGetCaseUserActions', () => {
       const pushAction123 = getUserAction(['pushed'], 'push-to-service');
       const push456 = {
         ...basicPushSnake,
-        connector_id: '456',
         connector_name: 'other connector name',
         external_id: 'other_external_id',
       };
 
-      const pushAction456 = {
-        ...getUserAction(['pushed'], 'push-to-service'),
+      const pushAction456 = getUserAction(['pushed'], 'push-to-service', {
         newValue: JSON.stringify(push456),
-      };
+        newValConnectorId: '456',
+      });
 
       const userActions = [
         ...caseUserActions,
-        {
-          ...getUserAction(['connector'], 'update'),
-          oldValue: JSON.stringify({ id: '123', fields: { issueType: '10006', priority: null } }),
-          newValue: JSON.stringify({ id: '123', fields: { issueType: '10006', priority: 'High' } }),
-        },
+        getUserAction(['connector'], 'update', {
+          oldValue: JSON.stringify({ fields: { issueType: '10006', priority: null } }),
+          oldValConnectorId: '123',
+          newValue: JSON.stringify({ fields: { issueType: '10006', priority: 'High' } }),
+          newValConnectorId: '123',
+        }),
         pushAction123,
-        {
-          ...getUserAction(['connector'], 'update'),
-          oldValue: JSON.stringify({ id: '123', fields: { issueType: '10006', priority: 'High' } }),
-          newValue: JSON.stringify({ id: '456', fields: { issueTypes: ['10'], severity: '6' } }),
-        },
+        getUserAction(['connector'], 'update', {
+          oldValue: JSON.stringify({
+            fields: { issueType: '10006', priority: 'High' },
+          }),
+          oldValConnectorId: '123',
+          newValue: JSON.stringify({ fields: { issueTypes: ['10'], severity: '6' } }),
+          newValConnectorId: '456',
+        }),
         pushAction456,
-        {
-          ...getUserAction(['connector'], 'update'),
-          oldValue: JSON.stringify({ id: '456', fields: { issueTypes: ['10'], severity: '6' } }),
-          newValue: JSON.stringify({ id: '123', fields: { issueType: '10006', priority: 'Low' } }),
-        },
-        {
-          ...getUserAction(['connector'], 'update'),
-          oldValue: JSON.stringify({ id: '123', fields: { issueType: '10006', priority: 'Low' } }),
-          newValue: JSON.stringify({ id: '456', fields: { issueTypes: ['10'], severity: '6' } }),
-        },
-        {
-          ...getUserAction(['connector'], 'update'),
-          oldValue: JSON.stringify({ id: '456', fields: { issueTypes: ['10'], severity: '6' } }),
-          newValue: JSON.stringify({ id: '123', fields: { issueType: '10006', priority: 'Low' } }),
-        },
+        getUserAction(['connector'], 'update', {
+          oldValConnectorId: '456',
+          newValConnectorId: '123',
+          oldValue: JSON.stringify({ fields: { issueTypes: ['10'], severity: '6' } }),
+          newValue: JSON.stringify({ fields: { issueType: '10006', priority: 'Low' } }),
+        }),
+        getUserAction(['connector'], 'update', {
+          newValConnectorId: '456',
+          oldValConnectorId: '123',
+          oldValue: JSON.stringify({
+            fields: { issueType: '10006', priority: 'Low' },
+          }),
+          newValue: JSON.stringify({ fields: { issueTypes: ['10'], severity: '6' } }),
+        }),
+        getUserAction(['connector'], 'update', {
+          oldValConnectorId: '456',
+          newValConnectorId: '123',
+          oldValue: JSON.stringify({ fields: { issueTypes: ['10'], severity: '6' } }),
+          newValue: JSON.stringify({ fields: { issueType: '10006', priority: 'Low' } }),
+        }),
       ];
 
       const result = getPushedInfo(userActions, '123');
@@ -617,34 +625,41 @@ describe('useGetCaseUserActions', () => {
       const pushAction123 = getUserAction(['pushed'], 'push-to-service');
       const push456 = {
         ...basicPushSnake,
-        connector_id: '456',
         connector_name: 'other connector name',
         external_id: 'other_external_id',
       };
 
-      const pushAction456 = {
-        ...getUserAction(['pushed'], 'push-to-service'),
+      const pushAction456 = getUserAction(['pushed'], 'push-to-service', {
+        newValConnectorId: '456',
         newValue: JSON.stringify(push456),
-      };
+      });
+
       const userActions = [
         ...caseUserActions,
-        {
-          ...getUserAction(['connector'], 'update'),
-          oldValue: JSON.stringify({ id: '123', fields: { issueType: '10006', priority: null } }),
-          newValue: JSON.stringify({ id: '123', fields: { issueType: '10006', priority: 'High' } }),
-        },
+        getUserAction(['connector'], 'update', {
+          oldValue: JSON.stringify({ fields: { issueType: '10006', priority: null } }),
+          newValue: JSON.stringify({
+            fields: { issueType: '10006', priority: 'High' },
+          }),
+          oldValConnectorId: '123',
+          newValConnectorId: '123',
+        }),
         pushAction123,
-        {
-          ...getUserAction(['connector'], 'update'),
-          oldValue: JSON.stringify({ id: '123', fields: { issueType: '10006', priority: 'High' } }),
-          newValue: JSON.stringify({ id: '456', fields: { issueTypes: ['10'], severity: '6' } }),
-        },
+        getUserAction(['connector'], 'update', {
+          oldValue: JSON.stringify({
+            fields: { issueType: '10006', priority: 'High' },
+          }),
+          newValue: JSON.stringify({ fields: { issueTypes: ['10'], severity: '6' } }),
+          oldValConnectorId: '123',
+          newValConnectorId: '456',
+        }),
         pushAction456,
-        {
-          ...getUserAction(['connector'], 'update'),
-          oldValue: JSON.stringify({ id: '456', fields: { issueTypes: ['10'], severity: '6' } }),
-          newValue: JSON.stringify({ id: '123', fields: { issueType: '10006', priority: 'High' } }),
-        },
+        getUserAction(['connector'], 'update', {
+          oldValue: JSON.stringify({ fields: { issueTypes: ['10'], severity: '6' } }),
+          newValue: JSON.stringify({ fields: { issueType: '10006', priority: 'High' } }),
+          oldValConnectorId: '456',
+          newValConnectorId: '123',
+        }),
       ];
 
       const result = getPushedInfo(userActions, '123');
@@ -675,22 +690,30 @@ describe('useGetCaseUserActions', () => {
     it('Changing other connectors fields does not count as an update', () => {
       const userActions = [
         ...caseUserActions,
-        {
-          ...getUserAction(['connector'], 'update'),
-          oldValue: JSON.stringify({ id: '123', fields: { issueType: '10006', priority: null } }),
-          newValue: JSON.stringify({ id: '123', fields: { issueType: '10006', priority: 'High' } }),
-        },
+        getUserAction(['connector'], 'update', {
+          oldValConnectorId: '123',
+          oldValue: JSON.stringify({ fields: { issueType: '10006', priority: null } }),
+          newValConnectorId: '123',
+          newValue: JSON.stringify({
+            fields: { issueType: '10006', priority: 'High' },
+          }),
+        }),
         getUserAction(['pushed'], 'push-to-service'),
-        {
-          ...getUserAction(['connector'], 'update'),
-          oldValue: JSON.stringify({ id: '123', fields: { issueType: '10006', priority: 'High' } }),
+        getUserAction(['connector'], 'update', {
+          oldValConnectorId: '123',
+          newValConnectorId: '456',
+          oldValue: JSON.stringify({
+            id: '123',
+            fields: { issueType: '10006', priority: 'High' },
+          }),
           newValue: JSON.stringify({ id: '456', fields: { issueTypes: ['10'], severity: '6' } }),
-        },
-        {
-          ...getUserAction(['connector'], 'update'),
-          oldValue: JSON.stringify({ id: '456', fields: { issueTypes: ['10'], severity: '6' } }),
-          newValue: JSON.stringify({ id: '456', fields: { issueTypes: ['10'], severity: '3' } }),
-        },
+        }),
+        getUserAction(['connector'], 'update', {
+          oldValConnectorId: '456',
+          newValConnectorId: '456',
+          newValue: JSON.stringify({ fields: { issueTypes: ['10'], severity: '3' } }),
+          oldValue: JSON.stringify({ fields: { issueTypes: ['10'], severity: '6' } }),
+        }),
       ];
 
       const result = getPushedInfo(userActions, '123');

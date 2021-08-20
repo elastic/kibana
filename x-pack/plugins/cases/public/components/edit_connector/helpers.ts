@@ -12,11 +12,11 @@ export const getConnectorFieldsFromUserActions = (id: string, userActions: CaseU
   try {
     for (const action of [...userActions].reverse()) {
       if (action.actionField.length === 1 && action.actionField[0] === 'connector') {
-        if (isMatchingActionValue(id, action.newValConnectorId, action.newValue)) {
+        if (idMatchesActionValue(id, action.newValConnectorId, action.newValue)) {
           return JSON.parse(action.newValue).fields;
         }
 
-        if (isMatchingActionValue(id, action.oldValConnectorId, action.oldValue)) {
+        if (idMatchesActionValue(id, action.oldValConnectorId, action.oldValue)) {
           return JSON.parse(action.oldValue).fields;
         }
       }
@@ -28,7 +28,7 @@ export const getConnectorFieldsFromUserActions = (id: string, userActions: CaseU
   }
 };
 
-const isMatchingActionValue = (
+const idMatchesActionValue = (
   id: string,
   valueId: string | null,
   encodedValue: string | null

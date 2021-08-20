@@ -15,6 +15,8 @@ import {
   CaseExternalService,
   CaseUserActions,
   ElasticUser,
+  noneConnectorId,
+  ConnectorTypes,
 } from '../../common';
 import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
@@ -58,8 +60,22 @@ export interface UseGetCaseUserActions extends CaseUserActionsState {
   ) => Promise<void>;
 }
 
-const getExternalService = (value: string): CaseExternalService | null =>
-  convertToCamelCase<CaseFullExternalService, CaseExternalService>(parseString(`${value}`));
+const unknownConnectorId = 'unknown';
+
+const getExternalService = (
+  connectorId: string | null,
+  encodedValue: string | null
+): CaseExternalService | null => {
+  const decodedValue = parseString(encodedValue);
+
+  if (decodedValue == null) {
+    return null;
+  }
+  return {
+    ...convertToCamelCase<CaseFullExternalService, CaseExternalService>(decodedValue),
+    connectorId: connectorId ?? unknownConnectorId,
+  };
+};
 
 const groupConnectorFields = (
   userActions: CaseUserActions[]
@@ -69,25 +85,42 @@ const groupConnectorFields = (
       return acc;
     }
 
-    const oldValue = parseString(`${mua.oldValue}`);
-    const newValue = parseString(`${mua.newValue}`);
+    const oldValue = parseString(mua.oldValue);
+    const newValue = parseString(mua.newValue);
 
-    if (oldValue == null || newValue == null) {
+    const oldValueId = getConnectorId(mua.oldValConnectorId, oldValue);
+    const newValueId = getConnectorId(mua.newValConnectorId, newValue);
+
+    if (oldValue == null || newValue == null || oldValueId == null || newValueId == null) {
       return acc;
     }
 
     return {
       ...acc,
-      [oldValue.id]: [
-        ...(acc[oldValue.id] || []),
-        ...(oldValue.id === newValue.id ? [oldValue.fields, newValue.fields] : [oldValue.fields]),
+      [oldValueId]: [
+        ...(acc[oldValueId] || []),
+        ...(oldValueId === newValueId ? [oldValue.fields, newValue.fields] : [oldValue.fields]),
       ],
-      [newValue.id]: [
-        ...(acc[newValue.id] || []),
-        ...(oldValue.id === newValue.id ? [oldValue.fields, newValue.fields] : [newValue.fields]),
+      [newValueId]: [
+        ...(acc[newValueId] || []),
+        ...(oldValueId === newValueId ? [oldValue.fields, newValue.fields] : [newValue.fields]),
       ],
     };
   }, {} as Record<string, Array<CaseConnector['fields']>>);
+
+interface TypeField {
+  type: string;
+}
+
+const getConnectorId = (id: string | null, decodedValue?: unknown | null): string | undefined => {
+  if (id != null) {
+    return id;
+  }
+
+  if (decodedValue != null && (decodedValue as TypeField).type === ConnectorTypes.none) {
+    return noneConnectorId;
+  }
+};
 
 const connectorHasChangedFields = ({
   connectorFieldsBeforePush,
@@ -137,9 +170,7 @@ export const getPushedInfo = (
   const hasDataToPushForConnector = (connectorId: string): boolean => {
     const caseUserActionsReversed = [...caseUserActions].reverse();
     const lastPushOfConnectorReversedIndex = caseUserActionsReversed.findIndex(
-      (mua) =>
-        mua.action === 'push-to-service' &&
-        getExternalService(`${mua.newValue}`)?.connectorId === connectorId
+      (mua) => mua.action === 'push-to-service' && mua.newValConnectorId === connectorId
     );
 
     if (lastPushOfConnectorReversedIndex === -1) {
@@ -190,7 +221,7 @@ export const getPushedInfo = (
       return acc;
     }
 
-    const externalService = getExternalService(`${cua.newValue}`);
+    const externalService = getExternalService(cua.newValConnectorId, cua.newValue);
     if (externalService === null) {
       return acc;
     }

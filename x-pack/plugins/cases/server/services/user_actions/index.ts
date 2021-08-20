@@ -20,17 +20,14 @@ import {
   SUB_CASE_SAVED_OBJECT,
   CaseUserActionResponse,
   CASE_COMMENT_SAVED_OBJECT,
+  isCreateConnector,
+  isPush,
+  isUpdateConnector,
 } from '../../../common';
 import { ClientArgs } from '..';
 import { UserActionFieldType } from './types';
 import { CASE_REF_NAME, COMMENT_REF_NAME, SUB_CASE_REF_NAME } from '../../common';
-import {
-  ConnectorIdReferenceName,
-  isCreateConnector,
-  isPush,
-  isUpdateConnector,
-  PushConnectorIdReferenceName,
-} from './transform';
+import { ConnectorIdReferenceName, PushConnectorIdReferenceName } from './transform';
 import { findConnectorIdReference } from '../transform';
 
 interface GetCaseUserActionArgs extends ClientArgs {
