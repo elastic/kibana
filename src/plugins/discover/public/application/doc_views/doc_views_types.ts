@@ -7,16 +7,9 @@
  */
 
 import { ComponentType } from 'react';
-import { IScope } from 'angular';
+
 import type { estypes } from '@elastic/elasticsearch';
 import { IndexPattern } from '../../../../data/public';
-
-export interface AngularDirective {
-  controller: (...injectedServices: unknown[]) => void;
-  template: string;
-}
-
-export type AngularScope = IScope;
 
 export type ElasticSearchHit<T = unknown> = estypes.SearchHit<T>;
 
