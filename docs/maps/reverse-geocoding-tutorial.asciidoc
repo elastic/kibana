@@ -9,7 +9,7 @@ In this tutorial, you’ll use reverse geocoding to visualize United States Cens
 You’ll learn to:
 
 - Upload custom regions.
-- Reverse geocoding with {es} {ref}/enrich-processor.html[enrich processor].
+- Reverse geocode with the {es} {ref}/enrich-processor.html[enrich processor].
 - Create a map and visualize CSA regions by web traffic.
 
 When you complete this tutorial, you’ll have a map that looks like this:
