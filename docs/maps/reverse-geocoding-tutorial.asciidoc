@@ -60,7 +60,7 @@ image::maps/images/reverse-geocoding-tutorial/csa_regions.jpeg[]
 
 [float]
 === Step 3: Reverse geocoding
-To visualize CSA regions by web log traffic, the web log traffic must contain a CSA region identifier. We will use {es} {ref}/enrich-processor.html[enrich processor] to add CSA region identifiers to Kibana's web logs sample data set. You can skip this step if your source data already contains region identifies.
+To visualize CSA regions by web log traffic, the web log traffic must contain a CSA region identifier. You'll use {es} {ref}/enrich-processor.html[enrich processor] to add CSA region identifiers to the web logs sample data set. You can skip this step if your source data already contains region identifiers.
 
 . Open the main menu, then click *Dev Tools*.
 . In *Console*, create a {ref}/geo-match-enrich-policy-type.html[geo_match enrichment policy]:
