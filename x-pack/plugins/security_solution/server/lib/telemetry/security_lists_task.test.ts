@@ -9,10 +9,13 @@ import { loggingSystemMock } from 'src/core/server/mocks';
 import { TaskStatus } from '../../../../task_manager/server';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 
-import { TelemetryTrustedAppsTask, TelemetryTrustedAppsTaskConstants } from './trusted_apps_task';
-import { createMockTelemetryEventsSender, MockTelemetryTrustedAppTask } from './mocks';
+import {
+  TelemetryExceptionListsTask,
+  TelemetrySecuityListsTaskConstants,
+} from './security_lists_task';
+import { createMockTelemetryEventsSender, MockExceptionListsTask } from './mocks';
 
-describe('test trusted apps telemetry task functionality', () => {
+describe('test exception list telemetry task functionality', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
@@ -20,25 +23,25 @@ describe('test trusted apps telemetry task functionality', () => {
   });
 
   test('the trusted apps task can register', () => {
-    const telemetryTrustedAppsTask = new TelemetryTrustedAppsTask(
+    const telemetryTrustedAppsTask = new TelemetryExceptionListsTask(
       logger,
       taskManagerMock.createSetup(),
       createMockTelemetryEventsSender(true)
     );
 
-    expect(telemetryTrustedAppsTask).toBeInstanceOf(TelemetryTrustedAppsTask);
+    expect(telemetryTrustedAppsTask).toBeInstanceOf(TelemetryExceptionListsTask);
   });
 
-  test('the trusted apps task should be registered', () => {
+  test('the exception list task should be registered', () => {
     const mockTaskManager = taskManagerMock.createSetup();
-    new TelemetryTrustedAppsTask(logger, mockTaskManager, createMockTelemetryEventsSender(true));
+    new TelemetryExceptionListsTask(logger, mockTaskManager, createMockTelemetryEventsSender(true));
 
     expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalled();
   });
 
-  test('the trusted apps task should be scheduled', async () => {
+  test('the exception list task should be scheduled', async () => {
     const mockTaskManagerSetup = taskManagerMock.createSetup();
-    const telemetryTrustedAppsTask = new TelemetryTrustedAppsTask(
+    const telemetryTrustedAppsTask = new TelemetryExceptionListsTask(
       logger,
       mockTaskManagerSetup,
       createMockTelemetryEventsSender(true)
@@ -49,13 +52,13 @@ describe('test trusted apps telemetry task functionality', () => {
     expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalled();
   });
 
-  test('the trusted apps task should not query elastic if telemetry is not opted in', async () => {
+  test('the exception list task should not query elastic if telemetry is not opted in', async () => {
     const mockSender = createMockTelemetryEventsSender(false);
     const mockTaskManager = taskManagerMock.createSetup();
-    new MockTelemetryTrustedAppTask(logger, mockTaskManager, mockSender);
+    new MockExceptionListsTask(logger, mockTaskManager, mockSender);
 
     const mockTaskInstance = {
-      id: TelemetryTrustedAppsTaskConstants.TYPE,
+      id: TelemetrySecuityListsTaskConstants.TYPE,
       runAt: new Date(),
       attempts: 0,
       ownerId: '',
@@ -65,28 +68,28 @@ describe('test trusted apps telemetry task functionality', () => {
       retryAt: new Date(),
       params: {},
       state: {},
-      taskType: TelemetryTrustedAppsTaskConstants.TYPE,
+      taskType: TelemetrySecuityListsTaskConstants.TYPE,
     };
     const createTaskRunner =
       mockTaskManager.registerTaskDefinitions.mock.calls[0][0][
-        TelemetryTrustedAppsTaskConstants.TYPE
+        TelemetrySecuityListsTaskConstants.TYPE
       ].createTaskRunner;
     const taskRunner = createTaskRunner({ taskInstance: mockTaskInstance });
     await taskRunner.run();
     expect(mockSender.fetchTrustedApplications).not.toHaveBeenCalled();
   });
 
-  test('the trusted apps task should  query elastic if telemetry opted in', async () => {
+  test('the exception list task should query elastic if telemetry opted in', async () => {
     const mockSender = createMockTelemetryEventsSender(true);
     const mockTaskManager = taskManagerMock.createSetup();
-    const telemetryTrustedAppsTask = new MockTelemetryTrustedAppTask(
+    const telemetryTrustedAppsTask = new MockExceptionListsTask(
       logger,
       mockTaskManager,
       mockSender
     );
 
     const mockTaskInstance = {
-      id: TelemetryTrustedAppsTaskConstants.TYPE,
+      id: TelemetrySecuityListsTaskConstants.TYPE,
       runAt: new Date(),
       attempts: 0,
       ownerId: '',
@@ -96,11 +99,11 @@ describe('test trusted apps telemetry task functionality', () => {
       retryAt: new Date(),
       params: {},
       state: {},
-      taskType: TelemetryTrustedAppsTaskConstants.TYPE,
+      taskType: TelemetrySecuityListsTaskConstants.TYPE,
     };
     const createTaskRunner =
       mockTaskManager.registerTaskDefinitions.mock.calls[0][0][
-        TelemetryTrustedAppsTaskConstants.TYPE
+        TelemetrySecuityListsTaskConstants.TYPE
       ].createTaskRunner;
     const taskRunner = createTaskRunner({ taskInstance: mockTaskInstance });
     await taskRunner.run();
