@@ -26,7 +26,6 @@ import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_acce
 import { Header } from './ui';
 import {
   ChromeBadge,
-  ChromeBrand,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
   ChromeHelpExtension,
@@ -105,9 +104,6 @@ export class ChromeService {
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
 
-    const appTitle$ = new BehaviorSubject<string>('Kibana');
-    const brand$ = new BehaviorSubject<ChromeBrand>({});
-    const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
     const breadcrumbsAppendExtension$ = new BehaviorSubject<
@@ -210,7 +206,6 @@ export class ChromeService {
         <Header
           loadingCount$={http.getLoadingCount$()}
           application={application}
-          appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
           headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
           badge$={badge$.pipe(takeUntil(this.stop$))}
           basePath={http.basePath}
@@ -234,40 +229,9 @@ export class ChromeService {
         />
       ),
 
-      setAppTitle: (appTitle: string) => appTitle$.next(appTitle),
-
-      getBrand$: () => brand$.pipe(takeUntil(this.stop$)),
-
-      setBrand: (brand: ChromeBrand) => {
-        brand$.next(
-          Object.freeze({
-            logo: brand.logo,
-            smallLogo: brand.smallLogo,
-          })
-        );
-      },
-
       getIsVisible$: () => this.isVisible$,
 
       setIsVisible: (isVisible: boolean) => this.isForceHidden$.next(!isVisible),
-
-      getApplicationClasses$: () =>
-        applicationClasses$.pipe(
-          map((set) => [...set]),
-          takeUntil(this.stop$)
-        ),
-
-      addApplicationClass: (className: string) => {
-        const update = new Set([...applicationClasses$.getValue()]);
-        update.add(className);
-        applicationClasses$.next(update);
-      },
-
-      removeApplicationClass: (className: string) => {
-        const update = new Set([...applicationClasses$.getValue()]);
-        update.delete(className);
-        applicationClasses$.next(update);
-      },
 
       getBadge$: () => badge$.pipe(takeUntil(this.stop$)),
 

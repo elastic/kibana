@@ -50,13 +50,12 @@ const i18nTexts = {
         criticalDeprecations,
       },
     }),
-  getWarningDeprecationMessage: (clusterCount: number, indexCount: number) =>
-    i18n.translate('xpack.upgradeAssistant.esDeprecationStats.totalDeprecationsTooltip', {
+  getWarningDeprecationMessage: (warningDeprecations: number) =>
+    i18n.translate('xpack.upgradeAssistant.esDeprecationStats.warningDeprecationsTooltip', {
       defaultMessage:
-        'This cluster is using {clusterCount} deprecated cluster settings and {indexCount} deprecated index settings',
+        'This cluster has {warningDeprecations} non-critical {warningDeprecations, plural, one {deprecation} other {deprecations}}',
       values: {
-        clusterCount,
-        indexCount,
+        warningDeprecations,
       },
     }),
 };
@@ -65,15 +64,12 @@ export const ESDeprecationStats: FunctionComponent = () => {
   const history = useHistory();
   const { api } = useAppContext();
 
-  const { data: esDeprecations, isLoading, error } = api.useLoadUpgradeStatus();
+  const { data: esDeprecations, isLoading, error } = api.useLoadEsDeprecations();
 
-  const allDeprecations = esDeprecations?.cluster?.concat(esDeprecations?.indices) ?? [];
-  const warningDeprecations = allDeprecations.filter(
-    (deprecation) => deprecation.level === 'warning'
-  );
-  const criticalDeprecations = allDeprecations.filter(
-    (deprecation) => deprecation.level === 'critical'
-  );
+  const warningDeprecations =
+    esDeprecations?.deprecations?.filter((deprecation) => deprecation.isCritical === false) || [];
+  const criticalDeprecations =
+    esDeprecations?.deprecations?.filter((deprecation) => deprecation.isCritical) || [];
 
   const hasWarnings = warningDeprecations.length > 0;
   const hasCritical = criticalDeprecations.length > 0;
@@ -90,7 +86,7 @@ export const ESDeprecationStats: FunctionComponent = () => {
           {error && <EsStatsErrors error={error} />}
         </>
       }
-      {...(!hasNoDeprecations && reactRouterNavigate(history, '/es_deprecations/cluster'))}
+      {...(!hasNoDeprecations && reactRouterNavigate(history, '/es_deprecations'))}
     >
       <EuiSpacer />
       <EuiFlexGroup>
@@ -137,10 +133,7 @@ export const ESDeprecationStats: FunctionComponent = () => {
                   <p>
                     {isLoading
                       ? i18nTexts.loadingText
-                      : i18nTexts.getWarningDeprecationMessage(
-                          esDeprecations?.cluster.length ?? 0,
-                          esDeprecations?.indices.length ?? 0
-                        )}
+                      : i18nTexts.getWarningDeprecationMessage(warningDeprecations.length)}
                   </p>
                 </EuiScreenReaderOnly>
               )}
