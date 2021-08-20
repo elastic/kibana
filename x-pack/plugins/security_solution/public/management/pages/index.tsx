@@ -25,6 +25,7 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { EventFiltersContainer } from './event_filters';
 import { getEndpointListPath } from '../common/routing';
 import { useUserPrivileges } from '../../common/components/user_privileges';
+import { RunningConsoleManagementProvider } from '../components/running_console_magenement_provider';
 
 const NoPermissions = memo(() => {
   return (
@@ -92,16 +93,18 @@ export const ManagementContainer = memo(() => {
   }
 
   return (
-    <Switch>
-      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointTelemetry} />
-      <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyTelemetry} />
-      <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} component={TrustedAppTelemetry} />
-      <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} component={EventFilterTelemetry} />
-      <Route path={MANAGEMENT_PATH} exact>
-        <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
-      </Route>
-      <Route path="*" component={NotFoundPage} />
-    </Switch>
+    <RunningConsoleManagementProvider>
+      <Switch>
+        <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointTelemetry} />
+        <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyTelemetry} />
+        <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} component={TrustedAppTelemetry} />
+        <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} component={EventFilterTelemetry} />
+        <Route path={MANAGEMENT_PATH} exact>
+          <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
+        </Route>
+        <Route path="*" component={NotFoundPage} />
+      </Switch>
+    </RunningConsoleManagementProvider>
   );
 });
 

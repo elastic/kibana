@@ -16,10 +16,7 @@ import {
 } from '@elastic/eui';
 import { SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import {
-  RunningConsoleManagementProvider,
-  useRunningConsoleManagement,
-} from './running_console_magenement_provider/running_console_management_provider';
+import { useRunningConsoleManagement } from './running_console_magenement_provider';
 
 interface AdministrationListPageProps {
   title: React.ReactNode;
@@ -58,7 +55,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
     }, [subtitle]);
 
     return (
-      <RunningConsoleManagementProvider>
+      <>
         <RunningConsoles />
 
         <EuiPageHeader
@@ -73,7 +70,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
         {children}
 
         <SpyRoute pageName={SecurityPageName.administration} />
-      </RunningConsoleManagementProvider>
+      </>
     );
   }
 );
