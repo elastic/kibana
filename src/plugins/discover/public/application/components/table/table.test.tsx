@@ -475,10 +475,7 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
         .length
     ).toBe(0);
 
-    expect(
-      findTestSubject(component, 'tableDocViewRow-customer_first_name')
-        .length
-    ).toBe(1);
+    expect(findTestSubject(component, 'tableDocViewRow-customer_first_name').length).toBe(1);
     expect(
       findTestSubject(component, 'tableDocViewRow-customer_first_name.nickname-multifieldBadge')
         .length
