@@ -30,7 +30,7 @@ const Icon = styled(EuiIcon)`
   transform: scale(${({ color }) => (color === 'primary' ? 1.4 : 1)});
 `;
 
-export const CtiInnerPanel = ({
+export const InnerLinkPanel = ({
   color,
   title,
   body,

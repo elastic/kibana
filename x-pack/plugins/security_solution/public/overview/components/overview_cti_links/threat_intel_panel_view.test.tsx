@@ -68,7 +68,7 @@ describe('ThreatIntelPanelView', () => {
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
             <ThreatIntelPanelView
-              {...{ ...mockThreatIntelPanelViewProps, isDashboardPluginDisabled: true }}
+              {...{ ...mockThreatIntelPanelViewProps, isPluginDisabled: true }}
             />
           </ThemeProvider>
         </I18nProvider>
@@ -84,7 +84,7 @@ describe('ThreatIntelPanelView', () => {
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
             <ThreatIntelPanelView
-              {...{ ...mockThreatIntelPanelViewProps, isDashboardPluginDisabled: false }}
+              {...{ ...mockThreatIntelPanelViewProps, isPluginDisabled: false }}
             />
           </ThemeProvider>
         </I18nProvider>

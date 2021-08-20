@@ -64,3 +64,15 @@ export const DANGER_BUTTON = i18n.translate(
     defaultMessage: 'Enable Module',
   }
 );
+
+export const LINK_COPY = i18n.translate('xpack.securitySolution.overview.ctiViewSourceDashboard', {
+  defaultMessage: 'View source dashboard',
+});
+
+export const PANEL_TITLE = i18n.translate('xpack.securitySolution.overview.ctiDashboardTitle', {
+  defaultMessage: 'Threat Intelligence',
+});
+
+export const VIEW_DASHBOARD = i18n.translate('xpack.securitySolution.overview.ctiViewDasboard', {
+  defaultMessage: 'View dashboard',
+});

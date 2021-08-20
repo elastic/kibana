@@ -31,7 +31,7 @@ export const mockCtiEventCountsResponse = {
 };
 
 export const mockCtiLinksResponse = {
-  isDashboardPluginDisabled: false,
+  isPluginDisabled: false,
   buttonHref: '/button',
   listItems: [
     { title: 'abuseurl', count: 1, path: '/dashboard_path_abuseurl' },
@@ -45,7 +45,7 @@ export const mockCtiLinksResponse = {
 };
 
 export const mockEmptyCtiLinksResponse = {
-  isDashboardPluginDisabled: false,
+  isPluginDisabled: false,
   buttonHref: '/button',
   listItems: [
     { title: 'abuseurl', count: 0, path: '/dashboard_path_abuseurl' },
@@ -72,7 +72,7 @@ export const mockCtiWithEventsProps = {
 
 export const mockThreatIntelPanelViewProps = {
   buttonHref: '/button_href',
-  isDashboardPluginDisabled: false,
+  isPluginDisabled: false,
   listItems: mockCtiLinksResponse.listItems,
   splitPanel: undefined,
   totalEventCount: 1337,

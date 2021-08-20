@@ -8,13 +8,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useKibana } from '../../../common/lib/kibana';
 import {
-  CtiListItem,
   TAG_REQUEST_BODY,
   createLinkFromDashboardSO,
-  getListItemsWithoutLinks,
-  isCtiListItem,
+  getCtiListItemsWithoutLinks,
   isOverviewItem,
+  EMPTY_LIST_ITEMS,
 } from './helpers';
+import { LinkPanelListItem, isLinkPanelListItem } from '../../components/link_panel';
 
 export const useCtiDashboardLinks = (
   eventCountsByDataset: { [key: string]: number },
@@ -25,15 +25,15 @@ export const useCtiDashboardLinks = (
   const savedObjectsClient = useKibana().services.savedObjects.client;
 
   const [buttonHref, setButtonHref] = useState<string | undefined>();
-  const [listItems, setListItems] = useState<CtiListItem[]>([]);
+  const [listItems, setListItems] = useState<LinkPanelListItem[]>(EMPTY_LIST_ITEMS);
 
-  const [isDashboardPluginDisabled, setIsDashboardPluginDisabled] = useState(false);
+  const [isPluginDisabled, setIsDashboardPluginDisabled] = useState(false);
   const handleDisabledPlugin = useCallback(() => {
-    if (!isDashboardPluginDisabled) {
+    if (!isPluginDisabled) {
       setIsDashboardPluginDisabled(true);
     }
-    setListItems(getListItemsWithoutLinks(eventCountsByDataset));
-  }, [setIsDashboardPluginDisabled, setListItems, eventCountsByDataset, isDashboardPluginDisabled]);
+    setListItems(getCtiListItemsWithoutLinks(eventCountsByDataset));
+  }, [setIsDashboardPluginDisabled, setListItems, eventCountsByDataset, isPluginDisabled]);
 
   const handleTagsReceived = useCallback(
     (TagsSO?) => {
@@ -75,7 +75,7 @@ export const useCtiDashboardLinks = (
                 )
               );
               const items = DashboardsSO.savedObjects
-                ?.reduce((acc: CtiListItem[], dashboardSO, i) => {
+                ?.reduce((acc: LinkPanelListItem[], dashboardSO, i) => {
                   const item = createLinkFromDashboardSO(
                     dashboardSO,
                     eventCountsByDataset,
@@ -83,7 +83,7 @@ export const useCtiDashboardLinks = (
                   );
                   if (isOverviewItem(item)) {
                     setButtonHref(item.path);
-                  } else if (isCtiListItem(item)) {
+                  } else if (isLinkPanelListItem(item)) {
                     acc.push(item);
                   }
                   return acc;
@@ -102,14 +102,14 @@ export const useCtiDashboardLinks = (
     from,
     handleDisabledPlugin,
     handleTagsReceived,
-    isDashboardPluginDisabled,
+    isPluginDisabled,
     savedObjectsClient,
     to,
   ]);
 
   return {
     buttonHref,
-    isDashboardPluginDisabled,
+    isPluginDisabled,
     listItems,
   };
 };
