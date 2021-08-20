@@ -24,6 +24,22 @@ export const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   .euiTableHeaderCell .euiTableCellContent {
     padding: 0;
   }
+
+  .flyoutOverviewDescription {
+    .hoverActions-active {
+      .timelines__hoverActionButton,
+      .securitySolution__hoverActionButton {
+        opacity: 1;
+      }
+    }
+
+    &:hover {
+      .timelines__hoverActionButton,
+      .securitySolution__hoverActionButton {
+        opacity: 1;
+      }
+    }
+  }
 `;
 
 export const SummaryViewComponent: React.FC<{

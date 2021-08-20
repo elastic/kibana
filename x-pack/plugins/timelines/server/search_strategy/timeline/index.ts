@@ -5,14 +5,25 @@
  * 2.0.
  */
 
-import { ALERT_OWNER, RULE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
+import {
+  AlertConsumers as CONSUMERS,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_TYPE_ID,
+  SPACE_IDS,
+} from '@kbn/rule-data-utils';
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import { from } from 'rxjs';
-import {
-  isValidFeatureId,
-  mapConsumerToIndexName,
+
+import type {
   AlertConsumers,
-} from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
+  mapConsumerToIndexName as mapConsumerToIndexNameTyped,
+  isValidFeatureId as isValidFeatureIdTyped,
+} from '@kbn/rule-data-utils';
+import {
+  mapConsumerToIndexName as mapConsumerToIndexNameNonTyped,
+  isValidFeatureId as isValidFeatureIdNonTyped,
+  // @ts-expect-error
+} from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 
 import {
   AlertingAuthorizationEntity,
@@ -37,6 +48,9 @@ import {
   ENHANCED_ES_SEARCH_STRATEGY,
   ISearchOptions,
 } from '../../../../../../src/plugins/data/common';
+
+const mapConsumerToIndexName: typeof mapConsumerToIndexNameTyped = mapConsumerToIndexNameNonTyped;
+const isValidFeatureId: typeof isValidFeatureIdTyped = isValidFeatureIdNonTyped;
 
 export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTypes>(
   data: PluginStart,
@@ -129,7 +143,13 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
 }) => {
   // Based on what solution alerts you want to see, figures out what corresponding
   // index to query (ex: siem --> .alerts-security.alerts)
-  const indices = alertConsumers.flatMap((consumer) => mapConsumerToIndexName[consumer]);
+  const indices = alertConsumers.flatMap((consumer) => {
+    if (consumer === CONSUMERS.SIEM) {
+      return request.defaultIndex ?? request.indexType;
+    }
+
+    return `${mapConsumerToIndexName[consumer]}`;
+  });
   const requestWithAlertsIndices = { ...request, defaultIndex: indices, indexName: indices };
 
   // Note: Alerts RBAC are built off of the alerting's authorization class, which
@@ -140,8 +160,8 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
       type: AlertingAuthorizationFilterType.ESDSL,
       // Not passing in values, these are the paths for these fields
       fieldNames: {
-        consumer: ALERT_OWNER,
-        ruleTypeId: RULE_ID,
+        consumer: ALERT_RULE_CONSUMER,
+        ruleTypeId: ALERT_RULE_TYPE_ID,
         spaceIds: SPACE_IDS,
       },
     });

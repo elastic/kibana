@@ -17,6 +17,8 @@ export interface EditPolicyContextValue {
     canUseSearchableSnapshot: () => boolean;
   };
   policyName?: string;
+  indices: string[];
+  indexTemplates: string[];
 }
 
 const EditPolicyContext = createContext<EditPolicyContextValue>(null as any);
