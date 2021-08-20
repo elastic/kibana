@@ -10,16 +10,16 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
-import type { AlertStatus } from '../../../common/typings';
+import type { AlertWorkflowStatus } from '../../../common/typings';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useFetcher } from '../../hooks/use_fetcher';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
+import { callObservabilityApi } from '../../services/call_observability_api';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTableTGrid } from './alerts_table_t_grid';
-import { StatusFilter } from './status_filter';
-import { useFetcher } from '../../hooks/use_fetcher';
-import { callObservabilityApi } from '../../services/call_observability_api';
+import { WorkflowStatusFilter } from './workflow_status_filter';
 import './styles.scss';
 
 export interface TopAlert {
@@ -44,7 +44,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
       rangeFrom = 'now-15m',
       rangeTo = 'now',
       kuery = 'kibana.alert.status: "open"', // TODO change hardcoded values as part of another PR
-      status = 'open',
+      workflowStatus = 'open',
     },
   } = routeParams;
 
@@ -72,10 +72,10 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
     [dynamicIndexPatternResp]
   );
 
-  const setStatusFilter = useCallback(
-    (value: AlertStatus) => {
+  const setWorkflowStatusFilter = useCallback(
+    (value: AlertWorkflowStatus) => {
       const nextSearchParams = new URLSearchParams(history.location.search);
-      nextSearchParams.set('status', value);
+      nextSearchParams.set('workflowStatus', value);
       history.push({
         ...history.location,
         search: nextSearchParams.toString(),
@@ -172,27 +172,25 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             onQueryChange={onQueryChange}
           />
         </EuiFlexItem>
+
         <EuiFlexItem>
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem>
-              <EuiFlexGroup justifyContent="flexStart">
-                <EuiFlexItem grow={false}>
-                  <StatusFilter status={status} onChange={setStatusFilter} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <AlertsTableTGrid
-                indexName={dynamicIndexPattern.length > 0 ? dynamicIndexPattern[0].title : ''}
-                rangeFrom={rangeFrom}
-                rangeTo={rangeTo}
-                kuery={kuery}
-                status={status}
-                setRefetch={setRefetch}
-                addToQuery={addToQuery}
-              />
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <WorkflowStatusFilter status={workflowStatus} onChange={setWorkflowStatusFilter} />
             </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <AlertsTableTGrid
+            indexName={dynamicIndexPattern.length > 0 ? dynamicIndexPattern[0].title : ''}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            kuery={kuery}
+            workflowStatus={workflowStatus}
+            setRefetch={setRefetch}
+            addToQuery={addToQuery}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>
