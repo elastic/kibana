@@ -1484,6 +1484,7 @@ export class IndexPatternsService {
     getIds: (refresh?: boolean) => Promise<string[]>;
     getIdsWithTitle: (refresh?: boolean) => Promise<IndexPatternListItem[]>;
     getTitles: (refresh?: boolean) => Promise<string[]>;
+    hasUserIndexPattern(): Promise<boolean>;
     // (undocumented)
     migrate(indexPattern: IndexPattern, newTitle: string): Promise<this>;
     refreshFields: (indexPattern: IndexPattern) => Promise<void>;
