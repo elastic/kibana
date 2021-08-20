@@ -9,14 +9,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import {
-  KibanaPageTemplate,
-  overviewPageActions,
-  OverviewPageFooter,
-} from '../../../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplate, OverviewPageFooter } from '../../../../kibana_react/public';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import { FeatureCatalogueCategory } from '../../services';
 import { getServices } from '../kibana_services';
@@ -75,15 +70,9 @@ export class Home extends Component {
         }
       }, 500);
 
-      const resp = await this.props.find({
-        type: 'index-pattern',
-        fields: ['title'],
-        search: `*`,
-        search_fields: ['title'],
-        perPage: 1,
-      });
+      const { isNewInstance } = await this.props.http.get('/internal/home/new_instance_status');
 
-      this.endLoading({ isNewKibanaInstance: resp.total === 0 });
+      this.endLoading({ isNewKibanaInstance: isNewInstance });
     } catch (err) {
       // An error here is relatively unimportant, as it only means we don't provide
       // some UI niceties.
@@ -113,10 +102,10 @@ export class Home extends Component {
       .sort((directoryA, directoryB) => directoryA.order - directoryB.order);
 
   renderNormal() {
-    const { addBasePath, solutions, directories } = this.props;
+    const { addBasePath, solutions } = this.props;
     const { application, trackUiMetric } = getServices();
+    const isDarkMode = getServices().uiSettings?.get('theme:darkMode') || false;
     const devTools = this.findDirectoryById('console');
-    const addDataFeatures = this.getFeaturesByCategory(FeatureCatalogueCategory.DATA);
     const manageDataFeatures = this.getFeaturesByCategory(FeatureCatalogueCategory.ADMIN);
 
     // Show card for console if none of the manage data plugins are available, most likely in OSS
@@ -128,41 +117,20 @@ export class Home extends Component {
       <KibanaPageTemplate
         data-test-subj="homeApp"
         pageHeader={{
-          pageTitle: <FormattedMessage id="home.header.title" defaultMessage="Home" />,
-          rightSideItems: overviewPageActions({
-            addBasePath,
-            application,
-            showDevToolsLink: true,
-            showManagementLink: true,
-          }),
+          bottomBorder: false,
+          pageTitle: <FormattedMessage id="home.header.title" defaultMessage="Welcome home" />,
         }}
         template="empty"
       >
-        {solutions.length ? (
-          <SolutionsSection
-            addBasePath={addBasePath}
-            solutions={solutions}
-            directories={directories}
-          />
-        ) : null}
+        <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
 
-        <EuiFlexGroup
-          className={`homData ${
-            addDataFeatures.length === 1 && manageDataFeatures.length === 1
-              ? 'homData--compressed'
-              : 'homData--expanded'
-          }`}
-        >
-          <EuiFlexItem>
-            <AddData addBasePath={addBasePath} features={addDataFeatures} />
-          </EuiFlexItem>
+        <AddData addBasePath={addBasePath} application={application} isDarkMode={isDarkMode} />
 
-          <EuiFlexItem>
-            <ManageData addBasePath={addBasePath} features={manageDataFeatures} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiHorizontalRule margin="xl" aria-hidden="true" />
+        <ManageData
+          addBasePath={addBasePath}
+          application={application}
+          features={manageDataFeatures}
+        />
 
         <OverviewPageFooter
           addBasePath={addBasePath}
@@ -183,6 +151,7 @@ export class Home extends Component {
   renderLoading() {
     return '';
   }
+
   renderWelcome() {
     return (
       <Welcome
@@ -211,27 +180,11 @@ export class Home extends Component {
 
 Home.propTypes = {
   addBasePath: PropTypes.func.isRequired,
-  directories: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-      subtitle: PropTypes.string,
-      description: PropTypes.string.isRequired,
-      icon: PropTypes.string.isRequired,
-      path: PropTypes.string.isRequired,
-      showOnHomePage: PropTypes.bool.isRequired,
-      category: PropTypes.string.isRequired,
-      order: PropTypes.number,
-      solutionId: PropTypes.string,
-    })
-  ),
   solutions: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       title: PropTypes.string.isRequired,
-      subtitle: PropTypes.string.isRequired,
       description: PropTypes.string,
-      appDescriptions: PropTypes.arrayOf(PropTypes.string).isRequired,
       icon: PropTypes.string.isRequired,
       path: PropTypes.string.isRequired,
       order: PropTypes.number,
