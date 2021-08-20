@@ -47,8 +47,10 @@ export async function enqueueJob(
       created_by: user ? user.username : false,
       payload: job,
       meta: {
+        // telemetry fields
         objectType: jobParams.objectType,
         layout: jobParams.layout?.id,
+        isDeprecated: job.isDeprecated,
       },
     })
   );
