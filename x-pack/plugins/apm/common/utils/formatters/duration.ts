@@ -38,10 +38,10 @@ type TimeFormatterBuilder = (max: number, threshold?: number) => TimeFormatter;
 // threshold defines the value from which upwards there should be no decimal places.
 function getUnitLabelAndConvertedValue(
   unitKey: DurationTimeUnit,
-  microsecondsValue: number,
+  value: number,
   threshold: number = 10
 ) {
-  const millisecondsValue = microsecondsValue / 1000;
+  const ms = value / 1000;
 
   switch (unitKey) {
     case 'hours': {
@@ -50,7 +50,7 @@ function getUnitLabelAndConvertedValue(
           defaultMessage: 'h',
         }),
         convertedValue: asDecimalOrInteger(
-          moment.duration(millisecondsValue).asHours(),
+          moment.duration(ms).asHours(),
           threshold
         ),
       };
@@ -61,7 +61,7 @@ function getUnitLabelAndConvertedValue(
           defaultMessage: 'min',
         }),
         convertedValue: asDecimalOrInteger(
-          moment.duration(millisecondsValue).asMinutes(),
+          moment.duration(ms).asMinutes(),
           threshold
         ),
       };
@@ -72,7 +72,7 @@ function getUnitLabelAndConvertedValue(
           defaultMessage: 's',
         }),
         convertedValue: asDecimalOrInteger(
-          moment.duration(millisecondsValue).asSeconds(),
+          moment.duration(ms).asSeconds(),
           threshold
         ),
       };
@@ -83,7 +83,7 @@ function getUnitLabelAndConvertedValue(
           defaultMessage: 'ms',
         }),
         convertedValue: asDecimalOrInteger(
-          moment.duration(millisecondsValue).asMilliseconds(),
+          moment.duration(ms).asMilliseconds(),
           threshold
         ),
       };
@@ -93,7 +93,7 @@ function getUnitLabelAndConvertedValue(
         unitLabel: i18n.translate('xpack.apm.formatters.microsTimeUnitLabel', {
           defaultMessage: 'μs',
         }),
-        convertedValue: asInteger(microsecondsValue),
+        convertedValue: asInteger(value),
       };
     }
   }
