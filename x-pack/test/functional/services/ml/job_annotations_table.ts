@@ -341,5 +341,51 @@ export function MachineLearningJobAnnotationsProvider({ getService }: FtrProvide
         await this.setAnnotationText(text);
       });
     }
+
+    public async assertAnnotationsDelayedDataChartActionExists() {
+      await retry.tryForTime(1000, async () => {
+        await testSubjects.existOrFail('mlAnnotationsActionViewDatafeed');
+      });
+    }
+
+    public async ensureAllMenuPopoversClosed() {
+      await retry.tryForTime(5000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        const popoverExists = await find.existsByCssSelector('euiContextMenuPanel');
+        expect(popoverExists).to.eql(false, 'All popovers should be closed');
+      });
+    }
+
+    public async ensureAnnotationsActionsMenuOpen(annotationId: string) {
+      await retry.tryForTime(10 * 1000, async () => {
+        await this.ensureAllMenuPopoversClosed();
+        await testSubjects.click(
+          `mlAnnotationsTableRow row-${annotationId} > euiCollapsedItemActionsButton`,
+          30 * 1000
+        );
+        await find.existsByCssSelector('euiContextMenuPanel');
+      });
+    }
+
+    public async openDatafeedChartFlyout(annotationId: string, jobId: string) {
+      await retry.tryForTime(10 * 1000, async () => {
+        await this.ensureAnnotationsActionsMenuOpen(annotationId);
+        await this.assertAnnotationsDelayedDataChartActionExists();
+
+        await testSubjects.clickWhenNotDisabled('mlAnnotationsActionViewDatafeed');
+        await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyout');
+        await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyoutTitle');
+
+        const title = await testSubjects.getVisibleText('mlAnnotationsViewDatafeedFlyoutTitle');
+        expect(title).to.eql(
+          `Datafeed chart for ${jobId}`,
+          `Expected annotations flyout title to be 'Datafeed chart for ${jobId}' but got ${title}`
+        );
+      });
+    }
+
+    public async assertDelayedDataChartExists() {
+      await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyoutChart');
+    }
   })();
 }
