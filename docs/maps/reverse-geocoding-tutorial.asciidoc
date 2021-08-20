@@ -146,7 +146,7 @@ Your web log data now contains `csa.GEOID` and `csa.NAME` fields from the matchi
 image::maps/images/reverse-geocoding-tutorial/discover_enriched_web_log.png[]
 
 [float]
-=== Step 3: Visualize Combined Statistical Area (CSA) regions by web traffic
+=== Step 4: Visualize Combined Statistical Area (CSA) regions by web traffic
 Now that our web traffic contains CSA region identifiers, lets visualize CSA regions by web traffic.
 
 . Open the main menu, and click *Maps*.
