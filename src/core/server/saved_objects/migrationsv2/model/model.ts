@@ -740,7 +740,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'TRANSFORMED_DOCUMENTS_BULK_INDEX') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (stateP.currentBatch < stateP.transformedDocBatches.length) {
+      if (stateP.currentBatch + 1 < stateP.transformedDocBatches.length) {
         return {
           ...stateP,
           controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',

@@ -21,7 +21,7 @@ import { Root } from '../../../root';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 
-const logFilePath = Path.join(__dirname, 'migration_test_kibana_from_v1.log');
+const logFilePath = Path.join(__dirname, 'migration_test_migration_from_v1.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
 async function removeLogFile() {
