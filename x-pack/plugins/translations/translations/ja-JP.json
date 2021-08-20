@@ -25174,7 +25174,6 @@
     "xpack.uptime.overview.alerts.enabled.failed": "ルールを有効にできません。",
     "xpack.uptime.overview.alerts.enabled.success": "ルールが正常に有効にされました。 ",
     "xpack.uptime.overview.alerts.enabled.success.description": "この監視が停止しているときには、メッセージが {actionConnectors} に送信されます。",
-    "xpack.uptime.overview.filterButton.label": "{title}フィルターのフィルターグループを展開",
     "xpack.uptime.overview.heading": "監視",
     "xpack.uptime.overview.pageHeader.syntheticsCallout.announcementLink": "お知らせを読む",
     "xpack.uptime.overview.pageHeader.syntheticsCallout.content": "アップタイムは、スクリプト化された複数ステップの可用性チェックのサポートをプレビューしています。つまり、単に単一のページのアップ/ダウンのチェックだけではなく、Webページの要素を操作したり、全体的な可用性を確認したりできます (購入やシステムへのサインインなど) 。詳細については以下をクリックしてください。これらの機能を先駆けて使用したい場合は、プレビュー合成エージェントをダウンロードし、アップタイムでチェックを表示できます。",
