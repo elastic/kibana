@@ -18,8 +18,3 @@ export {
 } from '../../../../../fleet/common';
 
 export type PackagePolicyVars = Record<string, PackagePolicyConfigRecordEntry>;
-
-export type OnFormChangeFn = (
-  newVars: PackagePolicyVars,
-  isValid: boolean
-) => void;

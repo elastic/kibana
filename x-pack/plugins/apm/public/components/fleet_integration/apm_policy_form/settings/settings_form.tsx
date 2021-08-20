@@ -83,7 +83,7 @@ function FormRow({
 }
 interface Props {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   settings: SettingDefinition[];
   vars?: PackagePolicyVars;
   onChange: FormRowOnChange;
@@ -104,11 +104,13 @@ export function SettingsForm({
             <h3>{title}</h3>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s" color="subdued">
-            {subtitle}
-          </EuiText>
-        </EuiFlexItem>
+        {subtitle && (
+          <EuiFlexItem>
+            <EuiText size="s" color="subdued">
+              {subtitle}
+            </EuiText>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiHorizontalRule margin="s" />
 
