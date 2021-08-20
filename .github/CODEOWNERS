@@ -29,9 +29,9 @@
 /src/plugins/vis_type_timelion/ @elastic/kibana-app
 /src/plugins/vis_type_timeseries/ @elastic/kibana-app
 /src/plugins/vis_type_vega/ @elastic/kibana-app
-/src/plugins/vis_type_vislib/ @elastic/kibana-app
-/src/plugins/vis_type_xy/ @elastic/kibana-app
-/src/plugins/vis_type_pie/ @elastic/kibana-app
+/src/plugins/vis_types/vislib/ @elastic/kibana-app
+/src/plugins/vis_types/xy/ @elastic/kibana-app
+/src/plugins/vis_types/pie/ @elastic/kibana-app
 /src/plugins/visualize/ @elastic/kibana-app
 /src/plugins/visualizations/ @elastic/kibana-app
 /src/plugins/url_forwarding/ @elastic/kibana-app
