@@ -30,8 +30,18 @@ export const TableRowActions = memo<TableRowActionProps>(({ endpointMetadata }) 
   const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
 
   const menuItems: EuiContextMenuPanelProps['items'] = useMemo(() => {
-    return endpointActions.map((itemProps) => {
-      return <ContextMenuItemNavByRouter {...itemProps} onClick={handleCloseMenu} />;
+    return endpointActions.map(({ onClick, ...itemProps }) => {
+      return (
+        <ContextMenuItemNavByRouter
+          {...itemProps}
+          onClick={(ev) => {
+            handleCloseMenu();
+            if (onClick) {
+              return onClick(ev);
+            }
+          }}
+        />
+      );
     });
   }, [handleCloseMenu, endpointActions]);
 
