@@ -50,10 +50,7 @@ const i18nTexts = {
 
 const UpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }) => {
   const { cloud } = useKibana().services;
-
   const isCloudEnabled: boolean = Boolean(cloud?.isCloudEnabled);
-  const cloudDeploymentUrl: string = `${cloud?.baseUrl ?? ''}/deployments/${cloud?.cloudId ?? ''}`;
-
   let callToAction;
 
   if (isCloudEnabled) {
@@ -61,7 +58,7 @@ const UpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }) => {
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButton
-            href={cloudDeploymentUrl}
+            href={cloud!.deploymentUrl}
             target="_blank"
             data-test-subj="upgradeSetupCloudLink"
             iconSide="right"
