@@ -9,7 +9,8 @@ import { act } from 'react-dom/test-utils';
 import { deprecationsServiceMock } from 'src/core/public/mocks';
 
 import * as mockedResponses from './mocked_responses';
-import { OverviewTestBed, setupOverviewPage, setupEnvironment } from '../../helpers';
+import { setupEnvironment } from '../../helpers';
+import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
 describe('Overview - Fix deprecated settings step', () => {
   let testBed: OverviewTestBed;
@@ -46,27 +47,7 @@ describe('Overview - Fix deprecated settings step', () => {
       expect(find('esStatsPanel.criticalDeprecations').text()).toContain('1');
     });
 
-    test('Handles network failure', async () => {
-      const error = {
-        statusCode: 500,
-        error: 'Cant retrieve deprecations error',
-        message: 'Cant retrieve deprecations error',
-      };
-
-      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
-
-      await act(async () => {
-        testBed = await setupOverviewPage();
-      });
-
-      const { component, exists } = testBed;
-
-      component.update();
-
-      expect(exists('esRequestErrorIconTip')).toBe(true);
-    });
-
-    test('Hides deprecation counts if it doesnt have any', async () => {
+    test(`Hides deprecation counts if it doesn't have any`, async () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(mockedResponses.esDeprecationsEmpty);
 
       await act(async () => {
@@ -78,7 +59,7 @@ describe('Overview - Fix deprecated settings step', () => {
       expect(exists('noDeprecationsLabel')).toBe(true);
     });
 
-    test('Stats panel navigates to deprecations list if clicked', () => {
+    test('Stats panel contains link to ES deprecations page', () => {
       const { component, exists, find } = testBed;
 
       component.update();
@@ -87,7 +68,7 @@ describe('Overview - Fix deprecated settings step', () => {
       expect(find('esStatsPanel').find('a').props().href).toBe('/es_deprecations');
     });
 
-    describe('Renders ES errors', () => {
+    describe('Renders errors', () => {
       test('handles network failure', async () => {
         const error = {
           statusCode: 500,
@@ -177,7 +158,7 @@ describe('Overview - Fix deprecated settings step', () => {
   });
 
   describe('Kibana deprecations', () => {
-    test('Show deprecation warning and critical counts', () => {
+    test('Shows deprecation warning and critical counts', () => {
       const { exists, find } = testBed;
 
       expect(exists('kibanaStatsPanel')).toBe(true);
@@ -185,26 +166,7 @@ describe('Overview - Fix deprecated settings step', () => {
       expect(find('kibanaStatsPanel.criticalDeprecations').text()).toContain('1');
     });
 
-    test('Handles network failure', async () => {
-      await act(async () => {
-        const deprecationService = deprecationsServiceMock.createStartContract();
-        deprecationService.getAllDeprecations = jest
-          .fn()
-          .mockRejectedValue(new Error('Internal Server Error'));
-
-        testBed = await setupOverviewPage({
-          deprecations: deprecationService,
-        });
-      });
-
-      const { component, exists } = testBed;
-
-      component.update();
-
-      expect(exists('kibanaRequestErrorIconTip')).toBe(true);
-    });
-
-    test('Hides deprecation count if it doesnt have any', async () => {
+    test(`Hides deprecation count if it doesn't have any`, async () => {
       await act(async () => {
         const deprecationService = deprecationsServiceMock.createStartContract();
         deprecationService.getAllDeprecations = jest.fn().mockRejectedValue([]);
@@ -221,13 +183,34 @@ describe('Overview - Fix deprecated settings step', () => {
       expect(exists('kibanaStatsPanel.criticalDeprecations')).toBe(false);
     });
 
-    test('Stats panel navigates to deprecations list if clicked', () => {
+    test('Stats panel contains link to Kibana deprecations page', () => {
       const { component, exists, find } = testBed;
 
       component.update();
 
       expect(exists('kibanaStatsPanel')).toBe(true);
       expect(find('kibanaStatsPanel').find('a').props().href).toBe('/kibana_deprecations');
+    });
+
+    describe('Renders errors', () => {
+      test('Handles network failure', async () => {
+        await act(async () => {
+          const deprecationService = deprecationsServiceMock.createStartContract();
+          deprecationService.getAllDeprecations = jest
+            .fn()
+            .mockRejectedValue(new Error('Internal Server Error'));
+
+          testBed = await setupOverviewPage({
+            deprecations: deprecationService,
+          });
+        });
+
+        const { component, exists } = testBed;
+
+        component.update();
+
+        expect(exists('kibanaRequestErrorIconTip')).toBe(true);
+      });
     });
   });
 });
