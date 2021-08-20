@@ -10,5 +10,5 @@
   "configPath": ["xpack", "upgrade_assistant"],
   "requiredPlugins": ["management", "discover", "data", "licensing", "features", "infra"],
   "optionalPlugins": ["usageCollection", "cloud"],
-  "requiredBundles": ["esUiShared", "kibanaReact"]
+  "requiredBundles": ["esUiShared", "kibanaReact", "kibanaUtils"]
 }
