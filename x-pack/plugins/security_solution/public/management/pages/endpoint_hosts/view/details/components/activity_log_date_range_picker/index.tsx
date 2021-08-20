@@ -19,7 +19,7 @@ import {
 import { useEndpointSelector } from '../../../hooks';
 import { getActivityLogDataPaging } from '../../../../store/selectors';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../../../common/constants';
-import { useUiSetting$ } from '../../../../../../../../public/common/lib/kibana';
+import { useUiSetting$ } from '../../../../../../../common/lib/kibana';
 
 interface Range {
   from: string;
@@ -32,7 +32,7 @@ const DatePickerWrapper = styled.div`
   max-width: 250px;
 `;
 const StickyFlexItem = styled(EuiFlexItem)`
-  background: ${(props) => `${props.theme.eui.euiColorGhost}`};
+  background: ${(props) => `${props.theme.eui.euiHeaderBackgroundColor}`};
   position: sticky;
   top: 0;
   z-index: 1;
