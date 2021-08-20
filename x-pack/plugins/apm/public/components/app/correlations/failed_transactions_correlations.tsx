@@ -22,6 +22,7 @@ import { useHistory } from 'react-router-dom';
 import { orderBy } from 'lodash';
 import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
+import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { CorrelationsTable } from './correlations_table';
@@ -127,8 +128,42 @@ export function FailedTransactionsCorrelations({
 
   const failedTransactionsCorrelationsColumns: Array<
     EuiBasicTableColumn<FailedTransactionsCorrelationValue>
-  > = useMemo(
-    () => [
+  > = useMemo(() => {
+    const percentageColumns: Array<
+      EuiTableComputedColumnType<FailedTransactionsCorrelationValue>
+    > = inspectEnabled
+      ? [
+          {
+            name: (
+              <>
+                {i18n.translate(
+                  'xpack.apm.correlations.failedTransactions.correlationsTable.failurePercentageLabel',
+                  {
+                    defaultMessage: 'Failure %',
+                  }
+                )}
+              </>
+            ),
+            render: (item) => item.failurePercentage * 100,
+            sortable: (item) => item.failurePercentage,
+          },
+          {
+            name: (
+              <>
+                {i18n.translate(
+                  'xpack.apm.correlations.failedTransactions.correlationsTable.failurePercentageLabel',
+                  {
+                    defaultMessage: 'Success %',
+                  }
+                )}
+              </>
+            ),
+            render: (item) => item.successPercentage * 100,
+            sortable: (item) => item.failurePercentage,
+          },
+        ]
+      : [];
+    return [
       {
         width: '80px',
         field: 'normalizedScore',
@@ -164,8 +199,8 @@ export function FailedTransactionsCorrelations({
             )}
           </>
         ),
-        render: (item) => {
-          const label = getFailedTransactionsCorrelationImpactLabel(item);
+        render: (pValue: number) => {
+          const label = getFailedTransactionsCorrelationImpactLabel(pValue);
           return label ? (
             <EuiBadge color={label.color}>{label.impact}</EuiBadge>
           ) : null;
@@ -189,6 +224,7 @@ export function FailedTransactionsCorrelations({
         render: (fieldValue: string) => String(fieldValue).slice(0, 50),
         sortable: true,
       },
+      ...percentageColumns,
       {
         width: '100px',
         actions: [
@@ -265,9 +301,8 @@ export function FailedTransactionsCorrelations({
           );
         },
       },
-    ],
-    [history, onFilter, trackApmEvent]
-  );
+    ] as Array<EuiBasicTableColumn<FailedTransactionsCorrelationValue>>;
+  }, [history, onFilter, trackApmEvent, inspectEnabled]);
 
   useEffect(() => {
     if (isErrorMessage(error)) {
