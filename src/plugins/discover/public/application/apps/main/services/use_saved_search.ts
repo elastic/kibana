@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, merge, Subject } from 'rxjs';
-import { debounceTime, filter, tap } from 'rxjs/operators';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { SearchSource } from '../../../../../../data/common';
 import { GetStateReturn } from './discover_state';
 import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
 import { RequestAdapter } from '../../../../../../inspector/public';
-import { AutoRefreshDoneFn } from '../../../../../../data/public';
+import type { AutoRefreshDoneFn } from '../../../../../../data/public';
 import { validateTimeRange } from '../utils/validate_time_range';
 import { Chart } from '../components/chart/point_series';
 import { TimechartBucketInterval } from '../components/timechart_header/timechart_header';
@@ -24,6 +23,7 @@ import { FetchStatus } from '../../../types';
 import { fetchAll } from '../utils/fetch_all';
 import { useBehaviorSubject } from '../utils/use_behavior_subject';
 import { sendResetMsg } from './use_saved_search_messages';
+import { getFetch$ } from '../utils/get_fetch_observable';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -141,32 +141,14 @@ export const useSavedSearch = ({
      * to notify when data completed loading and to start a new autorefresh loop
      */
     let autoRefreshDoneCb: AutoRefreshDoneFn | undefined;
-    const fetch$ = merge(
+    const fetch$ = getFetch$({
+      autoRefreshDoneCb,
+      data,
+      main$,
       refetch$,
-      filterManager.getFetches$(),
-      timefilter.getFetch$(),
-      timefilter.getAutoRefreshFetch$().pipe(
-        tap((done) => {
-          autoRefreshDoneCb = done;
-        }),
-        filter(() => {
-          const currentFetchStatus = main$.getValue().fetchStatus;
-          return (
-            /**
-             * filter to prevent auto-refresh triggered fetch when
-             * loading is still ongoing
-             */
-            currentFetchStatus !== FetchStatus.LOADING &&
-            currentFetchStatus !== FetchStatus.PARTIAL &&
-            // don't autofetch if it's a index pattern without time field, however this is a temorary solutiom
-            // till we've got a better UI
-            Boolean(searchSource.getField('index')?.isTimeBased())
-          );
-        })
-      ),
-      data.query.queryString.getUpdates$(),
-      searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((sessionId) => !!sessionId))
-    ).pipe(debounceTime(100));
+      searchSessionManager,
+      searchSource,
+    });
 
     const subscription = fetch$.subscribe((val) => {
       if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
