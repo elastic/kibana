@@ -82,7 +82,6 @@ function createFakeElasticsearchServer() {
 
 describe('fake elasticsearch', () => {
   let esServer: http.Server;
-  let requestHandler: jest.Mock;
   let kibanaServer: Root;
   let kibanaHttpServer: http.Server;
 
@@ -90,7 +89,6 @@ describe('fake elasticsearch', () => {
     kibanaServer = createRootWithCorePlugins({ status: { allowAnonymous: true } });
     const fakeServer = createFakeElasticsearchServer();
     esServer = fakeServer.server;
-    requestHandler = fakeServer.requestHandler;
 
     const kibanaPreboot = await kibanaServer.preboot();
     kibanaHttpServer = kibanaPreboot.http.server.listener; // Mind that we are using the prebootServer at this point because the migration gets hanging, while waiting for ES to be correct
@@ -101,7 +99,7 @@ describe('fake elasticsearch', () => {
 
   afterAll(async () => {
     await kibanaServer.shutdown();
-    await new Promise((resolve, reject) =>
+    await new Promise<void>((resolve, reject) =>
       esServer.close((err) => (err ? reject(err) : resolve()))
     );
   });
