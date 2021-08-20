@@ -24,7 +24,7 @@ image::maps/images/reverse-geocoding-tutorial/csa_regions_by_web_traffic.png[]
 === Step 1: Index web traffic data
 GeoIP is a common way of transforming an IP address to a longitude and latitude. GeoIP is roughly accurate on the city level globally and neighborhood level in selected countries. It’s not as good as an actual GPS location from your phone, but it’s much more precise than just a country, state, or province. Use {ref}/geoip-processor.html[GeoIP processor] to transform an IP adderess into a {ref}/geo-point.html[geo_point] field.
 
-We’ll use the <<get-started, web logs sample data set>> that comes with Kibana for this tutorial.
+You’ll use the <<get-started, web logs sample data set>> that comes with Kibana for this tutorial.
 
 . On the home page, click *Try sample data*.
 . On the *Sample web logs* card, click *Add data*.
