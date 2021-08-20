@@ -35,6 +35,8 @@ export const getPieVisTypeDefinition = ({
       addLegend: !showElasticChartsOptions,
       legendPosition: Position.Right,
       nestedLegend: false,
+      truncateLegend: true,
+      maxLegendLines: 1,
       distinctColors: false,
       isDonut: true,
       palette: {
