@@ -44,7 +44,7 @@ Once you have your GeoJSON file:
 . Click *Create map*.
 . Click *Add layer*.
 . Click *Upload GeoJSON*.
-. Use the File Picker to select the CSA GeoJSON file.
+. Use the file chooser to import the CSA GeoJSON file.
 . Set index name to *csa* and click *Import file*.
 . When importing is complete, click *Add as document layer*.
 . Add Tooltip fields:
