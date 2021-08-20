@@ -16,20 +16,23 @@ export async function validateDatafeedPreview(
   job: CombinedJob
 ): Promise<JobValidationMessage[]> {
   const { datafeed_config: datafeed, ...tempJob } = job;
-  const { body } = ((await mlClient.previewDatafeed(
-    {
-      body: {
-        job_config: tempJob,
-        datafeed_config: datafeed,
+  try {
+    const { body } = ((await mlClient.previewDatafeed(
+      {
+        body: {
+          job_config: tempJob,
+          datafeed_config: datafeed,
+        },
       },
-    },
-    authHeader
-    // previewDatafeed response type is incorrect
-  )) as unknown) as { body: unknown[] };
+      authHeader
+      // previewDatafeed response type is incorrect
+    )) as unknown) as { body: unknown[] };
 
-  if (Array.isArray(body) === false || body.length === 0) {
-    return [{ id: 'datafeed_preview_no_documents' }];
+    if (Array.isArray(body) === false || body.length === 0) {
+      return [{ id: 'datafeed_preview_no_documents' }];
+    }
+    return [];
+  } catch (error) {
+    return [{ id: 'datafeed_preview_failed' }];
   }
-
-  return [];
 }

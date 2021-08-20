@@ -142,6 +142,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
             influencers: ['order_id'],
+            // summary_count_field_name: 'doc_count',
           },
           data_description: { time_field: 'order_date' },
           analysis_limits: { model_memory_limit: '1MB' },
@@ -184,7 +185,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body.length).to.eql(
         expectedResponse.length,
-        `Response body should have ${expectedResponse.length} entries (got ${body})`
+        `Response body should have ${expectedResponse.length} entries (got ${JSON.stringify(body)})`
       );
       for (const entry of expectedResponse) {
         const responseEntry = body.find((obj: any) => obj.id === entry.id);

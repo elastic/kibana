@@ -449,4 +449,50 @@ describe('ML - validateJob', () => {
       }
     );
   });
+
+  it('datafeed preview failed', () => {
+    const payload: any = {
+      job: {
+        job_id: 'categorization_test',
+        analysis_config: {
+          bucket_span: '15m',
+          detectors: [
+            {
+              function: 'count',
+              partition_field_name: 'custom_script_field',
+            },
+          ],
+          influencers: [''],
+        },
+        data_description: { time_field: '@timestamp' },
+        datafeed_config: {
+          indices: [],
+          data_description: {
+            time_field: 'timestamp',
+            time_format: 'epoch_ms',
+          },
+        },
+      },
+      fields: { testField: {} },
+    };
+
+    const mlClientEmptyDatafeedPreview = ({
+      ...mlClient,
+      previewDatafeed: () => Promise.reject({}),
+    } as unknown) as MlClient;
+
+    return validateJob(mlClusterClient, mlClientEmptyDatafeedPreview, payload, authHeader).then(
+      (messages) => {
+        const ids = messages.map((m) => m.id);
+        expect(ids).toStrictEqual([
+          'job_id_valid',
+          'detectors_function_not_empty',
+          'index_fields_valid',
+          'field_not_aggregatable',
+          'time_field_invalid',
+          'datafeed_preview_failed',
+        ]);
+      }
+    );
+  });
 });
