@@ -175,8 +175,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   public async find<T = unknown, A = unknown>(options: SavedObjectsFindOptions) {
-    throwErrorIfNamespaceSpecified(options);
-
     let namespaces: string[];
     try {
       namespaces = await this.getSearchableSpaces(options.namespaces);
@@ -199,21 +197,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
       ),
       namespaces,
     });
-  }
-
-  private async getSearchableSpaces(namespaces?: string[]): Promise<string[]> {
-    if (namespaces) {
-      const availableSpaces = await this.spacesClient.getAll({ purpose: 'findSavedObjects' });
-      if (namespaces.includes(ALL_SPACES_ID)) {
-        return availableSpaces.map((space) => space.id);
-      } else {
-        return namespaces.filter((namespace) =>
-          availableSpaces.some((space) => space.id === namespace)
-        );
-      }
-    } else {
-      return [this.spaceId];
-    }
   }
 
   /**
@@ -456,5 +439,20 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
       // Include dependencies last so that subsequent SO client wrappers have their settings applied.
       ...dependencies,
     });
+  }
+
+  private async getSearchableSpaces(namespaces?: string[]): Promise<string[]> {
+    if (namespaces) {
+      const availableSpaces = await this.spacesClient.getAll({ purpose: 'findSavedObjects' });
+      if (namespaces.includes(ALL_SPACES_ID)) {
+        return availableSpaces.map((space) => space.id);
+      } else {
+        return namespaces.filter((namespace) =>
+          availableSpaces.some((space) => space.id === namespace)
+        );
+      }
+    } else {
+      return [this.spaceId];
+    }
   }
 }

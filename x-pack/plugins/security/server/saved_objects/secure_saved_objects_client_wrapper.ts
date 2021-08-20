@@ -529,14 +529,6 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       throw SavedObjectsErrorHelpers.decorateForbiddenError(new Error(status));
     }
 
-    const typeToNamespacesMap = Array.from(typeMap).reduce<Map<string, string[] | undefined>>(
-      (acc, [currentType, { authorizedSpaces, isGloballyAuthorized }]) =>
-        isGloballyAuthorized
-          ? acc.set(currentType, options.namespaces)
-          : acc.set(currentType, authorizedSpaces),
-      new Map()
-    );
-
     this.auditLogger.log(
       savedObjectEvent({
         action: SavedObjectAction.OPEN_POINT_IN_TIME,
@@ -544,14 +536,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       })
     );
 
-    return await this.baseClient.openPointInTimeForType(
-      status === 'partially_authorized' ? '' : type, // if the user is partially authorized, type must be an empty string to use typeToNamespacesMap instead
-      {
-        ...options,
-        typeToNamespacesMap: undefined, // if the user is fully authorized, use `undefined` as the typeToNamespacesMap to prevent privilege escalation
-        ...(status === 'partially_authorized' && { typeToNamespacesMap, namespaces: [] }), // the repository requires that `type` and `namespaces` must be empty if `typeToNamespacesMap` is defined
-      }
-    );
+    const allowedTypes = [...typeMap.keys()]; // only allow the user to open a PIT against indices for type(s) they are authorized to access
+    return await this.baseClient.openPointInTimeForType(allowedTypes, options);
   }
 
   public async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {

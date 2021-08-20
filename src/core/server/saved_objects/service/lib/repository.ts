@@ -1936,36 +1936,9 @@ export class SavedObjectsRepository {
    */
   async openPointInTimeForType(
     type: string | string[],
-    {
-      keepAlive = '5m',
-      preference,
-      namespaces,
-      typeToNamespacesMap,
-    }: SavedObjectsOpenPointInTimeOptions = {}
+    { keepAlive = '5m', preference }: SavedObjectsOpenPointInTimeOptions = {}
   ): Promise<SavedObjectsOpenPointInTimeResponse> {
-    if (!type && !typeToNamespacesMap) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'options.type must be a string or an array of strings'
-      );
-    } else if (namespaces?.length === 0 && !typeToNamespacesMap) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'options.namespaces cannot be an empty array'
-      );
-    } else if (type && typeToNamespacesMap) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'options.type must be an empty string when options.typeToNamespacesMap is used'
-      );
-    } else if ((!namespaces || namespaces?.length) && typeToNamespacesMap) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'options.namespaces must be an empty array when options.typeToNamespacesMap is used'
-      );
-    }
-
-    const types = type
-      ? Array.isArray(type)
-        ? type
-        : [type]
-      : Array.from(typeToNamespacesMap!.keys());
+    const types = Array.isArray(type) ? type : [type];
     const allowedTypes = types.filter((t) => this._allowedTypes.includes(t));
     if (allowedTypes.length === 0) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError();
