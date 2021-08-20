@@ -29,7 +29,7 @@ export class RuleDataPluginService {
   private readonly resourceInstaller: ResourceInstaller;
   private installCommonResources: Promise<Either<Error, 'ok'>>;
   private isInitialized: boolean;
-  private registrationContextWithBaseName: Map<string, string>;
+  private registeredIndices: Map<string, IndexInfo> = new Map();
 
   constructor(private readonly options: ConstructorOptions) {
     this.resourceInstaller = new ResourceInstaller({
@@ -41,7 +41,6 @@ export class RuleDataPluginService {
 
     this.installCommonResources = Promise.resolve(right('ok'));
     this.isInitialized = false;
-    this.registrationContextWithBaseName = new Map();
   }
 
   /**
@@ -107,7 +106,7 @@ export class RuleDataPluginService {
       indexOptions,
     });
 
-    this.registrationContextWithBaseName.set(indexOptions.registrationContext, indexInfo.baseName);
+    this.registeredIndices.set(indexOptions.registrationContext, indexInfo);
 
     const waitUntilClusterClientAvailable = async (): Promise<WaitResult> => {
       try {
@@ -154,11 +153,11 @@ export class RuleDataPluginService {
   }
 
   /**
-   * Initializes alerts-as-data index and starts index bootstrapping right away.
-   * @param indexOptions Index parameters: names and resources.
-   * @returns Client for reading and writing data to this index.
+   * Looks up the index information associated with the given `registrationContext`.
+   * @param registrationContext
+   * @returns the IndexInfo or undefined
    */
-  public getBaseNameByRegistrationContext(registrationContext: string): string | undefined {
-    return this.registrationContextWithBaseName.get(registrationContext);
+  public getRegisteredIndexInfo(registrationContext: string): IndexInfo | undefined {
+    return this.registeredIndices.get(registrationContext);
   }
 }

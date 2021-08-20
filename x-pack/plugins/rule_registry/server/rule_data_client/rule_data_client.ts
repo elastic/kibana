@@ -37,13 +37,9 @@ export class RuleDataClient implements IRuleDataClient {
     return this.options.isWriteEnabled;
   }
 
-  public getReader(options: { namespace?: string; indexNames?: string[] } = {}): IRuleDataReader {
+  public getReader(options: { namespace?: string } = {}): IRuleDataReader {
     const { indexInfo } = this.options;
-    const { namespace, indexNames } = options;
-    let indexPattern = indexInfo.getPatternForReading(namespace);
-    if (indexNames && indexNames.length > 0) {
-      indexPattern = indexNames.join(',');
-    }
+    const indexPattern = indexInfo.getPatternForReading(options.namespace);
 
     const waitUntilReady = async () => {
       const result = await this.options.waitUntilReadyForReading;

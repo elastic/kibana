@@ -12,7 +12,7 @@ type Schema = PublicMethodsOf<RuleDataPluginService>;
 
 const createRuleDataPluginService = () => {
   const mocked: jest.Mocked<Schema> = {
-    getBaseNameByRegistrationContext: jest.fn(),
+    getRegisteredIndexInfo: jest.fn(),
     getResourcePrefix: jest.fn(),
     getResourceName: jest.fn(),
     isWriteEnabled: jest.fn(),
