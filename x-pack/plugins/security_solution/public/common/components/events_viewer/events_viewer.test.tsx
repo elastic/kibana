@@ -33,12 +33,23 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
 import { mockTimelines } from '../../mock/mock_timelines_plugin';
 
+jest.mock('@kbn/alerts', () => ({
+  useGetUserAlertsPermissions: () => ({
+    loading: false,
+    crud: true,
+    read: true,
+  }),
+}));
+
 jest.mock('../../lib/kibana', () => ({
   useKibana: () => ({
     services: {
       application: {
         navigateToApp: jest.fn(),
         getUrlForApp: jest.fn(),
+        capabilities: {
+          siem: { crud_alerts: true, read_alerts: true },
+        },
       },
       uiSettings: {
         get: jest.fn(),

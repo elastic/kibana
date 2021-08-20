@@ -72,6 +72,7 @@ export type TimelineModel = TGridModelForTimeline & {
   /** timeline is saving */
   isSaving: boolean;
   version: string | null;
+  initialized?: boolean;
 };
 
 export type SubsetTimelineModel = Readonly<
@@ -80,6 +81,7 @@ export type SubsetTimelineModel = Readonly<
     | 'activeTab'
     | 'prevActiveTab'
     | 'columns'
+    | 'defaultColumns'
     | 'dataProviders'
     | 'deletedEventIds'
     | 'description'
