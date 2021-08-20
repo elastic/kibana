@@ -2,7 +2,9 @@
 [[reverse-geocoding-tutorial]]
 == Map custom regions with reverse geocoding
 
-*Maps* comes with https://maps.elastic.co/#file[predefined regions] that allow you to quickly visualize regions by metrics. *Maps* also offers the ability to map your own regions. You can use any region data you'd like, as long as your source data contains an identifier for the corresponding region. How can you map regions when your source data does not contain a region identifier? This is where reverse geocoding comes in. Reverse geocoding is the process of assigning a region identifer to a feature based on its location.
+*Maps* comes with https://maps.elastic.co/#file[predefined regions] that allow you to quickly visualize regions by metrics. *Maps* also offers the ability to map your own regions. You can use any region data you'd like, as long as your source data contains an identifier for the corresponding region. 
+
+But how can you map regions when your source data does not contain a region identifier? This is where reverse geocoding comes in. Reverse geocoding is the process of assigning a region identifer to a feature based on its location.
 
 In this tutorial, you’ll use reverse geocoding to visualize United States Census Bureau Combined Statistical Area (CSA) regions by web traffic.
 
@@ -24,7 +26,7 @@ GeoIP is a common way of transforming an IP address to a longitude and latitude.
 
 We’ll use the <<get-started, web logs sample data set>> that comes with Kibana for this tutorial.
 
-. On the home page, click *Try our sample data*.
+. On the home page, click *Try sample data*.
 . On the *Sample web logs* card, click *Add data*.
 
 
@@ -32,11 +34,14 @@ We’ll use the <<get-started, web logs sample data set>> that comes with Kibana
 === Step 2: Index Combined Statistical Area (CSA) regions
 GeoIP level of detail is very useful for driving decision-making. For example, say you want to spin up a marketing campaign based on the locations of your users or show executive stakeholders which metro areas are experiencing an uptick of traffic.
 
-That kind of scale in the United States is often captured with what the Census Bureau calls the Combined Statistical Area (CSA). Combined Statistical Area is roughly equivalent with how people intuitively think of which urban area they live in. It does not necessarily coincide with state or city boundaries. CSAs generally share the same telecom providers and ad networks. New fast food franchises expand to a CSA rather than a particular city or municipality. Basically, people in the same CSA shop in the same IKEA.
+That kind of scale in the United States is often captured with what the Census Bureau calls the Combined Statistical Area (CSA). Combined Statistical Area is roughly equivalent with how people intuitively think of which urban area they live in. It does not necessarily coincide with state or city boundaries.
 
-To get the CSA boundary data, download the https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html[Cartographic Boundary shapefile (.shp)] from the Census Bureau’s website.
+CSAs generally share the same telecom providers and ad networks. New fast food franchises expand to a CSA rather than a particular city or municipality. Basically, people in the same CSA shop in the same IKEA.
 
-To use it in Kibana, GeoJSON format is required. You can use QGIS to convert the Cartographic Boundary shapefile to GeoJSON. Follow this https://gist.github.com/YKCzoli/b7f5ff0e0f641faba0f47fa5d16c4d8d[helpful tutorial] if you'd like to do the same or you can https://raw.githubusercontent.com/elastic/examples/master/blog/reverse-geocoding/csba.json[Download a prebuilt GeoJSON version].
+To get the CSA boundary data:
+
+. Download the https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html[Cartographic Boundary shapefile (.shp)] from the Census Bureau’s website.
+. To use the data in Kibana, convert it to GeoJSON format. Follow this https://gist.github.com/YKCzoli/b7f5ff0e0f641faba0f47fa5d16c4d8d[helpful tutorial] to use QGIS to convert the Cartographic Boundary shapefile to GeoJSON. Or download a https://raw.githubusercontent.com/elastic/examples/master/blog/reverse-geocoding/csba.json[prebuilt GeoJSON version].
 
 Once you have your GeoJSON file:
 
