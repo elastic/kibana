@@ -1009,7 +1009,12 @@ export function overridePackageInputs(
       return { ...resultingPackagePolicy, errors };
     }
 
-    throw errors;
+    throw new Error(
+      i18n.translate('xpack.fleet.packagePolicyInvalidError', {
+        defaultMessage: 'Package policy is invalid: {errors}',
+        values: { errors: errors.map(({ key, message }) => `${key}: ${message}`).join('\n') },
+      })
+    );
   }
 
   return resultingPackagePolicy;

@@ -573,7 +573,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('when no package policy is not found', function () {
+    describe('when package policy is not found', function () {
       it('should return an 200 with errors when "dryRun:true" is provided', async function () {
         const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
           .post(`/api/fleet/package_policies/upgrade`)
