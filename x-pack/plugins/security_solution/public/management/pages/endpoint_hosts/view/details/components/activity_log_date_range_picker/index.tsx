@@ -58,8 +58,8 @@ export const DateRangePicker = memo(() => {
           disabled: false,
           page,
           pageSize,
-          startDate: start ? dateMath.parse(start)?.toISOString() : undefined,
-          endDate: end ? dateMath.parse(end)?.toISOString() : undefined,
+          startDate: dateMath.parse(start)?.toISOString(),
+          endDate: dateMath.parse(end)?.toISOString(),
         },
       });
     },
