@@ -45,7 +45,7 @@ describe('selectedFiltersReducer', () => {
             tags: [],
           })
         )
-      ).toEqual({ locations: [], ports: [5601], schemes: [], tags: [] });
+      ).toEqual({ locations: [], ports: ['5601'], schemes: [], tags: [] });
     });
 
     it('merges state and action payload', () => {
@@ -64,7 +64,7 @@ describe('selectedFiltersReducer', () => {
             tags: ['prod'],
           })
         )
-      ).toEqual({ locations: [], ports: [5601], schemes: [], tags: ['prod'] });
+      ).toEqual({ locations: [], ports: ['5601'], schemes: [], tags: ['prod'] });
     });
   });
 
