@@ -50,7 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           dataset: monitorType,
           type: 'synthetics',
         },
-        id: `${agentFullPolicy.inputs[0]?.streams?.[0]?.id}`,
+        id: `${getSyntheticsPolicy(agentFullPolicy)?.streams?.[0]?.id}`,
         name,
         type: monitorType,
         processors: [
