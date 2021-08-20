@@ -190,6 +190,13 @@ export function FieldValueSelection({
               )}
               <EuiPopoverFooter paddingSize="s">
                 <EuiButton
+                  aria-label={i18n.translate(
+                    'xpack.observability.fieldValueSelection.apply.label',
+                    {
+                      defaultMessage: 'Apply the selected filters for {label}',
+                      values: { label },
+                    }
+                  )}
                   fill
                   fullWidth
                   size="s"
