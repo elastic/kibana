@@ -21,7 +21,7 @@
   },
   "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {
-    "url": "http://github.com/elastic/kibana/issues"
+    "url": "https://github.com/elastic/kibana/issues"
   },
   "kibana": {
     "clean": {
