@@ -58,7 +58,7 @@ const UpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }) => {
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButton
-            href={cloud?.deploymentUrl}
+            href={cloud!.deploymentUrl}
             target="_blank"
             data-test-subj="upgradeSetupCloudLink"
             iconSide="right"
