@@ -144,6 +144,32 @@ describe('Lens App', () => {
       Array [
         Array [
           Object {
+            "lensInspector": InspectorService {
+              "adapters": Object {
+                "expression": ExpressionsInspectorAdapter {
+                  "_ast": Object {},
+                  "_events": Object {},
+                  "_eventsCount": 0,
+                  "_maxListeners": undefined,
+                  Symbol(kCapture): false,
+                },
+                "requests": RequestAdapter {
+                  "_events": Object {},
+                  "_eventsCount": 0,
+                  "_maxListeners": undefined,
+                  "requests": Map {},
+                  Symbol(kCapture): false,
+                },
+                "tables": TablesAdapter {
+                  "_events": Object {},
+                  "_eventsCount": 0,
+                  "_maxListeners": undefined,
+                  "_tables": Object {},
+                  Symbol(kCapture): false,
+                },
+              },
+              "inspect": [Function],
+            },
             "showNoDataPopover": [Function],
           },
           Object {},

@@ -23,6 +23,7 @@ import { navigationPluginMock } from '../../../../src/plugins/navigation/public/
 import { LensAppServices } from './app_plugin/types';
 import { DOC_TYPE, layerTypes } from '../common';
 import { DataPublicPluginStart, esFilters, UI_SETTINGS } from '../../../../src/plugins/data/public';
+import { inspectorPluginMock } from '../../../../src/plugins/inspector/public/mocks';
 import { dashboardPluginMock } from '../../../../src/plugins/dashboard/public/mocks';
 import type {
   LensByValueInput,
@@ -378,6 +379,7 @@ export function makeDefaultServices(
     navigation: navigationStartMock,
     notifications: core.notifications,
     attributeService: makeAttributeService(),
+    inspector: inspectorPluginMock.createStartContract(),
     dashboard: dashboardPluginMock.createStartContract(),
     presentationUtil: presentationUtilPluginMock.createStartContract(core),
     savedObjectsClient: core.savedObjects.client,

@@ -55,6 +55,12 @@ initialArgs: {
     [K in keyof FunctionArgs<FnDef>]: FunctionArgs<FnDef>[K] | ExpressionAstExpressionBuilder | ExpressionAstExpressionBuilder[] | ExpressionAstExpression | ExpressionAstExpression[];
 }): ExpressionAstFunctionBuilder<FnDef>;
 
+// Warning: (ae-forgotten-export) The symbol "DefaultInspectorAdapters" needs to be exported by the entry point index.d.ts
+// Warning: (ae-missing-release-tag) "createDefaultInspectorAdapters" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const createDefaultInspectorAdapters: () => DefaultInspectorAdapters;
+
 // Warning: (ae-missing-release-tag) "Datatable" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
@@ -95,7 +101,6 @@ export type DatatableRow = Record<string, any>;
 
 // Warning: (ae-forgotten-export) The symbol "Adapters" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "ExpressionExecutionParams" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "DefaultInspectorAdapters" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "Execution" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)

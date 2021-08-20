@@ -206,6 +206,7 @@ export class LensPlugin {
         indexPatternService: deps.data.indexPatterns,
         uiActions: deps.uiActions,
         usageCollection,
+        inspector: deps.inspector,
       };
     };
 

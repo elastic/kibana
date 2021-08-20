@@ -8,7 +8,7 @@
 import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import {
+import type {
   ExecutionContextSearch,
   Filter,
   Query,
@@ -16,11 +16,12 @@ import {
   TimeRange,
   IndexPattern,
 } from 'src/plugins/data/public';
-import { PaletteOutput } from 'src/plugins/charts/public';
+import type { PaletteOutput } from 'src/plugins/charts/public';
+import type { Start as InspectorStart } from 'src/plugins/inspector/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter/common';
-import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
+import { RenderMode } from 'src/plugins/expressions';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
@@ -40,7 +41,7 @@ import {
   ReferenceOrValueEmbeddable,
 } from '../../../../../src/plugins/embeddable/public';
 import { Document, injectFilterReferences } from '../persistence';
-import { ExpressionWrapper } from './expression_wrapper';
+import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import {
   isLensBrushEvent,
@@ -56,6 +57,7 @@ import { getEditPath, DOC_TYPE, PLUGIN_ID } from '../../common';
 import { IBasePath } from '../../../../../src/core/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage } from '../editor_frame_service/types';
+import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -93,6 +95,7 @@ export interface LensEmbeddableDeps {
   expressionRenderer: ReactExpressionRendererType;
   timefilter: TimefilterContract;
   basePath: IBasePath;
+  inspector: InspectorStart;
   getTrigger?: UiActionsStart['getTrigger'] | undefined;
   getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
   capabilities: { canSaveVisualizations: boolean; canSaveDashboards: boolean };
@@ -112,10 +115,10 @@ export class Embeddable
   private domNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
   private isInitialized = false;
-  private activeData: Partial<DefaultInspectorAdapters> | undefined;
   private errors: ErrorMessage[] | undefined;
   private inputReloadSubscriptions: Subscription[];
   private isDestroyed?: boolean;
+  private lensInspector: LensInspector;
 
   private logError(type: 'runtime' | 'validation') {
     this.deps.usageCollection?.reportUiCounter(
@@ -144,7 +147,7 @@ export class Embeddable
       },
       parent
     );
-
+    this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
     this.initializeSavedVis(initialInput).then(() => this.onContainerStateChanged(initialInput));
     this.subscription = this.getUpdated$().subscribe(() =>
@@ -246,7 +249,7 @@ export class Embeddable
   }
 
   public getInspectorAdapters() {
-    return this.activeData;
+    return this.lensInspector.adapters;
   }
 
   async initializeSavedVis(input: LensEmbeddableInput) {
@@ -300,11 +303,7 @@ export class Embeddable
     return isDirty;
   }
 
-  private updateActiveData = (
-    data: unknown,
-    inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
-  ) => {
-    this.activeData = inspectorAdapters;
+  private updateActiveData: ExpressionWrapperProps['onData$'] = () => {
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
       this.input.onLoad(false);
@@ -341,6 +340,7 @@ export class Embeddable
         ExpressionRenderer={this.expressionRenderer}
         expression={this.expression || null}
         errors={this.errors}
+        lensInspector={this.lensInspector}
         searchContext={this.getMergedSearchContext()}
         variables={input.palette ? { theme: { palette: input.palette } } : {}}
         searchSessionId={this.externalSearchContext.searchSessionId}

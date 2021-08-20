@@ -23,6 +23,7 @@ import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../embeddable';
 import { EditorFrameInstance } from '../types';
 import { Document } from '../persistence/saved_object_store';
+
 import {
   setState,
   useLensSelector,
@@ -36,6 +37,7 @@ import {
   getLastKnownDocWithoutPinnedFilters,
   runSaveLensVisualization,
 } from './save_modal_container';
+import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -63,11 +65,11 @@ export function App({
     data,
     chrome,
     uiSettings,
+    inspector,
     application,
     notifications,
     savedObjectsTagging,
     getOriginatingAppName,
-
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag,
   } = lensAppServices;
@@ -94,6 +96,8 @@ export function App({
   const [indicateNoData, setIndicateNoData] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(undefined);
+
+  const lensInspector = getLensInspectorService(inspector);
 
   useEffect(() => {
     if (currentDoc) {
@@ -267,11 +271,13 @@ export function App({
           indicateNoData={indicateNoData}
           datasourceMap={datasourceMap}
           title={persistedDoc?.title}
+          lensInspector={lensInspector}
         />
         {(!isLoading || persistedDoc) && (
           <MemoizedEditorFrameWrapper
             editorFrame={editorFrame}
             showNoDataPopover={showNoDataPopover}
+            lensInspector={lensInspector}
           />
         )}
       </div>
@@ -308,10 +314,14 @@ export function App({
 const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   editorFrame,
   showNoDataPopover,
+  lensInspector,
 }: {
   editorFrame: EditorFrameInstance;
+  lensInspector: LensInspector;
   showNoDataPopover: () => void;
 }) {
   const { EditorFrameContainer } = editorFrame;
-  return <EditorFrameContainer showNoDataPopover={showNoDataPopover} />;
+  return (
+    <EditorFrameContainer showNoDataPopover={showNoDataPopover} lensInspector={lensInspector} />
+  );
 });

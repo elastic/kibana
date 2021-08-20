@@ -21,14 +21,10 @@ import {
   EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
-import { CoreStart, ApplicationStart } from 'kibana/public';
-import {
-  DataPublicPluginStart,
-  ExecutionContextSearch,
-  TimefilterContract,
-} from 'src/plugins/data/public';
+import type { CoreStart, ApplicationStart } from 'kibana/public';
+import type { DataPublicPluginStart, ExecutionContextSearch } from 'src/plugins/data/public';
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
-import {
+import type {
   ExpressionRendererEvent,
   ExpressionRenderError,
   ReactExpressionRendererType,
@@ -67,6 +63,7 @@ import {
   selectActiveDatasourceId,
   selectSearchSessionId,
 } from '../../../state_management';
+import type { LensInspector } from '../../../lens_inspector_service';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -76,6 +73,7 @@ export interface WorkspacePanelProps {
   core: CoreStart;
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
   getSuggestionForField: (field: DragDropIdentifier) => Suggestion | undefined;
+  lensInspector: LensInspector;
 }
 
 interface WorkspaceState {
@@ -124,6 +122,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   plugins,
   ExpressionRenderer: ExpressionRendererComponent,
   suggestionForDraggedField,
+  lensInspector,
 }: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
   suggestionForDraggedField: Suggestion | undefined;
 }) {
@@ -335,7 +334,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       <VisualizationWrapper
         expression={expression}
         framePublicAPI={framePublicAPI}
-        timefilter={plugins.data.query.timefilter.timefilter}
+        lensInspector={lensInspector}
         onEvent={onEvent}
         setLocalState={setLocalState}
         localState={{ ...localState, configurationValidationError, missingRefsErrors }}
@@ -401,7 +400,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 export const VisualizationWrapper = ({
   expression,
   framePublicAPI,
-  timefilter,
+  lensInspector,
   onEvent,
   setLocalState,
   localState,
@@ -411,7 +410,7 @@ export const VisualizationWrapper = ({
 }: {
   expression: string | null | undefined;
   framePublicAPI: FramePublicAPI;
-  timefilter: TimefilterContract;
+  lensInspector: LensInspector;
   onEvent: (event: ExpressionRendererEvent) => void;
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
   localState: WorkspaceState & {
@@ -443,9 +442,9 @@ export const VisualizationWrapper = ({
   const dispatchLens = useLensDispatch();
 
   const onData$ = useCallback(
-    (data: unknown, inspectorAdapters?: Partial<DefaultInspectorAdapters>) => {
-      if (inspectorAdapters && inspectorAdapters.tables) {
-        dispatchLens(onActiveDataChange({ ...inspectorAdapters.tables.tables }));
+    (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
+      if (adapters && adapters.tables) {
+        dispatchLens(onActiveDataChange({ ...adapters.tables.tables }));
       }
     },
     [dispatchLens]
@@ -634,6 +633,7 @@ export const VisualizationWrapper = ({
         searchSessionId={searchSessionId}
         onEvent={onEvent}
         onData$={onData$}
+        inspectorAdapters={lensInspector.adapters}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
           const errorsFromRequest = getOriginalRequestErrorMessages(error);
