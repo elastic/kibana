@@ -51,12 +51,10 @@ separated with a comma.  Do not include a space after the comma.
 +
 ** To exclude a source, use a minus sign (-), for example, `-test3`.
 
-. Click *Next step*.
-
-. If {kib} detects an index with a timestamp, expand the *Time field* menu,
+. If {kib} detects an index with a timestamp, expand the *Timestamp field* menu,
 and then select the default field for filtering your data by time.
 +
-** If your index doesn’t have time-based data, choose *I don’t want to use the Time Filter*.
+** If your index doesn’t have time-based data, choose *I don’t want to use the time filter*.
 +
 ** If you don’t set a default time field, you can't use
 global time filters on your dashboards. This is useful if
