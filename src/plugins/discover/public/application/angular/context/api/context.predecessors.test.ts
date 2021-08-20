@@ -27,7 +27,7 @@ interface Timestamp {
   lte?: string;
 }
 
-describe('context successors', function () {
+describe('context predecessors', function () {
   let fetchPredecessors: (
     indexPatternId: string,
     timeField: string,
