@@ -194,8 +194,9 @@ export interface ValidationFuncArg<I extends FormData, V = unknown> {
   formData: I;
   errors: readonly ValidationError[];
   customData: {
+    /** Async handler that will resolve whenever a value is sent to the `validationData$` Observable */
     provider: () => Promise<unknown>;
-    current: unknown;
+    value: unknown;
   };
 }
 

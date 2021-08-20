@@ -11,7 +11,7 @@ import { Subject, Observable } from 'rxjs';
 export const useAsyncValidationData = <T = any>(state?: T) => {
   const validationData$ = useRef<Subject<T>>();
 
-  const getValidationData = useCallback(() => {
+  const getValidationData$ = useCallback(() => {
     if (validationData$.current === undefined) {
       validationData$.current = new Subject();
     }
@@ -19,18 +19,18 @@ export const useAsyncValidationData = <T = any>(state?: T) => {
   }, []);
 
   const hook: [Observable<T>, (value?: T) => void] = useMemo(() => {
-    const subject = getValidationData();
+    const subject = getValidationData$();
 
     const observable = subject.asObservable();
     const next = subject.next.bind(subject);
 
     return [observable, next];
-  }, [getValidationData]);
+  }, [getValidationData$]);
 
   // Whenever the state changes we update the observable
   useEffect(() => {
-    getValidationData().next(state);
-  }, [state, getValidationData]);
+    getValidationData$().next(state);
+  }, [state, getValidationData$]);
 
   return hook;
 };

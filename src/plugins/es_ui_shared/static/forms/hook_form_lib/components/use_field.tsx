@@ -20,7 +20,30 @@ export interface Props<T, FormType = FormData, I = T> {
   component?: FunctionComponent<any>;
   componentProps?: Record<string, any>;
   readDefaultValueOnForm?: boolean;
+  /**
+   * Use this prop to pass down dynamic data **asynchronously** to your validators.
+   * Your validator accesses the dynamic data by resolving the provider() Promise.
+   * The Promise will resolve **when a new value is sent** to the validationData$ Observable.
+   *
+   * ```typescript
+   * validator: ({ customData }) => {
+   *   // Wait until a value is sent to the "validationData$" Observable
+   *   const dynamicData = await customData.provider();
+   * }
+   * ```
+   */
   validationData$?: Observable<unknown>;
+  /**
+   * Use this prop to pass down dynamic data to your validators. The validation data
+   * is then accessible in your validator inside the `customData.value` property.
+   *
+   * ```typescript
+   * validator: ({ customData: { value: dynamicData } }) => {
+   *   // Validate with the dynamic data
+   *   if (dynamicData) { .. }
+   * }
+   * ```
+   */
   validationData?: unknown;
   onChange?: (value: I) => void;
   onError?: (errors: string[] | null) => void;

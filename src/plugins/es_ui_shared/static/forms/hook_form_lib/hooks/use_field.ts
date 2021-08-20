@@ -266,7 +266,7 @@ export const useField = <T, FormType = FormData, I = T>(
             form: { getFormData, getFields },
             formData,
             path,
-            customData: { provider: dataProvider, current: customValidationData },
+            customData: { provider: dataProvider, value: customValidationData },
           }) as Promise<ValidationError>;
 
           const validationResult = await inflightValidation.current;
@@ -310,7 +310,7 @@ export const useField = <T, FormType = FormData, I = T>(
             form: { getFormData, getFields },
             formData,
             path,
-            customData: { provider: dataProvider, current: customValidationData },
+            customData: { provider: dataProvider, value: customValidationData },
           });
 
           if (!validationResult) {

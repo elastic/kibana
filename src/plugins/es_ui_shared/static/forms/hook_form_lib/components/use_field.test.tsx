@@ -313,7 +313,7 @@ describe('<UseField />', () => {
         lastName: {
           validations: [
             {
-              validator: ({ customData: { current: validationData } }) => {
+              validator: ({ customData: { value: validationData } }) => {
                 // Sync validator that receives the validationData passed through
                 // props on <UseField validationData={...} />
                 if (validationData === 'bad') {
