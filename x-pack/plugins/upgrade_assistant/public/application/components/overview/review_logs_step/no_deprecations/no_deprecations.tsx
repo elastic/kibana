@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const i18nTexts = {
@@ -21,15 +21,18 @@ const i18nTexts = {
 
 export const NoDeprecations: FunctionComponent = () => {
   return (
-    <EuiText color="success">
-      <EuiFlexGroup gutterSize="s" alignItems="center" className="upgRenderSuccessMessage">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="check" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} data-test-subj="noDeprecationsLabel">
-          {i18nTexts.noDeprecationsText}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiText>
+    <>
+      <EuiSpacer size="xl" />
+      <EuiText color="success">
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="check" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} data-test-subj="noDeprecationsLabel">
+            {i18nTexts.noDeprecationsText}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiText>
+    </>
   );
 };
