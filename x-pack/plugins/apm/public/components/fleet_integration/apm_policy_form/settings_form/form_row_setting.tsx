@@ -15,8 +15,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { FormRowOnChange } from './settings_form';
-import { SettingDefinition } from './typings';
+import { FormRowOnChange } from './';
+import { SettingDefinition } from '../typings';
 
 interface Props {
   setting: SettingDefinition;
