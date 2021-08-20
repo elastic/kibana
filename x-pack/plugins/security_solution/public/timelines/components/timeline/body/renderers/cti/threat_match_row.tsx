@@ -27,8 +27,8 @@ export interface ThreatMatchRowProps {
   indicatorReference: string | undefined;
   indicatorType: string | undefined;
   isDraggable?: boolean;
-  sourceField: string;
-  sourceValue: string;
+  sourceField: string | undefined;
+  sourceValue: string | undefined;
 }
 
 export const ThreatMatchRow = ({
@@ -49,8 +49,8 @@ export const ThreatMatchRow = ({
     indicatorProvider: getOr([], PROVIDER, data)[0] as string | undefined,
     indicatorType: getOr([], MATCHED_TYPE, data)[0] as string | undefined,
     isDraggable,
-    sourceField: getOr([], MATCHED_FIELD, data)[0] as string,
-    sourceValue: getOr([], MATCHED_ATOMIC, data)[0] as string,
+    sourceField: getOr([], MATCHED_FIELD, data)[0] as string | undefined,
+    sourceValue: getOr([], MATCHED_ATOMIC, data)[0] as string | undefined,
   };
 
   return <ThreatMatchRowView {...props} />;
@@ -73,15 +73,17 @@ export const ThreatMatchRowView = ({
       gutterSize="s"
       justifyContent="center"
     >
-      <EuiFlexItem grow={false}>
-        <MatchDetails
-          contextId={contextId}
-          eventId={eventId}
-          isDraggable={isDraggable}
-          sourceField={sourceField}
-          sourceValue={sourceValue}
-        />
-      </EuiFlexItem>
+      {sourceField && sourceValue && (
+        <EuiFlexItem grow={false}>
+          <MatchDetails
+            contextId={contextId}
+            eventId={eventId}
+            isDraggable={isDraggable}
+            sourceField={sourceField}
+            sourceValue={sourceValue}
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <IndicatorDetails
           contextId={contextId}

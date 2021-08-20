@@ -119,6 +119,18 @@ describe('ThreatMatchRowView', () => {
       );
     });
 
+    it('does not render the match field, if absent', () => {
+      const wrapper = render({ ...baseProps, sourceField: undefined });
+      const matchField = wrapper.find('[data-test-subj="threat-match-details-source-field"]');
+      expect(matchField.exists()).toBeFalsy();
+    });
+
+    it('does not render the match value, if absent', () => {
+      const wrapper = render({ ...baseProps, sourceValue: undefined });
+      const matchValue = wrapper.find('[data-test-subj="threat-match-details-source-value"]');
+      expect(matchValue.exists()).toBeFalsy();
+    });
+
     it('does not render the indicator type, if absent', () => {
       const wrapper = render({
         ...baseProps,
