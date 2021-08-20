@@ -50,7 +50,6 @@ import { useTimelineEvents } from '../../../container';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
-import * as i18n from '../translations';
 import { Sort } from '../body/sort';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
@@ -138,6 +137,7 @@ export interface TGridIntegratedProps {
   data?: DataPublicPluginStart;
   tGridEventRenderedViewEnabled: boolean;
   hasAlertsCrud: boolean;
+  unit?: (n: number) => string;
 }
 
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
@@ -175,6 +175,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   tGridEventRenderedViewEnabled,
   data,
   hasAlertsCrud,
+  unit,
 }) => {
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -183,7 +184,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const [tableView, setTableView] = useState<ViewSelection>('gridView');
   const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
-  const unit = useMemo(() => (n: number) => i18n.ALERTS_UNIT(n), []);
   const { queryFields, title } = useDeepEqualSelector((state) =>
     getManageTimeline(state, id ?? '')
   );
