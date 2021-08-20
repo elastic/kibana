@@ -174,19 +174,19 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         },
       });
     }
-    actionItems.push({
-      disabled: this.props.isEditButtonDisabled,
-      name: EDIT_LAYER_SETTINGS_LABEL,
-      icon: <EuiIcon type="pencil" size="m" />,
-      'data-test-subj': 'layerSettingsButton',
-      toolTipContent: null,
-      onClick: () => {
-        this._closePopover();
-        this.props.openLayerSettings();
-      },
-    });
 
     if (!this.props.isReadOnly) {
+      actionItems.push({
+        disabled: this.props.isEditButtonDisabled,
+        name: EDIT_LAYER_SETTINGS_LABEL,
+        icon: <EuiIcon type="pencil" size="m" />,
+        'data-test-subj': 'layerSettingsButton',
+        toolTipContent: null,
+        onClick: () => {
+          this._closePopover();
+          this.props.openLayerSettings();
+        },
+      });
       if (this.state.supportsFeatureEditing) {
         actionItems.push({
           name: EDIT_FEATURES_LABEL,
