@@ -13,59 +13,48 @@ Alerts and actions are enabled by default in {kib}, but require you configure th
 
 You can configure the following settings in the `kibana.yml` file.
 
-
 [float]
 [[general-alert-action-settings]]
 ==== General settings
 
-[cols="2*<"]
-|===
-
-| `xpack.encryptedSavedObjects`
-`.encryptionKey`
-  | A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in {es}. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties. +
-  +
-  {kib} offers a <<kibana-encryption-keys, CLI tool>> to help generate this encryption key. +
-  +
-  If not set, {kib} will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of {kib} will behave unexpectedly if the key isn't the same on all instances of {kib}. +
-  +
-  Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,{kib} Keystore>>.
-  Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>.
-
-|===
+`xpack.encryptedSavedObjects.encryptionKey`::
+A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in {es}. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties.
++
+{kib} offers a <<kibana-encryption-keys, CLI tool>> to help generate this encryption key.
++
+If not set, {kib} will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of {kib} will behave unexpectedly if the key isn't the same on all instances of {kib}.
++
+Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,{kib} Keystore>>.
+Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>.
 
 [float]
 [[action-settings]]
 ==== Action settings
 
-[cols="2*<"]
-|===
-| `xpack.actions.enabled`
-  | Feature toggle that enables Actions in {kib}.
-  If `false`, all features dependent on Actions are disabled, including the *Observability* and *Security* apps.  Default: `true`.
+`xpack.actions.enabled`::
+Feature toggle that enables Actions in {kib}.
+If `false`, all features dependent on Actions are disabled, including the *Observability* and *Security* apps.  Default: `true`.
 
-| `xpack.actions.allowedHosts` {ess-icon}
-  | A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `[*]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections. +
-  +
-  Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `[*]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.
+`xpack.actions.allowedHosts` {ess-icon}::
+A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `[*]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
++
+Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `[*]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.
 
-| `xpack.actions.customHostSettings` {ess-icon}
-  | A list of custom host settings to override existing global settings.
-  Default: an empty list. +
-  +
-  Each entry in the list must have a `url` property, to associate a connection
-  type (mail or https), hostname and port with the remaining options in the
-  entry.
-  +
-  In the following example, two custom host settings
-  are defined.  The first provides a custom host setting for mail server
-  `mail.example.com` using port 465 that supplies server certificate authorization
-  data from both a file and inline, and requires TLS for the
-  connection.  The second provides a custom host setting for https server
-  `webhook.example.com` which turns off server certificate authorization.
-
-|===
-
+`xpack.actions.customHostSettings` {ess-icon}::
+A list of custom host settings to override existing global settings.
+Default: an empty list.
++
+Each entry in the list must have a `url` property, to associate a connection
+type (mail or https), hostname and port with the remaining options in the
+entry.
++
+In the following example, two custom host settings
+are defined.  The first provides a custom host setting for mail server
+`mail.example.com` using port 465 that supplies server certificate authorization
+data from both a file and inline, and requires TLS for the
+connection.  The second provides a custom host setting for https server
+`webhook.example.com` which turns off server certificate authorization.
++
 [source,yaml]
 --
 xpack.actions.customHostSettings:
@@ -86,132 +75,106 @@ xpack.actions.customHostSettings:
       verificationMode: 'none'
 --
 
-[cols="2*<"]
-|===
+`xpack.actions.customHostSettings[n].url` {ess-icon}::
+A URL associated with this custom host setting.  Should be in the form of
+`protocol://hostname:port`, where `protocol` is `https` or `smtp`.  If the
+port is not provided, 443 is used for `https` and 25 is used for
+`smtp`.  The `smtp` URLs are used for the Email actions that use this
+server, and the `https` URLs are used for actions which use `https` to
+connect to services.
++
+Entries with `https` URLs can use the `ssl` options, and entries with `smtp`
+URLs can use both the `ssl` and `smtp` options.
++
+No other URL values should be part of this URL, including paths,
+query strings, and authentication information.  When an http or smtp request
+is made as part of executing an action, only the protocol, hostname, and
+port of the URL for that request are used to look up these configuration
+values.
 
-| `xpack.actions.customHostSettings[n]`
-`.url` {ess-icon}
-  | A URL associated with this custom host setting.  Should be in the form of
-  `protocol://hostname:port`, where `protocol` is `https` or `smtp`.  If the
-  port is not provided, 443 is used for `https` and 25 is used for
-  `smtp`.  The `smtp` URLs are used for the Email actions that use this
-  server, and the `https` URLs are used for actions which use `https` to
-  connect to services. +
-  +
-  Entries with `https` URLs can use the `ssl` options, and entries with `smtp`
-  URLs can use both the `ssl` and `smtp` options. +
-  +
-  No other URL values should be part of this URL, including paths,
-  query strings, and authentication information.  When an http or smtp request
-  is made as part of executing an action, only the protocol, hostname, and
-  port of the URL for that request are used to look up these configuration
-  values.
+`xpack.actions.customHostSettings[n].smtp.ignoreTLS` {ess-icon}::
+A boolean value indicating that TLS must not be used for this connection.
+The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
 
-| `xpack.actions.customHostSettings[n]`
-`.smtp.ignoreTLS` {ess-icon}
-  | A boolean value indicating that TLS must not be used for this connection.
-  The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
+`xpack.actions.customHostSettings[n].smtp.requireTLS` {ess-icon}::
+A boolean value indicating that TLS must be used for this connection.
+The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
 
-| `xpack.actions.customHostSettings[n]`
-`.smtp.requireTLS` {ess-icon}
-  | A boolean value indicating that TLS must be used for this connection.
-  The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
+`xpack.actions.customHostSettings[n].ssl.rejectUnauthorized`::
+Deprecated. Use <<action-config-custom-host-verification-mode,`xpack.actions.customHostSettings.ssl.verificationMode`>> instead. A boolean value indicating whether to bypass server certificate validation.
+Overrides the general `xpack.actions.rejectUnauthorized` configuration
+for requests made for this hostname/port.
 
-| `xpack.actions.customHostSettings[n]`
-`.ssl.rejectUnauthorized`
-  | Deprecated. Use <<action-config-custom-host-verification-mode,`xpack.actions.customHostSettings.ssl.verificationMode`>> instead. A boolean value indicating whether to bypass server certificate validation.
-  Overrides the general `xpack.actions.rejectUnauthorized` configuration
-  for requests made for this hostname/port.
+[[action-config-custom-host-verification-mode]] `xpack.actions.customHostSettings[n].ssl.verificationMode` {ess-icon}::
+Controls the verification of the server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection to the host server. Valid values are `full`, `certificate`, and `none`.
+Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>. Overrides the general `xpack.actions.ssl.verificationMode` configuration
+for requests made for this hostname/port.
 
-|[[action-config-custom-host-verification-mode]] `xpack.actions.customHostSettings[n]`
-`.ssl.verificationMode` {ess-icon}
-  | Controls the verification of the server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection to the host server. Valid values are `full`, `certificate`, and `none`.
- Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>. Overrides the general `xpack.actions.ssl.verificationMode` configuration
-  for requests made for this hostname/port.
+`xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesFiles`::
+A file name or list of file names of PEM-encoded certificate files to use
+to validate the server.
 
-| `xpack.actions.customHostSettings[n]`
-`.ssl.certificateAuthoritiesFiles`
-  | A file name or list of file names of PEM-encoded certificate files to use
-  to validate the server.
+`xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesData` {ess-icon}::
+The contents of a PEM-encoded certificate file, or multiple files appended
+into a single string.  This configuration can be used for environments where
+the files cannot be made available.
 
-| `xpack.actions.customHostSettings[n]`
-`.ssl.certificateAuthoritiesData` {ess-icon}
-  | The contents of a PEM-encoded certificate file, or multiple files appended
-  into a single string.  This configuration can be used for environments where
-  the files cannot be made available.
+`xpack.actions.enabledActionTypes` {ess-icon}::
+A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, and `.webhook`. An empty list `[]` will disable all action types.
++
+Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
 
-| `xpack.actions.enabledActionTypes` {ess-icon}
-  | A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, and `.webhook`. An empty list `[]` will disable all action types. +
-  +
-  Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
+`xpack.actions.preconfiguredAlertHistoryEsIndex` {ess-icon}::
+Enables a preconfigured alert history {es} <<index-action-type, Index>> connector. Default: `false`.
 
-| `xpack.actions`
-`.preconfiguredAlertHistoryEsIndex` {ess-icon}
-  | Enables a preconfigured alert history {es} <<index-action-type, Index>> connector. Default: `false`.
+`xpack.actions.preconfigured`::
+Specifies preconfigured connector IDs and configs. Default: {}.
 
-| `xpack.actions.preconfigured`
-  | Specifies preconfigured connector IDs and configs. Default: {}.
+`xpack.actions.proxyUrl` {ess-icon}::
+Specifies the proxy URL to use, if using a proxy for actions. By default, no proxy is used.
 
-| `xpack.actions.proxyUrl` {ess-icon}
-  | Specifies the proxy URL to use, if using a proxy for actions. By default, no proxy is used.
+`xpack.actions.proxyBypassHosts` {ess-icon}::
+Specifies hostnames which should not use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.  By default, all hosts will use the proxy, but if an action's hostname is in this list, the proxy will not be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
 
-| `xpack.actions.proxyBypassHosts` {ess-icon}
-  | Specifies hostnames which should not use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.  By default, all hosts will use the proxy, but if an action's hostname is in this list, the proxy will not be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
+`xpack.actions.proxyOnlyHosts` {ess-icon}::
+Specifies hostnames which should only use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.  By default, no hosts will use the proxy, but if an action's hostname is in this list, the proxy will be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
 
-| `xpack.actions.proxyOnlyHosts` {ess-icon}
-  | Specifies hostnames which should only use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.  By default, no hosts will use the proxy, but if an action's hostname is in this list, the proxy will be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
+`xpack.actions.proxyHeaders` {ess-icon}::
+Specifies HTTP headers for the proxy, if using a proxy for actions. Default: {}.
 
-| `xpack.actions.proxyHeaders` {ess-icon}
-  | Specifies HTTP headers for the proxy, if using a proxy for actions. Default: {}.
+`xpack.actions.proxyRejectUnauthorizedCertificates` {ess-icon}::
+Deprecated. Use <<action-config-proxy-verification-mode,`xpack.actions.ssl.proxyVerificationMode`>> instead. Set to `false` to bypass certificate validation for the proxy, if using a proxy for actions. Default: `true`.
 
-a|`xpack.actions.`
-`proxyRejectUnauthorizedCertificates` {ess-icon}
-  | Deprecated. Use <<action-config-proxy-verification-mode,`xpack.actions.ssl.proxyVerificationMode`>> instead. Set to `false` to bypass certificate validation for the proxy, if using a proxy for actions. Default: `true`.
-
-|[[action-config-proxy-verification-mode]]
-`xpack.actions[n]`
-`.ssl.proxyVerificationMode` {ess-icon}
-| Controls the verification for the proxy server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection to the proxy server. Valid values are `full`, `certificate`, and `none`.
+[[action-config-proxy-verification-mode]]`xpack.actions[n].ssl.proxyVerificationMode` {ess-icon}::
+Controls the verification for the proxy server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection to the proxy server. Valid values are `full`, `certificate`, and `none`.
 Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>.
 
-| `xpack.actions.rejectUnauthorized` {ess-icon}
-  | Deprecated. Use <<action-config-verification-mode,`xpack.actions.ssl.verificationMode`>> instead. Set to `false` to bypass certificate validation for actions. Default: `true`. +
-  +
-  As an alternative to setting `xpack.actions.rejectUnauthorized`, you can use the setting
-  `xpack.actions.customHostSettings` to set SSL options for specific servers.
+`xpack.actions.rejectUnauthorized` {ess-icon}::
+Deprecated. Use <<action-config-verification-mode,`xpack.actions.ssl.verificationMode`>> instead. Set to `false` to bypass certificate validation for actions. Default: `true`.
++
+As an alternative to setting `xpack.actions.rejectUnauthorized`, you can use the setting
+`xpack.actions.customHostSettings` to set SSL options for specific servers.
 
-|[[action-config-verification-mode]]
-`xpack.actions[n]`
-`.ssl.verificationMode` {ess-icon}
-| Controls the verification for the server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection for actions. Valid values are `full`, `certificate`, and `none`.
-  Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>. +
-  +
-  As an alternative to setting `xpack.actions.ssl.verificationMode`, you can use the setting
-  `xpack.actions.customHostSettings` to set SSL options for specific servers.
+[[action-config-verification-mode]] `xpack.actions[n].ssl.verificationMode` {ess-icon}::
+Controls the verification for the server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection for actions. Valid values are `full`, `certificate`, and `none`.
+Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>.
++
+As an alternative to setting `xpack.actions.ssl.verificationMode`, you can use the setting
+`xpack.actions.customHostSettings` to set SSL options for specific servers.
 
+`xpack.actions.maxResponseContentLength` {ess-icon}::
+Specifies the max number of bytes of the http response for requests to external resources. Default: 1000000 (1MB).
 
-
-| `xpack.actions.maxResponseContentLength` {ess-icon}
-  | Specifies the max number of bytes of the http response for requests to external resources. Default: 1000000 (1MB).
-
-| `xpack.actions.responseTimeout` {ess-icon}
-  | Specifies the time allowed for requests to external resources. Requests that take longer are aborted. The time is formatted as: +
-  +
-  `<count>[ms,s,m,h,d,w,M,Y]` +
-  +
-  For example, `20m`, `24h`, `7d`, `1w`. Default: `60s`.
-
-
-|===
+`xpack.actions.responseTimeout` {ess-icon}::
+Specifies the time allowed for requests to external resources. Requests that take longer are aborted. The time is formatted as:
++
+`<count>[ms,s,m,h,d,w,M,Y]` 
++
+For example, `20m`, `24h`, `7d`, `1w`. Default: `60s`.
 
 [float]
 [[alert-settings]]
 ==== Alerting settings
 
-[cols="2*<"]
-|===
-
-| `xpack.alerting.maxEphemeralActionsPerAlert`
-  | Sets the number of actions that will be executed ephemerally. To use this, enable ephemeral tasks in task manager first with <<task-manager-settings,`xpack.task_manager.ephemeral_tasks.enabled`>>
-
-|===
+`xpack.alerting.maxEphemeralActionsPerAlert`::
+Sets the number of actions that will be executed ephemerally. To use this, enable ephemeral tasks in task manager first with <<task-manager-settings,`xpack.task_manager.ephemeral_tasks.enabled`>>

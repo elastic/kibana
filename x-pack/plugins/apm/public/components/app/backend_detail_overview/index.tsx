@@ -23,11 +23,16 @@ import { BackendDetailDependenciesTable } from './backend_detail_dependencies_ta
 import { BackendThroughputChart } from './backend_throughput_chart';
 import { BackendFailedTransactionRateChart } from './backend_error_rate_chart';
 import { BackendDetailTemplate } from '../../routing/templates/backend_detail_template';
+import {
+  getKueryBarBoolFilter,
+  kueryBarPlaceholder,
+} from '../../../../common/backends';
+import { useBreakPoints } from '../../../hooks/use_break_points';
 
 export function BackendDetailOverview() {
   const {
     path: { backendName },
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, environment, kuery },
   } = useApmParams('/backends/:backendName/overview');
 
   const apmRouter = useApmRouter();
@@ -35,7 +40,9 @@ export function BackendDetailOverview() {
   useBreadcrumb([
     {
       title: BackendInventoryTitle,
-      href: apmRouter.link('/backends', { query: { rangeFrom, rangeTo } }),
+      href: apmRouter.link('/backends', {
+        query: { rangeFrom, rangeTo, environment, kuery },
+      }),
     },
     {
       title: backendName,
@@ -44,17 +51,33 @@ export function BackendDetailOverview() {
         query: {
           rangeFrom,
           rangeTo,
+          environment,
+          kuery,
         },
       }),
     },
   ]);
 
+  const kueryBarBoolFilter = getKueryBarBoolFilter({
+    environment,
+    backendName,
+  });
+
+  const largeScreenOrSmaller = useBreakPoints().isLarge;
+
   return (
     <ApmBackendContextProvider>
       <BackendDetailTemplate title={backendName}>
-        <SearchBar showTimeComparison />
+        <SearchBar
+          showTimeComparison
+          kueryBarPlaceholder={kueryBarPlaceholder}
+          kueryBarBoolFilter={kueryBarBoolFilter}
+        />
         <ChartPointerEventContextProvider>
-          <EuiFlexGroup direction="row" gutterSize="s">
+          <EuiFlexGroup
+            direction={largeScreenOrSmaller ? 'column' : 'row'}
+            gutterSize="s"
+          >
             <EuiFlexItem>
               <EuiPanel hasBorder={true}>
                 <EuiTitle size="xs">
@@ -96,7 +119,7 @@ export function BackendDetailOverview() {
             </EuiFlexItem>
           </EuiFlexGroup>
         </ChartPointerEventContextProvider>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="l" />
         <BackendDetailDependenciesTable />
       </BackendDetailTemplate>
     </ApmBackendContextProvider>

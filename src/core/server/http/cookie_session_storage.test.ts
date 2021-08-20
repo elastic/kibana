@@ -14,7 +14,6 @@ import { BehaviorSubject } from 'rxjs';
 
 import { CoreContext } from '../core_context';
 import { HttpService } from './http_service';
-import { KibanaRequest } from './router';
 import { Env } from '../config';
 
 import { contextServiceMock } from '../context/context_service.mock';
@@ -323,7 +322,7 @@ describe.skip('Cookie based SessionStorage', () => {
         },
       };
 
-      const mockRequest = httpServerMock.createRawRequest();
+      const mockRequest = httpServerMock.createKibanaRequest();
 
       const factory = await createCookieSessionStorageFactory(
         logger.get(),
@@ -334,7 +333,7 @@ describe.skip('Cookie based SessionStorage', () => {
       expect(mockServer.register).toBeCalledTimes(1);
       expect(mockServer.auth.strategy).toBeCalledTimes(1);
 
-      const session = await factory.asScoped(KibanaRequest.from(mockRequest)).get();
+      const session = await factory.asScoped(mockRequest).get();
       expect(session).toBe(null);
 
       expect(mockServer.auth.test).toBeCalledTimes(1);
@@ -354,7 +353,7 @@ describe.skip('Cookie based SessionStorage', () => {
         },
       };
 
-      const mockRequest = httpServerMock.createRawRequest();
+      const mockRequest = httpServerMock.createKibanaRequest();
 
       const factory = await createCookieSessionStorageFactory(
         logger.get(),
@@ -365,7 +364,7 @@ describe.skip('Cookie based SessionStorage', () => {
       expect(mockServer.register).toBeCalledTimes(1);
       expect(mockServer.auth.strategy).toBeCalledTimes(1);
 
-      const session = await factory.asScoped(KibanaRequest.from(mockRequest)).get();
+      const session = await factory.asScoped(mockRequest).get();
       expect(session).toBe('foo');
 
       expect(mockServer.auth.test).toBeCalledTimes(1);
@@ -383,7 +382,7 @@ describe.skip('Cookie based SessionStorage', () => {
         },
       };
 
-      const mockRequest = httpServerMock.createRawRequest();
+      const mockRequest = httpServerMock.createKibanaRequest();
 
       const factory = await createCookieSessionStorageFactory(
         logger.get(),
@@ -394,7 +393,7 @@ describe.skip('Cookie based SessionStorage', () => {
       expect(mockServer.register).toBeCalledTimes(1);
       expect(mockServer.auth.strategy).toBeCalledTimes(1);
 
-      const session = await factory.asScoped(KibanaRequest.from(mockRequest)).get();
+      const session = await factory.asScoped(mockRequest).get();
       expect(session).toBe(null);
 
       expect(loggingSystemMock.collect(logger).debug).toEqual([['Error: Invalid cookie.']]);

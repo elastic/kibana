@@ -12,14 +12,14 @@ import React, { useMemo } from 'react';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { ScheduledQueryGroupForm } from '../../../scheduled_query_groups/form';
-import { useOsqueryIntegration } from '../../../common/hooks';
+import { useOsqueryIntegrationStatus } from '../../../common/hooks';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
 const AddScheduledQueryGroupPageComponent = () => {
   useBreadcrumbs('scheduled_query_group_add');
   const scheduledQueryListProps = useRouterNavigate('scheduled_query_groups');
-  const { data: osqueryIntegration } = useOsqueryIntegration();
+  const { data: osqueryIntegration } = useOsqueryIntegrationStatus();
 
   const packageInfo = useMemo(() => {
     if (!osqueryIntegration) return;

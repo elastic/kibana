@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging/target/mocks';
+import { loggerMock } from '@kbn/logging/mocks';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
@@ -27,7 +27,7 @@ import {
   ALERT_RULE_CONSUMER,
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
-import { createRuleDataClientMock } from '../rule_data_client/create_rule_data_client_mock';
+import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleExecutor } from './create_lifecycle_executor';
 
 describe('createLifecycleExecutor', () => {
