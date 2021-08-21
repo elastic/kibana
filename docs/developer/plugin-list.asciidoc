@@ -378,10 +378,6 @@ The client-side plugin configures following values:
 |Adds drilldown capabilities to dashboard.  Owned by the Kibana App team.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/dashboard_mode/README.md[dashboardMode]
-|The deprecated dashboard only mode.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/data_enhanced/README.md[dataEnhanced]
 |The data_enhanced plugin is the x-pack counterpart to the src/plguins/data plugin.
 
