@@ -56,6 +56,8 @@ export const TimeSeries = ({
   showGrid,
   legend,
   legendPosition,
+  truncateLegend,
+  maxLegendLines,
   tooltipMode,
   series,
   yAxis,
@@ -172,6 +174,9 @@ export const TimeSeries = ({
             background: {
               color: backgroundColor,
             },
+            legend: {
+              labelOptions: { maxLines: truncateLegend ? maxLegendLines ?? 1 : 0 },
+            },
           },
           chartTheme,
         ]}
@@ -216,6 +221,7 @@ export const TimeSeries = ({
             lines,
             data,
             hideInLegend,
+            truncateLegend,
             xScaleType,
             yScaleType,
             groupId,
@@ -249,6 +255,7 @@ export const TimeSeries = ({
                 name={getValueOrEmpty(seriesName)}
                 data={data}
                 hideInLegend={hideInLegend}
+                truncateLegend={truncateLegend}
                 bars={bars}
                 color={finalColor}
                 stackAccessors={stackAccessors}
@@ -274,6 +281,7 @@ export const TimeSeries = ({
                 name={getValueOrEmpty(seriesName)}
                 data={data}
                 hideInLegend={hideInLegend}
+                truncateLegend={truncateLegend}
                 lines={lines}
                 color={finalColor}
                 stackAccessors={stackAccessors}
@@ -336,6 +344,8 @@ TimeSeries.propTypes = {
   showGrid: PropTypes.bool,
   legend: PropTypes.bool,
   legendPosition: PropTypes.string,
+  truncateLegend: PropTypes.bool,
+  maxLegendLines: PropTypes.number,
   series: PropTypes.array,
   yAxis: PropTypes.array,
   onBrush: PropTypes.func,

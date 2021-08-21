@@ -146,6 +146,15 @@ export function ServiceOverviewInstancesTable({
             isEmptyAndLoading={mainStatsItemCount === 0 && isLoading}
           >
             <EuiBasicTable
+              noItemsMessage={
+                isLoading
+                  ? i18n.translate('xpack.apm.serviceOverview.loadingText', {
+                      defaultMessage: 'No instances found',
+                    })
+                  : i18n.translate('xpack.apm.serviceOverview.noResultsText', {
+                      defaultMessage: 'No instances found',
+                    })
+              }
               data-test-subj="instancesTable"
               loading={isLoading}
               items={mainStatsItems}

@@ -11,24 +11,22 @@
  * This way plugins can do targeted imports to reduce the final code bundle
  */
 import {
-  AlertConsumers as AlertConsumersTyped,
   ALERT_DURATION as ALERT_DURATION_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
-  ALERT_STATUS as ALERT_STATUS_TYPED,
-  ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
+  ALERT_REASON as ALERT_REASON_TYPED,
   ALERT_RULE_CONSUMER,
+  ALERT_STATUS as ALERT_STATUS_TYPED,
+  ALERT_WORKFLOW_STATUS as ALERT_WORKFLOW_STATUS_TYPED,
 } from '@kbn/rule-data-utils';
+// @ts-expect-error importing from a place other than root because we want to limit what we import from this package
+import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 import {
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
+  ALERT_REASON as ALERT_REASON_NON_TYPED,
   ALERT_STATUS as ALERT_STATUS_NON_TYPED,
-  ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
+  ALERT_WORKFLOW_STATUS as ALERT_WORKFLOW_STATUS_NON_TYPED,
   TIMESTAMP,
   // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
-
-// @ts-expect-error importing from a place other than root because we want to limit what we import from this package
-import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 
 import {
   EuiButtonIcon,
@@ -41,7 +39,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback } from 'react';
-
 import { get } from 'lodash';
 import { useGetUserAlertsPermissions } from '../../hooks/use_alert_permission';
 import type { TimelinesUIStart, TGridType, SortDirection } from '../../../../timelines/public';
@@ -50,7 +47,7 @@ import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import type {
   ActionProps,
-  AlertStatus,
+  AlertWorkflowStatus,
   ColumnHeaderOptions,
   RowRenderer,
 } from '../../../../timelines/common';
@@ -64,23 +61,23 @@ import { LazyAlertsFlyout } from '../..';
 import { parseAlert } from './parse_alert';
 import { CoreStart } from '../../../../../../src/core/public';
 
-const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
-const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
+const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
-const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
+const ALERT_WORKFLOW_STATUS: typeof ALERT_WORKFLOW_STATUS_TYPED = ALERT_WORKFLOW_STATUS_NON_TYPED;
 
 interface AlertsTableTGridProps {
-  indexName: string;
+  indexNames: string[];
   rangeFrom: string;
   rangeTo: string;
   kuery: string;
-  status: string;
+  workflowStatus: AlertWorkflowStatus;
   setRefetch: (ref: () => void) => void;
+  addToQuery: (value: string) => void;
 }
 
 interface ObservabilityActionsProps extends ActionProps {
-  currentStatus: AlertStatus;
+  currentStatus: AlertWorkflowStatus;
   setFlyoutAlert: React.Dispatch<React.SetStateAction<TopAlert | undefined>>;
 }
 
@@ -113,10 +110,10 @@ export const columns: Array<
   {
     columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate('xpack.observability.alertsTGrid.statusColumnDescription', {
-      defaultMessage: 'Status',
+      defaultMessage: 'Alert Status',
     }),
     id: ALERT_STATUS,
-    initialWidth: 79,
+    initialWidth: 110,
   },
   {
     columnHeaderType: 'not-filtered',
@@ -136,32 +133,17 @@ export const columns: Array<
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.observability.alertsTGrid.severityColumnDescription', {
-      defaultMessage: 'Severity',
-    }),
-    id: ALERT_SEVERITY_LEVEL,
-    initialWidth: 102,
-  },
-  {
-    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate('xpack.observability.alertsTGrid.reasonColumnDescription', {
       defaultMessage: 'Reason',
     }),
+    id: ALERT_REASON,
     linkField: '*',
-    id: ALERT_RULE_NAME,
   },
 ];
 
 const NO_ROW_RENDER: RowRenderer[] = [];
 
 const trailingControlColumns: never[] = [];
-
-const OBSERVABILITY_ALERT_CONSUMERS = [
-  AlertConsumers.APM,
-  AlertConsumers.LOGS,
-  AlertConsumers.INFRASTRUCTURE,
-  AlertConsumers.UPTIME,
-];
 
 function ObservabilityActions({
   data,
@@ -299,7 +281,7 @@ function ObservabilityActions({
 }
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
-  const { indexName, rangeFrom, rangeTo, kuery, status, setRefetch } = props;
+  const { indexNames, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch, addToQuery } = props;
   const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
@@ -324,29 +306,28 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           return (
             <ObservabilityActions
               {...actionProps}
-              currentStatus={status as AlertStatus}
+              currentStatus={workflowStatus}
               setFlyoutAlert={setFlyoutAlert}
             />
           );
         },
       },
     ];
-  }, [status]);
+  }, [workflowStatus]);
 
   const tGridProps = useMemo(() => {
     const type: TGridType = 'standalone';
     const sortDirection: SortDirection = 'desc';
     return {
-      alertConsumers: OBSERVABILITY_ALERT_CONSUMERS,
       appId: observabilityFeatureId,
       casePermissions,
       type,
       columns,
       deletedEventIds: [],
-      defaultCellActions: getDefaultCellActions({ enableFilterActions: false }),
+      defaultCellActions: getDefaultCellActions({ addToQuery }),
       end: rangeTo,
       filters: [],
-      indexNames: [indexName],
+      indexNames,
       itemsPerPage: 10,
       itemsPerPageOptions: [10, 25, 50],
       loadingText: i18n.translate('xpack.observability.alertsTable.loadingTextLabel', {
@@ -356,7 +337,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         defaultMessage: 'alerts',
       }),
       query: {
-        query: `${ALERT_STATUS}: ${status}${kuery !== '' ? ` and ${kuery}` : ''}`,
+        query: `${ALERT_WORKFLOW_STATUS}: ${workflowStatus}${kuery !== '' ? ` and ${kuery}` : ''}`,
         language: 'kuery',
       },
       renderCellValue: getRenderCellValue({ rangeFrom, rangeTo, setFlyoutAlert }),
@@ -370,7 +351,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           sortDirection,
         },
       ],
-      filterStatus: status as AlertStatus,
+      filterStatus: workflowStatus as AlertWorkflowStatus,
       leadingControlColumns,
       trailingControlColumns,
       unit: (totalAlerts: number) =>
@@ -381,13 +362,14 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     };
   }, [
     casePermissions,
-    indexName,
+    indexNames,
     kuery,
     leadingControlColumns,
     rangeFrom,
     rangeTo,
     setRefetch,
-    status,
+    workflowStatus,
+    addToQuery,
   ]);
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const { observabilityRuleTypeRegistry } = usePluginContext();
