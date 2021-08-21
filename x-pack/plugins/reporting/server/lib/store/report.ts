@@ -24,8 +24,7 @@ const puid = new Puid();
 export const MIGRATION_VERSION = '7.14.0';
 
 /*
- * The public fields are a flattened version what Elasticsearch returns when you
- * `GET` a document.
+ * Class for an ephemeral report document: possibly is not saved in Elasticsearch
  */
 export class Report implements Partial<ReportSource & ReportDocumentHead> {
   public _index?: string;

@@ -16,13 +16,9 @@ export { ExecuteReportTask } from './execute_report';
 export { MonitorReportsTask } from './monitor_reports';
 export { TaskRunResult };
 
-/*
- * The document created by Reporting to store as task parameters for Task
- * Manager to reference the report in .reporting
- */
 export interface ReportTaskParams<JobPayloadType = BasePayload> {
   id: string;
-  index?: string; // For ad-hoc, which as an existing "pending" record
+  index: string;
   payload: JobPayloadType;
   created_at: ReportSource['created_at'];
   created_by: ReportSource['created_by'];
