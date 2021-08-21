@@ -13,7 +13,6 @@ import type {
   getEsQueryConfig as getEsQueryConfigTyped,
   getSafeSortIds as getSafeSortIdsTyped,
   isValidFeatureId as isValidFeatureIdTyped,
-  mapConsumerToIndexName as mapConsumerToIndexNameTyped,
   STATUS_VALUES,
   ValidFeatureId,
 } from '@kbn/rule-data-utils';
@@ -21,7 +20,6 @@ import {
   getEsQueryConfig as getEsQueryConfigNonTyped,
   getSafeSortIds as getSafeSortIdsNonTyped,
   isValidFeatureId as isValidFeatureIdNonTyped,
-  mapConsumerToIndexName as mapConsumerToIndexNameNonTyped,
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 
@@ -48,7 +46,6 @@ import { Dataset, RuleDataPluginService } from '../rule_data_plugin_service';
 const getEsQueryConfig: typeof getEsQueryConfigTyped = getEsQueryConfigNonTyped;
 const getSafeSortIds: typeof getSafeSortIdsTyped = getSafeSortIdsNonTyped;
 const isValidFeatureId: typeof isValidFeatureIdTyped = isValidFeatureIdNonTyped;
-const mapConsumerToIndexName: typeof mapConsumerToIndexNameTyped = mapConsumerToIndexNameNonTyped;
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> &
@@ -679,6 +676,10 @@ export class AlertsClient {
       const toReturn = validAuthorizedFeatures.flatMap((feature) => {
         const indices = this.ruleDataService.findIndicesByFeature(feature, Dataset.alerts);
         if (feature === 'siem') {
+          // TODO: Remove space id from the index name and make sure the app works well.
+          // We should not include space id into the index name, because a
+          // namespace goes into the index name, and it's user-defined in general.
+          // The user can set a custom namespace per rule instance which could be != space id.
           return indices.map((i) => `${i.baseName}-${this.spaceId}`);
         } else {
           return indices.map((i) => i.baseName);
