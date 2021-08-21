@@ -11,7 +11,7 @@ import { applicationServiceMock } from '../../../../../../src/core/public/applic
 
 const discoverMock = discoverPluginMock.createStartContract();
 
-export const servicesMock = {
+export const kibanaContextMock = {
   data: dataPluginMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
   discover: {
