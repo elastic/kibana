@@ -7,8 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { ElasticsearchTestBed, setupElasticsearchPage, setupEnvironment } from '../helpers';
-
+import { setupEnvironment } from '../helpers';
+import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
 import { esDeprecationsMockResponse, MOCK_SNAPSHOT_ID, MOCK_JOB_ID } from './mocked_responses';
 
 // Note: The reindexing flyout UX is subject to change; more tests should be added here once functionality is built out
@@ -40,7 +40,7 @@ describe('Reindex deprecation flyout', () => {
     const reindexDeprecation = esDeprecationsMockResponse.deprecations[3];
     const { actions, find, exists } = testBed;
 
-    await actions.clickReindexDeprecationAt(0);
+    await actions.table.clickDeprecationRowAt('reindex', 0);
 
     expect(exists('reindexDetails')).toBe(true);
     expect(find('reindexDetails.flyoutTitle').text()).toContain(
