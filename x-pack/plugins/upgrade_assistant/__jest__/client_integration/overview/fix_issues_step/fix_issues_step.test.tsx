@@ -12,7 +12,7 @@ import * as mockedResponses from './mocked_responses';
 import { setupEnvironment } from '../../helpers';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
-describe('Overview - Fix deprecated settings step', () => {
+describe('Overview - Fix deprecation issues step', () => {
   let testBed: OverviewTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
