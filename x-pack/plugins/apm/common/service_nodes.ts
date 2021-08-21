@@ -16,8 +16,27 @@ const UNIDENTIFIED_SERVICE_NODES_LABEL = i18n.translate(
   }
 );
 
+// const UNIDENTIFIED_HOST_NAME_LABEL = i18n.translate(
+//   'xpack.apm.serviceNodeHostNameMissing',
+//   {
+//     defaultMessage: '(Empty)',
+//   }
+// );
+
 export function getServiceNodeName(serviceNodeName?: string) {
   return serviceNodeName === SERVICE_NODE_NAME_MISSING || !serviceNodeName
     ? UNIDENTIFIED_SERVICE_NODES_LABEL
     : serviceNodeName;
+}
+
+export function getServiceNodeHostName(hostName: string | number | null, serviceNodeName?: string ) {
+  if(hostName === null || !hostName) {
+    return ''
+  }
+
+  // if(serviceNodeName && serviceNodeName === hostName) {
+  //   return 'mimi'
+  // }
+
+  return hostName
 }

@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
+  getServiceNodeHostName,
   getServiceNodeName,
   SERVICE_NODE_NAME_MISSING,
 } from '../../../../common/service_nodes';
@@ -109,6 +110,14 @@ function ServiceNodeOverview() {
           </EuiToolTip>
         );
       },
+    },
+    {
+      name: i18n.translate('xpack.apm.jvmsTable.hostName', {
+        defaultMessage: 'Host Name',
+      }),
+      field: 'hostName',
+      sortable: true,
+      render: (_, { hostName, name }) => getServiceNodeHostName(hostName, name),
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.cpuColumnLabel', {
