@@ -125,7 +125,7 @@ export class RuleRegistryPlugin
     core: CoreStart,
     plugins: RuleRegistryPluginStartDependencies
   ): RuleRegistryPluginStartContract {
-    const { logger, alertsClientFactory, security } = this;
+    const { logger, alertsClientFactory, ruleDataService, security } = this;
 
     alertsClientFactory.initialize({
       logger,
@@ -135,6 +135,7 @@ export class RuleRegistryPlugin
         return plugins.alerting.getAlertingAuthorizationWithRequest(request);
       },
       securityPluginSetup: security,
+      ruleDataService,
     });
 
     const getRacClientWithRequest = (request: KibanaRequest) => {

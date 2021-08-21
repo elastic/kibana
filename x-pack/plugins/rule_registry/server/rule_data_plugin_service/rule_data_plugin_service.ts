@@ -171,7 +171,8 @@ export class RuleDataPluginService {
    * Looks up the index information associated with the given Kibana "feature".
    * Note: features are used in RBAC.
    */
-  public findIndicesByFeature(featureId: ValidFeatureId): IndexInfo[] {
-    return this.indicesByFeatureId.get(featureId) ?? [];
+  public findIndicesByFeature(featureId: ValidFeatureId, dataset?: Dataset): IndexInfo[] {
+    const foundIndices = this.indicesByFeatureId.get(featureId) ?? [];
+    return dataset ? foundIndices.filter((i) => i.indexOptions.dataset === dataset) : foundIndices;
   }
 }
