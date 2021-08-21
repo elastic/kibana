@@ -136,6 +136,7 @@ export interface GetFieldsOptionsTimePattern {
 export interface IIndexPatternsApiClient {
   getFieldsForTimePattern: (options: GetFieldsOptionsTimePattern) => Promise<any>;
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
+  hasUserIndexPattern: () => Promise<boolean>;
 }
 
 export type { SavedObject };

@@ -174,6 +174,17 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     minMaxByColumnId[args.valueAccessor!]
   );
 
+  const bands = ranges.map((start, index, array) => {
+    return {
+      // with the default continuity:above the every range is left-closed
+      start,
+      // with the default continuity:above the last range is right-open
+      end: index === array.length - 1 ? Infinity : array[index + 1],
+      // the current colors array contains a duplicated color at the beginning that we need to skip
+      color: colors[index + 1],
+    };
+  });
+
   const onElementClick = ((e: HeatmapElementEvent[]) => {
     const cell = e[0][0];
     const { x, y } = cell.datum;
@@ -331,9 +342,10 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
       <Heatmap
         id={tableId}
         name={valueColumn.name}
-        colorScale={ScaleType.Threshold}
-        colors={colors}
-        ranges={ranges}
+        colorScale={{
+          type: 'bands',
+          bands,
+        }}
         data={chartData}
         xAccessor={args.xAccessor}
         yAccessor={args.yAccessor || 'unifiedY'}
