@@ -23,8 +23,6 @@ const createRuleDataPluginService = () => {
   return mocked;
 };
 
-export const ruleDataPluginServiceMock: {
-  create: () => jest.Mocked<PublicMethodsOf<RuleDataPluginService>>;
-} = {
+export const ruleDataPluginServiceMock = {
   create: createRuleDataPluginService,
 };
