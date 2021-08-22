@@ -532,6 +532,7 @@ class IndexPatternsService {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternListItem" needs to be exported by the entry point index.d.ts
     getIdsWithTitle: (refresh?: boolean) => Promise<IndexPatternListItem[]>;
     getTitles: (refresh?: boolean) => Promise<string[]>;
+    hasUserIndexPattern(): Promise<boolean>;
     refreshFields: (indexPattern: IndexPattern) => Promise<void>;
     savedObjectToSpec: (savedObject: SavedObject_2<IndexPatternAttributes>) => IndexPatternSpec;
     setDefault: (id: string | null, force?: boolean) => Promise<void>;
@@ -697,7 +698,7 @@ export class Plugin implements Plugin_2<PluginSetup, PluginStart, DataPluginSetu
     start(core: CoreStart_2, { fieldFormats }: DataPluginStartDependencies): {
         fieldFormats: FieldFormatsStart;
         indexPatterns: {
-            indexPatternsServiceFactory: (savedObjectsClient: Pick<import("../../../core/server").SavedObjectsClient, "update" | "get" | "delete" | "create" | "bulkCreate" | "checkConflicts" | "find" | "bulkGet" | "resolve" | "collectMultiNamespaceReferences" | "updateObjectsSpaces" | "bulkUpdate" | "removeReferencesTo" | "openPointInTimeForType" | "closePointInTime" | "createPointInTimeFinder" | "errors">, elasticsearchClient: import("../../../core/server").ElasticsearchClient) => Promise<import(".").IndexPatternsService>;
+            indexPatternsServiceFactory: (savedObjectsClient: Pick<import("../../../core/server").SavedObjectsClient, "update" | "get" | "closePointInTime" | "create" | "delete" | "bulkCreate" | "checkConflicts" | "find" | "bulkGet" | "resolve" | "collectMultiNamespaceReferences" | "updateObjectsSpaces" | "bulkUpdate" | "removeReferencesTo" | "openPointInTimeForType" | "createPointInTimeFinder" | "errors">, elasticsearchClient: import("../../../core/server").ElasticsearchClient) => Promise<import(".").IndexPatternsService>;
         };
         search: ISearchStart<import("./search").IEsSearchRequest, import("./search").IEsSearchResponse<any>>;
     };

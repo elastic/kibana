@@ -87,8 +87,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/106660
-    describe.skip('Saved Views', () => {
+    describe('Saved Views', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       it('should have save and load controls', async () => {
