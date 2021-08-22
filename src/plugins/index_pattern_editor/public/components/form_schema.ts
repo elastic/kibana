@@ -51,12 +51,12 @@ export const schema = {
     }),
     helpText: i18n.translate('indexPatternEditor.editor.form.customIdHelp', {
       defaultMessage:
-        'Kibana provides a unique identifier for each index pattern, or you can create your own.',
+        'Kibana provides a unique identifier for each data view, or you can create your own.',
     }),
   },
   type: {
     label: i18n.translate('indexPatternEditor.editor.form.TypeLabel', {
-      defaultMessage: 'Index pattern type',
+      defaultMessage: 'Data view type',
     }),
     defaultValue: INDEX_PATTERN_TYPE.DEFAULT,
   },
