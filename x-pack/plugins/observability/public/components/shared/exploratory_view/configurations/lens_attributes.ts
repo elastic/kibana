@@ -496,7 +496,7 @@ export class LensAttributes {
       if (qFilter.query?.bool?.should) {
         const values: string[] = [];
         let fieldName = '';
-        qFilter.query?.bool.should.forEach((ft) => {
+        qFilter.query?.bool.should.forEach((ft: any) => {
           if (ft.match_phrase) {
             fieldName = Object.keys(ft.match_phrase)[0];
             values.push(ft.match_phrase[fieldName]);
