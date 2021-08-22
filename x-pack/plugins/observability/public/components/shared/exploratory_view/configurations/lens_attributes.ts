@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
-import { ExistsFilter } from '@kbn/es-query';
+import { ExistsFilter, isExistsFilter } from '@kbn/es-query';
 import {
   CountIndexPatternColumn,
   DateHistogramIndexPatternColumn,
@@ -496,7 +496,7 @@ export class LensAttributes {
       if (qFilter.query?.bool?.should) {
         const values: string[] = [];
         let fieldName = '';
-        qFilter.query?.bool.should.forEach((ft: any) => {
+        qFilter.query?.bool.should.forEach((ft) => {
           if (ft.match_phrase) {
             fieldName = Object.keys(ft.match_phrase)[0];
             values.push(ft.match_phrase[fieldName]);
@@ -513,8 +513,8 @@ export class LensAttributes {
       }
       const existFilter = filter as ExistsFilter;
 
-      if (existFilter.exists) {
-        const fieldName = existFilter.exists.field;
+      if (isExistsFilter(existFilter)) {
+        const fieldName = existFilter.exists?.field;
         const kql = `${fieldName} : *`;
         if (baseFilters.length > 0) {
           baseFilters += ` and ${kql}`;

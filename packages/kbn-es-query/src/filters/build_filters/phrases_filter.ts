@@ -8,11 +8,11 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { Filter, FilterMeta, FILTERS } from './types';
-import { getPhraseScript } from './phrase_filter';
+import { getPhraseScript, PhraseFilterValue } from './phrase_filter';
 import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
 
 export type PhrasesFilterMeta = FilterMeta & {
-  params: string[]; // The unformatted values
+  params: PhraseFilterValue[]; // The unformatted values
   field?: string;
 };
 
@@ -49,7 +49,7 @@ export const getPhrasesFilterField = (filter: PhrasesFilter) => {
  */
 export const buildPhrasesFilter = (
   field: IndexPatternFieldBase,
-  params: string[],
+  params: PhraseFilterValue[],
   indexPattern: IndexPatternBase
 ) => {
   const index = indexPattern.id;

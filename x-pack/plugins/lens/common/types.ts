@@ -6,6 +6,7 @@
  */
 
 import { Filter, FilterMeta } from '@kbn/es-query';
+import { estypes } from '@elastic/elasticsearch';
 import type { IFieldFormat } from '../../../../src/plugins/field_formats/common';
 import type { Datatable, SerializedFieldFormat } from '../../../../src/plugins/expressions/common';
 
@@ -27,6 +28,12 @@ export interface PersistableFilterMeta extends FilterMeta {
 
 export interface PersistableFilter extends Filter {
   meta: PersistableFilterMeta;
+  query: {
+    match_phrase?: estypes.QueryDslQueryContainer['match_phrase'];
+    bool: {
+      should: Array<{ match_phrase: Record<string, string> }>;
+    };
+  };
 }
 
 export interface LensMultiTable {
