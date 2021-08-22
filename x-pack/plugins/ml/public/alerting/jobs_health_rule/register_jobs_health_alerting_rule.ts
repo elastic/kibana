@@ -87,7 +87,7 @@ export function registerJobsHealthAlertingRule(
     defaultActionMessage: i18n.translate(
       'xpack.ml.alertTypes.jobsHealthAlertingRule.defaultActionMessage',
       {
-        defaultMessage: `Anomaly detection jobs health check result:
+        defaultMessage: `[\\{\\{rule.name\\}\\}] Anomaly detection jobs health check result:
 \\{\\{context.message\\}\\}
 \\{\\{#context.results\\}\\}
   Job ID: \\{\\{job_id\\}\\}
