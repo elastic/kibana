@@ -671,144 +671,138 @@ describe('queryEventsBySavedObject', () => {
     );
 
     const [query] = clusterClient.search.mock.calls[0];
-    expect(query).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "from": 0,
-          "query": Object {
-            "bool": Object {
-              "filter": Array [],
-              "must": Array [
-                Object {
-                  "nested": Object {
-                    "path": "kibana.saved_objects",
-                    "query": Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "term": Object {
-                              "kibana.saved_objects.rel": Object {
-                                "value": "primary",
+    expect(query).toMatchObject({
+      body: {
+        from: 0,
+        query: {
+          bool: {
+            filter: [],
+            must: [
+              {
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.type': {
+                              value: 'saved-object-type',
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.namespace': {
+                              value: 'namespace',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        must: [
+                          {
+                            nested: {
+                              path: 'kibana.saved_objects',
+                              query: {
+                                bool: {
+                                  must: [
+                                    {
+                                      terms: {
+                                        'kibana.saved_objects.id': ['legacy-id'],
+                                      },
+                                    },
+                                  ],
+                                },
                               },
                             },
                           },
-                          Object {
-                            "term": Object {
-                              "kibana.saved_objects.type": Object {
-                                "value": "saved-object-type",
-                              },
-                            },
-                          },
-                          Object {
-                            "term": Object {
-                              "kibana.saved_objects.namespace": Object {
-                                "value": "namespace",
+                          {
+                            range: {
+                              'kibana.version': {
+                                lt: '8.0.0',
                               },
                             },
                           },
                         ],
                       },
                     },
-                  },
-                },
-                Object {
-                  "bool": Object {
-                    "should": Array [
-                      Object {
-                        "bool": Object {
-                          "must": Array [
-                            Object {
-                              "nested": Object {
-                                "path": "kibana.saved_objects",
-                                "query": Object {
-                                  "bool": Object {
-                                    "must": Array [
-                                        Object {
-                                          "terms": Object {
-                                          "kibana.saved_objects.id": Array [
-                                            "legacy-id",
-                                          ],
-                                        },
+                    {
+                      bool: {
+                        must: [
+                          {
+                            nested: {
+                              path: 'kibana.saved_objects',
+                              query: {
+                                bool: {
+                                  must: [
+                                    {
+                                      terms: {
+                                        'kibana.saved_objects.id': ['saved-object-id'],
                                       },
-                                    ],
-                                  },
+                                    },
+                                  ],
                                 },
                               },
                             },
-                            Object {
-                              "range": Object {
-                                "kibana.version": Object {
-                                  "lt": "8.0.0",
-                                },
+                          },
+                          {
+                            range: {
+                              'kibana.version': {
+                                gte: '8.0.0',
                               },
                             },
-                          ],
-                        },
+                          },
+                        ],
                       },
-                      Object {
-                        "bool": Object {
-                          "must": Array [
-                            Object {
-                              "nested": Object {
-                                "path": "kibana.saved_objects",
-                                "query": Object {
-                                  "bool": Object {
-                                    "must": Array [
-                                      Object {
-                                        "terms": Object {
-                                          "kibana.saved_objects.id": Array [
-                                              "saved-object-id",
-                                            ],
-                                        },
-                                      },
-                                    ],
-                                  },
-                                },
-                              },
-                            },
-                            Object {
-                              "range": Object {
-                                "kibana.version": Object {
-                                  "gte": "8.0.0",
-                                },
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-                Object {
-                  "range": Object {
-                    "@timestamp": Object {
-                      "gte": "2020-07-08T00:52:28.350Z",
                     },
+                  ],
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '2020-07-08T00:52:28.350Z',
                   },
                 },
-                Object {
-                  "range": Object {
-                    "@timestamp": Object {
-                      "lte": "2020-07-08T00:00:00.000Z",
-                    },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    lte: '2020-07-08T00:00:00.000Z',
                   },
                 },
-              ],
+              },
+            ],
+          },
+        },
+        size: 10,
+        sort: [
+          {
+            '@timestamp': {
+              order: 'asc',
             },
           },
-          "size": 10,
-          "sort": Array [
-            Object {
-              "@timestamp": Object {
-                "order": "asc",
-              },
-            },
-          ],
-        },
-        "index": "index-name",
-        "track_total_hits": true,
-      }
-    `);
+        ],
+      },
+      index: 'index-name',
+      track_total_hits: true,
+    });
   });
 });
 
