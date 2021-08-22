@@ -45,14 +45,14 @@ export class ApiService {
     this.client = httpClient;
   }
 
-  public useLoadUpgradeStatus() {
+  public useLoadEsDeprecations() {
     return this.useRequest<ESUpgradeStatus>({
       path: `${API_BASE_PATH}/es_deprecations`,
       method: 'get',
     });
   }
 
-  public async sendTelemetryData(telemetryData: { [tabName: string]: boolean }) {
+  public async sendPageTelemetryData(telemetryData: { [tabName: string]: boolean }) {
     const result = await this.sendRequest({
       path: `${API_BASE_PATH}/stats/ui_open`,
       method: 'put',
@@ -123,6 +123,37 @@ export class ApiService {
     return await this.sendRequest({
       path: `${API_BASE_PATH}/ml_snapshots/${jobId}/${snapshotId}`,
       method: 'get',
+    });
+  }
+
+  public async sendReindexTelemetryData(telemetryData: { [key: string]: boolean }) {
+    const result = await this.sendRequest({
+      path: `${API_BASE_PATH}/stats/ui_reindex`,
+      method: 'put',
+      body: JSON.stringify(telemetryData),
+    });
+
+    return result;
+  }
+
+  public async getReindexStatus(indexName: string) {
+    return await this.sendRequest({
+      path: `${API_BASE_PATH}/reindex/${indexName}`,
+      method: 'get',
+    });
+  }
+
+  public async startReindexTask(indexName: string) {
+    return await this.sendRequest({
+      path: `${API_BASE_PATH}/reindex/${indexName}`,
+      method: 'post',
+    });
+  }
+
+  public async cancelReindexTask(indexName: string) {
+    return await this.sendRequest({
+      path: `${API_BASE_PATH}/reindex/${indexName}/cancel`,
+      method: 'post',
     });
   }
 }
