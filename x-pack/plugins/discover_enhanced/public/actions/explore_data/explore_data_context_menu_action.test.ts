@@ -28,7 +28,7 @@ afterEach(() => {
   i18nTranslateSpy.mockClear();
 });
 
-const setup = ({ dashboardOnlyMode = false }: { dashboardOnlyMode?: boolean } = {}) => {
+const setup = () => {
   const core = coreMock.createStart();
   const locator: DiscoverAppLocator = {
     getLocation: jest.fn(() =>
@@ -50,11 +50,6 @@ const setup = ({ dashboardOnlyMode = false }: { dashboardOnlyMode?: boolean } = 
   const plugins: PluginDeps = {
     discover: {
       locator,
-    },
-    kibanaLegacy: {
-      dashboardConfig: {
-        getHideWriteControls: () => dashboardOnlyMode,
-      },
     },
   };
 
@@ -172,13 +167,6 @@ describe('"Explore underlying data" panel action', () => {
       const { action, input, context } = setup();
       input.viewMode = ViewMode.EDIT;
 
-      const isCompatible = await action.isCompatible(context);
-
-      expect(isCompatible).toBe(false);
-    });
-
-    test('return false for dashboard_only mode', async () => {
-      const { action, context } = setup({ dashboardOnlyMode: true });
       const isCompatible = await action.isCompatible(context);
 
       expect(isCompatible).toBe(false);
