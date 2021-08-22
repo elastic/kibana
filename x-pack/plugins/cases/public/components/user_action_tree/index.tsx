@@ -162,19 +162,28 @@ export const UserActionTree = React.memo(
     const currentUser = useCurrentUser();
     const [manageMarkdownEditIds, setManageMarkdownEditIds] = useState<string[]>([]);
     const commentRefs = useRef<Record<string, any>>({});
-    const { draftComment, openLensModal } = useLensDraftComment();
+    const {
+      clearDraftComment,
+      draftComment,
+      hasIncomingLensState,
+      openLensModal,
+    } = useLensDraftComment();
 
     const [loadingAlertData, manualAlertsData] = useFetchAlertData(
       getManualAlertIdsWithNoRuleId(caseData.comments)
     );
 
-    const handleManageMarkdownEditId = useCallback((id: string) => {
-      setManageMarkdownEditIds((prevManageMarkdownEditIds) =>
-        !prevManageMarkdownEditIds.includes(id)
-          ? prevManageMarkdownEditIds.concat(id)
-          : prevManageMarkdownEditIds.filter((myId) => id !== myId)
-      );
-    }, []);
+    const handleManageMarkdownEditId = useCallback(
+      (id: string) => {
+        clearDraftComment();
+        setManageMarkdownEditIds((prevManageMarkdownEditIds) =>
+          !prevManageMarkdownEditIds.includes(id)
+            ? prevManageMarkdownEditIds.concat(id)
+            : prevManageMarkdownEditIds.filter((myId) => id !== myId)
+        );
+      },
+      [clearDraftComment]
+    );
 
     const handleSaveComment = useCallback(
       ({ id, version }: { id: string; version: string }, content: string) => {
@@ -650,10 +659,21 @@ export const UserActionTree = React.memo(
           commentRefs.current[draftComment.commentId].editor?.toolbar
         ) {
           commentRefs.current[draftComment.commentId].setComment(draftComment.comment);
-          openLensModal({ editorRef: commentRefs.current[draftComment.commentId].editor });
+          if (hasIncomingLensState) {
+            openLensModal({ editorRef: commentRefs.current[draftComment.commentId].editor });
+          } else {
+            clearDraftComment();
+          }
         }
       }
-    }, [draftComment, openLensModal]);
+    }, [
+      draftComment,
+      openLensModal,
+      commentRefs,
+      hasIncomingLensState,
+      clearDraftComment,
+      manageMarkdownEditIds,
+    ]);
 
     return (
       <>

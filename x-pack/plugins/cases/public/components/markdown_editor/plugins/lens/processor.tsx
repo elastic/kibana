@@ -7,7 +7,7 @@
 
 import { first } from 'rxjs/operators';
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { useLocation } from 'react-router-dom';
 
@@ -90,27 +90,20 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
     <Container>
       {attributes ? (
         <>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiText>
-                <h5>{attributes.title}</h5>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {viewMode && canUseEditor() ? (
-                <EuiButton
-                  iconType="lensApp"
-                  fullWidth={false}
-                  isDisabled={!canUseEditor()}
-                  onClick={handleClick}
-                >
-                  {`Open visualization`}
-                </EuiButton>
-              ) : null}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          <EuiSpacer size="xs" />
+          {viewMode && canUseEditor() && (
+            <>
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  {viewMode && canUseEditor() ? (
+                    <EuiButton iconType="lensApp" fullWidth={false} onClick={handleClick} size="s">
+                      {`Open visualization`}
+                    </EuiButton>
+                  ) : null}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="xs" />
+            </>
+          )}
 
           <EmbeddableComponent
             id=""

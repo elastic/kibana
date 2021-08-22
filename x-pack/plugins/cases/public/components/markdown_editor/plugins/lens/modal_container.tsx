@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { EuiFlexGroup } from '@elastic/eui';
 import styled from 'styled-components';
 
-export const ModalContainer = styled.div`
+export const ModalContainer = styled(EuiFlexGroup)`
   width: ${({ theme }) => theme.eui.euiBreakpoints.m};
+  height: 100%;
 
   .euiModalBody {
     min-height: 300px;

@@ -15,8 +15,8 @@ import { ADD_VISUALIZATION } from './translations';
 interface DraftComment {
   commentId: string;
   comment: string;
+  lensEditorQuery: string;
   position: EuiMarkdownAstNodePosition;
-  title: string;
 }
 
 export const useLensDraftComment = () => {
@@ -26,6 +26,7 @@ export const useLensDraftComment = () => {
     storage,
   } = useKibana().services;
   const [draftComment, setDraftComment] = useState<DraftComment | null>(null);
+  const [hasIncomingLensState, setHasIncomingLensState] = useState(false);
 
   useEffect(() => {
     const fetchDraftComment = async () => {
@@ -38,14 +39,12 @@ export const useLensDraftComment = () => {
       const incomingEmbeddablePackage = embeddable
         ?.getStateTransfer()
         .getIncomingEmbeddablePackage(currentAppId);
+      const storageDraftComment = storage.get(DRAFT_COMMENT_STORAGE_ID);
 
-      if (incomingEmbeddablePackage) {
-        if (storage.get(DRAFT_COMMENT_STORAGE_ID)) {
-          try {
-            setDraftComment(storage.get(DRAFT_COMMENT_STORAGE_ID));
-            // eslint-disable-next-line no-empty
-          } catch (e) {}
-        }
+      setHasIncomingLensState(!!incomingEmbeddablePackage);
+
+      if (storageDraftComment) {
+        setDraftComment(storageDraftComment);
       }
     };
     fetchDraftComment();
@@ -64,7 +63,8 @@ export const useLensDraftComment = () => {
 
   const clearDraftComment = useCallback(() => {
     storage.remove(DRAFT_COMMENT_STORAGE_ID);
+    setDraftComment(null);
   }, [storage]);
 
-  return { draftComment, openLensModal, clearDraftComment };
+  return { draftComment, hasIncomingLensState, openLensModal, clearDraftComment };
 };
