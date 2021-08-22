@@ -25,7 +25,8 @@ export function getRequestInspectorStats(searchSource: ISearchSource) {
 
   if (index) {
     stats.indexPattern = {
-      // todo - KIP or string?
+      // todo - This looks like an index pattern string, verify
+      // maybe it should be the index pattern title
       label: i18n.translate('data.search.searchSource.indexPatternLabel', {
         defaultMessage: 'Index pattern',
       }),

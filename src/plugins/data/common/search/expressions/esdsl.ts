@@ -115,7 +115,7 @@ export const getEsdslFn = ({
 
       request.stats({
         indexPattern: {
-          // todo is this kibana index pattern or index pattern string?
+          // todo This looks like an index pattern string - verify
           label: i18n.translate('data.search.es_search.indexPatternLabel', {
             defaultMessage: 'Index pattern',
           }),
