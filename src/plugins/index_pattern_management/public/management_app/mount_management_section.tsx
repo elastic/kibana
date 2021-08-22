@@ -28,8 +28,8 @@ const readOnlyBadge = {
   text: i18n.translate('indexPatternManagement.indexPatterns.badge.readOnly.text', {
     defaultMessage: 'Read only',
   }),
-  tooltip: i18n.translate('indexPatternManagement.indexPatterns.badge.readOnly.tooltip', {
-    defaultMessage: 'Unable to save index patterns',
+  tooltip: i18n.translate('indexPatternManagement.dataViews.badge.readOnly.tooltip', {
+    defaultMessage: 'Unable to save data views',
   }),
   iconType: 'glasses',
 };
