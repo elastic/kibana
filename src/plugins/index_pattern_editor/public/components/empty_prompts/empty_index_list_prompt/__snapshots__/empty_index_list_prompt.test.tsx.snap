@@ -200,8 +200,8 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
                   onClick={[Function]}
                 >
                   <FormattedMessage
-                    defaultMessage="create an index pattern"
-                    id="indexPatternEditor.createIndexPattern.emptyState.createAnywayLink"
+                    defaultMessage="create a data view"
+                    id="indexPatternEditor.createDataView.emptyState.createAnywayLink"
                     values={Object {}}
                   />
                 </EuiLink>,
