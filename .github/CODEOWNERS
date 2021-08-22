@@ -144,7 +144,6 @@
 /x-pack/plugins/dashboard_enhanced/ @elastic/kibana-presentation
 /x-pack/test/functional/apps/canvas/  @elastic/kibana-presentation
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
-#CC# /x-pack/plugins/dashboard_mode @elastic/kibana-presentation
 
 # Machine Learning
 /x-pack/plugins/ml/  @elastic/ml-ui
