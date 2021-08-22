@@ -82,7 +82,7 @@ interface BaseSavedObjectFinder {
   noItemsMessage?: React.ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
   showFilter?: boolean;
-  euiFormRowProps?: Omit<EuiFormRowCommonProps, 'children'>;
+  euiFormRowProps?: EuiFormRowProps;
   euiFieldSearchProps?: EuiFieldSearchProps;
   initialQuery?: string;
   initialHideListing?: boolean;
