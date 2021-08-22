@@ -6,17 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiInMemoryTable, EuiCodeBlock, EuiToolTip, EuiButtonIcon, EuiPanel } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import { EuiInMemoryTable, EuiCodeBlock, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 import { encode } from 'rison-node';
 import { stringify } from 'querystring';
 
-import {
-  useKibana,
-  isModifiedEvent,
-  isLeftClickEvent,
-  isMiddleClickEvent,
-} from '../common/lib/kibana';
+import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { AgentIdToName } from '../agents/agent_id_to_name';
 import { useScheduledQueryGroupQueryErrors } from './use_scheduled_query_group_query_errors';
 
@@ -42,10 +37,7 @@ const ViewErrorsInLogsActionComponent: React.FC<ViewErrorsInLogsActionProps> = (
 
   const handleClick = useCallback(
     (event) => {
-      const openInNewTab = !(
-        !isModifiedEvent(event) &&
-        (isLeftClickEvent(event) || isMiddleClickEvent(event))
-      );
+      const openInNewTab = !(!isModifiedEvent(event) && isLeftClickEvent(event));
 
       event.preventDefault();
       const queryString = stringify({

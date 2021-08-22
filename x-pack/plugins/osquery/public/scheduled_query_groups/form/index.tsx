@@ -244,7 +244,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     ),
   });
 
-  const { submit } = form;
+  const { setFieldValue, submit } = form;
 
   const policyIdEuiFieldProps = useMemo(
     () => ({ isDisabled: !!defaultValue, options: agentPolicyOptions }),
@@ -275,6 +275,10 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
       agentPolicy: currentAgentPolicy,
     };
   }, [agentPoliciesById, policyId]);
+
+  const handleNameChange = useCallback((newName: string) => setFieldValue('name', newName), [
+    setFieldValue,
+  ]);
 
   const handleSaveClick = useCallback(() => {
     if (currentPolicy.agentCount) {
@@ -343,6 +347,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
           component={QueriesField}
           scheduledQueryGroupId={defaultValue?.id ?? null}
           integrationPackageVersion={integrationPackageVersion}
+          handleNameChange={handleNameChange}
         />
 
         <CommonUseField path="enabled" component={GhostFormField} />

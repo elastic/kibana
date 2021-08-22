@@ -175,7 +175,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
 
   const handleClick = useCallback(
     (event) => {
-      const openInNewWindow = !(!isModifiedEvent(event) && isLeftClickEvent(event));
+      const openInNewTab = !(!isModifiedEvent(event) && isLeftClickEvent(event));
 
       event.preventDefault();
 
@@ -189,7 +189,9 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
           },
           attributes: getLensAttributes(actionId),
         },
-        openInNewWindow
+        {
+          openInNewTab,
+        }
       );
     },
     [actionId, endDate, lensService, startDate]
@@ -372,7 +374,7 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiNotificationBadge color="subdued">
-              {lastResultsData?.unique_agents.value ?? 0}
+              {lastResultsData?.unique_agents?.value ?? 0}
             </EuiNotificationBadge>
           </EuiFlexItem>
           <EuiFlexItem>{'Agents'}</EuiFlexItem>
