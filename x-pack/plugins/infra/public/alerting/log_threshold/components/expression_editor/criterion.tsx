@@ -174,6 +174,7 @@ export const Criterion: React.FC<Props> = ({
               }
               isOpen={isFieldPopoverOpen}
               closePopover={() => setIsFieldPopoverOpen(false)}
+              onClick={(e) => e.stopPropagation()}
               ownFocus
               panelPaddingSize="s"
               anchorPosition="downLeft"
@@ -220,6 +221,7 @@ export const Criterion: React.FC<Props> = ({
               }
               isOpen={isComparatorPopoverOpen}
               closePopover={() => setIsComparatorPopoverOpen(false)}
+              onClick={(e) => e.stopPropagation()}
               ownFocus
               panelPaddingSize="s"
               anchorPosition="downLeft"
