@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Filter, FilterMeta } from '@kbn/es-query';
 import { estypes } from '@elastic/elasticsearch';
+import type { Filter, FilterMeta } from '@kbn/es-query';
 import type { IFieldFormat } from '../../../../src/plugins/field_formats/common';
 import type { Datatable, SerializedFieldFormat } from '../../../../src/plugins/expressions/common';
 
