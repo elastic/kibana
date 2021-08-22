@@ -32,7 +32,7 @@ export function getMigrations(): SavedObjectMigrationMap {
       }),
       '7.4.0'
     ),
-    '7.6.0': executeMigrationWithErrorHandling(moveIntervalIntoSchedule, '7.16.0'),
+    '7.6.0': executeMigrationWithErrorHandling(moveIntervalIntoSchedule, '7.6.0'),
     '8.0.0': executeMigrationWithErrorHandling(
       pipeMigrations(alertingTaskLegacyIdToSavedObjectIds, actionsTasksLegacyIdToSavedObjectIds),
       '8.0.0'
