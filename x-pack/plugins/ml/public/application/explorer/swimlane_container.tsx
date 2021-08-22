@@ -427,22 +427,36 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
                       <Heatmap
                         id={id}
-                        colorScale={ScaleType.Threshold}
-                        ranges={[
-                          ANOMALY_THRESHOLD.LOW,
-                          ANOMALY_THRESHOLD.WARNING,
-                          ANOMALY_THRESHOLD.MINOR,
-                          ANOMALY_THRESHOLD.MAJOR,
-                          ANOMALY_THRESHOLD.CRITICAL,
-                        ]}
-                        colors={[
-                          SEVERITY_COLORS.BLANK,
-                          SEVERITY_COLORS.LOW,
-                          SEVERITY_COLORS.WARNING,
-                          SEVERITY_COLORS.MINOR,
-                          SEVERITY_COLORS.MAJOR,
-                          SEVERITY_COLORS.CRITICAL,
-                        ]}
+                        colorScale={{
+                          type: 'bands',
+                          bands: [
+                            {
+                              start: ANOMALY_THRESHOLD.LOW,
+                              end: ANOMALY_THRESHOLD.WARNING,
+                              color: SEVERITY_COLORS.LOW,
+                            },
+                            {
+                              start: ANOMALY_THRESHOLD.WARNING,
+                              end: ANOMALY_THRESHOLD.MINOR,
+                              color: SEVERITY_COLORS.WARNING,
+                            },
+                            {
+                              start: ANOMALY_THRESHOLD.MINOR,
+                              end: ANOMALY_THRESHOLD.MAJOR,
+                              color: SEVERITY_COLORS.MINOR,
+                            },
+                            {
+                              start: ANOMALY_THRESHOLD.MAJOR,
+                              end: ANOMALY_THRESHOLD.CRITICAL,
+                              color: SEVERITY_COLORS.MAJOR,
+                            },
+                            {
+                              start: ANOMALY_THRESHOLD.CRITICAL,
+                              end: Infinity,
+                              color: SEVERITY_COLORS.CRITICAL,
+                            },
+                          ],
+                        }}
                         data={swimLanePoints}
                         xAccessor="time"
                         yAccessor="laneLabel"
