@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { useLocation } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { createGlobalStyle } from '../../../../../../../../src/plugins/kibana_react/common';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
@@ -96,7 +97,10 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
                 <EuiFlexItem grow={false}>
                   {viewMode && canUseEditor() ? (
                     <EuiButton iconType="lensApp" fullWidth={false} onClick={handleClick} size="s">
-                      {`Open visualization`}
+                      <FormattedMessage
+                        id="xpack.cases.markdownEditor.plugins.lens.openVisualizationButtonLabel"
+                        defaultMessage="Open visualization"
+                      />
                     </EuiButton>
                   ) : null}
                 </EuiFlexItem>

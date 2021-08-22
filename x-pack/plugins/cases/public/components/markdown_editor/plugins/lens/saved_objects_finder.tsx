@@ -308,7 +308,7 @@ export class SavedObjectFinderUi extends React.Component<
           });
         }}
       >
-        {i18n.translate('savedObjects.finder.sortAsc', {
+        {i18n.translate('xpack.cases.markdownEditor.plugins.lens.savedObjects.finder.sortAsc', {
           defaultMessage: 'Ascending',
         })}
       </EuiContextMenuItem>,
@@ -321,7 +321,7 @@ export class SavedObjectFinderUi extends React.Component<
           });
         }}
       >
-        {i18n.translate('savedObjects.finder.sortDesc', {
+        {i18n.translate('xpack.cases.markdownEditor.plugins.lens.savedObjects.finder.sortDesc', {
           defaultMessage: 'Descending',
         })}
       </EuiContextMenuItem>,
@@ -337,7 +337,7 @@ export class SavedObjectFinderUi extends React.Component<
             });
           }}
         >
-          {i18n.translate('savedObjects.finder.sortAuto', {
+          {i18n.translate('xpack.cases.markdownEditor.plugins.lens.savedObjects.finder.sortAuto', {
             defaultMessage: 'Best match',
           })}
         </EuiContextMenuItem>
@@ -354,12 +354,18 @@ export class SavedObjectFinderUi extends React.Component<
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem grow={true}>
             <EuiFieldSearch
-              placeholder={i18n.translate('savedObjects.finder.searchPlaceholder', {
-                defaultMessage: 'Search…',
-              })}
-              aria-label={i18n.translate('savedObjects.finder.searchPlaceholder', {
-                defaultMessage: 'Search…',
-              })}
+              placeholder={i18n.translate(
+                'xpack.cases.markdownEditor.plugins.lens.savedObjects.finder.searchPlaceholder',
+                {
+                  defaultMessage: 'Search…',
+                }
+              )}
+              aria-label={i18n.translate(
+                'xpack.cases.markdownEditor.plugins.lens.savedObjects.finder.searchPlaceholder',
+                {
+                  defaultMessage: 'Search…',
+                }
+              )}
               fullWidth
               value={this.state.query}
               onChange={(e) => {
@@ -394,9 +400,12 @@ export class SavedObjectFinderUi extends React.Component<
                     isSelected={this.state.sortOpen}
                     data-test-subj="savedObjectFinderSortButton"
                   >
-                    {i18n.translate('savedObjects.finder.sortButtonLabel', {
-                      defaultMessage: 'Sort',
-                    })}
+                    {i18n.translate(
+                      'xpack.cases.markdownEditor.plugins.lens.savedObjects.finder.sortButtonLabel',
+                      {
+                        defaultMessage: 'Sort',
+                      }
+                    )}
                   </EuiFilterButton>
                 }
               >
@@ -426,9 +435,12 @@ export class SavedObjectFinderUi extends React.Component<
                       hasActiveFilters={this.state.filteredTypes.length > 0}
                       numActiveFilters={this.state.filteredTypes.length}
                     >
-                      {i18n.translate('savedObjects.finder.filterButtonLabel', {
-                        defaultMessage: 'Types',
-                      })}
+                      {i18n.translate(
+                        'xpack.cases.markdownEditor.plugins.lens.savedObjects.finder.filterButtonLabel',
+                        {
+                          defaultMessage: 'Types',
+                        }
+                      )}
                     </EuiFilterButton>
                   }
                 >

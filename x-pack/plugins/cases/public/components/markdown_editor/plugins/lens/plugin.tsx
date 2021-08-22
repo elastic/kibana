@@ -242,7 +242,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   const euiFieldSearchProps = useMemo(
     () => ({
       prepend: i18n.translate(
-        'xpack.cases.markdownEditor.plugins.lens.savedObjectsFinder.searchInputPrependLabel',
+        'xpack.cases.markdownEditor.plugins.lens.savedObjects.finder.searchInputPrependLabel',
         {
           defaultMessage: 'Template',
         }
@@ -254,7 +254,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   const euiFormRowProps = useMemo(
     () => ({
       label: i18n.translate(
-        'xpack.cases.markdownEditor.plugins.lens.savedObjectsFinder.searchInputLabel',
+        'xpack.cases.markdownEditor.plugins.lens.savedObjects.finder.searchInputLabel',
         {
           defaultMessage: 'Select lens',
         }
@@ -268,7 +268,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
         </EuiButtonEmpty>
       ),
       helpText: i18n.translate(
-        'xpack.cases.markdownEditor.plugins.lens.savedObjectsFinder.searchInputHelpText',
+        'xpack.cases.markdownEditor.plugins.lens.savedObjects.finder.searchInputHelpText',
         {
           defaultMessage:
             'Insert lens from existing templates or creating a new one. You will only create lens for this comment and won’t change Visualize Library.',
