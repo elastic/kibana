@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MockedLogger, loggerMock } from '@kbn/logging/target/mocks';
+import { MockedLogger, loggerMock } from '@kbn/logging/mocks';
 import { TaskRunnerFactory } from '../task_runner';
 import { AlertTypeRegistry, ConstructorOptions } from '../alert_type_registry';
 import { taskManagerMock } from '../../../task_manager/server/mocks';
