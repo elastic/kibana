@@ -61,13 +61,20 @@ export function injectSavedObjectReferences(
   const injectedRelatedSavedObjects = (relatedSavedObjects ?? []).flatMap((relatedSavedObject) => {
     const reference = references.find((ref) => ref.name === relatedSavedObject.id);
 
-    // These are used to provide context in the event log so we will not throw an error
-    // if it is not found because we don't want to block the action execution
+    // relatedSavedObjects are used only in the event log document that is written during
+    // action execution. Because they are not critical to the actual execution of the action
+    // we will not throw an error if no reference is found matching this related saved object
     return reference ? [{ ...relatedSavedObject, id: reference.id }] : [relatedSavedObject];
   });
 
-  return {
-    ...(action ? { actionId: action.id } : {}),
-    ...(relatedSavedObjects ? { relatedSavedObjects: injectedRelatedSavedObjects } : {}),
-  };
+  const result: { actionId?: string; relatedSavedObjects?: SavedObjectAttribute } = {};
+  if (action) {
+    result.actionId = action.id;
+  }
+
+  if (relatedSavedObjects) {
+    result.relatedSavedObjects = injectedRelatedSavedObjects;
+  }
+
+  return result;
 }

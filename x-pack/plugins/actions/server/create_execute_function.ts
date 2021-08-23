@@ -73,6 +73,14 @@ export function createExecutionEnqueuerFunction({
     );
     const executionSourceReference = executionSourceAsSavedObjectReferences(source);
 
+    const taskReferences = [];
+    if (executionSourceReference.references) {
+      taskReferences.push(...executionSourceReference.references);
+    }
+    if (references) {
+      taskReferences.push(...references);
+    }
+
     const actionTaskParamsRecord = await unsecuredSavedObjectsClient.create(
       ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
       {
@@ -82,7 +90,7 @@ export function createExecutionEnqueuerFunction({
         relatedSavedObjects: relatedSavedObjectWithRefs,
       },
       {
-        references: [...(executionSourceReference.references ?? []), ...(references ?? [])],
+        references: taskReferences,
       }
     );
 
