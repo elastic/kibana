@@ -62,6 +62,7 @@ export const loadTestFiles = ({
 
       const context = decorateMochaUi(log, lifecycle, global, {
         isDockerGroup,
+        rootTags: config.get('rootTags'),
       });
       mocha.suite.emit('pre-require', context, path, mocha);
 
