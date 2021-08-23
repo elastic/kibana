@@ -6,7 +6,10 @@
  */
 
 import { createCommentsMigrations } from './index';
-import { getLensVisualizations, parseCommentString } from '../../common';
+import {
+  getLensVisualizations,
+  parseCommentString,
+} from '../../../common/utils/markdown_plugins/utils';
 
 import { savedObjectsServiceMock } from '../../../../../../src/core/server/mocks';
 import { lensEmbeddableFactory } from '../../../../lens/server/embeddable/lens_embeddable_factory';
