@@ -274,11 +274,6 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
       // with other functions.
       // For example, if we would like to use `essql`, `esdocs`, or even `demodata` functions,
       // this chart vis would not fully support rendering of that data with flexibility.
-      //
-      // I propose to create a layer, some function, as `pointseries`, which would receive the data
-      // from some data source, process its output, prepare for rendering `xy_vis` and pass the result to current fn.
-      // And as a result, we would have always good, stable, customizable interface, without connection to the special data
-      // from the query result.
       dimensions: {
         x: args.xDimension,
         y: args.yDimension,
