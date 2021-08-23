@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { createGetterSetter } from '../../kibana_utils/public';
-import { DataPublicPluginStart } from '../../data/public';
-
-export const [getFormatService, setFormatService] = createGetterSetter<
-  DataPublicPluginStart['fieldFormats']
->('data.fieldFormats');
+export * from './tagcloud_component';

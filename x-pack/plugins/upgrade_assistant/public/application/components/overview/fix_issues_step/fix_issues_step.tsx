@@ -14,6 +14,8 @@ import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { ESDeprecationStats } from './es_stats';
 import { KibanaDeprecationStats } from './kibana_stats';
 
+import './_fix_issues_step.scss';
+
 const i18nTexts = {
   reviewStepTitle: i18n.translate('xpack.upgradeAssistant.overview.fixIssuesStepTitle', {
     defaultMessage: 'Review deprecated settings and resolve issues',
