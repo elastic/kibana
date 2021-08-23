@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import { deleteNotifications } from '../notifications/delete_notifications';
-import { deleteRuleActionsSavedObject } from '../rule_actions/delete_rule_actions_saved_object';
 import { DeleteRuleOptions } from './types';
 
 export const deleteRules = async ({
   rulesClient,
-  savedObjectsClient,
+  savedObjectsClient, // TODO: Delete this unused parameter
   ruleStatusClient,
   ruleStatuses,
   id,
 }: DeleteRuleOptions) => {
   await rulesClient.delete({ id });
-  await deleteNotifications({ rulesClient, ruleAlertId: id });
-  await deleteRuleActionsSavedObject({ ruleAlertId: id, savedObjectsClient });
   ruleStatuses.forEach(async (obj) => ruleStatusClient.delete(obj.id));
 };

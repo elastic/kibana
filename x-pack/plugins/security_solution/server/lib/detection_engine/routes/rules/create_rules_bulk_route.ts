@@ -24,7 +24,6 @@ import { transformValidateBulkError } from './validate';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
 import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '../utils';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 
 export const createRulesBulkRoute = (
@@ -111,21 +110,7 @@ export const createRulesBulkRoute = (
                 await rulesClient.muteAll({ id: createdRule.id });
               }
 
-              const ruleActions = await updateRulesNotifications({
-                ruleAlertId: createdRule.id,
-                rulesClient,
-                savedObjectsClient,
-                enabled: createdRule.enabled,
-                actions: payloadRule.actions,
-                throttle: payloadRule.throttle ?? null,
-                name: createdRule.name,
-              });
-
-              return transformValidateBulkError(
-                internalRule.params.ruleId,
-                createdRule,
-                ruleActions
-              );
+              return transformValidateBulkError(internalRule.params.ruleId, createdRule, undefined);
             } catch (err) {
               return transformBulkError(internalRule.params.ruleId, err);
             }

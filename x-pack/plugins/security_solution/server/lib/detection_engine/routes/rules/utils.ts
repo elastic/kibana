@@ -116,7 +116,7 @@ export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<R
 
 export const transformFindAlerts = (
   findResults: FindResult<RuleParams>,
-  ruleActions: { [key: string]: RuleActions | undefined },
+  ruleActions: { [key: string]: RuleActions | undefined }, // TODO: Can we remove this and just use the findResults now?
   ruleStatuses: { [key: string]: IRuleStatusSOAttributes[] | undefined }
 ): {
   page: number;

@@ -576,6 +576,7 @@ export const getSuccessfulSignalUpdateResponse = () => ({
   failures: [],
 });
 
+// TODO: Should this be deleted?
 export const getNotificationResult = (): RuleNotificationAlertType => ({
   id: '200dbf2f-b269-4bf9-aa85-11ba32ba73ba',
   name: 'Notification for Rule Test',
@@ -615,13 +616,6 @@ export const getNotificationResult = (): RuleNotificationAlertType => ({
     status: 'unknown',
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
-});
-
-export const getFindNotificationsResultWithSingleHit = (): FindHit<RuleNotificationAlertType> => ({
-  page: 1,
-  perPage: 1,
-  total: 1,
-  data: [getNotificationResult()],
 });
 
 export const getFinalizeSignalsMigrationRequest = () =>

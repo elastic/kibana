@@ -8,14 +8,9 @@
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { deleteRules } from './delete_rules';
-import { deleteNotifications } from '../notifications/delete_notifications';
-import { deleteRuleActionsSavedObject } from '../rule_actions/delete_rule_actions_saved_object';
 import { SavedObjectsFindResult } from '../../../../../../../src/core/server';
 import { IRuleStatusSOAttributes } from './types';
 import { RuleExecutionLogClient } from '../rule_execution_log/__mocks__/rule_execution_log_client';
-
-jest.mock('../notifications/delete_notifications');
-jest.mock('../rule_actions/delete_rule_actions_saved_object');
 
 describe('deleteRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
@@ -28,7 +23,7 @@ describe('deleteRules', () => {
     ruleStatusClient = new RuleExecutionLogClient();
   });
 
-  it('should delete the rule along with its notifications, actions, and statuses', async () => {
+  it('should delete the rule along with its actions, and statuses', async () => {
     const ruleStatus: SavedObjectsFindResult<IRuleStatusSOAttributes> = {
       id: 'statusId',
       type: '',
@@ -60,14 +55,6 @@ describe('deleteRules', () => {
     await deleteRules(rule);
 
     expect(rulesClient.delete).toHaveBeenCalledWith({ id: rule.id });
-    expect(deleteNotifications).toHaveBeenCalledWith({
-      ruleAlertId: rule.id,
-      rulesClient: expect.any(Object),
-    });
-    expect(deleteRuleActionsSavedObject).toHaveBeenCalledWith({
-      ruleAlertId: rule.id,
-      savedObjectsClient: expect.any(Object),
-    });
     expect(ruleStatusClient.delete).toHaveBeenCalledWith(ruleStatus.id);
   });
 });

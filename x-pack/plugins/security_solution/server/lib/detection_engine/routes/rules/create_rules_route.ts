@@ -19,7 +19,6 @@ import { throwHttpError } from '../../../machine_learning/validation';
 import { readRules } from '../../rules/read_rules';
 import { buildSiemResponse } from '../utils';
 
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { createRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 import { newTransformValidate } from './validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
@@ -103,22 +102,12 @@ export const createRulesRoute = (
           await rulesClient.muteAll({ id: createdRule.id });
         }
 
-        const ruleActions = await updateRulesNotifications({
-          ruleAlertId: createdRule.id,
-          rulesClient,
-          savedObjectsClient,
-          enabled: createdRule.enabled,
-          actions: request.body.actions,
-          throttle: request.body.throttle ?? null,
-          name: createdRule.name,
-        });
-
         const ruleStatuses = await context.securitySolution.getExecutionLogClient().find({
           logsCount: 1,
           ruleId: createdRule.id,
           spaceId: context.securitySolution.getSpaceId(),
         });
-        const [validated, errors] = newTransformValidate(createdRule, ruleActions, ruleStatuses[0]);
+        const [validated, errors] = newTransformValidate(createdRule, undefined, ruleStatuses[0]);
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {

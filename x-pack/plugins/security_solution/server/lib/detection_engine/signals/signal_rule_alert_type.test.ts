@@ -20,7 +20,6 @@ import {
 } from './utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { RuleExecutorOptions, SearchAfterAndBulkCreateReturnType } from './types';
-import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 import { RuleAlertType } from '../rules/types';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getListClientMock } from '../../../../../lists/server/services/lists/list_client.mock';
@@ -35,6 +34,7 @@ import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.moc
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
+import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 
 jest.mock('./rule_status_saved_objects_client');
 jest.mock('./rule_status_service');
@@ -304,12 +304,6 @@ describe('signal_rule_alert_type', () => {
       });
 
       await alert.executor(payload);
-
-      expect(scheduleNotificationActions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          signalsCount: 10,
-        })
-      );
     });
 
     it('should resolve results_link when meta is an empty object to use "/app/security"', async () => {

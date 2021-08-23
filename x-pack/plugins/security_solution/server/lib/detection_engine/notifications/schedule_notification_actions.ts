@@ -22,6 +22,9 @@ interface ScheduleNotificationActions {
   signals: unknown[];
 }
 
+/**
+ *
+ */
 export const scheduleNotificationActions = ({
   alertInstance,
   signalsCount,

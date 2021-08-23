@@ -19,6 +19,7 @@ export interface IRuleActionsAttributes extends Record<string, any> {
   alertThrottle: string | null;
 }
 
+// TODO: Can this be removed and anything using it be removed as well?
 export interface RuleActions {
   id: string;
   actions: RuleAlertAction[];

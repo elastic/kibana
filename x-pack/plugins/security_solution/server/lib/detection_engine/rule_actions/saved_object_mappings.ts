@@ -8,8 +8,16 @@
 import { SavedObjectsType } from '../../../../../../../src/core/server';
 import { ruleActionsSavedObjectMigration } from './migrations';
 
+// TODO: Can we delete this mapping now or do we have to wait for the migration for the delete to remove it?
+/**
+ * @deprecated
+ */
 export const ruleActionsSavedObjectType = 'siem-detection-engine-rule-actions';
 
+// TODO: Can we delete this mapping now or do we have to wait for the migration for the delete to remove it?
+/**
+ * @deprecated
+ */
 export const ruleActionsSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {
     alertThrottle: {

@@ -57,7 +57,7 @@ export const newTransformValidate = (
 export const transformValidateBulkError = (
   ruleId: string,
   alert: PartialAlert<RuleParams>,
-  ruleActions?: RuleActions | null,
+  ruleActions?: RuleActions | null, // TODO: Can we remove this now? I don't think anyone is using it anymore.
   ruleStatus?: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>
 ): RulesSchema | BulkError => {
   if (isAlertType(alert)) {
