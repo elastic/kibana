@@ -138,11 +138,12 @@ export type DashboardBuildContext = Pick<
   executionContext?: KibanaExecutionContext;
 };
 
-export interface DashboardOptions {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DashboardOptions = {
   hidePanelTitles: boolean;
   useMargins: boolean;
   syncColors: boolean;
-}
+};
 
 export type DashboardRedirect = (props: RedirectToProps) => void;
 export type RedirectToProps =

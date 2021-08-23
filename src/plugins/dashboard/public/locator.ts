@@ -11,6 +11,7 @@ import { flow } from 'lodash';
 import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
 import type { LocatorDefinition, LocatorPublic } from '../../share/public';
 import type { SavedDashboardPanel } from '../common/types';
+import type { RawDashboardState } from './types';
 import { esFilters } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { ViewMode } from '../../embeddable/public';
@@ -93,6 +94,8 @@ export type DashboardAppLocatorParams = {
    * Saved query ID
    */
   savedQuery?: string;
+
+  options?: RawDashboardState['options'];
 };
 
 export type DashboardAppLocator = LocatorPublic<DashboardAppLocatorParams>;

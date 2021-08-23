@@ -7,6 +7,7 @@
  */
 
 import semverSatisfies from 'semver/functions/satisfies';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
@@ -75,7 +76,7 @@ export function migrateAppState(
       >,
       kibanaVersion,
       appState.useMargins as boolean,
-      appState.uiState as Record<string, Record<string, unknown>>
+      appState.uiState as { [key: string]: SerializableRecord }
     ) as SavedDashboardPanel[];
     delete appState.uiState;
   }
