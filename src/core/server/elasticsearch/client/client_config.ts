@@ -35,6 +35,7 @@ export type ElasticsearchClientConfig = Pick<
   requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
   ssl?: Partial<ElasticsearchConfig['ssl']>;
   keepAlive?: boolean;
+  caFingerprint?: ClientOptions['caFingerprint'];
 };
 
 /**
@@ -94,6 +95,10 @@ export function parseClientOptions(
       config.ssl,
       scoped && !config.ssl.alwaysPresentCertificate
     );
+  }
+
+  if (config.caFingerprint != null) {
+    clientOptions.caFingerprint = config.caFingerprint;
   }
 
   return clientOptions;

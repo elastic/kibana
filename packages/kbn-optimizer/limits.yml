@@ -98,7 +98,6 @@ pageLoadAssetSize:
   runtimeFields: 41752
   stackAlerts: 29684
   presentationUtil: 94301
-  spacesOss: 18817
   indexPatternFieldEditor: 50000
   osquery: 107090
   fileUpload: 25664
@@ -116,3 +115,4 @@ pageLoadAssetSize:
   expressionMetric: 22238
   expressionShape: 34008
   interactiveSetup: 18532
+  expressionTagcloud: 27505
