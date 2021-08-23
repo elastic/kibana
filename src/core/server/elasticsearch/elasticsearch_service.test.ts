@@ -49,17 +49,6 @@ let coreContext: CoreContext;
 
 let mockClusterClientInstance: ReturnType<typeof elasticsearchClientMock.createCustomClusterClient>;
 
-const defaultMessage = {
-  isCompatible: true,
-  kibanaVersion: '8.0.0',
-  incompatibleNodes: [],
-  warningNodes: [],
-};
-const observable$ = new BehaviorSubject<NodesVersionCompatibility>(defaultMessage);
-
-// @ts-expect-error this module is mocked, so `mockImplementation` is an allowed property
-pollEsNodesVersion.mockImplementation(() => observable$);
-
 let mockConfig$: BehaviorSubject<any>;
 beforeEach(() => {
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -82,6 +71,9 @@ beforeEach(() => {
   MockClusterClient.mockClear();
   mockClusterClientInstance = elasticsearchClientMock.createCustomClusterClient();
   MockClusterClient.mockImplementation(() => mockClusterClientInstance);
+
+  // @ts-expect-error TS does not get that `pollEsNodesVersion` is mocked
+  pollEsNodesVersion.mockImplementation(pollEsNodesVersionActual);
 });
 
 afterEach(() => jest.clearAllMocks());
@@ -178,6 +170,39 @@ describe('#setup', () => {
       ElasticsearchConfig
     );
   });
+
+  it('esNodeVersionCompatibility$ only starts polling when subscribed to', async (done) => {
+    const mockedClient = mockClusterClientInstance.asInternalUser;
+    mockedClient.nodes.info.mockImplementation(() =>
+      elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
+    );
+
+    const setupContract = await elasticsearchService.setup(setupDeps);
+    await delay(10);
+
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
+    setupContract.esNodesCompatibility$.subscribe(() => {
+      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
+      done();
+    });
+  });
+
+  it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async (done) => {
+    const mockedClient = mockClusterClientInstance.asInternalUser;
+    mockedClient.nodes.info.mockImplementation(() =>
+      elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
+    );
+
+    const setupContract = await elasticsearchService.setup(setupDeps);
+
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
+    const sub = setupContract.esNodesCompatibility$.subscribe(async () => {
+      sub.unsubscribe();
+      await delay(100);
+      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
+      done();
+    });
+  });
 });
 
 describe('#start', () => {
@@ -196,6 +221,17 @@ describe('#start', () => {
   });
 
   it('should log.error non-compatible nodes error', async () => {
+    const defaultMessage = {
+      isCompatible: true,
+      kibanaVersion: '8.0.0',
+      incompatibleNodes: [],
+      warningNodes: [],
+    };
+    const observable$ = new BehaviorSubject<NodesVersionCompatibility>(defaultMessage);
+
+    // @ts-expect-error this module is mocked, so `mockImplementation` is an allowed property
+    pollEsNodesVersion.mockImplementation(() => observable$);
+
     await elasticsearchService.setup(setupDeps);
     await elasticsearchService.start();
     expect(loggingSystemMock.collect(coreContext.logger).error).toEqual([]);
@@ -287,9 +323,6 @@ describe('#stop', () => {
 
   it('stops pollEsNodeVersions even if there are active subscriptions', async (done) => {
     expect.assertions(3);
-
-    // @ts-expect-error TS does not get that `pollEsNodesVersion` is mocked
-    pollEsNodesVersion.mockImplementation(pollEsNodesVersionActual);
 
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockImplementation(() =>
