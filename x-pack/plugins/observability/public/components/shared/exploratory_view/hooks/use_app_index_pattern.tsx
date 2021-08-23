@@ -13,14 +13,14 @@ import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
 import { getDataHandler } from '../../../../data_handler';
 
-export interface IIndexPatternContext {
+export interface IndexPatternContext {
   loading: boolean;
   indexPatterns: IndexPatternState;
   hasAppData: HasAppDataState;
   loadIndexPattern: (params: { dataType: AppDataType }) => void;
 }
 
-export const IndexPatternContext = createContext<Partial<IIndexPatternContext>>({});
+export const IndexPatternContext = createContext<Partial<IndexPatternContext>>({});
 
 interface ProviderProps {
   children: JSX.Element;
@@ -46,7 +46,7 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
     services: { data },
   } = useKibana<ObservabilityPublicPluginsStart>();
 
-  const loadIndexPattern: IIndexPatternContext['loadIndexPattern'] = useCallback(
+  const loadIndexPattern: IndexPatternContext['loadIndexPattern'] = useCallback(
     async ({ dataType }) => {
       if (hasAppData[dataType] === null && !loading[dataType]) {
         setLoading((prevState) => ({ ...prevState, [dataType]: true }));
@@ -101,7 +101,7 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
 
 export const useAppIndexPatternContext = (dataType?: AppDataType) => {
   const { loading, hasAppData, loadIndexPattern, indexPatterns } = useContext(
-    (IndexPatternContext as unknown) as Context<IIndexPatternContext>
+    (IndexPatternContext as unknown) as Context<IndexPatternContext>
   );
 
   if (dataType && !indexPatterns?.[dataType] && !loading) {
