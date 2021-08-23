@@ -35,12 +35,12 @@ body:
       label: Expected Behavior
       description: A concise description of what you expected to happen.
     validations:
-      required: true
+      required: false
   - type: textarea
     attributes:
       label: Actual Behavior
       description: A concise description of what you're experiencing.
     validations:
-      required: true
+      required: false
     
 
