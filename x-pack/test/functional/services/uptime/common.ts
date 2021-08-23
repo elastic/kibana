@@ -76,10 +76,15 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
         `[aria-label="expands filter group for ${filterType} filter"]`
       );
       await filterPopoverButton.click();
+      await this.clickFilterItems(itemList);
+      return this.applyFilterItems(filterType);
+    },
+    async clickFilterItems(itemList: string[]) {
       for (const title of itemList) {
-        const filterItem = await find.byCssSelector(`li[title="${title}"]`);
-        await filterItem.click();
+        await find.clickByCssSelector(`li[title="${title}"]`);
       }
+    },
+    async applyFilterItems(filterType: string) {
       const applyButton = await find.byCssSelector(
         `[aria-label="Apply the selected filters for ${filterType}"]`
       );
