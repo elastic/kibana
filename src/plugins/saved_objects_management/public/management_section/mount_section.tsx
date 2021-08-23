@@ -39,7 +39,7 @@ export const mountManagementSection = async ({
 }: MountParams) => {
   const [
     coreStart,
-    { data, savedObjectsTaggingOss, spacesOss },
+    { data, savedObjectsTaggingOss, spaces: spacesApi },
     pluginStart,
   ] = await core.getStartServices();
   const { element, history, setBreadcrumbs } = mountParams;
@@ -60,8 +60,6 @@ export const mountManagementSection = async ({
     }
     return children! as React.ReactElement;
   };
-
-  const spacesApi = spacesOss?.isSpacesAvailable ? spacesOss : undefined;
 
   ReactDOM.render(
     <I18nProvider>
