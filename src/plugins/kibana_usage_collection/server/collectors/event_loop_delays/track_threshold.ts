@@ -17,7 +17,7 @@ import {
   MONITOR_EVENT_LOOP_WARN_THRESHOLD,
   ONE_MILLISECOND_AS_NANOSECONDS,
 } from './constants';
-import { EventLoopDelaysMonitor } from '../../../../../core/server';
+import type { EventLoopDelaysMonitor } from '../../../../../core/server';
 
 /**
  * The monitoring of the event loop starts immediately.
@@ -29,6 +29,7 @@ export function startTrackingEventLoopDelaysThreshold(
   eventLoopCounter: UsageCounter,
   logger: Logger,
   stopMonitoringEventLoop$: Observable<void>,
+  eventLoopDelaysMonitor: EventLoopDelaysMonitor,
   configs: {
     warnThreshold?: number;
     collectionStartDelay?: number;
@@ -41,7 +42,6 @@ export function startTrackingEventLoopDelaysThreshold(
     collectionInterval = MONITOR_EVENT_LOOP_THRESHOLD_INTERVAL,
   } = configs;
 
-  const eventLoopDelaysMonitor = new EventLoopDelaysMonitor();
   timer(collectionStartDelay, collectionInterval)
     .pipe(
       takeUntil(stopMonitoringEventLoop$),

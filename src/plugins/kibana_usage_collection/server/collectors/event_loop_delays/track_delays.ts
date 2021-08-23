@@ -9,7 +9,7 @@
 import { takeUntil, finalize, map } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
 import type { ISavedObjectsRepository } from 'kibana/server';
-import { EventLoopDelaysMonitor } from '../../../../../core/server';
+import type { EventLoopDelaysMonitor } from '../../../../../core/server';
 import {
   MONITOR_EVENT_LOOP_DELAYS_START,
   MONITOR_EVENT_LOOP_DELAYS_INTERVAL,
@@ -25,6 +25,7 @@ import { storeHistogram } from './saved_objects';
 export function startTrackingEventLoopDelaysUsage(
   internalRepository: ISavedObjectsRepository,
   stopMonitoringEventLoop$: Observable<void>,
+  eventLoopDelaysMonitor: EventLoopDelaysMonitor,
   configs: {
     collectionStartDelay?: number;
     collectionInterval?: number;
@@ -37,7 +38,6 @@ export function startTrackingEventLoopDelaysUsage(
     histogramReset = MONITOR_EVENT_LOOP_DELAYS_RESET,
   } = configs;
 
-  const eventLoopDelaysMonitor = new EventLoopDelaysMonitor();
   const resetOnCount = Math.ceil(histogramReset / collectionInterval);
 
   timer(collectionStartDelay, collectionInterval)

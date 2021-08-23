@@ -10,6 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { MetricsService } from './metrics_service';
 import { collectorMock } from './collectors/mocks';
+import { mocked as eventLoopDelaysMonitorMock } from './event_loop_delays/event_loop_delays_monitor.mocks';
 import {
   InternalMetricsServiceSetup,
   InternalMetricsServiceStart,
@@ -77,4 +78,5 @@ export const metricsServiceMock = {
   createStartContract: createStartContractMock,
   createInternalSetupContract: createInternalSetupContractMock,
   createInternalStartContract: createInternalStartContractMock,
+  createEventLoopDelaysMonitor: eventLoopDelaysMonitorMock.createEventLoopDelaysMonitor,
 };

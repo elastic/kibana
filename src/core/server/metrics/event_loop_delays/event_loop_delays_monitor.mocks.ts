@@ -7,22 +7,7 @@
  */
 import moment from 'moment';
 import type { IntervalHistogram } from 'kibana/server';
-
-export const mockMonitorEnable = jest.fn();
-export const mockMonitorPercentile = jest.fn();
-export const mockMonitorReset = jest.fn();
-export const mockMonitorDisable = jest.fn();
-export const monitorEventLoopDelay = jest.fn().mockReturnValue({
-  enable: mockMonitorEnable,
-  percentile: mockMonitorPercentile,
-  disable: mockMonitorDisable,
-  reset: mockMonitorReset,
-  ...createMockHistogram(),
-});
-
-jest.doMock('perf_hooks', () => ({
-  monitorEventLoopDelay,
-}));
+import type { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
 
 function createMockHistogram(overwrites: Partial<IntervalHistogram> = {}): IntervalHistogram {
   const now = moment();
@@ -45,6 +30,22 @@ function createMockHistogram(overwrites: Partial<IntervalHistogram> = {}): Inter
   };
 }
 
+function createMockEventLoopDelaysMonitor() {
+  const mockCollect = jest.fn();
+  const MockEventLoopDelaysMonitor: jest.MockedClass<
+    typeof EventLoopDelaysMonitor
+  > = jest.fn().mockReturnValue({
+    collect: mockCollect,
+    reset: jest.fn(),
+    stop: jest.fn(),
+  });
+
+  mockCollect.mockReturnValue(createMockHistogram());
+
+  return new MockEventLoopDelaysMonitor();
+}
+
 export const mocked = {
   createHistogram: createMockHistogram,
+  createEventLoopDelaysMonitor: createMockEventLoopDelaysMonitor,
 };
