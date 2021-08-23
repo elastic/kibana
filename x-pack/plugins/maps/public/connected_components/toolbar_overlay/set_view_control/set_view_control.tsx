@@ -86,73 +86,16 @@ export class SetViewControl extends Component<Props, State> {
     isCoordPopoverOpen: false,
   };
 
-  static convertLatLonToUTM(lat: any, lon: any) {
-    const utmCoord = converter.LLtoUTM(lat, lon);
-
-    let eastwest = 'E';
-    if (utmCoord.easting < 0) {
-      eastwest = 'W';
-    }
-    let norwest = 'N';
-    if (utmCoord.northing < 0) {
-      norwest = 'S';
-    }
-
-    utmCoord.zoneLetter = isNaN(lat) ? '' : converter.UTMLetterDesignator(lat);
-    utmCoord.zone = `${utmCoord.zoneNumber}${utmCoord.zoneLetter}`;
-    utmCoord.easting = Math.round(utmCoord.easting);
-    utmCoord.northing = Math.round(utmCoord.northing);
-    utmCoord.str = `${utmCoord.zoneNumber}${utmCoord.zoneLetter} ${utmCoord.easting}${eastwest} ${utmCoord.northing}${norwest}`;
-
-    return utmCoord;
-  }
-
-  static convertLatLonToMGRS(lat: any, lon: any) {
-    const mgrsCoord = converter.LLtoMGRS(lat, lon, 5);
-    return mgrsCoord;
-  }
-
-  static getViewString(lat: any, lon: any, zoom: any) {
-    return `${lat},${lon},${zoom}`;
-  }
-
-  static convertMGRStoUSNG(mgrs: any) {
-    let squareIdEastSpace;
-    for (let i = mgrs.length - 1; i > -1; i--) {
-      // check if we have hit letters yet
-      if (isNaN(mgrs.substr(i, 1))) {
-        squareIdEastSpace = i + 1;
-        break;
-      }
-    }
-    const gridZoneSquareIdSpace = squareIdEastSpace ? squareIdEastSpace - 2 : -1;
-    const numPartLength = mgrs.substr(squareIdEastSpace).length / 2;
-    // add the number split space
-    const eastNorthSpace = squareIdEastSpace ? squareIdEastSpace + numPartLength : -1;
-    const stringArray = mgrs.split('');
-
-    stringArray.splice(eastNorthSpace, 0, ' ');
-    stringArray.splice(squareIdEastSpace, 0, ' ');
-    stringArray.splice(gridZoneSquareIdSpace, 0, ' ');
-
-    const rejoinedArray = stringArray.join('');
-    return rejoinedArray;
-  }
-
-  static convertMGRStoLL(mgrs: any) {
-    return mgrs ? converter.USNGtoLL(SetViewControl.convertMGRStoUSNG(mgrs)) : '';
-  }
-
   static getDerivedStateFromProps(nextProps: any, prevState: any) {
-    const nextView = SetViewControl.getViewString(
+    const nextView = getViewString(
       nextProps.center.lat,
       nextProps.center.lon,
       nextProps.zoom
     );
-
-    const utm = SetViewControl.convertLatLonToUTM(nextProps.center.lat, nextProps.center.lon);
-    const mgrs = SetViewControl.convertLatLonToMGRS(nextProps.center.lat, nextProps.center.lon);
-
+  
+    const utm = convertLatLonToUTM(nextProps.center.lat, nextProps.center.lon);
+    const mgrs = convertLatLonToMGRS(nextProps.center.lat, nextProps.center.lon);
+  
     if (nextView !== prevState.prevView) {
       return {
         lat: nextProps.center.lat,
@@ -163,7 +106,7 @@ export class SetViewControl extends Component<Props, State> {
         prevView: nextView,
       };
     }
-
+  
     return null;
   }
 
@@ -258,8 +201,8 @@ export class SetViewControl extends Component<Props, State> {
    */
   _syncToLatLon = () => {
     if (this.state.lat !== '' && this.state.lon !== '') {
-      const utm = SetViewControl.convertLatLonToUTM(this.state.lat, this.state.lon);
-      const mgrs = SetViewControl.convertLatLonToMGRS(this.state.lat, this.state.lon);
+      const utm = convertLatLonToUTM(this.state.lat, this.state.lon);
+      const mgrs = convertLatLonToMGRS(this.state.lat, this.state.lon);
 
       this.setState({ mgrs, utm });
     } else {
@@ -276,16 +219,15 @@ export class SetViewControl extends Component<Props, State> {
       let lat;
 
       try {
-        const { north, east } = SetViewControl.convertMGRStoLL(this.state.mgrs);
+        const { north, east } = convertMGRStoLL(this.state.mgrs);
         lat = north;
         lon = east;
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.log('error converting MGRS:' + this.state.mgrs, err);
         return;
       }
 
-      const utm = SetViewControl.convertLatLonToUTM(lat, lon);
+      const utm = convertLatLonToUTM(lat, lon);
 
       this.setState({
         lat: isNaN(lat) ? '' : lat,
@@ -316,11 +258,10 @@ export class SetViewControl extends Component<Props, State> {
         ));
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.log('error converting UTM');
         return;
       }
 
-      const mgrs = SetViewControl.convertLatLonToMGRS(lat, lon);
+      const mgrs = convertLatLonToMGRS(lat, lon);
 
       this.setState({
         lat: isNaN(lat) ? '' : lat,
@@ -382,15 +323,16 @@ export class SetViewControl extends Component<Props, State> {
   }) => {
     let point;
     try {
-      point = SetViewControl.convertMGRStoLL(value);
+      point = convertMGRStoLL(value);
     } catch (err) {
       point = undefined;
       // eslint-disable-next-line no-console
-      console.log('error converting MGRS', err);
     }
 
     const isInvalid = value === '' || point === undefined;
-    const error = isInvalid ? `MGRS is invalid` : null;
+    const error = isInvalid ? i18n.translate('xpack.maps.setViewControl.mgrsInvalid', {
+      defaultMessage: 'MGRS is invalid'
+    }) : null;
     return {
       isInvalid,
       component: (
@@ -418,9 +360,6 @@ export class SetViewControl extends Component<Props, State> {
     label: string;
     dataTestSubj: string;
   }) => {
-    // const zoneNum = ( value ) ? parseInt(value.substring(0, value.length - 1)) : '';
-    // const zoneLetter = ( value ) ? value.substring(value.length - 1, value.length) : '';
-
     let point;
     try {
       point = converter.UTMtoLL(
@@ -433,7 +372,9 @@ export class SetViewControl extends Component<Props, State> {
     }
 
     const isInvalid = value === '' || point === undefined;
-    const error = isInvalid ? `UTM Zone is invalid` : null;
+    const error = isInvalid ? i18n.translate('xpack.maps.setViewControl.utmInvalidZone', {
+      defaultMessage: 'UTM Zone is invalid'
+    }) : null;
     return {
       isInvalid,
       component: (
@@ -468,7 +409,9 @@ export class SetViewControl extends Component<Props, State> {
       point = undefined;
     }
     const isInvalid = value === '' || point === undefined;
-    const error = isInvalid ? `UTM Easting is invalid` : null;
+    const error = isInvalid ? i18n.translate('xpack.maps.setViewControl.utmInvalidEasting', {
+      defaultMessage: 'UTM Easting is invalid'
+    }) : null;
     return {
       isInvalid,
       component: (
@@ -503,7 +446,9 @@ export class SetViewControl extends Component<Props, State> {
       point = undefined;
     }
     const isInvalid = value === '' || point === undefined;
-    const error = isInvalid ? `UTM Northing is invalid` : null;
+    const error = isInvalid ? i18n.translate('xpack.maps.setViewControl.utmInvalidNorthing', {
+      defaultMessage: 'UTM Northing is invalid'
+    }) : null;
     return {
       isInvalid,
       component: (
@@ -549,7 +494,7 @@ export class SetViewControl extends Component<Props, State> {
       dataTestSubj: 'longitudeInput',
     });
 
-    const { isInvalid: isMGRSInvalid, component: mgrsFormRow } = this._renderMGRSFormRow({
+    const { component: mgrsFormRow } = this._renderMGRSFormRow({
       value: this.state.mgrs,
       onChange: this._onMGRSChange,
       label: i18n.translate('xpack.maps.setViewControl.mgrsLabel', {
@@ -558,7 +503,7 @@ export class SetViewControl extends Component<Props, State> {
       dataTestSubj: 'mgrsInput',
     });
 
-    const { isInvalid: isUTMZoneInvalid, component: utmZoneRow } = this._renderUTMZoneRow({
+    const { component: utmZoneRow } = this._renderUTMZoneRow({
       value: this.state.utm !== undefined ? this.state.utm.zone : '',
       onChange: this._onUTMZoneChange,
       label: i18n.translate('xpack.maps.setViewControl.utmZoneLabel', {
@@ -567,7 +512,7 @@ export class SetViewControl extends Component<Props, State> {
       dataTestSubj: 'utmZoneInput',
     });
 
-    const { isInvalid: isUTMEastingInvalid, component: utmEastingRow } = this._renderUTMEastingRow({
+    const { component: utmEastingRow } = this._renderUTMEastingRow({
       value: this.state.utm !== undefined ? this.state.utm.easting : '',
       onChange: this._onUTMEastingChange,
       label: i18n.translate('xpack.maps.setViewControl.utmEastingLabel', {
@@ -576,10 +521,7 @@ export class SetViewControl extends Component<Props, State> {
       dataTestSubj: 'utmEastingInput',
     });
 
-    const {
-      isInvalid: isUTMNorthingInvalid,
-      component: utmNorthingRow,
-    } = this._renderUTMNorthingRow({
+    const { component: utmNorthingRow } = this._renderUTMNorthingRow({
       value: this.state.utm !== undefined ? this.state.utm.northing : '',
       onChange: this._onUTMNorthingChange,
       label: i18n.translate('xpack.maps.setViewControl.utmNorthingLabel', {
@@ -713,3 +655,61 @@ export class SetViewControl extends Component<Props, State> {
     );
   }
 }
+
+function convertLatLonToUTM(lat: any, lon: any) {
+  const utmCoord = converter.LLtoUTM(lat, lon);
+
+  let eastwest = 'E';
+  if (utmCoord.easting < 0) {
+    eastwest = 'W';
+  }
+  let norwest = 'N';
+  if (utmCoord.northing < 0) {
+    norwest = 'S';
+  }
+
+  utmCoord.zoneLetter = isNaN(lat) ? '' : converter.UTMLetterDesignator(lat);
+  utmCoord.zone = `${utmCoord.zoneNumber}${utmCoord.zoneLetter}`;
+  utmCoord.easting = Math.round(utmCoord.easting);
+  utmCoord.northing = Math.round(utmCoord.northing);
+  utmCoord.str = `${utmCoord.zoneNumber}${utmCoord.zoneLetter} ${utmCoord.easting}${eastwest} ${utmCoord.northing}${norwest}`;
+
+  return utmCoord;
+}
+
+function convertLatLonToMGRS(lat: any, lon: any) {
+  const mgrsCoord = converter.LLtoMGRS(lat, lon, 5);
+  return mgrsCoord;
+}
+
+function getViewString(lat: any, lon: any, zoom: any) {
+  return `${lat},${lon},${zoom}`;
+}
+
+function convertMGRStoUSNG(mgrs: any) {
+  let squareIdEastSpace;
+  for (let i = mgrs.length - 1; i > -1; i--) {
+    // check if we have hit letters yet
+    if (isNaN(mgrs.substr(i, 1))) {
+      squareIdEastSpace = i + 1;
+      break;
+    }
+  }
+  const gridZoneSquareIdSpace = squareIdEastSpace ? squareIdEastSpace - 2 : -1;
+  const numPartLength = mgrs.substr(squareIdEastSpace).length / 2;
+  // add the number split space
+  const eastNorthSpace = squareIdEastSpace ? squareIdEastSpace + numPartLength : -1;
+  const stringArray = mgrs.split('');
+
+  stringArray.splice(eastNorthSpace, 0, ' ');
+  stringArray.splice(squareIdEastSpace, 0, ' ');
+  stringArray.splice(gridZoneSquareIdSpace, 0, ' ');
+
+  const rejoinedArray = stringArray.join('');
+  return rejoinedArray;
+}
+
+function convertMGRStoLL(mgrs: any) {
+  return mgrs ? converter.USNGtoLL(convertMGRStoUSNG(mgrs)) : '';
+}
+
