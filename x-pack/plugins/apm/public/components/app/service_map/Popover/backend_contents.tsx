@@ -21,7 +21,11 @@ import { ApmRoutes } from '../../../routing/apm_route_config';
 import { StatsList } from './stats_list';
 
 export function BackendContents({ nodeData, environment }: ContentsProps) {
-  const { query } = useApmParams('/*');
+  const { query } = useApmParams(
+    '/service-map',
+    '/services/:serviceName/service-map'
+  );
+
   const apmRouter = useApmRouter();
   const {
     urlParams: { start, end },

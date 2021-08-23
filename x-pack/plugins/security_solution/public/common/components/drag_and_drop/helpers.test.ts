@@ -656,6 +656,7 @@ describe('helpers', () => {
         allowTopN({
           browserField: aggregatableAllowedType,
           fieldName: aggregatableAllowedType.name,
+          hideTopN: false,
         })
       ).toBe(true);
     });
@@ -665,6 +666,7 @@ describe('helpers', () => {
         allowTopN({
           browserField: undefined,
           fieldName: ALERT_RULE_NAME,
+          hideTopN: false,
         })
       ).toBe(true);
     });
@@ -679,6 +681,7 @@ describe('helpers', () => {
         allowTopN({
           browserField: nonAggregatableAllowedType,
           fieldName: nonAggregatableAllowedType.name,
+          hideTopN: false,
         })
       ).toBe(false);
     });
@@ -693,6 +696,7 @@ describe('helpers', () => {
         allowTopN({
           browserField: aggregatableNotAllowedType,
           fieldName: aggregatableNotAllowedType.name,
+          hideTopN: false,
         })
       ).toBe(false);
     });
@@ -704,6 +708,7 @@ describe('helpers', () => {
         allowTopN({
           browserField: missingAggregatable,
           fieldName: missingAggregatable.name,
+          hideTopN: false,
         })
       ).toBe(false);
     });
@@ -715,6 +720,7 @@ describe('helpers', () => {
         allowTopN({
           browserField: missingType,
           fieldName: missingType.name,
+          hideTopN: false,
         })
       ).toBe(false);
     });
@@ -724,6 +730,17 @@ describe('helpers', () => {
         allowTopN({
           browserField: undefined,
           fieldName: 'non-allowlisted',
+          hideTopN: false,
+        })
+      ).toBe(false);
+    });
+
+    test('it returns false when hideTopN is true', () => {
+      expect(
+        allowTopN({
+          browserField: aggregatableAllowedType,
+          fieldName: aggregatableAllowedType.name,
+          hideTopN: true, // <-- the Top N action shall not be shown for this (otherwise valid) field
         })
       ).toBe(false);
     });

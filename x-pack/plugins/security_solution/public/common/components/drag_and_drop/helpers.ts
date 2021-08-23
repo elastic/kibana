@@ -160,9 +160,11 @@ export const addProviderToTimeline = ({
 export const allowTopN = ({
   browserField,
   fieldName,
+  hideTopN,
 }: {
   browserField: Partial<BrowserField> | undefined;
   fieldName: string;
+  hideTopN: boolean;
 }): boolean => {
   const isAggregatable = browserField?.aggregatable ?? false;
   const fieldType = browserField?.type ?? '';
@@ -244,6 +246,10 @@ export const allowTopN = ({
     ALERT_RULE_VERSION,
     ALERT_WORKFLOW_STATUS,
   ] as string[]).includes(fieldName);
+
+  if (hideTopN) {
+    return false;
+  }
 
   return isAllowlistedNonBrowserField || (isAggregatable && isAllowedType);
 };
