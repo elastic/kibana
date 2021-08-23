@@ -116,28 +116,30 @@ export const FieldEditorFlyoutContentContainer = ({
     [apiService, search, notifications]
   );
 
-  const saveRuntimeObject = useCallback(
+  const saveCompositeRuntime = useCallback(
     (updatedField: Field): IndexPatternField[] => {
-      if (field?.type !== undefined && field?.type !== 'object') {
-        // A previous runtime field is now a runtime object
+      if (field?.type !== undefined && field?.type !== 'composite') {
+        // A previous runtime field is now a runtime composite
         indexPattern.removeRuntimeField(field.name);
       } else if (field?.name && field.name !== updatedField.name) {
-        // rename an existing runtime object
-        indexPattern.removeRuntimeObject(field.name);
+        // rename an existing runtime composite
+        indexPattern.removeRuntimeComposite(field.name);
       }
 
+      // console.log(updatedField);
+      return [];
       // --- Temporary hack to create a runtime object ---
-      const runtimeName = 'aaaObject';
-      const tempRuntimeObject = {
-        name: runtimeName,
-        script: updatedField.script!,
-        subFields: {
-          field_a: updatedField,
-          field_b: updatedField,
-          field_c: updatedField,
-        },
-      };
-      return indexPattern.addRuntimeObject(runtimeName, tempRuntimeObject);
+      // const runtimeName = 'aaaObject';
+      // const tempRuntimeObject = {
+      //   name: runtimeName,
+      //   script: updatedField.script!,
+      //   subFields: {
+      //     field_a: updatedField,
+      //     field_b: updatedField,
+      //     field_c: updatedField,
+      //   },
+      // };
+      // return indexPattern.addRuntimeComposite(runtimeName, tempRuntimeObject);
       // --- end temporary hack ---
     },
     [field?.name, field?.type, indexPattern]
@@ -147,7 +149,7 @@ export const FieldEditorFlyoutContentContainer = ({
     (updatedField: Field): [IndexPatternField] => {
       if (field?.type !== undefined && field?.type === 'object') {
         // A previous runtime object is now a runtime field
-        indexPattern.removeRuntimeObject(field.name);
+        indexPattern.removeRuntimeComposite(field.name);
       } else if (field?.name && field.name !== updatedField.name) {
         // rename an existing runtime field
         indexPattern.removeRuntimeField(field.name);
@@ -177,9 +179,9 @@ export const FieldEditorFlyoutContentContainer = ({
 
       try {
         const editedFields: IndexPatternField[] =
-          // updatedField.type === 'object'
-          // --> always "true" to demo the creation of runtime objects
-          true ? saveRuntimeObject(updatedField) : saveRuntimeField(updatedField);
+          updatedField.type === 'composite'
+            ? saveCompositeRuntime(updatedField)
+            : saveRuntimeField(updatedField);
 
         await indexPatternService.updateSavedObject(indexPattern);
 
@@ -207,7 +209,7 @@ export const FieldEditorFlyoutContentContainer = ({
       fieldTypeToProcess,
       usageCollection,
       saveRuntimeField,
-      saveRuntimeObject,
+      saveCompositeRuntime,
     ]
   );
 
