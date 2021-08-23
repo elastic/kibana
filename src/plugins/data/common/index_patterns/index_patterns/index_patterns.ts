@@ -233,6 +233,13 @@ export class IndexPatternsService {
   };
 
   /**
+   * Checks if current user has a user created index pattern ignoring fleet's server default index patterns
+   */
+  async hasUserIndexPattern(): Promise<boolean> {
+    return this.apiClient.hasUserIndexPattern();
+  }
+
+  /**
    * Get field list by providing { pattern }
    * @param options
    * @returns FieldSpec[]
