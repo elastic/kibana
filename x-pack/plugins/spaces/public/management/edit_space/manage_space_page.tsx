@@ -23,10 +23,10 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { Capabilities, NotificationsStart, ScopedHistory } from 'src/core/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { SectionLoading } from '../../../../../../src/plugins/es_ui_shared/public';
 import type { FeaturesPluginStart, KibanaFeature } from '../../../../features/public';
+import type { Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
 import { getSpacesFeatureDescription } from '../../constants';
 import { getSpaceColor, getSpaceInitials } from '../../space_avatar';
