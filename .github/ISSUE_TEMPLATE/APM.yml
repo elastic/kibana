@@ -5,7 +5,7 @@ title: "[APM] "
 body: 
   - type: markdown
     attributes:
-      value: Thank you for our interest in Elastic and APM. This issue tracker is meant for reporting of bugs and problems with APM UI. For questions around how to use or setup APM, please refer to our [Discuss Forum](https://discuss.elastic.co/)
+      value: Thank you for our interest in Elastic APM. This issue tracker is meant for reporting of bugs and problems with APM UI. For questions around how to use or setup APM, please refer to our [Discuss Forum](https://discuss.elastic.co/)
   - type: input
     attributes:
       label: Kibana version
