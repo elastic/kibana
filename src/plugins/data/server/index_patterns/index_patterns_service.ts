@@ -65,7 +65,7 @@ export const indexPatternsServiceFactory = ({
   return new IndexPatternsCommonService({
     uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
     savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
-    apiClient: new IndexPatternsApiServer(elasticsearchClient),
+    apiClient: new IndexPatternsApiServer(elasticsearchClient, savedObjectsClient),
     fieldFormats: formats,
     onError: (error) => {
       logger.error(error);
