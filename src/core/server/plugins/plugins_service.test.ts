@@ -103,7 +103,7 @@ const createPlugin = (
       server,
       owner: {
         name: 'Core',
-        githubTeam: 'elastic/kibana-core',
+        githubTeam: 'kibana-core',
       },
       ui,
     },

@@ -40,7 +40,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     ui: true,
     owner: {
       name: 'Core',
-      githubTeam: 'elastic/kibana-core',
+      githubTeam: 'kibana-core',
     },
     ...manifestProps,
   };

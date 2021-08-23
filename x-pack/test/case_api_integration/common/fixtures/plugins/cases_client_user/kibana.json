@@ -1,6 +1,9 @@
 {
   "id": "casesClientUserFixture",
-  "owner": { "name": "Security solution", "githubTeam": "security-solution" },
+  "owner": {
+    "githubTeam": "security-threat-hunting",
+    "name": "Security Solution Threat Hunting"
+  },
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack"],
