@@ -25,9 +25,9 @@ import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { AppCategory } from 'src/core/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
 import type { KibanaFeatureConfig } from '../../../../../features/public';
+import type { Space } from '../../../../common';
 import { getEnabledFeatures } from '../../lib/feature_utils';
 
 interface Props {
