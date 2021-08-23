@@ -77,7 +77,7 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
       );
       await filterPopoverButton.click();
       for (const title of itemList) {
-        const filterItem = await find.byCssSelector(`[title="${title}"]`);
+        const filterItem = await find.byCssSelector(`li[title="${title}"]`);
         await filterItem.click();
       }
       const applyButton = await find.byCssSelector(
