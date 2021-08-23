@@ -9,9 +9,10 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
+import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { createFieldFormatter } from '../../lib/create_field_formatter';
-import { get, isUndefined, assign, includes, last } from 'lodash';
+import { get, isUndefined, assign, includes } from 'lodash';
 import { Gauge } from '../../../visualizations/views/gauge';
 import { getLastValue } from '../../../../../common/last_value_utils';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
@@ -48,7 +49,7 @@ function GaugeVisualization(props) {
       if (seriesDef) {
         newProps.formatter =
           seriesDef.formatter === DATA_FORMATTERS.DEFAULT
-            ? createFieldFormatter(last(seriesDef.metrics)?.field, fieldFormatMap)
+            ? createFieldFormatter(getMetricsField(seriesDef.metrics), fieldFormatMap)
             : createTickFormatter(seriesDef.formatter, seriesDef.value_template, getConfig);
       }
       if (i === 0 && colors.gauge) newProps.color = colors.gauge;

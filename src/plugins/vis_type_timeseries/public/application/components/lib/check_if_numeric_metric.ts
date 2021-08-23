@@ -7,7 +7,7 @@
  */
 
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
-import { METRIC_TYPES } from '../../../../common/enums';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { KBN_FIELD_TYPES } from '../../../../../data/public';
 
 import type { Metric, IndexPatternValue } from '../../../../common/types';
@@ -20,7 +20,7 @@ export const checkIfNumericMetric = (
   indexPattern: IndexPatternValue
 ) => {
   // currently only Top Hit could have not numeric value result
-  if (metric?.type === METRIC_TYPES.TOP_HIT) {
+  if (metric?.type === TSVB_METRIC_TYPES.TOP_HIT) {
     const selectedField = fields[getIndexPatternKey(indexPattern)]?.find(
       ({ name }) => name === metric?.field
     );

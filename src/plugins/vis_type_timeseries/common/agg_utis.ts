@@ -28,6 +28,7 @@ export interface Agg {
     isFieldRequired: boolean;
     isFilterRatioSupported: boolean;
     isHistogramSupported: boolean;
+    isFieldFormattingDisabled: boolean;
     hasExtendedStats: boolean;
   };
 }
@@ -37,6 +38,7 @@ const aggDefaultMeta = {
   isFieldRequired: true,
   isFilterRatioSupported: false,
   isHistogramSupported: false,
+  isFieldFormattingDisabled: false,
   hasExtendedStats: false,
 };
 
@@ -201,6 +203,7 @@ export const aggs: Agg[] = [
     id: TSVB_METRIC_TYPES.CALCULATION,
     meta: {
       ...aggDefaultMeta,
+      isFieldFormattingDisabled: true,
       type: AGG_TYPE.PARENT_PIPELINE,
       label: i18n.translate('visTypeTimeseries.aggUtils.calculationLabel', {
         defaultMessage: 'Calculation',
@@ -342,6 +345,7 @@ export const aggs: Agg[] = [
     id: TSVB_METRIC_TYPES.MATH,
     meta: {
       ...aggDefaultMeta,
+      isFieldFormattingDisabled: true,
       type: AGG_TYPE.SPECIAL,
       label: i18n.translate('visTypeTimeseries.aggUtils.mathLabel', { defaultMessage: 'Math' }),
     },

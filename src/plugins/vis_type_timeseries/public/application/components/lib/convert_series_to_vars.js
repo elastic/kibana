@@ -7,11 +7,12 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { startsWith, snakeCase, last } from 'lodash';
+import { startsWith, snakeCase } from 'lodash';
 import { BUCKET_TYPES, DATA_FORMATTERS } from '../../../../common/enums';
 import { getLastValue } from '../../../../common/last_value_utils';
 import { getValueOrEmpty, emptyLabel } from '../../../../common/empty_label';
 import { createTickFormatter } from './tick_formatter';
+import { getMetricsField } from './get_metrics_field';
 import { createFieldFormatter } from './create_field_formatter';
 import { labelDateFormatter } from './label_date_formatter';
 import moment from 'moment';
@@ -33,7 +34,7 @@ export const convertSeriesToVars = (series, model, getConfig = null, fieldFormat
 
         const formatter =
           seriesModel.formatter === DATA_FORMATTERS.DEFAULT
-            ? createFieldFormatter(last(seriesModel.metrics)?.field, fieldFormatMap)
+            ? createFieldFormatter(getMetricsField(seriesModel.metrics), fieldFormatMap)
             : createTickFormatter(seriesModel.formatter, seriesModel.value_template, getConfig);
         const lastValue = getLastValue(row.data);
 

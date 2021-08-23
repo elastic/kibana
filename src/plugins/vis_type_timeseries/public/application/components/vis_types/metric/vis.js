@@ -9,9 +9,10 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
+import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { createFieldFormatter } from '../../lib/create_field_formatter';
-import { get, isUndefined, assign, includes, pick, last } from 'lodash';
+import { get, isUndefined, assign, includes, pick } from 'lodash';
 import { Metric } from '../../../visualizations/views/metric';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getLastValue } from '../../../../../common/last_value_utils';
@@ -48,7 +49,7 @@ function MetricVisualization(props) {
       if (seriesDef) {
         newProps.formatter =
           seriesDef.formatter === DATA_FORMATTERS.DEFAULT
-            ? createFieldFormatter(last(seriesDef.metrics)?.field, fieldFormatMap)
+            ? createFieldFormatter(getMetricsField(seriesDef.metrics), fieldFormatMap)
             : createTickFormatter(seriesDef.formatter, seriesDef.value_template, getConfig);
       }
       if (i === 0 && colors.color) newProps.color = colors.color;

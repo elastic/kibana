@@ -9,10 +9,11 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { startsWith, get, cloneDeep, map, last } from 'lodash';
+import { startsWith, get, cloneDeep, map } from 'lodash';
 import { htmlIdGenerator } from '@elastic/eui';
 import { ScaleType } from '@elastic/charts';
 
+import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { checkIfSeriesHaveSameFormatters } from '../../lib/check_if_series_have_same_formatters';
@@ -187,7 +188,7 @@ class TimeseriesVisualization extends Component {
 
       const seriesGroupTickFormatter =
         seriesGroup.formatter === DATA_FORMATTERS.DEFAULT
-          ? createFieldFormatter(last(seriesGroup.metrics)?.field, fieldFormatMap)
+          ? createFieldFormatter(getMetricsField(seriesGroup.metrics), fieldFormatMap)
           : TimeseriesVisualization.getTickFormatter(seriesGroup, getConfig);
 
       const palette = {

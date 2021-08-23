@@ -13,6 +13,7 @@ import React, { Component } from 'react';
 import { parse as parseUrl } from 'url';
 import PropTypes from 'prop-types';
 import { RedirectAppLinks } from '../../../../../../kibana_react/public';
+import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { isSortable } from './is_sortable';
@@ -84,7 +85,7 @@ class TableVis extends Component {
         const column = this.visibleSeries.find((c) => c.id === item.id);
         if (!column) return null;
         const isFieldFormatter = column.formatter === DATA_FORMATTERS.DEFAULT;
-        const field = last(column.metrics)?.field;
+        const field = getMetricsField(column.metrics);
         const formatter = isFieldFormatter
           ? createFieldFormatter(field, fieldFormatMap, 'html')
           : createTickFormatter(column.formatter, column.value_template, getConfig);
