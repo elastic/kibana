@@ -50,7 +50,7 @@ describe('EnrollmentTokenForm', () => {
       expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/interactive_setup/enroll', {
         body: JSON.stringify({
           hosts: [`https://${token.adr[0]}`],
-          apiKey: token.key,
+          apiKey: btoa(token.key),
           caFingerprint: token.fgr,
         }),
       });

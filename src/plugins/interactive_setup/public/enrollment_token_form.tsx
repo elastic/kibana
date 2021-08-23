@@ -75,7 +75,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
       await http.post('/internal/interactive_setup/enroll', {
         body: JSON.stringify({
           hosts: decoded.adr.map((host) => `https://${host}`),
-          apiKey: decoded.key,
+          apiKey: btoa(decoded.key),
           caFingerprint: decoded.fgr,
         }),
       });
