@@ -12,11 +12,11 @@ import React from 'react';
 
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
+import type { Space } from '../../../common';
 import { getSpacesContextProviderWrapper } from '../../spaces_context';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
-import type { SavedObjectTarget } from '../types';
+import type { CopyToSpaceSavedObjectTarget } from '../types';
 import { CopyModeControl } from './copy_mode_control';
 import { getCopyToSpaceFlyoutComponent } from './copy_to_space_flyout';
 import { CopyToSpaceForm } from './copy_to_space_form';
@@ -82,7 +82,7 @@ const setup = async (opts: SetupOpts = {}) => {
     namespaces: ['default'],
     icon: 'dashboard',
     title: 'foo',
-  } as SavedObjectTarget;
+  } as CopyToSpaceSavedObjectTarget;
 
   const SpacesContext = await getSpacesContextProviderWrapper({
     getStartServices,

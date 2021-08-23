@@ -28,6 +28,9 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { isErrorMessage } from '../../correlations/utils/is_error_message';
 
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
+// Enforce min height so it's consistent across all tabs on the same level
+// to prevent "flickering" behavior
+const MIN_TAB_TITLE_HEIGHT = 56;
 
 type Selection = [number, number];
 
@@ -147,7 +150,7 @@ export function TransactionDistribution({
 
   return (
     <div data-test-subj="apmTransactionDistributionTabContent">
-      <EuiFlexGroup>
+      <EuiFlexGroup style={{ minHeight: MIN_TAB_TITLE_HEIGHT }}>
         <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
           <EuiTitle size="xs">
             <h5 data-test-subj="apmTransactionDistributionChartTitle">
