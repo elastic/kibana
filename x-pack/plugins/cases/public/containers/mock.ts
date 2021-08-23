@@ -9,6 +9,7 @@ import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } 
 
 import {
   AssociationType,
+  CaseUserActionConnector,
   CaseResponse,
   CasesFindResponse,
   CasesResponse,
@@ -430,7 +431,8 @@ const getValues = (
 ): Partial<CaseUserActions> => {
   if (isCreateConnector(userAction, actionFields)) {
     return {
-      newValue: overrides?.newValue ?? JSON.stringify(basicCaseSnake),
+      newValue:
+        overrides?.newValue === undefined ? JSON.stringify(basicCaseSnake) : overrides.newValue,
       newValConnectorId: overrides?.newValConnectorId ?? null,
       oldValue: null,
       oldValConnectorId: null,
@@ -438,30 +440,45 @@ const getValues = (
   } else if (isUpdateConnector(userAction, actionFields)) {
     return {
       newValue:
-        overrides?.newValue ??
-        JSON.stringify({ name: 'My Connector', type: ConnectorTypes.none, fields: null }),
+        overrides?.newValue === undefined
+          ? JSON.stringify({ name: 'My Connector', type: ConnectorTypes.none, fields: null })
+          : overrides.newValue,
       newValConnectorId: overrides?.newValConnectorId ?? null,
       oldValue:
-        overrides?.oldValue ??
-        JSON.stringify({ name: 'My Connector2', type: ConnectorTypes.none, fields: null }),
+        overrides?.oldValue === undefined
+          ? JSON.stringify({ name: 'My Connector2', type: ConnectorTypes.none, fields: null })
+          : overrides.oldValue,
       oldValConnectorId: overrides?.oldValConnectorId ?? null,
     };
   } else if (isPush(userAction, actionFields)) {
     return {
-      newValue: overrides?.newValue ?? JSON.stringify(basicPushSnake),
-      newValConnectorId: overrides?.newValConnectorId ?? pushConnectorId,
+      newValue:
+        overrides?.newValue === undefined ? JSON.stringify(basicPushSnake) : overrides?.newValue,
+      newValConnectorId:
+        overrides?.newValConnectorId === undefined ? pushConnectorId : overrides.newValConnectorId,
       oldValue: overrides?.oldValue ?? null,
       oldValConnectorId: overrides?.oldValConnectorId ?? null,
     };
   } else {
     return {
-      newValue: overrides?.newValue ?? basicAction.newValue,
+      newValue: overrides?.newValue === undefined ? basicAction.newValue : overrides.newValue,
       newValConnectorId: overrides?.newValConnectorId ?? null,
       oldValue: overrides?.oldValue ?? null,
       oldValConnectorId: overrides?.oldValConnectorId ?? null,
     };
   }
 };
+
+export const getJiraConnectorWithoutId = (overrides?: Partial<CaseUserActionConnector>) => {
+  return JSON.stringify({
+    name: 'jira1',
+    type: ConnectorTypes.jira,
+    ...jiraFields,
+    ...overrides,
+  });
+};
+
+export const jiraFields = { fields: { issueType: '10006', priority: null, parent: null } };
 
 export const getAlertUserAction = () => ({
   ...basicAction,

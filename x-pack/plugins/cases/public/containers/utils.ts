@@ -30,13 +30,50 @@ import {
   CaseUserActionsResponseRt,
   CommentType,
   CasePatchRequest,
+  CaseUserActionConnectorRt,
+  CaseConnector,
+  ConnectorTypes,
+  noneConnectorId,
+  CaseFullExternalService,
+  CaseUserActionExternalServiceRt,
 } from '../../common';
 import { AllCases, Case, UpdateByKey } from './types';
 import * as i18n from './translations';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
 
-export const parseString = (params: string | null) => {
+export const parseStringAsConnector = (
+  id: string | null,
+  encodedData: string | null
+): CaseConnector | undefined => {
+  if (encodedData == null) {
+    return;
+  }
+
+  const decodedConnector = parseString(encodedData);
+
+  if (!CaseUserActionConnectorRt.is(decodedConnector)) {
+    return;
+  }
+
+  if (id == null && decodedConnector.type === ConnectorTypes.none) {
+    return {
+      ...decodedConnector,
+      id: noneConnectorId,
+    };
+  } else if (id == null) {
+    return;
+  } else {
+    // id does not equal null or undefined and the connector type does not equal none
+    // so return the connector with its id
+    return {
+      ...decodedConnector,
+      id,
+    };
+  }
+};
+
+const parseString = (params: string | null): unknown | null => {
   if (params == null) {
     return null;
   }
@@ -46,6 +83,25 @@ export const parseString = (params: string | null) => {
   } catch {
     return null;
   }
+};
+
+export const parseStringAsExternalService = (
+  id: string | null,
+  encodedData: string | null
+): CaseFullExternalService | undefined => {
+  if (encodedData == null) {
+    return;
+  }
+
+  const decodedExternalService = parseString(encodedData);
+  if (!CaseUserActionExternalServiceRt.is(decodedExternalService)) {
+    return;
+  }
+
+  return {
+    ...decodedExternalService,
+    connector_id: id,
+  };
 };
 
 export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>

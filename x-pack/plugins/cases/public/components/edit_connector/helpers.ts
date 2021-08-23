@@ -5,19 +5,33 @@
  * 2.0.
  */
 
-import { ConnectorTypes, noneConnectorId } from '../../../common';
+import { ConnectorTypeFields } from '../../../common';
 import { CaseUserActions } from '../../containers/types';
+import { parseStringAsConnector } from '../../containers/utils';
 
-export const getConnectorFieldsFromUserActions = (id: string, userActions: CaseUserActions[]) => {
+export const getConnectorFieldsFromUserActions = (
+  id: string,
+  userActions: CaseUserActions[]
+): ConnectorTypeFields['fields'] => {
   try {
     for (const action of [...userActions].reverse()) {
       if (action.actionField.length === 1 && action.actionField[0] === 'connector') {
-        if (idMatchesActionValue(id, action.newValConnectorId, action.newValue)) {
-          return JSON.parse(action.newValue).fields;
+        const parsedNewConnector = parseStringAsConnector(
+          action.newValConnectorId,
+          action.newValue
+        );
+
+        if (parsedNewConnector && id === parsedNewConnector.id) {
+          return parsedNewConnector.fields;
         }
 
-        if (idMatchesActionValue(id, action.oldValConnectorId, action.oldValue)) {
-          return JSON.parse(action.oldValue).fields;
+        const parsedOldConnector = parseStringAsConnector(
+          action.oldValConnectorId,
+          action.oldValue
+        );
+
+        if (parsedOldConnector && id === parsedOldConnector.id) {
+          return parsedOldConnector.fields;
         }
       }
     }
@@ -26,27 +40,4 @@ export const getConnectorFieldsFromUserActions = (id: string, userActions: CaseU
   } catch {
     return null;
   }
-};
-
-const idMatchesActionValue = (
-  id: string,
-  valueId: string | null,
-  encodedValue: string | null
-): encodedValue is string => {
-  try {
-    if (id === valueId && encodedValue != null) {
-      return true;
-    }
-
-    if (id === noneConnectorId && valueId === null && encodedValue != null) {
-      const decodedValue = JSON.parse(encodedValue);
-      if (decodedValue.type === ConnectorTypes.none) {
-        return true;
-      }
-    }
-  } catch (error) {
-    // just return false when an error occurs
-  }
-
-  return false;
 };

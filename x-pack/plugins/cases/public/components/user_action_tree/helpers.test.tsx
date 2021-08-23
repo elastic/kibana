@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { CaseStatuses } from '../../../common';
+import { CaseStatuses, ConnectorTypes } from '../../../common';
 import { basicPush, getUserAction } from '../../containers/mock';
 import {
   getLabelTitle,
@@ -129,7 +129,7 @@ describe('User action tree helpers', () => {
       `${i18n.PUSHED_NEW_INCIDENT} ${basicPush.connectorName}`
     );
     expect(wrapper.find(`[data-test-subj="pushed-value"]`).first().prop('href')).toEqual(
-      JSON.parse(action.newValue).external_url
+      JSON.parse(action.newValue!).external_url
     );
   });
 
@@ -142,50 +142,74 @@ describe('User action tree helpers', () => {
       `${i18n.UPDATE_INCIDENT} ${basicPush.connectorName}`
     );
     expect(wrapper.find(`[data-test-subj="pushed-value"]`).first().prop('href')).toEqual(
-      JSON.parse(action.newValue).external_url
+      JSON.parse(action.newValue!).external_url
     );
   });
 
-  it('label title generated for update connector - change connector', () => {
-    const action = {
-      ...getUserAction(['connector'], 'update'),
-      oldValue: JSON.stringify({ id: 'servicenow-1' }),
-      newValue: JSON.stringify({ id: 'resilient-2' }),
-    };
-    const result: string | JSX.Element = getConnectorLabelTitle({
-      action,
-      connectors,
+  describe('getConnectorLabelTitle', () => {
+    it('returns an empty string when the encoded old value is null', () => {
+      const result = getConnectorLabelTitle({
+        action: getUserAction(['connector'], 'update', { oldValue: null }),
+        connectors,
+      });
+
+      expect(result).toEqual('');
     });
 
-    expect(result).toEqual('selected My Connector 2 as incident management system');
-  });
+    it('returns an empty string when the encoded new value is null', () => {
+      const result = getConnectorLabelTitle({
+        action: getUserAction(['connector'], 'update', { newValue: null }),
+        connectors,
+      });
 
-  it('label title generated for update connector - change connector to none', () => {
-    const action = {
-      ...getUserAction(['connector'], 'update'),
-      oldValue: JSON.stringify({ id: 'servicenow-1' }),
-      newValue: JSON.stringify({ id: 'none' }),
-    };
-    const result: string | JSX.Element = getConnectorLabelTitle({
-      action,
-      connectors,
+      expect(result).toEqual('');
     });
 
-    expect(result).toEqual('removed external incident management system');
-  });
+    it('returns the change connector label', () => {
+      const result: string | JSX.Element = getConnectorLabelTitle({
+        action: getUserAction(['connector'], 'update', {
+          oldValue: JSON.stringify({
+            type: ConnectorTypes.serviceNowITSM,
+            name: 'a',
+            fields: null,
+          }),
+          oldValConnectorId: 'servicenow-1',
+          newValue: JSON.stringify({ type: ConnectorTypes.resilient, name: 'a', fields: null }),
+          newValConnectorId: 'resilient-2',
+        }),
+        connectors,
+      });
 
-  it('label title generated for update connector - field change', () => {
-    const action = {
-      ...getUserAction(['connector'], 'update'),
-      oldValue: JSON.stringify({ id: 'servicenow-1' }),
-      newValue: JSON.stringify({ id: 'servicenow-1' }),
-    };
-    const result: string | JSX.Element = getConnectorLabelTitle({
-      action,
-      connectors,
+      expect(result).toEqual('selected My Connector 2 as incident management system');
     });
 
-    expect(result).toEqual('changed connector field');
+    it('returns the removed connector label', () => {
+      const result: string | JSX.Element = getConnectorLabelTitle({
+        action: getUserAction(['connector'], 'update', {
+          oldValue: JSON.stringify({ type: ConnectorTypes.serviceNowITSM, name: '', fields: null }),
+          oldValConnectorId: 'servicenow-1',
+          newValue: JSON.stringify({ type: ConnectorTypes.none, name: '', fields: null }),
+          newValConnectorId: 'none',
+        }),
+        connectors,
+      });
+
+      expect(result).toEqual('removed external incident management system');
+    });
+
+    it('returns the connector fields changed label', () => {
+      const result: string | JSX.Element = getConnectorLabelTitle({
+        action: getUserAction(['connector'], 'update', {
+          oldValue: JSON.stringify({ type: ConnectorTypes.serviceNowITSM, name: '', fields: null }),
+          oldValConnectorId: 'servicenow-1',
+          newValue: JSON.stringify({ type: ConnectorTypes.serviceNowITSM, name: '', fields: null }),
+          newValConnectorId: 'servicenow-1',
+        }),
+        connectors,
+      });
+
+      expect(result).toEqual('changed connector field');
+    });
   });
 
   describe('toStringArray', () => {

@@ -15,12 +15,10 @@ import {
   CaseExternalService,
   CaseUserActions,
   ElasticUser,
-  noneConnectorId,
-  ConnectorTypes,
 } from '../../common';
 import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
-import { convertToCamelCase, parseString } from './utils';
+import { convertToCamelCase, parseStringAsConnector, parseStringAsExternalService } from './utils';
 import { useToasts } from '../common/lib/kibana';
 
 export interface CaseService extends CaseExternalService {
@@ -60,20 +58,22 @@ export interface UseGetCaseUserActions extends CaseUserActionsState {
   ) => Promise<void>;
 }
 
-const unknownConnectorId = 'unknown';
+const unknownExternalServiceConnectorId = 'unknown';
 
 const getExternalService = (
   connectorId: string | null,
   encodedValue: string | null
 ): CaseExternalService | null => {
-  const decodedValue = parseString(encodedValue);
+  const decodedValue = parseStringAsExternalService(connectorId, encodedValue);
 
   if (decodedValue == null) {
     return null;
   }
   return {
     ...convertToCamelCase<CaseFullExternalService, CaseExternalService>(decodedValue),
-    connectorId: connectorId ?? unknownConnectorId,
+    // if in the rare case that the connector id is null we'll set it to unknown if we need to reference it in the UI
+    // anywhere. The id would only ever be null if a migration failed or some logic error within the backend occurred
+    connectorId: connectorId ?? unknownExternalServiceConnectorId,
   };
 };
 
@@ -85,42 +85,29 @@ const groupConnectorFields = (
       return acc;
     }
 
-    const oldValue = parseString(mua.oldValue);
-    const newValue = parseString(mua.newValue);
+    const oldConnector = parseStringAsConnector(mua.oldValConnectorId, mua.oldValue);
+    const newConnector = parseStringAsConnector(mua.newValConnectorId, mua.newValue);
 
-    const oldValueId = getConnectorId(mua.oldValConnectorId, oldValue);
-    const newValueId = getConnectorId(mua.newValConnectorId, newValue);
-
-    if (oldValue == null || newValue == null || oldValueId == null || newValueId == null) {
+    if (!oldConnector || !newConnector) {
       return acc;
     }
 
     return {
       ...acc,
-      [oldValueId]: [
-        ...(acc[oldValueId] || []),
-        ...(oldValueId === newValueId ? [oldValue.fields, newValue.fields] : [oldValue.fields]),
+      [oldConnector.id]: [
+        ...(acc[oldConnector.id] || []),
+        ...(oldConnector.id === newConnector.id
+          ? [oldConnector.fields, newConnector.fields]
+          : [oldConnector.fields]),
       ],
-      [newValueId]: [
-        ...(acc[newValueId] || []),
-        ...(oldValueId === newValueId ? [oldValue.fields, newValue.fields] : [newValue.fields]),
+      [newConnector.id]: [
+        ...(acc[newConnector.id] || []),
+        ...(oldConnector.id === newConnector.id
+          ? [oldConnector.fields, newConnector.fields]
+          : [newConnector.fields]),
       ],
     };
   }, {} as Record<string, Array<CaseConnector['fields']>>);
-
-interface TypeField {
-  type: string;
-}
-
-const getConnectorId = (id: string | null, decodedValue?: unknown | null): string | undefined => {
-  if (id != null) {
-    return id;
-  }
-
-  if (decodedValue != null && (decodedValue as TypeField).type === ConnectorTypes.none) {
-    return noneConnectorId;
-  }
-};
 
 const connectorHasChangedFields = ({
   connectorFieldsBeforePush,

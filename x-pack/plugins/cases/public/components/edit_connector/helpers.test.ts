@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CaseUserActionConnector, ConnectorTypes } from '../../../common';
 import { CaseUserActions } from '../../containers/types';
 import { getConnectorFieldsFromUserActions } from './helpers';
 
@@ -14,7 +15,7 @@ describe('helpers', () => {
       expect(getConnectorFieldsFromUserActions('a', [])).toBeNull();
     });
 
-    it('returns null when an error is thrown', () => {
+    it('returns null when the value fields are not valid encoded fields', () => {
       expect(
         getConnectorFieldsFromUserActions('a', [createUserAction({ newValue: 'a', oldValue: 'a' })])
       ).toBeNull();
@@ -35,55 +36,61 @@ describe('helpers', () => {
       expect(
         getConnectorFieldsFromUserActions('a', [
           createUserAction({
-            newValue: JSON.stringify({ a: '1', fields: { hello: '1' } }),
+            newValue: createEncodedJiraConnector(),
             oldValue: JSON.stringify({ a: '1' }),
             newValConnectorId: 'a',
           }),
         ])
-      ).toEqual({ hello: '1' });
+      ).toEqual(defaultJiraFields);
     });
 
     it('returns the fields when it finds the connector id in the new value and the old value is null', () => {
       expect(
         getConnectorFieldsFromUserActions('a', [
           createUserAction({
-            newValue: JSON.stringify({ a: '1', fields: { hello: '1' } }),
+            newValue: createEncodedJiraConnector(),
             newValConnectorId: 'a',
           }),
         ])
-      ).toEqual({ hello: '1' });
+      ).toEqual(defaultJiraFields);
     });
 
     it('returns the fields when it finds the connector id in the old value', () => {
+      const expectedFields = { ...defaultJiraFields, issueType: '5' };
+
       expect(
         getConnectorFieldsFromUserActions('id-to-find', [
           createUserAction({
-            newValue: JSON.stringify({ a: '1', fields: { hello: '1' } }),
-            oldValue: JSON.stringify({ a: '1', fields: { hi: '2' } }),
+            newValue: createEncodedJiraConnector(),
+            oldValue: createEncodedJiraConnector({
+              fields: expectedFields,
+            }),
             newValConnectorId: 'b',
             oldValConnectorId: 'id-to-find',
           }),
         ])
-      ).toEqual({ hi: '2' });
+      ).toEqual(expectedFields);
     });
 
     it('returns the fields when it finds the connector id in the second user action', () => {
+      const expectedFields = { ...defaultJiraFields, issueType: '5' };
+
       expect(
         getConnectorFieldsFromUserActions('id-to-find', [
           createUserAction({
-            newValue: JSON.stringify({ a: '1', fields: { hello: '1' } }),
-            oldValue: JSON.stringify({ a: '1', fields: { hi: '2' } }),
+            newValue: createEncodedJiraConnector(),
+            oldValue: createEncodedJiraConnector(),
             newValConnectorId: 'b',
             oldValConnectorId: 'a',
           }),
           createUserAction({
-            newValue: JSON.stringify({ a: '1', fields: { hello: '1' } }),
-            oldValue: JSON.stringify({ a: '1', fields: { hi: '2' } }),
+            newValue: createEncodedJiraConnector(),
+            oldValue: createEncodedJiraConnector({ fields: expectedFields }),
             newValConnectorId: 'b',
             oldValConnectorId: 'id-to-find',
           }),
         ])
-      ).toEqual({ hi: '2' });
+      ).toEqual(expectedFields);
     });
 
     it('ignores a parse failure and finds the right user action', () => {
@@ -94,11 +101,15 @@ describe('helpers', () => {
             newValConnectorId: null,
           }),
           createUserAction({
-            newValue: JSON.stringify({ type: '.none', fields: { hello: '1' } }),
+            newValue: createEncodedJiraConnector({
+              type: ConnectorTypes.none,
+              name: '',
+              fields: null,
+            }),
             newValConnectorId: null,
           }),
         ])
-      ).toEqual({ hello: '1' });
+      ).toBeNull();
     });
 
     it('returns null when the id matches but the encoded value is null', () => {
@@ -130,11 +141,15 @@ describe('helpers', () => {
       expect(
         getConnectorFieldsFromUserActions('none', [
           createUserAction({
-            newValue: JSON.stringify({ type: '.none', fields: { hello: '1' } }),
+            newValue: createEncodedJiraConnector({
+              type: ConnectorTypes.none,
+              name: '',
+              fields: null,
+            }),
             newValConnectorId: null,
           }),
         ])
-      ).toEqual({ hello: '1' });
+      ).toBeNull();
     });
   });
 });
@@ -155,3 +170,18 @@ function createUserAction(fields: Partial<CaseUserActions>): CaseUserActions {
     ...fields,
   };
 }
+
+function createEncodedJiraConnector(fields?: Partial<CaseUserActionConnector>): string {
+  return JSON.stringify({
+    type: ConnectorTypes.jira,
+    name: 'name',
+    fields: defaultJiraFields,
+    ...fields,
+  });
+}
+
+const defaultJiraFields = {
+  issueType: '1',
+  parent: null,
+  priority: null,
+};
