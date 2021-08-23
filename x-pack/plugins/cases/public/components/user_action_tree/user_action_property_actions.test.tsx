@@ -11,6 +11,7 @@ import { UserActionPropertyActions } from './user_action_property_actions';
 const onEdit = jest.fn();
 const onQuote = jest.fn();
 const props = {
+  commentMarkdown: '',
   id: 'property-actions-id',
   editLabel: 'edit',
   quoteLabel: 'quote',
@@ -18,6 +19,7 @@ const props = {
   isLoading: false,
   onEdit,
   onQuote,
+  userCanCrud: true,
 };
 
 describe('UserActionPropertyActions ', () => {

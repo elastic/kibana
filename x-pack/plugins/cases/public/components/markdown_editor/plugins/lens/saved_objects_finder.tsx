@@ -55,7 +55,6 @@ interface FinderAttributes {
 }
 
 interface SavedObjectFinderState {
-  hideListing: boolean;
   items: Array<{
     title: string | null;
     id: SimpleSavedObject['id'];
@@ -84,8 +83,6 @@ interface BaseSavedObjectFinder {
   showFilter?: boolean;
   euiFormRowProps?: EuiFormRowProps;
   euiFieldSearchProps?: EuiFieldSearchProps;
-  initialQuery?: string;
-  initialHideListing?: boolean;
 }
 
 interface SavedObjectFinderFixedPage extends BaseSavedObjectFinder {
@@ -114,8 +111,6 @@ export class SavedObjectFinderUi extends React.Component<
     noItemsMessage: PropTypes.node,
     savedObjectMetaData: PropTypes.array.isRequired,
     initialPageSize: PropTypes.oneOf([5, 10, 15, 25]),
-    initialQuery: PropTypes.string,
-    initialHideListing: PropTypes.bool,
     fixedPageSize: PropTypes.number,
     showFilter: PropTypes.bool,
     euiFormRowProps: PropTypes.object,
@@ -187,11 +182,10 @@ export class SavedObjectFinderUi extends React.Component<
       isFetchingItems: false,
       page: 0,
       perPage: props.initialPageSize || props.fixedPageSize || 10,
-      query: props.initialQuery || '',
+      query: '',
       filterOpen: false,
       filteredTypes: [],
       sortOpen: false,
-      hideListing: !!props.initialQuery || !!props.initialHideListing,
     };
   }
 
@@ -203,16 +197,6 @@ export class SavedObjectFinderUi extends React.Component<
   public componentDidMount() {
     this.isComponentMounted = true;
     this.fetchItems();
-  }
-
-  public componentDidUpdate(prevProps: SavedObjectFinderUiProps) {
-    if (this.props.initialQuery && prevProps.initialQuery !== this.props.initialQuery) {
-      this.setState({
-        query: this.props.initialQuery,
-        hideListing: !!this.props.initialQuery || !!this.props.initialHideListing,
-        isFetchingItems: !this.props.initialQuery,
-      });
-    }
   }
 
   public render() {
@@ -278,7 +262,6 @@ export class SavedObjectFinderUi extends React.Component<
     this.setState(
       {
         isFetchingItems: true,
-        hideListing: false,
       },
       this.debouncedFetch.bind(null, this.state.query)
     );
@@ -481,8 +464,6 @@ export class SavedObjectFinderUi extends React.Component<
     const items = this.state.items.length === 0 ? [] : this.getPageOfItems();
     const { onChoose, savedObjectMetaData } = this.props;
 
-    if (this.state.hideListing) return null;
-
     return (
       <>
         {this.state.isFetchingItems && this.state.items.length === 0 && (
@@ -494,38 +475,41 @@ export class SavedObjectFinderUi extends React.Component<
           </EuiFlexGroup>
         )}
         {items.length > 0 ? (
-          <EuiListGroup data-test-subj="savedObjectFinderItemList" maxWidth={false} flush>
-            {items.map((item) => {
-              const currentSavedObjectMetaData = savedObjectMetaData.find(
-                (metaData) => metaData.type === item.type
-              )!;
-              const fullName = currentSavedObjectMetaData.getTooltipForSavedObject
-                ? currentSavedObjectMetaData.getTooltipForSavedObject(item.savedObject)
-                : `${item.title} (${currentSavedObjectMetaData!.name})`;
-              const iconType = (
-                currentSavedObjectMetaData ||
-                ({
-                  getIconForSavedObject: () => 'document',
-                } as Pick<SavedObjectMetaData<{ title: string }>, 'getIconForSavedObject'>)
-              ).getIconForSavedObject(item.savedObject);
-              return (
-                <EuiListGroupItem
-                  key={item.id}
-                  iconType={iconType}
-                  label={item.title}
-                  onClick={
-                    onChoose
-                      ? () => {
-                          onChoose(item.id, item.type, fullName, item.savedObject);
-                        }
-                      : undefined
-                  }
-                  title={fullName}
-                  data-test-subj={`savedObjectTitle${(item.title || '').split(' ').join('-')}`}
-                />
-              );
-            })}
-          </EuiListGroup>
+          <>
+            <EuiSpacer size="s" />
+            <EuiListGroup data-test-subj="savedObjectFinderItemList" maxWidth={false} flush>
+              {items.map((item) => {
+                const currentSavedObjectMetaData = savedObjectMetaData.find(
+                  (metaData) => metaData.type === item.type
+                )!;
+                const fullName = currentSavedObjectMetaData.getTooltipForSavedObject
+                  ? currentSavedObjectMetaData.getTooltipForSavedObject(item.savedObject)
+                  : `${item.title} (${currentSavedObjectMetaData!.name})`;
+                const iconType = (
+                  currentSavedObjectMetaData ||
+                  ({
+                    getIconForSavedObject: () => 'document',
+                  } as Pick<SavedObjectMetaData<{ title: string }>, 'getIconForSavedObject'>)
+                ).getIconForSavedObject(item.savedObject);
+                return (
+                  <EuiListGroupItem
+                    key={item.id}
+                    iconType={iconType}
+                    label={item.title}
+                    onClick={
+                      onChoose
+                        ? () => {
+                            onChoose(item.id, item.type, fullName, item.savedObject);
+                          }
+                        : undefined
+                    }
+                    title={fullName}
+                    data-test-subj={`savedObjectTitle${(item.title || '').split(' ').join('-')}`}
+                  />
+                );
+              })}
+            </EuiListGroup>
+          </>
         ) : (
           !this.state.isFetchingItems && <EuiEmptyPrompt body={this.props.noItemsMessage} />
         )}

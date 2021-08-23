@@ -310,6 +310,7 @@ export const UserActionTree = React.memo(
         }),
         actions: (
           <UserActionContentToolbar
+            commentMarkdown={caseData.description}
             getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
             id={DESCRIPTION_ID}
             editLabel={i18n.EDIT_DESCRIPTION}
@@ -388,6 +389,7 @@ export const UserActionTree = React.memo(
                       <UserActionContentToolbar
                         getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
                         id={comment.id}
+                        commentMarkdown={comment.comment}
                         editLabel={i18n.EDIT_COMMENT}
                         quoteLabel={i18n.QUOTE}
                         isLoading={isLoadingIds.includes(comment.id)}

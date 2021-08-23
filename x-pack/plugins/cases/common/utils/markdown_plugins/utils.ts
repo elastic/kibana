@@ -8,34 +8,36 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 import { filter } from 'lodash';
-import type { Parent } from 'unist';
+import type { Node } from 'unist';
 import markdown from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import unified from 'unified';
 
 import { TimeRange } from 'src/plugins/data/server';
-import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
-import { LensEmbeddablePersistableState } from '../../../../lens/common/embeddable_factory';
+import { SerializableRecord } from '@kbn/utility-types';
 import { LENS_ID, LensParser, LensSerializer } from './lens';
 import { TimelineSerializer, TimelineParser } from './timeline';
 
-interface LensMarkdownNode extends EmbeddableStateWithType {
+interface LensMarkdownNode extends Node {
   timeRange: TimeRange;
-  attributes: LensEmbeddablePersistableState;
+  attributes: SerializableRecord;
+  type: string;
+  id: string;
 }
 
-export const getLensVisualizations = (parsedComment: Array<LensMarkdownNode | Node>) =>
-  filter(parsedComment, { type: LENS_ID }) as LensMarkdownNode[];
+interface LensMarkdownParent extends Node {
+  children: Array<LensMarkdownNode | Node>;
+}
+
+export const getLensVisualizations = (parsedComment?: Array<LensMarkdownNode | Node>) =>
+  (parsedComment?.length ? filter(parsedComment, { type: LENS_ID }) : []) as LensMarkdownNode[];
 
 export const parseCommentString = (comment: string) => {
   const processor = unified().use([[markdown, {}], LensParser, TimelineParser]);
-  // @ts-expect-error
-  return processor.parse(comment) as Omit<Parent, 'children'> & {
-    children: Array<LensMarkdownNode | Node>;
-  };
+  return processor.parse(comment) as LensMarkdownParent;
 };
 
-export const stringifyComment = (comment: Parent) =>
+export const stringifyComment = (comment: LensMarkdownParent) =>
   unified()
     .use([
       [

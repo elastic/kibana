@@ -15,7 +15,6 @@ import { ADD_VISUALIZATION } from './translations';
 interface DraftComment {
   commentId: string;
   comment: string;
-  lensEditorQuery: string;
   position: EuiMarkdownAstNodePosition;
 }
 

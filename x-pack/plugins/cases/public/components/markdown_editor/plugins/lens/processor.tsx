@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
-import React, { useCallback, useEffect, useState } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 import styled from 'styled-components';
-import { useLocation } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { createGlobalStyle } from '../../../../../../../../src/plugins/kibana_react/common';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
@@ -30,95 +26,31 @@ const LensChartTooltipFix = createGlobalStyle`
 
 interface LensMarkDownRendererProps {
   attributes: TypedLensByValueInput['attributes'] | null;
-  id?: string | null;
   timeRange?: TypedLensByValueInput['timeRange'];
-  startDate?: string | null;
-  endDate?: string | null;
-  viewMode?: boolean | undefined;
 }
 
 const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
   attributes,
   timeRange,
-  viewMode = true,
 }) => {
-  const location = useLocation();
   const {
-    application: { currentAppId$ },
-    lens: { EmbeddableComponent, navigateToPrefilledEditor, canUseEditor },
+    lens: { EmbeddableComponent },
   } = useKibana().services;
-  const [currentAppId, setCurrentAppId] = useState<string | undefined>(undefined);
 
-  const handleClick = useCallback(() => {
-    const options = viewMode
-      ? {
-          openInNewTab: true,
-        }
-      : {
-          originatingApp: currentAppId,
-          originatingPath: `${location.pathname}${location.search}`,
-        };
-
-    if (attributes) {
-      navigateToPrefilledEditor(
-        {
-          id: '',
-          timeRange,
-          attributes,
-        },
-        options
-      );
-    }
-  }, [
-    attributes,
-    currentAppId,
-    location.pathname,
-    location.search,
-    navigateToPrefilledEditor,
-    timeRange,
-    viewMode,
-  ]);
-
-  useEffect(() => {
-    const getCurrentAppId = async () => {
-      const appId = await currentAppId$.pipe(first()).toPromise();
-      setCurrentAppId(appId);
-    };
-    getCurrentAppId();
-  }, [currentAppId$]);
+  if (!attributes) {
+    return null;
+  }
 
   return (
     <Container>
-      {attributes ? (
-        <>
-          {viewMode && canUseEditor() && (
-            <>
-              <EuiFlexGroup justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  {viewMode && canUseEditor() ? (
-                    <EuiButton iconType="lensApp" fullWidth={false} onClick={handleClick} size="s">
-                      <FormattedMessage
-                        id="xpack.cases.markdownEditor.plugins.lens.openVisualizationButtonLabel"
-                        defaultMessage="Open visualization"
-                      />
-                    </EuiButton>
-                  ) : null}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="xs" />
-            </>
-          )}
-
-          <EmbeddableComponent
-            id=""
-            style={{ height: LENS_VISUALIZATION_HEIGHT }}
-            timeRange={timeRange}
-            attributes={attributes}
-            renderMode="display"
-          />
-          <LensChartTooltipFix />
-        </>
-      ) : null}
+      <EmbeddableComponent
+        id=""
+        style={{ height: LENS_VISUALIZATION_HEIGHT }}
+        timeRange={timeRange}
+        attributes={attributes}
+        renderMode="display"
+      />
+      <LensChartTooltipFix />
     </Container>
   );
 };
