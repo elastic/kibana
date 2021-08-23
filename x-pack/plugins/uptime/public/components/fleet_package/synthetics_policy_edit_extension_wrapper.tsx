@@ -7,27 +7,17 @@
 
 import React, { memo, useMemo } from 'react';
 import { PackagePolicyEditExtensionComponentProps } from '../../../../fleet/public';
-import {
-  PolicyConfig,
-  ConfigKeys,
-  ContentType,
-  DataStream,
-  ICustomFields,
-  contentTypesToMode,
-} from './types';
+import { PolicyConfig, ConfigKeys, DataStream, ITLSFields, ICustomFields } from './types';
 import { SyntheticsPolicyEditExtension } from './synthetics_policy_edit_extension';
 import {
   MonitorTypeContextProvider,
   HTTPContextProvider,
   TCPContextProvider,
-  defaultTCPSimpleFields,
-  defaultHTTPSimpleFields,
-  defaultICMPSimpleFields,
-  defaultHTTPAdvancedFields,
-  defaultTCPAdvancedFields,
-  defaultTLSFields,
   ICMPSimpleFieldsContextProvider,
+  BrowserContextProvider,
+  TLSFieldsContextProvider,
 } from './contexts';
+import { normalizers } from './helpers/normalizers';
 
 /**
  * Exports Synthetics-specific package policy instructions
@@ -35,123 +25,64 @@ import {
  */
 export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtensionComponentProps>(
   ({ policy: currentPolicy, newPolicy, onChange }) => {
-    const { enableTLS: isTLSEnabled, config: defaultConfig, monitorType } = useMemo(() => {
-      const fallbackConfig: PolicyConfig = {
-        [DataStream.HTTP]: {
-          ...defaultHTTPSimpleFields,
-          ...defaultHTTPAdvancedFields,
-          ...defaultTLSFields,
-        },
-        [DataStream.TCP]: {
-          ...defaultTCPSimpleFields,
-          ...defaultTCPAdvancedFields,
-          ...defaultTLSFields,
-        },
-        [DataStream.ICMP]: defaultICMPSimpleFields,
-      };
+    const {
+      enableTLS: isTLSEnabled,
+      fullConfig: fullDefaultConfig,
+      monitorTypeConfig: defaultConfig,
+      monitorType,
+      tlsConfig: defaultTLSConfig,
+    } = useMemo(() => {
       let enableTLS = false;
       const getDefaultConfig = () => {
+        // find the enabled input to identify the current monitor type
         const currentInput = currentPolicy.inputs.find((input) => input.enabled === true);
-        const vars = currentInput?.streams[0]?.vars;
-        const type: DataStream = vars?.[ConfigKeys.MONITOR_TYPE].value as DataStream;
-        const fallbackConfigForMonitorType = fallbackConfig[type] as Partial<ICustomFields>;
+        /* Inputs can have multiple data streams. This is true of the `synthetics/browser` input, which includes the browser.network and browser.screenshot
+         * data streams. The `browser.network` and `browser.screenshot` data streams are used to store metadata and mappings.
+         * However, the `browser` data stream is where the variables for the policy are stored. For this reason, we only want
+         * to grab the data stream that exists within our explicitly defined list, which is the browser data stream */
+        const vars = currentInput?.streams.find((stream) =>
+          Object.values(DataStream).includes(stream.data_stream.dataset as DataStream)
+        )?.vars;
 
-        const configKeys: ConfigKeys[] = Object.values(ConfigKeys);
-        const formatttedDefaultConfigForMonitorType = configKeys.reduce(
-          (acc: Record<string, unknown>, key: ConfigKeys) => {
-            const value = vars?.[key]?.value;
-            switch (key) {
-              case ConfigKeys.NAME:
-                acc[key] = currentPolicy.name;
-                break;
-              case ConfigKeys.SCHEDULE:
-                // split unit and number
-                if (value) {
-                  const fullString = JSON.parse(value);
-                  const fullSchedule = fullString.replace('@every ', '');
-                  const unit = fullSchedule.slice(-1);
-                  const number = fullSchedule.slice(0, fullSchedule.length - 1);
-                  acc[key] = {
-                    unit,
-                    number,
-                  };
-                } else {
-                  acc[key] = fallbackConfigForMonitorType[key];
-                }
-                break;
-              case ConfigKeys.TIMEOUT:
-              case ConfigKeys.WAIT:
-                acc[key] = value
-                  ? value.slice(0, value.length - 1)
-                  : fallbackConfigForMonitorType[key]; // remove unit
-                break;
-              case ConfigKeys.TAGS:
-              case ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE:
-              case ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE:
-              case ConfigKeys.RESPONSE_STATUS_CHECK:
-              case ConfigKeys.RESPONSE_HEADERS_CHECK:
-              case ConfigKeys.REQUEST_HEADERS_CHECK:
-                acc[key] = value ? JSON.parse(value) : fallbackConfigForMonitorType[key];
-                break;
-              case ConfigKeys.REQUEST_BODY_CHECK:
-                const headers = value
-                  ? JSON.parse(vars?.[ConfigKeys.REQUEST_HEADERS_CHECK].value)
-                  : fallbackConfigForMonitorType[ConfigKeys.REQUEST_HEADERS_CHECK];
-                const requestBodyValue =
-                  value !== null && value !== undefined
-                    ? JSON.parse(value)
-                    : fallbackConfigForMonitorType[key]?.value;
-                let requestBodyType = fallbackConfigForMonitorType[key]?.type;
-                Object.keys(headers || []).some((headerKey) => {
-                  if (
-                    headerKey === 'Content-Type' &&
-                    contentTypesToMode[headers[headerKey] as ContentType]
-                  ) {
-                    requestBodyType = contentTypesToMode[headers[headerKey] as ContentType];
-                    return true;
-                  }
-                });
-                acc[key] = {
-                  value: requestBodyValue,
-                  type: requestBodyType,
-                };
-                break;
-              case ConfigKeys.TLS_KEY_PASSPHRASE:
-              case ConfigKeys.TLS_VERIFICATION_MODE:
-                acc[key] = {
-                  value: value ?? fallbackConfigForMonitorType[key]?.value,
-                  isEnabled: !!value,
-                };
-                if (!!value) {
-                  enableTLS = true;
-                }
-                break;
-              case ConfigKeys.TLS_CERTIFICATE:
-              case ConfigKeys.TLS_CERTIFICATE_AUTHORITIES:
-              case ConfigKeys.TLS_KEY:
-              case ConfigKeys.TLS_VERSION:
-                acc[key] = {
-                  value: value ? JSON.parse(value) : fallbackConfigForMonitorType[key]?.value,
-                  isEnabled: !!value,
-                };
-                if (!!value) {
-                  enableTLS = true;
-                }
-                break;
-              default:
-                acc[key] = value ?? fallbackConfigForMonitorType[key];
-            }
-            return acc;
+        const type: DataStream = vars?.[ConfigKeys.MONITOR_TYPE].value as DataStream;
+
+        const configKeys: ConfigKeys[] = Object.values(ConfigKeys) || ([] as ConfigKeys[]);
+        const formattedDefaultConfigForMonitorType: ICustomFields = configKeys.reduce<ICustomFields>(
+          (acc: ICustomFields, key: ConfigKeys) => {
+            return {
+              ...acc,
+              [key]: normalizers[key]?.(vars),
+            };
           },
-          {}
+          {} as ICustomFields
         );
 
-        const formattedDefaultConfig: PolicyConfig = {
-          ...fallbackConfig,
-          [type]: formatttedDefaultConfigForMonitorType,
+        const tlsConfig: ITLSFields = {
+          [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]:
+            formattedDefaultConfigForMonitorType[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES],
+          [ConfigKeys.TLS_CERTIFICATE]:
+            formattedDefaultConfigForMonitorType[ConfigKeys.TLS_CERTIFICATE],
+          [ConfigKeys.TLS_KEY]: formattedDefaultConfigForMonitorType[ConfigKeys.TLS_KEY],
+          [ConfigKeys.TLS_KEY_PASSPHRASE]:
+            formattedDefaultConfigForMonitorType[ConfigKeys.TLS_KEY_PASSPHRASE],
+          [ConfigKeys.TLS_VERIFICATION_MODE]:
+            formattedDefaultConfigForMonitorType[ConfigKeys.TLS_VERIFICATION_MODE],
+          [ConfigKeys.TLS_VERSION]: formattedDefaultConfigForMonitorType[ConfigKeys.TLS_VERSION],
         };
 
-        return { config: formattedDefaultConfig, enableTLS, monitorType: type };
+        enableTLS = Object.values(tlsConfig).some((value) => value?.isEnabled);
+
+        const formattedDefaultConfig: Partial<PolicyConfig> = {
+          [type]: formattedDefaultConfigForMonitorType,
+        };
+
+        return {
+          fullConfig: formattedDefaultConfig,
+          monitorTypeConfig: formattedDefaultConfigForMonitorType,
+          tlsConfig,
+          enableTLS,
+          monitorType: type,
+        };
       };
 
       return getDefaultConfig();
@@ -159,18 +90,22 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
 
     return (
       <MonitorTypeContextProvider defaultValue={monitorType}>
-        <HTTPContextProvider defaultValues={defaultConfig[DataStream.HTTP]}>
-          <TCPContextProvider defaultValues={defaultConfig[DataStream.TCP]}>
-            <ICMPSimpleFieldsContextProvider defaultValues={defaultConfig[DataStream.ICMP]}>
-              <SyntheticsPolicyEditExtension
-                newPolicy={newPolicy}
-                onChange={onChange}
-                defaultConfig={defaultConfig}
-                isTLSEnabled={isTLSEnabled}
-              />
-            </ICMPSimpleFieldsContextProvider>
-          </TCPContextProvider>
-        </HTTPContextProvider>
+        <TLSFieldsContextProvider defaultValues={isTLSEnabled ? defaultTLSConfig : undefined}>
+          <HTTPContextProvider defaultValues={fullDefaultConfig?.[DataStream.HTTP]}>
+            <TCPContextProvider defaultValues={fullDefaultConfig?.[DataStream.TCP]}>
+              <ICMPSimpleFieldsContextProvider defaultValues={fullDefaultConfig?.[DataStream.ICMP]}>
+                <BrowserContextProvider defaultValues={fullDefaultConfig?.[DataStream.BROWSER]}>
+                  <SyntheticsPolicyEditExtension
+                    newPolicy={newPolicy}
+                    onChange={onChange}
+                    defaultConfig={defaultConfig}
+                    isTLSEnabled={isTLSEnabled}
+                  />
+                </BrowserContextProvider>
+              </ICMPSimpleFieldsContextProvider>
+            </TCPContextProvider>
+          </HTTPContextProvider>
+        </TLSFieldsContextProvider>
       </MonitorTypeContextProvider>
     );
   }
