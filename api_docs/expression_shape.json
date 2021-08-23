@@ -1915,7 +1915,22 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "start": {
+      "parentPluginId": "expressionShape",
+      "id": "def-server.ExpressionShapePluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "ExpressionShapePluginStart",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "src/plugins/expression_shape/server/plugin.ts",
+      "deprecated": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],

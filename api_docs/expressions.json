@@ -7575,6 +7575,10 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
+              },
+              {
+                "plugin": "visTypeXy",
+                "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
               }
             ]
           }
@@ -8976,7 +8980,7 @@
             "label": "label",
             "description": [],
             "signature": [
-              "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\""
+              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
             ],
             "path": "src/plugins/expressions/common/fonts.ts",
             "deprecated": false
@@ -8989,7 +8993,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "\"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"'Open Sans', Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+              "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
             ],
             "path": "src/plugins/expressions/common/fonts.ts",
             "deprecated": false
@@ -10639,7 +10643,7 @@
           "\nThis type contains a unions of all supported font labels, or the the name of\nthe font the user would see in a UI."
         ],
         "signature": [
-          "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\""
+          "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -10655,7 +10659,7 @@
           "\nThis type contains a union of all supported font values, equivalent to the CSS\n`font-value` property."
         ],
         "signature": [
-          "\"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"'Open Sans', Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+          "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -17219,6 +17223,10 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
+              },
+              {
+                "plugin": "visTypeXy",
+                "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
               }
             ]
           }
@@ -18160,7 +18168,7 @@
             "label": "label",
             "description": [],
             "signature": [
-              "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\""
+              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
             ],
             "path": "src/plugins/expressions/common/fonts.ts",
             "deprecated": false
@@ -18173,7 +18181,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "\"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"'Open Sans', Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+              "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
             ],
             "path": "src/plugins/expressions/common/fonts.ts",
             "deprecated": false
@@ -19237,7 +19245,7 @@
           "\nThis type contains a unions of all supported font labels, or the the name of\nthe font the user would see in a UI."
         ],
         "signature": [
-          "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\""
+          "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -19253,7 +19261,7 @@
           "\nThis type contains a union of all supported font values, equivalent to the CSS\n`font-value` property."
         ],
         "signature": [
-          "\"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"'Open Sans', Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+          "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -26109,7 +26117,7 @@
             "label": "fontFamily",
             "description": [],
             "signature": [
-              "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\" | undefined"
+              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\" | undefined"
             ],
             "path": "src/plugins/expressions/common/types/style.ts",
             "deprecated": false
@@ -28659,6 +28667,10 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
+              },
+              {
+                "plugin": "visTypeXy",
+                "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
               }
             ]
           }
@@ -30028,7 +30040,7 @@
             "label": "label",
             "description": [],
             "signature": [
-              "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\""
+              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
             ],
             "path": "src/plugins/expressions/common/fonts.ts",
             "deprecated": false
@@ -30041,7 +30053,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "\"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"'Open Sans', Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+              "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
             ],
             "path": "src/plugins/expressions/common/fonts.ts",
             "deprecated": false
@@ -32143,7 +32155,7 @@
           "\nThis type contains a unions of all supported font labels, or the the name of\nthe font the user would see in a UI."
         ],
         "signature": [
-          "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\""
+          "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -32159,7 +32171,7 @@
           "\nA collection of supported fonts."
         ],
         "signature": [
-          "({ label: \"American Typewriter\"; value: \"'American Typewriter', 'Courier New', Courier, Monaco, mono\"; } | { label: \"Arial\"; value: \"Arial, sans-serif\"; } | { label: \"Baskerville\"; value: \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Book Antiqua\"; value: \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Brush Script\"; value: \"'Brush Script MT', 'Comic Sans', sans-serif\"; } | { label: \"Chalkboard\"; value: \"Chalkboard, 'Comic Sans', sans-serif\"; } | { label: \"Didot\"; value: \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Futura\"; value: \"Futura, Impact, Helvetica, Arial, sans-serif\"; } | { label: \"Gill Sans\"; value: \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Helvetica Neue\"; value: \"'Helvetica Neue', Helvetica, Arial, sans-serif\"; } | { label: \"Hoefler Text\"; value: \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\"; } | { label: \"Lucida Grande\"; value: \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Myriad\"; value: \"Myriad, Helvetica, Arial, sans-serif\"; } | { label: \"Open Sans\"; value: \"'Open Sans', Helvetica, Arial, sans-serif\"; } | { label: \"Optima\"; value: \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Palatino\"; value: \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\"; })[]"
+          "({ label: \"Open Sans\"; value: \"'Open Sans', Helvetica, Arial, sans-serif\"; } | { label: \"American Typewriter\"; value: \"'American Typewriter', 'Courier New', Courier, Monaco, mono\"; } | { label: \"Arial\"; value: \"Arial, sans-serif\"; } | { label: \"Baskerville\"; value: \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Book Antiqua\"; value: \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Brush Script\"; value: \"'Brush Script MT', 'Comic Sans', sans-serif\"; } | { label: \"Chalkboard\"; value: \"Chalkboard, 'Comic Sans', sans-serif\"; } | { label: \"Didot\"; value: \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Futura\"; value: \"Futura, Impact, Helvetica, Arial, sans-serif\"; } | { label: \"Gill Sans\"; value: \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Helvetica Neue\"; value: \"'Helvetica Neue', Helvetica, Arial, sans-serif\"; } | { label: \"Hoefler Text\"; value: \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\"; } | { label: \"Lucida Grande\"; value: \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Myriad\"; value: \"Myriad, Helvetica, Arial, sans-serif\"; } | { label: \"Optima\"; value: \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Palatino\"; value: \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\"; })[]"
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -32175,7 +32187,7 @@
           "\nThis type contains a union of all supported font values, equivalent to the CSS\n`font-value` property."
         ],
         "signature": [
-          "\"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"'Open Sans', Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+          "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -32466,6 +32478,22 @@
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/target/types/canvas_plugin_src/functions/browser/markdown.d.ts"
+          },
+          {
+            "plugin": "visTypePie",
+            "path": "src/plugins/vis_types/pie/public/pie_fn.ts"
+          },
+          {
+            "plugin": "visTypePie",
+            "path": "src/plugins/vis_types/pie/public/pie_fn.ts"
+          },
+          {
+            "plugin": "visTypeXy",
+            "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
+          },
+          {
+            "plugin": "visTypeXy",
+            "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
           }
         ],
         "initialIsOpen": false

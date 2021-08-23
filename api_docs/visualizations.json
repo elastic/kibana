@@ -5046,8 +5046,49 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-server.VISUALIZE_ENABLE_LABS_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "VISUALIZE_ENABLE_LABS_SETTING",
+        "description": [],
+        "signature": [
+          "\"visualize:enableLabs\""
+        ],
+        "path": "src/plugins/visualizations/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "visualizations",
+      "id": "def-server.VisualizationsPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "VisualizationsPluginSetup",
+      "description": [],
+      "path": "src/plugins/visualizations/server/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "visualizations",
+      "id": "def-server.VisualizationsPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "VisualizationsPluginStart",
+      "description": [],
+      "path": "src/plugins/visualizations/server/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],

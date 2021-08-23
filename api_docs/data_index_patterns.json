@@ -1108,7 +1108,16 @@
             "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
             "deprecated": true,
             "removeBy": "8.1",
-            "references": [],
+            "references": [
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/scripted_fields_table/scripted_fields_table.tsx"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/field_editor/field_editor.tsx"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "data",
@@ -1172,6 +1181,26 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_type_timeseries/public/application/lib/fetch_fields.ts"
               }
             ],
             "children": [],
@@ -1202,7 +1231,12 @@
             "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
             "deprecated": true,
             "removeBy": "8.1",
-            "references": [],
+            "references": [
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/scripted_fields_table/scripted_fields_table.tsx"
+              }
+            ],
             "children": [],
             "returnComment": []
           },
@@ -5080,6 +5114,22 @@
             "path": "x-pack/plugins/infra/target/types/public/pages/metrics/inventory_view/components/waffle/metric_control/index.d.ts"
           },
           {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/utils.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/utils.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/target/types/public/components/utils.d.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/target/types/public/components/utils.d.ts"
+          },
+          {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts"
           },
@@ -5130,6 +5180,14 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/target/types/public/indexpattern_datasource/types.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
           },
           {
             "plugin": "stackAlerts",
@@ -6030,6 +6088,38 @@
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/target/types/public/application/jobs/new_job/common/index_pattern_context.d.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/indexed_fields_table/components/table/table.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/indexed_fields_table/components/table/table.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/scripted_fields_table/components/table/table.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/scripted_fields_table/components/table/table.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/index_header/index_header.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/index_header/index_header.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/target/types/public/components/edit_index_pattern/index_header/index_header.d.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/target/types/public/components/edit_index_pattern/index_header/index_header.d.ts"
           },
           {
             "plugin": "ml",

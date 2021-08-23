@@ -4282,7 +4282,7 @@
         "label": "ActionType",
         "description": [],
         "signature": [
-          "\"append\" | \"nothing\" | \"overwrite\""
+          "\"append\" | \"overwrite\" | \"nothing\""
         ],
         "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
         "deprecated": false,
@@ -5431,7 +5431,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { mappings: { action_type: \"append\" | \"nothing\" | \"overwrite\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]; owner: string; } & { id: string; version: string; error: string | null; owner: string; })[]"
+          ".swimlane; fields: { caseId: string | null; } | null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { mappings: { action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]; owner: string; } & { id: string; version: string; error: string | null; owner: string; })[]"
         ],
         "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
@@ -5741,7 +5741,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { mappings: { action_type: \"append\" | \"nothing\" | \"overwrite\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]; owner: string; } & { id: string; version: string; error: string | null; owner: string; }"
+          ".swimlane; fields: { caseId: string | null; } | null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { mappings: { action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]; owner: string; } & { id: string; version: string; error: string | null; owner: string; }"
         ],
         "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
         "deprecated": false,
@@ -7089,7 +7089,7 @@
         "label": "ConnectorMappings",
         "description": [],
         "signature": [
-          "{ mappings: { action_type: \"append\" | \"nothing\" | \"overwrite\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]; owner: string; }"
+          "{ mappings: { action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]; owner: string; }"
         ],
         "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
         "deprecated": false,
@@ -7103,7 +7103,7 @@
         "label": "ConnectorMappingsAttributes",
         "description": [],
         "signature": [
-          "{ action_type: \"append\" | \"nothing\" | \"overwrite\"; source: \"description\" | \"title\" | \"comments\"; target: string; }"
+          "{ action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }"
         ],
         "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
         "deprecated": false,
@@ -7399,7 +7399,7 @@
         "label": "GetDefaultMappingsResponse",
         "description": [],
         "signature": [
-          "{ action_type: \"append\" | \"nothing\" | \"overwrite\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]"
+          "{ action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]"
         ],
         "path": "x-pack/plugins/cases/common/api/connectors/mappings.ts",
         "deprecated": false,

@@ -750,7 +750,24 @@
         ],
         "path": "src/core/public/plugins/plugin.ts",
         "deprecated": true,
-        "references": [],
+        "references": [
+          {
+            "plugin": "visTypeTable",
+            "path": "src/plugins/vis_type_table/public/plugin.ts"
+          },
+          {
+            "plugin": "visTypeTable",
+            "path": "src/plugins/vis_type_table/public/plugin.ts"
+          },
+          {
+            "plugin": "visTypeTable",
+            "path": "src/plugins/vis_type_table/target/types/public/plugin.d.ts"
+          },
+          {
+            "plugin": "visTypeTable",
+            "path": "src/plugins/vis_type_table/target/types/public/plugin.d.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "core",
@@ -1105,7 +1122,12 @@
             ],
             "path": "src/core/public/index.ts",
             "deprecated": true,
-            "references": []
+            "references": [
+              {
+                "plugin": "visTypeVega",
+                "path": "src/plugins/vis_type_vega/public/plugin.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "core",
@@ -1398,6 +1420,18 @@
               {
                 "plugin": "monitoring",
                 "path": "x-pack/plugins/monitoring/public/legacy_shims.ts"
+              },
+              {
+                "plugin": "visTypeVega",
+                "path": "src/plugins/vis_type_vega/public/data_model/search_api.ts"
+              },
+              {
+                "plugin": "visTypeVega",
+                "path": "src/plugins/vis_type_vega/public/plugin.ts"
+              },
+              {
+                "plugin": "visTypeVega",
+                "path": "src/plugins/vis_type_vega/target/types/public/data_model/search_api.d.ts"
               }
             ]
           }
@@ -5631,6 +5665,10 @@
               {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/components/copy_to_space_flyout_internal.tsx"
+              },
+              {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/lib/resolve_import_errors.ts"
               }
             ]
           },
@@ -6103,6 +6141,14 @@
               {
                 "plugin": "advancedSettings",
                 "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/server/ui_settings.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/server/ui_settings.ts"
               }
             ]
           }
@@ -6631,7 +6677,7 @@
           "\nThe namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive:\n * single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace.\n * multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces.\n * multiple-isolated: This type of saved object is namespace-isolated, e.g., it exists in only one namespace, but object IDs must be\n   unique across all namespaces. This is intended to be an intermediate step when objects with a \"single\" namespace type are being\n   converted to a \"multiple\" namespace type. In other words, objects with a \"multiple-isolated\" namespace type will be *share-capable*,\n   but will not actually be shareable until the namespace type is changed to \"multiple\".\n * agnostic: This type of saved object is global.\n"
         ],
         "signature": [
-          "\"multiple\" | \"agnostic\" | \"single\" | \"multiple-isolated\""
+          "\"multiple\" | \"single\" | \"multiple-isolated\" | \"agnostic\""
         ],
         "path": "src/core/server/saved_objects/types.ts",
         "deprecated": false,
@@ -9611,7 +9657,12 @@
             ],
             "path": "src/core/server/elasticsearch/types.ts",
             "deprecated": true,
-            "references": []
+            "references": [
+              {
+                "plugin": "console",
+                "path": "src/plugins/console/server/plugin.ts"
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -15781,6 +15832,14 @@
               {
                 "plugin": "advancedSettings",
                 "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/server/ui_settings.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/server/ui_settings.ts"
               }
             ]
           }

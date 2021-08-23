@@ -639,6 +639,22 @@
               {
                 "plugin": "visualizations",
                 "path": "src/plugins/visualizations/public/vis.ts"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/plugins/vis_default_editor/public/components/sidebar/state/reducers.ts"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/plugins/vis_default_editor/public/components/sidebar/state/reducers.ts"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/plugins/vis_default_editor/public/components/sidebar/state/reducers.ts"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/plugins/vis_default_editor/public/components/sidebar/sidebar.tsx"
               }
             ],
             "children": [],
@@ -3246,7 +3262,16 @@
             "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
             "deprecated": true,
             "removeBy": "8.1",
-            "references": [],
+            "references": [
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/scripted_fields_table/scripted_fields_table.tsx"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/field_editor/field_editor.tsx"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "data",
@@ -3310,6 +3335,26 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_type_timeseries/public/application/lib/fetch_fields.ts"
               }
             ],
             "children": [],
@@ -3340,7 +3385,12 @@
             "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
             "deprecated": true,
             "removeBy": "8.1",
-            "references": [],
+            "references": [
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/scripted_fields_table/scripted_fields_table.tsx"
+              }
+            ],
             "children": [],
             "returnComment": []
           },
@@ -6509,6 +6559,14 @@
               {
                 "plugin": "maps",
                 "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "inputControlVis",
+                "path": "src/plugins/input_control_vis/public/control/list_control_factory.ts"
+              },
+              {
+                "plugin": "inputControlVis",
+                "path": "src/plugins/input_control_vis/public/control/range_control_factory.ts"
               }
             ],
             "children": [
@@ -6724,6 +6782,14 @@
           {
             "plugin": "indexPatternFieldEditor",
             "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/field_format_editor.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts"
           }
         ],
         "returnComment": [],
@@ -6910,7 +6976,16 @@
         "path": "src/plugins/data/common/kbn_field_types/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [],
+        "references": [
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/field_editor/constants/index.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/field_editor/constants/index.ts"
+          }
+        ],
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -11051,6 +11126,22 @@
             "path": "x-pack/plugins/infra/target/types/public/pages/metrics/inventory_view/components/waffle/metric_control/index.d.ts"
           },
           {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/utils.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/utils.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/target/types/public/components/utils.d.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/target/types/public/components/utils.d.ts"
+          },
+          {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts"
           },
@@ -11101,6 +11192,14 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/target/types/public/indexpattern_datasource/types.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
           },
           {
             "plugin": "stackAlerts",
@@ -12001,6 +12100,38 @@
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/target/types/public/application/jobs/new_job/common/index_pattern_context.d.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/indexed_fields_table/components/table/table.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/indexed_fields_table/components/table/table.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/scripted_fields_table/components/table/table.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/scripted_fields_table/components/table/table.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/index_header/index_header.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/index_header/index_header.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/target/types/public/components/edit_index_pattern/index_header/index_header.d.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/target/types/public/components/edit_index_pattern/index_header/index_header.d.ts"
           },
           {
             "plugin": "ml",
@@ -15990,6 +16121,222 @@
             "path": "x-pack/plugins/maps/target/types/public/connected_components/mb_map/tooltip_control/features_tooltip/features_tooltip.d.ts"
           },
           {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/url_generator.test.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/url_generator.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/control.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/control.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/vis_controller.tsx"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/vis_controller.tsx"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/helpers/timelion_request_handler.ts"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/helpers/timelion_request_handler.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/utils.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/utils.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/use/use_linked_search_updates.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/use/use_linked_search_updates.ts"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/timelion_vis_fn.ts"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/timelion_vis_fn.ts"
+          },
+          {
+            "plugin": "visTypeVega",
+            "path": "src/plugins/vis_type_vega/public/vega_request_handler.ts"
+          },
+          {
+            "plugin": "visTypeVega",
+            "path": "src/plugins/vis_type_vega/public/vega_request_handler.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.test.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.test.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/angular/context_state.test.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/angular/context_state.test.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/angular/context_state.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/target/types/server/saved_objects/move_filters_to_query.d.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/target/types/server/saved_objects/move_filters_to_query.d.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/target/types/server/saved_objects/move_filters_to_query.d.ts"
+          },
+          {
+            "plugin": "presentationUtil",
+            "path": "src/plugins/presentation_util/public/components/input_controls/embeddable/types.ts"
+          },
+          {
+            "plugin": "presentationUtil",
+            "path": "src/plugins/presentation_util/public/components/input_controls/embeddable/types.ts"
+          },
+          {
+            "plugin": "presentationUtil",
+            "path": "src/plugins/presentation_util/public/components/input_controls/embeddable/types.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/application/angular/context/api/context.d.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/application/angular/context/api/context.d.ts"
+          },
+          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/detection_engine/types.ts"
           },
@@ -17256,7 +17603,40 @@
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [],
+        "references": [
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/create_search_source.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/create_search_source.ts"
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -17324,6 +17704,34 @@
           {
             "plugin": "discoverEnhanced",
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
           }
         ],
         "initialIsOpen": false
@@ -17346,7 +17754,20 @@
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [],
+        "references": [
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -17364,7 +17785,44 @@
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [],
+        "references": [
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/components/timelion_vis_component.tsx"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/components/timelion_vis_component.tsx"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/timelion_vis_renderer.tsx"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/timelion_vis_renderer.tsx"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/legacy/timelion_vis_component.tsx"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/legacy/timelion_vis_component.tsx"
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -17890,6 +18348,114 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/all/__mocks__/mock.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/locator.test.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/locator.test.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/url_generator.test.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/url_generator.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/use/use_visualize_app_state.tsx"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/use/use_visualize_app_state.tsx"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/plugin.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/plugin.ts"
+          },
+          {
+            "plugin": "timelion",
+            "path": "src/plugins/timelion/public/plugin.ts"
+          },
+          {
+            "plugin": "timelion",
+            "path": "src/plugins/timelion/public/plugin.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.test.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.test.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.test.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/application/listing/get_dashboard_list_item_link.test.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/application/listing/get_dashboard_list_item_link.test.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/get_visualize_list_item_link.test.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/get_visualize_list_item_link.test.ts"
+          },
+          {
+            "plugin": "presentationUtil",
+            "path": "src/plugins/presentation_util/public/components/input_controls/control_types/options_list/options_list_embeddable.tsx"
+          },
+          {
+            "plugin": "presentationUtil",
+            "path": "src/plugins/presentation_util/public/components/input_controls/control_types/options_list/options_list_embeddable.tsx"
           }
         ],
         "children": [
@@ -20030,6 +20596,42 @@
           {
             "plugin": "transform",
             "path": "x-pack/plugins/transform/public/app/hooks/use_search_items/common.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/field_editor/components/scripting_help/test_script.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/field_editor/components/scripting_help/test_script.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/field_editor/components/scripting_help/test_script.tsx"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/helpers/timelion_request_handler.ts"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/helpers/timelion_request_handler.ts"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/helpers/timelion_request_handler.ts"
+          },
+          {
+            "plugin": "visTypeVega",
+            "path": "src/plugins/vis_type_vega/public/vega_request_handler.ts"
+          },
+          {
+            "plugin": "visTypeVega",
+            "path": "src/plugins/vis_type_vega/public/vega_request_handler.ts"
+          },
+          {
+            "plugin": "visTypeVega",
+            "path": "src/plugins/vis_type_vega/public/vega_request_handler.ts"
           }
         ],
         "children": [
@@ -22108,6 +22710,118 @@
             {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/target/types/public/application/util/dependency_cache.d.ts"
+            },
+            {
+              "plugin": "indexPatternManagement",
+              "path": "src/plugins/index_pattern_management/public/components/field_editor/field_editor.tsx"
+            },
+            {
+              "plugin": "indexPatternManagement",
+              "path": "src/plugins/index_pattern_management/public/components/field_editor/field_editor.tsx"
+            },
+            {
+              "plugin": "indexPatternManagement",
+              "path": "src/plugins/index_pattern_management/public/components/field_editor/field_editor.tsx"
+            },
+            {
+              "plugin": "indexPatternManagement",
+              "path": "src/plugins/index_pattern_management/public/components/field_editor/field_editor.tsx"
+            },
+            {
+              "plugin": "indexPatternManagement",
+              "path": "src/plugins/index_pattern_management/public/components/field_editor/field_editor.tsx"
+            },
+            {
+              "plugin": "indexPatternManagement",
+              "path": "src/plugins/index_pattern_management/public/components/field_editor/field_editor.tsx"
+            },
+            {
+              "plugin": "visTypeMetric",
+              "path": "src/plugins/vis_type_metric/public/plugin.ts"
+            },
+            {
+              "plugin": "visTypeTable",
+              "path": "src/plugins/vis_type_table/public/plugin.ts"
+            },
+            {
+              "plugin": "visTypeTimeseries",
+              "path": "src/plugins/vis_type_timeseries/public/plugin.ts"
+            },
+            {
+              "plugin": "visTypePie",
+              "path": "src/plugins/vis_types/pie/public/pie_component.tsx"
+            },
+            {
+              "plugin": "visTypePie",
+              "path": "src/plugins/vis_types/pie/public/pie_component.tsx"
+            },
+            {
+              "plugin": "visTypePie",
+              "path": "src/plugins/vis_types/pie/public/pie_component.tsx"
+            },
+            {
+              "plugin": "visTypePie",
+              "path": "src/plugins/vis_types/pie/public/pie_component.tsx"
+            },
+            {
+              "plugin": "visTypePie",
+              "path": "src/plugins/vis_types/pie/public/pie_component.tsx"
+            },
+            {
+              "plugin": "visTypePie",
+              "path": "src/plugins/vis_types/pie/public/pie_component.tsx"
+            },
+            {
+              "plugin": "visTypePie",
+              "path": "src/plugins/vis_types/pie/public/pie_component.tsx"
+            },
+            {
+              "plugin": "visTypePie",
+              "path": "src/plugins/vis_types/pie/public/pie_component.tsx"
+            },
+            {
+              "plugin": "visTypePie",
+              "path": "src/plugins/vis_types/pie/public/pie_component.tsx"
+            },
+            {
+              "plugin": "visTypeXy",
+              "path": "src/plugins/vis_types/xy/public/plugin.ts"
+            },
+            {
+              "plugin": "visTypeVislib",
+              "path": "src/plugins/vis_types/vislib/public/plugin.ts"
+            },
+            {
+              "plugin": "indexPatternFieldEditor",
+              "path": "src/plugins/index_pattern_field_editor/target/types/public/components/field_format_editor/field_format_editor.d.ts"
+            },
+            {
+              "plugin": "visTypePie",
+              "path": "src/plugins/vis_types/pie/public/utils/get_layers.test.ts"
+            },
+            {
+              "plugin": "indexPatternFieldEditor",
+              "path": "src/plugins/index_pattern_field_editor/__jest__/client_integration/helpers/setup_environment.tsx"
+            },
+            {
+              "plugin": "visTypePie",
+              "path": "src/plugins/vis_types/pie/public/utils/get_layers.test.ts"
+            },
+            {
+              "plugin": "visTypePie",
+              "path": "src/plugins/vis_types/pie/public/utils/get_layers.test.ts"
+            },
+            {
+              "plugin": "visTypePie",
+              "path": "src/plugins/vis_types/pie/public/utils/get_layers.test.ts"
+            },
+            {
+              "plugin": "visTypePie",
+              "path": "src/plugins/vis_types/pie/public/utils/get_layers.test.ts"
+            },
+            {
+              "plugin": "visTypePie",
+              "path": "src/plugins/vis_types/pie/public/utils/get_layers.test.ts"
             }
           ]
         },
@@ -23108,7 +23822,16 @@
             "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
             "deprecated": true,
             "removeBy": "8.1",
-            "references": [],
+            "references": [
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/scripted_fields_table/scripted_fields_table.tsx"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/field_editor/field_editor.tsx"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "data",
@@ -23172,6 +23895,26 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_type_timeseries/public/application/lib/fetch_fields.ts"
               }
             ],
             "children": [],
@@ -23202,7 +23945,12 @@
             "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
             "deprecated": true,
             "removeBy": "8.1",
-            "references": [],
+            "references": [
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/scripted_fields_table/scripted_fields_table.tsx"
+              }
+            ],
             "children": [],
             "returnComment": []
           },
@@ -26699,6 +27447,14 @@
           {
             "plugin": "indexPatternFieldEditor",
             "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/field_format_editor.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts"
           }
         ],
         "returnComment": [],
@@ -27676,6 +28432,22 @@
             "path": "x-pack/plugins/infra/target/types/public/pages/metrics/inventory_view/components/waffle/metric_control/index.d.ts"
           },
           {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/utils.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/utils.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/target/types/public/components/utils.d.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/target/types/public/components/utils.d.ts"
+          },
+          {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts"
           },
@@ -27726,6 +28498,14 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/target/types/public/indexpattern_datasource/types.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
           },
           {
             "plugin": "stackAlerts",
@@ -29931,6 +30711,222 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/target/types/public/connected_components/mb_map/tooltip_control/features_tooltip/features_tooltip.d.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/url_generator.test.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/url_generator.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/control.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/control.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/vis_controller.tsx"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/vis_controller.tsx"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/helpers/timelion_request_handler.ts"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/helpers/timelion_request_handler.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/utils.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/utils.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/use/use_linked_search_updates.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/use/use_linked_search_updates.ts"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/timelion_vis_fn.ts"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/timelion_vis_fn.ts"
+          },
+          {
+            "plugin": "visTypeVega",
+            "path": "src/plugins/vis_type_vega/public/vega_request_handler.ts"
+          },
+          {
+            "plugin": "visTypeVega",
+            "path": "src/plugins/vis_type_vega/public/vega_request_handler.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.test.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.test.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/angular/context_state.test.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/angular/context_state.test.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/angular/context_state.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/target/types/server/saved_objects/move_filters_to_query.d.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/target/types/server/saved_objects/move_filters_to_query.d.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/target/types/server/saved_objects/move_filters_to_query.d.ts"
+          },
+          {
+            "plugin": "presentationUtil",
+            "path": "src/plugins/presentation_util/public/components/input_controls/embeddable/types.ts"
+          },
+          {
+            "plugin": "presentationUtil",
+            "path": "src/plugins/presentation_util/public/components/input_controls/embeddable/types.ts"
+          },
+          {
+            "plugin": "presentationUtil",
+            "path": "src/plugins/presentation_util/public/components/input_controls/embeddable/types.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/application/angular/context/api/context.d.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/application/angular/context/api/context.d.ts"
           },
           {
             "plugin": "securitySolution",
@@ -32712,6 +33708,14 @@
           {
             "plugin": "indexPatternFieldEditor",
             "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/field_format_editor.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts"
           }
         ],
         "returnComment": [],
@@ -33314,7 +34318,16 @@
         "path": "src/plugins/data/common/kbn_field_types/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [],
+        "references": [
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/field_editor/constants/index.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/field_editor/constants/index.ts"
+          }
+        ],
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -36371,6 +37384,222 @@
             "path": "x-pack/plugins/maps/target/types/public/connected_components/mb_map/tooltip_control/features_tooltip/features_tooltip.d.ts"
           },
           {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/url_generator.test.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/url_generator.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/control.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/control.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/vis_controller.tsx"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/vis_controller.tsx"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/helpers/timelion_request_handler.ts"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/helpers/timelion_request_handler.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/utils.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/utils.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/use/use_linked_search_updates.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/use/use_linked_search_updates.ts"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/timelion_vis_fn.ts"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/timelion_vis_fn.ts"
+          },
+          {
+            "plugin": "visTypeVega",
+            "path": "src/plugins/vis_type_vega/public/vega_request_handler.ts"
+          },
+          {
+            "plugin": "visTypeVega",
+            "path": "src/plugins/vis_type_vega/public/vega_request_handler.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.test.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.test.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/angular/context_state.test.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/angular/context_state.test.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/angular/context_state.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/target/types/server/saved_objects/move_filters_to_query.d.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/target/types/server/saved_objects/move_filters_to_query.d.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/target/types/server/saved_objects/move_filters_to_query.d.ts"
+          },
+          {
+            "plugin": "presentationUtil",
+            "path": "src/plugins/presentation_util/public/components/input_controls/embeddable/types.ts"
+          },
+          {
+            "plugin": "presentationUtil",
+            "path": "src/plugins/presentation_util/public/components/input_controls/embeddable/types.ts"
+          },
+          {
+            "plugin": "presentationUtil",
+            "path": "src/plugins/presentation_util/public/components/input_controls/embeddable/types.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/application/angular/context/api/context.d.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/application/angular/context/api/context.d.ts"
+          },
+          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/detection_engine/types.ts"
           },
@@ -37045,7 +38274,40 @@
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [],
+        "references": [
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/create_search_source.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/create_search_source.ts"
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -37113,6 +38375,34 @@
           {
             "plugin": "discoverEnhanced",
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
           }
         ],
         "initialIsOpen": false
@@ -37135,7 +38425,20 @@
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [],
+        "references": [
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -37153,7 +38456,44 @@
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [],
+        "references": [
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/components/timelion_vis_component.tsx"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/components/timelion_vis_component.tsx"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/timelion_vis_renderer.tsx"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/timelion_vis_renderer.tsx"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/legacy/timelion_vis_component.tsx"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_type_timelion/public/legacy/timelion_vis_component.tsx"
+          }
+        ],
         "initialIsOpen": false
       },
       {

@@ -2631,9 +2631,316 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "charts",
+        "id": "def-server.CustomPaletteArguments",
+        "type": "Interface",
+        "tags": [],
+        "label": "CustomPaletteArguments",
+        "description": [],
+        "path": "src/plugins/charts/common/palette.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "charts",
+            "id": "def-server.CustomPaletteArguments.color",
+            "type": "Array",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/charts/common/palette.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-server.CustomPaletteArguments.gradient",
+            "type": "boolean",
+            "tags": [],
+            "label": "gradient",
+            "description": [],
+            "path": "src/plugins/charts/common/palette.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-server.CustomPaletteArguments.reverse",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "reverse",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/charts/common/palette.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-server.CustomPaletteArguments.stop",
+            "type": "Array",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "src/plugins/charts/common/palette.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-server.CustomPaletteArguments.range",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "range",
+            "description": [],
+            "signature": [
+              "\"number\" | \"percent\" | undefined"
+            ],
+            "path": "src/plugins/charts/common/palette.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-server.CustomPaletteArguments.rangeMin",
+            "type": "number",
+            "tags": [],
+            "label": "rangeMin",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/charts/common/palette.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-server.CustomPaletteArguments.rangeMax",
+            "type": "number",
+            "tags": [],
+            "label": "rangeMax",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/charts/common/palette.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-server.CustomPaletteArguments.continuity",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "continuity",
+            "description": [],
+            "signature": [
+              "\"above\" | \"below\" | \"all\" | \"none\" | undefined"
+            ],
+            "path": "src/plugins/charts/common/palette.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "charts",
+        "id": "def-server.CustomPaletteState",
+        "type": "Interface",
+        "tags": [],
+        "label": "CustomPaletteState",
+        "description": [],
+        "path": "src/plugins/charts/common/palette.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "charts",
+            "id": "def-server.CustomPaletteState.colors",
+            "type": "Array",
+            "tags": [],
+            "label": "colors",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/charts/common/palette.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-server.CustomPaletteState.gradient",
+            "type": "boolean",
+            "tags": [],
+            "label": "gradient",
+            "description": [],
+            "path": "src/plugins/charts/common/palette.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-server.CustomPaletteState.stops",
+            "type": "Array",
+            "tags": [],
+            "label": "stops",
+            "description": [],
+            "signature": [
+              "number[]"
+            ],
+            "path": "src/plugins/charts/common/palette.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-server.CustomPaletteState.range",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "range",
+            "description": [],
+            "signature": [
+              "\"number\" | \"percent\""
+            ],
+            "path": "src/plugins/charts/common/palette.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-server.CustomPaletteState.rangeMin",
+            "type": "number",
+            "tags": [],
+            "label": "rangeMin",
+            "description": [],
+            "path": "src/plugins/charts/common/palette.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-server.CustomPaletteState.rangeMax",
+            "type": "number",
+            "tags": [],
+            "label": "rangeMax",
+            "description": [],
+            "path": "src/plugins/charts/common/palette.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-server.CustomPaletteState.continuity",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "continuity",
+            "description": [],
+            "signature": [
+              "\"above\" | \"below\" | \"all\" | \"none\" | undefined"
+            ],
+            "path": "src/plugins/charts/common/palette.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "charts",
+        "id": "def-server.PaletteOutput",
+        "type": "Interface",
+        "tags": [],
+        "label": "PaletteOutput",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "charts",
+            "scope": "common",
+            "docId": "kibChartsPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
+          "<T>"
+        ],
+        "path": "src/plugins/charts/common/palette.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "charts",
+            "id": "def-server.PaletteOutput.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"palette\""
+            ],
+            "path": "src/plugins/charts/common/palette.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-server.PaletteOutput.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/plugins/charts/common/palette.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-server.PaletteOutput.params",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "src/plugins/charts/common/palette.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "charts",
+        "id": "def-server.SystemPaletteArguments",
+        "type": "Interface",
+        "tags": [],
+        "label": "SystemPaletteArguments",
+        "description": [],
+        "path": "src/plugins/charts/common/palette.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "charts",
+            "id": "def-server.SystemPaletteArguments.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/plugins/charts/common/palette.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "charts",
+        "id": "def-server.paletteIds",
+        "type": "Array",
+        "tags": [],
+        "label": "paletteIds",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/plugins/charts/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "common": {

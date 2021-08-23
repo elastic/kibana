@@ -940,7 +940,36 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "telemetryCollectionManager",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"telemetryCollectionManager\""
+        ],
+        "path": "src/plugins/telemetry_collection_manager/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "telemetryCollectionManager",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"telemetry_collection_manager\""
+        ],
+        "path": "src/plugins/telemetry_collection_manager/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

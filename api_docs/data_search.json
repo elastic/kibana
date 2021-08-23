@@ -2960,6 +2960,22 @@
               {
                 "plugin": "visualizations",
                 "path": "src/plugins/visualizations/public/vis.ts"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/plugins/vis_default_editor/public/components/sidebar/state/reducers.ts"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/plugins/vis_default_editor/public/components/sidebar/state/reducers.ts"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/plugins/vis_default_editor/public/components/sidebar/state/reducers.ts"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/plugins/vis_default_editor/public/components/sidebar/sidebar.tsx"
               }
             ],
             "children": [],
@@ -8047,6 +8063,14 @@
               {
                 "plugin": "maps",
                 "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "inputControlVis",
+                "path": "src/plugins/input_control_vis/public/control/list_control_factory.ts"
+              },
+              {
+                "plugin": "inputControlVis",
+                "path": "src/plugins/input_control_vis/public/control/range_control_factory.ts"
               }
             ],
             "children": [

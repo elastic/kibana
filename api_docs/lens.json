@@ -1007,7 +1007,7 @@
             "label": "shape",
             "description": [],
             "signature": [
-              "\"donut\" | \"pie\" | \"treemap\""
+              "\"pie\" | \"donut\" | \"treemap\""
             ],
             "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
             "deprecated": false
@@ -1500,7 +1500,7 @@
             "label": "fittingFunction",
             "description": [],
             "signature": [
-              "\"None\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | undefined"
+              "\"None\" | \"Linear\" | \"Zero\" | \"Carry\" | \"Lookahead\" | undefined"
             ],
             "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
             "deprecated": false
