@@ -79,14 +79,13 @@ export async function mountApp({
     urlForwarding,
     data: dataStart,
     share: shareStart,
+    spaces: spacesApi,
     embeddable: embeddableStart,
-    kibanaLegacy: { dashboardConfig },
     savedObjectsTaggingOss,
     visualizations,
     presentationUtil,
   } = pluginsStart;
 
-  const spacesApi = pluginsStart.spacesOss?.isSpacesAvailable ? pluginsStart.spacesOss : undefined;
   const activeSpaceId =
     spacesApi && (await spacesApi.getActiveSpace$().pipe(first()).toPromise())?.id;
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
@@ -117,12 +116,12 @@ export async function mountApp({
     allowByValueEmbeddables: initializerContext.config.get<DashboardFeatureFlagConfig>()
       .allowByValueEmbeddables,
     dashboardCapabilities: {
-      hideWriteControls: dashboardConfig.getHideWriteControls(),
       show: Boolean(coreStart.application.capabilities.dashboard.show),
       saveQuery: Boolean(coreStart.application.capabilities.dashboard.saveQuery),
       createNew: Boolean(coreStart.application.capabilities.dashboard.createNew),
       mapsCapabilities: { save: Boolean(coreStart.application.capabilities.maps?.save) },
       createShortUrl: Boolean(coreStart.application.capabilities.dashboard.createShortUrl),
+      showWriteControls: Boolean(coreStart.application.capabilities.dashboard.showWriteControls),
       visualizeCapabilities: { save: Boolean(coreStart.application.capabilities.visualize?.save) },
       storeSearchSession: Boolean(coreStart.application.capabilities.dashboard.storeSearchSession),
     },
@@ -251,7 +250,7 @@ export async function mountApp({
   );
 
   addHelpMenuToAppChrome(dashboardServices.chrome, coreStart.docLinks);
-  if (dashboardServices.dashboardCapabilities.hideWriteControls) {
+  if (!dashboardServices.dashboardCapabilities.showWriteControls) {
     coreStart.chrome.setBadge({
       text: dashboardReadonlyBadge.getText(),
       tooltip: dashboardReadonlyBadge.getTooltip(),

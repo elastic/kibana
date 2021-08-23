@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { ALERT_DURATION, ALERT_STATUS, ALERT_UUID } from '@kbn/rule-data-utils';
-import { loggerMock } from '@kbn/logging/target/mocks';
+import { loggerMock } from '@kbn/logging/mocks';
 import { castArray, omit, mapValues } from 'lodash';
 import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
@@ -199,6 +199,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.alert.status": "open",
+              "kibana.alert.workflow_status": "open",
               "kibana.space_ids": Array [
                 "spaceId",
               ],
@@ -221,6 +222,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.alert.status": "open",
+              "kibana.alert.workflow_status": "open",
               "kibana.space_ids": Array [
                 "spaceId",
               ],

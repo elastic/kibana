@@ -59,7 +59,9 @@ export default function ({ getService }: FtrProviderContext) {
           "attempts": 0,
           "created_by": false,
           "jobtype": "csv",
-          "meta": Object {},
+          "meta": Object {
+            "isDeprecated": true,
+          },
           "payload": Object {
             "isDeprecated": true,
             "title": "A Saved Search With a DATE FILTER",
@@ -101,7 +103,9 @@ export default function ({ getService }: FtrProviderContext) {
             "attempts": 0,
             "created_by": false,
             "jobtype": "csv",
-            "meta": Object {},
+            "meta": Object {
+              "isDeprecated": true,
+            },
             "payload": Object {
               "isDeprecated": true,
               "title": "A Saved Search With a DATE FILTER",
@@ -136,7 +140,9 @@ export default function ({ getService }: FtrProviderContext) {
             "attempts": 0,
             "created_by": false,
             "jobtype": "csv",
-            "meta": Object {},
+            "meta": Object {
+              "isDeprecated": true,
+            },
             "payload": Object {
               "isDeprecated": true,
               "title": "A Saved Search With a DATE FILTER",
@@ -168,7 +174,9 @@ export default function ({ getService }: FtrProviderContext) {
           "attempts": 0,
           "created_by": false,
           "jobtype": "csv",
-          "meta": Object {},
+          "meta": Object {
+            "isDeprecated": true,
+          },
           "payload": Object {
             "isDeprecated": true,
             "title": "A Saved Search With a DATE FILTER",
