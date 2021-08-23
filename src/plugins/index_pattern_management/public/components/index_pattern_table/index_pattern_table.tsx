@@ -97,8 +97,8 @@ export const IndexPatternTable = ({
   const columns = [
     {
       field: 'title',
-      name: i18n.translate('indexPatternManagement.dataViewTable.titleColumn', {
-        defaultMessage: 'Title',
+      name: i18n.translate('indexPatternManagement.dataViewTable.nameColumn', {
+        defaultMessage: 'Name',
       }),
       render: (
         name: string,
