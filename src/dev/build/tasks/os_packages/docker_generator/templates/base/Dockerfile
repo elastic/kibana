@@ -42,7 +42,8 @@ COPY {{metricbeatTarball}} /tmp/metricbeat.tar.gz
 
 RUN mkdir -p /opt/filebeat /opt/metricbeat && \
   tar xf /tmp/filebeat.tar.gz -C /opt/filebeat --strip-components=1 && \
-  tar xf /tmp/metricbeat.tar.gz -C /opt/metricbeat --strip-components=1
+  tar xf /tmp/metricbeat.tar.gz -C /opt/metricbeat --strip-components=1 && \
+  rm /tmp/filebeat.tar.gz  /tmp/metricbeat.tar.gz
 {{/cloud}}
 
 ################################################################################
