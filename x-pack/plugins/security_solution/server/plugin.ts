@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { once } from 'lodash';
 import { Observable } from 'rxjs';
 import LRU from 'lru-cache';
 import { estypes } from '@elastic/elasticsearch';
@@ -22,7 +21,10 @@ import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '../../../../src/plugins/data/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import {
+  UsageCollectionSetup,
+  UsageCounter,
+} from '../../../../src/plugins/usage_collection/server';
 import {
   PluginSetupContract as AlertingSetup,
   PluginStartContract as AlertPluginStartContract,
@@ -30,15 +32,13 @@ import {
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 
 import { PluginStartContract as CasesPluginStartContract } from '../../cases/server';
-import {
-  ECS_COMPONENT_TEMPLATE_NAME,
-  TECHNICAL_COMPONENT_TEMPLATE_NAME,
-} from '../../rule_registry/common/assets';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
 import { SecurityPluginSetup as SecuritySetup, SecurityPluginStart } from '../../security/server';
 import {
-  RuleDataClient,
+  IRuleDataClient,
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
+  Dataset,
 } from '../../rule_registry/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
@@ -66,6 +66,7 @@ import {
   NOTIFICATIONS_ID,
   QUERY_ALERT_TYPE_ID,
   DEFAULT_SPACE_ID,
+  INDICATOR_ALERT_TYPE_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
@@ -94,6 +95,9 @@ import { rulesFieldMap } from './lib/detection_engine/rule_types/field_maps/rule
 import { RuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/rule_execution_log_client';
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
+import { createIndicatorMatchAlertType } from './lib/detection_engine/rule_types/indicator_match/create_indicator_match_alert_type';
+import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
+import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -142,6 +146,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   private manifestTask: ManifestTask | undefined;
   private artifactsCache: LRU<string, Buffer>;
+  private telemetryUsageCounter?: UsageCounter;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
@@ -180,6 +185,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       usageCollection: plugins.usageCollection,
     });
 
+    this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
+
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
       APP_ID,
@@ -202,80 +209,56 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // TODO: Once we are past experimental phase this check can be removed along with legacy registration of rules
     const isRuleRegistryEnabled = experimentalFeatures.ruleRegistryEnabled;
 
-    let ruleDataClient: RuleDataClient | null = null;
     const { ruleDataService } = plugins.ruleRegistry;
+    let ruleDataClient: IRuleDataClient | null = null;
+
     if (isRuleRegistryEnabled) {
-      const alertsIndexPattern = ruleDataService.getFullAssetName('security.alerts*');
-
-      const initializeRuleDataTemplates = once(async () => {
-        if (!ruleDataService.isWriteEnabled()) {
-          return;
-        }
-
-        // TODO: convert the aliases to FieldMaps. Requires enhancing FieldMap to support alias path.
-        // Split aliases by component template since we need to alias some fields in technical field mappings,
-        // some fields in security solution specific component template.
-        const aliases: Record<string, estypes.MappingProperty> = {};
-        Object.entries(aadFieldConversion).forEach(([key, value]) => {
-          aliases[key] = {
-            type: 'alias',
-            path: value,
-          };
-        });
-
-        const componentTemplateName = ruleDataService.getFullAssetName('security.alerts-mappings');
-        await ruleDataService.createOrUpdateComponentTemplate({
-          name: componentTemplateName,
-          body: {
-            template: {
-              settings: {
-                number_of_shards: 1,
-              },
-              mappings: mappingFromFieldMap({ ...alertsFieldMap, ...rulesFieldMap }, false),
-            },
-          },
-        });
-
-        await ruleDataService.createOrUpdateIndexTemplate({
-          name: ruleDataService.getFullAssetName('security.alerts-index-template'),
-          body: {
-            index_patterns: [alertsIndexPattern],
-            composed_of: [
-              ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
-              ruleDataService.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
-              componentTemplateName,
-            ],
-          },
-        });
-        await ruleDataService.updateIndexMappingsMatchingPattern(alertsIndexPattern);
+      // NOTE: this is not used yet
+      // TODO: convert the aliases to FieldMaps. Requires enhancing FieldMap to support alias path.
+      // Split aliases by component template since we need to alias some fields in technical field mappings,
+      // some fields in security solution specific component template.
+      const aliases: Record<string, estypes.MappingProperty> = {};
+      Object.entries(aadFieldConversion).forEach(([key, value]) => {
+        aliases[key] = {
+          type: 'alias',
+          path: value,
+        };
       });
 
-      // initialize eagerly
-      const initializeRuleDataTemplatesPromise = initializeRuleDataTemplates().catch((err) => {
-        this.logger!.error(err);
+      ruleDataClient = ruleDataService.initializeIndex({
+        feature: SERVER_APP_ID,
+        registrationContext: 'security',
+        dataset: Dataset.alerts,
+        componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
+        componentTemplates: [
+          {
+            name: 'mappings',
+            version: 0,
+            mappings: mappingFromFieldMap(
+              { ...alertsFieldMap, ...rulesFieldMap, ...ctiFieldMap },
+              false
+            ),
+          },
+        ],
+        indexTemplate: {
+          version: 0,
+        },
+        secondaryAlias: config.signalsIndex,
       });
-
-      const indexAlias = ruleDataService.getFullAssetName('security.alerts');
-
-      ruleDataClient = ruleDataService.getRuleDataClient(
-        SERVER_APP_ID,
-        indexAlias,
-        () => initializeRuleDataTemplatesPromise
-      );
 
       // Register rule types via rule-registry
-      this.setupPlugins.alerting.registerType(
-        createQueryAlertType({
-          experimentalFeatures,
-          indexAlias,
-          lists: plugins.lists,
-          logger: this.logger,
-          mergeStrategy: this.config.alertMergeStrategy,
-          ruleDataClient,
-          version: this.context.env.packageInfo.version,
-          ruleDataService,
-        })
-      );
+      const createRuleOptions: CreateRuleOptions = {
+        experimentalFeatures,
+        lists: plugins.lists,
+        logger: this.logger,
+        mergeStrategy: this.config.alertMergeStrategy,
+        ruleDataClient,
+        ruleDataService,
+        version: this.context.env.packageInfo.version,
+      };
+
+      this.setupPlugins.alerting.registerType(createQueryAlertType(createRuleOptions));
+      this.setupPlugins.alerting.registerType(createIndicatorMatchAlertType(createRuleOptions));
     }
 
     // TODO We need to get the endpoint routes inside of initRoutes
@@ -295,16 +278,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerTrustedAppsRoutes(router, endpointContext);
     registerActionRoutes(router, endpointContext);
 
-    const racRuleTypes = [QUERY_ALERT_TYPE_ID];
+    const racRuleTypes = [QUERY_ALERT_TYPE_ID, INDICATOR_ALERT_TYPE_ID];
     const ruleTypes = [
       SIGNALS_ID,
       NOTIFICATIONS_ID,
       ...(isRuleRegistryEnabled ? racRuleTypes : []),
     ];
 
-    plugins.features.registerKibanaFeature(
-      getKibanaPrivilegesFeaturePrivileges(ruleTypes, isRuleRegistryEnabled)
-    );
+    plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));
 
     // Continue to register legacy rules against alerting client exposed through rule-registry
     if (this.setupPlugins.alerting != null) {
@@ -354,7 +335,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     });
 
-    this.telemetryEventsSender.setup(plugins.telemetry, plugins.taskManager);
+    this.telemetryEventsSender.setup(
+      plugins.telemetry,
+      plugins.taskManager,
+      this.telemetryUsageCounter
+    );
 
     return {};
   }

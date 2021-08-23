@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useEffect, useState } from 'react';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { isEmpty } from 'lodash';
 
 import {
@@ -37,7 +37,7 @@ export const useFetchEcsAlertsData = ({
       try {
         setIsLoading(true);
         const alertResponse = await KibanaServices.get().http.fetch<
-          SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
+          estypes.SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
         >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
           method: 'POST',
           body: JSON.stringify(buildAlertsQuery(alertIds ?? [])),
@@ -45,10 +45,10 @@ export const useFetchEcsAlertsData = ({
 
         setAlertEcsData(
           alertResponse?.hits.hits.reduce<Ecs[]>(
-            (acc, { _id, _index, _source }) => [
+            (acc, { _id, _index, _source = {} }) => [
               ...acc,
               {
-                ...formatAlertToEcsSignal(_source as {}),
+                ...formatAlertToEcsSignal(_source),
                 _id,
                 _index,
                 timestamp: _source['@timestamp'],

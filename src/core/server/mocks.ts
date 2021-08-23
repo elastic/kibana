@@ -236,6 +236,7 @@ function createInternalCoreStartMock() {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     coreUsageData: coreUsageDataServiceMock.createStartContract(),
     executionContext: executionContextServiceMock.createInternalStartContract(),
+    deprecations: deprecationsServiceMock.createInternalStartContract(),
   };
   return startDeps;
 }
@@ -251,12 +252,12 @@ function createCoreRequestHandlerContextMock() {
     },
     elasticsearch: {
       client: elasticsearchServiceMock.createScopedClusterClient(),
-      legacy: {
-        client: elasticsearchServiceMock.createLegacyScopedClusterClient(),
-      },
     },
     uiSettings: {
       client: uiSettingsServiceMock.createClient(),
+    },
+    deprecations: {
+      client: deprecationsServiceMock.createClient(),
     },
   };
 }

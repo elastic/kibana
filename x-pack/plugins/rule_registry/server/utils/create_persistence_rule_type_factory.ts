@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_ID } from '@kbn/rule-data-utils/target/technical_field_names';
+import { ALERT_ID } from '@kbn/rule-data-utils';
 import { CreatePersistenceRuleTypeFactory } from './persistence_types';
 
 export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory = ({

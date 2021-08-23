@@ -7,6 +7,7 @@
 
 import type { JobType } from '../../../../../common/types/saved_objects';
 import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
+import type { Filter } from '../../../../../common/types/filters';
 import type { DataFrameAnalyticsConfig } from '../../../data_frame_analytics/common';
 
 export interface ImportedAdJob {
@@ -33,6 +34,7 @@ export interface JobIdObject {
 export interface SkippedJobs {
   jobId: string;
   missingIndices: string[];
+  missingFilters: string[];
 }
 
 function isImportedAdJobs(obj: any): obj is ImportedAdJob[] {
@@ -127,17 +129,25 @@ export class JobImportService {
   public async validateJobs(
     jobs: ImportedAdJob[] | DataFrameAnalyticsConfig[],
     type: JobType,
-    getIndexPatternTitles: (refresh?: boolean) => Promise<string[]>
+    getIndexPatternTitles: (refresh?: boolean) => Promise<string[]>,
+    getFilters: () => Promise<Filter[]>
   ) {
     const existingIndexPatterns = new Set(await getIndexPatternTitles());
+    const existingFilters = new Set((await getFilters()).map((f) => f.filter_id));
     const tempJobs: Array<{ jobId: string; destIndex?: string }> = [];
-    const tempSkippedJobIds: SkippedJobs[] = [];
+    const skippedJobs: SkippedJobs[] = [];
 
-    const commonJobs: Array<{ jobId: string; indices: string[]; destIndex?: string }> =
+    const commonJobs: Array<{
+      jobId: string;
+      indices: string[];
+      filters?: string[];
+      destIndex?: string;
+    }> =
       type === 'anomaly-detector'
         ? (jobs as ImportedAdJob[]).map((j) => ({
             jobId: j.job.job_id,
             indices: j.datafeed.indices,
+            filters: getFilterIdsFromJob(j.job),
           }))
         : (jobs as DataFrameAnalyticsConfig[]).map((j) => ({
             jobId: j.id,
@@ -145,24 +155,46 @@ export class JobImportService {
             indices: Array.isArray(j.source.index) ? j.source.index : [j.source.index],
           }));
 
-    commonJobs.forEach(({ jobId, indices, destIndex }) => {
+    commonJobs.forEach(({ jobId, indices, filters = [], destIndex }) => {
       const missingIndices = indices.filter((i) => existingIndexPatterns.has(i) === false);
-      if (missingIndices.length === 0) {
+      const missingFilters = filters.filter((i) => existingFilters.has(i) === false);
+
+      if (missingIndices.length === 0 && missingFilters.length === 0) {
         tempJobs.push({
           jobId,
           ...(type === 'data-frame-analytics' ? { destIndex } : {}),
         });
       } else {
-        tempSkippedJobIds.push({
+        skippedJobs.push({
           jobId,
           missingIndices,
+          missingFilters,
         });
       }
     });
 
     return {
       jobs: tempJobs,
-      skippedJobs: tempSkippedJobIds,
+      skippedJobs,
     };
   }
+}
+
+function getFilterIdsFromJob(job: Job) {
+  const filters = new Set<string>();
+  job.analysis_config.detectors.forEach((d) => {
+    if (d.custom_rules === undefined) {
+      return;
+    }
+    d.custom_rules.forEach((r) => {
+      if (r.scope === undefined) {
+        return;
+      }
+      Object.values(r.scope).forEach((s) => {
+        filters.add(s.filter_id);
+      });
+    });
+  });
+
+  return [...filters];
 }

@@ -8,10 +8,13 @@
 import {
   ALERT_DURATION,
   ALERT_ID,
-  ALERT_PRODUCER,
+  ALERT_RULE_PRODUCER,
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
+  ALERT_RULE_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_CATEGORY,
 } from '@kbn/rule-data-utils';
 
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
@@ -23,25 +26,47 @@ import { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { columns } from '../../configurations/security_solution_detections/columns';
 
-export const buildAlertStatusFilter = (status: Status): Filter[] => [
-  {
-    meta: {
-      alias: null,
-      negate: false,
-      disabled: false,
-      type: 'phrase',
-      key: 'signal.status',
-      params: {
-        query: status,
+export const buildAlertStatusFilter = (status: Status): Filter[] => {
+  const combinedQuery =
+    status === 'acknowledged'
+      ? {
+          bool: {
+            should: [
+              {
+                term: {
+                  'signal.status': status,
+                },
+              },
+              {
+                term: {
+                  'signal.status': 'in-progress',
+                },
+              },
+            ],
+          },
+        }
+      : {
+          term: {
+            'signal.status': status,
+          },
+        };
+
+  return [
+    {
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
+        type: 'phrase',
+        key: 'signal.status',
+        params: {
+          query: status,
+        },
       },
+      query: combinedQuery,
     },
-    query: {
-      term: {
-        'signal.status': status,
-      },
-    },
-  },
-];
+  ];
+};
 
 export const buildAlertsRuleIdFilter = (ruleId: string | null): Filter[] =>
   ruleId
@@ -136,25 +161,47 @@ export const requiredFieldsForActions = [
 ];
 
 // TODO: Once we are past experimental phase this code should be removed
-export const buildAlertStatusFilterRuleRegistry = (status: Status): Filter[] => [
-  {
-    meta: {
-      alias: null,
-      negate: false,
-      disabled: false,
-      type: 'phrase',
-      key: ALERT_STATUS,
-      params: {
-        query: status,
+export const buildAlertStatusFilterRuleRegistry = (status: Status): Filter[] => {
+  const combinedQuery =
+    status === 'acknowledged'
+      ? {
+          bool: {
+            should: [
+              {
+                term: {
+                  [ALERT_STATUS]: status,
+                },
+              },
+              {
+                term: {
+                  [ALERT_STATUS]: 'in-progress',
+                },
+              },
+            ],
+          },
+        }
+      : {
+          term: {
+            [ALERT_STATUS]: status,
+          },
+        };
+
+  return [
+    {
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
+        type: 'phrase',
+        key: ALERT_STATUS,
+        params: {
+          query: status,
+        },
       },
+      query: combinedQuery,
     },
-    query: {
-      term: {
-        [ALERT_STATUS]: status,
-      },
-    },
-  },
-];
+  ];
+};
 
 export const buildShowBuildingBlockFilterRuleRegistry = (
   showBuildingBlockAlerts: boolean
@@ -185,11 +232,10 @@ export const requiredFieldMappingsForActionsRuleRegistry = {
   'event.action': 'event.action',
   'alert.status': ALERT_STATUS,
   'alert.duration.us': ALERT_DURATION,
-  'rule.uuid': 'rule.uuid',
-  'rule.id': 'rule.id',
-  'rule.name': 'rule.name',
-  'rule.category': 'rule.category',
-  producer: ALERT_PRODUCER,
+  'rule.uuid': ALERT_RULE_UUID,
+  'rule.name': ALERT_RULE_NAME,
+  'rule.category': ALERT_RULE_CATEGORY,
+  producer: ALERT_RULE_PRODUCER,
   tags: 'tags',
 };
 
