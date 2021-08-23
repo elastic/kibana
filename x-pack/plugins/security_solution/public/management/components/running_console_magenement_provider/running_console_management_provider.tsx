@@ -98,7 +98,7 @@ export const RunningConsoleManagementProvider = memo(({ children }) => {
     for (const [id, { show, console, title }] of Object.entries(consoles)) {
       if (show) {
         dialogs.push(
-          <EuiModal onClose={() => hideConsole(id)} style={{ width: '80vw' }}>
+          <EuiModal onClose={() => hideConsole(id)} style={{ width: '80vw', maxWidth: `80vw` }}>
             <EuiModalHeader>
               <EuiModalHeaderTitle>
                 <h1>
