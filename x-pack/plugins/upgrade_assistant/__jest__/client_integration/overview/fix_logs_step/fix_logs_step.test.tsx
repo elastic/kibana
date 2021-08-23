@@ -7,9 +7,10 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { OverviewTestBed, setupOverviewPage, setupEnvironment } from '../../helpers';
 import { DeprecationLoggingStatus } from '../../../../common/types';
 import { DEPRECATION_LOGS_SOURCE_ID } from '../../../../common/constants';
+import { setupEnvironment } from '../../helpers';
+import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
 const getLoggingResponse = (toggle: boolean): DeprecationLoggingStatus => ({
   isDeprecationLogIndexingEnabled: toggle,

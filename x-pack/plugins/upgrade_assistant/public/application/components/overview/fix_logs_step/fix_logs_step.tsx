@@ -40,7 +40,7 @@ const i18nTexts = {
   ),
 };
 
-const DeprecationLogsPreview: FunctionComponent = () => {
+const FixLogsStep: FunctionComponent = () => {
   const state = useDeprecationLogging();
 
   return (
@@ -81,10 +81,10 @@ const DeprecationLogsPreview: FunctionComponent = () => {
   );
 };
 
-export const getFixDeprecationLogsStep = (): EuiStepProps => {
+export const getFixLogsStep = (): EuiStepProps => {
   return {
     title: i18nTexts.identifyStepTitle,
     status: 'incomplete',
-    children: <DeprecationLogsPreview />,
+    children: <FixLogsStep />,
   };
 };
