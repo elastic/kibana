@@ -7,7 +7,6 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
-import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { CanvasSetup } from '../public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
@@ -19,7 +18,6 @@ import { renderFunctions, renderFunctionFactories } from './renderers';
 
 interface SetupDeps {
   canvas: CanvasSetup;
-  expressions: ExpressionsSetup;
 }
 
 export interface StartDeps {

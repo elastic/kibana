@@ -19,11 +19,6 @@ export interface ElementSpec {
   width?: number;
   height?: number;
   /**
-   * the flag shows if the expression is defined at the external plugin
-   */
-  external?: boolean;
-
-  /**
    * a name of the expression which the element represents
    */
   expression_name?: string;

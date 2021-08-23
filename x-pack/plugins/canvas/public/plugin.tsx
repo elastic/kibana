@@ -106,10 +106,7 @@ export class CanvasPlugin
         const { CanvasSrcPlugin } = await import('../canvas_plugin_src/plugin');
         const srcPlugin = new CanvasSrcPlugin();
 
-        srcPlugin.setup(coreSetup, {
-          canvas: canvasApi,
-          expressions: setupPlugins.expressions,
-        });
+        srcPlugin.setup(coreSetup, { canvas: canvasApi });
         setupExpressions({ coreSetup, setupPlugins });
 
         // Get start services
