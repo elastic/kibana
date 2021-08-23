@@ -26,7 +26,7 @@ import { refreshPage } from '../../tasks/security_header';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe('Marking alerts as acknowledged', () => {
+describe.skip('Marking alerts as acknowledged', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL);

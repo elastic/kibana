@@ -8,9 +8,7 @@
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 
-import type { SpacesContextProps } from 'src/plugins/spaces_oss/public';
-
-import type { InternalProps } from './types';
+import type { InternalProps, SpacesContextProps } from './types';
 
 export const getSpacesContextProviderWrapper = async (
   internalProps: InternalProps
