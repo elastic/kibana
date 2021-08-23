@@ -76,4 +76,6 @@ export type OverviewTestSubjects =
   | 'upgradeSetupDocsLink'
   | 'upgradeSetupCloudLink'
   | 'deprecationWarningCallout'
+  | 'whatsNewLink'
+  | 'documentationLink'
   | 'upgradeStatusError';

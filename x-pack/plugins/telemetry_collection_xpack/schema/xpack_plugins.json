@@ -4037,6 +4037,9 @@
             },
             "total": {
               "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
             }
           }
         },
@@ -4046,6 +4049,9 @@
               "type": "boolean"
             },
             "total": {
+              "type": "long"
+            },
+            "deprecated": {
               "type": "long"
             }
           }
@@ -4057,6 +4063,9 @@
             },
             "total": {
               "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
             }
           }
         },
@@ -4066,6 +4075,9 @@
               "type": "boolean"
             },
             "total": {
+              "type": "long"
+            },
+            "deprecated": {
               "type": "long"
             },
             "app": {
@@ -4098,9 +4110,6 @@
         },
         "status": {
           "properties": {
-            "cancelled": {
-              "type": "long"
-            },
             "completed": {
               "type": "long"
             },
@@ -4120,62 +4129,6 @@
         },
         "statuses": {
           "properties": {
-            "cancelled": {
-              "properties": {
-                "csv": {
-                  "properties": {
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "csv_searchsource": {
-                  "properties": {
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "PNG": {
-                  "properties": {
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "printable_pdf": {
-                  "properties": {
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
             "completed": {
               "properties": {
                 "csv": {
@@ -4476,6 +4429,9 @@
                 },
                 "total": {
                   "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
                 }
               }
             },
@@ -4485,6 +4441,9 @@
                   "type": "boolean"
                 },
                 "total": {
+                  "type": "long"
+                },
+                "deprecated": {
                   "type": "long"
                 }
               }
@@ -4496,6 +4455,9 @@
                 },
                 "total": {
                   "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
                 }
               }
             },
@@ -4505,6 +4467,9 @@
                   "type": "boolean"
                 },
                 "total": {
+                  "type": "long"
+                },
+                "deprecated": {
                   "type": "long"
                 },
                 "app": {
@@ -4537,9 +4502,6 @@
             },
             "status": {
               "properties": {
-                "cancelled": {
-                  "type": "long"
-                },
                 "completed": {
                   "type": "long"
                 },
@@ -4559,62 +4521,6 @@
             },
             "statuses": {
               "properties": {
-                "cancelled": {
-                  "properties": {
-                    "csv": {
-                      "properties": {
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "csv_searchsource": {
-                      "properties": {
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "PNG": {
-                      "properties": {
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "printable_pdf": {
-                      "properties": {
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
                 "completed": {
                   "properties": {
                     "csv": {
@@ -5914,16 +5820,10 @@
         },
         "ui_open": {
           "properties": {
-            "cluster": {
+            "elasticsearch": {
               "type": "long",
               "_meta": {
-                "description": "Number of times a user viewed the list of Elasticsearch cluster deprecations."
-              }
-            },
-            "indices": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times a user viewed the list of Elasticsearch index deprecations."
+                "description": "Number of times a user viewed the list of Elasticsearch deprecations."
               }
             },
             "overview": {

@@ -21,7 +21,7 @@
   },
   "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {
-    "url": "http://github.com/elastic/kibana/issues"
+    "url": "https://github.com/elastic/kibana/issues"
   },
   "kibana": {
     "clean": {
@@ -95,9 +95,9 @@
   "dependencies": {
     "@elastic/apm-rum": "^5.8.0",
     "@elastic/apm-rum-react": "^1.2.11",
-    "@elastic/charts": "34.0.0",
+    "@elastic/charts": "34.1.1",
     "@elastic/datemath": "link:bazel-bin/packages/elastic-datemath",
-    "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary.17",
+    "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary.18",
     "@elastic/ems-client": "7.15.0",
     "@elastic/eui": "37.1.1",
     "@elastic/filesaver": "1.1.2",
