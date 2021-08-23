@@ -42,7 +42,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const BULK_INDEX_DELAY = 1000;
   const INDEXING_DELAY = 5000;
 
-  const ALERTS_INDEX_TARGET = '.alerts-observability.apm.alerts*';
+  const getAlertsTargetIndicesUrl =
+    '/api/observability/rules/alerts/dynamic_index_pattern?namespace=default&registrationContexts=observability.apm&registrationContexts=';
+
+  const getAlertsTargetIndices = async () =>
+    supertest.get(getAlertsTargetIndicesUrl).send().set('kbn-xsrf', 'foo');
   const APM_METRIC_INDEX_NAME = 'apm-8.0.0-transaction';
 
   const createTransactionMetric = (override: Record<string, any>) => {
@@ -92,6 +96,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       .get(`/api/alerts/alert/${alert.id}`)
       .set('kbn-xsrf', 'foo');
 
+    const { body: targetIndices, status: targetIndicesStatus } = await getAlertsTargetIndices();
+    if (targetIndices.length === 0) {
+      const error = new Error('Error getting alert');
+      Object.assign(error, { response: { body: targetIndices, status: targetIndicesStatus } });
+      throw error;
+    }
+
     if (status >= 300) {
       const error = new Error('Error getting alert');
       Object.assign(error, { response: { body, status } });
@@ -104,10 +115,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await new Promise((resolve) => {
         setTimeout(resolve, BULK_INDEX_DELAY);
       });
-      await es.indices.refresh({
-        index: ALERTS_INDEX_TARGET,
-      });
-
+      try {
+        await es.indices.refresh({
+          index: targetIndices[0],
+        });
+        // eslint-disable-next-line no-empty
+      } catch (exc) {}
       return nextAlert;
     }
 
@@ -120,20 +133,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('Rule registry with write enabled', { config: 'rules', archives: [] }, () => {
     it('does not bootstrap indices on plugin startup', async () => {
-      const { body } = await es.indices.get({
-        index: ALERTS_INDEX_TARGET,
-        expand_wildcards: 'open',
-        allow_no_indices: true,
-      });
-
-      const indices = Object.entries(body).map(([indexName, index]) => {
-        return {
-          indexName,
-          index,
-        };
-      });
-
-      expect(indices.length).to.be(0);
+      const { body: targetIndices } = await getAlertsTargetIndices();
+      try {
+        await es.indices.get({
+          index: targetIndices[0],
+          expand_wildcards: 'open',
+          allow_no_indices: true,
+        });
+      } catch (exc) {
+        expect(exc.statusCode).to.eql(404);
+      }
     });
 
     describe('when creating a rule', () => {
@@ -143,6 +152,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       };
 
       before(async () => {
+        try {
+          await es.indices.delete({
+            index: APM_METRIC_INDEX_NAME,
+          });
+          // eslint-disable-next-line no-empty
+        } catch (exc) {}
         await es.indices.create({
           index: APM_METRIC_INDEX_NAME,
           body: {
@@ -232,6 +247,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        const { body: targetIndices } = await getAlertsTargetIndices();
         if (createResponse.alert) {
           const { body, status } = await supertest
             .delete(`/api/alerts/alert/${createResponse.alert.id}`)
@@ -244,15 +260,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }
         }
 
-        await es.deleteByQuery({
-          index: ALERTS_INDEX_TARGET,
-          body: {
-            query: {
-              match_all: {},
+        try {
+          await es.deleteByQuery({
+            index: targetIndices[0],
+            body: {
+              query: {
+                match_all: {},
+              },
             },
-          },
-          refresh: true,
-        });
+            refresh: true,
+          });
+          // eslint-disable-next-line no-empty
+        } catch (exc) {}
 
         await es.indices.delete({
           index: APM_METRIC_INDEX_NAME,
@@ -263,25 +282,29 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(createResponse.status).to.be.below(299);
 
         expect(createResponse.alert).not.to.be(undefined);
-
         let alert = await waitUntilNextExecution(createResponse.alert);
 
-        const beforeDataResponse = await es.search({
-          index: ALERTS_INDEX_TARGET,
-          body: {
-            query: {
-              term: {
-                [EVENT_KIND]: 'signal',
+        const { body: targetIndices } = await getAlertsTargetIndices();
+
+        try {
+          const beforeDataResponse = await es.search({
+            index: targetIndices[0],
+            body: {
+              query: {
+                term: {
+                  [EVENT_KIND]: 'signal',
+                },
+              },
+              size: 1,
+              sort: {
+                '@timestamp': 'desc',
               },
             },
-            size: 1,
-            sort: {
-              '@timestamp': 'desc',
-            },
-          },
-        });
+          });
 
-        expect(beforeDataResponse.body.hits.hits.length).to.be(0);
+          expect(beforeDataResponse.body.hits.hits.length).to.be(0);
+          // eslint-disable-next-line no-empty
+        } catch (exc) {}
 
         await es.index({
           index: APM_METRIC_INDEX_NAME,
@@ -295,22 +318,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         alert = await waitUntilNextExecution(alert);
 
-        const afterInitialDataResponse = await es.search({
-          index: ALERTS_INDEX_TARGET,
-          body: {
-            query: {
-              term: {
-                [EVENT_KIND]: 'signal',
+        try {
+          const afterInitialDataResponse = await es.search({
+            index: targetIndices[0],
+            body: {
+              query: {
+                term: {
+                  [EVENT_KIND]: 'signal',
+                },
+              },
+              size: 1,
+              sort: {
+                '@timestamp': 'desc',
               },
             },
-            size: 1,
-            sort: {
-              '@timestamp': 'desc',
-            },
-          },
-        });
+          });
 
-        expect(afterInitialDataResponse.body.hits.hits.length).to.be(0);
+          expect(afterInitialDataResponse.body.hits.hits.length).to.be(0);
+          // eslint-disable-next-line no-empty
+        } catch (exc) {}
 
         await es.index({
           index: APM_METRIC_INDEX_NAME,
@@ -325,7 +351,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         alert = await waitUntilNextExecution(alert);
 
         const afterViolatingDataResponse = await es.search({
-          index: ALERTS_INDEX_TARGET,
+          index: targetIndices[0],
           body: {
             query: {
               term: {
@@ -437,7 +463,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         alert = await waitUntilNextExecution(alert);
 
         const afterRecoveryResponse = await es.search({
-          index: ALERTS_INDEX_TARGET,
+          index: targetIndices[0],
           body: {
             query: {
               term: {
@@ -530,9 +556,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('Rule registry with write not enabled', { config: 'basic', archives: [] }, () => {
     it('does not bootstrap the apm rule indices', async () => {
+      const { body: targetIndices } = await getAlertsTargetIndices();
       const errorOrUndefined = await es.indices
         .get({
-          index: ALERTS_INDEX_TARGET,
+          index: targetIndices[0],
           expand_wildcards: 'open',
           allow_no_indices: false,
         })
