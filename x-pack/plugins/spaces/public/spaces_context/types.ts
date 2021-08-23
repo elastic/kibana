@@ -11,23 +11,31 @@ import type { CoreStart, StartServicesAccessor } from 'src/core/public';
 
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';
-import type { ShareToSpacesData } from '../types';
+import type { SpacesData } from '../types';
 
-export type KibanaServices = Partial<CoreStart>;
-
-export interface SpacesReactContextValue<Services extends KibanaServices> {
+export interface SpacesReactContextValue<Services extends Partial<CoreStart>> {
   readonly spacesManager: SpacesManager;
-  readonly shareToSpacesDataPromise: Promise<ShareToSpacesData>;
+  readonly spacesDataPromise: Promise<SpacesData>;
   readonly services: Services;
 }
 
-export interface SpacesReactContext<T extends KibanaServices> {
-  value: SpacesReactContextValue<T>;
+export interface SpacesReactContext<Services extends Partial<CoreStart>> {
+  value: SpacesReactContextValue<Services>;
   Provider: React.FC;
-  Consumer: React.Consumer<SpacesReactContextValue<T>>;
+  Consumer: React.Consumer<SpacesReactContextValue<Services>>;
 }
 
 export interface InternalProps {
   spacesManager: SpacesManager;
   getStartServices: StartServicesAccessor<PluginsStart>;
+}
+
+/**
+ * Properties for the SpacesContext.
+ */
+export interface SpacesContextProps {
+  /**
+   * If a feature is specified, all Spaces components will treat it appropriately if the feature is disabled in a given Space.
+   */
+  feature?: string;
 }
