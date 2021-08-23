@@ -80,10 +80,10 @@ function ServiceNodeOverview() {
               defaultMessage: 'Name',
             })}
             <EuiIcon
-             size="s"
-             color="subdued"
-             type="questionInCircle"
-             className="eui-alignTop"
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignTop"
             />
           </>
         </EuiToolTip>
@@ -123,7 +123,7 @@ function ServiceNodeOverview() {
       }),
       field: 'hostName',
       sortable: true,
-      render: (_, { hostName }) => getServiceNodeHostName(hostName),
+      render: (_, { hostName }) => hostName ?? '',
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.cpuColumnLabel', {

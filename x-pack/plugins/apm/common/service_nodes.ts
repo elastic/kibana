@@ -23,7 +23,7 @@ export function getServiceNodeName(serviceNodeName?: string) {
 }
 
 export function getServiceNodeHostName(hostName: string | number | null) {
-  if(hostName === null || !hostName) {
+  if (hostName === null || !hostName) {
     return '';
   }
 
