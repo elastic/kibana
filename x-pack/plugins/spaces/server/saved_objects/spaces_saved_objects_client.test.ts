@@ -584,7 +584,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         expect(spacesClient.getAll).toHaveBeenCalledWith({ purpose: 'findSavedObjects' });
       });
 
-      test(`translates options.namespace: ['*']`, async () => {
+      test(`translates options.namespaces: ['*']`, async () => {
         const { client, baseClient, spacesService } = createSpacesSavedObjectsClient();
         const expectedReturnValue = { id: 'abc123' };
         baseClient.openPointInTimeForType.mockReturnValue(Promise.resolve(expectedReturnValue));
@@ -620,7 +620,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         expect(actualReturnValue).toBe(expectedReturnValue);
         expect(baseClient.openPointInTimeForType).toHaveBeenCalledWith('foo', {
           keepAlive: '2m',
-          namespaces: [currentSpace.expectedNamespace ?? 'default'],
+          namespaces: [currentSpace.expectedNamespace ?? DEFAULT_SPACE_ID],
         });
       });
     });

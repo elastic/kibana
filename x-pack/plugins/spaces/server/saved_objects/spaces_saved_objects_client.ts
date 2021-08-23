@@ -383,8 +383,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     type: string | string[],
     options: SavedObjectsOpenPointInTimeOptions = {}
   ) {
-    throwErrorIfNamespaceSpecified(options);
-
     const namespaces = await this.getSearchableSpaces(options.namespaces);
     if (namespaces.length === 0) {
       // throw bad request if no valid spaces were found.
