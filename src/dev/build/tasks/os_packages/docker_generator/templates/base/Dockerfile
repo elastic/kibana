@@ -24,12 +24,12 @@ RUN cd /opt && \
 {{/usePublicArtifact}}
 
 {{^usePublicArtifact}}
-COPY {{artifactTarball}} /opt/kibana.tar.gz
+COPY {{artifactTarball}} /tmp/kibana.tar.gz
 {{/usePublicArtifact}}
 
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
-RUN tar --strip-components=1 -zxf /opt/kibana.tar.gz
+RUN tar --strip-components=1 -zxf /tmp/kibana.tar.gz
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
 # OpenShift does this, for example.
@@ -42,8 +42,7 @@ COPY {{metricbeatTarball}} /tmp/metricbeat.tar.gz
 
 RUN mkdir -p /opt/filebeat /opt/metricbeat && \
   tar xf /tmp/filebeat.tar.gz -C /opt/filebeat --strip-components=1 && \
-  tar xf /tmp/metricbeat.tar.gz -C /opt/metricbeat --strip-components=1 && \
-  rm /tmp/filebeat.tar.gz  /tmp/metricbeat.tar.gz
+  tar xf /tmp/metricbeat.tar.gz -C /opt/metricbeat --strip-components=1
 {{/cloud}}
 
 ################################################################################
@@ -96,6 +95,9 @@ RUN fc-cache -v
 
 # Bring in Kibana from the initial stage.
 COPY --from=builder --chown=1000:0 /usr/share/kibana /usr/share/kibana
+{{#cloud}}
+COPY --from=builder --chown=0:0 /opt /opt
+{{/cloud}}
 WORKDIR /usr/share/kibana
 RUN ln -s /usr/share/kibana /opt/kibana
 
