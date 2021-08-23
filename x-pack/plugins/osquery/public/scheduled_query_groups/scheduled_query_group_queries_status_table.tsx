@@ -55,12 +55,16 @@ export enum ViewResultsActionButtonType {
 
 interface ViewResultsInDiscoverActionProps {
   actionId: string;
+  agentIds: string[];
   buttonType: ViewResultsActionButtonType;
   endDate?: string;
   startDate?: string;
 }
 
-function getLensAttributes(actionId: string): TypedLensByValueInput['attributes'] {
+function getLensAttributes(
+  actionId: string,
+  agentIds: string[]
+): TypedLensByValueInput['attributes'] {
   const dataLayer: PersistedIndexPatternLayer = {
     columnOrder: ['8690befd-fd69-4246-af4a-dd485d2a3b38', 'ed999e9d-204c-465b-897f-fe1a125b39ed'],
     columns: {
@@ -108,6 +112,13 @@ function getLensAttributes(actionId: string): TypedLensByValueInput['attributes'
         categoryDisplay: 'default',
       },
     ],
+  };
+
+  const agentIdsQuery = {
+    bool: {
+      minimum_should_match: 1,
+      should: agentIds.map((agentId) => ({ match_phrase: { 'agent.id': agentId } })),
+    },
   };
 
   return {
@@ -158,6 +169,19 @@ function getLensAttributes(actionId: string): TypedLensByValueInput['attributes'
             },
           },
         },
+        {
+          $state: { store: FilterStateStore.APP_STATE },
+          meta: {
+            alias: 'agent IDs',
+            disabled: false,
+            indexRefName: 'filter-index-pattern-0',
+            key: 'query',
+            negate: false,
+            type: 'custom',
+            value: JSON.stringify(agentIdsQuery),
+          },
+          query: agentIdsQuery,
+        },
       ],
       query: { language: 'kuery', query: '' },
       visualization: xyConfig,
@@ -167,6 +191,7 @@ function getLensAttributes(actionId: string): TypedLensByValueInput['attributes'
 
 const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProps> = ({
   actionId,
+  agentIds,
   buttonType,
   endDate,
   startDate,
@@ -187,14 +212,14 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
             to: endDate ?? 'now',
             mode: startDate || endDate ? 'absolute' : 'relative',
           },
-          attributes: getLensAttributes(actionId),
+          attributes: getLensAttributes(actionId, agentIds),
         },
         {
           openInNewTab,
         }
       );
     },
-    [actionId, endDate, lensService, startDate]
+    [actionId, agentIds, endDate, lensService, startDate]
   );
 
   if (buttonType === ViewResultsActionButtonType.button) {
@@ -226,6 +251,7 @@ export const ViewResultsInLensAction = React.memo(ViewResultsInLensActionCompone
 
 const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverActionProps> = ({
   actionId,
+  agentIds,
   buttonType,
   endDate,
   startDate,
@@ -236,6 +262,13 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   useEffect(() => {
     const getDiscoverUrl = async () => {
       if (!urlGenerator?.createUrl) return;
+
+      const agentIdsQuery = {
+        bool: {
+          minimum_should_match: 1,
+          should: agentIds.map((agentId) => ({ match_phrase: { 'agent.id': agentId } })),
+        },
+      };
 
       const newUrl = await urlGenerator.createUrl({
         indexPatternId: 'logs-*',
@@ -252,6 +285,19 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
             },
             query: { match_phrase: { action_id: actionId } },
             $state: { store: FilterStateStore.APP_STATE },
+          },
+          {
+            $state: { store: FilterStateStore.APP_STATE },
+            meta: {
+              alias: 'agent IDs',
+              disabled: false,
+              index: 'logs-*',
+              key: 'query',
+              negate: false,
+              type: 'custom',
+              value: JSON.stringify(agentIdsQuery),
+            },
+            query: agentIdsQuery,
           },
         ],
         refreshInterval: {
@@ -274,7 +320,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
       setDiscoverUrl(newUrl);
     };
     getDiscoverUrl();
-  }, [actionId, endDate, startDate, urlGenerator]);
+  }, [actionId, agentIds, endDate, startDate, urlGenerator]);
 
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
@@ -295,16 +341,17 @@ export const ViewResultsInDiscoverAction = React.memo(ViewResultsInDiscoverActio
 
 interface ScheduledQueryExpandedContentProps {
   actionId: string;
+  agentIds: string[];
   interval: number;
 }
 
 const ScheduledQueryExpandedContent = React.memo<ScheduledQueryExpandedContentProps>(
-  ({ actionId, interval }) => (
+  ({ actionId, agentIds, interval }) => (
     <EuiFlexGroup direction="column" gutterSize="xl">
       <EuiFlexItem>
         <EuiSpacer size="m" />
         <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
-          <ScheduledQueryErrorsTable actionId={actionId} interval={interval} />
+          <ScheduledQueryErrorsTable actionId={actionId} agentIds={agentIds} interval={interval} />
         </EuiPanel>
         <EuiSpacer size="m" />
       </EuiFlexItem>
@@ -316,6 +363,7 @@ ScheduledQueryExpandedContent.displayName = 'ScheduledQueryExpandedContent';
 
 interface ScheduledQueryLastResultsProps {
   actionId: string;
+  agentIds: string[];
   queryId: string;
   interval: number;
   toggleErrors: (payload: { queryId: string; interval: number }) => void;
@@ -324,21 +372,21 @@ interface ScheduledQueryLastResultsProps {
 
 const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
   actionId,
+  agentIds,
   queryId,
   interval,
   toggleErrors,
   expanded,
 }) => {
-  const data = useKibana().services.data;
-
   const { data: lastResultsData, isFetched } = useScheduledQueryGroupQueryLastResults({
     actionId,
-    queryId,
+    agentIds,
     interval,
   });
 
   const { data: errorsData, isFetched: errorsFetched } = useScheduledQueryGroupQueryErrors({
     actionId,
+    agentIds,
     interval,
   });
 
@@ -410,11 +458,13 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
 const getPackActionId = (actionId: string, packName: string) => `pack_${packName}_${actionId}`;
 
 interface ScheduledQueryGroupQueriesStatusTableProps {
+  agentIds: string[];
   data: OsqueryManagerPackagePolicyInputStream[];
   scheduledQueryGroupName: string;
 }
 
 const ScheduledQueryGroupQueriesStatusTableComponent: React.FC<ScheduledQueryGroupQueriesStatusTableProps> = ({
+  agentIds,
   data,
   scheduledQueryGroupName,
 }) => {
@@ -440,48 +490,50 @@ const ScheduledQueryGroupQueriesStatusTableComponent: React.FC<ScheduledQueryGro
         itemIdToExpandedRowMapValues[queryId] = (
           <ScheduledQueryExpandedContent
             actionId={getPackActionId(queryId, scheduledQueryGroupName)}
+            agentIds={agentIds}
             interval={interval}
           />
         );
       }
       setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
     },
-    [itemIdToExpandedRowMap, scheduledQueryGroupName]
+    [agentIds, itemIdToExpandedRowMap, scheduledQueryGroupName]
   );
 
   const renderLastResultsColumn = useCallback(
     (item) => (
-      <>
-        <ScheduledQueryLastResults
-          queryId={item.vars.id.value}
-          actionId={getPackActionId(item.vars.id.value, scheduledQueryGroupName)}
-          interval={item.vars?.interval.value}
-          toggleErrors={toggleErrors}
-          expanded={!!itemIdToExpandedRowMap[item.vars.id.value]}
-        />
-      </>
+      <ScheduledQueryLastResults
+        agentIds={agentIds}
+        queryId={item.vars.id.value}
+        actionId={getPackActionId(item.vars.id.value, scheduledQueryGroupName)}
+        interval={item.vars?.interval.value}
+        toggleErrors={toggleErrors}
+        expanded={!!itemIdToExpandedRowMap[item.vars.id.value]}
+      />
     ),
-    [itemIdToExpandedRowMap, scheduledQueryGroupName, toggleErrors]
+    [agentIds, itemIdToExpandedRowMap, scheduledQueryGroupName, toggleErrors]
   );
 
   const renderDiscoverResultsAction = useCallback(
     (item) => (
       <ViewResultsInDiscoverAction
         actionId={getPackActionId(item.vars?.id.value, scheduledQueryGroupName)}
+        agentIds={agentIds}
         buttonType={ViewResultsActionButtonType.icon}
       />
     ),
-    [scheduledQueryGroupName]
+    [agentIds, scheduledQueryGroupName]
   );
 
   const renderLensResultsAction = useCallback(
     (item) => (
       <ViewResultsInLensAction
         actionId={item.vars?.id.value}
+        agentIds={agentIds}
         buttonType={ViewResultsActionButtonType.icon}
       />
     ),
-    []
+    [agentIds]
   );
 
   const getItemId = useCallback(

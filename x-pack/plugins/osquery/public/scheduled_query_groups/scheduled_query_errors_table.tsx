@@ -70,6 +70,7 @@ export const ViewErrorsInLogsAction = React.memo(ViewErrorsInLogsActionComponent
 
 interface ScheduledQueryErrorsTableProps {
   actionId: string;
+  agentIds: string[];
   interval: number;
 }
 
@@ -81,9 +82,14 @@ const renderErrorMessage = (error: string) => (
 
 const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProps> = ({
   actionId,
+  agentIds,
   interval,
 }) => {
-  const { data: lastErrorsData } = useScheduledQueryGroupQueryErrors({ actionId, interval });
+  const { data: lastErrorsData } = useScheduledQueryGroupQueryErrors({
+    actionId,
+    agentIds,
+    interval,
+  });
 
   const renderAgentIdColumn = useCallback((agentId) => <AgentIdToName agentId={agentId} />, []);
 

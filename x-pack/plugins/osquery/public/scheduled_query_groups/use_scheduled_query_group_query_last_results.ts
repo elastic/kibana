@@ -11,12 +11,14 @@ import { useKibana } from '../common/lib/kibana';
 
 interface UseScheduledQueryGroupQueryLastResultsProps {
   actionId: string;
+  agentIds: string[];
   interval: number;
   skip?: boolean;
 }
 
 export const useScheduledQueryGroupQueryLastResults = ({
   actionId,
+  agentIds,
   interval,
   skip = false,
 }: UseScheduledQueryGroupQueryLastResultsProps) => {
@@ -28,6 +30,7 @@ export const useScheduledQueryGroupQueryLastResults = ({
       const indexPattern = await data.indexPatterns.find('logs-*');
       const searchSource = await data.search.searchSource.create({
         index: indexPattern[0],
+        size: 0,
         aggs: {
           runs: {
             terms: {
@@ -44,12 +47,13 @@ export const useScheduledQueryGroupQueryLastResults = ({
         query: {
           // @ts-expect-error update types
           bool: {
-            filter: [
-              {
-                term: {
-                  'data_stream.dataset': 'elastic_agent.osquerybeat',
-                },
+            should: agentIds.map((agentId) => ({
+              match_phrase: {
+                'agent.id': agentId,
               },
+            })),
+            minimum_should_match: 1,
+            filter: [
               {
                 match_phrase: {
                   action_id: actionId,
@@ -72,8 +76,13 @@ export const useScheduledQueryGroupQueryLastResults = ({
     },
     {
       keepPreviousData: true,
-      enabled: !skip || !actionId || !interval,
-      select: (response) => response.rawResponse.aggregations?.runs?.buckets[0] ?? [],
+      enabled: !skip || !actionId || !interval || !agentIds.length,
+      select: (response) => {
+        if (actionId.includes('rpm_packages')) {
+          console.error('resss', response);
+        }
+        return response.rawResponse.aggregations?.runs?.buckets[0] ?? [];
+      },
     }
   );
 };

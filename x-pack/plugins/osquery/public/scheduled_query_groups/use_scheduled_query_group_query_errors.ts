@@ -12,12 +12,14 @@ import { useKibana } from '../common/lib/kibana';
 
 interface UseScheduledQueryGroupQueryErrorsProps {
   actionId: string;
+  agentIds: string[];
   interval: number;
   skip?: boolean;
 }
 
 export const useScheduledQueryGroupQueryErrors = ({
   actionId,
+  agentIds,
   interval,
   skip = false,
 }: UseScheduledQueryGroupQueryErrorsProps) => {
@@ -41,15 +43,16 @@ export const useScheduledQueryGroupQueryErrors = ({
         query: {
           // @ts-expect-error update types
           bool: {
+            should: agentIds.map((agentId) => ({
+              match_phrase: {
+                'agent.id': agentId,
+              },
+            })),
+            minimum_should_match: 1,
             filter: [
               {
                 match_phrase: {
                   message: 'Error',
-                },
-              },
-              {
-                term: {
-                  'data_stream.dataset': 'elastic_agent.osquerybeat',
                 },
               },
               {
@@ -60,7 +63,7 @@ export const useScheduledQueryGroupQueryErrors = ({
               {
                 range: {
                   '@timestamp': {
-                    gte: `now-${interval * 2}s`,
+                    gte: `now-${interval * 200}s`,
                     lte: 'now',
                   },
                 },
@@ -75,8 +78,13 @@ export const useScheduledQueryGroupQueryErrors = ({
     },
     {
       keepPreviousData: true,
-      enabled: !skip || !actionId || !interval,
-      select: (response) => response.rawResponse.hits ?? [],
+      enabled: !skip || !actionId || !interval || !agentIds.length,
+      select: (response) => {
+        if (actionId === 'windows_drivers') {
+          console.error('responose', response);
+        }
+        return response.rawResponse.hits ?? [];
+      },
     }
   );
 };
