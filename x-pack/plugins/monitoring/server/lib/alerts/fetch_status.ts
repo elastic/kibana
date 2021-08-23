@@ -9,7 +9,7 @@ import { AlertInstanceState } from '../../../common/types/alerts';
 import { RulesClient } from '../../../../alerting/server';
 import { AlertsFactory } from '../../alerts';
 import { CommonAlertState, CommonAlertFilter, RulesByType } from '../../../common/types/alerts';
-import { ALERTS } from '../../../common/constants';
+import { RULES } from '../../../common/constants';
 
 export async function fetchStatus(
   rulesClient: RulesClient,
@@ -18,7 +18,7 @@ export async function fetchStatus(
   filters: CommonAlertFilter[] = []
 ): Promise<RulesByType> {
   const rulesByType = await Promise.all(
-    (alertTypes || ALERTS).map(async (type) => AlertsFactory.getByType(type, rulesClient))
+    (alertTypes || RULES).map(async (type) => AlertsFactory.getByType(type, rulesClient))
   );
   if (!rulesByType.length) return {};
 
@@ -26,13 +26,13 @@ export async function fetchStatus(
   const rulesWithStates = await Promise.all(
     rulesFlattened.map(async (rule) => {
       // we should have a different class to distinguish between "alerts" where the rule exists
-      // and a BaseAlert created without an existing rule for better typing so we don't need to check here
-      if (!rule.rawAlert) {
-        throw new Error('alert missing rawAlert');
+      // and a BaseRule created without an existing rule for better typing so we don't need to check here
+      if (!rule.sanitizedRule) {
+        throw new Error('alert missing sanitizedRule');
       }
       const id = rule.getId();
       if (!id) {
-        throw new Error('alert missing id');
+        throw new Error('rule missing id');
       }
 
       // Now that we have the id, we can get the state
@@ -63,10 +63,10 @@ export async function fetchStatus(
         []
       );
 
-      const type = rule.alertOptions.id;
+      const type = rule.ruleOptions.id;
       const result = {
         states: alertStates,
-        rawAlert: rule.rawAlert,
+        sanitizedRule: rule.sanitizedRule,
       };
       return { type, result };
     })

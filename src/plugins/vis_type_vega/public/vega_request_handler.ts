@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { KibanaExecutionContext } from 'src/core/public';
 import { Filter, esQuery, TimeRange, Query } from '../../data/public';
 
 import { SearchAPI } from './data_model/search_api';
@@ -22,6 +22,7 @@ interface VegaRequestHandlerParams {
   timeRange: TimeRange;
   visParams: VisParams;
   searchSessionId?: string;
+  executionContext?: KibanaExecutionContext;
 }
 
 interface VegaRequestHandlerContext {
@@ -43,17 +44,22 @@ export function createVegaRequestHandler(
     query,
     visParams,
     searchSessionId,
+    executionContext,
   }: VegaRequestHandlerParams) {
     if (!searchAPI) {
+      const { search, indexPatterns } = getData();
+
       searchAPI = new SearchAPI(
         {
           uiSettings,
-          search: getData().search,
+          search,
+          indexPatterns,
           injectedMetadata: getInjectedMetadata(),
         },
         context.abortSignal,
         context.inspectorAdapters,
-        searchSessionId
+        searchSessionId,
+        executionContext
       );
     }
 

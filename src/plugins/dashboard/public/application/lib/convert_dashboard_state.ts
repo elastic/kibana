@@ -7,6 +7,7 @@
  */
 
 import _ from 'lodash';
+import type { KibanaExecutionContext } from 'src/core/public';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
 import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
@@ -26,7 +27,7 @@ import {
 
 interface SavedObjectToDashboardStateProps {
   version: string;
-  hideWriteControls: boolean;
+  showWriteControls: boolean;
   savedDashboard: DashboardSavedObject;
   usageCollection: DashboardAppServices['usageCollection'];
   savedObjectsTagging: DashboardAppServices['savedObjectsTagging'];
@@ -40,6 +41,7 @@ interface StateToDashboardContainerInputProps {
   query: DashboardBuildContext['query'];
   incomingEmbeddable?: EmbeddablePackageState;
   dashboardCapabilities: DashboardBuildContext['dashboardCapabilities'];
+  executionContext?: KibanaExecutionContext;
 }
 
 interface StateToRawDashboardStateProps {
@@ -53,9 +55,9 @@ interface StateToRawDashboardStateProps {
  */
 export const savedObjectToDashboardState = ({
   version,
-  hideWriteControls,
   savedDashboard,
   usageCollection,
+  showWriteControls,
   savedObjectsTagging,
 }: SavedObjectToDashboardStateProps): DashboardState => {
   const rawState = migrateAppState(
@@ -68,7 +70,7 @@ export const savedObjectToDashboardState = ({
       description: savedDashboard.description || '',
       tags: getTagsFromSavedDashboard(savedDashboard, savedObjectsTagging),
       panels: savedDashboard.panelsJSON ? JSON.parse(savedDashboard.panelsJSON) : [],
-      viewMode: savedDashboard.id || hideWriteControls ? ViewMode.VIEW : ViewMode.EDIT,
+      viewMode: savedDashboard.id || showWriteControls ? ViewMode.EDIT : ViewMode.VIEW,
       options: savedDashboard.optionsJSON ? JSON.parse(savedDashboard.optionsJSON) : {},
     },
     version,
@@ -92,6 +94,7 @@ export const stateToDashboardContainerInput = ({
   searchSessionId,
   savedDashboard,
   dashboardState,
+  executionContext,
 }: StateToDashboardContainerInputProps): DashboardContainerInput => {
   const { filterManager, timefilter: timefilterService } = queryService;
   const { timefilter } = timefilterService;
@@ -125,6 +128,7 @@ export const stateToDashboardContainerInput = ({
     timeRange: {
       ..._.cloneDeep(timefilter.getTime()),
     },
+    executionContext,
   };
 };
 

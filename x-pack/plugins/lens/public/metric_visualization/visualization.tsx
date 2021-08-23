@@ -6,11 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Ast } from '@kbn/interpreter/target/common';
+import { Ast } from '@kbn/interpreter/common';
 import { getSuggestions } from './metric_suggestions';
 import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
 import type { MetricState } from '../../common/expressions';
+import { layerTypes } from '../../common';
 
 const toExpression = (
   state: MetricState,
@@ -90,6 +91,7 @@ export const metricVisualization: Visualization<MetricState> = {
       state || {
         layerId: addNewLayer(),
         accessor: undefined,
+        layerType: layerTypes.DATA,
       }
     );
   },
@@ -107,6 +109,23 @@ export const metricVisualization: Visualization<MetricState> = {
         },
       ],
     };
+  },
+
+  getSupportedLayers() {
+    return [
+      {
+        type: layerTypes.DATA,
+        label: i18n.translate('xpack.lens.metric.addLayer', {
+          defaultMessage: 'Add visualization layer',
+        }),
+      },
+    ];
+  },
+
+  getLayerType(layerId, state) {
+    if (state?.layerId === layerId) {
+      return state.layerType;
+    }
   },
 
   toExpression,

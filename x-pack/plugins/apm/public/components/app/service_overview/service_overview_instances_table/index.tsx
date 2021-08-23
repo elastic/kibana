@@ -20,7 +20,6 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import {
   PAGE_SIZE,
-  MainStatsServiceInstanceItem,
   SortDirection,
   SortField,
 } from '../service_overview_instances_chart_and_table';
@@ -28,6 +27,8 @@ import { OverviewTableContainer } from '../../../shared/overview_table_container
 import { getColumns } from './get_columns';
 import { InstanceDetails } from './intance_details';
 
+type ServiceInstanceMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];
 type ServiceInstanceDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
 export interface TableOptions {
@@ -141,9 +142,19 @@ export function ServiceOverviewInstancesTable({
       <EuiFlexItem data-test-subj="serviceInstancesTableContainer">
         <TableFetchWrapper status={status}>
           <OverviewTableContainer
+            fixedHeight={true}
             isEmptyAndLoading={mainStatsItemCount === 0 && isLoading}
           >
             <EuiBasicTable
+              noItemsMessage={
+                isLoading
+                  ? i18n.translate('xpack.apm.serviceOverview.loadingText', {
+                      defaultMessage: 'No instances found',
+                    })
+                  : i18n.translate('xpack.apm.serviceOverview.noResultsText', {
+                      defaultMessage: 'No instances found',
+                    })
+              }
               data-test-subj="instancesTable"
               loading={isLoading}
               items={mainStatsItems}

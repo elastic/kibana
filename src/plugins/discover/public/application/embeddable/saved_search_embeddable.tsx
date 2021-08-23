@@ -22,11 +22,10 @@ import {
   Query,
   TimeRange,
   Filter,
-  IndexPatternField,
   IndexPattern,
   ISearchSource,
+  IndexPatternField,
 } from '../../../../data/common';
-import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { UiActionsStart } from '../../../../ui_actions/public';
@@ -38,23 +37,27 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
-import * as columnActions from '../angular/doc_table/actions/columns';
-import { getSortForSearchSource, getDefaultSort } from '../angular/doc_table';
+import * as columnActions from '../apps/main/components/doc_table/actions/columns';
 import { handleSourceColumnState } from '../angular/helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
+import { DocTableProps } from '../apps/main/components/doc_table/doc_table_wrapper';
+import { getDefaultSort } from '../apps/main/components/doc_table';
+import { SortOrder } from '../apps/main/components/doc_table/components/table_header/helpers';
+import { updateSearchSource } from './helpers/update_search_source';
 
-export interface SearchProps extends Partial<DiscoverGridProps> {
-  settings?: DiscoverGridSettings;
-  description?: string;
-  sharedItemTitle?: string;
-  inspectorAdapters?: Adapters;
+export type SearchProps = Partial<DiscoverGridProps> &
+  Partial<DocTableProps> & {
+    settings?: DiscoverGridSettings;
+    description?: string;
+    sharedItemTitle?: string;
+    inspectorAdapters?: Adapters;
 
-  filter?: (field: IndexPatternField, value: string[], operator: string) => void;
-  hits?: ElasticSearchHit[];
-  totalHitCount?: number;
-  onMoveColumn?: (column: string, index: number) => void;
-}
+    filter?: (field: IndexPatternField, value: string[], operator: string) => void;
+    hits?: ElasticSearchHit[];
+    totalHitCount?: number;
+    onMoveColumn?: (column: string, index: number) => void;
+  };
 
 interface SearchEmbeddableConfig {
   savedSearch: SavedSearch;
@@ -141,26 +144,16 @@ export class SavedSearchEmbeddable
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
-    searchSource.setField('size', this.services.uiSettings.get(SAMPLE_SIZE_SETTING));
-    searchSource.setField(
-      'sort',
-      getSortForSearchSource(
-        this.searchProps!.sort,
-        this.searchProps!.indexPattern,
-        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
-      )
-    );
-    if (useNewFieldsApi) {
-      searchSource.removeField('fieldsFromSource');
-      const fields: Record<string, string> = { field: '*', include_unmapped: 'true' };
-      searchSource.setField('fields', [fields]);
-    } else {
-      searchSource.removeField('fields');
-      if (this.searchProps.indexPattern) {
-        const fieldNames = this.searchProps.indexPattern.fields.map((field) => field.name);
-        searchSource.setField('fieldsFromSource', fieldNames);
+    updateSearchSource(
+      searchSource,
+      this.searchProps!.indexPattern,
+      this.searchProps!.sort,
+      useNewFieldsApi,
+      {
+        sampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
+        defaultSort: this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
       }
-    }
+    );
 
     // Log request to inspector
     this.inspectorAdapters.requests!.reset();
@@ -168,6 +161,14 @@ export class SavedSearchEmbeddable
     this.searchProps!.isLoading = true;
 
     this.updateOutput({ loading: true, error: undefined });
+    const executionContext = {
+      type: this.type,
+      name: 'discover',
+      id: this.savedSearch.id,
+      description: this.output.title || this.output.defaultTitle || '',
+      url: this.output.editUrl,
+      parent: this.input.executionContext,
+    };
 
     try {
       // Make the request
@@ -185,6 +186,7 @@ export class SavedSearchEmbeddable
                 'This request queries Elasticsearch to fetch the data for the search.',
             }),
           },
+          executionContext,
         })
         .toPromise();
       this.updateOutput({ loading: false, error: undefined });

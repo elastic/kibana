@@ -5,19 +5,20 @@
  * 2.0.
  */
 
+import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
-import { IIndexPattern, SearchBar, TimeHistory } from '../../../../../../src/plugins/data/public';
+import { SearchBar, TimeHistory } from '../../../../../../src/plugins/data/public';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
 export function AlertsSearchBar({
-  dynamicIndexPattern,
+  dynamicIndexPatterns,
   rangeFrom,
   rangeTo,
   onQueryChange,
   query,
 }: {
-  dynamicIndexPattern: IIndexPattern[];
+  dynamicIndexPatterns: IndexPatternBase[];
   rangeFrom?: string;
   rangeTo?: string;
   query?: string;
@@ -31,9 +32,19 @@ export function AlertsSearchBar({
   }, []);
   const [queryLanguage, setQueryLanguage] = useState<'lucene' | 'kuery'>('kuery');
 
+  const compatibleIndexPatterns = useMemo(
+    () =>
+      dynamicIndexPatterns.map((dynamicIndexPattern) => ({
+        title: dynamicIndexPattern.title ?? '',
+        id: dynamicIndexPattern.id ?? '',
+        fields: dynamicIndexPattern.fields,
+      })),
+    [dynamicIndexPatterns]
+  );
+
   return (
     <SearchBar
-      indexPatterns={dynamicIndexPattern}
+      indexPatterns={compatibleIndexPatterns}
       placeholder={i18n.translate('xpack.observability.alerts.searchBarPlaceholder', {
         defaultMessage: 'kibana.alert.evaluation.threshold > 75',
       })}
@@ -51,6 +62,7 @@ export function AlertsSearchBar({
         });
         setQueryLanguage((nextQuery?.language || 'kuery') as 'kuery' | 'lucene');
       }}
+      displayStyle="inPage"
     />
   );
 }

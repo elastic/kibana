@@ -9,9 +9,9 @@ Returns a serialized field format for the field used in this agg. This can be pa
 <b>Signature:</b>
 
 ```typescript
-toSerializedFieldFormat(): {} | Ensure<SerializedFieldFormat<SerializableState>, SerializableState>;
+toSerializedFieldFormat(): {} | Ensure<SerializedFieldFormat<SerializableRecord>, SerializableRecord>;
 ```
 <b>Returns:</b>
 
-`{} | Ensure<SerializedFieldFormat<SerializableState>, SerializableState>`
+`{} | Ensure<SerializedFieldFormat<SerializableRecord>, SerializableRecord>`
 

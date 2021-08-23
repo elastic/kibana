@@ -111,6 +111,10 @@ export interface ImportResponse {
 export interface ImportFailure {
   item: number;
   reason: string;
+  caused_by?: {
+    type: string;
+    reason: string;
+  };
   doc: ImportDoc;
 }
 

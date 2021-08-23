@@ -19,6 +19,7 @@ import {
 } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { truncate, unit } from '../../../utils/style';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
@@ -34,7 +35,11 @@ const ServiceNodeName = euiStyled.div`
 
 function ServiceNodeOverview() {
   const {
-    urlParams: { kuery, start, end },
+    query: { environment, kuery },
+  } = useApmParams('/services/:serviceName/nodes');
+
+  const {
+    urlParams: { start, end },
   } = useUrlParams();
 
   const { serviceName } = useApmServiceContext();
@@ -52,13 +57,14 @@ function ServiceNodeOverview() {
           },
           query: {
             kuery,
+            environment,
             start,
             end,
           },
         },
       });
     },
-    [kuery, serviceName, start, end]
+    [kuery, environment, serviceName, start, end]
   );
 
   const items = data?.serviceNodes ?? [];
@@ -79,7 +85,7 @@ function ServiceNodeOverview() {
       ),
       field: 'name',
       sortable: true,
-      render: (name: string) => {
+      render: (_, { name }) => {
         const { displayedName, tooltip } =
           name === SERVICE_NODE_NAME_MISSING
             ? {
@@ -112,7 +118,7 @@ function ServiceNodeOverview() {
       }),
       field: 'cpu',
       sortable: true,
-      render: (value: number | null) => asPercent(value, 1),
+      render: (_, { cpu }) => asPercent(cpu, 1),
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.heapMemoryColumnLabel', {

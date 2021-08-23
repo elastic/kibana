@@ -136,6 +136,7 @@ export interface GetFieldsOptionsTimePattern {
 export interface IIndexPatternsApiClient {
   getFieldsForTimePattern: (options: GetFieldsOptionsTimePattern) => Promise<any>;
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
+  hasUserIndexPattern: () => Promise<boolean>;
 }
 
 export type { SavedObject };
@@ -185,6 +186,7 @@ export interface FieldSpecExportFmt {
 }
 
 /**
+ * @public
  * Serialized version of IndexPatternField
  */
 export interface FieldSpec extends IndexPatternFieldBase {
