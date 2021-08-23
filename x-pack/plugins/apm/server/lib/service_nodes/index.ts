@@ -56,12 +56,6 @@ const getServiceNodes = async ({
                 },
               },
             },
-            host: {
-              terms: {
-                field: HOST_NAME,
-                size: 1,
-              },
-            },
             cpu: {
               avg: {
                 field: METRIC_PROCESS_CPU_PERCENT,
@@ -100,7 +94,6 @@ const getServiceNodes = async ({
       cpu: bucket.cpu.value,
       heapMemory: bucket.heapMemory.value,
       hostName: bucket.latest.top[0].metrics['host.hostname'],
-      host: bucket.host,
       nonHeapMemory: bucket.nonHeapMemory.value,
       threadCount: bucket.threadCount.value,
     }))
