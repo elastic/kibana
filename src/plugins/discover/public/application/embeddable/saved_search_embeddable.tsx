@@ -39,7 +39,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
 import * as columnActions from '../angular/doc_table/actions/columns';
-import { getSortForSearchSource, getDefaultSort } from '../angular/doc_table';
+import { getDefaultSort } from '../angular/doc_table';
 import { handleSourceColumnState } from '../angular/helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { DiscoverGridSettings } from '../components/discover_grid/types';

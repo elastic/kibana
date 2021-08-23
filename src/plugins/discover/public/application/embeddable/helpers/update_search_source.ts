@@ -7,8 +7,8 @@
  */
 
 import { IndexPattern, ISearchSource } from '../../../../../data/common';
-import { getSortForSearchSource } from '../../apps/main/components/doc_table';
-import { SortPairArr } from '../../apps/main/components/doc_table/lib/get_sort';
+import { getSortForSearchSource } from '../../angular/doc_table';
+import { SortPairArr } from '../../angular/doc_table/lib/get_sort';
 
 export const updateSearchSource = (
   searchSource: ISearchSource,
