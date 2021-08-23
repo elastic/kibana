@@ -7,11 +7,13 @@
  */
 
 import React from 'react';
-import sinon from 'sinon';
 import { shallow } from 'enzyme';
+import type { HomeProps } from './home';
 import { Home } from './home';
 
 import { FeatureCatalogueCategory } from '../../services';
+import { telemetryPluginMock } from '../../../../telemetry/public/mocks';
+import { dataPluginMock } from '../../../../data/public/mocks';
 
 jest.mock('../kibana_services', () => ({
   getServices: () => ({
@@ -31,46 +33,31 @@ jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
 }));
 
 describe('home', () => {
-  let defaultProps;
+  let defaultProps: HomeProps;
 
   beforeEach(() => {
     defaultProps = {
       directories: [],
       solutions: [],
-      apmUiEnabled: true,
-      mlEnabled: true,
-      kibanaVersion: '99.2.1',
-      fetchTelemetry: jest.fn(),
-      getTelemetryBannerId: jest.fn(),
-      setOptIn: jest.fn(),
-      showTelemetryOptIn: false,
+      localStorage: {
+        ...localStorage,
+        getItem: jest.fn((path) => {
+          expect(path).toEqual('home:welcome:show');
+          return null; // Simulate that the local item has not been set yet
+        }),
+        setItem: jest.fn(),
+      },
+      urlBasePath: 'goober',
+      telemetry: telemetryPluginMock.createStartContract(),
       addBasePath(url) {
         return `base_path/${url}`;
       },
-      find() {
-        return Promise.resolve({ total: 1 });
-      },
-      loadingCount: {
-        increment: sinon.mock(),
-        decrement: sinon.mock(),
-      },
-      localStorage: {
-        getItem: sinon.spy((path) => {
-          expect(path).toEqual('home:welcome:show');
-          return 'false';
-        }),
-        setItem: sinon.mock(),
-      },
-      urlBasePath: 'goober',
-      onOptInSeen() {
-        return false;
-      },
-      getOptInStatus: jest.fn(),
+      indexPatternService: dataPluginMock.createStartContract().indexPatterns,
     };
   });
 
-  async function renderHome(props = {}) {
-    const component = shallow(<Home {...defaultProps} {...props} />);
+  async function renderHome(props: Partial<HomeProps> = {}) {
+    const component = shallow<Home>(<Home {...defaultProps} {...props} />);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -93,6 +80,7 @@ describe('home', () => {
       const solutionEntry1 = {
         id: 'kibana',
         title: 'Kibana',
+        description: 'description',
         icon: 'logoKibana',
         path: 'kibana_landing_page',
         order: 1,
@@ -100,6 +88,7 @@ describe('home', () => {
       const solutionEntry2 = {
         id: 'solution-2',
         title: 'Solution two',
+        description: 'description',
         icon: 'empty',
         path: 'path-to-solution-two',
         order: 2,
@@ -107,6 +96,7 @@ describe('home', () => {
       const solutionEntry3 = {
         id: 'solution-3',
         title: 'Solution three',
+        description: 'description',
         icon: 'empty',
         path: 'path-to-solution-three',
         order: 3,
@@ -114,6 +104,7 @@ describe('home', () => {
       const solutionEntry4 = {
         id: 'solution-4',
         title: 'Solution four',
+        description: 'description',
         icon: 'empty',
         path: 'path-to-solution-four',
         order: 4,
@@ -185,46 +176,44 @@ describe('home', () => {
 
   describe('welcome', () => {
     test('should show the welcome screen if enabled, and there are no index patterns defined', async () => {
-      defaultProps.localStorage.getItem = sinon.spy(() => 'true');
+      defaultProps.localStorage.getItem = jest.fn(() => 'true');
 
-      const component = await renderHome({
-        http: {
-          get: () => Promise.resolve({ isNewInstance: true }),
-        },
-      });
+      const indexPatternService = dataPluginMock.createStartContract().indexPatterns;
+      indexPatternService.hasUserIndexPattern = jest.fn(async () => false);
+      const component = await renderHome({ indexPatternService });
 
-      sinon.assert.calledOnce(defaultProps.localStorage.getItem);
+      expect(defaultProps.localStorage.getItem).toHaveBeenCalledTimes(1);
 
       expect(component).toMatchSnapshot();
     });
 
     test('stores skip welcome setting if skipped', async () => {
-      defaultProps.localStorage.getItem = sinon.spy(() => 'true');
+      defaultProps.localStorage.getItem = jest.fn(() => 'true');
 
-      const component = await renderHome({
-        find: () => Promise.resolve({ total: 0 }),
-      });
+      const indexPatternService = dataPluginMock.createStartContract().indexPatterns;
+      indexPatternService.hasUserIndexPattern = jest.fn(async () => false);
+      const component = await renderHome({ indexPatternService });
 
       component.instance().skipWelcome();
       component.update();
 
-      sinon.assert.calledWith(defaultProps.localStorage.setItem, 'home:welcome:show', 'false');
+      expect(defaultProps.localStorage.setItem).toHaveBeenCalledWith('home:welcome:show', 'false');
 
       expect(component).toMatchSnapshot();
     });
 
     test('should show the normal home page if loading fails', async () => {
-      defaultProps.localStorage.getItem = sinon.spy(() => 'true');
+      defaultProps.localStorage.getItem = jest.fn(() => 'true');
 
-      const component = await renderHome({
-        find: () => Promise.reject('Doh!'),
-      });
+      const indexPatternService = dataPluginMock.createStartContract().indexPatterns;
+      indexPatternService.hasUserIndexPattern = jest.fn(() => Promise.reject('Doh!'));
+      const component = await renderHome({ indexPatternService });
 
       expect(component).toMatchSnapshot();
     });
 
     test('should show the normal home page if welcome screen is disabled locally', async () => {
-      defaultProps.localStorage.getItem = sinon.spy(() => 'false');
+      defaultProps.localStorage.getItem = jest.fn(() => 'false');
 
       const component = await renderHome();
 
@@ -234,27 +223,33 @@ describe('home', () => {
 
   describe('isNewKibanaInstance', () => {
     test('should set isNewKibanaInstance to true when there are no index patterns', async () => {
-      const component = await renderHome({
-        find: () => Promise.resolve({ total: 0 }),
-      });
+      const indexPatternService = dataPluginMock.createStartContract().indexPatterns;
+      indexPatternService.hasUserIndexPattern = jest.fn(async () => false);
+      const component = await renderHome({ indexPatternService });
+
+      expect(component.state().isNewKibanaInstance).toBe(true);
 
       expect(component).toMatchSnapshot();
     });
 
     test('should set isNewKibanaInstance to false when there are index patterns', async () => {
-      const component = await renderHome({
-        find: () => Promise.resolve({ total: 1 }),
-      });
+      const indexPatternService = dataPluginMock.createStartContract().indexPatterns;
+      indexPatternService.hasUserIndexPattern = jest.fn(async () => true);
+      const component = await renderHome({ indexPatternService });
+
+      expect(component.state().isNewKibanaInstance).toBe(false);
 
       expect(component).toMatchSnapshot();
     });
 
-    test('should safely handle execeptions', async () => {
-      const component = await renderHome({
-        find: () => {
-          throw new Error('simulated find error');
-        },
+    test('should safely handle exceptions', async () => {
+      const indexPatternService = dataPluginMock.createStartContract().indexPatterns;
+      indexPatternService.hasUserIndexPattern = jest.fn(() => {
+        throw new Error('simulated find error');
       });
+      const component = await renderHome({ indexPatternService });
+
+      expect(component.state().isNewKibanaInstance).toBe(false);
 
       expect(component).toMatchSnapshot();
     });

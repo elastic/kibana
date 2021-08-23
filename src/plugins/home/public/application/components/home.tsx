@@ -7,12 +7,14 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
+import type { IndexPatternsContract } from 'src/plugins/data/public';
+import type { TelemetryPluginStart } from 'src/plugins/telemetry/public';
 import { KibanaPageTemplate, OverviewPageFooter } from '../../../../kibana_react/public';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
+import type { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../services';
 import { FeatureCatalogueCategory } from '../../services';
 import { getServices } from '../kibana_services';
 import { AddData } from './add_data';
@@ -22,8 +24,26 @@ import { Welcome } from './welcome';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
 
-export class Home extends Component {
-  constructor(props) {
+export interface HomeProps {
+  addBasePath: (url: string) => string;
+  directories: FeatureCatalogueEntry[];
+  solutions: FeatureCatalogueSolution[];
+  localStorage: Storage;
+  urlBasePath: string;
+  telemetry: TelemetryPluginStart;
+  indexPatternService: IndexPatternsContract;
+}
+
+interface State {
+  isLoading: boolean;
+  isNewKibanaInstance: boolean;
+  isWelcomeEnabled: boolean;
+}
+
+export class Home extends Component<HomeProps, State> {
+  private _isMounted?: boolean;
+
+  constructor(props: HomeProps) {
     super(props);
 
     const isWelcomeEnabled = !(
@@ -31,7 +51,7 @@ export class Home extends Component {
       props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
     );
 
-    const body = document.querySelector('body');
+    const body = document.querySelector('body')!;
     body.classList.add('isHomPage');
 
     this.state = {
@@ -48,7 +68,7 @@ export class Home extends Component {
   componentWillUnmount() {
     this._isMounted = false;
 
-    const body = document.querySelector('body');
+    const body = document.querySelector('body')!;
     body.classList.remove('isHomPage');
   }
 
@@ -70,9 +90,9 @@ export class Home extends Component {
         }
       }, 500);
 
-      const { isNewInstance } = await this.props.http.get('/internal/home/new_instance_status');
+      const hasUserIndexPattern = await this.props.indexPatternService.hasUserIndexPattern();
 
-      this.endLoading({ isNewKibanaInstance: isNewInstance });
+      this.endLoading({ isNewKibanaInstance: !hasUserIndexPattern });
     } catch (err) {
       // An error here is relatively unimportant, as it only means we don't provide
       // some UI niceties.
@@ -91,15 +111,16 @@ export class Home extends Component {
 
   skipWelcome = () => {
     this.props.localStorage.setItem(KEY_ENABLE_WELCOME, 'false');
-    this._isMounted && this.setState({ isWelcomeEnabled: false });
+    if (this._isMounted) this.setState({ isWelcomeEnabled: false });
   };
 
-  findDirectoryById = (id) => this.props.directories.find((directory) => directory.id === id);
+  findDirectoryById = (id: string) =>
+    this.props.directories.find((directory) => directory.id === id);
 
-  getFeaturesByCategory = (category) =>
+  getFeaturesByCategory = (category: FeatureCatalogueCategory) =>
     this.props.directories
       .filter((directory) => directory.showOnHomePage && directory.category === category)
-      .sort((directoryA, directoryB) => directoryA.order - directoryB.order);
+      .sort((directoryA, directoryB) => (directoryA.order ?? -1) - (directoryB.order ?? -1));
 
   renderNormal() {
     const { addBasePath, solutions } = this.props;
@@ -177,24 +198,3 @@ export class Home extends Component {
     return this.renderNormal();
   }
 }
-
-Home.propTypes = {
-  addBasePath: PropTypes.func.isRequired,
-  solutions: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-      description: PropTypes.string,
-      icon: PropTypes.string.isRequired,
-      path: PropTypes.string.isRequired,
-      order: PropTypes.number,
-    })
-  ),
-  find: PropTypes.func.isRequired,
-  localStorage: PropTypes.object.isRequired,
-  urlBasePath: PropTypes.string.isRequired,
-  telemetry: PropTypes.shape({
-    telemetryService: PropTypes.any,
-    telemetryNotifications: PropTypes.any,
-  }),
-};
