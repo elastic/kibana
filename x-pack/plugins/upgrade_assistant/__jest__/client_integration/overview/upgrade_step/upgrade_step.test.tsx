@@ -23,36 +23,33 @@ describe('Overview - Upgrade Step', () => {
     server.restore();
   });
 
-  describe('Step 3 - Upgrade stack', () => {
-    test('Shows link to setup upgrade docs for on-prem installations', () => {
-      const { exists } = testBed;
+  test('Shows link to setup upgrade docs for on-prem installations', () => {
+    const { exists } = testBed;
 
-      expect(exists('upgradeSetupDocsLink')).toBe(true);
-      expect(exists('upgradeSetupCloudLink')).toBe(false);
-    });
+    expect(exists('upgradeSetupDocsLink')).toBe(true);
+    expect(exists('upgradeSetupCloudLink')).toBe(false);
+  });
 
-    test('Shows upgrade cta and link to docs for cloud installations', async () => {
-      await act(async () => {
-        testBed = await setupOverviewPage({
-          kibanaContextOverrides: {
-            cloud: {
-              isCloudEnabled: true,
-              deploymentUrl:
-                'https://cloud.elastic.co./deployments/bfdad4ef99a24212a06d387593686d63',
-            },
+  test('Shows upgrade CTA and link to docs for cloud installations', async () => {
+    await act(async () => {
+      testBed = await setupOverviewPage({
+        kibanaContextOverrides: {
+          cloud: {
+            isCloudEnabled: true,
+            deploymentUrl: 'https://cloud.elastic.co./deployments/bfdad4ef99a24212a06d387593686d63',
           },
-        });
+        },
       });
-
-      const { component, exists, find } = testBed;
-      component.update();
-
-      expect(exists('upgradeSetupCloudLink')).toBe(true);
-      expect(exists('upgradeSetupDocsLink')).toBe(true);
-
-      expect(find('upgradeSetupCloudLink').props().href).toBe(
-        'https://cloud.elastic.co./deployments/bfdad4ef99a24212a06d387593686d63'
-      );
     });
+
+    const { component, exists, find } = testBed;
+    component.update();
+
+    expect(exists('upgradeSetupCloudLink')).toBe(true);
+    expect(exists('upgradeSetupDocsLink')).toBe(true);
+
+    expect(find('upgradeSetupCloudLink').props().href).toBe(
+      'https://cloud.elastic.co./deployments/bfdad4ef99a24212a06d387593686d63'
+    );
   });
 });
