@@ -1,0 +1,267 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { act } from 'react-dom/test-utils';
+
+import { API_BASE_PATH } from '../../../common/constants';
+import type { MlAction } from '../../../common/types';
+import { ElasticsearchTestBed, setupElasticsearchPage, setupEnvironment } from '../helpers';
+import {
+  esDeprecationsMockResponse,
+  MOCK_SNAPSHOT_ID,
+  MOCK_JOB_ID,
+  createEsDeprecationsMockResponse,
+} from './mocked_responses';
+
+describe('Deprecations table', () => {
+  let testBed: ElasticsearchTestBed;
+  const { server, httpRequestsMockHelpers } = setupEnvironment();
+
+  afterAll(() => {
+    server.restore();
+  });
+
+  beforeEach(async () => {
+    httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
+    httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
+      nodeId: 'my_node',
+      snapshotId: MOCK_SNAPSHOT_ID,
+      jobId: MOCK_JOB_ID,
+      status: 'idle',
+    });
+
+    await act(async () => {
+      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+    });
+
+    testBed.component.update();
+  });
+
+  it('renders deprecations', () => {
+    const { exists, find } = testBed;
+    // Verify container exists
+    expect(exists('esDeprecationsContent')).toBe(true);
+
+    // Verify all deprecations appear in the table
+    expect(find('deprecationTableRow').length).toEqual(
+      esDeprecationsMockResponse.deprecations.length
+    );
+  });
+
+  it('refreshes deprecation data', async () => {
+    const { actions } = testBed;
+    const totalRequests = server.requests.length;
+
+    await actions.clickRefreshButton();
+
+    const mlDeprecation = esDeprecationsMockResponse.deprecations[0];
+    const reindexDeprecation = esDeprecationsMockResponse.deprecations[3];
+
+    // Since upgradeStatusMockResponse includes ML and reindex actions (which require fetching status), there will be 3 requests made
+    expect(server.requests.length).toBe(totalRequests + 3);
+    expect(server.requests[server.requests.length - 3].url).toBe(
+      `${API_BASE_PATH}/es_deprecations`
+    );
+    expect(server.requests[server.requests.length - 2].url).toBe(
+      `${API_BASE_PATH}/ml_snapshots/${(mlDeprecation.correctiveAction as MlAction).jobId}/${
+        (mlDeprecation.correctiveAction as MlAction).snapshotId
+      }`
+    );
+    expect(server.requests[server.requests.length - 1].url).toBe(
+      `${API_BASE_PATH}/reindex/${reindexDeprecation.index}`
+    );
+  });
+
+  describe('search bar', () => {
+    it('filters results by "critical" status', async () => {
+      const { find, actions } = testBed;
+
+      await actions.clickCriticalFilterButton();
+
+      const criticalDeprecations = esDeprecationsMockResponse.deprecations.filter(
+        (deprecation) => deprecation.isCritical
+      );
+
+      expect(find('deprecationTableRow').length).toEqual(criticalDeprecations.length);
+
+      await actions.clickCriticalFilterButton();
+
+      expect(find('deprecationTableRow').length).toEqual(
+        esDeprecationsMockResponse.deprecations.length
+      );
+    });
+
+    it('filters results by type', async () => {
+      const { component, find, actions } = testBed;
+
+      await actions.clickTypeFilterDropdownAt(0);
+
+      // We need to read the document "body" as the filter dropdown options are added there and not inside
+      // the component DOM tree.
+      const clusterTypeFilterButton: HTMLButtonElement | null = document.body.querySelector(
+        '.euiFilterSelect__items .euiFilterSelectItem'
+      );
+
+      expect(clusterTypeFilterButton).not.toBeNull();
+
+      await act(async () => {
+        clusterTypeFilterButton!.click();
+      });
+
+      component.update();
+
+      const clusterDeprecations = esDeprecationsMockResponse.deprecations.filter(
+        (deprecation) => deprecation.type === 'cluster_settings'
+      );
+
+      expect(find('deprecationTableRow').length).toEqual(clusterDeprecations.length);
+    });
+
+    it('filters results by query string', async () => {
+      const { find, actions } = testBed;
+      const multiFieldsDeprecation = esDeprecationsMockResponse.deprecations[2];
+
+      await actions.setSearchInputValue(multiFieldsDeprecation.message);
+
+      expect(find('deprecationTableRow').length).toEqual(1);
+      expect(find('deprecationTableRow').at(0).text()).toContain(multiFieldsDeprecation.message);
+    });
+
+    it('shows error for invalid search queries', async () => {
+      const { find, exists, actions } = testBed;
+
+      await actions.setSearchInputValue('%');
+
+      expect(exists('invalidSearchQueryMessage')).toBe(true);
+      expect(find('invalidSearchQueryMessage').text()).toContain('Invalid search');
+    });
+
+    it('shows message when search query does not return results', async () => {
+      const { find, actions, exists } = testBed;
+
+      await actions.setSearchInputValue('foobarbaz');
+
+      expect(exists('noDeprecationsRow')).toBe(true);
+      expect(find('noDeprecationsRow').text()).toContain(
+        'No Elasticsearch deprecation issues found'
+      );
+    });
+  });
+
+  describe('pagination', () => {
+    const esDeprecationsMockResponseWithManyDeprecations = createEsDeprecationsMockResponse(20);
+    const { deprecations } = esDeprecationsMockResponseWithManyDeprecations;
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(
+        esDeprecationsMockResponseWithManyDeprecations
+      );
+      httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
+        nodeId: 'my_node',
+        snapshotId: MOCK_SNAPSHOT_ID,
+        jobId: MOCK_JOB_ID,
+        status: 'idle',
+      });
+
+      await act(async () => {
+        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      });
+
+      testBed.component.update();
+    });
+
+    it('shows the correct number of pages and deprecations per page', async () => {
+      const { find, actions } = testBed;
+
+      expect(find('esDeprecationsPagination').find('.euiPagination__item').length).toEqual(
+        Math.round(deprecations.length / 50) // Default rows per page is 50
+      );
+      expect(find('deprecationTableRow').length).toEqual(50);
+
+      // Navigate to the next page
+      await actions.clickPaginationAt(1);
+
+      // On the second (last) page, we expect to see the remaining deprecations
+      expect(find('deprecationTableRow').length).toEqual(deprecations.length - 50);
+    });
+
+    it('allows the number of viewable rows to change', async () => {
+      const { find, actions, component } = testBed;
+
+      await actions.clickRowsPerPageDropdown();
+
+      // We need to read the document "body" as the rows-per-page dropdown options are added there and not inside
+      // the component DOM tree.
+      const rowsPerPageButton: HTMLButtonElement | null = document.body.querySelector(
+        '[data-test-subj="tablePagination-100-rows"]'
+      );
+
+      expect(rowsPerPageButton).not.toBeNull();
+
+      await act(async () => {
+        rowsPerPageButton!.click();
+      });
+
+      component.update();
+
+      expect(find('esDeprecationsPagination').find('.euiPagination__item').length).toEqual(
+        Math.round(deprecations.length / 100) // Rows per page is now 100
+      );
+      expect(find('deprecationTableRow').length).toEqual(deprecations.length);
+    });
+
+    it('updates pagination when filters change', async () => {
+      const { actions, find } = testBed;
+
+      const criticalDeprecations = deprecations.filter((deprecation) => deprecation.isCritical);
+
+      await actions.clickCriticalFilterButton();
+
+      // Only 40 critical deprecations, so only one page should show
+      expect(find('esDeprecationsPagination').find('.euiPagination__item').length).toEqual(1);
+      expect(find('deprecationTableRow').length).toEqual(criticalDeprecations.length);
+    });
+
+    it('updates pagination on search', async () => {
+      const { actions, find } = testBed;
+      const reindexDeprecations = deprecations.filter(
+        (deprecation) => deprecation.correctiveAction?.type === 'reindex'
+      );
+
+      await actions.setSearchInputValue('Index created before 7.0');
+
+      // Only 20 deprecations that match, so only one page should show
+      expect(find('esDeprecationsPagination').find('.euiPagination__item').length).toEqual(1);
+      expect(find('deprecationTableRow').length).toEqual(reindexDeprecations.length);
+    });
+  });
+
+  describe('no deprecations', () => {
+    beforeEach(async () => {
+      const noDeprecationsResponse = {
+        totalCriticalDeprecations: 0,
+        deprecations: [],
+      };
+
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(noDeprecationsResponse);
+
+      await act(async () => {
+        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      });
+
+      testBed.component.update();
+    });
+
+    test('renders prompt', () => {
+      const { exists, find } = testBed;
+      expect(exists('noDeprecationsPrompt')).toBe(true);
+      expect(find('noDeprecationsPrompt').text()).toContain(
+        'Your Elasticsearch configuration is up to date'
+      );
+    });
+  });
+});

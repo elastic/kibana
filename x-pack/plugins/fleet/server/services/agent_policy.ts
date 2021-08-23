@@ -45,6 +45,7 @@ import type {
   FleetServerPolicy,
   Installation,
   Output,
+  DeletePackagePoliciesResponse,
 } from '../../common';
 import { AgentPolicyNameExistsError, HostedAgentPolicyRestrictionRelatedError } from '../errors';
 import {
@@ -616,7 +617,7 @@ class AgentPolicyService {
     }
 
     if (agentPolicy.package_policies && agentPolicy.package_policies.length) {
-      await packagePolicyService.delete(
+      const deletedPackagePolicies: DeletePackagePoliciesResponse = await packagePolicyService.delete(
         soClient,
         esClient,
         agentPolicy.package_policies as string[],
@@ -624,6 +625,13 @@ class AgentPolicyService {
           skipUnassignFromAgentPolicies: true,
         }
       );
+      try {
+        await packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies);
+      } catch (error) {
+        const logger = appContextService.getLogger();
+        logger.error(`An error occurred executing external callback: ${error}`);
+        logger.error(error);
+      }
     }
 
     if (agentPolicy.is_preconfigured) {

@@ -21,7 +21,7 @@ import { useSourcererScope } from '../../containers/sourcerer';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
 
-interface UseHoverActionItemsProps {
+export interface UseHoverActionItemsProps {
   dataProvider?: DataProvider | DataProvider[];
   dataType?: string;
   defaultFocusedButtonRef: React.MutableRefObject<HTMLButtonElement | null>;
@@ -43,7 +43,7 @@ interface UseHoverActionItemsProps {
   values?: string[] | string | null;
 }
 
-interface UseHoverActionItems {
+export interface UseHoverActionItems {
   overflowActionItems: JSX.Element[];
   allActionItems: JSX.Element[];
 }
@@ -116,7 +116,6 @@ export const useHoverActionItems = ({
    */
   const showFilters =
     values != null && (enableOverflowButton || (!showTopN && !enableOverflowButton));
-
   const allItems = useMemo(
     () =>
       [
@@ -243,7 +242,7 @@ export const useHoverActionItems = ({
     ]
   ) as JSX.Element[];
 
-  const overflowBtn = useMemo(
+  const showTopNBtn = useMemo(
     () => (
       <ShowTopNButton
         Component={enableOverflowButton ? EuiContextMenuItem : undefined}
@@ -276,7 +275,7 @@ export const useHoverActionItems = ({
                 onClick: onOverflowButtonClick,
                 showTooltip: enableOverflowButton ? false : true,
                 value: values,
-                items: showTopN ? [overflowBtn] : allItems.slice(itemsToShow),
+                items: showTopN ? [showTopNBtn] : allItems.slice(itemsToShow),
                 isOverflowPopoverOpen: !!isOverflowPopoverOpen,
               }),
             ]
@@ -293,7 +292,7 @@ export const useHoverActionItems = ({
       isOverflowPopoverOpen,
       itemsToShow,
       onOverflowButtonClick,
-      overflowBtn,
+      showTopNBtn,
       ownFocus,
       showTopN,
       stKeyboardEvent,
@@ -301,9 +300,9 @@ export const useHoverActionItems = ({
     ]
   );
 
-  const allActionItems = useMemo(() => (showTopN ? [overflowBtn] : allItems), [
+  const allActionItems = useMemo(() => (showTopN ? [showTopNBtn] : allItems), [
     allItems,
-    overflowBtn,
+    showTopNBtn,
     showTopN,
   ]);
 
