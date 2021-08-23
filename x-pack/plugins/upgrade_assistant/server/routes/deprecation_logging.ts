@@ -68,7 +68,11 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
   router.get(
     {
       path: `${API_BASE_PATH}/deprecation_logging/count`,
-      validate: false,
+      validate: {
+        query: schema.object({
+          from: schema.string(),
+        }),
+      },
     },
     versionCheckHandlerWrapper(
       async (
@@ -80,9 +84,13 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
         request,
         response
       ) => {
-        const {
-          url: { searchParams },
-        } = request;
+        const { body: indexExists } = await client.asCurrentUser.indices.exists({
+          index: DEPRECATION_LOGS_INDEX_PATTERN,
+        });
+
+        if (!indexExists) {
+          return response.ok({ body: { count: 0 } });
+        }
 
         const { body } = await client.asCurrentUser.count({
           index: DEPRECATION_LOGS_INDEX_PATTERN,
@@ -90,7 +98,7 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
             query: {
               range: {
                 '@timestamp': {
-                  gte: searchParams.get('from') || '',
+                  gte: request.query.from,
                 },
               },
             },
