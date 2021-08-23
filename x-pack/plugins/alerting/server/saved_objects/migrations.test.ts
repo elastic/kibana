@@ -1518,6 +1518,274 @@ describe('successful migrations', () => {
         },
       });
     });
+
+    test('removes preconfigured connectors from references array', () => {
+      const migration716 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
+        '7.16.0'
+      ];
+      const rule = {
+        ...getMockData({
+          actions: [
+            {
+              actionRef: 'action_0',
+              actionTypeId: '.slack',
+              group: 'small',
+              params: {
+                message: 'preconfigured',
+              },
+            },
+            {
+              actionRef: 'action_1',
+              actionTypeId: '.server-log',
+              group: 'small',
+              params: {
+                level: 'info',
+                message: 'boo',
+              },
+            },
+          ],
+        }),
+        references: [
+          {
+            id: 'my-slack1',
+            name: 'action_0',
+            type: 'action',
+          },
+          {
+            id: '997c0120-00ee-11ec-b067-2524946ba327',
+            name: 'action_1',
+            type: 'action',
+          },
+        ],
+      };
+      expect(migration716(rule, migrationContext)).toEqual({
+        ...rule,
+        attributes: {
+          ...rule.attributes,
+          legacyId: rule.id,
+          actions: [
+            {
+              actionRef: 'preconfigured:my-slack1',
+              actionTypeId: '.slack',
+              group: 'small',
+              params: {
+                message: 'preconfigured',
+              },
+            },
+            {
+              actionRef: 'action_1',
+              actionTypeId: '.server-log',
+              group: 'small',
+              params: {
+                level: 'info',
+                message: 'boo',
+              },
+            },
+          ],
+        },
+        references: [
+          {
+            id: '997c0120-00ee-11ec-b067-2524946ba327',
+            name: 'action_1',
+            type: 'action',
+          },
+        ],
+      });
+    });
+
+    test('removes preconfigured connectors from references array and maintains non-action references', () => {
+      const migration716 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
+        '7.16.0'
+      ];
+      const rule = {
+        ...getMockData({
+          actions: [
+            {
+              actionRef: 'action_0',
+              actionTypeId: '.slack',
+              group: 'small',
+              params: {
+                message: 'preconfigured',
+              },
+            },
+            {
+              actionRef: 'action_1',
+              actionTypeId: '.server-log',
+              group: 'small',
+              params: {
+                level: 'info',
+                message: 'boo',
+              },
+            },
+          ],
+        }),
+        references: [
+          {
+            id: 'my-slack1',
+            name: 'action_0',
+            type: 'action',
+          },
+          {
+            id: '997c0120-00ee-11ec-b067-2524946ba327',
+            name: 'action_1',
+            type: 'action',
+          },
+          {
+            id: '3838d98c-67d3-49e8-b813-aa8404bb6b1a',
+            name: 'params:something-else',
+            type: 'some-other-type',
+          },
+        ],
+      };
+      expect(migration716(rule, migrationContext)).toEqual({
+        ...rule,
+        attributes: {
+          ...rule.attributes,
+          legacyId: rule.id,
+          actions: [
+            {
+              actionRef: 'preconfigured:my-slack1',
+              actionTypeId: '.slack',
+              group: 'small',
+              params: {
+                message: 'preconfigured',
+              },
+            },
+            {
+              actionRef: 'action_1',
+              actionTypeId: '.server-log',
+              group: 'small',
+              params: {
+                level: 'info',
+                message: 'boo',
+              },
+            },
+          ],
+        },
+        references: [
+          {
+            id: '997c0120-00ee-11ec-b067-2524946ba327',
+            name: 'action_1',
+            type: 'action',
+          },
+          {
+            id: '3838d98c-67d3-49e8-b813-aa8404bb6b1a',
+            name: 'params:something-else',
+            type: 'some-other-type',
+          },
+        ],
+      });
+    });
+
+    test('does nothing to rules with no references', () => {
+      const migration716 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
+        '7.16.0'
+      ];
+      const rule = {
+        ...getMockData({
+          actions: [
+            {
+              actionRef: 'action_0',
+              actionTypeId: '.slack',
+              group: 'small',
+              params: {
+                message: 'preconfigured',
+              },
+            },
+            {
+              actionRef: 'action_1',
+              actionTypeId: '.server-log',
+              group: 'small',
+              params: {
+                level: 'info',
+                message: 'boo',
+              },
+            },
+          ],
+        }),
+        references: [],
+      };
+      expect(migration716(rule, migrationContext)).toEqual({
+        ...rule,
+        attributes: {
+          ...rule.attributes,
+          legacyId: rule.id,
+        },
+      });
+    });
+
+    test('does nothing to rules with no action references', () => {
+      const migration716 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
+        '7.16.0'
+      ];
+      const rule = {
+        ...getMockData({
+          actions: [
+            {
+              actionRef: 'action_0',
+              actionTypeId: '.slack',
+              group: 'small',
+              params: {
+                message: 'preconfigured',
+              },
+            },
+            {
+              actionRef: 'action_1',
+              actionTypeId: '.server-log',
+              group: 'small',
+              params: {
+                level: 'info',
+                message: 'boo',
+              },
+            },
+          ],
+        }),
+        references: [
+          {
+            id: '3838d98c-67d3-49e8-b813-aa8404bb6b1a',
+            name: 'params:something-else',
+            type: 'some-other-type',
+          },
+        ],
+      };
+      expect(migration716(rule, migrationContext)).toEqual({
+        ...rule,
+        attributes: {
+          ...rule.attributes,
+          legacyId: rule.id,
+        },
+      });
+    });
+
+    test('does nothing to rules with references but no actions', () => {
+      const migration716 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
+        '7.16.0'
+      ];
+      const rule = {
+        ...getMockData({
+          actions: [],
+        }),
+        references: [
+          {
+            id: 'my-slack1',
+            name: 'action_0',
+            type: 'action',
+          },
+          {
+            id: '997c0120-00ee-11ec-b067-2524946ba327',
+            name: 'action_1',
+            type: 'action',
+          },
+        ],
+      };
+      expect(migration716(rule, migrationContext)).toEqual({
+        ...rule,
+        attributes: {
+          ...rule.attributes,
+          legacyId: rule.id,
+        },
+      });
+    });
   });
 });
 
@@ -1628,6 +1896,31 @@ describe('handles errors during migrations', () => {
               ...alert,
               attributes: {
                 ...alert.attributes,
+              },
+            },
+          },
+        }
+      );
+    });
+  });
+
+  describe('7.16.0 throws if migration fails', () => {
+    test('should show the proper exception', () => {
+      const migration7160 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
+        '7.16.0'
+      ];
+      const rule = getMockData();
+      expect(() => {
+        migration7160(rule, migrationContext);
+      }).toThrowError(`Can't migrate!`);
+      expect(migrationContext.log.error).toHaveBeenCalledWith(
+        `encryptedSavedObject 7.16.0 migration failed for alert ${rule.id} with error: Can't migrate!`,
+        {
+          migrations: {
+            alertDocument: {
+              ...rule,
+              attributes: {
+                ...rule.attributes,
               },
             },
           },

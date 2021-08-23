@@ -600,11 +600,79 @@ function getRemovePreconfiguredConnectorsFromReferencesFn(
   };
 }
 
+export function isPreconfiguredConnector(
+  id: string,
+  preconfiguredConnectors: PreConfiguredAction[]
+): boolean {
+  return !!preconfiguredConnectors.find((connector) => connector.id === id);
+}
+
 function removePreconfiguredConnectorsFromReferences(
   doc: SavedObjectUnsanitizedDoc<RawAlert>,
   preconfiguredConnectors: PreConfiguredAction[]
 ): SavedObjectUnsanitizedDoc<RawAlert> {
+  const {
+    attributes: { actions },
+    references,
+  } = doc;
+
+  // Look for connector references
+  const connectorReferences = (references ?? []).filter((ref: SavedObjectReference) =>
+    ref.name.startsWith('action_')
+  );
+  if (connectorReferences.length > 0) {
+    const restReferences = (references ?? []).filter(
+      (ref: SavedObjectReference) => !ref.name.startsWith('action_')
+    );
+
+    const updatedConnectorReferences: SavedObjectReference[] = [];
+    const updatedActions: RawAlert['actions'] = [];
+
+    // For each connector reference, check if connector is preconfigured
+    // If yes, we need to remove from the references array and update
+    // the corresponding action so it directly references the preconfigured connector id
+    connectorReferences.forEach((connectorRef: SavedObjectReference) => {
+      // Look for the corresponding entry in the actions array
+      const correspondingAction = getCorrespondingAction(actions, connectorRef.name);
+      if (correspondingAction) {
+        if (isPreconfiguredConnector(connectorRef.id, preconfiguredConnectors)) {
+          updatedActions.push({
+            ...correspondingAction,
+            actionRef: `preconfigured:${connectorRef.id}`,
+          });
+        } else {
+          updatedActions.push(correspondingAction);
+          updatedConnectorReferences.push(connectorRef);
+        }
+      } else {
+        // Couldn't find the matching action, leave as is
+        updatedConnectorReferences.push(connectorRef);
+      }
+    });
+
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        actions: [...updatedActions],
+      },
+      references: [...updatedConnectorReferences, ...restReferences],
+    };
+  }
   return doc;
+}
+
+function getCorrespondingAction(
+  actions: SavedObjectAttribute,
+  connectorRef: string
+): RawAlertAction | null {
+  if (!Array.isArray(actions)) {
+    return null;
+  } else {
+    return actions.find(
+      (action) => (action as RawAlertAction)?.actionRef === connectorRef
+    ) as RawAlertAction;
+  }
 }
 
 function pipeMigrations(...migrations: AlertMigration[]): AlertMigration {
