@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { ExpressionRepeatImagePlugin } from './plugin';
 
 export type { ExpressionRepeatImagePluginSetup, ExpressionRepeatImagePluginStart } from './plugin';

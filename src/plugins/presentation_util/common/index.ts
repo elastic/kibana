@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable @kbn/eslint/no_export_all */
+
 export const PLUGIN_ID = 'presentationUtil';
 export const PLUGIN_NAME = 'presentationUtil';
 

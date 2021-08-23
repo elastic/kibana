@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
 import { ObservabilityPlugin, ObservabilityPluginSetup } from './plugin';

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { PluginInitializerContext, PluginInitializer } from 'kibana/public';
 import { lazy } from 'react';
 import {

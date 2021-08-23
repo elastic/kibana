@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @kbn/eslint/no_export_all */
+
 export * from './shared_exports';
 
 import type { PluginInitializerContext } from '../../../../src/core/public';

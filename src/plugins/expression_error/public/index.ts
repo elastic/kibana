@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { ExpressionErrorPlugin } from './plugin';
 
 export type { ExpressionErrorPluginSetup, ExpressionErrorPluginStart } from './plugin';

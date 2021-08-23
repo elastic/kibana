@@ -5,4 +5,6 @@
  * 2.0.
  */
 
+/* eslint-disable @kbn/eslint/no_export_all */
+
 export * from './types';

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { FileUploadPlugin } from './plugin';
 
 export function plugin() {
