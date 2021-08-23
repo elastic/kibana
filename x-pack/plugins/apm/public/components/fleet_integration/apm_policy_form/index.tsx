@@ -12,10 +12,6 @@ import {
   isAgentAuthorizationFormValid,
 } from './settings_definition/agent_authorization_settings';
 import {
-  getAnonymousSettings,
-  isAnonymousAuthFormValid,
-} from './settings_definition/anonymous_auth_settings';
-import {
   getApmSettings,
   isAPMFormValid,
 } from './settings_definition/apm_settings';
@@ -45,14 +41,12 @@ export function APMPolicyForm({
   const {
     apmSettings,
     rumSettings,
-    anonymousAuthSettings,
     tlsSettings,
     agentAuthorizationSettings,
   } = useMemo(() => {
     return {
       apmSettings: getApmSettings(isCloudPolicy),
       rumSettings: getRUMSettings(),
-      anonymousAuthSettings: getAnonymousSettings(),
       tlsSettings: getTLSSettings(),
       agentAuthorizationSettings: getAgentAuthorizationSettings(isCloudPolicy),
     };
@@ -67,7 +61,6 @@ export function APMPolicyForm({
       isAPMFormValid(newVars, apmSettings) &&
       isRUMFormValid(newVars, rumSettings) &&
       isTLSFormValid(newVars, tlsSettings) &&
-      isAnonymousAuthFormValid(newVars, anonymousAuthSettings) &&
       isAgentAuthorizationFormValid(newVars, agentAuthorizationSettings);
 
     updateAPMPolicy(newVars, isFormValid);
@@ -109,14 +102,6 @@ export function APMPolicyForm({
         { defaultMessage: 'Settings for TLS certification.' }
       ),
       settings: tlsSettings,
-    },
-    {
-      id: 'anonymousAuth',
-      title: i18n.translate(
-        'xpack.apm.fleet_integration.settings.anonymousAuth.settings.title',
-        { defaultMessage: 'Anonymous auth' }
-      ),
-      settings: anonymousAuthSettings,
     },
     {
       id: 'agentAuthorization',

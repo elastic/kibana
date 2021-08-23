@@ -29,6 +29,36 @@ export function getAgentAuthorizationSettings(
             'Enable API Key auth between APM Server and APM Agents.',
         }
       ),
+      settings: [
+        {
+          key: 'api_key_limit',
+          type: 'integer',
+          labelAppend: OPTIONAL_LABEL,
+          label: i18n.translate(
+            'xpack.apm.fleet_integration.settings.agentAuthorization.apiKeyLimitLabel',
+            { defaultMessage: 'Number of keys' }
+          ),
+          helpText: i18n.translate(
+            'xpack.apm.fleet_integration.settings.agentAuthorization.apiKeyLimitHelpText',
+            { defaultMessage: 'Might be used for security policy compliance.' }
+          ),
+          rowTitle: i18n.translate(
+            'xpack.apm.fleet_integration.settings.agentAuthorization.apiKeyLimitTitle',
+            {
+              defaultMessage:
+                'Maximum number of API keys of Agent authentication',
+            }
+          ),
+          rowDescription: i18n.translate(
+            'xpack.apm.fleet_integration.settings.agentAuthorization.apiKeyLimitDescription',
+            {
+              defaultMessage:
+                'Restrict number of unique API keys per minute, used for auth between APM Agents and Server.',
+            }
+          ),
+          validation: getIntegerRt({ min: 1 }),
+        },
+      ],
     },
     {
       type: 'text',
@@ -39,33 +69,6 @@ export function getAgentAuthorizationSettings(
         'xpack.apm.fleet_integration.settings.agentAuthorization.secretTokenLabel',
         { defaultMessage: 'Secret token' }
       ),
-    },
-    {
-      key: 'api_key_limit',
-      type: 'integer',
-      labelAppend: OPTIONAL_LABEL,
-      label: i18n.translate(
-        'xpack.apm.fleet_integration.settings.agentAuthorization.apiKeyLimitLabel',
-        { defaultMessage: 'Number of keys' }
-      ),
-      helpText: i18n.translate(
-        'xpack.apm.fleet_integration.settings.agentAuthorization.apiKeyLimitHelpText',
-        { defaultMessage: 'Might be used for security policy compliance.' }
-      ),
-      rowTitle: i18n.translate(
-        'xpack.apm.fleet_integration.settings.agentAuthorization.apiKeyLimitTitle',
-        {
-          defaultMessage: 'Maximum number of API keys of Agent authentication',
-        }
-      ),
-      rowDescription: i18n.translate(
-        'xpack.apm.fleet_integration.settings.agentAuthorization.apiKeyLimitDescription',
-        {
-          defaultMessage:
-            'Restrict number of unique API keys per minute, used for auth between APM Agents and Server.',
-        }
-      ),
-      validation: getIntegerRt({ min: 1 }),
     },
     {
       type: 'boolean',
