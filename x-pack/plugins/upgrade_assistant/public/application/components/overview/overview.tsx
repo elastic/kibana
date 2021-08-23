@@ -84,7 +84,7 @@ export const Overview: FunctionComponent = () => {
 
         <EuiSteps
           steps={[
-            getBackupStep({ nextMajor }),
+            getBackupStep(),
             getReviewLogsStep({ nextMajor }),
             getFixDeprecationLogsStep(),
             getUpgradeStep({ docLinks, nextMajor }),
