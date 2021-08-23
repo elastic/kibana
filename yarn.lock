@@ -1389,10 +1389,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@34.0.0":
-  version "34.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-34.0.0.tgz#42288a6b3a303ccc61385b786f2ccf3549c3b43a"
-  integrity sha512-gXekMH6iWIo5DaUzPJLjbn02CuPaxwGIOOF2cz/UH9zRY2A5UZ8CDICysDgriK1PcJfKPCa7Yk5cntn590coyg==
+"@elastic/charts@34.1.1":
+  version "34.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-34.1.1.tgz#ad0a614448d7a3b28a77cc6d3a5ef5c89530ea34"
+  integrity sha512-9HFqjGZALURKg0uwuo0t91IMDUY1lnRTovnJJgTrE0zIkUtEIX/yL1gKJlVKLECJO6KrwIO1LcGhobtkVQkR/A==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -1404,7 +1404,6 @@
     d3-interpolate "^1.4.0"
     d3-scale "^1.0.7"
     d3-shape "^1.3.4"
-    newtype-ts "^0.2.4"
     prop-types "^15.7.2"
     re-reselect "^3.4.0"
     react-redux "^7.1.0"
@@ -1433,10 +1432,10 @@
   dependencies:
     "@elastic/ecs-helpers" "^1.1.0"
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.17":
-  version "8.0.0-canary.17"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.17.tgz#0625a04cc585e3f311bc6471e04cd4fb0e927e9a"
-  integrity sha512-rsbEdzxYlEU+jS+qf5Gr3+2U6/1Z/S/Yt2dM7lp1A64mCjuOqqHoR2FTHN27BWvBCjtJrtyhlCJht4fsTLNuYA==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.18":
+  version "8.0.0-canary.18"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.18.tgz#d17e3c74809079c7272bb5ee0f8f96c16d723bae"
+  integrity sha512-YxFeoOWLWRMOLLSv1Zp5TyGe6hwc6FQtrLZT1TjsXucm9LVnxQSpg9tUPnYUfUNDwoY3FZwthUxH3+gb3Lqedw==
   dependencies:
     debug "^4.3.1"
     hpagent "^0.1.1"
@@ -14210,11 +14209,6 @@ forwarded@~0.1.2:
   resolved "https://registry.yarnpkg.com/forwarded/-/forwarded-0.1.2.tgz#98c23dab1175657b8c0573e8ceccd91b0ff18c84"
   integrity sha1-mMI9qxF1ZXuMBXPozszZGw/xjIQ=
 
-fp-ts@^1.0.0:
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-1.12.0.tgz#d333310e4ac104cdcb6bea47908e381bb09978e7"
-  integrity sha512-fWwnAgVlTsV26Ruo9nx+fxNHIm6l1puE1VJ/C0XJ3nRQJJJIgRHYw6sigB3MuNFZL1o4fpGlhwFhcbxHK0RsOA==
-
 fp-ts@^2.3.1:
   version "2.8.6"
   resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-2.8.6.tgz#1a0e6c3f29f5b0fbfa3120f034ea266aa73c811b"
@@ -19817,11 +19811,6 @@ monitor-event-loop-delay@^1.0.0:
   resolved "https://registry.yarnpkg.com/monitor-event-loop-delay/-/monitor-event-loop-delay-1.0.0.tgz#b5ab78165a3bb93f2b275c50d01430c7f155d1f7"
   integrity sha512-YRIr1exCIfBDLZle8WHOfSo7Xg3M+phcZfq9Fx1L6Abo+atGp7cge5pM7PjyBn4s1oZI/BRD4EMrzQBbPpVb5Q==
 
-monocle-ts@^1.0.0:
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/monocle-ts/-/monocle-ts-1.7.1.tgz#03a615938aa90983a4fa29749969d30f72d80ba1"
-  integrity sha512-X9OzpOyd/R83sYex8NYpJjUzi/MLQMvGNVfxDYiIvs+QMXMEUDwR61MQoARFN10Cqz5h/mbFSPnIQNUIGhYd2Q==
-
 moo-color@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/moo-color/-/moo-color-1.0.2.tgz#837c40758d2d58763825d1359a84e330531eca64"
@@ -20105,14 +20094,6 @@ nested-error-stacks@^2.0.0, nested-error-stacks@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/nested-error-stacks/-/nested-error-stacks-2.1.0.tgz#0fbdcf3e13fe4994781280524f8b96b0cdff9c61"
   integrity sha512-AO81vsIO1k1sM4Zrd6Hu7regmJN1NSiAja10gc4bX3F0wd+9rQmcuHQaHVQCYIEC8iFXnE+mavh23GOt7wBgug==
-
-newtype-ts@^0.2.4:
-  version "0.2.4"
-  resolved "https://registry.yarnpkg.com/newtype-ts/-/newtype-ts-0.2.4.tgz#a02a8f160a3d179f871848d687a93de73a964a41"
-  integrity sha512-HrzPdG0+0FK1qHbc3ld/HXu252OYgmN993bFxUtZ6NFCLUk1eq+yKwdvP07BblXQibGqMWNXBUrNoLUq23Ma2Q==
-  dependencies:
-    fp-ts "^1.0.0"
-    monocle-ts "^1.0.0"
 
 next-line@^1.1.0:
   version "1.1.0"
