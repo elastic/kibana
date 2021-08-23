@@ -39,8 +39,6 @@ export const getElasticsearchMetricQuery = (
   const to = timeframe.end;
   const from = timeframe.start;
 
-  const deliveryDelay = 60 * 1000; // INFO: This allows us to account for any delay ES has in indexing the most recent data.
-
   const aggregations =
     aggType === Aggregators.COUNT
       ? {}
@@ -72,21 +70,7 @@ export const getElasticsearchMetricQuery = (
             aggregations,
           },
         }
-      : {
-          aggregatedIntervals: {
-            date_range: {
-              field: timefield,
-              // Generate an array of buckets, starting at `from` and ending at `to`
-              // This is usually only necessary for alert previews or rate aggs. Most alert evaluations
-              // will generate only one bucket from this logic.
-              ranges: Array.from(Array(Math.floor((to - from) / intervalAsMS)), (_, i) => ({
-                from: from + intervalAsMS * i - deliveryDelay,
-                to: from + intervalAsMS * (i + 1) - deliveryDelay,
-              })),
-            },
-            aggregations,
-          },
-        };
+      : aggregations;
 
   const aggs = groupBy
     ? {
