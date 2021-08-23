@@ -137,6 +137,7 @@ export const defaultCellActions: TGridCellAction[] = [
         {allowTopN({
           browserField: getAllFieldsByName(browserFields)[columnId],
           fieldName: columnId,
+          hideTopN: false,
         }) && (
           <ShowTopNButton
             Component={Component}

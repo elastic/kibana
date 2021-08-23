@@ -14,6 +14,8 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
 import { SkipBottomButton } from '../skip_bottom_button';
 
+const FOOTER_PADDING = { padding: 0 };
+
 const DocTableInfiniteContent = (props: DocTableRenderProps) => {
   const [limit, setLimit] = useState(props.minimumVisibleRows);
 
@@ -74,29 +76,38 @@ const DocTableInfiniteContent = (props: DocTableRenderProps) => {
       <table className="kbn-table table" data-test-subj="docTable">
         <thead>{props.renderHeader()}</thead>
         <tbody>{props.renderRows(props.rows.slice(0, limit))}</tbody>
-      </table>
-      {props.rows.length === props.sampleSize ? (
-        <div
-          className="kbnDocTable__footer"
-          data-test-subj="discoverDocTableFooter"
-          tabIndex={-1}
-          id="discoverBottomMarker"
-        >
-          <FormattedMessage
-            id="discover.howToSeeOtherMatchingDocumentsDescription"
-            defaultMessage="These are the first {sampleSize} documents matching
+        <tfoot>
+          <tr>
+            <td colSpan={(props.columnLength || 1) + 2} style={FOOTER_PADDING}>
+              {props.rows.length === props.sampleSize ? (
+                <div
+                  className="kbnDocTable__footer"
+                  data-test-subj="discoverDocTableFooter"
+                  tabIndex={-1}
+                  id="discoverBottomMarker"
+                >
+                  <FormattedMessage
+                    id="discover.howToSeeOtherMatchingDocumentsDescription"
+                    defaultMessage="These are the first {sampleSize} documents matching
   your search, refine your search to see others."
-            values={{ sampleSize: props.sampleSize }}
-          />
-          <EuiButtonEmpty onClick={onBackToTop} data-test-subj="discoverBackToTop">
-            <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
-          </EuiButtonEmpty>
-        </div>
-      ) : (
-        <span tabIndex={-1} id="discoverBottomMarker">
-          &#8203;
-        </span>
-      )}
+                    values={{ sampleSize: props.sampleSize }}
+                  />
+                  <EuiButtonEmpty onClick={onBackToTop} data-test-subj="discoverBackToTop">
+                    <FormattedMessage
+                      id="discover.backToTopLinkText"
+                      defaultMessage="Back to top."
+                    />
+                  </EuiButtonEmpty>
+                </div>
+              ) : (
+                <span tabIndex={-1} id="discoverBottomMarker">
+                  &#8203;
+                </span>
+              )}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
     </Fragment>
   );
 };
