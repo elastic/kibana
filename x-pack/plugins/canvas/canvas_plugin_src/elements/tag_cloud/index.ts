@@ -12,7 +12,6 @@ export const tagCloud: ElementFactory = () => ({
   type: 'chart',
   help: 'Tagcloud visualization',
   icon: 'visTagCloud',
-  expression_name: 'tagcloud',
   expression: `filters
   | demodata 
   | head 150

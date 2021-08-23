@@ -18,10 +18,6 @@ export interface ElementSpec {
   filter?: string;
   width?: number;
   height?: number;
-  /**
-   * a name of the expression which the element represents
-   */
-  expression_name?: string;
 }
 
 export type ElementFactory = () => ElementSpec;
