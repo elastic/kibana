@@ -44,6 +44,11 @@ ruleTester.run('@kbn/eslint/no_export_all', rule, {
           message:
             '`export *` is not allowed in the index files of plugins to prevent accidentally exporting too many APIs',
         },
+        {
+          line: 2,
+          message:
+            '`export *` is not allowed in the index files of plugins to prevent accidentally exporting too many APIs',
+        },
       ],
     },
   ],
