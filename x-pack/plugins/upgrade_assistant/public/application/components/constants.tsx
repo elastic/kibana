@@ -49,5 +49,3 @@ export const DEPRECATION_TYPE_MAP = {
     defaultMessage: 'Machine Learning',
   }),
 };
-
-export const DEPRECATION_WARNINGS_POLLING_INTERVAL = 30000;
