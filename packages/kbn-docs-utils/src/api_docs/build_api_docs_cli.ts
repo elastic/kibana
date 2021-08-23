@@ -74,15 +74,15 @@ export function runBuildApiDocsCli() {
       }
       const collectReferences = flags.references as boolean;
 
-      const { pluginApiMap, missingApiItems, referencedDeprecations } = getPluginApiMap(
-        project,
-        plugins,
-        log,
-        {
-          collectReferences,
-          pluginFilter: pluginFilter as string[],
-        }
-      );
+      const {
+        pluginApiMap,
+        missingApiItems,
+        unReferencedDeprecations,
+        referencedDeprecations,
+      } = getPluginApiMap(project, plugins, log, {
+        collectReferences,
+        pluginFilter: pluginFilter as string[],
+      });
 
       const reporter = CiStatsReporter.fromEnv(log);
       plugins.forEach((plugin) => {
@@ -211,7 +211,12 @@ export function runBuildApiDocsCli() {
           writePluginDocs(outputFolder, { doc: pluginApi, plugin, pluginStats, log });
         }
         writeDeprecationDocByPlugin(outputFolder, referencedDeprecations, log);
-        writeDeprecationDocByApi(outputFolder, referencedDeprecations, log);
+        writeDeprecationDocByApi(
+          outputFolder,
+          referencedDeprecations,
+          unReferencedDeprecations,
+          log
+        );
       });
       if (Object.values(pathsOutsideScopes).length > 0) {
         log.warning(`Found paths outside of normal scope folders:`);
