@@ -7,7 +7,7 @@ Search across the layers in your map to focus in on just the data you want.
 Layers that request data from {es} are narrowed when you submit a <<kibana-concepts-searching-your-data, search request>>.
 Layers narrowed by semi-structured search and filters contain the filter icon image:maps/images/filter_icon.png[] next to the layer name in the legend.
 
-Layers that request data from {es} using an <<index-patterns, index pattern>> with a configured time field are narrowed by the <<set-time-filter, global time filter>>.
+Layers that request data from {es} using an <<data-views, data-view>> with a configured time field are narrowed by the <<set-time-filter, global time filter>>.
 These layers contain the clock icon image:maps/images/clock_icon.png[clock icon] next to the layer name in the legend. Use the time slider to quickly select time slices within the global time filter range.
 Click previous and next buttons to advance the time slice backward or forward. Click play to animate your spatial temporal data.
 

@@ -1,4 +1,4 @@
-[[managing-index-patterns]]
+[[managing-data-views]]
 == Manage index pattern data fields
 
 To customize the data fields in your index pattern, you can add runtime fields to the existing documents, add scrited fields to compute data on the fly, and change how {kib} displays the data fields. 
@@ -206,7 +206,7 @@ To customize how {kib} displays data fields, use the formatting options.
 
 . Click the index pattern that contains the field you want to change.
 
-. Find the field, then open the edit options (image:management/index-patterns/images/edit_icon.png[Data field edit icon]).
+. Find the field, then open the edit options (image:management/data-views/images/edit_icon.png[Data field edit icon]).
 
 . Select *Set custom label*, then enter a *Custom label* for the field.
 

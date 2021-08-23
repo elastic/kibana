@@ -128,7 +128,7 @@ Kerberos, PKI, OIDC, and SAML.
 [cols="50, 50"]
 |===
 
-a| <<managing-index-patterns, Manage index pattern data fields>>
+a| <<managing-data-views, Manage index pattern data fields>>
 |Manage the data fields in the index patterns that retrieve your data from {es}.
 
 | <<managing-saved-objects, Saved Objects>>
@@ -183,7 +183,7 @@ include::{kib-repo-dir}/management/action-types.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-licenses.asciidoc[]
 
-include::{kib-repo-dir}/management/manage-index-patterns.asciidoc[]
+include::{kib-repo-dir}/management/manage-data-views.asciidoc[]
 
 include::{kib-repo-dir}/management/numeral.asciidoc[]
 

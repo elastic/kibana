@@ -44,7 +44,7 @@ For example, `logs-elasticsearch-prod-*` is an index pattern,
 and it is time-based with a time field of `@timestamp`. The time field is not editable.
 
 Index patterns are typically created by an administrator when sending data to {es}.
-You can <<index-patterns,create or update index patterns>> in *Stack Management*, or by using a script
+You can <<data-views,create or update data views>> in *Stack Management*, or by using a script
 that accesses the {kib} API.
 
 {kib} uses the index pattern to show you a list of fields, such as
@@ -159,7 +159,7 @@ Use the global search to quickly open a saved object.
 * Go to <<discover, Discover>> for instructions on searching your data.
 
 
-include::index-patterns.asciidoc[]
+include::data-views.asciidoc[]
 
 include::set-time-filter.asciidoc[]
 
