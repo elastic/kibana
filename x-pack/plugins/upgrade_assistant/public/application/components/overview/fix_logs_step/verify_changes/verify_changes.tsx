@@ -15,7 +15,7 @@ import { EuiCallOut, EuiButton } from '@elastic/eui';
 import { useAppContext } from '../../../../app_context';
 import { Storage } from '../../../../../shared_imports';
 
-const POLLING_INTERVAL = 30000;
+const POLLING_INTERVAL = 60000;
 const LOCALSTORAGE_KEY = 'kibana.upgradeAssistant.lastPollingCheck';
 const localStorage = new Storage(window.localStorage);
 
