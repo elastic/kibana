@@ -784,6 +784,7 @@ Object {
       "type": "keyword",
     },
   },
+  "runtimeObjectMap": Object {},
   "sourceFilters": undefined,
   "timeFieldName": "time",
   "title": "title",
