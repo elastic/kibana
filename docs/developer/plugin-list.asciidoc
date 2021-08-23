@@ -115,6 +115,10 @@ for use in their own application.
 |Expression Shape plugin adds a shape function to the expression plugin and an associated renderer. The renderer will display the given shape with selected decorations.
 
 
+|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_tagcloud/README.md[expressionTagcloud]
+|Expression Tagcloud plugin adds a tagcloud renderer and function to the expression plugin. The renderer will display the Wordcloud chart.
+
+
 |{kib-repo}blob/{branch}/src/plugins/field_formats/README.md[fieldFormats]
 |Index pattern fields formatters
 
@@ -376,10 +380,6 @@ The client-side plugin configures following values:
 
 |<<dashboard-enhanced-plugin>>
 |Adds drilldown capabilities to dashboard.  Owned by the Kibana App team.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/dashboard_mode/README.md[dashboardMode]
-|The deprecated dashboard only mode.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/data_enhanced/README.md[dataEnhanced]
