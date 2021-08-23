@@ -193,12 +193,13 @@ export const addBuildingBlockStyle = (
   ecs: Ecs,
   theme: EuiTheme,
   setCellProps: EuiDataGridCellValueElementProps['setCellProps'],
-  defaultStyles: React.CSSProperties
+  defaultStyles?: React.CSSProperties
 ) => {
+  const currentStyles = defaultStyles ?? {};
   if (isEventBuildingBlockType(ecs)) {
     setCellProps({
       style: {
-        ...defaultStyles,
+        ...currentStyles,
         backgroundColor: `${theme.eui.euiColorHighlight}`,
       },
     });
@@ -206,7 +207,7 @@ export const addBuildingBlockStyle = (
     // reset cell style
     setCellProps({
       style: {
-        ...defaultStyles,
+        ...currentStyles,
         backgroundColor: 'inherit',
       },
     });
