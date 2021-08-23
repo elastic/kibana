@@ -116,7 +116,7 @@ describe('context app', function () {
       });
     });
 
-    it('should update search source correctly when useFieldApi set to false', function () {
+    it('should update search source correctly when useNewFieldsApi set to false', function () {
       const searchSource = updateSearchSource(
         savedSearchMock.searchSource,
         'id',
@@ -124,10 +124,12 @@ describe('context app', function () {
         false,
         indexPatternMock
       );
-      expect(searchSource.getSearchRequestBody()).toMatchSnapshot();
+      const searchRequestBody = searchSource.getSearchRequestBody();
+      expect(searchRequestBody._source).toBeInstanceOf(Object);
+      expect(searchRequestBody.track_total_hits).toBe(false);
     });
 
-    it('should update search source correctly when useFieldApi set to true', function () {
+    it('should update search source correctly when useNewFieldsApi set to true', function () {
       const searchSource = updateSearchSource(
         savedSearchMock.searchSource,
         'id',
@@ -135,7 +137,9 @@ describe('context app', function () {
         true,
         indexPatternMock
       );
-      expect(searchSource.getSearchRequestBody()).toMatchSnapshot();
+      const searchRequestBody = searchSource.getSearchRequestBody();
+      expect(searchRequestBody._source).toBe(false);
+      expect(searchRequestBody.track_total_hits).toBe(false);
     });
 
     it('should reject with an error when no hits were found', function () {
