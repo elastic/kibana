@@ -22457,7 +22457,6 @@
     "xpack.securitySolution.overview.ctiDashboardWarningPanelBody": "我们尚未从选定时间范围检测到任何数据，请尝试搜索其他时间范围。",
     "xpack.securitySolution.overview.ctiDashboardWarningPanelTitle": "没有可显示的威胁情报数据",
     "xpack.securitySolution.overview.ctiViewDasboard": "查看仪表板",
-    "xpack.securitySolution.overview.ctiViewSourceDasboard": "查看源仪表板",
     "xpack.securitySolution.overview.endgameDnsTitle": "DNS",
     "xpack.securitySolution.overview.endgameFileTitle": "文件",
     "xpack.securitySolution.overview.endgameImageLoadTitle": "映像加载",

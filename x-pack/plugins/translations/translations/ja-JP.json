@@ -21939,7 +21939,6 @@
     "xpack.securitySolution.overview.ctiDashboardWarningPanelBody": "選択した時間範囲からデータが検出されませんでした。別の時間範囲の検索を試してください。",
     "xpack.securitySolution.overview.ctiDashboardWarningPanelTitle": "表示する脅威インテリジェンスデータがありません",
     "xpack.securitySolution.overview.ctiViewDasboard": "ダッシュボードを表示",
-    "xpack.securitySolution.overview.ctiViewSourceDasboard": "ソースダッシュボードを表示",
     "xpack.securitySolution.overview.endgameDnsTitle": "DNS",
     "xpack.securitySolution.overview.endgameFileTitle": "ファイル",
     "xpack.securitySolution.overview.endgameImageLoadTitle": "画像読み込み",
