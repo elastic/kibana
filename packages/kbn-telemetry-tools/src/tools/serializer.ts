@@ -111,8 +111,7 @@ export function getConstraints(node: ts.Node, program: ts.Program): any {
 
   // node input ( enum { A = 'my_a', B = 'my_b' } ). returns ['my_a', 'my_b'];
   if (ts.isEnumDeclaration(node)) {
-    const { parent, ...rest } = node;
-    return rest.members.map((member) => getConstraints(member, program));
+    return node.members.map((member) => getConstraints(member, program));
   }
 
   // node input ( 'A = my_a' )
