@@ -41,7 +41,7 @@ export const ACKNOWLEDGED_ALERTS_FILTER_BTN = '[data-test-subj="acknowledgedAler
 
 export const LOADING_ALERTS_PANEL = '[data-test-subj="loading-alerts-panel"]';
 
-export const LOADING_SPINNER = '.SpinnerFlexItem-zdczxa-0';
+export const LOADING_SPINNER = '[data-test-subj="LoadingPanelTimeline"]';
 
 export const MANAGE_ALERT_DETECTION_RULES_BTN = '[data-test-subj="manage-alert-detection-rules"]';
 
