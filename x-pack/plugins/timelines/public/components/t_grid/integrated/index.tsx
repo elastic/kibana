@@ -57,8 +57,6 @@ import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selec
 
 const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 
-export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
-
 const TitleText = styled.span`
   margin-right: 12px;
 `;
@@ -102,8 +100,10 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
 const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
 export interface TGridIntegratedProps {
+  additionalFilters: React.ReactNode;
   browserFields: BrowserFields;
   columns: ColumnHeaderOptions[];
+  data?: DataPublicPluginStart;
   dataProviders: DataProvider[];
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
@@ -111,9 +111,12 @@ export interface TGridIntegratedProps {
   end: string;
   entityType: EntityType;
   filters: Filter[];
-  globalFullScreen: boolean;
-  graphOverlay?: React.ReactNode;
   filterStatus?: AlertStatus;
+  globalFullScreen: boolean;
+  // If truthy, the graph viewer (Resolver) is showing
+  graphEventId: string | undefined;
+  graphOverlay?: React.ReactNode;
+  hasAlertsCrud: boolean;
   height?: number;
   id: TimelineId;
   indexNames: string[];
@@ -123,35 +126,35 @@ export interface TGridIntegratedProps {
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: 'filter' | 'search';
-  query: Query;
+  leadingControlColumns?: ControlColumnProps[];
   onRuleChange?: () => void;
+  query: Query;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
-  setGlobalFullScreen: (fullscreen: boolean) => void;
-  start: string;
   sort: Sort[];
-  additionalFilters: React.ReactNode;
-  // If truthy, the graph viewer (Resolver) is showing
-  graphEventId: string | undefined;
-  leadingControlColumns?: ControlColumnProps[];
-  trailingControlColumns?: ControlColumnProps[];
-  data?: DataPublicPluginStart;
+  start: string;
   tGridEventRenderedViewEnabled: boolean;
-  hasAlertsCrud: boolean;
+  trailingControlColumns?: ControlColumnProps[];
+  unit?: (n: number) => string;
 }
 
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
+  additionalFilters,
   browserFields,
   columns,
-  defaultCellActions,
+  data,
   dataProviders,
+  defaultCellActions,
   deletedEventIds,
   docValueFields,
   end,
   entityType,
   filters,
-  globalFullScreen,
   filterStatus,
+  globalFullScreen,
+  graphEventId,
+  graphOverlay = null,
+  hasAlertsCrud,
   id,
   indexNames,
   indexPattern,
@@ -160,21 +163,17 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   itemsPerPage,
   itemsPerPageOptions,
   kqlMode,
+  leadingControlColumns,
   onRuleChange,
   query,
   renderCellValue,
   rowRenderers,
-  setGlobalFullScreen,
-  start,
   sort,
-  additionalFilters,
-  graphOverlay = null,
-  graphEventId,
-  leadingControlColumns,
+  start,
+  tGridEventRenderedViewEnabled,
   trailingControlColumns,
   tGridEventRenderedViewEnabled,
-  data,
-  hasAlertsCrud,
+  unit,
 }) => {
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -236,34 +235,36 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   ] = useTimelineEvents({
     // We rely on entityType to determine Events vs Alerts
     alertConsumers: SECURITY_ALERTS_CONSUMERS,
+    data,
     docValueFields,
+    endDate: end,
     entityType,
     fields,
     filterQuery: combinedQueries!.filterQuery,
     id,
     indexNames,
     limit: itemsPerPage,
+    skip: !canQueryTimeline,
     sort: sortField,
     startDate: start,
-    endDate: end,
-    skip: !canQueryTimeline,
-    data,
   });
 
-  const filterQuery = useMemo(() => {
-    return getCombinedFilterQuery({
-      config: esQuery.getEsQueryConfig(uiSettings),
-      dataProviders,
-      indexPattern,
-      browserFields,
-      filters,
-      kqlQuery: query,
-      kqlMode,
-      isEventViewer: true,
-      from: start,
-      to: end,
-    });
-  }, [uiSettings, dataProviders, indexPattern, browserFields, filters, start, end, query, kqlMode]);
+  const filterQuery = useMemo(
+    () =>
+      getCombinedFilterQuery({
+        config: esQuery.getEsQueryConfig(uiSettings),
+        browserFields,
+        dataProviders,
+        filters,
+        from: start,
+        indexPattern,
+        isEventViewer: true,
+        kqlMode,
+        kqlQuery: query,
+        to: end,
+      }),
+    [uiSettings, dataProviders, indexPattern, browserFields, filters, start, end, query, kqlMode]
+  );
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
@@ -292,6 +293,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       >
         {loading && <EuiProgress size="xs" position="absolute" color="accent" />}
 
+        {graphOverlay}
         {canQueryTimeline ? (
           <>
             <EventsContainerLoading
@@ -299,14 +301,14 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               data-test-subj={`events-container-loading-${loading}`}
             >
               <UpdatedFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems={alignItems}>
-                <UpdatedFlexItem grow={false} show={!loading}>
+                <UpdatedFlexItem grow={false} $show={!loading}>
                   <InspectButton title={justTitle} inspect={inspect} loading={loading} />
                 </UpdatedFlexItem>
-                <UpdatedFlexItem grow={false} show={!loading}>
+                <UpdatedFlexItem grow={false} $show={!loading}>
                   {!resolverIsShowing(graphEventId) && additionalFilters}
                 </UpdatedFlexItem>
                 {tGridEventRenderedViewEnabled && entityType === 'alerts' && (
-                  <UpdatedFlexItem grow={false} show={!loading}>
+                  <UpdatedFlexItem grow={false} $show={!loading}>
                     <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
                   </UpdatedFlexItem>
                 )}
@@ -340,33 +342,33 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                   ) : (
                     <>
                       <StatefulBody
-                        hasAlertsCrud={hasAlertsCrud}
                         activePage={pageInfo.activePage}
                         browserFields={browserFields}
-                        filterQuery={filterQuery}
                         data={nonDeletedEvents}
                         defaultCellActions={defaultCellActions}
+                        filterQuery={filterQuery}
+                        filterStatus={filterStatus}
+                        hasAlertsCrud={hasAlertsCrud}
                         id={id}
+                        indexNames={indexNames}
                         isEventViewer={true}
                         itemsPerPageOptions={itemsPerPageOptions}
+                        leadingControlColumns={leadingControlColumns}
                         loadPage={loadPage}
                         onRuleChange={onRuleChange}
                         querySize={pageInfo.querySize}
+                        refetch={refetch}
                         renderCellValue={renderCellValue}
                         rowRenderers={rowRenderers}
-                        tabType={TimelineTabs.query}
                         tableView={tableView}
+                        tabType={TimelineTabs.query}
+                        totalItems={totalCountMinusDeleted}
                         totalPages={calculateTotalPages({
                           itemsCount: totalCountMinusDeleted,
                           itemsPerPage,
                         })}
-                        totalItems={totalCountMinusDeleted}
-                        unit={unit}
-                        filterStatus={filterStatus}
-                        leadingControlColumns={leadingControlColumns}
                         trailingControlColumns={trailingControlColumns}
-                        refetch={refetch}
-                        indexNames={indexNames}
+                        unit={unit}
                       />
                       {tableView === 'gridView' && (
                         <Footer
