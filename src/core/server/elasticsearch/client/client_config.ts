@@ -52,6 +52,7 @@ export function parseClientOptions(
   const clientOptions: ClientOptions = {
     sniffOnStart: config.sniffOnStart,
     sniffOnConnectionFault: config.sniffOnConnectionFault,
+    caFingerprint: config.caFingerprint,
     headers: {
       ...DEFAULT_HEADERS,
       ...config.customHeaders,
@@ -95,10 +96,6 @@ export function parseClientOptions(
       config.ssl,
       scoped && !config.ssl.alwaysPresentCertificate
     );
-  }
-
-  if (config.caFingerprint != null) {
-    clientOptions.caFingerprint = config.caFingerprint;
   }
 
   return clientOptions;
