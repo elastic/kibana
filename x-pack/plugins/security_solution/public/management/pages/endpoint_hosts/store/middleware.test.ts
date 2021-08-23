@@ -43,11 +43,13 @@ import {
   hostIsolationResponseMock,
 } from '../../../../common/lib/endpoint_isolation/mocks';
 import { endpointPageHttpMock, failedTransformStateMock } from '../mocks';
+import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
 
 jest.mock('../../policy/store/services/ingest', () => ({
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
   sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
   sendGetEndpointSecurityPackage: () => Promise.resolve({}),
+  sendGetFleetAgentsWithEndpoint: () => Promise.resolve({ total: 0 }),
 }));
 
 jest.mock('../../../../common/lib/kibana');
@@ -127,8 +129,18 @@ describe('endpoint list middleware', () => {
     dispatch({
       type: 'appRequestedEndpointList',
     });
-    await waitForAction('serverReturnedEndpointList');
-    expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
+
+    await Promise.all([
+      waitForAction('serverReturnedEndpointList'),
+      waitForAction('endpointPendingActionsStateChanged'),
+      waitForAction('serverReturnedEndpointsTotal'),
+      waitForAction('serverReturnedMetadataPatterns'),
+      waitForAction('serverCancelledPolicyItemsLoading'),
+      waitForAction('serverReturnedEndpointExistValue'),
+      waitForAction('serverReturnedAgenstWithEndpointsTotal'),
+    ]);
+
+    expect(fakeHttpServices.post).toHaveBeenCalledWith(HOST_METADATA_LIST_ROUTE, {
       body: JSON.stringify({
         paging_properties: [{ page_index: '0' }, { page_size: '10' }],
         filters: { kql: '' },
