@@ -66,7 +66,7 @@ describe('<WatchEdit />', () => {
       test('should populate the correct values', () => {
         const { find, exists, component } = testBed;
         const { watch } = WATCH;
-        const codeEditor = component.find('EuiCodeEditor');
+        const codeEditor = component.find('EuiCodeEditor').at(1);
 
         expect(exists('jsonWatchForm')).toBe(true);
         expect(find('nameInput').props().value).toBe(watch.name);
