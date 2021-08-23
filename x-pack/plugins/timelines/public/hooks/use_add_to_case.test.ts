@@ -62,7 +62,7 @@ describe('normalizedEventFields', () => {
     });
   });
   it('returns null when all the data is bad', () => {
-    const result = normalizedEventFields({ ...defaultArgs, data: [], ecs: {} });
+    const result = normalizedEventFields({ ...defaultArgs, data: [], ecs: { _id: 'bad' } });
     expect(result).toEqual({
       ruleId: null,
       ruleName: null,
