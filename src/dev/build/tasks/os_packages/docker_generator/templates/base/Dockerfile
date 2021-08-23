@@ -155,8 +155,6 @@ RUN mkdir /licenses && \
     cp LICENSE.txt /licenses/LICENSE
 {{/ubi}}
 
-USER kibana
-
 ENTRYPOINT ["/bin/tini", "--"]
 
 {{#cloud}}
@@ -170,3 +168,6 @@ RUN mkdir /app && \
 {{^cloud}}
 CMD ["/usr/local/bin/kibana-docker"]
 {{/cloud}}
+
+
+USER kibana
