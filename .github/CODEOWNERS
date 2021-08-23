@@ -34,6 +34,7 @@
 /src/plugins/vis_types/pie/ @elastic/kibana-app
 /src/plugins/visualize/ @elastic/kibana-app
 /src/plugins/visualizations/ @elastic/kibana-app
+/src/plugins/chart_expressions/expression_tagcloud/ @elastic/kibana-app
 /src/plugins/url_forwarding/ @elastic/kibana-app
 /packages/kbn-tinymath/ @elastic/kibana-app
 
