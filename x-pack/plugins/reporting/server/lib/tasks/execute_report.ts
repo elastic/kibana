@@ -323,12 +323,22 @@ export class ExecuteReportTask implements ReportingTask {
           this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
 
           try {
-            const stream = await getContentStream(this.reporting, {
-              id: report._id,
-              index: report._index,
-              if_primary_term: report._primary_term,
-              if_seq_no: report._seq_no,
-            });
+            const exportTypesRegistry = await this.reporting.getExportTypesRegistry();
+            const { jobContentEncoding } = exportTypesRegistry.get(
+              ({ jobType: item }) => item === jobType
+            );
+            const stream = await getContentStream(
+              this.reporting,
+              {
+                id: report._id,
+                index: report._index,
+                if_primary_term: report._primary_term,
+                if_seq_no: report._seq_no,
+              },
+              {
+                encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
+              }
+            );
             const output = await this._performJob(task, cancellationToken, stream);
 
             stream.end();
