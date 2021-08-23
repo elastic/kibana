@@ -17,11 +17,6 @@ import { shortenCountIntoString } from '../../../common/utils/shorten_count_into
 import { Link } from '../link_panel/link';
 import { ID as CTIEventCountQueryId } from '../../containers/overview_cti_links/use_cti_event_counts';
 
-const ThreatIntelDashboardLink: React.FC<{ path: string }> = (props) => (
-  <Link path={(props as unknown) as string} copy={i18n.LINK_COPY} />
-);
-ThreatIntelDashboardLink.displayName = 'ThreatIntelDashboardLink';
-
 const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
   { name: 'Name', field: 'title', sortable: true, truncateText: true, width: '100%' },
   {
@@ -38,7 +33,8 @@ const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
     field: 'path',
     truncateText: true,
     width: '200px',
-    render: ThreatIntelDashboardLink,
+    // eslint-disable-next-line react/display-name
+    render: (path: string) => <Link path={path} copy={i18n.LINK_COPY} />,
   },
 ];
 
@@ -57,6 +53,7 @@ export const ThreatIntelPanelView: React.FC<LinkPanelViewProps> = ({
   return (
     <LinkPanel
       {...{
+        dataTestSubj: 'cti-dashboard-links',
         button: useMemo(
           () => (
             <EuiButton

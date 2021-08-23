@@ -14,7 +14,7 @@ import { LinkPanelViewProps } from '../link_panel/types';
 import { Link } from '../link_panel/link';
 import * as i18n from './translations';
 import { VIEW_DASHBOARD } from '../overview_cti_links/translations';
-import { QUERY_ID as RiskyHostsQueryId } from '../../containers/overview_risky_host_links/use_is_risky_host_links';
+import { QUERY_ID as RiskyHostsQueryId } from '../../containers/overview_risky_host_links/use_risky_host_links';
 
 const RiskyHostsDashboardLink: React.FC<{ path?: string }> = (props) => (
   <Link path={props as string} copy={i18n.LINK_COPY} />
@@ -65,6 +65,7 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
 }) => (
   <LinkPanel
     {...{
+      dataTestSubj: 'risky-hosts-dashboard-links',
       button: useMemo(
         () => (
           <EuiButton

@@ -55,6 +55,7 @@ const LinkPanelComponent = ({
   splitPanel,
   subtitle,
   inspectQueryId,
+  dataTestSubj,
 }: {
   button: React.ReactNode;
   columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>>;
@@ -64,6 +65,7 @@ const LinkPanelComponent = ({
   splitPanel: React.ReactNode;
   subtitle: React.ReactNode;
   inspectQueryId?: string;
+  dataTestSubj: string;
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [sortField, setSortField] = useState<string | number>('title');
@@ -108,11 +110,7 @@ const LinkPanelComponent = ({
   return (
     <>
       <EuiSpacer data-test-subj="spacer" size="l" />
-      <EuiFlexGroup
-        gutterSize="l"
-        justifyContent="spaceBetween"
-        data-test-subj="cti-dashboard-links"
-      >
+      <EuiFlexGroup gutterSize="l" justifyContent="spaceBetween" data-test-subj={dataTestSubj}>
         <EuiFlexItem grow={1}>
           <InspectButtonContainer>
             <EuiPanel hasBorder>

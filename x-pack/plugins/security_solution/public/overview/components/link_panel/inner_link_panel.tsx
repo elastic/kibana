@@ -46,12 +46,14 @@ export const InnerLinkPanel = ({
   const iconType = color === 'primary' ? 'iInCircle' : 'help';
   return (
     <PanelContainer grow={false} color={color}>
-      <EuiFlexGroup direction={'column'} data-test-subj={dataTestSubj}>
+      <EuiFlexGroup direction="column" data-test-subj={dataTestSubj}>
         <EuiFlexItem>
-          <EuiFlexGroup direction={'row'}>
+          <EuiFlexGroup direction="row">
             <Icon type={iconType} size="m" color={color} />
             <EuiFlexItem>
-              <Title textcolor={color}>{title}</Title>
+              <Title data-test-subj="inner-link-panel-title" textcolor={color}>
+                {title}
+              </Title>
             </EuiFlexItem>
           </EuiFlexGroup>
           {body}

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useKibana } from '../../../common/lib/kibana';
 
@@ -21,17 +21,8 @@ export const useRiskyHostsDashboardButtonHref = (to: string, from: string) => {
 
   const [buttonHref, setButtonHref] = useState<string | undefined>();
 
-  const [isPluginDisabled, setIsDashboardPluginDisabled] = useState(false);
-  const handleDisabledPlugin = useCallback(() => {
-    if (!isPluginDisabled) {
-      setIsDashboardPluginDisabled(true);
-    }
-  }, [setIsDashboardPluginDisabled, isPluginDisabled]);
-
   useEffect(() => {
-    if (!createDashboardUrl || !savedObjectsClient) {
-      handleDisabledPlugin();
-    } else {
+    if (createDashboardUrl && savedObjectsClient) {
       savedObjectsClient.find<SavedObjectAttributes>(DASHBOARD_REQUEST_BODY).then(
         async (DashboardsSO?: {
           savedObjects?: Array<{
@@ -48,16 +39,13 @@ export const useRiskyHostsDashboardButtonHref = (to: string, from: string) => {
               },
             });
             setButtonHref(dashboardUrl);
-          } else {
-            handleDisabledPlugin();
           }
         }
       );
     }
-  }, [createDashboardUrl, from, handleDisabledPlugin, isPluginDisabled, savedObjectsClient, to]);
+  }, [createDashboardUrl, from, savedObjectsClient, to]);
 
   return {
     buttonHref,
-    isPluginDisabled,
   };
 };

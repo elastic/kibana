@@ -20,7 +20,7 @@ export const RiskyHostsDisabledModuleComponent = () => (
     buttonCopy={i18n.DANGER_BUTTON}
     dataTestSubjPrefix="risky-hosts"
     docLink={RISKY_HOSTS_DOC_LINK}
-    listItems={[{ title: 'a', count: 0, path: '/b' }]}
+    listItems={[]}
     titleCopy={i18n.DANGER_TITLE}
     LinkPanelViewComponent={RiskyHostsPanelView}
   />

@@ -34,13 +34,13 @@ const DisabledLinkPanelComponent: React.FC<DisabledLinkPanelProps> = ({
     <LinkPanelViewComponent
       splitPanel={
         <InnerLinkPanel
-          color={'warning'}
+          color="warning"
           title={titleCopy}
           body={bodyCopy}
           button={
             <EuiButton
               href={docLink}
-              color={'warning'}
+              color="warning"
               target="_blank"
               data-test-subj={`${dataTestSubjPrefix}-enable-module-button`}
             >

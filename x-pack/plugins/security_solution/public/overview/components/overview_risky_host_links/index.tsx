@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
-import { useRiskyHostLinks } from '../../containers/overview_risky_host_links/use_is_risky_host_links';
+import { useRiskyHostLinks } from '../../containers/overview_risky_host_links/use_risky_host_links';
 import { RiskyHostsEnabledModule } from './risky_hosts_enabled_module';
 import { RiskyHostsDisabledModule } from './risky_hosts_disabled_module';
 export type RiskyHostLinksProps = Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'>;
