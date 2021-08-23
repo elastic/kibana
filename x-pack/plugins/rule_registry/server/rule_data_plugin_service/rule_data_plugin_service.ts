@@ -29,6 +29,7 @@ export class RuleDataPluginService {
   private readonly resourceInstaller: ResourceInstaller;
   private installCommonResources: Promise<Either<Error, 'ok'>>;
   private isInitialized: boolean;
+  private registeredIndices: Map<string, IndexInfo> = new Map();
 
   constructor(private readonly options: ConstructorOptions) {
     this.resourceInstaller = new ResourceInstaller({
@@ -105,6 +106,8 @@ export class RuleDataPluginService {
       indexOptions,
     });
 
+    this.registeredIndices.set(indexOptions.registrationContext, indexInfo);
+
     const waitUntilClusterClientAvailable = async (): Promise<WaitResult> => {
       try {
         const clusterClient = await this.options.getClusterClient();
@@ -147,5 +150,14 @@ export class RuleDataPluginService {
       waitUntilReadyForReading,
       waitUntilReadyForWriting,
     });
+  }
+
+  /**
+   * Looks up the index information associated with the given `registrationContext`.
+   * @param registrationContext
+   * @returns the IndexInfo or undefined
+   */
+  public getRegisteredIndexInfo(registrationContext: string): IndexInfo | undefined {
+    return this.registeredIndices.get(registrationContext);
   }
 }

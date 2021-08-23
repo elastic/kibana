@@ -155,8 +155,16 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     if (failure?.reason === 'unauthorized') {
       // In export only, the API uses "bulkGet" or "find" depending on the parameters it receives.
       if (failure.statusCode === 403) {
-        // "bulkGet" was unauthorized, which returns a forbidden error
-        await expectSavedObjectForbiddenBulkGet(type)(response);
+        if (id) {
+          // "bulkGet" was unauthorized, which returns a forbidden error
+          await expectSavedObjectForbiddenBulkGet(type)(response);
+        } else {
+          expect(response.body).to.eql({
+            statusCode: 403,
+            error: 'Forbidden',
+            message: `unauthorized`,
+          });
+        }
       } else if (failure.statusCode === 200) {
         // "find" was unauthorized, which returns an empty result
         expect(response.body).not.to.have.property('error');
