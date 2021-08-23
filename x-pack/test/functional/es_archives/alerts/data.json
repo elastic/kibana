@@ -333,3 +333,57 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:38482620-ef1b-11eb-ad71-7de7959be71c",
+    "index": ".kibana_1",
+    "source": {
+      "alert" : {
+        "name" : "test upgrade of exceptionsList",
+        "alertTypeId" : "siem.signals",
+        "consumer" : "alertsFixture",
+        "params" : {
+          "ruleId" : "4ec223b9-77fa-4895-8539-6b3e586a2858",
+          "exceptionsList" : [
+            {
+              "id" : "endpoint_list",
+              "list_id" : "endpoint_list",
+              "namespace_type" : "agnostic",
+              "type" : "endpoint"
+            },
+            {
+              "list_id" : "cd152d0d-3590-4a45-a478-eed04da7936b",
+              "namespace_type" : "single",
+              "id" : "50e3bd70-ef1b-11eb-ad71-7de7959be71c",
+              "type" : "detection"
+            }
+          ]
+        },
+        "schedule" : {
+          "interval" : "1m"
+        },
+        "enabled" : true,
+        "actions" : [ ],
+        "throttle" : null,
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt" : "2021-07-27T20:42:55.896Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "scheduledTaskId" : null,
+        "tags": []
+      },
+      "type" : "alert",
+      "migrationVersion" : {
+        "alert" : "7.8.0"
+      },
+      "updated_at" : "2021-08-13T23:00:11.985Z",
+      "references": [
+      ]
+    }
+  }
+}

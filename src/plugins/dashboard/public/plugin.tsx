@@ -183,31 +183,12 @@ export class DashboardPlugin
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
 
-      const useHideChrome = ({ toggleChrome } = { toggleChrome: true }) => {
-        React.useEffect(() => {
-          if (toggleChrome) {
-            coreStart.chrome.setIsVisible(false);
-          }
-
-          return () => {
-            if (toggleChrome) {
-              coreStart.chrome.setIsVisible(true);
-            }
-          };
-        }, [toggleChrome]);
-      };
-
-      const ExitFullScreenButton: React.FC<
-        ExitFullScreenButtonProps & {
-          toggleChrome: boolean;
-        }
-      > = ({ toggleChrome, ...props }) => {
-        useHideChrome({ toggleChrome });
-        return <ExitFullScreenButtonUi {...props} />;
+      const ExitFullScreenButton: React.FC<ExitFullScreenButtonProps> = (props) => {
+        return <ExitFullScreenButtonUi {...props} chrome={coreStart.chrome} />;
       };
       return {
         SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
-        hideWriteControls: deps.kibanaLegacy.dashboardConfig.getHideWriteControls(),
+        showWriteControls: Boolean(coreStart.application.capabilities.dashboard.showWriteControls),
         notifications: coreStart.notifications,
         application: coreStart.application,
         uiSettings: coreStart.uiSettings,

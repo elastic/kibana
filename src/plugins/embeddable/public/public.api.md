@@ -369,6 +369,8 @@ export interface EmbeddableEditorState {
     embeddableId?: string;
     // (undocumented)
     originatingApp: string;
+    // (undocumented)
+    originatingPath?: string;
     searchSessionId?: string;
     // (undocumented)
     valueInput?: EmbeddableInput;

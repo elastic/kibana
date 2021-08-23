@@ -7,8 +7,7 @@
 
 import { APMPlugin, APMRouteHandlerResources } from '../..';
 import {
-  ExternalCallback,
-  PostPackagePolicyDeleteCallback,
+  PostPackagePolicyCreateCallback,
   PutPackagePolicyUpdateCallback,
 } from '../../../../fleet/server';
 import {
@@ -60,7 +59,9 @@ export async function registerFleetPolicyCallbacks({
   });
 }
 
-type ExternalCallbackParams = Parameters<ExternalCallback[1]>;
+type ExternalCallbackParams =
+  | Parameters<PostPackagePolicyCreateCallback>
+  | Parameters<PutPackagePolicyUpdateCallback>;
 export type PackagePolicy = NewPackagePolicy | UpdatePackagePolicy;
 type Context = ExternalCallbackParams[1];
 type Request = ExternalCallbackParams[2];
@@ -81,7 +82,7 @@ function registerPackagePolicyExternalCallback({
   logger: NonNullable<APMPlugin['logger']>;
 }) {
   const callbackFn:
-    | PostPackagePolicyDeleteCallback
+    | PostPackagePolicyCreateCallback
     | PutPackagePolicyUpdateCallback = async (
     packagePolicy: PackagePolicy,
     context: Context,

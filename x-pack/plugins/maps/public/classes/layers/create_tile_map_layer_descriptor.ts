@@ -33,6 +33,16 @@ import { isMetricCountable } from '../util/is_metric_countable';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 
+export interface CreateTileMapLayerDescriptorParams {
+  label: string;
+  mapType: string;
+  colorSchema: string;
+  indexPatternId?: string;
+  geoFieldName?: string;
+  metricAgg: string;
+  metricFieldName?: string;
+}
+
 function isHeatmap(mapType: string): boolean {
   return mapType.toLowerCase() === 'heatmap';
 }
@@ -81,15 +91,7 @@ export function createTileMapLayerDescriptor({
   geoFieldName,
   metricAgg,
   metricFieldName,
-}: {
-  label: string;
-  mapType: string;
-  colorSchema: string;
-  indexPatternId?: string;
-  geoFieldName?: string;
-  metricAgg: string;
-  metricFieldName?: string;
-}): LayerDescriptor | null {
+}: CreateTileMapLayerDescriptorParams): LayerDescriptor | null {
   if (!indexPatternId || !geoFieldName) {
     return null;
   }

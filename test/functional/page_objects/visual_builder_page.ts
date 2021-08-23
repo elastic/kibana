@@ -131,7 +131,7 @@ export class VisualBuilderPageObject extends FtrService {
     await this.clearMarkdown();
     const input = await this.find.byCssSelector('.tvbMarkdownEditor__editor textarea');
     await input.type(markdown);
-    await this.common.sleep(3000);
+    await this.visChart.waitForVisualizationRenderingStabilized();
   }
 
   public async clearMarkdown() {

@@ -33,15 +33,17 @@ export class MarkdownEditor extends Component {
     this.props.onChange({ markdown: value });
   };
 
-  handleOnLoad = (ace) => {
-    this.ace = ace;
+  handleOnLoad = (editor) => {
+    this.editor = editor;
   };
 
-  handleVarClick(snippet) {
-    return () => {
-      if (this.ace) this.ace.insert(snippet);
-    };
-  }
+  handleVarClick = (snippet) => () => {
+    if (this.editor) {
+      const range = this.editor.getSelection();
+
+      this.editor.executeEdits('', [{ range, text: snippet }]);
+    }
+  };
 
   async componentDidMount() {
     const { indexPatterns } = getDataStart();

@@ -60,10 +60,12 @@ interface Props {
   numberOfTransactionsPerPage?: number;
   showAggregationAccurateCallout?: boolean;
   environment: string;
+  fixedHeight?: boolean;
   kuery: string;
 }
 
 export function TransactionsTable({
+  fixedHeight = false,
   hideViewTransactionsLink = false,
   numberOfTransactionsPerPage = 5,
   showAggregationAccurateCallout = false,
@@ -232,12 +234,9 @@ export function TransactionsTable({
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h2>
-                {i18n.translate(
-                  'xpack.apm.serviceOverview.transactionsTableTitle',
-                  {
-                    defaultMessage: 'Transactions',
-                  }
-                )}
+                {i18n.translate('xpack.apm.transactionsTable.title', {
+                  defaultMessage: 'Transactions',
+                })}
               </h2>
             </EuiTitle>
           </EuiFlexItem>
@@ -248,12 +247,9 @@ export function TransactionsTable({
                 latencyAggregationType={latencyAggregationType}
                 transactionType={transactionType}
               >
-                {i18n.translate(
-                  'xpack.apm.serviceOverview.transactionsTableLinkText',
-                  {
-                    defaultMessage: 'View transactions',
-                  }
-                )}
+                {i18n.translate('xpack.apm.transactionsTable.linkText', {
+                  defaultMessage: 'View transactions',
+                })}
               </TransactionOverviewLink>
             </EuiFlexItem>
           )}
@@ -263,7 +259,7 @@ export function TransactionsTable({
         <EuiFlexItem>
           <EuiCallOut
             title={i18n.translate(
-              'xpack.apm.transactionCardinalityWarning.title',
+              'xpack.apm.transactionsTable.cardinalityWarning.title',
               {
                 defaultMessage:
                   'This view shows a subset of reported transactions.',
@@ -274,7 +270,7 @@ export function TransactionsTable({
           >
             <p>
               <FormattedMessage
-                id="xpack.apm.transactionCardinalityWarning.body"
+                id="xpack.apm.transactionsTable.cardinalityWarning.body"
                 defaultMessage="The number of unique transaction names exceeds the configured value of {bucketSize}. Try reconfiguring your agents to group similar transactions or increase the value of {codeBlock}"
                 values={{
                   bucketSize,
@@ -289,7 +285,7 @@ export function TransactionsTable({
                 path="/troubleshooting.html#troubleshooting-too-many-transactions"
               >
                 {i18n.translate(
-                  'xpack.apm.transactionCardinalityWarning.docsLink',
+                  'xpack.apm.transactionsTable.cardinalityWarning.docsLink',
                   { defaultMessage: 'Learn more in the docs' }
                 )}
               </ElasticDocsLink>
@@ -301,9 +297,19 @@ export function TransactionsTable({
         <EuiFlexItem>
           <TableFetchWrapper status={status}>
             <OverviewTableContainer
+              fixedHeight={fixedHeight}
               isEmptyAndLoading={transactionGroupsTotalItems === 0 && isLoading}
             >
               <EuiBasicTable
+                noItemsMessage={
+                  isLoading
+                    ? i18n.translate('xpack.apm.transactionsTable.loading', {
+                        defaultMessage: 'Loading...',
+                      })
+                    : i18n.translate('xpack.apm.transactionsTable.noResults', {
+                        defaultMessage: 'No transaction groups found',
+                      })
+                }
                 loading={isLoading}
                 items={transactionGroups}
                 columns={columns}
