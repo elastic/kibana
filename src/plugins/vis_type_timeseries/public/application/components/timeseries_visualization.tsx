@@ -144,7 +144,8 @@ function TimeseriesVisualization({
   const shouldDisplayLastValueIndicator =
     isLastValueMode && !model.hide_last_value_indicator && model.type !== PANEL_TYPES.TIMESERIES;
 
-  const series = (isVisTableData(visData) ? visData.series : visData?.[model.id]?.series) ?? [];
+  const [firstSeries] =
+    (isVisTableData(visData) ? visData.series : visData[model.id]?.series) ?? [];
 
   if (VisComponent) {
     return (
@@ -152,7 +153,7 @@ function TimeseriesVisualization({
         {shouldDisplayLastValueIndicator && (
           <EuiFlexItem className="tvbLastValueIndicator" grow={false}>
             <LastValueModeIndicator
-              seriesData={series?.[0]?.data}
+              seriesData={firstSeries?.data}
               ignoreDaylightTime={model.ignore_daylight_time}
               panelInterval={getInterval(visData, model)}
               modelInterval={model.interval ?? AUTO_INTERVAL}

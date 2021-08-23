@@ -14,6 +14,7 @@ import { isMetricEnabled } from '../../lib/check_ui_restrictions';
 // @ts-expect-error not typed yet
 import { seriesChangeHandler } from '../lib/series_change_handler';
 import { checkIfNumericMetric } from '../lib/check_if_numeric_metric';
+import { getFormatterType } from '../lib/get_formatter_type';
 import { UnsupportedAgg } from './unsupported_agg';
 import { TemporaryUnsupportedAgg } from './temporary_unsupported_agg';
 import { DATA_FORMATTERS } from '../../../../common/enums';
@@ -63,9 +64,10 @@ export function Agg(props: AggProps) {
   );
 
   useEffect(() => {
+    const formatterType = getFormatterType(series.formatter);
     const isNumericMetric = checkIfNumericMetric(model, fields, indexPattern);
     const isNumberFormatter = ![DATA_FORMATTERS.DEFAULT, DATA_FORMATTERS.CUSTOM].includes(
-      series.formatter as DATA_FORMATTERS
+      formatterType
     );
 
     if (isNumberFormatter && !isNumericMetric) {
@@ -73,7 +75,7 @@ export function Agg(props: AggProps) {
     }
     // in case of string index pattern mode, change default formatter depending on metric type
     // "number" formatter for numeric metric and "" as custom formatter for any other type
-    if (series.formatter === DATA_FORMATTERS.DEFAULT && !isKibanaIndexPattern) {
+    if (formatterType === DATA_FORMATTERS.DEFAULT && !isKibanaIndexPattern) {
       onChange({
         formatter: isNumericMetric ? DATA_FORMATTERS.NUMBER : '',
       });

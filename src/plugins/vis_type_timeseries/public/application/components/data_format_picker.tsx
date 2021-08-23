@@ -23,12 +23,8 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { DATA_FORMATTERS } from '../../../common/enums';
-import {
-  durationInputOptions,
-  durationOutputOptions,
-  getDurationParams,
-  isDuration,
-} from './lib/durations';
+import { getFormatterType } from './lib/get_formatter_type';
+import { durationInputOptions, durationOutputOptions, getDurationParams } from './lib/durations';
 
 const DEFAULT_OUTPUT_PRECISION = '2';
 const DEFAULT_CUSTOM_FORMAT_PATTERN = '0,0.[000]';
@@ -108,21 +104,6 @@ const getDataFormatPickerOptions = (
   ];
 };
 
-const getSelectedFormatter = (formatter: string) => {
-  if (
-    [
-      DATA_FORMATTERS.NUMBER,
-      DATA_FORMATTERS.BYTES,
-      DATA_FORMATTERS.PERCENT,
-      DATA_FORMATTERS.DEFAULT,
-    ].includes(formatter as DATA_FORMATTERS)
-  ) {
-    return formatter as DATA_FORMATTERS;
-  }
-
-  return formatter && isDuration(formatter) ? DATA_FORMATTERS.DURATION : DATA_FORMATTERS.CUSTOM;
-};
-
 interface DataFormatPickerProps {
   formatterValue: string;
   changeModelFormatter: (formatter: string) => void;
@@ -140,7 +121,7 @@ export const DataFormatPicker = ({
     () => getDataFormatPickerOptions(shouldIncludeDefaultOption, shouldIncludeNumberOptions),
     [shouldIncludeDefaultOption, shouldIncludeNumberOptions]
   );
-  const [selectedFormatter, setSelectedFormatter] = useState(getSelectedFormatter(formatterValue));
+  const [selectedFormatter, setSelectedFormatter] = useState(getFormatterType(formatterValue));
   const [customFormatPattern, setCustomFormatPattern] = useState('');
   const [durationParams, setDurationParams] = useState(
     getDurationParams(selectedFormatter === DATA_FORMATTERS.DURATION ? formatterValue : 'ms,ms,')
@@ -285,7 +266,7 @@ export const DataFormatPicker = ({
             <span>
               <EuiLink target="_blank" href="http://numeraljs.com/#format">
                 <FormattedMessage
-                  id="visTypeTimeseries.dataFormatPicker.formatStringHelpText"
+                  id="visTypeTimeseries.dataFormatPicker.formatPatternHelpText"
                   defaultMessage="Documentation"
                 />
                 &nbsp;
