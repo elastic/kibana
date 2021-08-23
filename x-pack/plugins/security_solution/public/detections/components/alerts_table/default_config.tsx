@@ -37,25 +37,48 @@ import {
   ALERT_RULE_QUERY,
 } from '../../../../../timelines/common/alerts';
 
-export const buildAlertStatusFilter = (status: Status): Filter[] => [
-  {
-    meta: {
-      alias: null,
-      negate: false,
-      disabled: false,
-      type: 'phrase',
-      key: ALERT_WORKFLOW_STATUS,
-      params: {
-        query: status,
+// TODO: Confirm changes with @dplumlee
+export const buildAlertStatusFilter = (status: Status): Filter[] => {
+  const combinedQuery =
+    status === 'acknowledged'
+      ? {
+          bool: {
+            should: [
+              {
+                term: {
+                  [ALERT_WORKFLOW_STATUS]: status,
+                },
+              },
+              {
+                term: {
+                  [ALERT_WORKFLOW_STATUS]: 'in-progress',
+                },
+              },
+            ],
+          },
+        }
+      : {
+          term: {
+            [ALERT_WORKFLOW_STATUS]: status,
+          },
+        };
+
+  return [
+    {
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
+        type: 'phrase',
+        key: ALERT_WORKFLOW_STATUS,
+        params: {
+          query: status,
+        },
       },
+      query: combinedQuery,
     },
-    query: {
-      term: {
-        [ALERT_WORKFLOW_STATUS]: status,
-      },
-    },
-  },
-];
+  ];
+};
 
 export const buildAlertsRuleIdFilter = (ruleId: string | null): Filter[] =>
   ruleId
@@ -149,25 +172,48 @@ export const requiredFieldsForActions = [
 ];
 
 // TODO: Once we are past experimental phase this code should be removed
-export const buildAlertStatusFilterRuleRegistry = (status: Status): Filter[] => [
-  {
-    meta: {
-      alias: null,
-      negate: false,
-      disabled: false,
-      type: 'phrase',
-      key: ALERT_WORKFLOW_STATUS,
-      params: {
-        query: status,
+// TODO: Confirm changes with @dplumlee
+export const buildAlertStatusFilterRuleRegistry = (status: Status): Filter[] => {
+  const combinedQuery =
+    status === 'acknowledged'
+      ? {
+          bool: {
+            should: [
+              {
+                term: {
+                  [ALERT_WORKFLOW_STATUS]: status,
+                },
+              },
+              {
+                term: {
+                  [ALERT_WORKFLOW_STATUS]: 'in-progress',
+                },
+              },
+            ],
+          },
+        }
+      : {
+          term: {
+            [ALERT_WORKFLOW_STATUS]: status,
+          },
+        };
+
+  return [
+    {
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
+        type: 'phrase',
+        key: ALERT_WORKFLOW_STATUS,
+        params: {
+          query: status,
+        },
       },
+      query: combinedQuery,
     },
-    query: {
-      term: {
-        [ALERT_WORKFLOW_STATUS]: status,
-      },
-    },
-  },
-];
+  ];
+};
 
 export const buildShowBuildingBlockFilterRuleRegistry = (
   showBuildingBlockAlerts: boolean
