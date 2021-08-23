@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { getQueryWithParams } from './get_query_with_params';
 
 describe('correlations', () => {
@@ -16,6 +17,8 @@ describe('correlations', () => {
           start: '2020',
           end: '2021',
           includeFrozen: false,
+          environment: ENVIRONMENT_ALL.value,
+          kuery: '',
         },
       });
       expect(query).toEqual({
@@ -45,7 +48,7 @@ describe('correlations', () => {
           start: '2020',
           end: '2021',
           environment: 'dev',
-          percentileThresholdValue: 75,
+          kuery: '',
           includeFrozen: false,
         },
       });
@@ -81,13 +84,6 @@ describe('correlations', () => {
                 'transaction.name': 'actualTransactionName',
               },
             },
-            {
-              range: {
-                'transaction.duration.us': {
-                  gte: 75,
-                },
-              },
-            },
           ],
         },
       });
@@ -100,6 +96,8 @@ describe('correlations', () => {
           start: '2020',
           end: '2021',
           includeFrozen: false,
+          environment: ENVIRONMENT_ALL.value,
+          kuery: '',
         },
         fieldName: 'actualFieldName',
         fieldValue: 'actualFieldValue',

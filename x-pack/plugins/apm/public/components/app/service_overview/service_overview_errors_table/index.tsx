@@ -24,6 +24,7 @@ import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_column';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 
 interface Props {
   serviceName: string;
@@ -57,14 +58,7 @@ const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
 
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const {
-    urlParams: {
-      environment,
-      kuery,
-      start,
-      end,
-      comparisonType,
-      comparisonEnabled,
-    },
+    urlParams: { start, end, comparisonType, comparisonEnabled },
   } = useUrlParams();
   const { transactionType } = useApmServiceContext();
   const [tableOptions, setTableOptions] = useState<{
@@ -87,6 +81,10 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const { pageIndex, sort } = tableOptions;
   const { direction, field } = sort;
+
+  const {
+    query: { environment, kuery },
+  } = useApmParams('/services/:serviceName/overview');
 
   const { data = INITIAL_STATE_MAIN_STATISTICS, status } = useFetcher(
     (callApmApi) => {
@@ -205,11 +203,23 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       <EuiFlexItem>
         <TableFetchWrapper status={status}>
           <OverviewTableContainer
+            fixedHeight={true}
             isEmptyAndLoading={
               totalItems === 0 && status === FETCH_STATUS.LOADING
             }
           >
             <EuiBasicTable
+              noItemsMessage={
+                status === FETCH_STATUS.LOADING
+                  ? i18n.translate(
+                      'xpack.apm.serviceOverview.errorsTable.loading',
+                      { defaultMessage: 'Loading...' }
+                    )
+                  : i18n.translate(
+                      'xpack.apm.serviceOverview.errorsTable.noResults',
+                      { defaultMessage: 'No errors found' }
+                    )
+              }
               columns={columns}
               items={items}
               pagination={{

@@ -16,12 +16,10 @@ import {
   agentPolicyRouteService,
   AgentPolicy,
   PLUGIN_ID,
-  INTEGRATIONS_PLUGIN_ID,
   NewPackagePolicy,
 } from '../../../fleet/common';
 import {
   pagePathGetters,
-  CreatePackagePolicyRouteState,
   PackagePolicyCreateExtensionComponentProps,
   PackagePolicyEditExtensionComponentProps,
 } from '../../../fleet/public';
@@ -49,7 +47,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
     http,
   } = useKibana().services;
   const { state: locationState } = useLocation();
-  const { replace, go } = useHistory();
+  const { go } = useHistory();
 
   const agentsLinkHref = useMemo(() => {
     if (!policy?.policy_id) return '#';
@@ -126,27 +124,28 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (!editMode) {
-      replace({
-        state: {
-          onSaveNavigateTo: (newPackagePolicy) => [
-            INTEGRATIONS_PLUGIN_ID,
-            {
-              path:
-                '#' +
-                pagePathGetters.integration_policy_edit({
-                  packagePolicyId: newPackagePolicy.id,
-                })[1],
-              state: {
-                forceRefresh: true,
-              },
-            },
-          ],
-        } as CreatePackagePolicyRouteState,
-      });
-    }
-  }, [editMode, replace]);
+  // TODO: Find a better solution
+  // useEffect(() => {
+  //   if (!editMode) {
+  //     replace({
+  //       state: {
+  //         onSaveNavigateTo: (newPackagePolicy) => [
+  //           INTEGRATIONS_PLUGIN_ID,
+  //           {
+  //             path:
+  //               '#' +
+  //               pagePathGetters.integration_policy_edit({
+  //                 packagePolicyId: newPackagePolicy.id,
+  //               })[1],
+  //             state: {
+  //               forceRefresh: true,
+  //             },
+  //           },
+  //         ],
+  //       } as CreatePackagePolicyRouteState,
+  //     });
+  //   }
+  // }, [editMode, replace]);
 
   const scheduledQueryGroupTableData = useMemo(() => {
     const policyWithoutEmptyQueries = produce<
