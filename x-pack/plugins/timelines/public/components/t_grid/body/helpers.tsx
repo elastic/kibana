@@ -192,11 +192,13 @@ export const allowSorting = ({
 export const addBuildingBlockStyle = (
   ecs: Ecs,
   theme: EuiTheme,
-  setCellProps: EuiDataGridCellValueElementProps['setCellProps']
+  setCellProps: EuiDataGridCellValueElementProps['setCellProps'],
+  defaultStyles: React.CSSProperties
 ) => {
   if (isEventBuildingBlockType(ecs)) {
     setCellProps({
       style: {
+        ...defaultStyles,
         backgroundColor: `${theme.eui.euiColorHighlight}`,
       },
     });
@@ -204,6 +206,7 @@ export const addBuildingBlockStyle = (
     // reset cell style
     setCellProps({
       style: {
+        ...defaultStyles,
         backgroundColor: 'inherit',
       },
     });
