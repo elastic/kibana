@@ -93,7 +93,11 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
 
   return (
     <>
-      <EuiButtonEmpty onClick={() => setShowFlyout(true)} style={{ height: 'auto' }}>
+      <EuiButtonEmpty
+        onClick={() => setShowFlyout(true)}
+        style={{ height: 'auto' }}
+        data-test-subj="mlJobListRowManageSpacesButton"
+      >
         <LazySpaceList namespaces={spaceIds} displayLimit={0} behaviorContext="outside-space" />
       </EuiButtonEmpty>
       {showFlyout && <LazyShareToSpaceFlyout {...shareToSpaceFlyoutProps} />}
