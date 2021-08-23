@@ -7,6 +7,7 @@
 
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import semverLte from 'semver/functions/lte';
 import { getFlattenedObject } from '@kbn/std';
 import type { KibanaRequest } from 'src/core/server';
 import type {
@@ -452,7 +453,7 @@ class PackagePolicyService {
   ) {
     const packagePolicy = await this.get(soClient, id);
     if (!packagePolicy) {
-      throw new Error(
+      throw new IngestManagerError(
         i18n.translate('xpack.fleet.packagePolicy.policyNotFoundError', {
           defaultMessage: 'Package policy with id {id} not found',
           values: { id },
@@ -461,7 +462,7 @@ class PackagePolicyService {
     }
 
     if (!packagePolicy.package?.name) {
-      throw new Error(
+      throw new IngestManagerError(
         i18n.translate('xpack.fleet.packagePolicy.packageNotFoundError', {
           defaultMessage: 'Package policy with id {id} has no named package',
           values: { id },
@@ -483,11 +484,41 @@ class PackagePolicyService {
         pkgName: packagePolicy.package.name,
       });
 
+      if (!installedPackage) {
+        throw new IngestManagerError(
+          i18n.translate('xpack.fleet.packagePolicy.packageNotInstalledError', {
+            defaultMessage: 'Package {name} is not installed',
+            values: {
+              name: packagePolicy.package.name,
+            },
+          })
+        );
+      }
+
       packageInfo = await getPackageInfo({
         savedObjectsClient: soClient,
         pkgName: packagePolicy.package.name,
         pkgVersion: installedPackage?.version ?? '',
       });
+
+      const isInstalledVersionLessThanOrEqualToPolicyVersion = semverLte(
+        installedPackage?.version ?? '',
+        packagePolicy.package.version
+      );
+
+      if (isInstalledVersionLessThanOrEqualToPolicyVersion) {
+        throw new IngestManagerError(
+          i18n.translate('xpack.fleet.packagePolicy.ineligibleForUpgradeError', {
+            defaultMessage:
+              "Package policy {id}'s package version {version} of package {name} is up to date with the installed package. Please install the latest version of {name}.",
+            values: {
+              id: packagePolicy.id,
+              name: packagePolicy.package.name,
+              version: packagePolicy.package.version,
+            },
+          })
+        );
+      }
     }
 
     return {
@@ -527,13 +558,7 @@ class PackagePolicyService {
           updatePackagePolicy.inputs as PackagePolicyInput[]
         );
 
-        await this.update(
-          soClient,
-          esClient,
-          id,
-          omit(updatePackagePolicy, 'missingVars'),
-          options
-        );
+        await this.update(soClient, esClient, id, updatePackagePolicy, options);
         result.push({
           id,
           name: packagePolicy.name,
@@ -874,7 +899,7 @@ export function overridePackageInputs(
 
     if (!originalInput) {
       const e = {
-        error: new Error(
+        error: new IngestManagerError(
           i18n.translate('xpack.fleet.packagePolicyInputOverrideError', {
             defaultMessage: 'Input type {inputType} does not exist on package {packageName}',
             values: {
@@ -914,7 +939,7 @@ export function overridePackageInputs(
         if (!originalStream) {
           const streamSet = stream.data_stream.dataset;
           const e = {
-            error: new Error(
+            error: new IngestManagerError(
               i18n.translate('xpack.fleet.packagePolicyStreamOverrideError', {
                 defaultMessage:
                   'Data stream {streamSet} does not exist on {inputType} of package {packageName}',
@@ -969,8 +994,17 @@ export function overridePackageInputs(
     errors = [...errors, ...responseFormattedValidationErrors];
   }
 
-  if (dryRun && errors.length) {
-    return { ...resultingPackagePolicy, errors };
+  if (errors.length) {
+    if (dryRun) {
+      return { ...resultingPackagePolicy, errors };
+    }
+
+    throw new IngestManagerError(
+      i18n.translate('xpack.fleet.packagePolicyInvalidError', {
+        defaultMessage: 'Package policy is invalid: {errors}',
+        values: { errors: errors.map(({ key, message }) => `${key}: ${message}`).join('\n') },
+      })
+    );
   }
 
   return resultingPackagePolicy;

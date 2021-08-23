@@ -6,18 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import request from 'superagent';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
-
 import { PartialSearchRequest } from '../../../../plugins/apm/server/lib/search_strategies/correlations/search_strategy';
-
-function parseBfetchResponse(resp: request.Response): Array<Record<string, any>> {
-  return resp.text
-    .trim()
-    .split('\n')
-    .map((item) => JSON.parse(item));
-}
+import { parseBfetchResponse } from '../../common/utils/parse_b_fetch';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const retry = getService('retry');
