@@ -6,7 +6,6 @@ module.exports = {
     './typescript.js',
     './jest.js',
     './react.js',
-    './plugins.js',
   ],
 
   plugins: [

@@ -13,6 +13,5 @@ module.exports = {
     'no-restricted-paths': require('./rules/no_restricted_paths'),
     module_migration: require('./rules/module_migration'),
     no_export_all: require('./rules/no_export_all'),
-    no_duplicate_exports: require('./rules/no_duplicate_exports'),
   },
 };

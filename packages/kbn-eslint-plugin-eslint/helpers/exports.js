@@ -14,14 +14,12 @@ const { REPO_ROOT } = require('@kbn/dev-utils');
 /** @typedef {import("@typescript-eslint/types").TSESTree.ExportAllDeclaration} ExportAllDeclaration */
 /** @typedef {import("estree").Node} Node */
 /** @typedef {(path: string) => ts.SourceFile} Parser */
-/** @typedef {ts.Identifier|ts.BindingName} ExportName */
+/** @typedef {ts.Identifier|ts.BindingName} ExportNameNode */
 
 const RESOLUTION_EXTENSIONS = ['.js', '.json', '.ts', '.tsx', '.d.ts'];
 
 /** @param {ts.Statement} node */
-const hasExportMod = (node) => {
-  return node.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword);
-};
+const hasExportMod = (node) => node.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword);
 
 /** @param {string} path */
 const safeStat = (path) => {
@@ -91,63 +89,6 @@ const getImportPath = (dir, specifier) => {
 };
 
 /**
- * @param {ts.Statement} statement
- * @return {ExportName[]|undefined}
- */
-const getExportNamesFromStatement = (statement) => {
-  // export function xyz() ...
-  if (ts.isFunctionDeclaration(statement) && statement.name && hasExportMod(statement)) {
-    return [statement.name];
-  }
-
-  // export const/let foo = ...
-  if (ts.isVariableStatement(statement) && hasExportMod(statement)) {
-    return statement.declarationList.declarations.map((dec) => dec.name);
-  }
-
-  // export class xyc
-  if (ts.isClassDeclaration(statement) && statement.name && hasExportMod(statement)) {
-    return [statement.name];
-  }
-
-  // export interface Foo {...}
-  if (ts.isInterfaceDeclaration(statement) && hasExportMod(statement)) {
-    return [statement.name];
-  }
-
-  // export type Foo = ...
-  if (ts.isTypeAliasDeclaration(statement) && hasExportMod(statement)) {
-    return [statement.name];
-  }
-
-  // export enum ...
-  if (ts.isEnumDeclaration(statement) && hasExportMod(statement)) {
-    return [statement.name];
-  }
-
-  if (ts.isExportDeclaration(statement)) {
-    const clause = statement.exportClause;
-
-    // export * from '../foo';
-    if (!clause) {
-      return undefined;
-    }
-
-    // export * as foo from './foo'
-    if (ts.isNamespaceExport(clause)) {
-      return [clause.name];
-    }
-
-    // export { foo }
-    // export { foo as x } from 'other'
-    // export { default as foo } from 'other'
-    return clause.elements.map((e) => e.name);
-  }
-
-  return undefined;
-};
-
-/**
  * @param {Parser} parser
  * @param {string} from
  * @param {ts.ExportDeclaration} exportFrom
@@ -171,24 +112,73 @@ const getExportNamesDeep = (parser, from, exportFrom, exportNames = new Set()) =
   const sourceFile = parser(importPath);
 
   for (const statement of sourceFile.statements) {
-    const ownNames = getExportNamesFromStatement(statement);
-    if (ownNames) {
-      for (const name of ownNames) {
-        exportNames.add(name.getText());
+    // export function xyz() ...
+    if (ts.isFunctionDeclaration(statement) && statement.name && hasExportMod(statement)) {
+      exportNames.add(statement.name.getText());
+      continue;
+    }
+
+    // export const/let foo = ...
+    if (ts.isVariableStatement(statement) && hasExportMod(statement)) {
+      for (const dec of statement.declarationList.declarations) {
+        exportNames.add(dec.name.getText());
       }
       continue;
     }
 
-    // export * from '../foo';
-    if (ts.isExportDeclaration(statement) && !statement.exportClause) {
-      if (!getExportNamesDeep(parser, sourceFile.fileName, statement, exportNames)) {
-        // abort if we can't get all the exported names
-        return undefined;
+    // export class xyc
+    if (ts.isClassDeclaration(statement) && statement.name && hasExportMod(statement)) {
+      exportNames.add(statement.name.getText());
+      continue;
+    }
+
+    // export interface Foo {...}
+    if (ts.isInterfaceDeclaration(statement) && hasExportMod(statement)) {
+      exportNames.add(statement.name.getText());
+      continue;
+    }
+
+    // export type Foo = ...
+    if (ts.isTypeAliasDeclaration(statement) && hasExportMod(statement)) {
+      exportNames.add(statement.name.getText());
+      continue;
+    }
+
+    // export enum ...
+    if (ts.isEnumDeclaration(statement) && hasExportMod(statement)) {
+      exportNames.add(statement.name.getText());
+      continue;
+    }
+
+    if (ts.isExportDeclaration(statement)) {
+      const clause = statement.exportClause;
+
+      // export * from '../foo';
+      if (!clause) {
+        if (!getExportNamesDeep(parser, sourceFile.fileName, statement, exportNames)) {
+          // abort if we can't get all the exported names
+          return undefined;
+        }
+        continue;
       }
+
+      // export * as foo from './foo'
+      if (ts.isNamespaceExport(clause)) {
+        exportNames.add(clause.name.getText());
+        continue;
+      }
+
+      // export { foo }
+      // export { foo as x } from 'other'
+      // export { default as foo } from 'other'
+      for (const e of clause.elements) {
+        exportNames.add(e.name.getText());
+      }
+      continue;
     }
   }
 
   return exportNames;
 };
 
-module.exports = { getExportNamesDeep, getExportNamesFromStatement };
+module.exports = { getExportNamesDeep };
