@@ -21,11 +21,3 @@ export function getServiceNodeName(serviceNodeName?: string) {
     ? UNIDENTIFIED_SERVICE_NODES_LABEL
     : serviceNodeName;
 }
-
-export function getServiceNodeHostName(hostName: string | number | null) {
-  if (hostName === null || !hostName) {
-    return '';
-  }
-
-  return hostName;
-}

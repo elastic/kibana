@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
-  getServiceNodeHostName,
   getServiceNodeName,
   SERVICE_NODE_NAME_MISSING,
 } from '../../../../common/service_nodes';
