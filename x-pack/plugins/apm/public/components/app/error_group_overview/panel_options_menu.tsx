@@ -39,12 +39,22 @@ export function PanelOptionsMenu({ data }: { data: any }) {
       const requestParams = {
         id: operation.operationName,
         name: operation.operationName,
+        // Taken from https://github.com/smith/kibana/blob/b1202c2a42a878069350797e70b2950d69d78027/src/plugins/data/common/search/search_source/inspect/inspector_stats.ts#L29
+        // TODO: Fill in all (or most of) the stats
+        stats: {
+          indexPattern: {
+            label: 'Index pattern',
+            value: operation.requestParams.index,
+            description:
+              'The index pattern that connected to the Elasticsearch indices.',
+          },
+        },
       };
       const requestResponder = inspectorAdapters.requests.start(
         operation.operationName,
         requestParams
       );
-      requestResponder.json(operation.requestParams);
+      requestResponder.json(operation.requestParams.body);
       // TODO: Get status as well as data
       requestResponder.finish(RequestStatus.OK, { json: operation.response });
     });
