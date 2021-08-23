@@ -33,7 +33,7 @@ describe('<FieldEditorFlyoutContent />', () => {
   test('should allow a field to be provided', async () => {
     const field = {
       name: 'foo',
-      type: 'ip',
+      type: 'ip' as const,
       script: {
         source: 'emit("hello world")',
       },
@@ -50,7 +50,7 @@ describe('<FieldEditorFlyoutContent />', () => {
   test('should accept an "onSave" prop', async () => {
     const field = {
       name: 'foo',
-      type: 'date',
+      type: 'date' as const,
       script: { source: 'test=123' },
     };
     const onSave: jest.Mock<Props['onSave']> = jest.fn();
