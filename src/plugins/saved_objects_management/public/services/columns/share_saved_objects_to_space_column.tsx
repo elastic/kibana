@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectsManagementColumn } from 'src/plugins/saved_objects_management/public';
-import type { SpaceListProps, SpacesApiUi } from 'src/plugins/spaces_oss/public';
+
+import type { SpaceListProps, SpacesApiUi } from '../../../../../../x-pack/plugins/spaces/public';
+import type { SavedObjectsManagementColumn } from '../types';
 
 interface WrapperProps {
   spacesApiUi: SpacesApiUi;
@@ -28,10 +30,10 @@ export class ShareToSpaceSavedObjectsManagementColumn
 
   public euiColumn = {
     field: 'namespaces',
-    name: i18n.translate('xpack.spaces.shareToSpace.columnTitle', {
+    name: i18n.translate('savedObjectsManagement.shareToSpace.columnTitle', {
       defaultMessage: 'Shared spaces',
     }),
-    description: i18n.translate('xpack.spaces.shareToSpace.columnDescription', {
+    description: i18n.translate('savedObjectsManagement.shareToSpace.columnDescription', {
       defaultMessage: 'The other spaces that this object is currently shared to',
     }),
     render: (namespaces: string[] | undefined) => {
