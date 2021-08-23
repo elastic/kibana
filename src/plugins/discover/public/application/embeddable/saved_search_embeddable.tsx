@@ -42,8 +42,9 @@ import { handleSourceColumnState } from '../angular/helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DocTableProps } from '../apps/main/components/doc_table/doc_table_wrapper';
-import { getDefaultSort, getSortForSearchSource } from '../apps/main/components/doc_table';
+import { getDefaultSort } from '../apps/main/components/doc_table';
 import { SortOrder } from '../apps/main/components/doc_table/components/table_header/helpers';
+import { updateSearchSource } from './helpers/update_search_source';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -143,26 +144,16 @@ export class SavedSearchEmbeddable
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
-    searchSource.setField('size', this.services.uiSettings.get(SAMPLE_SIZE_SETTING));
-    searchSource.setField(
-      'sort',
-      getSortForSearchSource(
-        this.searchProps!.sort,
-        this.searchProps!.indexPattern,
-        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
-      )
-    );
-    if (useNewFieldsApi) {
-      searchSource.removeField('fieldsFromSource');
-      const fields: Record<string, string> = { field: '*', include_unmapped: 'true' };
-      searchSource.setField('fields', [fields]);
-    } else {
-      searchSource.removeField('fields');
-      if (this.searchProps.indexPattern) {
-        const fieldNames = this.searchProps.indexPattern.fields.map((field) => field.name);
-        searchSource.setField('fieldsFromSource', fieldNames);
+    updateSearchSource(
+      searchSource,
+      this.searchProps!.indexPattern,
+      this.searchProps!.sort,
+      useNewFieldsApi,
+      {
+        sampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
+        defaultSort: this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
       }
-    }
+    );
 
     // Log request to inspector
     this.inspectorAdapters.requests!.reset();
