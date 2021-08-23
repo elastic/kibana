@@ -15,23 +15,9 @@ export const ENTERPRISE_SEARCH_PLUGIN = {
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.navTitle', {
     defaultMessage: 'Overview',
   }),
-  SUBTITLE: i18n.translate('xpack.enterpriseSearch.featureCatalogue.subtitle', {
-    defaultMessage: 'Search everything',
-  }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.FeatureCatalogue.description', {
     defaultMessage: 'Create search experiences with a refined set of APIs and tools.',
   }),
-  APP_DESCRIPTIONS: [
-    i18n.translate('xpack.enterpriseSearch.featureCatalogueDescription1', {
-      defaultMessage: 'Build a powerful search experience.',
-    }),
-    i18n.translate('xpack.enterpriseSearch.featureCatalogueDescription2', {
-      defaultMessage: 'Connect your users to relevant data.',
-    }),
-    i18n.translate('xpack.enterpriseSearch.featureCatalogueDescription3', {
-      defaultMessage: 'Unify your team content.',
-    }),
-  ],
   URL: '/app/enterprise_search/overview',
   LOGO: 'logoEnterpriseSearch',
 };
@@ -46,8 +32,7 @@ export const APP_SEARCH_PLUGIN = {
       'Leverage dashboards, analytics, and APIs for advanced application search made simple.',
   }),
   CARD_DESCRIPTION: i18n.translate('xpack.enterpriseSearch.appSearch.productCardDescription', {
-    defaultMessage:
-      'Elastic App Search provides user-friendly tools to design and deploy a powerful search to your websites or web/mobile applications.',
+    defaultMessage: 'Design and deploy a powerful search to your websites and apps.',
   }),
   URL: '/app/enterprise_search/app_search',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/app-search/',
@@ -66,7 +51,7 @@ export const WORKPLACE_SEARCH_PLUGIN = {
     'xpack.enterpriseSearch.workplaceSearch.productCardDescription',
     {
       defaultMessage:
-        "Unify all your team's content in one place, with instant connectivity to popular productivity and collaboration tools.",
+        'Unify your content in one place, with instant connectivity to popular productivity and collaboration tools.',
     }
   ),
   URL: '/app/enterprise_search/workplace_search',

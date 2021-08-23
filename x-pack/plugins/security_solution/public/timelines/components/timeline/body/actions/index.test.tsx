@@ -12,6 +12,7 @@ import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../
 import { Actions } from '.';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -20,13 +21,40 @@ jest.mock('../../../../../common/hooks/use_selector', () => ({
   useShallowEqualSelector: jest.fn(),
 }));
 
-jest.mock('../../../../../common/lib/kibana', () => {
-  const useKibana = jest.requireActual('../../../../../common/lib/kibana');
-  return {
-    ...useKibana,
-    useGetUserCasesPermissions: jest.fn(),
-  };
-});
+jest.mock('@kbn/alerts', () => ({
+  useGetUserAlertsPermissions: () => ({
+    loading: false,
+    crud: true,
+    read: true,
+  }),
+}));
+
+jest.mock('../../../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        navigateToApp: jest.fn(),
+        getUrlForApp: jest.fn(),
+        capabilities: {
+          siem: { crud_alerts: true, read_alerts: true },
+        },
+      },
+      uiSettings: {
+        get: jest.fn(),
+      },
+      savedObjects: {
+        client: {},
+      },
+      timelines: { ...mockTimelines },
+    },
+  }),
+  useToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+  }),
+  useGetUserCasesPermissions: jest.fn(),
+}));
 
 describe('Actions', () => {
   beforeEach(() => {
@@ -57,6 +85,8 @@ describe('Actions', () => {
           timelineId={'test'}
           refetch={jest.fn()}
           showCheckboxes={true}
+          setEventsLoading={jest.fn()}
+          setEventsDeleted={jest.fn()}
         />
       </TestProviders>
     );
@@ -87,6 +117,8 @@ describe('Actions', () => {
           onEventDetailsPanelOpened={jest.fn()}
           onRowSelected={jest.fn()}
           showCheckboxes={false}
+          setEventsLoading={jest.fn()}
+          setEventsDeleted={jest.fn()}
         />
       </TestProviders>
     );
@@ -119,6 +151,8 @@ describe('Actions', () => {
           onEventDetailsPanelOpened={jest.fn()}
           onRowSelected={jest.fn()}
           showCheckboxes={true}
+          setEventsLoading={jest.fn()}
+          setEventsDeleted={jest.fn()}
         />
       </TestProviders>
     );

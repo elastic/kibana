@@ -19,7 +19,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should show page title', async () => {
       expect(await testSubjects.getVisibleText('header-page-title')).to.equal(
-        'Trusted Applications'
+        'Trusted applications'
       );
     });
 

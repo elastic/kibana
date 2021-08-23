@@ -6,22 +6,18 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { RuleDataPluginService } from './';
+import { RuleDataPluginService } from './rule_data_plugin_service';
 
 type Schema = PublicMethodsOf<RuleDataPluginService>;
 
 const createRuleDataPluginService = () => {
   const mocked: jest.Mocked<Schema> = {
-    init: jest.fn(),
-    isReady: jest.fn(),
-    wait: jest.fn(),
+    getRegisteredIndexInfo: jest.fn(),
+    getResourcePrefix: jest.fn(),
+    getResourceName: jest.fn(),
     isWriteEnabled: jest.fn(),
-    getFullAssetName: jest.fn(),
-    createOrUpdateComponentTemplate: jest.fn(),
-    createOrUpdateIndexTemplate: jest.fn(),
-    createOrUpdateLifecyclePolicy: jest.fn(),
-    getRuleDataClient: jest.fn(),
-    updateIndexMappingsMatchingPattern: jest.fn(),
+    initializeService: jest.fn(),
+    initializeIndex: jest.fn(),
   };
   return mocked;
 };

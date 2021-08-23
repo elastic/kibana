@@ -9,9 +9,9 @@ import { first } from 'rxjs/operators';
 
 import { i18n } from '@kbn/i18n';
 import type { StartServicesAccessor } from 'src/core/public';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
 import type { PluginsStart } from '../../plugin';
+import type { SpacesApiUi } from '../../ui_api';
 import { DEFAULT_OBJECT_NOUN } from '../components/constants';
 
 export function createRedirectLegacyUrl(

@@ -33,6 +33,7 @@ export function HomeApp({ directories, solutions }) {
     addBasePath,
     environmentService,
     telemetry,
+    http,
   } = getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
@@ -71,10 +72,10 @@ export function HomeApp({ directories, solutions }) {
               addBasePath={addBasePath}
               directories={directories}
               solutions={solutions}
-              find={savedObjectsClient.find}
               localStorage={localStorage}
               urlBasePath={getBasePath()}
               telemetry={telemetry}
+              http={http}
             />
           </Route>
           <Route path="*" exact={true} component={RedirectToDefaultApp} />
@@ -103,9 +104,7 @@ HomeApp.propTypes = {
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       title: PropTypes.string.isRequired,
-      subtitle: PropTypes.string.isRequired,
       description: PropTypes.string,
-      appDescriptions: PropTypes.arrayOf(PropTypes.string).isRequired,
       icon: PropTypes.string.isRequired,
       path: PropTypes.string.isRequired,
       order: PropTypes.number,

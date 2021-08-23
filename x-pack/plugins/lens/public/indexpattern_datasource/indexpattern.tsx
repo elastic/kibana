@@ -77,7 +77,7 @@ export {
 } from '../../common/expressions';
 export { FormatColumnArgs, supportedFormats, formatColumn } from '../../common/expressions';
 export { getSuffixFormatter, unitSuffixesLong } from '../../common/suffix_formatter';
-export { timeScale, TimeScaleArgs } from '../../common/expressions';
+export { getTimeScale, TimeScaleArgs } from '../../common/expressions';
 export { renameColumns } from '../../common/expressions';
 
 export function getIndexPatternDatasource({
@@ -473,6 +473,16 @@ export function getIndexPatternDatasource({
     checkIntegrity: (state) => {
       const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);
       return ids.filter((id) => !state.indexPatterns[id]);
+    },
+    isTimeBased: (state) => {
+      const { layers } = state;
+      return (
+        Boolean(layers) &&
+        Object.values(layers).some((layer) => {
+          const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
+          return buckets.some((colId) => layer.columns[colId].operationType === 'date_histogram');
+        })
+      );
     },
   };
 

@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { EuiContextMenu, EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
+import { EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
@@ -15,20 +15,16 @@ import { TimelineEventsDetailsItem, TimelineNonEcsData } from '../../../../commo
 import { useExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';
 import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_investigate_in_timeline';
-/* Todo: Uncomment case action after getAddToCaseAction is split into action and modal
-import {
-    ACTION_ADD_TO_CASE
-} from '../alerts_table/translations';
 import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
 import { useInsertTimeline } from '../../../cases/components/use_insert_timeline';
-import { addToCaseActionItem } from './helpers'; */
 import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
-import { CHANGE_ALERT_STATUS } from './translations';
 import { getFieldValue } from '../host_isolation/helpers';
 import type { Ecs } from '../../../../common/ecs';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { endpointAlertCheck } from '../../../common/utils/endpoint_alert_check';
+import { APP_ID } from '../../../../common/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 interface ActionsData {
   alertStatus: Status;
@@ -50,6 +46,7 @@ export const TakeActionDropdown = React.memo(
     onAddExceptionTypeClick,
     onAddIsolationStatusClick,
     refetch,
+    indexName,
     timelineId,
   }: {
     detailsData: TimelineEventsDetailsItem[] | null;
@@ -59,16 +56,17 @@ export const TakeActionDropdown = React.memo(
     loadingEventDetails: boolean;
     nonEcsData?: TimelineNonEcsData[];
     refetch: (() => void) | undefined;
+    indexName: string;
     onAddEventFilterClick: () => void;
     onAddExceptionTypeClick: (type: ExceptionListType) => void;
     onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
     timelineId: string;
   }) => {
-    /* Todo: Uncomment case action after getAddToCaseAction is split into action and modal
     const casePermissions = useGetUserCasesPermissions();
+    const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
+
     const { timelines: timelinesUi } = useKibana().services;
     const insertTimelineHook = useInsertTimeline;
-    */
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const actionsData = useMemo(
@@ -120,7 +118,7 @@ export const TakeActionDropdown = React.memo(
       [onAddIsolationStatusClick]
     );
 
-    const hostIsolationAction = useHostIsolationAction({
+    const hostIsolationActionItems = useHostIsolationAction({
       closePopover: closePopoverHandler,
       detailsData,
       onAddIsolationStatusClick: handleOnAddIsolationStatusClick,
@@ -135,7 +133,7 @@ export const TakeActionDropdown = React.memo(
       [onAddExceptionTypeClick]
     );
 
-    const { exceptionActions } = useExceptionActions({
+    const { exceptionActionItems } = useExceptionActions({
       isEndpointAlert,
       onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
     });
@@ -145,18 +143,24 @@ export const TakeActionDropdown = React.memo(
       setIsPopoverOpen(false);
     }, [onAddEventFilterClick]);
 
-    const eventFilterActions = useEventFilterAction({
+    const { eventFilterActionItems } = useEventFilterAction({
       onAddEventFilterClick: handleOnAddEventFilterClick,
     });
 
-    const { actionItems } = useAlertsActions({
+    const afterCaseSelection = useCallback(() => {
+      closePopoverHandler();
+    }, [closePopoverHandler]);
+
+    const { actionItems: statusActionItems } = useAlertsActions({
       alertStatus: actionsData.alertStatus,
       eventId: actionsData.eventId,
+      indexName,
       timelineId,
+      refetch,
       closePopover: closePopoverAndFlyout,
     });
 
-    const { investigateInTimelineAction } = useInvestigateInTimeline({
+    const { investigateInTimelineActionItems } = useInvestigateInTimeline({
       alertIds,
       ecsRowData: ecsData,
       onInvestigateInTimelineAlertClick: closePopoverHandler,
@@ -165,52 +169,53 @@ export const TakeActionDropdown = React.memo(
     const alertsActionItems = useMemo(
       () =>
         !isEvent && actionsData.ruleId
-          ? [
-              {
-                name: CHANGE_ALERT_STATUS,
-                panel: 1,
-              },
-              ...exceptionActions,
-            ]
-          : [eventFilterActions],
-      [eventFilterActions, exceptionActions, isEvent, actionsData.ruleId]
+          ? [...statusActionItems, ...exceptionActionItems]
+          : eventFilterActionItems,
+      [eventFilterActionItems, exceptionActionItems, statusActionItems, isEvent, actionsData.ruleId]
     );
 
-    const panels = useMemo(
+    const addToCaseProps = useMemo(() => {
+      if (ecsData) {
+        return {
+          event: { data: [], ecs: ecsData, _id: ecsData._id },
+          useInsertTimeline: insertTimelineHook,
+          casePermissions,
+          appId: APP_ID,
+          onClose: afterCaseSelection,
+        };
+      } else {
+        return null;
+      }
+    }, [afterCaseSelection, casePermissions, ecsData, insertTimelineHook]);
+
+    const addToCasesActionItems = useMemo(
+      () =>
+        addToCaseProps &&
+        ['detections-page', 'detections-rules-details-page', 'timeline-1'].includes(
+          timelineId ?? ''
+        )
+          ? [
+              timelinesUi.getAddToExistingCaseButton(addToCaseProps),
+              timelinesUi.getAddToNewCaseButton(addToCaseProps),
+            ]
+          : [],
+      [timelinesUi, addToCaseProps, timelineId]
+    );
+
+    const items: React.ReactElement[] = useMemo(
       () => [
-        {
-          id: 0,
-          items: [
-            ...alertsActionItems,
-            /* Todo: Uncomment case action after getAddToCaseAction is split into action and modal
-            ...addToCaseActionItem(timelineId),*/
-            ...hostIsolationAction,
-            ...investigateInTimelineAction,
-          ],
-        },
-        {
-          id: 1,
-          title: CHANGE_ALERT_STATUS,
-          content: <EuiContextMenuPanel size="s" items={actionItems} />,
-        },
-        /* Todo: Uncomment case action after getAddToCaseAction is split into action and modal
-        {
-          id: 2,
-          title: ACTION_ADD_TO_CASE,
-          content: (
-            <>
-              {ecsData &&
-                timelinesUi.getAddToCaseAction({
-                  ecsRowData: ecsData,
-                  useInsertTimeline: insertTimelineHook,
-                  casePermissions,
-                  showIcon: false,
-                })}
-            </>
-          ),
-        },*/
+        ...(tGridEnabled ? addToCasesActionItems : []),
+        ...alertsActionItems,
+        ...hostIsolationActionItems,
+        ...investigateInTimelineActionItems,
       ],
-      [actionItems, alertsActionItems, hostIsolationAction, investigateInTimelineAction]
+      [
+        tGridEnabled,
+        alertsActionItems,
+        addToCasesActionItems,
+        hostIsolationActionItems,
+        investigateInTimelineActionItems,
+      ]
     );
 
     const takeActionButton = useMemo(() => {
@@ -221,17 +226,18 @@ export const TakeActionDropdown = React.memo(
       );
     }, [togglePopoverHandler]);
 
-    return panels[0].items?.length && !loadingEventDetails ? (
+    return items.length && !loadingEventDetails ? (
       <>
         <EuiPopover
-          id="hostIsolationTakeActionPanel"
+          id="AlertTakeActionPanel"
           button={takeActionButton}
           isOpen={isPopoverOpen}
           closePopover={closePopoverHandler}
           panelPaddingSize="none"
           anchorPosition="downLeft"
+          repositionOnScroll
         >
-          <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
+          <EuiContextMenuPanel size="s" items={items} />
         </EuiPopover>
       </>
     ) : null;

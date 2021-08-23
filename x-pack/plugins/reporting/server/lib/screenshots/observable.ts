@@ -34,7 +34,13 @@ interface ScreenSetupData {
 export function getScreenshots$(
   captureConfig: CaptureConfig,
   browserDriverFactory: HeadlessChromiumDriverFactory,
-  { logger, urls, conditionalHeaders, layout, browserTimezone }: ScreenshotObservableOpts
+  {
+    logger,
+    urlsOrUrlLocatorTuples,
+    conditionalHeaders,
+    layout,
+    browserTimezone,
+  }: ScreenshotObservableOpts
 ): Rx.Observable<ScreenshotResults[]> {
   const apmTrans = apm.startTransaction(`reporting screenshot pipeline`, 'reporting');
 
@@ -49,8 +55,8 @@ export function getScreenshots$(
       apmCreatePage?.end();
       exit$.subscribe({ error: () => apmTrans?.end() });
 
-      return Rx.from(urls).pipe(
-        concatMap((url, index) => {
+      return Rx.from(urlsOrUrlLocatorTuples).pipe(
+        concatMap((urlOrUrlLocatorTuple, index) => {
           const setup$: Rx.Observable<ScreenSetupData> = Rx.of(1).pipe(
             mergeMap(() => {
               // If we're moving to another page in the app, we'll want to wait for the app to tell us
@@ -62,7 +68,7 @@ export function getScreenshots$(
               return openUrl(
                 captureConfig,
                 driver,
-                url,
+                urlOrUrlLocatorTuple,
                 pageLoadSelector,
                 conditionalHeaders,
                 logger
@@ -129,7 +135,7 @@ export function getScreenshots$(
             )
           );
         }),
-        take(urls.length),
+        take(urlsOrUrlLocatorTuples.length),
         toArray()
       );
     }),

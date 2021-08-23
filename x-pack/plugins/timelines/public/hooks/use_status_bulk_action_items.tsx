@@ -7,30 +7,11 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { FILTER_CLOSED, FILTER_IN_PROGRESS, FILTER_OPEN } from '../../common/constants';
+import { FILTER_CLOSED, FILTER_ACKNOWLEDGED, FILTER_OPEN } from '../../common/constants';
 import * as i18n from '../components/t_grid/translations';
-import type { AlertStatus } from '../../common/types/timeline';
+import type { AlertStatus, StatusBulkActionsProps } from '../../common/types/timeline';
 import { useUpdateAlertsStatus } from '../container/use_update_alerts';
-
-export interface SetEventsLoadingProps {
-  eventIds: string[];
-  isLoading: boolean;
-}
-
-export interface SetEventsDeletedProps {
-  eventIds: string[];
-  isDeleted: boolean;
-}
-
-export interface StatusBulkActionsProps {
-  eventIds: string[];
-  currentStatus?: AlertStatus;
-  query?: string;
-  setEventsLoading: (param: SetEventsLoadingProps) => void;
-  setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
-  onUpdateSuccess: (updated: number, conflicts: number, status: AlertStatus) => void;
-  onUpdateFailure: (status: AlertStatus, error: Error) => void;
-}
+import { useAppToasts } from './use_app_toasts';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   return { bool: { filter: { terms: { _id: eventIds } } } };
@@ -40,20 +21,78 @@ export const useStatusBulkActionItems = ({
   eventIds,
   currentStatus,
   query,
+  indexName,
   setEventsLoading,
   setEventsDeleted,
   onUpdateSuccess,
   onUpdateFailure,
 }: StatusBulkActionsProps) => {
   const { updateAlertStatus } = useUpdateAlertsStatus();
+  const { addSuccess, addError, addWarning } = useAppToasts();
+
+  const onAlertStatusUpdateSuccess = useCallback(
+    (updated: number, conflicts: number, newStatus: AlertStatus) => {
+      if (conflicts > 0) {
+        // Partial failure
+        addWarning({
+          title: i18n.UPDATE_ALERT_STATUS_FAILED(conflicts),
+          text: i18n.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
+        });
+      } else {
+        let title: string;
+        switch (newStatus) {
+          case 'closed':
+            title = i18n.CLOSED_ALERT_SUCCESS_TOAST(updated);
+            break;
+          case 'open':
+            title = i18n.OPENED_ALERT_SUCCESS_TOAST(updated);
+            break;
+          case 'in-progress':
+          case 'acknowledged':
+            title = i18n.ACKNOWLEDGED_ALERT_SUCCESS_TOAST(updated);
+        }
+        addSuccess({ title });
+      }
+      if (onUpdateSuccess) {
+        onUpdateSuccess(updated, conflicts, newStatus);
+      }
+    },
+    [addSuccess, addWarning, onUpdateSuccess]
+  );
+
+  const onAlertStatusUpdateFailure = useCallback(
+    (newStatus: AlertStatus, error: Error) => {
+      let title: string;
+      switch (newStatus) {
+        case 'closed':
+          title = i18n.CLOSED_ALERT_FAILED_TOAST;
+          break;
+        case 'open':
+          title = i18n.OPENED_ALERT_FAILED_TOAST;
+          break;
+        case 'in-progress':
+        case 'acknowledged':
+          title = i18n.ACKNOWLEDGED_ALERT_FAILED_TOAST;
+      }
+      addError(error.message, { title });
+      if (onUpdateFailure) {
+        onUpdateFailure(newStatus, error);
+      }
+    },
+    [addError, onUpdateFailure]
+  );
 
   const onClickUpdate = useCallback(
     async (status: AlertStatus) => {
       try {
         setEventsLoading({ eventIds, isLoading: true });
 
-        const queryObject = query ? JSON.parse(query) : getUpdateAlertsQuery(eventIds);
-        const response = await updateAlertStatus({ query: queryObject, status });
+        const response = await updateAlertStatus({
+          index: indexName,
+          status,
+          query: query ? JSON.parse(query) : getUpdateAlertsQuery(eventIds),
+        });
+
         // TODO: Only delete those that were successfully updated from updatedRules
         setEventsDeleted({ eventIds, isDeleted: true });
 
@@ -61,21 +100,22 @@ export const useStatusBulkActionItems = ({
           throw new Error(i18n.BULK_ACTION_FAILED_SINGLE_ALERT);
         }
 
-        onUpdateSuccess(response.updated ?? 0, response.version_conflicts ?? 0, status);
+        onAlertStatusUpdateSuccess(response.updated ?? 0, response.version_conflicts ?? 0, status);
       } catch (error) {
-        onUpdateFailure(status, error);
+        onAlertStatusUpdateFailure(status, error);
       } finally {
         setEventsLoading({ eventIds, isLoading: false });
       }
     },
     [
-      eventIds,
-      query,
       setEventsLoading,
+      eventIds,
       updateAlertStatus,
+      indexName,
+      query,
       setEventsDeleted,
-      onUpdateSuccess,
-      onUpdateFailure,
+      onAlertStatusUpdateSuccess,
+      onAlertStatusUpdateFailure,
     ]
   );
 
@@ -92,14 +132,14 @@ export const useStatusBulkActionItems = ({
         </EuiContextMenuItem>
       );
     }
-    if (currentStatus !== FILTER_IN_PROGRESS) {
+    if (currentStatus !== FILTER_ACKNOWLEDGED) {
       actionItems.push(
         <EuiContextMenuItem
-          key="progress"
-          data-test-subj="in-progress-alert-status"
-          onClick={() => onClickUpdate(FILTER_IN_PROGRESS)}
+          key="acknowledge"
+          data-test-subj="acknowledged-alert-status"
+          onClick={() => onClickUpdate(FILTER_ACKNOWLEDGED)}
         >
-          {i18n.BULK_ACTION_IN_PROGRESS_SELECTED}
+          {i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED}
         </EuiContextMenuItem>
       );
     }

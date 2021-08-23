@@ -22,7 +22,6 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import type { SpacesContextProps } from 'src/plugins/spaces_oss/public';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import { PLUGIN_ID } from '../../../../../../common/constants/app';
@@ -41,7 +40,7 @@ import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/a
 import { AccessDeniedPage } from '../access_denied_page';
 import { InsufficientLicensePage } from '../insufficient_license_page';
 import type { SharePluginStart } from '../../../../../../../../../src/plugins/share/public';
-import type { SpacesPluginStart } from '../../../../../../../spaces/public';
+import type { SpacesPluginStart, SpacesContextProps } from '../../../../../../../spaces/public';
 import { JobSpacesSyncFlyout } from '../../../../components/job_spaces_sync';
 import { getDefaultAnomalyDetectionJobsListState } from '../../../../jobs/jobs_list/jobs';
 import { getMlGlobalServices } from '../../../../app';
@@ -241,7 +240,7 @@ export const JobsListPage: FC<{
                 description={
                   <FormattedMessage
                     id="xpack.ml.management.jobsList.jobsListTagline"
-                    defaultMessage="View machine learning analytics and anomaly detection jobs."
+                    defaultMessage="View, export, and import machine learning analytics and anomaly detection jobs."
                   />
                 }
                 rightSideItems={[docsLink]}
@@ -258,7 +257,10 @@ export const JobsListPage: FC<{
                   <EuiFlexItem grow={false}>
                     {spacesEnabled && (
                       <>
-                        <EuiButtonEmpty onClick={() => setShowSyncFlyout(true)}>
+                        <EuiButtonEmpty
+                          onClick={() => setShowSyncFlyout(true)}
+                          data-test-subj="mlStackMgmtSyncButton"
+                        >
                           {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
                             defaultMessage: 'Synchronize saved objects',
                           })}

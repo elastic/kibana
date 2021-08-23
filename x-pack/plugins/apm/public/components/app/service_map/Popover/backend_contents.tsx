@@ -20,11 +20,15 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { StatsList } from './stats_list';
 
-export function BackendContents({ nodeData }: ContentsProps) {
-  const { query } = useApmParams('/*');
+export function BackendContents({ nodeData, environment }: ContentsProps) {
+  const { query } = useApmParams(
+    '/service-map',
+    '/services/:serviceName/service-map'
+  );
+
   const apmRouter = useApmRouter();
   const {
-    urlParams: { environment, start, end },
+    urlParams: { start, end },
   } = useUrlParams();
 
   const backendName = nodeData.label;

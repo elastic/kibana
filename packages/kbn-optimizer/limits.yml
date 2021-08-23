@@ -12,7 +12,6 @@ pageLoadAssetSize:
   crossClusterReplication: 65408
   dashboard: 374194
   dashboardEnhanced: 65646
-  dashboardMode: 22716
   data: 824229
   dataEnhanced: 50420
   devTools: 38637
@@ -42,7 +41,7 @@ pageLoadAssetSize:
   inspector: 148711
   kibanaLegacy: 107711
   kibanaOverview: 56279
-  kibanaReact: 161921
+  kibanaReact: 188705
   kibanaUtils: 198829
   lens: 96624
   licenseManagement: 41817
@@ -50,15 +49,13 @@ pageLoadAssetSize:
   lists: 22900
   logstash: 53548
   management: 46112
-  maps: 80000
-  mapsLegacy: 87859
+  maps: 90000
   ml: 82187
   monitoring: 80000
   navigation: 37269
   newsfeed: 42228
   observability: 89709
   painlessLab: 179748
-  regionMap: 66098
   remoteClusters: 51327
   reporting: 183418
   rollup: 97204
@@ -75,7 +72,6 @@ pageLoadAssetSize:
   spaces: 57868
   telemetry: 51957
   telemetryManagementSection: 38586
-  tileMap: 65337
   timelion: 29920
   transform: 41007
   triggersActionsUi: 100000
@@ -102,7 +98,6 @@ pageLoadAssetSize:
   runtimeFields: 41752
   stackAlerts: 29684
   presentationUtil: 94301
-  spacesOss: 18817
   indexPatternFieldEditor: 50000
   osquery: 107090
   fileUpload: 25664
@@ -120,3 +115,4 @@ pageLoadAssetSize:
   expressionMetric: 22238
   expressionShape: 34008
   interactiveSetup: 18532
+  expressionTagcloud: 27505

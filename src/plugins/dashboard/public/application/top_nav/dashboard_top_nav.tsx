@@ -64,11 +64,7 @@ export interface DashboardTopNavState {
 
 type CompleteDashboardAppState = Required<
   DashboardAppState,
-  | 'getLatestDashboardState'
-  | 'dashboardContainer'
-  | 'savedDashboard'
-  | 'indexPatterns'
-  | 'applyFilters'
+  'getLatestDashboardState' | 'dashboardContainer' | 'savedDashboard' | 'applyFilters'
 >;
 
 export const isCompleteDashboardAppState = (
@@ -78,7 +74,6 @@ export const isCompleteDashboardAppState = (
     Boolean(state.getLatestDashboardState) &&
     Boolean(state.dashboardContainer) &&
     Boolean(state.savedDashboard) &&
-    Boolean(state.indexPatterns) &&
     Boolean(state.applyFilters)
   );
 };
@@ -483,7 +478,7 @@ export function DashboardTopNav({
       dashboardAppState.getLatestDashboardState().viewMode,
       dashboardTopNavActions,
       {
-        hideWriteControls: dashboardCapabilities.hideWriteControls,
+        showWriteControls: dashboardCapabilities.showWriteControls,
         isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
         isSaveInProgress: state.isSaveInProgress,
         isNewDashboard: !savedDashboard.id,

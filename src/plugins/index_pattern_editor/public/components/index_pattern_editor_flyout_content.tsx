@@ -9,6 +9,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import memoizeOne from 'memoize-one';
 
 import {
   IndexPatternSpec,
@@ -70,7 +71,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
 }: Props) => {
   const isMounted = useRef<boolean>(false);
   const {
-    services: { http, indexPatternService, uiSettings },
+    services: { http, indexPatternService, uiSettings, searchClient },
   } = useKibana<IndexPatternEditorContext>();
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
@@ -105,12 +106,22 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   const { getFields } = form;
 
-  const [{ title, allowHidden, type }] = useFormData<FormInternal>({ form });
+  // `useFormData` initially returns `undefined`,
+  // we override `undefined` with real default values from `schema`
+  // to get a stable reference to avoid hooks re-run and reduce number of excessive requests
+  const [
+    {
+      title = schema.title.defaultValue,
+      allowHidden = schema.allowHidden.defaultValue,
+      type = schema.type.defaultValue,
+    },
+  ] = useFormData<FormInternal>({ form });
   const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
 
   const [timestampFieldOptions, setTimestampFieldOptions] = useState<TimestampOption[]>([]);
   const [isLoadingTimestampFields, setIsLoadingTimestampFields] = useState<boolean>(false);
   const [isLoadingMatchedIndices, setIsLoadingMatchedIndices] = useState<boolean>(false);
+  const currentLoadingMatchedIndicesRef = useRef(0);
   const [allSources, setAllSources] = useState<MatchedItem[]>([]);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
   const [existingIndexPatterns, setExistingIndexPatterns] = useState<string[]>([]);
@@ -128,13 +139,19 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   // load all data sources and set initial matchedIndices
   const loadSources = useCallback(() => {
-    getIndices(http, () => false, '*', allowHidden).then((dataSources) => {
+    getIndices({
+      http,
+      isRollupIndex: () => false,
+      pattern: '*',
+      showAllIndices: allowHidden,
+      searchClient,
+    }).then((dataSources) => {
       setAllSources(dataSources);
       const matchedSet = getMatchedIndices(dataSources, [], [], allowHidden);
       setMatchedIndices(matchedSet);
       setIsLoadingSources(false);
     });
-  }, [http, allowHidden]);
+  }, [http, allowHidden, searchClient]);
 
   // loading list of index patterns
   useEffect(() => {
@@ -159,7 +176,9 @@ const IndexPatternEditorFlyoutContentComponent = ({
       try {
         const response = await http.get('/api/rollup/indices');
         if (isMounted.current) {
-          setRollupIndicesCapabilities(response || {});
+          if (response) {
+            setRollupIndicesCapabilities(response);
+          }
         }
       } catch (e) {
         // Silently swallow failure responses such as expired trials
@@ -219,34 +238,31 @@ const IndexPatternEditorFlyoutContentComponent = ({
       let newRollupIndexName: string | undefined;
 
       const fetchIndices = async (query: string = '') => {
+        const currentLoadingMatchedIndicesIdx = ++currentLoadingMatchedIndicesRef.current;
+
         setIsLoadingMatchedIndices(true);
-        const indexRequests = [];
 
-        if (query?.endsWith('*')) {
-          const exactMatchedQuery = getIndices(http, isRollupIndex, query, allowHidden);
-          indexRequests.push(exactMatchedQuery);
-          // provide default value when not making a request for the partialMatchQuery
-          indexRequests.push(Promise.resolve([]));
-        } else {
-          const exactMatchQuery = getIndices(http, isRollupIndex, query, allowHidden);
-          const partialMatchQuery = getIndices(http, isRollupIndex, `${query}*`, allowHidden);
+        const { matchedIndicesResult, exactMatched } = !isLoadingSources
+          ? await loadMatchedIndices(query, allowHidden, allSources, {
+              isRollupIndex,
+              http,
+              searchClient,
+            })
+          : {
+              matchedIndicesResult: {
+                exactMatchedIndices: [],
+                allIndices: [],
+                partialMatchedIndices: [],
+                visibleIndices: [],
+              },
+              exactMatched: [],
+            };
 
-          indexRequests.push(exactMatchQuery);
-          indexRequests.push(partialMatchQuery);
-        }
-
-        const [exactMatched, partialMatched] = (await ensureMinimumTime(
-          indexRequests
-        )) as MatchedItem[][];
-
-        const matchedIndicesResult = getMatchedIndices(
-          allSources,
-          partialMatched,
-          exactMatched,
-          allowHidden
-        );
-
-        if (isMounted.current) {
+        if (
+          currentLoadingMatchedIndicesIdx === currentLoadingMatchedIndicesRef.current &&
+          isMounted.current
+        ) {
+          // we are still interested in this result
           if (type === INDEX_PATTERN_TYPE.ROLLUP) {
             const rollupIndices = exactMatched.filter((index) => isRollupIndex(index.name));
             newRollupIndexName = rollupIndices.length === 1 ? rollupIndices[0].name : undefined;
@@ -264,7 +280,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
       return fetchIndices(newTitle);
     },
-    [http, allowHidden, allSources, type, rollupIndicesCapabilities]
+    [http, allowHidden, allSources, type, rollupIndicesCapabilities, searchClient, isLoadingSources]
   );
 
   useEffect(() => {
@@ -314,12 +330,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   );
 
   return (
-    <EmptyPrompts
-      onCancel={onCancel}
-      allSources={allSources}
-      hasExistingIndexPatterns={!!existingIndexPatterns.length}
-      loadSources={loadSources}
-    >
+    <EmptyPrompts onCancel={onCancel} allSources={allSources} loadSources={loadSources}>
       <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
         <FlyoutPanels.Item className="fieldEditor__mainFlyoutPanel" border="right">
           <EuiTitle data-test-subj="flyoutTitle">
@@ -377,3 +388,76 @@ const IndexPatternEditorFlyoutContentComponent = ({
 };
 
 export const IndexPatternEditorFlyoutContent = React.memo(IndexPatternEditorFlyoutContentComponent);
+
+// loadMatchedIndices is called both as an side effect inside of a parent component and the inside forms validation functions
+// that are challenging to synchronize without a larger refactor
+// Use memoizeOne as a caching layer to avoid excessive network requests on each key type
+// TODO: refactor to remove `memoize` when https://github.com/elastic/kibana/pull/109238 is done
+const loadMatchedIndices = memoizeOne(
+  async (
+    query: string,
+    allowHidden: boolean,
+    allSources: MatchedItem[],
+    {
+      isRollupIndex,
+      http,
+      searchClient,
+    }: {
+      isRollupIndex: (index: string) => boolean;
+      http: IndexPatternEditorContext['http'];
+      searchClient: IndexPatternEditorContext['searchClient'];
+    }
+  ): Promise<{
+    matchedIndicesResult: MatchedIndicesSet;
+    exactMatched: MatchedItem[];
+    partialMatched: MatchedItem[];
+  }> => {
+    const indexRequests = [];
+
+    if (query?.endsWith('*')) {
+      const exactMatchedQuery = getIndices({
+        http,
+        isRollupIndex,
+        pattern: query,
+        showAllIndices: allowHidden,
+        searchClient,
+      });
+      indexRequests.push(exactMatchedQuery);
+      // provide default value when not making a request for the partialMatchQuery
+      indexRequests.push(Promise.resolve([]));
+    } else {
+      const exactMatchQuery = getIndices({
+        http,
+        isRollupIndex,
+        pattern: query,
+        showAllIndices: allowHidden,
+        searchClient,
+      });
+      const partialMatchQuery = getIndices({
+        http,
+        isRollupIndex,
+        pattern: `${query}*`,
+        showAllIndices: allowHidden,
+        searchClient,
+      });
+
+      indexRequests.push(exactMatchQuery);
+      indexRequests.push(partialMatchQuery);
+    }
+
+    const [exactMatched, partialMatched] = (await ensureMinimumTime(
+      indexRequests
+    )) as MatchedItem[][];
+
+    const matchedIndicesResult = getMatchedIndices(
+      allSources,
+      partialMatched,
+      exactMatched,
+      allowHidden
+    );
+
+    return { matchedIndicesResult, exactMatched, partialMatched };
+  },
+  // compare only query and allowHidden
+  (newArgs, oldArgs) => newArgs[0] === oldArgs[0] && newArgs[1] === oldArgs[1]
+);
