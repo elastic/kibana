@@ -32,7 +32,8 @@ const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
 
 export const DASHBOARD_APP_LOCATOR = 'DASHBOARD_APP_LOCATOR';
 
-export interface DashboardAppLocatorParams {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DashboardAppLocatorParams = {
   /**
    * If given, the dashboard saved object with this id will be loaded. If not given,
    * a new, unsaved dashboard will be loaded up.
@@ -92,11 +93,9 @@ export interface DashboardAppLocatorParams {
    * Saved query ID
    */
   savedQuery?: string;
-}
+};
 
-export type SerializableDashboardAppLocatorParams = DashboardAppLocatorParams & SerializableRecord;
-
-export type DashboardAppLocator = LocatorPublic<SerializableDashboardAppLocatorParams>;
+export type DashboardAppLocator = LocatorPublic<DashboardAppLocatorParams>;
 
 export interface DashboardAppLocatorDependencies {
   useHashedUrl: boolean;
@@ -108,8 +107,7 @@ export type ForwardedDashboardState = Omit<
   'dashboardId' | 'preserveSavedFilters' | 'useHash' | 'searchSessionId'
 >;
 
-export class DashboardAppLocatorDefinition
-  implements LocatorDefinition<SerializableDashboardAppLocatorParams> {
+export class DashboardAppLocatorDefinition implements LocatorDefinition<DashboardAppLocatorParams> {
   public readonly id = DASHBOARD_APP_LOCATOR;
 
   constructor(protected readonly deps: DashboardAppLocatorDependencies) {}
