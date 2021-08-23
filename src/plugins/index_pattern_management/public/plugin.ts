@@ -33,7 +33,7 @@ export interface IndexPatternManagementSetup {}
 export interface IndexPatternManagementStart {}
 
 const sectionsHeader = i18n.translate('indexPatternManagement.dataView.sectionsHeader', {
-  defaultMessage: 'Data views',
+  defaultMessage: 'Data Views',
 });
 
 const IPM_APP_ID = 'indexPatterns';
