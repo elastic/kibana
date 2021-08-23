@@ -134,7 +134,7 @@ describe('isCloudEnabled is false', () => {
     );
     await loadTutorialPromise;
     component.update();
-    component.find('#onPremElasticCloud').first().simulate('click');
+    component.find('#onPremElasticCloud').first().find('input').simulate('change');
     component.update();
     expect(component.state('visibleInstructions')).toBe('onPremElasticCloud');
   });
