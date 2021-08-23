@@ -41,7 +41,7 @@ CSAs generally share the same telecom providers and ad networks. New fast food f
 To get the CSA boundary data:
 
 . Download the https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html[Cartographic Boundary shapefile (.shp)] from the Census Bureau’s website.
-. To use the data in Kibana, convert it to GeoJSON format. Follow this https://gist.github.com/YKCzoli/b7f5ff0e0f641faba0f47fa5d16c4d8d[helpful tutorial] to use QGIS to convert the Cartographic Boundary shapefile to GeoJSON. Or download a https://raw.githubusercontent.com/elastic/examples/master/blog/reverse-geocoding/csba.json[prebuilt GeoJSON version].
+. To use the data in Kibana, convert it to GeoJSON format. Follow this https://gist.github.com/YKCzoli/b7f5ff0e0f641faba0f47fa5d16c4d8d[helpful tutorial] to use QGIS to convert the Cartographic Boundary shapefile to GeoJSON. Or, download a https://raw.githubusercontent.com/elastic/examples/master/blog/reverse-geocoding/csba.json[prebuilt GeoJSON version].
 
 Once you have your GeoJSON file:
 
