@@ -11,16 +11,16 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { throttle } from 'lodash';
 import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
 import { Chart, Settings, Wordcloud, RenderChangeListener } from '@elastic/charts';
-import type { PaletteRegistry } from '../../../charts/public';
-import type { IInterpreterRenderHandlers } from '../../../expressions/public';
+import type { PaletteRegistry } from '../../../../charts/public';
+import type { IInterpreterRenderHandlers } from '../../../../expressions/public';
 import { getFormatService } from '../services';
-import { TagCloudVisRenderValue } from '../tag_cloud_fn';
+import { TagcloudRendererConfig } from '../../common/types';
 
 import './tag_cloud.scss';
 
 const MAX_TAG_COUNT = 200;
 
-export type TagCloudChartProps = TagCloudVisRenderValue & {
+export type TagCloudChartProps = TagcloudRendererConfig & {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   palettesRegistry: PaletteRegistry;
@@ -204,7 +204,7 @@ export const TagCloudChart = ({
                 color="warning"
                 content={
                   <FormattedMessage
-                    id="visTypeTagCloud.feedbackMessage.tooSmallContainerDescription"
+                    id="expressionTagcloud.feedbackMessage.tooSmallContainerDescription"
                     defaultMessage="The container is too small to display the entire cloud. Tags might be cropped or omitted."
                   />
                 }
@@ -218,7 +218,7 @@ export const TagCloudChart = ({
                 color="warning"
                 content={
                   <FormattedMessage
-                    id="visTypeTagCloud.feedbackMessage.truncatedTagsDescription"
+                    id="expressionTagcloud.feedbackMessage.truncatedTagsDescription"
                     defaultMessage="The number of tags has been truncated to avoid long draw times."
                   />
                 }
@@ -231,6 +231,5 @@ export const TagCloudChart = ({
   );
 };
 
-// default export required for React.Lazy
 // eslint-disable-next-line import/no-default-export
 export { TagCloudChart as default };
