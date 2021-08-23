@@ -279,5 +279,20 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
       await testSubjects.click(`tablePagination-${rowsNumber}-rows`);
       await this.assertRowsNumberPerPage(testSubj, rowsNumber);
     },
+
+    async getEuiDescriptionListDescriptionFromTitle(testSubj: string, title: string) {
+      const subj = await testSubjects.find(testSubj);
+      const titles = await subj.findAllByTagName('dt');
+      const descriptions = await subj.findAllByTagName('dd');
+      let i = 0;
+      for (const t of titles) {
+        const titleText = (await t.parseDomContent()).html();
+        if (titleText === title) {
+          return (await descriptions[i].parseDomContent()).html();
+        }
+        i++;
+      }
+      return null;
+    },
   };
 }
