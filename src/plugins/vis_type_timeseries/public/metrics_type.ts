@@ -93,6 +93,8 @@ export const metricsVisDefinition: VisTypeDefinition<
       axis_formatter: 'number',
       axis_scale: 'normal',
       show_legend: 1,
+      truncate_legend: 1,
+      max_lines_legend: 1,
       show_grid: 1,
       tooltip_mode: TOOLTIP_MODES.SHOW_ALL,
       drop_last_bucket: 0,
