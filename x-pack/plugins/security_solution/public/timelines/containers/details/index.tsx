@@ -9,7 +9,6 @@ import { isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
@@ -30,7 +29,6 @@ export interface EventsArgs {
 }
 
 export interface UseTimelineEventsDetailsProps {
-  alertConsumers?: AlertConsumers[];
   entityType?: EntityType;
   docValueFields: DocValueFields[];
   indexName: string;
@@ -38,10 +36,7 @@ export interface UseTimelineEventsDetailsProps {
   skip: boolean;
 }
 
-const EMPTY_ARRAY: AlertConsumers[] = [];
-
 export const useTimelineEventsDetails = ({
-  alertConsumers = EMPTY_ARRAY,
   entityType = EntityType.EVENTS,
   docValueFields,
   indexName,
@@ -112,7 +107,6 @@ export const useTimelineEventsDetails = ({
     setTimelineDetailsRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
-        alertConsumers,
         docValueFields,
         entityType,
         indexName,
@@ -124,7 +118,7 @@ export const useTimelineEventsDetails = ({
       }
       return prevRequest;
     });
-  }, [alertConsumers, docValueFields, entityType, eventId, indexName]);
+  }, [docValueFields, entityType, eventId, indexName]);
 
   useEffect(() => {
     timelineDetailsSearch(timelineDetailsRequest);
