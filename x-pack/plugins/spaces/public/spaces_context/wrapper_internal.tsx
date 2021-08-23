@@ -9,12 +9,12 @@ import type { PropsWithChildren } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import type { ApplicationStart, DocLinksStart, NotificationsStart } from 'src/core/public';
-import type { SpacesContextProps } from 'src/plugins/spaces_oss/public';
 
+import type { GetAllSpacesPurpose } from '../../common';
 import type { SpacesManager } from '../spaces_manager';
-import type { ShareToSpacesData, ShareToSpaceTarget } from '../types';
+import type { SpacesData, SpacesDataEntry } from '../types';
 import { createSpacesReactContext } from './context';
-import type { InternalProps, SpacesReactContext } from './types';
+import type { InternalProps, SpacesContextProps, SpacesReactContext } from './types';
 
 interface Services {
   application: ApplicationStart;
@@ -22,25 +22,25 @@ interface Services {
   notifications: NotificationsStart;
 }
 
-async function getShareToSpacesData(
-  spacesManager: SpacesManager,
-  feature?: string
-): Promise<ShareToSpacesData> {
+async function getSpacesData(spacesManager: SpacesManager, feature?: string): Promise<SpacesData> {
   const spaces = await spacesManager.getSpaces({ includeAuthorizedPurposes: true });
   const activeSpace = await spacesManager.getActiveSpace();
   const spacesMap = spaces
-    .map<ShareToSpaceTarget>(({ authorizedPurposes, disabledFeatures, ...space }) => {
+    .map<SpacesDataEntry>(({ authorizedPurposes, disabledFeatures, ...space }) => {
       const isActiveSpace = space.id === activeSpace.id;
-      const cannotShareToSpace = authorizedPurposes?.shareSavedObjectsIntoSpace === false;
       const isFeatureDisabled = feature !== undefined && disabledFeatures.includes(feature);
       return {
         ...space,
         ...(isActiveSpace && { isActiveSpace }),
-        ...(cannotShareToSpace && { cannotShareToSpace }),
         ...(isFeatureDisabled && { isFeatureDisabled }),
+        isAuthorizedForPurpose: (purpose: GetAllSpacesPurpose) =>
+          // If authorizedPurposes is not present, then Security is disabled; normally in a situation like this we would "fail-secure", but
+          // in this case we are dealing with an abstraction over the client-side UI capabilities. There is no chance for privilege
+          // escalation here, and the correct behavior is that if Security is disabled, the user is implicitly authorized to do everything.
+          authorizedPurposes ? authorizedPurposes[purpose] === true : true,
       };
     })
-    .reduce((acc, cur) => acc.set(cur.id, cur), new Map<string, ShareToSpaceTarget>());
+    .reduce((acc, cur) => acc.set(cur.id, cur), new Map<string, SpacesDataEntry>());
 
   return {
     spacesMap,
@@ -54,7 +54,7 @@ export const SpacesContextWrapperInternal = (
   const { spacesManager, getStartServices, feature, children } = props;
 
   const [context, setContext] = useState<SpacesReactContext<Services> | undefined>();
-  const shareToSpacesDataPromise = useMemo(() => getShareToSpacesData(spacesManager, feature), [
+  const spacesDataPromise = useMemo(() => getSpacesData(spacesManager, feature), [
     spacesManager,
     feature,
   ]);
@@ -63,9 +63,9 @@ export const SpacesContextWrapperInternal = (
     getStartServices().then(([coreStart]) => {
       const { application, docLinks, notifications } = coreStart;
       const services = { application, docLinks, notifications };
-      setContext(createSpacesReactContext(services, spacesManager, shareToSpacesDataPromise));
+      setContext(createSpacesReactContext(services, spacesManager, spacesDataPromise));
     });
-  }, [getStartServices, shareToSpacesDataPromise, spacesManager]);
+  }, [getStartServices, spacesDataPromise, spacesManager]);
 
   if (!context) {
     return null;

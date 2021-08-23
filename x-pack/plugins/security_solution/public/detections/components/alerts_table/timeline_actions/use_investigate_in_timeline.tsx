@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
 
 import { TimelineId } from '../../../../../common/types/timeline';
@@ -102,18 +103,21 @@ export const useInvestigateInTimeline = ({
     updateTimelineIsLoading,
   ]);
 
-  const investigateInTimelineAction = showInvestigateInTimelineAction
+  const investigateInTimelineActionItems = showInvestigateInTimelineAction
     ? [
-        {
-          name: ACTION_INVESTIGATE_IN_TIMELINE,
-          onClick: investigateInTimelineAlertClick,
-          disabled: isFetchingAlertEcs,
-        },
+        <EuiContextMenuItem
+          key="investigate-in-timeline-action-item"
+          data-test-subj="investigate-in-timeline-action-item"
+          disabled={isFetchingAlertEcs === true}
+          onClick={investigateInTimelineAlertClick}
+        >
+          {ACTION_INVESTIGATE_IN_TIMELINE}
+        </EuiContextMenuItem>,
       ]
     : [];
 
   return {
-    investigateInTimelineAction,
+    investigateInTimelineActionItems,
     investigateInTimelineAlertClick,
     showInvestigateInTimelineAction,
   };

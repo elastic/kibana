@@ -34,6 +34,7 @@
 /src/plugins/vis_types/pie/ @elastic/kibana-app
 /src/plugins/visualize/ @elastic/kibana-app
 /src/plugins/visualizations/ @elastic/kibana-app
+/src/plugins/chart_expressions/expression_tagcloud/ @elastic/kibana-app
 /src/plugins/url_forwarding/ @elastic/kibana-app
 /packages/kbn-tinymath/ @elastic/kibana-app
 
@@ -144,7 +145,6 @@
 /x-pack/plugins/dashboard_enhanced/ @elastic/kibana-presentation
 /x-pack/test/functional/apps/canvas/  @elastic/kibana-presentation
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
-#CC# /x-pack/plugins/dashboard_mode @elastic/kibana-presentation
 
 # Machine Learning
 /x-pack/plugins/ml/  @elastic/ml-ui
@@ -280,7 +280,6 @@
 # Security
 /src/core/server/csp/ @elastic/kibana-security @elastic/kibana-core
 /src/plugins/security_oss/ @elastic/kibana-security
-/src/plugins/spaces_oss/ @elastic/kibana-security
 /src/plugins/interactive_setup/ @elastic/kibana-security
 /test/security_functional/ @elastic/kibana-security
 /x-pack/plugins/spaces/ @elastic/kibana-security
