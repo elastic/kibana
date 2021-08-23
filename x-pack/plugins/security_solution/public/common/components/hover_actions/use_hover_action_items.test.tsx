@@ -23,7 +23,7 @@ describe('useHoverActionItems', () => {
     field: 'signal.rule.name',
     handleHoverActionClicked: jest.fn(),
     hideTopN: false,
-    isObjectArray: true,
+    isObjectArray: false,
     ownFocus: false,
     showTopN: false,
     stKeyboardEvent: undefined,
@@ -127,6 +127,34 @@ describe('useHoverActionItems', () => {
 
       result.current.allActionItems.forEach((item) => {
         expect(item.props['data-test-subj']).not.toEqual('hover-actions-show-top-n');
+      });
+    });
+  });
+
+  test('should not have toggle column', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const defaultFocusedButtonRef = useRef(null);
+        const testProps = {
+          ...defaultProps,
+          isObjectArray: true,
+          defaultFocusedButtonRef,
+          enableOverflowButton: true,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+
+      expect(result.current.overflowActionItems).toHaveLength(3);
+      expect(result.current.overflowActionItems[0].props['data-test-subj']).toEqual(
+        'hover-actions-filter-for'
+      );
+      expect(result.current.overflowActionItems[1].props['data-test-subj']).toEqual(
+        'hover-actions-filter-out'
+      );
+
+      result.current.overflowActionItems[2].props.items.forEach((item: JSX.Element) => {
+        expect(item.props['data-test-subj']).not.toEqual('hover-actions-toggle-column');
       });
     });
   });
