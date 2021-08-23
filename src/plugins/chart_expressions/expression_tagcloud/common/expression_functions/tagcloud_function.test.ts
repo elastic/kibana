@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { createTagCloudFn } from './tag_cloud_fn';
+import { tagcloudFunction } from './tagcloud_function';
 
-import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
-import { Datatable } from '../../expressions/common/expression_types/specs';
+import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
+import { Datatable } from '../../../../expressions/common/expression_types/specs';
 
 describe('interpreter/functions#tagcloud', () => {
-  const fn = functionWrapper(createTagCloudFn());
+  const fn = functionWrapper(tagcloudFunction());
   const context = {
     type: 'datatable',
     rows: [{ 'col-0-1': 0 }],

@@ -7,12 +7,12 @@
  */
 import React from 'react';
 import { Wordcloud, Settings } from '@elastic/charts';
-import { chartPluginMock } from '../../../charts/public/mocks';
-import type { Datatable } from '../../../expressions/public';
+import { chartPluginMock } from '../../../../charts/public/mocks';
+import type { Datatable } from '../../../../expressions/public';
 import { mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import TagCloudChart, { TagCloudChartProps } from './tag_cloud_chart';
-import { TagCloudVisParams } from '../types';
+import TagCloudChart, { TagCloudChartProps } from './tagcloud_component';
+import { TagCloudVisParams } from '../../common/types';
 
 jest.mock('../services', () => ({
   getFormatService: jest.fn(() => {
