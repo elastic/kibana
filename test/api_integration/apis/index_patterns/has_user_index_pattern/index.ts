@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  env: {
-    web: {
-      presets: ['@kbn/babel-preset/webpack_preset'],
-    },
-    node: {
-      presets: ['@kbn/babel-preset/node_preset'],
-    },
-  },
-  ignore: ['**/*.test.ts', '**/*.test.tsx'],
-};
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('has user index pattern', () => {
+    loadTestFile(require.resolve('./has_user_index_pattern'));
+  });
+}

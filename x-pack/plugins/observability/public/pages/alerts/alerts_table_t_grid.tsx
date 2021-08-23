@@ -11,7 +11,6 @@
  * This way plugins can do targeted imports to reduce the final code bundle
  */
 import {
-  AlertConsumers as AlertConsumersTyped,
   ALERT_DURATION as ALERT_DURATION_TYPED,
   ALERT_REASON as ALERT_REASON_TYPED,
   ALERT_RULE_CONSUMER,
@@ -62,14 +61,13 @@ import { LazyAlertsFlyout } from '../..';
 import { parseAlert } from './parse_alert';
 import { CoreStart } from '../../../../../../src/core/public';
 
-const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
 const ALERT_WORKFLOW_STATUS: typeof ALERT_WORKFLOW_STATUS_TYPED = ALERT_WORKFLOW_STATUS_NON_TYPED;
 
 interface AlertsTableTGridProps {
-  indexName: string;
+  indexNames: string[];
   rangeFrom: string;
   rangeTo: string;
   kuery: string;
@@ -146,13 +144,6 @@ export const columns: Array<
 const NO_ROW_RENDER: RowRenderer[] = [];
 
 const trailingControlColumns: never[] = [];
-
-const OBSERVABILITY_ALERT_CONSUMERS = [
-  AlertConsumers.APM,
-  AlertConsumers.LOGS,
-  AlertConsumers.INFRASTRUCTURE,
-  AlertConsumers.UPTIME,
-];
 
 function ObservabilityActions({
   data,
@@ -290,7 +281,7 @@ function ObservabilityActions({
 }
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
-  const { indexName, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch, addToQuery } = props;
+  const { indexNames, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch, addToQuery } = props;
   const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
@@ -328,7 +319,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     const type: TGridType = 'standalone';
     const sortDirection: SortDirection = 'desc';
     return {
-      alertConsumers: OBSERVABILITY_ALERT_CONSUMERS,
       appId: observabilityFeatureId,
       casePermissions,
       type,
@@ -337,7 +327,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       defaultCellActions: getDefaultCellActions({ addToQuery }),
       end: rangeTo,
       filters: [],
-      indexNames: [indexName],
+      indexNames,
       itemsPerPageOptions: [10, 25, 50],
       loadingText: i18n.translate('xpack.observability.alertsTable.loadingTextLabel', {
         defaultMessage: 'loading alerts',
@@ -371,7 +361,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     };
   }, [
     casePermissions,
-    indexName,
+    indexNames,
     kuery,
     leadingControlColumns,
     rangeFrom,
