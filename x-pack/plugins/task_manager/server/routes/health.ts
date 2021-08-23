@@ -15,7 +15,12 @@ import {
 import { Observable, Subject } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { throttleTime } from 'rxjs/operators';
-import { Logger, ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
+import {
+  Logger,
+  ServiceStatus,
+  ServiceStatusLevels,
+  ServiceStatusLevel,
+} from '../../../../../src/core/server';
 import {
   MonitoringStats,
   summarizeMonitoringStats,
@@ -118,9 +123,7 @@ export function withServiceStatus(
   const level =
     monitoredHealth.status === HealthStatus.OK
       ? ServiceStatusLevels.available
-      : monitoredHealth.status === HealthStatus.Warning
-      ? ServiceStatusLevels.degraded
-      : ServiceStatusLevels.unavailable;
+      : ServiceStatusLevels.degraded;
   return [
     monitoredHealth,
     {

@@ -80,7 +80,7 @@ export function logHealthMetrics(
     // This is legacy support - we used to always show this
     logger.debug(message);
     if (logLevel !== LogLevel.Debug && lastLogLevel === LogLevel.Debug) {
-      logger.warn(
+      logger.debug(
         `Detected potential performance issue with Task Manager. Set 'xpack.task_manager.monitored_stats_health_verbose_log.enabled: true' in your Kibana.yml to enable debug logging`
       );
     }
