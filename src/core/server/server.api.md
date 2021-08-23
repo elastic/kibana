@@ -2462,8 +2462,9 @@ export interface SavedObjectsMigrationVersion {
 export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolated' | 'agnostic';
 
 // @public (undocumented)
-export interface SavedObjectsOpenPointInTimeOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsOpenPointInTimeOptions {
     keepAlive?: string;
+    namespaces?: string[];
     preference?: string;
 }
 
