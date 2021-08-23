@@ -9,7 +9,7 @@
 import { TelemetryEventsSender } from './sender';
 import { TelemetryDiagTask } from './diagnostic_task';
 import { TelemetryEndpointTask } from './endpoint_task';
-import { TelemetryTrustedAppsTask } from './trusted_apps_task';
+import { TelemetryExceptionListsTask } from './security_lists_task';
 import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 
 /**
@@ -69,8 +69,8 @@ export class MockTelemetryEndpointTask extends TelemetryEndpointTask {
 }
 
 /**
- * Creates a mocked Telemetry trusted app Task
+ * Creates a mocked Telemetry exception lists Task
  */
-export class MockTelemetryTrustedAppTask extends TelemetryTrustedAppsTask {
+export class MockExceptionListsTask extends TelemetryExceptionListsTask {
   public runTask = jest.fn();
 }
