@@ -21,7 +21,7 @@ interface SetupParams {
   artifacts: FetchArtifactsParams
 }
 
-async function setupRunner({getService}: FtrProviderContext, params: SetupParams, runner: (osqueryPolicyId: string) => Promise<void>) {
+async function setupRunner({getService}: FtrProviderContext, params: SetupParams, runner: (runnerEnv: Record<string, string>) => Promise<void>) {
   const log = getService('log');
   const config = getService('config');
 
@@ -31,10 +31,11 @@ async function setupRunner({getService}: FtrProviderContext, params: SetupParams
   );
   await artifactManager.fetchArtifacts();
 
+  const esHost = Url.format(config.get('servers.elasticsearch'))
   const fleetManager = new FleetManager(
     artifactManager.getArtifactDirectory('fleet-server'),
     {
-      host: Url.format(config.get('servers.elasticsearch')),
+      host: esHost,
       user: config.get('servers.elasticsearch.username'),
       password: config.get('servers.elasticsearch.password'),
     },
@@ -46,6 +47,7 @@ async function setupRunner({getService}: FtrProviderContext, params: SetupParams
     {
       user: config.get('servers.elasticsearch.username'),
       password: config.get('servers.elasticsearch.password'),
+      elasticHost: esHost,
       kibanaUrl: Url.format({
         protocol: config.get('servers.kibana.protocol'),
         hostname: config.get('servers.kibana.hostname'),
@@ -58,15 +60,21 @@ async function setupRunner({getService}: FtrProviderContext, params: SetupParams
   await agentManager.setup();
 
   await setupUserPermissions(config);
-  const policyId : string = agentManager.policyId;
-
-  try {
-    await runner(policyId)
-  } finally {
-    log.info('Cleaning up agent and fleet debris')
+  const policyId = agentManager.policyId;
+  async function cleanup() {
     fleetManager.cleanup();
     agentManager.cleanup()
     await artifactManager.cleanupArtifacts();
+  }
+  process.on('SIGINT', async () => await cleanup())
+
+  try {
+    await runner({
+      CYPRESS_OSQUERY_POLICY: policyId 
+    })
+  } finally {
+    log.info('Cleaning up agent and fleet debris')
+    await cleanup()
   }
 }
 
@@ -79,7 +87,7 @@ export async function OsqueryCypressCliTestRunner(context: FtrProviderContext) {
         'fleet-server': '7.15.0-SNAPSHOT',
       }
     },
-    (osqueryPolicyId) => withProcRunner(log, async (procs) => {
+    (runnerEnv) => withProcRunner(log, async (procs) => {
       await procs.run('cypress', {
         cmd: 'yarn',
         args: ['cypress:run'],
@@ -102,7 +110,7 @@ export async function OsqueryCypressCliTestRunner(context: FtrProviderContext) {
             hostname: config.get('servers.kibana.hostname'),
             port: config.get('servers.kibana.port'),
           }),
-          OSQUERY_POLICY_ID: osqueryPolicyId,
+          ...runnerEnv,
           ...process.env,
         },
         wait: true,
@@ -121,7 +129,7 @@ export async function OsqueryCypressVisualTestRunner(context: FtrProviderContext
         'fleet-server': '7.15.0-SNAPSHOT',
       }
     },
-    (osqueryPolicyId) => withProcRunner(log, async (procs) => {
+    (runnerEnv) => withProcRunner(log, async (procs) => {
       await procs.run('cypress', {
         cmd: 'yarn',
         args: ['cypress:open'],
@@ -144,7 +152,7 @@ export async function OsqueryCypressVisualTestRunner(context: FtrProviderContext
             hostname: config.get('servers.kibana.hostname'),
             port: config.get('servers.kibana.port'),
           }),
-          OSQUERY_POLICY_ID: osqueryPolicyId,
+          ...runnerEnv,
           ...process.env,
         },
         wait: true,

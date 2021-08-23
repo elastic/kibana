@@ -6,15 +6,16 @@
  */
 
 import {
-  ADD_POLICY_BTN,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
-  INTEGRATIONS_CARD,
   SAVE_PACKAGE_CONFIRM,
 } from '../screens/integrations';
 
-export const addIntegration = (integration: string, osqueryPolicyId?: string) => {
-  cy.get(INTEGRATIONS_CARD).contains(integration).click();
-  cy.get(ADD_POLICY_BTN).click();
+import {
+  OSQUERY_INTEGRATION_PAGE
+} from './navigation'
+
+export const addIntegration = (policyId: string) => {
+  cy.visit(OSQUERY_INTEGRATION_PAGE, {qs:{policyId}})
   cy.get(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
   cy.get(SAVE_PACKAGE_CONFIRM).click()
   return cy.reload();

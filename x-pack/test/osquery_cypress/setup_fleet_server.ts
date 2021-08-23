@@ -21,7 +21,6 @@ export class FleetManager {
   private directoryPath: string;
   private fleetProcess: ChildProcess;
   private esConfig: ElasticsearchConfig;
-  private esFleetUser: string = 'fleet-server'
   private log: ToolingLog;
   constructor(directoryPath: string, esConfig: ElasticsearchConfig, log: ToolingLog) {
     // TODO: check if the file exists
@@ -32,15 +31,6 @@ export class FleetManager {
   public async setup(): Promise<void> {
     this.log.info('Setting fleet up');
     await copyFile(resolve(__dirname, 'fleet-server.yml'), resolve('.', 'fleet-server.yml'));
-    await axios.post(`${this.esConfig.host}/_security/user/${this.esFleetUser}`, {
-        roles: ["superuser"],
-        password: this.esConfig.password
-    }, {
-        auth: {
-            username: this.esConfig.user,
-            password: this.esConfig.password
-        }
-    })
     return new Promise((res, rej) => {
       const env = {
         ELASTICSEARCH_HOSTS: this.esConfig.host,

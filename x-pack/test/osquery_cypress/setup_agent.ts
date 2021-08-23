@@ -16,6 +16,7 @@ interface AgentManagerParams {
   user: string;
   password: string;
   kibanaUrl: string;
+  elasticHost: string;
 }
 
 export class AgentManager {
@@ -40,8 +41,6 @@ export class AgentManager {
 
   public async setup() {
     this.log.info('Setting the agent up');
-    const agentBinPath = this.getBinaryPath();
-    this.agentProcess = spawn(agentBinPath, ['run', '-v'], {stdio: 'inherit'})
     await axios.post(
       `${this.params.kibanaUrl}/api/fleet/agents/setup`,
       {},
@@ -64,9 +63,8 @@ export class AgentManager {
         },
       }
     );
-    // TODO: push this policy id through to the test so it can assign the integration to the proper policy
     const policy = apiKeys.list[1]
-    this.policyId = policy.policy_id
+    this.policyId = policy.policy_id as string
     const args = [
       'enroll',
       '--insecure',
@@ -75,8 +73,14 @@ export class AgentManager {
       '--url=http://localhost:8220',
       `--enrollment-token=${policy.api_key}`,
     ];
+    const agentBinPath = this.getBinaryPath();
     execFileSync(agentBinPath, args, { stdio: 'inherit' });
-    await copyFile(resolve(__dirname, this.directoryPath, 'elastic-agent.yml'), resolve('.', 'elastic-agent.yml'));
+    const configPath = resolve(__dirname, 'elastic-agent.yml')
+    this.log.info(`Copying agent config from ${configPath}`)
+    await copyFile(configPath, resolve('.', 'elastic-agent.yml'));
+    this.agentProcess = spawn(agentBinPath, ['run', '-v', '-e'], {stdio: 'inherit', env:{
+      ELASTIC_HOST: this.params.elasticHost
+    }})
     let done = false
     let retries = 0
     while (!done) {
@@ -102,7 +106,7 @@ export class AgentManager {
     this.agentProcess.kill(9);
     unlinkSync(resolve('.', 'elastic-agent.yml'));
     this.agentProcess.on('close', () => {
-      console.log('Agent process closed')
+      this.log.info('Agent process closed')
     })
   }
 }

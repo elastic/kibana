@@ -76,9 +76,6 @@ export class ArtifactManager {
         );
       })
     );
-    process.on('SIGINT', () => {
-        this.cleanupArtifacts();
-    })
   };
 
   public getArtifactDirectory(artifactName: string) {

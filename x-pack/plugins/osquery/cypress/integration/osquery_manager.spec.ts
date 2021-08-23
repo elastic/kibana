@@ -9,7 +9,6 @@ import { HEADER } from '../screens/osquery';
 import { OSQUERY_NAVIGATION_LINK } from '../screens/navigation';
 
 import {
-  INTEGRATIONS,
   OSQUERY,
   NEW_LIVE_QUERY,
   openNavigationFlyout,
@@ -18,13 +17,11 @@ import {
 import { addIntegration } from '../tasks/integrations';
 import { inputQuery, selectAllAgents, submitQuery } from '../tasks/live_query';
 
-const osqueryPolicyId = process.env.OSQUERY_POLICY_ID
 describe('Osquery Manager', () => {
   before(() => {
-    navigateTo(INTEGRATIONS);
-    return addIntegration('Osquery Manager', osqueryPolicyId);
+    return addIntegration(Cypress.env('OSQUERY_POLICY'));
   });
-
+  
   it('Runs live queries', () => {
     navigateTo(NEW_LIVE_QUERY);
     selectAllAgents();
