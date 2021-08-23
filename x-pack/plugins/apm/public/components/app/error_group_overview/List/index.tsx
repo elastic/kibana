@@ -195,7 +195,7 @@ function ErrorGroupList({ items, serviceName }: Props) {
   return (
     <ManagedTable
       noItemsMessage={i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
-        defaultMessage: 'No errors were found',
+        defaultMessage: 'No errors found',
       })}
       items={items}
       columns={columns}
