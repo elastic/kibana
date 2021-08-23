@@ -24,7 +24,7 @@ export interface RouteMatch<TRoute extends Route = Route> {
     params: TRoute extends {
       params: t.Type<any>;
     }
-      ? t.OutputOf<TRoute['params']>
+      ? t.TypeOf<TRoute['params']>
       : {};
   };
 }
@@ -107,9 +107,11 @@ type TypeOfMatches<TRouteMatches extends RouteMatch[]> = TRouteMatches extends [
       (TNextRouteMatches extends RouteMatch[] ? TypeOfMatches<TNextRouteMatches> : {})
   : {};
 
-export type TypeOf<TRoutes extends Route[], TPath extends PathsOf<TRoutes>> = TypeOfMatches<
-  Match<TRoutes, TPath>
->;
+export type TypeOf<
+  TRoutes extends Route[],
+  TPath extends PathsOf<TRoutes>,
+  TWithDefaultOutput extends boolean = true
+> = TypeOfMatches<Match<TRoutes, TPath>> & (TWithDefaultOutput extends true ? DefaultOutput : {});
 
 export type TypeAsArgs<TObject> = keyof TObject extends never
   ? []
@@ -126,15 +128,15 @@ export interface Router<TRoutes extends Route[]> {
   getParams<TPath extends PathsOf<TRoutes>>(
     path: TPath,
     location: Location
-  ): OutputOf<TRoutes, TPath>;
+  ): TypeOf<TRoutes, TPath>;
   getParams<TPath extends PathsOf<TRoutes>, TOptional extends boolean>(
     path: TPath,
     location: Location,
     optional: TOptional
-  ): TOptional extends true ? OutputOf<TRoutes, TPath> | undefined : OutputOf<TRoutes, TPath>;
+  ): TOptional extends true ? TypeOf<TRoutes, TPath> | undefined : TypeOf<TRoutes, TPath>;
   link<TPath extends PathsOf<TRoutes>>(
     path: TPath,
-    ...args: TypeAsArgs<TypeOf<TRoutes, TPath>>
+    ...args: TypeAsArgs<TypeOf<TRoutes, TPath, false>>
   ): string;
   getRoutePath(route: Route): string;
 }

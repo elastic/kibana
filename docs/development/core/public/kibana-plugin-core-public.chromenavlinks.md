@@ -22,5 +22,4 @@ export interface ChromeNavLinks
 |  [getForceAppSwitcherNavigation$()](./kibana-plugin-core-public.chromenavlinks.getforceappswitchernavigation_.md) | An observable of the forced app switcher state. |
 |  [getNavLinks$()](./kibana-plugin-core-public.chromenavlinks.getnavlinks_.md) | Get an observable for a sorted list of navlinks. |
 |  [has(id)](./kibana-plugin-core-public.chromenavlinks.has.md) | Check whether or not a navlink exists. |
-|  [showOnly(id)](./kibana-plugin-core-public.chromenavlinks.showonly.md) | Remove all navlinks except the one matching the given id. |
 

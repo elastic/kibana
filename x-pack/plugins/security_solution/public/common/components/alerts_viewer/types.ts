@@ -6,6 +6,7 @@
  */
 
 import { Filter } from '../../../../../../../src/plugins/data/public';
+import type { EntityType } from '../../../../../timelines/common';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
 import { NetworkComponentQueryProps } from '../../../network/pages/navigation/types';
@@ -23,5 +24,6 @@ export interface AlertsComponentsProps
   stackByOptions?: MatrixHistogramOption[];
   defaultFilters?: Filter[];
   defaultStackByOption?: MatrixHistogramOption;
+  entityType?: EntityType;
   indexNames: string[];
 }

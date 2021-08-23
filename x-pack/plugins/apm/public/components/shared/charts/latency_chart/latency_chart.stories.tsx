@@ -11,7 +11,7 @@ import {
   ALERT_RULE_TYPE_ID,
   ALERT_EVALUATION_VALUE,
   ALERT_ID,
-  ALERT_SEVERITY_LEVEL,
+  ALERT_SEVERITY,
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
@@ -24,6 +24,7 @@ import { StoryContext } from '@storybook/react';
 import React, { ComponentType } from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
   ApmPluginContext,
@@ -119,7 +120,9 @@ export default {
 };
 
 export function Example(_args: Args) {
-  return <LatencyChart height={300} />;
+  return (
+    <LatencyChart height={300} environment={ENVIRONMENT_ALL.value} kuery="" />
+  );
 }
 Example.args = {
   alertsResponse: {
@@ -155,7 +158,7 @@ Example.args = {
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
         [ALERT_RULE_PRODUCER]: ['apm'],
-        [ALERT_SEVERITY_LEVEL]: ['warning'],
+        [ALERT_SEVERITY]: ['warning'],
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478181'],
         [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
@@ -177,7 +180,7 @@ Example.args = {
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
         [ALERT_RULE_PRODUCER]: ['apm'],
-        [ALERT_SEVERITY_LEVEL]: ['critical'],
+        [ALERT_SEVERITY]: ['critical'],
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478182'],
         [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
@@ -801,7 +804,9 @@ Example.args = {
 };
 
 export function NoData(_args: Args) {
-  return <LatencyChart height={300} />;
+  return (
+    <LatencyChart height={300} environment={ENVIRONMENT_ALL.value} kuery="" />
+  );
 }
 NoData.args = {
   alertsResponse: { alerts: [] },

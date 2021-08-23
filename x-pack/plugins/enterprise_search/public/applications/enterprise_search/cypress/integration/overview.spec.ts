@@ -18,12 +18,12 @@ context('Enterprise Search Overview', () => {
     cy.contains('Welcome to Elastic Enterprise Search');
 
     cy.get('[data-test-subj="appSearchProductCard"]')
-      .contains('Launch App Search')
+      .contains('Open App Search')
       .should('have.attr', 'href')
       .and('match', /app_search/);
 
     cy.get('[data-test-subj="workplaceSearchProductCard"]')
-      .contains('Launch Workplace Search')
+      .contains('Open Workplace Search')
       .should('have.attr', 'href')
       .and('match', /workplace_search/);
   });

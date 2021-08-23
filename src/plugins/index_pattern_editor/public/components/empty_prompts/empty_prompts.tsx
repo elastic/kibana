@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useCallback, FC } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 
 import { useKibana } from '../../shared_imports';
 
@@ -17,6 +18,7 @@ import { getIndices } from '../../lib';
 import { EmptyIndexListPrompt } from './empty_index_list_prompt';
 import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
 import { PromptFooter } from './prompt_footer';
+import { FLEET_ASSETS_TO_IGNORE } from '../../../../data/common';
 
 const removeAliases = (item: MatchedItem) =>
   !((item as unknown) as ResolveIndexResponseItemAlias).indices;
@@ -24,30 +26,44 @@ const removeAliases = (item: MatchedItem) =>
 interface Props {
   onCancel: () => void;
   allSources: MatchedItem[];
-  hasExistingIndexPatterns: boolean;
   loadSources: () => void;
 }
 
-export const EmptyPrompts: FC<Props> = ({
-  hasExistingIndexPatterns,
-  allSources,
-  onCancel,
-  children,
-  loadSources,
-}) => {
+export function isUserDataIndex(source: MatchedItem) {
+  // filter out indices that start with `.`
+  if (source.name.startsWith('.')) return false;
+
+  // filter out sources from FLEET_ASSETS_TO_IGNORE
+  if (source.name === FLEET_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE) return false;
+  if (source.name === FLEET_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE) return false;
+  if (source.name === FLEET_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE) return false;
+
+  return true;
+}
+
+export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSources }) => {
   const {
-    services: { docLinks, application, http },
+    services: { docLinks, application, http, searchClient, indexPatternService },
   } = useKibana<IndexPatternEditorContext>();
 
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
   const [goToForm, setGoToForm] = useState<boolean>(false);
 
-  const hasDataIndices = allSources.some(({ name }: MatchedItem) => !name.startsWith('.'));
+  const hasDataIndices = allSources.some(isUserDataIndex);
+  const hasUserIndexPattern = useAsync(() =>
+    indexPatternService.hasUserIndexPattern().catch(() => true)
+  );
 
   useCallback(() => {
     let isMounted = true;
     if (!hasDataIndices)
-      getIndices(http, () => false, '*:*', false).then((dataSources) => {
+      getIndices({
+        http,
+        isRollupIndex: () => false,
+        pattern: '*:*',
+        showAllIndices: false,
+        searchClient,
+      }).then((dataSources) => {
         if (isMounted) {
           setRemoteClustersExist(!!dataSources.filter(removeAliases).length);
         }
@@ -55,9 +71,11 @@ export const EmptyPrompts: FC<Props> = ({
     return () => {
       isMounted = false;
     };
-  }, [http, hasDataIndices]);
+  }, [http, hasDataIndices, searchClient]);
 
-  if (!hasExistingIndexPatterns && !goToForm) {
+  if (hasUserIndexPattern.loading) return null; // return null to prevent UI flickering while loading
+
+  if (!hasUserIndexPattern.value && !goToForm) {
     if (!hasDataIndices && !remoteClustersExist) {
       // load data
       return (
