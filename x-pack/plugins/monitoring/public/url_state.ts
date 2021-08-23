@@ -74,8 +74,8 @@ export class GlobalState {
   constructor(
     queryService: MonitoringStartPluginDependencies['data']['query'],
     toasts: MonitoringStartPluginDependencies['core']['notifications']['toasts'],
-    rootScope: ng.IRootScopeService,
-    ngLocation: ng.ILocationService,
+    rootScope: Partial<ng.IRootScopeService>,
+    ngLocation: Partial<ng.ILocationService>,
     externalState: RawObject
   ) {
     this.timefilterRef = queryService.timefilter.timefilter;
@@ -102,11 +102,16 @@ export class GlobalState {
     this.stateContainerChangeSub = this.stateContainer.state$.subscribe(() => {
       this.lastAssignedState = this.getState();
       if (!this.stateContainer.get() && this.lastKnownGlobalState) {
-        ngLocation.search(`${GLOBAL_STATE_KEY}=${this.lastKnownGlobalState}`).replace();
+        ngLocation.search?.(`${GLOBAL_STATE_KEY}=${this.lastKnownGlobalState}`).replace();
       }
-      Legacy.shims.breadcrumbs.update();
+
+      // TODO: check if this is not needed after https://github.com/elastic/kibana/pull/109132 is merged
+      if (Legacy.isInitializated()) {
+        Legacy.shims.breadcrumbs.update();
+      }
+
       this.syncExternalState(externalState);
-      rootScope.$applyAsync();
+      rootScope.$applyAsync?.();
     });
 
     this.syncQueryStateWithUrlManager = syncQueryStateWithUrl(queryService, this.stateStorage);
@@ -114,7 +119,7 @@ export class GlobalState {
     this.startHashSync(rootScope, ngLocation);
     this.lastAssignedState = this.getState();
 
-    rootScope.$on('$destroy', () => this.destroy());
+    rootScope.$on?.('$destroy', () => this.destroy());
   }
 
   private syncExternalState(externalState: { [key: string]: unknown }) {
@@ -131,15 +136,18 @@ export class GlobalState {
     }
   }
 
-  private startHashSync(rootScope: ng.IRootScopeService, ngLocation: ng.ILocationService) {
-    rootScope.$on(
+  private startHashSync(
+    rootScope: Partial<ng.IRootScopeService>,
+    ngLocation: Partial<ng.ILocationService>
+  ) {
+    rootScope.$on?.(
       '$routeChangeStart',
       (_: { preventDefault: () => void }, newState: Route, oldState: Route) => {
         const currentGlobalState = oldState?.params?._g;
         const nextGlobalState = newState?.params?._g;
         if (!nextGlobalState && currentGlobalState && typeof currentGlobalState === 'string') {
           newState.params._g = currentGlobalState;
-          ngLocation.search(`${GLOBAL_STATE_KEY}=${currentGlobalState}`).replace();
+          ngLocation.search?.(`${GLOBAL_STATE_KEY}=${currentGlobalState}`).replace();
         }
         this.lastKnownGlobalState = (nextGlobalState || currentGlobalState) as string;
       }
