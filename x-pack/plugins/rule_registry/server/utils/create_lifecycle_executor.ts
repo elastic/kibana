@@ -29,6 +29,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
   EVENT_KIND,
   TIMESTAMP,
@@ -259,6 +260,7 @@ export const createLifecycleExecutor = (
       [ALERT_ID]: alertId,
       [ALERT_START]: started,
       [ALERT_STATUS]: isActive ? ALERT_STATUS_ACTIVE : ALERT_STATUS_RECOVERED,
+      // [ALERT_WORKFLOW_STATUS]: alertData[ALERT_WORKFLOW_STATUS] ?? 'open';
       [ALERT_UUID]: alertUuid,
       [EVENT_KIND]: 'signal',
       [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
