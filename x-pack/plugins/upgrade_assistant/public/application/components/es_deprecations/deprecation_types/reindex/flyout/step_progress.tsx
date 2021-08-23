@@ -10,6 +10,8 @@ import React, { Fragment, ReactNode } from 'react';
 
 import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 
+import './_step_progress.scss';
+
 type STATUS = 'incomplete' | 'inProgress' | 'complete' | 'failed' | 'paused' | 'cancelled';
 
 const StepStatus: React.FunctionComponent<{ status: STATUS; idx: number }> = ({ status, idx }) => {
