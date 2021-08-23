@@ -62,7 +62,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly metricsEntitiesEnabled: boolean; readonly ruleRegistryEnabled: boolean; readonly tGridEnabled: boolean; readonly trustedAppsByPolicyEnabled: boolean; readonly uebaEnabled: boolean; }"
+              "{ readonly metricsEntitiesEnabled: boolean; readonly ruleRegistryEnabled: boolean; readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly trustedAppsByPolicyEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly uebaEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; }"
             ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false
@@ -273,7 +273,7 @@
         "signature": [
           "Pick<",
           "TGridModel",
-          ", \"columns\" | \"filters\" | \"title\" | \"id\" | \"sort\" | \"version\" | \"isLoading\" | \"dateRange\" | \"savedObjectId\" | \"dataProviders\" | \"deletedEventIds\" | \"excludedRowRendererIds\" | \"expandedDetail\" | \"graphEventId\" | \"kqlQuery\" | \"indexNames\" | \"isSelectAllChecked\" | \"itemsPerPage\" | \"itemsPerPageOptions\" | \"loadingEventIds\" | \"showCheckboxes\" | \"selectedEventIds\"> & { activeTab: ",
+          ", \"columns\" | \"filters\" | \"title\" | \"id\" | \"sort\" | \"version\" | \"isLoading\" | \"dateRange\" | \"defaultColumns\" | \"savedObjectId\" | \"dataProviders\" | \"deletedEventIds\" | \"excludedRowRendererIds\" | \"expandedDetail\" | \"graphEventId\" | \"kqlQuery\" | \"indexNames\" | \"isSelectAllChecked\" | \"itemsPerPage\" | \"itemsPerPageOptions\" | \"loadingEventIds\" | \"showCheckboxes\" | \"selectedEventIds\"> & { activeTab: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -289,7 +289,15 @@
             "section": "def-common.TimelineTabs",
             "text": "TimelineTabs"
           },
-          "; createdBy?: string | undefined; description: string; eqlOptions: ",
+          "; scrollToTop?: ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "common",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-common.ScrollToTopEvent",
+            "text": "ScrollToTopEvent"
+          },
+          " | undefined; createdBy?: string | undefined; description: string; eqlOptions: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -317,7 +325,7 @@
             "section": "def-common.TimelineStatus",
             "text": "TimelineStatus"
           },
-          "; updated?: number | undefined; isSaving: boolean; version: string | null; }"
+          "; updated?: number | undefined; updatedBy?: string | null | undefined; isSaving: boolean; version: string | null; initialized?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
         "deprecated": false,
@@ -387,7 +395,7 @@
                 "id": "def-server.AppClient.Unnamed.$1",
                 "type": "string",
                 "tags": [],
-                "label": "spaceId",
+                "label": "_spaceId",
                 "description": [],
                 "signature": [
                   "string"
@@ -426,6 +434,88 @@
             "path": "x-pack/plugins/security_solution/server/client/client.ts",
             "deprecated": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.AppClient.getSpaceId",
+            "type": "Function",
+            "tags": [],
+            "label": "getSpaceId",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/security_solution/server/client/client.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-server.EndpointError",
+        "type": "Class",
+        "tags": [],
+        "label": "EndpointError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "server",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-server.EndpointError",
+            "text": "EndpointError"
+          },
+          " extends Error"
+        ],
+        "path": "x-pack/plugins/security_solution/server/endpoint/errors.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.EndpointError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/security_solution/server/endpoint/errors.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-server.EndpointError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/security_solution/server/endpoint/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-server.EndpointError.Unnamed.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "meta",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "x-pack/plugins/security_solution/server/endpoint/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -704,6 +794,37 @@
                 "section": "def-server.AppClient",
                 "text": "AppClient"
               }
+            ],
+            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.AppRequestContext.getSpaceId",
+            "type": "Function",
+            "tags": [],
+            "label": "getSpaceId",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.AppRequestContext.getExecutionLogClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getExecutionLogClient",
+            "description": [],
+            "signature": [
+              "() => ",
+              "RuleExecutionLogClient"
             ],
             "path": "x-pack/plugins/security_solution/server/types.ts",
             "deprecated": false,
@@ -1183,6 +1304,64 @@
             "description": [],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.ActionProps.setEventsLoading",
+            "type": "Function",
+            "tags": [],
+            "label": "setEventsLoading",
+            "description": [],
+            "signature": [
+              "(params: { eventIds: string[]; isLoading: boolean; }) => void"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-common.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ eventIds: string[]; isLoading: boolean; }"
+                ],
+                "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.ActionProps.setEventsDeleted",
+            "type": "Function",
+            "tags": [],
+            "label": "setEventsDeleted",
+            "description": [],
+            "signature": [
+              "(params: { eventIds: string[]; isDeleted: boolean; }) => void"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-common.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ eventIds: string[]; isDeleted: boolean; }"
+                ],
+                "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "securitySolution",
@@ -2610,7 +2789,7 @@
         "tags": [],
         "label": "ColumnRenderer",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+        "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
         "deprecated": false,
         "children": [
           {
@@ -2631,7 +2810,7 @@
               },
               "[]) => boolean"
             ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
             "deprecated": false,
             "children": [
               {
@@ -2644,7 +2823,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2665,7 +2844,7 @@
                   },
                   "[]"
                 ],
-                "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2690,7 +2869,7 @@
               },
               "; timelineId: string; truncate?: boolean | undefined; values: string[] | null | undefined; linkValues?: string[] | null | undefined; }) => React.ReactNode"
             ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
             "deprecated": false,
             "children": [
               {
@@ -2700,7 +2879,7 @@
                 "tags": [],
                 "label": "{\n    columnName,\n    eventId,\n    field,\n    timelineId,\n    truncate,\n    values,\n    linkValues,\n  }",
                 "description": [],
-                "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                 "deprecated": false,
                 "children": [
                   {
@@ -2710,7 +2889,7 @@
                     "tags": [],
                     "label": "columnName",
                     "description": [],
-                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                     "deprecated": false
                   },
                   {
@@ -2720,7 +2899,7 @@
                     "tags": [],
                     "label": "eventId",
                     "description": [],
-                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                     "deprecated": false
                   },
                   {
@@ -2733,7 +2912,15 @@
                     "signature": [
                       "Pick<",
                       "EuiDataGridColumn",
-                      ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & { aggregatable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
+                      ", \"id\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+                      {
+                        "pluginId": "timelines",
+                        "scope": "common",
+                        "docId": "kibTimelinesPluginApi",
+                        "section": "def-common.TGridCellAction",
+                        "text": "TGridCellAction"
+                      },
+                      "[] | undefined; category?: string | undefined; columnHeaderType: ",
                       {
                         "pluginId": "timelines",
                         "scope": "common",
@@ -2745,7 +2932,7 @@
                       "IFieldSubType",
                       " | undefined; type?: string | undefined; }"
                     ],
-                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                     "deprecated": false
                   },
                   {
@@ -2755,7 +2942,7 @@
                     "tags": [],
                     "label": "timelineId",
                     "description": [],
-                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                     "deprecated": false
                   },
                   {
@@ -2768,7 +2955,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                     "deprecated": false
                   },
                   {
@@ -2781,7 +2968,7 @@
                     "signature": [
                       "string[] | null | undefined"
                     ],
-                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                     "deprecated": false
                   },
                   {
@@ -2794,7 +2981,7 @@
                     "signature": [
                       "string[] | null | undefined"
                     ],
-                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                     "deprecated": false
                   }
                 ]
@@ -14655,6 +14842,33 @@
       },
       {
         "parentPluginId": "securitySolution",
+        "id": "def-common.ScrollToTopEvent",
+        "type": "Interface",
+        "tags": [],
+        "label": "ScrollToTopEvent",
+        "description": [
+          "\nUsed for scrolling top inside a tab. Especially when swiching tabs."
+        ],
+        "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.ScrollToTopEvent.timestamp",
+            "type": "number",
+            "tags": [],
+            "label": "timestamp",
+            "description": [
+              "\nTimestamp of the moment when the event happened.\nThe timestamp might be necessary for the scenario where the event could happen multiple times."
+            ],
+            "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
         "id": "def-common.SerializedFilterQuery",
         "type": "Interface",
         "tags": [],
@@ -15187,7 +15401,7 @@
             "section": "def-common.TimelineEventsAllRequestOptions",
             "text": "TimelineEventsAllRequestOptions"
           },
-          ", \"id\" | \"sort\" | \"fields\" | \"timerange\" | \"language\" | \"defaultIndex\" | \"pagination\" | \"filterQuery\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\" | \"alertConsumers\" | \"fieldRequested\" | \"excludeEcsData\" | \"authFilter\">"
+          ", \"id\" | \"sort\" | \"fields\" | \"timerange\" | \"language\" | \"defaultIndex\" | \"pagination\" | \"filterQuery\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\" | \"fieldRequested\" | \"excludeEcsData\" | \"authFilter\">"
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
         "deprecated": false,
@@ -15784,7 +15998,7 @@
             "section": "def-common.TimelineRequestBasicOptions",
             "text": "TimelineRequestBasicOptions"
           },
-          ", \"id\" | \"params\" | \"defaultIndex\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\" | \"alertConsumers\">"
+          ", \"id\" | \"params\" | \"defaultIndex\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\">"
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
         "deprecated": false,
@@ -18857,7 +19071,25 @@
             "section": "def-common.ColumnHeaderOptions",
             "text": "ColumnHeaderOptions"
           },
-          "; isDraggable: boolean; linkValues: string[] | undefined; timelineId: string; setFlyoutAlert?: ((data: any) => void) | undefined; }"
+          "; isDraggable: boolean; linkValues: string[] | undefined; timelineId: string; setFlyoutAlert?: ((data: any) => void) | undefined; ecsData?: ",
+          "Ecs",
+          " | undefined; rowRenderers?: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.RowRenderer",
+            "text": "RowRenderer"
+          },
+          "[] | undefined; browserFields?: Readonly<Record<string, Partial<",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.BrowserField",
+            "text": "BrowserField"
+          },
+          ">>> | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/cells/index.ts",
         "deprecated": false,
@@ -18875,7 +19107,15 @@
         "signature": [
           "Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & { aggregatable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
+          ", \"id\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.TGridCellAction",
+            "text": "TGridCellAction"
+          },
+          "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -18887,7 +19127,7 @@
           "IFieldSubType",
           " | undefined; type?: string | undefined; }"
         ],
-        "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+        "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -18901,7 +19141,7 @@
         "signature": [
           "\"not-filtered\" | \"text-filter\""
         ],
-        "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+        "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -18917,7 +19157,7 @@
         "signature": [
           "string"
         ],
-        "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+        "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -19405,7 +19645,7 @@
             "section": "def-common.HostsKpiAuthenticationsStrategyResponse",
             "text": "HostsKpiAuthenticationsStrategyResponse"
           },
-          ", \"id\" | \"inspect\" | \"total\" | \"authenticationsSuccess\" | \"authenticationsSuccessHistogram\" | \"authenticationsFailure\" | \"authenticationsFailureHistogram\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\"> | Pick<",
+          ", \"warning\" | \"id\" | \"inspect\" | \"total\" | \"authenticationsSuccess\" | \"authenticationsSuccessHistogram\" | \"authenticationsFailure\" | \"authenticationsFailureHistogram\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\"> | Pick<",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -19413,7 +19653,7 @@
             "section": "def-common.HostsKpiHostsStrategyResponse",
             "text": "HostsKpiHostsStrategyResponse"
           },
-          ", \"id\" | \"inspect\" | \"hosts\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"hostsHistogram\"> | Pick<",
+          ", \"warning\" | \"id\" | \"inspect\" | \"total\" | \"hosts\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"hostsHistogram\"> | Pick<",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -19421,7 +19661,7 @@
             "section": "def-common.HostsKpiUniqueIpsStrategyResponse",
             "text": "HostsKpiUniqueIpsStrategyResponse"
           },
-          ", \"id\" | \"inspect\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"uniqueSourceIps\" | \"uniqueSourceIpsHistogram\" | \"uniqueDestinationIps\" | \"uniqueDestinationIpsHistogram\">"
+          ", \"warning\" | \"id\" | \"inspect\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"uniqueSourceIps\" | \"uniqueSourceIpsHistogram\" | \"uniqueDestinationIps\" | \"uniqueDestinationIpsHistogram\">"
         ],
         "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/kpi/index.ts",
         "deprecated": false,
@@ -19930,7 +20170,7 @@
             "section": "def-common.NetworkKpiDnsStrategyResponse",
             "text": "NetworkKpiDnsStrategyResponse"
           },
-          ", \"id\" | \"inspect\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"dnsQueries\"> | Pick<",
+          ", \"warning\" | \"id\" | \"inspect\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"dnsQueries\"> | Pick<",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -19938,7 +20178,7 @@
             "section": "def-common.NetworkKpiNetworkEventsStrategyResponse",
             "text": "NetworkKpiNetworkEventsStrategyResponse"
           },
-          ", \"id\" | \"inspect\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"networkEvents\"> | Pick<",
+          ", \"warning\" | \"id\" | \"inspect\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"networkEvents\"> | Pick<",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -19946,7 +20186,7 @@
             "section": "def-common.NetworkKpiTlsHandshakesStrategyResponse",
             "text": "NetworkKpiTlsHandshakesStrategyResponse"
           },
-          ", \"id\" | \"inspect\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"tlsHandshakes\"> | Pick<",
+          ", \"warning\" | \"id\" | \"inspect\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"tlsHandshakes\"> | Pick<",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -19954,7 +20194,7 @@
             "section": "def-common.NetworkKpiUniqueFlowsStrategyResponse",
             "text": "NetworkKpiUniqueFlowsStrategyResponse"
           },
-          ", \"id\" | \"inspect\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"uniqueFlowId\"> | Pick<",
+          ", \"warning\" | \"id\" | \"inspect\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"uniqueFlowId\"> | Pick<",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -19962,7 +20202,7 @@
             "section": "def-common.NetworkKpiUniquePrivateIpsStrategyResponse",
             "text": "NetworkKpiUniquePrivateIpsStrategyResponse"
           },
-          ", \"id\" | \"inspect\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"uniqueSourcePrivateIps\" | \"uniqueSourcePrivateIpsHistogram\" | \"uniqueDestinationPrivateIps\" | \"uniqueDestinationPrivateIpsHistogram\">"
+          ", \"warning\" | \"id\" | \"inspect\" | \"total\" | \"loaded\" | \"isRunning\" | \"isPartial\" | \"isRestored\" | \"uniqueSourcePrivateIps\" | \"uniqueSourcePrivateIpsHistogram\" | \"uniqueDestinationPrivateIps\" | \"uniqueDestinationPrivateIpsHistogram\">"
         ],
         "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/network/kpi/index.ts",
         "deprecated": false,
@@ -21793,7 +22033,7 @@
         "label": "TimelineExpandedDetail",
         "description": [],
         "signature": [
-          "{ query?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
+          "{ query?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -21801,7 +22041,7 @@
             "section": "def-common.FlowTarget",
             "text": "FlowTarget"
           },
-          "; } | undefined; } | undefined; graph?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
+          "; } | undefined; } | undefined; graph?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -21809,7 +22049,7 @@
             "section": "def-common.FlowTarget",
             "text": "FlowTarget"
           },
-          "; } | undefined; } | undefined; notes?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
+          "; } | undefined; } | undefined; notes?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -21817,7 +22057,7 @@
             "section": "def-common.FlowTarget",
             "text": "FlowTarget"
           },
-          "; } | undefined; } | undefined; pinned?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
+          "; } | undefined; } | undefined; pinned?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -21825,7 +22065,7 @@
             "section": "def-common.FlowTarget",
             "text": "FlowTarget"
           },
-          "; } | undefined; } | undefined; eql?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
+          "; } | undefined; } | undefined; eql?: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -21847,7 +22087,7 @@
         "label": "TimelineExpandedDetailType",
         "description": [],
         "signature": [
-          "{ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
+          "{ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; } | undefined; } | Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -21869,7 +22109,7 @@
         "label": "TimelineExpandedEventType",
         "description": [],
         "signature": [
-          "{ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; } | undefined; } | Record<any, never>"
+          "{ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; } | undefined; } | Record<any, never>"
         ],
         "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
         "deprecated": false,
@@ -22346,7 +22586,7 @@
         "label": "ToggleDetailPanel",
         "description": [],
         "signature": [
-          "({ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; } | undefined; } & { tabType?: ",
+          "({ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; refetch?: (() => void) | undefined; } | undefined; } & { tabType?: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",

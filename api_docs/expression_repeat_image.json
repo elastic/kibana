@@ -350,7 +350,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",

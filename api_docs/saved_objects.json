@@ -18,7 +18,13 @@
             "text": "SavedObjectFinderUi"
           },
           " extends React.Component<",
-          "SavedObjectFinderUiProps",
+          {
+            "pluginId": "savedObjects",
+            "scope": "public",
+            "docId": "kibSavedObjectsPluginApi",
+            "section": "def-public.SavedObjectFinderUiProps",
+            "text": "SavedObjectFinderUiProps"
+          },
           ", SavedObjectFinderState, any>"
         ],
         "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
@@ -479,7 +485,13 @@
                 "label": "props",
                 "description": [],
                 "signature": [
-                  "SavedObjectFinderUiProps"
+                  {
+                    "pluginId": "savedObjects",
+                    "scope": "public",
+                    "docId": "kibSavedObjectsPluginApi",
+                    "section": "def-public.SavedObjectFinderUiProps",
+                    "text": "SavedObjectFinderUiProps"
+                  }
                 ],
                 "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
@@ -627,46 +639,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/url_generator.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/services/service_registry.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/services/service_registry.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/create_field_list.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/object_view/components/form.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/object_view/components/form.tsx"
           }
         ],
         "children": [
@@ -2181,22 +2153,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts"
           }
         ],
         "children": [
@@ -3643,6 +3599,52 @@
             "deprecated": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjects",
+        "id": "def-public.SavedObjectFinderUiProps",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectFinderUiProps",
+        "description": [],
+        "signature": [
+          "({ savedObjects: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-public.SavedObjectsStart",
+            "text": "SavedObjectsStart"
+          },
+          "; uiSettings: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.IUiSettingsClient",
+            "text": "IUiSettingsClient"
+          },
+          "; } & SavedObjectFinderFixedPage) | ({ savedObjects: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-public.SavedObjectsStart",
+            "text": "SavedObjectsStart"
+          },
+          "; uiSettings: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.IUiSettingsClient",
+            "text": "IUiSettingsClient"
+          },
+          "; } & SavedObjectFinderInitialPageSize)"
+        ],
+        "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {

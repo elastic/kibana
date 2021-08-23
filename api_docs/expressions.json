@@ -72,13 +72,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>, ",
               {
                 "pluginId": "expressions",
@@ -112,13 +106,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>, {}>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -157,7 +145,7 @@
                 "text": "ExecutionContext"
               },
               "<InspectorAdapters, ",
-              "Serializable",
+              "SerializableRecord",
               ">"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -199,13 +187,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -346,13 +328,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -836,13 +812,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution_contract.ts",
@@ -1465,13 +1435,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/executor/executor.ts",
@@ -1847,13 +1811,7 @@
                 "text": "VersionedState"
               },
               "<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ">) => ",
               {
                 "pluginId": "expressions",
@@ -1882,13 +1840,7 @@
                     "text": "VersionedState"
                   },
                   "<",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
-                  },
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/executor/executor.ts",
@@ -2297,21 +2249,9 @@
             "description": [],
             "signature": [
               "{ [key: string]: (state: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ") => ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               "; }"
             ],
             "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
@@ -3996,13 +3936,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
@@ -4612,13 +4546,7 @@
                 "text": "VersionedState"
               },
               "<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ">) => ",
               {
                 "pluginId": "expressions",
@@ -4647,13 +4575,7 @@
                     "text": "VersionedState"
                   },
                   "<",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
-                  },
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
@@ -6545,13 +6467,7 @@
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IExecutionContextContainer",
-                "text": "IExecutionContextContainer"
-              },
+              "KibanaExecutionContext",
               " | undefined"
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
@@ -7709,7 +7625,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -7755,7 +7671,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -7793,7 +7709,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -7831,7 +7747,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -7869,7 +7785,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -7931,7 +7847,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -7993,7 +7909,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -8055,7 +7971,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -8117,7 +8033,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -8610,13 +8526,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
@@ -9105,7 +9015,7 @@
             "label": "searchContext",
             "description": [],
             "signature": [
-              "Serializable",
+              "SerializableRecord",
               " | undefined"
             ],
             "path": "src/plugins/expressions/public/types/index.ts",
@@ -9304,13 +9214,7 @@
             "label": "executionContext",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IExecutionContextContainer",
-                "text": "IExecutionContextContainer"
-              },
+              "KibanaExecutionContext",
               " | undefined"
             ],
             "path": "src/plugins/expressions/public/types/index.ts",
@@ -10235,7 +10139,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -10289,7 +10193,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"ip\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"geo_point\" | \"_source\" | \"attachment\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -10634,13 +10538,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }"
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/error.ts",
@@ -10782,13 +10680,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }"
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/error.ts",
@@ -11191,13 +11083,7 @@
           "text": "ErrorLike"
         },
         "; info?: ",
-        {
-          "pluginId": "kibanaUtils",
-          "scope": "common",
-          "docId": "kibKibanaUtilsPluginApi",
-          "section": "def-common.Serializable",
-          "text": "Serializable"
-        },
+        "SerializableRecord",
         " | undefined; }> | Output>>; readonly fork: () => ",
         {
           "pluginId": "expressions",
@@ -11546,13 +11432,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>, ",
               {
                 "pluginId": "expressions",
@@ -11586,13 +11466,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>, {}>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -11631,7 +11505,7 @@
                 "text": "ExecutionContext"
               },
               "<InspectorAdapters, ",
-              "Serializable",
+              "SerializableRecord",
               ">"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -11673,13 +11547,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -11820,13 +11688,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -12741,13 +12603,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/executor/executor.ts",
@@ -13123,13 +12979,7 @@
                 "text": "VersionedState"
               },
               "<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ">) => ",
               {
                 "pluginId": "expressions",
@@ -13158,13 +13008,7 @@
                     "text": "VersionedState"
                   },
                   "<",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
-                  },
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/executor/executor.ts",
@@ -13573,21 +13417,9 @@
             "description": [],
             "signature": [
               "{ [key: string]: (state: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ") => ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               "; }"
             ],
             "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
@@ -16308,13 +16140,7 @@
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IExecutionContextContainer",
-                "text": "IExecutionContextContainer"
-              },
+              "KibanaExecutionContext",
               " | undefined"
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
@@ -17443,7 +17269,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17489,7 +17315,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17527,7 +17353,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17565,7 +17391,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17603,7 +17429,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17665,7 +17491,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17727,7 +17553,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17789,7 +17615,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17851,7 +17677,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -18962,7 +18788,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -19016,7 +18842,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"ip\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"geo_point\" | \"_source\" | \"attachment\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -19310,13 +19136,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }"
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/error.ts",
@@ -19458,13 +19278,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }"
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/error.ts",
@@ -19835,13 +19649,7 @@
           "text": "ErrorLike"
         },
         "; info?: ",
-        {
-          "pluginId": "kibanaUtils",
-          "scope": "common",
-          "docId": "kibKibanaUtilsPluginApi",
-          "section": "def-common.Serializable",
-          "text": "Serializable"
-        },
+        "SerializableRecord",
         " | undefined; }> | Output>>; readonly fork: () => ",
         {
           "pluginId": "expressions",
@@ -19951,13 +19759,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>, ",
               {
                 "pluginId": "expressions",
@@ -19991,13 +19793,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>, {}>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -20036,7 +19832,7 @@
                 "text": "ExecutionContext"
               },
               "<InspectorAdapters, ",
-              "Serializable",
+              "SerializableRecord",
               ">"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -20078,13 +19874,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -20225,13 +20015,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -20715,13 +20499,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution_contract.ts",
@@ -21344,13 +21122,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/executor/executor.ts",
@@ -21726,13 +21498,7 @@
                 "text": "VersionedState"
               },
               "<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ">) => ",
               {
                 "pluginId": "expressions",
@@ -21761,13 +21527,7 @@
                     "text": "VersionedState"
                   },
                   "<",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
-                  },
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/executor/executor.ts",
@@ -22176,21 +21936,9 @@
             "description": [],
             "signature": [
               "{ [key: string]: (state: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ") => ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               "; }"
             ],
             "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
@@ -23244,13 +22992,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
@@ -23860,13 +23602,7 @@
                 "text": "VersionedState"
               },
               "<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ">) => ",
               {
                 "pluginId": "expressions",
@@ -23895,13 +23631,7 @@
                     "text": "VersionedState"
                   },
                   "<",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
-                  },
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
@@ -25363,13 +25093,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }>"
         ],
         "path": "src/plugins/expressions/common/util/create_error.ts",
@@ -25533,7 +25257,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">"
         ],
         "path": "src/plugins/expressions/common/util/test_utils.ts",
@@ -25919,13 +25643,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }>"
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/error.ts",
@@ -26699,7 +26417,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"ip\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"geo_point\" | \"_source\" | \"attachment\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false
@@ -26796,7 +26514,7 @@
               "\nany extra parameters for the source that produced this column"
             ],
             "signature": [
-              "Serializable",
+              "SerializableRecord",
               " | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
@@ -27111,13 +26829,7 @@
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IExecutionContextContainer",
-                "text": "IExecutionContextContainer"
-              },
+              "KibanaExecutionContext",
               " | undefined"
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
@@ -28551,13 +28263,7 @@
             "label": "searchContext",
             "description": [],
             "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
@@ -28667,13 +28373,7 @@
             "label": "executionContext",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IExecutionContextContainer",
-                "text": "IExecutionContextContainer"
-              },
+              "KibanaExecutionContext",
               " | undefined"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
@@ -29009,7 +28709,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29055,7 +28755,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29093,7 +28793,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29131,7 +28831,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29169,7 +28869,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29231,7 +28931,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29293,7 +28993,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29355,7 +29055,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29417,7 +29117,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29878,13 +29578,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
@@ -31260,7 +30954,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -31335,7 +31029,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"ip\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"geo_point\" | \"_source\" | \"attachment\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -31566,13 +31260,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }> | undefined; rawError?: any; duration: number | undefined; }"
         ],
         "path": "src/plugins/expressions/common/ast/types.ts",
@@ -31640,7 +31328,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/clog.ts",
@@ -31703,7 +31391,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/cumulative_sum.ts",
@@ -31766,7 +31454,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/derivative.ts",
@@ -31813,7 +31501,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
@@ -31876,7 +31564,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/moving_average.ts",
@@ -31939,7 +31627,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
@@ -31978,7 +31666,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/theme.ts",
@@ -32033,7 +31721,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/ui_setting.ts",
@@ -32072,7 +31760,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/var.ts",
@@ -32111,7 +31799,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
@@ -32267,13 +31955,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }> | Output>>; readonly fork: () => ",
           {
             "pluginId": "expressions",
@@ -32376,13 +32058,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }"
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/error.ts",
@@ -32546,13 +32222,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }"
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/error.ts",
@@ -32775,31 +32445,11 @@
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/progress.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/progress.ts"
-          },
-          {
-            "plugin": "canvas",
             "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
           },
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/render.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/render.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/render.ts"
           },
           {
             "plugin": "canvas",
@@ -34890,13 +34540,7 @@
                     "text": "ErrorLike"
                   },
                   "; info?: ",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
-                  },
+                  "SerializableRecord",
                   " | undefined; }>) => ",
                   {
                     "pluginId": "expressions",
@@ -34922,13 +34566,7 @@
                     "text": "ErrorLike"
                   },
                   "; info?: ",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
-                  },
+                  "SerializableRecord",
                   " | undefined; }>, \"error\" | \"info\">; }>"
                 ],
                 "path": "src/plugins/expressions/common/expression_types/specs/error.ts",
@@ -34958,13 +34596,7 @@
                         "text": "ErrorLike"
                       },
                       "; info?: ",
-                      {
-                        "pluginId": "kibanaUtils",
-                        "scope": "common",
-                        "docId": "kibKibanaUtilsPluginApi",
-                        "section": "def-common.Serializable",
-                        "text": "Serializable"
-                      },
+                      "SerializableRecord",
                       " | undefined; }>"
                     ],
                     "path": "src/plugins/expressions/common/expression_types/specs/error.ts",
@@ -36961,7 +36593,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">) => ",
               {
                 "pluginId": "expressions",
@@ -37038,7 +36670,7 @@
                     "text": "Adapters"
                   },
                   ", ",
-                  "Serializable",
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
@@ -39686,7 +39318,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">) => any"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/theme.ts",
@@ -39744,7 +39376,7 @@
                     "text": "Adapters"
                   },
                   ", ",
-                  "Serializable",
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/expression_functions/specs/theme.ts",
@@ -40166,7 +39798,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">) => any"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/var.ts",
@@ -40224,7 +39856,7 @@
                     "text": "Adapters"
                   },
                   ", ",
-                  "Serializable",
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/expression_functions/specs/var.ts",
@@ -40429,7 +40061,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">) => unknown"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
@@ -40487,7 +40119,7 @@
                     "text": "Adapters"
                   },
                   ", ",
-                  "Serializable",
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
