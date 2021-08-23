@@ -40,9 +40,9 @@ If you loaded your own data, follow these steps to create an index pattern.
 . Click *Create index pattern*.
 +
 [role="screenshot"]
-image:management/index-patterns/images/create-index-pattern.png["Create index pattern"]
+image:management/index-patterns/images/create-index-pattern.jpg["Create index pattern"]
 
-. Start typing in the *Index pattern* field, and {kib} looks for the names of
+. Start typing in the *name* field, and {kib} looks for the names of
 {es} indices that match your input.
 ** Use a wildcard (*) to match multiple indices.
 For example, suppose your system creates indices for Apache data
@@ -56,8 +56,6 @@ For example, `filebeat-a,filebeat-b` matches two indices, but not other indices
 you might have afterwards (filebeat-c).
 
 ** Use a minus sign (-) to exclude an index, for example, test*,-test3.
-
-. Click *Next step*.
 
 . If {kib} detects an index with a timestamp, expand the *Time field* menu,
 and then specify the default field for filtering your data by time.
