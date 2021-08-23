@@ -60,13 +60,7 @@ interface ComponentDocViewInput extends BaseDocViewInput {
   directive?: undefined;
 }
 
-interface DirectiveDocViewInput extends BaseDocViewInput {
-  component?: undefined;
-  render?: undefined;
-  directive: ng.IDirective;
-}
-
-export type DocViewInput = ComponentDocViewInput | RenderDocViewInput | DirectiveDocViewInput;
+export type DocViewInput = ComponentDocViewInput | RenderDocViewInput;
 
 export type DocView = DocViewInput & {
   shouldShow: NonNullable<DocViewInput['shouldShow']>;
