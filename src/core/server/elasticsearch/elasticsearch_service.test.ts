@@ -30,6 +30,9 @@ import { ElasticsearchService } from './elasticsearch_service';
 import { elasticsearchClientMock } from './client/mocks';
 import { duration } from 'moment';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
+const { pollEsNodesVersion: pollEsNodesVersionActual } = jest.requireActual(
+  './version_check/ensure_es_version'
+);
 
 const delay = async (durationMs: number) =>
   await new Promise((resolve) => setTimeout(resolve, durationMs));
@@ -175,39 +178,6 @@ describe('#setup', () => {
       ElasticsearchConfig
     );
   });
-
-  it('esNodeVersionCompatibility$ only starts polling when subscribed to', async (done) => {
-    const mockedClient = mockClusterClientInstance.asInternalUser;
-    mockedClient.nodes.info.mockImplementation(() =>
-      elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
-    );
-
-    const setupContract = await elasticsearchService.setup(setupDeps);
-    await delay(10);
-
-    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
-    setupContract.esNodesCompatibility$.subscribe(() => {
-      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-      done();
-    });
-  });
-
-  it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async (done) => {
-    const mockedClient = mockClusterClientInstance.asInternalUser;
-    mockedClient.nodes.info.mockImplementation(() =>
-      elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
-    );
-
-    const setupContract = await elasticsearchService.setup(setupDeps);
-
-    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
-    const sub = setupContract.esNodesCompatibility$.subscribe(async () => {
-      sub.unsubscribe();
-      await delay(100);
-      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-      done();
-    });
-  });
 });
 
 describe('#start', () => {
@@ -316,7 +286,10 @@ describe('#stop', () => {
   });
 
   it('stops pollEsNodeVersions even if there are active subscriptions', async (done) => {
-    expect.assertions(2);
+    expect.assertions(3);
+
+    // @ts-expect-error TS does not get that `pollEsNodesVersion` is mocked
+    pollEsNodesVersion.mockImplementation(pollEsNodesVersionActual);
 
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockImplementation(() =>
@@ -327,10 +300,12 @@ describe('#stop', () => {
 
     setupContract.esNodesCompatibility$.subscribe(async () => {
       expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
+      await delay(10);
+      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
 
       await elasticsearchService.stop();
       await delay(100);
-      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
+      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
       done();
     });
   });
