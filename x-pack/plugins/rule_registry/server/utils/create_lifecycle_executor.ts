@@ -252,7 +252,6 @@ export const createLifecycleExecutor = (
       alertUuid: v4(),
       started: commonRuleFields[TIMESTAMP],
     };
-
     const event: ParsedTechnicalFields = {
       ...alertData,
       ...commonRuleFields,
@@ -260,7 +259,7 @@ export const createLifecycleExecutor = (
       [ALERT_ID]: alertId,
       [ALERT_START]: started,
       [ALERT_STATUS]: isActive ? ALERT_STATUS_ACTIVE : ALERT_STATUS_RECOVERED,
-      // [ALERT_WORKFLOW_STATUS]: alertData[ALERT_WORKFLOW_STATUS] ?? 'open';
+      [ALERT_WORKFLOW_STATUS]: alertData[ALERT_WORKFLOW_STATUS] ?? 'open',
       [ALERT_UUID]: alertUuid,
       [EVENT_KIND]: 'signal',
       [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
