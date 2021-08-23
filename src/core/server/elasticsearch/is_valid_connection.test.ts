@@ -44,13 +44,28 @@ describe('isValidConnection', () => {
     await expect(promise).resolves.toStrictEqual(compatible);
   });
 
-  test('should throw an error on ProductCheckError', async () => {
+  test('should throw an error only on ProductCheckError', async () => {
     const esNodesCompatibility$ = new Subject<NodesVersionCompatibility>();
     const promise = isValidConnection(esNodesCompatibility$);
 
+    const { ProductNotSupportedError, ...otherErrors } = errors;
+
+    // Emit every declared Error by the ES client.
+    Object.entries(otherErrors).forEach(([errorName, ESError]) => {
+      // If the error accepts 2 arguments, it's message + meta, otherwise, it's meta only
+      const nodesInfoRequestError =
+        ESError.length === 2 ? new ESError('message', {}) : new ESError({});
+
+      esNodesCompatibility$.next({
+        ...errored,
+        message: `${errorName} occurred`,
+        nodesInfoRequestError,
+      });
+    });
+
     const productCheckErrored = {
       ...incompatible,
-      nodesInfoRequestError: new errors.ProductNotSupportedError({} as any),
+      nodesInfoRequestError: new ProductNotSupportedError({} as any),
     };
 
     esNodesCompatibility$.next(productCheckErrored);
