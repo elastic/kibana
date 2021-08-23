@@ -23,33 +23,38 @@ describe('Overview - Upgrade Step', () => {
     server.restore();
   });
 
-  test('Shows link to setup upgrade docs for on-prem installations', () => {
-    const { exists } = testBed;
+  describe('On-prem', () => {
+    test('Shows link to setup upgrade docs', () => {
+      const { exists } = testBed;
 
-    expect(exists('upgradeSetupDocsLink')).toBe(true);
-    expect(exists('upgradeSetupCloudLink')).toBe(false);
+      expect(exists('upgradeSetupDocsLink')).toBe(true);
+      expect(exists('upgradeSetupCloudLink')).toBe(false);
+    });
   });
 
-  test('Shows upgrade CTA and link to docs for cloud installations', async () => {
-    await act(async () => {
-      testBed = await setupOverviewPage({
-        kibanaContextOverrides: {
-          cloud: {
-            isCloudEnabled: true,
-            deploymentUrl: 'https://cloud.elastic.co./deployments/bfdad4ef99a24212a06d387593686d63',
+  describe('On Cloud', () => {
+    test('Shows upgrade CTA and link to docs', async () => {
+      await act(async () => {
+        testBed = await setupOverviewPage({
+          kibanaContextOverrides: {
+            cloud: {
+              isCloudEnabled: true,
+              deploymentUrl:
+                'https://cloud.elastic.co./deployments/bfdad4ef99a24212a06d387593686d63',
+            },
           },
-        },
+        });
       });
+
+      const { component, exists, find } = testBed;
+      component.update();
+
+      expect(exists('upgradeSetupDocsLink')).toBe(true);
+      expect(exists('upgradeSetupCloudLink')).toBe(true);
+
+      expect(find('upgradeSetupCloudLink').props().href).toBe(
+        'https://cloud.elastic.co./deployments/bfdad4ef99a24212a06d387593686d63'
+      );
     });
-
-    const { component, exists, find } = testBed;
-    component.update();
-
-    expect(exists('upgradeSetupCloudLink')).toBe(true);
-    expect(exists('upgradeSetupDocsLink')).toBe(true);
-
-    expect(find('upgradeSetupCloudLink').props().href).toBe(
-      'https://cloud.elastic.co./deployments/bfdad4ef99a24212a06d387593686d63'
-    );
   });
 });
