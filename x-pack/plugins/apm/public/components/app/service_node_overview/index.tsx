@@ -80,11 +80,11 @@ function ServiceNodeOverview() {
               defaultMessage: 'Name',
             })}
             <EuiIcon
-            size="s"
-            color="subdued"
-            type="questionInCircle"
-            className="eui-alignTop"
-          />
+             size="s"
+             color="subdued"
+             type="questionInCircle"
+             className="eui-alignTop"
+            />
           </>
         </EuiToolTip>
       ),
