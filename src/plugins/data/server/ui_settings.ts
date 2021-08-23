@@ -263,25 +263,6 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       category: ['search'],
       schema: schema.number(),
     },
-    [UI_SETTINGS.COURIER_BATCH_SEARCHES]: {
-      name: i18n.translate('data.advancedSettings.courier.batchSearchesTitle', {
-        defaultMessage: 'Use sync search',
-      }),
-      value: false,
-      type: 'boolean',
-      description: i18n.translate('data.advancedSettings.courier.batchSearchesText', {
-        defaultMessage: `Kibana uses a new asynchronous search and infrastructure.
-           Enable this option if you prefer to fallback to the legacy synchronous behavior`,
-      }),
-      deprecation: {
-        message: i18n.translate('data.advancedSettings.courier.batchSearchesTextDeprecation', {
-          defaultMessage: 'This setting is deprecated and will be removed in Kibana 8.0.',
-        }),
-        docLinksKey: 'kibanaSearchSettings',
-      },
-      category: ['search'],
-      schema: schema.boolean(),
-    },
     [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: {
       name: 'Search in frozen indices',
       description: `Will include <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/frozen-indices.html"
