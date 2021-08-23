@@ -28,30 +28,6 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
       rootPath: string,
       addDeprecation: AddConfigDeprecation
     ) => {
-      if (_.get(completeConfig, 'xpack.maps.showMapVisualizationTypes') === undefined) {
-        return completeConfig;
-      }
-      addDeprecation({
-        message: i18n.translate('xpack.maps.deprecation.showMapVisualizationTypes.message', {
-          defaultMessage:
-            'xpack.maps.showMapVisualizationTypes is deprecated and is no longer used',
-        }),
-        correctiveActions: {
-          manualSteps: [
-            i18n.translate('xpack.maps.deprecation.showMapVisualizationTypes.step1', {
-              defaultMessage:
-                'Remove "xpack.maps.showMapVisualizationTypes" in the Kibana config file, CLI flag, or environment variable (in Docker only).',
-            }),
-          ],
-        },
-      });
-      return completeConfig;
-    },
-    (
-      completeConfig: Record<string, any>,
-      rootPath: string,
-      addDeprecation: AddConfigDeprecation
-    ) => {
       if (_.get(completeConfig, 'map.proxyElasticMapsServiceInMaps') === undefined) {
         return completeConfig;
       }
