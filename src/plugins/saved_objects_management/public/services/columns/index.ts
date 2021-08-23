@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { Space } from './types';
+export { ShareToSpaceSavedObjectsManagementColumn } from './share_saved_objects_to_space_column';

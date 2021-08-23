@@ -1,18 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import type { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
-
-import { uiApiMock } from '../ui_api/mocks';
+import { spacesPluginMock } from '../../../../../../x-pack/plugins/spaces/public/mocks';
+import type { SavedObjectsManagementRecord } from '../types';
 import { ShareToSpaceSavedObjectsManagementAction } from './share_saved_objects_to_space_action';
 
 describe('ShareToSpaceSavedObjectsManagementAction', () => {
   const createAction = () => {
-    const spacesApiUi = uiApiMock.create();
+    const { ui: spacesApiUi } = spacesPluginMock.createStartContract();
     return new ShareToSpaceSavedObjectsManagementAction(spacesApiUi);
   };
   describe('#euiAction.available', () => {
