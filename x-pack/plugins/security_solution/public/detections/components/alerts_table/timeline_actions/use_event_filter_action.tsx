@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
+import { EuiContextMenuItem } from '@elastic/eui';
 import { ACTION_ADD_EVENT_FILTER } from '../translations';
 
 export const useEventFilterAction = ({
@@ -13,12 +14,17 @@ export const useEventFilterAction = ({
 }: {
   onAddEventFilterClick: () => void;
 }) => {
-  const eventFilterActions = useMemo(
-    () => ({
-      name: ACTION_ADD_EVENT_FILTER,
-      onClick: onAddEventFilterClick,
-    }),
+  const eventFilterActionItems = useMemo(
+    () => [
+      <EuiContextMenuItem
+        key="add-event-filter-menu-item"
+        data-test-subj="add-event-filter-menu-item"
+        onClick={onAddEventFilterClick}
+      >
+        {ACTION_ADD_EVENT_FILTER}
+      </EuiContextMenuItem>,
+    ],
     [onAddEventFilterClick]
   );
-  return eventFilterActions;
+  return { eventFilterActionItems };
 };

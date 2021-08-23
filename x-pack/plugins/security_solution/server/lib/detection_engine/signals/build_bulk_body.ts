@@ -42,7 +42,7 @@ export const buildBulkBody = (
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc });
   const rule = buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {});
   const timestamp = new Date().toISOString();
-  const reason = buildReasonMessage({ mergedDoc, rule, timestamp });
+  const reason = buildReasonMessage({ mergedDoc, rule });
   const signal: Signal = {
     ...buildSignal([mergedDoc], rule, reason),
     ...additionalSignalFields(mergedDoc),
@@ -122,7 +122,7 @@ export const buildSignalFromSequence = (
   const rule = buildRuleWithoutOverrides(ruleSO);
   const timestamp = new Date().toISOString();
 
-  const reason = buildReasonMessage({ rule, timestamp });
+  const reason = buildReasonMessage({ rule });
   const signal: Signal = buildSignal(events, rule, reason);
   const mergedEvents = objectArrayIntersection(events.map((event) => event._source));
   return {
@@ -154,7 +154,7 @@ export const buildSignalFromEvent = (
     ? buildRuleWithOverrides(ruleSO, mergedEvent._source ?? {})
     : buildRuleWithoutOverrides(ruleSO);
   const timestamp = new Date().toISOString();
-  const reason = buildReasonMessage({ mergedDoc: mergedEvent, rule, timestamp });
+  const reason = buildReasonMessage({ mergedDoc: mergedEvent, rule });
   const signal: Signal = {
     ...buildSignal([mergedEvent], rule, reason),
     ...additionalSignalFields(mergedEvent),
