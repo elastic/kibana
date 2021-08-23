@@ -17,6 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useTransactionDistributionFetcher } from '../../../../hooks/use_transaction_distribution_fetcher';
@@ -28,11 +29,25 @@ import { isErrorMessage } from '../../correlations/utils/is_error_message';
 
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
 
+type Selection = [number, number];
+
+// Format the selected latency range for the "Clear selection" badge.
+// If the two values share the same unit, it will only displayed once.
+// For example: 12 - 23 ms / 12 ms - 3 s
+export function getFormattedSelection(selection: Selection): string {
+  const from = getDurationFormatter(selection[0])(selection[0]);
+  const to = getDurationFormatter(selection[1])(selection[1]);
+
+  return `${from.unit === to.unit ? from.value : from.formatted} - ${
+    to.formatted
+  }`;
+}
+
 interface Props {
   markerCurrentTransaction?: number;
   onChartSelection: BrushEndListener;
   onClearSelection: () => void;
-  selection?: [number, number];
+  selection?: Selection;
 }
 
 export function TransactionDistribution({
@@ -177,10 +192,9 @@ export function TransactionDistribution({
               {i18n.translate(
                 'xpack.apm.transactionDetails.distribution.selectionText',
                 {
-                  defaultMessage: `Selection: {selectionFrom} - {selectionTo}ms`,
+                  defaultMessage: `Selection: {formattedSelection}`,
                   values: {
-                    selectionFrom: Math.round(selection[0] / 1000),
-                    selectionTo: Math.round(selection[1] / 1000),
+                    formattedSelection: getFormattedSelection(selection),
                   },
                 }
               )}

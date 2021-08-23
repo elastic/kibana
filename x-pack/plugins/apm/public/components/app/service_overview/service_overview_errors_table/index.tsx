@@ -209,6 +209,17 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
             }
           >
             <EuiBasicTable
+              noItemsMessage={
+                status === FETCH_STATUS.LOADING
+                  ? i18n.translate(
+                      'xpack.apm.serviceOverview.errorsTable.loading',
+                      { defaultMessage: 'Loading...' }
+                    )
+                  : i18n.translate(
+                      'xpack.apm.serviceOverview.errorsTable.noResults',
+                      { defaultMessage: 'No errors found' }
+                    )
+              }
               columns={columns}
               items={items}
               pagination={{

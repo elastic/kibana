@@ -23,12 +23,6 @@ export interface ChromeBadge {
 }
 
 /** @public */
-export interface ChromeBrand {
-  logo?: string;
-  smallLogo?: string;
-}
-
-/** @public */
 export type ChromeBreadcrumb = EuiBreadcrumb;
 
 /** @public */
@@ -94,40 +88,6 @@ export interface ChromeStart {
   docTitle: ChromeDocTitle;
 
   /**
-   * Sets the current app's title
-   *
-   * @internalRemarks
-   * This should be handled by the application service once it is in charge
-   * of mounting applications.
-   */
-  setAppTitle(appTitle: string): void;
-
-  /**
-   * Get an observable of the current brand information.
-   */
-  getBrand$(): Observable<ChromeBrand>;
-
-  /**
-   * Set the brand configuration.
-   *
-   * @remarks
-   * Normally the `logo` property will be rendered as the
-   * CSS background for the home link in the chrome navigation, but when the page is
-   * rendered in a small window the `smallLogo` will be used and rendered at about
-   * 45px wide.
-   *
-   * @example
-   * ```js
-   * chrome.setBrand({
-   *   logo: 'url(/plugins/app/logo.png) center no-repeat'
-   *   smallLogo: 'url(/plugins/app/logo-small.png) center no-repeat'
-   * })
-   * ```
-   *
-   */
-  setBrand(brand: ChromeBrand): void;
-
-  /**
    * Get an observable of the current visibility state of the chrome.
    */
   getIsVisible$(): Observable<boolean>;
@@ -138,21 +98,6 @@ export interface ChromeStart {
    * with an exit button.
    */
   setIsVisible(isVisible: boolean): void;
-
-  /**
-   * Get the current set of classNames that will be set on the application container.
-   */
-  getApplicationClasses$(): Observable<string[]>;
-
-  /**
-   * Add a className that should be set on the application container.
-   */
-  addApplicationClass(className: string): void;
-
-  /**
-   * Remove a className added with `addApplicationClass()`. If className is unknown it is ignored.
-   */
-  removeApplicationClass(className: string): void;
 
   /**
    * Get an observable of the current badge
@@ -232,6 +177,7 @@ export interface InternalChromeStart extends ChromeStart {
    * @internal
    */
   getHeaderComponent(): JSX.Element;
+
   /**
    * Used only by the rendering service to retrieve the set of classNames
    * that will be set on the body element.
