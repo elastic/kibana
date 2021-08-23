@@ -7,6 +7,7 @@
 
 import React, { memo, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 import {
+  EuiIcon,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
@@ -97,10 +98,12 @@ export const RunningConsoleManagementProvider = memo(({ children }) => {
     for (const [id, { show, console, title }] of Object.entries(consoles)) {
       if (show) {
         dialogs.push(
-          <EuiModal onClose={() => hideConsole(id)}>
+          <EuiModal onClose={() => hideConsole(id)} style={{ width: '80vw' }}>
             <EuiModalHeader>
               <EuiModalHeaderTitle>
-                <h1>{title}</h1>
+                <h1>
+                  <EuiIcon type="console" size="xl" /> {title}
+                </h1>
               </EuiModalHeaderTitle>
             </EuiModalHeader>
             <EuiModalBody>{console}</EuiModalBody>
