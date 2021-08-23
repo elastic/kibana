@@ -44,8 +44,9 @@ export function PanelOptionsMenu({ data }: { data: any }) {
         operation.operationName,
         requestParams
       );
+      requestResponder.json(operation.requestParams);
       // TODO: Get status as well as data
-      requestResponder.ok({ json: operation.response });
+      requestResponder.finish(RequestStatus.OK, { json: operation.response });
     });
 
     setInspectorSession(session);
