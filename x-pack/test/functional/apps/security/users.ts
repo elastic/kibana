@@ -7,13 +7,14 @@
 
 import expect from '@kbn/expect';
 import { keyBy } from 'lodash';
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['security', 'settings']);
   const config = getService('config');
   const log = getService('log');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/109349
-  describe.skip('users', function () {
+  describe('users', function () {
     before(async () => {
       log.debug('users');
       await PageObjects.settings.navigateTo();
@@ -104,9 +105,6 @@ export default function ({ getService, getPageObjects }) {
 
       expect(roles.kibana_user.reserved).to.be(true);
       expect(roles.kibana_user.deprecated).to.be(true);
-
-      expect(roles.kibana_dashboard_only_user.reserved).to.be(true);
-      expect(roles.kibana_dashboard_only_user.deprecated).to.be(true);
 
       expect(roles.kibana_system.reserved).to.be(true);
       expect(roles.kibana_system.deprecated).to.be(false);
