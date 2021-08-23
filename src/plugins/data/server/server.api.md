@@ -125,7 +125,7 @@ export const esFilters: {
 export const esKuery: {
     nodeTypes: import("@kbn/es-query/target_types/kuery/node_types").NodeTypes;
     fromKueryExpression: (expression: string | import("@elastic/elasticsearch/api/types").QueryDslQueryContainer, parseOptions?: Partial<import("@kbn/es-query/target_types/kuery/types").KueryParseOptions> | undefined) => import("@kbn/es-query").KueryNode;
-    toElasticsearchQuery: (node: import("@kbn/es-query").KueryNode, indexPattern?: import("@kbn/es-query").IndexPatternBase | undefined, config?: Record<string, any> | undefined, context?: Record<string, any> | undefined) => import("@kbn/utility-types").JsonObject;
+    toElasticsearchQuery: (node: import("@kbn/es-query").KueryNode, indexPattern?: import("@kbn/es-query").IndexPatternBase | undefined, config?: import("@kbn/es-query").KueryQueryOptions | undefined, context?: Record<string, any> | undefined) => import("@elastic/elasticsearch/api/types").QueryDslQueryContainer;
 };
 
 // Warning: (ae-missing-release-tag) "esQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -517,21 +517,18 @@ class IndexPatternsService {
     fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrs | undefined) => Record<string, FieldSpec>;
     find: (search: string, size?: number) => Promise<IndexPattern[]>;
     get: (id: string) => Promise<IndexPattern>;
-    // Warning: (ae-forgotten-export) The symbol "IndexPatternSavedObjectAttrs" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
-    getCache: () => Promise<SavedObject_2<IndexPatternSavedObjectAttrs>[] | null | undefined>;
+    getCache: () => Promise<SavedObject_2<Pick<IndexPatternAttributes, "type" | "title" | "typeMeta">>[] | null | undefined>;
     getDefault: () => Promise<IndexPattern | null>;
     getDefaultId: () => Promise<string | null>;
     getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions | undefined) => Promise<any>;
     // Warning: (ae-forgotten-export) The symbol "GetFieldsOptions" needs to be exported by the entry point index.d.ts
     getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
     getIds: (refresh?: boolean) => Promise<string[]>;
-    getIdsWithTitle: (refresh?: boolean) => Promise<Array<{
-        id: string;
-        title: string;
-    }>>;
+    // Warning: (ae-forgotten-export) The symbol "IndexPatternListItem" needs to be exported by the entry point index.d.ts
+    getIdsWithTitle: (refresh?: boolean) => Promise<IndexPatternListItem[]>;
     getTitles: (refresh?: boolean) => Promise<string[]>;
+    hasUserIndexPattern(): Promise<boolean>;
     refreshFields: (indexPattern: IndexPattern) => Promise<void>;
     savedObjectToSpec: (savedObject: SavedObject_2<IndexPatternAttributes>) => IndexPatternSpec;
     setDefault: (id: string | null, force?: boolean) => Promise<void>;
@@ -697,7 +694,7 @@ export class Plugin implements Plugin_2<PluginSetup, PluginStart, DataPluginSetu
     start(core: CoreStart_2, { fieldFormats }: DataPluginStartDependencies): {
         fieldFormats: FieldFormatsStart;
         indexPatterns: {
-            indexPatternsServiceFactory: (savedObjectsClient: Pick<import("../../../core/server").SavedObjectsClient, "update" | "get" | "delete" | "create" | "bulkCreate" | "checkConflicts" | "find" | "bulkGet" | "resolve" | "collectMultiNamespaceReferences" | "updateObjectsSpaces" | "bulkUpdate" | "removeReferencesTo" | "openPointInTimeForType" | "closePointInTime" | "createPointInTimeFinder" | "errors">, elasticsearchClient: import("../../../core/server").ElasticsearchClient) => Promise<import(".").IndexPatternsService>;
+            indexPatternsServiceFactory: (savedObjectsClient: Pick<import("../../../core/server").SavedObjectsClient, "update" | "get" | "closePointInTime" | "create" | "delete" | "bulkCreate" | "checkConflicts" | "find" | "bulkGet" | "resolve" | "collectMultiNamespaceReferences" | "updateObjectsSpaces" | "bulkUpdate" | "removeReferencesTo" | "openPointInTimeForType" | "createPointInTimeFinder" | "errors">, elasticsearchClient: import("../../../core/server").ElasticsearchClient) => Promise<import(".").IndexPatternsService>;
         };
         search: ISearchStart<import("./search").IEsSearchRequest, import("./search").IEsSearchResponse<any>>;
     };
