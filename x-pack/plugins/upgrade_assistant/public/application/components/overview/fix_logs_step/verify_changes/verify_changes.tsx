@@ -8,23 +8,33 @@
 import React, { FunctionComponent, useState } from 'react';
 import moment from 'moment-timezone';
 import useInterval from 'react-use/lib/useInterval';
+import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiButton } from '@elastic/eui';
 import { useAppContext } from '../../../../app_context';
 import { Storage } from '../../../../../shared_imports';
-import { DEPRECATION_WARNINGS_POLLING_INTERVAL } from '../../../constants';
 
-const DEPRECATION_WARNINGS_KEY = 'kibana.upgradeAssistant.lastPollingCheck';
+const POLLING_INTERVAL = 30000;
+const LOCALSTORAGE_KEY = 'kibana.upgradeAssistant.lastPollingCheck';
 const localStorage = new Storage(window.localStorage);
 
 const i18nTexts = {
-  calloutTitle: (warningsCount: number, previousCheck: string) =>
-    i18n.translate('xpack.upgradeAssistant.overview.verifyChanges.calloutTitle', {
-      defaultMessage:
-        '{warningsCount, plural, =0 {No} other {{warningsCount}}} deprecation {warningsCount, plural, one {warning} other {warnings}} since {previousCheck}',
-      values: { warningsCount, previousCheck },
-    }),
+  calloutTitle: (warningsCount: number, previousCheck: string) => (
+    <FormattedMessage
+      id="xpack.upgradeAssistant.overview.verifyChanges.calloutTitle"
+      defaultMessage="{warningsCount, plural, =0 {No} other {{warningsCount}}} deprecation {warningsCount, plural, one {warning} other {warnings}} since {previousCheck}"
+      values={{
+        warningsCount,
+        previousCheck: (
+          <>
+            <FormattedDate value={previousCheck} year="numeric" month="long" day="2-digit" />{' '}
+            <FormattedTime value={previousCheck} timeZoneName="short" hour12={false} />
+          </>
+        ),
+      }}
+    />
+  ),
   calloutBody: i18n.translate('xpack.upgradeAssistant.overview.verifyChanges.calloutBody', {
     defaultMessage:
       'Reset the counter after making changes and continue monitoring to verify that you are no longer using deprecated APIs.',
@@ -38,53 +48,48 @@ const i18nTexts = {
 };
 
 const getPreviousCheck = () => {
-  const lastStoredValue = moment(localStorage.get(DEPRECATION_WARNINGS_KEY));
+  const storedValue = moment(localStorage.get(LOCALSTORAGE_KEY));
 
-  if (lastStoredValue.isValid()) {
-    return lastStoredValue.toISOString();
+  if (storedValue.isValid()) {
+    return storedValue.toISOString();
   }
 
   const now = moment().toISOString();
-  localStorage.set(DEPRECATION_WARNINGS_KEY, now);
+  localStorage.set(LOCALSTORAGE_KEY, now);
 
   return now;
-};
-
-const getFormattedDate = (date: string) => {
-  const withFormat = 'MMMM DD, YYYY HH:mm';
-
-  return `${moment(date).format(withFormat)} ${moment.tz.guess()}`;
 };
 
 export const VerifyChanges: FunctionComponent = () => {
   const { api } = useAppContext();
   const [previousCheck, setPreviousCheck] = useState(getPreviousCheck());
-  const { data, error, isLoading, resendRequest } = api.getDeprecationLogsCount(previousCheck);
+  const { data, /* error, isLoading,*/ resendRequest } = api.getDeprecationLogsCount(previousCheck);
 
   const warningsCount = data?.count || 0;
   const calloutTint = warningsCount > 0 ? 'warning' : 'success';
   const calloutIcon = warningsCount > 0 ? 'alert' : 'check';
+  const calloutTestId = warningsCount > 0 ? 'hasWarningsCallout' : 'noWarningsCallout';
 
   useInterval(() => {
     resendRequest();
-  }, DEPRECATION_WARNINGS_POLLING_INTERVAL);
+  }, POLLING_INTERVAL);
 
   const onResetClick = () => {
     const now = moment().toISOString();
 
     setPreviousCheck(now);
-    localStorage.set(DEPRECATION_WARNINGS_KEY, now);
+    localStorage.set(LOCALSTORAGE_KEY, now);
   };
 
   return (
     <EuiCallOut
-      title={i18nTexts.calloutTitle(warningsCount, getFormattedDate(previousCheck))}
+      title={i18nTexts.calloutTitle(warningsCount, previousCheck)}
       color={calloutTint}
       iconType={calloutIcon}
-      data-test-subj="verifyChangesCallout"
+      data-test-subj={calloutTestId}
     >
       <p>{i18nTexts.calloutBody}</p>
-      <EuiButton color={calloutTint} onClick={onResetClick}>
+      <EuiButton color={calloutTint} onClick={onResetClick} data-test-subj="resetLastStoredDate">
         {i18nTexts.resetCounterButton}
       </EuiButton>
     </EuiCallOut>
