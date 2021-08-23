@@ -245,6 +245,9 @@ export const serviceDetail = {
         defaultMessage: 'Logs',
       }),
       element: <ServiceLogs />,
+      searchBarOptions: {
+        showKueryBar: false,
+      },
     }),
     page({
       path: '/profiling',
