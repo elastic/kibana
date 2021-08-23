@@ -34,7 +34,7 @@ export interface EnhancedRuntimeField extends RuntimeField {
   popularity?: number;
 }
 
-export interface RuntimeObject {
+export interface RuntimeComposite {
   name: string;
   script: {
     source: string;
@@ -42,7 +42,7 @@ export interface RuntimeObject {
   subFields: string[];
 }
 
-export type RuntimeObjectWithSubFields = Omit<RuntimeObject, 'subFields'> & {
+export type RuntimeCompositeWithSubFields = Omit<RuntimeComposite, 'subFields'> & {
   subFields: Record<string, EnhancedRuntimeField>;
 };
 
@@ -83,7 +83,7 @@ export interface IndexPatternAttributes {
   fieldFormatMap?: string;
   fieldAttrs?: string;
   runtimeFieldMap?: string;
-  runtimeObjectMap?: string;
+  runtimeCompositeMap?: string;
   /**
    * prevents errors when index pattern exists before indices
    */
@@ -258,7 +258,7 @@ export interface IndexPatternSpec {
   type?: string;
   fieldFormats?: Record<string, SerializedFieldFormat>;
   runtimeFieldMap?: Record<string, RuntimeField>;
-  runtimeObjectMap?: Record<string, RuntimeObject>;
+  runtimeCompositeMap?: Record<string, RuntimeComposite>;
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
 }
