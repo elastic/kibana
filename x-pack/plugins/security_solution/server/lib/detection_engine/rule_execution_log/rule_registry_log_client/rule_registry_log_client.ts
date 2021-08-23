@@ -7,16 +7,18 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import {
-  ALERT_OWNER,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_TYPE_ID,
   EVENT_ACTION,
   EVENT_KIND,
-  RULE_ID,
   SPACE_IDS,
   TIMESTAMP,
+  ALERT_RULE_UUID,
 } from '@kbn/rule-data-utils';
-import { once } from 'lodash/fp';
 import moment from 'moment';
-import { RuleDataClient } from '../../../../../../rule_registry/server';
+
+import { mappingFromFieldMap } from '../../../../../../rule_registry/common/mapping_from_field_map';
+import { Dataset, IRuleDataClient } from '../../../../../../rule_registry/server';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { invariant } from '../../../../../common/utils/invariant';
@@ -28,15 +30,9 @@ import {
   IRuleDataPluginService,
   LogStatusChangeArgs,
 } from '../types';
-import {
-  EVENTS_INDEX_PREFIX,
-  EVENT_SEQUENCE,
-  MESSAGE,
-  RULE_STATUS,
-  RULE_STATUS_SEVERITY,
-} from './constants';
+import { EVENT_SEQUENCE, MESSAGE, RULE_STATUS, RULE_STATUS_SEVERITY } from './constants';
 import { parseRuleExecutionLog, RuleExecutionEvent } from './parse_rule_execution_log';
-import { bootstrapRuleExecutionLog } from './rule_execution_log_bootstrapper';
+import { ruleExecutionFieldMap } from './rule_execution_field_map';
 import {
   getLastEntryAggregation,
   getMetricAggregation,
@@ -75,19 +71,26 @@ interface IRuleRegistryLogClient {
  */
 export class RuleRegistryLogClient implements IRuleRegistryLogClient {
   private sequence = 0;
-  private ruleDataClient: RuleDataClient;
+  private ruleDataClient: IRuleDataClient;
 
   constructor(ruleDataService: IRuleDataPluginService) {
-    this.ruleDataClient = ruleDataService.getRuleDataClient(
-      SERVER_APP_ID,
-      EVENTS_INDEX_PREFIX,
-      () => this.initialize(ruleDataService, EVENTS_INDEX_PREFIX)
-    );
+    this.ruleDataClient = ruleDataService.initializeIndex({
+      feature: SERVER_APP_ID,
+      registrationContext: 'security',
+      dataset: Dataset.events,
+      componentTemplateRefs: [],
+      componentTemplates: [
+        {
+          name: 'mappings',
+          version: 0,
+          mappings: mappingFromFieldMap(ruleExecutionFieldMap, 'strict'),
+        },
+      ],
+      indexTemplate: {
+        version: 0,
+      },
+    });
   }
-
-  private initialize = once(async (ruleDataService: IRuleDataPluginService, indexAlias: string) => {
-    await bootstrapRuleExecutionLog(ruleDataService, indexAlias);
-  });
 
   public async find({ ruleIds, spaceId, statuses, logsCount = 1 }: FindExecutionLogArgs) {
     if (ruleIds.length === 0) {
@@ -95,7 +98,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
     }
 
     const filter: estypes.QueryDslQueryContainer[] = [
-      { terms: { [RULE_ID]: ruleIds } },
+      { terms: { [ALERT_RULE_UUID]: ruleIds } },
       { terms: { [SPACE_IDS]: [spaceId] } },
     ];
 
@@ -114,7 +117,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         aggs: {
           rules: {
             terms: {
-              field: RULE_ID,
+              field: ALERT_RULE_UUID,
               size: ruleIds.length,
             },
             aggs: {
@@ -147,7 +150,10 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         bucket.key,
         bucket.most_recent_logs.hits.hits.map<IRuleStatusSOAttributes>((event) => {
           const logEntry = parseRuleExecutionLog(event._source);
-          invariant(logEntry['rule.id'], 'Malformed execution log entry: rule.id field not found');
+          invariant(
+            logEntry[ALERT_RULE_UUID] ?? '',
+            'Malformed execution log entry: rule.id field not found'
+          );
 
           const lastFailure = bucket.last_failure.event.hits.hits[0]
             ? parseRuleExecutionLog(bucket.last_failure.event.hits.hits[0]._source)
@@ -179,7 +185,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
               ]
             : undefined;
 
-          const alertId = logEntry['rule.id'];
+          const alertId = logEntry[ALERT_RULE_UUID] ?? '';
           const statusDate = logEntry[TIMESTAMP];
           const lastFailureAt = lastFailure?.[TIMESTAMP];
           const lastFailureMessage = lastFailure?.[MESSAGE];
@@ -226,9 +232,10 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         [EVENT_ACTION]: metric,
         [EVENT_KIND]: 'metric',
         [getMetricField(metric)]: value,
-        [RULE_ID]: ruleId,
+        [ALERT_RULE_UUID]: ruleId ?? '',
         [TIMESTAMP]: new Date().toISOString(),
-        [ALERT_OWNER]: 'siem',
+        [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
+        [ALERT_RULE_TYPE_ID]: SERVER_APP_ID,
       },
       namespace
     );
@@ -248,11 +255,12 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
         [EVENT_KIND]: 'event',
         [EVENT_SEQUENCE]: this.sequence++,
         [MESSAGE]: message,
-        [RULE_ID]: ruleId,
+        [ALERT_RULE_UUID]: ruleId ?? '',
         [RULE_STATUS_SEVERITY]: statusSeverityDict[newStatus],
         [RULE_STATUS]: newStatus,
         [TIMESTAMP]: new Date().toISOString(),
-        [ALERT_OWNER]: 'siem',
+        [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
+        [ALERT_RULE_TYPE_ID]: SERVER_APP_ID,
       },
       namespace
     );

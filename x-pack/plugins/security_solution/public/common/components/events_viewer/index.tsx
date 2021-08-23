@@ -23,6 +23,7 @@ import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
+import type { EntityType } from '../../../../../timelines/common';
 import { TGridCellAction } from '../../../../../timelines/common/types';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
@@ -30,7 +31,7 @@ import { useKibana } from '../../lib/kibana';
 import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { EventsViewer } from './events_viewer';
 import * as i18n from './translations';
-
+import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 const leadingControlColumns: ControlColumnProps[] = [
   {
@@ -51,17 +52,20 @@ export interface OwnProps {
   defaultCellActions?: TGridCellAction[];
   defaultModel: SubsetTimelineModel;
   end: string;
+  entityType: EntityType;
   id: TimelineId;
   scopeId: SourcererScopeName;
   start: string;
   showTotalCount?: boolean;
-  headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
   currentFilter?: Status;
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
+  additionalFilters?: React.ReactNode;
+  hasAlertsCrud?: boolean;
+  unit?: (n: number) => string;
 }
 
 type Props = OwnProps & PropsFromRedux;
@@ -79,9 +83,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   deletedEventIds,
   deleteEventQuery,
   end,
+  entityType,
   excludedRowRendererIds,
   filters,
-  headerFilterGroup,
   id,
   isLive,
   itemsPerPage,
@@ -98,8 +102,11 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   showCheckboxes,
   sort,
   utilityBar,
+  additionalFilters,
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId,
+  hasAlertsCrud = false,
+  unit,
 }) => {
   const { timelines: timelinesUi } = useKibana().services;
   const {
@@ -112,6 +119,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   // TODO: Once we are past experimental phase this code should be removed
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
+  const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
+    'tGridEventRenderedViewEnabled'
+  );
   useEffect(() => {
     if (createTimeline != null) {
       createTimeline({
@@ -132,13 +142,20 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
-
+  const graphOverlay = useMemo(
+    () =>
+      graphEventId != null && graphEventId.length > 0 ? (
+        <GraphOverlay isEventViewer={true} timelineId={id} />
+      ) : null,
+    [graphEventId, id]
+  );
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
         <InspectButtonContainer>
           {tGridEnabled ? (
             timelinesUi.getTGrid<'embedded'>({
+              id,
               type: 'embedded',
               browserFields,
               columns,
@@ -147,10 +164,11 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               deletedEventIds,
               docValueFields,
               end,
+              entityType,
               filters: globalFilters,
               globalFullScreen,
-              headerFilterGroup,
-              id,
+              graphOverlay,
+              hasAlertsCrud,
               indexNames: selectedPatterns,
               indexPattern,
               isLive,
@@ -165,11 +183,13 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               setGlobalFullScreen,
               start,
               sort,
-              utilityBar,
+              additionalFilters,
               graphEventId,
               filterStatus: currentFilter,
               leadingControlColumns,
               trailingControlColumns,
+              tGridEventRenderedViewEnabled,
+              unit,
             })
           ) : (
             <EventsViewer
@@ -182,7 +202,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               end={end}
               isLoadingIndexPattern={isLoadingIndexPattern}
               filters={globalFilters}
-              headerFilterGroup={headerFilterGroup}
               indexNames={selectedPatterns}
               indexPattern={indexPattern}
               isLive={isLive}
@@ -204,6 +223,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       </FullScreenContainer>
       <DetailsPanel
         browserFields={browserFields}
+        entityType={entityType}
         docValueFields={docValueFields}
         isFlyoutView
         timelineId={id}
@@ -291,6 +311,7 @@ export const StatefulEventsViewer = connector(
       prevProps.showCheckboxes === nextProps.showCheckboxes &&
       prevProps.start === nextProps.start &&
       prevProps.utilityBar === nextProps.utilityBar &&
+      prevProps.additionalFilters === nextProps.additionalFilters &&
       prevProps.graphEventId === nextProps.graphEventId
   )
 );

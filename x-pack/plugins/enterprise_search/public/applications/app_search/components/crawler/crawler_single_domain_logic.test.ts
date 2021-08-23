@@ -9,13 +9,14 @@ import {
   LogicMounter,
   mockHttpValues,
   mockFlashMessageHelpers,
+  mockKibanaValues,
 } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
 import { CrawlerSingleDomainLogic, CrawlerSingleDomainValues } from './crawler_single_domain_logic';
-import { CrawlerDomain } from './types';
+import { CrawlerDomain, CrawlerPolicies, CrawlerRules } from './types';
 
 const DEFAULT_VALUES: CrawlerSingleDomainValues = {
   dataLoading: true,
@@ -25,7 +26,7 @@ const DEFAULT_VALUES: CrawlerSingleDomainValues = {
 describe('CrawlerSingleDomainLogic', () => {
   const { mount } = new LogicMounter(CrawlerSingleDomainLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors } = mockFlashMessageHelpers;
+  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -50,9 +51,130 @@ describe('CrawlerSingleDomainLogic', () => {
         expect(CrawlerSingleDomainLogic.values.domain).toEqual(domain);
       });
     });
+
+    describe('updateEntryPoints', () => {
+      beforeEach(() => {
+        mount({
+          domain: {
+            id: '507f1f77bcf86cd799439011',
+            entryPoints: [],
+          },
+        });
+
+        CrawlerSingleDomainLogic.actions.updateEntryPoints([
+          {
+            id: '1234',
+            value: '/',
+          },
+        ]);
+      });
+
+      it('should update the entry points on the domain', () => {
+        expect(CrawlerSingleDomainLogic.values.domain).toEqual({
+          id: '507f1f77bcf86cd799439011',
+          entryPoints: [
+            {
+              id: '1234',
+              value: '/',
+            },
+          ],
+        });
+      });
+    });
+
+    describe('updateSitemaps', () => {
+      beforeEach(() => {
+        mount({
+          domain: {
+            id: '507f1f77bcf86cd799439011',
+            sitemaps: [],
+          },
+        });
+
+        CrawlerSingleDomainLogic.actions.updateSitemaps([
+          {
+            id: '1234',
+            url: 'http://www.example.com/sitemap.xml',
+          },
+        ]);
+      });
+
+      it('should update the sitemaps on the domain', () => {
+        expect(CrawlerSingleDomainLogic.values.domain).toEqual({
+          id: '507f1f77bcf86cd799439011',
+          sitemaps: [
+            {
+              id: '1234',
+              url: 'http://www.example.com/sitemap.xml',
+            },
+          ],
+        });
+      });
+    });
+
+    describe('updateCrawlRules', () => {
+      beforeEach(() => {
+        mount({
+          domain: {
+            id: '507f1f77bcf86cd799439011',
+            crawlRules: [],
+          },
+        });
+
+        CrawlerSingleDomainLogic.actions.updateCrawlRules([
+          {
+            id: '1234',
+            policy: CrawlerPolicies.allow,
+            rule: CrawlerRules.beginsWith,
+            pattern: 'foo',
+          },
+        ]);
+      });
+
+      it('should update the crawl rules on the domain', () => {
+        expect(CrawlerSingleDomainLogic.values.domain).toEqual({
+          id: '507f1f77bcf86cd799439011',
+          crawlRules: [
+            {
+              id: '1234',
+              policy: CrawlerPolicies.allow,
+              rule: CrawlerRules.beginsWith,
+              pattern: 'foo',
+            },
+          ],
+        });
+      });
+    });
   });
 
   describe('listeners', () => {
+    describe('deleteDomain', () => {
+      it('flashes a success toast and redirects the user to the crawler overview on success', async () => {
+        const { navigateToUrl } = mockKibanaValues;
+
+        http.delete.mockReturnValue(Promise.resolve());
+
+        CrawlerSingleDomainLogic.actions.deleteDomain({ id: '1234' } as CrawlerDomain);
+        await nextTick();
+
+        expect(http.delete).toHaveBeenCalledWith(
+          '/api/app_search/engines/some-engine/crawler/domains/1234'
+        );
+
+        expect(flashSuccessToast).toHaveBeenCalled();
+        expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/crawler');
+      });
+
+      it('calls flashApiErrors when there is an error', async () => {
+        http.delete.mockReturnValue(Promise.reject('error'));
+
+        CrawlerSingleDomainLogic.actions.deleteDomain({ id: '1234' } as CrawlerDomain);
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+    });
+
     describe('fetchDomainData', () => {
       it('updates logic with data that has been converted from server to client', async () => {
         jest.spyOn(CrawlerSingleDomainLogic.actions, 'onReceiveDomainData');
@@ -89,6 +211,63 @@ describe('CrawlerSingleDomainLogic', () => {
         http.get.mockReturnValueOnce(Promise.reject('error'));
 
         CrawlerSingleDomainLogic.actions.fetchDomainData('507f1f77bcf86cd799439011');
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+    });
+
+    describe('submitDeduplicationUpdate', () => {
+      it('updates logic with data that has been converted from server to client', async () => {
+        jest.spyOn(CrawlerSingleDomainLogic.actions, 'onReceiveDomainData');
+        http.put.mockReturnValueOnce(
+          Promise.resolve({
+            id: '507f1f77bcf86cd799439011',
+            name: 'https://elastic.co',
+            created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
+            document_count: 13,
+            sitemaps: [],
+            entry_points: [],
+            crawl_rules: [],
+            deduplication_enabled: true,
+            deduplication_fields: ['title'],
+            available_deduplication_fields: ['title', 'description'],
+          })
+        );
+
+        CrawlerSingleDomainLogic.actions.submitDeduplicationUpdate(
+          { id: '507f1f77bcf86cd799439011' } as CrawlerDomain,
+          { fields: ['title'], enabled: true }
+        );
+        await nextTick();
+
+        expect(http.put).toHaveBeenCalledWith(
+          '/api/app_search/engines/some-engine/crawler/domains/507f1f77bcf86cd799439011',
+          {
+            body: JSON.stringify({ deduplication_enabled: true, deduplication_fields: ['title'] }),
+          }
+        );
+        expect(CrawlerSingleDomainLogic.actions.onReceiveDomainData).toHaveBeenCalledWith({
+          id: '507f1f77bcf86cd799439011',
+          createdOn: 'Mon, 31 Aug 2020 17:00:00 +0000',
+          url: 'https://elastic.co',
+          documentCount: 13,
+          sitemaps: [],
+          entryPoints: [],
+          crawlRules: [],
+          deduplicationEnabled: true,
+          deduplicationFields: ['title'],
+          availableDeduplicationFields: ['title', 'description'],
+        });
+      });
+
+      it('displays any errors to the user', async () => {
+        http.put.mockReturnValueOnce(Promise.reject('error'));
+
+        CrawlerSingleDomainLogic.actions.submitDeduplicationUpdate(
+          { id: '507f1f77bcf86cd799439011' } as CrawlerDomain,
+          { fields: ['title'], enabled: true }
+        );
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');

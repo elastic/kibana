@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenuItem, EuiText } from '@elastic/eui';
+import { EuiContextMenuItem } from '@elastic/eui';
 import React from 'react';
 import * as i18n from '../translations';
 
@@ -23,10 +23,9 @@ const AddExceptionComponent: React.FC<AddExceptionProps> = ({ disabled, onClick 
       id="addException"
       onClick={onClick}
       disabled={disabled}
+      size="s"
     >
-      <EuiText data-test-subj="addExceptionButton" size="m">
-        {i18n.ACTION_ADD_EXCEPTION}
-      </EuiText>
+      {i18n.ACTION_ADD_EXCEPTION}
     </EuiContextMenuItem>
   );
 };

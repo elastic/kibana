@@ -41,7 +41,7 @@ export const EmptyState = memo<{
         >
           <FormattedMessage
             id="xpack.securitySolution.trustedapps.list.addButton"
-            defaultMessage="Add Trusted Application"
+            defaultMessage="Add trusted application"
           />
         </EuiButton>
       }

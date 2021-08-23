@@ -13,7 +13,7 @@ import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { AlertsList } from './alerts_list';
-import { ValidationResult } from '../../../../types';
+import { AlertTypeModel, ValidationResult } from '../../../../types';
 import {
   AlertExecutionStatusErrorReasons,
   ALERTS_FEATURE_ID,
@@ -43,6 +43,12 @@ jest.mock('react-router-dom', () => ({
   useLocation: () => ({
     pathname: '/triggersActions/alerts/',
   }),
+}));
+jest.mock('../../../lib/capabilities', () => ({
+  hasAllPrivilege: jest.fn(() => true),
+  hasSaveAlertsCapability: jest.fn(() => true),
+  hasShowActionsCapability: jest.fn(() => true),
+  hasExecuteActionsCapability: jest.fn(() => true),
 }));
 const { loadAlerts, loadAlertTypes } = jest.requireMock('../../../lib/alert_api');
 const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
@@ -264,7 +270,7 @@ describe('alerts_list component with items', () => {
     },
   ];
 
-  async function setup() {
+  async function setup(editable: boolean = true) {
     loadAlerts.mockResolvedValue({
       page: 1,
       perPage: 10000,
@@ -284,7 +290,20 @@ describe('alerts_list component with items', () => {
     loadAlertTypes.mockResolvedValue([alertTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
 
+    const ruleTypeMock: AlertTypeModel = {
+      id: 'test_alert_type',
+      iconClass: 'test',
+      description: 'Alert when testing',
+      documentationUrl: 'https://localhost.local/docs',
+      validate: () => {
+        return { errors: {} };
+      },
+      alertParamsExpression: jest.fn(),
+      requiresAppContext: !editable,
+    };
+
     ruleTypeRegistry.has.mockReturnValue(true);
+    ruleTypeRegistry.get.mockReturnValue(ruleTypeMock);
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
 
@@ -407,6 +426,18 @@ describe('alerts_list component with items', () => {
         },
       })
     );
+  });
+
+  it('renders edit and delete buttons when user can manage rules', async () => {
+    await setup();
+    expect(wrapper.find('[data-test-subj="alertSidebarEditAction"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="alertSidebarDeleteAction"]').exists()).toBeTruthy();
+  });
+
+  it('does not render edit and delete button when rule type does not allow editing in rules management', async () => {
+    await setup(false);
+    expect(wrapper.find('[data-test-subj="alertSidebarEditAction"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="alertSidebarDeleteAction"]').exists()).toBeFalsy();
   });
 });
 
@@ -536,11 +567,18 @@ describe('alerts_list with show only capability', () => {
     });
   }
 
+  it('renders table of alerts with edit button disabled', async () => {
+    await setup();
+    expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
+    expect(wrapper.find('EuiTableRow')).toHaveLength(2);
+    expect(wrapper.find('[data-test-subj="editActionHoverButton"]')).toHaveLength(0);
+  });
+
   it('renders table of alerts with delete button disabled', async () => {
     await setup();
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
-    // TODO: check delete button
+    expect(wrapper.find('[data-test-subj="deleteActionHoverButton"]')).toHaveLength(0);
   });
 });
 

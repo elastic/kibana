@@ -28,6 +28,7 @@ import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverServices } from '../../../build_services';
 import { getContextUrl } from '../../helpers/get_context_url';
+import { getSingleDocUrl } from '../../helpers/get_single_doc_url';
 
 interface Props {
   columns: string[];
@@ -138,11 +139,7 @@ export function DiscoverGridFlyout({
                 size="xs"
                 iconType="document"
                 flush="left"
-                href={services.addBasePath(
-                  `/app/discover#/doc/${indexPattern.id}/${hit._index}?id=${encodeURIComponent(
-                    hit._id as string
-                  )}`
-                )}
+                href={services.addBasePath(getSingleDocUrl(indexPattern.id!, hit._index, hit._id))}
                 data-test-subj="docTableRowAction"
               >
                 {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {

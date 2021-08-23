@@ -35,6 +35,7 @@ import {
 } from '../types';
 import { createSearchAfterReturnType, makeFloatString } from '../utils';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { buildReasonMessageForEqlAlert } from '../reason_formatters';
 
 export const eqlExecutor = async ({
   rule,
@@ -119,9 +120,9 @@ export const eqlExecutor = async ({
   result.searchAfterTimes = [eqlSearchDuration];
   let newSignals: SimpleHit[] | undefined;
   if (response.hits.sequences !== undefined) {
-    newSignals = wrapSequences(response.hits.sequences);
+    newSignals = wrapSequences(response.hits.sequences, buildReasonMessageForEqlAlert);
   } else if (response.hits.events !== undefined) {
-    newSignals = wrapHits(response.hits.events);
+    newSignals = wrapHits(response.hits.events, buildReasonMessageForEqlAlert);
   } else {
     throw new Error(
       'eql query response should have either `sequences` or `events` but had neither'

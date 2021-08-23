@@ -9,7 +9,8 @@ import { partition, mapValues, pickBy } from 'lodash';
 import { CoreStart } from 'kibana/public';
 import { Query } from 'src/plugins/data/common';
 import type {
-  FramePublicAPI,
+  DatasourceFixAction,
+  FrameDatasourceAPI,
   OperationMetadata,
   VisualizationDimensionGroupConfig,
 } from '../../types';
@@ -50,6 +51,7 @@ interface ColumnChange {
   targetGroup?: string;
   shouldResetLabel?: boolean;
   incompleteParams?: ColumnAdvancedParams;
+  initialParams?: { params: Record<string, unknown> }; // TODO: bind this to the op parameter
 }
 
 interface ColumnCopy {
@@ -397,6 +399,7 @@ export function replaceColumn({
     if (previousDefinition.input === 'managedReference') {
       // If the transition is incomplete, leave the managed state until it's finished.
       tempLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern });
+
       const hypotheticalLayer = insertNewColumn({
         layer: tempLayer,
         columnId,
@@ -1249,10 +1252,7 @@ export function getErrorMessages(
       | string
       | {
           message: string;
-          fixAction?: {
-            label: string;
-            newState: (frame: FramePublicAPI) => Promise<IndexPatternPrivateState>;
-          };
+          fixAction?: DatasourceFixAction<IndexPatternPrivateState>;
         }
     >
   | undefined {
@@ -1284,7 +1284,7 @@ export function getErrorMessages(
         fixAction: errorMessage.fixAction
           ? {
               ...errorMessage.fixAction,
-              newState: async (frame: FramePublicAPI) => ({
+              newState: async (frame: FrameDatasourceAPI) => ({
                 ...state,
                 layers: {
                   ...state.layers,
@@ -1300,10 +1300,7 @@ export function getErrorMessages(
     | string
     | {
         message: string;
-        fixAction?: {
-          label: string;
-          newState: (framePublicAPI: FramePublicAPI) => Promise<IndexPatternPrivateState>;
-        };
+        fixAction?: DatasourceFixAction<IndexPatternPrivateState>;
       }
   >;
 

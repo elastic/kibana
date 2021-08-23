@@ -8,6 +8,8 @@ import * as t from 'io-ts';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Outlet } from '@kbn/typed-react-router-config';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { environmentRt } from '../../../../common/environment_rt';
 import { ServiceOverview } from '../../app/service_overview';
 import { ApmServiceTemplate } from '../templates/apm_service_template';
 import { RedirectToDefaultServiceRouteView } from './redirect_to_default_service_route_view';
@@ -18,10 +20,11 @@ import { ErrorGroupDetails } from '../../app/error_group_details';
 import { ServiceMetrics } from '../../app/service_metrics';
 import { ServiceNodeOverview } from '../../app/service_node_overview';
 import { ServiceNodeMetrics } from '../../app/service_node_metrics';
-import { ServiceMap } from '../../app/service_map';
+import { ServiceMapServiceDetail } from '../../app/service_map';
 import { TransactionDetails } from '../../app/transaction_details';
 import { ServiceProfiling } from '../../app/service_profiling';
 import { ServiceDependencies } from '../../app/service_dependencies';
+import { ServiceLogs } from '../../app/service_logs';
 
 function page<TPath extends string>({
   path,
@@ -66,19 +69,31 @@ export const serviceDetail = {
         serviceName: t.string,
       }),
     }),
-    t.partial({
-      query: t.partial({
-        environment: t.string,
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        comparisonEnabled: t.string,
-        comparisonType: t.string,
-        latencyAggregationType: t.string,
-        transactionType: t.string,
-        kuery: t.string,
-      }),
+    t.type({
+      query: t.intersection([
+        environmentRt,
+        t.type({
+          rangeFrom: t.string,
+          rangeTo: t.string,
+          kuery: t.string,
+        }),
+        t.partial({
+          comparisonEnabled: t.string,
+          comparisonType: t.string,
+          latencyAggregationType: t.string,
+          transactionType: t.string,
+        }),
+      ]),
     }),
   ]),
+  defaults: {
+    query: {
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+      kuery: '',
+      environment: ENVIRONMENT_ALL.value,
+    },
+  },
   children: [
     page({
       path: '/overview',
@@ -218,10 +233,18 @@ export const serviceDetail = {
       title: i18n.translate('xpack.apm.views.serviceMap.title', {
         defaultMessage: 'Service Map',
       }),
-      element: <ServiceMap />,
+      element: <ServiceMapServiceDetail />,
       searchBarOptions: {
         hidden: true,
       },
+    }),
+    page({
+      path: '/logs',
+      tab: 'logs',
+      title: i18n.translate('xpack.apm.views.logs.title', {
+        defaultMessage: 'Logs',
+      }),
+      element: <ServiceLogs />,
     }),
     page({
       path: '/profiling',

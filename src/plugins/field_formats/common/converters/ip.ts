@@ -11,6 +11,7 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
+/** @public */
 export class IpFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.IP;
   static title = i18n.translate('fieldFormats.ip.title', {

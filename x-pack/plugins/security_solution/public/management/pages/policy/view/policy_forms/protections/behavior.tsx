@@ -23,16 +23,24 @@ import { SecurityPageName } from '../../../../../../app/types';
  *  which will configure for all relevant OSes.
  */
 export const BehaviorProtection = React.memo(() => {
-  const OSes: Immutable<BehaviorProtectionOSes[]> = [OS.windows];
+  const OSes: Immutable<BehaviorProtectionOSes[]> = [OS.windows, OS.mac, OS.linux];
   const protection = 'behavior_protection';
+  const protectionLabel = i18n.translate(
+    'xpack.securitySolution.endpoint.policy.protections.behavior',
+    {
+      defaultMessage: 'Behavior protections',
+    }
+  );
   return (
     <ConfigForm
       type={i18n.translate('xpack.securitySolution.endpoint.policy.details.behavior_protection', {
         defaultMessage: 'Behavior Protection',
       })}
-      supportedOss={[OperatingSystem.WINDOWS]}
+      supportedOss={[OperatingSystem.WINDOWS, OperatingSystem.MAC, OperatingSystem.LINUX]}
       dataTestSubj="behaviorProtectionsForm"
-      rightCorner={<ProtectionSwitch protection={protection} osList={OSes} />}
+      rightCorner={
+        <ProtectionSwitch protection={protection} protectionLabel={protectionLabel} osList={OSes} />
+      }
     >
       <RadioButtons protection={protection} osList={OSes} />
       <UserNotification protection={protection} osList={OSes} />

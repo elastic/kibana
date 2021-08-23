@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DatatableProps } from '../../common/expressions';
+import type { DatatableProps } from '../../common/expressions';
 import type { LensMultiTable } from '../../common';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
-import type { IFieldFormat } from '../../../../../src/plugins/field_formats/common';
+import type { FormatFactory } from '../../common';
 import { getDatatable } from './expression';
 
 function sampleArgs() {
@@ -83,9 +83,9 @@ function sampleArgs() {
 
 describe('datatable_expression', () => {
   describe('datatable renders', () => {
-    test('it renders with the specified data and args', () => {
+    test('it renders with the specified data and args', async () => {
       const { data, args } = sampleArgs();
-      const result = getDatatable({ formatFactory: (x) => x as IFieldFormat }).fn(
+      const result = await getDatatable(() => Promise.resolve((() => {}) as FormatFactory)).fn(
         data,
         args,
         createMockExecutionContext()

@@ -13,6 +13,7 @@ import { IndexPatternBase } from '../..';
 import { RangeFilterParams } from '../../filters';
 
 import * as range from './range';
+import { estypes } from '@elastic/elasticsearch';
 jest.mock('../grammar');
 
 describe('kuery functions', () => {
@@ -128,7 +129,9 @@ describe('kuery functions', () => {
         const node = nodeTypes.function.buildNode('range', 'script number', { gt: 1000, lt: 8000 });
         const result = range.toElasticsearchQuery(node, indexPattern);
 
-        expect(result.bool.should[0]).toHaveProperty('script');
+        expect((result.bool!.should as estypes.QueryDslQueryContainer[])[0]).toHaveProperty(
+          'script'
+        );
       });
 
       test('should support date fields without a dateFormat provided', () => {

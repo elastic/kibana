@@ -8,15 +8,19 @@
 import {
   ALERT_DURATION,
   ALERT_EVALUATION_THRESHOLD,
+  ALERT_RULE_TYPE_ID,
   ALERT_EVALUATION_VALUE,
   ALERT_ID,
-  ALERT_PRODUCER,
-  ALERT_OWNER,
-  ALERT_SEVERITY_LEVEL,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_CONSUMER,
+  ALERT_SEVERITY,
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
   SPACE_IDS,
+  ALERT_RULE_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_CATEGORY,
 } from '@kbn/rule-data-utils';
 import { ValuesType } from 'utility-types';
 import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
@@ -34,19 +38,19 @@ const theme = ({
   eui: { euiColorDanger, euiColorWarning },
 } as unknown) as EuiTheme;
 const alert: Alert = {
-  [SPACE_IDS]: ['space-id'],
-  'rule.id': ['apm.transaction_duration'],
+  [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
   [ALERT_EVALUATION_VALUE]: [2057657.39],
   'service.name': ['frontend-rum'],
-  'rule.name': ['Latency threshold | frontend-rum'],
+  [ALERT_RULE_NAME]: ['Latency threshold | frontend-rum'],
   [ALERT_DURATION]: [62879000],
   [ALERT_STATUS]: ['open'],
+  [SPACE_IDS]: ['myfakespaceid'],
   tags: ['apm', 'service.name:frontend-rum'],
   'transaction.type': ['page-load'],
-  [ALERT_PRODUCER]: ['apm'],
+  [ALERT_RULE_PRODUCER]: ['apm'],
   [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478180'],
-  [ALERT_OWNER]: ['apm'],
-  'rule.uuid': ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
+  [ALERT_RULE_CONSUMER]: ['apm'],
+  [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
   'event.action': ['active'],
   '@timestamp': ['2021-06-01T16:16:05.183Z'],
   [ALERT_ID]: ['apm.transaction_duration_All'],
@@ -54,7 +58,7 @@ const alert: Alert = {
   [ALERT_EVALUATION_THRESHOLD]: [500000],
   [ALERT_START]: ['2021-06-01T16:15:02.304Z'],
   'event.kind': ['state'],
-  'rule.category': ['Latency threshold'],
+  [ALERT_RULE_CATEGORY]: ['Latency threshold'],
 };
 const chartStartTime = new Date(alert[ALERT_START]![0] as string).getTime();
 const getFormatter: ObservabilityRuleTypeRegistry['getFormatter'] = () => () => ({
@@ -134,7 +138,7 @@ describe('getAlertAnnotations', () => {
             setSelectedAlertId,
             theme,
           })![0].props.dataValues[0].details
-        ).toEqual(alert['rule.name']![0]);
+        ).toEqual(alert[ALERT_RULE_NAME]![0]);
       });
     });
 
@@ -159,7 +163,7 @@ describe('getAlertAnnotations', () => {
   describe('with an alert with a warning severity', () => {
     const warningAlert: Alert = {
       ...alert,
-      [ALERT_SEVERITY_LEVEL]: ['warning'],
+      [ALERT_SEVERITY]: ['warning'],
     };
 
     it('uses the warning color', () => {
@@ -192,7 +196,7 @@ describe('getAlertAnnotations', () => {
   describe('with an alert with a critical severity', () => {
     const criticalAlert: Alert = {
       ...alert,
-      [ALERT_SEVERITY_LEVEL]: ['critical'],
+      [ALERT_SEVERITY]: ['critical'],
     };
 
     it('uses the critical color', () => {

@@ -77,7 +77,10 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
         landingPageUrl: emsSettings.getEMSLandingPageUrl(),
         fetchFunction: fetch,
       });
-      emsClient.addQueryParams({ license: currentLicenseId });
+      emsClient.addQueryParams({
+        license: currentLicenseId,
+        is_kibana_proxy: '1', // identifies this is proxied request from kibana
+      });
       return emsClient;
     } else {
       return EMPTY_EMS_CLIENT;
@@ -525,25 +528,23 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
       },
     },
     (context, request, response) => {
-      return new Promise((resolve, reject) => {
-        const santizedRange = path.normalize(request.params.range);
-        const fontPath = path.join(__dirname, 'fonts', 'open_sans', `${santizedRange}.pbf`);
-        fs.readFile(fontPath, (error, data) => {
-          if (error) {
-            reject(
-              response.custom({
-                statusCode: 404,
-              })
-            );
-          } else {
-            resolve(
-              response.ok({
-                body: data,
-              })
-            );
-          }
-        });
-      });
+      const range = path.normalize(request.params.range);
+      return range.startsWith('..')
+        ? response.notFound()
+        : new Promise((resolve) => {
+            const fontPath = path.join(__dirname, 'fonts', 'open_sans', `${range}.pbf`);
+            fs.readFile(fontPath, (error, data) => {
+              if (error) {
+                resolve(response.notFound());
+              } else {
+                resolve(
+                  response.ok({
+                    body: data,
+                  })
+                );
+              }
+            });
+          });
     }
   );
 

@@ -5,15 +5,35 @@
  * 2.0.
  */
 
-import { useUrlParams } from '../context/url_params_context/use_url_params';
+import { isEqual } from 'lodash';
+import { useRef } from 'react';
+import { getDateRange } from '../context/url_params_context/helpers';
 
-export function useTimeRange() {
-  const {
-    urlParams: { start, end },
-  } = useUrlParams();
+export function useTimeRange({
+  rangeFrom,
+  rangeTo,
+}: {
+  rangeFrom: string;
+  rangeTo: string;
+}) {
+  const rangeRef = useRef({ rangeFrom, rangeTo });
+
+  const stateRef = useRef(getDateRange({ state: {}, rangeFrom, rangeTo }));
+
+  const updateParsedTime = () => {
+    stateRef.current = getDateRange({ state: {}, rangeFrom, rangeTo });
+  };
+
+  if (!isEqual(rangeRef.current, { rangeFrom, rangeTo })) {
+    updateParsedTime();
+  }
+
+  rangeRef.current = { rangeFrom, rangeTo };
+
+  const { start, end } = stateRef.current;
 
   if (!start || !end) {
-    throw new Error('Time range not set');
+    throw new Error('start and/or end were unexpectedly not set');
   }
 
   return {
