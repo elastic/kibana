@@ -18,7 +18,7 @@ import {
   DocViewRenderProps,
 } from '../../doc_views/doc_views_types';
 import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
-import { getFieldsToShow } from '../../helpers/show_multi_fields';
+import { getFieldsToShow } from '../../helpers/get_fields_to_show';
 
 export interface DocViewerTableProps {
   columns?: string[];

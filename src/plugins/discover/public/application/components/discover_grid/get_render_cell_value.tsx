@@ -22,7 +22,7 @@ import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
 import { EsHitRecord } from '../../angular/context/api/context';
-import { getFieldsToShow } from '../../helpers/show_multi_fields';
+import { getFieldsToShow } from '../../helpers/get_fields_to_show';
 
 export const getRenderCellValueFn = (
   indexPattern: IndexPattern,

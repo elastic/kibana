@@ -7,7 +7,7 @@
  */
 
 import { IndexPattern, IndexPatternField } from '../../../../data/common';
-import { getFieldsToShow } from './show_multi_fields';
+import { getFieldsToShow } from './get_fields_to_show';
 
 describe('get fields to show', () => {
   let indexPattern: IndexPattern;
@@ -89,5 +89,67 @@ describe('get fields to show', () => {
       false
     );
     expect(fieldsToShow).toEqual(['machine.os', 'acknowledged', 'clientip']);
+  });
+
+  it('returns the same value when called multiple times with the same parameters', () => {
+    expect(
+      getFieldsToShow(
+        ['machine.os', 'machine.os.raw', 'acknowledged', 'clientip'],
+        indexPattern,
+        false
+      )
+    ).toEqual(['machine.os', 'acknowledged', 'clientip']);
+    expect(
+      getFieldsToShow(
+        ['machine.os', 'machine.os.raw', 'acknowledged', 'clientip'],
+        indexPattern,
+        false
+      )
+    ).toEqual(['machine.os', 'acknowledged', 'clientip']);
+    expect(
+      getFieldsToShow(
+        ['machine.os', 'machine.os.raw', 'acknowledged', 'clientip'],
+        indexPattern,
+        false
+      )
+    ).toEqual(['machine.os', 'acknowledged', 'clientip']);
+    expect(
+      getFieldsToShow(
+        ['machine.os', 'machine.os.raw', 'acknowledged', 'clientip'],
+        indexPattern,
+        false
+      )
+    ).toEqual(['machine.os', 'acknowledged', 'clientip']);
+    expect(
+      getFieldsToShow(
+        ['machine.os', 'machine.os.raw', 'acknowledged', 'clientip'],
+        indexPattern,
+        false
+      )
+    ).toEqual(['machine.os', 'acknowledged', 'clientip']);
+  });
+
+  it('returns appropriate values when called multiple times with different parameters', () => {
+    expect(
+      getFieldsToShow(
+        ['machine.os', 'machine.os.raw', 'acknowledged', 'clientip'],
+        indexPattern,
+        false
+      )
+    ).toEqual(['machine.os', 'acknowledged', 'clientip']);
+    expect(
+      getFieldsToShow(
+        ['machine.os', 'machine.os.raw', 'acknowledged', 'clientip'],
+        indexPattern,
+        false
+      )
+    ).toEqual(['machine.os', 'acknowledged', 'clientip']);
+    expect(
+      getFieldsToShow(
+        ['machine.os', 'machine.os.raw', 'acknowledged', 'clientip'],
+        indexPattern,
+        true
+      )
+    ).toEqual(['machine.os', 'machine.os.raw', 'acknowledged', 'clientip']);
   });
 });

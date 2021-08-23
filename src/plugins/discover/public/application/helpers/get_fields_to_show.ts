@@ -7,7 +7,18 @@
  */
 import { IndexPattern } from '../../../../data/common';
 
-export const getFieldsToShow = (
+const memoize = (func: (arg1: string[], arg2: IndexPattern, arg3: boolean) => string[]) => {
+  const results: Record<string, string[]> = {};
+  return (...args: [string[], IndexPattern, boolean]) => {
+    const argsKey = JSON.stringify(args);
+    if (!results[argsKey]) {
+      results[argsKey] = func(...args);
+    }
+    return results[argsKey];
+  };
+};
+
+const getFieldsToShowInner = (
   fields: string[],
   indexPattern: IndexPattern,
   showMultiFields: boolean
@@ -30,3 +41,5 @@ export const getFieldsToShow = (
     return showMultiFields || (parent && !fields.includes(parent));
   });
 };
+
+export const getFieldsToShow = memoize(getFieldsToShowInner);

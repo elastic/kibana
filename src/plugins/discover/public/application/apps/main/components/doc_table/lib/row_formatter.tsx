@@ -9,7 +9,7 @@
 import React, { Fragment } from 'react';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../../../../common';
 import { getServices, IndexPattern } from '../../../../../../kibana_services';
-import { getFieldsToShow } from '../../../../../helpers/show_multi_fields';
+import { getFieldsToShow } from '../../../../../helpers/get_fields_to_show';
 
 interface Props {
   defPairs: Array<[string, unknown]>;
