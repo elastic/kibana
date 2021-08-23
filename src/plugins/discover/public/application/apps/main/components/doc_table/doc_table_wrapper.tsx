@@ -82,6 +82,7 @@ export interface DocTableProps {
 }
 
 export interface DocTableRenderProps {
+  columnLength: number;
   rows: DocTableRow[];
   minimumVisibleRows: number;
   sampleSize: number;
@@ -224,6 +225,7 @@ export const DocTableWrapper = ({
     >
       {rows.length !== 0 &&
         render({
+          columnLength: columns.length,
           rows,
           minimumVisibleRows,
           sampleSize,
