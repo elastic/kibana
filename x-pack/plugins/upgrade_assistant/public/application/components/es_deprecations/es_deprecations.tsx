@@ -5,17 +5,43 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageHeader, EuiSpacer, EuiPageContent } from '@elastic/eui';
+import {
+  EuiPageHeader,
+  EuiSpacer,
+  EuiPageContent,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { SectionLoading } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
 import { EsDeprecationsTable } from './es_deprecations_table';
 import { EsDeprecationErrors } from './es_deprecation_errors';
 import { NoDeprecationsPrompt } from '../shared';
+
+const getDeprecationCountByLevel = (deprecations: EnrichedDeprecationInfo[]) => {
+  const criticalDeprecations: EnrichedDeprecationInfo[] = [];
+  const warningDeprecations: EnrichedDeprecationInfo[] = [];
+
+  deprecations.forEach((deprecation) => {
+    if (deprecation.isCritical) {
+      criticalDeprecations.push(deprecation);
+      return;
+    }
+    warningDeprecations.push(deprecation);
+  });
+
+  return {
+    criticalDeprecations: criticalDeprecations.length,
+    warningDeprecations: warningDeprecations.length,
+  };
+};
 
 const i18nTexts = {
   pageTitle: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageTitle', {
@@ -28,6 +54,20 @@ const i18nTexts = {
   isLoading: i18n.translate('xpack.upgradeAssistant.esDeprecations.loadingText', {
     defaultMessage: 'Loading deprecations…',
   }),
+  getCriticalStatusLabel: (count: number) =>
+    i18n.translate('xpack.upgradeAssistant.esDeprecations.criticalStatusLabel', {
+      defaultMessage: 'Critical: {count}',
+      values: {
+        count,
+      },
+    }),
+  getWarningStatusLabel: (count: number) =>
+    i18n.translate('xpack.upgradeAssistant.esDeprecations.warningStatusLabel', {
+      defaultMessage: 'Warning: {count}',
+      values: {
+        count,
+      },
+    }),
 };
 
 export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
@@ -40,6 +80,13 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
     resendRequest,
     isInitialRequest,
   } = api.useLoadEsDeprecations();
+
+  const deprecationsCountByLevel: {
+    warningDeprecations: number;
+    criticalDeprecations: number;
+  } = useMemo(() => getDeprecationCountByLevel(esDeprecations?.deprecations || []), [
+    esDeprecations?.deprecations,
+  ]);
 
   useEffect(() => {
     breadcrumbs.setBreadcrumbs('esDeprecations');
@@ -82,7 +129,20 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
 
   return (
     <div data-test-subj="esDeprecationsContent">
-      <EuiPageHeader pageTitle={i18nTexts.pageTitle} description={i18nTexts.pageDescription} />
+      <EuiPageHeader pageTitle={i18nTexts.pageTitle} description={i18nTexts.pageDescription}>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiHealth color="danger" data-test-subj="criticalDeprecationsCount">
+              {i18nTexts.getCriticalStatusLabel(deprecationsCountByLevel.criticalDeprecations)}
+            </EuiHealth>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiHealth color="subdued" data-test-subj="warningDeprecationsCount">
+              {i18nTexts.getWarningStatusLabel(deprecationsCountByLevel.warningDeprecations)}
+            </EuiHealth>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPageHeader>
 
       <EuiSpacer size="l" />
 
