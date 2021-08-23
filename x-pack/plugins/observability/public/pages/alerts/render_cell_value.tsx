@@ -26,7 +26,7 @@ import {
   TIMESTAMP,
   // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
-
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import type { CellValueElementProps, TimelineNonEcsData } from '../../../../timelines/common';
 import { TimestampTooltip } from '../../components/shared/timestamp_tooltip';
 import { asDuration } from '../../../common/utils/formatters';
@@ -82,7 +82,7 @@ export const getRenderCellValue = ({
     switch (columnId) {
       case ALERT_STATUS:
         switch (value) {
-          case 'open':
+          case ALERT_STATUS_ACTIVE:
             return (
               <EuiHealth color="primary" textSize="xs">
                 {i18n.translate('xpack.observability.alertsTGrid.statusActiveDescription', {
@@ -90,7 +90,7 @@ export const getRenderCellValue = ({
                 })}
               </EuiHealth>
             );
-          case 'closed':
+          case ALERT_STATUS_RECOVERED:
             return (
               <EuiHealth color={theme.eui.euiColorLightShade} textSize="xs">
                 <EuiText color={theme.eui.euiColorLightShade} size="relative">
