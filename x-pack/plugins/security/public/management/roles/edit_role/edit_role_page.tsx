@@ -35,12 +35,11 @@ import type {
   ScopedHistory,
 } from 'src/core/public';
 import type { IndexPatternsContract } from 'src/plugins/data/public';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import type { KibanaFeature } from '../../../../../features/common';
 import type { FeaturesPluginStart } from '../../../../../features/public';
-import type { Space } from '../../../../../spaces/public';
+import type { Space, SpacesApiUi } from '../../../../../spaces/public';
 import type { SecurityLicense } from '../../../../common/licensing';
 import type {
   BuiltinESPrivileges,

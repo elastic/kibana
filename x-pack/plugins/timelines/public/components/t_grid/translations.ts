@@ -29,7 +29,7 @@ export const BULK_ACTION_OPEN_SELECTED = i18n.translate(
 export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
   'xpack.timelines.timeline.closeSelectedTitle',
   {
-    defaultMessage: 'Close selected',
+    defaultMessage: 'Mark as closed',
   }
 );
 
