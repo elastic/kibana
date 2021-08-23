@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export const TABLE_COLUMN_EVENTS_MESSAGE = 2;
+export interface Alert {
+  id: string;
+  index: string;
+  error?: Error;
+  source?: unknown;
+}
