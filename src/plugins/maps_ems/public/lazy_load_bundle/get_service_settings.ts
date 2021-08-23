@@ -13,13 +13,14 @@ let loadPromise: Promise<IServiceSettings>;
 
 export async function getServiceSettings(): Promise<IServiceSettings> {
   if (typeof loadPromise !== 'undefined') {
-    return loadPromise;
+    return await loadPromise;
   }
 
-  loadPromise = new Promise(async (resolve) => {
+  loadPromise = (async () => {
     const { ServiceSettings } = await import('./lazy');
     const config = getMapsEmsConfig();
-    resolve(new ServiceSettings(config, config.tilemap));
-  });
-  return loadPromise;
+    return new ServiceSettings(config, config.tilemap);
+  })();
+
+  return await loadPromise;
 }

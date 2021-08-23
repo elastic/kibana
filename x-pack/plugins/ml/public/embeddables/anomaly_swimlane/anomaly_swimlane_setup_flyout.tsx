@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import * as Rx from 'rxjs';
+import { firstValueFrom } from '@kbn/std';
 import { CoreStart } from 'kibana/public';
 import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
@@ -24,32 +26,34 @@ export async function resolveAnomalySwimlaneUserInput(
 
   const anomalyDetectorService = new AnomalyDetectorService(new HttpService(http));
 
-  return new Promise(async (resolve, reject) => {
-    const { jobIds } = await resolveJobSelection(coreStart, input?.jobIds);
+  const { jobIds } = await resolveJobSelection(coreStart, input?.jobIds);
 
-    const title = input?.title ?? getDefaultSwimlanePanelTitle(jobIds);
+  const title = input?.title ?? getDefaultSwimlanePanelTitle(jobIds);
 
-    const jobs = await anomalyDetectorService.getJobs$(jobIds).toPromise();
+  const jobs = await anomalyDetectorService.getJobs$(jobIds).toPromise();
 
-    const influencers = anomalyDetectorService.extractInfluencers(jobs);
-    influencers.push(VIEW_BY_JOB_LABEL);
+  const influencers = anomalyDetectorService.extractInfluencers(jobs);
+  influencers.push(VIEW_BY_JOB_LABEL);
 
-    const modalSession = overlays.openModal(
-      toMountPoint(
-        <AnomalySwimlaneInitializer
-          defaultTitle={title}
-          influencers={influencers}
-          initialInput={input}
-          onCreate={({ panelTitle, viewBy, swimlaneType }) => {
-            modalSession.close();
-            resolve({ jobIds, title: panelTitle, swimlaneType, viewBy });
-          }}
-          onCancel={() => {
-            modalSession.close();
-            reject();
-          }}
-        />
-      )
-    );
-  });
+  const onCreate$ = new Rx.ReplaySubject<Partial<AnomalySwimlaneEmbeddableInput>>(1);
+
+  const modalSession = overlays.openModal(
+    toMountPoint(
+      <AnomalySwimlaneInitializer
+        defaultTitle={title}
+        influencers={influencers}
+        initialInput={input}
+        onCreate={({ panelTitle, viewBy, swimlaneType }) => {
+          modalSession.close();
+          onCreate$.next({ jobIds, title: panelTitle, swimlaneType, viewBy });
+        }}
+        onCancel={() => {
+          modalSession.close();
+          onCreate$.error(new Error('canceled'));
+        }}
+      />
+    )
+  );
+
+  return await firstValueFrom(onCreate$);
 }

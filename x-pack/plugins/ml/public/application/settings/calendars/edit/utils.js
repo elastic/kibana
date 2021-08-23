@@ -71,25 +71,23 @@ function getCalendars() {
   });
 }
 
-export function getCalendarSettingsData() {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const [jobIds, groupIds, calendars] = await Promise.all([
-        getJobIds(),
-        getGroupIds(),
-        getCalendars(),
-      ]);
+export async function getCalendarSettingsData() {
+  try {
+    const [jobIds, groupIds, calendars] = await Promise.all([
+      getJobIds(),
+      getGroupIds(),
+      getCalendars(),
+    ]);
 
-      resolve({
-        jobIds,
-        groupIds,
-        calendars,
-      });
-    } catch (error) {
-      console.log(error);
-      reject(error);
-    }
-  });
+    return {
+      jobIds,
+      groupIds,
+      calendars,
+    };
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 }
 
 export function validateCalendarId(calendarId) {

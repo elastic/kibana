@@ -24,42 +24,46 @@ describe('useActiveCursor', () => {
     events: Array<Partial<ActiveCursorPayload>>,
     eventsTimeout = 1
   ) =>
-    new Promise(async (resolve) => {
-      const activeCursor = new ActiveCursor();
-      let allEventsExecuted = false;
+    new Promise(async (resolve, reject) => {
+      try {
+        const activeCursor = new ActiveCursor();
+        let allEventsExecuted = false;
 
-      activeCursor.setup();
+        activeCursor.setup();
 
-      dispatchExternalPointerEvent.mockImplementation((pointerEvent) => {
-        if (allEventsExecuted) {
-          resolve(pointerEvent);
-        }
-      });
+        dispatchExternalPointerEvent.mockImplementation((pointerEvent) => {
+          if (allEventsExecuted) {
+            resolve(pointerEvent);
+          }
+        });
 
-      renderHook(() =>
-        useActiveCursor(
-          activeCursor,
-          {
-            current: {
-              dispatchExternalPointerEvent: dispatchExternalPointerEvent as (
-                pointerEvent: PointerEvent
-              ) => void,
-            },
-          } as RefObject<Chart>,
-          { ...syncOption, debounce: syncOption.debounce ?? 1 }
-        )
-      );
-
-      for (const e of events) {
-        await new Promise((eventResolve) =>
-          setTimeout(() => {
-            if (e === events[events.length - 1]) {
-              allEventsExecuted = true;
-            }
-            activeCursor.activeCursor$!.next({ cursor, ...e });
-            eventResolve(null);
-          }, eventsTimeout)
+        renderHook(() =>
+          useActiveCursor(
+            activeCursor,
+            {
+              current: {
+                dispatchExternalPointerEvent: dispatchExternalPointerEvent as (
+                  pointerEvent: PointerEvent
+                ) => void,
+              },
+            } as RefObject<Chart>,
+            { ...syncOption, debounce: syncOption.debounce ?? 1 }
+          )
         );
+
+        for (const e of events) {
+          await new Promise((eventResolve) =>
+            setTimeout(() => {
+              if (e === events[events.length - 1]) {
+                allEventsExecuted = true;
+              }
+              activeCursor.activeCursor$!.next({ cursor, ...e });
+              eventResolve(null);
+            }, eventsTimeout)
+          );
+        }
+      } catch (error) {
+        reject(error);
       }
     });
 

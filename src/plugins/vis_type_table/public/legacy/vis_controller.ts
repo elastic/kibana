@@ -9,6 +9,8 @@
 import { CoreSetup, PluginInitializerContext } from 'kibana/public';
 import angular, { IModule, auto, IRootScopeService, IScope, ICompileService } from 'angular';
 import $ from 'jquery';
+import * as Rx from 'rxjs';
+import { firstValueFrom } from '@kbn/std';
 
 import './index.scss';
 
@@ -69,39 +71,41 @@ export function getTableVisualizationControllerClass(
       handlers: IInterpreterRenderHandlers
     ): Promise<void> {
       await this.initLocalAngular();
+      const render$ = new Rx.ReplaySubject<void>(1);
 
-      return new Promise(async (resolve, reject) => {
-        if (!this.$rootScope) {
-          const $injector = this.getInjector();
-          this.$rootScope = $injector.get('$rootScope');
-          this.$compile = $injector.get('$compile');
+      if (!this.$rootScope) {
+        const $injector = this.getInjector();
+        this.$rootScope = $injector.get('$rootScope');
+        this.$compile = $injector.get('$compile');
+      }
+
+      const updateScope = () => {
+        if (!this.$scope) {
+          return;
         }
-        const updateScope = () => {
-          if (!this.$scope) {
-            return;
-          }
 
-          this.$scope.visState = { params: visParams, title: visParams.title };
-          this.$scope.esResponse = esResponse;
+        this.$scope.visState = { params: visParams, title: visParams.title };
+        this.$scope.esResponse = esResponse;
 
-          this.$scope.visParams = visParams;
-          this.$scope.renderComplete = resolve;
-          this.$scope.renderFailed = reject;
-          this.$scope.resize = Date.now();
-          this.$scope.$apply();
-        };
+        this.$scope.visParams = visParams;
+        this.$scope.renderComplete = () => render$.next();
+        this.$scope.renderFailed = (error: Error) => render$.error(error);
+        this.$scope.resize = Date.now();
+        this.$scope.$apply();
+      };
 
-        if (!this.$scope && this.$compile) {
-          this.$scope = this.$rootScope.$new();
-          this.$scope.uiState = handlers.uiState;
-          this.$scope.filter = handlers.event;
-          updateScope();
-          this.el.find('div').append(this.$compile(tableVisTemplate)(this.$scope));
-          this.$scope.$apply();
-        } else {
-          updateScope();
-        }
-      });
+      if (!this.$scope && this.$compile) {
+        this.$scope = this.$rootScope.$new();
+        this.$scope.uiState = handlers.uiState;
+        this.$scope.filter = handlers.event;
+        updateScope();
+        this.el.find('div').append(this.$compile(tableVisTemplate)(this.$scope));
+        this.$scope.$apply();
+      } else {
+        updateScope();
+      }
+
+      return await firstValueFrom(render$);
     }
 
     destroy() {

@@ -20,15 +20,16 @@ type Renderer = () => Dom | Promise<Dom>;
 export const createRenderer = (element: ReactElement | null): Renderer => {
   const dom: Dom = element && mount(<I18nProvider>{element}</I18nProvider>);
 
-  return () =>
-    new Promise(async (resolve) => {
-      if (dom) {
-        await act(async () => {
-          dom.update();
-        });
-      }
-      setImmediate(() => resolve(dom)); // flushes any pending promises
-    });
+  return async () => {
+    if (dom) {
+      act(() => {
+        dom.update();
+      });
+    }
+    // flushes any pending promises
+    await new Promise((resolve) => setImmediate(resolve));
+    return dom;
+  };
 };
 
 export const createAppMounter = ({

@@ -41,18 +41,19 @@ export interface LazyLoadedFileUploadModules {
 
 export async function lazyLoadModules(): Promise<LazyLoadedFileUploadModules> {
   if (typeof loadModulesPromise !== 'undefined') {
-    return loadModulesPromise;
+    return await loadModulesPromise;
   }
 
-  loadModulesPromise = new Promise(async (resolve) => {
+  loadModulesPromise = (async () => {
     const { JsonUploadAndParse, importerFactory, IndexNameForm } = await import('./lazy');
 
-    resolve({
+    return {
       JsonUploadAndParse,
       importerFactory,
       getHttp,
       IndexNameForm,
-    });
-  });
-  return loadModulesPromise;
+    };
+  })();
+
+  return await loadModulesPromise;
 }

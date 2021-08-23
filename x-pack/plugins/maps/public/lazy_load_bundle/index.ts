@@ -70,7 +70,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
     return loadModulesPromise;
   }
 
-  loadModulesPromise = new Promise(async (resolve) => {
+  loadModulesPromise = (async () => {
     const {
       MapEmbeddable,
       getIndexPatternService,
@@ -86,7 +86,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       suggestEMSTermJoinConfig,
     } = await import('./lazy');
 
-    resolve({
+    return {
       MapEmbeddable,
       getIndexPatternService,
       getMapsCapabilities,
@@ -99,7 +99,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       createBasemapLayerDescriptor,
       createESSearchSourceLayerDescriptor,
       suggestEMSTermJoinConfig,
-    });
-  });
+    };
+  })();
   return loadModulesPromise;
 }

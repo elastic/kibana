@@ -112,13 +112,15 @@ export class TaskScheduling {
    * @returns {Promise<ConcreteTaskInstance>}
    */
   public async runNow(taskId: string): Promise<RunNowResult> {
-    return new Promise(async (resolve, reject) => {
-      this.awaitTaskRunResult(taskId)
-        // don't expose state on runNow
-        .then(({ id }) => resolve({ id }))
-        .catch(reject);
-      this.taskPollingLifecycle.attemptToRun(taskId);
-    });
+    const promise = (async () => {
+      const { id } = await this.awaitTaskRunResult(taskId);
+      // don't expose state on runNow
+      return { id };
+    })();
+
+    this.taskPollingLifecycle.attemptToRun(taskId);
+
+    return await promise;
   }
 
   /**
@@ -136,7 +138,7 @@ export class TaskScheduling {
       ...options,
       taskInstance: task,
     });
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       // The actual promise returned from this function is resolved after the awaitTaskRunResult promise resolves.
       // However, we do not wait to await this promise, as we want later execution to happen in parallel.
       // The awaitTaskRunResult promise is resolved once the ephemeral task is successfully executed (technically, when a TaskEventType.TASK_RUN is emitted with the same id).

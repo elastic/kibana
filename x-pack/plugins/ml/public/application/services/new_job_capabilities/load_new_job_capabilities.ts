@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IIndexPattern, IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
+import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
 import { getIndexPatternAndSavedSearch } from '../../util/index_utils';
 import { JobType } from '../../../../common/types/saved_objects';
 import { newJobCapsServiceAnalytics } from '../new_job_capabilities/new_job_capabilities_service_analytics';
@@ -16,34 +16,31 @@ export const DATA_FRAME_ANALYTICS = 'data-frame-analytics';
 
 // called in the routing resolve block to initialize the NewJobCapabilites
 // service for the corresponding job type with the currently selected index pattern
-export function loadNewJobCapabilities(
+export async function loadNewJobCapabilities(
   indexPatternId: string,
   savedSearchId: string,
   indexPatterns: IndexPatternsContract,
   jobType: JobType
 ) {
-  return new Promise(async (resolve, reject) => {
-    const serviceToUse =
-      jobType === ANOMALY_DETECTOR ? newJobCapsService : newJobCapsServiceAnalytics;
-    if (indexPatternId !== undefined) {
-      // index pattern is being used
-      const indexPattern: IIndexPattern = await indexPatterns.get(indexPatternId);
-      await serviceToUse.initializeFromIndexPattern(indexPattern);
-      resolve(serviceToUse.newJobCaps);
-    } else if (savedSearchId !== undefined) {
-      // saved search is being used
-      // load the index pattern from the saved search
-      const { indexPattern } = await getIndexPatternAndSavedSearch(savedSearchId);
-      if (indexPattern === null) {
-        // eslint-disable-next-line no-console
-        console.error('Cannot retrieve index pattern from saved search');
-        reject();
-        return;
-      }
-      await serviceToUse.initializeFromIndexPattern(indexPattern);
-      resolve(serviceToUse.newJobCaps);
-    } else {
-      reject();
+  const serviceToUse =
+    jobType === ANOMALY_DETECTOR ? newJobCapsService : newJobCapsServiceAnalytics;
+  if (indexPatternId !== undefined) {
+    // index pattern is being used
+    const indexPattern = await indexPatterns.get(indexPatternId);
+    await serviceToUse.initializeFromIndexPattern(indexPattern);
+    return serviceToUse.newJobCaps;
+  } else if (savedSearchId !== undefined) {
+    // saved search is being used
+    // load the index pattern from the saved search
+    const { indexPattern } = await getIndexPatternAndSavedSearch(savedSearchId);
+    if (indexPattern === null) {
+      // eslint-disable-next-line no-console
+      console.error('Cannot retrieve index pattern from saved search');
+      throw new Error();
     }
-  });
+    await serviceToUse.initializeFromIndexPattern(indexPattern);
+    return serviceToUse.newJobCaps;
+  } else {
+    throw new Error();
+  }
 }

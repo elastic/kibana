@@ -109,14 +109,13 @@ describe('TopNavMenu', () => {
     let dom: ReactWrapper;
 
     const refresh = () => {
-      new Promise(async (resolve) => {
-        if (dom) {
-          act(() => {
-            dom.update();
-          });
-        }
-        setImmediate(() => resolve(dom)); // flushes any pending promises
-      });
+      if (dom) {
+        act(() => {
+          dom.update();
+        });
+      }
+      new Promise((resolve) => setImmediate(resolve)); // flushes any pending promises
+      return dom;
     };
 
     beforeEach(() => {

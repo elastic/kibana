@@ -6,8 +6,9 @@
  */
 import { CoreStart } from 'kibana/public';
 import moment from 'moment';
+import { firstValueFrom } from '@kbn/std';
 import { takeUntil } from 'rxjs/operators';
-import { from } from 'rxjs';
+import { from, ReplaySubject } from 'rxjs';
 import React from 'react';
 import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
 import {
@@ -18,6 +19,11 @@ import { getMlGlobalServices } from '../../application/app';
 import { DashboardConstants } from '../../../../../../src/plugins/dashboard/public';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { JobSelectorFlyout } from './components/job_selector_flyout';
+
+interface Result {
+  jobIds: string[];
+  groups: Array<{ groupId: string; jobIds: string[] }>;
+}
 
 /**
  * Handles Anomaly detection jobs selection by a user.
@@ -30,64 +36,66 @@ import { JobSelectorFlyout } from './components/job_selector_flyout';
 export async function resolveJobSelection(
   coreStart: CoreStart,
   selectedJobIds?: JobId[]
-): Promise<{ jobIds: string[]; groups: Array<{ groupId: string; jobIds: string[] }> }> {
+): Promise<Result> {
   const {
     http,
     uiSettings,
     application: { currentAppId$ },
   } = coreStart;
 
-  return new Promise(async (resolve, reject) => {
-    const maps = {
-      groupsMap: getInitialGroupsMap([]),
-      jobsMap: {},
-    };
+  const maps = {
+    groupsMap: getInitialGroupsMap([]),
+    jobsMap: {},
+  };
 
-    const tzConfig = uiSettings.get('dateFormat:tz');
-    const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
+  const result$ = new ReplaySubject<Result>(1);
+  const tzConfig = uiSettings.get('dateFormat:tz');
+  const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
 
-    const onFlyoutClose = () => {
+  const onFlyoutClose = async () => {
+    await flyoutSession.close();
+    result$.error(new Error('canceled'));
+  };
+
+  const onSelectionConfirmed = async ({
+    jobIds,
+    groups,
+  }: {
+    jobIds: string[];
+    groups: Array<{ groupId: string; jobIds: string[] }>;
+  }) => {
+    await flyoutSession.close();
+    result$.next({ jobIds, groups });
+  };
+
+  const flyoutSession = coreStart.overlays.openFlyout(
+    toMountPoint(
+      <KibanaContextProvider services={{ ...coreStart, mlServices: getMlGlobalServices(http) }}>
+        <JobSelectorFlyout
+          selectedIds={selectedJobIds}
+          withTimeRangeSelector={false}
+          dateFormatTz={dateFormatTz}
+          singleSelection={false}
+          timeseriesOnly={true}
+          onFlyoutClose={onFlyoutClose}
+          onSelectionConfirmed={onSelectionConfirmed}
+          maps={maps}
+        />
+      </KibanaContextProvider>
+    ),
+    {
+      'data-test-subj': 'mlFlyoutJobSelector',
+      ownFocus: true,
+      closeButtonAriaLabel: 'jobSelectorFlyout',
+    }
+  );
+
+  // Close the flyout when user navigates out of the dashboard plugin
+  currentAppId$.pipe(takeUntil(from(flyoutSession.onClose))).subscribe((appId) => {
+    if (appId !== DashboardConstants.DASHBOARDS_ID) {
       flyoutSession.close();
-      reject();
-    };
-
-    const onSelectionConfirmed = async ({
-      jobIds,
-      groups,
-    }: {
-      jobIds: string[];
-      groups: Array<{ groupId: string; jobIds: string[] }>;
-    }) => {
-      await flyoutSession.close();
-      resolve({ jobIds, groups });
-    };
-    const flyoutSession = coreStart.overlays.openFlyout(
-      toMountPoint(
-        <KibanaContextProvider services={{ ...coreStart, mlServices: getMlGlobalServices(http) }}>
-          <JobSelectorFlyout
-            selectedIds={selectedJobIds}
-            withTimeRangeSelector={false}
-            dateFormatTz={dateFormatTz}
-            singleSelection={false}
-            timeseriesOnly={true}
-            onFlyoutClose={onFlyoutClose}
-            onSelectionConfirmed={onSelectionConfirmed}
-            maps={maps}
-          />
-        </KibanaContextProvider>
-      ),
-      {
-        'data-test-subj': 'mlFlyoutJobSelector',
-        ownFocus: true,
-        closeButtonAriaLabel: 'jobSelectorFlyout',
-      }
-    );
-
-    // Close the flyout when user navigates out of the dashboard plugin
-    currentAppId$.pipe(takeUntil(from(flyoutSession.onClose))).subscribe((appId) => {
-      if (appId !== DashboardConstants.DASHBOARDS_ID) {
-        flyoutSession.close();
-      }
-    });
+    }
   });
+
+  return await firstValueFrom(result$);
 }

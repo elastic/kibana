@@ -18,15 +18,14 @@ describe('MountPointPortal', () => {
   let setMountPoint: jest.Mock<(mountPoint: MountPoint<HTMLElement>) => void>;
   let dom: ReactWrapper;
 
-  const refresh = () => {
-    new Promise(async (resolve) => {
-      if (dom) {
-        act(() => {
-          dom.update();
-        });
-      }
-      setImmediate(() => resolve(dom)); // flushes any pending promises
-    });
+  const refresh = async () => {
+    if (dom) {
+      act(() => {
+        dom.update();
+      });
+    }
+    await new Promise((resolve) => setImmediate(resolve)); // flushes any pending promises
+    return dom;
   };
 
   beforeEach(() => {

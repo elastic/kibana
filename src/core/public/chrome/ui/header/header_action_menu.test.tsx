@@ -25,15 +25,14 @@ describe('HeaderActionMenu', () => {
     unmounts = {};
   });
 
-  const refresh = () => {
-    new Promise(async (resolve) => {
-      if (component) {
-        act(() => {
-          component.update();
-        });
-      }
-      setImmediate(() => resolve(component)); // flushes any pending promises
-    });
+  const refresh = async () => {
+    if (component) {
+      act(() => {
+        component.update();
+      });
+    }
+    await new Promise((resolve) => setImmediate(resolve)); // flushes any pending promises
+    return component;
   };
 
   const createMountPoint = (id: string, content: string = id): MountPoint => (

@@ -97,29 +97,28 @@ function processPipelinesAPIResponse(response, throughputMetricKey, nodesCountMe
 async function getPaginatedThroughputData(pipelines, req, lsIndexPattern, throughputMetric) {
   const metricSeriesData = Object.values(
     await Promise.all(
-      pipelines.map((pipeline) => {
-        return new Promise(async (resolve) => {
-          const data = await getMetrics(
-            req,
-            lsIndexPattern,
-            [throughputMetric],
-            [
-              {
-                bool: {
-                  should: [
-                    { term: { type: 'logstash_stats' } },
-                    { term: { 'metricset.name': 'stats' } },
-                  ],
-                },
-              },
-            ],
+      pipelines.map(async (pipeline) => {
+        const data = await getMetrics(
+          req,
+          lsIndexPattern,
+          [throughputMetric],
+          [
             {
-              pipeline,
+              bool: {
+                should: [
+                  { term: { type: 'logstash_stats' } },
+                  { term: { 'metricset.name': 'stats' } },
+                ],
+              },
             },
-            2
-          );
-          resolve(reduceData(pipeline, data));
-        });
+          ],
+          {
+            pipeline,
+          },
+          2
+        );
+
+        return reduceData(pipeline, data);
       })
     )
   );
@@ -183,29 +182,27 @@ async function getPipelines(req, lsIndexPattern, pipelines, throughputMetric, no
 
 async function getThroughputPipelines(req, lsIndexPattern, pipelines, throughputMetric) {
   const metricsResponse = await Promise.all(
-    pipelines.map((pipeline) => {
-      return new Promise(async (resolve) => {
-        const data = await getMetrics(
-          req,
-          lsIndexPattern,
-          [throughputMetric],
-          [
-            {
-              bool: {
-                should: [
-                  { term: { type: 'logstash_stats' } },
-                  { term: { 'metricset.name': 'stats' } },
-                ],
-              },
-            },
-          ],
+    pipelines.map(async (pipeline) => {
+      const data = await getMetrics(
+        req,
+        lsIndexPattern,
+        [throughputMetric],
+        [
           {
-            pipeline,
-          }
-        );
+            bool: {
+              should: [
+                { term: { type: 'logstash_stats' } },
+                { term: { 'metricset.name': 'stats' } },
+              ],
+            },
+          },
+        ],
+        {
+          pipeline,
+        }
+      );
 
-        resolve(reduceData(pipeline, data));
-      });
+      return reduceData(pipeline, data);
     })
   );
 

@@ -19,16 +19,17 @@ interface LazyLoadedModules {
 
 export async function lazyLoadModules(): Promise<LazyLoadedModules> {
   if (typeof loadModulesPromise !== 'undefined') {
-    return loadModulesPromise;
+    return await loadModulesPromise;
   }
 
-  loadModulesPromise = new Promise(async (resolve) => {
+  loadModulesPromise = (async () => {
     const lazyImports = await import('./lazy');
 
-    resolve({
+    return {
       ...lazyImports,
       getHttp: () => getCoreStart().http,
-    });
-  });
-  return loadModulesPromise;
+    };
+  })();
+
+  return await loadModulesPromise;
 }

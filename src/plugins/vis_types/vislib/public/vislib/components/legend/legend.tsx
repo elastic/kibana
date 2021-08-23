@@ -123,18 +123,24 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     }));
   };
 
-  setFilterableLabels = (items: LegendItem[]): Promise<void> =>
-    new Promise(async (resolve) => {
-      const filterableLabels = new Set<string>();
-      items.forEach(async (item) => {
-        const canFilter = await this.canFilter(item);
-        if (canFilter) {
-          filterableLabels.add(item.label);
-        }
-      });
+  setFilterableLabels = async (items: LegendItem[]): Promise<void> => {
+    const filterableLabels = new Set<string>();
 
-      this.setState({ filterableLabels }, resolve);
+    for (const item of items) {
+      const canFilter = await this.canFilter(item);
+      if (canFilter) {
+        filterableLabels.add(item.label);
+      }
+    }
+
+    return new Promise((resolve, reject) => {
+      try {
+        this.setState({ filterableLabels }, resolve);
+      } catch (error) {
+        reject(error);
+      }
     });
+  };
 
   setLabels = (data: any, type: string) => {
     let labels = [];

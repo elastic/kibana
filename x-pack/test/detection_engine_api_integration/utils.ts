@@ -1183,7 +1183,7 @@ export const createContainerWithEndpointEntries = async (
 
   // Add the endpoint exception list container to the backend
   await Promise.all(
-    endpointEntries.map((endpointEntry) => {
+    endpointEntries.map(async (endpointEntry) => {
       const exceptionListItem: CreateExceptionListItemSchema = {
         description: 'endpoint description',
         entries: endpointEntry.entries,
@@ -1192,7 +1192,7 @@ export const createContainerWithEndpointEntries = async (
         os_types: endpointEntry.osTypes,
         type: 'simple',
       };
-      return createExceptionListItem(supertest, exceptionListItem);
+      await createExceptionListItem(supertest, exceptionListItem);
     })
   );
 
@@ -1239,7 +1239,7 @@ export const createContainerWithEntries = async (
 
   // Add the rule exception list container to the backend
   await Promise.all(
-    entries.map((entry) => {
+    entries.map(async (entry) => {
       const exceptionListItem: CreateExceptionListItemSchema = {
         description: 'some description',
         list_id: 'some-list-id',
@@ -1247,7 +1247,7 @@ export const createContainerWithEntries = async (
         type: 'simple',
         entries: entry,
       };
-      return createExceptionListItem(supertest, exceptionListItem);
+      await createExceptionListItem(supertest, exceptionListItem);
     })
   );
 
@@ -1343,12 +1343,12 @@ export const deleteMigrations = async ({
   kbnClient: KbnClient;
 }): Promise<void> => {
   await Promise.all(
-    ids.map((id) =>
-      kbnClient.savedObjects.delete({
+    ids.map(async (id) => {
+      await kbnClient.savedObjects.delete({
         id,
         type: signalsMigrationType,
-      })
-    )
+      });
+    })
   );
 };
 

@@ -17,18 +17,11 @@ const delimiter = '\n';
 const pDeflate = promisify(deflate);
 
 async function zipMessageToStream(output: PassThrough, message: string) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const gzipped = await pDeflate(message, {
-        flush: constants.Z_SYNC_FLUSH,
-      });
-      output.write(gzipped.toString('base64'));
-      output.write(delimiter);
-      resolve(undefined);
-    } catch (err) {
-      reject(err);
-    }
+  const gzipped = await pDeflate(message, {
+    flush: constants.Z_SYNC_FLUSH,
   });
+  output.write(gzipped.toString('base64'));
+  output.write(delimiter);
 }
 
 export const createCompressedStream = <Response>(
