@@ -1,0 +1,4 @@
+{
+  "presets": ["@kbn/babel-preset/webpack_preset"],
+  "ignore": ["**/*.test.ts", "**/*.test.tsx"]
+}
