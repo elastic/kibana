@@ -75,7 +75,7 @@ export function ErrorGroupOverview() {
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
         <EuiPanel>
-          <PanelOptionsMenu />
+          <PanelOptionsMenu data={errorDistributionData} />
           <ErrorDistribution
             distribution={errorDistributionData}
             title={i18n.translate(

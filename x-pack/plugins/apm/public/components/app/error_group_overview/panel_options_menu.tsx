@@ -12,15 +12,43 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import React, { useState } from 'react';
+import { RequestStatus } from '../../../../../../../src/plugins/inspector/common';
+import {
+  InspectorSession,
+  RequestAdapter,
+} from '../../../../../../../src/plugins/inspector/public';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
-export function PanelOptionsMenu() {
+export function PanelOptionsMenu({ data }: { data: any }) {
+  const inspectorAdapters = { requests: new RequestAdapter() };
+  const { inspector } = useApmPluginContext();
+  const [inspectorSession, setInspectorSession] = useState<
+    InspectorSession | undefined
+  >(undefined);
   const [isOpen, setIsOpen] = useState(false);
   const toggleContextMenu = () => {
     setIsOpen((prevIsOpen) => !prevIsOpen);
   };
+
   const inspect = () => {
     toggleContextMenu();
-    alert('inspect');
+    const session = inspector.open(inspectorAdapters, {
+      title: 'Error occurrences (TODO)',
+    });
+    data._inspect.forEach((operation) => {
+      const requestParams = {
+        id: operation.operationName,
+        name: operation.operationName,
+      };
+      const requestResponder = inspectorAdapters.requests.start(
+        operation.operationName,
+        requestParams
+      );
+      // TODO: Get status as well as data
+      requestResponder.ok({ json: operation.response });
+    });
+
+    setInspectorSession(session);
   };
 
   const button = (
