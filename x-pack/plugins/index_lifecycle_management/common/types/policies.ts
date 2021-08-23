@@ -18,6 +18,7 @@ export type PhaseExceptDelete = keyof Omit<Phases, 'delete'>;
 export interface SerializedPolicy {
   name: string;
   phases: Phases;
+  _meta?: Record<string, any>;
 }
 
 export interface Phases {
