@@ -18,14 +18,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
 
   const testData = {
-    latencyCorrelationsTab: 'Latency correlations',
-    logLogChartTitle: 'Latency distribution',
+    correlationsTab: 'Failed transaction correlations',
     serviceName: 'opbeans-go',
     transactionsTab: 'Transactions',
     transaction: 'GET /api/stats',
   };
 
-  describe('latency correlations', () => {
+  describe('failed transactions correlations', () => {
     describe('space with no features disabled', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm');
@@ -119,43 +118,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const apmMainContainerTextItems = apmMainContainerText[0].split('\n');
 
           expect(apmMainContainerTextItems).to.contain(testData.transaction);
-          expect(apmMainContainerTextItems).to.contain(testData.latencyCorrelationsTab);
+          expect(apmMainContainerTextItems).to.contain(testData.correlationsTab);
+        });
+      });
 
-          // The default tab 'Trace samples' should show the log log chart without the correlations analysis part.
-          // First assert that the log log chart and its header are present
-          const apmTransactionDistributionChartTitle = await testSubjects.getVisibleText(
-            'apmTransactionDistributionChartTitle'
+      it('shows the failed transactions correlations tab', async function () {
+        await testSubjects.click('apmFailedTransactionsCorrelationsTabButton');
+
+        await retry.try(async () => {
+          await testSubjects.existOrFail('apmFailedTransactionsCorrelationsTabContent');
+        });
+      });
+
+      it('loads the failed transactions correlations results', async function () {
+        await retry.try(async () => {
+          const apmFailedTransactionsCorrelationsTabTitle = await testSubjects.getVisibleText(
+            'apmFailedTransactionsCorrelationsTabTitle'
           );
-          expect(apmTransactionDistributionChartTitle).to.be(testData.logLogChartTitle);
-          await testSubjects.existOrFail('apmCorrelationsChart');
-          // Then assert that the correlation analysis part is not present
-          await testSubjects.missingOrFail('apmCorrelationsLatencyCorrelationsTablePanelTitle');
-        });
-      });
+          expect(apmFailedTransactionsCorrelationsTabTitle).to.be('Failed transactions');
 
-      it('shows the correlations tab', async function () {
-        await testSubjects.click('apmLatencyCorrelationsTabButton');
-
-        await retry.try(async () => {
-          await testSubjects.existOrFail('apmLatencyCorrelationsTabContent');
-        });
-      });
-
-      it('loads the correlation results', async function () {
-        await retry.try(async () => {
           // Assert that the data fully loaded to 100%
-          const apmLatencyCorrelationsProgressTitle = await testSubjects.getVisibleText(
+          const apmFailedTransactionsCorrelationsProgressTitle = await testSubjects.getVisibleText(
             'apmCorrelationsProgressTitle'
           );
-          expect(apmLatencyCorrelationsProgressTitle).to.be('Progress: 100%');
-
-          // Assert that the Correlations Chart and its header are present
-          const apmCorrelationsLatencyCorrelationsChartTitle = await testSubjects.getVisibleText(
-            'apmCorrelationsLatencyCorrelationsChartTitle'
-          );
-          expect(apmCorrelationsLatencyCorrelationsChartTitle).to.be(testData.logLogChartTitle);
-          await testSubjects.existOrFail('apmCorrelationsChart');
-          await testSubjects.existOrFail('apmCorrelationsLatencyCorrelationsTablePanelTitle');
+          expect(apmFailedTransactionsCorrelationsProgressTitle).to.be('Progress: 100%');
 
           // Assert that results for the given service didn't find any correlations
           const apmCorrelationsTable = await testSubjects.getVisibleText('apmCorrelationsTable');
