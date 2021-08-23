@@ -43,7 +43,13 @@ function FormRow({
       );
     } else {
       const { key } = setting;
-      const value = vars?.[key]?.value;
+      const configEntry = vars?.[key];
+      // hides a field that doesn't have its key defined in vars.
+      // This is moust likely to happen when a field is no longer supported in the current package version
+      if (!configEntry) {
+        return null;
+      }
+      const { value } = configEntry;
       const { isValid, message } = validateSettingValue(setting, value);
       return (
         <React.Fragment key={key}>
