@@ -284,14 +284,14 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
       const subj = await testSubjects.find(testSubj);
       const titles = await subj.findAllByTagName('dt');
       const descriptions = await subj.findAllByTagName('dd');
-      let i = 0;
-      for (const t of titles) {
-        const titleText = (await t.parseDomContent()).html();
+
+      for (let i = 0; i < titles.length; i++) {
+        const titleText = (await titles[i].parseDomContent()).html();
         if (titleText === title) {
           return (await descriptions[i].parseDomContent()).html();
         }
-        i++;
       }
+
       return null;
     },
   };
