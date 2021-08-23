@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternField, IndexPattern } from '../shared_imports';
+import { IndexPatternField, IndexPattern, RuntimeType } from '../shared_imports';
 import type { Field } from '../types';
 
 export const deserializeField = (
@@ -19,7 +19,7 @@ export const deserializeField = (
 
   return {
     name: field.name,
-    type: field?.esTypes ? field.esTypes[0] : 'keyword',
+    type: (field?.esTypes ? field.esTypes[0] : 'keyword') as RuntimeType,
     script: field.runtimeField ? field.runtimeField.script : undefined,
     customLabel: field.customLabel,
     popularity: field.count,

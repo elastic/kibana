@@ -80,6 +80,7 @@ export {
   AggregationRestrictions,
   IndexPatternType,
   IndexPatternListItem,
+  RuntimeType,
 } from '../common';
 
 export { DuplicateIndexPatternError } from '../common/index_patterns/errors';

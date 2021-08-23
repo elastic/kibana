@@ -14,7 +14,7 @@ export const RUNTIME_FIELD_TYPES = [
   'ip',
   'boolean',
   'geo_point',
-  'object',
+  'composite',
 ] as const;
 
 /**
