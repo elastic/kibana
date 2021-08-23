@@ -374,8 +374,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud/README.md[cloud]
-|The cloud plugin adds cloud specific features to Kibana.
-The client-side plugin configures following values:
+|The cloud plugin adds Cloud-specific features to Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/code[code]
