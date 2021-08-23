@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-
 import { setupEnvironment } from '../../helpers';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
