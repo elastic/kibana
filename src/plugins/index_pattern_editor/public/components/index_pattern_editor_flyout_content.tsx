@@ -121,7 +121,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const [timestampFieldOptions, setTimestampFieldOptions] = useState<TimestampOption[]>([]);
   const [isLoadingTimestampFields, setIsLoadingTimestampFields] = useState<boolean>(false);
   const [isLoadingMatchedIndices, setIsLoadingMatchedIndices] = useState<boolean>(false);
-  const currentLoadingMatchedIndicesRef = useRef<object>();
+  const currentLoadingMatchedIndicesRef = useRef(0);
   const [allSources, setAllSources] = useState<MatchedItem[]>([]);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
   const [existingIndexPatterns, setExistingIndexPatterns] = useState<string[]>([]);
@@ -238,8 +238,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
       let newRollupIndexName: string | undefined;
 
       const fetchIndices = async (query: string = '') => {
-        const currentRequestRef = {};
-        currentLoadingMatchedIndicesRef.current = currentRequestRef;
+        const currentLoadingMatchedIndicesIdx = ++currentLoadingMatchedIndicesRef.current;
+
         setIsLoadingMatchedIndices(true);
 
         const { matchedIndicesResult, exactMatched } = !isLoadingSources
@@ -258,7 +258,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
               exactMatched: [],
             };
 
-        if (currentLoadingMatchedIndicesRef.current === currentRequestRef && isMounted.current) {
+        if (
+          currentLoadingMatchedIndicesIdx === currentLoadingMatchedIndicesRef.current &&
+          isMounted.current
+        ) {
           // we are still interested in this result
           if (type === INDEX_PATTERN_TYPE.ROLLUP) {
             const rollupIndices = exactMatched.filter((index) => isRollupIndex(index.name));
@@ -270,8 +273,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
           setMatchedIndices(matchedIndicesResult);
           setIsLoadingMatchedIndices(false);
-        } else {
-          // ignore setting state because there is a newer loading request and older result may override
         }
 
         return { matchedIndicesResult, newRollupIndexName };
@@ -391,6 +392,7 @@ export const IndexPatternEditorFlyoutContent = React.memo(IndexPatternEditorFlyo
 // loadMatchedIndices is called both as an side effect inside of a parent component and the inside forms validation functions
 // that are challenging to synchronize without a larger refactor
 // Use memoizeOne as a caching layer to avoid excessive network requests on each key type
+// TODO: refactor to remove `memoize` when https://github.com/elastic/kibana/pull/109238 is done
 const loadMatchedIndices = memoizeOne(
   async (
     query: string,
