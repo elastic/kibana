@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { convertSavedDashboardPanelToPanelState } from '../../../common/embeddable/embeddable_saved_object_converters';
 import { ForwardedDashboardState } from '../../locator';
-import { DashboardPanelMap, DashboardState } from '../../types';
+import { DashboardState } from '../../types';
+import { convertSavedPanelsToPanelMap } from './convert_saved_panels_to_panel_map';
 
 export const loadDashboardHistoryLocationState = (
   state?: ForwardedDashboardState
@@ -22,13 +22,8 @@ export const loadDashboardHistoryLocationState = (
     return restOfState;
   }
 
-  const panelsMap: DashboardPanelMap = {};
-  panels!.forEach((panel, idx) => {
-    panelsMap![panel.panelIndex ?? String(idx)] = convertSavedDashboardPanelToPanelState(panel);
-  });
-
   return {
     ...restOfState,
-    ...{ panels: panelsMap },
+    ...{ panels: convertSavedPanelsToPanelMap(panels) },
   };
 };

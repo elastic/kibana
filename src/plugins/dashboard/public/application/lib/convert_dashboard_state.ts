@@ -11,19 +11,15 @@ import type { KibanaExecutionContext } from 'src/core/public';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
 import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
-import {
-  convertPanelStateToSavedDashboardPanel,
-  convertSavedDashboardPanelToPanelState,
-} from '../../../common/embeddable/embeddable_saved_object_converters';
+import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
 import {
   DashboardState,
   RawDashboardState,
-  DashboardPanelMap,
-  SavedDashboardPanel,
   DashboardAppServices,
   DashboardContainerInput,
   DashboardBuildContext,
 } from '../../types';
+import { convertSavedPanelsToPanelMap } from './convert_saved_panels_to_panel_map';
 
 interface SavedObjectToDashboardStateProps {
   version: string;
@@ -77,11 +73,7 @@ export const savedObjectToDashboardState = ({
     usageCollection
   );
 
-  const panels: DashboardPanelMap = {};
-  rawState.panels?.forEach((panel: SavedDashboardPanel) => {
-    panels[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
-  });
-  return { ...rawState, panels };
+  return { ...rawState, panels: convertSavedPanelsToPanelMap(rawState.panels) };
 };
 
 /**
