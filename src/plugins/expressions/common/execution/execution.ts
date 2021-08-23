@@ -42,7 +42,7 @@ import { ExpressionFunction } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
 import { ExpressionExecutionParams } from '../service';
-import { createDefaultInspectorAdapters } from '../util/create_detault_instector_adapters';
+import { createDefaultInspectorAdapters } from '../util/create_default_inspector_adapters';
 
 /**
  * The result returned after an expression function execution.
