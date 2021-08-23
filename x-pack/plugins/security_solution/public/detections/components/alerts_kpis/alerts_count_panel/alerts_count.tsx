@@ -40,9 +40,11 @@ const getAlertsCountTableColumns = (
       render: function DraggableStackOptionField(value: string) {
         return (
           <DefaultDraggable
+            isDraggable={false}
             field={selectedStackByOption}
             id={`alert-count-draggable-${selectedStackByOption}-${value}`}
             value={value}
+            tooltipContent={null}
           />
         );
       },
