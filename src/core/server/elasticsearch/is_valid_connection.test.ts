@@ -48,26 +48,22 @@ describe('isValidConnection', () => {
     const esNodesCompatibility$ = new Subject<NodesVersionCompatibility>();
     const promise = isValidConnection(esNodesCompatibility$);
 
-    const { ProductNotSupportedError, ...otherErrors } = errors;
+    const { ProductNotSupportedError, ConnectionError, ConfigurationError } = errors;
 
-    // Emit every declared Error by the ES client.
-    Object.entries(otherErrors).forEach(([errorName, ESError]) => {
-      // If the error accepts 2 arguments, it's message + meta, otherwise, it's meta only
-      const nodesInfoRequestError =
-        ESError.length === 2 ? new ESError('message', {}) : new ESError({});
-
-      esNodesCompatibility$.next({
-        ...errored,
-        message: `${errorName} occurred`,
-        nodesInfoRequestError,
-      });
+    // Emit some other errors declared by the ES client
+    esNodesCompatibility$.next({
+      ...errored,
+      nodesInfoRequestError: new ConnectionError('Something went terribly wrong', {} as any),
+    });
+    esNodesCompatibility$.next({
+      ...errored,
+      nodesInfoRequestError: new ConfigurationError('Something went terribly wrong'),
     });
 
     const productCheckErrored = {
       ...incompatible,
       nodesInfoRequestError: new ProductNotSupportedError({} as any),
     };
-
     esNodesCompatibility$.next(productCheckErrored);
 
     await expect(promise).rejects.toThrow(productCheckErrored.nodesInfoRequestError);
