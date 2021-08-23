@@ -8,6 +8,8 @@
 
 import { esTestConfig } from '@kbn/test';
 import * as http from 'http';
+import { Subject } from 'rxjs';
+import supertest from 'supertest';
 
 import {
   createRootWithCorePlugins,
@@ -16,9 +18,6 @@ import {
   TestKibanaUtils,
 } from '../../../test_helpers/kbn_server';
 import { Root } from '../../root';
-import { Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
-import supertest from 'supertest';
 
 describe('elasticsearch clients', () => {
   let esServer: TestElasticsearchUtils;
@@ -93,8 +92,6 @@ describe('fake elasticsearch', () => {
     const kibanaPreboot = await kibanaServer.preboot();
     kibanaHttpServer = kibanaPreboot.http.server.listener; // Mind that we are using the prebootServer at this point because the migration gets hanging, while waiting for ES to be correct
     await kibanaServer.setup();
-    kibanaServer.start();
-    await fakeServer.firstRequestReceived$.pipe(first()).toPromise(); // Waiting for the first ES request instead of the start to complete, because start can't never complete due to waiting for ES to be ready
   });
 
   afterAll(async () => {
@@ -109,6 +106,12 @@ describe('fake elasticsearch', () => {
     expect(resp.body.status.overall.state).toBe('red');
     expect(resp.body.status.statuses[0].message).toBe(
       'Unable to retrieve version information from Elasticsearch nodes. The client noticed that the server is not Elasticsearch and we do not support this unknown product.'
+    );
+  });
+
+  test('should fail to start Kibana because of the Product Check Error', async () => {
+    await expect(kibanaServer.start()).rejects.toThrowError(
+      'The client noticed that the server is not Elasticsearch and we do not support this unknown product.'
     );
   });
 });

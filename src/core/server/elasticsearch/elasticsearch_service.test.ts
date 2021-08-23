@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// Mocking the module to avoid waiting for a valid ES connection during these unit tests
+jest.mock('./is_valid_connection');
+
 import { MockClusterClient } from './elasticsearch_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
