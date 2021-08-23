@@ -31,7 +31,7 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
     <EuiThemeProvider darkMode={true}>
       <ConsoleWindow>
         <OutputHistory className="output">history here</OutputHistory>
-        <CommandInput>input</CommandInput>
+        <CommandInput prompt={prompt} />
       </ConsoleWindow>
     </EuiThemeProvider>
   );

@@ -15,7 +15,7 @@ export interface EndpointConsoleProps {
 export const EndpointConsole = memo<EndpointConsoleProps>(() => {
   return (
     <ConsoleProvider service={{}}>
-      <Console />
+      <Console prompt="endpoint-v7.14.0 >" />
     </ConsoleProvider>
   );
 });
