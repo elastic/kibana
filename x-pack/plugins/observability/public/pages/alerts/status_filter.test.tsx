@@ -6,6 +6,7 @@
  */
 
 import { render } from '@testing-library/react';
+import { Simulate } from 'react-dom/test-utils';
 import React from 'react';
 import type { AlertStatus } from '../../../common/typings';
 import { StatusFilter } from './status_filter';
@@ -28,8 +29,9 @@ describe('StatusFilter', () => {
 
           const { getByTestId } = render(<StatusFilter {...props} />);
           const button = getByTestId(`StatusFilter ${status} button`);
+          const input = button.querySelector('input') as Element;
 
-          button.click();
+          Simulate.change(input);
 
           expect(onChange).toHaveBeenCalledWith(status);
         });
