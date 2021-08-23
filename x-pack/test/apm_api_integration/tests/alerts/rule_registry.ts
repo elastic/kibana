@@ -287,7 +287,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const { body: targetIndices } = await getAlertsTargetIndices();
 
         try {
-          const beforeDataResponse = await es.search({
+          await es.search({
             index: targetIndices[0],
             body: {
               query: {
@@ -301,10 +301,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               },
             },
           });
-
-          expect(beforeDataResponse.body.hits.hits.length).to.be(0);
-          // eslint-disable-next-line no-empty
-        } catch (exc) {}
+        } catch (exc) {
+          expect(exc.message).contain('index_not_found_exception');
+        }
 
         await es.index({
           index: APM_METRIC_INDEX_NAME,
@@ -319,7 +318,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         alert = await waitUntilNextExecution(alert);
 
         try {
-          const afterInitialDataResponse = await es.search({
+          await es.search({
             index: targetIndices[0],
             body: {
               query: {
@@ -333,10 +332,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               },
             },
           });
-
-          expect(afterInitialDataResponse.body.hits.hits.length).to.be(0);
-          // eslint-disable-next-line no-empty
-        } catch (exc) {}
+        } catch (exc) {
+          expect(exc.message).contain('index_not_found_exception');
+        }
 
         await es.index({
           index: APM_METRIC_INDEX_NAME,
