@@ -8,7 +8,6 @@
 
 import { esTestConfig } from '@kbn/test';
 import * as http from 'http';
-import { Subject } from 'rxjs';
 import supertest from 'supertest';
 
 import {
@@ -64,19 +63,14 @@ describe('elasticsearch clients', () => {
 });
 
 function createFakeElasticsearchServer() {
-  const firstRequestReceived$ = new Subject<boolean>();
-
-  const requestHandler = jest.fn((req, res) => {
+  const server = http.createServer((req, res) => {
     // Reply with a 200 and empty response by default (intentionally malformed response)
     res.writeHead(200);
     res.end();
-
-    firstRequestReceived$.next(true);
   });
-
-  const server = http.createServer(requestHandler);
   server.listen(esTestConfig.getPort());
-  return { server, requestHandler, firstRequestReceived$ };
+
+  return server;
 }
 
 describe('fake elasticsearch', () => {
@@ -86,8 +80,7 @@ describe('fake elasticsearch', () => {
 
   beforeAll(async () => {
     kibanaServer = createRootWithCorePlugins({ status: { allowAnonymous: true } });
-    const fakeServer = createFakeElasticsearchServer();
-    esServer = fakeServer.server;
+    esServer = createFakeElasticsearchServer();
 
     const kibanaPreboot = await kibanaServer.preboot();
     kibanaHttpServer = kibanaPreboot.http.server.listener; // Mind that we are using the prebootServer at this point because the migration gets hanging, while waiting for ES to be correct
