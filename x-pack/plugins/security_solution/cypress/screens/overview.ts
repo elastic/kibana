@@ -155,3 +155,14 @@ export const OVERVIEW_CTI_LINKS_INFO_INNER_PANEL = '[data-test-subj="cti-inner-p
 export const OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON = '[data-test-subj="cti-view-dashboard-button"]';
 export const OVERVIEW_CTI_TOTAL_EVENT_COUNT = `${OVERVIEW_CTI_LINKS} [data-test-subj="header-panel-subtitle"]`;
 export const OVERVIEW_CTI_ENABLE_MODULE_BUTTON = '[data-test-subj="cti-enable-module-button"]';
+
+export const OVERVIEW_RISKY_HOSTS_LINKS = '[data-test-subj="risky-hosts-dashboard-links"]';
+export const OVERVIEW_RISKY_HOSTS_LINKS_ERROR_INNER_PANEL =
+  '[data-test-subj="risky-hosts-inner-panel-danger"]';
+export const OVERVIEW_RISKY_HOSTS_LINKS_WARNING_INNER_PANEL =
+  '[data-test-subj="risky-hosts-inner-panel-warning"]';
+export const OVERVIEW_RISKY_HOSTS_VIEW_DASHBOARD_BUTTON =
+  '[data-test-subj="risky-hosts-view-dashboard-button"]';
+export const OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT = `${OVERVIEW_RISKY_HOSTS_LINKS} [data-test-subj="header-panel-subtitle"]`;
+export const OVERVIEW_RISKY_HOSTS_ENABLE_MODULE_BUTTON =
+  '[data-test-subj="risky-hosts-enable-module-button"]';

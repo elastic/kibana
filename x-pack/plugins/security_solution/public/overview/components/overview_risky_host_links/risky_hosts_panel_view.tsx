@@ -62,39 +62,47 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
   listItems,
   splitPanel,
   totalCount = 0,
-}) => (
-  <LinkPanel
-    {...{
-      dataTestSubj: 'risky-hosts-dashboard-links',
-      button: useMemo(
-        () => (
-          <EuiButton
-            href={buttonHref}
-            isDisabled={!buttonHref}
-            data-test-subj="risky-hosts-view-dashboard-button"
-            target="_blank"
-          >
-            {VIEW_DASHBOARD}
-          </EuiButton>
+}) => {
+  const splitPanelElement =
+    typeof splitPanel === 'undefined'
+      ? listItems.length === 0
+        ? warningPanel
+        : undefined
+      : splitPanel;
+  return (
+    <LinkPanel
+      {...{
+        dataTestSubj: 'risky-hosts-dashboard-links',
+        button: useMemo(
+          () => (
+            <EuiButton
+              href={buttonHref}
+              isDisabled={!buttonHref}
+              data-test-subj="risky-hosts-view-dashboard-button"
+              target="_blank"
+            >
+              {VIEW_DASHBOARD}
+            </EuiButton>
+          ),
+          [buttonHref]
         ),
-        [buttonHref]
-      ),
-      columns,
-      inspectQueryId: isInspectEnabled ? RiskyHostsQueryId : undefined,
-      listItems,
-      panelTitle: i18n.PANEL_TITLE,
-      splitPanel: splitPanel || listItems.length ? undefined : warningPanel,
-      subtitle: useMemo(
-        () => (
-          <FormattedMessage
-            data-test-subj="risky-hosts-total-event-count"
-            defaultMessage="Showing: {totalCount} {totalCount, plural, one {host} other {hosts}}"
-            id="xpack.securitySolution.overview.riskyHostsDashboardSubtitle"
-            values={{ totalCount }}
-          />
+        columns,
+        inspectQueryId: isInspectEnabled ? RiskyHostsQueryId : undefined,
+        listItems,
+        panelTitle: i18n.PANEL_TITLE,
+        splitPanel: splitPanelElement,
+        subtitle: useMemo(
+          () => (
+            <FormattedMessage
+              data-test-subj="risky-hosts-total-event-count"
+              defaultMessage="Showing: {totalCount} {totalCount, plural, one {host} other {hosts}}"
+              id="xpack.securitySolution.overview.riskyHostsDashboardSubtitle"
+              values={{ totalCount }}
+            />
+          ),
+          [totalCount]
         ),
-        [totalCount]
-      ),
-    }}
-  />
-);
+      }}
+    />
+  );
+};

@@ -47,5 +47,6 @@ describe('RiskyHostsModule', () => {
 
     expect(wrapper.exists('[data-test-subj="risky-hosts-dashboard-links"]')).toEqual(true);
     expect(wrapper.exists('[data-test-subj="risky-hosts-view-dashboard-button"]')).toEqual(true);
+    expect(wrapper.exists('[data-test-subj="risky-hosts-enable-module-button"]')).toEqual(true);
   });
 });
