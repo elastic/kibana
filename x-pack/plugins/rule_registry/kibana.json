@@ -1,5 +1,9 @@
 {
   "id": "ruleRegistry",
+  "owner": {
+    "name": "Kibana Alerting",
+    "githubTeam": "kibana-alerting-services"
+  },
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "ruleRegistry"],

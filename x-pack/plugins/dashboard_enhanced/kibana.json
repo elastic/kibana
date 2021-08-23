@@ -1,5 +1,9 @@
 {
   "id": "dashboardEnhanced",
+  "owner": {
+    "name": "Kibana Presentation",
+    "githubTeam": "kibana-presentation"
+  },
   "version": "kibana",
   "server": true,
   "ui": true,
