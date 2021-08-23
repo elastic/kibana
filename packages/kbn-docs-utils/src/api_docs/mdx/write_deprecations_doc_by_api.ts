@@ -94,13 +94,14 @@ Safe to remove.
 
 | Deprecated API |
 | ---------------|
-${unReferencedDeprecations.map(
-  (api) =>
-    `| <DocLink id="${getPluginApiDocId(api.parentPluginId)}" section="${api.id}" text="${
-      api.label
-    }"/>`
-)}
-
+${unReferencedDeprecations
+  .map(
+    (api) =>
+      `| <DocLink id="${getPluginApiDocId(api.parentPluginId)}" section="${api.id}" text="${
+        api.label
+      }"/> |`
+  )
+  .join('\n')}
 
 `);
 
