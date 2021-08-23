@@ -6,7 +6,6 @@
     - assert_keystore_cli
     - assert_kibana_yml
     - assert_kibana_listening
-    # flaky https://github.com/elastic/kibana/issues/106749
-    # - assert_kibana_available
+    - assert_kibana_available
     - assert_kibana_log
     - assert_kibana_data

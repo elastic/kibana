@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
 import {
   flashAPIErrors,
-  setSuccessMessage,
+  flashSuccessToast,
   setErrorMessage,
   clearFlashMessages,
 } from '../../../../../shared/flash_messages';
@@ -346,7 +346,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
           body: JSON.stringify({ ...updatedSchema }),
         });
         actions.onSchemaSetSuccess(response);
-        setSuccessMessage(successMessage);
+        flashSuccessToast(successMessage);
       } catch (e) {
         window.scrollTo(0, 0);
         if (isAdding) {

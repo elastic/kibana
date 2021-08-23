@@ -137,7 +137,7 @@ export class StringFormat extends FieldFormat {
     }
 
     return hit?.highlight?.[field?.name]
-      ? getHighlightHtml(val, hit.highlight[field.name])
+      ? getHighlightHtml(escape(val), hit.highlight[field.name])
       : escape(this.textConvert(val));
   };
 }

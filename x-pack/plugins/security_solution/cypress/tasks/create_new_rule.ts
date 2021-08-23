@@ -273,7 +273,7 @@ export const fillDefineThresholdRule = (rule: ThresholdRule) => {
 
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(rule.timeline.id!)).click();
-  cy.get(COMBO_BOX_CLEAR_BTN).click();
+  cy.get(COMBO_BOX_CLEAR_BTN).first().click();
 
   rule.index.forEach((index) => {
     cy.get(COMBO_BOX_INPUT).first().type(`${index}{enter}`);
@@ -293,7 +293,8 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const thresholdField = 0;
   const threshold = 1;
 
-  const typeThresholdField = ($el: Cypress.ObjectLike) => cy.wrap($el).type(rule.thresholdField);
+  const typeThresholdField = ($el: Cypress.ObjectLike) =>
+    cy.wrap($el).type(rule.thresholdField, { delay: 35 });
 
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(rule.timeline.id!)).click();
@@ -301,6 +302,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
     .then((inputs) => {
+      cy.wrap(inputs[thresholdField]).click();
       cy.wrap(inputs[thresholdField]).pipe(typeThresholdField);
       cy.get(THRESHOLD_FIELD_SELECTION).click({ force: true });
       cy.wrap(inputs[threshold]).clear().type(rule.threshold);
@@ -394,7 +396,7 @@ export const fillIndexAndIndicatorIndexPattern = (
 ) => {
   getIndexPatternClearButton().click();
   getIndicatorIndex().type(`${indexPattern}{enter}`);
-  getIndicatorIndicatorIndex().type(`${indicatorIndex}{enter}`);
+  getIndicatorIndicatorIndex().type(`{backspace}{enter}${indicatorIndex}{enter}`);
 };
 
 export const fillEmailConnectorForm = (connector: EmailConnector = getEmailConnector()) => {
@@ -437,7 +439,7 @@ export const getIndexPatternInvalidationText = () => cy.contains(AT_LEAST_ONE_IN
 export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
 
 /** Returns the continue button on the step of define */
-export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON);
+export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON).should('exist');
 
 /** Returns the indicator index pattern */
 export const getIndicatorIndex = () => cy.get(THREAT_MATCH_INDICATOR_INDEX).eq(0);
@@ -447,7 +449,7 @@ export const getIndicatorIndicatorIndex = () =>
   cy.get(THREAT_MATCH_INDICATOR_INDICATOR_INDEX).eq(0);
 
 /** Returns the index pattern's clear button  */
-export const getIndexPatternClearButton = () => cy.get(COMBO_BOX_CLEAR_BTN);
+export const getIndexPatternClearButton = () => cy.get(COMBO_BOX_CLEAR_BTN).should('exist').first();
 
 /** Returns the custom query input */
 export const getCustomQueryInput = () => cy.get(THREAT_MATCH_CUSTOM_QUERY_INPUT).eq(0);

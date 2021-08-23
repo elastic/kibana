@@ -5,34 +5,47 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
+import { EuiLoadingContent, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
+import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { Filter, esQuery } from '../../../../../../../src/plugins/data/public';
 import { RowRendererId, TimelineIdLiteral } from '../../../../common/types/timeline';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { HeaderSection } from '../../../common/components/header_section';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { combineQueries } from '../../../timelines/components/timeline/helpers';
-import { useKibana } from '../../../common/lib/kibana';
-import { inputsSelectors, State, inputsModel } from '../../../common/store';
-import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
-import { TimelineModel } from '../../../timelines/store/timeline/model';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { updateAlertStatusAction } from './actions';
 import {
-  requiredFieldsForActions,
-  alertsDefaultModel,
-  buildAlertStatusFilter,
-  alertsDefaultModelRuleRegistry,
-  buildAlertStatusFilterRuleRegistry,
-} from './default_config';
-import { AditionalFiltersAction, AlertsUtilityBar } from './alerts_utility_bar';
+  displayErrorToast,
+  displaySuccessToast,
+  useStateToaster,
+} from '../../../common/components/toasters';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
+import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
+import { useKibana } from '../../../common/lib/kibana';
+import { inputsModel, inputsSelectors, State } from '../../../common/store';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import * as i18nCommon from '../../../common/translations';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { combineQueries } from '../../../timelines/components/timeline/helpers';
+import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { TimelineModel } from '../../../timelines/store/timeline/model';
+import { columns, RenderCellValue } from '../../configurations/security_solution_detections';
+import { updateAlertStatusAction } from './actions';
+import { AditionalFiltersAction, AlertsUtilityBar } from './alerts_utility_bar';
+import {
+  alertsDefaultModel,
+  alertsDefaultModelRuleRegistry,
+  buildAlertStatusFilter,
+  buildAlertStatusFilterRuleRegistry,
+  requiredFieldsForActions,
+} from './default_config';
+import { buildTimeRangeFilter } from './helpers';
 import * as i18n from './translations';
 import {
   SetEventsDeletedProps,
@@ -40,19 +53,6 @@ import {
   UpdateAlertsStatusCallback,
   UpdateAlertsStatusProps,
 } from './types';
-import {
-  useStateToaster,
-  displaySuccessToast,
-  displayErrorToast,
-} from '../../../common/components/toasters';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
-import { buildTimeRangeFilter } from './helpers';
-import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import { columns, RenderCellValue } from '../../configurations/security_solution_detections';
-import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
 
 interface OwnProps {
   defaultFilters?: Filter[];
@@ -165,7 +165,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           text: i18nCommon.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
         });
       } else {
-        let title: string;
+        let title = '';
         switch (status) {
           case 'closed':
             title = i18n.CLOSED_ALERT_SUCCESS_TOAST(updated);
@@ -173,8 +173,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           case 'open':
             title = i18n.OPENED_ALERT_SUCCESS_TOAST(updated);
             break;
-          case 'in-progress':
-            title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(updated);
+          case 'acknowledged':
+            title = i18n.ACKNOWLEDGED_ALERT_SUCCESS_TOAST(updated);
         }
         displaySuccessToast(title, dispatchToaster);
       }
@@ -184,7 +184,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const onAlertStatusUpdateFailure = useCallback(
     (status: Status, error: Error) => {
-      let title: string;
+      let title = '';
       switch (status) {
         case 'closed':
           title = i18n.CLOSED_ALERT_FAILED_TOAST;
@@ -192,8 +192,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         case 'open':
           title = i18n.OPENED_ALERT_FAILED_TOAST;
           break;
-        case 'in-progress':
-          title = i18n.IN_PROGRESS_ALERT_FAILED_TOAST;
+        case 'acknowledged':
+          title = i18n.ACKNOWLEDGED_ALERT_FAILED_TOAST;
       }
       displayErrorToast(title, [error.message], dispatchToaster);
     },
@@ -383,6 +383,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       pageFilters={defaultFiltersMemo}
       defaultCellActions={defaultCellActions}
       defaultModel={defaultTimelineModel}
+      entityType="alerts"
       end={to}
       currentFilter={filterGroup}
       id={timelineId}
@@ -393,6 +394,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       start={from}
       utilityBar={utilityBarCallback}
       additionalFilters={additionalFiltersComponent}
+      hasAlertsCrud={hasIndexWrite}
     />
   );
 };

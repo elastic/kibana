@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  MigrationDeprecationInfoDeprecation,
+  MigrationDeprecationInfoResponse,
+} from '@elastic/elasticsearch/api/types';
 import { SavedObject, SavedObjectAttributes } from 'src/core/public';
 
 export enum ReindexStep {
@@ -116,13 +120,12 @@ export enum IndexGroup {
 // Telemetry types
 export const UPGRADE_ASSISTANT_TYPE = 'upgrade-assistant-telemetry';
 export const UPGRADE_ASSISTANT_DOC_ID = 'upgrade-assistant-telemetry';
-export type UIOpenOption = 'overview' | 'cluster' | 'indices' | 'kibana';
+export type UIOpenOption = 'overview' | 'elasticsearch' | 'kibana';
 export type UIReindexOption = 'close' | 'open' | 'start' | 'stop';
 
 export interface UIOpen {
   overview: boolean;
-  cluster: boolean;
-  indices: boolean;
+  elasticsearch: boolean;
   kibana: boolean;
 }
 
@@ -136,8 +139,7 @@ export interface UIReindex {
 export interface UpgradeAssistantTelemetrySavedObject {
   ui_open: {
     overview: number;
-    cluster: number;
-    indices: number;
+    elasticsearch: number;
     kibana: number;
   };
   ui_reindex: {
@@ -151,8 +153,7 @@ export interface UpgradeAssistantTelemetrySavedObject {
 export interface UpgradeAssistantTelemetry {
   ui_open: {
     overview: number;
-    cluster: number;
-    indices: number;
+    elasticsearch: number;
     kibana: number;
   };
   ui_reindex: {
@@ -186,13 +187,6 @@ export interface DeprecationInfo {
 export interface IndexSettingsDeprecationInfo {
   [indexName: string]: DeprecationInfo[];
 }
-export interface DeprecationAPIResponse {
-  cluster_settings: DeprecationInfo[];
-  ml_settings: DeprecationInfo[];
-  node_settings: DeprecationInfo[];
-  index_settings: IndexSettingsDeprecationInfo;
-}
-
 export interface ReindexAction {
   type: 'reindex';
   /**
@@ -215,15 +209,18 @@ export interface IndexSettingAction {
   type: 'indexSetting';
   deprecatedSettings: string[];
 }
-export interface EnrichedDeprecationInfo extends DeprecationInfo {
+export interface EnrichedDeprecationInfo
+  extends Omit<MigrationDeprecationInfoDeprecation, 'level'> {
+  type: keyof MigrationDeprecationInfoResponse;
+  isCritical: boolean;
   index?: string;
   correctiveAction?: ReindexAction | MlAction | IndexSettingAction;
+  resolveDuringUpgrade: boolean;
 }
 
-export interface UpgradeAssistantStatus {
-  readyForUpgrade: boolean;
-  cluster: EnrichedDeprecationInfo[];
-  indices: EnrichedDeprecationInfo[];
+export interface ESUpgradeStatus {
+  totalCriticalDeprecations: number;
+  deprecations: EnrichedDeprecationInfo[];
 }
 
 export interface ResolveIndexResponseFromES {
@@ -247,4 +244,9 @@ export interface MlOperation extends SavedObjectAttributes {
   nodeId: string;
   snapshotId: string;
   jobId: string;
+}
+
+export interface DeprecationLoggingStatus {
+  isDeprecationLogIndexingEnabled: boolean;
+  isDeprecationLoggingEnabled: boolean;
 }

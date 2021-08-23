@@ -34,10 +34,12 @@ export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
 
 export const CREATE_NEW_TIMELINE_TEMPLATE = '[data-test-subj="template-timeline-new"]';
 
-export const DRAGGABLE_HEADER =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="headers-group"] [data-test-subj="draggable-header"]';
+export const DATAGRID_HEADERS =
+  '[data-test-subj="events-viewer-panel"] [data-test-subj^="dataGridHeaderCell-"]';
 
 export const FAVORITE_TIMELINE = '[data-test-subj="timeline-favorite-filled-star"]';
+
+export const FIELD_BROWSER = '[data-test-subj="show-field-browser"]';
 
 export const GRAPH_TAB_BUTTON = '[data-test-subj="timelineTabs-graph"]';
 
@@ -51,6 +53,8 @@ export const ID_HEADER_FIELD = '[data-test-subj="timeline"] [data-test-subj="hea
 export const ID_FIELD = '[data-test-subj="timeline"] [data-test-subj="field-name-_id"]';
 
 export const ID_TOGGLE_FIELD = '[data-test-subj="toggle-field-_id"]';
+
+export const ID_HOVER_ACTION_OVERFLOW_BTN = '[data-test-subj="more-actions-_id"]';
 
 export const LOCKED_ICON = '[data-test-subj="timeline-date-picker-lock-button"]';
 
@@ -141,11 +145,7 @@ export const TIMELINE_CORRELATION_INPUT = '[data-test-subj="eqlQueryBarTextInput
 
 export const TIMELINE_CORRELATION_TAB = '[data-test-subj="timelineTabs-eql"]';
 
-export const IS_DRAGGING_DATA_PROVIDERS = '.is-dragging';
-
 export const TIMELINE_BOTTOM_BAR_CONTAINER = '[data-test-subj="timeline-bottom-bar-container"]';
-
-export const TIMELINE_DATA_PROVIDERS = '[data-test-subj="dataProviders"]';
 
 export const TIMELINE_DATA_PROVIDERS_ACTION_MENU = '[data-test-subj="providerActions"]';
 
@@ -158,9 +158,6 @@ export const TIMELINE_DATA_PROVIDER_OPERATOR = `[data-test-subj="operator"]`;
 export const TIMELINE_DATA_PROVIDER_VALUE = `[data-test-subj="value"]`;
 
 export const SAVE_DATA_PROVIDER_BTN = `[data-test-subj="save"]`;
-
-export const TIMELINE_DATA_PROVIDERS_EMPTY =
-  '[data-test-subj="dataProviders"] [data-test-subj="empty"]';
 
 export const TIMELINE_DESCRIPTION = '[data-test-subj="timeline-description"]';
 
@@ -266,3 +263,5 @@ export const TIMELINE_TAB_CONTENT_PINNED = '[data-test-subj="timeline-tab-conten
 
 export const TIMELINE_TAB_CONTENT_GRAPHS_NOTES =
   '[data-test-subj="timeline-tab-content-graph-notes"]';
+
+export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN = '[data-test-subj="more-actions-@timestamp"]';

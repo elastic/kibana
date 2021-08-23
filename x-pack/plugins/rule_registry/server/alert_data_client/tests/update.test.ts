@@ -7,7 +7,7 @@
 
 import {
   ALERT_RULE_CONSUMER,
-  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
   ALERT_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
@@ -41,6 +41,13 @@ beforeEach(() => {
   alertingAuthMock.getAuthorizationFilter.mockImplementation(async () =>
     Promise.resolve({ filter: [] })
   );
+
+  // @ts-expect-error
+  alertingAuthMock.getAugmentedRuleTypesWithAuthorization.mockImplementation(async () => {
+    const authorizedRuleTypes = new Set();
+    authorizedRuleTypes.add({ producer: 'apm' });
+    return Promise.resolve({ authorizedRuleTypes });
+  });
 
   alertingAuthMock.ensureAuthorized.mockImplementation(
     // @ts-expect-error
@@ -89,8 +96,8 @@ describe('update()', () => {
                 _source: {
                   [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
                   [ALERT_RULE_CONSUMER]: 'apm',
-                  [ALERT_STATUS]: 'open',
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
@@ -139,7 +146,7 @@ describe('update()', () => {
         Object {
           "body": Object {
             "doc": Object {
-              "${ALERT_STATUS}": "closed",
+              "${ALERT_WORKFLOW_STATUS}": "closed",
             },
           },
           "id": "1",
@@ -175,8 +182,8 @@ describe('update()', () => {
                 _source: {
                   [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
                   [ALERT_RULE_CONSUMER]: 'apm',
-                  [ALERT_STATUS]: 'open',
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
@@ -249,7 +256,7 @@ describe('update()', () => {
                 _source: {
                   [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
                   [ALERT_RULE_CONSUMER]: 'apm',
-                  [ALERT_STATUS]: 'open',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
@@ -267,7 +274,7 @@ describe('update()', () => {
         index: '.alerts-observability-apm',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-            "Unable to retrieve alert details for alert with id of \\"myfakeid1\\" or with query \\"null\\" and operation update 
+            "Unable to retrieve alert details for alert with id of \\"myfakeid1\\" or with query \\"undefined\\" and operation update 
             Error: Error: Unauthorized for fake.rule and apm"
           `);
 
@@ -299,7 +306,7 @@ describe('update()', () => {
         index: '.alerts-observability-apm',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-            "Unable to retrieve alert details for alert with id of \\"NoxgpHkBqbdrfX07MqXV\\" or with query \\"null\\" and operation update 
+            "Unable to retrieve alert details for alert with id of \\"NoxgpHkBqbdrfX07MqXV\\" or with query \\"undefined\\" and operation update 
             Error: Error: something went wrong on update"
           `);
   });
@@ -330,8 +337,8 @@ describe('update()', () => {
                 _source: {
                   [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   message: 'hello world 1',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
                   [ALERT_RULE_CONSUMER]: 'apm',
-                  [ALERT_STATUS]: 'open',
                   [SPACE_IDS]: [DEFAULT_SPACE],
                 },
               },
@@ -391,7 +398,7 @@ describe('update()', () => {
                     [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                     message: 'hello world 1',
                     [ALERT_RULE_CONSUMER]: 'apm',
-                    [ALERT_STATUS]: 'open',
+                    [ALERT_WORKFLOW_STATUS]: 'open',
                     [SPACE_IDS]: [DEFAULT_SPACE],
                   },
                 },
