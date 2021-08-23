@@ -11,6 +11,11 @@ import React, { useCallback, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { IndexPatternBase } from '@kbn/es-query';
+import { ALERT_STATUS as ALERT_STATUS_TYPED } from '@kbn/rule-data-utils';
+import {
+  ALERT_STATUS as ALERT_STATUS_NON_TYPED,
+  // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
+} from '@kbn/rule-data-utils/target_node/technical_field_names';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import type { AlertWorkflowStatus } from '../../../common/typings';
@@ -24,6 +29,8 @@ import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTableTGrid } from './alerts_table_t_grid';
 import { WorkflowStatusFilter } from './workflow_status_filter';
 import './styles.scss';
+
+const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
 
 export interface TopAlert {
   fields: ParsedTechnicalFields;
@@ -46,7 +53,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
     query: {
       rangeFrom = 'now-15m',
       rangeTo = 'now',
-      kuery = `kibana.alert.status: "${ALERT_STATUS_ACTIVE}"`,
+      kuery = `${ALERT_STATUS}: "${ALERT_STATUS_ACTIVE}"`,
       workflowStatus = 'open',
     },
   } = routeParams;
