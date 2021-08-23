@@ -13,7 +13,7 @@ import { isEmpty } from 'lodash';
 
 import { useKibana } from '../../lib/kibana';
 import { getAllFieldsByName } from '../../containers/source';
-import { allowTopN } from './utils';
+import { allowTopN } from '../drag_and_drop/helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
 import { SourcererScopeName } from '../../store/sourcerer/model';
@@ -29,6 +29,7 @@ export interface UseHoverActionItemsProps {
   enableOverflowButton?: boolean;
   field: string;
   handleHoverActionClicked: () => void;
+  hideTopN: boolean;
   isObjectArray: boolean;
   isOverflowPopoverOpen?: boolean;
   itemsToShow?: number;
@@ -56,6 +57,7 @@ export const useHoverActionItems = ({
   enableOverflowButton,
   field,
   handleHoverActionClicked,
+  hideTopN,
   isObjectArray,
   isOverflowPopoverOpen,
   itemsToShow = 2,
@@ -182,6 +184,7 @@ export const useHoverActionItems = ({
         allowTopN({
           browserField: getAllFieldsByName(browserFields)[field],
           fieldName: field,
+          hideTopN,
         }) ? (
           <ShowTopNButton
             Component={enableOverflowButton ? EuiContextMenuItem : undefined}
@@ -229,6 +232,7 @@ export const useHoverActionItems = ({
       getFilterForValueButton,
       getFilterOutValueButton,
       handleHoverActionClicked,
+      hideTopN,
       isObjectArray,
       onFilterAdded,
       ownFocus,
