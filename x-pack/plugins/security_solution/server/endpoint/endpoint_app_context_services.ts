@@ -22,6 +22,7 @@ import { PluginStartContract as AlertsPluginStartContract } from '../../../alert
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
+  getPackagePolicyDeleteCallback,
 } from '../fleet_integration/fleet_integration';
 import { ManifestManager } from './services/artifacts';
 import { AppClientFactory } from '../client';
@@ -101,6 +102,11 @@ export class EndpointAppContextService {
       dependencies.registerIngestCallback(
         'packagePolicyUpdate',
         getPackagePolicyUpdateCallback(dependencies.logger, dependencies.licenseService)
+      );
+
+      dependencies.registerIngestCallback(
+        'postPackagePolicyDelete',
+        getPackagePolicyDeleteCallback(dependencies.exceptionListsClient, this.experimentalFeatures)
       );
     }
   }

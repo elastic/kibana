@@ -8,8 +8,7 @@ import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import {
-  ALERT_SEVERITY_LEVEL,
-  ALERT_SEVERITY_VALUE,
+  ALERT_SEVERITY,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_REASON,
@@ -135,8 +134,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
             'anomaly.bucket_span.minutes': summary.bucketSpan,
             [ALERT_EVALUATION_VALUE]: anomaly.actualSort,
             [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
-            [ALERT_SEVERITY_LEVEL]: summary.severity,
-            [ALERT_SEVERITY_VALUE]: summary.severityScore,
+            [ALERT_SEVERITY]: summary.severity,
             [ALERT_REASON]: generateAlertMessage(
               CommonDurationAnomalyTranslations.defaultActionMessage,
               summary

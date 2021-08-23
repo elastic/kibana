@@ -165,14 +165,6 @@ export class VisualizePageObject extends FtrService {
     await this.clickVisType('line');
   }
 
-  public async clickRegionMap() {
-    await this.clickVisType('region_map');
-  }
-
-  public async hasRegionMap() {
-    return await this.hasVisType('region_map');
-  }
-
   public async clickMarkdownWidget() {
     await this.clickVisType('markdown');
   }
@@ -187,14 +179,6 @@ export class VisualizePageObject extends FtrService {
 
   public async clickPieChart() {
     await this.clickVisType('pie');
-  }
-
-  public async clickTileMap() {
-    await this.clickVisType('tile_map');
-  }
-
-  public async hasTileMap() {
-    return await this.hasVisType('tile_map');
   }
 
   public async clickTimelion() {
@@ -326,6 +310,7 @@ export class VisualizePageObject extends FtrService {
     if (navigateToVisualize) {
       await this.clickLoadSavedVisButton();
     }
+    await this.listingTable.searchForItemWithName(vizName);
     await this.openSavedVisualization(vizName);
   }
 

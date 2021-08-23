@@ -64,6 +64,8 @@ export interface OwnProps {
   rowRenderers: RowRenderer[];
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
   additionalFilters?: React.ReactNode;
+  hasAlertsCrud?: boolean;
+  unit?: (n: number) => string;
 }
 
 type Props = OwnProps & PropsFromRedux;
@@ -103,6 +105,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   additionalFilters,
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId,
+  hasAlertsCrud = false,
+  unit,
 }) => {
   const { timelines: timelinesUi } = useKibana().services;
   const {
@@ -112,7 +116,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     selectedPatterns,
     loading: isLoadingIndexPattern,
   } = useSourcererScope(scopeId);
-  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
+  const { globalFullScreen } = useGlobalFullScreen();
   // TODO: Once we are past experimental phase this code should be removed
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
@@ -164,6 +168,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               filters: globalFilters,
               globalFullScreen,
               graphOverlay,
+              hasAlertsCrud,
               indexNames: selectedPatterns,
               indexPattern,
               isLive,
@@ -175,7 +180,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               onRuleChange,
               renderCellValue,
               rowRenderers,
-              setGlobalFullScreen,
               start,
               sort,
               additionalFilters,
@@ -184,6 +188,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               leadingControlColumns,
               trailingControlColumns,
               tGridEventRenderedViewEnabled,
+              unit,
             })
           ) : (
             <EventsViewer

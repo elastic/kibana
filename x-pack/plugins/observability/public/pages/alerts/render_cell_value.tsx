@@ -6,7 +6,7 @@
  */
 import { EuiLink, EuiHealth, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React from 'react';
 /**
  * We need to produce types and code transpilation at different folders during the build of the package.
  * We have types and code at different imports because we don't want to import the whole package in the resulting webpack bundle for the plugin.
@@ -14,13 +14,13 @@ import React, { useEffect } from 'react';
  */
 import type {
   ALERT_DURATION as ALERT_DURATION_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
+  ALERT_SEVERITY as ALERT_SEVERITY_TYPED,
   ALERT_STATUS as ALERT_STATUS_TYPED,
   ALERT_REASON as ALERT_REASON_TYPED,
 } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
+  ALERT_SEVERITY as ALERT_SEVERITY_NON_TYPED,
   ALERT_STATUS as ALERT_STATUS_NON_TYPED,
   ALERT_REASON as ALERT_REASON_NON_TYPED,
   TIMESTAMP,
@@ -37,7 +37,7 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTheme } from '../../hooks/use_theme';
 
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
-const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
+const ALERT_SEVERITY: typeof ALERT_SEVERITY_TYPED = ALERT_SEVERITY_NON_TYPED;
 const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
 const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 
@@ -77,16 +77,6 @@ export const getRenderCellValue = ({
       fieldName: columnId,
     })?.reduce((x) => x[0]);
 
-    useEffect(() => {
-      if (columnId === ALERT_STATUS) {
-        setCellProps({
-          style: {
-            textAlign: 'center',
-          },
-        });
-      }
-    }, [columnId, setCellProps]);
-
     const theme = useTheme();
 
     switch (columnId) {
@@ -118,7 +108,7 @@ export const getRenderCellValue = ({
         return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
       case ALERT_DURATION:
         return asDuration(Number(value));
-      case ALERT_SEVERITY_LEVEL:
+      case ALERT_SEVERITY:
         return <SeverityBadge severityLevel={value ?? undefined} />;
       case ALERT_REASON:
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
