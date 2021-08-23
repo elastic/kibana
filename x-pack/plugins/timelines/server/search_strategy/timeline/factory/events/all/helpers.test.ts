@@ -350,7 +350,7 @@ describe('#formatTimelineData', () => {
                 building_block_type: [],
                 exceptions_list: [],
                 from: ['now-360s'],
-                id: ['696c24e0-526d-11eb-836c-e1620268b945'],
+                uuid: ['696c24e0-526d-11eb-836c-e1620268b945'],
                 index: [
                   'apm-*-transaction*',
                   'traces-apm*',

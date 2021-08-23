@@ -18,7 +18,6 @@ import { getFieldColumns, getFieldItems } from './field_items';
 import { FIELDS_PANE_WIDTH } from './helpers';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 import { ColumnHeaderOptions } from '../../../../../common';
-import { ALERT_RULE_THREAT_TECHNIQUE_NAME } from '../../../../../common/alerts';
 
 const selectedCategoryId = 'base';
 const selectedCategoryFields = mockBrowserFields[selectedCategoryId].fields;
@@ -208,7 +207,7 @@ describe('field_items', () => {
               example: '',
               format: '',
               indexes: ['auditbeat', 'filebeat', 'packetbeat'],
-              name: ALERT_RULE_THREAT_TECHNIQUE_NAME,
+              name: ALERT_RULE_NAME,
               searchable: true,
               type: 'string',
             },
@@ -246,7 +245,7 @@ describe('field_items', () => {
       await waitFor(() => {
         expect(toggleColumn).toBeCalledWith({
           columnHeaderType: 'not-filtered',
-          id: ALERT_RULE_THREAT_TECHNIQUE_NAME,
+          id: ALERT_RULE_NAME,
           initialWidth: 180,
         });
       });

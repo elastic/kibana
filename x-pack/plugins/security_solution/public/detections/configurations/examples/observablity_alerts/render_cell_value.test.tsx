@@ -12,7 +12,7 @@ import {
   ALERT_DURATION,
   ALERT_REASON,
   ALERT_RULE_SEVERITY,
-  ALERT_WORKFLOW_STATUS,
+  ALERT_STATUS,
 } from '@kbn/rule-data-utils';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { DragDropContextWrapper } from '../../../../common/components/drag_and_drop/drag_drop_context_wrapper';
@@ -60,7 +60,7 @@ describe('RenderCellValue', () => {
     const wrapper = mount(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
-          <RenderCellValue {...props} columnId={ALERT_WORKFLOW_STATUS} />
+          <RenderCellValue {...props} columnId={ALERT_STATUS} />
         </DragDropContextWrapper>
       </TestProviders>
     );
