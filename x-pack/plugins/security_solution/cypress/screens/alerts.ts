@@ -45,6 +45,8 @@ export const ACKNOWLEDGED_ALERTS_FILTER_BTN = '[data-test-subj="acknowledgedAler
 
 export const LOADING_ALERTS_PANEL = '[data-test-subj="loading-alerts-panel"]';
 
+export const LOADING_SPINNER = '[data-test-subj="LoadingPanelTimeline"]';
+
 export const MANAGE_ALERT_DETECTION_RULES_BTN = '[data-test-subj="manage-alert-detection-rules"]';
 
 export const MARK_ALERT_ACKNOWLEDGED_BTN = '[data-test-subj="acknowledged-alert-status"]';
