@@ -2,10 +2,11 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "allowJs": true,
-    "incremental": true,
-    "outDir": "./target",
     "declaration": true,
     "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "incremental": false,
+    "outDir": "./target_types",
     "rootDir": "src",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-ui-shared-deps/src",

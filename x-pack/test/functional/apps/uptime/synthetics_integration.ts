@@ -111,7 +111,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('create new policy', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/109329
+    describe.skip('create new policy', () => {
       let version: string;
       before(async () => {
         await uptimeService.syntheticsPackage.deletePolicyByName('system-1');

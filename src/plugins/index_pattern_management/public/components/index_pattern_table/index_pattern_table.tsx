@@ -14,6 +14,7 @@ import {
   EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';
+import useAsync from 'react-use/lib/useAsync';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
@@ -28,6 +29,7 @@ import { EmptyState } from './empty_state';
 import { MatchedItem, ResolveIndexResponseItemAlias } from '../create_index_pattern_wizard/types';
 import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
 import { getIndices } from '../create_index_pattern_wizard/lib';
+import { FLEET_ASSETS_TO_IGNORE } from '../../../../data/common';
 
 const pagination = {
   initialPageSize: 10,
@@ -58,6 +60,18 @@ interface Props extends RouteComponentProps {
   canSave: boolean;
 }
 
+export function isUserDataIndex(source: MatchedItem) {
+  // filter out indices that start with `.`
+  if (source.name.startsWith('.')) return false;
+
+  // filter out sources from FLEET_ASSETS_TO_IGNORE
+  if (source.name === FLEET_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE) return false;
+  if (source.name === FLEET_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE) return false;
+  if (source.name === FLEET_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE) return false;
+
+  return true;
+}
+
 export const IndexPatternTable = ({ canSave, history }: Props) => {
   const {
     setBreadcrumbs,
@@ -75,6 +89,9 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
   const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
+  const hasUserIndexPattern = useAsync(() =>
+    data.indexPatterns.hasUserIndexPattern().catch(() => true)
+  );
 
   setBreadcrumbs(getListBreadcrumbs());
   useEffect(() => {
@@ -162,13 +179,13 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     <></>
   );
 
-  if (isLoadingSources || isLoadingIndexPatterns) {
+  if (isLoadingSources || isLoadingIndexPatterns || hasUserIndexPattern.loading) {
     return <></>;
   }
 
-  const hasDataIndices = sources.some(({ name }: MatchedItem) => !name.startsWith('.'));
+  const hasDataIndices = sources.some(isUserDataIndex);
 
-  if (!indexPatterns.length) {
+  if (!hasUserIndexPattern.value) {
     if (!hasDataIndices && !remoteClustersExist) {
       return (
         <EmptyState

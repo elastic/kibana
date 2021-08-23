@@ -13,6 +13,7 @@ import {
   HTTPContextProvider,
   ICMPSimpleFieldsContextProvider,
   MonitorTypeContextProvider,
+  TLSFieldsContextProvider,
 } from './contexts';
 import { CustomFields } from './custom_fields';
 import { ConfigKeys, DataStream, ScheduleUnit } from './types';
@@ -32,15 +33,17 @@ const defaultTCPConfig = defaultConfig[DataStream.TCP];
 describe('<CustomFields />', () => {
   const WrappedComponent = ({ validate = defaultValidation, typeEditable = false }) => {
     return (
-      <HTTPContextProvider>
-        <MonitorTypeContextProvider>
-          <TCPContextProvider>
-            <ICMPSimpleFieldsContextProvider>
-              <CustomFields validate={validate} typeEditable={typeEditable} />
-            </ICMPSimpleFieldsContextProvider>
-          </TCPContextProvider>
-        </MonitorTypeContextProvider>
-      </HTTPContextProvider>
+      <TLSFieldsContextProvider>
+        <HTTPContextProvider>
+          <MonitorTypeContextProvider>
+            <TCPContextProvider>
+              <ICMPSimpleFieldsContextProvider>
+                <CustomFields validate={validate} typeEditable={typeEditable} />
+              </ICMPSimpleFieldsContextProvider>
+            </TCPContextProvider>
+          </MonitorTypeContextProvider>
+        </HTTPContextProvider>
+      </TLSFieldsContextProvider>
     );
   };
 
