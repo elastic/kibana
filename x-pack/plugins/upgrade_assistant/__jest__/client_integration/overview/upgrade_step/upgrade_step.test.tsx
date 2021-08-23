@@ -7,7 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { OverviewTestBed, setupOverviewPage, setupEnvironment } from '../../helpers';
+import { setupEnvironment } from '../../helpers';
+import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
 describe('Overview - Upgrade Step', () => {
   let testBed: OverviewTestBed;
@@ -33,11 +34,11 @@ describe('Overview - Upgrade Step', () => {
     test('Shows upgrade cta and link to docs for cloud installations', async () => {
       await act(async () => {
         testBed = await setupOverviewPage({
-          servicesOverrides: {
+          kibanaContextOverrides: {
             cloud: {
               isCloudEnabled: true,
-              baseUrl: 'https://test.com',
-              cloudId: '1234',
+              deploymentUrl:
+                'https://cloud.elastic.co./deployments/bfdad4ef99a24212a06d387593686d63',
             },
           },
         });
@@ -49,7 +50,9 @@ describe('Overview - Upgrade Step', () => {
       expect(exists('upgradeSetupCloudLink')).toBe(true);
       expect(exists('upgradeSetupDocsLink')).toBe(true);
 
-      expect(find('upgradeSetupCloudLink').props().href).toBe('https://test.com/deployments/1234');
+      expect(find('upgradeSetupCloudLink').props().href).toBe(
+        'https://cloud.elastic.co./deployments/bfdad4ef99a24212a06d387593686d63'
+      );
     });
   });
 });

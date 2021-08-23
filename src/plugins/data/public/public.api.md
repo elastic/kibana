@@ -1149,6 +1149,7 @@ export interface IKibanaSearchResponse<RawResponse = any> {
     loaded?: number;
     rawResponse: RawResponse;
     total?: number;
+    warning?: string;
 }
 
 // Warning: (ae-forgotten-export) The symbol "MetricAggType" needs to be exported by the entry point index.d.ts
@@ -1484,6 +1485,7 @@ export class IndexPatternsService {
     getIds: (refresh?: boolean) => Promise<string[]>;
     getIdsWithTitle: (refresh?: boolean) => Promise<IndexPatternListItem[]>;
     getTitles: (refresh?: boolean) => Promise<string[]>;
+    hasUserIndexPattern(): Promise<boolean>;
     // (undocumented)
     migrate(indexPattern: IndexPattern, newTitle: string): Promise<this>;
     refreshFields: (indexPattern: IndexPattern) => Promise<void>;
