@@ -21,6 +21,7 @@ import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { ErrorDistribution } from '../error_group_details/Distribution';
 import { ErrorGroupList } from './List';
+import { PanelOptionsMenu } from './panel_options_menu';
 
 export function ErrorGroupOverview() {
   const { serviceName } = useApmServiceContext();
@@ -73,7 +74,8 @@ export function ErrorGroupOverview() {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiPanel hasBorder={true}>
+        <EuiPanel>
+          <PanelOptionsMenu />
           <ErrorDistribution
             distribution={errorDistributionData}
             title={i18n.translate(
