@@ -16,11 +16,6 @@ interface TagCloudCommonParams {
   showLabel: boolean;
 }
 
-export interface TagCloudVisConfig extends TagCloudCommonParams {
-  metric: ExpressionValueVisDimension;
-  bucket?: ExpressionValueVisDimension;
-}
-
 export interface TagCloudVisParams extends TagCloudCommonParams {
   palette: PaletteOutput;
   metric: ExpressionValueVisDimension;

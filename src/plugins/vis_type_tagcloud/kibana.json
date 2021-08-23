@@ -3,8 +3,8 @@
   "version": "kibana",
   "ui": true,
   "server": true,
-  "requiredPlugins": ["data", "expressions", "presentationUtil", "visualizations", "charts"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor"],
+  "requiredPlugins": ["data", "expressions", "visualizations", "charts"],
+  "requiredBundles": ["kibanaReact", "visDefaultEditor"],
   "owner": {
     "name": "Kibana App",
     "githubTeam": "kibana-app"

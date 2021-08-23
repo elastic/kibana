@@ -9,10 +9,12 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useUiTracker } from '../../../../../observability/public';
 import { useTheme } from '../../../hooks/use_theme';
-import { CorrelationsTerm } from '../../../../common/search_strategies/failure_correlations/types';
+import type { CorrelationsTerm } from '../../../../common/search_strategies/failure_correlations/types';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 
@@ -29,6 +31,8 @@ interface Props<T> {
   selectedTerm?: { fieldName: string; fieldValue: string };
   onFilter?: () => void;
   columns: Array<EuiBasicTableColumn<T>>;
+  onTableChange: (c: Criteria<T>) => void;
+  sorting?: EuiTableSortingType<T>;
 }
 
 export function CorrelationsTable<T extends CorrelationsTerm>({
@@ -37,6 +41,8 @@ export function CorrelationsTable<T extends CorrelationsTerm>({
   setSelectedSignificantTerm,
   columns,
   selectedTerm,
+  onTableChange,
+  sorting,
 }: Props<T>) {
   const euiTheme = useTheme();
   const trackApmEvent = useUiTracker({ app: 'apm' });
@@ -67,12 +73,17 @@ export function CorrelationsTable<T extends CorrelationsTerm>({
     };
   }, [pageIndex, pageSize, significantTerms]);
 
-  const onTableChange = useCallback(({ page }) => {
-    const { index, size } = page;
+  const onChange = useCallback(
+    (tableSettings) => {
+      const { index, size } = tableSettings.page;
 
-    setPageIndex(index);
-    setPageSize(size);
-  }, []);
+      setPageIndex(index);
+      setPageSize(size);
+
+      onTableChange(tableSettings);
+    },
+    [onTableChange]
+  );
 
   return (
     <EuiBasicTable
@@ -100,7 +111,8 @@ export function CorrelationsTable<T extends CorrelationsTerm>({
         };
       }}
       pagination={pagination}
-      onChange={onTableChange}
+      onChange={onChange}
+      sorting={sorting}
     />
   );
 }
