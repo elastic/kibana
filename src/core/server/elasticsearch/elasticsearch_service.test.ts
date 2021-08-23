@@ -9,6 +9,12 @@
 // Mocking the module to avoid waiting for a valid ES connection during these unit tests
 jest.mock('./is_valid_connection');
 
+// Mocking this module to force different statuses to help with the unit tests
+jest.mock('./version_check/ensure_es_version', () => ({
+  pollEsNodesVersion: jest.fn(),
+}));
+
+import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { MockClusterClient } from './elasticsearch_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -23,6 +29,7 @@ import { configSchema, ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { elasticsearchClientMock } from './client/mocks';
 import { duration } from 'moment';
+import { pollEsNodesVersion } from './version_check/ensure_es_version';
 
 const delay = async (durationMs: number) =>
   await new Promise((resolve) => setTimeout(resolve, durationMs));
@@ -36,9 +43,19 @@ const setupDeps = {
 
 let env: Env;
 let coreContext: CoreContext;
-const logger = loggingSystemMock.create();
 
 let mockClusterClientInstance: ReturnType<typeof elasticsearchClientMock.createCustomClusterClient>;
+
+const defaultMessage = {
+  isCompatible: true,
+  kibanaVersion: '8.0.0',
+  incompatibleNodes: [],
+  warningNodes: [],
+};
+const observable$ = new BehaviorSubject<NodesVersionCompatibility>(defaultMessage);
+
+// @ts-expect-error this module is mocked, so `mockImplementation` is an allowed property
+pollEsNodesVersion.mockImplementation(() => observable$);
 
 let mockConfig$: BehaviorSubject<any>;
 beforeEach(() => {
@@ -55,6 +72,7 @@ beforeEach(() => {
   });
   configService.atPath.mockReturnValue(mockConfig$);
 
+  const logger = loggingSystemMock.create();
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
   elasticsearchService = new ElasticsearchService(coreContext);
 
@@ -205,6 +223,20 @@ describe('#start', () => {
     const client = startContract.client;
 
     expect(client.asInternalUser).toBe(mockClusterClientInstance.asInternalUser);
+  });
+
+  it('should log.error non-compatible nodes error', async () => {
+    await elasticsearchService.setup(setupDeps);
+    await elasticsearchService.start();
+    expect(loggingSystemMock.collect(coreContext.logger).error).toEqual([]);
+    observable$.next({
+      ...defaultMessage,
+      isCompatible: false,
+      message: 'Something went terribly wrong!',
+    });
+    expect(loggingSystemMock.collect(coreContext.logger).error).toEqual([
+      ['Something went terribly wrong!'],
+    ]);
   });
 
   describe('#createClient', () => {
