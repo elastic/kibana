@@ -11,6 +11,7 @@ import {
   notificationServiceMock,
   applicationServiceMock,
 } from 'src/core/public/mocks';
+import { sharePluginMock } from 'src/plugins/share/public/mocks';
 import { HttpSetup } from 'src/core/public';
 
 import { mockKibanaSemverVersion } from '../../../common/constants';
@@ -31,4 +32,5 @@ export const getAppContextMock = (mockHttpClient: HttpSetup) => ({
   breadcrumbs: breadcrumbService,
   getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
   deprecations: deprecationsServiceMock.createStartContract(),
+  share: sharePluginMock.createSetupContract(),
 });

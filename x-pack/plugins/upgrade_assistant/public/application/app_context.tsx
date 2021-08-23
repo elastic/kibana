@@ -14,7 +14,6 @@ import {
   NotificationsStart,
 } from 'src/core/public';
 import { SharePluginSetup } from 'src/plugins/share/public';
-
 import { ApiService } from './lib/api';
 import { BreadcrumbService } from './lib/breadcrumbs';
 
