@@ -14,6 +14,7 @@ import { VisualizationContainer } from '../../../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../../../expressions/common/expression_renderers';
 import { ExpressioTagcloudRendererDependencies } from '../plugin';
 import { TagcloudRendererConfig } from '../../common/types';
+import { EXPRESSION_NAME } from '../../common';
 
 const tagCloudVisClass = {
   height: '100%',
@@ -24,7 +25,7 @@ const TagCloudChart = lazy(() => import('../components/tagcloud_component'));
 export const tagcloudRenderer: (
   deps: ExpressioTagcloudRendererDependencies
 ) => ExpressionRenderDefinition<TagcloudRendererConfig> = ({ palettes }) => ({
-  name: 'tagloud',
+  name: EXPRESSION_NAME,
   displayName: 'Tag Cloud visualization',
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
