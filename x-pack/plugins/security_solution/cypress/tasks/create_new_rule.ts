@@ -14,6 +14,7 @@ import {
   ThreatIndicatorRule,
   ThresholdRule,
 } from '../objects/rule';
+import { LOADING_SPINNER } from '../screens/alerts';
 import {
   ABOUT_CONTINUE_BTN,
   ABOUT_EDIT_TAB,
@@ -293,7 +294,8 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const thresholdField = 0;
   const threshold = 1;
 
-  const typeThresholdField = ($el: Cypress.ObjectLike) => cy.wrap($el).type(rule.thresholdField);
+  const typeThresholdField = ($el: Cypress.ObjectLike) =>
+    cy.wrap($el).type(rule.thresholdField, { delay: 35 });
 
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(rule.timeline.id!)).click();
@@ -301,6 +303,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
     .then((inputs) => {
+      cy.wrap(inputs[thresholdField]).click();
       cy.wrap(inputs[thresholdField]).pipe(typeThresholdField);
       cy.get(THRESHOLD_FIELD_SELECTION).click({ force: true });
       cy.wrap(inputs[threshold]).clear().type(rule.threshold);
@@ -529,6 +532,7 @@ export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
   cy.waitUntil(
     () => {
       refreshPage();
+      cy.get(LOADING_SPINNER).should('not.exist');
       return cy
         .get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
