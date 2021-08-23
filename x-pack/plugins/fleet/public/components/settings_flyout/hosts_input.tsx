@@ -162,7 +162,7 @@ export const HostsInput: FunctionComponent<Props> = ({
     if (!errors) {
       return [];
     }
-    return errors.reduce((acc, err) => {
+    return errors.reduce<string[][]>((acc, err) => {
       if (err.index === undefined) {
         return acc;
       }
@@ -174,7 +174,7 @@ export const HostsInput: FunctionComponent<Props> = ({
       acc[err.index].push(err.message);
 
       return acc;
-    }, [] as string[][]);
+    }, []);
   }, [errors]);
 
   const onDelete = useCallback(
