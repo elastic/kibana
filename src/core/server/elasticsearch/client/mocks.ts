@@ -6,19 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { Client, ApiResponse } from '@elastic/elasticsearch';
+import type { Client, ApiResponse } from '@elastic/elasticsearch';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { ElasticsearchClient } from './types';
 import { ICustomClusterClient } from './cluster_client';
+import { PRODUCT_RESPONSE_HEADER } from '../supported_server_response_check';
+
+// use jest.requireActual() to prevent weird errors when people mock @elastic/elasticsearch
+const { Client: UnmockedClient } = jest.requireActual('@elastic/elasticsearch');
 
 const createInternalClientMock = (
   res?: MockedTransportRequestPromise<unknown>
 ): DeeplyMockedKeys<Client> => {
   // we mimic 'reflection' on a concrete instance of the client to generate the mocked functions.
-  const client = new Client({
+  const client = new UnmockedClient({
     node: 'http://localhost',
-  }) as any;
+  });
 
   const omittedProps = [
     '_events',
@@ -142,7 +146,7 @@ export type MockedTransportRequestPromise<T> = TransportRequestPromise<T> & {
 const createSuccessTransportRequestPromise = <T>(
   body: T,
   { statusCode = 200 }: { statusCode?: number } = {},
-  headers?: Record<string, string | string[]>
+  headers: Record<string, string | string[]> = { [PRODUCT_RESPONSE_HEADER]: 'Elasticsearch' }
 ): MockedTransportRequestPromise<ApiResponse<T>> => {
   const response = createApiResponse({ body, statusCode, headers });
   const promise = Promise.resolve(response);
@@ -163,7 +167,7 @@ function createApiResponse<TResponse = Record<string, any>>(
   return {
     body: {} as any,
     statusCode: 200,
-    headers: {},
+    headers: { [PRODUCT_RESPONSE_HEADER]: 'Elasticsearch' },
     warnings: [],
     meta: {} as any,
     ...opts,

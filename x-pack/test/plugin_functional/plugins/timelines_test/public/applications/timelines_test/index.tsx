@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils/target/alerts_as_data_rbac';
 import { Router } from 'react-router-dom';
 import React, { useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom';
@@ -38,7 +37,6 @@ export function renderApp(
     ReactDOM.unmountComponentAtNode(parameters.element);
   };
 }
-const ALERT_CONSUMER = [AlertConsumers.SIEM];
 
 const AppRoot = React.memo(
   ({
@@ -63,8 +61,12 @@ const AppRoot = React.memo(
             {(timelinesPluginSetup &&
               timelinesPluginSetup.getTGrid &&
               timelinesPluginSetup.getTGrid<'standalone'>({
-                alertConsumers: ALERT_CONSUMER,
+                appId: 'securitySolution',
                 type: 'standalone',
+                casePermissions: {
+                  read: true,
+                  crud: true,
+                },
                 columns: [],
                 indexNames: [],
                 deletedEventIds: [],

@@ -112,7 +112,8 @@ export default ({ getService }: FtrProviderContext) => {
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const signalNoRule = omit(signal, 'rule');
+        // remove reason to avoid failures due to @timestamp mismatches in the reason string
+        const signalNoRule = omit(signal, ['rule', 'reason']);
 
         expect(signalNoRule).eql({
           parents: [
@@ -165,7 +166,8 @@ export default ({ getService }: FtrProviderContext) => {
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const signalNoRule = omit(signal, 'rule');
+        // remove reason to avoid failures due to @timestamp mismatches in the reason string
+        const signalNoRule = omit(signal, ['rule', 'reason']);
         expect(signalNoRule).eql({
           parents: [
             {
@@ -228,7 +230,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const signalNoRule = omit(signal, 'rule');
+        const signalNoRule = omit(signal, ['rule', 'reason']);
         expect(signalNoRule).eql({
           parents: [
             {
@@ -360,6 +362,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             signal: {
+              reason: `Alert Signal Testing Query created at ${fullSignal['@timestamp']} with a high severity and risk score of 1 on suricata-zeek-sensor-toronto.`,
               rule: fullSignal.signal.rule,
               original_time: fullSignal.signal.original_time,
               status: 'open',
@@ -494,6 +497,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             signal: {
+              reason: `Alert Signal Testing Query created at ${fullSignal['@timestamp']} with a high severity and risk score of 1 on suricata-zeek-sensor-toronto.`,
               rule: fullSignal.signal.rule,
               original_time: fullSignal.signal.original_time,
               status: 'open',
@@ -658,6 +662,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             signal: {
+              reason: `Alert Signal Testing Query created at ${fullSignal['@timestamp']} with a high severity and risk score of 1 by root on zeek-sensor-amsterdam.`,
               rule: fullSignal.signal.rule,
               group: fullSignal.signal.group,
               original_time: fullSignal.signal.original_time,
@@ -748,6 +753,7 @@ export default ({ getService }: FtrProviderContext) => {
               status: 'open',
               depth: 2,
               group: source.signal.group,
+              reason: `Alert Signal Testing Query created at ${source['@timestamp']} with a high severity and risk score of 1.`,
               rule: source.signal.rule,
               ancestors: [
                 {
@@ -866,6 +872,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               status: 'open',
+              reason: `Alert Signal Testing Query created at ${fullSignal['@timestamp']} with a high severity and risk score of 1.`,
               rule: fullSignal.signal.rule,
               original_time: fullSignal.signal.original_time,
               depth: 1,
@@ -1003,6 +1010,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               status: 'open',
+              reason: `Alert Signal Testing Query created at ${fullSignal['@timestamp']} with a high severity and risk score of 1.`,
               rule: fullSignal.signal.rule,
               original_time: fullSignal.signal.original_time,
               depth: 1,
@@ -1086,6 +1094,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               status: 'open',
+              reason: `Alert Signal Testing Query created at ${fullSignal['@timestamp']} with a high severity and risk score of 1.`,
               rule: fullSignal.signal.rule,
               original_time: fullSignal.signal.original_time,
               depth: 1,
@@ -1171,7 +1180,8 @@ export default ({ getService }: FtrProviderContext) => {
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const signalNoRule = omit(signal, 'rule');
+        // remove reason to avoid failures due to @timestamp mismatches in the reason string
+        const signalNoRule = omit(signal, ['rule', 'reason']);
         expect(signalNoRule).eql({
           parents: [
             {
@@ -1228,7 +1238,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const signalNoRule = omit(signal, 'rule');
+        const signalNoRule = omit(signal, ['rule', 'reason']);
 
         expect(signalNoRule).eql({
           parents: [
@@ -1325,7 +1335,8 @@ export default ({ getService }: FtrProviderContext) => {
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const signalNoRule = omit(signal, 'rule');
+        // remove reason to avoid failures due to @timestamp mismatches in the reason string
+        const signalNoRule = omit(signal, ['rule', 'reason']);
         expect(signalNoRule).eql({
           parents: [
             {
@@ -1387,7 +1398,7 @@ export default ({ getService }: FtrProviderContext) => {
         const signalsOpen = await getSignalsByRuleIds(supertest, ['signal-on-signal']);
         const signal = signalsOpen.hits.hits[0]._source?.signal;
         // remove rule to cut down on touch points for test changes when the rule format changes
-        const signalNoRule = omit(signal, 'rule');
+        const signalNoRule = omit(signal, ['rule', 'reason']);
 
         expect(signalNoRule).eql({
           parents: [
@@ -1675,6 +1686,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
             status: 'open',
+            reason: `Alert boot created at ${fullSignal['@timestamp']} with a high severity and risk score of 1 on zeek-sensor-amsterdam.`,
             rule: {
               ...fullSignal.signal.rule,
               name: 'boot',

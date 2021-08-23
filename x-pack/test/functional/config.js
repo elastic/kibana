@@ -29,7 +29,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/monitoring'),
       resolve(__dirname, './apps/watcher'),
       resolve(__dirname, './apps/dashboard'),
-      resolve(__dirname, './apps/dashboard_mode'),
       resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/security'),
       resolve(__dirname, './apps/spaces'),
@@ -378,6 +377,17 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['connections*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
+        test_logs_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['test_data_stream'],
                 privileges: ['read', 'view_index_metadata'],
               },
             ],
