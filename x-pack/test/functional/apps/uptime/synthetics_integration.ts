@@ -35,7 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     data_stream: {
       namespace: 'default',
     },
-    id: getSyntheticsPolicy(agentFullPolicy).id,
+    id: getSyntheticsPolicy(agentFullPolicy)?.id,
     meta: {
       package: {
         name: 'synthetics',
@@ -77,7 +77,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     use_output: 'default',
   });
 
-  describe.only('When on the Synthetics Integration Policy Create Page', function () {
+  describe('When on the Synthetics Integration Policy Create Page', function () {
     this.tags(['ciGroup6']);
     const basicConfig = {
       name: monitorName,
@@ -95,7 +95,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       host,
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/109260
     describe('displays custom UI', () => {
       before(async () => {
         const version = await uptimeService.syntheticsPackage.getSyntheticsPackageVersion();
@@ -114,7 +113,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/109329
     describe('create new policy', () => {
       let version: string;
 
